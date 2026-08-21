@@ -1,9 +1,0 @@
-{
-  "changes": [
-    {
-      "packageName": "@rushstack/operation-graph",
-      "comment": "Compile package output for ES2022.",
-      "type": "patch"
-    }
-  ]
-}

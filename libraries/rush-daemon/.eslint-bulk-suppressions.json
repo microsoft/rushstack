@@ -1,6 +1,16 @@
 {
   "suppressions": [
     {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession._onFrame",
+      "rule": "complexity"
+    },
+    {
       "file": "src/RequestScheduler.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -76,6 +86,131 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/RushDaemonCommandLine.ts",
+      "scopeId": ".findRushJsonPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost._closeOnceAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost._closeOnceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost.constructor",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost.startAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost.startAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceInvalidationTracker.ts",
+      "scopeId": ".WorkspaceInvalidationTracker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceInvalidationTracker.ts",
+      "scopeId": ".WorkspaceInvalidationTracker.acknowledgeThrough",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceInvalidationTracker.ts",
+      "scopeId": ".WorkspaceInvalidationTracker.acknowledgeThrough",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceInvalidationTracker.ts",
+      "scopeId": ".WorkspaceInvalidationTracker.invalidate",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
+      "scopeId": ".WorkspaceSession.constructor",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
+      "scopeId": ".WorkspaceSession.createAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
+      "scopeId": ".WorkspaceSession.createAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
+      "scopeId": ".WorkspaceSession.createAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
+      "scopeId": ".WorkspaceSession.disposeOnceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".WorkspaceSessionFileWatcher.createWatcher",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".WorkspaceSessionFileWatcher.startAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionProvider.ts",
+      "scopeId": ".WorkspaceSessionProvider.disposeOnceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionProvider.ts",
+      "scopeId": ".WorkspaceSessionProvider.getSessionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".serveRushDaemonAsync",
+      "rule": "complexity"
+    },
+    {
       "file": "src/test/RequestScheduler.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -87,6 +222,66 @@
     },
     {
       "file": "src/test/RequestScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushDaemonCommandLine.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushDaemonCommandLine.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RushDaemonHost.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushDaemonHost.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RushDaemonHost.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceSession.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceSession.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceSession.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceSessionFileWatcher.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceSessionProvider.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceSessionProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceSessionProvider.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
     }

@@ -4,8 +4,6 @@
 import type * as lockfileTypes from '@pnpm/lockfile.types';
 import type * as pnpmTypes from '@pnpm/types';
 
-import { Text } from '@rushstack/node-core-library';
-
 import {
   type ILfxGraphDependencyOptions,
   type ILfxGraphEntryOptions,
@@ -398,9 +396,9 @@ function createPackageLockfileEntry(options: {
 
       // Rewrite to:
       // "@rushstack/m@1.0.0; @rushstack/n@2.0.0"
-      suffix = Text.replaceAll(suffix, ')(', '; ');
-      suffix = Text.replaceAll(suffix, '(', '');
-      suffix = Text.replaceAll(suffix, ')', '');
+      suffix = suffix.replaceAll(')(', '; ');
+      suffix = suffix.replaceAll('(', '');
+      suffix = suffix.replaceAll(')', '');
       result.entrySuffix = suffix;
 
       //       @rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
@@ -412,10 +410,10 @@ function createPackageLockfileEntry(options: {
     // -->       @rushstack+l@1.0.0_@rushstack+m@1.0.0_@rushstack+n@2.0.0
 
     // @rushstack/l 1.0.0 (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
-    dotPnpmSubfolder = Text.replaceAll(slashlessRawEntryId, '/', '+');
-    dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, ')(', '_');
-    dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, '(', '_');
-    dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, ')', '');
+    dotPnpmSubfolder = slashlessRawEntryId.replaceAll('/', '+');
+    dotPnpmSubfolder = dotPnpmSubfolder.replaceAll(')(', '_');
+    dotPnpmSubfolder = dotPnpmSubfolder.replaceAll('(', '_');
+    dotPnpmSubfolder = dotPnpmSubfolder.replaceAll(')', '');
   }
 
   // Example:

@@ -624,14 +624,16 @@ packages:
 
   '@microsoft/api-extractor-model@file:../../../libraries/api-extractor-model':
     resolution: {directory: ../../../libraries/api-extractor-model, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@microsoft/api-extractor@file:../../../apps/api-extractor':
     resolution: {directory: ../../../apps/api-extractor, type: directory}
+    engines: {node: '>=20.9.0'}
     hasBin: true
 
   '@microsoft/rush-lib@file:../../../libraries/rush-lib':
     resolution: {directory: ../../../libraries/rush-lib, type: directory}
-    engines: {node: '>=5.6.0'}
+    engines: {node: '>=20.9.0'}
 
   '@microsoft/tsdoc-config@0.18.1':
     resolution: {integrity: sha512-9brPoVdfN9k9g0dcWkFeA7IH9bbcttzDJlXvkf8b2OBzd5MueR1V2wkKBL0abn0otvmkHJC6aapBOTJDDeMCZg==}
@@ -699,19 +701,19 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/dependency-path@1000.0.9':
-    resolution: {integrity: sha1-BycnqFkF4RIQeAXmERrlHekMYYA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-1000.0.9.tgz}
+    resolution: {integrity: sha1-BycnqFkF4RIQeAXmERrlHekMYYA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-1000.0.9.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/dependency-path@1001.1.10':
-    resolution: {integrity: sha1-UUVZbGiAa+GBl15GEWrCxSxijFE=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-1001.1.10.tgz}
+    resolution: {integrity: sha1-UUVZbGiAa+GBl15GEWrCxSxijFE=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-1001.1.10.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/dependency-path@2.1.8':
-    resolution: {integrity: sha1-l06jxmckkWzPFTGpCKyMIGvgyPQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-2.1.8.tgz}
+    resolution: {integrity: sha1-l06jxmckkWzPFTGpCKyMIGvgyPQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-2.1.8.tgz}
     engines: {node: '>=16.14'}
 
   '@pnpm/dependency-path@5.1.7':
-    resolution: {integrity: sha1-QfX0+QujGOTzmSll8AQMpGEvXYE=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-5.1.7.tgz}
+    resolution: {integrity: sha1-QfX0+QujGOTzmSll8AQMpGEvXYE=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/dependency-path/-/dependency-path-5.1.7.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/error@1.4.0':
@@ -747,17 +749,17 @@ packages:
     engines: {node: '>=10.16'}
 
   '@pnpm/lockfile-file@8.1.8':
-    resolution: {integrity: sha1-XNY28vDj/ZipBcI7chdQHGb3aDs=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile-file/-/lockfile-file-8.1.8.tgz}
+    resolution: {integrity: sha1-XNY28vDj/ZipBcI7chdQHGb3aDs=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile-file/-/lockfile-file-8.1.8.tgz}
     engines: {node: '>=16.14'}
     peerDependencies:
       '@pnpm/logger': ^5.0.0
 
   '@pnpm/lockfile-types@5.1.5':
-    resolution: {integrity: sha1-FLhcl23c90dPWmopNRy1eZWdDsg=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile-types/-/lockfile-types-5.1.5.tgz}
+    resolution: {integrity: sha1-FLhcl23c90dPWmopNRy1eZWdDsg=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile-types/-/lockfile-types-5.1.5.tgz}
     engines: {node: '>=16.14'}
 
   '@pnpm/lockfile.fs@1001.1.32':
-    resolution: {integrity: sha1-BBG6O7B1WDMUqhh3YXPsXO36nOU=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.fs/-/lockfile.fs-1001.1.32.tgz}
+    resolution: {integrity: sha1-BBG6O7B1WDMUqhh3YXPsXO36nOU=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.fs/-/lockfile.fs-1001.1.32.tgz}
     engines: {node: '>=18.12'}
     peerDependencies:
       '@pnpm/logger': ^1001.0.1
@@ -767,7 +769,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/lockfile.types@1001.1.0':
-    resolution: {integrity: sha1-rhsx7V+7Du0y0CpfVlG8zilTW6E=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.types/-/lockfile.types-1001.1.0.tgz}
+    resolution: {integrity: sha1-rhsx7V+7Du0y0CpfVlG8zilTW6E=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.types/-/lockfile.types-1001.1.0.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/lockfile.types@1002.1.0':
@@ -775,7 +777,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/lockfile.types@900.0.0':
-    resolution: {integrity: sha1-r+ZWP2++XpHWqF3bg40QOViZjN0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.types/-/lockfile.types-900.0.0.tgz}
+    resolution: {integrity: sha1-r+ZWP2++XpHWqF3bg40QOViZjN0=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/lockfile.types/-/lockfile.types-900.0.0.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/lockfile.utils@1004.0.3':
@@ -850,11 +852,11 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/types@6.4.0':
-    resolution: {integrity: sha512-nco4+4sZqNHn60Y4VE/fbtlShCBqipyUO+nKRPvDHqLrecMW9pzHWMVRxk4nrMRoeowj3q0rX3GYRBa8lsHTAg==}
+    resolution: {integrity: sha1-MSw78LQ7ADUIyyG9OBVAbqDztmk=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-6.4.0.tgz}
     engines: {node: '>=10.16'}
 
   '@pnpm/types@8.9.0':
-    resolution: {integrity: sha512-3MYHYm8epnciApn6w5Fzx6sepawmsNU7l6lvIq+ER22/DPSrr83YMhU/EQWnf4lORn2YyiXFj0FJSyJzEtIGmw==}
+    resolution: {integrity: sha1-ljbV8GQnk0MvcmCbeUWMqb4EmwI=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-8.9.0.tgz}
     engines: {node: '>=14.6'}
 
   '@pnpm/types@9.4.2':
@@ -866,11 +868,11 @@ packages:
     engines: {node: '>=18.12'}
 
   '@pnpm/util.lex-comparator@1.0.0':
-    resolution: {integrity: sha1-bRfa0vGiPhN/04QCs6FBmWnk0JA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/util.lex-comparator/-/util.lex-comparator-1.0.0.tgz}
+    resolution: {integrity: sha1-bRfa0vGiPhN/04QCs6FBmWnk0JA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/util.lex-comparator/-/util.lex-comparator-1.0.0.tgz}
     engines: {node: '>=12.22.0'}
 
   '@pnpm/util.lex-comparator@3.0.2':
-    resolution: {integrity: sha1-UmhowKypnOlGZkWM+MKLlyBx0Nw=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/util.lex-comparator/-/util.lex-comparator-3.0.2.tgz}
+    resolution: {integrity: sha1-UmhowKypnOlGZkWM+MKLlyBx0Nw=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/util.lex-comparator/-/util.lex-comparator-3.0.2.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/write-project-manifest@1.1.7':
@@ -882,44 +884,52 @@ packages:
 
   '@rushstack/credential-cache@file:../../../libraries/credential-cache':
     resolution: {directory: ../../../libraries/credential-cache, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/eslint-config@file:../../../eslint/eslint-config':
     resolution: {directory: ../../../eslint/eslint-config, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.25.1
       typescript: '>=4.7.0'
 
   '@rushstack/eslint-patch@file:../../../eslint/eslint-patch':
     resolution: {directory: ../../../eslint/eslint-patch, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/eslint-plugin-packlets@file:../../../eslint/eslint-plugin-packlets':
     resolution: {directory: ../../../eslint/eslint-plugin-packlets, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
 
   '@rushstack/eslint-plugin-security@file:../../../eslint/eslint-plugin-security':
     resolution: {directory: ../../../eslint/eslint-plugin-security, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
 
   '@rushstack/eslint-plugin@file:../../../eslint/eslint-plugin':
     resolution: {directory: ../../../eslint/eslint-plugin, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
 
   '@rushstack/heft-api-extractor-plugin@file:../../../heft-plugins/heft-api-extractor-plugin':
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': 1.2.23
+      '@rushstack/heft': 1.2.25
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
-    engines: {node: '>=10.13.0'}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/heft-jest-plugin@file:../../../heft-plugins/heft-jest-plugin':
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': ^1.2.23
+      '@rushstack/heft': ^1.2.25
       '@types/jest': ^30.0.0
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
@@ -933,26 +943,29 @@ packages:
 
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin':
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': 1.2.23
+      '@rushstack/heft': 1.2.25
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.2.23
+      '@rushstack/heft': ^1.2.25
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': 1.2.23
+      '@rushstack/heft': 1.2.25
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
-    engines: {node: '>=10.13.0'}
+    engines: {node: '>=20.9.0'}
     hasBin: true
 
   '@rushstack/lookup-by-path@file:../../../libraries/lookup-by-path':
     resolution: {directory: ../../../libraries/lookup-by-path, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -961,6 +974,7 @@ packages:
 
   '@rushstack/node-core-library@file:../../../libraries/node-core-library':
     resolution: {directory: ../../../libraries/node-core-library, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -969,9 +983,11 @@ packages:
 
   '@rushstack/npm-check-fork@file:../../../libraries/npm-check-fork':
     resolution: {directory: ../../../libraries/npm-check-fork, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/operation-graph@file:../../../libraries/operation-graph':
     resolution: {directory: ../../../libraries/operation-graph, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -980,12 +996,15 @@ packages:
 
   '@rushstack/package-deps-hash@file:../../../libraries/package-deps-hash':
     resolution: {directory: ../../../libraries/package-deps-hash, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/package-extractor@file:../../../libraries/package-extractor':
     resolution: {directory: ../../../libraries/package-extractor, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/problem-matcher@file:../../../libraries/problem-matcher':
     resolution: {directory: ../../../libraries/problem-matcher, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -994,24 +1013,31 @@ packages:
 
   '@rushstack/rig-package@file:../../../libraries/rig-package':
     resolution: {directory: ../../../libraries/rig-package, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/rush-pnpm-kit-v10@file:../../../libraries/rush-pnpm-kit-v10':
     resolution: {directory: ../../../libraries/rush-pnpm-kit-v10, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/rush-pnpm-kit-v8@file:../../../libraries/rush-pnpm-kit-v8':
     resolution: {directory: ../../../libraries/rush-pnpm-kit-v8, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/rush-pnpm-kit-v9@file:../../../libraries/rush-pnpm-kit-v9':
     resolution: {directory: ../../../libraries/rush-pnpm-kit-v9, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/rush-sdk@file:../../../libraries/rush-sdk':
     resolution: {directory: ../../../libraries/rush-sdk, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/stream-collator@file:../../../libraries/stream-collator':
     resolution: {directory: ../../../libraries/stream-collator, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/terminal@file:../../../libraries/terminal':
     resolution: {directory: ../../../libraries/terminal, type: directory}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -1020,9 +1046,11 @@ packages:
 
   '@rushstack/tree-pattern@file:../../../libraries/tree-pattern':
     resolution: {directory: ../../../libraries/tree-pattern, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@rushstack/ts-command-line@file:../../../libraries/ts-command-line':
     resolution: {directory: ../../../libraries/ts-command-line, type: directory}
+    engines: {node: '>=20.9.0'}
 
   '@sinclair/typebox@0.34.49':
     resolution: {integrity: sha512-brySQQs7Jtn0joV8Xh9ZV/hZb9Ozb0pmazDIASBkYKCjXrXU3mpcFahmK/z4YDhGkQvP9mWJbVyahdtU5wQA+A==}
@@ -1344,7 +1372,7 @@ packages:
     engines: {node: '>=18.12'}
 
   '@zkochan/which@2.0.3':
-    resolution: {integrity: sha1-okOQNZOQ04wVH6YHgbNiC8WhMtA=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/which/-/which-2.0.3.tgz}
+    resolution: {integrity: sha1-okOQNZOQ04wVH6YHgbNiC8WhMtA=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@zkochan/which/-/which-2.0.3.tgz}
     engines: {node: '>= 8'}
     hasBin: true
 
@@ -1809,7 +1837,7 @@ packages:
     engines: {node: '>=12'}
 
   emoji-regex@8.0.0:
-    resolution: {integrity: sha1-6Bj9ac5cz8tARZT4QpY79TFkzDc=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/emoji-regex/-/emoji-regex-8.0.0.tgz}
+    resolution: {integrity: sha1-6Bj9ac5cz8tARZT4QpY79TFkzDc=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/emoji-regex/-/emoji-regex-8.0.0.tgz}
 
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
@@ -2129,7 +2157,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   get-npm-tarball-url@2.1.0:
-    resolution: {integrity: sha1-y9a7JYhGIrwxkcdhRmyTrIM0MhM=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/get-npm-tarball-url/-/get-npm-tarball-url-2.1.0.tgz}
+    resolution: {integrity: sha1-y9a7JYhGIrwxkcdhRmyTrIM0MhM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/get-npm-tarball-url/-/get-npm-tarball-url-2.1.0.tgz}
     engines: {node: '>=12.17'}
 
   get-package-type@0.1.0:
@@ -2351,7 +2379,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   is-fullwidth-code-point@3.0.0:
-    resolution: {integrity: sha1-8Rb4Bk/pCz94RKOJl8C3UFEmnx0=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz}
+    resolution: {integrity: sha1-8Rb4Bk/pCz94RKOJl8C3UFEmnx0=, tarball: https://ms-feed-17.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz}
     engines: {node: '>=8'}
 
   is-generator-fn@2.1.0:
@@ -3022,7 +3050,7 @@ packages:
     engines: {node: '>=8'}
 
   path-name@1.0.0:
-    resolution: {integrity: sha1-jKBjpj3nmC36lXYO2v/RAhRJTyQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/path-name/-/path-name-1.0.0.tgz}
+    resolution: {integrity: sha1-jKBjpj3nmC36lXYO2v/RAhRJTyQ=, tarball: https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/path-name/-/path-name-1.0.0.tgz}
 
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
@@ -3484,7 +3512,7 @@ packages:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
 
   tslib@2.8.1:
-    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+    resolution: {integrity: sha1-YS7+TtI11Wfoq6Xypfq3AoCt6D8=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/tslib/-/tslib-2.8.1.tgz}
 
   tslint@5.20.1:
     resolution: {integrity: sha512-EcMxhzCFt8k+/UP5r8waCf/lzmeSyVlqxqMEDQE7rWYiQky8KpIBz1JAoYXfROHrPZ1XXd43q8yQnULOLiBRQg==}
@@ -3642,7 +3670,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   wrap-ansi@7.0.0:
-    resolution: {integrity: sha1-Z+FFz/UQpqaYS98RUpEdadLrnkM=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/wrap-ansi/-/wrap-ansi-7.0.0.tgz}
+    resolution: {integrity: sha1-Z+FFz/UQpqaYS98RUpEdadLrnkM=, tarball: https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/wrap-ansi/-/wrap-ansi-7.0.0.tgz}
     engines: {node: '>=10'}
 
   wrap-ansi@8.1.0:

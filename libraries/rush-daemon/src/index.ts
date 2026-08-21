@@ -11,3 +11,20 @@ export {
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
+export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
+export {
+  WorkspaceSession,
+  type CreateWorkspaceSessionComponentsAsync,
+  type ICreateWorkspaceSessionComponentsOptions,
+  type IWorkspaceInvalidationWatcher,
+  type IWorkspaceSession,
+  type IWorkspaceSessionComponents,
+  type IWorkspaceSessionMetadata,
+  type IWorkspaceSessionOptions,
+  type WorkspaceSessionFactory
+} from './WorkspaceSession';
+export {
+  WorkspaceInvalidationTracker,
+  type IWorkspaceInvalidationSnapshot
+} from './WorkspaceInvalidationTracker';

@@ -9,6 +9,7 @@ import { captureProtocolError } from './TestVectors';
 
 const UPTIME_MS: number = 42;
 const COLUMNS: number = 120;
+const DAEMON_VERSION: string = '5.178.1';
 
 const MESSAGES: readonly DaemonControlMessage[] = [
   { kind: 'hello', payload: { protocolVersion: DAEMON_PROTOCOL_VERSION } },
@@ -17,6 +18,14 @@ const MESSAGES: readonly DaemonControlMessage[] = [
   { kind: 'unsubscribe', payload: {} },
   { kind: 'ping', payload: {} },
   { kind: 'pong', payload: { uptimeMs: UPTIME_MS } },
+  {
+    kind: 'pong',
+    payload: {
+      daemonVersion: DAEMON_VERSION,
+      protocolVersion: DAEMON_PROTOCOL_VERSION,
+      uptimeMs: UPTIME_MS
+    }
+  },
   { kind: 'error', payload: { code: 'malformedPayload', message: 'bad' } }
 ];
 

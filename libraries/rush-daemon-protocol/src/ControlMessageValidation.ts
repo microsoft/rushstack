@@ -5,7 +5,7 @@ import { isDaemonControlMessageKind } from './DaemonControlMessage';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { isDaemonVerbosity } from './DaemonVerbosity';
 
-/** Returns `true` when `value` is a plain object. @beta */
+/** Returns `true` when `value` is a non-null object usable as a control record. @beta */
 export function isDaemonControlRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -45,6 +45,12 @@ function validateHelloAck(payload: Record<string, unknown>): void {
   requireStringField(payload, 'sessionId');
 }
 
+function validatePong(payload: Record<string, unknown>): void {
+  if (payload.daemonVersion !== undefined) requireStringField(payload, 'daemonVersion');
+  if (payload.protocolVersion !== undefined) requireVersion(payload);
+  requireNumberField(payload, 'uptimeMs');
+}
+
 function validateSubscribe(payload: Record<string, unknown>): void {
   if (typeof payload.isTTY !== 'boolean') {
     fail('Subscribe message payload.isTTY must be a boolean.');
@@ -73,13 +79,11 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   subscribe: validateSubscribe,
   unsubscribe: noopValidator,
   ping: noopValidator,
-  pong: (payload: Record<string, unknown>) => requireNumberField(payload, 'uptimeMs'),
+  pong: validatePong,
   error: validateError
 };
 
-/**
- * Structurally validates a parsed control message.
- *
+/** Structurally validates a parsed control message.
  * @throws {@link DaemonProtocolError} when the value is not a well-formed control message.
  *
  * @beta

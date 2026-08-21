@@ -1,6 +1,18 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Fri, 14 Aug 2026 00:18:07 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 0.16.3
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 0.16.2
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
 
 ## 0.16.1
 Fri, 14 Aug 2026 00:18:07 GMT

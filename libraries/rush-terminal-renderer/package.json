@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-terminal-renderer",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Client-side renderer for the Rush daemon (rushd): hosts reporters and per-operation stream collation, applies per-client verbosity, and threads terminal capabilities to child processes. (public beta)",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

@@ -146,6 +146,11 @@
       "rule": "complexity"
     },
     {
+      "file": "src/no-new-null.ts",
+      "scopeId": ".noNewNullRule.create.isPubliclyAccessible",
+      "rule": "complexity"
+    },
+    {
       "file": "src/no-null.ts",
       "scopeId": ".",
       "rule": "sort-imports"

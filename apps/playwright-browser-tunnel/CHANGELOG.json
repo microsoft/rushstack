@@ -2,6 +2,49 @@
   "name": "@rushstack/playwright-browser-tunnel",
   "entries": [
     {
+      "version": "0.3.29",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.29",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.28",
+      "tag": "@rushstack/playwright-browser-tunnel_v0.3.28",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Widen the `playwright-core` peer dependency to `>=1.56.1 <2.0.0` so consumers are not pinned to a single Playwright minor, and update the package's own Playwright dependencies to 1.62.1."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.24`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.27",
       "tag": "@rushstack/playwright-browser-tunnel_v0.3.27",
       "date": "Fri, 14 Aug 2026 00:18:07 GMT",

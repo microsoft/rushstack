@@ -5,7 +5,7 @@ import * as child_process from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { Text, Path, FileSystem, type FolderItem } from '@rushstack/node-core-library';
+import { Path, FileSystem, type FolderItem } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
 import { IS_WINDOWS } from './executionUtilities';
@@ -131,7 +131,7 @@ export class AsyncRecycler {
       command = 'cmd.exe';
 
       // In PowerShell single-quote literals, single quotes are escaped by doubling them
-      const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, "'", "''");
+      const escapedRecyclerFolder: string = this.recyclerFolder.replaceAll("'", "''");
 
       // As of PowerShell 3.0, the "\\?" prefix can be used for paths that exceed MAX_PATH.
       // (This prefix does not seem to work for cmd.exe's "rd" command.)

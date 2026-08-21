@@ -1,6 +1,18 @@
 # Change Log - @rushstack/playwright-browser-tunnel
 
-This log was last generated on Fri, 14 Aug 2026 00:18:07 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 0.3.29
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 0.3.28
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Widen the `playwright-core` peer dependency to `>=1.56.1 <2.0.0` so consumers are not pinned to a single Playwright minor, and update the package's own Playwright dependencies to 1.62.1.
 
 ## 0.3.27
 Fri, 14 Aug 2026 00:18:07 GMT

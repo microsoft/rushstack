@@ -6,6 +6,25 @@
 
 /// <reference types="node" />
 
+import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type { IInputsSnapshot } from '@microsoft/rush-lib';
+import type { IOperationGraph } from '@microsoft/rush-lib';
+import { RushConfiguration } from '@microsoft/rush-lib';
+import type { RushSession } from '@microsoft/rush-lib';
+
+// @beta
+export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSessionComponentsOptions) => Promise<IWorkspaceSessionComponents>;
+
+// @beta
+export interface ICreateWorkspaceSessionComponentsOptions {
+    // (undocumented)
+    readonly invalidations: WorkspaceInvalidationTracker;
+    // (undocumented)
+    readonly onError?: (error: Error) => void;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+}
+
 // @public
 export interface IRequestLease {
     // (undocumented)
@@ -21,6 +40,89 @@ export interface IRequestSchedulerAcquireOptions {
     noWait?: boolean;
     onQueuePositionChanged?: (position: number) => void;
     waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IRushDaemonHostOptions {
+    readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
+    readonly daemonVersion: string;
+    readonly onError?: (error: Error) => void;
+    readonly repoRoot: string;
+    readonly rushVersion: string;
+    readonly startupOptions?: Readonly<Record<string, unknown>>;
+}
+
+// @beta
+export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
+    readonly onReady?: (host: RushDaemonHost) => void | Promise<void>;
+    readonly shutdownSignal?: AbortSignal;
+}
+
+// @beta
+export interface IWorkspaceInvalidationSnapshot {
+    readonly changedPaths: ReadonlyArray<string>;
+    readonly hasUnknownChanges: boolean;
+    readonly isWatcherHealthy: boolean;
+    readonly sequence: number;
+}
+
+// @beta
+export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
+    // (undocumented)
+    startAsync(onInvalidation: (changedPath?: string) => void): Promise<void>;
+}
+
+// @beta
+export interface IWorkspaceSession extends AsyncDisposable {
+    // (undocumented)
+    readonly inputsSnapshot: IInputsSnapshot | undefined;
+    // (undocumented)
+    readonly invalidations: WorkspaceInvalidationTracker;
+    // (undocumented)
+    readonly metadata: IWorkspaceSessionMetadata;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph | undefined;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+    // (undocumented)
+    readonly rushSession: RushSession | undefined;
+}
+
+// @beta
+export interface IWorkspaceSessionComponents extends AsyncDisposable {
+    // (undocumented)
+    readonly inputsSnapshot?: IInputsSnapshot;
+    // (undocumented)
+    readonly operationGraph?: IOperationGraph;
+    readonly projectWatcher?: IWorkspaceInvalidationWatcher;
+    // (undocumented)
+    readonly rushSession?: RushSession;
+}
+
+// @beta
+export interface IWorkspaceSessionMetadata {
+    // (undocumented)
+    readonly projectCount: number;
+    // (undocumented)
+    readonly projectNames: ReadonlyArray<string>;
+    // (undocumented)
+    readonly repoRoot: string;
+    // (undocumented)
+    readonly rushJsonFile: string;
+    // (undocumented)
+    readonly rushVersion: string;
+}
+
+// @beta
+export interface IWorkspaceSessionOptions {
+    // (undocumented)
+    readonly createComponentsAsync?: CreateWorkspaceSessionComponentsAsync;
+    // (undocumented)
+    readonly onError?: (error: Error) => void;
+    // (undocumented)
+    readonly repoRoot: string;
+    // (undocumented)
+    readonly rushVersion: string;
 }
 
 // @public
@@ -56,6 +158,47 @@ export enum RequestSchedulerErrorCode {
     // (undocumented)
     WaitTimeout = "WAIT_TIMEOUT"
 }
+
+// @beta
+export class RushDaemonHost {
+    closeAsync(): Promise<void>;
+    getWorkspaceSessionAsync(): Promise<IWorkspaceSession>;
+    // (undocumented)
+    readonly paths: IDaemonPaths;
+    static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
+}
+
+// @beta
+export function serveRushDaemonAsync(options: IRushDaemonServeOptions): Promise<void>;
+
+// @beta
+export class WorkspaceInvalidationTracker {
+    acknowledgeThrough(sequence: number): void;
+    getSnapshot(): IWorkspaceInvalidationSnapshot;
+    invalidate(changedPath?: string): void;
+    markWatcherUnhealthy(): void;
+}
+
+// @beta
+export class WorkspaceSession implements IWorkspaceSession {
+    [Symbol.asyncDispose](): Promise<void>;
+    static createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession>;
+    // (undocumented)
+    readonly inputsSnapshot: IInputsSnapshot | undefined;
+    // (undocumented)
+    readonly invalidations: WorkspaceInvalidationTracker;
+    // (undocumented)
+    readonly metadata: IWorkspaceSessionMetadata;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph | undefined;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+    // (undocumented)
+    readonly rushSession: RushSession | undefined;
+}
+
+// @beta
+export type WorkspaceSessionFactory = (options: IWorkspaceSessionOptions) => Promise<IWorkspaceSession>;
 
 // (No @packageDocumentation comment for this package)
 
