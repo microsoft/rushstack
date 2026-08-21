@@ -119,11 +119,12 @@ function createInputsSnapshot(name: string): IInputsSnapshot {
 }
 
 function createTestEngine(
+  projects: Iterable<RushConfigurationProject>,
   getInputsSnapshotAsync: () => Promise<IInputsSnapshot | undefined>,
   onDisposeAsync?: () => Promise<void>
 ): ITestEngine {
   const operations: Operation[] = Array.from(
-    TEST_RUSH_CONFIGURATION.projects,
+    projects,
     (project: RushConfigurationProject) =>
       new Operation({
         logFilenameIdentifier: '_phase_test',
@@ -190,13 +191,19 @@ async function disposeComponentsAsync(components: IWorkspaceSessionComponents): 
 describe(WorkspaceEngineComponentFactory.name, () => {
   it('initializes exactly once through WorkspaceSession and reconciles startup conservatively', async () => {
     const nextSnapshot: IInputsSnapshot = createInputsSnapshot('next');
-    const engine: ITestEngine = createTestEngine(() => Promise.resolve(nextSnapshot));
+    let initializedEngine: ITestEngine | undefined;
+    let initializedRushConfiguration:
+      | ICreateWorkspaceEngineComponentsOptions['rushConfiguration']
+      | undefined;
     const createEngineComponentsAsync: jest.Mock<
       Promise<IWorkspaceEngineComponents>,
       [ICreateWorkspaceEngineComponentsOptions]
     > = jest.fn(async (createOptions: ICreateWorkspaceEngineComponentsOptions) => {
-      void createOptions;
-      return engine.components;
+      initializedRushConfiguration = createOptions.rushConfiguration;
+      initializedEngine = createTestEngine(createOptions.rushConfiguration.projects, () =>
+        Promise.resolve(nextSnapshot)
+      );
+      return initializedEngine.components;
     });
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync,
@@ -210,7 +217,6 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       [Symbol.asyncDispose]: () => Promise.resolve(),
       startAsync: () => Promise.resolve()
     };
-    const invalidateSpy: jest.SpyInstance = jest.spyOn(engine.graph, 'invalidateOperations');
     const session: WorkspaceSession = await WorkspaceSession.createAsync({
       createComponentsAsync: async (createOptions) => {
         const engineComponents: IWorkspaceSessionComponents =
@@ -227,11 +233,22 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       repoRoot: TEST_REPO_ROOT,
       rushVersion: '5.178.1'
     });
+    const engine: ITestEngine | undefined = initializedEngine;
+    if (!engine) {
+      throw new Error('Expected the workspace engine to be initialized.');
+    }
+    const invalidateSpy: jest.SpyInstance = jest.spyOn(engine.graph, 'invalidateOperations');
 
     const result = await session.reconcileInvalidationsAsync();
 
     expect(createEngineComponentsAsync).toHaveBeenCalledTimes(1);
+    expect(initializedRushConfiguration).toBe(session.rushConfiguration);
     expect(session.operationGraph).toBe(engine.graph);
+    expect(
+      engine.operations.every((operation: Operation) =>
+        session.rushConfiguration.projects.includes(operation.associatedProject)
+      )
+    ).toBe(true);
     expect(session.engineShape).toEqual({
       phaseNames: [PHASE_NAME],
       pluginNames: []
@@ -249,7 +266,9 @@ describe(WorkspaceEngineComponentFactory.name, () => {
 
   it('constructs an explicitly shaped all-project engine and maps retained paths', async () => {
     const nextSnapshot: IInputsSnapshot = createInputsSnapshot('next');
-    const engine: ITestEngine = createTestEngine(() => Promise.resolve(nextSnapshot));
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+      Promise.resolve(nextSnapshot)
+    );
     const targetOperation: Operation = engine.operations[0];
     const createEngineComponentsAsync: jest.Mock<
       Promise<IWorkspaceEngineComponents>,
@@ -303,11 +322,84 @@ describe(WorkspaceEngineComponentFactory.name, () => {
     await disposeComponentsAsync(components);
   });
 
+  it('serializes concurrent reconciliation against the latest inputs snapshot', async () => {
+    const initialSnapshot: IInputsSnapshot = createInputsSnapshot('initial');
+    const firstSnapshot: IInputsSnapshot = createInputsSnapshot('first');
+    const secondSnapshot: IInputsSnapshot = createInputsSnapshot('second');
+    let startFirstSnapshot: (() => void) | undefined;
+    const firstSnapshotStarted: Promise<void> = new Promise((resolve: () => void) => {
+      startFirstSnapshot = resolve;
+    });
+    let finishFirstSnapshot: (() => void) | undefined;
+    const blockedFirstSnapshot: Promise<IInputsSnapshot> = new Promise(
+      (resolve: (snapshot: IInputsSnapshot) => void) => {
+        finishFirstSnapshot = () => resolve(firstSnapshot);
+      }
+    );
+    let snapshotCalls: number = 0;
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () => {
+      snapshotCalls++;
+      if (snapshotCalls === 1) {
+        startFirstSnapshot?.();
+        return blockedFirstSnapshot;
+      }
+      return Promise.resolve(secondSnapshot);
+    });
+    const mapInvalidationsToOperationsAsync: jest.Mock<
+      Promise<Iterable<Operation>>,
+      [IMapWorkspaceInvalidationsOptions]
+    > = jest.fn(async (mapOptions: IMapWorkspaceInvalidationsOptions) => {
+      void mapOptions;
+      return [engine.operations[0]];
+    });
+    const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+      createEngineComponentsAsync: async () => ({
+        ...engine.components,
+        inputsSnapshot: initialSnapshot
+      }),
+      mapInvalidationsToOperationsAsync,
+      shape: {
+        phaseNames: [PHASE_NAME],
+        pluginNames: [PLUGIN_NAME]
+      }
+    });
+    const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+    invalidations.invalidate('libraries/a/src/index.ts');
+    const components: IWorkspaceSessionComponents = await factory.createAsync({
+      invalidations,
+      rushConfiguration: TEST_RUSH_CONFIGURATION
+    });
+
+    const firstReconciliation: Promise<unknown> = getReconcileAsync(components)();
+    await firstSnapshotStarted;
+    const queueSecondInvalidation: Promise<void> = firstReconciliation.then(() => {
+      invalidations.invalidate('libraries/b/src/index.ts');
+    });
+    const secondReconciliation: Promise<unknown> = getReconcileAsync(components)();
+
+    expect(snapshotCalls).toBe(1);
+    expect(mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+    finishFirstSnapshot?.();
+    await Promise.all([firstReconciliation, queueSecondInvalidation, secondReconciliation]);
+
+    expect(mapInvalidationsToOperationsAsync).toHaveBeenCalledTimes(2);
+    expect(mapInvalidationsToOperationsAsync.mock.calls[0][0]).toMatchObject({
+      currentInputsSnapshot: initialSnapshot,
+      nextInputsSnapshot: firstSnapshot
+    });
+    expect(mapInvalidationsToOperationsAsync.mock.calls[1][0]).toMatchObject({
+      currentInputsSnapshot: firstSnapshot,
+      nextInputsSnapshot: secondSnapshot
+    });
+    expect(components.inputsSnapshot).toBe(secondSnapshot);
+    await disposeComponentsAsync(components);
+  });
+
   it('uses a full invalidation for unknown changes and for snapshot races', async () => {
     const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
     invalidations.invalidate('libraries/a/src/index.ts');
     let snapshotCalls: number = 0;
-    const engine: ITestEngine = createTestEngine(() => {
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () => {
       snapshotCalls++;
       if (snapshotCalls === 1) {
         invalidations.invalidate('libraries/b/src/index.ts');
@@ -344,8 +436,9 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   });
 
   it('retains invalidations when a mapper returns an operation outside the graph', async () => {
-    const engine: ITestEngine = createTestEngine(() =>
-      Promise.resolve(createInputsSnapshot('next'))
+    const engine: ITestEngine = createTestEngine(
+      TEST_RUSH_CONFIGURATION.projects,
+      () => Promise.resolve(createInputsSnapshot('next'))
     );
     const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
     invalidations.invalidate('libraries/a/src/index.ts');
@@ -387,6 +480,7 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       }
     );
     const engine: ITestEngine = createTestEngine(
+      TEST_RUSH_CONFIGURATION.projects,
       () => snapshotPromise,
       async () => {
         events.push('components-dispose');
@@ -438,7 +532,9 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   it('accepts an explicitly empty plugin shape', () => {
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync: async () =>
-        createTestEngine(() => Promise.resolve(createInputsSnapshot('next'))).components,
+        createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+          Promise.resolve(createInputsSnapshot('next'))
+        ).components,
       mapInvalidationsToOperationsAsync: async () => [],
       shape: {
         phaseNames: [PHASE_NAME],
@@ -450,8 +546,9 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   });
 
   it('rejects a graph that does not represent every configured project', async () => {
-    const engine: ITestEngine = createTestEngine(() =>
-      Promise.resolve(createInputsSnapshot('next'))
+    const engine: ITestEngine = createTestEngine(
+      TEST_RUSH_CONFIGURATION.projects,
+      () => Promise.resolve(createInputsSnapshot('next'))
     );
     const shape: IWorkspaceEngineShape = {
       phaseNames: [PHASE_NAME],
@@ -476,8 +573,9 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   });
 
   it('rejects a graph containing an undeclared plugin phase', async () => {
-    const engine: ITestEngine = createTestEngine(() =>
-      Promise.resolve(createInputsSnapshot('next'))
+    const engine: ITestEngine = createTestEngine(
+      TEST_RUSH_CONFIGURATION.projects,
+      () => Promise.resolve(createInputsSnapshot('next'))
     );
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync: async () => engine.components,
