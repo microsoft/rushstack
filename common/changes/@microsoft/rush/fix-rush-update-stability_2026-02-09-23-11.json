@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Handle versioned selectors in `globalOverrides` during pnpm shrinkwrap comparison.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
