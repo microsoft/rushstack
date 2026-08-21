@@ -121,12 +121,12 @@ export class NdjsonDecoder {
   }
 
   private _processLine(line: string, records: unknown[]): void {
+    if (Buffer.byteLength(line, 'utf8') > this._maxRecordBytes) {
+      throw new NdjsonRecordTooLargeError(this._maxRecordBytes);
+    }
     const trimmed: string = line.trim();
     if (trimmed.length === 0) {
       return;
-    }
-    if (Buffer.byteLength(trimmed, 'utf8') > this._maxRecordBytes) {
-      throw new NdjsonRecordTooLargeError(this._maxRecordBytes);
     }
     records.push(JSON.parse(trimmed));
   }

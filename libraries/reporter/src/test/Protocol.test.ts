@@ -8,6 +8,7 @@ import {
   encodeNdjsonRecord,
   NdjsonDecoder,
   NdjsonRecordTooLargeError,
+  InvalidReporterHelloError,
   negotiateReporterHello,
   type IReporterHello,
   type IReporterHandshakeResult
@@ -59,6 +60,11 @@ describe('NDJSON encode/decode', () => {
   it('throws when a decoded record exceeds the limit', () => {
     const decoder: NdjsonDecoder = new NdjsonDecoder({ maxRecordBytes: 10 });
     expect(() => decoder.decode(`${'"'}${'x'.repeat(100)}${'"'}\n`)).toThrow(NdjsonRecordTooLargeError);
+  });
+
+  it('counts leading and trailing whitespace toward the decoded record limit', () => {
+    const decoder: NdjsonDecoder = new NdjsonDecoder({ maxRecordBytes: 10 });
+    expect(() => decoder.decode(` ${' '.repeat(10)}{}\n`)).toThrow(NdjsonRecordTooLargeError);
   });
 
   it('throws when a partial line exceeds the limit before a newline arrives', () => {
@@ -131,5 +137,23 @@ describe('negotiateReporterHello', () => {
     );
     expect(result.accepted).toBe(true);
     expect(result.ack.rejectedRequiredFeatures).toEqual([]);
+  });
+
+  it('rejects a malformed wire hello with a predictable validation error', () => {
+    expect(() =>
+      negotiateReporterHello(
+        { kind: 'hello' },
+        { supportedProtocolVersion: { major: 1, minor: 0 } }
+      )
+    ).toThrow(InvalidReporterHelloError);
+    expect(() =>
+      negotiateReporterHello(
+        {
+          ...makeHello(),
+          capabilities: [42]
+        },
+        { supportedProtocolVersion: { major: 1, minor: 0 } }
+      )
+    ).toThrow(/capabilities must be an array of strings/);
   });
 });

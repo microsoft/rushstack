@@ -85,7 +85,12 @@ export type {
   IReporterHandshakeResult,
   ReporterCapability
 } from './protocol/ReporterHandshake';
-export { negotiateReporterHello, REPORTER_KNOWN_CAPABILITIES } from './protocol/ReporterHandshake';
+export {
+  InvalidReporterHelloError,
+  negotiateReporterHello,
+  parseReporterHello,
+  REPORTER_KNOWN_CAPABILITIES
+} from './protocol/ReporterHandshake';
 
 export type { IReporter, IReporterContext } from './manager/IReporter';
 export type { IReporterRegistrationOptions, IReporterManagerOptions } from './manager/ReporterManager';
@@ -103,4 +108,7 @@ export type {
   IScopedReporter
 } from './producers/IScopedReporter';
 export type { ReporterExtensionEventName } from './producers/ReporterExtensionEventName';
-export { isReporterExtensionEventName } from './producers/ReporterExtensionEventName';
+export {
+  isReporterExtensionEventName,
+  parseReporterExtensionEventName
+} from './producers/ReporterExtensionEventName';

@@ -19,6 +19,7 @@ class RecordingReporter implements IReporter {
   public closeCount: number = 0;
   public throwOnInit: boolean = false;
   public throwOnReportType: ReporterEventType | undefined = undefined;
+  public throwOnClose: boolean = false;
 
   public constructor(name: string) {
     this.name = name;
@@ -44,6 +45,9 @@ class RecordingReporter implements IReporter {
 
   public async closeAsync(): Promise<void> {
     this.closeCount++;
+    if (this.throwOnClose) {
+      throw new Error(`close failed ${this.name}`);
+    }
   }
 }
 
@@ -185,6 +189,7 @@ describe('ReporterManager ordering and assignment', () => {
     );
     expect(ingested?.sequence).toBe(2);
     expect(ingested?.sourceSequence).toBe(42);
+    expect(ingested?.required).toBe(true);
   });
 });
 
@@ -243,10 +248,11 @@ describe('ReporterManager failure handling', () => {
 
     manager.emit(makeInput('activityChanged'));
     manager.emit(makeInput('commandCompleted'));
-    await manager.flushAsync();
+    await manager.closeAsync();
 
     expect(good.reported).toHaveLength(2);
     expect(bad.reported).toHaveLength(0);
+    expect(bad.closeCount).toBe(1);
     expect(emergency.some((m: string) => m.includes('Disabling optional reporter "bad"'))).toBe(true);
   });
 
@@ -323,6 +329,17 @@ describe('ReporterManager flush and close', () => {
     expect(reporter.closeCount).toBe(1);
   });
 
+  it('surfaces a required reporter close failure', async () => {
+    const manager: ReporterManager = new ReporterManager({ emergencyDiagnosticWriter: () => undefined });
+    const reporter: RecordingReporter = new RecordingReporter('required');
+    reporter.throwOnClose = true;
+    manager.addReporter(reporter, { required: true });
+    await manager.initializeAsync();
+
+    await expect(manager.closeAsync()).rejects.toThrow(/close failed required/);
+    expect(reporter.closeCount).toBe(1);
+  });
+
   it('returns from flush even when a reporter never resolves, using the timeout', async () => {
     const slow: IReporter = {
       name: 'slow',
@@ -348,5 +365,37 @@ describe('ReporterManager flush and close', () => {
     manager.emit(makeInput('commandStarted'));
     await manager.flushAsync(50);
     expect(true).toBe(true);
+  });
+
+  it('does not overlap close with a timed-out flush', async () => {
+    let resolveFlush: (() => void) | undefined;
+    let closeCount: number = 0;
+    const slow: IReporter = {
+      name: 'slow',
+      async initializeAsync(): Promise<void> {
+        /* no-op */
+      },
+      report(): void {
+        /* no-op */
+      },
+      flushAsync(): Promise<void> {
+        return new Promise<void>((resolve: () => void) => {
+          resolveFlush = resolve;
+        });
+      },
+      async closeAsync(): Promise<void> {
+        closeCount++;
+      }
+    };
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(slow);
+    await manager.initializeAsync();
+
+    await manager.closeAsync(10);
+    expect(closeCount).toBe(0);
+
+    resolveFlush!();
+    await new Promise<void>((resolve: () => void) => setTimeout(resolve, 0));
+    expect(closeCount).toBe(1);
   });
 });

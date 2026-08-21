@@ -39,6 +39,19 @@ export interface IReporterHello {
 }
 
 /**
+ * Thrown when an untrusted wire value is not a valid reporter hello message.
+ *
+ * @beta
+ */
+export class InvalidReporterHelloError extends Error {
+  public constructor(reason: string) {
+    super(`Invalid reporter hello message: ${reason}`);
+    this.name = 'InvalidReporterHelloError';
+    Object.setPrototypeOf(this, InvalidReporterHelloError.prototype);
+  }
+}
+
+/**
  * The consumer's reply that accepts capabilities and reports unsupported required features.
  *
  * @beta
@@ -133,6 +146,65 @@ export interface IReporterHandshakeResult {
   readonly diagnostic?: IRushDiagnostic;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isProtocolVersion(value: unknown): value is IReporterProtocolVersion {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.major === 'number' &&
+    Number.isSafeInteger(value.major) &&
+    value.major >= 0 &&
+    typeof value.minor === 'number' &&
+    Number.isSafeInteger(value.minor) &&
+    value.minor >= 0
+  );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item: unknown) => typeof item === 'string');
+}
+
+/**
+ * Validates and parses an untrusted wire value as a reporter hello message.
+ *
+ * @param value - the decoded NDJSON value
+ * @throws {@link InvalidReporterHelloError} if the value is malformed
+ *
+ * @beta
+ */
+export function parseReporterHello(value: unknown): IReporterHello {
+  if (!isRecord(value) || value.kind !== 'hello') {
+    throw new InvalidReporterHelloError('expected kind "hello".');
+  }
+  if (!isProtocolVersion(value.protocolVersion)) {
+    throw new InvalidReporterHelloError('protocolVersion must contain nonnegative integer major and minor.');
+  }
+  if (typeof value.producerVersion !== 'string' || value.producerVersion.length === 0) {
+    throw new InvalidReporterHelloError('producerVersion must be a nonempty string.');
+  }
+  if (!isStringArray(value.capabilities)) {
+    throw new InvalidReporterHelloError('capabilities must be an array of strings.');
+  }
+  if (!isStringArray(value.requiredFeatures)) {
+    throw new InvalidReporterHelloError('requiredFeatures must be an array of strings.');
+  }
+
+  return {
+    kind: 'hello',
+    protocolVersion: {
+      major: value.protocolVersion.major,
+      minor: value.protocolVersion.minor
+    },
+    producerVersion: value.producerVersion,
+    capabilities: [...value.capabilities],
+    requiredFeatures: [...value.requiredFeatures]
+  };
+}
+
 /**
  * Negotiates a producer's hello against the consumer's supported protocol.
  *
@@ -143,15 +215,16 @@ export interface IReporterHandshakeResult {
  * update-global-Rush diagnostic. A differing minor is always compatible because
  * minor versions are additive.
  *
- * @param hello - the producer's hello message
+ * @param helloValue - the producer's decoded hello wire value
  * @param options - the consumer's supported protocol and capabilities
  *
  * @beta
  */
 export function negotiateReporterHello(
-  hello: IReporterHello,
+  helloValue: unknown,
   options: IReporterHandshakeOptions
 ): IReporterHandshakeResult {
+  const hello: IReporterHello = parseReporterHello(helloValue);
   const consumerVersion: IReporterProtocolVersion = options.supportedProtocolVersion;
   const supportedCapabilities: ReadonlySet<string> = new Set(options.supportedCapabilities ?? []);
 

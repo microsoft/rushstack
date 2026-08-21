@@ -94,6 +94,7 @@ interface IReporterEntry {
   readonly queue: IReporterEventEnvelope<unknown>[];
   draining: boolean;
   drainPromise: Promise<void>;
+  lifecyclePromise: Promise<void>;
 }
 
 /**
@@ -169,7 +170,8 @@ export class ReporterManager implements IReporterEventSink {
       failureNotified: false,
       queue: [],
       draining: false,
-      drainPromise: Promise.resolve()
+      drainPromise: Promise.resolve(),
+      lifecyclePromise: Promise.resolve()
     });
   }
 
@@ -226,6 +228,7 @@ export class ReporterManager implements IReporterEventSink {
     this._ensureInitialized();
     const rehomed: IReporterEventEnvelope<unknown> = {
       ...envelope,
+      required: isReporterEventRequired(envelope.type),
       sequence: this._nextSequence++,
       sourceSequence: envelope.sequence
     };
@@ -280,12 +283,13 @@ export class ReporterManager implements IReporterEventSink {
       flushError = error as Error;
     }
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
-      if (!entry.disabled) {
-        await entry.reporter.closeAsync();
-      }
+      await entry.reporter.closeAsync();
     }, timeoutMs);
     if (flushError) {
       throw flushError;
+    }
+    if (this._fatalError) {
+      throw this._fatalError;
     }
   }
 
@@ -378,11 +382,7 @@ export class ReporterManager implements IReporterEventSink {
     timeoutMs: number
   ): Promise<void> {
     const work: Promise<void> = Promise.all(
-      this._entries.map((entry: IReporterEntry) =>
-        action(entry).catch((error: Error) => {
-          this._handleReporterFailure(entry, error);
-        })
-      )
+      this._entries.map((entry: IReporterEntry) => this._scheduleLifecycleAction(entry, action))
     ).then(() => undefined);
 
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -397,5 +397,17 @@ export class ReporterManager implements IReporterEventSink {
         clearTimeout(timer);
       }
     }
+  }
+
+  private _scheduleLifecycleAction(
+    entry: IReporterEntry,
+    action: (entry: IReporterEntry) => Promise<void>
+  ): Promise<void> {
+    const scheduled: Promise<void> = entry.lifecyclePromise.then(() => action(entry));
+    const settled: Promise<void> = scheduled.catch((error: Error) => {
+      this._handleReporterFailure(entry, error);
+    });
+    entry.lifecyclePromise = settled;
+    return settled;
   }
 }

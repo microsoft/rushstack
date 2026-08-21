@@ -13,6 +13,7 @@ import {
   RushError,
   type IRushDiagnostic,
   type IRushDiagnosticCodeDefinition,
+  type RushDiagnosticCode,
   type RushDiagnosticCategory,
   type ReporterPrivacyClassification
 } from '../index';
@@ -72,6 +73,32 @@ describe('RushDiagnosticCodeRegistry', () => {
     expect(isValidRushDiagnosticCode('RUSH_CONFIG')).toBe(false); // missing name segment
     expect(isValidRushDiagnosticCode('CONFIG_INVALID_JSON')).toBe(false); // missing RUSH_ prefix
     expect(isValidRushDiagnosticCode('RUSH__DOUBLE')).toBe(false); // empty segment
+  });
+
+  it('validates authored code literals at compile time', () => {
+    const valid: RushDiagnosticCode<'RUSH_CONFIG_INVALID_JSON'> = 'RUSH_CONFIG_INVALID_JSON';
+    // @ts-expect-error -- lowercase segments cannot enter the governed registry
+    const invalid: RushDiagnosticCode<'RUSH_config_bad'> = 'RUSH_config_bad';
+    // @ts-expect-error -- the default public code type also excludes lowercase codes
+    const invalidDefault: RushDiagnosticCode = 'RUSH_config_bad';
+    // @ts-expect-error -- the exact authored-code validator requires nonempty segments
+    const invalidEmptySegment: RushDiagnosticCode<'RUSH__BAD'> = 'RUSH__BAD';
+    const invalidDiagnostic: IRushDiagnostic = {
+      diagnosticId: 'diag_invalid',
+      // @ts-expect-error -- diagnostic DTOs cannot claim malformed codes
+      code: 'RUSH_config_bad',
+      category: 'configuration',
+      severity: 'error',
+      summaryKey: 'diagnostic.RUSH_config_bad.summary'
+    };
+
+    expect([valid, invalid, invalidDefault, invalidEmptySegment, invalidDiagnostic.code]).toEqual([
+      'RUSH_CONFIG_INVALID_JSON',
+      'RUSH_config_bad',
+      'RUSH_config_bad',
+      'RUSH__BAD',
+      'RUSH_config_bad'
+    ]);
   });
 });
 

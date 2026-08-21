@@ -11,14 +11,15 @@
  * event names from colliding with the closed core event set, which remains
  * controlled by Rush.
  *
- * The template-literal type enforces the two-segment lowercase shape at
- * compile time; {@link isReporterExtensionEventName} remains the exact
- * wire-level validator for untrusted data (types cannot express rules such as
- * "no empty segments" or "no leading digit").
+ * Names are validated with {@link parseReporterExtensionEventName} or narrowed
+ * with {@link isReporterExtensionEventName} before being emitted. The brand
+ * prevents unchecked strings from crossing the producer API.
  *
  * @beta
  */
-export type ReporterExtensionEventName = `${Lowercase<string>}.${Lowercase<string>}`;
+export type ReporterExtensionEventName = `${string}.${string}` & {
+  readonly __reporterExtensionEventNameBrand: 'ReporterExtensionEventName';
+};
 
 const EXTENSION_EVENT_NAME_REGEXP: RegExp =
   /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*)+$/;
@@ -35,6 +36,21 @@ const EXTENSION_EVENT_NAME_REGEXP: RegExp =
  *
  * @beta
  */
-export function isReporterExtensionEventName(name: string): boolean {
+export function isReporterExtensionEventName(name: string): name is ReporterExtensionEventName {
   return EXTENSION_EVENT_NAME_REGEXP.test(name);
+}
+
+/**
+ * Validates an extension event name and returns its branded representation.
+ *
+ * @param name - the candidate extension event name
+ * @throws Error if `name` is malformed
+ *
+ * @beta
+ */
+export function parseReporterExtensionEventName(name: string): ReporterExtensionEventName {
+  if (!isReporterExtensionEventName(name)) {
+    throw new Error(`Invalid reporter extension event name: ${JSON.stringify(name)}.`);
+  }
+  return name;
 }

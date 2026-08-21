@@ -55,6 +55,11 @@ export interface INdjsonOptions {
 }
 
 // @beta
+export class InvalidReporterHelloError extends Error {
+    constructor(reason: string);
+}
+
+// @beta
 export interface IReporter {
     closeAsync(): Promise<void>;
     flushAsync(): Promise<void>;
@@ -230,7 +235,7 @@ export interface IScopedMessageOptions {
 // @beta
 export interface IScopedReporter {
     emitDiagnostic(diagnostic: IRushDiagnostic): string;
-    emitExtension<TPayload>(name: ReporterExtensionEventName, payload: TPayload): string;
+    emitExtension(name: ReporterExtensionEventName, payload: ReporterJsonValue): string;
     emitMessage(options: IScopedMessageOptions): string;
 }
 
@@ -238,7 +243,7 @@ export interface IScopedReporter {
 export function isReporterEventRequired(type: ReporterEventType): boolean;
 
 // @beta
-export function isReporterExtensionEventName(name: string): boolean;
+export function isReporterExtensionEventName(name: string): name is ReporterExtensionEventName;
 
 // @beta
 export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
@@ -263,10 +268,16 @@ export class NdjsonRecordTooLargeError extends Error {
 }
 
 // @beta
-export function negotiateReporterHello(hello: IReporterHello, options: IReporterHandshakeOptions): IReporterHandshakeResult;
+export function negotiateReporterHello(helloValue: unknown, options: IReporterHandshakeOptions): IReporterHandshakeResult;
 
 // @beta
-export type OneOrMoreRushDiagnosticCodeSegments<S extends string = RushDiagnosticCodeSegment> = S extends string ? S | `${S}${RushDiagnosticCodeSegment}` : never;
+export type OneOrMoreRushDiagnosticCodeSegments<TSegments extends string = string> = string extends TSegments ? `_${Uppercase<string>}` : TSegments extends `_${infer Segments}` ? Segments extends '' ? never : TSegments extends Uppercase<TSegments> ? TSegments : never : never;
+
+// @beta
+export function parseReporterExtensionEventName(name: string): ReporterExtensionEventName;
+
+// @beta
+export function parseReporterHello(value: unknown): IReporterHello;
 
 // @beta
 export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension"];
@@ -290,7 +301,9 @@ export type ReporterCapability = (typeof REPORTER_KNOWN_CAPABILITIES)[number] | 
 export type ReporterEventType = (typeof REPORTER_EVENT_TYPES)[number];
 
 // @beta
-export type ReporterExtensionEventName = `${Lowercase<string>}.${Lowercase<string>}`;
+export type ReporterExtensionEventName = `${string}.${string}` & {
+    readonly __reporterExtensionEventNameBrand: 'ReporterExtensionEventName';
+};
 
 // @beta
 export type ReporterJsonNull = null;
@@ -396,13 +409,13 @@ export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 export type RushDiagnosticCategory = KnownRushDiagnosticCategory | (string & {});
 
 // @beta
-export type RushDiagnosticCode = `RUSH${RushDiagnosticCodeSegment}${OneOrMoreRushDiagnosticCodeSegments}`;
+export type RushDiagnosticCode<TCode extends string = string> = string extends TCode ? `RUSH_${Uppercase<string>}_${Uppercase<string>}` : TCode extends `RUSH_${infer Domain}_${infer Name}` ? Domain extends '' ? never : Name extends '' ? never : TCode extends Uppercase<TCode> ? TCode : never : never;
 
 // @beta
 export type RushDiagnosticCodes = (typeof RUSH_DIAGNOSTIC_CODE_DEFINITIONS)[number]['code'];
 
 // @beta
-export type RushDiagnosticCodeSegment = `_${Uppercase<string>}`;
+export type RushDiagnosticCodeSegment<TSegment extends string = string> = string extends TSegment ? `_${Uppercase<string>}` : TSegment extends `_${infer Segment}` ? Segment extends '' ? never : TSegment extends Uppercase<TSegment> ? TSegment : never : never;
 
 // @beta
 export type RushDiagnosticDetailKey = `diagnostic.${RushDiagnosticCode}.detail`;
