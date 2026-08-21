@@ -77,7 +77,12 @@ export {
   isReporterProtocolCompatible
 } from './protocol/ReporterProtocol';
 export type { INdjsonOptions } from './protocol/Ndjson';
-export { NdjsonRecordTooLargeError, encodeNdjsonRecord, NdjsonDecoder } from './protocol/Ndjson';
+export {
+  NdjsonInvalidRecordError,
+  NdjsonRecordTooLargeError,
+  encodeNdjsonRecord,
+  NdjsonDecoder
+} from './protocol/Ndjson';
 export type {
   IReporterHello,
   IReporterHelloAck,

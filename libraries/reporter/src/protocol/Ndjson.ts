@@ -14,14 +14,46 @@ export class NdjsonRecordTooLargeError extends Error {
    */
   public readonly maxRecordBytes: number;
 
-  public constructor(maxRecordBytes: number) {
+  /**
+   * Valid records completed by the decoder before it rejected the oversized record.
+   */
+  public readonly decodedRecords: readonly unknown[];
+
+  public constructor(maxRecordBytes: number, decodedRecords: readonly unknown[] = []) {
     super(`The NDJSON record exceeds the maximum size of ${maxRecordBytes} bytes.`);
     this.name = 'NdjsonRecordTooLargeError';
     this.maxRecordBytes = maxRecordBytes;
+    this.decodedRecords = [...decodedRecords];
 
     // Restore the prototype chain, which is broken when subclassing a built-in
     // and compiling to CommonJS.
     Object.setPrototypeOf(this, NdjsonRecordTooLargeError.prototype);
+  }
+}
+
+/**
+ * Thrown when a completed NDJSON record is not valid JSON.
+ *
+ * @beta
+ */
+export class NdjsonInvalidRecordError extends Error {
+  /**
+   * Valid records completed before the malformed record.
+   */
+  public readonly decodedRecords: readonly unknown[];
+
+  /**
+   * The JSON parser error that caused this failure.
+   */
+  public readonly cause: Error;
+
+  public constructor(decodedRecords: readonly unknown[], cause: Error) {
+    super('The NDJSON record is not valid JSON.');
+    this.name = 'NdjsonInvalidRecordError';
+    this.decodedRecords = [...decodedRecords];
+    this.cause = cause;
+
+    Object.setPrototypeOf(this, NdjsonInvalidRecordError.prototype);
   }
 }
 
@@ -67,6 +99,9 @@ export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): st
  * Call {@link NdjsonDecoder.decode} for each received chunk to obtain the
  * records completed by that chunk, then call {@link NdjsonDecoder.flush} once
  * the stream ends to obtain any trailing record that was not newline-terminated.
+ * If a later record fails, its error exposes earlier valid records through
+ * `decodedRecords`; the rejected completed line is consumed and any subsequent
+ * buffered lines remain available to a later call.
  *
  * @beta
  */
@@ -83,7 +118,8 @@ export class NdjsonDecoder {
    * Appends a chunk and returns any records it completed.
    *
    * @param chunk - a fragment of the NDJSON stream
-   * @throws NdjsonRecordTooLargeError if a record exceeds the limit
+   * @throws {@link NdjsonRecordTooLargeError} if a record exceeds the limit
+   * @throws {@link NdjsonInvalidRecordError} if a completed record is malformed
    */
   public decode(chunk: string): unknown[] {
     this._buffer += chunk;
@@ -99,7 +135,7 @@ export class NdjsonDecoder {
 
     // A partial line that already exceeds the limit can never become a valid record.
     if (Buffer.byteLength(this._buffer, 'utf8') > this._maxRecordBytes) {
-      throw new NdjsonRecordTooLargeError(this._maxRecordBytes);
+      throw new NdjsonRecordTooLargeError(this._maxRecordBytes, records);
     }
 
     return records;
@@ -108,7 +144,8 @@ export class NdjsonDecoder {
   /**
    * Returns any trailing record that was not newline-terminated and resets the buffer.
    *
-   * @throws NdjsonRecordTooLargeError if the trailing record exceeds the limit
+   * @throws {@link NdjsonRecordTooLargeError} if the trailing record exceeds the limit
+   * @throws {@link NdjsonInvalidRecordError} if the trailing record is malformed
    */
   public flush(): unknown[] {
     const records: unknown[] = [];
@@ -122,12 +159,18 @@ export class NdjsonDecoder {
 
   private _processLine(line: string, records: unknown[]): void {
     if (Buffer.byteLength(line, 'utf8') > this._maxRecordBytes) {
-      throw new NdjsonRecordTooLargeError(this._maxRecordBytes);
+      throw new NdjsonRecordTooLargeError(this._maxRecordBytes, records);
     }
     const trimmed: string = line.trim();
     if (trimmed.length === 0) {
       return;
     }
-    records.push(JSON.parse(trimmed));
+    try {
+      records.push(JSON.parse(trimmed));
+    } catch (error) {
+      const cause: Error =
+        error instanceof Error ? error : new Error('An unknown JSON parsing failure occurred.');
+      throw new NdjsonInvalidRecordError(records, cause);
+    }
   }
 }

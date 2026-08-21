@@ -262,8 +262,16 @@ export class NdjsonDecoder {
 }
 
 // @beta
+export class NdjsonInvalidRecordError extends Error {
+    constructor(decodedRecords: readonly unknown[], cause: Error);
+    readonly cause: Error;
+    readonly decodedRecords: readonly unknown[];
+}
+
+// @beta
 export class NdjsonRecordTooLargeError extends Error {
-    constructor(maxRecordBytes: number);
+    constructor(maxRecordBytes: number, decodedRecords?: readonly unknown[]);
+    readonly decodedRecords: readonly unknown[];
     readonly maxRecordBytes: number;
 }
 

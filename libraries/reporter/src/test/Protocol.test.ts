@@ -7,6 +7,7 @@ import {
   isReporterProtocolCompatible,
   encodeNdjsonRecord,
   NdjsonDecoder,
+  NdjsonInvalidRecordError,
   NdjsonRecordTooLargeError,
   InvalidReporterHelloError,
   negotiateReporterHello,
@@ -70,6 +71,39 @@ describe('NDJSON encode/decode', () => {
   it('throws when a partial line exceeds the limit before a newline arrives', () => {
     const decoder: NdjsonDecoder = new NdjsonDecoder({ maxRecordBytes: 10 });
     expect(() => decoder.decode('x'.repeat(50))).toThrow(NdjsonRecordTooLargeError);
+  });
+
+  it('exposes valid records completed before a malformed later record', () => {
+    const decoder: NdjsonDecoder = new NdjsonDecoder();
+    let caught: unknown;
+    try {
+      decoder.decode('{"id":1}\nnot-json\n{"id":2}\n');
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(NdjsonInvalidRecordError);
+    if (!(caught instanceof NdjsonInvalidRecordError)) {
+      throw new Error('Expected an NdjsonInvalidRecordError.');
+    }
+    expect(caught.decodedRecords).toEqual([{ id: 1 }]);
+    expect(decoder.decode('')).toEqual([{ id: 2 }]);
+  });
+
+  it('exposes valid records completed before an oversized later record', () => {
+    const decoder: NdjsonDecoder = new NdjsonDecoder({ maxRecordBytes: 10 });
+    let caught: unknown;
+    try {
+      decoder.decode(`1\n${'"'}${'x'.repeat(20)}${'"'}\n`);
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(NdjsonRecordTooLargeError);
+    if (!(caught instanceof NdjsonRecordTooLargeError)) {
+      throw new Error('Expected an NdjsonRecordTooLargeError.');
+    }
+    expect(caught.decodedRecords).toEqual([1]);
   });
 });
 
