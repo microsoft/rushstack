@@ -1,3 +1,8 @@
+parameters:
+  # Only the packages belonging to this version policy are packed.
+  - name: VersionPolicyName
+    type: string
+
 steps:
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
     parameters:
@@ -14,5 +19,6 @@ steps:
         --publish
         --pack
         --include-all
+        --version-policy ${{ parameters.VersionPolicyName }}
         --release-folder $(Build.ArtifactStagingDirectory)/packages
-      DisplayName: 'Rush Pack'
+      DisplayName: 'Rush Pack (Policy: ${{ parameters.VersionPolicyName }})'
