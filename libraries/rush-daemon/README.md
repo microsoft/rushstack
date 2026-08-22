@@ -12,7 +12,18 @@ The host loads `RushConfiguration` once before signaling readiness and keeps a h
 active for the daemon lifetime. Its invalidation tracker retains changes while no clients are
 connected so a later request can reconcile them. The tracker starts with a conservative unknown
 invalidation covering session startup, and excessive distinct paths are compacted into the same
-full-workspace signal. Reusable operation graph, plugin, and input snapshot state can be supplied
-through the session component factory; the default session does not construct those command-specific
-resources while the reusable runner lifetime tracked by
-[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remains incomplete.
+full-workspace signal.
+
+`WorkspaceEngineComponentFactory` provides the opt-in seam for a command integration to supply a real
+all-project operation graph, its `RushSession`, and a refreshable inputs snapshot. The integration must
+declare the complete phase and plugin shape because Rush plugins can currently vary that shape by command.
+The factory validates graph ownership, serializes retained invalidation reconciliation, and maps path-specific
+changes through the integration. The engine owner must supply one deterministic async disposer because
+`IOperationGraph` does not yet expose an operation that both stops the lifetime and awaits runner cleanup.
+After the initial conservative startup reconciliation, changes to Rush configuration, project package manifests,
+or integration-classified plugin graph inputs fail closed with `WorkspaceEngineRecreationRequiredError` before
+the input baseline advances or the invalidation is acknowledged. The startup watcher-registration boundary has
+no paths to classify and therefore remains a full invalidation. The routing layer must replace the complete
+workspace session rather than run a stale graph.
+The default daemon executable does not construct or route this graph while the command-independent plugin shape and per-iteration runner
+lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.
