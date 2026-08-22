@@ -21,7 +21,10 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'unsubscribe',
 'ping',
 'pong',
-'error'
+'error',
+'setRawMode',
+'rawModeChanged',
+'terminalPolicy'
 ];
 
 // @beta
@@ -44,13 +47,16 @@ export const DAEMON_EVENT_TYPES: readonly [
 ];
 
 // @beta
+export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 
 // @beta
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -116,6 +122,15 @@ export class DaemonProtocolError extends Error {
 export type DaemonProtocolErrorCode = 'frameTooLarge' | 'unknownFrameType' | 'malformedPayload' | 'malformedControlMessage' | 'protocolVersionMismatch';
 
 // @beta
+export type DaemonTerminalPolicyDecision = 'runInDaemon' | 'requiresInProcess';
+
+// @beta
+export type DaemonTerminalPolicyReason = 'controllingTerminalRequired';
+
+// @beta
+export type DaemonTerminalRequirement = 'none' | 'interactiveInput' | 'controllingTerminal';
+
+// @beta
 export type DaemonVerbosity = 'quiet' | 'normal' | 'verbose' | 'debug';
 
 // @beta
@@ -126,6 +141,9 @@ export function decodeDaemonEventFrame(payload: Uint8Array): IDaemonEventEnvelop
 
 // @beta
 export function decodeDaemonLogChunk(payload: Uint8Array): IDaemonLogChunk;
+
+// @beta
+export function decodeDaemonStdinChunk(payload: Uint8Array): IDaemonStdinChunk;
 
 // @beta
 export const DEFAULT_MAX_PAYLOAD_BYTES: number;
@@ -146,6 +164,9 @@ export function encodeDaemonFrames(frames: readonly IDaemonFrame[]): Uint8Array[
 export function encodeDaemonLogChunk(log: IDaemonLogChunk): Uint8Array;
 
 // @beta
+export function encodeDaemonStdinChunk(input: IDaemonStdinChunk): Uint8Array;
+
+// @beta
 export const FRAME_HEADER_BYTES: number;
 
 // @beta
@@ -159,6 +180,7 @@ export interface IDaemonClientCaps {
     readonly colorLevel?: number;
     readonly columns?: number;
     readonly isTTY: boolean;
+    readonly supportsInteractiveIO?: boolean;
     readonly verbosity?: DaemonVerbosity;
 }
 
@@ -314,11 +336,13 @@ export interface IDaemonPhasedOperationSelection {
 
 // @beta
 export interface IDaemonPhasedRequest {
+    readonly acceptsStdin?: boolean;
     readonly commandName: string;
     readonly engineShape: IDaemonPhasedEngineShape;
     readonly environment: Readonly<Record<string, string>>;
     readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
     readonly requestId: string;
+    readonly terminalRequirement?: DaemonTerminalRequirement;
 }
 
 // @beta
@@ -360,11 +384,57 @@ export interface IDaemonProtocolVersion {
 }
 
 // @beta
+export interface IDaemonRawModeChangedMessage {
+    // (undocumented)
+    readonly kind: 'rawModeChanged';
+    // (undocumented)
+    readonly payload: {
+        readonly enabled: boolean;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonSetRawModeMessage {
+    // (undocumented)
+    readonly kind: 'setRawMode';
+    // (undocumented)
+    readonly payload: {
+        readonly enabled: boolean;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonStdinChunk {
+    readonly chunk: Uint8Array;
+    readonly requestId: string;
+}
+
+// @beta
 export interface IDaemonSubscribeMessage {
     // (undocumented)
     readonly kind: 'subscribe';
     // (undocumented)
     readonly payload: IDaemonClientCaps;
+}
+
+// @beta
+export interface IDaemonTerminalPolicyMessage {
+    // (undocumented)
+    readonly kind: 'terminalPolicy';
+    // (undocumented)
+    readonly payload: IDaemonTerminalPolicyResult;
+}
+
+// @beta
+export interface IDaemonTerminalPolicyResult {
+    // (undocumented)
+    readonly decision: DaemonTerminalPolicyDecision;
+    // (undocumented)
+    readonly reason?: DaemonTerminalPolicyReason;
+    // (undocumented)
+    readonly requestId: string;
 }
 
 // @beta
@@ -412,6 +482,9 @@ export const LENGTH_FIELD_OFFSET: number;
 export const MAX_OPERATION_ID_BYTES: number;
 
 // @beta
+export const MAX_REQUEST_ID_BYTES: number;
+
+// @beta
 export function negotiateDaemonHello(hello: IDaemonHelloMessage, localVersion: IDaemonProtocolVersion, sessionId: string): DaemonHandshakeOutcome;
 
 // @beta
@@ -429,6 +502,12 @@ export class ProtocolVersionMismatchError extends DaemonProtocolError {
     readonly actualMajor: number;
     readonly expectedMajor: number;
 }
+
+// @beta
+export const REQUEST_ID_LENGTH_BYTES: number;
+
+// @beta
+export const REQUEST_ID_LENGTH_OFFSET: number;
 
 // @beta
 export const RUSHD_EXTENSION_NAMESPACE: 'rushd';

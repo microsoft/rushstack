@@ -15,6 +15,10 @@ import {
   type IResolvedGlobalCommandRequest
 } from './GlobalCommandRequest';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+import type {
+  IInteractiveRequestInputSink,
+  IInteractiveRequestSession
+} from './InteractiveRequestInputRouter';
 import type { IWorkspaceSession } from './WorkspaceSession';
 
 const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
@@ -26,6 +30,7 @@ const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
  */
 export interface IGlobalCommandSpawnOptions {
   readonly environmentOverlay?: Readonly<NodeJS.ProcessEnv>;
+  readonly forwardInput?: boolean;
   readonly forwardOutput?: boolean;
   readonly shell?: boolean | string;
   readonly windowsHide?: boolean;
@@ -40,6 +45,7 @@ export interface IGlobalCommandExecutionContext {
   readonly abortSignal: AbortSignal;
   readonly cwd: string;
   readonly environment: IGlobalCommandEnvironment;
+  readonly interactiveInput: IInteractiveRequestSession | undefined;
   readonly terminal: ITerminal;
   readonly terminalProperties: IGlobalCommandTerminalProperties;
   readonly workspaceSession: IWorkspaceSession;
@@ -159,6 +165,7 @@ export class GlobalCommandExecutionContext
   #requestAborted: boolean = false;
 
   public readonly terminal: ITerminal;
+  public readonly interactiveInput: IInteractiveRequestSession | undefined;
   public readonly workspaceSession: IWorkspaceSession;
 
   public constructor(
@@ -168,6 +175,7 @@ export class GlobalCommandExecutionContext
   ) {
     this.#request = request;
     this.#client = client;
+    this.interactiveInput = client.interactiveSession;
     this.workspaceSession = workspaceSession;
     this.#onClientAbort = () => this.#abortRequest(client.abortSignal.reason);
     this.#writer = new OrderedTerminalWriter(client, (error: Error) => this.#abortRequest(error));
@@ -231,11 +239,30 @@ export class GlobalCommandExecutionContext
     const trackedChild: ITrackedChild = { completion };
     this.#trackedChildren.add(trackedChild);
     void completion.then(() => this.#trackedChildren.delete(trackedChild));
+    if (options.forwardInput === true) {
+      this.#attachChildInput(child);
+    }
     if (options.forwardOutput !== false) {
       this.#forwardChildOutput(child.stdout, 'stdout');
       this.#forwardChildOutput(child.stderr, 'stderr');
     }
     return child;
+  }
+
+  #attachChildInput(child: childProcess.ChildProcessWithoutNullStreams): void {
+    if (!this.interactiveInput) {
+      throw new Error('The global command did not register an interactive input session.');
+    }
+    const sink: IInteractiveRequestInputSink = {
+      writeInputAsync: (chunk: Uint8Array): Promise<void> => writeChildInputAsync(child, chunk)
+    };
+    const attachment: Disposable = this.interactiveInput.attachInputSink(sink);
+    this.registerDisposable({
+      [Symbol.asyncDispose]: (): Promise<void> => {
+        attachment[Symbol.dispose]();
+        return Promise.resolve();
+      }
+    });
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
@@ -353,4 +380,19 @@ function throwCleanupErrors(cleanupErrors: unknown[]): void {
 
 function normalizeError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
+}
+
+function writeChildInputAsync(
+  child: childProcess.ChildProcessWithoutNullStreams,
+  chunk: Uint8Array
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    child.stdin.write(chunk, (error: Error | null | undefined) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
 }

@@ -1,19 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { isDaemonControlMessageKind } from './DaemonControlMessage';
+import { isDaemonControlMessageKind } from './DaemonControlKinds';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { isDaemonVerbosity } from './DaemonVerbosity';
-
-/** Returns `true` when `value` is a non-null object usable as a control record. @beta */
+import {
+  validateInteractiveCapability,
+  validateRawModeControl,
+  validateTerminalPolicyControl
+} from './InteractiveControlValidation';
+/** Returns `true` when `value` is a non-null control record. @beta */
 export function isDaemonControlRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
-
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);
 }
-
 function requireRecordField(record: Record<string, unknown>, field: string): Record<string, unknown> {
   const value: unknown = record[field];
   if (!isDaemonControlRecord(value)) {
@@ -21,13 +23,11 @@ function requireRecordField(record: Record<string, unknown>, field: string): Rec
   }
   return value;
 }
-
 function requireStringField(record: Record<string, unknown>, field: string): void {
   if (typeof record[field] !== 'string') {
     fail(`Control message field "${field}" must be a string.`);
   }
 }
-
 function requireNumberField(record: Record<string, unknown>, field: string): void {
   if (typeof record[field] !== 'number') {
     fail(`Control message field "${field}" must be a number.`);
@@ -55,6 +55,7 @@ function validateSubscribe(payload: Record<string, unknown>): void {
   if (typeof payload.isTTY !== 'boolean') {
     fail('Subscribe message payload.isTTY must be a boolean.');
   }
+  validateInteractiveCapability(payload);
   requireSubscribeVerbosity(payload);
 }
 
@@ -80,14 +81,13 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   unsubscribe: noopValidator,
   ping: noopValidator,
   pong: validatePong,
-  error: validateError
+  error: validateError,
+  setRawMode: validateRawModeControl,
+  rawModeChanged: validateRawModeControl,
+  terminalPolicy: validateTerminalPolicyControl
 };
 
-/** Structurally validates a parsed control message.
- * @throws {@link DaemonProtocolError} when the value is not a well-formed control message.
- *
- * @beta
- */
+/** Structurally validates a parsed control message. @beta */
 export function validateDaemonControlMessage(value: unknown): void {
   if (!isDaemonControlRecord(value)) {
     fail('Control frame payload is not a JSON object.');

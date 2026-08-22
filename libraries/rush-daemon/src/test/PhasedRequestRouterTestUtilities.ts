@@ -17,9 +17,11 @@ import { OperationGraph } from '@microsoft/rush-lib/lib/logic/operations/Operati
 import type { IOperationGraphOptions } from '@microsoft/rush-lib/lib/logic/operations/OperationGraph';
 import type {
   IDaemonEventEnvelope,
-  IDaemonPhasedRequestResult
+  IDaemonPhasedRequestResult,
+  IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
+import type { IInteractiveRequestSession } from '../InteractiveRequestInputRouter';
 import type { IPhasedRequestClient } from '../PhasedRequestClient';
 import type {
   IWorkspaceEngineShape,
@@ -59,6 +61,8 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public readonly abortController: AbortController = new AbortController();
   public readonly sessionId: string = 'test-session';
   public readonly writes: ITestClientWrite[] = [];
+  public readonly policies: IDaemonTerminalPolicyResult[] = [];
+  public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
   readonly #sequenceState: { next: number };
 
@@ -100,6 +104,11 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
     const write: ITestClientWrite = { result };
     await this.onWriteAsync?.(write);
     this.writes.push(write);
+  }
+
+  public writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void> {
+    this.policies.push(result);
+    return Promise.resolve();
   }
 }
 
