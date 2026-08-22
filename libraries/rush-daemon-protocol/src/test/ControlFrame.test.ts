@@ -19,6 +19,7 @@ const MESSAGES: readonly DaemonControlMessage[] = [
     payload: {
       isTTY: true,
       supportsInteractiveIO: true,
+      supportsRequestAdmission: true,
       verbosity: 'verbose',
       columns: COLUMNS
     }
@@ -34,6 +35,7 @@ const MESSAGES: readonly DaemonControlMessage[] = [
       uptimeMs: UPTIME_MS
     }
   },
+  { kind: 'queuePosition', payload: { position: 1, requestId: 'request-1' } },
   { kind: 'error', payload: { code: 'malformedPayload', message: 'bad' } }
 ];
 
@@ -74,6 +76,23 @@ it('rejects a hello without a version', () => {
 
 it('rejects a subscribe with an unknown verbosity', () => {
   const json: string = '{"kind":"subscribe","payload":{"isTTY":true,"verbosity":"loud"}}';
+  const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
+    decodeDaemonControlMessage(Buffer.from(json))
+  );
+  expect(error.code).toBe('malformedControlMessage');
+});
+
+it('rejects an invalid request-admission capability', () => {
+  const json: string =
+    '{"kind":"subscribe","payload":{"isTTY":true,"supportsRequestAdmission":"yes"}}';
+  const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
+    decodeDaemonControlMessage(Buffer.from(json))
+  );
+  expect(error.code).toBe('malformedControlMessage');
+});
+
+it('rejects an invalid queue position', () => {
+  const json: string = '{"kind":"queuePosition","payload":{"position":0,"requestId":"request-1"}}';
   const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
     decodeDaemonControlMessage(Buffer.from(json))
   );

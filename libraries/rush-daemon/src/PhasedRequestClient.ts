@@ -4,6 +4,7 @@
 import type {
   IDaemonEventEnvelope,
   IDaemonPhasedRequestResult,
+  IDaemonRequestQueuePositionMessage,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
@@ -25,6 +26,8 @@ export interface IPhasedRequestClient {
   readonly interactiveSession?: IInteractiveRequestSession;
   /** The connection session identifier used in structured event envelopes. */
   readonly sessionId: string;
+  /** Set only after negotiating request-admission protocol support with the client. */
+  readonly supportsRequestAdmission?: boolean;
 
   /** Returns the next structured-event sequence number for this connection. */
   getNextEventSequence(): number;
@@ -44,4 +47,7 @@ export interface IPhasedRequestClient {
 
   /** Writes the final command result after every preceding event and log chunk has drained. */
   writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void>;
+
+  /** Writes the request's current one-based scheduler queue position. */
+  writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
 }

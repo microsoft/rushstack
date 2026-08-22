@@ -9,6 +9,10 @@ import {
   validateRawModeControl,
   validateTerminalPolicyControl
 } from './InteractiveControlValidation';
+import {
+  validateRequestAdmissionCapability,
+  validateRequestQueuePositionControl
+} from './RequestAdmissionControlValidation';
 /** Returns `true` when `value` is a non-null control record. @beta */
 export function isDaemonControlRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -33,43 +37,37 @@ function requireNumberField(record: Record<string, unknown>, field: string): voi
     fail(`Control message field "${field}" must be a number.`);
   }
 }
-
 function requireVersion(payload: Record<string, unknown>): void {
   const version: Record<string, unknown> = requireRecordField(payload, 'protocolVersion');
   requireNumberField(version, 'major');
   requireNumberField(version, 'minor');
 }
-
 function validateHelloAck(payload: Record<string, unknown>): void {
   requireVersion(payload);
   requireStringField(payload, 'sessionId');
 }
-
 function validatePong(payload: Record<string, unknown>): void {
   if (payload.daemonVersion !== undefined) requireStringField(payload, 'daemonVersion');
   if (payload.protocolVersion !== undefined) requireVersion(payload);
   requireNumberField(payload, 'uptimeMs');
 }
-
 function validateSubscribe(payload: Record<string, unknown>): void {
   if (typeof payload.isTTY !== 'boolean') {
     fail('Subscribe message payload.isTTY must be a boolean.');
   }
   validateInteractiveCapability(payload);
+  validateRequestAdmissionCapability(payload);
   requireSubscribeVerbosity(payload);
 }
-
 function requireSubscribeVerbosity(payload: Record<string, unknown>): void {
   if (payload.verbosity !== undefined && !isDaemonVerbosity(payload.verbosity)) {
     fail('Subscribe message payload.verbosity is not a known verbosity level.');
   }
 }
-
 function validateError(payload: Record<string, unknown>): void {
   requireStringField(payload, 'code');
   requireStringField(payload, 'message');
 }
-
 type ControlValidator = (payload: Record<string, unknown>) => void;
 
 const noopValidator: ControlValidator = () => undefined;
@@ -84,7 +82,8 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   error: validateError,
   setRawMode: validateRawModeControl,
   rawModeChanged: validateRawModeControl,
-  terminalPolicy: validateTerminalPolicyControl
+  terminalPolicy: validateTerminalPolicyControl,
+  queuePosition: validateRequestQueuePositionControl
 };
 
 /** Structurally validates a parsed control message. @beta */

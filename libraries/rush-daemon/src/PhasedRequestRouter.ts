@@ -24,6 +24,7 @@ import {
   evaluateDaemonTerminalPolicy
 } from './DaemonTerminalPolicy';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
+import { classifyRushCommand } from './RushCommandRequestPolicy';
 import {
   RequestExclusivityClass,
   RequestScheduler,
@@ -31,6 +32,10 @@ import {
   RequestSchedulerErrorCode
 } from './RequestScheduler';
 import type { IRequestLease } from './RequestScheduler';
+import {
+  acquireWorkspaceRequestLeaseAsync,
+  getRequestAdmissionErrorCode
+} from './WorkspaceRequestAdmission';
 import type { IWorkspaceEngineShape } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import {
@@ -49,8 +54,8 @@ interface IResolvedSelection {
 }
 
 interface IGraphRoutingState {
+  readonly graphExecutionScheduler: RequestScheduler;
   readonly multiplexer: PhasedRequestEventMultiplexer;
-  readonly scheduler: RequestScheduler;
 }
 
 const ROUTING_STATE_BY_GRAPH: WeakMap<IOperationGraph, IGraphRoutingState> = new WeakMap();
@@ -93,36 +98,52 @@ export class PhasedRequestRouter {
     }
     const graph: IDualEmitOperationGraph = getDualEmitGraph(this.#workspaceSession);
     const routingState: IGraphRoutingState = getGraphRoutingState(graph);
-    let lease: IRequestLease;
+    let admissionLease: IRequestLease;
     try {
-      lease = await routingState.scheduler.acquireAsync({
-        abortSignal: client.abortSignal,
-        exclusivityClass: RequestExclusivityClass.Exclusive
+      admissionLease = await acquireWorkspaceRequestLeaseAsync({
+        admission: request.admission,
+        client,
+        exclusivityClass: classifyRushCommand(request.commandName),
+        requestId: request.requestId,
+        workspaceSession: this.#workspaceSession
       });
     } catch (error) {
-      if (
-        error instanceof RequestSchedulerError &&
-        error.code === RequestSchedulerErrorCode.Aborted
-      ) {
-        return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
-      }
-      throw error;
+      return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
     }
 
     try {
+      let graphLease: IRequestLease;
       try {
-        return await this.#executeAdmittedAsync(
-          request,
-          client,
-          graph,
-          routingState,
-          interactiveSession
-        );
+        graphLease = await routingState.graphExecutionScheduler.acquireAsync({
+          abortSignal: client.abortSignal,
+          exclusivityClass: RequestExclusivityClass.Exclusive
+        });
       } catch (error) {
-        return await finishAfterRoutingErrorAsync(interactiveSession, error);
+        if (
+          error instanceof RequestSchedulerError &&
+          error.code === RequestSchedulerErrorCode.Aborted
+        ) {
+          return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
+        }
+        throw error;
+      }
+      try {
+        try {
+          return await this.#executeAdmittedAsync(
+            request,
+            client,
+            graph,
+            routingState,
+            interactiveSession
+          );
+        } catch (error) {
+          return await finishAfterRoutingErrorAsync(interactiveSession, error);
+        }
+      } finally {
+        graphLease.release();
       }
     } finally {
-      lease.release();
+      admissionLease.release();
     }
   }
 
@@ -286,7 +307,10 @@ function getGraphRoutingState(graph: IDualEmitOperationGraph): IGraphRoutingStat
     const multiplexer: PhasedRequestEventMultiplexer = new PhasedRequestEventMultiplexer(
       getGraphEventSink(graph)
     );
-    state = { multiplexer, scheduler: new RequestScheduler() };
+    state = {
+      graphExecutionScheduler: new RequestScheduler(),
+      multiplexer
+    };
     ROUTING_STATE_BY_GRAPH.set(graph, state);
     setGraphEventSink(graph, multiplexer);
   } else if (getGraphEventSink(graph) !== state.multiplexer) {
@@ -443,19 +467,23 @@ function compareOperations(left: Operation, right: Operation): number {
 async function writeAbortedResultAsync(
   requestId: string,
   client: IPhasedRequestClient,
-  interactiveSession: IInteractiveRequestSession | undefined
+  interactiveSession: IInteractiveRequestSession | undefined,
+  admissionErrorCode?: ReturnType<typeof getRequestAdmissionErrorCode>
 ): Promise<IDaemonPhasedRequestResult> {
   const cleanupErrors: unknown[] = [];
   await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
-  const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
-    aborted: true,
-    error: combineErrors(undefined, cleanupErrors),
-    graphStatus: OperationStatus.Aborted,
-    operationOutcomes: [],
-    requestId,
-    scheduled: false,
-    warningsAllowedByEnvironment: false
-  });
+  const result: IDaemonPhasedRequestResult = {
+    ...createPhasedCommandResult({
+      aborted: true,
+      error: combineErrors(undefined, cleanupErrors),
+      graphStatus: OperationStatus.Aborted,
+      operationOutcomes: [],
+      requestId,
+      scheduled: false,
+      warningsAllowedByEnvironment: false
+    }),
+    ...(admissionErrorCode === undefined ? {} : { admissionErrorCode })
+  };
   await client.writeResultAsync(result);
   return result;
 }
@@ -498,6 +526,43 @@ async function finishAfterRoutingErrorAsync(
     );
   }
   throw routingError;
+}
+
+async function finishAfterAdmissionErrorAsync(
+  request: IDaemonPhasedRequest,
+  client: IPhasedRequestClient,
+  interactiveSession: IInteractiveRequestSession | undefined,
+  admissionError: unknown
+): Promise<IDaemonPhasedRequestResult> {
+  if (!(admissionError instanceof RequestSchedulerError)) {
+    return await finishAfterRoutingErrorAsync(interactiveSession, admissionError);
+  }
+  const admissionErrorCode: ReturnType<typeof getRequestAdmissionErrorCode> =
+    getRequestAdmissionErrorCode(admissionError);
+  if (admissionError.code === RequestSchedulerErrorCode.Aborted) {
+    return await writeAbortedResultAsync(
+      request.requestId,
+      client,
+      interactiveSession,
+      admissionErrorCode
+    );
+  }
+  const cleanupErrors: unknown[] = [];
+  await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
+  const result: IDaemonPhasedRequestResult = {
+    ...createPhasedCommandResult({
+      aborted: false,
+      error: combineErrors(admissionError, cleanupErrors),
+      graphStatus: OperationStatus.Ready,
+      operationOutcomes: [],
+      requestId: request.requestId,
+      scheduled: false,
+      warningsAllowedByEnvironment: false
+    }),
+    admissionErrorCode
+  };
+  await client.writeResultAsync(result);
+  return result;
 }
 
 function combineErrors(executionError: unknown, cleanupErrors: unknown[]): unknown {

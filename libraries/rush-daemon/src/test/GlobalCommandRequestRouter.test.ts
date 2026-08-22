@@ -8,6 +8,7 @@ import { SubprocessTerminator } from '@rushstack/node-core-library';
 import { encodeDaemonStdinChunk } from '@rushstack/rush-daemon-protocol';
 import type {
   IDaemonCommandResult,
+  IDaemonRequestQueuePositionMessage,
   IDaemonSetRawModeMessage,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
@@ -44,6 +45,7 @@ class TestGlobalCommandClient implements IGlobalCommandRequestClient {
   public readonly chunks: IClientChunk[] = [];
   public readonly results: IDaemonCommandResult[] = [];
   public readonly policies: IDaemonTerminalPolicyResult[] = [];
+  public readonly queuePositions: IDaemonRequestQueuePositionMessage[] = [];
   public readonly writeOrder: Array<'chunk' | 'result'> = [];
   public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((chunk: IClientChunk) => Promise<void>) | undefined;
@@ -67,6 +69,11 @@ class TestGlobalCommandClient implements IGlobalCommandRequestClient {
     await this.onResultAsync?.(result);
     this.results.push(result);
     this.writeOrder.push('result');
+  }
+
+  public writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void> {
+    this.queuePositions.push(message);
+    return Promise.resolve();
   }
 
   public writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void> {
@@ -154,10 +161,16 @@ describe(GlobalCommandRequestRouter.name, () => {
     const firstClient: TestGlobalCommandClient = new TestGlobalCommandClient();
     const secondClient: TestGlobalCommandClient = new TestGlobalCommandClient();
     const firstRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
-      createRequestOptions('first', FIRST_CWD, { RUSHD_CONTEXT_TEST: 'first' }, 80)
+      {
+        ...createRequestOptions('first', FIRST_CWD, { RUSHD_CONTEXT_TEST: 'first' }, 80),
+        commandName: 'list'
+      }
     );
     const secondRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
-      createRequestOptions('second', SECOND_CWD, { RUSHD_CONTEXT_TEST: 'second' }, 160)
+      {
+        ...createRequestOptions('second', SECOND_CWD, { RUSHD_CONTEXT_TEST: 'second' }, 160),
+        commandName: 'scan'
+      }
     );
 
     const results: IGlobalCommandRequestResult[] = await Promise.all([
@@ -459,13 +472,18 @@ describe(GlobalCommandRequestRouter.name, () => {
     const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
     const client: TestGlobalCommandClient = new TestGlobalCommandClient();
     let releaseExecutor: (() => void) | undefined;
+    let markExecutorStarted: (() => void) | undefined;
     let executorSettled: boolean = false;
+    const executorStarted: Promise<void> = new Promise((resolve) => {
+      markExecutorStarted = resolve;
+    });
     const executorRelease: Promise<void> = new Promise((resolve) => {
       releaseExecutor = resolve;
     });
     const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
       router.resolveRequest(createRequestOptions('cooperative-cancel', FIRST_CWD, {}, 80)),
       async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        markExecutorStarted?.();
         await waitForAbortAsync(context.abortSignal);
         await executorRelease;
         executorSettled = true;
@@ -478,6 +496,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       requestSettled = true;
     });
 
+    await executorStarted;
     client.abortController.abort();
     await new Promise<void>((resolve) => setImmediate(resolve));
     expect(requestSettled).toBe(false);
