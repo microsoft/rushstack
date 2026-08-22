@@ -1,0 +1,126 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "cargo-test-plugin",
+      "entryPoint": "./lib/CargoTestPlugin",
+      "optionsSchema": "./lib/schemas/cargo-test.schema.json",
+
+      "parameterScope": "cargo-test",
+      "parameters": [
+        {
+          "longName": "--release",
+          "parameterKind": "flag",
+          "description": "Run cargo test in release mode."
+        },
+        {
+          "longName": "--workspace",
+          "parameterKind": "flag",
+          "description": "Run tests for all packages in the workspace."
+        }
+      ]
+    },
+    {
+      "pluginName": "cargo-build-plugin",
+      "entryPoint": "./lib/CargoBuildPlugin",
+      "optionsSchema": "./lib/schemas/cargo-build.schema.json",
+
+      "parameterScope": "cargo-build",
+      "parameters": [
+        {
+          "longName": "--release",
+          "parameterKind": "flag",
+          "description": "Run cargo build in release mode."
+        },
+        {
+          "longName": "--workspace",
+          "parameterKind": "flag",
+          "description": "Build all packages in the workspace."
+        }
+      ]
+    },
+    {
+      "pluginName": "cargo-clippy-plugin",
+      "entryPoint": "./lib/CargoClippyPlugin",
+      "optionsSchema": "./lib/schemas/cargo-clippy.schema.json",
+
+      "parameterScope": "cargo-clippy",
+      "parameters": [
+        {
+          "longName": "--release",
+          "parameterKind": "flag",
+          "description": "Run cargo clippy in release mode."
+        },
+        {
+          "longName": "--workspace",
+          "parameterKind": "flag",
+          "description": "Run clippy for all packages in the workspace."
+        },
+        {
+          "longName": "--fix",
+          "parameterKind": "flag",
+          "description": "Automatically apply suggested fixes."
+        },
+        {
+          "longName": "--warnings-as-errors",
+          "parameterKind": "flag",
+          "description": "Treat warnings as errors."
+        }
+      ]
+    },
+    {
+      "pluginName": "cargo-fmt-plugin",
+      "entryPoint": "./lib/CargoFmtPlugin",
+      "optionsSchema": "./lib/schemas/cargo-fmt.schema.json",
+
+      "parameterScope": "cargo-fmt",
+      "parameters": [
+        {
+          "longName": "--workspace",
+          "parameterKind": "flag",
+          "description": "Format all packages in the workspace."
+        },
+        {
+          "longName": "--check",
+          "parameterKind": "flag",
+          "description": "Run in check mode (no files will be modified)."
+        }
+      ]
+    },
+    {
+      "pluginName": "cargo-lint-plugin",
+      "entryPoint": "./lib/CargoLintPlugin",
+      "optionsSchema": "./lib/schemas/cargo-lint.schema.json",
+
+      "parameterScope": "cargo-lint",
+      "parameters": [
+        {
+          "longName": "--release",
+          "parameterKind": "flag",
+          "description": "Run cargo clippy in release mode."
+        },
+        {
+          "longName": "--workspace",
+          "parameterKind": "flag",
+          "description": "Lint all packages in the workspace."
+        },
+        {
+          "longName": "--warnings-as-errors",
+          "parameterKind": "flag",
+          "description": "Treat clippy warnings as errors."
+        },
+        {
+          "longName": "--skip-fmt",
+          "parameterKind": "flag",
+          "description": "Skip the cargo fmt check step."
+        },
+        {
+          "longName": "--skip-clippy",
+          "parameterKind": "flag",
+          "description": "Skip the cargo clippy step."
+        }
+      ]
+    }
+  ]
+}
