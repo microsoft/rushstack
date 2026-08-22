@@ -5,7 +5,13 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { EnvironmentMap } from '@rushstack/node-core-library';
-import type { DaemonTerminalRequirement } from '@rushstack/rush-daemon-protocol';
+import {
+  validateDaemonRequestAdmissionOptions
+} from '@rushstack/rush-daemon-protocol';
+import type {
+  DaemonTerminalRequirement,
+  IDaemonRequestAdmissionOptions
+} from '@rushstack/rush-daemon-protocol';
 
 import type { IWorkspaceSession } from './WorkspaceSession';
 
@@ -39,6 +45,7 @@ export interface IGlobalCommandEnvironment {
  * @beta
  */
 export interface IResolveGlobalCommandRequestOptions {
+  readonly admission?: IDaemonRequestAdmissionOptions;
   readonly commandName: string;
   readonly cwd: string;
   readonly environment: Readonly<NodeJS.ProcessEnv>;
@@ -52,6 +59,7 @@ export interface IResolveGlobalCommandRequestOptions {
  * @beta
  */
 export interface IResolvedGlobalCommandRequest {
+  readonly admission: IDaemonRequestAdmissionOptions | undefined;
   readonly commandName: string;
   readonly cwd: string;
   readonly environment: IGlobalCommandEnvironment;
@@ -92,10 +100,12 @@ export function resolveGlobalCommandRequest(
 ): IResolvedGlobalCommandRequest {
   validateNonemptyName(options.requestId, 'request id');
   validateNonemptyName(options.commandName, 'command name');
+  validateDaemonRequestAdmissionOptions(options.admission);
   const repoRoot: string = getCanonicalDirectory(workspaceSession.metadata.repoRoot, 'workspace root');
   const cwd: string = getCanonicalDirectory(options.cwd, 'working directory');
   validatePathWithinWorkspace(cwd, repoRoot);
   const request: IResolvedGlobalCommandRequest = Object.freeze({
+    admission: options.admission ? Object.freeze({ ...options.admission }) : undefined,
     commandName: options.commandName,
     cwd,
     environment: new GlobalCommandEnvironment(options.environment),

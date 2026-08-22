@@ -24,6 +24,8 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   with the authoritative Rush-compatible exit code, delivered after request output drains.
 - **Interactive request contracts** — request-tagged stdin frames preserve arbitrary bytes, while
   acknowledged raw-mode controls and typed terminal-policy results remain scoped to one request.
+- **Request admission contracts** — resolved no-wait and bounded-timeout options, typed admission
+  failure codes, and capability-gated one-based queue-position control messages.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

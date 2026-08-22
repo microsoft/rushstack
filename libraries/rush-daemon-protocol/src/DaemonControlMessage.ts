@@ -10,6 +10,7 @@ import type {
 import type { IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
+import type { IDaemonRequestQueuePositionMessage } from './DaemonRequestAdmission';
 
 /** The empty payload of control messages that carry no data. @beta */
 export type DaemonEmptyPayload = Record<string, never>;
@@ -74,4 +75,5 @@ export type DaemonControlMessage =
   | IDaemonErrorMessage
   | IDaemonSetRawModeMessage
   | IDaemonRawModeChangedMessage
-  | IDaemonTerminalPolicyMessage;
+  | IDaemonTerminalPolicyMessage
+  | IDaemonRequestQueuePositionMessage;

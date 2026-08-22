@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonCommandResult } from './DaemonCommandResult';
+import type { IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 import type { DaemonTerminalRequirement } from './DaemonTerminalPolicy';
 
 /**
@@ -45,6 +46,8 @@ export interface IDaemonPhasedEngineShape {
  * @beta
  */
 export interface IDaemonPhasedRequest {
+  /** Queue-and-wait behavior resolved by the client integration. */
+  readonly admission?: IDaemonRequestAdmissionOptions;
   /** Whether the command accepts request-scoped stdin bytes. */
   readonly acceptsStdin?: boolean;
   /** The parsed phased command name. */

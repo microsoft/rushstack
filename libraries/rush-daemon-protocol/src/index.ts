@@ -27,6 +27,7 @@ export { DaemonProtocolError, ProtocolVersionMismatchError } from './DaemonProto
 export type { DaemonProtocolErrorCode, IDaemonProtocolErrorOptions } from './DaemonProtocolError';
 export {
   DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   isDaemonProtocolCompatible
 } from './DaemonProtocolVersion';
@@ -50,6 +51,15 @@ export { createDaemonHello, createDaemonHelloAck, negotiateDaemonHello } from '.
 export type { DaemonHandshakeOutcome } from './DaemonHandshake';
 export type { DaemonJsonNull, DaemonJsonValue } from './DaemonJsonValue';
 export type { DaemonCommandOutcome, IDaemonCommandResult } from './DaemonCommandResult';
+export {
+  MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS,
+  validateDaemonRequestAdmissionOptions
+} from './DaemonRequestAdmission';
+export type {
+  DaemonRequestAdmissionErrorCode,
+  IDaemonRequestAdmissionOptions,
+  IDaemonRequestQueuePositionMessage
+} from './DaemonRequestAdmission';
 export type {
   DaemonTerminalPolicyDecision,
   DaemonTerminalPolicyReason,

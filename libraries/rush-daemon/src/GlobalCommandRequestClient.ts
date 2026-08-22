@@ -3,6 +3,7 @@
 
 import type {
   IDaemonCommandResult,
+  IDaemonRequestQueuePositionMessage,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
@@ -22,6 +23,8 @@ export interface IGlobalCommandRequestClient {
   readonly abortSignal: AbortSignal;
   /** The request-scoped stdin/control lifecycle when one was registered by the transport integration. */
   readonly interactiveSession?: IInteractiveRequestSession;
+  /** Set only after negotiating request-admission protocol support with the client. */
+  readonly supportsRequestAdmission?: boolean;
 
   /** Writes one request-scoped terminal chunk through the client's backpressured destination. */
   writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
@@ -31,4 +34,7 @@ export interface IGlobalCommandRequestClient {
 
   /** Writes the final command result after every preceding terminal chunk has drained. */
   writeResultAsync(result: IDaemonCommandResult): Promise<void>;
+
+  /** Writes the request's current one-based scheduler queue position. */
+  writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
 }
