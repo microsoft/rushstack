@@ -165,3 +165,68 @@
     - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
     - resolver (5 combos incl newer-major), engine sink (structured + fallback), adapter bridge + chunk-split tests pass; all exports @beta
   Next: Feature 11/28 - Expose RushSession event sink and scoped producers to actions and plugins
+
+[2026-07-14] Feature 11/28 COMPLETE: RushSession event sink + scoped producers for actions/plugins
+  Files (new):
+    - session/ScopedReporterFactory.ts (createScopedReporter -> IScopedReporter; emitMessage->activityChanged {kind:'message',severity,text}, required for warning/error; emitDiagnostic->diagnosticEmitted with computeEnvelopePrivacyFloor; emitExtension validates namespaced name, wraps {name,payload})
+    - session/ScopedLogger.ts (IScopedLogger writeLine/writeDebugLine/writeWarningLine/writeErrorLine; NO .terminal handle)
+    - session/RushSessionReporting.ts (facade: createScopedReporter/createScopedLogger; getSink(); createExecutionContext()->IReporterExecutionContext {sink, reporter})
+    - session/PluginApi.ts (RUSH_PLUGIN_API_VERSION '1.0.0', IRushPluginManifest.pluginApiVersion, isPluginApiVersionSupported major-equality, createPluginApiIncompatibleDiagnostic migration diagnostic)
+    - test/Session.test.ts
+  Files (modified): diagnostics/RushDiagnosticCodeRegistry.ts (APPENDED RUSH_PLUGIN_API_INCOMPATIBLE code+templates), index.ts, api.md
+  Notes:
+    - Human messages map to activityChanged (closed union has no 'message' type; golden freezes the 15). required-by-severity so warnings/errors aren't coalesced.
+    - Step 3 (no modes/destinations/thresholds) satisfied structurally: scoped reporter/logger + sink are emit-only. Test asserts Object.keys == 3 emit methods.
+    - Same source-of-truth scoping (RushSession itself lives in rush-lib; not wired live).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - scoped message/diagnostic/extension, privacy floor, emit-only surface, logger severities, session facade end-to-end via ReporterManager, plugin API compat + migration diagnostic tests pass; all exports @beta
+  Next: Feature 12/28 - Emit shadow structured lifecycle + diagnostic events without changing output
+
+[2026-07-14] Feature 12/28 COMPLETE: Shadow structured lifecycle + diagnostic emission
+  Files (new):
+    - lifecycle/LifecycleEvents.ts (OperationStatus + payload interfaces: session/command started+completed, operation registered+statusChanged, commandResult, watchCycleCompleted)
+    - lifecycle/LifecycleEmitter.ts (emit* methods, all required=true; merges base scope + per-event scope override; emitDiagnostic uses privacy floor; writes nothing to stdout/stderr)
+    - lifecycle/ShadowParity.ts (deriveExitCodeFromEvents: commandResult succeeded->0 else exitCode/1, sessionCompleted fallback; summarizeShadowResult: operationCounts + result)
+    - test/Lifecycle.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Step 3 "keep legacy output unchanged": emitter is output-neutral (only sink.emit). Test spies process.stdout/stderr.write and asserts not called.
+    - Step 4 parity: exit-code parity helper + result summary. Full telemetry allowlist deferred to Feature 13; authoritative exit-code semantics to Feature 14 (this is shadow parity derivation).
+    - Same source-of-truth scoping (actions/scheduler/plugins live in rush-lib; not wired live).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - lifecycle emit + scope merge, diagnostic privacy floor, shadow output-neutrality, exit-code parity (4 cases), result summary, manager integration tests pass; all exports @beta
+  Next: Feature 13/28 - Telemetry projection subscriber (allowlist + beforeLog adapter)
+
+[2026-07-14] Feature 13/28 COMPLETE: Telemetry projection subscriber (allowlist + beforeLog adapter)
+  Files (new):
+    - telemetry/TelemetryAggregate.ts (ITelemetryAggregate allowlist: commandName/result/exitCode/durationMs/operationStatusCounts/diagnosticCodes/diagnosticCategoryCounts/reporterMode/protocolVersion/producerVersions; TELEMETRY_AGGREGATE_KEYS)
+    - telemetry/TelemetrySubscriber.ts (ingest extracts only allowlisted values - diagnostics keep code+category only, ignores argv/messages/external/artifacts; buildAggregate; setReporterMode; createTelemetryReporter adapter = IReporter with no destination, feeds before reporter filtering)
+    - telemetry/BeforeLogAdapter.ts (LegacyBeforeLogHook + createBeforeLogAdapter runs hooks with plain copy of aggregate)
+    - test/Telemetry.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - "Before reporter filtering": manager fans full events to all reporters (each filters internally), so telemetry-as-reporter sees unfiltered events.
+    - Leakage test emits secret param/path/argv/message/remediation-command/raw-output; asserts JSON.stringify(aggregate) contains none; keys subset of allowlist.
+    - Same source-of-truth scoping (Rush telemetry lives in rush-lib; not wired live).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - aggregate build, allowlist schema, leakage (5 forbidden strings absent), beforeLog adapter (plain copy) tests pass; all exports @beta
+  Next: Feature 14/28 - Preserve command success + exit-code semantics independent of reporters
+
+[2026-07-14] Feature 14/28 COMPLETE: Authoritative command success + exit-code semantics
+  Files (new):
+    - exit/ExitStatus.ts (EXIT_CODE_SUCCESS=0/FAILURE=1; RushCommandOutcome succeeded|failed|cancelled|signal; getSignalExitCode=128+os.constants.signals[sig]; resolveExitStatus(hasFailures/cancelled/signal); resolveExitStatusFromEvents - failure = failed commandResult OR error diagnostic OR failed operation; category & reporter never inputs; precedence signal>cancelled>failure)
+    - exit/CommandJson.ts (separateJsonControls -> {commandJson (--json), reporterJson (--reporter=json/--reporter json)} independent)
+    - test/ExitStatus.test.ts
+  Files (modified): index.ts, api.md
+  Notes:
+    - Warning-only success -> 0 (warnings not failures). Signal-derived status conventional (SIGINT->130, SIGTERM->143).
+    - Category-independence proven: error diagnostics of any category ->1; warnings of any category ->0.
+    - Command-specific --json preserved and NOT an alias for --reporter=json.
+    - Distinct from Feature 12 shadow deriveExitCodeFromEvents (this is authoritative full outcome incl cancel/signal).
+  Verify:
+    - rush test --only @rushstack/reporter: clean SUCCESS (build + jest)
+    - resolveExitStatus (success/warning-only/failure/cancel/signal precedence), signal codes, from-events (warning/error/op-failure/failed-result/category-independence/cancel/signal), separateJsonControls (5 cases) tests pass; all exports @beta
+  Next: Feature 15/28 - Reporter selection + configuration controls with precedence
