@@ -42,3 +42,5 @@ export {
   WorkspaceInvalidationTracker,
   type IWorkspaceInvalidationSnapshot
 } from './WorkspaceInvalidationTracker';
+export { type IPhasedRequestClient } from './PhasedRequestClient';
+export { PhasedRequestRouter } from './PhasedRequestRouter';

@@ -101,6 +101,9 @@ export type DaemonJsonValue = string | number | boolean | DaemonJsonNull | reado
 };
 
 // @beta
+export type DaemonPhasedOperationEnabledState = true | 'ignore-dependency-changes';
+
+// @beta
 export class DaemonProtocolError extends Error {
     constructor(code: DaemonProtocolErrorCode, message: string, options?: IDaemonProtocolErrorOptions);
     readonly code: DaemonProtocolErrorCode;
@@ -276,6 +279,41 @@ export interface IDaemonOperationStatusChangedPayload {
 // @beta
 export interface IDaemonOperationStreamClosedPayload {
     readonly operationId: string;
+}
+
+// @beta
+export interface IDaemonPhasedEngineShape {
+    readonly phaseNames: ReadonlyArray<string>;
+    readonly pluginNames: ReadonlyArray<string>;
+}
+
+// @beta
+export interface IDaemonPhasedOperationResult {
+    readonly errorMessage?: string;
+    readonly operationId: string;
+    readonly status: string;
+}
+
+// @beta
+export interface IDaemonPhasedOperationSelection {
+    readonly enabledState: DaemonPhasedOperationEnabledState;
+    readonly operationId: string;
+}
+
+// @beta
+export interface IDaemonPhasedRequest {
+    readonly commandName: string;
+    readonly engineShape: IDaemonPhasedEngineShape;
+    readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
+    readonly requestId: string;
+}
+
+// @beta
+export interface IDaemonPhasedRequestResult {
+    readonly aborted: boolean;
+    readonly operationResults: ReadonlyArray<IDaemonPhasedOperationResult>;
+    readonly requestId: string;
+    readonly scheduled: boolean;
 }
 
 // @beta

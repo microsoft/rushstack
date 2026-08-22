@@ -17,6 +17,9 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   reference when the reporter package lands) plus namespaced `rushd.*` extension events.
 - **Per-subscription verbosity** — a pure filter applied at event serialization so each
   client receives its own verbosity subset without mutating shared engine state.
+- **Resolved phased-request contracts** — engine-agnostic request, enabled-state selection,
+  and client-scoped result types for integrations that have already parsed a command and
+  resolved it against a real warm operation graph.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).
