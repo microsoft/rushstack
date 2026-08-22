@@ -17,6 +17,8 @@ export function connectDaemonAsync(socketPath: string, options?: IDaemonConnecto
 // @beta
 export class DaemonFrameConnection {
     constructor(socket: net.Socket);
+    // @internal
+    abort(error: Error): void;
     closeAsync(): Promise<void>;
     onClosed(handler: (error: Error | undefined) => void): void;
     onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void;

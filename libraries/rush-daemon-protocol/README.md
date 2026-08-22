@@ -26,6 +26,9 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   acknowledged raw-mode controls and typed terminal-policy results remain scoped to one request.
 - **Request admission contracts** — resolved no-wait and bounded-timeout options, typed admission
   failure codes, and capability-gated one-based queue-position control messages.
+- **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
+  typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
+  and Rush action construction remain outside the protocol.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

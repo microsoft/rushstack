@@ -20,6 +20,8 @@ export interface IDaemonClientCaps {
   readonly supportsInteractiveIO?: boolean;
   /** Whether the client supports request admission progress controls and typed failures. */
   readonly supportsRequestAdmission?: boolean;
+  /** Whether the client supports the request start, cancellation, and terminal outcome controls. */
+  readonly supportsRequestLifecycle?: boolean;
   /** The verbosity subset this client receives. Defaults to `normal`. */
   readonly verbosity?: DaemonVerbosity;
   /** The client's terminal width in columns, when known. */

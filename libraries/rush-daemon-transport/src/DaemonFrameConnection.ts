@@ -48,6 +48,11 @@ export class DaemonFrameConnection {
     this._socket.end();
     this._socket.destroySoon();
   }
+  /** Immediately closes a connection whose graceful drain cannot make progress. @internal */
+  public abort(error: Error): void {
+    this._closedError = this._closedError ?? error;
+    this._socket.destroy(error);
+  }
   /** The wrapped socket, for the internal raw-write test hook. @internal */
   public get socket(): net.Socket {
     return this._socket;
@@ -60,7 +65,6 @@ export class DaemonFrameConnection {
       );
     }
   }
-
   private _onData(chunk: Buffer): void {
     let frames: IDaemonFrame[];
     try {
@@ -77,13 +81,11 @@ export class DaemonFrameConnection {
       })
       .catch((error: unknown) => this._fail(error));
   }
-
   private async _dispatchFramesAsync(frames: ReadonlyArray<IDaemonFrame>): Promise<void> {
     for (const frame of frames) {
       await this._frameHandler?.(frame);
     }
   }
-
   private _fail(error: unknown): void {
     const cause: Error = error instanceof Error ? error : new Error(String(error));
     this._closedError = this._closedError ?? cause;
@@ -92,7 +94,6 @@ export class DaemonFrameConnection {
   private _onError(error: Error): void {
     this._closedError = this._closedError ?? error;
   }
-
   private _onClose(): void {
     this._closedHandler?.(this._closedError);
   }

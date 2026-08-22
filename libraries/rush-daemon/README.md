@@ -65,6 +65,23 @@ caller-owned logic can outlive its request resources. Executors return their com
 that code, translates thrown or cleanup failures to Rush's failure exit code, drains terminal output, and delivers one
 final result.
 
+`RushDaemonHost` now owns one `DaemonRequestDispatcher` for the complete warm workspace lifecycle and passes it
+to every `DaemonControlSession`. After hello and capability subscription, each connection validates unique request
+identifiers, accepts presentation-free request envelopes, routes request-tagged stdin and cancellation, and serializes
+queue progress, raw-mode controls, binary output, structured events, and the terminal result through one backpressured
+wire queue. A connection runs at most one request at a time so binary operation output remains unambiguous; concurrent
+requests use separate connections. Disconnect and host shutdown abort every connection-owned active or queued request
+before the resolver and warm workspace are disposed. Separate connections still share the workspace scheduler and
+phased batch coordinator, so compatible selections can execute in one iteration.
+
+The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
+typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle
+when cancellation, disconnect, or host shutdown aborts it. Without that resolver, the standalone executable continues
+to start, answer ping, and reject request execution with the typed `unsupported` outcome; it never constructs an empty
+graph or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
+reported as `workspaceRecreationRequired` before scheduling. Replacing the warm session is intentionally deferred to
+WS3.
+
 The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global action helpers still consult or mutate
 process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the
 integration must supply already resolved command logic that consumes `IGlobalCommandExecutionContext`, including

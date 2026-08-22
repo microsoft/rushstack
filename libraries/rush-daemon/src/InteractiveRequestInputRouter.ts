@@ -70,7 +70,6 @@ interface IRequestState {
   }>;
 }
 
-const MAX_COMPLETED_REQUEST_IDS: number = 256;
 const MAX_PENDING_INPUT_BYTES: number = 1024 * 1024;
 const MAX_PENDING_INPUT_FRAMES: number = 256;
 const requestInputFailures: WeakSet<Error> = new WeakSet();
@@ -176,12 +175,6 @@ export class InteractiveRequestInputRouter {
     }
     this.#stateByRequestId.delete(requestId);
     this.#completedRequestIds.add(requestId);
-    if (this.#completedRequestIds.size > MAX_COMPLETED_REQUEST_IDS) {
-      const oldestRequestId: string | undefined = this.#completedRequestIds.values().next().value;
-      if (oldestRequestId !== undefined) {
-        this.#completedRequestIds.delete(oldestRequestId);
-      }
-    }
   }
 }
 

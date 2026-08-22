@@ -11,6 +11,12 @@ import type { IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 import type { IDaemonRequestQueuePositionMessage } from './DaemonRequestAdmission';
+import type {
+  IDaemonRequestCancelMessage,
+  IDaemonRequestRejectedMessage,
+  IDaemonRequestResultMessage,
+  IDaemonRequestStartMessage
+} from './DaemonRequestControl';
 
 /** The empty payload of control messages that carry no data. @beta */
 export type DaemonEmptyPayload = Record<string, never>;
@@ -76,4 +82,8 @@ export type DaemonControlMessage =
   | IDaemonSetRawModeMessage
   | IDaemonRawModeChangedMessage
   | IDaemonTerminalPolicyMessage
-  | IDaemonRequestQueuePositionMessage;
+  | IDaemonRequestQueuePositionMessage
+  | IDaemonRequestStartMessage
+  | IDaemonRequestCancelMessage
+  | IDaemonRequestRejectedMessage
+  | IDaemonRequestResultMessage;
