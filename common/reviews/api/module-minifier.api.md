@@ -16,6 +16,7 @@ export function getIdentifier(ordinal: number): string;
 
 // @public
 export interface ILocalMinifierOptions {
+    cache?: boolean;
     // (undocumented)
     terserOptions?: MinifyOptions;
 }
@@ -77,6 +78,7 @@ export interface IModuleMinifierFunction {
 
 // @public
 export interface IWorkerPoolMinifierOptions {
+    cache?: boolean;
     maxThreads?: number;
     terserOptions?: MinifyOptions;
     verbose?: boolean;
