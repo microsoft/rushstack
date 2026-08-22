@@ -107,6 +107,9 @@ export class PlaywrightTunnel {
   private _status: TunnelStatus = 'stopped';
   private _initWsPromise?: Promise<WebSocket>;
   private _cancelPollConnection?: (error: Error) => void;
+  /// Bumped whenever polling starts or is cancelled, so an attempt that resolves
+  /// after a stop or restart can recognise that it no longer owns the shared state.
+  private _pollGeneration: number = 0;
   private _keepRunning: boolean = false;
   private _ws?: WebSocket;
   private _mode: TunnelMode;
@@ -307,8 +310,13 @@ export class PlaywrightTunnel {
   // Need to support multiple simultaneous connections for parallel tests.
   private async _pollConnectionAsync(): Promise<WebSocket> {
     this._terminal.writeLine(`Waiting for WebSocket connection`);
+    const generation: number = ++this._pollGeneration;
+    const ownsPollState = (): boolean => this._pollGeneration === generation;
     return await new Promise((resolve, reject) => {
       this._cancelPollConnection = (error: Error): void => {
+        // Retire this generation so an attempt still in flight cannot clear the
+        // interval or the canceller belonging to whatever starts next.
+        this._pollGeneration += 1;
         if (this._pollInterval) {
           clearInterval(this._pollInterval);
           this._pollInterval = undefined;
@@ -324,6 +332,13 @@ export class PlaywrightTunnel {
         this._pendingConnectionAttempt = connectionPromise;
         connectionPromise
           .then((ws: WebSocket) => {
+            if (!ownsPollState()) {
+              // Stopped or restarted while this attempt was in flight: the socket
+              // belongs to nobody now, so close it rather than leave it open.
+              ws.removeAllListeners();
+              ws.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
+              return;
+            }
             clearInterval(this._pollInterval);
             this._pollInterval = undefined;
             ws.removeAllListeners();
@@ -333,7 +348,9 @@ export class PlaywrightTunnel {
           })
           .catch(() => {
             // no-op - will retry on next interval
-            this._pendingConnectionAttempt = undefined;
+            if (ownsPollState()) {
+              this._pendingConnectionAttempt = undefined;
+            }
           });
       }, 500);
     });
