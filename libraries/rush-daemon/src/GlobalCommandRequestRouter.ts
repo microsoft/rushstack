@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+
+import { createGlobalCommandResult, RUSH_SUCCESS_EXIT_CODE } from './CommandResultPolicy';
 import type { IGlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
 import { GlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
 import {
@@ -21,17 +24,25 @@ import type { IWorkspaceSession } from './WorkspaceSession';
  *
  * @beta
  */
-export type GlobalCommandExecutor = (context: IGlobalCommandExecutionContext) => Promise<void>;
+export type GlobalCommandExecutor = (
+  context: IGlobalCommandExecutionContext
+) => Promise<IGlobalCommandExecutionResult>;
+
+/**
+ * The process result returned by caller-owned global command logic.
+ *
+ * @beta
+ */
+export interface IGlobalCommandExecutionResult {
+  readonly exitCode: number;
+}
 
 /**
  * The completion state for one global command request.
  *
  * @beta
  */
-export interface IGlobalCommandRequestResult {
-  readonly aborted: boolean;
-  readonly requestId: string;
-}
+export type IGlobalCommandRequestResult = IDaemonCommandResult;
 
 /**
  * Routes caller-owned global command logic through isolated per-request process and terminal context.
@@ -67,15 +78,19 @@ export class GlobalCommandRequestRouter {
       this.#workspaceSession
     );
     let executionError: unknown;
+    let executionResult: IGlobalCommandExecutionResult | undefined;
     let aborted: boolean = context.abortSignal.aborted;
     try {
       if (!aborted) {
-        const executorPromise: Promise<void> = Promise.resolve().then(() => executor(context));
+        const executorPromise: Promise<IGlobalCommandExecutionResult> = Promise.resolve().then(() =>
+          executor(context)
+        );
         const outcome: 'aborted' | 'completed' = await waitForExecutionAsync(
           executorPromise,
           context.abortSignal
         );
         aborted = outcome === 'aborted';
+        executionResult = await executorPromise;
       }
     } catch (error) {
       executionError = error;
@@ -87,13 +102,30 @@ export class GlobalCommandRequestRouter {
     } catch (error) {
       cleanupError = error;
     }
-    throwExecutionAndCleanupErrors(executionError, cleanupError);
-    return { aborted: aborted || client.abortSignal.aborted, requestId: request.requestId };
+    const combinedError: unknown = combineExecutionAndCleanupErrors(executionError, cleanupError);
+    let result: IDaemonCommandResult;
+    try {
+      result = createGlobalCommandResult({
+        aborted,
+        error: combinedError,
+        exitCode: executionResult?.exitCode ?? RUSH_SUCCESS_EXIT_CODE,
+        requestId: request.requestId
+      });
+    } catch (error) {
+      result = createGlobalCommandResult({
+        aborted: false,
+        error,
+        exitCode: undefined,
+        requestId: request.requestId
+      });
+    }
+    await client.writeResultAsync(result);
+    return result;
   }
 }
 
 async function waitForExecutionAsync(
-  executorPromise: Promise<void>,
+  executorPromise: Promise<IGlobalCommandExecutionResult>,
   abortSignal: AbortSignal
 ): Promise<'aborted' | 'completed'> {
   let removeAbortListener: (() => void) | undefined;
@@ -110,7 +142,7 @@ async function waitForExecutionAsync(
   try {
     const outcome: 'aborted' | 'completed' = await Promise.race([completedPromise, abortPromise]);
     if (outcome === 'aborted') {
-      await executorPromise.catch(() => undefined);
+      await executorPromise;
     }
     return outcome;
   } finally {
@@ -119,17 +151,18 @@ async function waitForExecutionAsync(
   }
 }
 
-function throwExecutionAndCleanupErrors(executionError: unknown, cleanupError: unknown): void {
+function combineExecutionAndCleanupErrors(executionError: unknown, cleanupError: unknown): unknown {
   if (executionError !== undefined && cleanupError !== undefined) {
-    throw new AggregateError(
+    return new AggregateError(
       [executionError, cleanupError],
       'The global command failed and could not clean up its request context.'
     );
   }
   if (executionError !== undefined) {
-    throw executionError;
+    return executionError;
   }
   if (cleanupError !== undefined) {
-    throw cleanupError;
+    return cleanupError;
   }
+  return undefined;
 }

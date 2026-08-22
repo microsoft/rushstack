@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add a typed final daemon command result with Rush-compatible outcome and exit-code semantics.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "mojazayeri@users.noreply.github.com"
+}

@@ -25,6 +25,7 @@ export { type IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
 export {
   type GlobalCommandExecutor,
   GlobalCommandRequestRouter,
+  type IGlobalCommandExecutionResult,
   type IGlobalCommandRequestResult
 } from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';

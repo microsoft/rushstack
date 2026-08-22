@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonEventEnvelope,
+  IDaemonPhasedRequestResult
+} from '@rushstack/rush-daemon-protocol';
 
 /**
  * A client-scoped destination for one routed phased request.
@@ -30,4 +33,7 @@ export interface IPhasedRequestClient {
     stream: 'stdout' | 'stderr',
     chunk: Uint8Array
   ): Promise<void>;
+
+  /** Writes the final command result after every preceding event and log chunk has drained. */
+  writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void>;
 }
