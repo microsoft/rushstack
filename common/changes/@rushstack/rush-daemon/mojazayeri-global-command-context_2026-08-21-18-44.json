@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add an opt-in isolated execution context for caller-resolved global commands.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

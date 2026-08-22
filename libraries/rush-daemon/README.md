@@ -40,3 +40,19 @@ This layer deliberately does not add control-frame admission or reconstruct `Pha
 initialization. The typed phased request contract begins after an integration has produced a validated selection for
 the exact warm engine shape; full command parsing remains blocked by
 [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895).
+
+`GlobalCommandRequestRouter` is the corresponding opt-in boundary for caller-resolved global command logic. It
+canonicalizes and confines the request working directory to the workspace, snapshots its environment, creates a
+request-scoped terminal with explicit columns/color/TTY properties, and tracks child processes and async resources
+through cancellation or disconnect. Concurrent requests never change `process.cwd()`, `process.env`, or daemon
+stdin/stdout/stderr; child commands receive cwd, environment, cancellation, and output routing through the injected
+execution context.
+Executors must cooperatively observe the context abort signal and settle before cancellation completes, ensuring no
+caller-owned logic can outlive its request resources.
+
+The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global action helpers still consult or mutate
+process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the
+integration must supply already resolved command logic that consumes `IGlobalCommandExecutionContext`, including
+`spawnChild()` for command-local subprocesses. Adapting the complete action surface remains bounded by the open
+[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) engine/action prerequisite work. Exit-code policy,
+interactive stdin/raw-mode/PTY support, scheduling classification, and shared-build merging belong to later layers.

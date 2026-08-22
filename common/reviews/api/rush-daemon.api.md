@@ -6,6 +6,7 @@
 
 /// <reference types="node" />
 
+import * as childProcess from 'node:child_process';
 import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
@@ -13,6 +14,7 @@ import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import type { IOperationGraph } from '@microsoft/rush-lib';
+import type { ITerminal } from '@rushstack/terminal';
 import type { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
@@ -23,6 +25,16 @@ export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEng
 
 // @beta
 export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSessionComponentsOptions) => Promise<IWorkspaceSessionComponents>;
+
+// @beta
+export type GlobalCommandExecutor = (context: IGlobalCommandExecutionContext) => Promise<void>;
+
+// @beta
+export class GlobalCommandRequestRouter {
+    constructor(workspaceSession: IWorkspaceSession);
+    executeAsync(request: IResolvedGlobalCommandRequest, executor: GlobalCommandExecutor, client: IGlobalCommandRequestClient): Promise<IGlobalCommandRequestResult>;
+    resolveRequest(options: IResolveGlobalCommandRequestOptions): IResolvedGlobalCommandRequest;
+}
 
 // @beta
 export interface IClassifyWorkspaceInvalidationsOptions {
@@ -47,6 +59,72 @@ export interface ICreateWorkspaceSessionComponentsOptions {
     readonly onError?: (error: Error) => void;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
+}
+
+// @beta
+export interface IGlobalCommandEnvironment {
+    // (undocumented)
+    get(name: string): string | undefined;
+    // (undocumented)
+    getNames(): ReadonlyArray<string>;
+    // (undocumented)
+    toObject(): NodeJS.ProcessEnv;
+}
+
+// @beta
+export interface IGlobalCommandExecutionContext {
+    // (undocumented)
+    readonly abortSignal: AbortSignal;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly environment: IGlobalCommandEnvironment;
+    // (undocumented)
+    registerDisposable(disposable: AsyncDisposable): void;
+    // (undocumented)
+    spawnChild(command: string, args: ReadonlyArray<string>, options?: IGlobalCommandSpawnOptions): childProcess.ChildProcessWithoutNullStreams;
+    // (undocumented)
+    readonly terminal: ITerminal;
+    // (undocumented)
+    readonly terminalProperties: IGlobalCommandTerminalProperties;
+    // (undocumented)
+    readonly workspaceSession: IWorkspaceSession;
+}
+
+// @beta
+export interface IGlobalCommandRequestClient {
+    readonly abortSignal: AbortSignal;
+    writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+}
+
+// @beta
+export interface IGlobalCommandRequestResult {
+    // (undocumented)
+    readonly aborted: boolean;
+    // (undocumented)
+    readonly requestId: string;
+}
+
+// @beta
+export interface IGlobalCommandSpawnOptions {
+    // (undocumented)
+    readonly environmentOverlay?: Readonly<NodeJS.ProcessEnv>;
+    // (undocumented)
+    readonly forwardOutput?: boolean;
+    // (undocumented)
+    readonly shell?: boolean | string;
+    // (undocumented)
+    readonly windowsHide?: boolean;
+}
+
+// @beta
+export interface IGlobalCommandTerminalProperties {
+    // (undocumented)
+    readonly columns: number | undefined;
+    // (undocumented)
+    readonly isTTY: boolean;
+    // (undocumented)
+    readonly supportsColor: boolean;
 }
 
 // @beta
@@ -85,6 +163,34 @@ export interface IRequestSchedulerAcquireOptions {
     noWait?: boolean;
     onQueuePositionChanged?: (position: number) => void;
     waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IResolvedGlobalCommandRequest {
+    // (undocumented)
+    readonly commandName: string;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly environment: IGlobalCommandEnvironment;
+    // (undocumented)
+    readonly requestId: string;
+    // (undocumented)
+    readonly terminal: IGlobalCommandTerminalProperties;
+}
+
+// @beta
+export interface IResolveGlobalCommandRequestOptions {
+    // (undocumented)
+    readonly commandName: string;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly environment: Readonly<NodeJS.ProcessEnv>;
+    // (undocumented)
+    readonly requestId: string;
+    // (undocumented)
+    readonly terminal: IGlobalCommandTerminalProperties;
 }
 
 // @beta
