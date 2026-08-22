@@ -120,7 +120,7 @@
     - rush test --only @rushstack/rush-reporter: clean SUCCESS (build + jest), 8 snapshots
   Next: Feature 8/28 - Two-stage bootstrap in install-run-rush (handoff file)
 
-[2026-07-14] Feature 8/28 COMPLETE: Two-stage bootstrap handoff (buffer + encoder + handoff + early controls)
+[2026-07-14] Feature 8/28 PARTIAL: Two-stage bootstrap handoff (buffer + encoder + handoff + early controls)
   Files (new):
     - bootstrap/BootstrapProtocol.ts (BOOTSTRAP_PROTOCOL_MAJOR=1 frozen, BUFFER_MAX 1MiB, EXTERNAL_CHUNK 64KiB, RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR='_RUSH_REPORTER_BOOTSTRAP_HANDOFF', bufferTruncated ext name)
     - bootstrap/BootstrapEventBuffer.ts (self-contained mini-sink; emit assigns ids/seq/ts; addExternalOutput 64KiB chunking; overflow preserves required+diagnostic, evicts non-preserve, fails if required can't fit; serialize appends bufferTruncated extension event)
@@ -137,7 +137,7 @@
     - early-controls parsing, encode/serialize round-trip, 64KiB external chunking, overflow preserve+truncate, required-cannot-preserve fail, handoff write/read/delete tests pass; all exports @beta
   Next: Feature 9/28 - Frontend ReporterManager host + replay the bootstrap handoff
 
-[2026-07-14] Feature 9/28 COMPLETE: Frontend ReporterManager host + bootstrap handoff replay
+[2026-07-14] Feature 9/28 PARTIAL: Frontend ReporterManager host + bootstrap handoff replay
   Files (new):
     - frontend/ReporterHost.ts (ReporterHost: owns a ReporterManager; getSink()->IReporterEventSink (narrowed, no selection ownership); replayBootstrapHandoffAsync (read+ingestForeignEnvelope+delete; direct when env var absent; tolerates missing/corrupt file); cleanAbandonedHandoffFilesAsync (14d retention default); DEFAULT_HANDOFF_RETENTION_MS)
     - test/ReporterHost.test.ts
@@ -150,7 +150,7 @@
     - replay+delete+rehome(sourceSequence), direct skip, missing-file tolerance, typed sink emit, abandoned-file cleanup (stale deleted, new/non-matching kept) tests pass; all exports @beta
   Next: Feature 10/28 - Cross-version compatibility adapters (new/old frontend/engine) while keeping legacy rendering visible
 
-[2026-07-14] Feature 10/28 COMPLETE: Cross-version compatibility adapters (both directions)
+[2026-07-14] Feature 10/28 PARTIAL: Cross-version compatibility adapters (both directions)
   Files (new):
     - compat/ReporterCompatibility.ts (resolveReporterCompatibility -> mode structured|new-frontend-old-engine|old-frontend-new-engine|legacy; flags provideSinkToEngine/engineRendersLegacy/legacyRenderingVisible=true always)
     - compat/LegacyFallbackSink.ts (LegacyFallbackSink discards emits; createEngineSink(providedSink?) -> {sink, mode structured|legacy-fallback})
