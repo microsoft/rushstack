@@ -42,6 +42,12 @@ backpressured, ordered callbacks, followed exactly once by a typed final command
 drains. The result translates only that client's operation subset to Rush's success, warning, failure, or abort exit
 semantics. Warning-only builds honor the operation's configured `allowWarningsInSuccessfulBuild` state plus the
 request's immutable `RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment override without mutating `process.env`.
+Compatible phased `SHARED-BUILD` requests admitted before the next graph iteration starts are coalesced at a
+deterministic event-loop-turn boundary. The router reconciles retained invalidations once, unions the clients' enabled
+dependency closures, and schedules one iteration. Shared operations execute once, while each client subscribes only
+to its own closure and derives its final result only from that subset. Requests admitted after scheduling starts form
+a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
+clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
 
 This layer deliberately does not reconstruct `PhasedScriptAction` command/plugin initialization. The typed phased
 request contract begins after an integration has produced a validated selection for the exact warm engine shape;
@@ -74,6 +80,4 @@ Terminal width remains the immutable request-start value established by WS2.5. T
 rendering, so this layer does not forward `SIGWINCH`. Commands declaring a real controlling-terminal requirement
 receive a typed `requiresInProcess` policy result and are not executed by rushd; no pseudo-terminal is allocated or
 emulated. The future WS4 client will perform the actual in-process fallback and parse `--no-wait` /
-`--wait-timeout`. Compatible `SHARED-BUILD` requests may hold admission leases concurrently, but the phased router
-continues to serialize mutation of the single warm graph. WS2.9 will replace that internal graph lock with coordinated
-selection merging.
+`--wait-timeout`.

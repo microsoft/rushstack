@@ -41,11 +41,11 @@ interface IEventOptions {
 
 class OrderedClientWriter {
   readonly #client: IPhasedRequestClient;
-  readonly #onFailure: () => void;
+  readonly #onFailure: (error: Error) => void;
   #failure: Error | undefined;
   #tail: Promise<void> = Promise.resolve();
 
-  public constructor(client: IPhasedRequestClient, onFailure: () => void) {
+  public constructor(client: IPhasedRequestClient, onFailure: (error: Error) => void) {
     this.#client = client;
     this.#onFailure = onFailure;
   }
@@ -78,7 +78,7 @@ class OrderedClientWriter {
         await writeAsync();
       } catch (error) {
         this.#failure = error instanceof Error ? error : new Error(String(error));
-        this.#onFailure();
+        this.#onFailure(this.#failure);
       }
     });
   }
@@ -96,7 +96,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     activeOperationIds: ReadonlySet<string>;
     client: IPhasedRequestClient;
     getNextSequence: () => number;
-    onWriteFailure: () => void;
+    onWriteFailure: (error: Error) => void;
     rushVersion: string;
   }) {
     this.#activeOperationIds = options.activeOperationIds;

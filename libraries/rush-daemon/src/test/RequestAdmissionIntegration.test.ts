@@ -11,6 +11,7 @@ import type {
   IDaemonRequestQueuePositionMessage,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
+import { OperationStatus } from '@microsoft/rush-lib';
 
 import type { IGlobalCommandExecutionContext } from '../GlobalCommandExecutionContext';
 import type { IResolvedGlobalCommandRequest } from '../GlobalCommandRequest';
@@ -349,7 +350,7 @@ describe('request admission integration', () => {
     expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(1);
   });
 
-  it('applies no-wait and one deadline across workspace and phased graph admission', async () => {
+  it('applies no-wait and timeouts to requests admitted after a shared iteration starts', async () => {
     jest.useFakeTimers();
     const graphStarted = createDeferred();
     const releaseGraph = createDeferred();
@@ -379,13 +380,8 @@ describe('request admission integration', () => {
       createPhasedRequest('first-phased'),
       new TestPhasedRequestClient()
     );
-    const timeoutClient: TestPhasedRequestClient = new TestPhasedRequestClient();
-    const timeoutPhased = phasedRouter.executeAsync(
-      createPhasedRequest('timeout-phased', { waitTimeoutMs: 10 }),
-      timeoutClient
-    );
-    jest.advanceTimersByTime(8);
     releaseWorkspace.resolve();
+    await jest.advanceTimersByTimeAsync(0);
     await graphStarted.promise;
 
     const noWaitResult = await phasedRouter.executeAsync(
@@ -393,18 +389,19 @@ describe('request admission integration', () => {
       new TestPhasedRequestClient()
     );
     expect(noWaitResult).toMatchObject({ admissionErrorCode: 'no-wait', outcome: 'failure' });
+    const timeoutClient: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const timeoutPhased = phasedRouter.executeAsync(
+      createPhasedRequest('timeout-phased', { waitTimeoutMs: 10 }),
+      timeoutClient
+    );
+    await jest.advanceTimersByTimeAsync(10);
+    const timeoutResult = await timeoutPhased;
+    expect(timeoutResult).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
     expect(
       timeoutClient.writes
         .map(({ queuePosition }) => queuePosition?.payload.position)
         .filter((position): position is number => position !== undefined)
-    ).toEqual(expect.arrayContaining([2, 1]));
-    jest.advanceTimersByTime(2);
-    const timeoutResult = await timeoutPhased;
-    expect(timeoutResult).toMatchObject({
-      admissionErrorCode: 'wait-timeout',
-      errorMessage: 'The request was not admitted within 10ms.',
-      outcome: 'failure'
-    });
+    ).toContain(1);
     expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(1);
 
     releaseGraph.resolve();
@@ -441,6 +438,69 @@ describe('request admission integration', () => {
 
     await Promise.all([global, phased]);
     expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(1);
+  });
+
+  it('keeps an exclusive FIFO gate between shared-build batches', async () => {
+    const buildStarted = createDeferred();
+    const releaseBuild = createDeferred();
+    const fixture = createRoutingFixture(
+      new Map([
+        [
+          TEST_OPERATION,
+          new TestOperationRunner(TEST_OPERATION, OperationStatus.Success, async (): Promise<void> => {
+            buildStarted.resolve();
+            await releaseBuild.promise;
+          })
+        ]
+      ])
+    );
+    const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(fixture.session);
+    const phasedRouter: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const firstBuild = phasedRouter.executeAsync(
+      {
+        commandName: 'build',
+        commandOrigin: 'built-in',
+        engineShape: TEST_ENGINE_SHAPE,
+        environment: {},
+        operationSelection: [{ enabledState: true, operationId: TEST_OPERATION }],
+        requestId: 'first-build'
+      },
+      new TestPhasedRequestClient('first-build')
+    );
+    await buildStarted.promise;
+
+    const exclusiveStarted = createDeferred();
+    const releaseExclusive = createDeferred();
+    const exclusive = globalRouter.executeAsync(
+      createRequest(globalRouter, 'exclusive', 'custom-exclusive'),
+      createBlockingExecutor(exclusiveStarted.resolve, releaseExclusive.promise),
+      new AdmissionClient()
+    );
+    let lateBuildSettled: boolean = false;
+    const lateBuild = phasedRouter
+      .executeAsync(
+        {
+          commandName: 'build',
+          commandOrigin: 'built-in',
+          engineShape: TEST_ENGINE_SHAPE,
+          environment: {},
+          operationSelection: [{ enabledState: true, operationId: TEST_OPERATION }],
+          requestId: 'late-build'
+        },
+        new TestPhasedRequestClient('late-build')
+      )
+      .then((result) => {
+        lateBuildSettled = true;
+        return result;
+      });
+
+    releaseBuild.resolve();
+    await exclusiveStarted.promise;
+    expect(lateBuildSettled).toBe(false);
+    releaseExclusive.resolve();
+
+    await Promise.all([firstBuild, exclusive, lateBuild]);
+    expect(lateBuildSettled).toBe(true);
   });
 
   it('holds an exclusive lease until cleanup and final-result output settle', async () => {
