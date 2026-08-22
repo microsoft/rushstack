@@ -31,10 +31,13 @@ lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issu
 `PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
 integration parses the command and supplies an explicit phase/plugin shape plus operation enabled-state selection;
 the router validates both, reconciles retained invalidations, applies the selection with `IOperationGraph.setEnabledStates`,
-and runs at most one scheduled iteration. Requests are serialized until shared-build merging is implemented. A
-requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
-backpressured, ordered callbacks, followed by client-scoped operation results. Cancellation or disconnect aborts the
-current iteration without closing daemon-owned runners or the graph.
+and runs at most one scheduled iteration. Requests are serialized until shared-build merging is implemented. A requesting client receives only its enabled
+dependency closure's WS1 raw chunks and structured events through backpressured, ordered callbacks, followed exactly
+once by a typed final command result after all preceding output drains. The result translates only that client's
+operation subset to Rush's success, warning, failure, or abort exit semantics. Warning-only builds honor the
+operation's configured `allowWarningsInSuccessfulBuild` state plus the request's immutable
+`RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment override without mutating `process.env`. Cancellation or
+disconnect aborts the current iteration without closing daemon-owned runners or the graph.
 
 This layer deliberately does not add control-frame admission or reconstruct `PhasedScriptAction` command/plugin
 initialization. The typed phased request contract begins after an integration has produced a validated selection for
@@ -48,11 +51,13 @@ through cancellation or disconnect. Concurrent requests never change `process.cw
 stdin/stdout/stderr; child commands receive cwd, environment, cancellation, and output routing through the injected
 execution context.
 Executors must cooperatively observe the context abort signal and settle before cancellation completes, ensuring no
-caller-owned logic can outlive its request resources.
+caller-owned logic can outlive its request resources. Executors return their command exit code; the router preserves
+that code, translates thrown or cleanup failures to Rush's failure exit code, drains terminal output, and delivers one
+final result.
 
 The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global action helpers still consult or mutate
 process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the
 integration must supply already resolved command logic that consumes `IGlobalCommandExecutionContext`, including
 `spawnChild()` for command-local subprocesses. Adapting the complete action surface remains bounded by the open
-[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) engine/action prerequisite work. Exit-code policy,
-interactive stdin/raw-mode/PTY support, scheduling classification, and shared-build merging belong to later layers.
+[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) engine/action prerequisite work. Interactive
+stdin/raw-mode/PTY support, scheduling classification, and shared-build merging belong to later layers.

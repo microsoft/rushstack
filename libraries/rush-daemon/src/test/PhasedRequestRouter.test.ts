@@ -35,6 +35,7 @@ function createRequest(
   return {
     commandName: 'build',
     engineShape: TEST_ENGINE_SHAPE,
+    environment: {},
     operationSelection,
     requestId: 'request-1'
   };
@@ -184,10 +185,11 @@ describe(PhasedRequestRouter.name, () => {
       fixture.graph,
       'executeScheduledIterationAsync'
     );
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
 
     const result = await new PhasedRequestRouter(fixture.session).executeAsync(
       createRequest([select(OPERATION_B)]),
-      new TestPhasedRequestClient()
+      client
     );
 
     expect(order).toEqual(['reconcile', 'schedule', 'run']);
@@ -201,6 +203,8 @@ describe(PhasedRequestRouter.name, () => {
       OPERATION_B
     ]);
     expect(result.scheduled).toBe(true);
+    expect(result).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(clientResultWrites(client)).toEqual([{ result }]);
   });
 
   it('forwards only enabled operations with ordered client backpressure', async () => {
@@ -234,13 +238,19 @@ describe(PhasedRequestRouter.name, () => {
       OPERATION_A
     ]);
     expect(logWrites.map(({ stream }) => stream)).toEqual(['stdout', 'stderr']);
-    expect(logWrites.map(({ text }) => text)).toEqual(['stdout-a\n', 'stderr-a\n']);
+    expect(logWrites[0]?.text).toContain('stdout-a');
+    expect(logWrites[1]?.text).toContain('stderr-a');
     const eventOperationIds: string[] = client.writes
       .map((write: ITestClientWrite) => write.event)
       .filter((event: IDaemonEventEnvelope | undefined): event is IDaemonEventEnvelope => !!event)
       .map(getEventOperationId)
       .filter((operationId: string | undefined): operationId is string => !!operationId);
     expect(new Set(eventOperationIds)).toEqual(new Set([OPERATION_A]));
+    expect(clientResultWrites(client)).toHaveLength(1);
+    expect(client.writes[client.writes.length - 1]?.result).toMatchObject({
+      exitCode: 0,
+      outcome: 'success'
+    });
     const streamClosedEvent: IDaemonEventEnvelope | undefined = client.writes
       .map((write: ITestClientWrite) => write.event)
       .find(
@@ -300,6 +310,7 @@ describe(PhasedRequestRouter.name, () => {
     expect(result.operationResults).toEqual([
       { errorMessage: undefined, operationId: OPERATION_A, status: OperationStatus.Failure }
     ]);
+    expect(result).toMatchObject({ exitCode: 1, outcome: 'failure' });
   });
 
   it('aborts a cancelled iteration, restores subscriptions, and keeps runners reusable', async () => {
@@ -336,6 +347,7 @@ describe(PhasedRequestRouter.name, () => {
     const result = await requestPromise;
 
     expect(result.aborted).toBe(true);
+    expect(result).toMatchObject({ exitCode: 1, outcome: 'aborted' });
     expect(
       result.operationResults.find(({ operationId }) => operationId === OPERATION_B)?.status
     ).toBe(OperationStatus.Aborted);
@@ -419,7 +431,12 @@ describe(PhasedRequestRouter.name, () => {
         createRequest([select(OPERATION_B)]),
         client
       )
-    ).rejects.toThrow('client disconnected');
+    ).resolves.toMatchObject({
+      errorMessage: 'client disconnected',
+      exitCode: 1,
+      outcome: 'failure'
+    });
+    expect(clientResultWrites(client)).toHaveLength(1);
     expect(fixture.graph.pauseNextIteration).toBe(false);
     expect(fixture.runners.get(OPERATION_A)?.closeCount).toBe(0);
   });
@@ -478,18 +495,25 @@ describe(PhasedRequestRouter.name, () => {
       throw new Error('scheduling hook failed');
     });
 
-    await expect(
-      new PhasedRequestRouter(fixture.session).executeAsync(
-        createRequest([select(OPERATION_A)]),
-        new TestPhasedRequestClient()
-      )
-    ).rejects.toThrow('scheduling hook failed');
+    const result = await new PhasedRequestRouter(fixture.session).executeAsync(
+      createRequest([select(OPERATION_A)]),
+      new TestPhasedRequestClient()
+    );
+    expect(result).toMatchObject({
+      errorMessage: 'scheduling hook failed',
+      exitCode: 1,
+      outcome: 'failure'
+    });
     expect(fixture.graph.hasScheduledIteration).toBe(false);
     expect(fixture.graph.status).not.toBe(OperationStatus.Executing);
     const completedRunCount: number = fixture.runners.get(OPERATION_A)?.runCount ?? 0;
     await new Promise<void>((resolve) => setImmediate(resolve));
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(completedRunCount);
   });
+
+  function clientResultWrites(client: TestPhasedRequestClient): ITestClientWrite[] {
+    return client.writes.filter(({ result }) => result !== undefined);
+  }
 
   it('returns retained results when real graph hooks collapse a repeated warm request to no work', async () => {
     const fixture: ITestRoutingFixture = createThreeOperationFixture();

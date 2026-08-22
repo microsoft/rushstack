@@ -15,7 +15,10 @@ import type {
 import { Operation, OperationStatus } from '@microsoft/rush-lib';
 import { OperationGraph } from '@microsoft/rush-lib/lib/logic/operations/OperationGraph';
 import type { IOperationGraphOptions } from '@microsoft/rush-lib/lib/logic/operations/OperationGraph';
-import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonEventEnvelope,
+  IDaemonPhasedRequestResult
+} from '@rushstack/rush-daemon-protocol';
 
 import type { IPhasedRequestClient } from '../PhasedRequestClient';
 import type {
@@ -47,6 +50,7 @@ const TEST_PHASE: IPhase = {
 export interface ITestClientWrite {
   readonly event?: IDaemonEventEnvelope;
   readonly operationId?: string;
+  readonly result?: IDaemonPhasedRequestResult;
   readonly stream?: 'stdout' | 'stderr';
   readonly text?: string;
 }
@@ -88,6 +92,12 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
       stream,
       text: new TextDecoder().decode(chunk)
     };
+    await this.onWriteAsync?.(write);
+    this.writes.push(write);
+  }
+
+  public async writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void> {
+    const write: ITestClientWrite = { result };
     await this.onWriteAsync?.(write);
     this.writes.push(write);
   }

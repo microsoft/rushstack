@@ -8,6 +8,7 @@
 
 import * as childProcess from 'node:child_process';
 import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
+import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
@@ -27,7 +28,7 @@ export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEng
 export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSessionComponentsOptions) => Promise<IWorkspaceSessionComponents>;
 
 // @beta
-export type GlobalCommandExecutor = (context: IGlobalCommandExecutionContext) => Promise<void>;
+export type GlobalCommandExecutor = (context: IGlobalCommandExecutionContext) => Promise<IGlobalCommandExecutionResult>;
 
 // @beta
 export class GlobalCommandRequestRouter {
@@ -92,18 +93,20 @@ export interface IGlobalCommandExecutionContext {
 }
 
 // @beta
+export interface IGlobalCommandExecutionResult {
+    // (undocumented)
+    readonly exitCode: number;
+}
+
+// @beta
 export interface IGlobalCommandRequestClient {
     readonly abortSignal: AbortSignal;
+    writeResultAsync(result: IDaemonCommandResult): Promise<void>;
     writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
 }
 
 // @beta
-export interface IGlobalCommandRequestResult {
-    // (undocumented)
-    readonly aborted: boolean;
-    // (undocumented)
-    readonly requestId: string;
-}
+export type IGlobalCommandRequestResult = IDaemonCommandResult;
 
 // @beta
 export interface IGlobalCommandSpawnOptions {
@@ -146,6 +149,7 @@ export interface IPhasedRequestClient {
     readonly sessionId: string;
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+    writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void>;
 }
 
 // @public
