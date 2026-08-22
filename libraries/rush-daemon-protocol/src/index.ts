@@ -17,20 +17,31 @@ export type { IDaemonFrame } from './DaemonFrame';
 export { DaemonFrameType, isDaemonFrameType } from './DaemonFrameType';
 export {
   DEFAULT_MAX_PAYLOAD_BYTES, FRAME_HEADER_BYTES, LENGTH_FIELD_BYTES, LENGTH_FIELD_OFFSET,
-  MAX_OPERATION_ID_BYTES, OPERATION_ID_LENGTH_BYTES, OPERATION_ID_LENGTH_OFFSET, PAYLOAD_OFFSET,
+  MAX_OPERATION_ID_BYTES, MAX_REQUEST_ID_BYTES, OPERATION_ID_LENGTH_BYTES, OPERATION_ID_LENGTH_OFFSET,
+  PAYLOAD_OFFSET, REQUEST_ID_LENGTH_BYTES, REQUEST_ID_LENGTH_OFFSET,
   TYPE_FIELD_BYTES, TYPE_FIELD_OFFSET
 } from './FrameConstants';
 export { encodeDaemonFrame, encodeDaemonFrames } from './FrameEncoder';
 export { DaemonFrameDecoder, type IDaemonFrameDecoderOptions } from './FrameDecoder';
 export { DaemonProtocolError, ProtocolVersionMismatchError } from './DaemonProtocolError';
 export type { DaemonProtocolErrorCode, IDaemonProtocolErrorOptions } from './DaemonProtocolError';
-export { DAEMON_PROTOCOL_VERSION, isDaemonProtocolCompatible } from './DaemonProtocolVersion';
+export {
+  DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_PROTOCOL_VERSION,
+  isDaemonProtocolCompatible
+} from './DaemonProtocolVersion';
 export type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 export type { IDaemonClientCaps } from './DaemonClientCaps';
-export { DAEMON_CONTROL_MESSAGE_KINDS, isDaemonControlMessageKind } from './DaemonControlMessage';
-export type { DaemonControlMessage, DaemonControlMessageKind, DaemonEmptyPayload } from './DaemonControlMessage';
+export { DAEMON_CONTROL_MESSAGE_KINDS, isDaemonControlMessageKind } from './DaemonControlKinds';
+export type { DaemonControlMessageKind } from './DaemonControlKinds';
+export type { DaemonControlMessage, DaemonEmptyPayload } from './DaemonControlMessage';
 export type { IDaemonErrorMessage, IDaemonHelloAckMessage, IDaemonHelloMessage } from './DaemonControlMessage';
 export type { IDaemonPingMessage, IDaemonSubscribeMessage, IDaemonUnsubscribeMessage } from './DaemonControlMessage';
+export type {
+  IDaemonRawModeChangedMessage,
+  IDaemonSetRawModeMessage,
+  IDaemonTerminalPolicyMessage
+} from './DaemonInteractiveControl';
 export type { IDaemonPongMessage } from './DaemonPongMessage';
 export { isDaemonControlRecord, validateDaemonControlMessage } from './ControlMessageValidation';
 export { decodeDaemonControlMessage, encodeDaemonControlMessage } from './ControlFrameCodec';
@@ -39,6 +50,17 @@ export { createDaemonHello, createDaemonHelloAck, negotiateDaemonHello } from '.
 export type { DaemonHandshakeOutcome } from './DaemonHandshake';
 export type { DaemonJsonNull, DaemonJsonValue } from './DaemonJsonValue';
 export type { DaemonCommandOutcome, IDaemonCommandResult } from './DaemonCommandResult';
+export type {
+  DaemonTerminalPolicyDecision,
+  DaemonTerminalPolicyReason,
+  DaemonTerminalRequirement,
+  IDaemonTerminalPolicyResult
+} from './DaemonTerminalPolicy';
+export {
+  decodeDaemonStdinChunk,
+  encodeDaemonStdinChunk,
+  type IDaemonStdinChunk
+} from './StdinFrameCodec';
 export { DAEMON_EVENT_TYPES, isDaemonEventType, type DaemonEventType } from './DaemonEventType';
 export type { DaemonEventPrivacy, IDaemonEventEnvelope, IDaemonEventScope, IDaemonEventSource } from './DaemonEventEnvelope';
 export { isDaemonEventEnvelope, validateDaemonEventEnvelope } from './DaemonEventValidation';

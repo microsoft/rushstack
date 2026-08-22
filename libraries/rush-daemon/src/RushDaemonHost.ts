@@ -15,6 +15,7 @@ import type {
 } from '@rushstack/rush-daemon-transport';
 
 import { DaemonControlSession } from './DaemonControlSession';
+import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
@@ -31,6 +32,8 @@ export interface IRushDaemonHostOptions {
   readonly daemonVersion: string;
   /** Reports connection-level failures. */
   readonly onError?: (error: Error) => void;
+  /** Receives the request-scoped interactive broker owned by each accepted connection. */
+  readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   /** The repository root containing rush.json. */
   readonly repoRoot: string;
   /** The selected Rush version used to isolate the workspace transport. */
@@ -96,6 +99,7 @@ export class RushDaemonHost {
           const session: DaemonControlSession = new DaemonControlSession(connection, {
             daemonVersion: options.daemonVersion,
             startedAtMs,
+            onInteractiveConnection: options.onInteractiveConnection,
             onClosed: (closedSession: DaemonControlSession, error: Error | undefined) => {
               sessions.delete(closedSession);
               if (error) {

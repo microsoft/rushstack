@@ -59,5 +59,15 @@ The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global
 process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the
 integration must supply already resolved command logic that consumes `IGlobalCommandExecutionContext`, including
 `spawnChild()` for command-local subprocesses. Adapting the complete action surface remains bounded by the open
-[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) engine/action prerequisite work. Interactive
-stdin/raw-mode/PTY support, scheduling classification, and shared-build merging belong to later layers.
+[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) engine/action prerequisite work. `InteractiveRequestInputRouter` supplies the opt-in WS2.7 boundary for connection-scoped input. The WS1 stdin
+frame carries a request identifier plus untouched raw bytes; frames are serialized per request through an injected
+sink while separate requests remain isolated. Global command integrations can bind that sink directly to a spawned
+child process. Both global and phased routes stop accepting input on abort/disconnect and await input drain plus an
+acknowledged cooked-mode restoration before publishing the exact-once command result. The daemon never reads or
+mutates its own stdin or raw-mode state.
+
+Terminal width remains the immutable request-start value established by WS2.5. The thin client owns resize and
+rendering, so this layer does not forward `SIGWINCH`. Commands declaring a real controlling-terminal requirement
+receive a typed `requiresInProcess` policy result and are not executed by rushd; no pseudo-terminal is allocated or
+emulated. The future WS4 client will perform the actual in-process fallback. Scheduling classification and
+shared-build merging remain later layers.

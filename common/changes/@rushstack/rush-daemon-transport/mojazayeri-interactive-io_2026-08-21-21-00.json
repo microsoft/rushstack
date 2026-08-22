@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Serialize and backpressure asynchronous incoming frame handlers.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "mojazayeri@users.noreply.github.com"
+}

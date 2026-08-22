@@ -18,26 +18,24 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
 export class DaemonFrameConnection {
   private readonly _socket: net.Socket;
   private readonly _decoder: DaemonFrameDecoder = new DaemonFrameDecoder();
-  private _frameHandler: ((frame: IDaemonFrame) => void) | undefined;
+  private _frameHandler: ((frame: IDaemonFrame) => void | Promise<void>) | undefined;
   private _closedHandler: ((error: Error | undefined) => void) | undefined;
   private _closedError: Error | undefined;
-
+  private _receiveQueue: Promise<void> = Promise.resolve();
   public constructor(socket: net.Socket) {
     this._socket = socket;
     socket.on('data', (chunk: Buffer) => this._onData(chunk));
     socket.on('error', (error: Error) => this._onError(error));
     socket.on('close', () => this._onClose());
   }
-
-  /** Registers the frame handler invoked for each decoded frame. */
-  public onFrame(handler: (frame: IDaemonFrame) => void): void {
+  /** Registers the serialized, backpressured handler invoked for each decoded frame. */
+  public onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void {
     this._frameHandler = handler;
   }
   /** Registers the close handler, invoked at most once with the cause. */
   public onClosed(handler: (error: Error | undefined) => void): void {
     this._closedHandler = handler;
   }
-
   /** Encodes and writes a frame, resolving when the socket has drained it. @throws {@link DaemonTransportError} when closed. */
   public async sendFrameAsync(frame: IDaemonFrame): Promise<void> {
     this._assertOpen();
@@ -45,13 +43,11 @@ export class DaemonFrameConnection {
       await once(this._socket, 'drain');
     }
   }
-
   /** Half-closes the writable side and releases the socket. */
   public async closeAsync(): Promise<void> {
     this._socket.end();
     this._socket.destroySoon();
   }
-
   /** The wrapped socket, for the internal raw-write test hook. @internal */
   public get socket(): net.Socket {
     return this._socket;
@@ -73,15 +69,18 @@ export class DaemonFrameConnection {
       this._fail(error);
       return;
     }
-    for (const frame of frames) {
-      this._dispatchFrame(frame);
-    }
+    this._socket.pause();
+    this._receiveQueue = this._receiveQueue
+      .then(() => this._dispatchFramesAsync(frames))
+      .then(() => {
+        this._socket.resume();
+      })
+      .catch((error: unknown) => this._fail(error));
   }
-  private _dispatchFrame(frame: IDaemonFrame): void {
-    try {
-      this._frameHandler?.(frame);
-    } catch (error) {
-      this._fail(error);
+
+  private async _dispatchFramesAsync(frames: ReadonlyArray<IDaemonFrame>): Promise<void> {
+    for (const frame of frames) {
+      await this._frameHandler?.(frame);
     }
   }
 

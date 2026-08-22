@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonCommandResult } from './DaemonCommandResult';
+import type { DaemonTerminalRequirement } from './DaemonTerminalPolicy';
 
 /**
  * The enabled state assigned to one selected operation by a phased request.
@@ -44,6 +45,8 @@ export interface IDaemonPhasedEngineShape {
  * @beta
  */
 export interface IDaemonPhasedRequest {
+  /** Whether the command accepts request-scoped stdin bytes. */
+  readonly acceptsStdin?: boolean;
   /** The parsed phased command name. */
   readonly commandName: string;
   /** The exact warm engine shape against which the selection was resolved. */
@@ -54,6 +57,8 @@ export interface IDaemonPhasedRequest {
   readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
   /** A client-generated identifier unique within the connection. */
   readonly requestId: string;
+  /** Terminal capability needed by the resolved command. */
+  readonly terminalRequirement?: DaemonTerminalRequirement;
 }
 
 /**

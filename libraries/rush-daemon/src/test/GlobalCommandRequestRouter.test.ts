@@ -5,8 +5,14 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { SubprocessTerminator } from '@rushstack/node-core-library';
-import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import { encodeDaemonStdinChunk } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonCommandResult,
+  IDaemonSetRawModeMessage,
+  IDaemonTerminalPolicyResult
+} from '@rushstack/rush-daemon-protocol';
 
+import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
 import type { IGlobalCommandExecutionContext } from '../GlobalCommandExecutionContext';
 import type {
   IResolvedGlobalCommandRequest,
@@ -18,6 +24,10 @@ import {
   type IGlobalCommandExecutionResult,
   type IGlobalCommandRequestResult
 } from '../GlobalCommandRequestRouter';
+import {
+  InteractiveRequestInputRouter,
+  type IInteractiveRequestSession
+} from '../InteractiveRequestInputRouter';
 import { TestWorkspaceSession, TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 const TEXT_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder();
@@ -33,7 +43,9 @@ class TestGlobalCommandClient implements IGlobalCommandRequestClient {
   public readonly abortController: AbortController = new AbortController();
   public readonly chunks: IClientChunk[] = [];
   public readonly results: IDaemonCommandResult[] = [];
+  public readonly policies: IDaemonTerminalPolicyResult[] = [];
   public readonly writeOrder: Array<'chunk' | 'result'> = [];
+  public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((chunk: IClientChunk) => Promise<void>) | undefined;
   public onResultAsync: ((result: IDaemonCommandResult) => Promise<void>) | undefined;
 
@@ -55,6 +67,11 @@ class TestGlobalCommandClient implements IGlobalCommandRequestClient {
     await this.onResultAsync?.(result);
     this.results.push(result);
     this.writeOrder.push('result');
+  }
+
+  public writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void> {
+    this.policies.push(result);
+    return Promise.resolve();
   }
 }
 
@@ -592,5 +609,146 @@ describe(GlobalCommandRequestRouter.name, () => {
       secondRouter.executeAsync(request, executor, new TestGlobalCommandClient())
     ).rejects.toThrow('not resolved for this workspace session');
     expect(executor).not.toHaveBeenCalled();
+  });
+
+  it('forwards raw stdin bytes to an injected child process with backpressure', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    const inputRouter: InteractiveRequestInputRouter = new InteractiveRequestInputRouter();
+    const requestId: string = 'child-input';
+    client.interactiveSession = inputRouter.register({
+      acceptsStdin: true,
+      client: {
+        abortSignal: client.abortSignal,
+        writeRawModeControlAsync: (): Promise<void> => Promise.resolve()
+      },
+      onFailure: (error: Error) => client.abortController.abort(error),
+      requestId
+    });
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
+      requestId,
+      FIRST_CWD,
+      {},
+      80
+    );
+    const request: IResolvedGlobalCommandRequest = router.resolveRequest({
+      ...options,
+      terminal: { ...options.terminal, acceptsStdin: true }
+    });
+    let markChildStarted: (() => void) | undefined;
+    const childStarted: Promise<void> = new Promise((resolve) => {
+      markChildStarted = resolve;
+    });
+    const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+      request,
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        const child = context.spawnChild(
+          process.execPath,
+          ['-e', "process.stdin.once('data',b=>{process.stdout.write(Buffer.from(b).toString('hex'));process.exit(0)})"],
+          { forwardInput: true }
+        );
+        child.once('spawn', () => markChildStarted?.());
+        await new Promise<void>((resolve) => child.once('close', () => resolve()));
+        return { exitCode: 0 };
+      },
+      client
+    );
+    await childStarted;
+    const inputBytes: Uint8Array = Uint8Array.of(0xff, 0x00, 0x80);
+    await inputRouter.routeStdinFrameAsync(encodeDaemonStdinChunk({ chunk: inputBytes, requestId }));
+    await resultPromise;
+
+    expect(client.chunks.map(({ text }) => text).join('')).toBe('ff0080');
+  });
+
+  it('restores raw mode after output drain and before the final result', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    const lifecycleOrder: string[] = [];
+    const inputRouter: InteractiveRequestInputRouter = new InteractiveRequestInputRouter();
+    const requestId: string = 'raw-lifecycle';
+    client.interactiveSession = inputRouter.register({
+      acceptsStdin: true,
+      client: {
+        abortSignal: client.abortSignal,
+        writeRawModeControlAsync: (message: IDaemonSetRawModeMessage): Promise<void> => {
+          lifecycleOrder.push(`raw:${message.payload.enabled}`);
+          return Promise.resolve();
+        }
+      },
+      onFailure: (error: Error) => client.abortController.abort(error),
+      requestId
+    });
+    client.onWriteAsync = async (): Promise<void> => {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      lifecycleOrder.push('output');
+    };
+    client.onResultAsync = (): Promise<void> => {
+      lifecycleOrder.push('result');
+      return Promise.resolve();
+    };
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
+      requestId,
+      FIRST_CWD,
+      {},
+      80
+    );
+
+    await router.executeAsync(
+      router.resolveRequest({
+        ...options,
+        terminal: { ...options.terminal, acceptsStdin: true }
+      }),
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        await context.interactiveInput?.setRawModeAsync(true);
+        context.terminal.writeLine('prompt');
+        return { exitCode: 0 };
+      },
+      client
+    );
+
+    expect(lifecycleOrder).toEqual(['raw:true', 'output', 'raw:false', 'result']);
+  });
+
+  it('signals typed in-process fallback without executing a PTY-only command', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    const executor: jest.Mock<Promise<IGlobalCommandExecutionResult>, [IGlobalCommandExecutionContext]> =
+      jest.fn(async (context: IGlobalCommandExecutionContext) => {
+        void context;
+        return { exitCode: 0 };
+      });
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
+      'pty-only',
+      FIRST_CWD,
+      {},
+      80
+    );
+
+    await expect(
+      router.executeAsync(
+        router.resolveRequest({
+          ...options,
+          terminal: { ...options.terminal, terminalRequirement: 'controllingTerminal' }
+        }),
+        executor,
+        client
+      )
+    ).rejects.toBeInstanceOf(DaemonRequiresInProcessError);
+    expect(client.policies).toEqual([
+      {
+        decision: 'requiresInProcess',
+        reason: 'controllingTerminalRequired',
+        requestId: 'pty-only'
+      }
+    ]);
+    expect(executor).not.toHaveBeenCalled();
+    expect(client.results).toHaveLength(0);
   });
 });

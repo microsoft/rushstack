@@ -4,6 +4,23 @@
 /// <reference types="node" preserve="true" />
 
 export {
+  type IDaemonInteractiveConnection,
+  type IDaemonInteractiveRequestOptions
+} from './DaemonInteractiveConnection';
+export {
+  DaemonRequiresInProcessError,
+  evaluateDaemonTerminalPolicy
+} from './DaemonTerminalPolicy';
+export {
+  type IInteractiveRequestControlClient,
+  type IInteractiveRequestInputSink,
+  type IInteractiveRequestRegistrationOptions,
+  type IInteractiveRequestSession,
+  InteractiveInputRoutingError,
+  type InteractiveInputRoutingErrorCode,
+  InteractiveRequestInputRouter
+} from './InteractiveRequestInputRouter';
+export {
   type IRequestLease,
   type IRequestSchedulerAcquireOptions,
   RequestExclusivityClass,

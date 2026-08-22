@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add request-scoped stdin, raw-mode control, and terminal fallback contracts.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "mojazayeri@users.noreply.github.com"
+}

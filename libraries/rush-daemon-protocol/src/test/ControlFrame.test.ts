@@ -14,7 +14,15 @@ const DAEMON_VERSION: string = '5.178.1';
 const MESSAGES: readonly DaemonControlMessage[] = [
   { kind: 'hello', payload: { protocolVersion: DAEMON_PROTOCOL_VERSION } },
   { kind: 'helloAck', payload: { protocolVersion: DAEMON_PROTOCOL_VERSION, sessionId: 's-1' } },
-  { kind: 'subscribe', payload: { isTTY: true, verbosity: 'verbose', columns: COLUMNS } },
+  {
+    kind: 'subscribe',
+    payload: {
+      isTTY: true,
+      supportsInteractiveIO: true,
+      verbosity: 'verbose',
+      columns: COLUMNS
+    }
+  },
   { kind: 'unsubscribe', payload: {} },
   { kind: 'ping', payload: {} },
   { kind: 'pong', payload: { uptimeMs: UPTIME_MS } },

@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonCommandResult,
+  IDaemonTerminalPolicyResult
+} from '@rushstack/rush-daemon-protocol';
 
 import { createGlobalCommandResult } from './CommandResultPolicy';
 import type { IGlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
@@ -13,6 +16,11 @@ import {
   validateResolvedGlobalCommandRequest
 } from './GlobalCommandRequest';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+import {
+  DaemonRequiresInProcessError,
+  evaluateDaemonTerminalPolicy
+} from './DaemonTerminalPolicy';
+import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import type { IWorkspaceSession } from './WorkspaceSession';
 
 /**
@@ -72,6 +80,19 @@ export class GlobalCommandRequestRouter {
     client: IGlobalCommandRequestClient
   ): Promise<IGlobalCommandRequestResult> {
     validateResolvedGlobalCommandRequest(request, this.#workspaceSession);
+    const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
+      request,
+      client
+    );
+    const policy: IDaemonTerminalPolicyResult = evaluateDaemonTerminalPolicy(
+      request.requestId,
+      request.terminal.terminalRequirement
+    );
+    if (policy.decision === 'requiresInProcess') {
+      await interactiveSession?.finishAsync();
+      await client.writeTerminalPolicyAsync(policy);
+      throw new DaemonRequiresInProcessError(policy);
+    }
     const context: GlobalCommandExecutionContext = new GlobalCommandExecutionContext(
       request,
       client,
@@ -103,6 +124,11 @@ export class GlobalCommandRequestRouter {
     } catch (error) {
       cleanupError = error;
     }
+    try {
+      await interactiveSession?.finishAsync();
+    } catch (error) {
+      cleanupError = combineExecutionAndCleanupErrors(cleanupError, error);
+    }
     const combinedError: unknown = combineExecutionAndCleanupErrors(executionError, cleanupError);
     let result: IDaemonCommandResult;
     try {
@@ -119,6 +145,20 @@ export class GlobalCommandRequestRouter {
         exitCode: undefined,
         requestId: request.requestId
       });
+    }
+
+    function validateInteractiveSession(
+      resolvedRequest: IResolvedGlobalCommandRequest,
+      requestClient: IGlobalCommandRequestClient
+    ): IInteractiveRequestSession | undefined {
+      const session: IInteractiveRequestSession | undefined = requestClient.interactiveSession;
+      if (session && session.requestId !== resolvedRequest.requestId) {
+        throw new Error('The interactive input session does not belong to the global command request.');
+      }
+      if (resolvedRequest.terminal.acceptsStdin === true && !session) {
+        throw new Error('The interactive global command does not have a registered input session.');
+      }
+      return session;
     }
     await client.writeResultAsync(result);
     return result;

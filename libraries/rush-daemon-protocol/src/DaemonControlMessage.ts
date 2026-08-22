@@ -2,6 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonClientCaps } from './DaemonClientCaps';
+import type {
+  IDaemonRawModeChangedMessage,
+  IDaemonSetRawModeMessage,
+  IDaemonTerminalPolicyMessage
+} from './DaemonInteractiveControl';
 import type { IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
@@ -66,30 +71,7 @@ export type DaemonControlMessage =
   | IDaemonUnsubscribeMessage
   | IDaemonPingMessage
   | IDaemonPongMessage
-  | IDaemonErrorMessage;
-
-/**
- * The runtime list of control message `kind` discriminants, from which
- * {@link DaemonControlMessageKind} is derived (single source of truth).
- *
- * @beta
- */
-export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
-  'hello',
-  'helloAck',
-  'subscribe',
-  'unsubscribe',
-  'ping',
-  'pong',
-  'error'
-] = ['hello', 'helloAck', 'subscribe', 'unsubscribe', 'ping', 'pong', 'error'];
-
-/** The union of control message `kind` discriminants, derived from the runtime list. @beta */
-export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
-
-const CONTROL_KIND_SET: ReadonlySet<string> = new Set<string>(DAEMON_CONTROL_MESSAGE_KINDS);
-
-/** Returns `true` when `value` is a control message `kind`. @beta */
-export function isDaemonControlMessageKind(value: unknown): value is DaemonControlMessageKind {
-  return typeof value === 'string' && CONTROL_KIND_SET.has(value);
-}
+  | IDaemonErrorMessage
+  | IDaemonSetRawModeMessage
+  | IDaemonRawModeChangedMessage
+  | IDaemonTerminalPolicyMessage;

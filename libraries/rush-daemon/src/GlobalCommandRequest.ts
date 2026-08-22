@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { EnvironmentMap } from '@rushstack/node-core-library';
+import type { DaemonTerminalRequirement } from '@rushstack/rush-daemon-protocol';
 
 import type { IWorkspaceSession } from './WorkspaceSession';
 
@@ -14,8 +15,10 @@ import type { IWorkspaceSession } from './WorkspaceSession';
  * @beta
  */
 export interface IGlobalCommandTerminalProperties {
+  readonly acceptsStdin?: boolean;
   readonly columns: number | undefined;
   readonly isTTY: boolean;
+  readonly terminalRequirement?: DaemonTerminalRequirement;
   readonly supportsColor: boolean;
 }
 
@@ -170,9 +173,22 @@ function resolveTerminalProperties(
   if (typeof terminal.isTTY !== 'boolean' || typeof terminal.supportsColor !== 'boolean') {
     throw new Error('Global command terminal TTY and color properties must be boolean values.');
   }
+  if (terminal.acceptsStdin !== undefined && typeof terminal.acceptsStdin !== 'boolean') {
+    throw new Error('Global command terminal acceptsStdin must be a boolean value.');
+  }
+  if (
+    terminal.terminalRequirement !== undefined &&
+    terminal.terminalRequirement !== 'none' &&
+    terminal.terminalRequirement !== 'interactiveInput' &&
+    terminal.terminalRequirement !== 'controllingTerminal'
+  ) {
+    throw new Error('Global command terminal requirement is not recognized.');
+  }
   return Object.freeze({
+    acceptsStdin: terminal.acceptsStdin ?? false,
     columns: terminal.columns,
     isTTY: terminal.isTTY,
+    terminalRequirement: terminal.terminalRequirement ?? 'none',
     supportsColor: terminal.supportsColor
   });
 }
