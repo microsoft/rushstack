@@ -25,12 +25,12 @@ interface INavigationFile {
 export class RushStackFeature extends MarkdownDocumenterFeature {
   private _apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
 
-  public onInitialized(): void {
+  public override onInitialized(): void {
     // eslint-disable-next-line no-console
     console.log('RushStackFeature: onInitialized()');
   }
 
-  public onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void {
+  public override onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void {
     // Add the Jekyll header
     const header: string = [
       '---',
@@ -45,7 +45,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
     this._apiItemsWithPages.add(eventArgs.apiItem);
   }
 
-  public onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
+  public override onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
     const navigationFile: INavigationFile = {
       api_nav: [
         {

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update class field declarations for ES2022 emit semantics.",
+      "type": "none"
+    }
+  ]
+}

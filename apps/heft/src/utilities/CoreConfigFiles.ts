@@ -59,12 +59,10 @@ export interface IHeftConfigurationJson {
   phasesByName?: IHeftConfigurationJsonPhases;
 }
 
-export class CoreConfigFiles {
-  private static _heftConfigFileLoader: ProjectConfigurationFile<IHeftConfigurationJson> | undefined;
-  private static _nodeServiceConfigurationLoader:
-    | ProjectConfigurationFile<INodeServicePluginConfiguration>
-    | undefined;
+let _heftConfigFileLoader: ProjectConfigurationFile<IHeftConfigurationJson> | undefined;
+let _nodeServiceConfigurationLoader: ProjectConfigurationFile<INodeServicePluginConfiguration> | undefined;
 
+export class CoreConfigFiles {
   public static heftConfigurationProjectRelativeFilePath: string = `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`;
 
   public static nodeServiceConfigurationProjectRelativeFilePath: string = `${Constants.projectConfigFolderName}/${Constants.nodeServiceConfigurationFilename}`;
@@ -77,7 +75,7 @@ export class CoreConfigFiles {
     projectPath: string,
     rigConfig?: IRigConfig | undefined
   ): Promise<IHeftConfigurationJson> {
-    if (!CoreConfigFiles._heftConfigFileLoader) {
+    if (!_heftConfigFileLoader) {
       let heftPluginPackageFolder: string | undefined;
 
       const pluginPackageResolver: (
@@ -111,7 +109,8 @@ export class CoreConfigFiles {
       };
 
       const schemaObject: object = await import('../schemas/heft.schema.json');
-      CoreConfigFiles._heftConfigFileLoader = new ProjectConfigurationFile<IHeftConfigurationJson>({
+      // eslint-disable-next-line require-atomic-updates
+      _heftConfigFileLoader = new ProjectConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
         jsonSchemaObject: schemaObject,
         propertyInheritanceDefaults: {
@@ -135,8 +134,7 @@ export class CoreConfigFiles {
       });
     }
 
-    const heftConfigFileLoader: ProjectConfigurationFile<IHeftConfigurationJson> =
-      CoreConfigFiles._heftConfigFileLoader;
+    const heftConfigFileLoader: ProjectConfigurationFile<IHeftConfigurationJson> = _heftConfigFileLoader;
 
     let configurationFile: IHeftConfigurationJson;
     try {
@@ -231,17 +229,17 @@ export class CoreConfigFiles {
     projectPath: string,
     rigConfig?: IRigConfig | undefined
   ): Promise<INodeServicePluginConfiguration | undefined> {
-    if (!CoreConfigFiles._nodeServiceConfigurationLoader) {
+    if (!_nodeServiceConfigurationLoader) {
       const schemaObject: object = await import('../schemas/node-service.schema.json');
-      CoreConfigFiles._nodeServiceConfigurationLoader =
-        new ProjectConfigurationFile<INodeServicePluginConfiguration>({
-          projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
-          jsonSchemaObject: schemaObject
-        });
+      // eslint-disable-next-line require-atomic-updates
+      _nodeServiceConfigurationLoader = new ProjectConfigurationFile<INodeServicePluginConfiguration>({
+        projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
+        jsonSchemaObject: schemaObject
+      });
     }
 
     const configurationFile: INodeServicePluginConfiguration | undefined =
-      await CoreConfigFiles._nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+      await _nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
         terminal,
         projectPath,
         rigConfig

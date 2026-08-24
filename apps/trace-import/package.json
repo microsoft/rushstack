@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/trace-import",
-  "version": "0.7.19",
+  "version": "0.7.25",
   "description": "CLI tool for understanding how require() and \"import\" statements get resolved",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/trace-import"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "bin": {
     "trace-import": "./bin/trace-import"

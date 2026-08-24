@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/heft-vscode-extension-plugin",
-  "version": "1.1.19",
+  "version": "1.1.25",
   "description": "Heft plugin for building vscode extensions.",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-vscode-extension-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
@@ -33,7 +36,7 @@
     }
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.2.19"
+    "@rushstack/heft": "^1.2.25"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

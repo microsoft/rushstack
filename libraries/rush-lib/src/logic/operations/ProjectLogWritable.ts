@@ -119,7 +119,7 @@ export class JsonLFileWritable extends TerminalWritable {
     this._writer.write(JSON.stringify(chunk) + '\n');
   }
 
-  protected onClose(): void {
+  protected override onClose(): void {
     if (this._writer) {
       try {
         this._writer.close();
@@ -176,7 +176,7 @@ export class SplitLogFileWritable extends TerminalWritable {
     }
   }
 
-  protected onClose(): void {
+  protected override onClose(): void {
     if (this._logWriter) {
       try {
         this._logWriter.close();

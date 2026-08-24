@@ -1,0 +1,70 @@
+# Pipeline: rushstack-esrp-publish (AzDO project GitHubProjectsPublish)
+# Trigger: Automatically when a version bump PR from the non-Rush bump pipeline (definition 10) merges to main.
+# Purpose: Publish the tarballs packed by that bump pipeline run to the npm feed via ESRP.
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - '**/CHANGELOG.md'
+      - 'common/config/rush/version-policies.json'
+
+pr: none
+
+parameters:
+  - name: publishToNpmFeed
+    displayName: 'Publish to npm feed'
+    type: boolean
+    default: true
+  - name: NpmTag
+    displayName: 'NPM dist-tag'
+    type: string
+    default: latest
+  - name: DryRun
+    displayName: 'Dry run'
+    type: boolean
+    default: false
+  - name: CommitShaOverride
+    displayName: 'Commit SHA Override (for testing)'
+    type: string
+    default: $(Build.SourceVersion)
+
+variables:
+  - name: FORCE_COLOR
+    value: 1
+  - name: PackagesPath
+    value: $(Pipeline.Workspace)/packages
+
+resources:
+  repositories:
+    - repository: 1esPipelines
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+    - repository: publishConfig
+      type: git
+      name: GitHubProjectsPublish/GitHubProjectsPublish
+      ref: refs/heads/main
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    settings:
+      networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3,DefaultDeny
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      os: windows
+    stages:
+      - template: /common/config/azure-pipelines/templates/esrp-publish-stages.yaml@self
+        parameters:
+          # https://dev.azure.com/RushStack/GitHubProjects/_build?definitionId=10
+          BumpPipelineId: 10
+          BumpPipelineProject: GitHubProjects
+          StageNameSuffix: Rushstack
+          DisplayNameSuffix: Rushstack
+          PublishToNpmFeed: ${{ parameters.publishToNpmFeed }}
+          NpmTag: ${{ parameters.NpmTag }}
+          DryRun: ${{ parameters.DryRun }}
+          CommitShaOverride: ${{ parameters.CommitShaOverride }}

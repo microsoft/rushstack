@@ -147,7 +147,6 @@ export class FileError extends Error {
     readonly projectFolder: string;
     // @internal (undocumented)
     static _sanitizedEnvironmentVariable: string | undefined;
-    // @override
     toString(): string;
 }
 
@@ -534,7 +533,7 @@ export interface INodePackageJson {
 export class InternalError extends Error {
     constructor(message: string);
     static breakInDebugger: boolean;
-    // @override (undocumented)
+    // (undocumented)
     toString(): string;
     readonly unformattedMessage: string;
 }
@@ -969,6 +968,7 @@ export class Text {
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
     static readLinesFromIterable(iterable: Iterable<string | Buffer | null>, options?: IReadLinesFromIterableOptions): Generator<string>;
     static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
+    // @deprecated
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
     static reverse(s: string): string;
     static splitByNewLines(s: undefined): undefined;

@@ -1,12 +1,15 @@
 {
   "name": "@rushstack/rush-resolver-cache-plugin",
-  "version": "5.177.2",
+  "version": "5.178.1",
   "description": "A Rush plugin that generates a resolver cache file after successful install.",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "rush-plugins/rush-resolver-cache-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

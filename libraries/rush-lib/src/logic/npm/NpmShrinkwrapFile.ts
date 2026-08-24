@@ -67,18 +67,15 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new NpmShrinkwrapFile(JSON.parse(data));
   }
 
-  /** @override */
-  public getTempProjectNames(): ReadonlyArray<string> {
+  public override getTempProjectNames(): ReadonlyArray<string> {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
-  /** @override */
-  protected serialize(): string {
+  protected override serialize(): string {
     return JsonFile.stringify(this._shrinkwrapJson);
   }
 
-  /** @override */
-  protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
+  protected override getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     // First, check under tempProjectName, as this is the first place we look during linking.
     const dependencyJson: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
       this._shrinkwrapJson.dependencies,
@@ -96,9 +93,8 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @param dependencyName the name of the dependency to get a version for
    * @param tempProjectName the name of the temp project to check for this dependency
    * @param versionRange Not used, just exists to satisfy abstract API contract
-   * @override
    */
-  protected tryEnsureDependencyVersion(
+  protected override tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
   ): DependencySpecifier | undefined {
@@ -124,15 +120,13 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return DependencySpecifier.parseWithCache(dependencySpecifier.packageName, dependencyJson.version);
   }
 
-  /** @override */
-  public getProjectShrinkwrap(
+  public override getProjectShrinkwrap(
     project: RushConfigurationProject
   ): BaseProjectShrinkwrapFile<NpmShrinkwrapFile> | undefined {
     return undefined;
   }
 
-  /** @override */
-  public async isWorkspaceProjectModifiedAsync(
+  public override async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
     subspace: Subspace,
     variant: string | undefined

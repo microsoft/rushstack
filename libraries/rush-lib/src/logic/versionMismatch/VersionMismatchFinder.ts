@@ -78,7 +78,7 @@ export class VersionMismatchFinder {
       truncateLongPackageNameLists
     } = options ?? {};
 
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
+    _checkForInconsistentVersions(rushConfiguration, {
       variant,
       subspace,
       printAsJson,
@@ -95,7 +95,7 @@ export class VersionMismatchFinder {
   ): void {
     const { variant, subspace = rushConfiguration.defaultSubspace } = options ?? {};
 
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
+    _checkForInconsistentVersions(rushConfiguration, {
       subspace,
       variant,
       terminal,
@@ -127,62 +127,6 @@ export class VersionMismatchFinder {
     }
 
     return new VersionMismatchFinder(projects, commonVersions.allowedAlternativeVersions);
-  }
-
-  private static _checkForInconsistentVersions(
-    rushConfiguration: RushConfiguration,
-    options: {
-      isRushCheckCommand: boolean;
-      subspace: Subspace;
-      variant: string | undefined;
-      printAsJson?: boolean | undefined;
-      terminal: ITerminal;
-      truncateLongPackageNameLists?: boolean | undefined;
-    }
-  ): void {
-    const { variant, isRushCheckCommand, printAsJson, subspace, truncateLongPackageNameLists, terminal } =
-      options;
-    if (subspace.shouldEnsureConsistentVersions(variant) || isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-        rushConfiguration,
-        options
-      );
-
-      if (printAsJson) {
-        mismatchFinder.printAsJson();
-      } else {
-        mismatchFinder.print(truncateLongPackageNameLists);
-
-        if (mismatchFinder.numberOfMismatches > 0) {
-          // eslint-disable-next-line no-console
-          console.log(
-            Colorize.red(
-              `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
-                subspace?.subspaceName ? `in subspace: ${subspace?.subspaceName}` : ''
-              }`
-            )
-          );
-          rushConfiguration.customTipsConfiguration._showErrorTip(
-            terminal,
-            CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
-          );
-          if (!isRushCheckCommand && truncateLongPackageNameLists) {
-            // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
-            // eslint-disable-next-line no-console
-            console.log(
-              'For more detailed reporting about these version mismatches, use the "rush check --verbose" command.'
-            );
-          }
-
-          throw new AlreadyReportedError();
-        } else {
-          if (isRushCheckCommand) {
-            // eslint-disable-next-line no-console
-            console.log(Colorize.green(`Found no mis-matching dependencies!`));
-          }
-        }
-      }
-    }
   }
 
   public get mismatches(): ReadonlyMap<string, ReadonlyMap<string, readonly VersionMismatchFinderEntity[]>> {
@@ -349,5 +293,61 @@ export class VersionMismatchFinder {
       });
     }
     return keys;
+  }
+}
+
+function _checkForInconsistentVersions(
+  rushConfiguration: RushConfiguration,
+  options: {
+    isRushCheckCommand: boolean;
+    subspace: Subspace;
+    variant: string | undefined;
+    printAsJson?: boolean | undefined;
+    terminal: ITerminal;
+    truncateLongPackageNameLists?: boolean | undefined;
+  }
+): void {
+  const { variant, isRushCheckCommand, printAsJson, subspace, truncateLongPackageNameLists, terminal } =
+    options;
+  if (subspace.shouldEnsureConsistentVersions(variant) || isRushCheckCommand) {
+    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+      rushConfiguration,
+      options
+    );
+
+    if (printAsJson) {
+      mismatchFinder.printAsJson();
+    } else {
+      mismatchFinder.print(truncateLongPackageNameLists);
+
+      if (mismatchFinder.numberOfMismatches > 0) {
+        // eslint-disable-next-line no-console
+        console.log(
+          Colorize.red(
+            `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
+              subspace?.subspaceName ? `in subspace: ${subspace?.subspaceName}` : ''
+            }`
+          )
+        );
+        rushConfiguration.customTipsConfiguration._showErrorTip(
+          terminal,
+          CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
+        );
+        if (!isRushCheckCommand && truncateLongPackageNameLists) {
+          // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
+          // eslint-disable-next-line no-console
+          console.log(
+            'For more detailed reporting about these version mismatches, use the "rush check --verbose" command.'
+          );
+        }
+
+        throw new AlreadyReportedError();
+      } else {
+        if (isRushCheckCommand) {
+          // eslint-disable-next-line no-console
+          console.log(Colorize.green(`Found no mis-matching dependencies!`));
+        }
+      }
+    }
   }
 }

@@ -317,6 +317,27 @@ describe('RushCommandLineParser', () => {
       });
     });
 
+    describe('in repo plugin that produces no operations', () => {
+      it('succeeds when a plugin returns an empty operation set', async () => {
+        // Regression test: `@rushstack/rush-buildxl-graph-plugin` writes the build graph to disk in
+        // response to `--drop-graph` and then returns an empty operation set, because there is
+        // nothing left for Rush to execute. An iteration with zero operations resolves to
+        // `OperationStatus.NoOp`, which must not be reported as a failure.
+        const repoName: string = 'clearOperationsAndRunBuildActionRepo';
+        const { parser, spawnMock } = await getCommandLineParserInstanceAsync(repoName, 'build');
+
+        /**
+         * The plugin is copied into the autoinstaller folder using an option in /config/heft.json
+         */
+        jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
+
+        await expect(parser.executeAsync()).resolves.toEqual(true);
+
+        // Nothing should have been executed, since the plugin removed every operation.
+        expect(spawnMock.mock.calls.length).toEqual(0);
+      });
+    });
+
     describe('in repo plugin with build command', () => {
       describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {

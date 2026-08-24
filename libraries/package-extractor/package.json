@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-extractor",
-  "version": "0.13.7",
+  "version": "0.13.13",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -31,6 +31,9 @@
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/package-extractor"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",

@@ -77,17 +77,14 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
     this._newlineRegex = new RegExp(`${Text.escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
   }
 
-  /** @override */
   public get supportsColor(): boolean {
     return this._parentTerminalProvider.supportsColor;
   }
 
-  /** @override */
   public get eolCharacter(): string {
     return this._parentTerminalProvider.eolCharacter;
   }
 
-  /** @override */
   public write(data: string, severity: TerminalProviderSeverity): void {
     // We need to track newlines to ensure that the prefix is added to each line
     let currentIndex: number = 0;

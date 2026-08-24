@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.58.9",
+  "version": "7.59.0",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -23,6 +23,9 @@
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/api-extractor"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://api-extractor.com",
   "main": "./lib-commonjs/index.js",
@@ -77,7 +80,7 @@
     "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.19",
+    "@rushstack/heft": "1.2.23",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.7.1",
     "decoupled-local-node-rig": "workspace:*",

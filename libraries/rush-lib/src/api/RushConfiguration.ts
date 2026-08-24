@@ -219,14 +219,14 @@ export interface ITryFindRushJsonLocationOptions {
   startingFolder?: string; // Defaults to cwd
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"
  * configuration file.
  * @public
  */
 export class RushConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   /**
@@ -760,7 +760,7 @@ export class RushConfiguration {
       )
     );
 
-    RushConfiguration._validateCommonRushConfigFolder(
+    _validateCommonRushConfigFolder(
       this.commonRushConfigFolder,
       this.packageManagerWrapper,
       this.experimentsConfiguration,
@@ -933,10 +933,7 @@ export class RushConfiguration {
     const usedTempNames: Set<string> = new Set();
     for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
       const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
-      const tempProjectName: string | undefined = RushConfiguration._generateTempNameForProject(
-        projectJson,
-        usedTempNames
-      );
+      const tempProjectName: string | undefined = _generateTempNameForProject(projectJson, usedTempNames);
 
       let subspace: Subspace | undefined = undefined;
       if (this.subspacesFeatureEnabled) {
@@ -1043,7 +1040,7 @@ export class RushConfiguration {
       }
     }
 
-    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
+    _jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
 
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
@@ -1103,118 +1100,6 @@ export class RushConfiguration {
 
     // no match
     return undefined;
-  }
-
-  /**
-   * This generates the unique names that are used to create temporary projects
-   * in the Rush common folder.
-   * NOTE: sortedProjectJsons is sorted by the caller.
-   */
-  private static _generateTempNameForProject(
-    projectJson: IRushConfigurationProjectJson,
-    usedTempNames: Set<string>
-  ): string {
-    // If the name is "@ms/MyProject", extract the "MyProject" part
-    const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
-
-    // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
-    // there is a naming conflict
-    let counter: number = 0;
-    let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
-    while (usedTempNames.has(tempProjectName)) {
-      ++counter;
-      tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
-    }
-    usedTempNames.add(tempProjectName);
-
-    return tempProjectName;
-  }
-
-  /**
-   * If someone adds a config file in the "common/rush/config" folder, it would be a bad
-   * experience for Rush to silently ignore their file simply because they misspelled the
-   * filename, or maybe it's an old format that's no longer supported.  The
-   * _validateCommonRushConfigFolder() function makes sure that this folder only contains
-   * recognized config files.
-   */
-  private static _validateCommonRushConfigFolder(
-    commonRushConfigFolder: string,
-    packageManagerWrapper: PackageManager,
-    experiments: ExperimentsConfiguration,
-    subspacesFeatureEnabled: boolean
-  ): void {
-    if (!FileSystem.exists(commonRushConfigFolder)) {
-      // eslint-disable-next-line no-console
-      console.log(`Creating folder: ${commonRushConfigFolder}`);
-      FileSystem.ensureFolder(commonRushConfigFolder);
-      return;
-    }
-
-    for (const filename of FileSystem.readFolderItemNames(commonRushConfigFolder)) {
-      // Ignore things that aren't actual files
-      const stat: FileSystemStats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
-      if (!stat.isFile() && !stat.isSymbolicLink()) {
-        continue;
-      }
-
-      // Ignore harmless file extensions
-      const fileExtension: string = path.extname(filename);
-      if (['.bak', '.disabled', '.md', '.old', '.orig'].indexOf(fileExtension) >= 0) {
-        continue;
-      }
-
-      // Check if there are prohibited files when subspaces is enabled
-      if (subspacesFeatureEnabled) {
-        if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
-          throw new Error(
-            'When the subspaces feature is enabled, a separate lockfile is stored in each subspace folder. ' +
-              `To avoid confusion, remove this file: ${commonRushConfigFolder}/${filename}`
-          );
-        }
-      }
-
-      // Ignore hidden files such as ".DS_Store"
-      if (filename.startsWith('.')) {
-        continue;
-      }
-
-      if (filename.startsWith('deploy-') && fileExtension === '.json') {
-        // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
-        continue;
-      }
-
-      const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
-
-      // Add the shrinkwrap filename for the package manager to the known set.
-      knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
-
-      // If the package manager is pnpm, then also add the pnpm file to the known set.
-      if (packageManagerWrapper.packageManager === 'pnpm') {
-        const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
-        knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
-      }
-
-      // Is the filename something we know?  If not, report an error.
-      if (!knownSet.has(filename.toUpperCase())) {
-        throw new Error(
-          `An unrecognized file "${filename}" was found in the Rush config folder:` +
-            ` ${commonRushConfigFolder}`
-        );
-      }
-    }
-
-    const pinnedVersionsFilename: string = path.join(
-      commonRushConfigFolder,
-      RushConstants.pinnedVersionsFilename
-    );
-    if (FileSystem.exists(pinnedVersionsFilename)) {
-      throw new Error(
-        'The "pinned-versions.json" config file is no longer supported;' +
-          ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.' +
-          ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n` +
-          pinnedVersionsFilename
-      );
-    }
   }
 
   /**
@@ -1597,5 +1482,117 @@ export class RushConfiguration {
         throw e;
       }
     }
+  }
+}
+
+/**
+ * This generates the unique names that are used to create temporary projects
+ * in the Rush common folder.
+ * NOTE: sortedProjectJsons is sorted by the caller.
+ */
+function _generateTempNameForProject(
+  projectJson: IRushConfigurationProjectJson,
+  usedTempNames: Set<string>
+): string {
+  // If the name is "@ms/MyProject", extract the "MyProject" part
+  const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
+
+  // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
+  // there is a naming conflict
+  let counter: number = 0;
+  let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
+  while (usedTempNames.has(tempProjectName)) {
+    ++counter;
+    tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
+  }
+  usedTempNames.add(tempProjectName);
+
+  return tempProjectName;
+}
+
+/**
+ * If someone adds a config file in the "common/rush/config" folder, it would be a bad
+ * experience for Rush to silently ignore their file simply because they misspelled the
+ * filename, or maybe it's an old format that's no longer supported.  The
+ * _validateCommonRushConfigFolder() function makes sure that this folder only contains
+ * recognized config files.
+ */
+function _validateCommonRushConfigFolder(
+  commonRushConfigFolder: string,
+  packageManagerWrapper: PackageManager,
+  experiments: ExperimentsConfiguration,
+  subspacesFeatureEnabled: boolean
+): void {
+  if (!FileSystem.exists(commonRushConfigFolder)) {
+    // eslint-disable-next-line no-console
+    console.log(`Creating folder: ${commonRushConfigFolder}`);
+    FileSystem.ensureFolder(commonRushConfigFolder);
+    return;
+  }
+
+  for (const filename of FileSystem.readFolderItemNames(commonRushConfigFolder)) {
+    // Ignore things that aren't actual files
+    const stat: FileSystemStats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
+    if (!stat.isFile() && !stat.isSymbolicLink()) {
+      continue;
+    }
+
+    // Ignore harmless file extensions
+    const fileExtension: string = path.extname(filename);
+    if (['.bak', '.disabled', '.md', '.old', '.orig'].indexOf(fileExtension) >= 0) {
+      continue;
+    }
+
+    // Check if there are prohibited files when subspaces is enabled
+    if (subspacesFeatureEnabled) {
+      if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
+        throw new Error(
+          'When the subspaces feature is enabled, a separate lockfile is stored in each subspace folder. ' +
+            `To avoid confusion, remove this file: ${commonRushConfigFolder}/${filename}`
+        );
+      }
+    }
+
+    // Ignore hidden files such as ".DS_Store"
+    if (filename.startsWith('.')) {
+      continue;
+    }
+
+    if (filename.startsWith('deploy-') && fileExtension === '.json') {
+      // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
+      continue;
+    }
+
+    const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
+
+    // Add the shrinkwrap filename for the package manager to the known set.
+    knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
+
+    // If the package manager is pnpm, then also add the pnpm file to the known set.
+    if (packageManagerWrapper.packageManager === 'pnpm') {
+      const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
+      knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
+    }
+
+    // Is the filename something we know?  If not, report an error.
+    if (!knownSet.has(filename.toUpperCase())) {
+      throw new Error(
+        `An unrecognized file "${filename}" was found in the Rush config folder:` +
+          ` ${commonRushConfigFolder}`
+      );
+    }
+  }
+
+  const pinnedVersionsFilename: string = path.join(
+    commonRushConfigFolder,
+    RushConstants.pinnedVersionsFilename
+  );
+  if (FileSystem.exists(pinnedVersionsFilename)) {
+    throw new Error(
+      'The "pinned-versions.json" config file is no longer supported;' +
+        ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.' +
+        ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n` +
+        pinnedVersionsFilename
+    );
   }
 }

@@ -60,8 +60,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     this._fileUrlPath = options.fileUrlPath;
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiDeclaredItemOptions>,
     context: DeserializerContext,
     jsonObject: IApiDeclaredItemJson
@@ -135,8 +134,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     return excerpt;
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void {
+  public override serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void {
     super.serializeInto(jsonObject);
     jsonObject.excerptTokens = this.excerptTokens.map((x) => {
       const excerptToken: IExcerptToken = { kind: x.kind, text: x.text };

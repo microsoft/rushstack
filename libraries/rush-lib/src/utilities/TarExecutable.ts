@@ -37,7 +37,7 @@ export class TarExecutable {
   public static async tryInitializeAsync(terminal: ITerminal): Promise<TarExecutable | undefined> {
     terminal.writeVerboseLine('Trying to find "tar" binary');
     const tarExecutablePath: string | undefined =
-      EnvironmentConfiguration.tarBinaryPath || (await TarExecutable._tryFindTarExecutablePathAsync());
+      EnvironmentConfiguration.tarBinaryPath || (await _tryFindTarExecutablePathAsync());
     if (!tarExecutablePath) {
       terminal.writeVerboseLine('"tar" was not found on the PATH');
       return undefined;
@@ -173,22 +173,22 @@ export class TarExecutable {
 
     return tarExitCode;
   }
+}
 
-  private static async _tryFindTarExecutablePathAsync(): Promise<string | undefined> {
-    if (IS_WINDOWS) {
-      // If we're running on Windows, first try to use the OOB tar executable. If
-      // we're running in the Git Bash, the tar executable on the PATH doesn't handle
-      // Windows file paths correctly.
-      // eslint-disable-next-line dot-notation
-      const windowsFolderPath: string | undefined = process.env['WINDIR'];
-      if (windowsFolderPath) {
-        const defaultWindowsTarExecutablePath: string = `${windowsFolderPath}\\system32\\tar.exe`;
-        if (await FileSystem.existsAsync(defaultWindowsTarExecutablePath)) {
-          return defaultWindowsTarExecutablePath;
-        }
+async function _tryFindTarExecutablePathAsync(): Promise<string | undefined> {
+  if (IS_WINDOWS) {
+    // If we're running on Windows, first try to use the OOB tar executable. If
+    // we're running in the Git Bash, the tar executable on the PATH doesn't handle
+    // Windows file paths correctly.
+    // eslint-disable-next-line dot-notation
+    const windowsFolderPath: string | undefined = process.env['WINDIR'];
+    if (windowsFolderPath) {
+      const defaultWindowsTarExecutablePath: string = `${windowsFolderPath}\\system32\\tar.exe`;
+      if (await FileSystem.existsAsync(defaultWindowsTarExecutablePath)) {
+        return defaultWindowsTarExecutablePath;
       }
     }
-
-    return Executable.tryResolve('tar');
   }
+
+  return Executable.tryResolve('tar');
 }

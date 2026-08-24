@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix cross-subspace `workspace:*` dependency failures with pnpm 11.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

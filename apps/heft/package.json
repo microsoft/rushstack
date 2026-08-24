@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "1.2.19",
+  "version": "1.2.25",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -18,7 +18,7 @@
     "directory": "apps/heft"
   },
   "engines": {
-    "node": ">=10.13.0"
+    "node": ">=20.9.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "./lib-commonjs/index.js",
@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "@rushstack/heft": "1.2.19",
+    "@rushstack/heft": "1.2.23",
     "@types/watchpack": "2.4.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"

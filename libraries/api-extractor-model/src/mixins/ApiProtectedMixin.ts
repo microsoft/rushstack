@@ -42,7 +42,6 @@ export interface ApiProtectedMixin extends ApiItem {
    */
   readonly isProtected: boolean;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -69,8 +68,7 @@ export function ApiProtectedMixin<TBaseClass extends IApiItemConstructor>(
       this[_isProtected] = options.isProtected;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiProtectedMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiProtectedMixinJson
@@ -84,8 +82,7 @@ export function ApiProtectedMixin<TBaseClass extends IApiItemConstructor>(
       return this[_isProtected];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiProtectedMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiProtectedMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.isProtected = this.isProtected;

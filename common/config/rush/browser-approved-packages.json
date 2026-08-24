@@ -11,6 +11,10 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@jridgewell/sourcemap-codec",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@lifaon/path",
       "allowedCategories": [ "libraries" ]
     },
@@ -41,6 +45,22 @@
     {
       "name": "@rushstack/problem-matcher",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-daemon-protocol",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/rush-daemon-transport",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/rush-serve-dashboard",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-terminal-renderer",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/rush-themed-ui",

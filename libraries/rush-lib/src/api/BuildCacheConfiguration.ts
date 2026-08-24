@@ -145,12 +145,8 @@ export class BuildCacheConfiguration {
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
   ): Promise<BuildCacheConfiguration | undefined> {
-    const { buildCacheConfiguration } = await BuildCacheConfiguration._tryLoadInternalAsync(
-      terminal,
-      rushConfiguration,
-      rushSession
-    );
-    return buildCacheConfiguration;
+    const { options } = await _tryLoadInternalAsync(terminal, rushConfiguration, rushSession);
+    return options ? new BuildCacheConfiguration(options) : undefined;
   }
 
   /**
@@ -162,11 +158,10 @@ export class BuildCacheConfiguration {
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
   ): Promise<BuildCacheConfiguration> {
-    const { buildCacheConfiguration, jsonFilePath } = await BuildCacheConfiguration._tryLoadInternalAsync(
-      terminal,
-      rushConfiguration,
-      rushSession
-    );
+    const { options, jsonFilePath } = await _tryLoadInternalAsync(terminal, rushConfiguration, rushSession);
+    const buildCacheConfiguration: BuildCacheConfiguration | undefined = options
+      ? new BuildCacheConfiguration(options)
+      : undefined;
 
     if (!buildCacheConfiguration) {
       terminal.writeErrorLine(
@@ -193,102 +188,103 @@ export class BuildCacheConfiguration {
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
     return `${rushConfiguration.commonRushConfigFolder}/${RushConstants.buildCacheFilename}`;
   }
+}
 
-  private static async _tryLoadInternalAsync(
-    terminal: ITerminal,
-    rushConfiguration: RushConfiguration,
-    rushSession: RushSession
-  ): Promise<{ buildCacheConfiguration: BuildCacheConfiguration | undefined; jsonFilePath: string }> {
-    const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
-    const buildCacheConfiguration: BuildCacheConfiguration | undefined =
-      await BuildCacheConfiguration._tryLoadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
-    return { buildCacheConfiguration, jsonFilePath };
-  }
+async function _tryLoadInternalAsync(
+  terminal: ITerminal,
+  rushConfiguration: RushConfiguration,
+  rushSession: RushSession
+): Promise<{ options: IBuildCacheConfigurationOptions | undefined; jsonFilePath: string }> {
+  const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
+  const options: IBuildCacheConfigurationOptions | undefined = await _tryLoadAsync(
+    jsonFilePath,
+    terminal,
+    rushConfiguration,
+    rushSession
+  );
+  return { options, jsonFilePath };
+}
 
-  private static async _tryLoadAsync(
-    jsonFilePath: string,
-    terminal: ITerminal,
-    rushConfiguration: RushConfiguration,
-    rushSession: RushSession
-  ): Promise<BuildCacheConfiguration | undefined> {
-    let buildCacheJson: IBuildCacheJson;
-    const buildCacheOverrideJson: string | undefined = EnvironmentConfiguration.buildCacheOverrideJson;
-    if (buildCacheOverrideJson) {
-      buildCacheJson = JsonFile.parseString(buildCacheOverrideJson);
-      BUILD_CACHE_JSON_SCHEMA.validateObject(
-        buildCacheJson,
-        `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} environment variable`
+async function _tryLoadAsync(
+  jsonFilePath: string,
+  terminal: ITerminal,
+  rushConfiguration: RushConfiguration,
+  rushSession: RushSession
+): Promise<IBuildCacheConfigurationOptions | undefined> {
+  let buildCacheJson: IBuildCacheJson;
+  const buildCacheOverrideJson: string | undefined = EnvironmentConfiguration.buildCacheOverrideJson;
+  if (buildCacheOverrideJson) {
+    buildCacheJson = JsonFile.parseString(buildCacheOverrideJson);
+    BUILD_CACHE_JSON_SCHEMA.validateObject(
+      buildCacheJson,
+      `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} environment variable`
+    );
+  } else {
+    const buildCacheOverrideJsonFilePath: string | undefined =
+      EnvironmentConfiguration.buildCacheOverrideJsonFilePath;
+    if (buildCacheOverrideJsonFilePath) {
+      buildCacheJson = await JsonFile.loadAndValidateAsync(
+        buildCacheOverrideJsonFilePath,
+        BUILD_CACHE_JSON_SCHEMA
       );
     } else {
-      const buildCacheOverrideJsonFilePath: string | undefined =
-        EnvironmentConfiguration.buildCacheOverrideJsonFilePath;
-      if (buildCacheOverrideJsonFilePath) {
-        buildCacheJson = await JsonFile.loadAndValidateAsync(
-          buildCacheOverrideJsonFilePath,
-          BUILD_CACHE_JSON_SCHEMA
-        );
-      } else {
-        try {
-          buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BUILD_CACHE_JSON_SCHEMA);
-        } catch (e) {
-          if (!FileSystem.isNotExistError(e)) {
-            throw e;
-          } else {
-            return undefined;
-          }
+      try {
+        buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BUILD_CACHE_JSON_SCHEMA);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        } else {
+          return undefined;
         }
       }
     }
-
-    const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
-    let innerGetCacheEntryId: GetCacheEntryIdFunction;
-    try {
-      innerGetCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
-    } catch (e) {
-      terminal.writeErrorLine(
-        `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
-      );
-      throw new AlreadyReportedError();
-    }
-
-    const { cacheHashSalt = '', cacheProvider } = buildCacheJson;
-    const salt: string = `${RushConstants.buildCacheVersion}${
-      cacheHashSalt ? `${RushConstants.hashDelimiter}${cacheHashSalt}` : ''
-    }`;
-    // Extend the cache entry id with to salt the hash
-    // This facilitates forcing cache invalidation either when the build cache version changes (new version of Rush)
-    // or when the user-side salt changes (need to purge bad cache entries, plugins including additional files)
-    const getCacheEntryId: GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions): string => {
-      const saltedHash: string = createHash('sha1')
-        .update(salt)
-        .update(options.projectStateHash)
-        .digest('hex');
-
-      return innerGetCacheEntryId({
-        phaseName: options.phaseName,
-        projectName: options.projectName,
-        projectStateHash: saltedHash
-      });
-    };
-
-    let cloudCacheProvider: ICloudBuildCacheProvider | undefined;
-    // Don't configure a cloud cache provider if local-only
-    if (cacheProvider !== 'local-only') {
-      const cloudCacheProviderFactory: CloudBuildCacheProviderFactory | undefined =
-        rushSession.getCloudBuildCacheProviderFactory(cacheProvider);
-      if (!cloudCacheProviderFactory) {
-        throw new Error(`Unexpected cache provider: ${cacheProvider}`);
-      }
-      cloudCacheProvider = await cloudCacheProviderFactory(buildCacheJson as ICloudBuildCacheJson);
-    }
-
-    return new BuildCacheConfiguration({
-      buildCacheJson,
-      getCacheEntryId,
-      rushConfiguration,
-      rushUserConfiguration,
-      rushSession,
-      cloudCacheProvider
-    });
   }
+
+  const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
+  let innerGetCacheEntryId: GetCacheEntryIdFunction;
+  try {
+    innerGetCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
+  } catch (e) {
+    terminal.writeErrorLine(
+      `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
+    );
+    throw new AlreadyReportedError();
+  }
+
+  const { cacheHashSalt = '', cacheProvider } = buildCacheJson;
+  const salt: string = `${RushConstants.buildCacheVersion}${
+    cacheHashSalt ? `${RushConstants.hashDelimiter}${cacheHashSalt}` : ''
+  }`;
+  // Extend the cache entry id with to salt the hash
+  // This facilitates forcing cache invalidation either when the build cache version changes (new version of Rush)
+  // or when the user-side salt changes (need to purge bad cache entries, plugins including additional files)
+  const getCacheEntryId: GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions): string => {
+    const saltedHash: string = createHash('sha1').update(salt).update(options.projectStateHash).digest('hex');
+
+    return innerGetCacheEntryId({
+      phaseName: options.phaseName,
+      projectName: options.projectName,
+      projectStateHash: saltedHash
+    });
+  };
+
+  let cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+  // Don't configure a cloud cache provider if local-only
+  if (cacheProvider !== 'local-only') {
+    const cloudCacheProviderFactory: CloudBuildCacheProviderFactory | undefined =
+      rushSession.getCloudBuildCacheProviderFactory(cacheProvider);
+    if (!cloudCacheProviderFactory) {
+      throw new Error(`Unexpected cache provider: ${cacheProvider}`);
+    }
+    cloudCacheProvider = await cloudCacheProviderFactory(buildCacheJson as ICloudBuildCacheJson);
+  }
+
+  return {
+    buildCacheJson,
+    getCacheEntryId,
+    rushConfiguration,
+    rushUserConfiguration,
+    rushSession,
+    cloudCacheProvider
+  };
 }

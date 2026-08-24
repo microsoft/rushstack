@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.24.0",
+  "version": "0.24.3",
   "description": "User interface primitives for console applications",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -33,6 +33,9 @@
     "type": "git",
     "directory": "libraries/terminal"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -44,7 +47,7 @@
     "supports-color": "~8.1.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.19",
+    "@rushstack/heft": "1.2.23",
     "@types/supports-color": "8.1.3",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0"

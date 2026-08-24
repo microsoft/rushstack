@@ -70,6 +70,15 @@ const vsProblemMatcherPattern: IProblemPattern = {
   message: 6
 };
 
+const _environmentVariableBasePathFnMap: ReadonlyMap<
+  string | undefined,
+  (fileError: FileError) => string | undefined
+> = new Map([
+  [undefined, (fileError: FileError) => fileError.projectFolder],
+  ['{PROJECT_FOLDER}', (fileError: FileError) => fileError.projectFolder],
+  ['{ABSOLUTE_PATH}', (fileError: FileError) => undefined as string | undefined]
+]);
+
 /**
  * An `Error` subclass that should be thrown to report an unexpected state that specifically references
  * a location in a file.
@@ -84,15 +93,6 @@ export class FileError extends Error {
   public static _sanitizedEnvironmentVariable: string | undefined;
   /** @internal */
   public static _environmentVariableIsAbsolutePath: boolean = false;
-
-  private static _environmentVariableBasePathFnMap: ReadonlyMap<
-    string | undefined,
-    (fileError: FileError) => string | undefined
-  > = new Map([
-    [undefined, (fileError: FileError) => fileError.projectFolder],
-    ['{PROJECT_FOLDER}', (fileError: FileError) => fileError.projectFolder],
-    ['{ABSOLUTE_PATH}', (fileError: FileError) => undefined as string | undefined]
-  ]);
 
   /** {@inheritdoc IFileErrorOptions.absolutePath} */
   public readonly absolutePath: string;
@@ -126,10 +126,8 @@ export class FileError extends Error {
 
   /**
    * Get the Unix-formatted the error message.
-   *
-   * @override
    */
-  public toString(): string {
+  public override toString(): string {
     // Default to formatting in 'Unix' format, for consistency.
     return this.getFormattedErrorMessage();
   }
@@ -185,7 +183,7 @@ export class FileError extends Error {
 
     // undefined environment variable has a mapping to the project folder
     const baseFolderFn: ((fileError: FileError) => string | undefined) | undefined =
-      FileError._environmentVariableBasePathFnMap.get(FileError._sanitizedEnvironmentVariable);
+      _environmentVariableBasePathFnMap.get(FileError._sanitizedEnvironmentVariable);
     if (baseFolderFn) {
       return baseFolderFn(this);
     }

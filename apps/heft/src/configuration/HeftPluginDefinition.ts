@@ -337,9 +337,10 @@ export class HeftLifecyclePluginDefinition extends HeftPluginDefinitionBase {
 
   /**
    * {@inheritDoc HeftPluginDefinitionBase.loadPluginAsync}
-   * @override
    */
-  public loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin<HeftLifecycleSession, object | void>> {
+  public override loadPluginAsync(
+    logger: IScopedLogger
+  ): Promise<IHeftPlugin<HeftLifecycleSession, object | void>> {
     return super.loadPluginAsync(logger);
   }
 }
@@ -354,9 +355,10 @@ export class HeftTaskPluginDefinition extends HeftPluginDefinitionBase {
 
   /**
    * {@inheritDoc HeftPluginDefinitionBase.loadPluginAsync}
-   * @override
    */
-  public loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin<HeftTaskSession, object | void>> {
+  public override loadPluginAsync(
+    logger: IScopedLogger
+  ): Promise<IHeftPlugin<HeftTaskSession, object | void>> {
     return super.loadPluginAsync(logger);
   }
 }

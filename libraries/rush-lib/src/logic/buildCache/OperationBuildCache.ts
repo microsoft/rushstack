@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 
-import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+import { FileSystem, type FolderItem, InternalError, Async, LockFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -13,7 +13,17 @@ import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult';
+import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
+
+/**
+ * How long to wait to acquire the per-cache-entry download lock (see
+ * {@link OperationBuildCache._getDirectFileTransferLockResourceName}) before giving up and
+ * downloading independently. This is strictly a best-effort optimization to avoid redundant
+ * downloads when multiple local Rush processes race to restore the same cache entry; it is not
+ * required for correctness, since downloads always land in a uniquely-named temp file that is
+ * atomically renamed into place.
+ */
+const DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS: number = 5 * 60 * 1000; // Five minutes
 
 /**
  * @internal
@@ -32,6 +42,11 @@ export interface IOperationBuildCacheOptions {
    * and a companion file exists in the same directory.
    */
   excludeAppleDoubleFiles: boolean;
+  /**
+   * If true, use file-based APIs (when available) to transfer cache entries to and from the
+   * cloud provider, avoiding buffering the entire entry in memory.
+   */
+  useDirectFileTransfersForBuildCache: boolean;
 }
 
 /**
@@ -61,12 +76,59 @@ interface IPathsToCache {
   outputFilePaths: string[];
 }
 
+function _getDirectFileTransferLockResourceName(cacheId: string): string {
+  // LockFile resource names must match /^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/, but cacheId may
+  // contain other characters (e.g. "/") depending on the configured cacheEntryNamePattern, so hash
+  // it into a fixed-length, lock-file-safe token.
+  return crypto.createHash('sha1').update(cacheId).digest('hex');
+}
+
+let _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
+
+function _getTempLocalCacheEntryPath(finalLocalCacheEntryPath: string): string {
+  // Derive the temp file from the destination path to ensure they are on the same volume.
+  // In the case of a shared network drive containing the build cache, we also need to make
+  // sure the temp path won't be shared by two parallel rush builds.
+  const randomSuffix: string = crypto.randomBytes(8).toString('hex');
+  return `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+}
+
+function _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
+  if (!_tarUtilityPromise) {
+    _tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
+  }
+
+  return _tarUtilityPromise;
+}
+
+function _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
+  const {
+    buildCacheConfiguration,
+    project: { packageName },
+    operationStateHash,
+    phaseName
+  } = options;
+  return buildCacheConfiguration.getCacheEntryId({
+    projectName: packageName,
+    projectStateHash: operationStateHash,
+    phaseName
+  });
+}
+
+/**
+ * Overrides the cached `TarExecutable` promise. Exposed for unit testing only.
+ * @internal
+ */
+export function _setTarUtilityPromiseForTesting(
+  promise: Promise<TarExecutable | undefined> | undefined
+): void {
+  _tarUtilityPromise = promise;
+}
+
 /**
  * @internal
  */
 export class OperationBuildCache {
-  private static _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
-
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
@@ -75,6 +137,7 @@ export class OperationBuildCache {
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
   private readonly _excludeAppleDoubleFiles: boolean;
+  private readonly _useDirectFileTransfersForBuildCache: boolean;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -86,7 +149,8 @@ export class OperationBuildCache {
       },
       project,
       projectOutputFolderNames,
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useDirectFileTransfersForBuildCache
     } = options;
     this._project = project;
     this._localBuildCacheProvider = localCacheProvider;
@@ -96,14 +160,7 @@ export class OperationBuildCache {
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
     this._excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
-  }
-
-  private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
-    if (!OperationBuildCache._tarUtilityPromise) {
-      OperationBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
-    }
-
-    return OperationBuildCache._tarUtilityPromise;
+    this._useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
   }
 
   public get cacheId(): string | undefined {
@@ -111,15 +168,20 @@ export class OperationBuildCache {
   }
 
   public static getOperationBuildCache(options: IProjectBuildCacheOptions): OperationBuildCache {
-    const cacheId: string | undefined = OperationBuildCache._getCacheId(options);
+    const cacheId: string | undefined = _getCacheId(options);
     return new OperationBuildCache(cacheId, options);
   }
 
   public static forOperation(
-    executionResult: IOperationExecutionResult,
+    executionResult: IBaseOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
-    const { buildCacheConfiguration, terminal, excludeAppleDoubleFiles } = options;
+    const {
+      buildCacheConfiguration,
+      terminal,
+      excludeAppleDoubleFiles,
+      useDirectFileTransfersForBuildCache
+    } = options;
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
     if (executionResult.metadataFolderPath) {
       outputFolders.push(executionResult.metadataFolderPath);
@@ -132,9 +194,10 @@ export class OperationBuildCache {
       phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
       operationStateHash: executionResult.getStateHash(),
-      excludeAppleDoubleFiles
+      excludeAppleDoubleFiles,
+      useDirectFileTransfersForBuildCache
     };
-    const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
+    const cacheId: string | undefined = _getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);
   }
 
@@ -152,32 +215,115 @@ export class OperationBuildCache {
 
     let localCacheEntryPath: string | undefined =
       await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
-    let cacheEntryBuffer: Buffer | undefined;
+    let cloudCacheHit: boolean = false;
     let updateLocalCacheSuccess: boolean | undefined;
     if (!localCacheEntryPath && this._cloudBuildCacheProvider) {
       terminal.writeVerboseLine(
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
-        terminal,
-        cacheId
-      );
-      if (cacheEntryBuffer) {
+      if (
+        this._useDirectFileTransfersForBuildCache &&
+        this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync
+      ) {
+        // Use file-based path to avoid loading the entire cache entry into memory.
+        // The provider downloads directly to a temp file that is atomically moved into place.
+        const targetPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+
+        // If multiple local Rush processes race to restore the same cache entry (e.g. parallel
+        // "rush build" invocations on the same machine or CI agent), avoid redundant downloads by
+        // having later processes wait for the first one to finish, mirroring the pattern used for
+        // installing the package manager (see InstallHelpers.ensureLocalPackageManagerAsync). This
+        // is strictly a best-effort optimization: if the lock cannot be acquired (for example,
+        // because it is held by a process on a different machine sharing a network cache folder,
+        // where the lock's stale-holder detection cannot see across machines) we simply fall back
+        // to downloading independently below. Correctness never depends on the lock, because
+        // downloads always land in a uniquely-named temp file that is atomically renamed into
+        // place.
+        let downloadLock: LockFile | undefined;
         try {
-          localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
-            terminal,
-            cacheId,
-            cacheEntryBuffer
+          downloadLock = await LockFile.acquireAsync(
+            path.dirname(targetPath),
+            _getDirectFileTransferLockResourceName(cacheId),
+            DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS
           );
-          updateLocalCacheSuccess = true;
         } catch (e) {
-          updateLocalCacheSuccess = false;
+          terminal.writeVerboseLine(
+            `Unable to acquire the local download lock for cache entry "${cacheId}"; downloading independently: ${e}`
+          );
+        }
+
+        try {
+          // Another process may have finished populating the cache entry while we were waiting
+          // for the lock (or the lock may not have been acquired at all).
+          if (await FileSystem.existsAsync(targetPath)) {
+            cloudCacheHit = true;
+            localCacheEntryPath = targetPath;
+            updateLocalCacheSuccess = true;
+          } else {
+            const tempTargetPath: string = _getTempLocalCacheEntryPath(targetPath);
+            try {
+              const downloadedToTempFile: boolean =
+                await this._cloudBuildCacheProvider.tryDownloadCacheEntryToFileAsync(
+                  terminal,
+                  cacheId,
+                  tempTargetPath
+                );
+              if (downloadedToTempFile) {
+                await Async.runWithRetriesAsync({
+                  action: () =>
+                    FileSystem.moveAsync({
+                      sourcePath: tempTargetPath,
+                      destinationPath: targetPath,
+                      overwrite: true
+                    }),
+                  maxRetries: 2,
+                  retryDelayMs: 500
+                });
+                cloudCacheHit = true;
+                localCacheEntryPath = targetPath;
+                updateLocalCacheSuccess = true;
+              }
+            } catch (e) {
+              terminal.writeVerboseLine(`Failed to download cache entry to local cache: ${e}`);
+              updateLocalCacheSuccess = false;
+            }
+
+            if (!cloudCacheHit) {
+              // Clean up any partial file left by the failed or missed download so it isn't
+              // mistaken for a valid cache entry on the next build. Providers may catch errors
+              // internally and return false instead of throwing, leaving a partially written file.
+              try {
+                await FileSystem.deleteFileAsync(tempTargetPath);
+              } catch {
+                // Ignore cleanup errors (file may not have been created)
+              }
+            }
+          }
+        } finally {
+          downloadLock?.release();
+        }
+      } else {
+        const cacheEntryBuffer: Buffer | undefined =
+          await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
+        if (cacheEntryBuffer) {
+          cloudCacheHit = true;
+          try {
+            localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+              terminal,
+              cacheId,
+              cacheEntryBuffer
+            );
+            updateLocalCacheSuccess = true;
+          } catch (e) {
+            terminal.writeVerboseLine(`Failed to update local cache: ${e}`);
+            updateLocalCacheSuccess = false;
+          }
         }
       }
     }
 
-    if (!localCacheEntryPath && !cacheEntryBuffer) {
+    if (!localCacheEntryPath && !cloudCacheHit) {
       terminal.writeVerboseLine('This project was not found in the build cache.');
       return false;
     }
@@ -195,7 +341,7 @@ export class OperationBuildCache {
       )
     );
 
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
@@ -245,15 +391,10 @@ export class OperationBuildCache {
 
     let localCacheEntryPath: string | undefined;
 
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
     if (tarUtility) {
       const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-
-      // Derive the temp file from the destination path to ensure they are on the same volume
-      // In the case of a shared network drive containing the build cache, we also need to make
-      // sure the the temp path won't be shared by two parallel rush builds.
-      const randomSuffix: string = crypto.randomBytes(8).toString('hex');
-      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+      const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
 
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'tar');
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
@@ -300,8 +441,6 @@ export class OperationBuildCache {
       return false;
     }
 
-    let cacheEntryBuffer: Buffer | undefined;
-
     let setCloudCacheEntryPromise: Promise<boolean> | undefined;
 
     // Note that "writeAllowed" settings (whether in config or environment) always apply to
@@ -309,17 +448,29 @@ export class OperationBuildCache {
     // write to the local build cache.
 
     if (this._cloudBuildCacheProvider?.isCacheWriteAllowed) {
-      if (localCacheEntryPath) {
-        cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
-      } else {
+      if (!localCacheEntryPath) {
         throw new InternalError('Expected the local cache entry path to be set.');
       }
 
-      setCloudCacheEntryPromise = this._cloudBuildCacheProvider?.trySetCacheEntryBufferAsync(
-        terminal,
-        cacheId,
-        cacheEntryBuffer
-      );
+      if (
+        this._useDirectFileTransfersForBuildCache &&
+        this._cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync
+      ) {
+        // Use file-based upload to avoid loading the entire cache entry into memory.
+        // The provider reads from the local cache file directly.
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.tryUploadCacheEntryFromFileAsync(
+          terminal,
+          cacheId,
+          localCacheEntryPath
+        );
+      } else {
+        const cacheEntryBuffer: Buffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
+        setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(
+          terminal,
+          cacheId,
+          cacheEntryBuffer
+        );
+      }
     }
 
     const updateCloudCacheSuccess: boolean | undefined = (await setCloudCacheEntryPromise) ?? true;
@@ -426,19 +577,5 @@ export class OperationBuildCache {
 
   private _getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
     return path.join(this._project.projectRushTempFolder, `${cacheId}.${mode}.log`);
-  }
-
-  private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
-    const {
-      buildCacheConfiguration,
-      project: { packageName },
-      operationStateHash,
-      phaseName
-    } = options;
-    return buildCacheConfiguration.getCacheEntryId({
-      projectName: packageName,
-      projectStateHash: operationStateHash,
-      phaseName
-    });
   }
 }

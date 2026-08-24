@@ -9,12 +9,12 @@ import * as ssri from 'ssri';
 
 import {
   JsonFile,
-  Text,
   FileSystem,
   FileConstants,
   Sort,
   InternalError,
-  AlreadyReportedError
+  AlreadyReportedError,
+  Path
 } from '@rushstack/node-core-library';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
@@ -32,7 +32,7 @@ import {
   type PackageJsonDependency
 } from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { InstallHelpers } from './InstallHelpers';
+import { InstallHelpers, type IResolvedPnpmSettings } from './InstallHelpers';
 import { TempProjectHelper } from '../TempProjectHelper';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushConfiguration } from '../..';
@@ -81,10 +81,8 @@ export class RushInstallManager extends BaseInstallManager {
    * If shrinkwrapFile is provided, this function also validates whether it contains
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
-   *
-   * @override
    */
-  public async prepareCommonTempAsync(
+  public override async prepareCommonTempAsync(
     subspace: Subspace,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
@@ -369,10 +367,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // Remove the workspace file if it exists
     if (this.rushConfiguration.isPnpm) {
-      const workspaceFilePath: string = path.join(
-        this.rushConfiguration.commonTempFolder,
-        'pnpm-workspace.yaml'
-      );
+      const workspaceFilePath: string = `${this.rushConfiguration.commonTempFolder}/pnpm-workspace.yaml`;
       try {
         await FileSystem.deleteFileAsync(workspaceFilePath);
       } catch (e) {
@@ -382,12 +377,16 @@ export class RushInstallManager extends BaseInstallManager {
       }
     }
 
-    // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(
+    // Read the pnpm options (if any) in a single place, then write the common package.json.
+    const pnpmSettings: IResolvedPnpmSettings | undefined = InstallHelpers.resolvePnpmSettings(
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
-      commonDependencies,
       this._terminal
+    );
+    await InstallHelpers.generateCommonPackageJsonAsync(
+      this.rushConfiguration.defaultSubspace,
+      commonDependencies,
+      pnpmSettings
     );
 
     stopwatch.stop();
@@ -448,10 +447,8 @@ export class RushInstallManager extends BaseInstallManager {
 
   /**
    * Check whether or not the install is already valid, and therefore can be skipped.
-   *
-   * @override
    */
-  protected async canSkipInstallAsync(
+  protected override async canSkipInstallAsync(
     lastModifiedDate: Date,
     subspace: Subspace,
     variant: string | undefined
@@ -476,10 +473,8 @@ export class RushInstallManager extends BaseInstallManager {
 
   /**
    * Runs "npm/pnpm/yarn install" in the "common/temp" folder.
-   *
-   * @override
    */
-  protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
+  protected override async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -563,11 +558,8 @@ export class RushInstallManager extends BaseInstallManager {
           // eslint-disable-next-line no-console
           console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
           // Glob can't handle Windows paths
-          const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(
-            pathToDeleteWithoutStar,
-            '\\',
-            '/'
-          );
+          const normalizedPathToDeleteWithoutStar: string =
+            Path.convertToSlashes(pathToDeleteWithoutStar);
 
           const { default: glob } = await import('fast-glob');
           const tempModulePaths: string[] = await glob(
@@ -698,7 +690,7 @@ export class RushInstallManager extends BaseInstallManager {
       RushConstants.rushTempNpmScope
     );
     // Glob can't handle Windows paths
-    const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+    const normalizedPathToDeleteWithoutStar: string = Path.convertToSlashes(pathToDeleteWithoutStar);
 
     let anyChanges: boolean = false;
 

@@ -14,13 +14,6 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConstants } from '../logic/RushConstants';
 
 export class PnpmSyncUtilities {
-  private static _addLinePrefix(message: string): string {
-    return message
-      .split('\n')
-      .map((x) => (x.trim() ? Colorize.cyan(`pnpm-sync: `) + x : x))
-      .join('\n');
-  }
-
   public static processLogMessage(options: ILogMessageCallbackOptions, terminal: ITerminal): void {
     const message: string = options.message;
     const details: LogMessageDetails = options.details;
@@ -29,7 +22,7 @@ export class PnpmSyncUtilities {
     switch (details.messageIdentifier) {
       case LogMessageIdentifier.PREPARE_FINISHING:
         terminal.writeVerboseLine(
-          PnpmSyncUtilities._addLinePrefix(
+          _addLinePrefix(
             `Regenerated ${RushConstants.pnpmSyncFilename} in ${Math.round(details.executionTimeInMs)} ms`
           )
         );
@@ -42,7 +35,7 @@ export class PnpmSyncUtilities {
             (details.fileCount === 1 ? 'file' : 'files') +
             ` in ${Math.round(details.executionTimeInMs)} ms`;
 
-          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
+          terminal.writeVerboseLine(_addLinePrefix(customMessage));
         }
         return;
 
@@ -52,21 +45,21 @@ export class PnpmSyncUtilities {
             `Expecting ${RushConstants.pnpmSyncFilename} version ${details.expectedVersion}, ` +
             `but found version ${details.actualVersion}`;
 
-          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(message));
-          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
+          terminal.writeVerboseLine(_addLinePrefix(message));
+          terminal.writeVerboseLine(_addLinePrefix(customMessage));
         }
         return;
 
       case LogMessageIdentifier.COPY_ERROR_INCOMPATIBLE_SYNC_FILE: {
         terminal.writeErrorLine(
-          PnpmSyncUtilities._addLinePrefix(
+          _addLinePrefix(
             `The workspace was installed using an incompatible version of pnpm-sync.\n` +
               `Please run "rush install" or "rush update" again.`
           )
         );
 
         terminal.writeLine(
-          PnpmSyncUtilities._addLinePrefix(
+          _addLinePrefix(
             `Expecting ${RushConstants.pnpmSyncFilename} version ${details.expectedVersion}, ` +
               `but found version ${details.actualVersion}\n` +
               `Affected folder: ${details.pnpmSyncJsonPath}`
@@ -88,8 +81,15 @@ export class PnpmSyncUtilities {
 
       case LogMessageKind.INFO:
       case LogMessageKind.VERBOSE:
-        terminal.writeDebugLine(PnpmSyncUtilities._addLinePrefix(message));
+        terminal.writeDebugLine(_addLinePrefix(message));
         return;
     }
   }
+}
+
+function _addLinePrefix(message: string): string {
+  return message
+    .split('\n')
+    .map((x) => (x.trim() ? Colorize.cyan(`pnpm-sync: `) + x : x))
+    .join('\n');
 }

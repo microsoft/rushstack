@@ -22,17 +22,17 @@ export interface IRushWorkspace {
   startingFolder: string;
 }
 
+let _rushWorkspace: RushWorkspace | undefined;
+
+const _onDidChangeWorkspace: vscode.EventEmitter<RushWorkspace> = new vscode.EventEmitter();
+
 export class RushWorkspace {
   private _rushLib: typeof RushLib | undefined;
   private _startingFolderPath: string;
   private _rushConfiguration: RushLib.RushConfiguration;
   private _rushCommandLineParser: RushCommandLine.CommandLineParser | undefined;
-  private static _rushWorkspace: RushWorkspace | undefined;
 
-  private static readonly _onDidChangeWorkspace: vscode.EventEmitter<RushWorkspace> =
-    new vscode.EventEmitter();
-  public static readonly onDidChangeWorkspace: vscode.Event<RushWorkspace> =
-    RushWorkspace._onDidChangeWorkspace.event;
+  public static readonly onDidChangeWorkspace: vscode.Event<RushWorkspace> = _onDidChangeWorkspace.event;
 
   private constructor({ rushLib, startingFolder }: IRushWorkspace) {
     this._rushLib = rushLib;
@@ -60,15 +60,15 @@ export class RushWorkspace {
     //   terminal.writeWarningLine(`load RushCommandLineParser from rush-sdk failed`);
     // }
 
-    RushWorkspace._rushWorkspace = this;
-    RushWorkspace._onDidChangeWorkspace.fire(this);
+    _rushWorkspace = this;
+    _onDidChangeWorkspace.fire(this);
   }
 
   public static getCurrentInstance(): RushWorkspace {
-    if (!RushWorkspace._rushWorkspace) {
+    if (!_rushWorkspace) {
       throw new Error('RushWorkspace not initialized');
     }
-    return RushWorkspace._rushWorkspace;
+    return _rushWorkspace;
   }
 
   public static async initializeFromWorkspaceFolderPathsAsync(

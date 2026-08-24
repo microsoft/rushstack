@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import * as semver from 'semver';
 
 import {
@@ -21,215 +19,362 @@ import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
 import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
+import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
 
+export interface ICommonPackageJsonPnpmSection {
+  overrides?: typeof PnpmOptionsConfiguration.prototype.globalOverrides;
+  packageExtensions?: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
+  peerDependencyRules?: typeof PnpmOptionsConfiguration.prototype.globalPeerDependencyRules;
+  neverBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalNeverBuiltDependencies;
+  onlyBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalOnlyBuiltDependencies;
+  ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
+  allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
+  patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
+  trustPolicy?: typeof PnpmOptionsConfiguration.prototype.trustPolicy;
+  trustPolicyExclude?: typeof PnpmOptionsConfiguration.prototype.trustPolicyExclude;
+  trustPolicyIgnoreAfter?: typeof PnpmOptionsConfiguration.prototype.trustPolicyIgnoreAfterMinutes;
+}
+
 interface ICommonPackageJson extends IPackageJson {
-  pnpm?: {
-    overrides?: typeof PnpmOptionsConfiguration.prototype.globalOverrides;
-    packageExtensions?: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
-    peerDependencyRules?: typeof PnpmOptionsConfiguration.prototype.globalPeerDependencyRules;
-    neverBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalNeverBuiltDependencies;
-    onlyBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalOnlyBuiltDependencies;
-    ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
-    allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
-    patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
-    minimumReleaseAge?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeMinutes;
-    minimumReleaseAgeExclude?: typeof PnpmOptionsConfiguration.prototype.minimumReleaseAgeExclude;
-    trustPolicy?: typeof PnpmOptionsConfiguration.prototype.trustPolicy;
-    trustPolicyExclude?: typeof PnpmOptionsConfiguration.prototype.trustPolicyExclude;
-    trustPolicyIgnoreAfter?: typeof PnpmOptionsConfiguration.prototype.trustPolicyIgnoreAfterMinutes;
-  };
+  pnpm?: ICommonPackageJsonPnpmSection;
+}
+
+/**
+ * The pnpm-specific settings that Rush writes into the generated `common/temp` install files,
+ * derived from a subspace's pnpm options by {@link InstallHelpers.resolvePnpmSettings}.
+ */
+export interface IResolvedPnpmSettings {
+  /**
+   * The "pnpm" field to write into `common/temp/package.json`, or `undefined` for pnpm 11+ (which
+   * no longer reads that field — all settings are placed on {@link workspaceFile} instead).
+   */
+  packageJsonPnpmSection: ICommonPackageJsonPnpmSection | undefined;
+
+  /**
+   * Additional top-level properties to merge into `common/temp/package.json`
+   * (from `pnpmOptions.unsupportedPackageJsonSettings`).
+   */
+  additionalPackageJsonProperties: unknown;
+
+  /**
+   * The `common/temp/pnpm-workspace.yaml` file, populated with the version-gated pnpm settings.
+   * The caller is responsible for adding the workspace packages and saving the file. Only used by
+   * workspace installs.
+   */
+  workspaceFile: PnpmWorkspaceFile;
+
+  /**
+   * The configured pnpm `globalOverrides` (defaulting to `{}`), regardless of the pnpm version.
+   * Used to verify that the shrinkwrap file is up to date.
+   */
+  configuredOverrides: Record<string, string>;
+
+  /**
+   * The configured pnpm `globalPackageExtensions`, regardless of the pnpm version. Used to verify
+   * that the shrinkwrap file is up to date.
+   */
+  configuredPackageExtensions: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
 }
 
 export class InstallHelpers {
-  public static generateCommonPackageJson(
-    rushConfiguration: RushConfiguration,
+  public static async generateCommonPackageJsonAsync(
     subspace: Subspace,
-    dependencies: Map<string, string> = new Map<string, string>(),
-    terminal: ITerminal
-  ): void {
-    const commonPackageJson: ICommonPackageJson = {
-      dependencies: {},
-      description: 'Temporary file generated by the Rush tool',
-      name: 'rush-common',
-      private: true,
-      version: '0.0.0'
-    };
-
-    if (rushConfiguration.isPnpm) {
-      const pnpmOptions: PnpmOptionsConfiguration =
-        subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
-      if (!commonPackageJson.pnpm) {
-        commonPackageJson.pnpm = {};
-      }
-
-      if (pnpmOptions.globalOverrides) {
-        commonPackageJson.pnpm.overrides = pnpmOptions.globalOverrides;
-      }
-
-      if (pnpmOptions.globalPackageExtensions) {
-        commonPackageJson.pnpm.packageExtensions = pnpmOptions.globalPackageExtensions;
-      }
-      if (pnpmOptions.globalPeerDependencyRules) {
-        commonPackageJson.pnpm.peerDependencyRules = pnpmOptions.globalPeerDependencyRules;
-      }
-
-      const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
-
-      if (pnpmOptions.globalNeverBuiltDependencies) {
-        if (semver.gte(pnpmVersion, '11.0.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `no longer supports the "globalNeverBuiltDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Use "globalAllowBuilds" instead (with a value of false to deny build scripts).'
-            )
-          );
-        } else {
-          commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
-        }
-      }
-
-      if (pnpmOptions.globalOnlyBuiltDependencies) {
-        if (semver.gte(pnpmVersion, '11.0.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `no longer supports the "globalOnlyBuiltDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Use "globalAllowBuilds" instead (with a value of true to allow build scripts).'
-            )
-          );
-        } else {
-          if (semver.lt(pnpmVersion, '10.1.0')) {
-            terminal.writeWarningLine(
-              Colorize.yellow(
-                `Your version of PNPM (${pnpmVersion}) ` +
-                  `doesn't support the "globalOnlyBuiltDependencies" field in ` +
-                  `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                  'Remove this field or upgrade to PNPM 10.1.0 or newer.'
-              )
-            );
-          }
-
-          commonPackageJson.pnpm.onlyBuiltDependencies = pnpmOptions.globalOnlyBuiltDependencies;
-        }
-      }
-
-      if (pnpmOptions.globalIgnoredOptionalDependencies) {
-        if (semver.lt(pnpmVersion, '9.0.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to PNPM 9.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
-      }
-
-      if (pnpmOptions.globalAllowedDeprecatedVersions) {
-        commonPackageJson.pnpm.allowedDeprecatedVersions = pnpmOptions.globalAllowedDeprecatedVersions;
-      }
-
-      if (pnpmOptions.globalPatchedDependencies) {
-        commonPackageJson.pnpm.patchedDependencies = pnpmOptions.globalPatchedDependencies;
-      }
-
-      if (pnpmOptions.minimumReleaseAgeMinutes !== undefined || pnpmOptions.minimumReleaseAgeExclude) {
-        if (semver.lt(pnpmVersion, '10.16.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove these fields or upgrade to PNPM 10.16.0 or newer.'
-            )
-          );
-        }
-
-        if (pnpmOptions.minimumReleaseAgeMinutes !== undefined) {
-          // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
-          commonPackageJson.pnpm.minimumReleaseAge = pnpmOptions.minimumReleaseAgeMinutes;
-        }
-
-        if (pnpmOptions.minimumReleaseAgeExclude) {
-          commonPackageJson.pnpm.minimumReleaseAgeExclude = pnpmOptions.minimumReleaseAgeExclude;
-        }
-      }
-
-      if (pnpmOptions.trustPolicy !== undefined) {
-        if (semver.lt(pnpmVersion, '10.21.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `doesn't support the "trustPolicy" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to PNPM 10.21.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.trustPolicy = pnpmOptions.trustPolicy;
-      }
-
-      if (pnpmOptions.trustPolicyExclude) {
-        if (semver.lt(pnpmVersion, '10.22.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `doesn't support the "trustPolicyExclude" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to PNPM 10.22.0 or newer.'
-            )
-          );
-        }
-
-        commonPackageJson.pnpm.trustPolicyExclude = pnpmOptions.trustPolicyExclude;
-      }
-
-      if (pnpmOptions.trustPolicyIgnoreAfterMinutes !== undefined) {
-        if (semver.lt(pnpmVersion, '10.27.0')) {
-          terminal.writeWarningLine(
-            Colorize.yellow(
-              `Your version of PNPM (${pnpmVersion}) ` +
-                `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
-                'Remove this field or upgrade to PNPM 10.27.0 or newer.'
-            )
-          );
-        }
-
-        // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
-        commonPackageJson.pnpm.trustPolicyIgnoreAfter = pnpmOptions.trustPolicyIgnoreAfterMinutes;
-      }
-
-      if (pnpmOptions.unsupportedPackageJsonSettings) {
-        merge(commonPackageJson, pnpmOptions.unsupportedPackageJsonSettings);
-      }
-    }
+    dependenciesMap: Map<string, string> = new Map<string, string>(),
+    resolvedPnpmSettings: IResolvedPnpmSettings | undefined
+  ): Promise<void> {
+    const { packageJsonPnpmSection, additionalPackageJsonProperties } = resolvedPnpmSettings ?? {};
 
     // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
-    for (const dependency of Array.from(dependencies.keys()).sort()) {
-      commonPackageJson.dependencies![dependency] = dependencies.get(dependency)!;
+    const sortedDependencyEntries: [string, string][] = Array.from(dependenciesMap.entries()).sort(
+      ([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)
+    );
+    const dependencies: Record<string, string> = Object.fromEntries(sortedDependencyEntries);
+    const commonPackageJson: ICommonPackageJson = {
+      dependencies,
+      description: 'Temporary file generated by the Rush tool',
+      name: 'rush-common',
+      private: true,
+      version: '0.0.0',
+      pnpm: packageJsonPnpmSection
+    };
+
+    if (additionalPackageJsonProperties) {
+      merge(commonPackageJson, additionalPackageJsonProperties);
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
-    const commonPackageJsonFilename: string = path.join(
-      subspace.getSubspaceTempFolderPath(),
-      FileConstants.PackageJson
-    );
+    const commonPackageJsonFilename: string = `${subspace.getSubspaceTempFolderPath()}/${FileConstants.PackageJson}`;
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
-    JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+    await JsonFile.saveAsync(commonPackageJson, commonPackageJsonFilename, {
+      onlyIfChanged: true,
+      ignoreUndefinedValues: true
+    });
+  }
+
+  /**
+   * Interprets the pnpm options for the given subspace and derives the pnpm-specific settings that
+   * Rush writes into the generated install files: the "pnpm" field of `common/temp/package.json`
+   * (see {@link IResolvedPnpmSettings.packageJsonPnpmSection}) and the settings for
+   * `common/temp/pnpm-workspace.yaml` (see {@link IResolvedPnpmSettings.workspaceSettings}).
+   *
+   * This is the single place that reads through the pnpm options and emits the associated
+   * version-compatibility warnings, so that both "rush install" code paths stay consistent.
+   *
+   * Returns `undefined` when the package manager is not pnpm.
+   */
+  public static resolvePnpmSettings(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace,
+    terminal: ITerminal
+  ): IResolvedPnpmSettings | undefined {
+    if (!rushConfiguration.isPnpm) {
+      return undefined;
+    }
+
+    const {
+      globalOverrides = {},
+      globalPackageExtensions,
+      globalPeerDependencyRules,
+      globalNeverBuiltDependencies,
+      globalOnlyBuiltDependencies,
+      globalIgnoredOptionalDependencies,
+      globalAllowedDeprecatedVersions,
+      globalPatchedDependencies,
+      globalCatalogs,
+      globalAllowBuilds,
+      minimumReleaseAgeMinutes,
+      minimumReleaseAgeExclude,
+      trustPolicy,
+      trustPolicyExclude,
+      // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
+      trustPolicyIgnoreAfterMinutes: trustPolicyIgnoreAfter,
+      unsupportedPackageJsonSettings
+    } = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+
+    const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
+    const isPnpm11: boolean = semver.gte(pnpmVersion, '11.0.0');
+    // Example: "C:\MyRepo\common\config\rush\pnpm-config.json"
+    const pnpmConfigLocation: string = `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`;
+
+    //
+    // Derive the "pnpm" field of common/temp/package.json
+    //
+    let neverBuiltDependencies: ICommonPackageJsonPnpmSection['neverBuiltDependencies'];
+    if (globalNeverBuiltDependencies) {
+      if (isPnpm11) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of PNPM (${pnpmVersion}) ` +
+              `no longer supports the "globalNeverBuiltDependencies" field in ` +
+              `${pnpmConfigLocation}. ` +
+              'Use "globalAllowBuilds" instead (with a value of false to deny build scripts).'
+          )
+        );
+      } else {
+        neverBuiltDependencies = globalNeverBuiltDependencies;
+      }
+    }
+
+    let onlyBuiltDependencies: ICommonPackageJsonPnpmSection['onlyBuiltDependencies'];
+    if (globalOnlyBuiltDependencies) {
+      if (isPnpm11) {
+        terminal.writeWarningLine(
+          Colorize.yellow(
+            `Your version of PNPM (${pnpmVersion}) ` +
+              `no longer supports the "globalOnlyBuiltDependencies" field in ` +
+              `${pnpmConfigLocation}. ` +
+              'Use "globalAllowBuilds" instead (with a value of true to allow build scripts).'
+          )
+        );
+      } else {
+        if (semver.lt(pnpmVersion, '10.1.0')) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of PNPM (${pnpmVersion}) ` +
+                `doesn't support the "globalOnlyBuiltDependencies" field in ` +
+                `${pnpmConfigLocation}. ` +
+                'Remove this field or upgrade to PNPM 10.1.0 or newer.'
+            )
+          );
+        }
+
+        onlyBuiltDependencies = globalOnlyBuiltDependencies;
+      }
+    }
+
+    if (globalIgnoredOptionalDependencies && semver.lt(pnpmVersion, '9.0.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 9.'
+        )
+      );
+    }
+
+    if (trustPolicy !== undefined && semver.lt(pnpmVersion, '10.21.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "trustPolicy" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 10.21.0 or newer.'
+        )
+      );
+    }
+
+    if (trustPolicyExclude && semver.lt(pnpmVersion, '10.22.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "trustPolicyExclude" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 10.22.0 or newer.'
+        )
+      );
+    }
+
+    if (trustPolicyIgnoreAfter !== undefined && semver.lt(pnpmVersion, '10.27.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of PNPM (${pnpmVersion}) ` +
+            `doesn't support the "trustPolicyIgnoreAfterMinutes" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to PNPM 10.27.0 or newer.'
+        )
+      );
+    }
+
+    //
+    // Derive the settings for common/temp/pnpm-workspace.yaml
+    //
+    if (globalCatalogs && semver.lt(pnpmVersion, '9.5.0')) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${pnpmVersion}) ` +
+            `doesn't support the "globalCatalogs" fields in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove these fields or upgrade to pnpm 9.5.0 or newer.'
+        )
+      );
+    }
+
+    // For pnpm 11+, "allowBuilds" replaces onlyBuiltDependencies/neverBuiltDependencies
+    let allowBuilds: Record<string, boolean> | undefined;
+    if (isPnpm11) {
+      if (globalAllowBuilds) {
+        allowBuilds = globalAllowBuilds;
+      } else if (globalOnlyBuiltDependencies || globalNeverBuiltDependencies) {
+        // Backward compatibility: convert globalOnlyBuiltDependencies/globalNeverBuiltDependencies
+        // to allowBuilds format for pnpm 11+
+        allowBuilds = {};
+        if (globalOnlyBuiltDependencies) {
+          for (const pkg of globalOnlyBuiltDependencies) {
+            allowBuilds[pkg] = true;
+          }
+        }
+
+        if (globalNeverBuiltDependencies) {
+          for (const pkg of globalNeverBuiltDependencies) {
+            allowBuilds[pkg] = false;
+          }
+        }
+      }
+    } else if (globalAllowBuilds) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${pnpmVersion}) ` +
+            `doesn't support the "globalAllowBuilds" field in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove this field or upgrade to pnpm 11.0.0 or newer.'
+        )
+      );
+    }
+
+    // pnpm does not read these fields from package.json, only from pnpm-workspace.yaml or .npmrc.
+    if (
+      (minimumReleaseAgeMinutes !== undefined || minimumReleaseAgeExclude) &&
+      semver.lt(pnpmVersion, '10.16.0')
+    ) {
+      terminal.writeWarningLine(
+        Colorize.yellow(
+          `Your version of pnpm (${pnpmVersion}) ` +
+            `doesn't support the "minimumReleaseAgeMinutes" or "minimumReleaseAgeExclude" fields in ` +
+            `${pnpmConfigLocation}. ` +
+            'Remove these fields or upgrade to pnpm 10.16.0 or newer.'
+        )
+      );
+    }
+
+    // Populate a PnpmWorkspaceFile with the workspace settings. The caller adds the workspace
+    // packages to this file and saves it; here we only set the pnpm settings.
+    const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
+      `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmWorkspaceFileName}`
+    );
+    workspaceFile.catalogs = globalCatalogs;
+    workspaceFile.allowBuilds = allowBuilds;
+    // NOTE: the pnpm setting is `minimumReleaseAge`, but the Rush setting is `minimumReleaseAgeMinutes`
+    workspaceFile.minimumReleaseAge = minimumReleaseAgeMinutes;
+    workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
+
+    // pnpm 11 no longer reads the "pnpm" field of package.json, so for pnpm 11+ we don't generate
+    // it at all; every setting is written to common/temp/pnpm-workspace.yaml instead.
+    // See https://github.com/microsoft/rushstack/issues/5837
+    let packageJsonPnpmSection: ICommonPackageJsonPnpmSection | undefined;
+
+    if (isPnpm11) {
+      workspaceFile.overrides = globalOverrides;
+      workspaceFile.packageExtensions = globalPackageExtensions;
+      workspaceFile.peerDependencyRules = globalPeerDependencyRules;
+      workspaceFile.allowedDeprecatedVersions = globalAllowedDeprecatedVersions;
+      workspaceFile.patchedDependencies = globalPatchedDependencies;
+      workspaceFile.ignoredOptionalDependencies = globalIgnoredOptionalDependencies;
+      workspaceFile.trustPolicy = trustPolicy;
+      workspaceFile.trustPolicyExclude = trustPolicyExclude;
+      workspaceFile.trustPolicyIgnoreAfter = trustPolicyIgnoreAfter;
+
+      if (rushConfiguration.subspacesFeatureEnabled) {
+        // When subspaces are enabled, Rush generates a "global pnpmfile" that rewrites
+        // cross-subspace "workspace:*" dependency specifiers to "link:" specifiers. For pnpm 10 and
+        // earlier it is wired up via a "global-pnpmfile=" line in the generated .npmrc (see
+        // BaseInstallManager), but pnpm 11+ only reads auth/registry settings from .npmrc, so that
+        // line is silently ignored and installation fails with ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+        // For pnpm 11+, emit the path via the generated pnpm-workspace.yaml instead.
+        workspaceFile.globalPnpmfile = `${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmfileGlobalFilename}`;
+      }
+    } else {
+      // For older pnpm, these settings live in the "pnpm" field of package.json.
+      packageJsonPnpmSection = {
+        neverBuiltDependencies,
+        onlyBuiltDependencies,
+        overrides: globalOverrides,
+        packageExtensions: globalPackageExtensions,
+        peerDependencyRules: globalPeerDependencyRules,
+        allowedDeprecatedVersions: globalAllowedDeprecatedVersions,
+        patchedDependencies: globalPatchedDependencies,
+        ignoredOptionalDependencies: globalIgnoredOptionalDependencies,
+        trustPolicy,
+        trustPolicyExclude,
+        trustPolicyIgnoreAfter
+      };
+    }
+
+    return {
+      packageJsonPnpmSection,
+      additionalPackageJsonProperties: unsupportedPackageJsonSettings,
+      workspaceFile,
+      // The configured overrides/packageExtensions are needed to verify the shrinkwrap is up to
+      // date, regardless of the pnpm version.
+      configuredOverrides: globalOverrides,
+      configuredPackageExtensions: globalPackageExtensions
+    };
   }
 
   public static getPackageManagerEnvironment(
@@ -241,20 +386,14 @@ export class InstallHelpers {
     let configurationEnvironment: IConfigurationEnvironment | undefined = undefined;
 
     if (rushConfiguration.packageManager === 'npm') {
-      if (rushConfiguration.npmOptions && rushConfiguration.npmOptions.environmentVariables) {
-        configurationEnvironment = rushConfiguration.npmOptions.environmentVariables;
-      }
+      configurationEnvironment = rushConfiguration.npmOptions?.environmentVariables;
     } else if (rushConfiguration.isPnpm) {
-      if (rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.environmentVariables) {
-        configurationEnvironment = rushConfiguration.pnpmOptions.environmentVariables;
-      }
+      configurationEnvironment = rushConfiguration.pnpmOptions?.environmentVariables;
     } else if (rushConfiguration.packageManager === 'yarn') {
-      if (rushConfiguration.yarnOptions && rushConfiguration.yarnOptions.environmentVariables) {
-        configurationEnvironment = rushConfiguration.yarnOptions.environmentVariables;
-      }
+      configurationEnvironment = rushConfiguration.yarnOptions?.environmentVariables;
     }
 
-    return InstallHelpers._mergeEnvironmentVariables(process.env, configurationEnvironment, options);
+    return _mergeEnvironmentVariables(process.env, configurationEnvironment, options);
   }
 
   /**
@@ -292,7 +431,7 @@ export class InstallHelpers {
 
     const packageManagerAndVersion: string = `${packageManager}-${packageManagerVersion}`;
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
-    const packageManagerToolFolder: string = path.join(rushUserFolder, packageManagerAndVersion);
+    const packageManagerToolFolder: string = `${rushUserFolder}/${packageManagerAndVersion}`;
 
     const packageManagerMarker: LastInstallFlag = new LastInstallFlag(packageManagerToolFolder, {
       node: process.versions.node
@@ -343,10 +482,7 @@ export class InstallHelpers {
     FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
 
     // Example: "C:\MyRepo\common\temp\pnpm-local"
-    const localPackageManagerToolFolder: string = path.join(
-      rushConfiguration.commonTempFolder,
-      `${packageManager}-local`
-    );
+    const localPackageManagerToolFolder: string = `${rushConfiguration.commonTempFolder}/${packageManager}-local`;
 
     logIfConsoleOutputIsNotRestricted(`\nSymlinking "${localPackageManagerToolFolder}"`);
     logIfConsoleOutputIsNotRestricted(`  --> "${packageManagerToolFolder}"`);
@@ -354,77 +490,77 @@ export class InstallHelpers {
     // We cannot use FileSystem.exists() to test the existence of a symlink, because it will
     // return false for broken symlinks.  There is no way to test without catching an exception.
     try {
-      FileSystem.deleteFolder(localPackageManagerToolFolder);
+      await FileSystem.deleteFolderAsync(localPackageManagerToolFolder);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
         throw error;
       }
     }
 
-    FileSystem.createSymbolicLinkJunction({
+    await FileSystem.createSymbolicLinkJunctionAsync({
       linkTargetPath: packageManagerToolFolder,
       newLinkPath: localPackageManagerToolFolder
     });
 
     lock.release();
   }
+}
 
-  // Helper for getPackageManagerEnvironment
-  private static _mergeEnvironmentVariables(
-    baseEnv: NodeJS.ProcessEnv,
-    environmentVariables?: IConfigurationEnvironment,
-    options: {
-      debug?: boolean;
-    } = {}
-  ): NodeJS.ProcessEnv {
-    const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
+// Helper for getPackageManagerEnvironment
+function _mergeEnvironmentVariables(
+  baseEnv: NodeJS.ProcessEnv,
+  environmentVariables?: IConfigurationEnvironment,
+  options: {
+    debug?: boolean;
+  } = {}
+): NodeJS.ProcessEnv {
+  const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
 
-    if (environmentVariables) {
-      // eslint-disable-next-line guard-for-in
-      for (const envVar in environmentVariables) {
-        let setEnvironmentVariable: boolean = true;
+  if (environmentVariables) {
+    // eslint-disable-next-line guard-for-in
+    for (const envVar in environmentVariables) {
+      let setEnvironmentVariable: boolean = true;
+      // eslint-disable-next-line no-console
+      console.log(`\nProcessing definition for environment variable: ${envVar}`);
+
+      if (baseEnv.hasOwnProperty(envVar)) {
+        setEnvironmentVariable = false;
         // eslint-disable-next-line no-console
-        console.log(`\nProcessing definition for environment variable: ${envVar}`);
+        console.log(`Environment variable already defined:`);
+        // eslint-disable-next-line no-console
+        console.log(`  Name: ${envVar}`);
+        // eslint-disable-next-line no-console
+        console.log(`  Existing value: ${baseEnv[envVar]}`);
+        // eslint-disable-next-line no-console
+        console.log(
+          `  Value set in ${RushConstants.rushJsonFilename}: ${environmentVariables[envVar].value}`
+        );
 
-        if (baseEnv.hasOwnProperty(envVar)) {
-          setEnvironmentVariable = false;
+        if (environmentVariables[envVar].override) {
+          setEnvironmentVariable = true;
           // eslint-disable-next-line no-console
-          console.log(`Environment variable already defined:`);
+          console.log(
+            `Overriding the environment variable with the value set in ${RushConstants.rushJsonFilename}.`
+          );
+        } else {
+          // eslint-disable-next-line no-console
+          console.log(Colorize.yellow(`WARNING: Not overriding the value of the environment variable.`));
+        }
+      }
+
+      if (setEnvironmentVariable) {
+        if (options.debug) {
+          // eslint-disable-next-line no-console
+          console.log(`Setting environment variable for package manager.`);
           // eslint-disable-next-line no-console
           console.log(`  Name: ${envVar}`);
           // eslint-disable-next-line no-console
-          console.log(`  Existing value: ${baseEnv[envVar]}`);
-          // eslint-disable-next-line no-console
-          console.log(
-            `  Value set in ${RushConstants.rushJsonFilename}: ${environmentVariables[envVar].value}`
-          );
-
-          if (environmentVariables[envVar].override) {
-            setEnvironmentVariable = true;
-            // eslint-disable-next-line no-console
-            console.log(
-              `Overriding the environment variable with the value set in ${RushConstants.rushJsonFilename}.`
-            );
-          } else {
-            // eslint-disable-next-line no-console
-            console.log(Colorize.yellow(`WARNING: Not overriding the value of the environment variable.`));
-          }
+          console.log(`  Value: ${environmentVariables[envVar].value}`);
         }
-
-        if (setEnvironmentVariable) {
-          if (options.debug) {
-            // eslint-disable-next-line no-console
-            console.log(`Setting environment variable for package manager.`);
-            // eslint-disable-next-line no-console
-            console.log(`  Name: ${envVar}`);
-            // eslint-disable-next-line no-console
-            console.log(`  Value: ${environmentVariables[envVar].value}`);
-          }
-          packageManagerEnv[envVar] = environmentVariables[envVar].value;
-        }
+        packageManagerEnv[envVar] = environmentVariables[envVar].value;
       }
     }
-
-    return packageManagerEnv;
   }
+
+  return packageManagerEnv;
 }

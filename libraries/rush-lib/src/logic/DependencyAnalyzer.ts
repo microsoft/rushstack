@@ -28,11 +28,9 @@ export interface IDependencyAnalysis {
   allVersionsByPackageName: Map<string, Set<string>>;
 }
 
-export class DependencyAnalyzer {
-  private static _dependencyAnalyzerByRushConfiguration:
-    | WeakMap<RushConfiguration, DependencyAnalyzer>
-    | undefined;
+let _dependencyAnalyzerByRushConfiguration: WeakMap<RushConfiguration, DependencyAnalyzer> | undefined;
 
+export class DependencyAnalyzer {
   private _rushConfiguration: RushConfiguration;
   private _analysisByVariantBySubspace: Map<string, WeakMap<Subspace, IDependencyAnalysis>> | undefined;
 
@@ -41,15 +39,15 @@ export class DependencyAnalyzer {
   }
 
   public static forRushConfiguration(rushConfiguration: RushConfiguration): DependencyAnalyzer {
-    if (!DependencyAnalyzer._dependencyAnalyzerByRushConfiguration) {
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration = new WeakMap();
+    if (!_dependencyAnalyzerByRushConfiguration) {
+      _dependencyAnalyzerByRushConfiguration = new WeakMap();
     }
 
     let analyzer: DependencyAnalyzer | undefined =
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration.get(rushConfiguration);
+      _dependencyAnalyzerByRushConfiguration.get(rushConfiguration);
     if (!analyzer) {
       analyzer = new DependencyAnalyzer(rushConfiguration);
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration.set(rushConfiguration, analyzer);
+      _dependencyAnalyzerByRushConfiguration.set(rushConfiguration, analyzer);
     }
 
     return analyzer;

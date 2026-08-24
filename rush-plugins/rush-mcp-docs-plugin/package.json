@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/rush-mcp-docs-plugin",
-  "version": "0.3.19",
+  "version": "0.3.25",
   "description": "Docs plugin for @rushstack/mcp-server",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "rush-plugins/rush-mcp-docs-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://rushjs.io",
   "main": "./lib-commonjs/index.js",

@@ -3,6 +3,8 @@
 
 import { TSDocConfiguration, TSDocTagDefinition, TSDocTagSyntaxKind, StandardTags } from '@microsoft/tsdoc';
 
+let _tsdocConfiguration: TSDocConfiguration | undefined;
+
 /**
  * @internal
  * @deprecated - tsdoc configuration is now constructed from tsdoc.json files associated with each package.
@@ -24,7 +26,7 @@ export class AedocDefinitions {
   });
 
   public static get tsdocConfiguration(): TSDocConfiguration {
-    if (!AedocDefinitions._tsdocConfiguration) {
+    if (!_tsdocConfiguration) {
       const configuration: TSDocConfiguration = new TSDocConfiguration();
       configuration.addTagDefinitions(
         [
@@ -62,10 +64,8 @@ export class AedocDefinitions {
         true
       );
 
-      AedocDefinitions._tsdocConfiguration = configuration;
+      _tsdocConfiguration = configuration;
     }
-    return AedocDefinitions._tsdocConfiguration;
+    return _tsdocConfiguration;
   }
-
-  private static _tsdocConfiguration: TSDocConfiguration | undefined;
 }

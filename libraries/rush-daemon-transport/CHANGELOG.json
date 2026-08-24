@@ -1,0 +1,57 @@
+{
+  "name": "@rushstack/rush-daemon-transport",
+  "entries": [
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/rush-daemon-transport_v0.2.2",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/rush-daemon-transport_v0.2.1",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/rush-daemon-transport_v0.2.0",
+      "date": "Tue, 18 Aug 2026 00:18:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release: workspace-key hashing (sha256 of canonical root + rushVersion + startupOptions), per-user runtime-dir socket/pipe path derivation, net listener/connector with backpressure, and PID/lockfile handling with stale-socket reclaim."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.2.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

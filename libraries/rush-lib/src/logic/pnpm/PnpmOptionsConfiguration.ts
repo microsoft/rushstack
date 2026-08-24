@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import * as path from 'node:path';
+
+import { JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
 import { NonProjectConfigurationFile } from '@rushstack/heft-config-file';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -211,6 +213,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
  */
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   private readonly _json: JsonObject;
+  private readonly _commonTempFolder: string;
   private _globalPatchedDependencies: Record<string, string> | undefined;
 
   /**
@@ -556,6 +559,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   private constructor(json: IPnpmOptionsJson, commonTempFolder: string, jsonFilename?: string) {
     super(json);
     this._json = json;
+    this._commonTempFolder = commonTempFolder;
     this.jsonFilename = jsonFilename;
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
@@ -634,25 +638,82 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     return new PnpmOptionsConfiguration(json, commonTempFolder);
   }
 
+  private _getJsonFilenameOrThrow(): string {
+    if (!this.jsonFilename) {
+      throw new Error('Cannot save pnpm-config.json because no jsonFilename was provided.');
+    }
+
+    return this.jsonFilename;
+  }
+
   /**
    * Updates patchedDependencies field of the PNPM options in the common/config/rush/pnpm-config.json file.
+   *
+   * @remarks
+   * When running "pnpm patch-commit"/"pnpm patch-remove" (pnpm 9 and newer), pnpm rewrites the
+   * pre-existing entries using absolute paths pointing into the common/temp folder. Normalize any such
+   * value back to a path relative to the common/temp folder (e.g. "patches/example\@1.0.0.patch") so the location
+   * of the local checkout does not leak into pnpm-config.json.
    */
   public updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void {
+    if (patchedDependencies) {
+      const normalized: Record<string, string> = {};
+      for (const [dependency, patchPath] of Object.entries(patchedDependencies)) {
+        normalized[dependency] =
+          path.isAbsolute(patchPath) && Path.isUnder(patchPath, this._commonTempFolder)
+            ? Path.convertToSlashes(path.relative(this._commonTempFolder, patchPath))
+            : patchPath;
+      }
+      patchedDependencies = normalized;
+    }
+
     this._globalPatchedDependencies = patchedDependencies;
     this._json.globalPatchedDependencies = patchedDependencies;
+    JsonFile.save(this._json, this._getJsonFilenameOrThrow(), {
+      updateExistingFile: true,
+      ignoreUndefinedValues: true
+    });
+  }
+
+  /**
+   * Updates globalOnlyBuiltDependencies field of the PNPM options in the common/config/rush/pnpm-config.json file.
+   *
+   * @deprecated Use {@link PnpmOptionsConfiguration.updateGlobalOnlyBuiltDependenciesAsync} instead.
+   */
+  public updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void {
+    this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
     if (this.jsonFilename) {
-      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
+      JsonFile.save(this._json, this.jsonFilename, {
+        updateExistingFile: true,
+        ignoreUndefinedValues: true
+      });
     }
   }
 
   /**
    * Updates globalOnlyBuiltDependencies field of the PNPM options in the common/config/rush/pnpm-config.json file.
    */
-  public updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void {
+  public async updateGlobalOnlyBuiltDependenciesAsync(
+    onlyBuiltDependencies: string[] | undefined
+  ): Promise<void> {
     this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
-    if (this.jsonFilename) {
-      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
-    }
+    await JsonFile.saveAsync(this._json, this._getJsonFilenameOrThrow(), {
+      updateExistingFile: true,
+      ignoreUndefinedValues: true
+    });
+  }
+
+  /**
+   * Updates globalCatalogs field of the PNPM options in the common/config/rush/pnpm-config.json file.
+   */
+  public async updateGlobalCatalogsAsync(
+    catalogs: Record<string, Record<string, string>> | undefined
+  ): Promise<void> {
+    this._json.globalCatalogs = catalogs;
+    await JsonFile.saveAsync(this._json, this._getJsonFilenameOrThrow(), {
+      updateExistingFile: true,
+      ignoreUndefinedValues: true
+    });
   }
 
   /**

@@ -82,18 +82,16 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiInitialize
     return name;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.EnumMember;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiEnumMember.getContainerKey(this.name);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
       .addNavigationStep(Navigation.Exports, nameComponent)

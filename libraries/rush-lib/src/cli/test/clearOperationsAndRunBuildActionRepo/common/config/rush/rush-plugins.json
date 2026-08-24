@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "packageName": "rush-mock-clear-operations-plugin",
+      "pluginName": "rush-mock-clear-operations-plugin",
+      "autoinstallerName": "plugins"
+    }
+  ]
+}

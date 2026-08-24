@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/mcp-server",
-  "version": "0.4.19",
+  "version": "0.4.25",
   "description": "A Model Context Protocol server implementation for Rush",
   "keywords": [
     "rush",
@@ -41,7 +41,7 @@
     "directory": "apps/rush-mcp-server"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=20.9.0"
   },
   "engineStrict": true,
   "homepage": "https://rushstack.io",

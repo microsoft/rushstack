@@ -259,72 +259,6 @@ export class JsonSchema {
     return schema;
   }
 
-  private static _collectDependentSchemas(
-    collectedSchemas: JsonSchema[],
-    dependentSchemas: JsonSchema[],
-    seenObjects: Set<JsonSchema>,
-    seenIds: Set<string>
-  ): void {
-    for (const dependentSchema of dependentSchemas) {
-      // It's okay for the same schema to appear multiple times in the tree, but we only process it once
-      if (seenObjects.has(dependentSchema)) {
-        continue;
-      }
-      seenObjects.add(dependentSchema);
-
-      const schemaId: string = dependentSchema._ensureLoaded();
-      if (schemaId === '') {
-        throw new Error(
-          `This schema ${dependentSchema.shortName} cannot be referenced` +
-            ' because is missing the "id" (draft-04) or "$id" field'
-        );
-      }
-      if (seenIds.has(schemaId)) {
-        throw new Error(
-          `This schema ${dependentSchema.shortName} has the same "id" (draft-04) or "$id" as another schema in this set`
-        );
-      }
-
-      seenIds.add(schemaId);
-
-      collectedSchemas.push(dependentSchema);
-
-      JsonSchema._collectDependentSchemas(
-        collectedSchemas,
-        dependentSchema._dependentSchemas,
-        seenObjects,
-        seenIds
-      );
-    }
-  }
-
-  /**
-   * Used to nicely format the ZSchema error tree.
-   */
-  private static _formatErrorDetails(errorDetails: ErrorObject[]): string {
-    return JsonSchema._formatErrorDetailsHelper(errorDetails, '', '');
-  }
-
-  /**
-   * Used by _formatErrorDetails.
-   */
-  private static _formatErrorDetailsHelper(
-    errorDetails: ErrorObject[],
-    indent: string,
-    buffer: string
-  ): string {
-    for (const errorDetail of errorDetails) {
-      buffer += os.EOL + indent + `Error: #${errorDetail.instancePath}`;
-
-      buffer += os.EOL + indent + `       ${errorDetail.message}`;
-      if (errorDetail.params?.additionalProperty) {
-        buffer += `: ${errorDetail.params?.additionalProperty}`;
-      }
-    }
-
-    return buffer;
-  }
-
   /**
    * Returns a short name for this schema, for use in error messages.
    * @remarks
@@ -391,7 +325,7 @@ export class JsonSchema {
       const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
       const seenIds: Set<string> = new Set<string>();
 
-      JsonSchema._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
+      this._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
 
       // Unless explicitly rejected, scan the top-level keys of each schema for vendor
       // extension keys matching the x-<vendor>-<keyword> pattern and register them with
@@ -415,7 +349,7 @@ export class JsonSchema {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
               os.EOL +
-              JsonSchema._formatErrorDetails(validator.errors)
+              _formatErrorDetails(validator.errors)
           );
         }
         validator.addSchema(collectedSchema._schemaObject);
@@ -470,7 +404,7 @@ export class JsonSchema {
     }
 
     if (this._validator && !this._validator(jsonObject)) {
-      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator.errors!);
+      const errorDetails: string = _formatErrorDetails(this._validator.errors!);
 
       const args: IJsonSchemaErrorInfo = {
         details: errorDetails
@@ -485,4 +419,66 @@ export class JsonSchema {
     }
     return (this._schemaObject as ISchemaWithId).id || (this._schemaObject as ISchemaWithId).$id || '';
   }
+
+  private _collectDependentSchemas(
+    collectedSchemas: JsonSchema[],
+    dependentSchemas: JsonSchema[],
+    seenObjects: Set<JsonSchema>,
+    seenIds: Set<string>
+  ): void {
+    for (const dependentSchema of dependentSchemas) {
+      // It's okay for the same schema to appear multiple times in the tree, but we only process it once
+      if (seenObjects.has(dependentSchema)) {
+        continue;
+      }
+      seenObjects.add(dependentSchema);
+
+      const schemaId: string = dependentSchema._ensureLoaded();
+      if (schemaId === '') {
+        throw new Error(
+          `This schema ${dependentSchema.shortName} cannot be referenced` +
+            ' because is missing the "id" (draft-04) or "$id" field'
+        );
+      }
+      if (seenIds.has(schemaId)) {
+        throw new Error(
+          `This schema ${dependentSchema.shortName} has the same "id" (draft-04) or "$id" as another schema in this set`
+        );
+      }
+
+      seenIds.add(schemaId);
+
+      collectedSchemas.push(dependentSchema);
+
+      this._collectDependentSchemas(
+        collectedSchemas,
+        dependentSchema._dependentSchemas,
+        seenObjects,
+        seenIds
+      );
+    }
+  }
+}
+
+/**
+ * Used to nicely format the ZSchema error tree.
+ */
+function _formatErrorDetails(errorDetails: ErrorObject[]): string {
+  return _formatErrorDetailsHelper(errorDetails, '', '');
+}
+
+/**
+ * Used by _formatErrorDetails.
+ */
+function _formatErrorDetailsHelper(errorDetails: ErrorObject[], indent: string, buffer: string): string {
+  for (const errorDetail of errorDetails) {
+    buffer += os.EOL + indent + `Error: #${errorDetail.instancePath}`;
+
+    buffer += os.EOL + indent + `       ${errorDetail.message}`;
+    if (errorDetail.params?.additionalProperty) {
+      buffer += `: ${errorDetail.params?.additionalProperty}`;
+    }
+  }
+
+  return buffer;
 }

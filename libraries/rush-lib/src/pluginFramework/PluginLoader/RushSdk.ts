@@ -6,18 +6,18 @@ declare const global: typeof globalThis & {
   ___rush___rushLibModule?: RushLibModuleType;
 };
 
-export class RushSdk {
-  private static _initialized: boolean = false;
+let _initialized: boolean = false;
 
+export class RushSdk {
   public static ensureInitialized(): void {
-    if (!RushSdk._initialized) {
+    if (!_initialized) {
       const rushLibModule: RushLibModuleType = require('../../index');
 
       // The "@rushstack/rush-sdk" shim will look for this global variable to obtain
       // Rush's instance of "@microsoft/rush-lib".
       global.___rush___rushLibModule = rushLibModule;
 
-      RushSdk._initialized = true;
+      _initialized = true;
     }
   }
 }

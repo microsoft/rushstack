@@ -49,6 +49,8 @@
       "watchOptions": {
         // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
         "alwaysWatch": true,
+        // Build a full watch graph so projects can become enabled without rebuilding the graph.
+        "includeAllProjectsInWatchGraph": true,
         // During watch recompilation run both build and test for affected projects
         "watchPhases": ["_phase:lite-build", "_phase:build", "_phase:test"]
       }
@@ -245,7 +247,7 @@
       // Used for very simple builds that don't support CLI arguments like `--production` or `--fix`
       "name": "_phase:lite-build",
       "dependencies": {
-        "upstream": ["_phase:lite-build", "_phase:build"]
+        "upstream": ["_phase:build"]
       },
       "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
@@ -253,8 +255,8 @@
     {
       "name": "_phase:build",
       "dependencies": {
-        "self": ["_phase:lite-build"],
-        "upstream": ["_phase:build"]
+        // Don't need to declare the dependency on _phase:build because it is transitive via _phase:lite-build
+        "self": ["_phase:lite-build"]
       },
       "missingScriptBehavior": "log",
       "allowWarningsOnSuccess": false
@@ -262,7 +264,8 @@
     {
       "name": "_phase:test",
       "dependencies": {
-        "self": ["_phase:lite-build", "_phase:build"]
+        // Dependency on _phase:lite-build is transitive via _phase:build
+        "self": ["_phase:build"]
       },
       "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
@@ -493,6 +496,14 @@
       "description": "disable colors in the build log, defaults to 'true'",
       "associatedPhases": ["_phase:build", "_phase:test"],
       "associatedCommands": ["build", "rebuild", "test", "retest"]
+    },
+    {
+      "longName": "--port",
+      "parameterKind": "integer",
+      "argumentName": "PORT",
+      "description": "The port to use for the server",
+      "associatedPhases": [],
+      "associatedCommands": ["start"]
     },
     {
       "longName": "--update-snapshots",

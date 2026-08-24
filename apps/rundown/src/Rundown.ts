@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import stringArgv from 'string-argv';
 
-import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup, Path, Sort } from '@rushstack/node-core-library';
 
 import type { IpcMessage } from './LauncherTypes';
 
@@ -57,7 +57,7 @@ export class Rundown {
           importedPackageFolders.add(path.basename(importedPackageFolder));
         } else {
           const relativePath: string = path.relative(process.cwd(), importedPackageFolder);
-          importedPackageFolders.add(Text.replaceAll(relativePath, '\\', '/'));
+          importedPackageFolders.add(Path.convertToSlashes(relativePath));
         }
       } else {
         // If the importedPath does not belong to an NPM package, then rundown-snapshot.log can ignore it.

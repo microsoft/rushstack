@@ -3,8 +3,9 @@
 
 import { ApiParameterListMixin, type ApiItem } from '@microsoft/api-extractor-model';
 
+const _badFilenameCharsRegExp: RegExp = /[^a-z0-9_\-\.]/gi;
+
 export class Utilities {
-  private static readonly _badFilenameCharsRegExp: RegExp = /[^a-z0-9_\-\.]/gi;
   /**
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
@@ -21,6 +22,6 @@ export class Utilities {
   public static getSafeFilenameForName(name: string): string {
     // TODO: This can introduce naming collisions.
     // We will fix that as part of https://github.com/microsoft/rushstack/issues/1308
-    return name.replace(Utilities._badFilenameCharsRegExp, '_').toLowerCase();
+    return name.replace(_badFilenameCharsRegExp, '_').toLowerCase();
   }
 }

@@ -54,8 +54,7 @@ export class DocTable extends DocNode {
     }
   }
 
-  /** @override */
-  public get kind(): string {
+  public override get kind(): string {
     return CustomDocNodeKind.Table;
   }
 
@@ -73,8 +72,7 @@ export class DocTable extends DocNode {
     return row;
   }
 
-  /** @override */
-  protected onGetChildNodes(): ReadonlyArray<DocNode | undefined> {
+  protected override onGetChildNodes(): ReadonlyArray<DocNode | undefined> {
     return [this.header, ...this._rows];
   }
 }

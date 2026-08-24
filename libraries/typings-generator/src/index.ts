@@ -9,8 +9,11 @@
  * @packageDocumentation
  */
 
+export { type ISourcePosition, type IDeclarationMapping, serializeDeclarationMap } from './DeclarationMap';
+
 export {
   type ReadFile,
+  type IGeneratedTypings,
   type ITypingsGeneratorBaseOptions,
   type ITypingsGeneratorOptionsWithoutReadFile,
   type ITypingsGeneratorOptions,

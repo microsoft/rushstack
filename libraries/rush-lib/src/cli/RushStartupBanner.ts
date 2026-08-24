@@ -8,8 +8,8 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
 export class RushStartupBanner {
   public static logBanner(rushVersion: string, isManaged: boolean): void {
-    const nodeVersion: string = this._formatNodeVersion();
-    const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
+    const nodeVersion: string = _formatNodeVersion();
+    const versionSuffix: string = rushVersion ? ' ' + _formatRushVersion(rushVersion, isManaged) : '';
 
     // eslint-disable-next-line no-console
     console.log(
@@ -21,24 +21,24 @@ export class RushStartupBanner {
   }
 
   public static logStreamlinedBanner(rushVersion: string, isManaged: boolean): void {
-    const nodeVersion: string = this._formatNodeVersion();
-    const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
+    const nodeVersion: string = _formatNodeVersion();
+    const versionSuffix: string = rushVersion ? ' ' + _formatRushVersion(rushVersion, isManaged) : '';
 
     // eslint-disable-next-line no-console
     console.log(Colorize.bold(`Rush Multi-Project Build Tool${versionSuffix}`) + ` - Node.js ${nodeVersion}`);
   }
+}
 
-  private static _formatNodeVersion(): string {
-    const nodeVersion: string = process.versions.node;
-    const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
-      ? 'unstable'
-      : NodeJsCompatibility.isLtsVersion
-        ? 'LTS'
-        : 'pre-LTS';
-    return `${nodeVersion} (${nodeReleaseLabel})`;
-  }
+function _formatNodeVersion(): string {
+  const nodeVersion: string = process.versions.node;
+  const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
+    ? 'unstable'
+    : NodeJsCompatibility.isLtsVersion
+      ? 'LTS'
+      : 'pre-LTS';
+  return `${nodeVersion} (${nodeReleaseLabel})`;
+}
 
-  private static _formatRushVersion(rushVersion: string, isManaged: boolean): string {
-    return rushVersion + Colorize.yellow(isManaged ? '' : ' (unmanaged)');
-  }
+function _formatRushVersion(rushVersion: string, isManaged: boolean): string {
+  return rushVersion + Colorize.yellow(isManaged ? '' : ' (unmanaged)');
 }

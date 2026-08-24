@@ -75,18 +75,16 @@ export class ApiProperty extends ApiAbstractMixin(
     }
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Property;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiProperty.getContainerKey(this.name, this.isStatic);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
       .addNavigationStep(this.isStatic ? Navigation.Exports : Navigation.Members, nameComponent)

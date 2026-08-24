@@ -2,13 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { LockFile, getProcessStartTime, getProcessStartTimeFromProcStat } from '../LockFile';
+import {
+  LockFile,
+  getProcessStartTime,
+  getProcessStartTimeFromProcStat,
+  _setLockFileGetProcessStartTime
+} from '../LockFile';
 import { FileSystem } from '../FileSystem';
 import { FileWriter } from '../FileWriter';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (LockFile as any)._getStartTime = fn;
+  _setLockFileGetProcessStartTime(fn);
 }
 
 // lib/test

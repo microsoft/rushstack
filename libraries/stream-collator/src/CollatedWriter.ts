@@ -50,7 +50,7 @@ export class CollatedWriter extends TerminalWritable {
   }
 
   /** {@inheritDoc @rushstack/terminal#TerminalWritable.onClose} */
-  public onClose(): void {
+  public override onClose(): void {
     this._collator._writerClose(this, this._bufferedChunks);
   }
 

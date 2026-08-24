@@ -1,10 +1,19 @@
 parameters:
   - name: NodeMajorVersion
     type: number
-    default: 22
+    default: 24
 
 steps:
   - task: NodeTool@0
     inputs:
       versionSpec: '${{ parameters.NodeMajorVersion }}.x'
     displayName: 'Install Node.js ${{ parameters.NodeMajorVersion }}'
+
+  - bash: |
+      cat > "$HOME/.npmrc" <<'EOF'
+      registry=https://packagefeedproxy.microsoft.io/npm/
+      EOF
+    displayName: 'Set user npm registry to packagefeedproxy'
+
+  - bash: npm config list
+    displayName: 'Show npm configuration'

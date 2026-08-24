@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Require Node.js 20.9 or newer for the Rush bootstrap and runtime.",
+      "type": "none"
+    }
+  ]
+}

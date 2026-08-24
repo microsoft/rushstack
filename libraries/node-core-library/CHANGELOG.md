@@ -1,6 +1,27 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 18 Apr 2026 00:15:16 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+
+## 5.24.0
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Minor changes
+
+- Deprecate `Text.replaceAll()` in favor of the native `String.prototype.replaceAll()` function.
+
+## 5.23.3
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
+
+## 5.23.2
+Thu, 16 Jul 2026 00:16:13 GMT
+
+### Patches
+
+- Update `ajv` dependency to `~8.20.0` to resolve vulnerable transitive `fast-uri` versions.
 
 ## 5.23.1
 Sat, 18 Apr 2026 00:15:16 GMT

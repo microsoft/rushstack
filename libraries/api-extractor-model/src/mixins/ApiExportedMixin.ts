@@ -67,7 +67,6 @@ export interface ApiExportedMixin extends ApiItem {
    */
   readonly isExported: boolean;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -94,8 +93,7 @@ export function ApiExportedMixin<TBaseClass extends IApiItemConstructor>(
       this[_isExported] = options.isExported;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiExportedMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiExportedMixinJson
@@ -115,9 +113,8 @@ export function ApiExportedMixin<TBaseClass extends IApiItemConstructor>(
     /**
      * The `isExported` property is intentionally not serialized because the information is already present
      * in the item's `canonicalReference`.
-     * @override
      */
-    public serializeInto(jsonObject: Partial<IApiExportedMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiExportedMixinJson>): void {
       super.serializeInto(jsonObject);
     }
   }

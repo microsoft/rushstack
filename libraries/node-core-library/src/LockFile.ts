@@ -141,6 +141,23 @@ export function getProcessStartTime(pid: number): string | undefined {
 // multiple locks are acquired in the same process.
 const IN_PROC_LOCKS: Set<string> = new Set<string>();
 
+// The function used to determine a process's start time.  Overridable for unit testing.
+let _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
+
+/**
+ * For unit testing only: overrides the function used to determine a process's start time.
+ * @internal
+ */
+export function _setLockFileGetProcessStartTime(fn: (pid: number) => string | undefined): void {
+  _getStartTime = fn;
+}
+
+interface ITryAcquireResult {
+  fileWriter: FileWriter | undefined;
+  filePath: string;
+  dirtyWhenAcquired: boolean;
+}
+
 /**
  * The `LockFile` implements a file-based mutex for synchronizing access to a shared resource
  * between multiple Node.js processes.  It is not recommended for synchronization solely within
@@ -152,8 +169,6 @@ const IN_PROC_LOCKS: Set<string> = new Set<string>();
  * @public
  */
 export class LockFile {
-  private static _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
-
   private _fileWriter: FileWriter | undefined;
   private _filePath: string;
   private _dirtyWhenAcquired: boolean;
@@ -211,7 +226,12 @@ export class LockFile {
   public static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined {
     FileSystem.ensureFolder(resourceFolder);
     const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
-    return LockFile._tryAcquireInner(resourceFolder, resourceName, lockFilePath);
+    const result: ITryAcquireResult | undefined = _tryAcquireInner(
+      resourceFolder,
+      resourceName,
+      lockFilePath
+    );
+    return result && new LockFile(result.fileWriter, result.filePath, result.dirtyWhenAcquired);
   }
 
   /**
@@ -250,259 +270,19 @@ export class LockFile {
 
     // eslint-disable-next-line no-unmodified-loop-condition
     while (!timeoutTime || Date.now() <= timeoutTime) {
-      const lock: LockFile | undefined = LockFile._tryAcquireInner(
+      const result: ITryAcquireResult | undefined = _tryAcquireInner(
         resourceFolder,
         resourceName,
         lockFilePath
       );
-      if (lock) {
-        return lock;
+      if (result) {
+        return new LockFile(result.fileWriter, result.filePath, result.dirtyWhenAcquired);
       }
 
       await Async.sleepAsync(interval);
     }
 
     throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
-  }
-
-  private static _tryAcquireInner(
-    resourceFolder: string,
-    resourceName: string,
-    lockFilePath: string
-  ): LockFile | undefined {
-    if (!IN_PROC_LOCKS.has(lockFilePath)) {
-      switch (process.platform) {
-        case 'win32': {
-          return LockFile._tryAcquireWindows(lockFilePath);
-        }
-
-        case 'linux':
-        case 'darwin': {
-          return LockFile._tryAcquireMacOrLinux(resourceFolder, resourceName, lockFilePath);
-        }
-
-        default: {
-          throw new Error(`File locking not implemented for platform: "${process.platform}"`);
-        }
-      }
-    }
-  }
-
-  /**
-   * Attempts to acquire the lock on a Linux or OSX machine
-   */
-  private static _tryAcquireMacOrLinux(
-    resourceFolder: string,
-    resourceName: string,
-    pidLockFilePath: string
-  ): LockFile | undefined {
-    // get the current process identifier (PID)
-    const pid: number = process.pid;
-
-    // Suppose that a process terminates unexpectedly without deleting its PID-based lockfile,
-    // then we check to see if the process is still alive.  The OS may have given the same PID
-    // to a new process, how to detect that?  We will rely on getProcessStartTime() which
-    // is stored in the file itself for comparison.
-    const startTime: string | undefined = LockFile._getStartTime(pid);
-
-    if (!startTime) {
-      throw new Error(`Unable to calculate start time for current process.`);
-    }
-
-    let lockFileHandle: FileWriter | undefined;
-
-    let lockFile: LockFile;
-
-    try {
-      // open in write mode since if this file exists, it cannot be from the current process
-      // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
-      // We should ideally maintain a dictionary of normalized acquired filenames
-      lockFileHandle = FileWriter.open(pidLockFilePath);
-      lockFileHandle.write(startTime);
-      const currentBirthTimeMs: number = lockFileHandle.getStatistics().birthtime.getTime();
-
-      let smallestBirthTimeMs: number = currentBirthTimeMs;
-      let smallestBirthTimePid: string = pid.toString();
-
-      // now, scan the directory for all lockfiles
-      const files: string[] = FileSystem.readFolderItemNames(resourceFolder);
-
-      // look for anything ending with # then numbers and ".lock"
-      const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
-
-      // If we are the process to acquire the lock, it becomes our responsibility to clean up these
-      // stale files.  If there is at least 1 stale file, then the resource is assumed to be "dirty"
-      // (for example, the previous process was interrupted before releasing or while acquiring).
-      const staleFilesToDelete: string[] = [];
-
-      let match: RegExpMatchArray | null;
-      let otherPid: string;
-      for (const fileInFolder of files) {
-        if (
-          (match = fileInFolder.match(lockFileRegExp)) &&
-          match[1] === resourceName &&
-          (otherPid = match[2]) !== pid.toString()
-        ) {
-          // We found at least one lockfile hanging around that isn't ours
-          const fileInFolderPath: string = `${resourceFolder}/${fileInFolder}`;
-
-          // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
-
-          // Actual start time of the other PID
-          const otherPidCurrentStartTime: string | undefined = LockFile._getStartTime(parseInt(otherPid, 10));
-
-          // The start time from the file, which we will compare with otherPidCurrentStartTime
-          // to determine whether the PID got reused by a new process.
-          let otherPidOldStartTime: string | undefined;
-          let otherBirthtimeMs: number | undefined;
-          try {
-            otherPidOldStartTime = FileSystem.readFile(fileInFolderPath);
-            // check the timestamp of the file
-            otherBirthtimeMs = FileSystem.getStatistics(fileInFolderPath).birthtime.getTime();
-          } catch (error) {
-            if (FileSystem.isNotExistError(error)) {
-              // ==> Properly closed lockfile, safe to ignore:
-              // The other process deleted the file, which we assume means it completed successfully,
-              // so the state is not dirty.  This is equivalent to if readFolderItemNames() never saw
-              // the file in the firstplace.
-              continue;
-            }
-          }
-
-          // What the other process's file exists, but it is an empty file?
-          // Either they were terminated while acquiring, or else they haven't finished writing it yet.
-          if (otherBirthtimeMs !== undefined && otherPidOldStartTime === '') {
-            if (otherBirthtimeMs > currentBirthTimeMs) {
-              // ==> Safe to ignore
-              // If the other process was terminated, it happened before they finished acquiring.
-              // If the other process is alive, their file is newer, so we will acquire instead of them.
-
-              // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
-              continue;
-            } else if (
-              otherBirthtimeMs - currentBirthTimeMs < 0 &&
-              otherBirthtimeMs - currentBirthTimeMs > -1000
-            ) {
-              // ==> Race condition
-              // The other process created their file first, so they will probably acquire the lock
-              // after they finish writing the contents.  But what if their process is actually dead
-              // and replaced by a new process with the same PID?  Normally the otherPidOldStartTime
-              // gives the answer, but in this edge case we are missing that information.
-              // So we conservatively assume that it should not take them more than 1000ms to
-              // open a file, write a PID, and close the file.
-              return undefined; // fail to acquire and retry later
-            }
-          }
-
-          // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
-          // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
-
-          // Time to compare
-          if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
-            // ==> Stale lockfile
-            // This file doesn't prevent us from acquiring the lock, but it does indicate that
-            // the resource was left in a dirty state.  (If we delete the file right now, that
-            // information would be lost, so we clean up later when we acquire successfully.)
-
-            // console.log(`Other pid ${otherPid} is no longer executing!`);
-            staleFilesToDelete.push(fileInFolderPath);
-            continue;
-          }
-
-          // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
-          // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
-
-          if (otherBirthtimeMs !== undefined) {
-            // ==> We found a valid file belonging to another process.
-            // With multiple parties trying to acquire, the winner is the smallestBirthTime,
-            // so we need to sort.
-
-            // the other lock file was created before the current earliest lock file
-            // or the other lock file was created at the same exact time, but has earlier pid
-
-            // note that it is acceptable to do a direct comparison of the PIDs in this case
-            // since we are establishing a consistent order to apply to the lock files in all
-            // execution instances.
-
-            // it doesn't matter that the PIDs roll over, we've already
-            // established that these processes all started at the same time, so we just
-            // need to get all instances of the lock test to agree which one won.
-            if (
-              otherBirthtimeMs < smallestBirthTimeMs ||
-              (otherBirthtimeMs === smallestBirthTimeMs && otherPid < smallestBirthTimePid)
-            ) {
-              smallestBirthTimeMs = otherBirthtimeMs;
-              smallestBirthTimePid = otherPid;
-            }
-          }
-        }
-      }
-
-      if (smallestBirthTimePid !== pid.toString()) {
-        // we do not have the lock
-        return undefined;
-      }
-
-      let dirtyWhenAcquired: boolean = false;
-      for (const staleFileToDelete of staleFilesToDelete) {
-        FileSystem.deleteFile(staleFileToDelete, { throwIfNotExists: false });
-        dirtyWhenAcquired = true;
-      }
-
-      // We have the lock!
-      lockFile = new LockFile(lockFileHandle, pidLockFilePath, dirtyWhenAcquired);
-      lockFileHandle = undefined; // The LockFile object has taken ownership of our handle
-    } finally {
-      if (lockFileHandle) {
-        // ensure our lock is closed
-        lockFileHandle.close();
-        FileSystem.deleteFile(pidLockFilePath);
-      }
-    }
-    return lockFile;
-  }
-
-  /**
-   * Attempts to acquire the lock using Windows
-   * This algorithm is much simpler since we can rely on the operating system
-   */
-  private static _tryAcquireWindows(lockFilePath: string): LockFile | undefined {
-    let dirtyWhenAcquired: boolean = false;
-
-    let fileHandle: FileWriter | undefined;
-    let lockFile: LockFile;
-
-    try {
-      if (FileSystem.exists(lockFilePath)) {
-        dirtyWhenAcquired = true;
-
-        // If the lockfile is held by an process with an exclusive lock, then removing it will
-        // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
-
-        // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
-        // the last process to hold it died.
-        FileSystem.deleteFile(lockFilePath);
-      }
-
-      try {
-        // Attempt to open an exclusive lockfile
-        fileHandle = FileWriter.open(lockFilePath, { exclusive: true });
-      } catch (error) {
-        // we tried to delete the lock, but something else is holding it,
-        // (probably an active process), therefore we are unable to create a lock
-        return undefined;
-      }
-
-      // Ensure we can hand off the file descriptor to the lockfile
-      lockFile = new LockFile(fileHandle, lockFilePath, dirtyWhenAcquired);
-      fileHandle = undefined;
-    } finally {
-      if (fileHandle) {
-        fileHandle.close();
-      }
-    }
-
-    return lockFile;
   }
 
   /**
@@ -547,4 +327,244 @@ export class LockFile {
   public get isReleased(): boolean {
     return this._fileWriter === undefined;
   }
+}
+
+function _tryAcquireInner(
+  resourceFolder: string,
+  resourceName: string,
+  lockFilePath: string
+): ITryAcquireResult | undefined {
+  if (!IN_PROC_LOCKS.has(lockFilePath)) {
+    switch (process.platform) {
+      case 'win32': {
+        return _tryAcquireWindows(lockFilePath);
+      }
+
+      case 'linux':
+      case 'darwin': {
+        return _tryAcquireMacOrLinux(resourceFolder, resourceName, lockFilePath);
+      }
+
+      default: {
+        throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+      }
+    }
+  }
+}
+
+/**
+ * Attempts to acquire the lock on a Linux or OSX machine
+ */
+function _tryAcquireMacOrLinux(
+  resourceFolder: string,
+  resourceName: string,
+  pidLockFilePath: string
+): ITryAcquireResult | undefined {
+  // get the current process identifier (PID)
+  const pid: number = process.pid;
+
+  // Suppose that a process terminates unexpectedly without deleting its PID-based lockfile,
+  // then we check to see if the process is still alive.  The OS may have given the same PID
+  // to a new process, how to detect that?  We will rely on getProcessStartTime() which
+  // is stored in the file itself for comparison.
+  const startTime: string | undefined = _getStartTime(pid);
+
+  if (!startTime) {
+    throw new Error(`Unable to calculate start time for current process.`);
+  }
+
+  let lockFileHandle: FileWriter | undefined;
+
+  let result: ITryAcquireResult | undefined;
+
+  try {
+    // open in write mode since if this file exists, it cannot be from the current process
+    // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
+    // We should ideally maintain a dictionary of normalized acquired filenames
+    lockFileHandle = FileWriter.open(pidLockFilePath);
+    lockFileHandle.write(startTime);
+    const currentBirthTimeMs: number = lockFileHandle.getStatistics().birthtime.getTime();
+
+    let smallestBirthTimeMs: number = currentBirthTimeMs;
+    let smallestBirthTimePid: string = pid.toString();
+
+    // now, scan the directory for all lockfiles
+    const files: string[] = FileSystem.readFolderItemNames(resourceFolder);
+
+    // look for anything ending with # then numbers and ".lock"
+    const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
+
+    // If we are the process to acquire the lock, it becomes our responsibility to clean up these
+    // stale files.  If there is at least 1 stale file, then the resource is assumed to be "dirty"
+    // (for example, the previous process was interrupted before releasing or while acquiring).
+    const staleFilesToDelete: string[] = [];
+
+    let match: RegExpMatchArray | null;
+    let otherPid: string;
+    for (const fileInFolder of files) {
+      if (
+        (match = fileInFolder.match(lockFileRegExp)) &&
+        match[1] === resourceName &&
+        (otherPid = match[2]) !== pid.toString()
+      ) {
+        // We found at least one lockfile hanging around that isn't ours
+        const fileInFolderPath: string = `${resourceFolder}/${fileInFolder}`;
+
+        // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
+
+        // Actual start time of the other PID
+        const otherPidCurrentStartTime: string | undefined = _getStartTime(parseInt(otherPid, 10));
+
+        // The start time from the file, which we will compare with otherPidCurrentStartTime
+        // to determine whether the PID got reused by a new process.
+        let otherPidOldStartTime: string | undefined;
+        let otherBirthtimeMs: number | undefined;
+        try {
+          otherPidOldStartTime = FileSystem.readFile(fileInFolderPath);
+          // check the timestamp of the file
+          otherBirthtimeMs = FileSystem.getStatistics(fileInFolderPath).birthtime.getTime();
+        } catch (error) {
+          if (FileSystem.isNotExistError(error)) {
+            // ==> Properly closed lockfile, safe to ignore:
+            // The other process deleted the file, which we assume means it completed successfully,
+            // so the state is not dirty.  This is equivalent to if readFolderItemNames() never saw
+            // the file in the firstplace.
+            continue;
+          }
+        }
+
+        // What the other process's file exists, but it is an empty file?
+        // Either they were terminated while acquiring, or else they haven't finished writing it yet.
+        if (otherBirthtimeMs !== undefined && otherPidOldStartTime === '') {
+          if (otherBirthtimeMs > currentBirthTimeMs) {
+            // ==> Safe to ignore
+            // If the other process was terminated, it happened before they finished acquiring.
+            // If the other process is alive, their file is newer, so we will acquire instead of them.
+
+            // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
+            continue;
+          } else if (
+            otherBirthtimeMs - currentBirthTimeMs < 0 &&
+            otherBirthtimeMs - currentBirthTimeMs > -1000
+          ) {
+            // ==> Race condition
+            // The other process created their file first, so they will probably acquire the lock
+            // after they finish writing the contents.  But what if their process is actually dead
+            // and replaced by a new process with the same PID?  Normally the otherPidOldStartTime
+            // gives the answer, but in this edge case we are missing that information.
+            // So we conservatively assume that it should not take them more than 1000ms to
+            // open a file, write a PID, and close the file.
+            return undefined; // fail to acquire and retry later
+          }
+        }
+
+        // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
+        // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
+
+        // Time to compare
+        if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
+          // ==> Stale lockfile
+          // This file doesn't prevent us from acquiring the lock, but it does indicate that
+          // the resource was left in a dirty state.  (If we delete the file right now, that
+          // information would be lost, so we clean up later when we acquire successfully.)
+
+          // console.log(`Other pid ${otherPid} is no longer executing!`);
+          staleFilesToDelete.push(fileInFolderPath);
+          continue;
+        }
+
+        // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
+        // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
+
+        if (otherBirthtimeMs !== undefined) {
+          // ==> We found a valid file belonging to another process.
+          // With multiple parties trying to acquire, the winner is the smallestBirthTime,
+          // so we need to sort.
+
+          // the other lock file was created before the current earliest lock file
+          // or the other lock file was created at the same exact time, but has earlier pid
+
+          // note that it is acceptable to do a direct comparison of the PIDs in this case
+          // since we are establishing a consistent order to apply to the lock files in all
+          // execution instances.
+
+          // it doesn't matter that the PIDs roll over, we've already
+          // established that these processes all started at the same time, so we just
+          // need to get all instances of the lock test to agree which one won.
+          if (
+            otherBirthtimeMs < smallestBirthTimeMs ||
+            (otherBirthtimeMs === smallestBirthTimeMs && otherPid < smallestBirthTimePid)
+          ) {
+            smallestBirthTimeMs = otherBirthtimeMs;
+            smallestBirthTimePid = otherPid;
+          }
+        }
+      }
+    }
+
+    if (smallestBirthTimePid !== pid.toString()) {
+      // we do not have the lock
+      return undefined;
+    }
+
+    let dirtyWhenAcquired: boolean = false;
+    for (const staleFileToDelete of staleFilesToDelete) {
+      FileSystem.deleteFile(staleFileToDelete, { throwIfNotExists: false });
+      dirtyWhenAcquired = true;
+    }
+
+    // We have the lock!
+    result = { fileWriter: lockFileHandle, filePath: pidLockFilePath, dirtyWhenAcquired };
+    lockFileHandle = undefined; // The returned result has taken ownership of our handle
+  } finally {
+    if (lockFileHandle) {
+      // ensure our lock is closed
+      lockFileHandle.close();
+      FileSystem.deleteFile(pidLockFilePath);
+    }
+  }
+  return result;
+}
+
+/**
+ * Attempts to acquire the lock using Windows
+ * This algorithm is much simpler since we can rely on the operating system
+ */
+function _tryAcquireWindows(lockFilePath: string): ITryAcquireResult | undefined {
+  let dirtyWhenAcquired: boolean = false;
+
+  let fileHandle: FileWriter | undefined;
+  let result: ITryAcquireResult | undefined;
+
+  try {
+    if (FileSystem.exists(lockFilePath)) {
+      dirtyWhenAcquired = true;
+
+      // If the lockfile is held by an process with an exclusive lock, then removing it will
+      // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
+
+      // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
+      // the last process to hold it died.
+      FileSystem.deleteFile(lockFilePath);
+    }
+
+    try {
+      // Attempt to open an exclusive lockfile
+      fileHandle = FileWriter.open(lockFilePath, { exclusive: true });
+    } catch (error) {
+      // we tried to delete the lock, but something else is holding it,
+      // (probably an active process), therefore we are unable to create a lock
+      return undefined;
+    }
+
+    // Ensure we can hand off the file descriptor to the lockfile
+    result = { fileWriter: fileHandle, filePath: lockFilePath, dirtyWhenAcquired };
+    fileHandle = undefined;
+  } finally {
+    if (fileHandle) {
+      fileHandle.close();
+    }
+  }
+
+  return result;
 }

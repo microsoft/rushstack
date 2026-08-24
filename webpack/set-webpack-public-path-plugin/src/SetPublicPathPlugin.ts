@@ -130,7 +130,7 @@ export class SetPublicPathPlugin extends SetPublicPathPluginBase {
         this._pluginOptions = pluginOptions;
       }
 
-      public generate(): string {
+      public override generate(): string {
         const {
           name: regexpName,
           isTokenized: regexpIsTokenized,

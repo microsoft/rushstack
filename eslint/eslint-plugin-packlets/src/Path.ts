@@ -30,78 +30,11 @@ export class Path {
    *
    * @see {@link https://nodejs.org/en/docs/guides/working-with-different-filesystems/}
    */
-  public static usingCaseSensitive: boolean = Path._detectCaseSensitive();
-
-  private static _detectCaseSensitive(): boolean {
-    // Can our own file be accessed using a path with different case?  If so, then the filesystem is case-insensitive.
-    return !fs.existsSync(__filename.toUpperCase());
-  }
-
-  // Removes redundant trailing slashes from a path.
-  private static _trimTrailingSlashes(inputPath: string): string {
-    // Examples:
-    // "/a/b///\\" --> "/a/b"
-    // "/"         --> "/"
-    return inputPath.replace(/(?<=[^\/\\])[\/\\]+$/, '');
-  }
-
-  // An implementation of path.relative() that is case-insensitive.
-  private static _relativeCaseInsensitive(from: string, to: string): string {
-    // path.relative() apples path.normalize() and also trims any trailing slashes.
-    // Since we'll be matching toNormalized against result, we need to do that for our string as well.
-    const normalizedTo: string = Path._trimTrailingSlashes(path.normalize(to));
-
-    // We start by converting everything to uppercase and call path.relative()
-    const uppercasedFrom: string = from.toUpperCase();
-    const uppercasedTo: string = normalizedTo.toUpperCase();
-
-    // The result will be all uppercase because its inputs were uppercased
-    const uppercasedResult: string = path.relative(uppercasedFrom, uppercasedTo);
-
-    // Are there any cased characters in the result?
-    if (uppercasedResult.toLowerCase() === uppercasedResult) {
-      // No cased characters
-      // Example: "../.."
-      return uppercasedResult;
-    }
-
-    // Example:
-    //   from="/a/b/c"
-    //   to="/a/b/d/e"
-    //
-    //   fromNormalized="/A/B/C"
-    //   toNormalized="/A/B/D/E"
-    //
-    //   result="../D/E"
-    //
-    // Scan backwards comparing uppercasedResult versus uppercasedTo, stopping at the first place where they differ.
-    let resultIndex: number = uppercasedResult.length;
-    let toIndex: number = normalizedTo.length;
-    for (;;) {
-      if (resultIndex === 0 || toIndex === 0) {
-        // Stop if we reach the start of the string
-        break;
-      }
-
-      if (uppercasedResult.charCodeAt(resultIndex - 1) !== uppercasedTo.charCodeAt(toIndex - 1)) {
-        // Stop before we reach a character that is different
-        break;
-      }
-
-      --resultIndex;
-      --toIndex;
-    }
-
-    // Replace the matching part with the properly cased substring from the "normalizedTo" input
-    //
-    // Example:
-    //   ".." + "/d/e" = "../d/e"
-    return uppercasedResult.substring(0, resultIndex) + normalizedTo.substring(toIndex);
-  }
+  public static usingCaseSensitive: boolean = _detectCaseSensitive();
 
   public static relative(from: string, to: string): string {
     if (!Path.usingCaseSensitive) {
-      return Path._relativeCaseInsensitive(from, to);
+      return _relativeCaseInsensitive(from, to);
     }
     return path.relative(from, to);
   }
@@ -163,4 +96,71 @@ export class Path {
   public static convertToSlashes(inputPath: string): string {
     return inputPath.split('\\').join('/');
   }
+}
+
+function _detectCaseSensitive(): boolean {
+  // Can our own file be accessed using a path with different case?  If so, then the filesystem is case-insensitive.
+  return !fs.existsSync(__filename.toUpperCase());
+}
+
+// Removes redundant trailing slashes from a path.
+function _trimTrailingSlashes(inputPath: string): string {
+  // Examples:
+  // "/a/b///\\" --> "/a/b"
+  // "/"         --> "/"
+  return inputPath.replace(/(?<=[^\/\\])[\/\\]+$/, '');
+}
+
+// An implementation of path.relative() that is case-insensitive.
+export function _relativeCaseInsensitive(from: string, to: string): string {
+  // path.relative() apples path.normalize() and also trims any trailing slashes.
+  // Since we'll be matching toNormalized against result, we need to do that for our string as well.
+  const normalizedTo: string = _trimTrailingSlashes(path.normalize(to));
+
+  // We start by converting everything to uppercase and call path.relative()
+  const uppercasedFrom: string = from.toUpperCase();
+  const uppercasedTo: string = normalizedTo.toUpperCase();
+
+  // The result will be all uppercase because its inputs were uppercased
+  const uppercasedResult: string = path.relative(uppercasedFrom, uppercasedTo);
+
+  // Are there any cased characters in the result?
+  if (uppercasedResult.toLowerCase() === uppercasedResult) {
+    // No cased characters
+    // Example: "../.."
+    return uppercasedResult;
+  }
+
+  // Example:
+  //   from="/a/b/c"
+  //   to="/a/b/d/e"
+  //
+  //   fromNormalized="/A/B/C"
+  //   toNormalized="/A/B/D/E"
+  //
+  //   result="../D/E"
+  //
+  // Scan backwards comparing uppercasedResult versus uppercasedTo, stopping at the first place where they differ.
+  let resultIndex: number = uppercasedResult.length;
+  let toIndex: number = normalizedTo.length;
+  for (;;) {
+    if (resultIndex === 0 || toIndex === 0) {
+      // Stop if we reach the start of the string
+      break;
+    }
+
+    if (uppercasedResult.charCodeAt(resultIndex - 1) !== uppercasedTo.charCodeAt(toIndex - 1)) {
+      // Stop before we reach a character that is different
+      break;
+    }
+
+    --resultIndex;
+    --toIndex;
+  }
+
+  // Replace the matching part with the properly cased substring from the "normalizedTo" input
+  //
+  // Example:
+  //   ".." + "/d/e" = "../d/e"
+  return uppercasedResult.substring(0, resultIndex) + normalizedTo.substring(toIndex);
 }

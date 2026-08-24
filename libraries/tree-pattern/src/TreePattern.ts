@@ -128,109 +128,109 @@ export class TreePattern {
    * @returns `true` if `root` matches the pattern, or `false` otherwise
    */
   public match(root: TreeNode, captures: ITreePatternCaptureSet = {}): boolean {
-    return TreePattern._matchTreeRecursive(root, this._pattern, captures, 'root');
+    return _matchTreeRecursive(root, this._pattern, captures, 'root');
+  }
+}
+
+function _matchTreeRecursive(
+  root: TreeNode,
+  pattern: TreeNode,
+  captures: ITreePatternCaptureSet,
+  path: string
+): boolean {
+  if (pattern === undefined) {
+    throw new Error('pattern has an undefined value at ' + path);
   }
 
-  private static _matchTreeRecursive(
-    root: TreeNode,
-    pattern: TreeNode,
-    captures: ITreePatternCaptureSet,
-    path: string
-  ): boolean {
-    if (pattern === undefined) {
-      throw new Error('pattern has an undefined value at ' + path);
-    }
+  // Avoid "Element implicitly has an 'any' type" (TS7053)
+  const castedCaptures: Record<string, TreeNode> = captures;
 
-    // Avoid "Element implicitly has an 'any' type" (TS7053)
-    const castedCaptures: Record<string, TreeNode> = captures;
-
-    if (pattern instanceof TreePatternArg) {
-      if (pattern.subtree !== undefined) {
-        if (!TreePattern._matchTreeRecursive(root, pattern.subtree, captures, path)) {
-          return false;
-        }
-      }
-
-      castedCaptures[pattern.keyName] = root;
-      return true;
-    }
-
-    if (pattern instanceof TreePatternAlternatives) {
-      // Try each possible alternative until we find one that matches
-      for (const possibleSubtree of pattern.possibleSubtrees) {
-        // We shouldn't update "captures" unless the match is fully successful.
-        // So make a temporary copy of it.
-        const tempCaptures: Record<string, TreeNode> = { ...captures };
-        if (TreePattern._matchTreeRecursive(root, possibleSubtree, tempCaptures, path)) {
-          // The match was successful, so assign the tempCaptures results back into the
-          // original "captures" object.
-          for (const key of Object.getOwnPropertyNames(tempCaptures)) {
-            castedCaptures[key] = tempCaptures[key];
-          }
-          return true;
-        }
-      }
-
-      // None of the alternatives matched
-      return false;
-    }
-
-    if (Array.isArray(pattern)) {
-      if (!Array.isArray(root)) {
-        captures.failPath = path;
+  if (pattern instanceof TreePatternArg) {
+    if (pattern.subtree !== undefined) {
+      if (!_matchTreeRecursive(root, pattern.subtree, captures, path)) {
         return false;
       }
-
-      if (root.length !== pattern.length) {
-        captures.failPath = path;
-        return false;
-      }
-
-      for (let i: number = 0; i < pattern.length; ++i) {
-        const subPath: string = path + '[' + i + ']';
-
-        const rootElement: TreeNode = root[i];
-        const patternElement: TreeNode = pattern[i];
-        if (!TreePattern._matchTreeRecursive(rootElement, patternElement, captures, subPath)) {
-          return false;
-        }
-      }
-
-      return true;
     }
 
-    // In JavaScript, typeof null === 'object'
-    if (typeof pattern === 'object' && pattern !== null) {
-      if (typeof root !== 'object' || root === null) {
-        captures.failPath = path;
-        return false;
+    castedCaptures[pattern.keyName] = root;
+    return true;
+  }
+
+  if (pattern instanceof TreePatternAlternatives) {
+    // Try each possible alternative until we find one that matches
+    for (const possibleSubtree of pattern.possibleSubtrees) {
+      // We shouldn't update "captures" unless the match is fully successful.
+      // So make a temporary copy of it.
+      const tempCaptures: Record<string, TreeNode> = { ...captures };
+      if (_matchTreeRecursive(root, possibleSubtree, tempCaptures, path)) {
+        // The match was successful, so assign the tempCaptures results back into the
+        // original "captures" object.
+        for (const key of Object.getOwnPropertyNames(tempCaptures)) {
+          castedCaptures[key] = tempCaptures[key];
+        }
+        return true;
       }
-
-      for (const keyName of Object.getOwnPropertyNames(pattern)) {
-        let subPath: string;
-        if (/^[a-z_][a-z0-9_]*$/i.test(keyName)) {
-          subPath = path + '.' + keyName;
-        } else {
-          subPath = path + '[' + JSON.stringify(keyName) + ']';
-        }
-
-        if (!Object.hasOwnProperty.call(root, keyName)) {
-          captures.failPath = subPath;
-          return false;
-        }
-        if (!TreePattern._matchTreeRecursive(root[keyName], pattern[keyName], captures, subPath)) {
-          return false;
-        }
-      }
-
-      return true;
     }
 
-    if (root !== pattern) {
+    // None of the alternatives matched
+    return false;
+  }
+
+  if (Array.isArray(pattern)) {
+    if (!Array.isArray(root)) {
       captures.failPath = path;
       return false;
     }
 
+    if (root.length !== pattern.length) {
+      captures.failPath = path;
+      return false;
+    }
+
+    for (let i: number = 0; i < pattern.length; ++i) {
+      const subPath: string = path + '[' + i + ']';
+
+      const rootElement: TreeNode = root[i];
+      const patternElement: TreeNode = pattern[i];
+      if (!_matchTreeRecursive(rootElement, patternElement, captures, subPath)) {
+        return false;
+      }
+    }
+
     return true;
   }
+
+  // In JavaScript, typeof null === 'object'
+  if (typeof pattern === 'object' && pattern !== null) {
+    if (typeof root !== 'object' || root === null) {
+      captures.failPath = path;
+      return false;
+    }
+
+    for (const keyName of Object.getOwnPropertyNames(pattern)) {
+      let subPath: string;
+      if (/^[a-z_][a-z0-9_]*$/i.test(keyName)) {
+        subPath = path + '.' + keyName;
+      } else {
+        subPath = path + '[' + JSON.stringify(keyName) + ']';
+      }
+
+      if (!Object.hasOwnProperty.call(root, keyName)) {
+        captures.failPath = subPath;
+        return false;
+      }
+      if (!_matchTreeRecursive(root[keyName], pattern[keyName], captures, subPath)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  if (root !== pattern) {
+    captures.failPath = path;
+    return false;
+  }
+
+  return true;
 }

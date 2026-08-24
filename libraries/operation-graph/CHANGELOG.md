@@ -1,6 +1,30 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+
+## 0.7.1
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
+
+## 0.7.0
+Fri, 14 Aug 2026 00:18:07 GMT
+
+### Minor changes
+
+- Add Rush-compatible operation statuses in preparation for graph convergence.
+
+## 0.6.11
+Fri, 17 Jul 2026 00:15:59 GMT
+
+_Version update only_
+
+## 0.6.10
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 0.6.9
 Mon, 20 Apr 2026 23:31:13 GMT

@@ -276,6 +276,8 @@ const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProj
     jsonSchemaObject: anythingSchemaJson
   });
 
+const _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> = new Map();
+
 /**
  * Use this class to load the "config/rush-project.json" config file.
  *
@@ -283,9 +285,6 @@ const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProj
  * @alpha
  */
 export class RushProjectConfiguration {
-  private static readonly _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> =
-    new Map();
-
   public readonly project: RushConfigurationProject;
 
   /**
@@ -501,27 +500,28 @@ export class RushProjectConfiguration {
     terminal: ITerminal
   ): Promise<RushProjectConfiguration | undefined> {
     // false is a signal that the project config does not exist
-    const cacheEntry: RushProjectConfiguration | false | undefined =
-      RushProjectConfiguration._configCache.get(project);
+    const cacheEntry: RushProjectConfiguration | false | undefined = _configCache.get(project);
     if (cacheEntry !== undefined) {
       return cacheEntry || undefined;
     }
 
-    const rushProjectJson: IRushProjectJson | undefined = await this._tryLoadJsonForProjectAsync(
+    const rushProjectJson: IRushProjectJson | undefined = await _tryLoadJsonForProjectAsync(
       project,
       terminal
     );
 
     if (rushProjectJson) {
-      const result: RushProjectConfiguration = RushProjectConfiguration._getRushProjectConfiguration(
+      const operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings> =
+        _getRushProjectConfiguration(project, rushProjectJson, terminal);
+      const result: RushProjectConfiguration = new RushProjectConfiguration(
         project,
         rushProjectJson,
-        terminal
+        operationSettingsByOperationName
       );
-      RushProjectConfiguration._configCache.set(project, result);
+      _configCache.set(project, result);
       return result;
     } else {
-      RushProjectConfiguration._configCache.set(project, false);
+      _configCache.set(project, false);
       return undefined;
     }
   }
@@ -538,7 +538,7 @@ export class RushProjectConfiguration {
     project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<ReadonlyArray<string> | undefined> {
-    const rushProjectJson: IRushProjectJson | undefined = await this._tryLoadJsonForProjectAsync(
+    const rushProjectJson: IRushProjectJson | undefined = await _tryLoadJsonForProjectAsync(
       project,
       terminal
     );
@@ -570,111 +570,115 @@ export class RushProjectConfiguration {
 
     return result;
   }
+}
 
-  private static async _tryLoadJsonForProjectAsync(
-    project: RushConfigurationProject,
-    terminal: ITerminal
-  ): Promise<IRushProjectJson | undefined> {
-    const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-      projectFolderPath: project.projectFolder
-    });
+async function _tryLoadJsonForProjectAsync(
+  project: RushConfigurationProject,
+  terminal: ITerminal
+): Promise<IRushProjectJson | undefined> {
+  const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+    projectFolderPath: project.projectFolder
+  });
 
+  try {
+    return await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+      terminal,
+      project.projectFolder,
+      rigConfig
+    );
+  } catch (e1) {
+    // Detect if the project is using the old rush-project.json schema
+    let oldRushProjectJson: IOldRushProjectJson | undefined;
     try {
-      return await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+      oldRushProjectJson = await OLD_RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         project.projectFolder,
         rigConfig
       );
-    } catch (e1) {
-      // Detect if the project is using the old rush-project.json schema
-      let oldRushProjectJson: IOldRushProjectJson | undefined;
-      try {
-        oldRushProjectJson =
-          await OLD_RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
-            terminal,
-            project.projectFolder,
-            rigConfig
-          );
-      } catch (e2) {
-        // Ignore
-      }
+    } catch (e2) {
+      // Ignore
+    }
 
-      if (
-        oldRushProjectJson?.projectOutputFolderNames ||
-        oldRushProjectJson?.phaseOptions ||
-        oldRushProjectJson?.buildCacheOptions
-      ) {
-        throw new Error(
-          `The ${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file appears to be ` +
-            'in an outdated format. Please see the UPGRADING.md notes for details. ' +
-            'Quick link: https://rushjs.io/link/upgrading'
-        );
-      } else {
-        throw e1;
-      }
+    if (
+      oldRushProjectJson?.projectOutputFolderNames ||
+      oldRushProjectJson?.phaseOptions ||
+      oldRushProjectJson?.buildCacheOptions
+    ) {
+      throw new Error(
+        `The ${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file appears to be ` +
+          'in an outdated format. Please see the UPGRADING.md notes for details. ' +
+          'Quick link: https://rushjs.io/link/upgrading'
+      );
+    } else {
+      throw e1;
     }
   }
+}
 
-  private static _getRushProjectConfiguration(
-    project: RushConfigurationProject,
-    rushProjectJson: IRushProjectJson,
-    terminal: ITerminal
-  ): RushProjectConfiguration {
-    const operationSettingsByOperationName: Map<string, IOperationSettings> = new Map<
-      string,
-      IOperationSettings
-    >();
+/**
+ * Parses and validates the operation settings from the rush-project.json data. Returns the
+ * validated `operationSettingsByOperationName` map used to construct a {@link RushProjectConfiguration}.
+ * (The construction itself must remain in the class body because the constructor is private.)
+ */
+function _getRushProjectConfiguration(
+  project: RushConfigurationProject,
+  rushProjectJson: IRushProjectJson,
+  terminal: ITerminal
+): ReadonlyMap<string, IOperationSettings> {
+  const operationSettingsByOperationName: Map<string, IOperationSettings> = new Map<
+    string,
+    IOperationSettings
+  >();
 
-    let hasErrors: boolean = false;
+  let hasErrors: boolean = false;
 
-    if (rushProjectJson.operationSettings) {
-      for (const operationSettings of rushProjectJson.operationSettings) {
-        const operationName: string = operationSettings.operationName;
-        const existingOperationSettings: IOperationSettings | undefined =
-          operationSettingsByOperationName.get(operationName);
-        if (existingOperationSettings) {
-          const existingOperationSettingsJsonPath: string | undefined =
-            RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(existingOperationSettings);
-          const operationSettingsJsonPath: string | undefined =
-            RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(operationSettings);
-          hasErrors = true;
-          let errorMessage: string =
-            `The operation "${operationName}" appears multiple times in the "${project.packageName}" project's ` +
-            `${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file's ` +
-            'operationSettings property.';
-          if (existingOperationSettingsJsonPath && operationSettingsJsonPath) {
-            if (existingOperationSettingsJsonPath !== operationSettingsJsonPath) {
-              errorMessage +=
-                ` It first appears in "${existingOperationSettingsJsonPath}" and again ` +
-                `in "${operationSettingsJsonPath}".`;
-            } else if (
-              !Path.convertToSlashes(existingOperationSettingsJsonPath).startsWith(
-                Path.convertToSlashes(project.projectFolder)
-              )
-            ) {
-              errorMessage += ` It appears multiple times in "${operationSettingsJsonPath}".`;
-            }
+  if (rushProjectJson.operationSettings) {
+    for (const operationSettings of rushProjectJson.operationSettings) {
+      const operationName: string = operationSettings.operationName;
+      const existingOperationSettings: IOperationSettings | undefined =
+        operationSettingsByOperationName.get(operationName);
+      if (existingOperationSettings) {
+        const existingOperationSettingsJsonPath: string | undefined =
+          RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(existingOperationSettings);
+        const operationSettingsJsonPath: string | undefined =
+          RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(operationSettings);
+        hasErrors = true;
+        let errorMessage: string =
+          `The operation "${operationName}" appears multiple times in the "${project.packageName}" project's ` +
+          `${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file's ` +
+          'operationSettings property.';
+        if (existingOperationSettingsJsonPath && operationSettingsJsonPath) {
+          if (existingOperationSettingsJsonPath !== operationSettingsJsonPath) {
+            errorMessage +=
+              ` It first appears in "${existingOperationSettingsJsonPath}" and again ` +
+              `in "${operationSettingsJsonPath}".`;
+          } else if (
+            !Path.convertToSlashes(existingOperationSettingsJsonPath).startsWith(
+              Path.convertToSlashes(project.projectFolder)
+            )
+          ) {
+            errorMessage += ` It appears multiple times in "${operationSettingsJsonPath}".`;
           }
-
-          terminal.writeErrorLine(errorMessage);
-        } else {
-          operationSettingsByOperationName.set(operationName, operationSettings);
         }
-      }
 
-      for (const [operationName, operationSettings] of operationSettingsByOperationName) {
-        if (operationSettings.sharding?.shardOperationSettings) {
-          terminal.writeWarningLine(
-            `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
-          );
-        }
+        terminal.writeErrorLine(errorMessage);
+      } else {
+        operationSettingsByOperationName.set(operationName, operationSettings);
       }
     }
 
-    if (hasErrors) {
-      throw new AlreadyReportedError();
+    for (const [operationName, operationSettings] of operationSettingsByOperationName) {
+      if (operationSettings.sharding?.shardOperationSettings) {
+        terminal.writeWarningLine(
+          `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
+        );
+      }
     }
-
-    return new RushProjectConfiguration(project, rushProjectJson, operationSettingsByOperationName);
   }
+
+  if (hasErrors) {
+    throw new AlreadyReportedError();
+  }
+
+  return operationSettingsByOperationName;
 }

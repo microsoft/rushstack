@@ -2,6 +2,66 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "5.3.13",
+      "tag": "@rushstack/ts-command-line_v5.3.13",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Compile package output for ES2022."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.12",
+      "tag": "@rushstack/ts-command-line_v5.3.12",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.11",
+      "tag": "@rushstack/ts-command-line_v5.3.11",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.10",
       "tag": "@rushstack/ts-command-line_v5.3.10",
       "date": "Sat, 13 Jun 2026 00:16:18 GMT",
