@@ -384,6 +384,7 @@ function collectOperationOutcomes(
       ? observed.executionResult.error?.message
       : retained?.error?.message;
     outcomes.push({
+      observedInCurrentIteration: observed !== undefined,
       result: { operationId: operation.name, status, errorMessage },
       warningsAreAllowed: operation.runner?.warningsAreAllowed ?? false
     });

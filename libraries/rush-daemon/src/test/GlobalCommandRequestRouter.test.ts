@@ -203,6 +203,31 @@ describe(GlobalCommandRequestRouter.name, () => {
     expect(client.writeOrder).toEqual(['result']);
   });
 
+  it.each([undefined, {}])(
+    'converts malformed global executor result %# to failure',
+    async (invalidResult) => {
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+        new TestWorkspaceSession(TEST_REPO_ROOT)
+      );
+      const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+
+      const result: IGlobalCommandRequestResult = await router.executeAsync(
+        router.resolveRequest(createRequestOptions('invalid-result', FIRST_CWD, {}, 80)),
+        async (): Promise<IGlobalCommandExecutionResult> =>
+          invalidResult as IGlobalCommandExecutionResult,
+        client
+      );
+
+      expect(result).toMatchObject({
+        aborted: false,
+        errorMessage: 'A global command executor must return a nonnegative safe-integer exit code.',
+        exitCode: 1,
+        outcome: 'failure'
+      });
+      expect(client.results).toEqual([result]);
+    }
+  );
+
   it('snapshots request environment and propagates isolated context to child processes', async () => {
     const mutableEnvironment: NodeJS.ProcessEnv = {
       CHILD_CONTEXT: 'request',

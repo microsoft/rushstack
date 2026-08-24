@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import process from 'node:process';
+
 import { OperationStatus } from '@microsoft/rush-lib';
 
 import {
@@ -78,6 +80,7 @@ describe('Rush command result parity', () => {
   it.each(PARITY_CASES)('matches the in-process outcome for %#', (testCase: IParityCase) => {
     const operationOutcomes: IPhasedOperationOutcome[] = testCase.statuses.map(
       ({ status: operationStatus, warningsAreAllowed = false }, index: number) => ({
+        observedInCurrentIteration: true,
         result: { operationId: `operation-${index}`, status: operationStatus },
         warningsAreAllowed
       })
@@ -108,6 +111,42 @@ describe('Rush command result parity', () => {
     expect(() =>
       parseWarningsAllowedByEnvironment({ RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'true' })
     ).toThrow('must be set to 1 or 0');
+  });
+
+  it('uses platform environment-name semantics for the warnings override', () => {
+    const lowercaseEnvironmentName: string = 'rush_allow_warnings_in_successful_build';
+    expect(
+      parseWarningsAllowedByEnvironment({ [lowercaseEnvironmentName]: '1' })
+    ).toBe(process.platform === 'win32');
+  });
+
+  it('ignores a retained warning when the current incremental iteration succeeds', () => {
+    const result = createPhasedCommandResult({
+      aborted: false,
+      error: undefined,
+      graphStatus: OperationStatus.Success,
+      operationOutcomes: [
+        {
+          observedInCurrentIteration: false,
+          result: { operationId: 'retained-warning', status: OperationStatus.SuccessWithWarning },
+          warningsAreAllowed: false
+        },
+        {
+          observedInCurrentIteration: true,
+          result: { operationId: 'current-success', status: OperationStatus.Success },
+          warningsAreAllowed: false
+        }
+      ],
+      requestId: 'incremental',
+      scheduled: true,
+      warningsAllowedByEnvironment: false
+    });
+
+    expect(result).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(result.operationResults).toEqual([
+      { operationId: 'retained-warning', status: OperationStatus.SuccessWithWarning },
+      { operationId: 'current-success', status: OperationStatus.Success }
+    ]);
   });
 });
 
