@@ -67,6 +67,8 @@ describe('daemon-aligned major default flip', () => {
 
   it('keeps the emergency legacy fallback overriding the flipped default', () => {
     expect(isEmergencyLegacyFallback({ RUSH_REPORTER: 'legacy' })).toBe(true);
+    expect(isEmergencyLegacyFallback({ RUSH_REPORTER: 'LEGACY' })).toBe(true);
+    expect(isEmergencyLegacyFallback({ RUSH_REPORTER: ' legacy ' })).toBe(true);
     expect(isEmergencyLegacyFallback({ RUSH_REPORTER: 'default' })).toBe(false);
     expect(isEmergencyLegacyFallback({})).toBe(false);
 
@@ -132,5 +134,14 @@ describe('plugin apply gate', () => {
       supportedApiVersion: '2.4.0'
     });
     expect(decisions[0].allowed).toBe(true);
+  });
+
+  it('reports the explicit supported API version when blocking a plugin', () => {
+    const decisions: IPluginApplyDecision[] = evaluatePluginApplyGate([compatible], {
+      supportedApiVersion: '2.4.0'
+    });
+
+    expect(decisions[0].allowed).toBe(false);
+    expect(decisions[0].diagnostic?.parameters?.supportedApiVersion.value).toBe('2.4.0');
   });
 });

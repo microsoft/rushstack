@@ -81,7 +81,7 @@ export function evaluatePluginApplyGate(
     return {
       manifest,
       allowed: false,
-      diagnostic: createPluginApiIncompatibleDiagnostic(manifest)
+      diagnostic: createPluginApiIncompatibleDiagnostic(manifest, supportedApiVersion)
     };
   });
 }

@@ -139,7 +139,11 @@ export function isEmergencyLegacyFallback(
   env: Record<string, string | undefined>,
   defaults: IReporterMajorDefaults = DAEMON_ALIGNED_MAJOR_REPORTER_DEFAULTS
 ): boolean {
-  return env[defaults.emergencyFallbackEnvVar] === defaults.emergencyFallbackReporterName;
+  const value: string | undefined = env[defaults.emergencyFallbackEnvVar];
+  return (
+    value !== undefined &&
+    value.trim().toLowerCase() === defaults.emergencyFallbackReporterName.trim().toLowerCase()
+  );
 }
 
 /**

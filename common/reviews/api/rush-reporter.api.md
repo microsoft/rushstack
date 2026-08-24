@@ -83,7 +83,7 @@ export function createColorizer(enabled: boolean): IColorizer;
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
-export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest): IRushDiagnostic;
+export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest, supportedApiVersion?: string): IRushDiagnostic;
 
 // @beta
 export function createRushDiagnostic(code: RushDiagnosticCodes, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
