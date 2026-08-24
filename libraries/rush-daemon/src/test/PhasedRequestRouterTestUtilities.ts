@@ -56,9 +56,20 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public readonly sessionId: string = 'test-session';
   public readonly writes: ITestClientWrite[] = [];
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
+  readonly #sequenceState: { next: number };
+
+  public constructor(sequenceState: { next: number } = { next: 1 }) {
+    this.#sequenceState = sequenceState;
+  }
 
   public get abortSignal(): AbortSignal {
     return this.abortController.signal;
+  }
+
+  public getNextEventSequence(): number {
+    const sequence: number = this.#sequenceState.next;
+    this.#sequenceState.next = sequence + 1;
+    return sequence;
   }
 
   public async writeEventAsync(event: IDaemonEventEnvelope): Promise<void> {

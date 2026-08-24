@@ -7,6 +7,7 @@ import type {
   IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest
 } from '@rushstack/rush-daemon-protocol';
+import { RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
@@ -143,6 +144,23 @@ describe(PhasedRequestRouter.name, () => {
     expect(ignoredDependencyFixture.operations.get(OPERATION_A)?.enabled).toBe(
       'ignore-dependency-changes'
     );
+
+    const mixedFixture: ITestRoutingFixture = createThreeOperationFixture();
+    await new PhasedRequestRouter(mixedFixture.session).executeAsync(
+      createRequest([
+        {
+          enabledState: 'ignore-dependency-changes',
+          operationId: OPERATION_A
+        },
+        select(OPERATION_B)
+      ]),
+      new TestPhasedRequestClient()
+    );
+
+    expect(mixedFixture.operations.get(OPERATION_A)?.enabled).toBe(
+      'ignore-dependency-changes'
+    );
+    expect(mixedFixture.operations.get(OPERATION_B)?.enabled).toBe(true);
   });
 
   it('reconciles invalidations, applies the safe dependency closure, and runs one iteration', async () => {
@@ -220,6 +238,50 @@ describe(PhasedRequestRouter.name, () => {
       .map(getEventOperationId)
       .filter((operationId: string | undefined): operationId is string => !!operationId);
     expect(new Set(eventOperationIds)).toEqual(new Set([OPERATION_A]));
+    const streamClosedEvent: IDaemonEventEnvelope | undefined = client.writes
+      .map((write: ITestClientWrite) => write.event)
+      .find(
+        (event: IDaemonEventEnvelope | undefined) =>
+          (event?.payload as { name?: unknown } | undefined)?.name ===
+          RUSHD_OPERATION_STREAM_CLOSED
+      );
+    expect(streamClosedEvent?.required).toBe(true);
+  });
+
+  it('allocates event sequences when queued writes are invoked', async () => {
+    let releaseFirstEvent: (() => void) | undefined;
+    let markFirstEventStarted: (() => void) | undefined;
+    const firstEventStarted: Promise<void> = new Promise<void>((resolve) => {
+      markFirstEventStarted = resolve;
+    });
+    const fixture: ITestRoutingFixture = createThreeOperationFixture();
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+    let hasBlockedEvent: boolean = false;
+    client.onWriteAsync = async (write: ITestClientWrite): Promise<void> => {
+      if (write.event && !hasBlockedEvent) {
+        hasBlockedEvent = true;
+        markFirstEventStarted?.();
+        await new Promise<void>((resolve) => {
+          releaseFirstEvent = resolve;
+        });
+      }
+    };
+
+    const requestPromise = new PhasedRequestRouter(fixture.session).executeAsync(
+      createRequest([select(OPERATION_A)]),
+      client
+    );
+    await firstEventStarted;
+    const interleavedSequence: number = client.getNextEventSequence();
+    releaseFirstEvent?.();
+    await requestPromise;
+
+    const routedSequences: number[] = client.writes
+      .map(({ event }) => event?.sequence)
+      .filter((sequence: number | undefined): sequence is number => sequence !== undefined);
+    expect(routedSequences[0]).toBe(1);
+    expect(interleavedSequence).toBe(2);
+    expect(routedSequences.slice(1).every((sequence) => sequence > interleavedSequence)).toBe(true);
   });
 
   it('returns client-scoped failures without converting them to routing errors', async () => {
@@ -287,6 +349,48 @@ describe(PhasedRequestRouter.name, () => {
       new TestPhasedRequestClient()
     );
     expect(followUp.operationResults[0]?.status).toBe(OperationStatus.Success);
+  });
+
+  it('does not combine an observed result with an error retained from a prior iteration', async () => {
+    let invocation: number = 0;
+    let releaseOperationA: (() => void) | undefined;
+    let markOperationAStarted: (() => void) | undefined;
+    const operationAStarted: Promise<void> = new Promise<void>((resolve) => {
+      markOperationAStarted = resolve;
+    });
+    const fixture: ITestRoutingFixture = createThreeOperationFixture({
+      actionAAsync: async (): Promise<void> => {
+        if (invocation++ === 0) {
+          throw new Error('first iteration failure');
+        }
+        markOperationAStarted?.();
+        await new Promise<void>((resolve) => {
+          releaseOperationA = resolve;
+        });
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = await router.executeAsync(
+      createRequest([select(OPERATION_B)]),
+      new TestPhasedRequestClient()
+    );
+    expect(
+      first.operationResults.find(({ operationId }) => operationId === OPERATION_A)?.errorMessage
+    ).toBe('first iteration failure');
+
+    const secondClient: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const secondPromise = router.executeAsync(
+      { ...createRequest([select(OPERATION_B)]), requestId: 'request-2' },
+      secondClient
+    );
+    await operationAStarted;
+    secondClient.abortController.abort();
+    releaseOperationA?.();
+    const second = await secondPromise;
+
+    expect(
+      second.operationResults.find(({ operationId }) => operationId === OPERATION_A)?.errorMessage
+    ).toBeUndefined();
   });
 
   it('aborts and unsubscribes when a disconnected client rejects a write', async () => {
@@ -398,8 +502,9 @@ describe(PhasedRequestRouter.name, () => {
       }
     });
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
-    const firstClient: TestPhasedRequestClient = new TestPhasedRequestClient();
-    const secondClient: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const sequenceState: { next: number } = { next: 1 };
+    const firstClient: TestPhasedRequestClient = new TestPhasedRequestClient(sequenceState);
+    const secondClient: TestPhasedRequestClient = new TestPhasedRequestClient(sequenceState);
 
     const first = await router.executeAsync(
       createRequest([select(OPERATION_A)]),

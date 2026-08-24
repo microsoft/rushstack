@@ -39,12 +39,10 @@ interface IResolvedSelection {
 }
 
 interface IGraphRoutingState {
-  readonly eventSequenceBySessionId: Map<string, number>;
   readonly multiplexer: PhasedRequestEventMultiplexer;
   readonly scheduler: RequestScheduler;
 }
 
-const FIRST_SEQUENCE: number = 1;
 const ROUTING_STATE_BY_GRAPH: WeakMap<IOperationGraph, IGraphRoutingState> = new WeakMap();
 
 /**
@@ -139,7 +137,7 @@ export class PhasedRequestRouter {
     const requestSink: PhasedRequestEventSink = new PhasedRequestEventSink({
       activeOperationIds,
       client,
-      getNextSequence: () => getNextEventSequence(routingState, client.sessionId),
+      getNextSequence: () => client.getNextEventSequence(),
       onWriteFailure: abortIteration,
       rushVersion: this.#workspaceSession.metadata.rushVersion
     });
@@ -232,19 +230,13 @@ function getGraphRoutingState(graph: IDualEmitOperationGraph): IGraphRoutingStat
     const multiplexer: PhasedRequestEventMultiplexer = new PhasedRequestEventMultiplexer(
       getGraphEventSink(graph)
     );
-    state = { eventSequenceBySessionId: new Map(), multiplexer, scheduler: new RequestScheduler() };
+    state = { multiplexer, scheduler: new RequestScheduler() };
     ROUTING_STATE_BY_GRAPH.set(graph, state);
     setGraphEventSink(graph, multiplexer);
   } else if (getGraphEventSink(graph) !== state.multiplexer) {
     throw new Error('The workspace operation graph event sink changed after routing began.');
   }
   return state;
-}
-
-function getNextEventSequence(state: IGraphRoutingState, sessionId: string): number {
-  const sequence: number = state.eventSequenceBySessionId.get(sessionId) ?? FIRST_SEQUENCE;
-  state.eventSequenceBySessionId.set(sessionId, sequence + 1);
-  return sequence;
 }
 
 function validateRequestIdentity(request: IDaemonPhasedRequest): void {
@@ -344,6 +336,11 @@ function applySelection(graph: IOperationGraph, selection: IResolvedSelection): 
     'safe'
   );
   graph.setEnabledStates(selection.enabledOperations, true, 'safe');
+  graph.setEnabledStates(
+    selection.ignoreDependencyOperations,
+    'ignore-dependency-changes',
+    'unsafe'
+  );
 }
 
 function collectOperationResults(
@@ -360,7 +357,9 @@ function collectOperationResults(
     if (status === undefined) {
       continue;
     }
-    const errorMessage: string | undefined = observed?.errorMessage ?? retained?.error?.message;
+    const errorMessage: string | undefined = observed
+      ? observed.errorMessage
+      : retained?.error?.message;
     results.push({ operationId: operation.name, status, errorMessage });
   }
   return results;

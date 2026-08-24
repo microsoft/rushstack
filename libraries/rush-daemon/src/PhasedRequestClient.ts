@@ -18,6 +18,9 @@ export interface IPhasedRequestClient {
   /** The connection session identifier used in structured event envelopes. */
   readonly sessionId: string;
 
+  /** Returns the next structured-event sequence number for this connection. */
+  getNextEventSequence(): number;
+
   /** Writes one structured event through the client's backpressured destination. */
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
 

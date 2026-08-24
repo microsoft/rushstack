@@ -64,6 +64,7 @@ export interface IMapWorkspaceInvalidationsOptions {
 // @beta
 export interface IPhasedRequestClient {
     readonly abortSignal: AbortSignal;
+    getNextEventSequence(): number;
     readonly sessionId: string;
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;

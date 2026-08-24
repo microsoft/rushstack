@@ -50,8 +50,8 @@ class OrderedClientWriter {
     this.#onFailure = onFailure;
   }
 
-  public writeEvent(event: IDaemonEventEnvelope): void {
-    this.#enqueue(() => this.#client.writeEventAsync(event));
+  public writeEvent(createEvent: () => IDaemonEventEnvelope): void {
+    this.#enqueue(() => this.#client.writeEventAsync(createEvent()));
   }
 
   public writeLogChunk(
@@ -159,10 +159,14 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
 
   public onOperationStreamClosed(operationId: string): void {
     if (this.#activeOperationIds.has(operationId)) {
-      this.#emitEvent('extension', {
-        data: { operationId },
-        name: RUSHD_OPERATION_STREAM_CLOSED
-      });
+      this.#emitEvent(
+        'extension',
+        {
+          data: { operationId },
+          name: RUSHD_OPERATION_STREAM_CLOSED
+        },
+        { required: true }
+      );
     }
   }
 
@@ -179,15 +183,14 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   }
 
   #emitEvent(type: DaemonEventType, payload: unknown, options?: IEventOptions): void {
-    const sequence: number = this.#getNextSequence();
-    this.#writer.writeEvent({
+    this.#writer.writeEvent(() => ({
       eventId: randomUUID(),
       payload,
       privacy: 'public',
       protocolVersion: DAEMON_PROTOCOL_VERSION,
       required: options?.required ?? false,
       scope: options?.scope,
-      sequence,
+      sequence: this.#getNextSequence(),
       sessionId: this.#client.sessionId,
       source: {
         component: EVENT_SOURCE_COMPONENT,
@@ -196,6 +199,6 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       },
       timestamp: new Date().toISOString(),
       type
-    });
+    }));
   }
 }
