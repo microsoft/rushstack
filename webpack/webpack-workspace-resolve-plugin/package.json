@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-workspace-resolve-plugin",
-  "version": "0.6.17",
+  "version": "0.6.25",
   "description": "This plugin leverages workspace-level metadata to greatly accelerate module resolution.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -34,7 +34,7 @@
     "directory": "webpack/webpack-workspace-resolve-plugin"
   },
   "engines": {
-    "node": ">=18.19.0"
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",

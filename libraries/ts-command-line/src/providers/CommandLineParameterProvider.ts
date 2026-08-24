@@ -89,6 +89,8 @@ const LONG_NAME_GROUP_NAME: string = 'longName';
 const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
   /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
 
+let _keyCounter: number = 0;
+
 interface IExtendedArgumentGroup extends argparse.ArgumentGroup {
   // The types are incorrect - this function returns the constructed argument
   // object, which looks like the argument options type.
@@ -107,8 +109,6 @@ interface IExtendedArgumentParser extends argparse.ArgumentParser {
  * @public
  */
 export abstract class CommandLineParameterProvider {
-  private static _keyCounter: number = 0;
-
   /** @internal */
   public readonly _ambiguousParameterParserKeysByName: Map<string, string>;
   /** @internal */
@@ -971,7 +971,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   private _generateKey(): string {
-    return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
+    return 'key_' + (_keyCounter++).toString();
   }
 
   private _getParameter<T extends CommandLineParameterBase>(

@@ -175,6 +175,33 @@ function _tryResolveTsdocMetadataFromMainField({ main }: INodePackageJson): stri
 }
 
 /**
+ * This feature is still being standardized: https://github.com/microsoft/tsdoc/issues/7
+ * In the future we will use the @microsoft/tsdoc library to read this file.
+ */
+function _resolveTsdocMetadataPathFromPackageJson(
+  packageFolder: string,
+  packageJson: INodePackageJson
+): string {
+  const tsdocMetadataRelativePath: string =
+    _tryResolveTsdocMetadataFromTsdocMetadataField(packageJson) ??
+    _tryResolveTsdocMetadataFromExportsField(packageJson) ??
+    _tryResolveTsdocMetadataFromTypesVersionsField(packageJson) ??
+    _tryResolveTsdocMetadataFromTypesOrTypingsFields(packageJson) ??
+    _tryResolveTsdocMetadataFromMainField(packageJson) ??
+    // As a final fallback, place the file in the root of the package.
+    TSDOC_METADATA_FILENAME;
+
+  // Always resolve relative to the package folder.
+  const tsdocMetadataPath: string = path.resolve(
+    packageFolder,
+    // This non-null assertion is safe because the last entry in TSDOC_METADATA_RESOLUTION_FUNCTIONS
+    // returns a non-undefined value.
+    tsdocMetadataRelativePath!
+  );
+  return tsdocMetadataPath;
+}
+
+/**
  * This class maintains a cache of analyzed information obtained from package.json
  * files.  It is built on top of the PackageJsonLookup class.
  *
@@ -203,33 +230,6 @@ export class PackageMetadataManager {
   }
 
   /**
-   * This feature is still being standardized: https://github.com/microsoft/tsdoc/issues/7
-   * In the future we will use the @microsoft/tsdoc library to read this file.
-   */
-  private static _resolveTsdocMetadataPathFromPackageJson(
-    packageFolder: string,
-    packageJson: INodePackageJson
-  ): string {
-    const tsdocMetadataRelativePath: string =
-      _tryResolveTsdocMetadataFromTsdocMetadataField(packageJson) ??
-      _tryResolveTsdocMetadataFromExportsField(packageJson) ??
-      _tryResolveTsdocMetadataFromTypesVersionsField(packageJson) ??
-      _tryResolveTsdocMetadataFromTypesOrTypingsFields(packageJson) ??
-      _tryResolveTsdocMetadataFromMainField(packageJson) ??
-      // As a final fallback, place the file in the root of the package.
-      TSDOC_METADATA_FILENAME;
-
-    // Always resolve relative to the package folder.
-    const tsdocMetadataPath: string = path.resolve(
-      packageFolder,
-      // This non-null assertion is safe because the last entry in TSDOC_METADATA_RESOLUTION_FUNCTIONS
-      // returns a non-undefined value.
-      tsdocMetadataRelativePath!
-    );
-    return tsdocMetadataPath;
-  }
-
-  /**
    * @param tsdocMetadataPath - An explicit path that can be configured in api-extractor.json.
    * If this parameter is not an empty string, it overrides the normal path calculation.
    * @returns the absolute path to the TSDoc metadata file
@@ -243,7 +243,7 @@ export class PackageMetadataManager {
       return path.resolve(packageFolder, tsdocMetadataPath);
     }
 
-    return PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(packageFolder, packageJson);
+    return _resolveTsdocMetadataPathFromPackageJson(packageFolder, packageJson);
   }
 
   /**
@@ -292,7 +292,7 @@ export class PackageMetadataManager {
 
       let aedocSupported: boolean = false;
 
-      const tsdocMetadataPath: string = PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(
+      const tsdocMetadataPath: string = _resolveTsdocMetadataPathFromPackageJson(
         packageJsonFolder,
         packageJson
       );

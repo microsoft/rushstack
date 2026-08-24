@@ -4,7 +4,7 @@
 import path from 'node:path';
 import nodeJsPath from 'node:path';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -33,6 +33,7 @@ type ICreateProcessorOptions = Partial<
     | 'postProcessCssAsync'
     | 'preserveIcssExports'
     | 'silenceDeprecations'
+    | 'sourceMap'
     | 'srcFolder'
   >
 >;
@@ -63,6 +64,43 @@ function createProcessor(
 
 async function compileFixtureAsync(processor: SassProcessor, fixtureFilename: string): Promise<void> {
   await processor.compileFilesAsync(new Set([`${fixturesFolder}/${fixtureFilename}`]));
+}
+
+/**
+ * Replaces OS-/checkout-dependent fields in a source map JSON string with stable placeholders so
+ * the test can snapshot the result on any machine. Specifically, rewrites `sources[]` entries that
+ * point at the fixtures folder to a `fixtures/<name>` form, and normalizes `sourcesContent[]`
+ * line endings to LF.
+ */
+function normalizeSourceMapForSnapshot(json: string): string {
+  const map: {
+    sources?: string[];
+    sourcesContent?: string[];
+    [key: string]: unknown;
+  } = JSON.parse(json);
+
+  if (map.sources) {
+    // sources[] are relative paths from the .css.map output file back to the source .scss.
+    // In real use both ends live on disk in the same project so this is stable; in this test
+    // the output folder is the mocked /fake/output/css/ while the source is the real fixture
+    // on disk, so the relative path traverses the entire checkout-specific path from /fake up
+    // to the real fixtures folder. Strip everything before the "/fixtures/" segment so the
+    // snapshot is checkout-independent.
+    map.sources = map.sources.map((source) => {
+      const normalized: string = Path.convertToSlashes(source);
+      const fixturesIndex: number = normalized.indexOf('/fixtures/');
+      if (fixturesIndex >= 0) {
+        return normalized.slice(fixturesIndex + 1);
+      }
+      const lastSlash: number = normalized.lastIndexOf('/');
+      return `fixtures/${lastSlash >= 0 ? normalized.slice(lastSlash + 1) : normalized}`;
+    });
+  }
+  if (map.sourcesContent) {
+    map.sourcesContent = map.sourcesContent.map(Text.convertToLf);
+  }
+
+  return JSON.stringify(map);
 }
 
 describe(SassProcessor.name, () => {
@@ -112,7 +150,14 @@ describe(SassProcessor.name, () => {
         NORMALIZED_PLATFORM_FAKE_OUTPUT_BASE_FOLDER,
         FAKE_OUTPUT_BASE_FOLDER
       );
-      writtenFiles.set(filePath, String(content));
+      let serialized: string = String(content);
+      // Source map contents include the absolute-relative path back to the source file and the
+      // verbatim source file bytes. Both vary by checkout location and OS line endings, which makes
+      // raw snapshots non-portable. Normalize them to stable forms before storing.
+      if (filePath.endsWith('.css.map')) {
+        serialized = normalizeSourceMapForSnapshot(serialized);
+      }
+      writtenFiles.set(filePath, serialized);
     });
   });
 
@@ -459,6 +504,31 @@ describe(SassProcessor.name, () => {
     });
   });
 
+  describe('use-plain-css.module.scss (@use of a plain .css file)', () => {
+    it('resolves a plain .css file referenced via @use with an explicit extension', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-plain-css.module.scss');
+      // The @use must resolve without "Can't find stylesheet to import."
+      expect(logger.errors).toHaveLength(0);
+      const css: string = getCssOutput('use-plain-css.module.scss');
+      // Rules from the plain .css file should be inlined into the output
+      expect(css).toContain('.token-base');
+      expect(css).toContain('#0078d4');
+      expect(css).toContain('.container');
+    });
+
+    it('resolves a plain .css file referenced via @use without an explicit extension', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'use-plain-css-extensionless.module.scss');
+      // Extensionless loads must fall back to the `.css` candidate, matching dart-sass
+      expect(logger.errors).toHaveLength(0);
+      const css: string = getCssOutput('use-plain-css-extensionless.module.scss');
+      expect(css).toContain('.token-base');
+      expect(css).toContain('#0078d4');
+      expect(css).toContain('.container');
+    });
+  });
+
   describe('global-styles.global.sass (.global.sass non-module file)', () => {
     it('compiles indented Sass syntax to plain CSS for a .global.sass file', async () => {
       const { processor } = createProcessor(terminalProvider);
@@ -688,6 +758,72 @@ describe(SassProcessor.name, () => {
       const { processor, logger } = createProcessor(terminalProvider);
       await compileFixtureAsync(processor, 'invalid.module.scss');
       expect(logger.errors.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('sourceMap option', () => {
+    it('emits .css.map and sourceMappingURL comment when sourceMap is true', async () => {
+      const { processor } = createProcessor(terminalProvider, { sourceMap: true });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
+      expect(mapPaths).toHaveLength(1);
+
+      const css: string = getCssOutput('classes-and-exports.module.scss');
+      expect(css).toMatch(/\/\*# sourceMappingURL=classes-and-exports\.module\.css\.map \*\//);
+
+      const mapJson: string = getWrittenFile('classes-and-exports.module.css.map');
+      const parsedMap: {
+        version: number;
+        mappings: string;
+        sources: string[];
+      } = JSON.parse(mapJson);
+      expect(parsedMap.version).toBe(3);
+      expect(parsedMap.mappings).toBeTruthy();
+      expect(parsedMap.sources).toHaveLength(1);
+      expect(parsedMap.sources[0]).toMatch(/classes-and-exports\.module\.scss$/);
+    });
+
+    it('emits a valid .css.map when the entry file @uses a partial (Linux/macOS regression)', async () => {
+      // use-with-partial.module.scss uses @use 'partial', which goes through loadAsync.
+      // Without sourceMapUrl on the ImporterResult, sass-embedded falls back to a data: URL
+      // for the partial in the source map; heftUrlToPath then crashes on Linux/macOS.
+      const { processor } = createProcessor(terminalProvider, { sourceMap: true });
+      await compileFixtureAsync(processor, 'use-with-partial.module.scss');
+
+      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
+      expect(mapPaths).toHaveLength(1);
+
+      const mapJson: string = getWrittenFile('use-with-partial.module.css.map');
+      const parsedMap: { version: number; mappings: string; sources: string[] } = JSON.parse(mapJson);
+      expect(parsedMap.version).toBe(3);
+      expect(parsedMap.mappings).toBeTruthy();
+      // Both the entry file and the partial must resolve to real paths, not data: URLs
+      expect(parsedMap.sources.every((s: string) => !s.startsWith('data:'))).toBe(true);
+    });
+
+    it('does not emit .css.map or sourceMappingURL comment by default', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      expect(getAllWrittenPathsMatching('.css.map')).toHaveLength(0);
+      expect(getCssOutput('classes-and-exports.module.scss')).not.toContain('sourceMappingURL');
+    });
+
+    it('uses the correct map filename when doNotTrimOriginalFileExtension is true', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        sourceMap: true,
+        doNotTrimOriginalFileExtension: true
+      });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      // With doNotTrimOriginalFileExtension the CSS file is foo.scss.css, so the map is foo.scss.css.map
+      const mapPaths: string[] = getAllWrittenPathsMatching('.css.map');
+      expect(mapPaths).toHaveLength(1);
+      expect(mapPaths[0]).toMatch(/classes-and-exports\.module\.scss\.css\.map$/);
+
+      const css: string = getWrittenFile('classes-and-exports.module.scss.css');
+      expect(css).toMatch(/\/\*# sourceMappingURL=classes-and-exports\.module\.scss\.css\.map \*\//);
     });
   });
 });

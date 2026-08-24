@@ -43,7 +43,7 @@ export class ChangelogGenerator {
     allChanges.packageChanges.forEach((change, packageName) => {
       const project: RushConfigurationProject | undefined = allProjects.get(packageName);
 
-      if (project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
+      if (project && _shouldUpdateChangeLog(project, allChanges)) {
         const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
           change,
           project.projectFolder,
@@ -79,15 +79,12 @@ export class ChangelogGenerator {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
         }
 
-        const changelog: IChangelog = ChangelogGenerator._getChangelog(
-          project.packageName,
-          project.projectFolder
-        );
+        const changelog: IChangelog = _getChangelog(project.packageName, project.projectFolder);
         const isLockstepped: boolean = !!project.versionPolicy && project.versionPolicy.isLockstepped;
 
         FileSystem.writeFile(
           path.join(project.projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped)
+          _translateToMarkdown(changelog, rushConfiguration, isLockstepped)
         );
       }
     });
@@ -108,7 +105,7 @@ export class ChangelogGenerator {
       // Early return if the project is lockstepped and does not host change logs
       return undefined;
     }
-    const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
+    const changelog: IChangelog = _getChangelog(change.packageName, projectFolder);
 
     if (!changelog.entries.some((entry) => entry.version === change.newVersion)) {
       const changelogEntry: IChangeLogEntry = {
@@ -165,7 +162,7 @@ export class ChangelogGenerator {
 
         FileSystem.writeFile(
           path.join(projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped)
+          _translateToMarkdown(changelog, rushConfiguration, isLockstepped)
         );
       }
       return changelog;
@@ -173,121 +170,116 @@ export class ChangelogGenerator {
     // change log not updated.
     return undefined;
   }
+}
 
-  /**
-   * Loads the changelog json from disk, or creates a new one if there isn't one.
-   */
-  private static _getChangelog(packageName: string, projectFolder: string): IChangelog {
-    const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
-    let changelog: IChangelog | undefined = undefined;
+/**
+ * Loads the changelog json from disk, or creates a new one if there isn't one.
+ */
+function _getChangelog(packageName: string, projectFolder: string): IChangelog {
+  const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
+  let changelog: IChangelog | undefined = undefined;
 
-    // Try to read the existing changelog.
-    if (FileSystem.exists(changelogFilename)) {
-      changelog = JsonFile.loadAndValidate(changelogFilename, ChangelogGenerator.jsonSchema);
-    }
-
-    if (!changelog) {
-      changelog = {
-        name: packageName,
-        entries: []
-      };
-    } else {
-      // Force the changelog name to be same as package name.
-      // In case the package has been renamed but change log name is not updated.
-      changelog.name = packageName;
-    }
-
-    return changelog;
+  // Try to read the existing changelog.
+  if (FileSystem.exists(changelogFilename)) {
+    changelog = JsonFile.loadAndValidate(changelogFilename, ChangelogGenerator.jsonSchema);
   }
 
-  /**
-   * Translates the given changelog json object into a markdown string.
-   */
-  private static _translateToMarkdown(
-    changelog: IChangelog,
-    rushConfiguration: RushConfiguration,
-    isLockstepped: boolean = false
-  ): string {
-    let markdown: string = [
-      `# Change Log - ${changelog.name}`,
-      '',
-      `This log was last generated on ${new Date().toUTCString()} and should not be manually modified.`,
-      '',
-      ''
-    ].join(EOL);
-
-    changelog.entries.forEach((entry, index) => {
-      markdown += `## ${entry.version}${EOL}`;
-
-      if (entry.date) {
-        markdown += `${entry.date}${EOL}`;
-      }
-
-      markdown += EOL;
-
-      let comments: string = '';
-
-      comments += ChangelogGenerator._getChangeComments('Breaking changes', entry.comments.major);
-
-      comments += ChangelogGenerator._getChangeComments('Minor changes', entry.comments.minor);
-
-      comments += ChangelogGenerator._getChangeComments('Patches', entry.comments.patch);
-
-      if (isLockstepped) {
-        // In lockstepped projects, all changes are of type ChangeType.none.
-        comments += ChangelogGenerator._getChangeComments('Updates', entry.comments.none);
-      }
-
-      if (rushConfiguration.hotfixChangeEnabled) {
-        comments += ChangelogGenerator._getChangeComments('Hotfixes', entry.comments.hotfix);
-      }
-
-      if (!comments) {
-        markdown +=
-          (changelog.entries.length === index + 1 ? '_Initial release_' : '_Version update only_') +
-          EOL +
-          EOL;
-      } else {
-        markdown += comments;
-      }
-    });
-
-    return markdown;
+  if (!changelog) {
+    changelog = {
+      name: packageName,
+      entries: []
+    };
+  } else {
+    // Force the changelog name to be same as package name.
+    // In case the package has been renamed but change log name is not updated.
+    changelog.name = packageName;
   }
 
-  /**
-   * Helper to return the comments string to be appends to the markdown content.
-   */
-  private static _getChangeComments(title: string, commentsArray: IChangeLogComment[] | undefined): string {
+  return changelog;
+}
+
+/**
+ * Translates the given changelog json object into a markdown string.
+ */
+function _translateToMarkdown(
+  changelog: IChangelog,
+  rushConfiguration: RushConfiguration,
+  isLockstepped: boolean = false
+): string {
+  let markdown: string = [
+    `# Change Log - ${changelog.name}`,
+    '',
+    `This log was last generated on ${new Date().toUTCString()} and should not be manually modified.`,
+    '',
+    ''
+  ].join(EOL);
+
+  changelog.entries.forEach((entry, index) => {
+    markdown += `## ${entry.version}${EOL}`;
+
+    if (entry.date) {
+      markdown += `${entry.date}${EOL}`;
+    }
+
+    markdown += EOL;
+
     let comments: string = '';
 
-    if (commentsArray) {
-      comments = `### ${title}${EOL + EOL}`;
-      commentsArray.forEach((comment) => {
-        comments += `- ${comment.comment}${EOL}`;
-      });
-      comments += EOL;
+    comments += _getChangeComments('Breaking changes', entry.comments.major);
+
+    comments += _getChangeComments('Minor changes', entry.comments.minor);
+
+    comments += _getChangeComments('Patches', entry.comments.patch);
+
+    if (isLockstepped) {
+      // In lockstepped projects, all changes are of type ChangeType.none.
+      comments += _getChangeComments('Updates', entry.comments.none);
     }
 
-    return comments;
+    if (rushConfiguration.hotfixChangeEnabled) {
+      comments += _getChangeComments('Hotfixes', entry.comments.hotfix);
+    }
+
+    if (!comments) {
+      markdown +=
+        (changelog.entries.length === index + 1 ? '_Initial release_' : '_Version update only_') + EOL + EOL;
+    } else {
+      markdown += comments;
+    }
+  });
+
+  return markdown;
+}
+
+/**
+ * Helper to return the comments string to be appends to the markdown content.
+ */
+function _getChangeComments(title: string, commentsArray: IChangeLogComment[] | undefined): string {
+  let comments: string = '';
+
+  if (commentsArray) {
+    comments = `### ${title}${EOL + EOL}`;
+    commentsArray.forEach((comment) => {
+      comments += `- ${comment.comment}${EOL}`;
+    });
+    comments += EOL;
   }
 
-  /**
-   * Changelogs should only be generated for publishable projects.
-   * Do not update changelog or delete the change files for prerelease. Save them for the official release.
-   * Unless the package is a hotfix, in which case do delete the change files.
-   *
-   * @param project
-   * @param allChanges
-   */
-  private static _shouldUpdateChangeLog(
-    project: RushConfigurationProject,
-    allChanges: IChangeRequests
-  ): boolean {
-    return (
-      project.shouldPublish &&
-      (!semver.prerelease(project.packageJson.version) ||
-        allChanges.packageChanges.get(project.packageName)?.changeType === ChangeType.hotfix)
-    );
-  }
+  return comments;
+}
+
+/**
+ * Changelogs should only be generated for publishable projects.
+ * Do not update changelog or delete the change files for prerelease. Save them for the official release.
+ * Unless the package is a hotfix, in which case do delete the change files.
+ *
+ * @param project
+ * @param allChanges
+ */
+function _shouldUpdateChangeLog(project: RushConfigurationProject, allChanges: IChangeRequests): boolean {
+  return (
+    project.shouldPublish &&
+    (!semver.prerelease(project.packageJson.version) ||
+      allChanges.packageChanges.get(project.packageName)?.changeType === ChangeType.hotfix)
+  );
 }

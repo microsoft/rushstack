@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-utilities",
-  "version": "0.15.17",
+  "version": "0.16.3",
   "description": "This plugin contains some useful functions for localization.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -33,6 +33,9 @@
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/localization-utilities"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",

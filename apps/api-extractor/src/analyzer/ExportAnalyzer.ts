@@ -657,7 +657,7 @@ export class ExportAnalyzer {
           importKind: AstImportKind.StarImport,
           exportName: declarationSymbol.name,
           modulePath: externalModulePath,
-          isTypeOnly: ExportAnalyzer._getIsTypeOnly(importDeclaration)
+          isTypeOnly: _getIsTypeOnly(importDeclaration)
         });
       }
 
@@ -690,7 +690,7 @@ export class ExportAnalyzer {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName,
-            isTypeOnly: ExportAnalyzer._getIsTypeOnly(importDeclaration)
+            isTypeOnly: _getIsTypeOnly(importDeclaration)
           });
         }
 
@@ -724,7 +724,7 @@ export class ExportAnalyzer {
             importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
             exportName,
-            isTypeOnly: ExportAnalyzer._getIsTypeOnly(importDeclaration)
+            isTypeOnly: _getIsTypeOnly(importDeclaration)
           });
         }
 
@@ -792,13 +792,6 @@ export class ExportAnalyzer {
     }
 
     return namespaceImport;
-  }
-
-  private static _getIsTypeOnly(importDeclaration: ts.ImportDeclaration): boolean {
-    if (importDeclaration.importClause) {
-      return !!importDeclaration.importClause.isTypeOnly;
-    }
-    return false;
   }
 
   private _getExportOfSpecifierAstModule(
@@ -1011,4 +1004,11 @@ export class ExportAnalyzer {
 
     return moduleSpecifier;
   }
+}
+
+function _getIsTypeOnly(importDeclaration: ts.ImportDeclaration): boolean {
+  if (importDeclaration.importClause) {
+    return !!importDeclaration.importClause.isTypeOnly;
+  }
+  return false;
 }

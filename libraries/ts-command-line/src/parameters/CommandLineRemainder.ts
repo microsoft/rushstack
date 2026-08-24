@@ -42,7 +42,7 @@ export class CommandLineRemainder {
     this._values.push(...data);
   }
 
-  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} */
   public appendToArgList(argList: string[]): void {
     if (this.values.length > 0) {
       for (const value of this.values) {

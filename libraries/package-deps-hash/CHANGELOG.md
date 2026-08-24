@@ -1,6 +1,60 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 4.7.27
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 4.7.26
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 4.7.25
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 4.7.24
+Tue, 21 Jul 2026 02:53:23 GMT
+
+_Version update only_
+
+## 4.7.23
+Fri, 17 Jul 2026 00:16:00 GMT
+
+_Version update only_
+
+## 4.7.22
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
+
+## 4.7.21
+Mon, 15 Jun 2026 15:15:33 GMT
+
+### Patches
+
+- Strip GIT_DIR and GIT_WORK_TREE Node env variables to fix issues with miscalculating the git repo root when working in a linked worktree
+
+## 4.7.20
+Sat, 13 Jun 2026 00:16:19 GMT
+
+_Version update only_
+
+## 4.7.19
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
+
+## 4.7.18
+Mon, 25 May 2026 15:14:32 GMT
+
+### Patches
+
+- Skip untracked files whose basename is a Windows reserved device name (e.g. `nul`, `con`, `aux`, `com1`-`com9`, `lpt1`-`lpt9`) when computing repo state on Windows. `git hash-object` cannot open such paths and otherwise aborts the entire repo-state calculation.
 
 ## 4.7.17
 Mon, 20 Apr 2026 23:31:13 GMT

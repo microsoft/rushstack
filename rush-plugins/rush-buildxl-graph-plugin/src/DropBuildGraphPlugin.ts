@@ -97,7 +97,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
 
     for (const buildXLCommandName of this._buildXLCommandNames) {
       session.hooks.runPhasedCommand.for(buildXLCommandName).tap(PLUGIN_NAME, (command: IPhasedCommand) => {
-        command.hooks.createOperations.tapPromise(
+        command.hooks.createOperationsAsync.tapPromise(
           {
             name: PLUGIN_NAME,
             stage: Number.MAX_SAFE_INTEGER // Run this after other plugins have created all operations

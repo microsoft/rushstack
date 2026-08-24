@@ -296,10 +296,6 @@
     // The React 17 types depend on a specific version of the scheduler types
     "@types/react@17.0.74>@types/scheduler": "0.16.8",
 
-    // Newer versions of `cheerio` have a dependency on `undici`, which does not support Node 18.
-    // Remove when we drop support for Node 18
-    "@vscode/vsce>cheerio": "1.0.0-rc.12",
-
     // `loader-utils@2.0.0` has a vulnerability
     "loader-utils@^2.0.0": "2.0.4",
 
@@ -551,7 +547,8 @@
    * PNPM documentation: https://pnpm.io/package_json#pnpmneverbuiltdependencies
    */
   "globalNeverBuiltDependencies": [
-    // "fsevents"
+    // The postinstall script redundantly downloads the platform binding, which PNPM installs as an optional dependency.
+    "unrs-resolver"
   ],
 
   /**

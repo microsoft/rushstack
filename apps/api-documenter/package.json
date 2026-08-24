@@ -1,11 +1,14 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.30.5",
+  "version": "7.30.13",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/api-documenter"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://api-extractor.com/",
   "license": "MIT",

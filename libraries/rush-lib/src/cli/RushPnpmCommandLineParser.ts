@@ -32,10 +32,30 @@ import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTyp
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { PnpmWorkspaceFile } from '../logic/pnpm/PnpmWorkspaceFile';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
+const RUSH_PNPM_RECURSIVE_DEFAULT_COMMANDS: Set<string> = new Set(['outdated', 'why']);
+
+function _hasRecursiveFlag(pnpmArgs: string[]): boolean {
+  return pnpmArgs.some((arg) => arg === '-r' || arg === '--recursive' || arg.startsWith('--recursive='));
+}
+
+function _hasGlobalFlag(pnpmArgs: string[]): boolean {
+  return pnpmArgs.some((arg) => arg === '-g' || arg === '--global' || arg.startsWith('--global='));
+}
+
+function _addDefaultRecursiveFlagIfNeeded(commandName: string, pnpmArgs: string[]): void {
+  if (
+    RUSH_PNPM_RECURSIVE_DEFAULT_COMMANDS.has(commandName) &&
+    !_hasRecursiveFlag(pnpmArgs) &&
+    !_hasGlobalFlag(pnpmArgs)
+  ) {
+    pnpmArgs.splice(1, 0, '--recursive');
+  }
+}
 
 /**
  * Options for RushPnpmCommandLineParser
@@ -146,7 +166,7 @@ export class RushPnpmCommandLineParser {
     this._subspace = subspace;
 
     const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
-    const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
+    const workspaceFilePath: string = `${workspaceFolder}/${RushConstants.pnpmWorkspaceFileName}`;
 
     if (!FileSystem.exists(workspaceFilePath)) {
       this._terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
@@ -253,6 +273,7 @@ export class RushPnpmCommandLineParser {
       }
 
       this._commandName = commandName;
+      _addDefaultRecursiveFlagIfNeeded(commandName, pnpmArgs);
 
       // Warn about commands known not to work
       /* eslint-disable no-fallthrough */
@@ -362,8 +383,9 @@ export class RushPnpmCommandLineParser {
         case 'approve-builds': {
           const semver: typeof import('semver') = await import('semver');
           /**
-           * The "approve-builds" command was introduced in pnpm version 10.1.0
-           * to approve packages for running build scripts when onlyBuiltDependencies is used
+           * The "approve-builds" command was introduced in PNPM version 10.1.0
+           * to approve packages for running build scripts when onlyBuiltDependencies is used.
+           * In PNPM 11.0.0, it was updated to use allowBuilds in pnpm-workspace.yaml.
            */
           if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '10.1.0')) {
             this._terminal.writeErrorLine(
@@ -516,12 +538,25 @@ export class RushPnpmCommandLineParser {
           break;
         }
 
-        // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
-        const newGlobalPatchedDependencies: Record<string, string> | undefined =
-          commonPackageJson?.pnpm?.patchedDependencies;
         const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        const pnpmVersion: string = this._rushConfiguration.packageManagerToolVersion;
+        const semver: typeof import('semver') = await import('semver');
+
+        let newGlobalPatchedDependencies: Record<string, string> | undefined;
+        if (semver.gte(pnpmVersion, '11.0.0')) {
+          // PNPM 11+ stores patchedDependencies in pnpm-workspace.yaml instead of the package.json "pnpm" field
+          const workspaceFile: PnpmWorkspaceFile | undefined = await PnpmWorkspaceFile.tryLoadAsync(
+            `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`
+          );
+          newGlobalPatchedDependencies = workspaceFile?.patchedDependencies;
+        } else {
+          // PNPM 10.x and earlier store patchedDependencies in the package.json "pnpm" field
+          // Example: "C:\MyRepo\common\temp\package.json"
+          const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
+          const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+          newGlobalPatchedDependencies = commonPackageJson?.pnpm?.patchedDependencies;
+        }
+
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           pnpmOptions?.globalPatchedDependencies;
 
@@ -572,20 +607,79 @@ export class RushPnpmCommandLineParser {
           break;
         }
 
-        // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);
-        const newGlobalOnlyBuiltDependencies: string[] | undefined =
-          commonPackageJson?.pnpm?.onlyBuiltDependencies;
         const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
-        const currentGlobalOnlyBuiltDependencies: string[] | undefined =
-          pnpmOptions?.globalOnlyBuiltDependencies;
+        const pnpmVersion: string = this._rushConfiguration.packageManagerToolVersion;
+        const semver: typeof import('semver') = await import('semver');
 
-        if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
-          // Update onlyBuiltDependencies to pnpm configuration file
-          pnpmOptions?.updateGlobalOnlyBuiltDependencies(newGlobalOnlyBuiltDependencies);
+        if (semver.gte(pnpmVersion, '11.0.0')) {
+          // PNPM 11+ uses allowBuilds in pnpm-workspace.yaml instead of onlyBuiltDependencies in package.json
+          const workspaceFile: PnpmWorkspaceFile | undefined = await PnpmWorkspaceFile.tryLoadAsync(
+            `${subspaceTempFolder}/${RushConstants.pnpmWorkspaceFileName}`
+          );
+          const newGlobalAllowBuilds: Record<string, boolean> | undefined = workspaceFile?.allowBuilds;
+          const currentGlobalAllowBuilds: Record<string, boolean> | undefined =
+            pnpmOptions?.globalAllowBuilds;
 
-          // Rerun installation to update
+          if (!Objects.areDeepEqual(currentGlobalAllowBuilds, newGlobalAllowBuilds)) {
+            // Update allowBuilds to pnpm configuration file
+            pnpmOptions?.updateGlobalAllowBuilds(newGlobalAllowBuilds);
+
+            // Rerun installation to update
+            await this._doRushUpdateAsync();
+
+            this._terminal.writeWarningLine(
+              `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
+                '  Please commit this change to Git.'
+            );
+          }
+        } else {
+          // PNPM 10.x uses onlyBuiltDependencies in package.json
+          // Example: "C:\MyRepo\common\temp\package.json"
+          const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
+          const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);
+          const newGlobalOnlyBuiltDependencies: string[] | undefined =
+            commonPackageJson?.pnpm?.onlyBuiltDependencies;
+          const currentGlobalOnlyBuiltDependencies: string[] | undefined =
+            pnpmOptions?.globalOnlyBuiltDependencies;
+
+          if (!Objects.areDeepEqual(currentGlobalOnlyBuiltDependencies, newGlobalOnlyBuiltDependencies)) {
+            // Update onlyBuiltDependencies to pnpm configuration file
+            await pnpmOptions?.updateGlobalOnlyBuiltDependenciesAsync(newGlobalOnlyBuiltDependencies);
+
+            // Rerun installation to update
+            await this._doRushUpdateAsync();
+
+            this._terminal.writeWarningLine(
+              `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
+                '  Please commit this change to Git.'
+            );
+          }
+        }
+        break;
+      }
+      case 'update':
+      case 'up': {
+        // When "pnpm up" / "pnpm update" runs, PNPM writes any updated catalog versions to the
+        // generated "catalogs" section of common/temp/<subspace>/pnpm-workspace.yaml. That file is
+        // regenerated on every install, so the updated versions must be synced back to the
+        // "globalCatalogs" field of pnpm-config.json for the change to be persisted.
+        const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
+        if (pnpmOptions === undefined) {
+          break;
+        }
+
+        const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
+        const yamlModule: typeof import('js-yaml') = await import('js-yaml');
+        const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
+        const workspaceYaml: { catalogs?: Record<string, Record<string, string>> } = (yamlModule.load(
+          workspaceYamlContent
+        ) ?? {}) as { catalogs?: Record<string, Record<string, string>> };
+        const newGlobalCatalogs: Record<string, Record<string, string>> | undefined = workspaceYaml?.catalogs;
+        const currentGlobalCatalogs: Record<string, Record<string, string>> | undefined =
+          pnpmOptions.globalCatalogs;
+
+        if (!Objects.areDeepEqual(currentGlobalCatalogs, newGlobalCatalogs)) {
+          await pnpmOptions.updateGlobalCatalogsAsync(newGlobalCatalogs);
           await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(

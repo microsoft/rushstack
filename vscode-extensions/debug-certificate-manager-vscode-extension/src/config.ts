@@ -11,12 +11,14 @@ import {
   CONFIG_CA_CERTIFICATE_FILENAME,
   CONFIG_CERTIFICATE_FILENAME,
   CONFIG_KEY_FILENAME,
+  CONFIG_HOME_DIRECTORY,
   CONFIG_STORE_PATH
 } from './constants';
 
 type StorePaths = Record<'windows' | 'linux' | 'osx', string>;
 export interface IExtensionConfig extends ICertificateStoreOptions {
   autoSync: boolean;
+  homeDirectory: string | undefined;
 }
 
 export function getConfig(terminal: ITerminal): IExtensionConfig {
@@ -27,6 +29,8 @@ export function getConfig(terminal: ITerminal): IExtensionConfig {
     config.get(CONFIG_CERTIFICATE_FILENAME) || 'rushstack-serve.pem';
   const keyFilename: string | undefined = config.get(CONFIG_KEY_FILENAME) || 'rushstack-serve.key';
   const autoSync: boolean = config.get(CONFIG_AUTOSYNC) ?? false;
+  const homeDirectory: string | undefined =
+    config.get<string>(CONFIG_HOME_DIRECTORY) || undefined;
   let storePath: string | undefined = undefined;
 
   const platformMap: Record<string, keyof StorePaths> = {
@@ -54,7 +58,8 @@ export function getConfig(terminal: ITerminal): IExtensionConfig {
     caCertificateFilename,
     certificateFilename,
     keyFilename,
-    autoSync
+    autoSync,
+    homeDirectory
   };
   terminal.writeLine(`Extension config: ${JSON.stringify(extensionConfig)}`);
   return extensionConfig;

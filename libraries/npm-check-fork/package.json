@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/npm-check-fork",
-  "version": "0.2.17",
+  "version": "0.2.25",
   "description": "A fork of npm-check.",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/npm-check-fork"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://github.com/dylang/npm-check",
   "main": "./lib-commonjs/index.js",

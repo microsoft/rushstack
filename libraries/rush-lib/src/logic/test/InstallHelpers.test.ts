@@ -7,16 +7,16 @@ import { TestUtilities } from '@rushstack/heft-config-file';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 
-describe('InstallHelpers', () => {
-  describe('generateCommonPackageJson', () => {
-    const originalJsonFileSave = JsonFile.save;
-    const mockJsonFileSave: jest.Mock = jest.fn();
+describe(InstallHelpers.name, () => {
+  describe(InstallHelpers.generateCommonPackageJsonAsync.name, () => {
+    let mockJsonFileSaveAsync: jest.SpyInstance;
     let terminal: Terminal;
     let terminalProvider: StringBufferTerminalProvider;
 
     beforeAll(() => {
-      JsonFile.save = mockJsonFileSave;
+      mockJsonFileSaveAsync = jest.spyOn(JsonFile, 'saveAsync').mockImplementation(async () => true);
     });
 
     beforeEach(() => {
@@ -31,25 +31,27 @@ describe('InstallHelpers', () => {
           asLines: true
         })
       ).toMatchSnapshot('Terminal Output');
-      mockJsonFileSave.mockClear();
+      mockJsonFileSaveAsync.mockClear();
     });
 
-    afterAll(() => {
-      JsonFile.save = originalJsonFileSave;
-    });
-
-    it('generates correct package json with pnpm configurations', () => {
+    it('generates correct package json with pnpm configurations', async () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-      InstallHelpers.generateCommonPackageJson(
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
         rushConfiguration,
         rushConfiguration.defaultSubspace,
-        undefined,
         terminal
       );
-      const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
-      expect(TestUtilities.stripAnnotations(packageJson)).toEqual(
+      await InstallHelpers.generateCommonPackageJsonAsync(
+        rushConfiguration.defaultSubspace,
+        undefined,
+        pnpmSettings
+      );
+      const packageJson: IPackageJson = JSON.parse(
+        JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
+      );
+      expect(packageJson).toEqual(
         expect.objectContaining({
           pnpm: {
             overrides: {
@@ -58,6 +60,7 @@ describe('InstallHelpers', () => {
               'bar@^2.1.0': '3.0.0',
               'qar@1>zoo': '2'
             },
+            // For pnpm < 11 all of these settings are still written into the package.json "pnpm" field.
             packageExtensions: {
               'react-redux': {
                 peerDependencies: {
@@ -65,12 +68,96 @@ describe('InstallHelpers', () => {
                 }
               }
             },
+            peerDependencyRules: {
+              allowedVersions: {
+                react: '18'
+              },
+              ignoreMissing: ['@babel/core']
+            },
+            allowedDeprecatedVersions: {
+              request: '*'
+            },
+            patchedDependencies: {
+              'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+            },
             neverBuiltDependencies: ['fsevents', 'level'],
             onlyBuiltDependencies: ['esbuild', 'playwright'],
             pnpmFutureFeature: true
           }
         })
       );
+      expect(packageJson).toMatchSnapshot();
+    });
+
+    it('does not generate a "pnpm" field for pnpm 11 (all settings belong in pnpm-workspace.yaml)', async () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        terminal
+      );
+      await InstallHelpers.generateCommonPackageJsonAsync(
+        rushConfiguration.defaultSubspace,
+        undefined,
+        pnpmSettings
+      );
+      const packageJson: IPackageJson = JSON.parse(
+        JsonFile.stringify(mockJsonFileSaveAsync.mock.calls[0][0], { ignoreUndefinedValues: true })
+      );
+      // For pnpm >= 11 the "pnpm" field is not generated at all; every setting is written to
+      // common/temp/pnpm-workspace.yaml instead.
+      expect(packageJson).not.toHaveProperty('pnpm');
+
+      // ...and the relocated settings are instead placed on the generated pnpm-workspace.yaml file.
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.ignoredOptionalDependencies).toEqual(['fsevents']);
+      expect(workspaceFile?.trustPolicy).toEqual('no-downgrade');
+      expect(workspaceFile?.trustPolicyExclude).toEqual(['chokidar@4.0.3']);
+      expect(workspaceFile?.trustPolicyIgnoreAfter).toEqual(1440);
+
+      // The subspaces feature is not enabled in this repo, so no global pnpmfile is emitted.
+      expect(workspaceFile?.globalPnpmfile).toBeUndefined();
+    });
+
+    it('emits the subspace global pnpmfile path via pnpm-workspace.yaml for pnpm 11', async () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigPnpm11Subspaces/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        terminal
+      );
+
+      // pnpm 11+ only reads auth/registry settings from .npmrc, so the "global-pnpmfile=" line in
+      // the generated .npmrc is ignored; the path must be emitted via pnpm-workspace.yaml instead,
+      // otherwise cross-subspace "workspace:*" dependencies fail with
+      // ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.globalPnpmfile).toEqual(
+        `${rushConfiguration.defaultSubspace.getSubspaceTempFolderPath()}/global-pnpmfile.cjs`
+      );
+    });
+
+    it('does not emit the global pnpmfile via pnpm-workspace.yaml for pnpm < 11', async () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/repoWithSubspaces/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const pnpmSettings = InstallHelpers.resolvePnpmSettings(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        terminal
+      );
+
+      // For pnpm 10 and earlier the global pnpmfile stays wired up via the generated .npmrc
+      // (see BaseInstallManager); the workspace file must not carry it.
+      const workspaceFile: PnpmWorkspaceFile | undefined =
+        TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
+      expect(workspaceFile?.globalPnpmfile).toBeUndefined();
     });
   });
 });

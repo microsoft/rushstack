@@ -10,22 +10,24 @@ variables:
   - name: FORCE_COLOR
     value: 1
 
-# This pipeline is triggered only by pipeline resources (npm publish pipelines),
+# This pipeline is triggered only by pipeline resources (esrp publish pipelines),
 # not by CI pushes or PR builds.
 trigger: none
 pr: none
 
 resources:
   pipelines:
-    - pipeline: npmPublish
-      source: 'rushstack NPM Publish'
+    - pipeline: esrpPublishRushstack
+      source: 'rushstack-esrp-publish'
+      project: GitHubProjectsPublish
       trigger:
         enabled: true
         branches:
           include:
             - refs/heads/main
-    - pipeline: npmPublishRush
-      source: 'rushstack NPM Publish (rush)'
+    - pipeline: esrpPublishRush
+      source: 'rushstack-esrp-publish-rush'
+      project: GitHubProjectsPublish
       trigger:
         enabled: true
         branches:
@@ -45,6 +47,8 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
   parameters:
+    settings:
+      networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3,DefaultDeny
     sdl:
       sourceRepositoriesToScan:
         exclude:
@@ -222,8 +226,8 @@ extends:
                 displayName: 'Download API review files'
                 inputs:
                   source: specific
-                  project: GitHubProjects
-                  pipeline: 'rushstack NPM Publish'
+                  project: GitHubProjectsPublish
+                  pipeline: 'rushstack-esrp-publish'
                   preferTriggeringPipeline: true
                   runVersion: latest
                   artifact: api

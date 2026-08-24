@@ -28,9 +28,17 @@
                   "hardlink": true
                 },
                 {
+                  "sourcePath": "lib-intermediate-commonjs/cli/test/rush-mock-clear-operations-plugin",
+                  "destinationFolders": [
+                    "lib-intermediate-commonjs/cli/test/clearOperationsAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-clear-operations-plugin"
+                  ],
+                  "fileExtensions": [".json", ".js", ".map"],
+                  "hardlink": true
+                },
+                {
                   "sourcePath": "src/cli/test",
                   "destinationFolders": ["lib-intermediate-commonjs/cli/test"],
-                  "fileExtensions": [".js"]
+                  "fileExtensions": [".js", ".yaml"]
                 },
                 {
                   "sourcePath": "src/logic/pnpm/test",

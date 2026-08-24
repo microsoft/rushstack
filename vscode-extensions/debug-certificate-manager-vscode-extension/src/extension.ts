@@ -206,7 +206,11 @@ export function activate(context: vscode.ExtensionContext): void {
       } else if (storePath.startsWith('~')) {
         let homeDir: string;
 
-        if (vscode.env.remoteName) {
+        const { homeDirectory } = getConfig(terminal);
+        if (homeDirectory) {
+          homeDir = homeDirectory;
+          terminal.writeLine(`Using configured home directory: ${homeDir}`);
+        } else if (vscode.env.remoteName) {
           const markerPrefix: string = '<<<HOMEDIR_START>>>';
           const markerSuffix: string = '<<<HOMEDIR_END>>>';
           const output: string = await runWorkspaceCommandAsync({

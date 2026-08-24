@@ -1,0 +1,7 @@
+{
+  "globalAllowBuilds": {
+    "esbuild": true,
+    "@parcel/watcher": true,
+    "fsevents": false
+  }
+}

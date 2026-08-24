@@ -1,5 +1,34 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`PnpmWorkspaceFile allowBuilds functionality generates workspace file with allowBuilds 1`] = `
+"allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  fsevents: false
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile allowBuilds functionality generates workspace file with allowBuilds and catalogs 1`] = `
+"allowBuilds:
+  esbuild: true
+catalogs:
+  default:
+    react: ^18.0.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile allowedDeprecatedVersions functionality generates workspace file with allowedDeprecatedVersions 1`] = `
+"allowedDeprecatedVersions:
+  querystring: '*'
+packages:
+  - projects/app1
+"
+`;
+
 exports[`PnpmWorkspaceFile basic functionality generates workspace file with packages only 1`] = `
 "packages:
   - projects/app1
@@ -44,7 +73,8 @@ packages:
 `;
 
 exports[`PnpmWorkspaceFile catalog functionality handles empty catalog object 1`] = `
-"packages:
+"catalogs: {}
+packages:
   - projects/app1
 "
 `;
@@ -63,5 +93,105 @@ packages:
 exports[`PnpmWorkspaceFile catalog functionality handles undefined catalog 1`] = `
 "packages:
   - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile combined pnpm 11 settings generates workspace file with all relocated settings together 1`] = `
+"allowBuilds:
+  esbuild: true
+allowedDeprecatedVersions:
+  querystring: '*'
+catalogs:
+  default:
+    react: ^18.0.0
+ignoredOptionalDependencies:
+  - fsevents
+overrides:
+  foo@1.0.0: 1.0.1
+packageExtensions:
+  react@*:
+    dependencies:
+      foo: 1.0.0
+packages:
+  - projects/app1
+patchedDependencies:
+  lodash@4.17.21: patches/lodash@4.17.21.patch
+peerDependencyRules:
+  allowedVersions:
+    react: '18'
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - chokidar@4.0.3
+trustPolicyIgnoreAfter: 1440
+"
+`;
+
+exports[`PnpmWorkspaceFile globalPnpmfile functionality generates workspace file with globalPnpmfile 1`] = `
+"globalPnpmfile: /repo/common/temp/my-subspace/global-pnpmfile.cjs
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAge 1`] = `
+"minimumReleaseAge: 20160
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAge and minimumReleaseAgeExclude 1`] = `
+"minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - webpack
+  - '@myorg/*'
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile minimumReleaseAge functionality generates workspace file with minimumReleaseAgeExclude only 1`] = `
+"minimumReleaseAgeExclude:
+  - webpack
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile overrides functionality generates workspace file with overrides 1`] = `
+"overrides:
+  bar: ^2.0.0
+  foo@1.0.0: 1.0.1
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile packageExtensions functionality generates workspace file with packageExtensions 1`] = `
+"packageExtensions:
+  react@*:
+    dependencies:
+      foo: 1.0.0
+packages:
+  - projects/app1
+"
+`;
+
+exports[`PnpmWorkspaceFile patchedDependencies functionality generates workspace file with patchedDependencies 1`] = `
+"packages:
+  - projects/app1
+patchedDependencies:
+  lodash@4.17.21: patches/lodash@4.17.21.patch
+"
+`;
+
+exports[`PnpmWorkspaceFile peerDependencyRules functionality generates workspace file with peerDependencyRules 1`] = `
+"packages:
+  - projects/app1
+peerDependencyRules:
+  allowedVersions:
+    react: '18'
+  ignoreMissing:
+    - baz
 "
 `;

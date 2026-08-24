@@ -23,9 +23,9 @@ export interface IAnalyzerError {
   data?: Readonly<Record<string, unknown>>;
 }
 
-export class PackletAnalyzer {
-  private static _validPackletName: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const _validPackletName: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+export class PackletAnalyzer {
   /**
    * The input file being linted.
    *
@@ -148,7 +148,7 @@ export class PackletAnalyzer {
           const thirdPartWithoutExtension: string = Path.parse(thirdPart).name;
 
           if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
-            if (!PackletAnalyzer._validPackletName.test(packletName)) {
+            if (!_validPackletName.test(packletName)) {
               this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
               return;
             }

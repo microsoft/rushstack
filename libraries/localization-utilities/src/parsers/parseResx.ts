@@ -204,7 +204,10 @@ function _readDataElement(
 
     return {
       value: value || '',
-      comment
+      comment,
+      // xmldoc's `column` refers to the end of the element's open tag rather than its start, so the
+      // beginning of the line is used instead. That reliably lands an editor on the <data> element.
+      sourcePosition: { line: dataElement.line, column: 0 }
     };
   }
 }

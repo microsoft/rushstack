@@ -1,6 +1,47 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 7.59.0
+Fri, 21 Aug 2026 15:16:34 GMT
+
+### Minor changes
+
+- Report a new `ae-unresolved-import-path` message when an inline `import()` type with a relative path cannot be resolved, instead of silently emitting the unusable path into the .d.ts rollup.
+
+## 7.58.13
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 7.58.12
+Tue, 21 Jul 2026 02:53:22 GMT
+
+### Patches
+
+- Improve the performance of the internal excerpt token condensing algorithm from O(n^2) to O(n) by eliminating repeated array splicing and per-merge bookkeeping.
+
+## 7.58.11
+Fri, 17 Jul 2026 00:15:59 GMT
+
+_Version update only_
+
+## 7.58.10
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
+
+## 7.58.9
+Sat, 13 Jun 2026 00:16:18 GMT
+
+_Version update only_
+
+## 7.58.8
+Mon, 08 Jun 2026 15:15:49 GMT
+
+### Patches
+
+- Add support for new d.ts extension format when using TS moduleResolution 'bundler' or 'nodenext'.
 
 ## 7.58.7
 Mon, 20 Apr 2026 23:31:13 GMT

@@ -11,7 +11,6 @@ import {
   type IPackageJson,
   JsonFile,
   AlreadyReportedError,
-  Text
 } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
@@ -264,7 +263,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   ): string {
     let expandedShellCommand: string = shellCommand;
     for (const [token, tokenReplacement] of Object.entries(tokenContext)) {
-      expandedShellCommand = Text.replaceAll(expandedShellCommand, `<${token}>`, tokenReplacement);
+      expandedShellCommand = expandedShellCommand.replaceAll(`<${token}>`, tokenReplacement);
     }
     return expandedShellCommand;
   }

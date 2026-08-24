@@ -34,10 +34,6 @@ export class ReadmeAction extends CommandLineAction {
     });
   }
 
-  private static _isPublished(project: RushConfigurationProject): boolean {
-    return project.shouldPublish || !!project.versionPolicyName;
-  }
-
   protected override async onExecuteAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
@@ -77,7 +73,7 @@ export class ReadmeAction extends CommandLineAction {
     builder.append('| Folder | Version | Changelog | Package |\n');
     builder.append('| ------ | ------- | --------- | ------- |\n');
     for (const project of orderedProjects) {
-      if (!ReadmeAction._isPublished(project)) {
+      if (!_isPublished(project)) {
         continue;
       }
 
@@ -131,7 +127,7 @@ export class ReadmeAction extends CommandLineAction {
     builder.append('| Folder | Description |\n');
     builder.append('| ------ | -----------|\n');
     for (const project of orderedProjects) {
-      if (ReadmeAction._isPublished(project)) {
+      if (_isPublished(project)) {
         continue;
       }
 
@@ -182,4 +178,8 @@ export class ReadmeAction extends CommandLineAction {
       console.log(`The README.md is up to date.`);
     }
   }
+}
+
+function _isPublished(project: RushConfigurationProject): boolean {
+  return project.shouldPublish || !!project.versionPolicyName;
 }

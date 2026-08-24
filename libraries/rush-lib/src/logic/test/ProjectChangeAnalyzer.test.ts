@@ -842,6 +842,35 @@ describe(ProjectChangeAnalyzer.name, () => {
         // 'c' has no catalog deps
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
       });
+
+      it('parses pnpm-config.json blobs containing comments (regression #5813)', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        mockPnpmConfigChanged();
+        mockGetBlobContentAsync.mockImplementation(() => {
+          return Promise.resolve(
+            `// banner comment from rush init template\n` +
+              `/* block comment */\n` +
+              JSON.stringify({
+                globalCatalogs: {
+                  default: { react: '^18.0.0', semver: '^7.5.4' },
+                  tools: { typescript: '~5.3.0', eslint: '^8.50.0' }
+                }
+              })
+          );
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        expect(changedProjects.size).toBe(0);
+      });
     });
 
     describe('subspace catalog change detection', () => {

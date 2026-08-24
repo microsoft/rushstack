@@ -28,6 +28,48 @@ const STANDARD_GIT_OPTIONS: readonly string[] = [
   'maintenance.auto=false'
 ];
 
+// Windows reserved device names (case-insensitive). A file whose final path segment matches one
+// of these (with or without an extension) cannot be opened by name on Windows, so passing it to
+// `git hash-object` aborts the process. Such files are typically untracked artifacts left behind
+// by tooling (e.g. stray `nul` from a shell redirect).
+const WINDOWS_RESERVED_BASENAMES: ReadonlySet<string> = new Set([
+  'CON',
+  'PRN',
+  'AUX',
+  'NUL',
+  'COM1',
+  'COM2',
+  'COM3',
+  'COM4',
+  'COM5',
+  'COM6',
+  'COM7',
+  'COM8',
+  'COM9',
+  'LPT1',
+  'LPT2',
+  'LPT3',
+  'LPT4',
+  'LPT5',
+  'LPT6',
+  'LPT7',
+  'LPT8',
+  'LPT9'
+]);
+
+/**
+ * Returns `true` if `filePath`'s final path segment is a Windows reserved device name
+ * (with or without an extension), case-insensitively. Exported for tests.
+ * @internal
+ */
+export function isWindowsReservedPath(filePath: string): boolean {
+  const lastSlash: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+  const basename: string = lastSlash >= 0 ? filePath.slice(lastSlash + 1) : filePath;
+  const dot: number = basename.indexOf('.');
+  const stem: string = (dot >= 0 ? basename.slice(0, dot) : basename).toUpperCase();
+  return WINDOWS_RESERVED_BASENAMES.has(stem);
+}
+
 const OBJECTMODE_SUBMODULE: '160000' = '160000';
 const OBJECTMODE_SYMLINK: '120000' = '120000';
 const OBJECTMODE_FILE_NONEXECUTABLE: '100644' = '100644';
@@ -231,6 +273,13 @@ export function parseGitStatus(output: string): Map<string, boolean> {
 
 const repoRootCache: Map<string, string> = new Map();
 
+// Strip GIT_DIR/GIT_WORK_TREE: git hooks in linked worktrees set GIT_DIR to the per-worktree metadata dir, causing rev-parse --show-toplevel to return CWD instead of the worktree root.
+function getCleanGitEnvironment(): NodeJS.ProcessEnv {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { GIT_DIR, GIT_WORK_TREE, ...trimmedEnv } = process.env;
+  return trimmedEnv;
+}
+
 /**
  * Finds the root of the current Git repository
  *
@@ -247,7 +296,8 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
       gitPath || 'git',
       ['--no-optional-locks', 'rev-parse', '--show-toplevel'],
       {
-        currentWorkingDirectory
+        currentWorkingDirectory,
+        environment: getCleanGitEnvironment()
       }
     );
 
@@ -282,7 +332,8 @@ async function spawnGitAsync(
 ): Promise<string> {
   const spawnOptions: IExecutableSpawnOptions = {
     currentWorkingDirectory,
-    stdio: ['pipe', 'pipe', 'pipe']
+    stdio: ['pipe', 'pipe', 'pipe'],
+    environment: getCleanGitEnvironment()
   };
 
   let stdout: string = '';
@@ -480,8 +531,15 @@ export async function getDetailedRepoStateAsync(
 
     const [{ files, symlinks }, locallyModified] = await Promise.all([statePromise, locallyModifiedPromise]);
 
+    const isWindows: boolean = process.platform === 'win32';
     for (const [filePath, exists] of locallyModified) {
       if (exists && !symlinks.has(filePath)) {
+        // Skip Windows reserved device names. `git hash-object` cannot open them and would abort
+        // the entire repo-state computation. These are almost always stray artifacts (e.g. a `nul`
+        // file produced by a misdirected shell redirect) rather than meaningful inputs.
+        if (isWindows && isWindowsReservedPath(filePath)) {
+          continue;
+        }
         yield filePath;
       } else {
         files.delete(filePath);
@@ -561,7 +619,8 @@ export function getRepoChanges(
       '--'
     ]),
     {
-      currentWorkingDirectory: rootDirectory
+      currentWorkingDirectory: rootDirectory,
+      environment: getCleanGitEnvironment()
     }
   );
 

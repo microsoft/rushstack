@@ -30,14 +30,14 @@ export class EnvironmentVariableParser {
             !parsedJson.every((x) => typeof x === 'string' || typeof x === 'boolean' || typeof x === 'number')
           ) {
             throw new Error(
-              `The ${environmentValue} environment variable value must be a JSON ` +
+              `The ${envVarName} environment variable value must be a JSON ` +
                 ` array containing only strings, numbers, and booleans.`
             );
           }
           return parsedJson.map((x) => x.toString());
         } catch (ex) {
           throw new Error(
-            `The ${environmentValue} environment variable value looks like a JSON array` +
+            `The ${envVarName} environment variable value looks like a JSON array` +
               ` but failed to parse: ` +
               (ex as Error).message
           );

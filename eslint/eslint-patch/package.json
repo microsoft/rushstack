@@ -46,6 +46,9 @@
     "type": "git",
     "directory": "eslint/eslint-patch"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "homepage": "https://rushstack.io",
   "scripts": {
     "build": "heft build --clean",
@@ -67,7 +70,7 @@
     "patch"
   ],
   "devDependencies": {
-    "@rushstack/heft": "1.2.17",
+    "@rushstack/heft": "1.2.23",
     "@types/eslint-8": "npm:@types/eslint@8.56.10",
     "@types/eslint-9": "npm:@types/eslint@9.6.1",
     "@typescript-eslint/types": "~8.56.1",

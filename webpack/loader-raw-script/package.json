@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.6.17",
+  "version": "1.6.25",
   "description": "",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -32,6 +32,9 @@
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/loader-raw-script"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",

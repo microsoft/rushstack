@@ -78,8 +78,7 @@ export class ApiVariable extends ApiNameMixin(
     this.variableTypeExcerpt = this.buildExcerpt(options.variableTypeTokenRange);
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiVariableOptions>,
     context: DeserializerContext,
     jsonObject: IApiVariableJson
@@ -93,25 +92,22 @@ export class ApiVariable extends ApiNameMixin(
     return `${name}|${ApiItemKind.Variable}`;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Variable;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiVariable.getContainerKey(this.name);
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiVariableJson>): void {
+  public override serializeInto(jsonObject: Partial<IApiVariableJson>): void {
     super.serializeInto(jsonObject);
 
     jsonObject.variableTypeTokenRange = this.variableTypeExcerpt.tokenRange;
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())

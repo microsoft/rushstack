@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync, type SpawnSyncReturns } from 'node:child_process';
 
 import {
   getDetailedRepoStateAsync,
@@ -12,7 +12,7 @@ import {
   parseGitHashObject
 } from '../getRepoState';
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { Executable, FileSystem } from '@rushstack/node-core-library';
 
 const SOURCE_PATH: string = path
   .join(__dirname)
@@ -44,6 +44,59 @@ describe(getRepoRoot.name, () => {
     const root: string = getRepoRoot(__dirname);
     const expectedRoot: string = path.resolve(__dirname, '../../../..').replace(/\\/g, '/');
     expect(root).toEqual(expectedRoot);
+  });
+
+  it(`strips GIT_DIR and GIT_WORK_TREE before invoking git`, () => {
+    // Regression test for the linked-worktree bug. When git runs a hook it injects GIT_DIR (and
+    // sometimes GIT_WORK_TREE) into the environment; in a linked worktree GIT_DIR points at the
+    // per-worktree metadata directory, which makes `git rev-parse --show-toplevel` resolve against
+    // the current directory instead of the true repository root. getRepoRoot must therefore invoke
+    // git with those variables removed, so the root is derived solely from currentWorkingDirectory.
+    //
+    // This is asserted at the spawn boundary rather than by mutating process.env and shelling out for
+    // real: the Jest environment does not propagate in-process process.env writes to child processes,
+    // so an end-to-end variant would pass whether or not the stripping actually happens.
+    const fakeRoot: string = '/fake/repo/root';
+    const mockResult: SpawnSyncReturns<string> = {
+      pid: 0,
+      output: [],
+      stdout: fakeRoot,
+      stderr: '',
+      status: 0,
+      signal: null
+    };
+    const spawnSyncSpy: jest.SpyInstance = jest.spyOn(Executable, 'spawnSync').mockReturnValue(mockResult);
+
+    const originalGitDir: string | undefined = process.env.GIT_DIR;
+    const originalGitWorkTree: string | undefined = process.env.GIT_WORK_TREE;
+    try {
+      process.env.GIT_DIR = '/repo/.git/worktrees/feature';
+      process.env.GIT_WORK_TREE = '/repo/work/tree';
+
+      // A unique cwd that no other test resolves, so getRepoRoot's module-level cache can't satisfy
+      // this from a previous call and skip the spawn.
+      getRepoRoot('/nonexistent/getRepoRoot-strips-git-env');
+
+      expect(spawnSyncSpy).toHaveBeenCalledTimes(1);
+      const passedEnvironment: NodeJS.ProcessEnv | undefined = spawnSyncSpy.mock.calls[0][2]?.environment;
+      // The fix passes an explicit environment (pre-fix code passed none) that omits both variables,
+      // while leaving the rest of process.env intact.
+      expect(passedEnvironment).toBeDefined();
+      expect(passedEnvironment).not.toHaveProperty('GIT_DIR');
+      expect(passedEnvironment).not.toHaveProperty('GIT_WORK_TREE');
+    } finally {
+      spawnSyncSpy.mockRestore();
+      if (originalGitDir === undefined) {
+        delete process.env.GIT_DIR;
+      } else {
+        process.env.GIT_DIR = originalGitDir;
+      }
+      if (originalGitWorkTree === undefined) {
+        delete process.env.GIT_WORK_TREE;
+      } else {
+        process.env.GIT_WORK_TREE = originalGitWorkTree;
+      }
+    }
   });
 });
 

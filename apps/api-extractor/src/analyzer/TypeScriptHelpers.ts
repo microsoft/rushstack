@@ -10,15 +10,15 @@ import { InternalError } from '@rushstack/node-core-library';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { TypeScriptInternals } from './TypeScriptInternals';
 
+// Matches TypeScript's encoded names for well-known ECMAScript symbols like
+// "__@iterator" or "__@toStringTag".
+const _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
+
+// Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
+// which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
+const _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
+
 export class TypeScriptHelpers {
-  // Matches TypeScript's encoded names for well-known ECMAScript symbols like
-  // "__@iterator" or "__@toStringTag".
-  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
-
-  // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
-  // which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
-  private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
-
   /**
    * This traverses any symbol aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
@@ -268,7 +268,7 @@ export class TypeScriptHelpers {
    * If the string does not start with `__@` then `undefined` is returned.
    */
   public static tryDecodeWellKnownSymbolName(name: ts.__String): string | undefined {
-    const match: RegExpExecArray | null = TypeScriptHelpers._wellKnownSymbolNameRegExp.exec(name as string);
+    const match: RegExpExecArray | null = _wellKnownSymbolNameRegExp.exec(name as string);
     if (match) {
       const identifier: string = match[1];
       return `[Symbol.${identifier}]`;
@@ -280,7 +280,7 @@ export class TypeScriptHelpers {
    * Returns whether the provided name was generated for a TypeScript `unique symbol`.
    */
   public static isUniqueSymbolName(name: ts.__String): boolean {
-    return TypeScriptHelpers._uniqueSymbolNameRegExp.test(name as string);
+    return _uniqueSymbolNameRegExp.test(name as string);
   }
 
   /**

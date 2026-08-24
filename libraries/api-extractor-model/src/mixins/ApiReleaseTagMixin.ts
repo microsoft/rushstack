@@ -50,7 +50,6 @@ export interface ApiReleaseTagMixin extends ApiItem {
    */
   readonly releaseTag: ReleaseTag;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -77,8 +76,7 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(
       this[_releaseTag] = options.releaseTag;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiReleaseTagMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiReleaseTagMixinJson
@@ -100,8 +98,7 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(
       return this[_releaseTag];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiReleaseTagMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiReleaseTagMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.releaseTag = ReleaseTag[this.releaseTag];

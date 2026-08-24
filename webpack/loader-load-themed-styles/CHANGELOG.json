@@ -2,6 +2,155 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "2.2.25",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.25",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.24` to `2.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.24",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.24",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.23` to `2.2.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.23",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.23",
+      "date": "Fri, 14 Aug 2026 00:18:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.22` to `2.2.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.22",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.22",
+      "date": "Tue, 21 Jul 2026 02:53:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.21` to `2.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.21",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.21",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.20` to `2.2.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.20",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.20",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.19` to `2.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.19",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.19",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.18` to `2.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.18",
+      "tag": "@microsoft/loader-load-themed-styles_v2.2.18",
+      "date": "Mon, 08 Jun 2026 15:15:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.2.17` to `2.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.17",
       "tag": "@microsoft/loader-load-themed-styles_v2.2.17",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",

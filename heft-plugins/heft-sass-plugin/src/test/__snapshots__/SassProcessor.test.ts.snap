@@ -1272,6 +1272,179 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor sourceMap option does not emit .css.map or sourceMappingURL comment by default: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sourceMap option does not emit .css.map or sourceMappingURL comment by default: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor sourceMap option emits .css.map and sourceMappingURL comment when sourceMap is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sourceMap option emits .css.map and sourceMappingURL comment when sourceMap is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+/*# sourceMappingURL=classes-and-exports.module.css.map */
+",
+  "/fake/output/css/classes-and-exports.module.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\n.root {\\\\n  color: red;\\\\n  font-size: 14px;\\\\n}\\\\n\\\\n.highlighted {\\\\n  background-color: yellow;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: blue;\\\\n  spacing: 8px;\\\\n}\\\\n\\"],\\"file\\":\\"classes-and-exports.module.css\\"}",
+}
+`;
+
+exports[`SassProcessor sourceMap option emits a valid .css.map when the entry file @uses a partial (Linux/macOS regression): terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sourceMap option emits a valid .css.map when the entry file @uses a partial (Linux/macOS regression): written-files 1`] = `
+Map {
+  "/fake/output/dts/use-with-partial.module.scss.d.ts" => "declare interface IStyles {
+  container: string;
+  header: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-with-partial.module.css" => ".container {
+  color: #0078d4;
+  padding: 8px;
+}
+
+.header {
+  border-bottom: 1px solid #0078d4;
+}
+/*# sourceMappingURL=use-with-partial.module.css.map */
+",
+  "/fake/output/css/use-with-partial.module.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/use-with-partial.module.scss\\",\\"fixtures/_partial.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAIA;EACE,OCHY;EDIZ;;;AAGF;EACE\\",\\"sourcesContent\\":[\\"// Uses the modern @use syntax to import variables from a local partial.\\\\n// Verifies that SassProcessor resolves _partial.scss when @use 'partial' is written.\\\\n@use 'partial' as tokens;\\\\n\\\\n.container {\\\\n  color: tokens.$brand-color;\\\\n  padding: tokens.$spacing-unit * 2;\\\\n}\\\\n\\\\n.header {\\\\n  border-bottom: 1px solid tokens.$brand-color;\\\\n}\\\\n\\",\\"// Sass partial exposing shared design tokens.\\\\n// Imported via @use 'partial' in use-with-partial.module.scss.\\\\n$brand-color: #0078d4;\\\\n$spacing-unit: 4px;\\\\n\\"],\\"file\\":\\"use-with-partial.module.css\\"}",
+}
+`;
+
+exports[`SassProcessor sourceMap option uses the correct map filename when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor sourceMap option uses the correct map filename when doNotTrimOriginalFileExtension is true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+/*# sourceMappingURL=classes-and-exports.module.scss.css.map */
+",
+  "/fake/output/css/classes-and-exports.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\n.root {\\\\n  color: red;\\\\n  font-size: 14px;\\\\n}\\\\n\\\\n.highlighted {\\\\n  background-color: yellow;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: blue;\\\\n  spacing: 8px;\\\\n}\\\\n\\"],\\"file\\":\\"classes-and-exports.module.scss.css\\"}",
+}
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use with an explicit extension: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use with an explicit extension: written-files 1`] = `
+Map {
+  "/fake/output/dts/use-plain-css.module.scss.d.ts" => "declare interface IStyles {
+  \\"token-base\\": string;
+  container: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-plain-css.module.css" => "/* A plain CSS file (no Sass syntax) imported via @use from another stylesheet. */
+.token-base {
+  color: #0078d4;
+  display: block;
+}
+
+.container {
+  font-weight: bold;
+}",
+}
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use without an explicit extension: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor use-plain-css.module.scss (@use of a plain .css file) resolves a plain .css file referenced via @use without an explicit extension: written-files 1`] = `
+Map {
+  "/fake/output/dts/use-plain-css-extensionless.module.scss.d.ts" => "declare interface IStyles {
+  \\"token-base\\": string;
+  container: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/use-plain-css-extensionless.module.css" => "/* A plain CSS file (no Sass syntax) imported via @use from another stylesheet. */
+.token-base {
+  color: #0078d4;
+  display: block;
+}
+
+.container {
+  font-weight: bold;
+}",
+}
+`;
+
 exports[`SassProcessor use-with-partial.module.scss (@use with local partial) generates .d.ts with class names from a file using @use: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",

@@ -1,6 +1,56 @@
 # Change Log - @rushstack/heft-sass-load-themed-styles-plugin
 
-This log was last generated on Thu, 30 Apr 2026 00:15:22 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 1.2.30
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 1.2.29
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 1.2.28
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 1.2.27
+Tue, 21 Jul 2026 02:53:22 GMT
+
+_Version update only_
+
+## 1.2.26
+Fri, 17 Jul 2026 00:15:59 GMT
+
+_Version update only_
+
+## 1.2.25
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
+
+## 1.2.24
+Sat, 13 Jun 2026 00:16:18 GMT
+
+_Version update only_
+
+## 1.2.23
+Mon, 08 Jun 2026 15:15:49 GMT
+
+_Version update only_
+
+## 1.2.22
+Tue, 02 Jun 2026 07:30:20 GMT
+
+_Version update only_
+
+## 1.2.21
+Fri, 29 May 2026 18:25:51 GMT
+
+_Version update only_
 
 ## 1.2.20
 Thu, 30 Apr 2026 00:15:22 GMT

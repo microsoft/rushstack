@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 25 Feb 2026 21:39:42 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+
+## 0.23.3
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
 
 ## 0.23.2
 Wed, 25 Feb 2026 21:39:42 GMT

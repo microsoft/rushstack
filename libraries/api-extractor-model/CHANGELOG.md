@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Sat, 18 Apr 2026 00:15:17 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+
+## 7.33.11
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 7.33.10
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
+
+## 7.33.9
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 7.33.8
 Sat, 18 Apr 2026 00:15:17 GMT

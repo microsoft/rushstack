@@ -29,6 +29,7 @@ function includePlugin(pluginName: string, pluginPackageName?: string): void {
 includePlugin('rush-amazon-s3-build-cache-plugin');
 includePlugin('rush-azure-storage-build-cache-plugin');
 includePlugin('rush-http-build-cache-plugin');
+includePlugin('rush-serve-plugin');
 // Including this here so that developers can reuse it without installing the plugin a second time
 includePlugin('rush-azure-interactive-auth-plugin', '@rushstack/rush-azure-storage-build-cache-plugin');
 

@@ -1,0 +1,8 @@
+// Uses the modern @use syntax to import a plain `.css` file without an explicit extension.
+// dart-sass resolves extensionless loads against `.scss`, `.sass`, then `.css`, so SassProcessor
+// must fall back to the `.css` candidate when no Sass file exists.
+@use './plain-tokens';
+
+.container {
+  font-weight: bold;
+}

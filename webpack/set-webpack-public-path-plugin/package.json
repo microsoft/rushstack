@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "5.3.18",
+  "version": "5.3.27",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -32,6 +32,9 @@
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/set-webpack-public-path-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft build --clean",

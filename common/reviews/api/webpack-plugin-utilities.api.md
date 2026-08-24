@@ -5,10 +5,15 @@
 ```ts
 
 import type { Configuration } from 'webpack';
+import type { Expression } from 'estree';
 import { IFs } from 'memfs';
 import type { MultiStats } from 'webpack';
+import type { SpreadElement } from 'estree';
 import type { Stats } from 'webpack';
 import type * as Webpack from 'webpack';
+
+// @beta
+export function evaluateConstantEstreeExpression<TNode>(node: Expression | SpreadElement): TNode;
 
 // @public
 function getTestingWebpackCompilerAsync(entry: string, additionalConfig?: Configuration, memFs?: IFs): Promise<(Stats | MultiStats) | undefined>;

@@ -450,7 +450,7 @@ export interface IConfigFile {
    *
    * @remarks
    *
-   * The file extension must be ".d.ts" and not ".ts".
+   * The file extension must be a declaration file (e.g. ".d.ts", ".d.mts", ".d.\{extension\}.ts"), not ".ts".
    * The path is resolved relative to the "projectFolder" location.
    */
   mainEntryPointFilePath: string;

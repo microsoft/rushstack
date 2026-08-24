@@ -34,6 +34,9 @@
     "type": "git",
     "directory": "libraries/rig-package"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -44,10 +47,10 @@
     "resolve": "~1.22.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.2.17",
+    "@rushstack/heft": "1.2.23",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.20.2",
-    "ajv": "~8.18.0",
+    "ajv": "~8.20.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "resolve": "~1.22.1"

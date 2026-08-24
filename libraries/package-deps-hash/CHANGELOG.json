@@ -2,6 +2,140 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.7.27",
+      "tag": "@rushstack/package-deps-hash_v4.7.27",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.26",
+      "tag": "@rushstack/package-deps-hash_v4.7.26",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.25",
+      "tag": "@rushstack/package-deps-hash_v4.7.25",
+      "date": "Fri, 14 Aug 2026 00:18:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.24",
+      "tag": "@rushstack/package-deps-hash_v4.7.24",
+      "date": "Tue, 21 Jul 2026 02:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.23",
+      "tag": "@rushstack/package-deps-hash_v4.7.23",
+      "date": "Fri, 17 Jul 2026 00:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.22",
+      "tag": "@rushstack/package-deps-hash_v4.7.22",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.21",
+      "tag": "@rushstack/package-deps-hash_v4.7.21",
+      "date": "Mon, 15 Jun 2026 15:15:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Strip GIT_DIR and GIT_WORK_TREE Node env variables to fix issues with miscalculating the git repo root when working in a linked worktree"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.20",
+      "tag": "@rushstack/package-deps-hash_v4.7.20",
+      "date": "Sat, 13 Jun 2026 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.19",
+      "tag": "@rushstack/package-deps-hash_v4.7.19",
+      "date": "Mon, 08 Jun 2026 15:15:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.7.18",
+      "tag": "@rushstack/package-deps-hash_v4.7.18",
+      "date": "Mon, 25 May 2026 15:14:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Skip untracked files whose basename is a Windows reserved device name (e.g. `nul`, `con`, `aux`, `com1`-`com9`, `lpt1`-`lpt9`) when computing repo state on Windows. `git hash-object` cannot open such paths and otherwise aborts the entire repo-state calculation."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.7.17",
       "tag": "@rushstack/package-deps-hash_v4.7.17",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",

@@ -2,6 +2,47 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.24.0",
+      "tag": "@rushstack/node-core-library_v5.24.0",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Deprecate `Text.replaceAll()` in favor of the native `String.prototype.replaceAll()` function."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.3",
+      "tag": "@rushstack/node-core-library_v5.23.3",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.2",
+      "tag": "@rushstack/node-core-library_v5.23.2",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update `ajv` dependency to `~8.20.0` to resolve vulnerable transitive `fast-uri` versions."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.1",
       "tag": "@rushstack/node-core-library_v5.23.1",
       "date": "Sat, 18 Apr 2026 00:15:16 GMT",

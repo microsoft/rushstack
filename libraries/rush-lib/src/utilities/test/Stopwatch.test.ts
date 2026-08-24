@@ -111,4 +111,29 @@ describe(Stopwatch.name, () => {
     expect(watch.duration).toEqual(1);
     expect(watch.duration).toEqual(2);
   });
+
+  it('uses startTimeOverride when provided to start()', () => {
+    const watch: Stopwatch = new Stopwatch(pseudoTimeMilliseconds([5000]));
+    watch.start(2000);
+    expect(watch.startTime).toEqual(2000);
+    watch.stop();
+    expect(watch.duration).toEqual(3);
+  });
+
+  it('uses startTimeOverride with the static start() shorthand', () => {
+    const watch: Stopwatch = Stopwatch.start(1000);
+    expect(watch.startTime).toEqual(1000);
+    expect(watch.state).toEqual(StopwatchState.Started);
+  });
+
+  it('ignores getTime for start when startTimeOverride is provided', () => {
+    const getTime = pseudoTimeMilliseconds([10000]);
+    const watch: Stopwatch = new Stopwatch(getTime);
+    watch.start(3000);
+    // startTime should be the override, not a value from getTime
+    expect(watch.startTime).toEqual(3000);
+    // stop still uses getTime
+    watch.stop();
+    expect(watch.duration).toEqual(7);
+  });
 });

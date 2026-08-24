@@ -97,33 +97,6 @@ export interface ILoadSdkAsyncOptions {
  */
 export class RushSdkLoader {
   /**
-   * Throws an "AbortError" exception if abortSignal.aborted is true.
-   */
-  private static _checkForCancel(
-    abortSignal: AbortSignal,
-    onNotifyEvent: SdkNotifyEventCallback | undefined,
-    progressPercent: number | undefined
-  ): void {
-    if (!abortSignal?.aborted) {
-      return;
-    }
-
-    if (onNotifyEvent) {
-      onNotifyEvent({
-        logMessage: {
-          kind: 'info',
-          text: `The operation was canceled`
-        },
-        progressPercent
-      });
-    }
-
-    const error: Error = new Error('The operation was canceled');
-    error.name = 'AbortError';
-    throw error;
-  }
-
-  /**
    * Returns true if the Rush engine has already been loaded.
    */
   public static get isLoaded(): boolean {
@@ -231,7 +204,7 @@ export class RushSdkLoader {
           }
 
           if (abortSignal) {
-            RushSdkLoader._checkForCancel(abortSignal, onNotifyEvent, progressPercent);
+            _checkForCancel(abortSignal, onNotifyEvent, progressPercent);
           }
 
           // TODO: Implement incremental progress updates
@@ -284,4 +257,31 @@ export class RushSdkLoader {
       throw e;
     }
   }
+}
+
+/**
+ * Throws an "AbortError" exception if abortSignal.aborted is true.
+ */
+function _checkForCancel(
+  abortSignal: AbortSignal,
+  onNotifyEvent: SdkNotifyEventCallback | undefined,
+  progressPercent: number | undefined
+): void {
+  if (!abortSignal?.aborted) {
+    return;
+  }
+
+  if (onNotifyEvent) {
+    onNotifyEvent({
+      logMessage: {
+        kind: 'info',
+        text: `The operation was canceled`
+      },
+      progressPercent
+    });
+  }
+
+  const error: Error = new Error('The operation was canceled');
+  error.name = 'AbortError';
+  throw error;
 }

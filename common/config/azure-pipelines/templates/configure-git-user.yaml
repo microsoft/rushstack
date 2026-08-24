@@ -1,0 +1,11 @@
+parameters:
+  - name: RepoPath
+    type: string
+    default: '$(Build.SourcesDirectory)'
+
+steps:
+  - script: |
+      git config --local user.email "rushbot@users.noreply.github.com"
+      git config --local user.name "Rushbot"
+    displayName: 'Configure Git User'
+    workingDirectory: ${{ parameters.RepoPath }}

@@ -223,6 +223,8 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
   }
 };
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
  * which allows repo maintainers to configure extra details to be printed alongside
@@ -230,8 +232,6 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
  * @beta
  */
 export class CustomTipsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   public readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
 
   /**
@@ -263,7 +263,7 @@ export class CustomTipsConfiguration {
 
     let configuration: ICustomTipsJson | undefined;
     try {
-      configuration = JsonFile.loadAndValidate(configFilePath, CustomTipsConfiguration._jsonSchema);
+      configuration = JsonFile.loadAndValidate(configFilePath, _jsonSchema);
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;

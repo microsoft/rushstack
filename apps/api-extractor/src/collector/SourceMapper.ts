@@ -13,7 +13,7 @@ interface ISourceMap {
 
   // SourceMapConsumer.originalPositionFor() is useless because the mapping contains numerous gaps,
   // and the API provides no way to find the nearest match.  So instead we extract all the mapping items
-  // and search them using SourceMapper._findNearestMappingItem().
+  // and search them using _findNearestMappingItem().
   mappingItems: MappingItem[];
 }
 
@@ -105,13 +105,10 @@ export class SourceMapper {
     const sourceMap: ISourceMap | null = this._getSourceMap(sourceFilePath);
     if (!sourceMap) return;
 
-    const nearestMappingItem: MappingItem | undefined = SourceMapper._findNearestMappingItem(
-      sourceMap.mappingItems,
-      {
-        line: sourceFileLine,
-        column: sourceFileColumn
-      }
-    );
+    const nearestMappingItem: MappingItem | undefined = _findNearestMappingItem(sourceMap.mappingItems, {
+      line: sourceFileLine,
+      column: sourceFileColumn
+    });
 
     if (!nearestMappingItem) return;
 
@@ -222,46 +219,43 @@ export class SourceMapper {
 
     return sourceMap;
   }
+}
 
-  // The `mappingItems` array is sorted by generatedLine/generatedColumn (GENERATED_ORDER).
-  // The _findNearestMappingItem() lookup is a simple binary search that returns the previous item
-  // if there is no exact match.
-  private static _findNearestMappingItem(
-    mappingItems: MappingItem[],
-    position: Position
-  ): MappingItem | undefined {
-    if (mappingItems.length === 0) {
-      return undefined;
-    }
-
-    let startIndex: number = 0;
-    let endIndex: number = mappingItems.length - 1;
-
-    while (startIndex <= endIndex) {
-      const middleIndex: number = startIndex + Math.floor((endIndex - startIndex) / 2);
-
-      const diff: number = SourceMapper._compareMappingItem(mappingItems[middleIndex], position);
-
-      if (diff < 0) {
-        startIndex = middleIndex + 1;
-      } else if (diff > 0) {
-        endIndex = middleIndex - 1;
-      } else {
-        // Exact match
-        return mappingItems[middleIndex];
-      }
-    }
-
-    // If we didn't find an exact match, then endIndex < startIndex.
-    // Take endIndex because it's the smaller value.
-    return mappingItems[endIndex];
+// The `mappingItems` array is sorted by generatedLine/generatedColumn (GENERATED_ORDER).
+// The _findNearestMappingItem() lookup is a simple binary search that returns the previous item
+// if there is no exact match.
+function _findNearestMappingItem(mappingItems: MappingItem[], position: Position): MappingItem | undefined {
+  if (mappingItems.length === 0) {
+    return undefined;
   }
 
-  private static _compareMappingItem(mappingItem: MappingItem, position: Position): number {
-    const diff: number = mappingItem.generatedLine - position.line;
-    if (diff !== 0) {
-      return diff;
+  let startIndex: number = 0;
+  let endIndex: number = mappingItems.length - 1;
+
+  while (startIndex <= endIndex) {
+    const middleIndex: number = startIndex + Math.floor((endIndex - startIndex) / 2);
+
+    const diff: number = _compareMappingItem(mappingItems[middleIndex], position);
+
+    if (diff < 0) {
+      startIndex = middleIndex + 1;
+    } else if (diff > 0) {
+      endIndex = middleIndex - 1;
+    } else {
+      // Exact match
+      return mappingItems[middleIndex];
     }
-    return mappingItem.generatedColumn - position.column;
   }
+
+  // If we didn't find an exact match, then endIndex < startIndex.
+  // Take endIndex because it's the smaller value.
+  return mappingItems[endIndex];
+}
+
+function _compareMappingItem(mappingItem: MappingItem, position: Position): number {
+  const diff: number = mappingItem.generatedLine - position.line;
+  if (diff !== 0) {
+    return diff;
+  }
+  return mappingItem.generatedColumn - position.column;
 }

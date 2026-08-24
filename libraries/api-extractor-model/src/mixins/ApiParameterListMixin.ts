@@ -136,8 +136,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiParameterListMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiParameterListJson
@@ -156,8 +155,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
       return this[_parameters];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiParameterListJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiParameterListJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.overloadIndex = this.overloadIndex;

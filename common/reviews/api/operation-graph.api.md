@@ -222,9 +222,13 @@ export enum OperationStatus {
     Blocked = "BLOCKED",
     Executing = "EXECUTING",
     Failure = "FAILURE",
+    FromCache = "FROM CACHE",
     NoOp = "NO OP",
+    Queued = "QUEUED",
     Ready = "READY",
+    Skipped = "SKIPPED",
     Success = "SUCCESS",
+    SuccessWithWarning = "SUCCESS WITH WARNINGS",
     Waiting = "WAITING"
 }
 

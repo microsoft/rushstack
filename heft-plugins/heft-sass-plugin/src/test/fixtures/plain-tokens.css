@@ -1,0 +1,5 @@
+/* A plain CSS file (no Sass syntax) imported via @use from another stylesheet. */
+.token-base {
+  color: #0078d4;
+  display: block;
+}

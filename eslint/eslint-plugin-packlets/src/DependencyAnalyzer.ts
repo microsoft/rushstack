@@ -89,95 +89,79 @@ interface IImportListNode extends IPackletImport {
   previousNode: IImportListNode | undefined;
 }
 
-export class DependencyAnalyzer {
-  /**
-   * @param packletName - the packlet to be checked next in our traversal
-   * @param startingPackletName - the packlet that we started with; if the traversal reaches this packlet,
-   *   then a circular dependency has been detected
-   * @param refFileMap - the compiler's `refFileMap` data structure describing import relationships
-   * @param fileIncludeReasonsMap - the compiler's data structure describing import relationships
-   * @param program - the compiler's `ts.Program` object
-   * @param packletsFolderPath - the absolute path of the "src/packlets" folder.
-   * @param visitedPacklets - the set of packlets that have already been visited in this traversal
-   * @param previousNode - a linked list of import statements that brought us to this step in the traversal
-   */
-  private static _walkImports(
-    packletName: string,
-    startingPackletName: string,
-    refFileMap: Map<string, IRefFile[]> | undefined,
-    fileIncludeReasonsMap: Map<string, IFileIncludeReason[]> | undefined,
-    program: ts.Program,
-    packletsFolderPath: string,
-    visitedPacklets: Set<string>,
-    previousNode: IImportListNode | undefined
-  ): IImportListNode | undefined {
-    visitedPacklets.add(packletName);
+/**
+ * @param packletName - the packlet to be checked next in our traversal
+ * @param startingPackletName - the packlet that we started with; if the traversal reaches this packlet,
+ *   then a circular dependency has been detected
+ * @param refFileMap - the compiler's `refFileMap` data structure describing import relationships
+ * @param fileIncludeReasonsMap - the compiler's data structure describing import relationships
+ * @param program - the compiler's `ts.Program` object
+ * @param packletsFolderPath - the absolute path of the "src/packlets" folder.
+ * @param visitedPacklets - the set of packlets that have already been visited in this traversal
+ * @param previousNode - a linked list of import statements that brought us to this step in the traversal
+ */
+function _walkImports(
+  packletName: string,
+  startingPackletName: string,
+  refFileMap: Map<string, IRefFile[]> | undefined,
+  fileIncludeReasonsMap: Map<string, IFileIncludeReason[]> | undefined,
+  program: ts.Program,
+  packletsFolderPath: string,
+  visitedPacklets: Set<string>,
+  previousNode: IImportListNode | undefined
+): IImportListNode | undefined {
+  visitedPacklets.add(packletName);
 
-    const packletEntryPoint: string = Path.join(packletsFolderPath, packletName, 'index');
+  const packletEntryPoint: string = Path.join(packletsFolderPath, packletName, 'index');
 
-    const tsSourceFile: ts.SourceFile | undefined =
-      program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
-    if (!tsSourceFile) {
-      return undefined;
+  const tsSourceFile: ts.SourceFile | undefined =
+    program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
+  if (!tsSourceFile) {
+    return undefined;
+  }
+
+  const referencingFilePaths: string[] = [];
+
+  if (refFileMap) {
+    // TypeScript version range: >= 3.6.0, <= 4.2.0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const refFiles: IRefFile[] | undefined = refFileMap.get((tsSourceFile as any).path);
+    if (refFiles) {
+      for (const refFile of refFiles) {
+        if (refFile.kind === RefFileKind.Import) {
+          referencingFilePaths.push(refFile.file);
+        }
+      }
     }
-
-    const referencingFilePaths: string[] = [];
-
-    if (refFileMap) {
-      // TypeScript version range: >= 3.6.0, <= 4.2.0
+  } else if (fileIncludeReasonsMap) {
+    // Typescript version range: > 4.2.0
+    const fileIncludeReasons: IFileIncludeReason[] | undefined = fileIncludeReasonsMap.get(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const refFiles: IRefFile[] | undefined = refFileMap.get((tsSourceFile as any).path);
-      if (refFiles) {
-        for (const refFile of refFiles) {
-          if (refFile.kind === RefFileKind.Import) {
-            referencingFilePaths.push(refFile.file);
-          }
-        }
-      }
-    } else if (fileIncludeReasonsMap) {
-      // Typescript version range: > 4.2.0
-      const fileIncludeReasons: IFileIncludeReason[] | undefined = fileIncludeReasonsMap.get(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (tsSourceFile as any).path
-      );
-      if (fileIncludeReasons) {
-        for (const fileIncludeReason of fileIncludeReasons) {
-          if (fileIncludeReason.kind === FileIncludeKind.Import) {
-            if (fileIncludeReason.file) {
-              referencingFilePaths.push(fileIncludeReason.file);
-            }
+      (tsSourceFile as any).path
+    );
+    if (fileIncludeReasons) {
+      for (const fileIncludeReason of fileIncludeReasons) {
+        if (fileIncludeReason.kind === FileIncludeKind.Import) {
+          if (fileIncludeReason.file) {
+            referencingFilePaths.push(fileIncludeReason.file);
           }
         }
       }
     }
+  }
 
-    for (const referencingFilePath of referencingFilePaths) {
-      // Is it a reference to a packlet?
-      if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
-        const referencingRelativePath: string = Path.relative(packletsFolderPath, referencingFilePath);
-        const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
-        const referencingPackletName: string = referencingPathParts[0];
+  for (const referencingFilePath of referencingFilePaths) {
+    // Is it a reference to a packlet?
+    if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
+      const referencingRelativePath: string = Path.relative(packletsFolderPath, referencingFilePath);
+      const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
+      const referencingPackletName: string = referencingPathParts[0];
 
-        // Did we return to where we started from?
-        if (referencingPackletName === startingPackletName) {
-          // Ignore the degenerate case where the starting node imports itself,
-          // since @rushstack/packlets/mechanics will already report that.
-          if (previousNode) {
-            // Make a new linked list node to record this step of the traversal
-            const importListNode: IImportListNode = {
-              previousNode: previousNode,
-              fromFilePath: referencingFilePath,
-              packletName: packletName
-            };
-
-            // The traversal has returned to the packlet that we started from;
-            // this means we have detected a circular dependency
-            return importListNode;
-          }
-        }
-
-        // Have we already analyzed this packlet?
-        if (!visitedPacklets.has(referencingPackletName)) {
+      // Did we return to where we started from?
+      if (referencingPackletName === startingPackletName) {
+        // Ignore the degenerate case where the starting node imports itself,
+        // since @rushstack/packlets/mechanics will already report that.
+        if (previousNode) {
           // Make a new linked list node to record this step of the traversal
           const importListNode: IImportListNode = {
             previousNode: previousNode,
@@ -185,26 +169,42 @@ export class DependencyAnalyzer {
             packletName: packletName
           };
 
-          const result: IImportListNode | undefined = DependencyAnalyzer._walkImports(
-            referencingPackletName,
-            startingPackletName,
-            refFileMap,
-            fileIncludeReasonsMap,
-            program,
-            packletsFolderPath,
-            visitedPacklets,
-            importListNode
-          );
-          if (result) {
-            return result;
-          }
+          // The traversal has returned to the packlet that we started from;
+          // this means we have detected a circular dependency
+          return importListNode;
+        }
+      }
+
+      // Have we already analyzed this packlet?
+      if (!visitedPacklets.has(referencingPackletName)) {
+        // Make a new linked list node to record this step of the traversal
+        const importListNode: IImportListNode = {
+          previousNode: previousNode,
+          fromFilePath: referencingFilePath,
+          packletName: packletName
+        };
+
+        const result: IImportListNode | undefined = _walkImports(
+          referencingPackletName,
+          startingPackletName,
+          refFileMap,
+          fileIncludeReasonsMap,
+          program,
+          packletsFolderPath,
+          visitedPacklets,
+          importListNode
+        );
+        if (result) {
+          return result;
         }
       }
     }
-
-    return undefined;
   }
 
+  return undefined;
+}
+
+export class DependencyAnalyzer {
   /**
    * For the specified packlet, trace all modules that import it, looking for a circular dependency
    * between packlets.  If found, an array is returned describing the import statements that cause
@@ -257,7 +257,7 @@ export class DependencyAnalyzer {
 
     const visitedPacklets: Set<string> = new Set();
 
-    const listNode: IImportListNode | undefined = DependencyAnalyzer._walkImports(
+    const listNode: IImportListNode | undefined = _walkImports(
       packletName,
       packletName,
       refFileMap,

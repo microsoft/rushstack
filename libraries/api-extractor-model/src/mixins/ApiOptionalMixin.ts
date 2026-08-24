@@ -51,7 +51,6 @@ export interface ApiOptionalMixin extends ApiItem {
    */
   readonly isOptional: boolean;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -78,8 +77,7 @@ export function ApiOptionalMixin<TBaseClass extends IApiItemConstructor>(
       this[_isOptional] = !!options.isOptional;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiOptionalMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiOptionalMixinJson
@@ -93,8 +91,7 @@ export function ApiOptionalMixin<TBaseClass extends IApiItemConstructor>(
       return this[_isOptional];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiOptionalMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiOptionalMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.isOptional = this.isOptional;

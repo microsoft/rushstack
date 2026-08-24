@@ -1,6 +1,48 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+
+## 0.10.14
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 0.10.13
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
+
+## 0.10.12
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 0.10.11
+Tue, 21 Jul 2026 02:53:22 GMT
+
+_Version update only_
+
+## 0.10.10
+Fri, 17 Jul 2026 00:16:00 GMT
+
+_Version update only_
+
+## 0.10.9
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
+
+## 0.10.8
+Sat, 13 Jun 2026 00:16:19 GMT
+
+_Version update only_
+
+## 0.10.7
+Mon, 08 Jun 2026 15:15:50 GMT
+
+_Version update only_
 
 ## 0.10.6
 Mon, 20 Apr 2026 23:31:13 GMT

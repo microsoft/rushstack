@@ -1,6 +1,80 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 20 Apr 2026 23:31:34 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2026 19:31:07 GMT and should not be manually modified.
+
+## 5.178.1
+Wed, 05 Aug 2026 19:31:07 GMT
+
+### Patches
+
+- Fix an issue where a phased command exited with a nonzero exit code when its overall execution status was successful but not `SUCCESS`. This covers an iteration that scheduled no operations because a plugin consumed the work itself (which broke `rush <command> --drop-graph` in `@rushstack/rush-buildxl-graph-plugin`), as well as an iteration that a plugin short-circuited with a `SKIPPED` or `FROM CACHE` status.
+
+### Updates
+
+- Add `useDirectFileTransfersForBuildCache` to the `experiments.json` `rush init` template.
+- Add catalog support to `rush-pnpm update`.
+
+## 5.178.0
+Mon, 20 Jul 2026 17:49:39 GMT
+
+### Patches
+
+- Pass change file paths as discrete Git arguments when adding commit details during publishing.
+- Fix an issue where "rush-pnpm patch-commit" rewrote the pre-existing "globalPatchedDependencies" entries in pnpm-config.json using absolute paths when running with pnpm >= 9.
+- Fixed an issue where the pnpm `ignoredOptionalDependencies`, `trustPolicy`, `trustPolicyExclude`, and `trustPolicyIgnoreAfterMinutes` settings were written to the `pnpm` field of the generated `package.json` (which pnpm 11 ignores) instead of `pnpm-workspace.yaml`, causing them to be silently ignored under pnpm 11.
+- Fix pnpm 11 silently ignoring the `globalOverrides`, `globalPackageExtensions`, `globalPeerDependencyRules`, `globalAllowedDeprecatedVersions`, and `globalPatchedDependencies` settings from pnpm-config.json. Because pnpm 11 no longer reads the `pnpm` field of package.json, Rush now writes these settings to the generated `common/temp/pnpm-workspace.yaml` for pnpm 11+ (matching the existing `allowBuilds` relocation), and `rush-pnpm patch-commit`/`patch-remove` now read `patchedDependencies` back from `pnpm-workspace.yaml` for pnpm 11+. Behavior for pnpm 10 and earlier is unchanged.
+
+### Updates
+
+- Fix `minimumReleaseAge` and `minimumReleaseAgeExclude` in `pnpm-config.json` being silently ignored because they were written to package.json instead of `pnpm-workspace.yaml`
+- Add optional file-based transfer APIs (`tryDownloadCacheEntryToFileAsync`, `tryUploadCacheEntryFromFileAsync`) to `ICloudBuildCacheProvider`, allowing cache plugins to transfer cache entries directly to and from files on disk without buffering entire contents in memory. Implement in `@rushstack/rush-http-build-cache-plugin`, `@rushstack/rush-amazon-s3-build-cache-plugin`, and `@rushstack/rush-azure-storage-build-cache-plugin`. Gated behind the `useDirectFileTransfersForBuildCache` experiment.
+- Avoid redundant downloads when multiple local Rush processes race to restore the same build cache entry (when useDirectFileTransfersForBuildCache is enabled).
+- Replace `@override` with the `override` keyword.
+- (PLUGIN BREAKING CHANGE) Overhaul watch-mode commands such that the graph is only created once at the start of command invocation, along with a stateful manager object. Plugins may now access the manager object and use it to orchestrate and tap into the build process.
+
+## 5.177.2
+Wed, 08 Jul 2026 21:27:15 GMT
+
+### Patches
+
+- Upgrade the `pnpm-sync-lib` dependency to 0.3.4.
+
+## 5.177.1
+Sat, 20 Jun 2026 21:37:30 GMT
+
+### Updates
+
+- Bump `ws` in `rush-serve-plugin` to mitigate CVE-2026-48779.
+
+## 5.177.0
+Sat, 20 Jun 2026 00:16:15 GMT
+
+### Patches
+
+- Set Redis `connectTimeout` and `socketTimeout` so half-dead TCP connections (NAT/firewall) surface in seconds instead of stalling in-flight commands for many minutes while the kernel waits to give up.
+
+### Updates
+
+- Fix build cache failures when running inside a git linked worktree via a pre-commit hook, caused by GIT_DIR being set to the per-worktree metadata directory
+
+## 5.176.0
+Tue, 09 Jun 2026 02:02:32 GMT
+
+### Minor changes
+
+- Add support for pnpm 11's `allowBuilds` field in `pnpm-workspace.yaml`. Rush now correctly handles the pnpm 11 security model where build scripts must be explicitly approved. The new `globalAllowBuilds` field in `pnpm-config.json` replaces the deprecated `globalOnlyBuiltDependencies` and `globalNeverBuiltDependencies` fields for pnpm 11+. The `rush-pnpm approve-builds` command is also updated to work correctly with pnpm 11.
+- Include seconds in the generated change file name so that running `rush change` more than once in the same minute no longer silently overwrites the previously generated change file.
+- Default `rush-pnpm outdated` and `rush-pnpm why` to recursive workspace queries.
+
+### Patches
+
+- Fix a regression where Rush change-detection treated any `pnpm-config.json` containing comments as unparseable, causing every project to be flagged as impacted.
+- Route the "Lockfile was created or deleted" warning to stderr so that machine-readable output (e.g. `rush list --json`) remains parseable when the lockfile was added or removed in the diff range.
+- Fix `rush update` not syncing `pnpm-lock.yaml` when a workspace dependency moves from `dependencies` to `devDependencies`.
+
+### Updates
+
+- Bump the `ws` dependency to `~8.20.0`.
 
 ## 5.175.1
 Mon, 20 Apr 2026 23:31:34 GMT

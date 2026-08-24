@@ -4,12 +4,13 @@ A Rush plugin that hooks into action execution and runs an express server to ser
 
 Supports HTTP/2, compression, CORS, and the new Access-Control-Allow-Private-Network header.
 
-```
+```bash
 # The user invokes this command
 $ rush start
 ```
 
 What happens:
+
 - Rush scans for riggable `rush-serve.json` config files in all projects
 - Rush uses the configuration in the aforementioned files to configure an Express server to serve project outputs as static (but not cached) content
 - When a change happens to a source file, Rush's normal watch-mode machinery will rebuild all affected project phases, resulting in new files on disk
@@ -21,70 +22,131 @@ This plugin also provides a web socket server that notifies clients of the build
 
 The recommended way to connect to the web socket is to serve a static HTML page from the serve plugin using the `globalRouting` configuration.
 
+This package includes the reference `@rushstack/rush-serve-dashboard` web app, which speaks the plugin's WebSocket protocol. Its source lives under `apps/rush-serve-dashboard/`, and its browser-ready JavaScript and CSS bundles are generated in this package at `lib-esm/dashboard/`. Serve the ESM build folder rather than a single file:
+
+```json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-serve-plugin-options.schema.json",
+  "phasedCommands": ["start"],
+  "buildStatusWebSocketPath": "/ws",
+  "globalRouting": [
+    {
+      "workspaceRelativeFolder": "rush-plugins/rush-serve-plugin/lib-esm/dashboard",
+      "servePath": "/dashboard",
+      "immutable": false
+    }
+  ]
+}
+```
+
+Then open `https://localhost:<port>/dashboard/dashboard.html`.
+
+### Dashboard
+
+The dashboard provides table and dependency-graph views of Rush operations. Use search or the
+failed/warning filter to narrow the current view, select operations to include their dependencies or consumers, and open the terminal pane to inspect operation logs. The current view and filter are reflected in the `view` and `filter` URL parameters so a dashboard view can be bookmarked.
+
+When connected, the dashboard can execute or abort a build, pause the watcher, change parallelism, invalidate
+operations, close runners, and change operation enabled states. Enabled-state changes default to safe mode;
+unsafe mode enables changes that can leave downstream state inconsistent. The dashboard reconnects
+automatically after an unexpected disconnect. A manual disconnect remains disconnected until the Connect button is selected.
+
+Because the WebSocket protocol accepts build-control commands, do not expose the dashboard or socket endpoint
+to untrusted networks. Apply the same authentication and network restrictions used for the served project.
+
 To use the socket:
+
 ```ts
 import type {
   IWebSocketEventMessage,
   IOperationInfo,
-  IRushSessionInfo,
-  ReadableOperationStatus
+  IOperationExecutionState,
+  ReadableOperationStatus,
+  IRushSessionInfo
 } from '@rushstack/rush-serve-plugin/api';
 
-const socket: WebSocket = new WebSocket(`wss://${self.location.host}${buildStatusWebSocketPath}`);
+const socket = new WebSocket(`wss://${self.location.host}${buildStatusWebSocketPath}`);
 
+// Static graph metadata (does not include dynamic status fields)
 const operationsByName: Map<string, IOperationInfo> = new Map();
+// Current execution state for this iteration
+const executionStates: Map<string, IOperationExecutionState> = new Map();
+// Queued states for the next iteration (if an iteration has been scheduled but not yet started)
+const queuedStates: Map<string, IOperationExecutionState> = new Map();
+
 let buildStatus: ReadableOperationStatus = 'Ready';
+let sessionInfo: IRushSessionInfo | undefined;
 
-function updateOperations(operations): void {
-  for (const operation of operations) {
-    operationsByName.set(operation.name, operation);
-  }
-
-  for (const [operationName, operation] of operationsByName) {
-    // Do something with the operation
-  }
+function upsertOperations(ops: IOperationInfo[]): void {
+  for (const op of ops) operationsByName.set(op.name, op);
+}
+function upsertExecutionStates(states: IOperationExecutionState[]): void {
+  for (const st of states) executionStates.set(st.name, st);
 }
 
-function updateSessionInfo(sessionInfo: IRushSessionInfo): void {
-  const { actionName, repositoryIdentifier } = sessionInfo;
+function applyQueuedStates(states: IOperationExecutionState[] | undefined): void {
+  queuedStates.clear();
+  if (states) for (const st of states) queuedStates.set(st.name, st);
 }
 
-function updateBuildStatus(newStatus: ReadableOperationStatus): void {
-  buildStatus = newStatus;
-  // Render
+function effectiveStatus(name: string): string | undefined {
+  const exec = executionStates.get(name);
+  if (exec) return exec.status;
+  // Optionally fall back to last-known previous iteration results if you track them.
+  return undefined;
 }
 
 socket.addEventListener('message', (ev) => {
-  const message: IWebSocketEventMessage = JSON.parse(ev.data);
-
-  switch (message.event) {
-    case 'before-execute': {
-      const { operations } = message;
-      updateOperations(operations);
-      updateBuildStatus('Executing');
-      break;
-    }
-
-    case 'status-change': {
-      const { operations } = message;
-      updateOperations(operations);
-      break;
-    }
-
-    case 'after-execute': {
-      const { status } = message;
-      updateBuildStatus(status);
-      break;
-    }
-
+  const msg: IWebSocketEventMessage = JSON.parse(ev.data as string);
+  switch (msg.event) {
     case 'sync': {
       operationsByName.clear();
-      const { operations, status, sessionInfo } = message;
-      updateOperations(operations);
-      updateSessionInfo(sessionInfo);
-      updateBuildStatus(status);
+      executionStates.clear();
+      upsertOperations(msg.operations);
+      upsertExecutionStates(msg.currentExecutionStates);
+      applyQueuedStates(msg.queuedStates);
+      sessionInfo = msg.sessionInfo;
+      buildStatus = msg.status;
       break;
     }
+    case 'sync-operations': {
+      // Static graph changed (e.g. enabled state toggles) – replace definitions only
+      operationsByName.clear();
+      upsertOperations(msg.operations);
+      break;
+    }
+    case 'sync-graph-state': {
+      // Graph state only – no operation arrays here
+      break;
+    }
+    case 'iteration-scheduled': {
+      applyQueuedStates(msg.queuedStates);
+      break;
+    }
+    case 'before-execute': {
+      // Start of an iteration: queuedStates become irrelevant until a new iteration is scheduled
+      applyQueuedStates(undefined);
+      upsertExecutionStates(msg.executionStates);
+      buildStatus = 'Executing';
+      break;
+    }
+    case 'status-change': {
+      upsertExecutionStates(msg.executionStates);
+      break;
+    }
+    case 'after-execute': {
+      upsertExecutionStates(msg.executionStates);
+      buildStatus = msg.status;
+      // msg.resultByOperation (if present) can be captured for historical display
+      break;
+    }
+  }
+
+  // Example: iterate and render
+  for (const [name, info] of operationsByName) {
+    const state = executionStates.get(name);
+    const status = state?.status ?? '(pending)';
+    // renderRow(name, info, status, queuedStates.has(name));
   }
 });
 ```

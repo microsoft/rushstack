@@ -57,14 +57,14 @@ interface ICommonVersionsJson {
   ensureConsistentVersions?: boolean;
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Use this class to load and save the "common/config/rush/common-versions.json" config file.
  * This config file stores dependency version information that affects all projects in the repo.
  * @public
  */
 export class CommonVersionsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   private _preferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
   private _modified: boolean = false;
@@ -170,14 +170,8 @@ export class CommonVersionsConfiguration {
 
     if (commonVersionsJson) {
       try {
-        CommonVersionsConfiguration._deserializeTable(
-          this.preferredVersions,
-          commonVersionsJson.preferredVersions
-        );
-        CommonVersionsConfiguration._deserializeTable(
-          this.allowedAlternativeVersions,
-          commonVersionsJson.allowedAlternativeVersions
-        );
+        _deserializeTable(this.preferredVersions, commonVersionsJson.preferredVersions);
+        _deserializeTable(this.allowedAlternativeVersions, commonVersionsJson.allowedAlternativeVersions);
       } catch (e) {
         throw new Error(`Error loading "${path.basename(filePath)}": ${(e as Error).message}`);
       }
@@ -194,7 +188,7 @@ export class CommonVersionsConfiguration {
   ): CommonVersionsConfiguration {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
     try {
-      commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, CommonVersionsConfiguration._jsonSchema);
+      commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, _jsonSchema);
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
@@ -214,10 +208,7 @@ export class CommonVersionsConfiguration {
   ): Promise<CommonVersionsConfiguration> {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
     try {
-      commonVersionsJson = await JsonFile.loadAndValidateAsync(
-        jsonFilePath,
-        CommonVersionsConfiguration._jsonSchema
-      );
+      commonVersionsJson = await JsonFile.loadAndValidateAsync(jsonFilePath, _jsonSchema);
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
@@ -225,29 +216,6 @@ export class CommonVersionsConfiguration {
     }
 
     return new CommonVersionsConfiguration(commonVersionsJson, jsonFilePath, rushConfiguration);
-  }
-
-  private static _deserializeTable<TValue>(
-    map: Map<string, TValue>,
-    object: { [key: string]: TValue } | undefined
-  ): void {
-    if (object) {
-      for (const [key, value] of Object.entries(object)) {
-        map.set(key, value);
-      }
-    }
-  }
-
-  private static _serializeTable<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
-    const table: { [key: string]: TValue } = {};
-
-    const keys: string[] = [...map.keys()];
-    keys.sort();
-    for (const key of keys) {
-      table[key] = map.get(key)!;
-    }
-
-    return table;
   }
 
   /**
@@ -334,12 +302,12 @@ export class CommonVersionsConfiguration {
   private _serialize(): ICommonVersionsJson {
     let preferredVersions: ICommonVersionsJsonVersionMap | undefined;
     if (this._preferredVersions.size) {
-      preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);
+      preferredVersions = _serializeTable(this.preferredVersions);
     }
 
     let allowedAlternativeVersions: ICommonVersionsJsonVersionsMap | undefined;
     if (this._allowedAlternativeVersions.size) {
-      allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
+      allowedAlternativeVersions = _serializeTable(
         this.allowedAlternativeVersions
       ) as ICommonVersionsJsonVersionsMap;
     }
@@ -355,4 +323,27 @@ export class CommonVersionsConfiguration {
     };
     return result;
   }
+}
+
+function _deserializeTable<TValue>(
+  map: Map<string, TValue>,
+  object: { [key: string]: TValue } | undefined
+): void {
+  if (object) {
+    for (const [key, value] of Object.entries(object)) {
+      map.set(key, value);
+    }
+  }
+}
+
+function _serializeTable<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
+  const table: { [key: string]: TValue } = {};
+
+  const keys: string[] = [...map.keys()];
+  keys.sort();
+  for (const key of keys) {
+    table[key] = map.get(key)!;
+  }
+
+  return table;
 }

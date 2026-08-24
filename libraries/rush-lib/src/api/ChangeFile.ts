@@ -84,10 +84,15 @@ export class ChangeFile {
       console.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 
-    // example filename: yourbranchname_2017-05-01-20-20.json
+    // The timestamp includes seconds so that running "rush change" more than once
+    // in the same minute produces distinct filenames. Without this, the "--overwrite"
+    // flag rarely had any effect, and a second invocation would silently clobber the
+    // change file written by the first one. See GitHub issue #2195.
+    // example filename: yourbranchname_2017-05-01-20-20-30.json
+    const timestamp: string | undefined = this._getTimestamp(true);
     const filename: string = branch
-      ? this._escapeFilename(`${branch}_${this._getTimestamp()}.json`)
-      : `${this._getTimestamp()}.json`;
+      ? this._escapeFilename(`${branch}_${timestamp}.json`)
+      : `${timestamp}.json`;
     const filePath: string = path.join(
       this._rushConfiguration.changesFolder,
       ...this._changeFileData.packageName.split('/'),
@@ -98,7 +103,7 @@ export class ChangeFile {
 
   /**
    * Gets the current time, formatted as YYYY-MM-DD-HH-MM
-   * Optionally will include seconds
+   * When useSeconds is true, the seconds are appended as well: YYYY-MM-DD-HH-MM-SS
    */
   private _getTimestamp(useSeconds: boolean = false): string | undefined {
     // Create a date string with the current time
@@ -120,7 +125,7 @@ export class ChangeFile {
       let formattedTime: string;
       if (useSeconds) {
         // formattedTime === "22-47-49"
-        formattedTime = matches[2].replace(':', '-');
+        formattedTime = matches[2].replace(/:/g, '-');
       } else {
         // formattedTime === "22-47"
         const timeParts: string[] = matches[2].split(':');

@@ -1,12 +1,15 @@
 {
   "name": "@rushstack/rush-published-versions-json-plugin",
-  "version": "0.1.10",
+  "version": "0.1.18",
   "description": "A Rush plugin for generating a JSON file containing the versions of all published packages in the monorepo.",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
     "directory": "rush-plugins/rush-published-versions-json-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "scripts": {
     "build": "heft test --clean",

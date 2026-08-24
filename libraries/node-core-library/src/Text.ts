@@ -60,6 +60,9 @@ interface IReadLinesFromIterableState {
 const NEWLINE_REGEX: RegExp = /\r\n|\n\r|\r|\n/g;
 const NEWLINE_AT_END_REGEX: RegExp = /(\r\n|\n\r|\r|\n)$/;
 
+const _newLineRegEx: RegExp = NEWLINE_REGEX;
+const _newLineAtEndRegEx: RegExp = NEWLINE_AT_END_REGEX;
+
 function* readLinesFromChunk(
   // eslint-disable-next-line @rushstack/no-new-null
   chunk: string | Buffer | null,
@@ -93,25 +96,29 @@ function* readLinesFromChunk(
  * @public
  */
 export class Text {
-  private static readonly _newLineRegEx: RegExp = NEWLINE_REGEX;
-  private static readonly _newLineAtEndRegEx: RegExp = NEWLINE_AT_END_REGEX;
-
   /**
-   * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
-   * all matches are replaced, rather than just the first match.
+   * Replaces every occurrence of `searchValue` with `replaceValue`.
+   *
+   * @remarks
+   * This method has the same behavior as {@link https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replaceAll | String.prototype.replaceAll}.
+   * In particular, if `searchValue` is an empty string, `replaceValue` is inserted before the first
+   * UTF-16 code unit, between each code unit, and after the last code unit.
+   *
    * @param input         - The string to be modified
    * @param searchValue   - The value to search for
    * @param replaceValue  - The replacement text
+   *
+   * @deprecated Use `String.prototype.replaceAll()` instead.
    */
   public static replaceAll(input: string, searchValue: string, replaceValue: string): string {
-    return input.split(searchValue).join(replaceValue);
+    return input.replaceAll(searchValue, replaceValue);
   }
 
   /**
    * Converts all newlines in the provided string to use Windows-style CRLF end of line characters.
    */
   public static convertToCrLf(input: string): string {
-    return input.replace(Text._newLineRegEx, '\r\n');
+    return input.replace(_newLineRegEx, '\r\n');
   }
 
   /**
@@ -120,14 +127,14 @@ export class Text {
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   public static convertToLf(input: string): string {
-    return input.replace(Text._newLineRegEx, '\n');
+    return input.replace(_newLineRegEx, '\n');
   }
 
   /**
    * Converts all newlines in the provided string to use the specified newline type.
    */
   public static convertTo(input: string, newlineKind: NewlineKind): string {
-    return input.replace(Text._newLineRegEx, Text.getNewline(newlineKind));
+    return input.replace(_newLineRegEx, Text.getNewline(newlineKind));
   }
 
   /**
@@ -214,7 +221,7 @@ export class Text {
    */
   public static ensureTrailingNewline(s: string, newlineKind: NewlineKind = NewlineKind.Lf): string {
     // Is there already a newline?
-    if (Text._newLineAtEndRegEx.test(s)) {
+    if (_newLineAtEndRegEx.test(s)) {
       return s; // yes, no change
     }
     return s + newlineKind; // no, add it

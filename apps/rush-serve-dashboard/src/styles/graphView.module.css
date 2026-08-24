@@ -1,0 +1,451 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
+/* See LICENSE in the project root for license information. */
+
+.graphContainer {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+}
+
+.graph {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: auto;
+  background: radial-gradient(circle at 25% 20%, #1e2530, #101318);
+}
+
+.phasePane {
+  width: 220px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  font-size: 0.65rem;
+  padding: 0.4rem 0.5rem 0.6rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.phasePane h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.phaseGroup {
+  padding: 0.4rem 0.45rem 0.45rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.phaseGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: calc(100% - 1.2rem);
+  overflow: hidden;
+}
+
+.phaseGroups > .phaseGroup {
+  flex: 1 1 0;
+}
+
+.phaseHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  font-size: 0.66rem;
+  padding: 2px 4px 3px;
+  background: #27303c;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.phaseStatusEmoji {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.phaseName {
+  flex: 1;
+}
+
+.phaseProblems {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.phaseProblems li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.phaseProblems a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.phaseProblems a:hover {
+  text-decoration: underline;
+}
+
+.phaseProblemEmoji {
+  font-size: 0.75rem;
+}
+
+.phasePaneEmpty {
+  opacity: 0.6;
+  font-style: italic;
+  font-size: 0.6rem;
+}
+
+.graphWrapper {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.graphLegend {
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  background: rgba(15, 17, 21, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px 6px;
+  font-size: 0.54rem;
+  line-height: 1.1;
+  max-width: 420px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+}
+
+.graphLegend .legendColumns {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.graphLegend .legendCol:first-child {
+  flex: 0 0 130px;
+}
+
+.graphLegend .legendCol:last-child {
+  flex: 1 1 auto;
+}
+
+.graphLegend.collapsed {
+  width: auto;
+  max-width: none;
+  padding: 4px 6px;
+}
+
+.graphLegend.collapsed .legendColumns {
+  display: none;
+}
+
+.graphLegend .legendCol {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.graphLegend .legendHeading {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  font-size: 0.58rem;
+  margin: 0 0 4px;
+}
+
+.graphLegend .legendRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.graphLegend .legendLabelWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.graphLegend .legendRow small {
+  font-size: 0.5rem;
+  opacity: 0.7;
+}
+
+.graphLegend .legendSubheading {
+  margin: 4px 0 2px;
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.65;
+  font-weight: 600;
+}
+
+.graphLegend h4 {
+  margin: 0 0 4px;
+  font-size: 0.6rem;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legendEmoji {
+  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: #1f2530;
+  box-sizing: border-box;
+}
+
+.legendEnabledSample {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: #1f2530;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.legendEnabledSample .sub {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(50%, 50%);
+  font-size: 9px;
+  line-height: 1;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+.legendLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.graphMarquee {
+  position: absolute;
+  border: 1px solid var(--accent);
+  background: rgba(var(--rgb-accent), 0.15);
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 0 0 1px rgba(var(--rgb-accent), 0.4) inset;
+}
+
+.opNode {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: #1f2530;
+  box-sizing: border-box;
+  user-select: none;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.opNode .enabledIndicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(50%, 50%);
+  font-size: 11px;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55));
+  transition: opacity 0.15s ease;
+}
+
+.opNode.selected {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.opNode:hover {
+  transform: scale(1.08);
+}
+
+.opNode .activeIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: translate(-50%, 50%);
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55));
+}
+
+.opNode .pendingIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55));
+}
+
+.opNode.filteredOut .activeIndicator,
+.opNode.filteredOutSearch .activeIndicator,
+.opNode.notRunning .activeIndicator,
+.opNode.filteredOut.notRunning .activeIndicator {
+  opacity: 1 !important;
+}
+
+.opNode .name {
+  font-weight: 600;
+}
+
+.opNode .pkg {
+  color: var(--muted);
+  font-size: 0.6rem;
+}
+
+.opNode .badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.opNode .enabledIndicator {
+  opacity: 1;
+}
+
+.opNode.notRunning .enabledIndicator {
+  opacity: 0.5;
+}
+
+.opNode.filteredOut .enabledIndicator {
+  opacity: 0.25;
+}
+
+.opNode.filteredOutSearch .enabledIndicator {
+  opacity: 0.15;
+}
+
+.opNode.filteredOut.notRunning .enabledIndicator {
+  opacity: 0.25;
+}
+
+.opNode .emoji {
+  transition: opacity 0.15s ease;
+}
+
+.opNode.filteredOut .emoji {
+  opacity: 0.25;
+}
+
+.opNode.filteredOutSearch .emoji {
+  opacity: 0.15;
+}
+
+.opNode.notRunning .emoji {
+  opacity: 0.5;
+}
+
+.opNode.filteredOut.notRunning .emoji {
+  opacity: 0.25;
+}
+
+.opNode.dashed {
+  border-style: dashed;
+}
+
+.opNode.dotted {
+  border-style: dotted;
+}
+
+.edge {
+  stroke-width: 1.2;
+  fill: none;
+}
+
+.edge.dashed {
+  stroke-dasharray: 5 4;
+}
+
+.edge.dotted {
+  stroke-dasharray: 2 4;
+}
+
+.edge.filteredOut {
+  opacity: 0.35;
+}
+
+.edge.filteredOutSearch {
+  opacity: 0.2;
+}
+
+.edge.highlight {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.edge.dim {
+  opacity: 0.28;
+  filter: brightness(0.8);
+}
+
+.edge.notRunning {
+  opacity: 0.55;
+}

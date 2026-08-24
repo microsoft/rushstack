@@ -35,7 +35,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
     this.options = options;
   }
 
-  protected onStart(): void {
+  protected override onStart(): void {
     this.stderr.write(Colorize.green('==>') + ' ');
     this.stderr.write(Colorize.bold(this.options.message));
     let optionSuffix: string = '';
@@ -53,7 +53,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
     this.stderr.write(' ' + Colorize.bold(optionSuffix) + ' ');
   }
 
-  protected onKeypress(character: string, key: readline.Key): void {
+  protected override onKeypress(character: string, key: readline.Key): void {
     if (this.result !== undefined) {
       return;
     }
@@ -102,7 +102,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     return this.stderr.columns ? this.stderr.columns : 80;
   }
 
-  protected onStart(): void {
+  protected override onStart(): void {
     this.result = '';
 
     readline.cursorTo(this.stderr, 0);
@@ -118,7 +118,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     this._startX = AnsiEscape.removeCodes(line).length % this._getLineWrapWidth();
   }
 
-  protected onKeypress(character: string, key: readline.Key): void {
+  protected override onKeypress(character: string, key: readline.Key): void {
     switch (key.name) {
       case 'enter':
       case 'return':
@@ -204,19 +204,6 @@ class PasswordKeyboardLoop extends KeyboardLoop {
 }
 
 export class TerminalInput {
-  private static async _readLineAsync(): Promise<string> {
-    const readlineInterface: readline.Interface = readline.createInterface({ input: process.stdin });
-    try {
-      return await new Promise((resolve, reject) => {
-        readlineInterface.question('', (answer: string) => {
-          resolve(answer);
-        });
-      });
-    } finally {
-      readlineInterface.close();
-    }
-  }
-
   public static async promptYesNoAsync(options: IPromptYesNoOptions): Promise<boolean> {
     const keyboardLoop: YesNoKeyboardLoop = new YesNoKeyboardLoop(options);
     await keyboardLoop.startAsync();
@@ -228,12 +215,25 @@ export class TerminalInput {
     stderr.write(Colorize.green('==>') + ' ');
     stderr.write(Colorize.bold(options.message));
     stderr.write(' ');
-    return await TerminalInput._readLineAsync();
+    return await _readLineAsync();
   }
 
   public static async promptPasswordLineAsync(options: IPromptLineOptions): Promise<string> {
     const keyboardLoop: PasswordKeyboardLoop = new PasswordKeyboardLoop(options);
     await keyboardLoop.startAsync();
     return keyboardLoop.result;
+  }
+}
+
+async function _readLineAsync(): Promise<string> {
+  const readlineInterface: readline.Interface = readline.createInterface({ input: process.stdin });
+  try {
+    return await new Promise((resolve, reject) => {
+      readlineInterface.question('', (answer: string) => {
+        resolve(answer);
+      });
+    });
+  } finally {
+    readlineInterface.close();
   }
 }

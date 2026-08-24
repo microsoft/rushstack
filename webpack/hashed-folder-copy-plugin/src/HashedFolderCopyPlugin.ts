@@ -6,6 +6,7 @@ import type webpack from 'webpack';
 import type glob from 'fast-glob';
 
 import { Async } from '@rushstack/node-core-library';
+import { evaluateConstantEstreeExpression } from '@rushstack/webpack-plugin-utilities';
 
 import {
   type IHashedFolderDependency,
@@ -24,16 +25,6 @@ const ParserHelpers: IParserHelpers = require('webpack/lib/javascript/Javascript
 const PLUGIN_NAME: 'hashed-folder-copy-plugin' = 'hashed-folder-copy-plugin';
 
 const EXPRESSION_NAME: 'requireFolder' = 'requireFolder';
-
-interface IAcornNode<TExpression> {
-  computed: boolean | undefined;
-  elements: IAcornNode<unknown>[];
-  key: IAcornNode<unknown> | undefined;
-  name: string | undefined;
-  properties: IAcornNode<unknown>[] | undefined;
-  type: 'Literal' | 'ObjectExpression' | 'Identifier' | 'ArrayExpression' | unknown;
-  value: TExpression;
-}
 
 export function renderError(errorMessage: string): string {
   return `(function () { throw new Error(${JSON.stringify(errorMessage)}); })()`;
@@ -92,10 +83,9 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
             if (expression.arguments.length !== 1) {
               errorMessage = `Exactly one argument is required to be passed to "${EXPRESSION_NAME}"`;
             } else {
-              const argument: IAcornNode<IRequireFolderOptions> = expression
-                .arguments[0] as IAcornNode<IRequireFolderOptions>;
+              const argument: Expression = expression.arguments[0] as Expression;
               try {
-                requireFolderOptions = this._evaluateAcornNode(argument) as IRequireFolderOptions;
+                requireFolderOptions = evaluateConstantEstreeExpression(argument);
               } catch (e) {
                 errorMessage = (e as Error).message;
               }
@@ -163,38 +153,5 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
         normalModuleFactory.hooks.parser.for('javascript/dynamic').tap(PLUGIN_NAME, handler);
       }
     );
-  }
-
-  private _evaluateAcornNode(node: IAcornNode<unknown>): unknown {
-    switch (node.type) {
-      case 'Literal': {
-        return node.value;
-      }
-
-      case 'ObjectExpression': {
-        const result: Record<string, unknown> = {};
-
-        for (const property of node.properties!) {
-          const keyNode: IAcornNode<unknown> = property.key!;
-          if (keyNode.type !== 'Identifier' || keyNode.computed) {
-            throw new Error('Property keys must be non-computed identifiers');
-          }
-
-          const key: string = keyNode.name!;
-          const value: unknown = this._evaluateAcornNode(property.value as IAcornNode<unknown>);
-          result[key] = value;
-        }
-
-        return result;
-      }
-
-      case 'ArrayExpression': {
-        return node.elements.map((element) => this._evaluateAcornNode(element));
-      }
-
-      default: {
-        throw new Error(`Unsupported node type: "${node.type}"`);
-      }
-    }
   }
 }
