@@ -57,14 +57,18 @@ export class JsonReporter implements IReporter {
     } catch (error) {
       if (error instanceof NdjsonRecordTooLargeError) {
         this._write(
-          encodeNdjsonRecord({
-            protocolVersion: event.protocolVersion,
-            eventId: event.eventId,
-            sessionId: event.sessionId,
-            sequence: event.sequence,
-            type: 'extension',
-            payload: { name: 'rush.reporter.recordTooLarge', originalType: event.type }
-          })
+          encodeNdjsonRecord(
+            {
+              ...event,
+              privacy: 'public',
+              type: 'extension',
+              payload: {
+                name: 'rush.reporter.record-too-large',
+                payload: { originalType: event.type }
+              }
+            },
+            { maxRecordBytes: this._maxRecordBytes }
+          )
         );
         return;
       }

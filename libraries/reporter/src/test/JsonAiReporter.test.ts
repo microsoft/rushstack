@@ -56,13 +56,21 @@ describe('JsonReporter', () => {
     let output: string = '';
     const reporter: JsonReporter = new JsonReporter({
       write: (text: string) => (output += text),
-      maxRecordBytes: 50
+      maxRecordBytes: 512
     });
     reporter.report(ev('externalOutput', { stream: 'stdout', text: 'x'.repeat(1000) }));
 
     const records: Record<string, unknown>[] = parseLines(output);
     expect(records).toHaveLength(1);
-    expect((records[0].payload as { name: string }).name).toBe('rush.reporter.recordTooLarge');
+    expect((records[0].payload as { name: string }).name).toBe('rush.reporter.record-too-large');
+    expect(records[0]).toMatchObject({
+      timestamp: '2026-01-01T00:00:00.000Z',
+      source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
+      privacy: 'public',
+      required: true,
+      type: 'extension'
+    });
+    expect(Buffer.byteLength(output.trim(), 'utf8')).toBeLessThanOrEqual(512);
   });
 
   it('redacts secret diagnostic fields from stdout', () => {
@@ -176,13 +184,37 @@ describe('AiReporter', () => {
     events.push(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
 
     let output: string = '';
-    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text), maxBytes: 400 });
+    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text), maxBytes: 512 });
     for (const event of events) {
       reporter.report(event);
     }
     const finalLine: string = output.trim().split('\n').pop() ?? '';
-    expect(Buffer.byteLength(finalLine, 'utf8')).toBeLessThanOrEqual(400);
+    expect(Buffer.byteLength(finalLine, 'utf8')).toBeLessThanOrEqual(512);
     expect((JSON.parse(finalLine) as IAiFinalRecord).truncated).toBe(true);
+  });
+
+  it('falls back to a minimal bounded record when fixed fields are oversized', () => {
+    const events: IReporterEventEnvelope<unknown>[] = [
+      ev('commandStarted', { commandName: 'x'.repeat(5000) }),
+      ev('artifactAvailable', { role: 'log', path: `/tmp/${'y'.repeat(5000)}`, complete: true }),
+      ev('commandResult', { succeeded: false, exitCode: 1 })
+    ];
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text), maxBytes: 512 });
+    for (const event of events) {
+      reporter.report(event);
+    }
+
+    const finalLine: string = output.trim().split('\n').pop()!;
+    const final: IAiFinalRecord = JSON.parse(finalLine) as IAiFinalRecord;
+    expect(Buffer.byteLength(finalLine, 'utf8')).toBeLessThanOrEqual(512);
+    expect(final.truncated).toBe(true);
+    expect(final.scope.commandName).toBeUndefined();
+    expect(final.log).toBeUndefined();
+  });
+
+  it('rejects an impossible final-record byte limit', () => {
+    expect(() => new AiReporter({ write: () => {}, maxBytes: 511 })).toThrow(/at least 512/);
   });
 
   it('represents warnings by count when failures exist but details them on warning-only success', () => {
@@ -200,6 +232,18 @@ describe('AiReporter', () => {
     ]);
     expect(warningOnly.final.result).toBe('succeeded');
     expect(warningOnly.final.diagnostics.map((d) => d.severity)).toEqual(['warning']);
+  });
+
+  it('reports truncation only for the diagnostic bucket included in the final record', () => {
+    const events: IReporterEventEnvelope<unknown>[] = [];
+    for (let i: number = 0; i < 5; i++) {
+      events.push(ev('diagnosticEmitted', { code: `RUSH_W_${i}`, category: 'input', severity: 'warning' }));
+    }
+    events.push(ev('commandResult', { succeeded: false, exitCode: 1 }));
+
+    const { final } = run(events, { maxBytes: 1024 });
+    expect(final.diagnostics).toEqual([]);
+    expect(final.truncated).toBe(false);
   });
 
   it('excludes raw external output and keeps stdout pure JSON', () => {

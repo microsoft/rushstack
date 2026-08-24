@@ -45,6 +45,18 @@ async function withTempDir(action: (directory: string) => Promise<void>): Promis
 }
 
 describe('FileReporter', () => {
+  it('streams events after initialization instead of retaining the full log', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      await reporter.initializeAsync();
+      reporter.report(ev('externalOutput', { text: 'streamed immediately' }));
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('streamed immediately');
+      await reporter.closeAsync();
+    });
+  });
+
   it('writes a debug NDJSON log with owner-only permissions and a latest.log pointer', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({
@@ -190,7 +202,11 @@ describe('FileReporter', () => {
 
       const artifact: IFileReporterArtifact = reporter.getArtifact();
       expect(artifact.available).toBe(true);
-      expect(artifact.path).toContain(path.join(osTemp, RUSH_LOGS_DIR_NAME));
+      expect(path.dirname(artifact.path!).startsWith(path.join(osTemp, `${RUSH_LOGS_DIR_NAME}-`))).toBe(true);
+      if (process.platform !== 'win32') {
+        const directoryStats: fs.Stats = await fs.promises.stat(path.dirname(artifact.path!));
+        expect(directoryStats.mode % 0o1000).toBe(0o700);
+      }
     });
   });
 

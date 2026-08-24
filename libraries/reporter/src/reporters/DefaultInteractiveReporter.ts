@@ -8,6 +8,7 @@ import {
   MIN_REFRESH_INTERVAL_MS,
   createColorizer,
   renderLiveRegion,
+  resolveColorEnabled,
   shouldRefresh,
   type IColorizer,
   type ILiveRegionState
@@ -65,6 +66,12 @@ export interface IDefaultInteractiveReporterOptions {
   readonly color?: boolean;
 
   /**
+   * Environment variables used to resolve `NO_COLOR` and `FORCE_COLOR`.
+   * Defaults to `process.env`.
+   */
+  readonly env?: Record<string, string | undefined>;
+
+  /**
    * Returns the current time in milliseconds. Injectable for testing.
    */
   readonly nowMs?: () => number;
@@ -106,6 +113,7 @@ export class DefaultInteractiveReporter implements IReporter {
   private _totalOperations: number;
   private _completedOperations: number;
   private _failedOperations: number;
+  private readonly _projectByOperation: Map<string, string>;
   private readonly _activeProjects: Map<string, string>;
   private _latestActivity: string;
   private readonly _diagnostics: string[];
@@ -120,7 +128,8 @@ export class DefaultInteractiveReporter implements IReporter {
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
     this._terminal = options.terminal;
-    this._colorEnabled = options.color ?? options.terminal.isTTY;
+    this._colorEnabled =
+      options.color ?? resolveColorEnabled(options.env ?? process.env, options.terminal.isTTY);
     this._color = createColorizer(this._colorEnabled);
     this._nowMs = options.nowMs ?? (() => Date.now());
     this._minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
@@ -129,6 +138,7 @@ export class DefaultInteractiveReporter implements IReporter {
     this._totalOperations = 0;
     this._completedOperations = 0;
     this._failedOperations = 0;
+    this._projectByOperation = new Map();
     this._activeProjects = new Map();
     this._latestActivity = '';
     this._diagnostics = [];
@@ -174,7 +184,15 @@ export class DefaultInteractiveReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
+        const payload: { operationId: string; projectName?: string } = event.payload as {
+          operationId: string;
+          projectName?: string;
+        };
         this._totalOperations++;
+        this._projectByOperation.set(
+          payload.operationId,
+          payload.projectName ?? event.scope?.projectName ?? payload.operationId
+        );
         break;
       }
       case 'operationStatusChanged': {
@@ -183,7 +201,11 @@ export class DefaultInteractiveReporter implements IReporter {
           status: string;
           projectName?: string;
         };
-        const projectName: string = payload.projectName ?? event.scope?.projectName ?? payload.operationId;
+        const projectName: string =
+          payload.projectName ??
+          event.scope?.projectName ??
+          this._projectByOperation.get(payload.operationId) ??
+          payload.operationId;
         if (payload.status === 'executing') {
           this._activeProjects.set(payload.operationId, projectName);
         } else if (TERMINAL_STATUSES.has(payload.status)) {

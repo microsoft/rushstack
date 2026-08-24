@@ -51,6 +51,13 @@ function makeEmitter(sink: CapturingSink, maxChunkBytes?: number): OperationStre
 }
 
 describe('OperationStreamEmitter', () => {
+  it('rejects chunk sizes that cannot preserve protocol boundaries', () => {
+    const sink: CapturingSink = new CapturingSink();
+    expect(() => makeEmitter(sink, 3)).toThrow(/between 4/);
+    expect(() => makeEmitter(sink, 64 * 1024 + 1)).toThrow(/between 4/);
+    expect(() => makeEmitter(sink, 4.5)).toThrow(/integer/);
+  });
+
   it('emits registration, status, output, and result with operation scope', () => {
     const sink: CapturingSink = new CapturingSink();
     const emitter: OperationStreamEmitter = makeEmitter(sink);
@@ -69,6 +76,7 @@ describe('OperationStreamEmitter', () => {
     ]);
     expect(sink.inputs[2].scope).toEqual({ commandName: 'build', operationId: 'op1' });
     expect(sink.inputs[2].privacy).toBe('local-sensitive');
+    expect(sink.inputs[3].payload).toMatchObject({ operationId: 'op1', status: 'success', durationMs: 100 });
     // externalOutput is protected (never coalesced/dropped); the manager derives `required`.
     expect(isReporterEventRequired('externalOutput')).toBe(true);
   });

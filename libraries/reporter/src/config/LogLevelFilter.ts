@@ -31,7 +31,7 @@ export function getLogLevelRank(level: ReporterLogLevel): number {
  * Returns the minimum log level at which an event is rendered.
  *
  * @remarks
- * - `quiet` renders failures, required warnings, and the final result.
+ * - `quiet` renders failures and the final result.
  * - `normal` adds standard lifecycle, progress, and all diagnostics.
  * - `verbose` adds detailed operation and external-process activity.
  * - `debug` adds protocol, cache, internal, and debug-message details.
@@ -54,9 +54,6 @@ export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>):
       if (severity === 'error') {
         return 'quiet';
       }
-      if (severity === 'warning') {
-        return event.required ? 'quiet' : 'normal';
-      }
       return 'normal';
     }
     case 'sessionStarted':
@@ -76,8 +73,8 @@ export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>):
       return 'normal';
     }
     case 'activityChanged':
-      return 'normal';
     case 'operationRegistered':
+      return 'normal';
     case 'externalProcessStarted':
     case 'externalProcessCompleted':
       return 'verbose';

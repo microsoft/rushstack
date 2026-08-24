@@ -51,12 +51,10 @@ export class ProblemMatcherRegistry {
       if (!options.includeDisabled && !matcher.enabledByDefault) {
         return false;
       }
-      if (
-        options.version !== undefined &&
-        matcher.matchesVersion !== undefined &&
-        !matcher.matchesVersion(options.version)
-      ) {
-        return false;
+      if (matcher.matchesVersion !== undefined) {
+        if (options.version === undefined || !matcher.matchesVersion(options.version)) {
+          return false;
+        }
       }
       return true;
     });

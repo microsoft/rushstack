@@ -59,6 +59,10 @@ describe('interactive rendering helpers', () => {
     expect(truncateToWidth('hello', 3)).toBe('he…');
     expect(truncateToWidth('hello', 1)).toBe('…');
     expect(truncateToWidth('hello', 0)).toBe('');
+    expect(truncateToWidth('a😀b', 4)).toBe('a😀b');
+    expect(truncateToWidth('a😀b', 3)).toBe('a…');
+    expect(truncateToWidth('界ab', 3)).toBe('界…');
+    expect(truncateToWidth('e\u0301x', 2)).toBe('e\u0301x');
   });
 
   it('renders width-aware active projects with a +N more suffix', () => {
@@ -92,6 +96,26 @@ describe('interactive rendering helpers', () => {
 });
 
 describe('DefaultInteractiveReporter', () => {
+  it('honors NO_COLOR and FORCE_COLOR when color is not explicit', async () => {
+    const noColorTerminal: FakeTerminal = new FakeTerminal();
+    const noColorReporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal: noColorTerminal,
+      env: { NO_COLOR: '' }
+    });
+    noColorReporter.report(ev('commandResult', { succeeded: false, exitCode: 1 }));
+    await noColorReporter.closeAsync();
+    expect(noColorTerminal.output).not.toContain('\u001b[31m');
+
+    const forceColorTerminal: FakeTerminal = new FakeTerminal(80, false);
+    const forceColorReporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal: forceColorTerminal,
+      env: { FORCE_COLOR: '1' }
+    });
+    forceColorReporter.report(ev('commandResult', { succeeded: false, exitCode: 1 }));
+    await forceColorReporter.closeAsync();
+    expect(forceColorTerminal.output).toContain('\u001b[31m');
+  });
+
   it('hides the cursor and paints the live region on TTY, throttled to 10 Hz', async () => {
     let now: number = 0;
     const terminal: FakeTerminal = new FakeTerminal();
@@ -137,6 +161,21 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).toContain('✔');
     expect(terminal.output).toContain('build succeeded — 1/1 operations');
     expect(terminal.output).toContain(SHOW_CURSOR);
+  });
+
+  it('uses registration metadata for status events', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'executing' }));
+    await reporter.flushAsync();
+
+    expect(terminal.output).toContain('project-a');
+    expect(terminal.output).not.toContain('executing op1');
   });
 
   it('appends a bounded diagnostic block and log path on failure', async () => {

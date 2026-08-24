@@ -42,7 +42,7 @@ const TSC_ERROR_MATCHER: IProblemMatcher = {
   }
 };
 
-function emitOutput(lines: string[]): IReporterEventEnvelope<unknown>[] {
+function emitOutput(lines: string[], operationId: string = 'op1'): IReporterEventEnvelope<unknown>[] {
   const sink: CapturingSink = new CapturingSink();
   const emitter: OperationStreamEmitter = new OperationStreamEmitter({
     sink,
@@ -51,7 +51,7 @@ function emitOutput(lines: string[]): IReporterEventEnvelope<unknown>[] {
     scope: { commandName: 'build' }
   });
   for (const line of lines) {
-    emitter.writeOutput('op1', 'stdout', line);
+    emitter.writeOutput(operationId, 'stdout', line);
   }
   return sink.inputs as unknown as IReporterEventEnvelope<unknown>[];
 }
@@ -87,6 +87,7 @@ describe('ProblemMatcherRegistry', () => {
     ]);
     expect(registry.getMatchers('heft', { version: '0.9.0' }).map((m) => m.name)).toEqual(['heft-old']);
     expect(registry.getMatchers('heft', { version: '1.2.0' })).toEqual([]);
+    expect(registry.getMatchers('heft')).toEqual([]);
   });
 });
 
@@ -135,6 +136,14 @@ describe('runProblemMatchers', () => {
     const ansiResult: IProblemMatcherResult = runProblemMatchers(ansiEvents, [TSC_ERROR_MATCHER]);
     expect(ansiResult.diagnostics).toHaveLength(1);
     expect(ansiResult.diagnostics[0].parameters?.code.value).toBe('TS2000');
+
+    const splitAnsiEvents: IReporterEventEnvelope<unknown>[] = emitOutput([
+      '\u001b[31',
+      "msrc/split.ts(4,5): error TS2001: split escape\u001b[0m\n"
+    ]);
+    const splitAnsiResult: IProblemMatcherResult = runProblemMatchers(splitAnsiEvents, [TSC_ERROR_MATCHER]);
+    expect(splitAnsiResult.diagnostics).toHaveLength(1);
+    expect(splitAnsiResult.diagnostics[0].parameters?.code.value).toBe('TS2001');
   });
 
   it('matches diagnostics with CRLF line endings', () => {
@@ -155,6 +164,29 @@ describe('runProblemMatchers', () => {
     });
     expect(result.diagnostics).toHaveLength(3);
     expect(result.suppressedDuplicateCount).toBe(2);
+  });
+
+  it('scopes duplicate caps by operation and full source position', () => {
+    const firstOperation: IReporterEventEnvelope<unknown>[] = emitOutput(
+      ['src/index.ts(1,1): error TS1005: same\n'],
+      'op1'
+    );
+    const secondOperation: IReporterEventEnvelope<unknown>[] = emitOutput(
+      ['src/index.ts(1,1): error TS1005: same\n'],
+      'op2'
+    );
+    const secondColumn: IReporterEventEnvelope<unknown>[] = emitOutput(
+      ['src/index.ts(1,2): error TS1005: same\n'],
+      'op1'
+    );
+    const result: IProblemMatcherResult = runProblemMatchers(
+      [...firstOperation, ...secondOperation, ...secondColumn],
+      [TSC_ERROR_MATCHER],
+      { maxDuplicates: 1 }
+    );
+
+    expect(result.diagnostics).toHaveLength(3);
+    expect(result.suppressedDuplicateCount).toBe(0);
   });
 
   it('recovers the expected diagnostics from a representative corpus', () => {

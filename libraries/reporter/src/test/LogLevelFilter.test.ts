@@ -27,12 +27,12 @@ describe('getLogLevelRank', () => {
 });
 
 describe('getEventMinimumLogLevel', () => {
-  it('classifies failures, required warnings, and results as quiet', () => {
+  it('classifies failures and results as quiet', () => {
     expect(getEventMinimumLogLevel(ev('commandResult', { succeeded: false, exitCode: 1 }))).toBe('quiet');
     expect(getEventMinimumLogLevel(ev('sessionCompleted'))).toBe('quiet');
     expect(getEventMinimumLogLevel(ev('commandCompleted'))).toBe('quiet');
     expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'error' }))).toBe('quiet');
-    expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'warning' }, true))).toBe('quiet');
+    expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'warning' }, true))).toBe('normal');
     expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'error' }))).toBe('quiet');
     expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'warning' }))).toBe('quiet');
   });
@@ -44,7 +44,7 @@ describe('getEventMinimumLogLevel', () => {
   });
 
   it('classifies external activity as verbose and raw output as debug', () => {
-    expect(getEventMinimumLogLevel(ev('operationRegistered', {}))).toBe('verbose');
+    expect(getEventMinimumLogLevel(ev('operationRegistered', {}))).toBe('normal');
     expect(getEventMinimumLogLevel(ev('externalProcessStarted', {}))).toBe('verbose');
     expect(getEventMinimumLogLevel(ev('externalOutput', { stream: 'stdout', text: 'x' }))).toBe('debug');
     expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'debug', text: 'd' }))).toBe('debug');
@@ -53,10 +53,10 @@ describe('getEventMinimumLogLevel', () => {
 });
 
 describe('shouldRenderAtLogLevel', () => {
-  it('renders only failures, required warnings, and the result at quiet', () => {
+  it('renders only failures and the result at quiet', () => {
     expect(shouldRenderAtLogLevel('quiet', ev('diagnosticEmitted', { severity: 'error' }))).toBe(true);
     expect(shouldRenderAtLogLevel('quiet', ev('diagnosticEmitted', { severity: 'warning' }, true))).toBe(
-      true
+      false
     );
     expect(shouldRenderAtLogLevel('quiet', ev('commandResult', { succeeded: true, exitCode: 0 }))).toBe(true);
     expect(shouldRenderAtLogLevel('quiet', ev('diagnosticEmitted', { severity: 'warning' }, false))).toBe(
@@ -68,6 +68,7 @@ describe('shouldRenderAtLogLevel', () => {
 
   it('adds lifecycle and diagnostics at normal but not external or debug detail', () => {
     expect(shouldRenderAtLogLevel('normal', ev('commandStarted', {}))).toBe(true);
+    expect(shouldRenderAtLogLevel('normal', ev('operationRegistered', {}))).toBe(true);
     expect(shouldRenderAtLogLevel('normal', ev('diagnosticEmitted', { severity: 'warning' }, false))).toBe(
       true
     );

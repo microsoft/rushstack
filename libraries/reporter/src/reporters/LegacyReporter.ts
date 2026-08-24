@@ -84,8 +84,7 @@ export class LegacyReporter implements IReporter {
   private _totalDurationMs: number;
   private readonly _registry: Map<string, string>;
   private readonly _outputBuffers: Map<string, string[]>;
-  private readonly _completed: ILegacyOperationRecord[];
-  private readonly _failed: ILegacyOperationRecord[];
+  private readonly _recordsByStatus: Map<string, ILegacyOperationRecord[]>;
 
   public constructor(options: ILegacyReporterOptions) {
     this._write = options.write;
@@ -97,8 +96,7 @@ export class LegacyReporter implements IReporter {
     this._totalDurationMs = 0;
     this._registry = new Map();
     this._outputBuffers = new Map();
-    this._completed = [];
-    this._failed = [];
+    this._recordsByStatus = new Map();
   }
 
   public async initializeAsync(): Promise<void> {
@@ -189,35 +187,45 @@ export class LegacyReporter implements IReporter {
         durationMs: payload.durationMs ?? 0,
         status: payload.status
       };
-      if (payload.status === 'failure') {
-        this._failed.push(record);
-      } else {
-        this._completed.push(record);
-      }
+      const records: ILegacyOperationRecord[] = this._recordsByStatus.get(payload.status) ?? [];
+      records.push(record);
+      this._recordsByStatus.set(payload.status, records);
     }
   }
 
   private _onResult(payload: { succeeded: boolean }): void {
     const commandName: string = this._commandName ?? 'rush';
     if (payload.succeeded) {
-      const count: number = this._completed.length;
+      const count: number =
+        (this._recordsByStatus.get('success')?.length ?? 0) +
+        (this._recordsByStatus.get('successWithWarnings')?.length ?? 0);
       this._write(`\n\n${this._summaryHeader(`SUCCESS: ${count} operations`)}\n\n`);
-      this._write('These operations completed successfully:\n');
-      for (const record of this._completed) {
-        this._write(`  ${record.title}    ${this._seconds(record.durationMs)} seconds\n`);
-      }
-      this._write(`\nrush ${commandName} (${this._seconds(this._totalDurationMs)} seconds)\n`);
     } else {
-      const count: number = this._failed.length;
+      const count: number = this._recordsByStatus.get('failure')?.length ?? 0;
       this._write(`\n\n${this._summaryHeader(`FAILURE: ${count} operation`)}\n\n`);
-      this._write('The following projects failed to build:\n');
-      for (const record of this._failed) {
-        this._write(`  ${record.title}    ${this._seconds(record.durationMs)} seconds\n`);
-      }
-      this._write(
-        `\nrush ${commandName} (${this._seconds(this._totalDurationMs)} seconds) ==> ERROR: Project(s) failed to build\n`
-      );
     }
+    this._writeStatusGroup('skipped', 'These operations were already up to date:');
+    this._writeStatusGroup('noOp', 'These operations did not define any work:');
+    this._writeStatusGroup('fromCache', 'These operations were restored from the build cache:');
+    this._writeStatusGroup('success', 'These operations completed successfully:');
+    this._writeStatusGroup('successWithWarnings', 'These operations succeeded with warnings:');
+    this._writeStatusGroup('blocked', 'These operations were blocked by dependencies that failed:');
+    this._writeStatusGroup('failure', 'The following projects failed to build:');
+
+    const suffix: string = payload.succeeded ? '' : ' ==> ERROR: Project(s) failed to build';
+    this._write(`rush ${commandName} (${this._seconds(this._totalDurationMs)} seconds)${suffix}\n`);
+  }
+
+  private _writeStatusGroup(status: string, heading: string): void {
+    const records: readonly ILegacyOperationRecord[] | undefined = this._recordsByStatus.get(status);
+    if (!records || records.length === 0) {
+      return;
+    }
+    this._write(`${heading}\n`);
+    for (const record of records) {
+      this._write(`  ${record.title}    ${this._seconds(record.durationMs)} seconds\n`);
+    }
+    this._write('\n');
   }
 
   private _title(projectName: string | undefined, phaseName: string | undefined): string {

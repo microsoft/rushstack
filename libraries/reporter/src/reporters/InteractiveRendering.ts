@@ -112,6 +112,77 @@ export function createColorizer(enabled: boolean): IColorizer {
   };
 }
 
+const COMBINING_MARK_REGEXP: RegExp = /\p{Mark}/u;
+const EXTENDED_PICTOGRAPHIC_REGEXP: RegExp = /\p{Extended_Pictographic}/u;
+
+function splitGraphemes(text: string): string[] {
+  const graphemes: string[] = [];
+  let current: string = '';
+  let regionalIndicatorCount: number = 0;
+  for (const symbol of text) {
+    const codePoint: number = symbol.codePointAt(0)!;
+    const isRegionalIndicator: boolean = codePoint >= 0x1f1e6 && codePoint <= 0x1f1ff;
+    const extendsCurrent: boolean =
+      current.length > 0 &&
+      (COMBINING_MARK_REGEXP.test(symbol) ||
+        codePoint === 0xfe0f ||
+        (codePoint >= 0x1f3fb && codePoint <= 0x1f3ff) ||
+        current.endsWith('\u200d') ||
+        symbol === '\u200d' ||
+        (isRegionalIndicator && regionalIndicatorCount === 1));
+    if (!extendsCurrent && current.length > 0) {
+      graphemes.push(current);
+      current = '';
+      regionalIndicatorCount = 0;
+    }
+    current += symbol;
+    regionalIndicatorCount = isRegionalIndicator ? regionalIndicatorCount + 1 : 0;
+  }
+  if (current.length > 0) {
+    graphemes.push(current);
+  }
+  return graphemes;
+}
+
+function isFullWidthCodePoint(codePoint: number): boolean {
+  return (
+    codePoint >= 0x1100 &&
+    (codePoint <= 0x115f ||
+      codePoint === 0x2329 ||
+      codePoint === 0x232a ||
+      (codePoint >= 0x2e80 && codePoint <= 0xa4cf && codePoint !== 0x303f) ||
+      (codePoint >= 0xac00 && codePoint <= 0xd7a3) ||
+      (codePoint >= 0xf900 && codePoint <= 0xfaff) ||
+      (codePoint >= 0xfe10 && codePoint <= 0xfe19) ||
+      (codePoint >= 0xfe30 && codePoint <= 0xfe6f) ||
+      (codePoint >= 0xff00 && codePoint <= 0xff60) ||
+      (codePoint >= 0xffe0 && codePoint <= 0xffe6) ||
+      (codePoint >= 0x20000 && codePoint <= 0x3fffd))
+  );
+}
+
+function getGraphemeWidth(grapheme: string): number {
+  if (EXTENDED_PICTOGRAPHIC_REGEXP.test(grapheme)) {
+    return 2;
+  }
+  let width: number = 0;
+  for (const symbol of grapheme) {
+    if (COMBINING_MARK_REGEXP.test(symbol) || symbol === '\u200d' || symbol === '\ufe0f') {
+      continue;
+    }
+    width += isFullWidthCodePoint(symbol.codePointAt(0)!) ? 2 : 1;
+  }
+  return width;
+}
+
+function getDisplayWidth(text: string): number {
+  let width: number = 0;
+  for (const grapheme of splitGraphemes(text)) {
+    width += getGraphemeWidth(grapheme);
+  }
+  return width;
+}
+
 /**
  * Truncates a line to a maximum width, adding an ellipsis when it overflows.
  *
@@ -121,13 +192,23 @@ export function truncateToWidth(text: string, width: number): string {
   if (width <= 0) {
     return '';
   }
-  if (text.length <= width) {
+  if (getDisplayWidth(text) <= width) {
     return text;
   }
   if (width === 1) {
     return '…';
   }
-  return `${text.slice(0, width - 1)}…`;
+  let result: string = '';
+  let usedWidth: number = 0;
+  for (const grapheme of splitGraphemes(text)) {
+    const segmentWidth: number = getGraphemeWidth(grapheme);
+    if (usedWidth + segmentWidth + 1 > width) {
+      break;
+    }
+    result += grapheme;
+    usedWidth += segmentWidth;
+  }
+  return `${result}…`;
 }
 
 /**
@@ -147,7 +228,7 @@ export function renderActiveProjectsRow(projects: readonly string[], width: numb
     const tentative: string = [...shown, projects[index]].join(', ');
     const remaining: number = projects.length - (index + 1);
     const suffix: string = remaining > 0 ? ` +${remaining} more` : '';
-    if (tentative.length + suffix.length > width && shown.length > 0) {
+    if (getDisplayWidth(tentative) + getDisplayWidth(suffix) > width && shown.length > 0) {
       const hidden: number = projects.length - shown.length;
       return `${shown.join(', ')} +${hidden} more`;
     }

@@ -26,7 +26,14 @@ export const LATEST_LOG_NAME: 'latest.log' = 'latest.log';
 const DEFAULT_RETENTION_DAYS: number = 14;
 const DEFAULT_MAX_SESSIONS: number = 20;
 const OWNER_ONLY_MODE: number = 0o600;
+const OWNER_ONLY_DIRECTORY_MODE: number = 0o700;
 const MS_PER_DAY: number = 24 * 60 * 60 * 1000;
+
+function getUserTempDirectoryName(): string {
+  const identity: string =
+    typeof process.getuid === 'function' ? String(process.getuid()) : os.userInfo().username;
+  return `${RUSH_LOGS_DIR_NAME}-${identity.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+}
 
 /**
  * The resolved full-detail log artifact.
@@ -97,7 +104,7 @@ export interface IFileReporterOptions {
  * Writes a full-detail, debug-level invocation log with retention and an OS-temp fallback.
  *
  * @remarks
- * The reporter buffers events and, on flush, writes them as NDJSON to
+ * The reporter streams events as NDJSON to
  * `<commonTempFolder>/rush-logs/<UTC timestamp>-<pid>-<action>.log` with
  * owner-only permissions, redacting fields classified as secret. It maintains a
  * `latest.log` pointer for both successful and failed commands, deletes logs
@@ -120,6 +127,7 @@ export class FileReporter implements IReporter {
   private readonly _emergencyWarn: (message: string) => void;
 
   private readonly _lines: string[];
+  private _fileDescriptor: number | undefined;
   private _targetResolved: boolean;
   private _available: boolean;
   private _targetPath: string | undefined;
@@ -141,6 +149,7 @@ export class FileReporter implements IReporter {
       });
 
     this._lines = [];
+    this._fileDescriptor = undefined;
     this._targetResolved = false;
     this._available = false;
     this._targetPath = undefined;
@@ -151,19 +160,49 @@ export class FileReporter implements IReporter {
   }
 
   public async initializeAsync(): Promise<void> {
-    /* Events are buffered until the first flush. */
+    await this._ensureTargetAsync();
+    this._writeBufferedLines();
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    this._lines.push(this._formatLine(event));
+    const line: string = this._formatLine(event);
+    if (this._fileDescriptor === undefined) {
+      if (!this._targetResolved) {
+        this._lines.push(line);
+      }
+      return;
+    }
+    this._writeLine(line);
   }
 
   public async flushAsync(): Promise<void> {
-    await this._writeAsync();
+    await this._ensureTargetAsync();
+    this._writeBufferedLines();
+    if (this._fileDescriptor !== undefined) {
+      try {
+        fs.fsyncSync(this._fileDescriptor);
+      } catch (error) {
+        this._markUnavailable(error as Error);
+      }
+    }
+    await this._refreshLatestCopyAsync();
   }
 
   public async closeAsync(): Promise<void> {
-    await this._writeAsync();
+    await this.flushAsync();
+    if (this._fileDescriptor !== undefined) {
+      try {
+        fs.closeSync(this._fileDescriptor);
+      } catch (error) {
+        this._available = false;
+        this._emergencyWarn(
+          `[reporter] Unable to close the full-detail log; the artifact is unavailable: ${(error as Error).message}`
+        );
+      } finally {
+        this._fileDescriptor = undefined;
+      }
+    }
+    await this._refreshLatestCopyAsync();
   }
 
   /**
@@ -179,47 +218,95 @@ export class FileReporter implements IReporter {
     return `${JSON.stringify(redactReporterEvent(event))}\n`;
   }
 
-  private async _writeAsync(): Promise<void> {
+  private async _ensureTargetAsync(): Promise<void> {
     if (!this._targetResolved) {
       this._targetResolved = true;
       await this._resolveTargetAsync();
     }
-    if (!this._available || this._targetPath === undefined) {
+  }
+
+  private _writeBufferedLines(): void {
+    if (this._fileDescriptor === undefined) {
       this._lines.length = 0;
       return;
     }
     const newLines: string[] = this._lines.splice(0);
-    if (newLines.length > 0) {
-      try {
-        await fs.promises.appendFile(this._targetPath, newLines.join(''), { encoding: 'utf8' });
-      } catch (error) {
-        this._lines.unshift(...newLines);
-        throw error;
-      }
-    }
-    if (this._latestCopyPath !== undefined) {
-      try {
-        await fs.promises.copyFile(this._targetPath, this._latestCopyPath);
-      } catch {
-        /* latest.log is best-effort. */
+    for (const line of newLines) {
+      if (!this._writeLine(line)) {
+        break;
       }
     }
   }
 
-  private async _resolveTargetAsync(): Promise<void> {
-    const candidateDirs: string[] = [];
-    if (this._commonTempFolder !== undefined) {
-      candidateDirs.push(path.join(this._commonTempFolder, RUSH_LOGS_DIR_NAME));
+  private _writeLine(line: string): boolean {
+    if (this._fileDescriptor === undefined) {
+      return false;
     }
-    candidateDirs.push(path.join(this._osTempFolder, RUSH_LOGS_DIR_NAME));
+    try {
+      fs.writeSync(this._fileDescriptor, line, null, 'utf8');
+      return true;
+    } catch (error) {
+      this._markUnavailable(error as Error);
+      return false;
+    }
+  }
+
+  private async _refreshLatestCopyAsync(): Promise<void> {
+    if (this._latestCopyPath === undefined || this._targetPath === undefined || !this._available) {
+      return;
+    }
+    try {
+      await fs.promises.copyFile(this._targetPath, this._latestCopyPath);
+    } catch {
+      /* latest.log is best-effort. */
+    }
+  }
+
+  private _markUnavailable(error: Error): void {
+    if (!this._available) {
+      return;
+    }
+    this._available = false;
+    this._lines.length = 0;
+    if (this._fileDescriptor !== undefined) {
+      try {
+        fs.closeSync(this._fileDescriptor);
+      } catch {
+        /* The original write failure is more useful. */
+      }
+      this._fileDescriptor = undefined;
+    }
+    this._emergencyWarn(
+      `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${error.message}`
+    );
+  }
+
+  private async _resolveTargetAsync(): Promise<void> {
+    const candidateDirs: Array<{ path: string; ownerOnly: boolean }> = [];
+    if (this._commonTempFolder !== undefined) {
+      candidateDirs.push({ path: path.join(this._commonTempFolder, RUSH_LOGS_DIR_NAME), ownerOnly: false });
+    }
+    candidateDirs.push({
+      path: path.join(this._osTempFolder, getUserTempDirectoryName()),
+      ownerOnly: true
+    });
 
     let lastError: Error | undefined;
-    for (const dir of candidateDirs) {
+    for (const candidate of candidateDirs) {
+      const dir: string = candidate.path;
       try {
-        await fs.promises.mkdir(dir, { recursive: true });
+        await fs.promises.mkdir(dir, {
+          recursive: true,
+          mode: candidate.ownerOnly ? OWNER_ONLY_DIRECTORY_MODE : undefined
+        });
+        if (candidate.ownerOnly) {
+          await fs.promises.chmod(dir, OWNER_ONLY_DIRECTORY_MODE);
+        }
         const filePath: string = path.join(dir, this._fileName);
         await fs.promises.writeFile(filePath, '', { mode: OWNER_ONLY_MODE });
         await fs.promises.chmod(filePath, OWNER_ONLY_MODE);
+        const fileDescriptor: number = fs.openSync(filePath, 'a');
+        this._fileDescriptor = fileDescriptor;
         this._targetPath = filePath;
         this._available = true;
         await this._updateLatestAsync(dir, filePath);
@@ -231,6 +318,7 @@ export class FileReporter implements IReporter {
     }
 
     this._available = false;
+    this._lines.length = 0;
     this._emergencyWarn(
       `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${lastError?.message ?? 'unknown error'}`
     );

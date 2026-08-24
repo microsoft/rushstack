@@ -71,7 +71,18 @@ export class OperationStreamEmitter {
     this._source = options.source;
     this._scope = options.scope;
     this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
-    this._maxChunkBytes = options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
+    const maxChunkBytes: number =
+      options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
+    if (
+      !Number.isInteger(maxChunkBytes) ||
+      maxChunkBytes < 4 ||
+      maxChunkBytes > REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes
+    ) {
+      throw new RangeError(
+        `maxChunkBytes must be an integer between 4 and ${REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes}`
+      );
+    }
+    this._maxChunkBytes = maxChunkBytes;
   }
 
   /**

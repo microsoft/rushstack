@@ -79,15 +79,18 @@ export function runProblemMatchers(
   let suppressedDuplicateCount: number = 0;
 
   const processLine = (line: string, operationId: string | undefined): void => {
-    if (line.length === 0) {
+    const normalizedLine: string = normalizeAnsi(line);
+    if (normalizedLine.length === 0) {
       return;
     }
     for (const matcher of matchers) {
-      const match: RegExpMatchArray | null = line.match(matcher.pattern);
+      const match: RegExpMatchArray | null = normalizedLine.match(matcher.pattern);
       if (match) {
         matchedLineCount++;
         const problem: IProblemMatch = matcher.extract(match);
-        const key: string = `${matcher.tool}|${problem.code ?? ''}|${problem.file ?? ''}|${problem.line ?? ''}|${problem.message}`;
+        const key: string =
+          `${operationId ?? ''}|${matcher.tool}|${problem.code ?? ''}|${problem.file ?? ''}|` +
+          `${problem.line ?? ''}|${problem.column ?? ''}|${problem.message}`;
         const seen: number = duplicateCounts.get(key) ?? 0;
         duplicateCounts.set(key, seen + 1);
         if (seen >= maxDuplicates) {
@@ -104,7 +107,7 @@ export function runProblemMatchers(
   const chunks: IExternalOutputChunk[] = iterateExternalOutput(events);
   for (const chunk of chunks) {
     const key: string = chunk.operationId ?? '';
-    const buffered: string = (partialLines.get(key) ?? '') + normalizeAnsi(chunk.text);
+    const buffered: string = (partialLines.get(key) ?? '') + chunk.text;
     const lines: string[] = buffered.split('\n');
     const remainder: string = lines.pop() ?? '';
     for (const line of lines) {

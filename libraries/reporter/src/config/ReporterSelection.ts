@@ -113,10 +113,11 @@ function resolvePrimaryReporter(input: IReporterSelectionInput): { reporter: Rep
     return { reporter: cliReporter, reason: 'explicit --reporter' };
   }
 
-  const envReporter: string | undefined = input.env.RUSH_REPORTER;
-  if (envReporter !== undefined && envReporter.length > 0) {
+  const envReporterRaw: string | undefined = input.env.RUSH_REPORTER;
+  if (envReporterRaw !== undefined && envReporterRaw.length > 0) {
+    const envReporter: string = envReporterRaw.trim().toLowerCase();
     if (!isSupportedReporterName(envReporter)) {
-      throw new Error(`Unsupported reporter requested with RUSH_REPORTER: ${JSON.stringify(envReporter)}`);
+      throw new Error(`Unsupported reporter requested with RUSH_REPORTER: ${JSON.stringify(envReporterRaw)}`);
     }
     return { reporter: envReporter, reason: 'RUSH_REPORTER' };
   }

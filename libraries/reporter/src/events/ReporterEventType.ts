@@ -18,11 +18,11 @@
  * | `sessionCompleted` | yes | `quiet` |
  * | `commandStarted` | yes | `normal` |
  * | `commandCompleted` | yes | `quiet` |
- * | `operationRegistered` | yes | `verbose` |
+ * | `operationRegistered` | yes | `normal` |
  * | `operationStatusChanged` | yes | `normal` |
  * | `activityChanged` | **no — coalescible** | `normal` |
  * | `watchCycleCompleted` | yes | `normal` |
- * | `diagnosticEmitted` | yes | `quiet` |
+ * | `diagnosticEmitted` | yes | by severity: error `quiet`, warning `normal` |
  * | `messageEmitted` | yes | by severity: error/warning `quiet`, info `normal`, debug `debug` |
  * | `externalProcessStarted` | yes | `verbose` |
  * | `externalOutput` | yes | `debug` |

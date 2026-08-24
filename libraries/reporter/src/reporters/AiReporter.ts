@@ -9,6 +9,7 @@ import { REPORTER_PROTOCOL_VERSION } from '../protocol/ReporterProtocol';
 
 const DEFAULT_AI_MAX_BYTES: number = 64 * 1024;
 const DEFAULT_AI_MAX_DETAILED_DIAGNOSTICS: number = 20;
+const MIN_AI_MAX_BYTES: number = 512;
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'success',
   'successWithWarnings',
@@ -113,7 +114,10 @@ export class AiReporter implements IReporter {
   private readonly _failedProjects: string[];
   private readonly _errorDiagnostics: IAiDiagnostic[];
   private readonly _warningDiagnostics: IAiDiagnostic[];
+  private readonly _errorCodes: Set<string>;
   private readonly _diagnosticCategoryCounts: { [category: string]: number };
+  private _errorDiagnosticsTruncated: boolean;
+  private _warningDiagnosticsTruncated: boolean;
   private _errorCount: number;
   private _warningCount: number;
   private _logPath: string | undefined;
@@ -125,6 +129,12 @@ export class AiReporter implements IReporter {
     this._write = options.write;
     this._maxBytes = options.maxBytes ?? DEFAULT_AI_MAX_BYTES;
     this._maxDetailedDiagnostics = options.maxDetailedDiagnostics ?? DEFAULT_AI_MAX_DETAILED_DIAGNOSTICS;
+    if (!Number.isInteger(this._maxBytes) || this._maxBytes < MIN_AI_MAX_BYTES) {
+      throw new RangeError(`maxBytes must be an integer of at least ${MIN_AI_MAX_BYTES}`);
+    }
+    if (!Number.isInteger(this._maxDetailedDiagnostics) || this._maxDetailedDiagnostics < 0) {
+      throw new RangeError('maxDetailedDiagnostics must be a nonnegative integer');
+    }
 
     this._protocolVersion = REPORTER_PROTOCOL_VERSION;
     this._commandName = undefined;
@@ -133,7 +143,10 @@ export class AiReporter implements IReporter {
     this._failedProjects = [];
     this._errorDiagnostics = [];
     this._warningDiagnostics = [];
+    this._errorCodes = new Set();
     this._diagnosticCategoryCounts = {};
+    this._errorDiagnosticsTruncated = false;
+    this._warningDiagnosticsTruncated = false;
     this._errorCount = 0;
     this._warningCount = 0;
     this._logPath = undefined;
@@ -231,20 +244,29 @@ export class AiReporter implements IReporter {
     }
     if (diagnostic.severity === 'error') {
       this._errorCount++;
-      this._errorDiagnostics.push({
-        code: diagnostic.code,
-        category: diagnostic.category,
-        severity: 'error',
-        remediation: diagnostic.remediation
-      });
+      this._errorCodes.add(diagnostic.code);
+      if (this._errorDiagnostics.length < this._maxDetailedDiagnostics) {
+        this._errorDiagnostics.push({
+          code: diagnostic.code,
+          category: diagnostic.category,
+          severity: 'error',
+          remediation: diagnostic.remediation
+        });
+      } else {
+        this._errorDiagnosticsTruncated = true;
+      }
     } else if (diagnostic.severity === 'warning') {
       this._warningCount++;
-      this._warningDiagnostics.push({
-        code: diagnostic.code,
-        category: diagnostic.category,
-        severity: 'warning',
-        remediation: diagnostic.remediation
-      });
+      if (this._warningDiagnostics.length < this._maxDetailedDiagnostics) {
+        this._warningDiagnostics.push({
+          code: diagnostic.code,
+          category: diagnostic.category,
+          severity: 'warning',
+          remediation: diagnostic.remediation
+        });
+      } else {
+        this._warningDiagnosticsTruncated = true;
+      }
     }
   }
 
@@ -279,13 +301,13 @@ export class AiReporter implements IReporter {
       result: succeeded ? 'succeeded' : 'failed',
       exitCode,
       scope: { commandName: this._commandName, failedProjects: [...this._failedProjects] },
-      errorCodes: [...new Set(this._errorDiagnostics.map((d: IAiDiagnostic) => d.code))].sort(),
+      errorCodes: [...this._errorCodes].sort(),
       diagnosticCategoryCounts: { ...this._diagnosticCategoryCounts },
       diagnostics: detailedSource.slice(0, this._maxDetailedDiagnostics),
       errorCount: this._errorCount,
       warningCount: this._warningCount,
       operationCounts: { ...this._operationCounts },
-      truncated: detailedSource.length > this._maxDetailedDiagnostics
+      truncated: hasFailures ? this._errorDiagnosticsTruncated : this._warningDiagnosticsTruncated
     };
 
     if (this._logPath !== undefined) {
@@ -315,6 +337,20 @@ export class AiReporter implements IReporter {
       }
     }
 
-    this._write(`${JSON.stringify(record)}\n`);
+    let serialized: string = JSON.stringify(record);
+    if (Buffer.byteLength(serialized, 'utf8') > this._maxBytes) {
+      record.scope = { failedProjects: [] };
+      record.errorCodes = [];
+      record.diagnosticCategoryCounts = {};
+      record.diagnostics = [];
+      record.operationCounts = {};
+      delete record.log;
+      record.truncated = true;
+      serialized = JSON.stringify(record);
+    }
+    if (Buffer.byteLength(serialized, 'utf8') > this._maxBytes) {
+      throw new Error(`The minimal AI final record exceeds maxBytes=${this._maxBytes}`);
+    }
+    this._write(`${serialized}\n`);
   }
 }

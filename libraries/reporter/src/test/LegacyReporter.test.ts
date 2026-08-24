@@ -121,6 +121,27 @@ describe('LegacyReporter', () => {
     expect(output).not.toContain('A\n1');
     expect(output.indexOf('A1')).toBeLessThan(output.indexOf('B2'));
   });
+
+  it('preserves separate summaries for non-success terminal statuses', () => {
+    let output: string = '';
+    const reporter: LegacyReporter = new LegacyReporter({ write: (text: string) => (output += text) });
+    for (const [operationId, status] of [
+      ['skipped', 'skipped'],
+      ['cached', 'fromCache'],
+      ['empty', 'noOp'],
+      ['blocked', 'blocked']
+    ] as const) {
+      reporter.report(ev('operationRegistered', { operationId, projectName: operationId }));
+      reporter.report(ev('operationStatusChanged', { operationId, status }));
+    }
+    reporter.report(ev('commandResult', { succeeded: false }));
+
+    expect(output).toContain('already up to date');
+    expect(output).toContain('restored from the build cache');
+    expect(output).toContain('did not define any work');
+    expect(output).toContain('blocked by dependencies that failed');
+    expect(output).not.toContain('These operations completed successfully:\n  blocked');
+  });
 });
 
 describe('legacy emergency fallback', () => {
@@ -135,6 +156,15 @@ describe('legacy emergency fallback', () => {
     const selection = resolveReporterSelection({
       argv: ['build'],
       env: { RUSH_REPORTER: 'legacy' },
+      isTTY: true
+    });
+    expect(selection.primaryReporter).toBe('legacy');
+  });
+
+  it('selects the legacy reporter case-insensitively', () => {
+    const selection = resolveReporterSelection({
+      argv: ['build'],
+      env: { RUSH_REPORTER: ' LEGACY ' },
       isTTY: true
     });
     expect(selection.primaryReporter).toBe('legacy');
