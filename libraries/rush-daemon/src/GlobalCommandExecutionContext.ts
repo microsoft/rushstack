@@ -145,6 +145,7 @@ export class GlobalCommandExecutionContext
   readonly #onClientAbort: () => void;
   readonly #request: IResolvedGlobalCommandRequest;
   readonly #trackedChildren: Set<ITrackedChild> = new Set();
+  readonly #childCompletionErrors: unknown[] = [];
   readonly #childTerminationErrors: unknown[] = [];
   readonly #writer: OrderedTerminalWriter;
   #closed: boolean = false;
@@ -212,10 +213,13 @@ export class GlobalCommandExecutionContext
       stdio: 'pipe',
       windowsHide: options.windowsHide
     });
-    const trackedChild: ITrackedChild = {
-      completion: this.#trackChildAsync(child)
-    };
+    const completion: Promise<void> = this.#trackChildAsync(child)
+      .catch((error: unknown) => {
+        this.#childCompletionErrors.push(error);
+      });
+    const trackedChild: ITrackedChild = { completion };
     this.#trackedChildren.add(trackedChild);
+    void completion.then(() => this.#trackedChildren.delete(trackedChild));
     if (options.forwardOutput !== false) {
       this.#forwardChildOutput(child.stdout, 'stdout');
       this.#forwardChildOutput(child.stderr, 'stderr');
@@ -236,6 +240,7 @@ export class GlobalCommandExecutionContext
         collectCleanupErrorAsync(completion, cleanupErrors)
       )
     );
+    cleanupErrors.push(...this.#childCompletionErrors);
     cleanupErrors.push(...this.#childTerminationErrors);
     for (const disposable of this.#disposables.reverse()) {
       await collectCleanupErrorAsync(

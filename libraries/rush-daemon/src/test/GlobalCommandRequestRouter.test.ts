@@ -203,6 +203,45 @@ describe(GlobalCommandRequestRouter.name, () => {
     expect(request.environment.get('CHILD_CONTEXT')).toBe('request');
   });
 
+  it('reports child spawn failures during request cleanup', async () => {
+    const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+
+    await expect(
+      router.executeAsync(
+        router.resolveRequest(createRequestOptions('spawn-failure', FIRST_CWD, {}, 80)),
+        async (context: IGlobalCommandExecutionContext): Promise<void> => {
+          context.spawnChild(path.join(FIRST_CWD, 'missing-global-command'), [], {
+            forwardOutput: false
+          });
+          await new Promise<void>((resolve) => setImmediate(resolve));
+        },
+        new TestGlobalCommandClient()
+      )
+    ).rejects.toThrow(/ENOENT|spawn/);
+  });
+
+  it('rejects non-string values in untrusted environment snapshots and overlays', async () => {
+    const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+    const invalidEnvironment: NodeJS.ProcessEnv = JSON.parse('{"INVALID_VALUE":123}') as NodeJS.ProcessEnv;
+
+    expect(() =>
+      router.resolveRequest(createRequestOptions('invalid-environment', FIRST_CWD, invalidEnvironment, 80))
+    ).toThrow('environment variable "INVALID_VALUE" must have a string value');
+
+    const invalidOverlay: NodeJS.ProcessEnv = JSON.parse('{"INVALID_OVERLAY":false}') as NodeJS.ProcessEnv;
+    await expect(
+      router.executeAsync(
+        router.resolveRequest(createRequestOptions('invalid-overlay', FIRST_CWD, {}, 80)),
+        async (context: IGlobalCommandExecutionContext): Promise<void> => {
+          context.spawnChild(process.execPath, [], { environmentOverlay: invalidOverlay });
+        },
+        new TestGlobalCommandClient()
+      )
+    ).rejects.toThrow('environment variable "INVALID_OVERLAY" must have a string value');
+  });
+
   it('cleans registered resources after success and failure without disposing the warm session', async () => {
     let sessionDisposeCount: number = 0;
     let requestDisposeCount: number = 0;
@@ -272,14 +311,18 @@ describe(GlobalCommandRequestRouter.name, () => {
       },
       client
     );
-    await childStarted;
-    client.abortController.abort(new Error('client cancelled'));
+    try {
+      await childStarted;
+      client.abortController.abort(new Error('client cancelled'));
 
-    await expect(resultPromise).resolves.toEqual({ aborted: true, requestId: 'cancelled' });
-    expect(resourceDisposed).toBe(true);
-    expect(killProcessTreeSpy).toHaveBeenCalledTimes(1);
-    expect(process.cwd()).toBe(processCwd);
-    expect(process.env.RUSHD_CONTEXT_TEST).toBe(processEnvironmentValue);
+      await expect(resultPromise).resolves.toEqual({ aborted: true, requestId: 'cancelled' });
+      expect(resourceDisposed).toBe(true);
+      expect(killProcessTreeSpy).toHaveBeenCalledTimes(1);
+      expect(process.cwd()).toBe(processCwd);
+      expect(process.env.RUSHD_CONTEXT_TEST).toBe(processEnvironmentValue);
+    } finally {
+      killProcessTreeSpy.mockRestore();
+    }
   });
 
   it('waits for cooperative executor settlement before completing cancellation', async () => {

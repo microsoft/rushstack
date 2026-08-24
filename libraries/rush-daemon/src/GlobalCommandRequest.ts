@@ -149,7 +149,10 @@ function validateEnvironmentName(name: string): void {
   }
 }
 
-function validateEnvironmentValue(name: string, value: string): void {
+function validateEnvironmentValue(name: string, value: unknown): asserts value is string {
+  if (typeof value !== 'string') {
+    throw new Error(`The global command environment variable "${name}" must have a string value.`);
+  }
   if (value.includes('\0')) {
     throw new Error(`The global command environment variable "${name}" contains a null character.`);
   }
