@@ -57,7 +57,7 @@ export function parseEarlyReporterControls(
 ): IEarlyReporterControls {
   const reporter: string | undefined = readFlagValue(argv, '--reporter') ?? env.RUSH_REPORTER ?? undefined;
 
-  let logLevel: string | undefined = readFlagValue(argv, '--log-level') ?? env.RUSH_LOG_LEVEL;
+  let logLevel: string | undefined = readFlagValue(argv, '--log-level');
 
   if (logLevel === undefined) {
     if (argv.includes('--debug')) {
@@ -67,8 +67,9 @@ export function parseEarlyReporterControls(
     } else if (argv.includes('--quiet') || argv.includes('-q')) {
       logLevel = 'quiet';
     } else {
+      logLevel = env.RUSH_LOG_LEVEL;
       const quietMode: string | undefined = env.RUSH_QUIET_MODE;
-      if (quietMode === '1' || quietMode === 'true') {
+      if (logLevel === undefined && (quietMode === '1' || quietMode === 'true')) {
         logLevel = 'quiet';
       }
     }

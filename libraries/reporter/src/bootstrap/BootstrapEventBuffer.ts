@@ -10,6 +10,8 @@ import {
 import type { ReporterEventType } from '../events/ReporterEventType';
 import { chunkUtf8Text } from '../utilities/chunkUtf8Text';
 
+const TRUNCATION_NOTICE_RESERVE_BYTES: number = 512;
+
 /**
  * A privacy classification, duplicated locally to keep the encoder self-contained.
  *
@@ -131,6 +133,7 @@ export interface IBootstrapEventBufferOptions {
 export class BootstrapEventBuffer {
   private readonly _entries: IBufferEntry[];
   private readonly _maxBytes: number;
+  private readonly _entryByteLimit: number;
   private readonly _sessionId: string;
   private readonly _source: IBootstrapEventSource;
   private readonly _now: () => string;
@@ -146,6 +149,10 @@ export class BootstrapEventBuffer {
   public constructor(options: IBootstrapEventBufferOptions) {
     this._entries = [];
     this._maxBytes = options.maxBytes ?? BOOTSTRAP_BUFFER_MAX_BYTES;
+    this._entryByteLimit = this._maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
+    if (this._entryByteLimit <= 0) {
+      throw new RangeError(`maxBytes must be greater than ${TRUNCATION_NOTICE_RESERVE_BYTES}.`);
+    }
     this._sessionId = options.sessionId;
     this._source = options.source;
     this._now = options.now ?? (() => new Date().toISOString());
@@ -195,14 +202,14 @@ export class BootstrapEventBuffer {
       privacy: input.privacy ?? 'public',
       required,
       type: input.type,
-      payload: input.payload ?? {}
+      payload: input.payload === undefined ? {} : input.payload
     };
     const line: string = JSON.stringify(envelope);
     const bytes: number = Buffer.byteLength(line, 'utf8') + 1;
-    const mustPreserve: boolean = required && input.type !== 'externalOutput';
+    const mustPreserve: boolean = required;
     const replaceable: boolean = input.type === 'activityChanged';
 
-    if (this._usedBytes + bytes <= this._maxBytes) {
+    if (this._usedBytes + bytes <= this._entryByteLimit) {
       this._entries.push({ line, bytes, mustPreserve, replaceable });
       this._usedBytes += bytes;
       return eventId;
@@ -211,7 +218,7 @@ export class BootstrapEventBuffer {
     this._truncated = true;
     if (mustPreserve) {
       this._evictToFit(bytes);
-      if (this._usedBytes + bytes <= this._maxBytes) {
+      if (this._usedBytes + bytes <= this._entryByteLimit) {
         this._entries.push({ line, bytes, mustPreserve, replaceable });
         this._usedBytes += bytes;
       } else {
@@ -268,14 +275,19 @@ export class BootstrapEventBuffer {
           failed: this._failed
         }
       };
-      lines.push(JSON.stringify(notice));
+      const noticeLine: string = JSON.stringify(notice);
+      const noticeBytes: number = Buffer.byteLength(noticeLine, 'utf8') + 1;
+      if (noticeBytes > TRUNCATION_NOTICE_RESERVE_BYTES) {
+        throw new Error('The bootstrap truncation notice exceeded its reserved capacity.');
+      }
+      lines.push(noticeLine);
     }
     return lines.length > 0 ? `${lines.join('\n')}\n` : '';
   }
 
   private _evictToFit(requiredBytes: number): void {
     let index: number = 0;
-    while (this._usedBytes + requiredBytes > this._maxBytes && index < this._entries.length) {
+    while (this._usedBytes + requiredBytes > this._entryByteLimit && index < this._entries.length) {
       const entry: IBufferEntry = this._entries[index];
       if (entry.mustPreserve) {
         index++;

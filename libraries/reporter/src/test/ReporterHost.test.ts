@@ -245,6 +245,7 @@ describe('ReporterHost handoff replay', () => {
         ...(JSON.parse(lines[1]) as Record<string, unknown>),
         eventId: 'future_1',
         type: 'futureMinorEvent',
+        required: false,
         protocolVersion: { major: 1, minor: 1 }
       };
       lines.splice(2, 0, JSON.stringify(unknownEvent));
@@ -270,6 +271,37 @@ describe('ReporterHost handoff replay', () => {
         'sessionStarted',
         'diagnosticEmitted'
       ]);
+    });
+  });
+
+  it('rejects an unknown required event from a newer minor', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      const unknownEvent: Record<string, unknown> = {
+        ...(JSON.parse(lines[1]) as Record<string, unknown>),
+        eventId: 'future_required_1',
+        type: 'futureRequiredEvent',
+        protocolVersion: { major: 1, minor: 1 }
+      };
+      lines.push(JSON.stringify(unknownEvent));
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+
+      const manager: ReporterManager = new ReporterManager();
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      expect(result).toMatchObject({ replayed: false, skipReason: 'invalid-event' });
     });
   });
 });

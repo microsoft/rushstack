@@ -9,6 +9,29 @@ import * as path from 'node:path';
 import type { BootstrapEventBuffer } from './BootstrapEventBuffer';
 import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
 
+const BOOTSTRAP_HANDOFF_MAX_BYTES: number =
+  REPORTER_PROTOCOL_LIMITS.bootstrapBufferBytes + 1024;
+
+async function readBoundedUtf8FileAsync(filePath: string, maxBytes: number): Promise<string> {
+  const fileHandle: fs.promises.FileHandle = await fs.promises.open(filePath, 'r');
+  const chunks: Buffer[] = [];
+  let totalBytes: number = 0;
+  try {
+    while (totalBytes <= maxBytes) {
+      const chunk: Buffer = Buffer.allocUnsafe(Math.min(64 * 1024, maxBytes + 1 - totalBytes));
+      const { bytesRead } = await fileHandle.read(chunk, 0, chunk.length);
+      if (bytesRead === 0) {
+        return Buffer.concat(chunks, totalBytes).toString('utf8');
+      }
+      chunks.push(chunk.subarray(0, bytesRead));
+      totalBytes += bytesRead;
+    }
+    throw new Error(`Bootstrap handoff exceeds the ${maxBytes}-byte limit.`);
+  } finally {
+    await fileHandle.close();
+  }
+}
+
 /**
  * The file-name prefix of a bootstrap handoff file.
  *
@@ -134,7 +157,7 @@ export async function readBootstrapHandoffFileAsync(
   events: unknown[];
   discardedRecordCount: number;
 }> {
-  const contents: string = await fs.promises.readFile(filePath, { encoding: 'utf8' });
+  const contents: string = await readBoundedUtf8FileAsync(filePath, BOOTSTRAP_HANDOFF_MAX_BYTES);
   const records: unknown[] = [];
   let discardedRecordCount: number = 0;
   for (const line of contents.split('\n')) {

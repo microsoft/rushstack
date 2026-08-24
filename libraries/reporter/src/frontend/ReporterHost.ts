@@ -261,6 +261,16 @@ export class ReporterHost {
         };
       }
       if (!isReporterEventEnvelope(event)) {
+        if (isRecord(event) && event.required === true) {
+          await deleteBootstrapHandoffFileAsync(handoffPath);
+          return {
+            direct: false,
+            replayed: false,
+            eventCount: 0,
+            handoffPath,
+            skipReason: 'invalid-event'
+          };
+        }
         skippedEventCount++;
         continue;
       }

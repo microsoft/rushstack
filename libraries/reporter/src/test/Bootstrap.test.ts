@@ -58,6 +58,7 @@ describe('parseEarlyReporterControls', () => {
       logLevel: 'debug'
     });
     expect(parseEarlyReporterControls([], { RUSH_QUIET_MODE: '1' }).logLevel).toBe('quiet');
+    expect(parseEarlyReporterControls(['--debug'], { RUSH_LOG_LEVEL: 'quiet' }).logLevel).toBe('debug');
     expect(parseEarlyReporterControls(['--reporter=plaintext'], { RUSH_REPORTER: 'ai' }).reporter).toBe(
       'plaintext'
     );
@@ -88,6 +89,13 @@ describe('BootstrapEventBuffer', () => {
     expect(buffer.truncation.truncated).toBe(false);
   });
 
+  it('preserves an explicit null payload', () => {
+    const buffer: BootstrapEventBuffer = makeBuffer();
+    buffer.emit({ type: 'extension', payload: null });
+
+    expect(decode(buffer.serialize())[0].payload).toBeNull();
+  });
+
   it('splits raw external output into 64 KiB chunks and preserves the text', () => {
     const buffer: BootstrapEventBuffer = makeBuffer();
     const text: string = `${'x'.repeat(65535)}😀${'y'.repeat(200000)}`;
@@ -116,7 +124,8 @@ describe('BootstrapEventBuffer', () => {
   });
 
   it('preserves required and diagnostic events on overflow and appends a bufferTruncated event', () => {
-    const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 600 });
+    const maxBytes: number = 1200;
+    const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes });
     buffer.emit({ type: 'sessionStarted', payload: {} });
     for (let i: number = 0; i < 40; i++) {
       buffer.emit({ type: 'activityChanged', payload: { i } });
@@ -137,11 +146,12 @@ describe('BootstrapEventBuffer', () => {
     expect((notice.payload as { name: string }).name).toBe(BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME);
     expect(isReporterExtensionEventName(BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME)).toBe(true);
     expect((notice.payload as { droppedReplaceable: number }).droppedReplaceable).toBeGreaterThan(0);
+    expect(Buffer.byteLength(buffer.serialize(), 'utf8')).toBeLessThanOrEqual(maxBytes);
   });
 
   it('fails the bootstrap when a required event cannot be preserved', () => {
-    const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 20 });
-    buffer.emit({ type: 'sessionStarted', payload: {} });
+    const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 600 });
+    buffer.emit({ type: 'sessionStarted', payload: { text: 'x'.repeat(1000) } });
 
     expect(buffer.failed).toBe(true);
     expect(buffer.truncation.droppedRequired).toBe(1);
@@ -152,12 +162,12 @@ describe('BootstrapEventBuffer', () => {
     expect((notice.payload as { failed: boolean }).failed).toBe(true);
   });
 
-  it('evicts external output without failing when the buffer overflows', () => {
+  it('fails rather than dropping required external output when the buffer overflows', () => {
     const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 800 });
     buffer.addExternalOutput('stdout', 'x'.repeat(2000));
 
-    expect(buffer.failed).toBe(false);
-    expect(buffer.truncation.droppedOther).toBeGreaterThan(0);
+    expect(buffer.failed).toBe(true);
+    expect(buffer.truncation.droppedRequired).toBeGreaterThan(0);
   });
 });
 
@@ -233,6 +243,18 @@ describe('bootstrap handoff', () => {
       const { events, discardedRecordCount } = await readBootstrapHandoffFileAsync(handoffPath);
       expect(events).toHaveLength(2);
       expect(discardedRecordCount).toBe(1);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects a handoff larger than the bounded bootstrap allowance', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-boot-test-'));
+    try {
+      const filePath: string = path.join(directory, 'oversized.ndjson');
+      await fs.promises.writeFile(filePath, 'x'.repeat(1024 * 1024 + 2048));
+
+      await expect(readBootstrapHandoffFileAsync(filePath)).rejects.toThrow(/exceeds/);
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

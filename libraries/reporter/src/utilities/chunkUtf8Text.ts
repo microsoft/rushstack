@@ -5,8 +5,8 @@
  * Splits text into bounded UTF-8 chunks without separating surrogate pairs.
  */
 export function* chunkUtf8Text(text: string, maxChunkBytes: number): Iterable<string> {
-  if (!Number.isSafeInteger(maxChunkBytes) || maxChunkBytes <= 0) {
-    throw new RangeError('maxChunkBytes must be a positive safe integer.');
+  if (!Number.isSafeInteger(maxChunkBytes) || maxChunkBytes < 4) {
+    throw new RangeError('maxChunkBytes must be a safe integer of at least 4.');
   }
 
   let chunkStart: number = 0;
