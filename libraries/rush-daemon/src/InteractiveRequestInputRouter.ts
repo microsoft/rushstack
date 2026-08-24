@@ -69,6 +69,12 @@ interface IRequestState {
 }
 
 const MAX_COMPLETED_REQUEST_IDS: number = 256;
+const requestInputFailures: WeakSet<Error> = new WeakSet();
+
+/** @internal */
+export function isInteractiveRequestInputFailure(error: unknown): error is Error {
+  return error instanceof Error && requestInputFailures.has(error);
+}
 
 class InteractiveRequestSession implements IInteractiveRequestSession {
   readonly #state: IRequestState;
@@ -148,16 +154,16 @@ export class InteractiveRequestInputRouter {
     return new InteractiveRequestSession(state, () => this.#completeRequest(options.requestId, state));
   }
 
-  public routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
+  public async routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
     const { chunk, requestId } = decodeDaemonStdinChunk(payload);
     const state: IRequestState | undefined = this.#stateByRequestId.get(requestId);
     if (!state) {
       if (this.#completedRequestIds.has(requestId)) {
-        return Promise.reject(createRoutingError('completedRequest', requestId));
+        throw createRoutingError('completedRequest', requestId);
       }
-      return Promise.reject(createRoutingError('unknownRequest', requestId));
+      throw createRoutingError('unknownRequest', requestId);
     }
-    return queueInputAsync(state, chunk);
+    await queueInputAsync(state, chunk);
   }
 
   #completeRequest(requestId: string, state: IRequestState): void {
@@ -200,10 +206,17 @@ function queueInputAsync(state: IRequestState, chunk: Uint8Array): Promise<void>
     assertAcceptingInput(state);
     const sink: IInteractiveRequestInputSink = await getInputSinkAsync(state);
     assertAcceptingInput(state);
-    await sink.writeInputAsync(chunk);
+    try {
+      await sink.writeInputAsync(chunk);
+    } catch (error) {
+      const normalizedError: Error = normalizeError(error);
+      requestInputFailures.add(normalizedError);
+      failState(state, normalizedError);
+      throw normalizedError;
+    }
   });
   state.inputTail = writePromise.catch((error: unknown) => {
-    if (!(error instanceof InteractiveInputRoutingError)) {
+    if (!(error instanceof InteractiveInputRoutingError) && !isInteractiveRequestInputFailure(error)) {
       failState(state, error);
     }
   });
@@ -256,12 +269,16 @@ function assertAcceptingInput(state: IRequestState): void {
 }
 
 function failState(state: IRequestState, error: unknown): void {
-  const normalizedError: Error = error instanceof Error ? error : new Error(String(error));
+  const normalizedError: Error = normalizeError(error);
   if (!state.failure) {
     state.failure = normalizedError;
     stopAcceptingInput(state);
     state.onFailure(normalizedError);
   }
+}
+
+function normalizeError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
 }
 
 function stopAcceptingInput(state: IRequestState): void {

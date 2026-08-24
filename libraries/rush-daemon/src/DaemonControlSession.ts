@@ -24,6 +24,7 @@ import {
   DaemonInteractiveConnection
 } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
+import { isInteractiveRequestInputFailure } from './InteractiveRequestInputRouter';
 
 export interface IDaemonControlSessionOptions {
   readonly daemonVersion: string;
@@ -67,7 +68,13 @@ export class DaemonControlSession {
           'The first frame on a connection must be a hello control message.'
         );
       }
-      await this._interactiveConnection.routeStdinFrameAsync(frame.payload);
+      try {
+        await this._interactiveConnection.routeStdinFrameAsync(frame.payload);
+      } catch (error) {
+        if (!isInteractiveRequestInputFailure(error)) {
+          throw error;
+        }
+      }
       return;
     }
     if (frame.kind !== DaemonFrameType.controlJson) {

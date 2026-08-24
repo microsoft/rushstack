@@ -200,6 +200,86 @@ describe(RushDaemonHost.name, () => {
     }
   });
 
+  it('keeps the connection alive after a request input sink fails', async () => {
+    let failureConnection: IDaemonInteractiveConnection | undefined;
+    const failureHost: RushDaemonHost = await RushDaemonHost.startAsync(
+      createHostOptions(createTestRepoRoot(), {
+        onInteractiveConnection: (connection: IDaemonInteractiveConnection) => {
+          failureConnection = connection;
+        }
+      })
+    );
+    const failureClient: DaemonFrameConnection = await connectDaemonAsync(failureHost.paths.socketPath);
+    try {
+      await exchangeControlAsync(failureClient, createDaemonHello(DAEMON_PROTOCOL_VERSION));
+      await failureClient.sendFrameAsync({
+        kind: DaemonFrameType.controlJson,
+        payload: encodeDaemonControlMessage({
+          kind: 'subscribe',
+          payload: { isTTY: true, supportsInteractiveIO: true }
+        })
+      });
+      await exchangeControlAsync(failureClient, { kind: 'ping', payload: {} });
+      if (!failureConnection) {
+        throw new Error('The host did not expose its interactive connection.');
+      }
+      let reportFailure: ((error: Error) => void) | undefined;
+      const failureReported: Promise<Error> = new Promise((resolve) => {
+        reportFailure = resolve;
+      });
+      const failedRequest: IInteractiveRequestSession = failureConnection.registerRequest({
+        abortSignal: new AbortController().signal,
+        acceptsStdin: true,
+        onFailure: (error: Error) => reportFailure?.(error),
+        requestId: 'failed-input'
+      });
+      failedRequest.attachInputSink({
+        writeInputAsync: (): Promise<void> => Promise.reject(new Error('request stdin failed'))
+      });
+      let markSurvivorInput: (() => void) | undefined;
+      const survivorInput: Promise<void> = new Promise((resolve) => {
+        markSurvivorInput = resolve;
+      });
+      const survivingRequest: IInteractiveRequestSession = failureConnection.registerRequest({
+        abortSignal: new AbortController().signal,
+        acceptsStdin: true,
+        onFailure: () => undefined,
+        requestId: 'surviving-input'
+      });
+      survivingRequest.attachInputSink({
+        writeInputAsync: (): Promise<void> => {
+          markSurvivorInput?.();
+          return Promise.resolve();
+        }
+      });
+
+      await failureClient.sendFrameAsync({
+        kind: DaemonFrameType.stdin,
+        payload: encodeDaemonStdinChunk({
+          chunk: Uint8Array.of(INPUT_BYTE),
+          requestId: 'failed-input'
+        })
+      });
+      expect((await failureReported).message).toBe('request stdin failed');
+      await failureClient.sendFrameAsync({
+        kind: DaemonFrameType.stdin,
+        payload: encodeDaemonStdinChunk({
+          chunk: Uint8Array.of(INPUT_BYTE),
+          requestId: 'surviving-input'
+        })
+      });
+      await survivorInput;
+      await expect(failedRequest.finishAsync()).rejects.toThrow('request stdin failed');
+      await survivingRequest.finishAsync();
+      await expect(
+        exchangeControlAsync(failureClient, { kind: 'ping', payload: {} })
+      ).resolves.toMatchObject({ kind: 'pong' });
+    } finally {
+      await failureClient.closeAsync();
+      await failureHost.closeAsync();
+    }
+  });
+
   it('signals readiness only after the listener and lockfile are available', async () => {
     const controller: AbortController = new AbortController();
     let readyPaths: IDaemonPaths | undefined;
