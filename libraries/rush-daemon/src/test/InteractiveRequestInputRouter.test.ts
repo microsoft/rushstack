@@ -51,6 +51,28 @@ function routeAsync(
 }
 
 describe(InteractiveRequestInputRouter.name, () => {
+  it('returns promise rejections for malformed and request-ineligible input', async () => {
+    const router: InteractiveRequestInputRouter = new InteractiveRequestInputRouter();
+    const malformedPromise: Promise<void> = router.routeStdinFrameAsync(Uint8Array.of(0));
+    expect(malformedPromise).toBeInstanceOf(Promise);
+    await expect(malformedPromise).rejects.toMatchObject({ code: 'malformedPayload' });
+
+    const session: IInteractiveRequestSession = register(
+      router,
+      'non-interactive',
+      new TestControlClient(),
+      false
+    ).session;
+    const ineligiblePromise: Promise<void> = routeAsync(
+      router,
+      'non-interactive',
+      Uint8Array.of(1)
+    );
+    expect(ineligiblePromise).toBeInstanceOf(Promise);
+    await expect(ineligiblePromise).rejects.toMatchObject({ code: 'nonInteractiveRequest' });
+    await session.finishAsync();
+  });
+
   it('backpressures stdin that arrives before its input sink is attached', async () => {
     const router: InteractiveRequestInputRouter = new InteractiveRequestInputRouter();
     const session: IInteractiveRequestSession = register(

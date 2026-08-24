@@ -46,11 +46,14 @@ type SendDaemonControlMessageAsync = (message: DaemonControlMessage) => Promise<
 
 /** Implements request input and acknowledged raw-mode control for one live connection. @internal */
 export class DaemonInteractiveConnection implements IDaemonInteractiveConnection {
+  readonly #abandonedRawModeEnableRequestIds: Set<string> = new Set();
   readonly #abortController: AbortController = new AbortController();
   readonly #inputRouter: InteractiveRequestInputRouter = new InteractiveRequestInputRouter();
   readonly #pendingRawModeByRequestId: Map<string, IRawModeAcknowledgement> = new Map();
   readonly #sendControlMessageAsync: SendDaemonControlMessageAsync;
   #enabled: boolean = false;
+  #rawModeOwnerRequestId: string | undefined;
+  #rawModeTail: Promise<void> = Promise.resolve();
 
   public constructor(sendControlMessageAsync: SendDaemonControlMessageAsync) {
     this.#sendControlMessageAsync = sendControlMessageAsync;
@@ -72,14 +75,14 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     const client: IInteractiveRequestControlClient = {
       abortSignal: requestAbortSignal,
       writeRawModeControlAsync: (message: IDaemonSetRawModeMessage): Promise<void> =>
-        this.#writeRawModeControlAsync(message, requestAbortSignal)
+        this.#queueRawModeControlAsync(message, requestAbortSignal)
     };
     return this.#inputRouter.register({ ...options, client });
   }
 
-  public routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
+  public async routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
     this.#assertEnabled();
-    return this.#inputRouter.routeStdinFrameAsync(payload);
+    await this.#inputRouter.routeStdinFrameAsync(payload);
   }
 
   public handleControlMessage(message: DaemonControlMessage): boolean {
@@ -102,20 +105,55 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     for (const acknowledgement of this.#pendingRawModeByRequestId.values()) {
       acknowledgement.reject(reason);
     }
+    this.#abandonedRawModeEnableRequestIds.clear();
     this.#pendingRawModeByRequestId.clear();
+    this.#rawModeOwnerRequestId = undefined;
   }
 
-  async #writeRawModeControlAsync(
+  #queueRawModeControlAsync(
+    message: IDaemonSetRawModeMessage,
+    requestAbortSignal: AbortSignal
+  ): Promise<void> {
+    const transition: Promise<void> = this.#rawModeTail.then(() =>
+      this.#applyRawModeControlAsync(message, requestAbortSignal)
+    );
+    this.#rawModeTail = transition.catch(() => undefined);
+    return transition;
+  }
+
+  async #applyRawModeControlAsync(
     message: IDaemonSetRawModeMessage,
     requestAbortSignal: AbortSignal
   ): Promise<void> {
     this.#assertEnabled();
+    const { enabled, requestId } = message.payload;
+    if (enabled) {
+      if (requestAbortSignal.aborted) {
+        throw normalizeAbortReason(requestAbortSignal);
+      }
+      if (this.#rawModeOwnerRequestId === requestId) {
+        return;
+      }
+      if (this.#rawModeOwnerRequestId !== undefined) {
+        throw new Error(
+          `Raw mode is already owned by interactive request "${this.#rawModeOwnerRequestId}".`
+        );
+      }
+      this.#rawModeOwnerRequestId = requestId;
+      await this.#sendRawModeControlAsync(message, requestAbortSignal);
+    } else if (this.#rawModeOwnerRequestId === requestId) {
+      await this.#sendRawModeControlAsync(message, this.abortSignal);
+      this.#rawModeOwnerRequestId = undefined;
+    }
+  }
+
+  async #sendRawModeControlAsync(
+    message: IDaemonSetRawModeMessage,
+    abortSignal: AbortSignal
+  ): Promise<void> {
     if (this.#pendingRawModeByRequestId.has(message.payload.requestId)) {
       throw new Error(`Request "${message.payload.requestId}" already has a pending raw-mode change.`);
     }
-    const abortSignal: AbortSignal = message.payload.enabled
-      ? requestAbortSignal
-      : this.abortSignal;
     if (abortSignal.aborted) {
       throw normalizeAbortReason(abortSignal);
     }
@@ -129,15 +167,35 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
       acknowledgement.reject(normalizeAbortReason(abortSignal));
       return await promise;
     }
+    let sendStarted: boolean = false;
     try {
+      sendStarted = true;
       await this.#sendControlMessageAsync(message);
     } catch (error) {
       acknowledgement.reject(normalizeError(error));
     }
-    await promise;
+    try {
+      await promise;
+    } catch (error) {
+      if (
+        message.payload.enabled &&
+        sendStarted &&
+        abortSignal.aborted &&
+        !this.abortSignal.aborted
+      ) {
+        this.#abandonedRawModeEnableRequestIds.add(message.payload.requestId);
+      }
+      throw error;
+    }
   }
 
   #acknowledgeRawMode(message: IDaemonRawModeChangedMessage): void {
+    if (
+      message.payload.enabled &&
+      this.#abandonedRawModeEnableRequestIds.delete(message.payload.requestId)
+    ) {
+      return;
+    }
     const acknowledgement: IRawModeAcknowledgement | undefined =
       this.#pendingRawModeByRequestId.get(message.payload.requestId);
     if (!acknowledgement || acknowledgement.enabled !== message.payload.enabled) {
