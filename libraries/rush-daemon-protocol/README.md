@@ -18,8 +18,8 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
 - **Per-subscription verbosity** — a pure filter applied at event serialization so each
   client receives its own verbosity subset without mutating shared engine state.
 - **Resolved phased-request contracts** — engine-agnostic request, enabled-state selection,
-  and client-scoped result types for integrations that have already parsed a command and
-  resolved it against a real warm operation graph.
+  parsed built-in/custom command origin, and client-scoped result types for integrations that
+  have already parsed a command and resolved it against a real warm operation graph.
 - **Final command result contract** — one typed success, warning, failure, or abort outcome
   with the authoritative Rush-compatible exit code, delivered after request output drains.
 - **Interactive request contracts** — request-tagged stdin frames preserve arbitrary bytes, while

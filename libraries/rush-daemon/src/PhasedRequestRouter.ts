@@ -33,8 +33,9 @@ import {
 } from './RequestScheduler';
 import type { IRequestLease } from './RequestScheduler';
 import {
-  acquireWorkspaceRequestLeaseAsync,
-  getRequestAdmissionErrorCode
+  getRequestAdmissionErrorCode,
+  getWorkspaceRequestScheduler,
+  RequestAdmissionController
 } from './WorkspaceRequestAdmission';
 import type { IWorkspaceEngineShape } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession } from './WorkspaceSession';
@@ -98,34 +99,35 @@ export class PhasedRequestRouter {
     }
     const graph: IDualEmitOperationGraph = getDualEmitGraph(this.#workspaceSession);
     const routingState: IGraphRoutingState = getGraphRoutingState(graph);
+    let admissionController: RequestAdmissionController | undefined;
     let admissionLease: IRequestLease;
     try {
-      admissionLease = await acquireWorkspaceRequestLeaseAsync({
+      admissionController = new RequestAdmissionController({
         admission: request.admission,
         client,
-        exclusivityClass: classifyRushCommand(request.commandName),
-        requestId: request.requestId,
-        workspaceSession: this.#workspaceSession
+        requestId: request.requestId
       });
+      admissionLease = await admissionController.acquireAsync(
+        getWorkspaceRequestScheduler(this.#workspaceSession),
+        classifyRushCommand({
+          commandName: request.commandName,
+          commandOrigin: request.commandOrigin
+        })
+      );
     } catch (error) {
+      admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
     }
 
     try {
       let graphLease: IRequestLease;
       try {
-        graphLease = await routingState.graphExecutionScheduler.acquireAsync({
-          abortSignal: client.abortSignal,
-          exclusivityClass: RequestExclusivityClass.Exclusive
-        });
+        graphLease = await admissionController.acquireAsync(
+          routingState.graphExecutionScheduler,
+          RequestExclusivityClass.Exclusive
+        );
       } catch (error) {
-        if (
-          error instanceof RequestSchedulerError &&
-          error.code === RequestSchedulerErrorCode.Aborted
-        ) {
-          return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
-        }
-        throw error;
+        return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
       }
       let inputAttachment: Disposable | undefined;
       try {
@@ -147,6 +149,7 @@ export class PhasedRequestRouter {
       }
     } finally {
       admissionLease.release();
+      admissionController.dispose();
     }
   }
 
@@ -325,6 +328,9 @@ function getGraphRoutingState(graph: IDualEmitOperationGraph): IGraphRoutingStat
 function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   validateNonemptyName(request.requestId, 'request id');
   validateNonemptyName(request.commandName, 'command name');
+  if (request.commandOrigin !== 'built-in' && request.commandOrigin !== 'custom') {
+    throw new Error('Phased request command origin is not recognized.');
+  }
   if (request.acceptsStdin !== undefined && typeof request.acceptsStdin !== 'boolean') {
     throw new Error('Phased request acceptsStdin must be a boolean value.');
   }

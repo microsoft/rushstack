@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { DaemonRushCommandOrigin } from '@rushstack/rush-daemon-protocol';
+
 import { RequestExclusivityClass } from './RequestScheduler';
+
+export interface IRushCommandClassificationOptions {
+  readonly commandName: string;
+  readonly commandOrigin: DaemonRushCommandOrigin;
+}
 
 /**
  * Admission classifications for every command that `RushCommandLineParser` registers without repository config.
@@ -11,7 +18,7 @@ import { RequestExclusivityClass } from './RequestScheduler';
 export const BUILT_IN_RUSH_COMMAND_CLASSIFICATION: Readonly<Record<string, RequestExclusivityClass>> =
   Object.freeze({
     add: RequestExclusivityClass.Exclusive,
-    alert: RequestExclusivityClass.SharedRead,
+    alert: RequestExclusivityClass.Exclusive,
     'bridge-package': RequestExclusivityClass.Exclusive,
     build: RequestExclusivityClass.SharedBuild,
     change: RequestExclusivityClass.Exclusive,
@@ -48,8 +55,11 @@ export const BUILT_IN_RUSH_COMMAND_CLASSIFICATION: Readonly<Record<string, Reque
  *
  * @beta
  */
-export function classifyRushCommand(commandName: string): RequestExclusivityClass {
-  return Object.hasOwn(BUILT_IN_RUSH_COMMAND_CLASSIFICATION, commandName)
-    ? BUILT_IN_RUSH_COMMAND_CLASSIFICATION[commandName]
+export function classifyRushCommand(options: IRushCommandClassificationOptions): RequestExclusivityClass {
+  if (options.commandOrigin !== 'built-in') {
+    return RequestExclusivityClass.Exclusive;
+  }
+  return Object.hasOwn(BUILT_IN_RUSH_COMMAND_CLASSIFICATION, options.commandName)
+    ? BUILT_IN_RUSH_COMMAND_CLASSIFICATION[options.commandName]
     : RequestExclusivityClass.Exclusive;
 }

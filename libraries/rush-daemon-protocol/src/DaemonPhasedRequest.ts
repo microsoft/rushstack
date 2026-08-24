@@ -3,6 +3,7 @@
 
 import type { IDaemonCommandResult } from './DaemonCommandResult';
 import type { IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
+import type { DaemonRushCommandOrigin } from './DaemonRushCommand';
 import type { DaemonTerminalRequirement } from './DaemonTerminalPolicy';
 
 /**
@@ -52,6 +53,8 @@ export interface IDaemonPhasedRequest {
   readonly acceptsStdin?: boolean;
   /** The parsed phased command name. */
   readonly commandName: string;
+  /** The parsed action's origin, used to fail plugin and repository replacements closed. */
+  readonly commandOrigin: DaemonRushCommandOrigin;
   /** The exact warm engine shape against which the selection was resolved. */
   readonly engineShape: IDaemonPhasedEngineShape;
   /** The request environment used for Rush command policy without mutating the daemon process environment. */

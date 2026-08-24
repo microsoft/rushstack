@@ -29,12 +29,14 @@ The default daemon executable does not construct or route this graph while the c
 lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.
 
 `PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
-integration parses the command and supplies an explicit phase/plugin shape plus operation enabled-state selection;
+integration parses the command and supplies its built-in/custom origin, an explicit phase/plugin shape, and operation enabled-state selection;
 the router validates both, reconciles retained invalidations, applies the selection with `IOperationGraph.setEnabledStates`,
 and runs at most one scheduled iteration. A workspace-wide `RequestScheduler` admits phased and global routes using
-the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE`); custom and unknown command names
-fail closed to `EXCLUSIVE`. Queued clients receive ordered, one-based position controls and can request fail-fast or
-bounded waiting. Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
+the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE`); custom-origin commands and unknown
+built-in names fail closed to `EXCLUSIVE`, including plugin replacements of built-in names. Queued clients receive
+ordered, one-based position controls and can request fail-fast or bounded waiting. One absolute deadline and progress
+channel cover both workspace admission and the temporary phased graph-execution gate. Cancellation, disconnect, or
+queue-output failure removes queued work before it can execute.
 A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
 backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output
 drains. The result translates only that client's operation subset to Rush's success, warning, failure, or abort exit

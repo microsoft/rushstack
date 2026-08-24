@@ -129,6 +129,9 @@ export type DaemonProtocolErrorCode = 'frameTooLarge' | 'unknownFrameType' | 'ma
 export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-timeout';
 
 // @beta
+export type DaemonRushCommandOrigin = 'built-in' | 'custom';
+
+// @beta
 export type DaemonTerminalPolicyDecision = 'runInDaemon' | 'requiresInProcess';
 
 // @beta
@@ -348,6 +351,7 @@ export interface IDaemonPhasedRequest {
     readonly acceptsStdin?: boolean;
     readonly admission?: IDaemonRequestAdmissionOptions;
     readonly commandName: string;
+    readonly commandOrigin: DaemonRushCommandOrigin;
     readonly engineShape: IDaemonPhasedEngineShape;
     readonly environment: Readonly<Record<string, string>>;
     readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;

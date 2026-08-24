@@ -23,8 +23,9 @@ import {
 } from './DaemonTerminalPolicy';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import {
-  acquireWorkspaceRequestLeaseAsync,
-  getRequestAdmissionErrorCode
+  getWorkspaceRequestScheduler,
+  getRequestAdmissionErrorCode,
+  RequestAdmissionController
 } from './WorkspaceRequestAdmission';
 import {
   type IRequestLease,
@@ -103,23 +104,34 @@ export class GlobalCommandRequestRouter {
       await client.writeTerminalPolicyAsync(policy);
       throw new DaemonRequiresInProcessError(policy);
     }
+    let admissionController: RequestAdmissionController | undefined;
     let lease: IRequestLease;
     try {
-      lease = await acquireWorkspaceRequestLeaseAsync({
+      admissionController = new RequestAdmissionController({
         admission: request.admission,
         client,
-        exclusivityClass: classifyRushCommand(request.commandName),
-        requestId: request.requestId,
-        workspaceSession: this.#workspaceSession
+        requestId: request.requestId
       });
+      lease = await admissionController.acquireAsync(
+        getWorkspaceRequestScheduler(this.#workspaceSession),
+        classifyRushCommand({
+          commandName: request.commandName,
+          commandOrigin: request.commandOrigin
+        })
+      );
     } catch (error) {
+      admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request.requestId, client, interactiveSession, error);
     }
 
     try {
-      return await executeAdmittedAsync(request, executor, client, interactiveSession, this.#workspaceSession);
+      try {
+        return await executeAdmittedAsync(request, executor, client, interactiveSession, this.#workspaceSession);
+      } finally {
+        lease.release();
+      }
     } finally {
-      lease.release();
+      admissionController.dispose();
     }
   }
 }

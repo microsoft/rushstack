@@ -90,6 +90,7 @@ function createRequestOptions(
 ): IResolveGlobalCommandRequestOptions {
   return {
     commandName: 'global-test',
+    commandOrigin: 'custom',
     cwd,
     environment,
     requestId,
@@ -163,13 +164,15 @@ describe(GlobalCommandRequestRouter.name, () => {
     const firstRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
       {
         ...createRequestOptions('first', FIRST_CWD, { RUSHD_CONTEXT_TEST: 'first' }, 80),
-        commandName: 'list'
+        commandName: 'list',
+        commandOrigin: 'built-in'
       }
     );
     const secondRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
       {
         ...createRequestOptions('second', SECOND_CWD, { RUSHD_CONTEXT_TEST: 'second' }, 160),
-        commandName: 'scan'
+        commandName: 'scan',
+        commandOrigin: 'built-in'
       }
     );
 
@@ -593,15 +596,21 @@ describe(GlobalCommandRequestRouter.name, () => {
       new TestWorkspaceSession(TEST_REPO_ROOT)
     );
     const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    let markExecutorStarted: (() => void) | undefined;
+    const executorStarted: Promise<void> = new Promise((resolve) => {
+      markExecutorStarted = resolve;
+    });
     const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
       router.resolveRequest(createRequestOptions('failed-cancel', FIRST_CWD, {}, 80)),
       async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        markExecutorStarted?.();
         await waitForAbortAsync(context.abortSignal);
         throw new Error('executor failed while aborting');
       },
       client
     );
 
+    await executorStarted;
     client.abortController.abort();
 
     await expect(resultPromise).resolves.toEqual({

@@ -34,6 +34,7 @@ function createRequest(
 ): IDaemonPhasedRequest {
   return {
     commandName: 'build',
+    commandOrigin: 'built-in',
     engineShape: TEST_ENGINE_SHAPE,
     environment: {},
     operationSelection,

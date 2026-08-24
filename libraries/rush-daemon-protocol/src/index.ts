@@ -60,6 +60,7 @@ export type {
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from './DaemonRequestAdmission';
+export type { DaemonRushCommandOrigin } from './DaemonRushCommand';
 export type {
   DaemonTerminalPolicyDecision,
   DaemonTerminalPolicyReason,

@@ -30,10 +30,29 @@ describe(classifyRushCommand.name, () => {
   });
 
   it('uses conservative classes and fails unknown commands closed', () => {
-    expect(classifyRushCommand('build')).toBe(RequestExclusivityClass.SharedBuild);
-    expect(classifyRushCommand('list')).toBe(RequestExclusivityClass.SharedRead);
-    expect(classifyRushCommand('rebuild')).toBe(RequestExclusivityClass.Exclusive);
-    expect(classifyRushCommand('custom-command')).toBe(RequestExclusivityClass.Exclusive);
-    expect(classifyRushCommand('constructor')).toBe(RequestExclusivityClass.Exclusive);
+    expect(classifyRushCommand({ commandName: 'build', commandOrigin: 'built-in' })).toBe(
+      RequestExclusivityClass.SharedBuild
+    );
+    expect(classifyRushCommand({ commandName: 'list', commandOrigin: 'built-in' })).toBe(
+      RequestExclusivityClass.SharedRead
+    );
+    expect(classifyRushCommand({ commandName: 'alert', commandOrigin: 'built-in' })).toBe(
+      RequestExclusivityClass.Exclusive
+    );
+    expect(classifyRushCommand({ commandName: 'rebuild', commandOrigin: 'built-in' })).toBe(
+      RequestExclusivityClass.Exclusive
+    );
+    expect(classifyRushCommand({ commandName: 'custom-command', commandOrigin: 'custom' })).toBe(
+      RequestExclusivityClass.Exclusive
+    );
+    expect(classifyRushCommand({ commandName: 'constructor', commandOrigin: 'built-in' })).toBe(
+      RequestExclusivityClass.Exclusive
+    );
+  });
+
+  it('fails a plugin replacement of a built-in command name closed', () => {
+    expect(classifyRushCommand({ commandName: 'build', commandOrigin: 'custom' })).toBe(
+      RequestExclusivityClass.Exclusive
+    );
   });
 });
