@@ -9,7 +9,6 @@ import type {
 } from '@microsoft/rush-lib';
 import { OperationStatus } from '@microsoft/rush-lib';
 import type {
-  DaemonPhasedOperationEnabledState,
   IDaemonPhasedEngineShape,
   IDaemonPhasedOperationResult,
   IDaemonPhasedOperationSelection,
@@ -323,15 +322,17 @@ function resolveSelection(
 }
 
 function addSelectedOperation(
-  enabledState: DaemonPhasedOperationEnabledState,
+  enabledState: unknown,
   operation: Operation,
   enabledOperations: Operation[],
   ignoreDependencyOperations: Operation[]
 ): void {
   if (enabledState === true) {
     enabledOperations.push(operation);
-  } else {
+  } else if (enabledState === 'ignore-dependency-changes') {
     ignoreDependencyOperations.push(operation);
+  } else {
+    throw new Error(`Invalid phased request enabled state: "${String(enabledState)}".`);
   }
 }
 

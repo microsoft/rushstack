@@ -40,6 +40,13 @@ function select(operationId: string): IDaemonPhasedOperationSelection {
   return { enabledState: true, operationId };
 }
 
+function selectRuntimeValue(
+  operationId: string,
+  enabledState: unknown
+): IDaemonPhasedOperationSelection {
+  return { enabledState, operationId } as unknown as IDaemonPhasedOperationSelection;
+}
+
 function createThreeOperationFixture(options?: {
   actionAAsync?: (terminal: ITerminal) => Promise<void>;
   statusA?: OperationStatus;
@@ -97,6 +104,14 @@ describe(PhasedRequestRouter.name, () => {
     await expect(
       router.executeAsync(createRequest([select(OPERATION_A), select(OPERATION_A)]), client)
     ).rejects.toThrow('Duplicate phased request operation id');
+    for (const enabledState of [false, 'invalid-state']) {
+      await expect(
+        router.executeAsync(
+          createRequest([selectRuntimeValue(OPERATION_A, enabledState)]),
+          client
+        )
+      ).rejects.toThrow(`Invalid phased request enabled state: "${String(enabledState)}"`);
+    }
     await expect(
       router.executeAsync(
         { ...createRequest([select(OPERATION_A)]), engineShape: { phaseNames: ['other'], pluginNames: [] } },
@@ -104,6 +119,30 @@ describe(PhasedRequestRouter.name, () => {
       )
     ).rejects.toThrow('phase shape does not match');
     expect(scheduleSpy).not.toHaveBeenCalled();
+  });
+
+  it('accepts both enabled states declared by the protocol', async () => {
+    const trueFixture: ITestRoutingFixture = createThreeOperationFixture();
+    await new PhasedRequestRouter(trueFixture.session).executeAsync(
+      createRequest([select(OPERATION_A)]),
+      new TestPhasedRequestClient()
+    );
+
+    const ignoredDependencyFixture: ITestRoutingFixture = createThreeOperationFixture();
+    await new PhasedRequestRouter(ignoredDependencyFixture.session).executeAsync(
+      createRequest([
+        {
+          enabledState: 'ignore-dependency-changes',
+          operationId: OPERATION_A
+        }
+      ]),
+      new TestPhasedRequestClient()
+    );
+
+    expect(trueFixture.operations.get(OPERATION_A)?.enabled).toBe(true);
+    expect(ignoredDependencyFixture.operations.get(OPERATION_A)?.enabled).toBe(
+      'ignore-dependency-changes'
+    );
   });
 
   it('reconciles invalidations, applies the safe dependency closure, and runs one iteration', async () => {
