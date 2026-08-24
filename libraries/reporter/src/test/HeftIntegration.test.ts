@@ -67,14 +67,21 @@ describe('Heft descriptor allocation', () => {
     expect(readChildDescriptorFd({ [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '3' })).toBe(3);
     expect(readChildDescriptorFd({})).toBeUndefined();
     expect(readChildDescriptorFd({ [RUSH_REPORTER_CHILD_FD_ENV_VAR]: 'abc' })).toBeUndefined();
+    expect(readChildDescriptorFd({ [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '3abc' })).toBeUndefined();
+    expect(readChildDescriptorFd({ [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '2' })).toBeUndefined();
+  });
+
+  it('rejects descriptor numbers that would replace standard streams', () => {
+    expect(() => allocateChildDescriptor(2)).toThrow(/greater than or equal to 3/);
   });
 });
 
 describe('HeftChildEmitter', () => {
   it('emits structured NDJSON when the descriptor is present', () => {
     let descriptor: string = '';
+    const env: Record<string, string | undefined> = { [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '3' };
     const emitter: HeftChildEmitter = new HeftChildEmitter({
-      env: { [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '3' },
+      env,
       childSessionId: 'child-sess',
       source: SOURCE,
       producerVersion: '@rushstack/heft 1.2.19',
@@ -82,12 +89,13 @@ describe('HeftChildEmitter', () => {
       writeDescriptor: (text: string) => (descriptor += text)
     });
     expect(emitter.mode).toBe('structured');
+    expect(env[RUSH_REPORTER_CHILD_FD_ENV_VAR]).toBeUndefined();
     expect(emitter.sendHello()).toBe(true);
     const eventId: string | undefined = emitter.emitEvent({
       type: 'commandStarted',
-      required: true,
       payload: {}
     });
+    emitter.emitEvent({ type: 'activityChanged', payload: {} });
     expect(eventId).toBe('child_1');
 
     const records: Record<string, unknown>[] = descriptor
@@ -97,6 +105,8 @@ describe('HeftChildEmitter', () => {
     expect(records[0].kind).toBe('hello');
     expect(records[1].sessionId).toBe('child-sess');
     expect(records[1].type).toBe('commandStarted');
+    expect(records[1].required).toBe(true);
+    expect(records[2].required).toBe(false);
   });
 
   it('falls back to raw streams when descriptor negotiation is unavailable', () => {
@@ -110,7 +120,7 @@ describe('HeftChildEmitter', () => {
     });
     expect(emitter.mode).toBe('raw-fallback');
     expect(emitter.sendHello()).toBe(false);
-    expect(emitter.emitEvent({ type: 'commandStarted', required: true })).toBeUndefined();
+    expect(emitter.emitEvent({ type: 'commandStarted' })).toBeUndefined();
     emitter.writeRaw('stdout', 'raw heft log\n');
     expect(stdout).toBe('raw heft log\n');
   });
@@ -131,7 +141,6 @@ describe('HeftDescriptorHost new descriptor path', () => {
     child.sendHello();
     child.emitEvent({
       type: 'operationStatusChanged',
-      required: true,
       payload: { operationId: 'c1', status: 'success' }
     });
 
@@ -198,7 +207,6 @@ describe('HeftDescriptorHost new descriptor path', () => {
     for (let i: number = 0; i < 5; i++) {
       child.emitEvent({
         type: 'operationStatusChanged',
-        required: true,
         payload: { operationId: `c${i}`, status: 'success' }
       });
     }
@@ -236,6 +244,81 @@ describe('HeftDescriptorHost new descriptor path', () => {
     const result: IHeftChildResult = host.processChildNdjson(descriptor);
     expect(result.accepted).toBe(false);
     expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_UPDATE_REQUIRED');
+  });
+
+  it('rejects malformed records without throwing from the streaming drain', () => {
+    const negotiationResults: boolean[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      forwardEnvelope: () => {
+        throw new Error('Malformed records must not be forwarded.');
+      },
+      onNegotiation: (result) => negotiationResults.push(result.accepted)
+    });
+    const processor = host.createStreamProcessor();
+
+    expect(() => processor.write('not json\n')).not.toThrow();
+    expect(() => processor.write('null\n')).not.toThrow();
+    const result: IHeftChildResult = processor.flush();
+
+    expect(result.accepted).toBe(false);
+    expect(result.eventCount).toBe(0);
+    expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+    expect(negotiationResults).toEqual([false]);
+  });
+
+  it('rejects an incomplete hello instead of dereferencing missing fields', () => {
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      forwardEnvelope: () => undefined
+    });
+
+    expect(() => host.processChildRecord({ kind: 'hello' })).not.toThrow();
+    const result: IHeftChildResult = host.processChildRecords([]);
+    expect(result.accepted).toBe(false);
+    expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
+  it('rejects malformed envelopes and derives required at the host boundary', () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => forwarded.push(envelope)
+    });
+
+    expect(
+      host.processChildRecord({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 0 },
+        producerVersion: '@rushstack/heft 1.2.19',
+        capabilities: [],
+        requiredFeatures: []
+      })
+    ).toBe(true);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 0 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: true,
+        type: 'activityChanged',
+        payload: {}
+      })
+    ).toBe(true);
+    expect(forwarded[0].required).toBe(false);
+
+    expect(host.processChildRecord(null)).toBe(false);
+    const result: IHeftChildResult = host.processChildRecords([]);
+    expect(result.accepted).toBe(false);
+    expect(result.eventCount).toBe(1);
+    expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
   });
 });
 

@@ -3,10 +3,11 @@
 
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
 import type { IReporterEventScope, IReporterEventSource } from '../events/IReporterEventEnvelope';
+import { isReporterEventRequired, type ReporterEventType } from '../events/ReporterEventType';
 import { encodeNdjsonRecord } from '../protocol/Ndjson';
 import { REPORTER_PROTOCOL_VERSION } from '../protocol/ReporterProtocol';
 import type { IReporterHello } from '../protocol/ReporterHandshake';
-import { readChildDescriptorFd } from './HeftDescriptor';
+import { readChildDescriptorFd, RUSH_REPORTER_CHILD_FD_ENV_VAR } from './HeftDescriptor';
 
 /**
  * The mode a Heft child reporter operates in.
@@ -21,8 +22,7 @@ export type HeftChildReporterMode = 'structured' | 'raw-fallback';
  * @beta
  */
 export interface IHeftChildEventInput {
-  readonly type: string;
-  readonly required: boolean;
+  readonly type: ReporterEventType;
   readonly privacy?: 'public' | 'local-sensitive' | 'secret';
   readonly scope?: IReporterEventScope;
   readonly payload?: unknown;
@@ -35,7 +35,9 @@ export interface IHeftChildEventInput {
  */
 export interface IHeftChildEmitterOptions {
   /**
-   * The environment variables, consulted for the inherited descriptor.
+   * The environment variables, consulted for the inherited descriptor. The
+   * descriptor variable is removed when the emitter is constructed so it is
+   * not inherited by descendants that do not inherit the descriptor itself.
    */
   readonly env: Record<string, string | undefined>;
 
@@ -122,6 +124,7 @@ export class HeftChildEmitter {
 
   public constructor(options: IHeftChildEmitterOptions) {
     const fd: number | undefined = readChildDescriptorFd(options.env);
+    delete options.env[RUSH_REPORTER_CHILD_FD_ENV_VAR];
     this.mode = fd !== undefined && options.writeDescriptor !== undefined ? 'structured' : 'raw-fallback';
 
     this._writeDescriptor = options.writeDescriptor;
@@ -174,7 +177,7 @@ export class HeftChildEmitter {
       source: this._source,
       scope: input.scope,
       privacy: input.privacy ?? 'public',
-      required: input.required,
+      required: isReporterEventRequired(input.type),
       type: input.type,
       payload: input.payload ?? {}
     };

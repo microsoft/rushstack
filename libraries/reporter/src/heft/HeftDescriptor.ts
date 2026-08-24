@@ -45,6 +45,10 @@ export interface IChildDescriptorPlan {
  * @beta
  */
 export function allocateChildDescriptor(fdNumber: number = 3): IChildDescriptorPlan {
+  if (!Number.isSafeInteger(fdNumber) || fdNumber < 3) {
+    throw new RangeError('The reporter file descriptor number must be an integer greater than or equal to 3.');
+  }
+
   const stdio: (string | number)[] = ['inherit', 'inherit', 'inherit'];
   while (stdio.length < fdNumber) {
     stdio.push('ignore');
@@ -70,9 +74,9 @@ export function allocateChildDescriptor(fdNumber: number = 3): IChildDescriptorP
  */
 export function readChildDescriptorFd(env: Record<string, string | undefined>): number | undefined {
   const raw: string | undefined = env[RUSH_REPORTER_CHILD_FD_ENV_VAR];
-  if (raw === undefined) {
+  if (raw === undefined || !/^\d+$/.test(raw)) {
     return undefined;
   }
-  const parsed: number = Number.parseInt(raw, 10);
-  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
+  const parsed: number = Number(raw);
+  return Number.isSafeInteger(parsed) && parsed >= 3 ? parsed : undefined;
 }
