@@ -83,6 +83,7 @@ export class LegacyReporter implements IReporter {
   private _ordinal: number;
   private _totalDurationMs: number;
   private readonly _registry: Map<string, string>;
+  private readonly _outputBuffers: Map<string, string[]>;
   private readonly _completed: ILegacyOperationRecord[];
   private readonly _failed: ILegacyOperationRecord[];
 
@@ -95,6 +96,7 @@ export class LegacyReporter implements IReporter {
     this._ordinal = 0;
     this._totalDurationMs = 0;
     this._registry = new Map();
+    this._outputBuffers = new Map();
     this._completed = [];
     this._failed = [];
   }
@@ -120,6 +122,7 @@ export class LegacyReporter implements IReporter {
           phaseName?: string;
         };
         this._registry.set(payload.operationId, this._title(payload.projectName, payload.phaseName));
+        this._outputBuffers.set(payload.operationId, []);
         this._total++;
         break;
       }
@@ -128,7 +131,15 @@ export class LegacyReporter implements IReporter {
         break;
       }
       case 'externalOutput': {
-        this._write(this._ensureNewline((event.payload as { text?: string }).text ?? ''));
+        const text: string = (event.payload as { text?: string }).text ?? '';
+        const operationId: string | undefined = event.scope?.operationId;
+        const buffer: string[] | undefined =
+          operationId === undefined ? undefined : this._outputBuffers.get(operationId);
+        if (buffer) {
+          buffer.push(text);
+        } else {
+          this._write(text);
+        }
         break;
       }
       case 'commandCompleted': {
@@ -163,13 +174,16 @@ export class LegacyReporter implements IReporter {
     };
     const title: string = this._registry.get(payload.operationId) ?? payload.operationId;
 
-    if (payload.status === 'executing') {
+    if (TERMINAL_STATUSES.has(payload.status)) {
       this._ordinal++;
       this._write(`\n${this._header(title, this._ordinal, this._total)}\n`);
-      return;
-    }
+      const output: string = this._outputBuffers.get(payload.operationId)?.join('') ?? '';
+      this._write(output);
+      if (output.length > 0 && !output.endsWith('\n')) {
+        this._write('\n');
+      }
+      this._outputBuffers.delete(payload.operationId);
 
-    if (TERMINAL_STATUSES.has(payload.status)) {
       const record: ILegacyOperationRecord = {
         title,
         durationMs: payload.durationMs ?? 0,
@@ -228,7 +242,4 @@ export class LegacyReporter implements IReporter {
     return (durationMs / 1000).toFixed(2);
   }
 
-  private _ensureNewline(text: string): string {
-    return text.endsWith('\n') ? text : `${text}\n`;
-  }
 }

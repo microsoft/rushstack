@@ -220,7 +220,7 @@ export class AiReporter implements IReporter {
 
   public async closeAsync(): Promise<void> {
     if (!this._finalEmitted) {
-      this._emitFinal(this._errorCount === 0, this._errorCount === 0 ? 0 : 1);
+      this._emitFinal(false, 1);
     }
   }
 

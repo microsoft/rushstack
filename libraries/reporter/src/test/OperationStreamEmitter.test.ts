@@ -82,6 +82,18 @@ describe('OperationStreamEmitter', () => {
     expect(text).toBe('abcdefgh');
   });
 
+  it('never splits a UTF-16 surrogate pair', () => {
+    const sink: CapturingSink = new CapturingSink();
+    const emitter: OperationStreamEmitter = makeEmitter(sink, 4);
+    emitter.writeOutput('op1', 'stdout', 'abc😀def');
+
+    const chunks: string[] = sink.inputs.map((input) => (input.payload as { text: string }).text);
+    expect(chunks.join('')).toBe('abc😀def');
+    expect(chunks).not.toContain('\ud83d');
+    expect(chunks).not.toContain('\ude00');
+    expect(chunks.every((chunk: string) => Buffer.byteLength(chunk, 'utf8') <= 4)).toBe(true);
+  });
+
   it('emits interleaved output uncollated, in call order', () => {
     const sink: CapturingSink = new CapturingSink();
     const emitter: OperationStreamEmitter = makeEmitter(sink);

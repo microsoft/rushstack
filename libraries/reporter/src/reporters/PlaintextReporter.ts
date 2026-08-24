@@ -82,6 +82,7 @@ export class PlaintextReporter implements IReporter {
   private _completed: number;
   private _failed: number;
   private _lastOutputMs: number;
+  private _atLineStart: boolean;
   private readonly _operations: Map<string, IOperationRecord>;
 
   public constructor(options: IPlaintextReporterOptions) {
@@ -96,6 +97,7 @@ export class PlaintextReporter implements IReporter {
     this._completed = 0;
     this._failed = 0;
     this._lastOutputMs = 0;
+    this._atLineStart = true;
     this._operations = new Map();
   }
 
@@ -200,14 +202,14 @@ export class PlaintextReporter implements IReporter {
       this._writeLine('');
       this._writeLine(`==[ ${projectName}${phase} ]==`);
       if (record) {
-        for (const chunk of record.buffer) {
-          this._writeRaw(chunk);
-        }
+        this._writeRaw(record.buffer.join(''));
+        record.buffer.length = 0;
       }
       this._writeLine(this._formatStatus(projectName, payload.status));
     } else {
       this._writeLine(this._formatStatus(projectName, payload.status));
     }
+    this._operations.delete(payload.operationId);
   }
 
   private _onExternalOutput(event: IReporterEventEnvelope<unknown>): void {
@@ -258,12 +260,19 @@ export class PlaintextReporter implements IReporter {
   }
 
   private _writeLine(text: string): void {
+    if (!this._atLineStart) {
+      this._write('\n');
+    }
     this._write(`${text}\n`);
+    this._atLineStart = true;
     this._lastOutputMs = this._nowMs();
   }
 
   private _writeRaw(text: string): void {
-    this._write(text.endsWith('\n') ? text : `${text}\n`);
+    this._write(text);
+    if (text.length > 0) {
+      this._atLineStart = text.endsWith('\n');
+    }
     this._lastOutputMs = this._nowMs();
   }
 }

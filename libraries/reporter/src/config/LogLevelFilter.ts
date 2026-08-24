@@ -46,6 +46,8 @@ export function getLogLevelRank(level: ReporterLogLevel): number {
 export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>): ReporterLogLevel {
   switch (event.type) {
     case 'commandResult':
+    case 'sessionCompleted':
+    case 'commandCompleted':
       return 'quiet';
     case 'diagnosticEmitted': {
       const severity: string | undefined = (event.payload as { severity?: string }).severity;
@@ -58,30 +60,31 @@ export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>):
       return 'normal';
     }
     case 'sessionStarted':
-    case 'sessionCompleted':
     case 'commandStarted':
-    case 'commandCompleted':
-    case 'operationRegistered':
     case 'operationStatusChanged':
     case 'watchCycleCompleted':
     case 'artifactAvailable':
       return 'normal';
-    case 'activityChanged': {
-      const payload: { kind?: string; severity?: string } = event.payload as {
-        kind?: string;
-        severity?: string;
-      };
-      if (payload.kind === 'message' && payload.severity === 'debug') {
+    case 'messageEmitted': {
+      const severity: string | undefined = (event.payload as { severity?: string }).severity;
+      if (severity === 'error' || severity === 'warning') {
+        return 'quiet';
+      }
+      if (severity === 'debug') {
         return 'debug';
       }
       return 'normal';
     }
+    case 'activityChanged':
+      return 'normal';
+    case 'operationRegistered':
     case 'externalProcessStarted':
     case 'externalProcessCompleted':
-    case 'externalOutput':
       return 'verbose';
+    case 'externalOutput':
+      return 'debug';
     case 'extension':
-      return event.required ? 'normal' : 'debug';
+      return 'normal';
     default:
       return 'normal';
   }

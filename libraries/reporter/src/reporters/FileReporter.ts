@@ -7,6 +7,7 @@ import * as path from 'node:path';
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
+import { redactReporterEvent } from './ReporterRedaction';
 
 /**
  * The subdirectory that holds full-detail invocation logs. `rush purge` removes it.
@@ -119,10 +120,10 @@ export class FileReporter implements IReporter {
   private readonly _emergencyWarn: (message: string) => void;
 
   private readonly _lines: string[];
-  private _writtenCount: number;
   private _targetResolved: boolean;
   private _available: boolean;
   private _targetPath: string | undefined;
+  private _latestCopyPath: string | undefined;
   private readonly _fileName: string;
 
   public constructor(options: IFileReporterOptions = {}) {
@@ -140,10 +141,10 @@ export class FileReporter implements IReporter {
       });
 
     this._lines = [];
-    this._writtenCount = 0;
     this._targetResolved = false;
     this._available = false;
     this._targetPath = undefined;
+    this._latestCopyPath = undefined;
 
     const timestamp: string = new Date(this._nowMs()).toISOString().replace(/[:.]/g, '-');
     this._fileName = `${timestamp}-${this._pid}-${this._actionName}.log`;
@@ -175,28 +176,7 @@ export class FileReporter implements IReporter {
   }
 
   private _formatLine(event: IReporterEventEnvelope<unknown>): string {
-    let payload: unknown = event.payload;
-    if (event.privacy === 'secret') {
-      payload = '[secret]';
-    } else if (event.type === 'diagnosticEmitted') {
-      payload = this._redactDiagnostic(event.payload);
-    }
-    return `${JSON.stringify({ ...event, payload })}\n`;
-  }
-
-  private _redactDiagnostic(payload: unknown): unknown {
-    const diagnostic: { parameters?: { [name: string]: { value: unknown; privacy: string } } } = payload as {
-      parameters?: { [name: string]: { value: unknown; privacy: string } };
-    };
-    if (!diagnostic.parameters) {
-      return payload;
-    }
-    const parameters: { [name: string]: { value: unknown; privacy: string } } = {};
-    for (const [name, classified] of Object.entries(diagnostic.parameters)) {
-      parameters[name] =
-        classified.privacy === 'secret' ? { value: '[secret]', privacy: 'secret' } : classified;
-    }
-    return { ...diagnostic, parameters };
+    return `${JSON.stringify(redactReporterEvent(event))}\n`;
   }
 
   private async _writeAsync(): Promise<void> {
@@ -205,12 +185,24 @@ export class FileReporter implements IReporter {
       await this._resolveTargetAsync();
     }
     if (!this._available || this._targetPath === undefined) {
+      this._lines.length = 0;
       return;
     }
-    const newLines: string[] = this._lines.slice(this._writtenCount);
+    const newLines: string[] = this._lines.splice(0);
     if (newLines.length > 0) {
-      await fs.promises.appendFile(this._targetPath, newLines.join(''), { encoding: 'utf8' });
-      this._writtenCount = this._lines.length;
+      try {
+        await fs.promises.appendFile(this._targetPath, newLines.join(''), { encoding: 'utf8' });
+      } catch (error) {
+        this._lines.unshift(...newLines);
+        throw error;
+      }
+    }
+    if (this._latestCopyPath !== undefined) {
+      try {
+        await fs.promises.copyFile(this._targetPath, this._latestCopyPath);
+      } catch {
+        /* latest.log is best-effort. */
+      }
     }
   }
 
@@ -249,12 +241,9 @@ export class FileReporter implements IReporter {
     try {
       await fs.promises.rm(latestPath, { force: true });
       await fs.promises.symlink(path.basename(filePath), latestPath);
+      this._latestCopyPath = undefined;
     } catch {
-      try {
-        await fs.promises.copyFile(filePath, latestPath);
-      } catch {
-        /* latest.log is best-effort. */
-      }
+      this._latestCopyPath = latestPath;
     }
   }
 

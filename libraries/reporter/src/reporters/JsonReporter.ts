@@ -5,6 +5,7 @@ import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import { encodeNdjsonRecord, NdjsonRecordTooLargeError } from '../protocol/Ndjson';
 import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
+import { redactReporterEvent } from './ReporterRedaction';
 
 /**
  * Options for {@link JsonReporter}.
@@ -50,7 +51,9 @@ export class JsonReporter implements IReporter {
 
   public report(event: IReporterEventEnvelope<unknown>): void {
     try {
-      this._write(encodeNdjsonRecord(event, { maxRecordBytes: this._maxRecordBytes }));
+      this._write(
+        encodeNdjsonRecord(redactReporterEvent(event), { maxRecordBytes: this._maxRecordBytes })
+      );
     } catch (error) {
       if (error instanceof NdjsonRecordTooLargeError) {
         this._write(

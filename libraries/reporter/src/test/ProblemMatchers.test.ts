@@ -137,6 +137,16 @@ describe('runProblemMatchers', () => {
     expect(ansiResult.diagnostics[0].parameters?.code.value).toBe('TS2000');
   });
 
+  it('matches diagnostics with CRLF line endings', () => {
+    const result: IProblemMatcherResult = runProblemMatchers(
+      emitOutput(['src/windows.ts(3,4): error TS3000: bad\r\n']),
+      [TSC_ERROR_MATCHER]
+    );
+
+    expect(result.diagnostics).toHaveLength(1);
+    expect(result.diagnostics[0].parameters?.code.value).toBe('TS3000');
+  });
+
   it('caps duplicate diagnostics', () => {
     const line: string = "src/dup.ts(1,1): error TS1005: ';' expected.\n";
     const events: IReporterEventEnvelope<unknown>[] = emitOutput([line, line, line, line, line]);

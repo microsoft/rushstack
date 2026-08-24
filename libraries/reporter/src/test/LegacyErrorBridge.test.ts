@@ -25,6 +25,20 @@ describe('isAlreadyReportedSentinel', () => {
     expect(isAlreadyReportedSentinel(new Error('generic'))).toBe(false);
     expect(isAlreadyReportedSentinel('not an error')).toBe(false);
   });
+
+  it('recognizes the node-core-library sentinel shape', () => {
+    class LegacyAlreadyReportedError extends Error {
+      public constructor() {
+        super('An error occurred.');
+        Object.setPrototypeOf(this, LegacyAlreadyReportedError.prototype);
+      }
+    }
+    Object.defineProperty(LegacyAlreadyReportedError, 'name', { value: 'AlreadyReportedError' });
+
+    const error: Error = new LegacyAlreadyReportedError();
+    expect(error.name).toBe('Error');
+    expect(isAlreadyReportedSentinel(error)).toBe(true);
+  });
 });
 
 describe('LegacyErrorBridge', () => {

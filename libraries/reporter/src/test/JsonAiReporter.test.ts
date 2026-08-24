@@ -64,6 +64,24 @@ describe('JsonReporter', () => {
     expect(records).toHaveLength(1);
     expect((records[0].payload as { name: string }).name).toBe('rush.reporter.recordTooLarge');
   });
+
+  it('redacts secret diagnostic fields from stdout', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
+    reporter.report(
+      ev('diagnosticEmitted', {
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        parameters: {
+          token: { value: 'sk-secret-value', privacy: 'secret' },
+          path: { value: '/tmp/log', privacy: 'local-sensitive' }
+        }
+      })
+    );
+
+    expect(output).not.toContain('sk-secret-value');
+    expect(output).toContain('[secret]');
+    expect(output).toContain('/tmp/log');
+  });
 });
 
 describe('AiReporter', () => {
@@ -85,6 +103,17 @@ describe('AiReporter', () => {
     const records: Record<string, unknown>[] = parseLines(output);
     return { records, final: records[records.length - 1] as unknown as IAiFinalRecord };
   }
+
+  it('fails closed when commandResult is missing', async () => {
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    await reporter.closeAsync();
+
+    const final: Record<string, unknown> = parseLines(output).at(-1)!;
+    expect(final.result).toBe('failed');
+    expect(final.exitCode).toBe(1);
+  });
 
   it('emits a status record and a bounded final record with scope, codes, and log', () => {
     const { records, final } = run([

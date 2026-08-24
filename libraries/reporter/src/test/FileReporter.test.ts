@@ -94,6 +94,28 @@ describe('FileReporter', () => {
     });
   });
 
+  it('refreshes the latest.log copy when symlinks are unavailable', async () => {
+    await withTempDir(async (base: string) => {
+      const symlinkSpy: jest.SpiedFunction<typeof fs.promises.symlink> = jest
+        .spyOn(fs.promises, 'symlink')
+        .mockRejectedValueOnce(new Error('symlinks unavailable'));
+      try {
+        const reporter: FileReporter = new FileReporter({
+          commonTempFolder: base,
+          actionName: 'build',
+          nowMs: () => FIXED_NOW
+        });
+        reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+        await reporter.closeAsync();
+
+        const latestPath: string = path.join(base, RUSH_LOGS_DIR_NAME, LATEST_LOG_NAME);
+        expect(await fs.promises.readFile(latestPath, 'utf8')).toContain('"type":"commandResult"');
+      } finally {
+        symlinkSpy.mockRestore();
+      }
+    });
+  });
+
   it('excludes secret fields but keeps local-sensitive values', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });

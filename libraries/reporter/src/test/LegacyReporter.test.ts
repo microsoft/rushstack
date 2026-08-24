@@ -99,6 +99,28 @@ describe('LegacyReporter', () => {
     expect(output).toContain('These operations completed successfully:');
     expect(output).toContain('rush build (X.XX seconds)');
   });
+
+  it('groups interleaved output by operation without adding chunk newlines', () => {
+    let output: string = '';
+    const reporter: LegacyReporter = new LegacyReporter({ write: (text: string) => (output += text) });
+    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(ev('operationRegistered', { operationId: 'op2', projectName: 'project-b' }));
+    reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'executing' }));
+    reporter.report(ev('operationStatusChanged', { operationId: 'op2', status: 'executing' }));
+    reporter.report(ev('externalOutput', { text: 'A' }, { operationId: 'op1' }));
+    reporter.report(ev('externalOutput', { text: 'B' }, { operationId: 'op2' }));
+    reporter.report(ev('externalOutput', { text: '1' }, { operationId: 'op1' }));
+    reporter.report(ev('externalOutput', { text: '2' }, { operationId: 'op2' }));
+    reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationStatusChanged', { operationId: 'op2', status: 'success' }));
+
+    expect(output).toContain('==[ project-a ]');
+    expect(output).toContain('A1\n');
+    expect(output).toContain('==[ project-b ]');
+    expect(output).toContain('B2\n');
+    expect(output).not.toContain('A\n1');
+    expect(output.indexOf('A1')).toBeLessThan(output.indexOf('B2'));
+  });
 });
 
 describe('legacy emergency fallback', () => {

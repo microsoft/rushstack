@@ -110,15 +110,27 @@ export class OperationStreamEmitter {
     const eventIds: string[] = [];
     let offset: number = 0;
     while (offset < text.length) {
-      let end: number = text.length;
-      while (Buffer.byteLength(text.slice(offset, end), 'utf8') > this._maxChunkBytes) {
-        end = offset + Math.floor((end - offset) / 2);
+      let end: number = offset;
+      let byteLength: number = 0;
+      while (end < text.length) {
+        const codePoint: number = text.codePointAt(end)!;
+        const codeUnitCount: number = codePoint > 0xffff ? 2 : 1;
+        const codePointByteLength: number =
+          codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
+        if (end > offset && byteLength + codePointByteLength > this._maxChunkBytes) {
+          break;
+        }
+        byteLength += codePointByteLength;
+        end += codeUnitCount;
+        if (byteLength >= this._maxChunkBytes) {
+          break;
+        }
       }
-      const chunk: string = text.slice(offset, end === offset ? offset + 1 : end);
+      const chunk: string = text.slice(offset, end);
       eventIds.push(
         this._emit('externalOutput', { stream, text: chunk }, { operationId }, 'local-sensitive')
       );
-      offset += chunk.length;
+      offset = end;
     }
     return eventIds;
   }

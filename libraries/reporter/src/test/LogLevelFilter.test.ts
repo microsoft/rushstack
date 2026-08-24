@@ -29,8 +29,12 @@ describe('getLogLevelRank', () => {
 describe('getEventMinimumLogLevel', () => {
   it('classifies failures, required warnings, and results as quiet', () => {
     expect(getEventMinimumLogLevel(ev('commandResult', { succeeded: false, exitCode: 1 }))).toBe('quiet');
+    expect(getEventMinimumLogLevel(ev('sessionCompleted'))).toBe('quiet');
+    expect(getEventMinimumLogLevel(ev('commandCompleted'))).toBe('quiet');
     expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'error' }))).toBe('quiet');
     expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'warning' }, true))).toBe('quiet');
+    expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'error' }))).toBe('quiet');
+    expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'warning' }))).toBe('quiet');
   });
 
   it('classifies standard lifecycle and non-required warnings as normal', () => {
@@ -39,13 +43,12 @@ describe('getEventMinimumLogLevel', () => {
     expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'warning' }, false))).toBe('normal');
   });
 
-  it('classifies external activity as verbose and debug details as debug', () => {
-    expect(getEventMinimumLogLevel(ev('externalOutput', { stream: 'stdout', text: 'x' }))).toBe('verbose');
+  it('classifies external activity as verbose and raw output as debug', () => {
+    expect(getEventMinimumLogLevel(ev('operationRegistered', {}))).toBe('verbose');
     expect(getEventMinimumLogLevel(ev('externalProcessStarted', {}))).toBe('verbose');
-    expect(
-      getEventMinimumLogLevel(ev('activityChanged', { kind: 'message', severity: 'debug', text: 'd' }))
-    ).toBe('debug');
-    expect(getEventMinimumLogLevel(ev('extension', { name: 'a.b' }, false))).toBe('debug');
+    expect(getEventMinimumLogLevel(ev('externalOutput', { stream: 'stdout', text: 'x' }))).toBe('debug');
+    expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'debug', text: 'd' }))).toBe('debug');
+    expect(getEventMinimumLogLevel(ev('extension', { name: 'a.b' }, false))).toBe('normal');
   });
 });
 
@@ -69,20 +72,14 @@ describe('shouldRenderAtLogLevel', () => {
       true
     );
     expect(shouldRenderAtLogLevel('normal', ev('externalOutput', {}))).toBe(false);
-    expect(
-      shouldRenderAtLogLevel('normal', ev('activityChanged', { kind: 'message', severity: 'debug' }))
-    ).toBe(false);
+    expect(shouldRenderAtLogLevel('normal', ev('messageEmitted', { severity: 'debug' }))).toBe(false);
   });
 
-  it('adds external activity at verbose and everything at debug', () => {
-    expect(shouldRenderAtLogLevel('verbose', ev('externalOutput', {}))).toBe(true);
-    expect(
-      shouldRenderAtLogLevel('verbose', ev('activityChanged', { kind: 'message', severity: 'debug' }))
-    ).toBe(false);
-    expect(
-      shouldRenderAtLogLevel('debug', ev('activityChanged', { kind: 'message', severity: 'debug' }))
-    ).toBe(true);
-    expect(shouldRenderAtLogLevel('debug', ev('extension', { name: 'a.b' }, false))).toBe(true);
+  it('adds external activity at verbose and raw output at debug', () => {
+    expect(shouldRenderAtLogLevel('verbose', ev('externalProcessStarted', {}))).toBe(true);
+    expect(shouldRenderAtLogLevel('verbose', ev('externalOutput', {}))).toBe(false);
+    expect(shouldRenderAtLogLevel('debug', ev('externalOutput', {}))).toBe(true);
+    expect(shouldRenderAtLogLevel('debug', ev('messageEmitted', { severity: 'debug' }))).toBe(true);
   });
 
   it('is monotonic: an event shown at a level is shown at every higher level', () => {
@@ -92,7 +89,7 @@ describe('shouldRenderAtLogLevel', () => {
       ev('diagnosticEmitted', { severity: 'warning' }, false),
       ev('commandStarted', {}),
       ev('externalOutput', {}),
-      ev('activityChanged', { kind: 'message', severity: 'debug' })
+      ev('messageEmitted', { severity: 'debug' })
     ];
     for (const event of events) {
       let seen: boolean = false;
@@ -125,6 +122,10 @@ describe('filterEventsForLogLevel and file reporter default', () => {
     ];
     expect(filterEventsForLogLevel('quiet', stream).map((e) => e.type)).toEqual(['commandResult']);
     expect(filterEventsForLogLevel('verbose', stream).map((e) => e.type)).toEqual([
+      'commandStarted',
+      'commandResult'
+    ]);
+    expect(filterEventsForLogLevel('debug', stream).map((e) => e.type)).toEqual([
       'commandStarted',
       'externalOutput',
       'commandResult'

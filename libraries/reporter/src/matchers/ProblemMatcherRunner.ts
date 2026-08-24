@@ -108,12 +108,15 @@ export function runProblemMatchers(
     const lines: string[] = buffered.split('\n');
     const remainder: string = lines.pop() ?? '';
     for (const line of lines) {
-      processLine(line, chunk.operationId);
+      processLine(line.endsWith('\r') ? line.slice(0, -1) : line, chunk.operationId);
     }
     partialLines.set(key, remainder);
   }
   for (const [key, remainder] of partialLines) {
-    processLine(remainder, key.length > 0 ? key : undefined);
+    processLine(
+      remainder.endsWith('\r') ? remainder.slice(0, -1) : remainder,
+      key.length > 0 ? key : undefined
+    );
   }
 
   return { diagnostics, matchedLineCount, unmatchedLineCount, suppressedDuplicateCount };

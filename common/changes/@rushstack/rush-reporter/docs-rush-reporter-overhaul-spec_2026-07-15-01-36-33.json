@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "packageName": "@rushstack/reporter",
+      "packageName": "@rushstack/rush-reporter",
       "comment": "Add problem matchers that recover linked diagnostics from preserved external output: ANSI normalization, a tool- and version-scoped registry with default-enablement gating, and a runner with line reassembly, evidence preservation, and duplicate caps",
       "type": "minor"
     }
   ],
-  "packageName": "@rushstack/reporter",
+  "packageName": "@rushstack/rush-reporter",
   "email": "TheLarkInn@users.noreply.github.com"
 }

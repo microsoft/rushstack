@@ -282,7 +282,7 @@ export class DefaultInteractiveReporter implements IReporter {
     this._finalized = true;
 
     const lines: string[] = [];
-    const succeeded: boolean = this._result ? this._result.succeeded : this._failedOperations === 0;
+    const succeeded: boolean = this._result?.succeeded ?? false;
     if (succeeded) {
       lines.push(
         `${this._color.green('✔')} ${this._commandName ?? 'rush'} succeeded — ` +

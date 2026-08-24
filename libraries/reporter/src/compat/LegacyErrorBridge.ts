@@ -54,7 +54,10 @@ export class AlreadyReportedError extends Error {
  * @beta
  */
 export function isAlreadyReportedSentinel(error: unknown): boolean {
-  return error instanceof Error && error.name === ALREADY_REPORTED_ERROR_NAME;
+  return (
+    error instanceof Error &&
+    (error.name === ALREADY_REPORTED_ERROR_NAME || error.constructor?.name === ALREADY_REPORTED_ERROR_NAME)
+  );
 }
 
 /**

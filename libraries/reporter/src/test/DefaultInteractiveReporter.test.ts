@@ -162,6 +162,22 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).toContain('Log: /tmp/rush-logs/latest.log');
   });
 
+  it('fails closed when commandResult is missing', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    await reporter.closeAsync();
+
+    expect(terminal.output).toContain('✖');
+    expect(terminal.output).toContain('build failed');
+    expect(terminal.output).not.toContain('build succeeded');
+  });
+
   it('appends one summary per completed watch cycle while keeping the live region', async () => {
     const terminal: FakeTerminal = new FakeTerminal();
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({

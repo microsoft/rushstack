@@ -83,6 +83,19 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).toMatchSnapshot();
   });
 
+  it('preserves partial-line chunks within grouped output', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('operationRegistered', { operationId: 'op1', projectName: 'project-a', phaseName: 'build' })
+    );
+    capture.reporter.report(ev('externalOutput', { text: 'Building ' }, { operationId: 'op1' }));
+    capture.reporter.report(ev('externalOutput', { text: 'project-a' }, { operationId: 'op1' }));
+    capture.reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+
+    expect(capture.getOutput()).toContain('Building project-a\nproject-a: success');
+    expect(capture.getOutput()).not.toContain('Building \nproject-a');
+  });
+
   it('emits a compact heartbeat only after the interval elapses', () => {
     let now: number = 0;
     let output: string = '';
