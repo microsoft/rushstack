@@ -156,14 +156,21 @@ describe('OldEngineOutputAdapter', () => {
       maxChunkBytes: 8
     });
 
-    const ids: string[] = adapter.capture('stderr', 'abcdefghijklmnop');
+    const originalText: string = '1234567😀abcdefghijklmnop';
+    const ids: string[] = adapter.capture('stderr', originalText);
     await manager.flushAsync();
 
-    expect(ids.length).toBe(2);
-    expect(reporter.reported).toHaveLength(2);
+    expect(ids.length).toBeGreaterThan(1);
+    expect(reporter.reported).toHaveLength(ids.length);
     const text: string = reporter.reported
       .map((e: IReporterEventEnvelope<unknown>) => (e.payload as { text: string }).text)
       .join('');
-    expect(text).toBe('abcdefghijklmnop');
+    expect(text).toBe(originalText);
+    for (const event of reporter.reported) {
+      const chunk: string = (event.payload as { text: string }).text;
+      expect(Buffer.byteLength(chunk, 'utf8')).toBeLessThanOrEqual(8);
+      const finalCodeUnit: number = chunk.charCodeAt(chunk.length - 1);
+      expect(finalCodeUnit < 0xd800 || finalCodeUnit > 0xdbff).toBe(true);
+    }
   });
 });

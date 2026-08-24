@@ -7,6 +7,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import type { BootstrapEventBuffer } from './BootstrapEventBuffer';
+import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
 
 /**
  * The file-name prefix of a bootstrap handoff file.
@@ -109,13 +110,14 @@ export async function writeBootstrapHandoffFileAsync(
 ): Promise<IBootstrapHandoffWriteResult> {
   const directory: string = options.directory ?? os.tmpdir();
   const pid: number = options.pid ?? process.pid;
-  const fileName: string = `${BOOTSTRAP_HANDOFF_FILE_PREFIX}${pid}-${Date.now()}${BOOTSTRAP_HANDOFF_FILE_SUFFIX}`;
-  const handoffPath: string = path.join(directory, fileName);
   const nonce: string = crypto.randomUUID();
+  const fileName: string = `${BOOTSTRAP_HANDOFF_FILE_PREFIX}${pid}-${nonce}${BOOTSTRAP_HANDOFF_FILE_SUFFIX}`;
+  const handoffPath: string = path.join(directory, fileName);
   const header: IBootstrapHandoffHeader = { kind: 'bootstrapHandoff', nonce };
   await fs.promises.writeFile(handoffPath, `${JSON.stringify(header)}\n${buffer.serialize()}`, {
     encoding: 'utf8',
-    mode: 0o600
+    mode: 0o600,
+    flag: 'wx'
   });
   return { handoffPath, nonce };
 }
@@ -127,24 +129,39 @@ export async function writeBootstrapHandoffFileAsync(
  */
 export async function readBootstrapHandoffFileAsync(
   filePath: string
-): Promise<{ header: IBootstrapHandoffHeader | undefined; events: unknown[] }> {
+): Promise<{
+  header: IBootstrapHandoffHeader | undefined;
+  events: unknown[];
+  discardedRecordCount: number;
+}> {
   const contents: string = await fs.promises.readFile(filePath, { encoding: 'utf8' });
-  const events: unknown[] = [];
-  let header: IBootstrapHandoffHeader | undefined;
-  let first: boolean = true;
+  const records: unknown[] = [];
+  let discardedRecordCount: number = 0;
   for (const line of contents.split('\n')) {
     const trimmed: string = line.trim();
-    if (trimmed.length > 0) {
-      const record: unknown = JSON.parse(trimmed);
-      if (first && (record as { kind?: string }).kind === 'bootstrapHandoff') {
-        header = record as IBootstrapHandoffHeader;
-      } else {
-        events.push(record);
-      }
+    if (trimmed.length === 0) {
+      continue;
     }
-    first = false;
+    if (Buffer.byteLength(line, 'utf8') > REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes) {
+      discardedRecordCount++;
+      continue;
+    }
+    try {
+      records.push(JSON.parse(trimmed));
+    } catch {
+      discardedRecordCount++;
+    }
   }
-  return { header, events };
+
+  let header: IBootstrapHandoffHeader | undefined;
+  if (
+    typeof records[0] === 'object' &&
+    records[0] !== null &&
+    (records[0] as { kind?: unknown }).kind === 'bootstrapHandoff'
+  ) {
+    header = records.shift() as IBootstrapHandoffHeader;
+  }
+  return { header, events: records, discardedRecordCount };
 }
 
 /**
@@ -153,5 +170,9 @@ export async function readBootstrapHandoffFileAsync(
  * @beta
  */
 export async function deleteBootstrapHandoffFileAsync(filePath: string): Promise<void> {
-  await fs.promises.rm(filePath, { force: true });
+  try {
+    await fs.promises.rm(filePath, { force: true, maxRetries: 3, retryDelay: 50 });
+  } catch {
+    // Abandoned handoffs are removed by the retention sweep.
+  }
 }

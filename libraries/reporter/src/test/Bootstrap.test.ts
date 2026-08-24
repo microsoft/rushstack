@@ -14,6 +14,7 @@ import {
   BOOTSTRAP_PROTOCOL_MAJOR,
   BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  isReporterExtensionEventName,
   REPORTER_PROTOCOL_VERSION,
   type IBootstrapEventBufferOptions,
   type IEarlyReporterControls
@@ -74,7 +75,7 @@ describe('BootstrapEventBuffer', () => {
 
   it('encodes events with assigned ids, sequence, timestamp, and protocol version', () => {
     const buffer: BootstrapEventBuffer = makeBuffer();
-    const id: string = buffer.emit({ type: 'sessionStarted', required: true, payload: { argv: ['build'] } });
+    const id: string = buffer.emit({ type: 'sessionStarted', payload: { argv: ['build'] } });
     expect(id).toBe('boot_1');
 
     const events: Record<string, unknown>[] = decode(buffer.serialize());
@@ -89,7 +90,7 @@ describe('BootstrapEventBuffer', () => {
 
   it('splits raw external output into 64 KiB chunks and preserves the text', () => {
     const buffer: BootstrapEventBuffer = makeBuffer();
-    const text: string = 'x'.repeat(200000);
+    const text: string = `${'x'.repeat(65535)}😀${'y'.repeat(200000)}`;
     buffer.addExternalOutput('stdout', text);
 
     const events: Record<string, unknown>[] = decode(buffer.serialize());
@@ -103,6 +104,10 @@ describe('BootstrapEventBuffer', () => {
         text: string;
       };
       expect(Buffer.byteLength(payload.text, 'utf8')).toBeLessThanOrEqual(64 * 1024);
+      const finalCodeUnit: number = payload.text.charCodeAt(payload.text.length - 1);
+      expect(finalCodeUnit < 0xd800 || finalCodeUnit > 0xdbff).toBe(true);
+      expect(chunk.privacy).toBe('local-sensitive');
+      expect(chunk.required).toBe(true);
     }
     const reconstructed: string = chunks
       .map((e: Record<string, unknown>) => (e.payload as { text: string }).text)
@@ -112,11 +117,11 @@ describe('BootstrapEventBuffer', () => {
 
   it('preserves required and diagnostic events on overflow and appends a bufferTruncated event', () => {
     const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 600 });
-    buffer.emit({ type: 'sessionStarted', required: true, payload: {} });
+    buffer.emit({ type: 'sessionStarted', payload: {} });
     for (let i: number = 0; i < 40; i++) {
-      buffer.emit({ type: 'activityChanged', required: false, payload: { i } });
+      buffer.emit({ type: 'activityChanged', payload: { i } });
     }
-    buffer.emit({ type: 'diagnosticEmitted', required: false, payload: { code: 'RUSH_X' } });
+    buffer.emit({ type: 'diagnosticEmitted', payload: { code: 'RUSH_X' } });
 
     const events: Record<string, unknown>[] = decode(buffer.serialize());
     const types: string[] = events.map((e: Record<string, unknown>) => e.type as string);
@@ -130,12 +135,13 @@ describe('BootstrapEventBuffer', () => {
     const notice: Record<string, unknown> = events[events.length - 1];
     expect(notice.type).toBe('extension');
     expect((notice.payload as { name: string }).name).toBe(BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME);
+    expect(isReporterExtensionEventName(BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME)).toBe(true);
     expect((notice.payload as { droppedReplaceable: number }).droppedReplaceable).toBeGreaterThan(0);
   });
 
   it('fails the bootstrap when a required event cannot be preserved', () => {
     const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 20 });
-    buffer.emit({ type: 'sessionStarted', required: true, payload: {} });
+    buffer.emit({ type: 'sessionStarted', payload: {} });
 
     expect(buffer.failed).toBe(true);
     expect(buffer.truncation.droppedRequired).toBe(1);
@@ -144,6 +150,14 @@ describe('BootstrapEventBuffer', () => {
     const notice: Record<string, unknown> = events[events.length - 1];
     expect(notice.type).toBe('extension');
     expect((notice.payload as { failed: boolean }).failed).toBe(true);
+  });
+
+  it('evicts external output without failing when the buffer overflows', () => {
+    const buffer: BootstrapEventBuffer = makeBuffer({ maxBytes: 800 });
+    buffer.addExternalOutput('stdout', 'x'.repeat(2000));
+
+    expect(buffer.failed).toBe(false);
+    expect(buffer.truncation.droppedOther).toBeGreaterThan(0);
   });
 });
 
@@ -156,8 +170,8 @@ describe('bootstrap handoff', () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-boot-test-'));
     try {
       const buffer: BootstrapEventBuffer = makeBuffer();
-      buffer.emit({ type: 'sessionStarted', required: true, payload: { argv: ['build'] } });
-      buffer.emit({ type: 'commandStarted', required: true, payload: { commandName: 'build' } });
+      buffer.emit({ type: 'sessionStarted', payload: { argv: ['build'] } });
+      buffer.emit({ type: 'commandStarted', payload: { commandName: 'build' } });
 
       const { handoffPath: filePath, nonce } = await writeBootstrapHandoffFileAsync(buffer, {
         directory,
@@ -165,6 +179,7 @@ describe('bootstrap handoff', () => {
       });
       expect(filePath.startsWith(directory)).toBe(true);
       expect(filePath).toContain('4242');
+      expect(path.basename(filePath)).toContain(nonce);
       expect(nonce).toHaveLength(36);
 
       const { header, events } = await readBootstrapHandoffFileAsync(filePath);
@@ -173,11 +188,51 @@ describe('bootstrap handoff', () => {
       expect(events).toHaveLength(2);
       expect((events[0] as Record<string, unknown>).type).toBe('sessionStarted');
       expect((events[1] as Record<string, unknown>).type).toBe('commandStarted');
+      if (process.platform !== 'win32') {
+        expect((await fs.promises.stat(filePath)).mode % 0o1000).toBe(0o600);
+      }
 
       await deleteBootstrapHandoffFileAsync(filePath);
       expect(fs.existsSync(filePath)).toBe(false);
       // Deleting a missing file is a no-op.
       await deleteBootstrapHandoffFileAsync(filePath);
+      // Cleanup failures are also best-effort.
+      await deleteBootstrapHandoffFileAsync(directory);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('preserves valid records before a malformed trailing record', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-boot-test-'));
+    try {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      await fs.promises.appendFile(handoffPath, '{"truncated":');
+
+      const { events, discardedRecordCount } = await readBootstrapHandoffFileAsync(handoffPath);
+      expect(events).toHaveLength(1);
+      expect(discardedRecordCount).toBe(1);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('preserves valid records after a malformed middle record', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-boot-test-'));
+    try {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      buffer.emit({ type: 'commandStarted', payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      lines.splice(2, 0, '{"malformed":');
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+
+      const { events, discardedRecordCount } = await readBootstrapHandoffFileAsync(handoffPath);
+      expect(events).toHaveLength(2);
+      expect(discardedRecordCount).toBe(1);
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

@@ -60,5 +60,5 @@ export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NO
  *
  * @beta
  */
-export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.bufferTruncated' =
-  'rush.reporter.bufferTruncated';
+export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.buffer-truncated' =
+  'rush.reporter.buffer-truncated';

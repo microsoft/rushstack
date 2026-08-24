@@ -7,6 +7,8 @@ import {
   BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES,
   BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME
 } from './BootstrapProtocol';
+import type { ReporterEventType } from '../events/ReporterEventType';
+import { chunkUtf8Text } from '../utilities/chunkUtf8Text';
 
 /**
  * A privacy classification, duplicated locally to keep the encoder self-contained.
@@ -34,13 +36,7 @@ export interface IBootstrapEventInput {
   /**
    * The event type, for example `sessionStarted`, `diagnosticEmitted`, or `externalOutput`.
    */
-  readonly type: string;
-
-  /**
-   * Whether the event is correctness-critical. Required and diagnostic events are
-   * preserved on overflow.
-   */
-  readonly required: boolean;
+  readonly type: ReporterEventType;
 
   /**
    * The privacy classification. Defaults to `public`.
@@ -89,6 +85,7 @@ interface IBufferEntry {
   readonly line: string;
   readonly bytes: number;
   readonly mustPreserve: boolean;
+  readonly replaceable: boolean;
 }
 
 /**
@@ -187,6 +184,7 @@ export class BootstrapEventBuffer {
    */
   public emit(input: IBootstrapEventInput): string {
     const eventId: string = `boot_${this._nextEventId++}`;
+    const required: boolean = input.type !== 'activityChanged';
     const envelope: Record<string, unknown> = {
       protocolVersion: { major: BOOTSTRAP_PROTOCOL_MAJOR, minor: 0 },
       eventId,
@@ -195,17 +193,17 @@ export class BootstrapEventBuffer {
       timestamp: this._now(),
       source: this._source,
       privacy: input.privacy ?? 'public',
-      required: input.required,
+      required,
       type: input.type,
       payload: input.payload ?? {}
     };
     const line: string = JSON.stringify(envelope);
     const bytes: number = Buffer.byteLength(line, 'utf8') + 1;
-    const mustPreserve: boolean = input.required || input.type === 'diagnosticEmitted';
-    const replaceable: boolean = input.type === 'activityChanged' && !input.required;
+    const mustPreserve: boolean = required && input.type !== 'externalOutput';
+    const replaceable: boolean = input.type === 'activityChanged';
 
     if (this._usedBytes + bytes <= this._maxBytes) {
-      this._entries.push({ line, bytes, mustPreserve });
+      this._entries.push({ line, bytes, mustPreserve, replaceable });
       this._usedBytes += bytes;
       return eventId;
     }
@@ -214,7 +212,7 @@ export class BootstrapEventBuffer {
     if (mustPreserve) {
       this._evictToFit(bytes);
       if (this._usedBytes + bytes <= this._maxBytes) {
-        this._entries.push({ line, bytes, mustPreserve });
+        this._entries.push({ line, bytes, mustPreserve, replaceable });
         this._usedBytes += bytes;
       } else {
         this._failed = true;
@@ -236,16 +234,12 @@ export class BootstrapEventBuffer {
    * @param text - the raw text to preserve
    */
   public addExternalOutput(stream: 'stdout' | 'stderr', text: string): void {
-    let offset: number = 0;
-    // Split on byte-safe character boundaries below the chunk limit.
-    while (offset < text.length) {
-      let end: number = text.length;
-      while (Buffer.byteLength(text.slice(offset, end), 'utf8') > BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES) {
-        end = offset + Math.floor((end - offset) / 2);
-      }
-      const chunk: string = text.slice(offset, end === offset ? offset + 1 : end);
-      this.emit({ type: 'externalOutput', required: false, payload: { stream, text: chunk } });
-      offset += chunk.length;
+    for (const chunk of chunkUtf8Text(text, BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES)) {
+      this.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream, text: chunk }
+      });
     }
   }
 
@@ -289,7 +283,11 @@ export class BootstrapEventBuffer {
       }
       this._entries.splice(index, 1);
       this._usedBytes -= entry.bytes;
-      this._droppedOther++;
+      if (entry.replaceable) {
+        this._droppedReplaceable++;
+      } else {
+        this._droppedOther++;
+      }
     }
   }
 }

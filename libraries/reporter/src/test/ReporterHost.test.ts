@@ -60,8 +60,8 @@ describe('ReporterHost handoff replay', () => {
   it('replays the handoff file into the manager and deletes it', async () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();
-      buffer.emit({ type: 'sessionStarted', required: true, payload: {} });
-      buffer.emit({ type: 'commandStarted', required: true, payload: { commandName: 'build' } });
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      buffer.emit({ type: 'commandStarted', payload: { commandName: 'build' } });
       const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
 
       const manager: ReporterManager = new ReporterManager();
@@ -74,7 +74,8 @@ describe('ReporterHost handoff replay', () => {
         env: {
           [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
           [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
-        }
+        },
+        handoffDirectory: directory
       });
 
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
@@ -102,20 +103,27 @@ describe('ReporterHost handoff replay', () => {
   });
 
   it('tolerates a missing handoff file', async () => {
-    const host: ReporterHost = new ReporterHost({
-      env: { [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: '/nonexistent/rush-handoff.ndjson' }
+    await withTempDir(async (directory: string) => {
+      const handoffPath: string = path.join(directory, 'rush-reporter-bootstrap-missing.ndjson');
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'missing'
+        },
+        handoffDirectory: directory
+      });
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      expect(result.direct).toBe(false);
+      expect(result.replayed).toBe(false);
+      expect(result.eventCount).toBe(0);
+      expect(result.skipReason).toBe('unreadable');
     });
-    const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
-    expect(result.direct).toBe(false);
-    expect(result.replayed).toBe(false);
-    expect(result.eventCount).toBe(0);
-    expect(result.skipReason).toBe('unreadable');
   });
 
   it('rejects a handoff file whose nonce does not match the environment', async () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();
-      buffer.emit({ type: 'sessionStarted', required: true, payload: {} });
+      buffer.emit({ type: 'sessionStarted', payload: {} });
       const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
 
       const manager: ReporterManager = new ReporterManager();
@@ -128,7 +136,8 @@ describe('ReporterHost handoff replay', () => {
         env: {
           [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
           [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'not-the-real-nonce'
-        }
+        },
+        handoffDirectory: directory
       });
 
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
@@ -137,7 +146,130 @@ describe('ReporterHost handoff replay', () => {
       expect(result.replayed).toBe(false);
       expect(result.skipReason).toBe('nonce-mismatch');
       expect(reporter.reported).toHaveLength(0);
-      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(fs.existsSync(handoffPath)).toBe(true);
+    });
+  });
+
+  it('rejects a missing nonce and leaves the unauthenticated file untouched', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: { [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath },
+        handoffDirectory: directory
+      });
+
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      expect(result.skipReason).toBe('nonce-mismatch');
+      expect(fs.existsSync(handoffPath)).toBe(true);
+    });
+  });
+
+  it('rejects a handoff outside the configured directory without deleting it', async () => {
+    await withTempDir(async (directory: string) => {
+      const unrelatedPath: string = path.join(directory, 'unrelated.txt');
+      await fs.promises.writeFile(unrelatedPath, 'keep me');
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: unrelatedPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'nonce'
+        },
+        handoffDirectory: directory
+      });
+
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      expect(result.skipReason).toBe('invalid-path');
+      expect(await fs.promises.readFile(unrelatedPath, 'utf8')).toBe('keep me');
+    });
+  });
+
+  it('rejects an incompatible bootstrap protocol', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
+      await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
+
+      const manager: ReporterManager = new ReporterManager();
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      expect(result.skipReason).toBe('incompatible-protocol');
+    });
+  });
+
+  it('replays a valid prefix before a malformed trailing record', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      await fs.promises.appendFile(handoffPath, '{"truncated":');
+
+      const manager: ReporterManager = new ReporterManager();
+      const reporter: RecordingReporter = new RecordingReporter();
+      manager.addReporter(reporter);
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      await manager.flushAsync();
+      expect(result).toMatchObject({ replayed: true, eventCount: 1, skippedEventCount: 1 });
+      expect(reporter.reported).toHaveLength(1);
+    });
+  });
+
+  it('skips an unknown additive event and replays known events', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      buffer.emit({ type: 'diagnosticEmitted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      const unknownEvent: Record<string, unknown> = {
+        ...(JSON.parse(lines[1]) as Record<string, unknown>),
+        eventId: 'future_1',
+        type: 'futureMinorEvent',
+        protocolVersion: { major: 1, minor: 1 }
+      };
+      lines.splice(2, 0, JSON.stringify(unknownEvent));
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+
+      const manager: ReporterManager = new ReporterManager();
+      const reporter: RecordingReporter = new RecordingReporter();
+      manager.addReporter(reporter);
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+      await manager.flushAsync();
+      expect(result).toMatchObject({ replayed: true, eventCount: 2, skippedEventCount: 1 });
+      expect(reporter.reported.map((event) => event.type)).toEqual([
+        'sessionStarted',
+        'diagnosticEmitted'
+      ]);
     });
   });
 });

@@ -5,6 +5,7 @@ import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion
 import type { IReporterEventSource } from '../events/IReporterEventEnvelope';
 import type { IReporterEventSink } from '../producers/IReporterEventSink';
 import { REPORTER_PROTOCOL_VERSION, REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
+import { chunkUtf8Text } from '../utilities/chunkUtf8Text';
 
 /**
  * Options for constructing an {@link OldEngineOutputAdapter}.
@@ -75,13 +76,7 @@ export class OldEngineOutputAdapter {
    */
   public capture(stream: 'stdout' | 'stderr', text: string): string[] {
     const eventIds: string[] = [];
-    let offset: number = 0;
-    while (offset < text.length) {
-      let end: number = text.length;
-      while (Buffer.byteLength(text.slice(offset, end), 'utf8') > this._maxChunkBytes) {
-        end = offset + Math.floor((end - offset) / 2);
-      }
-      const chunk: string = text.slice(offset, end === offset ? offset + 1 : end);
+    for (const chunk of chunkUtf8Text(text, this._maxChunkBytes)) {
       eventIds.push(
         this._sink.emit({
           protocolVersion: this._protocolVersion,
@@ -92,7 +87,6 @@ export class OldEngineOutputAdapter {
           payload: { stream, text: chunk }
         })
       );
-      offset += chunk.length;
     }
     return eventIds;
   }

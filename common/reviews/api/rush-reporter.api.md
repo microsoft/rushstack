@@ -8,7 +8,7 @@
 export const BOOTSTRAP_BUFFER_MAX_BYTES: number;
 
 // @beta
-export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.bufferTruncated';
+export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.buffer-truncated';
 
 // @beta
 export const BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES: number;
@@ -74,8 +74,7 @@ export interface IBootstrapEventBufferOptions {
 export interface IBootstrapEventInput {
     readonly payload?: unknown;
     readonly privacy?: BootstrapPrivacyClassification;
-    readonly required: boolean;
-    readonly type: string;
+    readonly type: ReporterEventType;
 }
 
 // @beta
@@ -104,7 +103,8 @@ export interface IBootstrapReplayResult {
     readonly eventCount: number;
     readonly handoffPath?: string;
     readonly replayed: boolean;
-    readonly skipReason?: 'unreadable' | 'nonce-mismatch';
+    readonly skippedEventCount?: number;
+    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
 }
 
 // @beta
@@ -460,6 +460,7 @@ export function parseReporterHello(value: unknown): IReporterHello;
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<{
     header: IBootstrapHandoffHeader | undefined;
     events: unknown[];
+    discardedRecordCount: number;
 }>;
 
 // @beta
