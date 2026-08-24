@@ -289,6 +289,10 @@ describe(GlobalCommandRequestRouter.name, () => {
       SubprocessTerminator,
       'killProcessTree'
     );
+    const killProcessTreeOnExitSpy: jest.SpyInstance = jest.spyOn(
+      SubprocessTerminator,
+      'killProcessTreeOnExit'
+    );
     let resourceDisposed: boolean = false;
     let markChildStarted: (() => void) | undefined;
     const childStarted: Promise<void> = new Promise((resolve) => {
@@ -317,10 +321,12 @@ describe(GlobalCommandRequestRouter.name, () => {
 
       await expect(resultPromise).resolves.toEqual({ aborted: true, requestId: 'cancelled' });
       expect(resourceDisposed).toBe(true);
+      expect(killProcessTreeOnExitSpy).toHaveBeenCalledTimes(1);
       expect(killProcessTreeSpy).toHaveBeenCalledTimes(1);
       expect(process.cwd()).toBe(processCwd);
       expect(process.env.RUSHD_CONTEXT_TEST).toBe(processEnvironmentValue);
     } finally {
+      killProcessTreeOnExitSpy.mockRestore();
       killProcessTreeSpy.mockRestore();
     }
   });

@@ -213,6 +213,7 @@ export class GlobalCommandExecutionContext
       stdio: 'pipe',
       windowsHide: options.windowsHide
     });
+    SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
     const completion: Promise<void> = this.#trackChildAsync(child)
       .catch((error: unknown) => {
         this.#childCompletionErrors.push(error);
