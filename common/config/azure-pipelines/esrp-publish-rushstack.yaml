@@ -29,7 +29,7 @@ parameters:
   - name: CommitShaOverride
     displayName: 'Commit SHA Override (for testing)'
     type: string
-    default: ''
+    default: $(Build.SourceVersion)
 
 variables:
   - name: FORCE_COLOR
