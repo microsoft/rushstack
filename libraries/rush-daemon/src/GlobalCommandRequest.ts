@@ -9,6 +9,7 @@ import {
   validateDaemonRequestAdmissionOptions
 } from '@rushstack/rush-daemon-protocol';
 import type {
+  DaemonRushCommandOrigin,
   DaemonTerminalRequirement,
   IDaemonRequestAdmissionOptions
 } from '@rushstack/rush-daemon-protocol';
@@ -47,6 +48,7 @@ export interface IGlobalCommandEnvironment {
 export interface IResolveGlobalCommandRequestOptions {
   readonly admission?: IDaemonRequestAdmissionOptions;
   readonly commandName: string;
+  readonly commandOrigin: DaemonRushCommandOrigin;
   readonly cwd: string;
   readonly environment: Readonly<NodeJS.ProcessEnv>;
   readonly requestId: string;
@@ -61,6 +63,7 @@ export interface IResolveGlobalCommandRequestOptions {
 export interface IResolvedGlobalCommandRequest {
   readonly admission: IDaemonRequestAdmissionOptions | undefined;
   readonly commandName: string;
+  readonly commandOrigin: DaemonRushCommandOrigin;
   readonly cwd: string;
   readonly environment: IGlobalCommandEnvironment;
   readonly requestId: string;
@@ -100,6 +103,7 @@ export function resolveGlobalCommandRequest(
 ): IResolvedGlobalCommandRequest {
   validateNonemptyName(options.requestId, 'request id');
   validateNonemptyName(options.commandName, 'command name');
+  validateCommandOrigin(options.commandOrigin);
   validateDaemonRequestAdmissionOptions(options.admission);
   const repoRoot: string = getCanonicalDirectory(workspaceSession.metadata.repoRoot, 'workspace root');
   const cwd: string = getCanonicalDirectory(options.cwd, 'working directory');
@@ -107,6 +111,7 @@ export function resolveGlobalCommandRequest(
   const request: IResolvedGlobalCommandRequest = Object.freeze({
     admission: options.admission ? Object.freeze({ ...options.admission }) : undefined,
     commandName: options.commandName,
+    commandOrigin: options.commandOrigin,
     cwd,
     environment: new GlobalCommandEnvironment(options.environment),
     requestId: options.requestId,
@@ -114,6 +119,12 @@ export function resolveGlobalCommandRequest(
   });
   REQUEST_SESSION_BY_REQUEST.set(request, workspaceSession);
   return request;
+}
+
+function validateCommandOrigin(value: DaemonRushCommandOrigin): void {
+  if (value !== 'built-in' && value !== 'custom') {
+    throw new Error('Global command origin is not recognized.');
+  }
 }
 
 export function validateResolvedGlobalCommandRequest(

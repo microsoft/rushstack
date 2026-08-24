@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-daemon-protocol",
-      "comment": "Add request admission options, queue progress messages, and typed admission failures.",
+      "comment": "Add parsed command origin, request admission options, queue progress messages, and typed admission failures.",
       "type": "minor"
     }
   ],

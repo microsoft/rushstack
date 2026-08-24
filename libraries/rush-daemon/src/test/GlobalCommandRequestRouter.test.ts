@@ -90,6 +90,7 @@ function createRequestOptions(
 ): IResolveGlobalCommandRequestOptions {
   return {
     commandName: 'global-test',
+    commandOrigin: 'custom',
     cwd,
     environment,
     requestId,
@@ -163,13 +164,15 @@ describe(GlobalCommandRequestRouter.name, () => {
     const firstRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
       {
         ...createRequestOptions('first', FIRST_CWD, { RUSHD_CONTEXT_TEST: 'first' }, 80),
-        commandName: 'list'
+        commandName: 'list',
+        commandOrigin: 'built-in'
       }
     );
     const secondRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
       {
         ...createRequestOptions('second', SECOND_CWD, { RUSHD_CONTEXT_TEST: 'second' }, 160),
-        commandName: 'scan'
+        commandName: 'scan',
+        commandOrigin: 'built-in'
       }
     );
 

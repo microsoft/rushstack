@@ -25,12 +25,10 @@ export interface IRequestAdmissionClient {
   writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
 }
 
-export interface IAcquireWorkspaceRequestOptions {
+export interface IRequestAdmissionControllerOptions {
   readonly admission: IDaemonRequestAdmissionOptions | undefined;
   readonly client: IRequestAdmissionClient;
-  readonly exclusivityClass: RequestExclusivityClass;
   readonly requestId: string;
-  readonly workspaceSession: IWorkspaceSession;
 }
 
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
@@ -82,44 +80,69 @@ class QueuePositionWriter {
   }
 }
 
-export async function acquireWorkspaceRequestLeaseAsync(
-  options: IAcquireWorkspaceRequestOptions
-): Promise<IRequestLease> {
-  validateDaemonRequestAdmissionOptions(options.admission);
-  const abortController: AbortController = new AbortController();
-  const writer: QueuePositionWriter | undefined =
-    options.client.supportsRequestAdmission === true
-      ? new QueuePositionWriter(options.client, options.requestId, abortController)
-      : undefined;
-  const abortFromClient = (): void => abortController.abort(options.client.abortSignal.reason);
-  if (options.client.abortSignal.aborted) {
-    abortFromClient();
-  } else {
-    options.client.abortSignal.addEventListener('abort', abortFromClient, { once: true });
-  }
-  let lease: IRequestLease | undefined;
-  try {
-    lease = await getRequestScheduler(options.workspaceSession).acquireAsync({
-      abortSignal: abortController.signal,
-      exclusivityClass: options.exclusivityClass,
-      noWait: options.admission?.noWait,
-      onQueuePositionChanged: writer ? (position: number) => writer.enqueue(position) : undefined,
-      waitTimeoutMs: options.admission?.waitTimeoutMs
-    });
-    await writer?.flushAsync();
-    if (abortController.signal.aborted) {
-      throw new RequestSchedulerError(
-        RequestSchedulerErrorCode.Aborted,
-        'The request was aborted before execution.'
-      );
+export class RequestAdmissionController {
+  readonly #abortController: AbortController = new AbortController();
+  readonly #abortFromClient: () => void;
+  readonly #admission: IDaemonRequestAdmissionOptions | undefined;
+  readonly #client: IRequestAdmissionClient;
+  readonly #deadlineMs: number | undefined;
+  readonly #writer: QueuePositionWriter | undefined;
+
+  public constructor(options: IRequestAdmissionControllerOptions) {
+    validateDaemonRequestAdmissionOptions(options.admission);
+    this.#admission = options.admission;
+    this.#client = options.client;
+    this.#deadlineMs =
+      options.admission?.waitTimeoutMs === undefined
+        ? undefined
+        : Date.now() + options.admission.waitTimeoutMs;
+    this.#writer =
+      options.client.supportsRequestAdmission === true
+        ? new QueuePositionWriter(options.client, options.requestId, this.#abortController)
+        : undefined;
+    this.#abortFromClient = () => this.#abortController.abort(options.client.abortSignal.reason);
+    if (options.client.abortSignal.aborted) {
+      this.#abortFromClient();
+    } else {
+      options.client.abortSignal.addEventListener('abort', this.#abortFromClient, { once: true });
     }
-    return lease;
-  } catch (error) {
-    lease?.release();
-    await writer?.flushAsync();
-    throw error;
-  } finally {
-    options.client.abortSignal.removeEventListener('abort', abortFromClient);
+  }
+
+  public async acquireAsync(
+    scheduler: RequestScheduler,
+    exclusivityClass: RequestExclusivityClass
+  ): Promise<IRequestLease> {
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    let lease: IRequestLease | undefined;
+    try {
+      lease = await scheduler.acquireAsync({
+        abortSignal: this.#abortController.signal,
+        exclusivityClass,
+        noWait: this.#admission?.noWait,
+        onQueuePositionChanged: writer ? (position: number) => writer.enqueue(position) : undefined,
+        waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
+      });
+      await writer?.flushAsync();
+      if (this.#abortController.signal.aborted) {
+        throw new RequestSchedulerError(
+          RequestSchedulerErrorCode.Aborted,
+          'The request was aborted before execution.'
+        );
+      }
+      return lease;
+    } catch (error) {
+      lease?.release();
+      await writer?.flushAsync();
+      throw error;
+    }
+  }
+
+  public dispose(): void {
+    this.#client.abortSignal.removeEventListener('abort', this.#abortFromClient);
+  }
+
+  #getRemainingWaitTimeoutMs(): number | undefined {
+    return this.#deadlineMs === undefined ? undefined : Math.max(0, this.#deadlineMs - Date.now());
   }
 }
 
@@ -136,7 +159,7 @@ export function getRequestAdmissionErrorCode(
   }
 }
 
-function getRequestScheduler(workspaceSession: IWorkspaceSession): RequestScheduler {
+export function getWorkspaceRequestScheduler(workspaceSession: IWorkspaceSession): RequestScheduler {
   let scheduler: RequestScheduler | undefined = REQUEST_SCHEDULER_BY_SESSION.get(workspaceSession);
   if (!scheduler) {
     scheduler = new RequestScheduler();

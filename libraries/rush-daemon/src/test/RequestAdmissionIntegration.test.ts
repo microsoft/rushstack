@@ -4,7 +4,9 @@
 import * as path from 'node:path';
 
 import type {
+  DaemonRushCommandOrigin,
   IDaemonCommandResult,
+  IDaemonPhasedRequest,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage,
   IDaemonTerminalPolicyResult
@@ -75,11 +77,13 @@ function createRequest(
   router: GlobalCommandRequestRouter,
   requestId: string,
   commandName: string,
-  admission?: IDaemonRequestAdmissionOptions
+  admission?: IDaemonRequestAdmissionOptions,
+  commandOrigin: DaemonRushCommandOrigin = 'built-in'
 ): IResolvedGlobalCommandRequest {
   return router.resolveRequest({
     admission,
     commandName,
+    commandOrigin,
     cwd: TEST_CWD,
     environment: {},
     requestId,
@@ -92,6 +96,21 @@ function createBlockingExecutor(started: () => void, completion: Promise<void>):
     started();
     await completion;
     return { exitCode: 0 };
+  };
+}
+
+function createPhasedRequest(
+  requestId: string,
+  admission?: IDaemonRequestAdmissionOptions
+): IDaemonPhasedRequest {
+  return {
+    admission,
+    commandName: 'build',
+    commandOrigin: 'built-in',
+    engineShape: TEST_ENGINE_SHAPE,
+    environment: {},
+    operationSelection: [{ enabledState: true, operationId: TEST_OPERATION }],
+    requestId
   };
 }
 
@@ -292,6 +311,65 @@ describe('request admission integration', () => {
     await Promise.all([active, queued]);
   });
 
+  it('applies no-wait and one deadline across workspace and phased graph admission', async () => {
+    jest.useFakeTimers();
+    const graphStarted = createDeferred();
+    const releaseGraph = createDeferred();
+    const fixture = createRoutingFixture(
+      new Map([
+        [
+          TEST_OPERATION,
+          new TestOperationRunner(TEST_OPERATION, undefined, async (): Promise<void> => {
+            graphStarted.resolve();
+            await releaseGraph.promise;
+          })
+        ]
+      ])
+    );
+    const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(fixture.session);
+    const phasedRouter: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const workspaceStarted = createDeferred();
+    const releaseWorkspace = createDeferred();
+    const activeGlobal = globalRouter.executeAsync(
+      createRequest(globalRouter, 'active-read', 'list'),
+      createBlockingExecutor(workspaceStarted.resolve, releaseWorkspace.promise),
+      new AdmissionClient()
+    );
+    await workspaceStarted.promise;
+
+    const firstPhased = phasedRouter.executeAsync(
+      createPhasedRequest('first-phased'),
+      new TestPhasedRequestClient()
+    );
+    const timeoutClient: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const timeoutPhased = phasedRouter.executeAsync(
+      createPhasedRequest('timeout-phased', { waitTimeoutMs: 10 }),
+      timeoutClient
+    );
+    jest.advanceTimersByTime(8);
+    releaseWorkspace.resolve();
+    await graphStarted.promise;
+
+    const noWaitResult = await phasedRouter.executeAsync(
+      createPhasedRequest('no-wait-phased', { noWait: true }),
+      new TestPhasedRequestClient()
+    );
+    expect(noWaitResult).toMatchObject({ admissionErrorCode: 'no-wait', outcome: 'failure' });
+    expect(
+      timeoutClient.writes
+        .map(({ queuePosition }) => queuePosition?.payload.position)
+        .filter((position): position is number => position !== undefined)
+    ).toEqual(expect.arrayContaining([2, 1]));
+    jest.advanceTimersByTime(2);
+    const timeoutResult = await timeoutPhased;
+    expect(timeoutResult).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
+    expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(1);
+
+    releaseGraph.resolve();
+    await Promise.all([activeGlobal, firstPhased]);
+    jest.useRealTimers();
+  });
+
   it('shares admission between global and phased routers while serializing graph execution', async () => {
     const fixture = createRoutingFixture(
       new Map([[TEST_OPERATION, new TestOperationRunner(TEST_OPERATION)]])
@@ -308,13 +386,7 @@ describe('request admission integration', () => {
     await globalStarted.promise;
     const phasedClient: TestPhasedRequestClient = new TestPhasedRequestClient();
     const phased = phasedRouter.executeAsync(
-      {
-        commandName: 'build',
-        engineShape: TEST_ENGINE_SHAPE,
-        environment: {},
-        operationSelection: [{ enabledState: true, operationId: TEST_OPERATION }],
-        requestId: 'phased'
-      },
+      createPhasedRequest('phased'),
       phasedClient
     );
 
@@ -409,6 +481,7 @@ describe('request admission integration', () => {
     });
     const request: IResolvedGlobalCommandRequest = router.resolveRequest({
       commandName: 'custom-exclusive',
+      commandOrigin: 'custom',
       cwd: TEST_CWD,
       environment: {},
       requestId: 'raw-failure',

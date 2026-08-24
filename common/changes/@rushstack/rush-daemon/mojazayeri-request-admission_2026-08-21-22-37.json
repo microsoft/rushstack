@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-daemon",
-      "comment": "Classify and admit phased and global requests through the workspace scheduler.",
+      "comment": "Classify parsed built-in commands and admit phased and global requests through bounded workspace and graph scheduling.",
       "type": "minor"
     }
   ],

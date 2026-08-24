@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import * as childProcess from 'node:child_process';
+import type { DaemonRushCommandOrigin } from '@rushstack/rush-daemon-protocol';
 import type { DaemonTerminalRequirement } from '@rushstack/rush-daemon-protocol';
 import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
 import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
@@ -284,6 +285,8 @@ export interface IResolvedGlobalCommandRequest {
     // (undocumented)
     readonly commandName: string;
     // (undocumented)
+    readonly commandOrigin: DaemonRushCommandOrigin;
+    // (undocumented)
     readonly cwd: string;
     // (undocumented)
     readonly environment: IGlobalCommandEnvironment;
@@ -299,6 +302,8 @@ export interface IResolveGlobalCommandRequestOptions {
     readonly admission?: IDaemonRequestAdmissionOptions;
     // (undocumented)
     readonly commandName: string;
+    // (undocumented)
+    readonly commandOrigin: DaemonRushCommandOrigin;
     // (undocumented)
     readonly cwd: string;
     // (undocumented)
