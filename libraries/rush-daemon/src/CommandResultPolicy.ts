@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { OperationStatus } from '@microsoft/rush-lib';
+import { EnvironmentMap } from '@rushstack/node-core-library';
 import type {
   DaemonCommandOutcome,
   IDaemonCommandResult,
@@ -15,6 +16,7 @@ export const RUSH_ALLOW_WARNINGS_ENVIRONMENT_VARIABLE: string =
   'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD';
 
 export interface IPhasedOperationOutcome {
+  readonly observedInCurrentIteration: boolean;
   readonly result: IDaemonPhasedOperationResult;
   readonly warningsAreAllowed: boolean;
 }
@@ -39,7 +41,9 @@ const SUCCESS_STATUSES: ReadonlySet<string> = new Set([
 export function parseWarningsAllowedByEnvironment(
   environment: Readonly<Record<string, string>>
 ): boolean {
-  const value: string | undefined = environment[RUSH_ALLOW_WARNINGS_ENVIRONMENT_VARIABLE];
+  const value: string | undefined = new EnvironmentMap(environment).get(
+    RUSH_ALLOW_WARNINGS_ENVIRONMENT_VARIABLE
+  );
   if (value === undefined || value === '' || value === '0') {
     return false;
   }
@@ -83,7 +87,8 @@ export function createPhasedCommandResult(
   }
   const outcome: DaemonCommandOutcome = getPhasedOutcome(options);
   const warningsAllowed: boolean = options.operationOutcomes.every(
-    ({ result, warningsAreAllowed }) =>
+    ({ observedInCurrentIteration, result, warningsAreAllowed }) =>
+      !observedInCurrentIteration ||
       result.status !== OperationStatus.SuccessWithWarning ||
       warningsAreAllowed ||
       options.warningsAllowedByEnvironment
@@ -108,7 +113,8 @@ function getPhasedOutcome(options: IPhasedCommandResultOptions): DaemonCommandOu
   if (
     options.graphStatus === OperationStatus.SuccessWithWarning ||
     options.operationOutcomes.some(
-      ({ result }) => result.status === OperationStatus.SuccessWithWarning
+      ({ observedInCurrentIteration, result }) =>
+        observedInCurrentIteration && result.status === OperationStatus.SuccessWithWarning
     )
   ) {
     return 'success-with-warning';

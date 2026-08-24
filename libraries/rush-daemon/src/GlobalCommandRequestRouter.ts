@@ -3,7 +3,7 @@
 
 import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 
-import { createGlobalCommandResult, RUSH_SUCCESS_EXIT_CODE } from './CommandResultPolicy';
+import { createGlobalCommandResult } from './CommandResultPolicy';
 import type { IGlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
 import { GlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
 import {
@@ -108,7 +108,7 @@ export class GlobalCommandRequestRouter {
       result = createGlobalCommandResult({
         aborted,
         error: combinedError,
-        exitCode: executionResult?.exitCode ?? RUSH_SUCCESS_EXIT_CODE,
+        exitCode: executionResult?.exitCode,
         requestId: request.requestId
       });
     } catch (error) {
