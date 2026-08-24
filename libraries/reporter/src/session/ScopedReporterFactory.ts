@@ -102,7 +102,8 @@ export function createScopedReporter(options: ICreateScopedReporterOptions): ISc
         sessionId,
         source,
         scope,
-        privacy: 'public',
+        // Free-form extension payloads have no field-level classifications.
+        privacy: 'local-sensitive',
         type: 'extension',
         payload: { name, payload }
       });

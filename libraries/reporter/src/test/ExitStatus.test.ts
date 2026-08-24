@@ -77,6 +77,28 @@ describe('resolveExitStatusFromEvents', () => {
       resolveExitStatusFromEvents([ev('commandResult', { commandName: 'b', succeeded: false, exitCode: 1 })])
         .exitCode
     ).toBe(1);
+    expect(
+      resolveExitStatusFromEvents([ev('operationStatusChanged', { operationId: 'b', status: 'aborted' })])
+        .exitCode
+    ).toBe(1);
+  });
+
+  it('fails on nonzero root command and session completion codes', () => {
+    expect(
+      resolveExitStatusFromEvents([ev('commandCompleted', { commandName: 'build', exitCode: 1 })])
+    ).toEqual({ exitCode: 1, outcome: 'failed' });
+    expect(resolveExitStatusFromEvents([ev('sessionCompleted', { exitCode: 2 })])).toEqual({
+      exitCode: 1,
+      outcome: 'failed'
+    });
+    expect(
+      resolveExitStatusFromEvents([
+        {
+          ...ev('sessionCompleted', { exitCode: 1 }),
+          parentSessionId: 'root'
+        }
+      ])
+    ).toEqual({ exitCode: 0, outcome: 'succeeded' });
   });
 
   it('never lets the diagnostic category select the exit code', () => {

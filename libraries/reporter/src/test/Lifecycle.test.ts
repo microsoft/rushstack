@@ -47,8 +47,12 @@ class RecordingReporter implements IReporter {
 
 const SOURCE: IReporterEventSource = { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' };
 
-function ev(type: string, payload: unknown): IReporterEventEnvelope<unknown> {
-  return { type, payload } as unknown as IReporterEventEnvelope<unknown>;
+function ev(
+  type: string,
+  payload: unknown,
+  envelope: Partial<IReporterEventEnvelope<unknown>> = {}
+): IReporterEventEnvelope<unknown> {
+  return { type, payload, ...envelope } as unknown as IReporterEventEnvelope<unknown>;
 }
 
 describe('LifecycleEmitter', () => {
@@ -66,6 +70,25 @@ describe('LifecycleEmitter', () => {
     expect(sink.inputs[0].type).toBe('operationRegistered');
     // Lifecycle events are protected; the manager derives `required` from the type.
     expect(isReporterEventRequired('operationRegistered')).toBe(true);
+    expect(sink.inputs[0].scope).toEqual({
+      commandName: 'build',
+      operationId: 'op1',
+      projectName: 'p',
+      phaseName: '_phase:build'
+    });
+  });
+
+  it('preserves inherited scope when operation fields are omitted', () => {
+    const sink: CapturingSink = new CapturingSink();
+    const emitter: LifecycleEmitter = new LifecycleEmitter({
+      sink,
+      sessionId: 'sess',
+      source: SOURCE,
+      scope: { commandName: 'build', projectName: 'p', phaseName: '_phase:build' }
+    });
+
+    emitter.emitOperationRegistered({ operationId: 'op1' });
+
     expect(sink.inputs[0].scope).toEqual({
       commandName: 'build',
       operationId: 'op1',
@@ -148,6 +171,59 @@ describe('summarizeShadowResult', () => {
     expect(summary.succeeded).toBe(false);
     expect(summary.exitCode).toBe(1);
     expect(summary.operationCounts).toEqual({ success: 2, fromCache: 1, failure: 1 });
+  });
+
+  it('derives failure from the session exit code when no command result exists', () => {
+    const summary: IShadowResultSummary = summarizeShadowResult([
+      ev('operationStatusChanged', { operationId: 'a', status: 'failure' }),
+      ev('sessionCompleted', { exitCode: 1 })
+    ]);
+
+    expect(summary.succeeded).toBe(false);
+    expect(summary.exitCode).toBe(1);
+  });
+
+  it('uses the final command result consistently', () => {
+    const events: IReporterEventEnvelope<unknown>[] = [
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }),
+      ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 })
+    ];
+
+    expect(deriveExitCodeFromEvents(events)).toBe(0);
+    expect(summarizeShadowResult(events)).toMatchObject({
+      commandName: 'build',
+      succeeded: true,
+      exitCode: 0
+    });
+  });
+
+  it('ignores child session results and counts only final root operation statuses', () => {
+    const events: IReporterEventEnvelope<unknown>[] = [
+      ev('operationStatusChanged', { operationId: 'a', status: 'waiting' }),
+      ev('operationStatusChanged', { operationId: 'a', status: 'queued' }),
+      ev('operationStatusChanged', { operationId: 'a', status: 'executing' }),
+      ev('operationStatusChanged', { operationId: 'a', status: 'success' }),
+      ev(
+        'operationStatusChanged',
+        { operationId: 'child-op', status: 'failure' },
+        { parentSessionId: 'root' }
+      ),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }),
+      ev(
+        'commandResult',
+        { commandName: 'child-command', succeeded: true, exitCode: 0 },
+        { parentSessionId: 'root' }
+      ),
+      ev('sessionCompleted', { exitCode: 0 }, { parentSessionId: 'root' })
+    ];
+
+    expect(deriveExitCodeFromEvents(events)).toBe(1);
+    expect(summarizeShadowResult(events)).toMatchObject({
+      commandName: 'build',
+      succeeded: false,
+      exitCode: 1,
+      operationCounts: { success: 1 }
+    });
   });
 });
 

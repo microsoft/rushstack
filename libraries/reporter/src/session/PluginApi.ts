@@ -1,19 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as semver from 'semver';
+
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
-
-/**
- * The Rush plugin API version this package implements.
- *
- * @remarks
- * A plugin manifest declares the plugin API version it targets. Compatibility is
- * gated on the major version.
- *
- * @beta
- */
-export const RUSH_PLUGIN_API_VERSION: '1.0.0' = '1.0.0';
 
 /**
  * The reporting-relevant fields of a Rush plugin manifest.
@@ -27,34 +18,30 @@ export interface IRushPluginManifest {
   readonly pluginName: string;
 
   /**
-   * The Rush plugin API version the plugin targets, for example `1.0.0`.
+   * The semver range of Rush versions supported by the plugin.
    */
-  readonly pluginApiVersion: string;
-}
-
-function majorOf(version: string): number {
-  return Number.parseInt(version.split('.')[0], 10);
+  readonly rushVersionRange: string;
 }
 
 /**
- * Returns `true` if a plugin's declared API version is supported.
+ * Returns `true` if the running Rush version satisfies a plugin's declared range.
  *
- * @remarks
- * Compatibility requires an equal major version.
- *
- * @param declaredApiVersion - the version declared by the plugin manifest
- * @param supportedApiVersion - the version supported by Rush; defaults to
- * {@link RUSH_PLUGIN_API_VERSION}
+ * @param rushVersionRange - the semver range declared by the plugin manifest
+ * @param rushVersion - the running Rush version
  *
  * @beta
  */
-export function isPluginApiVersionSupported(
-  declaredApiVersion: string,
-  supportedApiVersion: string = RUSH_PLUGIN_API_VERSION
-): boolean {
-  const declaredMajor: number = majorOf(declaredApiVersion);
-  const supportedMajor: number = majorOf(supportedApiVersion);
-  return Number.isFinite(declaredMajor) && declaredMajor === supportedMajor;
+export function isRushVersionSupported(rushVersionRange: string, rushVersion: string): boolean {
+  if (rushVersionRange.trim().length === 0) {
+    return false;
+  }
+  const validRushVersion: string | null = semver.valid(rushVersion);
+  const validRushVersionRange: string | null = semver.validRange(rushVersionRange);
+  return (
+    validRushVersion !== null &&
+    validRushVersionRange !== null &&
+    semver.satisfies(validRushVersion, validRushVersionRange, { includePrerelease: true })
+  );
 }
 
 /**
@@ -65,15 +52,19 @@ export function isPluginApiVersionSupported(
  * emitted at that boundary.
  *
  * @param manifest - the incompatible plugin's manifest
+ * @param rushVersion - the running Rush version
  *
  * @beta
  */
-export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest): IRushDiagnostic {
+export function createPluginApiIncompatibleDiagnostic(
+  manifest: IRushPluginManifest,
+  rushVersion: string
+): IRushDiagnostic {
   return createRushDiagnostic('RUSH_PLUGIN_API_INCOMPATIBLE', {
     parameters: {
       pluginName: { value: manifest.pluginName, privacy: 'public' },
-      declaredApiVersion: { value: manifest.pluginApiVersion, privacy: 'public' },
-      supportedApiVersion: { value: RUSH_PLUGIN_API_VERSION, privacy: 'public' }
+      rushVersionRange: { value: manifest.rushVersionRange, privacy: 'public' },
+      rushVersion: { value: rushVersion, privacy: 'public' }
     }
   });
 }

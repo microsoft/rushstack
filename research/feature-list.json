@@ -129,7 +129,7 @@
       "Expose scoped reporter and logger creation from RushSession",
       "Pass the sink to actions through execution context",
       "Prevent plugins from inspecting modes, destinations, or thresholds",
-      "Declare the supported Rush plugin API version in plugin manifests"
+      "Declare the supported Rush version range in plugin manifests"
     ],
     "passes": true
   },

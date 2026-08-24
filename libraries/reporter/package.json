@@ -49,7 +49,8 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*",
+    "@types/semver": "7.7.1"
   },
   "peerDependencies": {
     "@types/node": "*"
@@ -59,5 +60,8 @@
       "optional": true
     }
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "semver": "~7.7.4"
+  }
 }

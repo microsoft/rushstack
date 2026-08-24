@@ -8,6 +8,8 @@
  */
 export type OperationStatus =
   | 'ready'
+  | 'waiting'
+  | 'queued'
   | 'executing'
   | 'success'
   | 'successWithWarnings'
@@ -15,7 +17,8 @@ export type OperationStatus =
   | 'blocked'
   | 'skipped'
   | 'fromCache'
-  | 'noOp';
+  | 'noOp'
+  | 'aborted';
 
 /**
  * The payload of a `sessionStarted` event.

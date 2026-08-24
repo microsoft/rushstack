@@ -7,8 +7,7 @@ import {
   createRushDiagnostic,
   RushSessionReporting,
   ReporterManager,
-  RUSH_PLUGIN_API_VERSION,
-  isPluginApiVersionSupported,
+  isRushVersionSupported,
   createPluginApiIncompatibleDiagnostic,
   isReporterEventRequired,
   parseReporterExtensionEventName,
@@ -109,6 +108,7 @@ describe('createScopedReporter', () => {
     const reporter: IScopedReporter = createScopedReporter({ sink, sessionId: 'sess', source: SOURCE });
     reporter.emitExtension(parseReporterExtensionEventName('acme.cache-warmed'), { hits: 3 });
     expect(sink.inputs[0].type).toBe('extension');
+    expect(sink.inputs[0].privacy).toBe('local-sensitive');
     expect(sink.inputs[0].payload).toEqual({ name: 'acme.cache-warmed', payload: { hits: 3 } });
     expect(() =>
       reporter.emitExtension('notnamespaced' as Parameters<IScopedReporter['emitExtension']>[0], {})
@@ -171,21 +171,27 @@ describe('RushSessionReporting', () => {
 });
 
 describe('plugin API compatibility', () => {
-  it('accepts a matching major and rejects a mismatched or invalid major', () => {
-    expect(isPluginApiVersionSupported(RUSH_PLUGIN_API_VERSION)).toBe(true);
-    expect(isPluginApiVersionSupported('1.4.2')).toBe(true);
-    expect(isPluginApiVersionSupported('2.0.0')).toBe(false);
-    expect(isPluginApiVersionSupported('not-a-version')).toBe(false);
+  it('accepts a matching Rush semver range and rejects mismatched or malformed input', () => {
+    expect(isRushVersionSupported('>=5 <6', '5.177.2')).toBe(true);
+    expect(isRushVersionSupported('^5.150.0', '5.177.2')).toBe(true);
+    expect(isRushVersionSupported('>=6', '5.177.2')).toBe(false);
+    expect(isRushVersionSupported('5garbage', '5.177.2')).toBe(false);
+    expect(isRushVersionSupported('', '5.177.2')).toBe(false);
+    expect(isRushVersionSupported('>=5 <6', 'not-a-version')).toBe(false);
   });
 
   it('builds a migration diagnostic for an incompatible plugin', () => {
-    const diagnostic: IRushDiagnostic = createPluginApiIncompatibleDiagnostic({
-      pluginName: '@acme/rush-plugin',
-      pluginApiVersion: '2.0.0'
-    });
+    const diagnostic: IRushDiagnostic = createPluginApiIncompatibleDiagnostic(
+      {
+        pluginName: '@acme/rush-plugin',
+        rushVersionRange: '>=6 <7'
+      },
+      '5.177.2'
+    );
     expect(diagnostic.code).toBe('RUSH_PLUGIN_API_INCOMPATIBLE');
     expect(diagnostic.category).toBe('configuration');
     expect(diagnostic.parameters?.pluginName.value).toBe('@acme/rush-plugin');
-    expect(diagnostic.parameters?.declaredApiVersion.value).toBe('2.0.0');
+    expect(diagnostic.parameters?.rushVersionRange.value).toBe('>=6 <7');
+    expect(diagnostic.parameters?.rushVersion.value).toBe('5.177.2');
   });
 });

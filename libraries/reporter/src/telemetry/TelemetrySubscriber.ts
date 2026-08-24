@@ -4,6 +4,7 @@
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
+import type { IOperationStatusChangedPayload } from '../lifecycle/LifecycleEvents';
 import type { ITelemetryAggregate, TelemetryResult } from './TelemetryAggregate';
 
 /**
@@ -24,13 +25,13 @@ export class TelemetrySubscriber {
   private _durationMs: number | undefined;
   private _reporterMode: string | undefined;
   private _protocolVersion: IReporterProtocolVersion | undefined;
-  private readonly _operationStatusCounts: { [status: string]: number };
+  private readonly _operationStatuses: Map<string, IOperationStatusChangedPayload['status']>;
   private readonly _diagnosticCategoryCounts: { [category: string]: number };
   private readonly _diagnosticCodes: Set<string>;
   private readonly _producerVersions: Set<string>;
 
   public constructor() {
-    this._operationStatusCounts = {};
+    this._operationStatuses = new Map();
     this._diagnosticCategoryCounts = {};
     this._diagnosticCodes = new Set();
     this._producerVersions = new Set();
@@ -52,11 +53,17 @@ export class TelemetrySubscriber {
 
     switch (event.type) {
       case 'commandStarted': {
+        if (event.parentSessionId !== undefined) {
+          break;
+        }
         // Deliberately ignores argv.
         this._commandName = (event.payload as { commandName: string }).commandName;
         break;
       }
       case 'commandResult': {
+        if (event.parentSessionId !== undefined) {
+          break;
+        }
         const payload: { commandName: string; succeeded: boolean; exitCode: number } = event.payload as {
           commandName: string;
           succeeded: boolean;
@@ -68,28 +75,43 @@ export class TelemetrySubscriber {
         break;
       }
       case 'commandCompleted': {
-        const payload: { durationMs?: number } = event.payload as { durationMs?: number };
+        if (event.parentSessionId !== undefined) {
+          break;
+        }
+        const payload: { commandName: string; exitCode: number; durationMs?: number } = event.payload as {
+          commandName: string;
+          exitCode: number;
+          durationMs?: number;
+        };
+        this._commandName = payload.commandName;
+        this._exitCode = payload.exitCode;
+        this._result = payload.exitCode === 0 ? 'succeeded' : 'failed';
         if (payload.durationMs !== undefined) {
           this._durationMs = payload.durationMs;
         }
         break;
       }
       case 'sessionCompleted': {
+        if (event.parentSessionId !== undefined) {
+          break;
+        }
         const payload: { exitCode: number; durationMs?: number } = event.payload as {
           exitCode: number;
           durationMs?: number;
         };
-        if (this._exitCode === undefined) {
-          this._exitCode = payload.exitCode;
-        }
+        this._exitCode = payload.exitCode;
+        this._result = payload.exitCode === 0 ? 'succeeded' : 'failed';
         if (payload.durationMs !== undefined) {
           this._durationMs = payload.durationMs;
         }
         break;
       }
       case 'operationStatusChanged': {
-        const status: string = (event.payload as { status: string }).status;
-        this._operationStatusCounts[status] = (this._operationStatusCounts[status] ?? 0) + 1;
+        if (event.parentSessionId !== undefined) {
+          break;
+        }
+        const payload: IOperationStatusChangedPayload = event.payload as IOperationStatusChangedPayload;
+        this._operationStatuses.set(payload.operationId, payload.status);
         break;
       }
       case 'diagnosticEmitted': {
@@ -119,6 +141,11 @@ export class TelemetrySubscriber {
    * Builds the allowlisted aggregate.
    */
   public buildAggregate(): ITelemetryAggregate {
+    const operationStatusCounts: { [status: string]: number } = {};
+    for (const status of this._operationStatuses.values()) {
+      operationStatusCounts[status] = (operationStatusCounts[status] ?? 0) + 1;
+    }
+
     const aggregate: {
       commandName?: string;
       result?: TelemetryResult;
@@ -131,7 +158,7 @@ export class TelemetrySubscriber {
       protocolVersion?: IReporterProtocolVersion;
       producerVersions: string[];
     } = {
-      operationStatusCounts: { ...this._operationStatusCounts },
+      operationStatusCounts,
       diagnosticCodes: [...this._diagnosticCodes].sort(),
       diagnosticCategoryCounts: { ...this._diagnosticCategoryCounts },
       producerVersions: [...this._producerVersions].sort()

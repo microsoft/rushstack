@@ -4050,10 +4050,17 @@ importers:
         version: 9.37.0
 
   ../../../libraries/reporter:
+    dependencies:
+      semver:
+        specifier: ~7.7.4
+        version: 7.7.4
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@types/semver':
+        specifier: 7.7.1
+        version: 7.7.1
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
