@@ -476,6 +476,31 @@ describe(GlobalCommandRequestRouter.name, () => {
     expect(executorSettled).toBe(true);
   });
 
+  it('preserves cancellation when the executor rejects while aborting', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+      router.resolveRequest(createRequestOptions('failed-cancel', FIRST_CWD, {}, 80)),
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        await waitForAbortAsync(context.abortSignal);
+        throw new Error('executor failed while aborting');
+      },
+      client
+    );
+
+    client.abortController.abort();
+
+    await expect(resultPromise).resolves.toEqual({
+      aborted: true,
+      errorMessage: 'executor failed while aborting',
+      exitCode: 1,
+      outcome: 'failure',
+      requestId: 'failed-cancel'
+    });
+  });
+
   it('continues request cleanup after a disposer throws synchronously', async () => {
     const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
     const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);

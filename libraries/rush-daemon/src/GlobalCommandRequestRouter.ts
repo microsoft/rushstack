@@ -94,6 +94,7 @@ export class GlobalCommandRequestRouter {
       }
     } catch (error) {
       executionError = error;
+      aborted = context.abortSignal.aborted;
     }
 
     let cleanupError: unknown;
