@@ -19,7 +19,9 @@ export class DaemonFrameConnection {
     constructor(socket: net.Socket);
     closeAsync(): Promise<void>;
     onClosed(handler: (error: Error | undefined) => void): void;
-    onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void;
+    onFrame(handler: (frame: IDaemonFrame) => void): void;
+    // (undocumented)
+    onFrame(handler: (frame: IDaemonFrame) => Promise<void>): void;
     sendFrameAsync(frame: IDaemonFrame): Promise<void>;
     // @internal
     get socket(): net.Socket;

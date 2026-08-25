@@ -200,6 +200,116 @@ describe(RushDaemonHost.name, () => {
     }
   });
 
+  it('handles control frames while stdin waits for its request sink', async () => {
+    let interactiveConnection: IDaemonInteractiveConnection | undefined;
+    const inputHost: RushDaemonHost = await RushDaemonHost.startAsync(
+      createHostOptions(createTestRepoRoot(), {
+        onInteractiveConnection: (connection: IDaemonInteractiveConnection) => {
+          interactiveConnection = connection;
+        }
+      })
+    );
+    const inputClient: DaemonFrameConnection = await connectDaemonAsync(inputHost.paths.socketPath);
+    try {
+      await exchangeControlAsync(inputClient, createDaemonHello(DAEMON_PROTOCOL_VERSION));
+      await inputClient.sendFrameAsync({
+        kind: DaemonFrameType.controlJson,
+        payload: encodeDaemonControlMessage({
+          kind: 'subscribe',
+          payload: { isTTY: true, supportsInteractiveIO: true }
+        })
+      });
+      await exchangeControlAsync(inputClient, { kind: 'ping', payload: {} });
+      if (!interactiveConnection) {
+        throw new Error('The host did not expose its interactive connection.');
+      }
+      const requestSession: IInteractiveRequestSession = interactiveConnection.registerRequest({
+        abortSignal: new AbortController().signal,
+        acceptsStdin: true,
+        onFailure: () => undefined,
+        requestId: 'waiting-input'
+      });
+      await inputClient.sendFrameAsync({
+        kind: DaemonFrameType.stdin,
+        payload: encodeDaemonStdinChunk({
+          chunk: Uint8Array.of(INPUT_BYTE),
+          requestId: 'waiting-input'
+        })
+      });
+
+      await expect(
+        exchangeControlAsync(inputClient, { kind: 'ping', payload: {} })
+      ).resolves.toMatchObject({ kind: 'pong' });
+      let markInputDelivered: (() => void) | undefined;
+      const inputDelivered: Promise<void> = new Promise((resolve) => {
+        markInputDelivered = resolve;
+      });
+      requestSession.attachInputSink({
+        writeInputAsync: (): Promise<void> => {
+          markInputDelivered?.();
+          return Promise.resolve();
+        }
+      });
+      await inputDelivered;
+      await requestSession.finishAsync();
+    } finally {
+      await inputClient.closeAsync();
+      await inputHost.closeAsync();
+    }
+  });
+
+  it('keeps the connection alive when pending stdin is cancelled', async () => {
+    const errors: Error[] = [];
+    let interactiveConnection: IDaemonInteractiveConnection | undefined;
+    const inputHost: RushDaemonHost = await RushDaemonHost.startAsync(
+      createHostOptions(createTestRepoRoot(), {
+        onError: (error: Error) => errors.push(error),
+        onInteractiveConnection: (connection: IDaemonInteractiveConnection) => {
+          interactiveConnection = connection;
+        }
+      })
+    );
+    const inputClient: DaemonFrameConnection = await connectDaemonAsync(inputHost.paths.socketPath);
+    try {
+      await exchangeControlAsync(inputClient, createDaemonHello(DAEMON_PROTOCOL_VERSION));
+      await inputClient.sendFrameAsync({
+        kind: DaemonFrameType.controlJson,
+        payload: encodeDaemonControlMessage({
+          kind: 'subscribe',
+          payload: { isTTY: true, supportsInteractiveIO: true }
+        })
+      });
+      await exchangeControlAsync(inputClient, { kind: 'ping', payload: {} });
+      if (!interactiveConnection) {
+        throw new Error('The host did not expose its interactive connection.');
+      }
+      const requestAbortController: AbortController = new AbortController();
+      interactiveConnection.registerRequest({
+        abortSignal: requestAbortController.signal,
+        acceptsStdin: true,
+        onFailure: () => undefined,
+        requestId: 'cancelled-input'
+      });
+      await inputClient.sendFrameAsync({
+        kind: DaemonFrameType.stdin,
+        payload: encodeDaemonStdinChunk({
+          chunk: Uint8Array.of(INPUT_BYTE),
+          requestId: 'cancelled-input'
+        })
+      });
+      await exchangeControlAsync(inputClient, { kind: 'ping', payload: {} });
+      requestAbortController.abort();
+
+      await expect(
+        exchangeControlAsync(inputClient, { kind: 'ping', payload: {} })
+      ).resolves.toMatchObject({ kind: 'pong' });
+      expect(errors).toEqual([]);
+    } finally {
+      await inputClient.closeAsync();
+      await inputHost.closeAsync();
+    }
+  });
+
   it('keeps the connection alive after a request input sink fails', async () => {
     let failureConnection: IDaemonInteractiveConnection | undefined;
     const failureHost: RushDaemonHost = await RushDaemonHost.startAsync(

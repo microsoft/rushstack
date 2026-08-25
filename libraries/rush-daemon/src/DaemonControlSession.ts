@@ -24,7 +24,13 @@ import {
   DaemonInteractiveConnection
 } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
-import { isInteractiveRequestInputFailure } from './InteractiveRequestInputRouter';
+import {
+  InteractiveInputRoutingError,
+  isInteractiveRequestInputFailure
+} from './InteractiveRequestInputRouter';
+
+const MAX_PENDING_STDIN_FRAMES: number = 256;
+const MAX_PENDING_STDIN_BYTES: number = 1024 * 1024;
 
 export interface IDaemonControlSessionOptions {
   readonly daemonVersion: string;
@@ -40,6 +46,8 @@ export class DaemonControlSession {
   private readonly _options: IDaemonControlSessionOptions;
   private _handshakeComplete: boolean = false;
   private _peerSupportsInteractiveProtocol: boolean = false;
+  private _pendingStdinBytes: number = 0;
+  private _pendingStdinFrameCount: number = 0;
   private _sendQueue: Promise<void> = Promise.resolve();
 
   public constructor(connection: DaemonFrameConnection, options: IDaemonControlSessionOptions) {
@@ -48,7 +56,7 @@ export class DaemonControlSession {
     this._interactiveConnection = new DaemonInteractiveConnection(
       (message: DaemonControlMessage) => this._enqueueSendAsync(message)
     );
-    connection.onFrame((frame: IDaemonFrame) => this._onFrameAsync(frame));
+    connection.onFrame((frame: IDaemonFrame) => this._onFrame(frame));
     connection.onClosed((error: Error | undefined) => {
       this._interactiveConnection.close(error);
       options.onClosed(this, error);
@@ -60,7 +68,7 @@ export class DaemonControlSession {
     return this._connection.closeAsync();
   }
 
-  private async _onFrameAsync(frame: IDaemonFrame): Promise<void> {
+  private _onFrame(frame: IDaemonFrame): void {
     if (frame.kind === DaemonFrameType.stdin) {
       if (!this._handshakeComplete) {
         throw new DaemonProtocolError(
@@ -68,13 +76,16 @@ export class DaemonControlSession {
           'The first frame on a connection must be a hello control message.'
         );
       }
-      try {
-        await this._interactiveConnection.routeStdinFrameAsync(frame.payload);
-      } catch (error) {
-        if (!isInteractiveRequestInputFailure(error)) {
-          throw error;
-        }
+      if (this._pendingStdinFrameCount >= MAX_PENDING_STDIN_FRAMES) {
+        throw new Error(`The daemon connection exceeded ${MAX_PENDING_STDIN_FRAMES} pending stdin frames.`);
       }
+      if (this._pendingStdinBytes + frame.payload.byteLength > MAX_PENDING_STDIN_BYTES) {
+        throw new Error(`The daemon connection exceeded ${MAX_PENDING_STDIN_BYTES} pending stdin bytes.`);
+      }
+      const inputPromise: Promise<void> = this._interactiveConnection.routeStdinFrameAsync(frame.payload);
+      this._pendingStdinBytes += frame.payload.byteLength;
+      this._pendingStdinFrameCount++;
+      void this._completeInputAsync(inputPromise, frame.payload.byteLength);
       return;
     }
     if (frame.kind !== DaemonFrameType.controlJson) {
@@ -164,5 +175,25 @@ export class DaemonControlSession {
     const normalizedError: Error = error instanceof Error ? error : new Error(String(error));
     this._options.onError(normalizedError);
     await this._connection.closeAsync();
+  }
+
+  private async _handleInputErrorAsync(error: unknown): Promise<void> {
+    if (
+      !isInteractiveRequestInputFailure(error) &&
+      !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
+    ) {
+      await this._handleSendErrorAsync(error);
+    }
+  }
+
+  private async _completeInputAsync(inputPromise: Promise<void>, payloadBytes: number): Promise<void> {
+    try {
+      await inputPromise;
+    } catch (error) {
+      await this._handleInputErrorAsync(error);
+    } finally {
+      this._pendingStdinBytes -= payloadBytes;
+      this._pendingStdinFrameCount--;
+    }
   }
 }

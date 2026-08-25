@@ -29,6 +29,8 @@ export class DaemonFrameConnection {
     socket.on('close', () => this._onClose());
   }
   /** Registers the serialized, backpressured handler invoked for each decoded frame. */
+  public onFrame(handler: (frame: IDaemonFrame) => void): void;
+  public onFrame(handler: (frame: IDaemonFrame) => Promise<void>): void;
   public onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void {
     this._frameHandler = handler;
   }
@@ -60,7 +62,6 @@ export class DaemonFrameConnection {
       );
     }
   }
-
   private _onData(chunk: Buffer): void {
     let frames: IDaemonFrame[];
     try {

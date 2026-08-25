@@ -12,12 +12,20 @@ it('cancels an unacknowledged raw-mode entry but still acknowledges restoration'
   const restoreSent: Promise<void> = new Promise((resolve) => {
     markRestoreSent = resolve;
   });
+  let markEnableSent: (() => void) | undefined;
+  const enableSent: Promise<void> = new Promise((resolve) => {
+    markEnableSent = resolve;
+  });
   const holder: { connection?: DaemonInteractiveConnection } = {};
   const connection: DaemonInteractiveConnection = new DaemonInteractiveConnection(
     (message: DaemonControlMessage): Promise<void> => {
       sentControls.push(message);
-      if (message.kind === 'setRawMode' && !message.payload.enabled) {
-        markRestoreSent?.();
+      if (message.kind === 'setRawMode') {
+        if (message.payload.enabled) {
+          markEnableSent?.();
+        } else {
+          markRestoreSent?.();
+        }
       }
       return Promise.resolve();
     }
@@ -33,11 +41,15 @@ it('cancels an unacknowledged raw-mode entry but still acknowledges restoration'
   });
 
   const enterRawModePromise: Promise<void> = session.setRawModeAsync(true);
-  await Promise.resolve();
+  const enterRawModeRejection: Promise<void> = expect(enterRawModePromise).rejects.toThrow(
+    'request cancelled'
+  );
+  await enableSent;
   requestAbortController.abort(new Error('request cancelled'));
 
-  await expect(enterRawModePromise).rejects.toThrow('request cancelled');
+  await enterRawModeRejection;
   const finishPromise: Promise<void> = session.finishAsync();
+  const finishRejection: Promise<void> = expect(finishPromise).rejects.toThrow('request cancelled');
   await restoreSent;
   expect(() =>
     connection.handleControlMessage({
@@ -49,7 +61,7 @@ it('cancels an unacknowledged raw-mode entry but still acknowledges restoration'
     kind: 'rawModeChanged',
     payload: { enabled: false, requestId: 'raw-abort' }
   });
-  await expect(finishPromise).rejects.toThrow('request cancelled');
+  await finishRejection;
   expect(
     sentControls
       .filter((message): message is Extract<DaemonControlMessage, { kind: 'setRawMode' }> =>
