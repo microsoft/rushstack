@@ -527,13 +527,14 @@ describe(GlobalCommandRequestRouter.name, () => {
     });
     const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
       router.resolveRequest(createRequestOptions('cleanup-cancel', FIRST_CWD, {}, 80)),
-      async (context: IGlobalCommandExecutionContext): Promise<void> => {
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
         context.registerDisposable({
           [Symbol.asyncDispose]: async (): Promise<void> => {
             markDisposalStarted?.();
             await disposalRelease;
           }
         });
+        return { exitCode: 0 };
       },
       client
     );
@@ -544,7 +545,35 @@ describe(GlobalCommandRequestRouter.name, () => {
 
     await expect(resultPromise).resolves.toEqual({
       aborted: true,
+      errorMessage: undefined,
+      exitCode: 1,
+      outcome: 'aborted',
       requestId: 'cleanup-cancel'
+    });
+  });
+
+  it('preserves cancellation when the executor rejects while aborting', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+      router.resolveRequest(createRequestOptions('failed-cancel', FIRST_CWD, {}, 80)),
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        await waitForAbortAsync(context.abortSignal);
+        throw new Error('executor failed while aborting');
+      },
+      client
+    );
+
+    client.abortController.abort();
+
+    await expect(resultPromise).resolves.toEqual({
+      aborted: true,
+      errorMessage: 'executor failed while aborting',
+      exitCode: 1,
+      outcome: 'failure',
+      requestId: 'failed-cancel'
     });
   });
 
