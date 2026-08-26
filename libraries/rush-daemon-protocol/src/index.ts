@@ -50,3 +50,11 @@ export { decodeDaemonEventFrame, encodeDaemonEventFrame, serializeDaemonEventFor
 export type { IDaemonActivityPayload, IDaemonOperationRegisteredPayload, IDaemonOperationStatusChangedPayload } from './DaemonOperationPayloads';
 export { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from './DaemonRushdExtensions';
 export type { IDaemonExtensionEventPayload, IDaemonOperationHeaderPayload, IDaemonOperationStreamClosedPayload } from './DaemonRushdExtensions';
+export type {
+  DaemonPhasedOperationEnabledState,
+  IDaemonPhasedEngineShape,
+  IDaemonPhasedOperationResult,
+  IDaemonPhasedOperationSelection,
+  IDaemonPhasedRequest,
+  IDaemonPhasedRequestResult
+} from './DaemonPhasedRequest';

@@ -5,8 +5,10 @@ import {
   type DaemonVerbosity,
   type IDaemonEventEnvelope,
   type IDaemonExtensionEventPayload,
+  type IDaemonOperationHeaderPayload,
   type IDaemonOperationRegisteredPayload,
   type IDaemonOperationStreamClosedPayload,
+  RUSHD_OPERATION_HEADER,
   RUSHD_OPERATION_STREAM_CLOSED,
   shouldSerializeDaemonEvent
 } from '@rushstack/rush-daemon-protocol';
@@ -20,11 +22,7 @@ function readScopeOperationId(envelope: IDaemonEventEnvelope): string | undefine
   return scope === undefined ? undefined : scope.operationId;
 }
 
-/**
- * Routes decoded event envelopes between the collator (stream-affecting and
- * operation-scoped events) and the verbosity-filtered renderer.
- * @internal
- */
+/** Routes decoded events between the operation collator and renderer. @internal */
 export class HostEventRouter {
   private readonly _streams: OperationStreamRegistry;
   private readonly _renderer: IDaemonRenderer;
@@ -40,7 +38,6 @@ export class HostEventRouter {
     this._verbosity = verbosity;
   }
 
-  /** Routes one decoded `0x05` event envelope. */
   public routeEvent(envelope: IDaemonEventEnvelope): void {
     this._trackOperationLifecycle(envelope);
     if (this._routeScopedActivity(envelope)) {
@@ -67,6 +64,10 @@ export class HostEventRouter {
   }
 
   private _trackExtension(payload: IDaemonExtensionEventPayload): void {
+    if (payload.name === RUSHD_OPERATION_HEADER) {
+      this._streams.setOperationHeader(payload.data as IDaemonOperationHeaderPayload);
+      return;
+    }
     if (payload.name === RUSHD_OPERATION_STREAM_CLOSED) {
       const data: IDaemonOperationStreamClosedPayload =
         payload.data as IDaemonOperationStreamClosedPayload;
@@ -74,9 +75,6 @@ export class HostEventRouter {
     }
   }
 
-  // Operation-scoped activity lines are part of the operation's output block
-  // (legacy writes them to the operation's collated stream, bypassing the
-  // quiet-mode stdout discard), so they route to the collator, not the renderer.
   private _routeScopedActivity(envelope: IDaemonEventEnvelope): boolean {
     const operationId: string | undefined = readScopeOperationId(envelope);
     if (envelope.type !== 'activityChanged' || operationId === undefined) {

@@ -7,7 +7,10 @@
 /// <reference types="node" />
 
 import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
+import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import type { IOperationGraph } from '@microsoft/rush-lib';
 import type { Operation } from '@microsoft/rush-lib';
@@ -56,6 +59,15 @@ export interface IMapWorkspaceInvalidationsOptions {
     readonly nextInputsSnapshot: IInputsSnapshot;
     // (undocumented)
     readonly operationGraph: IOperationGraph;
+}
+
+// @beta
+export interface IPhasedRequestClient {
+    readonly abortSignal: AbortSignal;
+    getNextEventSequence(): number;
+    readonly sessionId: string;
+    writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
+    writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
 }
 
 // @public
@@ -216,6 +228,12 @@ export interface IWorkspaceSessionOptions {
 
 // @beta
 export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspaceInvalidationsOptions) => Promise<Iterable<Operation>>;
+
+// @beta
+export class PhasedRequestRouter {
+    constructor(workspaceSession: IWorkspaceSession);
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient): Promise<IDaemonPhasedRequestResult>;
+}
 
 // @public
 export enum RequestExclusivityClass {

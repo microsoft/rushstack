@@ -27,3 +27,16 @@ no paths to classify and therefore remains a full invalidation. The routing laye
 workspace session rather than run a stale graph.
 The default daemon executable does not construct or route this graph while the command-independent plugin shape and per-iteration runner
 lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.
+
+`PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
+integration parses the command and supplies an explicit phase/plugin shape plus operation enabled-state selection;
+the router validates both, reconciles retained invalidations, applies the selection with `IOperationGraph.setEnabledStates`,
+and runs at most one scheduled iteration. Requests are serialized until shared-build merging is implemented. A
+requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
+backpressured, ordered callbacks, followed by client-scoped operation results. Cancellation or disconnect aborts the
+current iteration without closing daemon-owned runners or the graph.
+
+This layer deliberately does not add control-frame admission or reconstruct `PhasedScriptAction` command/plugin
+initialization. The typed phased request contract begins after an integration has produced a validated selection for
+the exact warm engine shape; full command parsing remains blocked by
+[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895).
