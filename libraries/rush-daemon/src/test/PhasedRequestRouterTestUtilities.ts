@@ -71,12 +71,14 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
   readonly #sequenceState: { next: number };
 
-  public constructor(sequenceState: { next: number } = { next: 1 }) {
-    this.#sequenceState = sequenceState;
-  }
-
-  public constructor(sessionId: string = 'test-session') {
-    this.sessionId = sessionId;
+  public constructor(sessionIdOrSequenceState: string | { next: number } = 'test-session') {
+    if (typeof sessionIdOrSequenceState === 'string') {
+      this.sessionId = sessionIdOrSequenceState;
+      this.#sequenceState = { next: 1 };
+    } else {
+      this.sessionId = 'test-session';
+      this.#sequenceState = sessionIdOrSequenceState;
+    }
   }
 
   public get abortSignal(): AbortSignal {
