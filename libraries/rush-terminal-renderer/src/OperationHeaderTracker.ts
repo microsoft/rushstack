@@ -19,6 +19,10 @@ export class OperationHeaderTracker {
     this._headerByOperation.set(header.operationId, header);
   }
 
+  public hasOperationHeader(operationId: string): boolean {
+    return this._headerByOperation.has(operationId);
+  }
+
   public takeOperationHeader(operationId: string): IDaemonOperationHeaderPayload {
     const header: IDaemonOperationHeaderPayload | undefined =
       this._headerByOperation.get(operationId);

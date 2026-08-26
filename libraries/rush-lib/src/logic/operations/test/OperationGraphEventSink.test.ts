@@ -39,7 +39,7 @@ import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { IOperationGraphEventSink } from '../OperationEventSink';
+import type { IOperationActivityOptions, IOperationGraphEventSink } from '../OperationEventSink';
 import type { IOperationExecutionResult } from '../IOperationExecutionResult';
 import { OperationGraph, type IOperationGraphOptions } from '../OperationGraph';
 import { OperationStatus } from '../OperationStatus';
@@ -71,6 +71,7 @@ class RecordingSink implements IOperationGraphEventSink {
   public readonly transitions: [string, string][] = [];
   public readonly headers: [string, number, number][] = [];
   public readonly activities: string[] = [];
+  public readonly activityScopes: Array<string | undefined> = [];
   public readonly chunks: Map<string, string[]> = new Map();
 
   public onOperationRegistered(operationId: string, silent: boolean): void {
@@ -82,8 +83,9 @@ class RecordingSink implements IOperationGraphEventSink {
   public onOperationHeader(operationId: string, completed: number, total: number): void {
     this.headers.push([operationId, completed, total]);
   }
-  public onActivity(text: string): void {
+  public onActivity(text: string, options?: IOperationActivityOptions): void {
     this.activities.push(text);
+    this.activityScopes.push(options?.operationId);
   }
   public onOperationChunk(operationId: string, chunk: ITerminalChunk): void {
     let chunks: string[] | undefined = this.chunks.get(operationId);
@@ -182,6 +184,33 @@ describe('OperationGraph event sink (dual-emit)', () => {
     expect(tappedText).toContain('quiet-visible-stderr');
     // Quiet mode discards stdout from the collated terminal, but the tap still saw it.
     expect(mockWritable.getAllOutput()).not.toContain('quiet-hidden-stdout');
+  });
+
+  it('scopes blocked-operation activity to the stream that writes it', async () => {
+    const sink: RecordingSink = new RecordingSink();
+    const failingOperation: Operation = createOperation(
+      'fail',
+      new MockOperationRunner('fail', async () => OperationStatus.Failure)
+    );
+    const blockedOperation: Operation = createOperation(
+      'blocked',
+      new MockOperationRunner('blocked', async () => OperationStatus.Success)
+    );
+    blockedOperation.addDependency(failingOperation);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([failingOperation, blockedOperation]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.eventSink = sink;
+
+    await graph.executeAsync({});
+
+    const blockedActivityIndex: number = sink.activities.findIndex((line: string) =>
+      line.includes('"blocked" is blocked by "fail"')
+    );
+    expect(sink.activityScopes[blockedActivityIndex]).toBe('fail');
+    expect(sink.headers.some(([operationId]) => operationId === 'fail')).toBe(true);
+    expect(sink.headers.some(([operationId]) => operationId === 'blocked')).toBe(false);
   });
 
   it('leaves terminal output byte-identical whether or not a sink is attached', async () => {

@@ -1223,7 +1223,7 @@ function _handleOperationFailure(record: OperationExecutionRecord, context: ISta
     if (blockedRecord.status === OperationStatus.Waiting) {
       if (!blockedRecord.silent) {
         const blockedLine: string = `"${blockedRecord.name}" is blocked by "${name}".`;
-        record.eventSink?.onActivity?.(blockedLine, { operationId: blockedRecord.name });
+        record.eventSink?.onActivity?.(blockedLine, { operationId: name });
         terminal.writeStdoutLine(blockedLine);
       }
       blockedRecord.status = OperationStatus.Blocked;

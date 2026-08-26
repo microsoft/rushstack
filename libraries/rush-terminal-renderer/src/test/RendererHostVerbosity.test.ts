@@ -81,15 +81,17 @@ it('filters stdout display per client without mutating the shared stream', () =>
     terminal: quietTerminal,
     verbosity: 'quiet'
   });
-  const verboseHost: DaemonRendererHost = new DaemonRendererHost({
-    terminal: verboseTerminal,
-    verbosity: 'verbose'
-  });
+  const verboseHost: DaemonRendererHost = new DaemonRendererHost({ terminal: verboseTerminal, verbosity: 'verbose' });
   // Both clients receive the same raw stream; display filtering is per-client.
   quietHost.handleLogChunk('op-a', 'stdout', Buffer.from('hello\n'));
   verboseHost.handleLogChunk('op-a', 'stdout', Buffer.from('hello\n'));
   quietHost.handleLogChunk('op-a', 'stderr', Buffer.from('oops\n'));
   verboseHost.handleLogChunk('op-a', 'stderr', Buffer.from('oops\n'));
+  const close = makeEnvelope('extension', '', {
+    data: { operationId: 'op-a' }, name: 'rushd.operation-stream-closed'
+  });
+  quietHost.handleEvent(close);
+  verboseHost.handleEvent(close);
   // Quiet matches legacy DiscardStdoutTransform: stdout hidden, stderr shown.
   expect(quietTerminal.stdout).not.toContain('hello');
   expect(quietTerminal.stderr).toContain('oops');
