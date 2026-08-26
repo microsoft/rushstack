@@ -358,7 +358,7 @@ function collectOperationResults(
       continue;
     }
     const errorMessage: string | undefined = observed
-      ? observed.errorMessage
+      ? observed.executionResult.error?.message
       : retained?.error?.message;
     results.push({ operationId: operation.name, status, errorMessage });
   }

@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { NewlineKind } from '@rushstack/node-core-library';
+import type { IDaemonOperationHeaderPayload } from '@rushstack/rush-daemon-protocol';
 import { CollatedTerminal, StreamCollator } from '@rushstack/stream-collator';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import { TextRewriterTransform } from '@rushstack/terminal';
 import type { ITerminalChunk, TerminalWritable } from '@rushstack/terminal';
 
+import { OperationHeaderTracker } from './OperationHeaderTracker';
 import { formatDaemonOperationHeader } from './RendererHeader';
 
 /** Options for {@link OperationStreamRegistry}. @beta */
@@ -29,16 +31,12 @@ export interface IOperationStreamRegistryOptions {
 export class OperationStreamRegistry {
   private readonly _collator: StreamCollator;
   private readonly _collatedTerminal: CollatedTerminal;
-  private readonly _writers: Map<string, CollatedWriter>;
+  private readonly _headers: OperationHeaderTracker = new OperationHeaderTracker();
+  private readonly _writers: Map<string, CollatedWriter> = new Map();
   private readonly _quiet: boolean;
-  private _completedOperations: number;
-  private _totalOperations: number;
 
   public constructor(options: IOperationStreamRegistryOptions) {
-    this._writers = new Map();
     this._quiet = options.quiet;
-    this._completedOperations = 0;
-    this._totalOperations = 0;
     const transform: TextRewriterTransform = new TextRewriterTransform({
       destination: options.destination,
       normalizeNewlines: NewlineKind.OsDefault,
@@ -53,7 +51,12 @@ export class OperationStreamRegistry {
 
   /** Increments the total-operation count shown in headers. */
   public registerOperation(): void {
-    this._totalOperations += 1;
+    this._headers.registerOperation();
+  }
+
+  /** Records engine-authoritative counters before an operation's stream activates. */
+  public setOperationHeader(header: IDaemonOperationHeaderPayload): void {
+    this._headers.setOperationHeader(header);
   }
 
   /** Writes one raw chunk to the operation's collated stream. */
@@ -78,11 +81,13 @@ export class OperationStreamRegistry {
     if (writer === undefined) {
       return;
     }
-    this._completedOperations += 1;
+    const counters: IDaemonOperationHeaderPayload = this._headers.takeOperationHeader(
+      writer.taskName
+    );
     const header: string = formatDaemonOperationHeader(
       writer.taskName,
-      this._completedOperations,
-      this._totalOperations
+      counters.completedOperations,
+      counters.totalOperations
     );
     this._collatedTerminal.writeStdoutLine(`\n${header}`);
     if (!this._quiet) {

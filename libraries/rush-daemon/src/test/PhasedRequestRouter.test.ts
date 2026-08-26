@@ -7,7 +7,10 @@ import type {
   IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest
 } from '@rushstack/rush-daemon-protocol';
-import { RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
+import {
+  RUSHD_OPERATION_HEADER,
+  RUSHD_OPERATION_STREAM_CLOSED
+} from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
@@ -204,7 +207,7 @@ describe(PhasedRequestRouter.name, () => {
     const fixture: ITestRoutingFixture = createThreeOperationFixture({
       actionAAsync: async (terminal: ITerminal): Promise<void> => {
         terminal.writeLine('stdout-a');
-        terminal.writeErrorLine('stderr-a');
+        terminal.writeErrorLine('stderr-a', { doNotOverrideSgrCodes: true });
       }
     });
     const client: TestPhasedRequestClient = new TestPhasedRequestClient();
@@ -527,5 +530,41 @@ describe(PhasedRequestRouter.name, () => {
       .filter((sequence: number | undefined): sequence is number => sequence !== undefined);
     expect(firstSequences.length).toBeGreaterThan(0);
     expect(secondSequences[0]).toBeGreaterThan(firstSequences[firstSequences.length - 1]);
+  });
+
+  it('uses authoritative header totals after a partial warm iteration', async () => {
+    const fixture: ITestRoutingFixture = createThreeOperationFixture();
+    let iteration: number = 0;
+    fixture.graph.hooks.configureIteration.tap('partial warm iteration', (records, previousResults) => {
+      if (iteration++ === 0) {
+        return;
+      }
+      for (const record of records.values()) {
+        if (record.operation.name === OPERATION_A && previousResults.has(record.operation)) {
+          record.enabled = false;
+        }
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    await router.executeAsync(createRequest([select(OPERATION_B)]), new TestPhasedRequestClient());
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+
+    await router.executeAsync(
+      { ...createRequest([select(OPERATION_B)]), requestId: 'request-2' },
+      client
+    );
+
+    const headers: IDaemonEventEnvelope[] = client.writes
+      .map(({ event }) => event)
+      .filter(
+        (event: IDaemonEventEnvelope | undefined): event is IDaemonEventEnvelope =>
+          (event?.payload as { name?: unknown } | undefined)?.name === RUSHD_OPERATION_HEADER
+      );
+    expect(headers).toHaveLength(1);
+    expect(headers[0]?.required).toBe(true);
+    expect(headers[0]?.payload).toEqual({
+      data: { completedOperations: 1, operationId: OPERATION_B, totalOperations: 1 },
+      name: RUSHD_OPERATION_HEADER
+    });
   });
 });

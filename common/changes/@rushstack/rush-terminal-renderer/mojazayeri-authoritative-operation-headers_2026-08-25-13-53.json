@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "comment": "Use authoritative daemon operation-header counters when collating partial warm iterations.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-terminal-renderer",
+  "email": "mojazayeri@users.noreply.github.com"
+}

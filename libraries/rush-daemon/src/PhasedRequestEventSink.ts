@@ -30,7 +30,7 @@ const EVENT_SOURCE_COMPONENT: string = 'OperationGraph';
 const TEXT_ENCODER: InstanceType<typeof TextEncoder> = new TextEncoder();
 
 interface IObservedOperationResult {
-  readonly errorMessage: string | undefined;
+  readonly executionResult: IOperationExecutionResult;
   readonly status: string;
 }
 
@@ -129,7 +129,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       return;
     }
     this.#observedResults.set(result.operation, {
-      errorMessage: result.error?.message,
+      executionResult: result,
       status: result.status
     });
     this.#emitEvent('operationStatusChanged', {
@@ -141,10 +141,14 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
 
   public onOperationHeader(operationId: string, completed: number, total: number): void {
     if (this.#activeOperationIds.has(operationId)) {
-      this.#emitEvent('extension', {
-        data: { completedOperations: completed, operationId, totalOperations: total },
-        name: RUSHD_OPERATION_HEADER
-      });
+      this.#emitEvent(
+        'extension',
+        {
+          data: { completedOperations: completed, operationId, totalOperations: total },
+          name: RUSHD_OPERATION_HEADER
+        },
+        { required: true }
+      );
     }
   }
 
@@ -172,13 +176,13 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
 
   public onActivity(text: string, options?: _IOperationActivityOptions): void {
     const operationId: string | undefined = options?.operationId;
-    if (!operationId || !this.#activeOperationIds.has(operationId)) {
+    if (operationId !== undefined && !this.#activeOperationIds.has(operationId)) {
       return;
     }
     this.#emitEvent(
       'activityChanged',
       { stream: options?.stderr === true ? 'stderr' : 'stdout', text },
-      { required: true, scope: { operationId } }
+      { required: true, scope: operationId === undefined ? undefined : { operationId } }
     );
   }
 

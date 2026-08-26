@@ -7,6 +7,7 @@
 import type { DaemonVerbosity } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonOperationHeaderPayload } from '@rushstack/rush-daemon-protocol';
 import { ITerminalChunk } from '@rushstack/terminal';
 import { TerminalWritable } from '@rushstack/terminal';
 
@@ -82,6 +83,7 @@ export class OperationStreamRegistry {
     constructor(options: IOperationStreamRegistryOptions);
     closeOperation(operationId: string): void;
     registerOperation(): void;
+    setOperationHeader(header: IDaemonOperationHeaderPayload): void;
     writeChunk(operationId: string, chunk: ITerminalChunk): void;
 }
 
