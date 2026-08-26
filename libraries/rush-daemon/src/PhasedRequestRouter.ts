@@ -107,13 +107,14 @@ export class PhasedRequestRouter {
         client,
         requestId: request.requestId
       });
-      admissionLease = await admissionController.acquireAsync(
-        getWorkspaceRequestScheduler(this.#workspaceSession),
-        classifyRushCommand({
-          commandName: request.commandName,
-          commandOrigin: request.commandOrigin
-        })
-      );
+      const scheduler: RequestScheduler = getWorkspaceRequestScheduler(this.#workspaceSession);
+      const exclusivityClass: RequestExclusivityClass = classifyRushCommand({
+        commandName: request.commandName,
+        commandOrigin: request.commandOrigin
+      });
+      admissionLease =
+        admissionController.tryAcquire(scheduler, exclusivityClass) ??
+        (await admissionController.acquireAsync(scheduler, exclusivityClass));
     } catch (error) {
       admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
@@ -122,10 +123,15 @@ export class PhasedRequestRouter {
     try {
       let graphLease: IRequestLease;
       try {
-        graphLease = await admissionController.acquireAsync(
-          routingState.graphExecutionScheduler,
-          RequestExclusivityClass.Exclusive
-        );
+        graphLease =
+          admissionController.tryAcquire(
+            routingState.graphExecutionScheduler,
+            RequestExclusivityClass.Exclusive
+          ) ??
+          (await admissionController.acquireAsync(
+            routingState.graphExecutionScheduler,
+            RequestExclusivityClass.Exclusive
+          ));
       } catch (error) {
         return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
       }

@@ -123,20 +123,15 @@ export class RequestScheduler {
    * Waits until the request is compatible with all active requests and earlier queued requests.
    */
   public acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
+    let lease: IRequestLease | undefined;
     try {
-      this._validateOptions(options);
+      lease = this.tryAcquire(options);
     } catch (error) {
       return Promise.reject(error);
     }
 
-    if (options.abortSignal?.aborted) {
-      return Promise.reject(
-        new RequestSchedulerError(RequestSchedulerErrorCode.Aborted, 'The request was aborted before admission.')
-      );
-    }
-
-    if (this._queue.length === 0 && this._canAdmit(options.exclusivityClass)) {
-      return Promise.resolve(this._createLease(options.exclusivityClass));
+    if (lease) {
+      return Promise.resolve(lease);
     }
 
     if (options.noWait) {
@@ -182,6 +177,20 @@ export class RequestScheduler {
       this._notifyQueuePositions();
       this._drainQueue();
     });
+  }
+
+  /** Attempts immediate admission without yielding to the microtask queue. @internal */
+  public tryAcquire(options: IRequestSchedulerAcquireOptions): IRequestLease | undefined {
+    this._validateOptions(options);
+    if (options.abortSignal?.aborted) {
+      throw new RequestSchedulerError(
+        RequestSchedulerErrorCode.Aborted,
+        'The request was aborted before admission.'
+      );
+    }
+    return this._queue.length === 0 && this._canAdmit(options.exclusivityClass)
+      ? this._createLease(options.exclusivityClass)
+      : undefined;
   }
 
   private _validateOptions(options: IRequestSchedulerAcquireOptions): void {

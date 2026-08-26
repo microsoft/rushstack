@@ -137,6 +137,18 @@ export class RequestAdmissionController {
     }
   }
 
+  public tryAcquire(
+    scheduler: RequestScheduler,
+    exclusivityClass: RequestExclusivityClass
+  ): IRequestLease | undefined {
+    return scheduler.tryAcquire({
+      abortSignal: this.#abortController.signal,
+      exclusivityClass,
+      noWait: this.#admission?.noWait,
+      waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
+    });
+  }
+
   public dispose(): void {
     this.#client.abortSignal.removeEventListener('abort', this.#abortFromClient);
   }

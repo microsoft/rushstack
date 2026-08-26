@@ -478,6 +478,8 @@ export class RequestScheduler {
     acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease>;
     get activeRequestCount(): number;
     get queuedRequestCount(): number;
+    // @internal
+    tryAcquire(options: IRequestSchedulerAcquireOptions): IRequestLease | undefined;
 }
 
 // @public

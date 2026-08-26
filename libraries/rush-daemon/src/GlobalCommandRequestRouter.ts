@@ -29,6 +29,8 @@ import {
 } from './WorkspaceRequestAdmission';
 import {
   type IRequestLease,
+  type RequestExclusivityClass,
+  type RequestScheduler,
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
@@ -112,13 +114,14 @@ export class GlobalCommandRequestRouter {
         client,
         requestId: request.requestId
       });
-      lease = await admissionController.acquireAsync(
-        getWorkspaceRequestScheduler(this.#workspaceSession),
-        classifyRushCommand({
-          commandName: request.commandName,
-          commandOrigin: request.commandOrigin
-        })
-      );
+      const scheduler: RequestScheduler = getWorkspaceRequestScheduler(this.#workspaceSession);
+      const exclusivityClass: RequestExclusivityClass = classifyRushCommand({
+        commandName: request.commandName,
+        commandOrigin: request.commandOrigin
+      });
+      lease =
+        admissionController.tryAcquire(scheduler, exclusivityClass) ??
+        (await admissionController.acquireAsync(scheduler, exclusivityClass));
     } catch (error) {
       admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request.requestId, client, interactiveSession, error);
