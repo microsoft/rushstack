@@ -11,6 +11,22 @@ export {
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
+export {
+  type IGlobalCommandExecutionContext,
+  type IGlobalCommandSpawnOptions
+} from './GlobalCommandExecutionContext';
+export {
+  type IGlobalCommandEnvironment,
+  type IGlobalCommandTerminalProperties,
+  type IResolvedGlobalCommandRequest,
+  type IResolveGlobalCommandRequestOptions
+} from './GlobalCommandRequest';
+export { type IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+export {
+  type GlobalCommandExecutor,
+  GlobalCommandRequestRouter,
+  type IGlobalCommandRequestResult
+} from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
