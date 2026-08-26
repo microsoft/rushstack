@@ -364,6 +364,63 @@ describe('shared phased request batching', () => {
     expect(scheduleSpy).toHaveBeenCalledTimes(3);
   });
 
+  it('applies graph admission to same-turn shared-read requests', async () => {
+    const operationStarted: IDeferred = createDeferred();
+    const releaseOperation: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: async (): Promise<void> => {
+        operationStarted.resolve();
+        await releaseOperation.promise;
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      { ...createRequest('first', OPERATION_A), commandName: 'list' },
+      new TestPhasedRequestClient('one')
+    );
+    const noWait = router.executeAsync(
+      {
+        ...createRequest('no-wait', OPERATION_C),
+        admission: { noWait: true },
+        commandName: 'list'
+      },
+      new TestPhasedRequestClient('two')
+    );
+
+    const noWaitResult: IDaemonPhasedRequestResult = await noWait;
+    expect(noWaitResult).toMatchObject({ admissionErrorCode: 'no-wait', outcome: 'failure' });
+    await operationStarted.promise;
+    releaseOperation.resolve();
+    await first;
+  });
+
+  it('keeps true enabled state dominant across merged selections', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const enabledStates: Array<boolean | 'ignore-dependency-changes' | undefined> = [];
+    fixture.graph.hooks.onIterationScheduled.tap('capture enabled state', () => {
+      enabledStates.push(fixture.operations.get(OPERATION_A)?.enabled);
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+    await Promise.all([
+      router.executeAsync(
+        {
+          ...createRequest('ignore-dependency', OPERATION_A),
+          operationSelection: [
+            { enabledState: 'ignore-dependency-changes', operationId: OPERATION_A }
+          ]
+        },
+        new TestPhasedRequestClient('one')
+      ),
+      router.executeAsync(
+        createRequest('requires-dependency', OPERATION_B),
+        new TestPhasedRequestClient('two')
+      )
+    ]);
+
+    expect(enabledStates).toEqual([true]);
+  });
+
   it('preserves per-client backpressure and final-result ordering in a merged batch', async () => {
     const fixture: ITestRoutingFixture = createFixture({
       actionAAsync: async (terminal: ITerminal): Promise<void> => {

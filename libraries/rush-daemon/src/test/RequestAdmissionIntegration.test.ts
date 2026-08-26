@@ -116,13 +116,14 @@ function createPhasedRequest(
 }
 
 function createLegacyPhasedRequest(requestId: string): IDaemonPhasedRequest {
-  return {
+  const legacyRequest: Partial<IDaemonPhasedRequest> = {
     commandName: 'build',
     engineShape: TEST_ENGINE_SHAPE,
     environment: {},
     operationSelection: [{ enabledState: true, operationId: TEST_OPERATION }],
     requestId
   };
+  return legacyRequest as IDaemonPhasedRequest;
 }
 
 function createDeferred(): { readonly promise: Promise<void>; readonly resolve: () => void } {

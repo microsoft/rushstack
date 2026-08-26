@@ -210,6 +210,7 @@ class PhasedRequestBatchCoordinator {
   #acceptingCurrentBatch: boolean = false;
   #currentBatch: ReadonlyArray<IBatchEntry> | undefined;
   #drainScheduled: boolean = false;
+  #nextGraphLeasePromise: Promise<IRequestLease> | undefined;
   #running: boolean = false;
 
   public constructor(
@@ -265,6 +266,9 @@ class PhasedRequestBatchCoordinator {
       return;
     }
     this.#drainScheduled = true;
+    this.#nextGraphLeasePromise = this.#graphExecutionScheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
     setImmediate(() => {
       this.#drainScheduled = false;
       void this.#drainAsync();
@@ -277,6 +281,13 @@ class PhasedRequestBatchCoordinator {
     }
     this.#running = true;
     try {
+      if (this.#pending.length === 0) {
+        const unusedGraphLeasePromise: Promise<IRequestLease> | undefined =
+          this.#nextGraphLeasePromise;
+        this.#nextGraphLeasePromise = undefined;
+        (await unusedGraphLeasePromise)?.release();
+        return;
+      }
       while (this.#pending.length > 0) {
         const first: IBatchEntry = this.#pending.shift()!;
         const batch: IBatchEntry[] = [first];
@@ -307,12 +318,14 @@ class PhasedRequestBatchCoordinator {
   }
 
   #canJoinCurrentBatch(request: IPreparedPhasedRequest): boolean {
+    if (request.exclusivityClass !== RequestExclusivityClass.SharedBuild) {
+      return false;
+    }
     if (!this.#running) {
       return true;
     }
     return (
       this.#acceptingCurrentBatch &&
-      request.exclusivityClass === RequestExclusivityClass.SharedBuild &&
       this.#currentBatch?.[0]?.exclusivityClass === RequestExclusivityClass.SharedBuild
     );
   }
@@ -331,9 +344,12 @@ class PhasedRequestBatchCoordinator {
   }
 
   async #executeBatchAsync(batch: IBatchEntry[]): Promise<void> {
-    const graphLeasePromise: Promise<IRequestLease> = this.#graphExecutionScheduler.acquireAsync({
-      exclusivityClass: RequestExclusivityClass.Exclusive
-    });
+    const graphLeasePromise: Promise<IRequestLease> =
+      this.#nextGraphLeasePromise ??
+      this.#graphExecutionScheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive
+      });
+    this.#nextGraphLeasePromise = undefined;
     const graphLease: IRequestLease = await graphLeasePromise;
     try {
       if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
@@ -743,23 +759,33 @@ function applySelections(
   graph: IOperationGraph,
   selections: ReadonlyArray<IResolvedSelection>
 ): void {
+  const enabledOperations: ReadonlyArray<Operation> = selections.flatMap(
+    (selection: IResolvedSelection) => selection.enabledOperations
+  );
+  const ignoreDependencyOperations: ReadonlyArray<Operation> = selections.flatMap(
+    (selection: IResolvedSelection) => selection.ignoreDependencyOperations
+  );
+  const enabledClosureBySelection: ReadonlyArray<ReadonlySet<Operation>> = selections.map(
+    (selection: IResolvedSelection) =>
+      new Set(collectSelectionClosure(selection.enabledOperations, []))
+  );
+  const effectiveIgnoreDependencyOperations: Operation[] = [];
+  selections.forEach((selection: IResolvedSelection, selectionIndex: number) => {
+    for (const operation of selection.ignoreDependencyOperations) {
+      const requiredByAnotherSelection: boolean = enabledClosureBySelection.some(
+        (enabledClosure: ReadonlySet<Operation>, enabledSelectionIndex: number) =>
+          enabledSelectionIndex !== selectionIndex && enabledClosure.has(operation)
+      );
+      if (!requiredByAnotherSelection) {
+        effectiveIgnoreDependencyOperations.push(operation);
+      }
+    }
+  });
   graph.setEnabledStates(graph.operations, false, 'unsafe');
+  graph.setEnabledStates(ignoreDependencyOperations, 'ignore-dependency-changes', 'safe');
+  graph.setEnabledStates(enabledOperations, true, 'safe');
   graph.setEnabledStates(
-    selections.flatMap(
-      (selection: IResolvedSelection) => selection.ignoreDependencyOperations
-    ),
-    'ignore-dependency-changes',
-    'safe'
-  );
-  graph.setEnabledStates(
-    selections.flatMap((selection: IResolvedSelection) => selection.enabledOperations),
-    true,
-    'safe'
-  );
-  graph.setEnabledStates(
-    selections.flatMap(
-      (selection: IResolvedSelection) => selection.ignoreDependencyOperations
-    ),
+    effectiveIgnoreDependencyOperations,
     'ignore-dependency-changes',
     'unsafe'
   );
