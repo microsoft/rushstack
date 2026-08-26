@@ -313,6 +313,35 @@ describe(PhasedRequestRouter.name, () => {
     expect(result).toMatchObject({ exitCode: 1, outcome: 'failure' });
   });
 
+  it('preserves cancellation when warning environment validation fails', async () => {
+    const fixture: ITestRoutingFixture = createThreeOperationFixture();
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const abortSignalReadForResult: number = 2;
+    let abortSignalReadCount: number = 0;
+    jest.spyOn(client, 'abortSignal', 'get').mockImplementation(() => {
+      abortSignalReadCount++;
+      if (abortSignalReadCount === abortSignalReadForResult) {
+        client.abortController.abort(new Error('client cancelled'));
+      }
+      return client.abortController.signal;
+    });
+
+    const result = await new PhasedRequestRouter(fixture.session).executeAsync(
+      {
+        ...createRequest([select(OPERATION_A)]),
+        environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'invalid' }
+      },
+      client
+    );
+
+    expect(result).toMatchObject({
+      aborted: true,
+      errorMessage: expect.stringContaining('must be set to 1 or 0'),
+      exitCode: 1,
+      outcome: 'failure'
+    });
+  });
+
   it('aborts a cancelled iteration, restores subscriptions, and keeps runners reusable', async () => {
     let releaseOperationA: (() => void) | undefined;
     let markOperationAStarted: (() => void) | undefined;

@@ -577,6 +577,93 @@ describe(GlobalCommandRequestRouter.name, () => {
     });
   });
 
+  it('preserves a client abort observed during cleanup', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    let releaseCleanup: (() => void) | undefined;
+    let markCleanupStarted: (() => void) | undefined;
+    const cleanupStarted: Promise<void> = new Promise((resolve) => {
+      markCleanupStarted = resolve;
+    });
+    const cleanupRelease: Promise<void> = new Promise((resolve) => {
+      releaseCleanup = resolve;
+    });
+    const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+      router.resolveRequest(createRequestOptions('cleanup-cancel', FIRST_CWD, {}, 80)),
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        context.registerDisposable({
+          [Symbol.asyncDispose]: async (): Promise<void> => {
+            markCleanupStarted?.();
+            await cleanupRelease;
+          }
+        });
+        return { exitCode: 0 };
+      },
+      client
+    );
+    await cleanupStarted;
+    client.abortController.abort(new Error('client cancelled during cleanup'));
+    releaseCleanup?.();
+
+    await expect(resultPromise).resolves.toEqual({
+      aborted: true,
+      errorMessage: undefined,
+      exitCode: 1,
+      outcome: 'aborted',
+      requestId: 'cleanup-cancel'
+    });
+  });
+
+  it('preserves a delayed terminal disconnect observed during cleanup', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    let releaseWrite: (() => void) | undefined;
+    const writeRelease: Promise<void> = new Promise((resolve) => {
+      releaseWrite = resolve;
+    });
+    client.onWriteAsync = async (): Promise<void> => {
+      await writeRelease;
+      throw new Error('client disconnected during cleanup');
+    };
+    let releaseCleanup: (() => void) | undefined;
+    let markCleanupStarted: (() => void) | undefined;
+    const cleanupStarted: Promise<void> = new Promise((resolve) => {
+      markCleanupStarted = resolve;
+    });
+    const cleanupRelease: Promise<void> = new Promise((resolve) => {
+      releaseCleanup = resolve;
+    });
+    const resultPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+      router.resolveRequest(createRequestOptions('cleanup-disconnect', FIRST_CWD, {}, 80)),
+      async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+        context.registerDisposable({
+          [Symbol.asyncDispose]: async (): Promise<void> => {
+            markCleanupStarted?.();
+            await cleanupRelease;
+          }
+        });
+        context.terminal.writeLine('pending output');
+        return { exitCode: 0 };
+      },
+      client
+    );
+    await cleanupStarted;
+    releaseWrite?.();
+    releaseCleanup?.();
+
+    await expect(resultPromise).resolves.toEqual({
+      aborted: true,
+      errorMessage: 'client disconnected during cleanup',
+      exitCode: 1,
+      outcome: 'failure',
+      requestId: 'cleanup-disconnect'
+    });
+  });
+
   it('continues request cleanup after a disposer throws synchronously', async () => {
     const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
     const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);

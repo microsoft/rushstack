@@ -111,7 +111,7 @@ export class PhasedRequestRouter {
       warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
     } catch (error) {
       const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
-        aborted: false,
+        aborted: client.abortSignal.aborted,
         error,
         graphStatus: graph.status,
         operationOutcomes: [],

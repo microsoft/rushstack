@@ -103,6 +103,7 @@ export class GlobalCommandRequestRouter {
     } catch (error) {
       cleanupError = error;
     }
+    aborted ||= context.requestAborted;
     const combinedError: unknown = combineExecutionAndCleanupErrors(executionError, cleanupError);
     let result: IDaemonCommandResult;
     try {

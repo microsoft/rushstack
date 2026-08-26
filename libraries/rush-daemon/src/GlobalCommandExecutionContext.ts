@@ -156,6 +156,7 @@ export class GlobalCommandExecutionContext
   readonly #childTerminationErrors: unknown[] = [];
   readonly #writer: OrderedTerminalWriter;
   #closed: boolean = false;
+  #requestAborted: boolean = false;
 
   public readonly terminal: ITerminal;
   public readonly workspaceSession: IWorkspaceSession;
@@ -168,10 +169,8 @@ export class GlobalCommandExecutionContext
     this.#request = request;
     this.#client = client;
     this.workspaceSession = workspaceSession;
-    this.#onClientAbort = () => this.#abortController.abort(client.abortSignal.reason);
-    this.#writer = new OrderedTerminalWriter(client, (error: Error) =>
-      this.#abortController.abort(error)
-    );
+    this.#onClientAbort = () => this.#abortRequest(client.abortSignal.reason);
+    this.#writer = new OrderedTerminalWriter(client, (error: Error) => this.#abortRequest(error));
     this.terminal = new Terminal(
       new GlobalCommandTerminalProvider(this.#writer, request.terminal.supportsColor)
     );
@@ -192,6 +191,10 @@ export class GlobalCommandExecutionContext
 
   public get environment(): IGlobalCommandEnvironment {
     return this.#request.environment;
+  }
+
+  public get requestAborted(): boolean {
+    return this.#requestAborted;
   }
 
   public get terminalProperties(): IGlobalCommandTerminalProperties {
@@ -240,24 +243,32 @@ export class GlobalCommandExecutionContext
       return;
     }
     this.#closed = true;
-    this.#client.abortSignal.removeEventListener('abort', this.#onClientAbort);
     this.#abortController.abort(new Error('The global command execution context was disposed.'));
     const cleanupErrors: unknown[] = [];
-    await Promise.all(
-      Array.from(this.#trackedChildren, ({ completion }) =>
-        collectCleanupErrorAsync(completion, cleanupErrors)
-      )
-    );
-    cleanupErrors.push(...this.#childCompletionErrors);
-    cleanupErrors.push(...this.#childTerminationErrors);
-    for (const disposable of this.#disposables.reverse()) {
-      await collectCleanupErrorAsync(
-        Promise.resolve().then(() => disposable[Symbol.asyncDispose]()),
-        cleanupErrors
+    try {
+      await Promise.all(
+        Array.from(this.#trackedChildren, ({ completion }) =>
+          collectCleanupErrorAsync(completion, cleanupErrors)
+        )
       );
+      cleanupErrors.push(...this.#childCompletionErrors);
+      cleanupErrors.push(...this.#childTerminationErrors);
+      for (const disposable of this.#disposables.reverse()) {
+        await collectCleanupErrorAsync(
+          Promise.resolve().then(() => disposable[Symbol.asyncDispose]()),
+          cleanupErrors
+        );
+      }
+      await collectCleanupErrorAsync(this.#writer.closeAsync(), cleanupErrors);
+      throwCleanupErrors(cleanupErrors);
+    } finally {
+      this.#client.abortSignal.removeEventListener('abort', this.#onClientAbort);
     }
-    await collectCleanupErrorAsync(this.#writer.closeAsync(), cleanupErrors);
-    throwCleanupErrors(cleanupErrors);
+  }
+
+  #abortRequest(reason: unknown): void {
+    this.#requestAborted = true;
+    this.#abortController.abort(reason);
   }
 
   async #trackChildAsync(child: childProcess.ChildProcessWithoutNullStreams): Promise<void> {
