@@ -88,7 +88,7 @@ export class GlobalCommandRequestRouter {
       cleanupError = error;
     }
     throwExecutionAndCleanupErrors(executionError, cleanupError);
-    return { aborted, requestId: request.requestId };
+    return { aborted: aborted || client.abortSignal.aborted, requestId: request.requestId };
   }
 }
 

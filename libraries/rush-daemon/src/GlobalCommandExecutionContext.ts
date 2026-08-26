@@ -45,6 +45,13 @@ export interface IGlobalCommandExecutionContext {
   readonly workspaceSession: IWorkspaceSession;
 
   registerDisposable(disposable: AsyncDisposable): void;
+  /**
+   * Spawns a child process whose process tree is owned by this request.
+   *
+   * @remarks
+   * Descendants must not detach from the spawned child's process tree. On Windows, the spawned child must remain active
+   * until all of its descendants exit because a descendant cannot be recovered after its parent exits.
+   */
   spawnChild(
     command: string,
     args: ReadonlyArray<string>,
@@ -266,7 +273,14 @@ export class GlobalCommandExecutionContext
     try {
       await new Promise<void>((resolve, reject) => {
         child.once('error', reject);
-        child.once('close', () => resolve());
+        child.once('close', () => {
+          try {
+            terminateExitedChildProcessGroup(child);
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        });
       });
     } finally {
       this.abortSignal.removeEventListener('abort', terminateChild);
@@ -277,9 +291,10 @@ export class GlobalCommandExecutionContext
     source: NodeJS.ReadableStream & { pause(): unknown; resume(): unknown },
     stream: 'stdout' | 'stderr'
   ): void {
-    source.on('data', (chunk: Buffer) => {
+    source.on('data', (chunk: Buffer | string) => {
       source.pause();
-      void this.#writer.writeAsync(stream, chunk).then(() => {
+      const bytes: Uint8Array = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+      void this.#writer.writeAsync(stream, bytes).then(() => {
         if (!this.abortSignal.aborted) {
           source.resume();
         }
@@ -291,6 +306,19 @@ export class GlobalCommandExecutionContext
   #throwIfClosed(): void {
     if (this.#closed) {
       throw new Error('The global command execution context is closed.');
+    }
+  }
+}
+
+function terminateExitedChildProcessGroup(child: childProcess.ChildProcessWithoutNullStreams): void {
+  if (process.platform === 'win32' || child.pid === undefined) {
+    return;
+  }
+  try {
+    process.kill(-child.pid, 'SIGKILL');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
+      throw error;
     }
   }
 }

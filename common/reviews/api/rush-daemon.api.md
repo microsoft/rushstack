@@ -81,7 +81,6 @@ export interface IGlobalCommandExecutionContext {
     readonly environment: IGlobalCommandEnvironment;
     // (undocumented)
     registerDisposable(disposable: AsyncDisposable): void;
-    // (undocumented)
     spawnChild(command: string, args: ReadonlyArray<string>, options?: IGlobalCommandSpawnOptions): childProcess.ChildProcessWithoutNullStreams;
     // (undocumented)
     readonly terminal: ITerminal;
