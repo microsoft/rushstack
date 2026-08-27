@@ -15,6 +15,7 @@ import type {
   GlobalCommandExecutor,
   IDaemonRequestResolver
 } from '../index';
+import { MAX_REQUESTS_PER_CONNECTION } from '../DaemonConnectionLimits';
 import { RushDaemonHost } from '../RushDaemonHost';
 import type { IRushDaemonHostOptions } from '../RushDaemonHost';
 import { TestWorkspaceSession } from './TestWorkspaceSession';
@@ -310,10 +311,12 @@ describe('daemon global request wire integration', () => {
         payload: createWireEnvelope('first', 'custom', repoRoot)
       });
       await started.promise;
-      const second: ITerminalExchange = await startAsync(
-        client,
-        createWireEnvelope('second', 'custom', repoRoot)
-      );
+      await client.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('second', 'custom', repoRoot)
+      });
+      await client.sendStdinAsync('second', Uint8Array.of(INPUT_BYTE));
+      const second: ITerminalExchange = await client.readTerminalAsync('second');
       expect(second.terminal).toMatchObject({
         kind: 'requestRejected',
         payload: { code: 'invalidRequest', requestId: 'second' }
@@ -326,6 +329,47 @@ describe('daemon global request wire integration', () => {
     } finally {
       release.resolve();
       await client.closeAsync();
+      await host.closeAsync();
+    }
+  });
+
+  it('requires reconnecting after the bounded request id limit', async () => {
+    const repoRoot: string = createRepoRoot();
+    const executorAsync: GlobalCommandExecutor = async () => ({ exitCode: 0 });
+    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(async () => ({
+      executor: executorAsync,
+      kind: 'global'
+    }));
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot, resolver));
+    const client: DaemonRequestWireClient = await connectAsync(host);
+    try {
+      for (let index: number = 0; index < MAX_REQUESTS_PER_CONNECTION; index++) {
+        expect(
+          (
+            await startAsync(
+              client,
+              createWireEnvelope(`bounded-${index}`, 'custom', repoRoot)
+            )
+          ).terminal
+        ).toMatchObject({
+          kind: 'requestResult',
+          payload: { outcome: 'success', requestId: `bounded-${index}` }
+        });
+      }
+
+      await client.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('over-limit', 'custom', repoRoot)
+      });
+      expect(await client.readControlAsync()).toMatchObject({
+        kind: 'error',
+        payload: {
+          code: 'malformedControlMessage',
+          message: expect.stringContaining(`at most ${MAX_REQUESTS_PER_CONNECTION}`)
+        }
+      });
+      await client.closed;
+    } finally {
       await host.closeAsync();
     }
   });

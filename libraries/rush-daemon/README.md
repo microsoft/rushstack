@@ -70,9 +70,11 @@ to every `DaemonControlSession`. After hello and capability subscription, each c
 identifiers, accepts presentation-free request envelopes, routes request-tagged stdin and cancellation, and serializes
 queue progress, raw-mode controls, binary output, structured events, and the terminal result through one backpressured
 wire queue. A connection runs at most one request at a time so binary operation output remains unambiguous; concurrent
-requests use separate connections. Disconnect and host shutdown abort every connection-owned active or queued request
-before the resolver and warm workspace are disposed. Separate connections still share the workspace scheduler and
-phased batch coordinator, so compatible selections can execute in one iteration.
+requests use separate connections. Each connection accepts at most 256 distinct request identifiers before the client
+must reconnect, allowing the lifecycle and stdin routers to retain every identifier for deterministic duplicate and
+late-frame handling without unbounded growth. Disconnect and host shutdown abort every connection-owned active or
+queued request before the resolver and warm workspace are disposed. Separate connections still share the workspace
+scheduler and phased batch coordinator, so compatible selections can execute in one iteration.
 
 The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
 typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle

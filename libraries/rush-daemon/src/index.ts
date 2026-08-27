@@ -7,6 +7,7 @@ export {
   DaemonRequestDispatchError,
   type DaemonRequestDispatchErrorCode,
   DaemonRequestDispatcher,
+  type IDaemonRequestDispatchClient,
   type IDaemonRequestResolver,
   type IResolvedDaemonGlobalRequest,
   type IResolvedDaemonPhasedRequest,

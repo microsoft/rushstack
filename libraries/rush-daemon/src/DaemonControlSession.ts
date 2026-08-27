@@ -26,6 +26,7 @@ import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { DaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
+import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
@@ -217,7 +218,14 @@ export class DaemonControlSession {
         `Request id "${requestId}" has already been used on this connection.`
       );
     }
+    if (this.#requestById.size + this.#completedRequestIds.size >= MAX_REQUESTS_PER_CONNECTION) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        `A daemon control connection accepts at most ${MAX_REQUESTS_PER_CONNECTION} distinct request ids; reconnect before starting request "${requestId}".`
+      );
+    }
     if (this.#requestById.size > 0) {
+      this.#interactiveConnection.markRequestCompleted(requestId);
       this.#completedRequestIds.add(requestId);
       this.#send({
         kind: 'requestRejected',

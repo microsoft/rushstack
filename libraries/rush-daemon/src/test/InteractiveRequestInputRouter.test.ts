@@ -10,6 +10,7 @@ import type {
   IInteractiveRequestInputSink,
   IInteractiveRequestSession
 } from '../InteractiveRequestInputRouter';
+import { MAX_REQUESTS_PER_CONNECTION } from '../DaemonConnectionLimits';
 
 class TestControlClient implements IInteractiveRequestControlClient {
   public readonly abortController: AbortController = new AbortController();
@@ -149,6 +150,20 @@ describe(InteractiveRequestInputRouter.name, () => {
       code: 'completedRequest'
     });
     await interactive.finishAsync();
+  });
+
+  it('retains request id uniqueness up to a bounded connection limit', async () => {
+    const router: InteractiveRequestInputRouter = new InteractiveRequestInputRouter();
+    for (let index: number = 0; index < MAX_REQUESTS_PER_CONNECTION; index++) {
+      await register(router, `request-${index}`, new TestControlClient()).session.finishAsync();
+    }
+
+    expect(() =>
+      register(router, 'over-limit', new TestControlClient())
+    ).toThrow(expect.objectContaining({ code: 'requestLimitExceeded' }));
+    expect(() =>
+      register(router, 'request-0', new TestControlClient())
+    ).toThrow(expect.objectContaining({ code: 'duplicateRequest' }));
   });
 
   it('serializes raw-mode transitions and restores cooked mode before finishing', async () => {

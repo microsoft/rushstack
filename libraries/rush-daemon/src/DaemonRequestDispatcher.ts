@@ -63,7 +63,7 @@ export class DaemonRequestDispatchError extends Error {
   }
 }
 
-/** Wire destination consumed by the shared request dispatcher. @internal */
+/** Wire destination consumed by the shared request dispatcher. @beta */
 export interface IDaemonRequestDispatchClient {
   readonly abortSignal: AbortSignal;
   readonly interactiveSession: IInteractiveRequestSession;

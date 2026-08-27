@@ -39,8 +39,6 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
     // (undocumented)
     [Symbol.asyncDispose](): Promise<void>;
     constructor(workspaceSession: IWorkspaceSession, resolver?: IDaemonRequestResolver);
-    // Warning: (ae-forgotten-export) The symbol "IDaemonRequestDispatchClient" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     dispatchAsync(envelope: IDaemonRequestEnvelope, client: IDaemonRequestDispatchClient): Promise<void>;
 }
@@ -120,6 +118,32 @@ export interface IDaemonInteractiveRequestOptions {
     readonly onFailure: (error: Error) => void;
     // (undocumented)
     readonly requestId: string;
+}
+
+// @beta
+export interface IDaemonRequestDispatchClient {
+    // (undocumented)
+    readonly abortSignal: AbortSignal;
+    // (undocumented)
+    getNextEventSequence(): number;
+    // (undocumented)
+    readonly interactiveSession: IInteractiveRequestSession;
+    // (undocumented)
+    readonly sessionId: string;
+    // (undocumented)
+    readonly supportsRequestAdmission: boolean;
+    // (undocumented)
+    writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
+    // (undocumented)
+    writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+    // (undocumented)
+    writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+    // (undocumented)
+    writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void>;
+    // (undocumented)
+    writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+    // (undocumented)
+    writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
 }
 
 // @beta
@@ -266,10 +290,12 @@ export class InteractiveInputRoutingError extends Error {
 }
 
 // @beta
-export type InteractiveInputRoutingErrorCode = 'duplicateRequest' | 'unknownRequest' | 'completedRequest' | 'nonInteractiveRequest';
+export type InteractiveInputRoutingErrorCode = 'duplicateRequest' | 'unknownRequest' | 'completedRequest' | 'nonInteractiveRequest' | 'requestLimitExceeded';
 
 // @beta
 export class InteractiveRequestInputRouter {
+    // @internal
+    markRequestCompleted(requestId: string): void;
     // (undocumented)
     register(options: IInteractiveRequestRegistrationOptions): IInteractiveRequestSession;
     // (undocumented)
