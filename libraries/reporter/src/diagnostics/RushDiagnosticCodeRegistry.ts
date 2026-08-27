@@ -207,6 +207,13 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS = defineRushDiagnosticCodeDefiniti
     detailKey: 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail'
   },
   {
+    code: 'RUSH_PROTOCOL_INVALID_CHILD_STREAM',
+    category: 'environment',
+    defaultSeverity: 'error',
+    summaryKey: 'diagnostic.RUSH_PROTOCOL_INVALID_CHILD_STREAM.summary',
+    detailKey: 'diagnostic.RUSH_PROTOCOL_INVALID_CHILD_STREAM.detail'
+  },
+  {
     code: RUSH_INTERNAL_ERROR_CODE,
     category: 'internal',
     defaultSeverity: 'error',
