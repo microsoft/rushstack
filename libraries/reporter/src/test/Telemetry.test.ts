@@ -157,15 +157,103 @@ describe('TelemetrySubscriber', () => {
       expect(TELEMETRY_AGGREGATE_KEYS).toContain(key);
     }
   });
+
+  it('uses the root session completion as the final process result', async () => {
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.emit(rawInput('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    manager.emit(rawInput('sessionCompleted', { exitCode: 1, durationMs: 2000 }));
+    await manager.flushAsync();
+
+    expect(telemetry.buildAggregate()).toMatchObject({
+      commandName: 'build',
+      result: 'failed',
+      exitCode: 1,
+      durationMs: 2000
+    });
+  });
+
+  it('records command completion before later lifecycle results arrive', async () => {
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.emit(rawInput('commandCompleted', { commandName: 'build', exitCode: 1, durationMs: 1500 }));
+    await manager.flushAsync();
+
+    expect(telemetry.buildAggregate()).toMatchObject({
+      commandName: 'build',
+      result: 'failed',
+      exitCode: 1,
+      durationMs: 1500
+    });
+  });
+
+  it('counts each operation once using its final status', async () => {
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'op1', status: 'ready' }));
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'op1', status: 'queued' }));
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'op1', status: 'executing' }));
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'op2', status: 'aborted' }));
+    await manager.flushAsync();
+
+    expect(telemetry.buildAggregate().operationStatusCounts).toEqual({ success: 1, aborted: 1 });
+  });
+
+  it('does not let child session lifecycle events overwrite root command state', async () => {
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.emit(rawInput('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    manager.emit(rawInput('sessionCompleted', { exitCode: 1, durationMs: 2000 }));
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'root-op', status: 'success' }));
+    manager.emit({
+      ...rawInput('commandResult', { commandName: 'child-command', succeeded: true, exitCode: 0 }),
+      sessionId: 'child',
+      parentSessionId: 'sess'
+    });
+    manager.emit({
+      ...rawInput('sessionCompleted', { exitCode: 0, durationMs: 25 }),
+      sessionId: 'child',
+      parentSessionId: 'sess'
+    });
+    manager.emit({
+      ...rawInput('operationStatusChanged', { operationId: 'child-op', status: 'failure' }),
+      sessionId: 'child',
+      parentSessionId: 'sess'
+    });
+    await manager.flushAsync();
+
+    expect(telemetry.buildAggregate()).toMatchObject({
+      commandName: 'build',
+      result: 'failed',
+      exitCode: 1,
+      durationMs: 2000,
+      operationStatusCounts: { success: 1 }
+    });
+  });
 });
 
 describe('createBeforeLogAdapter', () => {
-  it('runs legacy hooks with a plain copy of the aggregate', () => {
-    const observed: Record<string, unknown>[] = [];
+  it('projects the legacy telemetry shape and returns hook augmentations without mutating the aggregate', () => {
     const hook: LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => {
-      observed.push(telemetry);
+      telemetry.customField = 'custom-value';
+      (telemetry.extraData as Record<string, number>).countSuccess = 99;
     };
-    const adapter: (aggregate: ITelemetryAggregate) => void = createBeforeLogAdapter([hook]);
+    const adapter: (aggregate: ITelemetryAggregate) => Record<string, unknown> = createBeforeLogAdapter([
+      hook
+    ]);
 
     const aggregate: ITelemetryAggregate = {
       commandName: 'build',
@@ -176,11 +264,35 @@ describe('createBeforeLogAdapter', () => {
       diagnosticCategoryCounts: {},
       producerVersions: ['@microsoft/rush-lib@5.177.2']
     };
-    adapter(aggregate);
+    const record: Record<string, unknown> = adapter(aggregate);
 
-    expect(observed).toHaveLength(1);
-    expect(observed[0]).toEqual({ ...aggregate });
-    // The hook receives a copy, not the aggregate itself.
-    expect(observed[0]).not.toBe(aggregate);
+    expect(record).toMatchObject({
+      name: 'build',
+      durationInSeconds: 0,
+      result: 'Succeeded',
+      customField: 'custom-value',
+      operationResults: {},
+      extraData: {
+        countAll: 2,
+        countSuccess: 99,
+        countSuccessWithWarnings: 0,
+        countFailure: 0
+      }
+    });
+    expect(aggregate.result).toBe('succeeded');
+    expect(aggregate.operationStatusCounts).toEqual({ success: 2 });
+    expect(record).not.toBe(aggregate);
+  });
+
+  it('rejects an aggregate built before command completion', () => {
+    const adapter: (aggregate: ITelemetryAggregate) => Record<string, unknown> = createBeforeLogAdapter([]);
+    expect(() =>
+      adapter({
+        operationStatusCounts: {},
+        diagnosticCodes: [],
+        diagnosticCategoryCounts: {},
+        producerVersions: []
+      })
+    ).toThrow(/completed telemetry aggregate/);
   });
 });

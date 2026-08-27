@@ -46,23 +46,27 @@ export interface IShadowResultSummary {
  * @beta
  */
 export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope<unknown>[]): number {
+  let commandResult: ICommandResultPayload | undefined;
   for (const event of events) {
-    if (event.type === 'commandResult') {
-      const payload: ICommandResultPayload = event.payload as ICommandResultPayload;
-      if (payload.succeeded) {
-        return 0;
-      }
-      return payload.exitCode !== 0 ? payload.exitCode : 1;
+    if (event.parentSessionId === undefined && event.type === 'commandResult') {
+      commandResult = event.payload as ICommandResultPayload;
+    }
+  }
+  if (commandResult !== undefined) {
+    if (commandResult.succeeded) {
+      return 0;
+    }
+    return commandResult.exitCode !== 0 ? commandResult.exitCode : 1;
+  }
+
+  let sessionExitCode: number | undefined;
+  for (const event of events) {
+    if (event.parentSessionId === undefined && event.type === 'sessionCompleted') {
+      sessionExitCode = (event.payload as { exitCode: number }).exitCode;
     }
   }
 
-  for (const event of events) {
-    if (event.type === 'sessionCompleted') {
-      return (event.payload as { exitCode: number }).exitCode;
-    }
-  }
-
-  return 0;
+  return sessionExitCode ?? 0;
 }
 
 /**
@@ -79,25 +83,34 @@ export function deriveExitCodeFromEvents(events: readonly IReporterEventEnvelope
 export function summarizeShadowResult(
   events: readonly IReporterEventEnvelope<unknown>[]
 ): IShadowResultSummary {
-  const operationCounts: { [status: string]: number } = {};
+  const operationStatuses: Map<string, IOperationStatusChangedPayload['status']> = new Map();
   let commandName: string | undefined;
-  let succeeded: boolean = true;
+  let commandSucceeded: boolean | undefined;
 
   for (const event of events) {
+    if (event.parentSessionId !== undefined) {
+      continue;
+    }
     if (event.type === 'operationStatusChanged') {
       const payload: IOperationStatusChangedPayload = event.payload as IOperationStatusChangedPayload;
-      operationCounts[payload.status] = (operationCounts[payload.status] ?? 0) + 1;
+      operationStatuses.set(payload.operationId, payload.status);
     } else if (event.type === 'commandResult') {
       const payload: ICommandResultPayload = event.payload as ICommandResultPayload;
       commandName = payload.commandName;
-      succeeded = payload.succeeded;
+      commandSucceeded = payload.succeeded;
     }
   }
 
+  const operationCounts: { [status: string]: number } = {};
+  for (const status of operationStatuses.values()) {
+    operationCounts[status] = (operationCounts[status] ?? 0) + 1;
+  }
+
+  const exitCode: number = deriveExitCodeFromEvents(events);
   return {
     commandName,
-    succeeded,
-    exitCode: deriveExitCodeFromEvents(events),
+    succeeded: commandSucceeded ?? exitCode === 0,
+    exitCode,
     operationCounts
   };
 }

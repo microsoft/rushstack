@@ -12,5 +12,5 @@
 export const CONFIGURATION_DIAGNOSTIC_TEMPLATES = {
   'diagnostic.RUSH_CONFIG_INVALID_JSON.summary': 'The configuration file {file} contains invalid JSON.',
   'diagnostic.RUSH_PLUGIN_API_INCOMPATIBLE.summary':
-    'The plugin {pluginName} declares plugin API version {declaredApiVersion}, which is incompatible with this Rush (supported: {supportedApiVersion}).'
+    'The plugin {pluginName} supports Rush {rushVersionRange}, which does not include the running Rush version {rushVersion}.'
 } as const;

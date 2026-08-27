@@ -68,10 +68,13 @@ export type BootstrapPrivacyClassification = 'public' | 'local-sensitive' | 'sec
 export function computeEnvelopePrivacyFloor(classifications: Iterable<ReporterPrivacyClassification>): ReporterPrivacyClassification;
 
 // @beta
+export function computeWallTimeRegressionPercent(baselineMs: number, candidateMs: number): number;
+
+// @beta
 export const COPILOT_CLI_ENV_VAR: 'COPILOT_CLI';
 
 // @beta
-export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => void;
+export function createBeforeLogAdapter(hooks: readonly LegacyBeforeLogHook[]): (aggregate: ITelemetryAggregate) => Record<string, unknown>;
 
 // @beta
 export function createColorizer(enabled: boolean): IColorizer;
@@ -80,7 +83,7 @@ export function createColorizer(enabled: boolean): IColorizer;
 export function createEngineSink(providedSink?: IReporterEventSink): IEngineSinkResolution;
 
 // @beta
-export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest): IRushDiagnostic;
+export function createPluginApiIncompatibleDiagnostic(manifest: IRushPluginManifest, rushVersion: string): IRushDiagnostic;
 
 // @beta
 export function createRushDiagnostic(code: RushDiagnosticCodes, options?: ICreateRushDiagnosticOptions): IRushDiagnostic;
@@ -93,6 +96,9 @@ export function createScopedReporter(options: ICreateScopedReporterOptions): ISc
 
 // @beta
 export function createTelemetryReporter(subscriber: TelemetrySubscriber): IReporter;
+
+// @beta
+export const DAEMON_ALIGNED_MAJOR_REPORTER_DEFAULTS: IReporterMajorDefaults;
 
 // @beta
 export const DEFAULT_FLUSH_TIMEOUT_MS: number;
@@ -134,6 +140,9 @@ export function detectAgent(env: Record<string, string | undefined>, configuredV
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
 
 // @beta
+export function evaluatePluginApplyGate(manifests: readonly IRushPluginManifest[], options: IPluginApplyGateOptions): IPluginApplyDecision[];
+
+// @beta
 export const EXIT_CODE_FAILURE: 1;
 
 // @beta
@@ -162,6 +171,9 @@ export class FileReporter implements IReporter {
 export function filterEventsForLogLevel(logLevel: ReporterLogLevel, events: readonly IReporterEventEnvelope<unknown>[]): IReporterEventEnvelope<unknown>[];
 
 // @beta
+export function getBlockedPlugins(decisions: readonly IPluginApplyDecision[]): IPluginApplyDecision[];
+
+// @beta
 export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>): ReporterLogLevel;
 
 // @beta
@@ -169,6 +181,9 @@ export function getLogLevelRank(level: ReporterLogLevel): number;
 
 // @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export function getReporterMigrationPhase(id: ReporterMigrationPhaseId): IReporterMigrationPhase;
 
 // @beta
 export function getSignalExitCode(signal: NodeJS.Signals): number;
@@ -271,6 +286,13 @@ export interface IAutomaticReporterPlan {
     readonly primary: IReporterPlanEntry;
     readonly reason: string;
     readonly stdoutOwner: 'machine' | 'human';
+}
+
+// @beta
+export interface IAutomaticSelectionContext {
+    readonly emergencyLegacyFallback?: boolean;
+    readonly experimentalSettingEnabled?: boolean;
+    readonly explicitOptIn?: boolean;
 }
 
 // @beta
@@ -616,6 +638,19 @@ export interface IPlaintextReporterOptions {
 }
 
 // @beta
+export interface IPluginApplyDecision {
+    readonly allowed: boolean;
+    readonly diagnostic?: IRushDiagnostic;
+    readonly manifest: IRushPluginManifest;
+}
+
+// @beta
+export interface IPluginApplyGateOptions {
+    readonly gateEnabled?: boolean;
+    readonly rushVersion: string;
+}
+
+// @beta
 export interface IProblemMatch {
     readonly code?: string;
     readonly column?: number;
@@ -773,11 +808,33 @@ export interface IReporterHostOptions {
 }
 
 // @beta
+export interface IReporterMajorDefaults {
+    readonly automaticSelectionEnabledByDefault: boolean;
+    readonly emergencyFallbackEnvVar: string;
+    readonly emergencyFallbackReporterName: string;
+    readonly gateIncompatiblePluginsBeforeApply: boolean;
+    readonly legacyRendererRetained: boolean;
+    readonly removedTerminalApis: readonly string[];
+    readonly sentinelBridgeRetained: boolean;
+    readonly verbosityAliasesRetained: boolean;
+}
+
+// @beta
 export interface IReporterManagerOptions {
     readonly coalesceThreshold?: number;
     readonly emergencyDiagnosticWriter?: (message: string) => void;
     readonly now?: () => string;
     readonly protocolVersion?: IReporterProtocolVersion;
+}
+
+// @beta
+export interface IReporterMigrationPhase {
+    readonly id: ReporterMigrationPhaseId;
+    readonly independentlyReleasable: boolean;
+    readonly ordinal: number;
+    readonly revertible: boolean;
+    readonly summary: string;
+    readonly title: string;
 }
 
 // @beta
@@ -787,6 +844,15 @@ export interface IReporterOutputTarget {
     };
     readonly reporter: string;
     readonly target: string;
+}
+
+// @beta
+export interface IReporterPerformanceBudgets {
+    readonly maxAdditionalPeakMemoryBytes: number;
+    readonly maxAiDetailedDiagnostics: number;
+    readonly maxAiOutputBytes: number;
+    readonly maxInteractiveRefreshHz: number;
+    readonly maxWallTimeRegressionPercent: number;
 }
 
 // @beta
@@ -901,8 +967,8 @@ export interface IRushFileDiagnosticSource {
 
 // @beta
 export interface IRushPluginManifest {
-    readonly pluginApiVersion: string;
     readonly pluginName: string;
+    readonly rushVersionRange: string;
 }
 
 // @beta
@@ -934,6 +1000,9 @@ export function isAgentVariableActive(value: string | undefined): boolean;
 export function isAlreadyReportedSentinel(error: unknown): boolean;
 
 // @beta
+export function isAutomaticSelectionEnabled(defaults: IReporterMajorDefaults, context?: IAutomaticSelectionContext): boolean;
+
+// @beta
 export function isBootstrapHandoffFileName(fileName: string): boolean;
 
 // @beta
@@ -960,6 +1029,9 @@ export interface IScopedReporter {
     emitExtension(name: ReporterExtensionEventName, payload: ReporterJsonValue): string;
     emitMessage(options: IScopedMessageOptions): string;
 }
+
+// @beta
+export function isEmergencyLegacyFallback(env: Record<string, string | undefined>, defaults?: IReporterMajorDefaults): boolean;
 
 // @beta
 export interface ISessionCompletedPayload {
@@ -990,9 +1062,6 @@ export function isLegacyEmergencyFallbackRequested(env: Record<string, string | 
 export function isMachineReporter(reporter: ReporterName): boolean;
 
 // @beta
-export function isPluginApiVersionSupported(declaredApiVersion: string, supportedApiVersion?: string): boolean;
-
-// @beta
 export function isReporterEventRequired(type: ReporterEventType): boolean;
 
 // @beta
@@ -1002,13 +1071,25 @@ export function isReporterExtensionEventName(name: string): name is ReporterExte
 export function isReporterProtocolCompatible(consumer: IReporterProtocolVersion, producer: IReporterProtocolVersion): boolean;
 
 // @beta
+export function isRushVersionSupported(rushVersionRange: string, rushVersion: string): boolean;
+
+// @beta
 export function isSupportedLogLevel(level: string): level is ReporterLogLevel;
 
 // @beta
 export function isSupportedReporterName(name: string): name is ReporterName;
 
 // @beta
+export function isTerminalApiRemoved(api: string, defaults?: IReporterMajorDefaults): boolean;
+
+// @beta
 export function isValidRushDiagnosticCode(code: string): boolean;
+
+// @beta
+export function isWithinMemoryBudget(additionalPeakBytes: number, budgets?: IReporterPerformanceBudgets): boolean;
+
+// @beta
+export function isWithinWallTimeBudget(baselineMs: number, candidateMs: number, budgets?: IReporterPerformanceBudgets): boolean;
 
 // @beta
 export interface ITelemetryAggregate {
@@ -1165,7 +1246,7 @@ export class OldEngineOutputAdapter {
 export type OneOrMoreRushDiagnosticCodeSegments<TSegments extends string = string> = string extends TSegments ? `_${Uppercase<string>}` : TSegments extends `_${infer Segments}` ? Segments extends '' ? never : TSegments extends Uppercase<TSegments> ? TSegments : never : never;
 
 // @beta
-export type OperationStatus = 'ready' | 'executing' | 'success' | 'successWithWarnings' | 'failure' | 'blocked' | 'skipped' | 'fromCache' | 'noOp';
+export type OperationStatus = 'ready' | 'waiting' | 'queued' | 'executing' | 'success' | 'successWithWarnings' | 'failure' | 'blocked' | 'skipped' | 'fromCache' | 'noOp' | 'aborted';
 
 // @beta
 export class OperationStreamEmitter {
@@ -1213,6 +1294,9 @@ export type PlaintextVariant = 'detailed' | 'concise';
 export function planAutomaticReporters(selection: IReporterSelection): IAutomaticReporterPlan;
 
 // @beta
+export const PRE_FLIP_REPORTER_DEFAULTS: IReporterMajorDefaults;
+
+// @beta
 export class ProblemMatcherRegistry {
     getMatchers(tool: string, options?: IGetMatchersOptions): IProblemMatcher[];
     register(matcher: IProblemMatcher): void;
@@ -1235,6 +1319,9 @@ export function regroupOperationOutput(events: readonly IReporterEventEnvelope<u
 export function relayHeftChildOutput(child: IHeftChildOutputStreams, targets?: IHeftChildOutputTargets): void;
 
 // @beta
+export const REMOVED_TERMINAL_APIS: readonly string[];
+
+// @beta
 export function renderActiveProjectsRow(projects: readonly string[], width: number): string;
 
 // @beta
@@ -1247,7 +1334,13 @@ export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted
 export const REPORTER_KNOWN_CAPABILITIES: readonly [];
 
 // @beta
+export const REPORTER_MIGRATION_PHASES: readonly IReporterMigrationPhase[];
+
+// @beta
 export const REPORTER_PACKAGE_NAME: '@rushstack/rush-reporter';
+
+// @beta
+export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets;
 
 // @beta
 export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
@@ -1296,6 +1389,7 @@ export class ReporterManager implements IReporterEventSink {
     closeAsync(timeoutMs?: number): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     flushAsync(timeoutMs?: number): Promise<void>;
+    getPendingEventCount(): number;
     ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string;
     initializeAsync(): Promise<void>;
     signalFlushAsync(timeoutMs?: number): Promise<void>;
@@ -1303,6 +1397,9 @@ export class ReporterManager implements IReporterEventSink {
 
 // @beta
 export type ReporterMessageSeverity = 'debug' | 'info' | 'warning' | 'error';
+
+// @beta
+export type ReporterMigrationPhaseId = 'contractsAndBaselines' | 'bootstrapAndCompatAdapters' | 'shadowStructuredEmission' | 'optInReporters' | 'heftProtocolTrack' | 'daemonAlignedMajorFlip' | 'laterCleanupMajor';
 
 // @beta
 export class ReporterMultiplexer implements IReporter {
@@ -1422,9 +1519,6 @@ export const RUSH_INTERNAL_ERROR_CODE: 'RUSH_INTERNAL_UNEXPECTED';
 
 // @beta
 export const RUSH_LOGS_DIR_NAME: 'rush-logs';
-
-// @beta
-export const RUSH_PLUGIN_API_VERSION: '1.0.0';
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';

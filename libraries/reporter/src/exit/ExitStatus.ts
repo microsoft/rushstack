@@ -129,10 +129,10 @@ export interface IResolveExitStatusFromEventsOptions {
  * Resolves a command's exit status from its structured event stream.
  *
  * @remarks
- * A failure is any failed command result, any error-severity diagnostic, or any
- * failed operation. Diagnostic categories and the selected reporter are never
- * consulted, so they cannot influence the exit code. Warning-severity
- * diagnostics never cause failure.
+ * A failure is any failed command result, nonzero root completion code,
+ * error-severity diagnostic, or failed or aborted operation. Diagnostic
+ * categories and the selected reporter are never consulted, so they cannot
+ * influence the exit code. Warning-severity diagnostics never cause failure.
  *
  * @param events - the structured events emitted during the command
  * @param options - cancellation and signal state
@@ -145,8 +145,15 @@ export function resolveExitStatusFromEvents(
 ): IRushExitStatus {
   let hasFailures: boolean = false;
   for (const event of events) {
+    if (event.parentSessionId !== undefined) {
+      continue;
+    }
     if (event.type === 'commandResult') {
       if ((event.payload as { succeeded: boolean }).succeeded === false) {
+        hasFailures = true;
+      }
+    } else if (event.type === 'commandCompleted' || event.type === 'sessionCompleted') {
+      if ((event.payload as { exitCode: number }).exitCode !== 0) {
         hasFailures = true;
       }
     } else if (event.type === 'diagnosticEmitted') {
@@ -154,7 +161,8 @@ export function resolveExitStatusFromEvents(
         hasFailures = true;
       }
     } else if (event.type === 'operationStatusChanged') {
-      if ((event.payload as { status?: string }).status === 'failure') {
+      const status: string | undefined = (event.payload as { status?: string }).status;
+      if (status === 'failure' || status === 'aborted') {
         hasFailures = true;
       }
     }

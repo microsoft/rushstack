@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
+
 /**
  * The spinner frames used by the interactive live region.
  *
@@ -13,7 +15,7 @@ export const SPINNER_FRAMES: readonly string[] = ['⠋', '⠙', '⠹', '⠸', '�
  *
  * @beta
  */
-export const MIN_REFRESH_INTERVAL_MS: number = 100;
+export const MIN_REFRESH_INTERVAL_MS: number = 1000 / REPORTER_PERFORMANCE_BUDGETS.maxInteractiveRefreshHz;
 
 /**
  * The snapshot of live state rendered into the three-row region.

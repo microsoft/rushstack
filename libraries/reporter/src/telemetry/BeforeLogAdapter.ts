@@ -19,8 +19,11 @@ export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
  *
  * @remarks
  * During migration the existing `beforeLog` hook is preserved: the adapter runs
- * each legacy hook with a plain-object copy of the new aggregate, so no hook
- * observes non-allowlisted data.
+ * each legacy hook with an allowlisted summary projection matching Rush's
+ * legacy `ITelemetryData` field names and units. Detailed operation records are
+ * intentionally unavailable at this privacy boundary. No hook mutates the
+ * allowlisted aggregate, and the returned record preserves hook augmentations
+ * for the legacy telemetry writer.
  *
  * @param hooks - the legacy hooks to preserve
  *
@@ -28,11 +31,33 @@ export type LegacyBeforeLogHook = (telemetry: Record<string, unknown>) => void;
  */
 export function createBeforeLogAdapter(
   hooks: readonly LegacyBeforeLogHook[]
-): (aggregate: ITelemetryAggregate) => void {
-  return (aggregate: ITelemetryAggregate): void => {
-    const record: Record<string, unknown> = { ...aggregate };
+): (aggregate: ITelemetryAggregate) => Record<string, unknown> {
+  return (aggregate: ITelemetryAggregate): Record<string, unknown> => {
+    if (aggregate.commandName === undefined || aggregate.result === undefined) {
+      throw new Error('A completed telemetry aggregate is required by the legacy beforeLog adapter.');
+    }
+
+    const counts: { readonly [status: string]: number } = aggregate.operationStatusCounts;
+    const record: Record<string, unknown> = {
+      name: aggregate.commandName,
+      durationInSeconds: (aggregate.durationMs ?? 0) / 1000,
+      result: aggregate.result === 'succeeded' ? 'Succeeded' : 'Failed',
+      operationResults: {},
+      extraData: {
+        countAll: Object.values(counts).reduce((total: number, count: number) => total + count, 0),
+        countSuccess: counts.success ?? 0,
+        countSuccessWithWarnings: counts.successWithWarnings ?? 0,
+        countFailure: counts.failure ?? 0,
+        countBlocked: counts.blocked ?? 0,
+        countFromCache: counts.fromCache ?? 0,
+        countSkipped: counts.skipped ?? 0,
+        countNoOp: counts.noOp ?? 0,
+        countAborted: counts.aborted ?? 0
+      }
+    };
     for (const hook of hooks) {
       hook(record);
     }
+    return record;
   };
 }

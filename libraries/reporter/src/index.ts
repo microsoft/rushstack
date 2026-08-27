@@ -167,11 +167,7 @@ export { createScopedLogger } from './session/ScopedLogger';
 export type { IRushSessionReportingOptions, IReporterExecutionContext } from './session/RushSessionReporting';
 export { RushSessionReporting } from './session/RushSessionReporting';
 export type { IRushPluginManifest } from './session/PluginApi';
-export {
-  RUSH_PLUGIN_API_VERSION,
-  isPluginApiVersionSupported,
-  createPluginApiIncompatibleDiagnostic
-} from './session/PluginApi';
+export { isRushVersionSupported, createPluginApiIncompatibleDiagnostic } from './session/PluginApi';
 
 export type {
   OperationStatus,
@@ -330,3 +326,28 @@ export {
   isReporterExtensionEventName,
   parseReporterExtensionEventName
 } from './producers/ReporterExtensionEventName';
+
+export type { IReporterPerformanceBudgets } from './perf/PerformanceBudgets';
+export {
+  REPORTER_PERFORMANCE_BUDGETS,
+  computeWallTimeRegressionPercent,
+  isWithinWallTimeBudget,
+  isWithinMemoryBudget
+} from './perf/PerformanceBudgets';
+
+export type { ReporterMigrationPhaseId, IReporterMigrationPhase } from './migration/MigrationPhase';
+export { REPORTER_MIGRATION_PHASES, getReporterMigrationPhase } from './migration/MigrationPhase';
+export type {
+  IReporterMajorDefaults,
+  IAutomaticSelectionContext
+} from './migration/DaemonAlignedMajorDefaults';
+export {
+  REMOVED_TERMINAL_APIS,
+  PRE_FLIP_REPORTER_DEFAULTS,
+  DAEMON_ALIGNED_MAJOR_REPORTER_DEFAULTS,
+  isTerminalApiRemoved,
+  isEmergencyLegacyFallback,
+  isAutomaticSelectionEnabled
+} from './migration/DaemonAlignedMajorDefaults';
+export type { IPluginApplyGateOptions, IPluginApplyDecision } from './migration/PluginApplyGate';
+export { evaluatePluginApplyGate, getBlockedPlugins } from './migration/PluginApplyGate';

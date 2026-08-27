@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-reporter",
-      "comment": "Add scoped session reporting (createScopedReporter, RushSessionReporting, IScopedLogger, execution context) and plugin API version compatibility with a migration diagnostic",
+      "comment": "Add scoped session reporting (createScopedReporter, RushSessionReporting, IScopedLogger, execution context) and Rush version range compatibility with a migration diagnostic",
       "type": "minor"
     }
   ],

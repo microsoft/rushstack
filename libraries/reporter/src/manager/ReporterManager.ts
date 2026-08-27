@@ -135,6 +135,9 @@ export class ReporterManager implements IReporterEventSink {
     this._ownedDestinations = new Set();
     this._protocolVersion = protocolVersion;
     this._now = now;
+    if (!Number.isSafeInteger(coalesceThreshold) || coalesceThreshold < 1) {
+      throw new RangeError('coalesceThreshold must be a positive integer.');
+    }
     this._coalesceThreshold = coalesceThreshold;
     this._emergencyDiagnosticWriter = emergencyDiagnosticWriter;
     this._nextSequence = 1;
@@ -237,6 +240,24 @@ export class ReporterManager implements IReporterEventSink {
   }
 
   /**
+   * Returns the total number of envelopes still buffered across all reporter
+   * queues.
+   *
+   * @remarks
+   * This is an observability hook for verifying bounded streaming. Each queue
+   * coalesces replaceable status events and applies synchronous backpressure at
+   * the configured threshold for protected events. After
+   * {@link ReporterManager.flushAsync} resolves it is `0`.
+   */
+  public getPendingEventCount(): number {
+    let total: number = 0;
+    for (const entry of this._entries) {
+      total += entry.queue.length;
+    }
+    return total;
+  }
+
+  /**
    * Drains every reporter queue and flushes each reporter, bounded by a timeout.
    *
    * @param timeoutMs - the flush timeout in milliseconds
@@ -320,6 +341,14 @@ export class ReporterManager implements IReporterEventSink {
       // coalesced or dropped.
       entry.queue[lastIndex] = envelope;
     } else {
+      if (entry.queue.length >= this._coalesceThreshold) {
+        const oldestEnvelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
+        this._deliverEnvelope(entry, oldestEnvelope);
+        if (entry.disabled) {
+          entry.queue.length = 0;
+          return;
+        }
+      }
       entry.queue.push(envelope);
     }
 
@@ -333,20 +362,24 @@ export class ReporterManager implements IReporterEventSink {
     try {
       while (entry.queue.length > 0) {
         const envelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
-        try {
-          entry.reporter.report(envelope);
-        } catch (error) {
-          this._handleReporterFailure(entry, error as Error);
-          if (entry.disabled) {
-            entry.queue.length = 0;
-            break;
-          }
+        this._deliverEnvelope(entry, envelope);
+        if (entry.disabled) {
+          entry.queue.length = 0;
+          break;
         }
         // Yield so producers and coalescing can interleave with delivery.
         await Promise.resolve();
       }
     } finally {
       entry.draining = false;
+    }
+  }
+
+  private _deliverEnvelope(entry: IReporterEntry, envelope: IReporterEventEnvelope<unknown>): void {
+    try {
+      entry.reporter.report(envelope);
+    } catch (error) {
+      this._handleReporterFailure(entry, error as Error);
     }
   }
 
