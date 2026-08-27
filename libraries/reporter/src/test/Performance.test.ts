@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
+
 import {
   ReporterManager,
   REPORTER_PERFORMANCE_BUDGETS,
@@ -69,6 +72,50 @@ const PROTECTED_TYPES: readonly ReporterEventType[] = [
   'externalProcessCompleted'
 ];
 
+interface IWorkloadMeasurement {
+  readonly elapsedMs: number;
+  readonly peakRssBytes: number;
+  readonly deliveredEvents: number;
+}
+
+const REPRESENTATIVE_WORK_UNIT: Buffer = Buffer.alloc(2 * 1024 * 1024, 0x5a);
+const REPRESENTATIVE_OPERATION_COUNT: number = 128;
+
+async function measureRepresentativeWorkload(enableReporter: boolean): Promise<IWorkloadMeasurement> {
+  let manager: ReporterManager | undefined;
+  let reporter: CountingReporter | undefined;
+  if (enableReporter) {
+    manager = new ReporterManager();
+    reporter = new CountingReporter('benchmark');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+  }
+
+  let peakRssBytes: number = process.memoryUsage().rss;
+  const startMs: number = performance.now();
+  for (let i: number = 0; i < REPRESENTATIVE_OPERATION_COUNT; i++) {
+    createHash('sha256').update(REPRESENTATIVE_WORK_UNIT).update(String(i)).digest();
+    manager?.emit(makeInput('operationStatusChanged', { operationId: `op-${i}`, status: 'success' }));
+    if (i % 16 === 0) {
+      peakRssBytes = Math.max(peakRssBytes, process.memoryUsage().rss);
+      await Promise.resolve();
+    }
+  }
+  await manager?.flushAsync();
+  peakRssBytes = Math.max(peakRssBytes, process.memoryUsage().rss);
+
+  return {
+    elapsedMs: performance.now() - startMs,
+    peakRssBytes,
+    deliveredEvents: reporter?.total ?? 0
+  };
+}
+
+function median(values: readonly number[]): number {
+  const sorted: number[] = [...values].sort((a: number, b: number) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
 describe('reporter performance budgets', () => {
   it('exposes the specification §7.3 blocking budgets', () => {
     expect(REPORTER_PERFORMANCE_BUDGETS.maxWallTimeRegressionPercent).toBe(3);
@@ -91,6 +138,15 @@ describe('reporter performance budgets', () => {
     expect(isWithinMemoryBudget(32 * 1024 * 1024)).toBe(true);
     expect(isWithinMemoryBudget(33 * 1024 * 1024)).toBe(false);
   });
+
+  it('measures representative baseline and reporter peak RSS within the 32 MiB budget', async () => {
+    const baseline: IWorkloadMeasurement = await measureRepresentativeWorkload(false);
+    const candidate: IWorkloadMeasurement = await measureRepresentativeWorkload(true);
+    const additionalPeakBytes: number = Math.max(0, candidate.peakRssBytes - baseline.peakRssBytes);
+
+    expect(candidate.deliveredEvents).toBe(REPRESENTATIVE_OPERATION_COUNT);
+    expect(isWithinMemoryBudget(additionalPeakBytes)).toBe(true);
+  });
 });
 
 describe('reporter bounded streaming', () => {
@@ -105,35 +161,26 @@ describe('reporter bounded streaming', () => {
       manager.emit(makeInput('activityChanged', { i }));
     }
 
-    // No microtask has run yet, so the queue holds every un-drained event. If the
-    // manager buffered the whole build it would hold ~5000; coalescing keeps it
-    // near the threshold instead, proving bounded rather than whole-build memory.
+    // No microtask has run yet. Coalescing keeps replaceable status noise near
+    // the threshold instead of buffering the whole build.
     const pendingDuringBurst: number = manager.getPendingEventCount();
-    expect(pendingDuringBurst).toBeLessThan(200);
+    expect(pendingDuringBurst).toBeLessThanOrEqual(64);
 
     await manager.flushAsync();
     expect(manager.getPendingEventCount()).toBe(0);
   });
 
-  it('completes a high-volume benchmark within the wall-time smoke ceiling', async () => {
-    const manager: ReporterManager = new ReporterManager();
-    const reporter: CountingReporter = new CountingReporter('a');
-    manager.addReporter(reporter);
-    await manager.initializeAsync();
-
-    const volume: number = 50000;
-    const startMs: number = Date.now();
-    for (let i: number = 0; i < volume; i++) {
-      manager.emit(makeInput('activityChanged', { i }));
+  it('keeps a representative reporter workload within the wall-time regression budget', async () => {
+    const baselineSamples: number[] = [];
+    const candidateSamples: number[] = [];
+    for (let sample: number = 0; sample < 3; sample++) {
+      baselineSamples.push((await measureRepresentativeWorkload(false)).elapsedMs);
+      const candidate: IWorkloadMeasurement = await measureRepresentativeWorkload(true);
+      expect(candidate.deliveredEvents).toBe(REPRESENTATIVE_OPERATION_COUNT);
+      candidateSamples.push(candidate.elapsedMs);
     }
-    await manager.flushAsync();
-    const elapsedMs: number = Date.now() - startMs;
 
-    // Generous smoke ceiling: the harness must sustain many thousands of events
-    // per second so a real build's per-event overhead stays negligible.
-    expect(elapsedMs).toBeLessThan(10000);
-    expect(reporter.total).toBeGreaterThan(0);
-    expect(manager.getPendingEventCount()).toBe(0);
+    expect(isWithinWallTimeBudget(median(baselineSamples), median(candidateSamples))).toBe(true);
   });
 });
 
@@ -190,5 +237,25 @@ describe('reporter queue pressure', () => {
     expect(reporter.counts.get('operationStatusChanged') ?? 0).toBe(protectedCount);
     expect(reporter.counts.get('activityChanged') ?? 0).toBeGreaterThan(0);
     expect(reporter.counts.get('activityChanged') ?? 0).toBeLessThan(2000);
+  });
+
+  it('applies bounded backpressure to a synchronous protected-event burst', async () => {
+    const threshold: number = 32;
+    const manager: ReporterManager = new ReporterManager({ coalesceThreshold: threshold });
+    const reporter: CountingReporter = new CountingReporter('a');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    const protectedCount: number = 5000;
+    let maxPendingCount: number = 0;
+    for (let i: number = 0; i < protectedCount; i++) {
+      manager.emit(makeInput('externalOutput', { stream: 'stdout', text: `line ${i}\n` }));
+      maxPendingCount = Math.max(maxPendingCount, manager.getPendingEventCount());
+    }
+
+    expect(maxPendingCount).toBeLessThanOrEqual(threshold);
+    await manager.flushAsync();
+    expect(reporter.counts.get('externalOutput')).toBe(protectedCount);
+    expect(manager.getPendingEventCount()).toBe(0);
   });
 });

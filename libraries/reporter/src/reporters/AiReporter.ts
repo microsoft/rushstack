@@ -5,10 +5,9 @@ import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import type { IRushRemediationAction } from '../diagnostics/IRushRemediationAction';
+import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
 import { REPORTER_PROTOCOL_VERSION } from '../protocol/ReporterProtocol';
 
-const DEFAULT_AI_MAX_BYTES: number = 64 * 1024;
-const DEFAULT_AI_MAX_DETAILED_DIAGNOSTICS: number = 20;
 const MIN_AI_MAX_BYTES: number = 512;
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'success',
@@ -127,8 +126,9 @@ export class AiReporter implements IReporter {
 
   public constructor(options: IAiReporterOptions) {
     this._write = options.write;
-    this._maxBytes = options.maxBytes ?? DEFAULT_AI_MAX_BYTES;
-    this._maxDetailedDiagnostics = options.maxDetailedDiagnostics ?? DEFAULT_AI_MAX_DETAILED_DIAGNOSTICS;
+    this._maxBytes = options.maxBytes ?? REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes;
+    this._maxDetailedDiagnostics =
+      options.maxDetailedDiagnostics ?? REPORTER_PERFORMANCE_BUDGETS.maxAiDetailedDiagnostics;
     if (!Number.isInteger(this._maxBytes) || this._maxBytes < MIN_AI_MAX_BYTES) {
       throw new RangeError(`maxBytes must be an integer of at least ${MIN_AI_MAX_BYTES}`);
     }

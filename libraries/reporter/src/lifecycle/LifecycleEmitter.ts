@@ -97,8 +97,8 @@ export class LifecycleEmitter {
   public emitOperationRegistered(payload: IOperationRegisteredPayload): string {
     return this._emit('operationRegistered', payload, 'public', {
       operationId: payload.operationId,
-      projectName: payload.projectName,
-      phaseName: payload.phaseName
+      ...(payload.projectName === undefined ? {} : { projectName: payload.projectName }),
+      ...(payload.phaseName === undefined ? {} : { phaseName: payload.phaseName })
     });
   }
 

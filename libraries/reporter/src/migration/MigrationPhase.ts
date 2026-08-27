@@ -78,7 +78,8 @@ export const REPORTER_MIGRATION_PHASES: readonly IReporterMigrationPhase[] = [
     id: 'contractsAndBaselines',
     ordinal: 1,
     title: 'Contracts and baselines',
-    summary: 'Publish @rushstack/reporter, freeze legacy snapshots, add protocol and compatibility goldens.',
+    summary:
+      'Publish @rushstack/rush-reporter, freeze legacy snapshots, add protocol and compatibility goldens.',
     independentlyReleasable: true,
     revertible: true
   },
