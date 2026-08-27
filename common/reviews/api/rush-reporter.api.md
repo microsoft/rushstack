@@ -484,17 +484,13 @@ export interface IHeftChildEventInput {
 
 // @beta
 export interface IHeftChildOutputStreams {
-    // (undocumented)
     readonly stderr: Readable | null;
-    // (undocumented)
     readonly stdout: Readable | null;
 }
 
 // @beta
 export interface IHeftChildOutputTargets {
-    // (undocumented)
     readonly stderr: Writable;
-    // (undocumented)
     readonly stdout: Writable;
 }
 

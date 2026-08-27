@@ -40,9 +40,15 @@ export interface IChildDescriptorPlan {
  * @beta
  */
 export interface IHeftChildOutputStreams {
-  // Node.js uses null when a child stream was not configured as a pipe.
+  /**
+   * The child's standard output stream, or `null` when it was not configured as a pipe.
+   */
   // eslint-disable-next-line @rushstack/no-new-null
   readonly stdout: Readable | null;
+
+  /**
+   * The child's standard error stream, or `null` when it was not configured as a pipe.
+   */
   // eslint-disable-next-line @rushstack/no-new-null
   readonly stderr: Readable | null;
 }
@@ -53,7 +59,14 @@ export interface IHeftChildOutputStreams {
  * @beta
  */
 export interface IHeftChildOutputTargets {
+  /**
+   * The parent stream that receives the child's standard output.
+   */
   readonly stdout: Writable;
+
+  /**
+   * The parent stream that receives the child's standard error.
+   */
   readonly stderr: Writable;
 }
 
