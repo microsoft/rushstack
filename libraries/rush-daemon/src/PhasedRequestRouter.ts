@@ -328,7 +328,11 @@ function getGraphRoutingState(graph: IDualEmitOperationGraph): IGraphRoutingStat
 function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   validateNonemptyName(request.requestId, 'request id');
   validateNonemptyName(request.commandName, 'command name');
-  if (request.commandOrigin !== 'built-in' && request.commandOrigin !== 'custom') {
+  if (
+    request.commandOrigin !== undefined &&
+    request.commandOrigin !== 'built-in' &&
+    request.commandOrigin !== 'custom'
+  ) {
     throw new Error('Phased request command origin is not recognized.');
   }
   if (request.acceptsStdin !== undefined && typeof request.acceptsStdin !== 'boolean') {

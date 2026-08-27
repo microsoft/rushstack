@@ -48,6 +48,7 @@ describe(classifyRushCommand.name, () => {
     expect(classifyRushCommand({ commandName: 'constructor', commandOrigin: 'built-in' })).toBe(
       RequestExclusivityClass.Exclusive
     );
+    expect(classifyRushCommand({ commandName: 'build' })).toBe(RequestExclusivityClass.Exclusive);
   });
 
   it('fails a plugin replacement of a built-in command name closed', () => {

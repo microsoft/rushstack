@@ -114,6 +114,16 @@ function createPhasedRequest(
   };
 }
 
+function createLegacyPhasedRequest(requestId: string): IDaemonPhasedRequest {
+  return {
+    commandName: 'build',
+    engineShape: TEST_ENGINE_SHAPE,
+    environment: {},
+    operationSelection: [{ enabledState: true, operationId: TEST_OPERATION }],
+    requestId
+  };
+}
+
 function createDeferred(): { readonly promise: Promise<void>; readonly resolve: () => void } {
   let resolvePromise: (() => void) | undefined;
   const promise: Promise<void> = new Promise((resolve) => {
@@ -311,6 +321,34 @@ describe('request admission integration', () => {
     await Promise.all([active, queued]);
   });
 
+  it('accepts a legacy phased request without command origin and fails it closed', async () => {
+    const fixture = createRoutingFixture(
+      new Map([[TEST_OPERATION, new TestOperationRunner(TEST_OPERATION)]])
+    );
+    const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(fixture.session);
+    const phasedRouter: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const release = createDeferred();
+    const activeStarted = createDeferred();
+    const active = globalRouter.executeAsync(
+      createRequest(globalRouter, 'active-build', 'build'),
+      createBlockingExecutor(activeStarted.resolve, release.promise),
+      new AdmissionClient()
+    );
+    await activeStarted.promise;
+    const legacyClient: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const legacy = phasedRouter.executeAsync(createLegacyPhasedRequest('legacy'), legacyClient);
+
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(0);
+    expect(legacyClient.writes.map(({ queuePosition }) => queuePosition?.payload.position)).toContain(
+      1
+    );
+    release.resolve();
+
+    await Promise.all([active, legacy]);
+    expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(1);
+  });
+
   it('applies no-wait and one deadline across workspace and phased graph admission', async () => {
     jest.useFakeTimers();
     const graphStarted = createDeferred();
@@ -362,7 +400,11 @@ describe('request admission integration', () => {
     ).toEqual(expect.arrayContaining([2, 1]));
     jest.advanceTimersByTime(2);
     const timeoutResult = await timeoutPhased;
-    expect(timeoutResult).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
+    expect(timeoutResult).toMatchObject({
+      admissionErrorCode: 'wait-timeout',
+      errorMessage: 'The request was not admitted within 10ms.',
+      outcome: 'failure'
+    });
     expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(1);
 
     releaseGraph.resolve();

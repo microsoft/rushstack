@@ -7,7 +7,7 @@ import { RequestExclusivityClass } from './RequestScheduler';
 
 export interface IRushCommandClassificationOptions {
   readonly commandName: string;
-  readonly commandOrigin: DaemonRushCommandOrigin;
+  readonly commandOrigin?: DaemonRushCommandOrigin;
 }
 
 /**

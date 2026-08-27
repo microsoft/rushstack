@@ -133,7 +133,7 @@ export class RequestAdmissionController {
     } catch (error) {
       lease?.release();
       await writer?.flushAsync();
-      throw error;
+      throw this.#getReportedError(error);
     }
   }
 
@@ -143,6 +143,21 @@ export class RequestAdmissionController {
 
   #getRemainingWaitTimeoutMs(): number | undefined {
     return this.#deadlineMs === undefined ? undefined : Math.max(0, this.#deadlineMs - Date.now());
+  }
+
+  #getReportedError(error: unknown): unknown {
+    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutMs;
+    if (
+      waitTimeoutMs !== undefined &&
+      error instanceof RequestSchedulerError &&
+      error.code === RequestSchedulerErrorCode.WaitTimeout
+    ) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `The request was not admitted within ${waitTimeoutMs}ms.`
+      );
+    }
+    return error;
   }
 }
 

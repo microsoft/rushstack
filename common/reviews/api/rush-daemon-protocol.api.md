@@ -351,7 +351,7 @@ export interface IDaemonPhasedRequest {
     readonly acceptsStdin?: boolean;
     readonly admission?: IDaemonRequestAdmissionOptions;
     readonly commandName: string;
-    readonly commandOrigin: DaemonRushCommandOrigin;
+    readonly commandOrigin?: DaemonRushCommandOrigin;
     readonly engineShape: IDaemonPhasedEngineShape;
     readonly environment: Readonly<Record<string, string>>;
     readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
