@@ -11,6 +11,7 @@ import {
   isPluginApiVersionSupported,
   createPluginApiIncompatibleDiagnostic,
   isReporterEventRequired,
+  parseReporterExtensionEventName,
   type IReporter,
   type IReporterEventEnvelope,
   type IReporterEventScope,
@@ -106,12 +107,12 @@ describe('createScopedReporter', () => {
   it('validates and wraps extension events, rejecting non-namespaced names', () => {
     const sink: CapturingSink = new CapturingSink();
     const reporter: IScopedReporter = createScopedReporter({ sink, sessionId: 'sess', source: SOURCE });
-    reporter.emitExtension('acme.cache-warmed', { hits: 3 });
+    reporter.emitExtension(parseReporterExtensionEventName('acme.cache-warmed'), { hits: 3 });
     expect(sink.inputs[0].type).toBe('extension');
     expect(sink.inputs[0].payload).toEqual({ name: 'acme.cache-warmed', payload: { hits: 3 } });
-    expect(() => reporter.emitExtension('notnamespaced' as Parameters<IScopedReporter['emitExtension']>[0], {})).toThrow(
-      /Invalid extension event name/
-    );
+    expect(() =>
+      reporter.emitExtension('notnamespaced' as Parameters<IScopedReporter['emitExtension']>[0], {})
+    ).toThrow(/Invalid extension event name/);
   });
 
   it('exposes only emit methods, hiding modes, destinations, and thresholds', () => {
