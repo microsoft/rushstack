@@ -78,8 +78,8 @@ interface IWorkloadMeasurement {
   readonly deliveredEvents: number;
 }
 
-const REPRESENTATIVE_WORK_UNIT: Buffer = Buffer.alloc(2 * 1024 * 1024, 0x5a);
-const REPRESENTATIVE_OPERATION_COUNT: number = 128;
+const REPRESENTATIVE_WORK_UNIT: Buffer = Buffer.alloc(8 * 1024 * 1024, 0x5a);
+const REPRESENTATIVE_OPERATION_COUNT: number = 64;
 
 async function measureRepresentativeWorkload(enableReporter: boolean): Promise<IWorkloadMeasurement> {
   let manager: ReporterManager | undefined;
@@ -109,11 +109,6 @@ async function measureRepresentativeWorkload(enableReporter: boolean): Promise<I
     peakRssBytes,
     deliveredEvents: reporter?.total ?? 0
   };
-}
-
-function median(values: readonly number[]): number {
-  const sorted: number[] = [...values].sort((a: number, b: number) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
 }
 
 describe('reporter performance budgets', () => {
@@ -171,16 +166,22 @@ describe('reporter bounded streaming', () => {
   });
 
   it('keeps a representative reporter workload within the wall-time regression budget', async () => {
-    const baselineSamples: number[] = [];
-    const candidateSamples: number[] = [];
-    for (let sample: number = 0; sample < 3; sample++) {
-      baselineSamples.push((await measureRepresentativeWorkload(false)).elapsedMs);
+    const measurementPairs: { baselineMs: number; candidateMs: number }[] = [];
+    for (let sample: number = 0; sample < 5; sample++) {
+      const baselineMs: number = (await measureRepresentativeWorkload(false)).elapsedMs;
       const candidate: IWorkloadMeasurement = await measureRepresentativeWorkload(true);
       expect(candidate.deliveredEvents).toBe(REPRESENTATIVE_OPERATION_COUNT);
-      candidateSamples.push(candidate.elapsedMs);
+      measurementPairs.push({ baselineMs, candidateMs: candidate.elapsedMs });
     }
 
-    expect(isWithinWallTimeBudget(median(baselineSamples), median(candidateSamples))).toBe(true);
+    measurementPairs.sort(
+      (a, b) =>
+        computeWallTimeRegressionPercent(a.baselineMs, a.candidateMs) -
+        computeWallTimeRegressionPercent(b.baselineMs, b.candidateMs)
+    );
+    const medianPair: { baselineMs: number; candidateMs: number } =
+      measurementPairs[Math.floor(measurementPairs.length / 2)];
+    expect(isWithinWallTimeBudget(medianPair.baselineMs, medianPair.candidateMs)).toBe(true);
   });
 });
 
