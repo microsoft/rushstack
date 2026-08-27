@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/** The first additive protocol minor that supports request-scoped interactive I/O. @beta */
+export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number = 3;
+
 /**
  * A rushd wire protocol version.
  *
@@ -34,7 +37,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: 2
+  minor: DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR
 };
 
 /**

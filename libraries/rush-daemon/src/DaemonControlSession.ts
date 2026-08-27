@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 
 import {
   DAEMON_PROTOCOL_VERSION,
+  DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
   decodeDaemonControlMessage,
@@ -19,24 +20,43 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
+import {
+  DaemonInteractiveConnection
+} from './DaemonInteractiveConnection';
+import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
+import {
+  InteractiveInputRoutingError,
+  isInteractiveRequestInputFailure
+} from './InteractiveRequestInputRouter';
+
 export interface IDaemonControlSessionOptions {
   readonly daemonVersion: string;
   readonly startedAtMs: number;
+  readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   readonly onClosed: (session: DaemonControlSession, error: Error | undefined) => void;
   readonly onError: (error: Error) => void;
 }
 
 export class DaemonControlSession {
   private readonly _connection: DaemonFrameConnection;
+  private readonly _interactiveConnection: DaemonInteractiveConnection;
   private readonly _options: IDaemonControlSessionOptions;
   private _handshakeComplete: boolean = false;
+  private _peerSupportsInteractiveProtocol: boolean = false;
   private _sendQueue: Promise<void> = Promise.resolve();
 
   public constructor(connection: DaemonFrameConnection, options: IDaemonControlSessionOptions) {
     this._connection = connection;
     this._options = options;
+    this._interactiveConnection = new DaemonInteractiveConnection(
+      (message: DaemonControlMessage) => this._enqueueSendAsync(message)
+    );
     connection.onFrame((frame: IDaemonFrame) => this._onFrame(frame));
-    connection.onClosed((error: Error | undefined) => options.onClosed(this, error));
+    connection.onClosed((error: Error | undefined) => {
+      this._interactiveConnection.close(error);
+      options.onClosed(this, error);
+    });
+    options.onInteractiveConnection?.(this._interactiveConnection);
   }
 
   public closeAsync(): Promise<void> {
@@ -44,6 +64,16 @@ export class DaemonControlSession {
   }
 
   private _onFrame(frame: IDaemonFrame): void {
+    if (frame.kind === DaemonFrameType.stdin) {
+      if (!this._handshakeComplete) {
+        throw new DaemonProtocolError(
+          'malformedControlMessage',
+          'The first frame on a connection must be a hello control message.'
+        );
+      }
+      void this._completeInputAsync(this._interactiveConnection.routeStdinFrameAsync(frame.payload));
+      return;
+    }
     if (frame.kind !== DaemonFrameType.controlJson) {
       throw new DaemonProtocolError(
         'malformedControlMessage',
@@ -53,6 +83,12 @@ export class DaemonControlSession {
     const message: DaemonControlMessage = decodeDaemonControlMessage(frame.payload);
     if (!this._handshakeComplete) {
       this._handleHello(message);
+    } else if (this._interactiveConnection.handleControlMessage(message)) {
+      return;
+    } else if (message.kind === 'subscribe') {
+      this._interactiveConnection.setEnabled(
+        this._peerSupportsInteractiveProtocol && message.payload.supportsInteractiveIO === true
+      );
     } else if (message.kind === 'ping') {
       this._send(this._createPong());
     } else {
@@ -77,6 +113,8 @@ export class DaemonControlSession {
     );
     if (outcome.accepted) {
       this._handshakeComplete = true;
+      this._peerSupportsInteractiveProtocol =
+        message.payload.protocolVersion.minor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
       this._send(outcome.ack);
     } else {
       const errorMessage: IDaemonErrorMessage = {
@@ -99,19 +137,42 @@ export class DaemonControlSession {
   }
 
   private _send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
+    void this._enqueueSendAsync(message, closeAfterSend).catch((error: unknown) =>
+      this._handleSendErrorAsync(error)
+    );
+  }
+
+  private _enqueueSendAsync(
+    message: DaemonControlMessage,
+    closeAfterSend: boolean = false
+  ): Promise<void> {
     const frame: IDaemonFrame = {
       kind: DaemonFrameType.controlJson,
       payload: encodeDaemonControlMessage(message)
     };
-    this._sendQueue = this._sendQueue
+    const sendPromise: Promise<void> = this._sendQueue
       .then(() => this._connection.sendFrameAsync(frame))
-      .then(() => (closeAfterSend ? this._connection.closeAsync() : undefined))
-      .catch((error: unknown) => this._handleSendErrorAsync(error));
+      .then(() => (closeAfterSend ? this._connection.closeAsync() : undefined));
+    this._sendQueue = sendPromise.catch(() => undefined);
+    return sendPromise;
   }
 
   private async _handleSendErrorAsync(error: unknown): Promise<void> {
     const normalizedError: Error = error instanceof Error ? error : new Error(String(error));
     this._options.onError(normalizedError);
     await this._connection.closeAsync();
+  }
+
+  private async _completeInputAsync(inputPromise: Promise<void>): Promise<void> {
+    try {
+      await inputPromise;
+    } catch (error) {
+      if (
+        !isInteractiveRequestInputFailure(error) &&
+        !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
+      ) {
+        await this._handleSendErrorAsync(error);
+      }
+    }
   }
 }

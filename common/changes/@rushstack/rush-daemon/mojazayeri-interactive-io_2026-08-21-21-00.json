@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Route request-scoped interactive input and signal PTY-only in-process fallback.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "mojazayeri@users.noreply.github.com"
+}

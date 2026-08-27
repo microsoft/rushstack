@@ -12,12 +12,18 @@ import type {
   IDaemonPhasedEngineShape,
   IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest,
-  IDaemonPhasedRequestResult
+  IDaemonPhasedRequestResult,
+  IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
+import {
+  DaemonRequiresInProcessError,
+  evaluateDaemonTerminalPolicy
+} from './DaemonTerminalPolicy';
+import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import {
   RequestExclusivityClass,
   RequestScheduler,
@@ -71,6 +77,20 @@ export class PhasedRequestRouter {
     request: IDaemonPhasedRequest,
     client: IPhasedRequestClient
   ): Promise<IDaemonPhasedRequestResult> {
+    validateRequestIdentity(request);
+    const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
+      request,
+      client
+    );
+    const policy: IDaemonTerminalPolicyResult = evaluateDaemonTerminalPolicy(
+      request.requestId,
+      request.terminalRequirement
+    );
+    if (policy.decision === 'requiresInProcess') {
+      await interactiveSession?.finishAsync();
+      await client.writeTerminalPolicyAsync(policy);
+      throw new DaemonRequiresInProcessError(policy);
+    }
     const graph: IDualEmitOperationGraph = getDualEmitGraph(this.#workspaceSession);
     const routingState: IGraphRoutingState = getGraphRoutingState(graph);
     let lease: IRequestLease;
@@ -84,14 +104,25 @@ export class PhasedRequestRouter {
         error instanceof RequestSchedulerError &&
         error.code === RequestSchedulerErrorCode.Aborted
       ) {
-        return await writeAbortedResultAsync(request.requestId, client);
+        return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
       }
       throw error;
     }
 
+    let inputAttachment: Disposable | undefined;
     try {
-      return await this.#executeAdmittedAsync(request, client, graph, routingState);
+      inputAttachment = attachInteractiveInput(request, client, interactiveSession);
+      return await this.#executeAdmittedAsync(
+        request,
+        client,
+        graph,
+        routingState,
+        interactiveSession
+      );
+    } catch (error) {
+      return await finishAfterRoutingErrorAsync(interactiveSession, error);
     } finally {
+      inputAttachment?.[Symbol.dispose]();
       lease.release();
     }
   }
@@ -100,9 +131,9 @@ export class PhasedRequestRouter {
     request: IDaemonPhasedRequest,
     client: IPhasedRequestClient,
     graph: IDualEmitOperationGraph,
-    routingState: IGraphRoutingState
+    routingState: IGraphRoutingState,
+    interactiveSession: IInteractiveRequestSession | undefined
   ): Promise<IDaemonPhasedRequestResult> {
-    validateRequestIdentity(request);
     validateEngineShape(request.engineShape, this.#workspaceSession.engineShape);
     const operationById: ReadonlyMap<string, Operation> = indexOperations(graph.operations);
     const selection: IResolvedSelection = resolveSelection(request.operationSelection, operationById);
@@ -110,9 +141,11 @@ export class PhasedRequestRouter {
     try {
       warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
     } catch (error) {
+      const cleanupErrors: unknown[] = [];
+      await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
       const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
         aborted: client.abortSignal.aborted,
-        error,
+        error: combineErrors(error, cleanupErrors),
         graphStatus: graph.status,
         operationOutcomes: [],
         requestId: request.requestId,
@@ -124,14 +157,14 @@ export class PhasedRequestRouter {
     }
 
     if (client.abortSignal.aborted) {
-      return await writeAbortedResultAsync(request.requestId, client);
+      return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
     }
     if (graph.hasScheduledIteration || graph.status === OperationStatus.Executing) {
       throw new Error('The warm workspace operation graph is not idle.');
     }
     await this.#workspaceSession.reconcileInvalidationsAsync();
     if (client.abortSignal.aborted) {
-      return await writeAbortedResultAsync(request.requestId, client);
+      return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
     }
 
     applySelection(graph, selection);
@@ -205,6 +238,7 @@ export class PhasedRequestRouter {
     } catch (error) {
       cleanupErrors.push(error);
     }
+    await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
     await abortTail;
     cleanupErrors.push(...abortErrors.slice(observedAbortErrorCount));
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
@@ -265,6 +299,20 @@ function getGraphRoutingState(graph: IDualEmitOperationGraph): IGraphRoutingStat
 function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   validateNonemptyName(request.requestId, 'request id');
   validateNonemptyName(request.commandName, 'command name');
+  if (request.acceptsStdin !== undefined && typeof request.acceptsStdin !== 'boolean') {
+    throw new Error('Phased request acceptsStdin must be a boolean value.');
+  }
+  if (
+    request.terminalRequirement !== undefined &&
+    request.terminalRequirement !== 'none' &&
+    request.terminalRequirement !== 'interactiveInput' &&
+    request.terminalRequirement !== 'controllingTerminal'
+  ) {
+    throw new Error('Phased request terminal requirement is not recognized.');
+  }
+  if (request.terminalRequirement === 'interactiveInput' && request.acceptsStdin !== true) {
+    throw new Error('Phased request interactive input requires acceptsStdin to be true.');
+  }
 }
 
 function validateNonemptyName(value: string, kind: string): void {
@@ -398,11 +446,14 @@ function compareOperations(left: Operation, right: Operation): number {
 
 async function writeAbortedResultAsync(
   requestId: string,
-  client: IPhasedRequestClient
+  client: IPhasedRequestClient,
+  interactiveSession: IInteractiveRequestSession | undefined
 ): Promise<IDaemonPhasedRequestResult> {
+  const cleanupErrors: unknown[] = [];
+  await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
   const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
     aborted: true,
-    error: undefined,
+    error: combineErrors(undefined, cleanupErrors),
     graphStatus: OperationStatus.Aborted,
     operationOutcomes: [],
     requestId,
@@ -411,6 +462,63 @@ async function writeAbortedResultAsync(
   });
   await client.writeResultAsync(result);
   return result;
+}
+
+function validateInteractiveSession(
+  request: IDaemonPhasedRequest,
+  client: IPhasedRequestClient
+): IInteractiveRequestSession | undefined {
+  const session: IInteractiveRequestSession | undefined = client.interactiveSession;
+  if (session && session.requestId !== request.requestId) {
+    throw new Error('The interactive input session does not belong to the phased request.');
+  }
+  if (request.acceptsStdin === true && !session) {
+    throw new Error('The interactive phased request does not have a registered input session.');
+  }
+  if (request.acceptsStdin === true && !client.interactiveInputSink) {
+    throw new Error('The interactive phased request does not have an input sink bridge.');
+  }
+  return session;
+}
+
+function attachInteractiveInput(
+  request: IDaemonPhasedRequest,
+  client: IPhasedRequestClient,
+  session: IInteractiveRequestSession | undefined
+): Disposable | undefined {
+  if (request.acceptsStdin !== true) {
+    return undefined;
+  }
+  if (!session || !client.interactiveInputSink) {
+    throw new Error('The interactive phased request input bridge is unavailable.');
+  }
+  return session.attachInputSink(client.interactiveInputSink);
+}
+
+async function collectInteractiveCleanupErrorAsync(
+  session: IInteractiveRequestSession | undefined,
+  cleanupErrors: unknown[]
+): Promise<void> {
+  try {
+    await session?.finishAsync();
+  } catch (error) {
+    cleanupErrors.push(error);
+  }
+}
+
+async function finishAfterRoutingErrorAsync(
+  session: IInteractiveRequestSession | undefined,
+  routingError: unknown
+): Promise<never> {
+  try {
+    await session?.finishAsync();
+  } catch (cleanupError) {
+    throw new AggregateError(
+      [routingError, cleanupError],
+      'The phased request failed and could not restore its interactive terminal state.'
+    );
+  }
+  throw routingError;
 }
 
 function combineErrors(executionError: unknown, cleanupErrors: unknown[]): unknown {

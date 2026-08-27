@@ -3,8 +3,14 @@
 
 import type {
   IDaemonEventEnvelope,
-  IDaemonPhasedRequestResult
+  IDaemonPhasedRequestResult,
+  IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
+
+import type {
+  IInteractiveRequestInputSink,
+  IInteractiveRequestSession
+} from './InteractiveRequestInputRouter';
 
 /**
  * A client-scoped destination for one routed phased request.
@@ -18,6 +24,10 @@ import type {
 export interface IPhasedRequestClient {
   /** Aborted by the transport when the request is cancelled or disconnected. */
   readonly abortSignal: AbortSignal;
+  /** The request-scoped stdin/control lifecycle when one was registered by the transport integration. */
+  readonly interactiveSession?: IInteractiveRequestSession;
+  /** The integration-owned destination for stdin accepted by this phased request. */
+  readonly interactiveInputSink?: IInteractiveRequestInputSink;
   /** The connection session identifier used in structured event envelopes. */
   readonly sessionId: string;
 
@@ -33,6 +43,9 @@ export interface IPhasedRequestClient {
     stream: 'stdout' | 'stderr',
     chunk: Uint8Array
   ): Promise<void>;
+
+  /** Signals that the client must execute this request in-process instead. */
+  writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
 
   /** Writes the final command result after every preceding event and log chunk has drained. */
   writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void>;

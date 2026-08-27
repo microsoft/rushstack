@@ -16,6 +16,8 @@ import type { DaemonVerbosity } from './DaemonVerbosity';
 export interface IDaemonClientCaps {
   /** Whether the client's output is an interactive TTY. */
   readonly isTTY: boolean;
+  /** Whether the client supports request-scoped stdin and acknowledged raw-mode control. */
+  readonly supportsInteractiveIO?: boolean;
   /** The verbosity subset this client receives. Defaults to `normal`. */
   readonly verbosity?: DaemonVerbosity;
   /** The client's terminal width in columns, when known. */

@@ -39,5 +39,14 @@ export const MAX_OPERATION_ID_BYTES: number = 65535;
 /** The offset of the operation-id length prefix within a log frame payload. @beta */
 export const OPERATION_ID_LENGTH_OFFSET: number = 0;
 
+/** The byte length of the request-id length prefix used by stdin frames (`u16` little-endian). @beta */
+export const REQUEST_ID_LENGTH_BYTES: number = 2;
+
+/** The maximum byte length of a request id in a stdin frame (`u16` range). @beta */
+export const MAX_REQUEST_ID_BYTES: number = 65535;
+
+/** The offset of the request-id length prefix within a stdin frame payload. @beta */
+export const REQUEST_ID_LENGTH_OFFSET: number = 0;
+
 /** The offset of the frame payload within a serialized frame. @beta */
 export const PAYLOAD_OFFSET: number = FRAME_HEADER_BYTES;
