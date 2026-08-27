@@ -83,6 +83,11 @@ interface IBatchEntry extends IPreparedPhasedRequest {
 }
 
 const ROUTING_STATE_BY_GRAPH: WeakMap<IOperationGraph, IGraphRoutingState> = new WeakMap();
+const OBSERVED_STATUS_OVERRIDES_RETAINED: ReadonlySet<OperationStatus> = new Set([
+  OperationStatus.Aborted,
+  OperationStatus.Blocked,
+  OperationStatus.Skipped
+]);
 
 /**
  * Routes one caller-resolved phased request through a real warm workspace operation graph.
@@ -607,6 +612,9 @@ function getGraphRoutingState(
     const multiplexer: PhasedRequestEventMultiplexer = new PhasedRequestEventMultiplexer(
       getGraphEventSink(graph)
     );
+    graph.hooks.onIterationScheduled.tap('rushd request event multiplexer', (records) => {
+      multiplexer.onIterationScheduled(records.values());
+    });
     const graphExecutionScheduler: RequestScheduler = new RequestScheduler();
     state = {
       coordinator: new PhasedRequestBatchCoordinator(
@@ -802,16 +810,22 @@ function collectOperationOutcomes(
     const observed: ReturnType<PhasedRequestEventSink['getObservedResult']> =
       requestSink.getObservedResult(operation);
     const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
-    const status: string | undefined =
-      retained?.status ??
-      observed?.status ??
-      (fillMissingAsAborted ? OperationStatus.Aborted : undefined);
+    let status: string | undefined;
+    let errorMessage: string | undefined;
+    if (
+      observed !== undefined &&
+      (retained === undefined || OBSERVED_STATUS_OVERRIDES_RETAINED.has(observed.status))
+    ) {
+      status = observed.status;
+      errorMessage = observed.executionResult.error?.message;
+    } else {
+      status = retained?.status ?? observed?.status;
+      errorMessage = retained?.error?.message ?? observed?.executionResult.error?.message;
+    }
+    status ??= fillMissingAsAborted ? OperationStatus.Aborted : undefined;
     if (status === undefined) {
       continue;
     }
-    const errorMessage: string | undefined = observed
-      ? observed.executionResult.error?.message
-      : retained?.error?.message;
     outcomes.push({
       observedInCurrentIteration: observed !== undefined,
       result: { operationId: operation.name, status, errorMessage },

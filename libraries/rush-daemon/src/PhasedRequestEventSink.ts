@@ -31,7 +31,7 @@ const TEXT_ENCODER: InstanceType<typeof TextEncoder> = new TextEncoder();
 
 interface IObservedOperationResult {
   readonly executionResult: IOperationExecutionResult;
-  readonly status: string;
+  readonly status: OperationStatus;
 }
 
 interface IEventOptions {
@@ -91,6 +91,8 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   readonly #observedResults: Map<Operation, IObservedOperationResult> = new Map();
   readonly #rushVersion: string;
   readonly #writer: OrderedClientWriter;
+  #completedOperations: number = 0;
+  #totalOperations: number = 0;
 
   public constructor(options: {
     activeOperationIds: ReadonlySet<string>;
@@ -120,6 +122,16 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     }
   }
 
+  public onIterationScheduled(records: Iterable<IOperationExecutionResult>): void {
+    this.#completedOperations = 0;
+    this.#totalOperations = 0;
+    for (const record of records) {
+      if (this.#activeOperationIds.has(record.operation.name) && !record.silent) {
+        this.#totalOperations++;
+      }
+    }
+  }
+
   public onOperationStatusChanged(
     result: IOperationExecutionResult,
     previousStatus: OperationStatus
@@ -139,12 +151,17 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     });
   }
 
-  public onOperationHeader(operationId: string, completed: number, total: number): void {
+  public onOperationHeader(operationId: string): void {
     if (this.#activeOperationIds.has(operationId)) {
+      this.#completedOperations++;
       this.#emitEvent(
         'extension',
         {
-          data: { completedOperations: completed, operationId, totalOperations: total },
+          data: {
+            completedOperations: this.#completedOperations,
+            operationId,
+            totalOperations: this.#totalOperations
+          },
           name: RUSHD_OPERATION_HEADER
         },
         { required: true }

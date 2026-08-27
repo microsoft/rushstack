@@ -9,15 +9,19 @@ import type {
 } from '@microsoft/rush-lib';
 import type { ITerminalChunk } from '@rushstack/terminal';
 
+interface IRequestEventSink extends _IOperationGraphEventSink {
+  onIterationScheduled(records: Iterable<IOperationExecutionResult>): void;
+}
+
 export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink {
   readonly #workspaceSink: _IOperationGraphEventSink | undefined;
-  readonly #requestSinks: Set<_IOperationGraphEventSink> = new Set();
+  readonly #requestSinks: Set<IRequestEventSink> = new Set();
 
   public constructor(workspaceSink: _IOperationGraphEventSink | undefined) {
     this.#workspaceSink = workspaceSink;
   }
 
-  public subscribe(requestSink: _IOperationGraphEventSink): () => void {
+  public subscribe(requestSink: IRequestEventSink): () => void {
     this.#requestSinks.add(requestSink);
     let subscribed: boolean = true;
     return () => {
@@ -26,6 +30,13 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
         this.#requestSinks.delete(requestSink);
       }
     };
+  }
+
+  public onIterationScheduled(records: Iterable<IOperationExecutionResult>): void {
+    const executionResults: IOperationExecutionResult[] = [...records];
+    for (const requestSink of this.#requestSinks) {
+      requestSink.onIterationScheduled(executionResults);
+    }
   }
 
   public onOperationRegistered(operationId: string, silent: boolean): void {

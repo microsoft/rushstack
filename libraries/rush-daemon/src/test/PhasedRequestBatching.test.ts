@@ -8,6 +8,7 @@ import type {
   IDaemonPhasedRequest,
   IDaemonPhasedRequestResult
 } from '@rushstack/rush-daemon-protocol';
+import { RUSHD_OPERATION_HEADER } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
@@ -136,6 +137,12 @@ describe('shared phased request batching', () => {
     expect(getResultOperationIds(resultC)).toEqual([OPERATION_C]);
     expect(getWrittenOperationIds(clientA)).toEqual(new Set([OPERATION_A]));
     expect(getWrittenOperationIds(clientC)).toEqual(new Set([OPERATION_C]));
+    expect(getHeaderData(clientA)).toEqual([
+      { completedOperations: 1, operationId: OPERATION_A, totalOperations: 1 }
+    ]);
+    expect(getHeaderData(clientC)).toEqual([
+      { completedOperations: 1, operationId: OPERATION_C, totalOperations: 1 }
+    ]);
   });
 
   it('derives shared and disjoint failure results from each client subset', async () => {
@@ -238,6 +245,33 @@ describe('shared phased request batching', () => {
     ]);
     expect(continuingResult).toMatchObject({ exitCode: 0, outcome: 'success' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+  });
+
+  it('prefers a current abort after invalidating a retained warm success', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = await router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    expect(first.operationResults).toEqual([
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success })
+    ]);
+    fixture.graph.invalidateOperations(undefined, 'rerun');
+    fixture.graph.hooks.beforeExecuteIterationAsync.tapPromise(
+      'abort current iteration',
+      async (): Promise<OperationStatus> => OperationStatus.Aborted
+    );
+
+    const second = await router.executeAsync(
+      createRequest('second', OPERATION_A),
+      new TestPhasedRequestClient('two')
+    );
+
+    expect(second).toMatchObject({ exitCode: 1, outcome: 'aborted', scheduled: true });
+    expect(second.operationResults).toEqual([
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Aborted })
+    ]);
   });
 
   it('preserves failure precedence when a client cancels during a failing shared operation', async () => {
@@ -497,4 +531,29 @@ function getWrittenOperationIds(client: TestPhasedRequestClient): ReadonlySet<st
     }
   }
   return operationIdSet;
+}
+
+function getHeaderData(
+  client: TestPhasedRequestClient
+): ReadonlyArray<{ completedOperations: number; operationId: string; totalOperations: number }> {
+  return client.writes.flatMap(({ event }) => {
+    const payload: unknown = event?.payload;
+    if (
+      typeof payload !== 'object' ||
+      payload === null ||
+      (payload as { name?: unknown }).name !== RUSHD_OPERATION_HEADER
+    ) {
+      return [];
+    }
+    const data: unknown = (payload as { data?: unknown }).data;
+    return typeof data === 'object' && data !== null
+      ? [
+          data as {
+            completedOperations: number;
+            operationId: string;
+            totalOperations: number;
+          }
+        ]
+      : [];
+  });
 }
