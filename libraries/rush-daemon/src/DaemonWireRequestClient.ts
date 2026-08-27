@@ -22,6 +22,7 @@ import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter
 
 export interface IDaemonWireRequestClientOptions {
   readonly abortSignal: AbortSignal;
+  readonly getNextEventSequence: () => number;
   readonly interactiveSession: IInteractiveRequestSession;
   readonly requestId: string;
   readonly sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
@@ -32,6 +33,7 @@ export interface IDaemonWireRequestClientOptions {
 
 /** Ordered wire destination for one request owned by a control session. @internal */
 export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
+  readonly #getNextEventSequence: () => number;
   readonly #requestId: string;
   readonly #sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
   readonly #sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
@@ -44,12 +46,17 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
 
   public constructor(options: IDaemonWireRequestClientOptions) {
     this.abortSignal = options.abortSignal;
+    this.#getNextEventSequence = options.getNextEventSequence;
     this.interactiveSession = options.interactiveSession;
     this.#requestId = options.requestId;
     this.#sendControlAsync = options.sendControlAsync;
     this.#sendFrameAsync = options.sendFrameAsync;
     this.sessionId = options.sessionId;
     this.supportsRequestAdmission = options.supportsRequestAdmission;
+  }
+
+  public getNextEventSequence(): number {
+    return this.#getNextEventSequence();
   }
 
   public get terminalOutcomeSent(): boolean {

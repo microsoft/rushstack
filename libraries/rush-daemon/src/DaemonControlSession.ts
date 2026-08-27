@@ -70,6 +70,7 @@ export class DaemonControlSession {
   #connectionClosed: boolean = false;
   #handshakeComplete: boolean = false;
   #isClosing: boolean = false;
+  #nextEventSequence: number = 1;
   #peerSupportsInteractiveProtocol: boolean = false;
   #peerSupportsRequestAdmission: boolean = false;
   #peerSupportsRequestLifecycle: boolean = false;
@@ -112,16 +113,7 @@ export class DaemonControlSession {
     }
     if (frame.kind === DaemonFrameType.stdin) {
       this.#assertHandshakeComplete();
-      try {
-        await this.#interactiveConnection.routeStdinFrameAsync(frame.payload);
-      } catch (error) {
-        if (
-          !isInteractiveRequestInputFailure(error) &&
-          !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
-        ) {
-          throw error;
-        }
-      }
+      void this.#completeInputAsync(this.#interactiveConnection.routeStdinFrameAsync(frame.payload));
       return;
     }
     if (frame.kind !== DaemonFrameType.controlJson) {
@@ -136,6 +128,19 @@ export class DaemonControlSession {
       return;
     }
     await this.#handleEstablishedControlAsync(message);
+  }
+
+  async #completeInputAsync(inputPromise: Promise<void>): Promise<void> {
+    try {
+      await inputPromise;
+    } catch (error) {
+      if (
+        !isInteractiveRequestInputFailure(error) &&
+        !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
+      ) {
+        await this.#handleProtocolFailureAsync(normalizeProtocolError(error));
+      }
+    }
   }
 
   async #handleEstablishedControlAsync(message: DaemonControlMessage): Promise<void> {
@@ -234,6 +239,7 @@ export class DaemonControlSession {
     const sessionId: string = this.#sessionId!;
     const client: DaemonWireRequestClient = new DaemonWireRequestClient({
       abortSignal: abortController.signal,
+      getNextEventSequence: () => this.#getNextEventSequence(),
       interactiveSession,
       requestId,
       sendControlAsync: (message: DaemonControlMessage) => this.#enqueueControlAsync(message),
@@ -244,6 +250,12 @@ export class DaemonControlSession {
     const state: IRequestState = { abortController, client, completion: Promise.resolve() };
     this.#requestById.set(requestId, state);
     state.completion = Promise.resolve().then(() => this.#dispatchRequestAsync(envelope, state));
+  }
+
+  #getNextEventSequence(): number {
+    const sequence: number = this.#nextEventSequence;
+    this.#nextEventSequence = sequence + 1;
+    return sequence;
   }
 
   #cancelRequest(requestId: string): void {
@@ -465,7 +477,7 @@ async function settlesWithinAsync(promise: Promise<void>, timeoutMs: number): Pr
     timeout = setTimeout(() => resolve(false), timeoutMs);
     timeout.unref();
   });
-  const settled: boolean = await Promise.race([promise.then(() => true), timeoutPromise]);
+  const settled: boolean = await Promise.race([promise.then(() => true, () => true), timeoutPromise]);
   if (timeout) clearTimeout(timeout);
   return settled;
 }

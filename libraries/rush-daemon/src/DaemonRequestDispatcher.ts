@@ -69,6 +69,7 @@ export interface IDaemonRequestDispatchClient {
   readonly interactiveSession: IInteractiveRequestSession;
   readonly sessionId: string;
   readonly supportsRequestAdmission: boolean;
+  getNextEventSequence(): number;
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
   writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
   writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
