@@ -127,6 +127,11 @@ export interface IOperationStatusChangedPayload {
    * The new status.
    */
   readonly status: OperationStatus;
+
+  /**
+   * The operation duration in milliseconds when known.
+   */
+  readonly durationMs?: number;
 }
 
 /**
