@@ -3,9 +3,8 @@
 
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import {
-  RUSH_PLUGIN_API_VERSION,
   createPluginApiIncompatibleDiagnostic,
-  isPluginApiVersionSupported,
+  isRushVersionSupported,
   type IRushPluginManifest
 } from '../session/PluginApi';
 
@@ -23,10 +22,9 @@ export interface IPluginApplyGateOptions {
   readonly gateEnabled?: boolean;
 
   /**
-   * The Rush plugin API version Rush supports; defaults to
-   * {@link RUSH_PLUGIN_API_VERSION}.
+   * The running Rush version used to evaluate each plugin's declared range.
    */
-  readonly supportedApiVersion?: string;
+  readonly rushVersion: string;
 }
 
 /**
@@ -68,20 +66,19 @@ export interface IPluginApplyDecision {
  */
 export function evaluatePluginApplyGate(
   manifests: readonly IRushPluginManifest[],
-  options: IPluginApplyGateOptions = {}
+  options: IPluginApplyGateOptions
 ): IPluginApplyDecision[] {
   const gateEnabled: boolean = options.gateEnabled ?? true;
-  const supportedApiVersion: string = options.supportedApiVersion ?? RUSH_PLUGIN_API_VERSION;
 
   return manifests.map((manifest: IRushPluginManifest): IPluginApplyDecision => {
-    const compatible: boolean = isPluginApiVersionSupported(manifest.pluginApiVersion, supportedApiVersion);
+    const compatible: boolean = isRushVersionSupported(manifest.rushVersionRange, options.rushVersion);
     if (compatible || !gateEnabled) {
       return { manifest, allowed: true };
     }
     return {
       manifest,
       allowed: false,
-      diagnostic: createPluginApiIncompatibleDiagnostic(manifest, supportedApiVersion)
+      diagnostic: createPluginApiIncompatibleDiagnostic(manifest, options.rushVersion)
     };
   });
 }

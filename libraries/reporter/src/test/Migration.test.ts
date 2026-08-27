@@ -101,11 +101,13 @@ describe('daemon-aligned major default flip', () => {
 });
 
 describe('plugin apply gate', () => {
-  const compatible: IRushPluginManifest = { pluginName: 'good', pluginApiVersion: '1.2.0' };
-  const incompatible: IRushPluginManifest = { pluginName: 'bad', pluginApiVersion: '2.0.0' };
+  const compatible: IRushPluginManifest = { pluginName: 'good', rushVersionRange: '>=5 <6' };
+  const incompatible: IRushPluginManifest = { pluginName: 'bad', rushVersionRange: '>=6 <7' };
 
   it('fails incompatible plugins with a structured migration diagnostic before apply()', () => {
-    const decisions: IPluginApplyDecision[] = evaluatePluginApplyGate([compatible, incompatible]);
+    const decisions: IPluginApplyDecision[] = evaluatePluginApplyGate([compatible, incompatible], {
+      rushVersion: '5.178.1'
+    });
 
     const good: IPluginApplyDecision = decisions[0];
     expect(good.allowed).toBe(true);
@@ -122,26 +124,27 @@ describe('plugin apply gate', () => {
 
   it('permits incompatible plugins when the gate is disabled, keeping the phase revertible', () => {
     const decisions: IPluginApplyDecision[] = evaluatePluginApplyGate([compatible, incompatible], {
-      gateEnabled: false
+      gateEnabled: false,
+      rushVersion: '5.178.1'
     });
 
     expect(decisions.every((decision: IPluginApplyDecision) => decision.allowed)).toBe(true);
     expect(getBlockedPlugins(decisions)).toHaveLength(0);
   });
 
-  it('honors an explicit supported API version', () => {
+  it('honors the running Rush version', () => {
     const decisions: IPluginApplyDecision[] = evaluatePluginApplyGate([incompatible], {
-      supportedApiVersion: '2.4.0'
+      rushVersion: '6.0.0'
     });
     expect(decisions[0].allowed).toBe(true);
   });
 
-  it('reports the explicit supported API version when blocking a plugin', () => {
+  it('reports the running Rush version when blocking a plugin', () => {
     const decisions: IPluginApplyDecision[] = evaluatePluginApplyGate([compatible], {
-      supportedApiVersion: '2.4.0'
+      rushVersion: '6.0.0'
     });
 
     expect(decisions[0].allowed).toBe(false);
-    expect(decisions[0].diagnostic?.parameters?.supportedApiVersion.value).toBe('2.4.0');
+    expect(decisions[0].diagnostic?.parameters?.rushVersion.value).toBe('6.0.0');
   });
 });
