@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as childProcess from 'node:child_process';
+import { PassThrough, type Readable } from 'node:stream';
+
 import {
   allocateChildDescriptor,
   readChildDescriptorFd,
   RUSH_REPORTER_CHILD_FD_ENV_VAR,
   HeftChildEmitter,
   HeftDescriptorHost,
+  relayHeftChildOutput,
   ReporterManager,
   runProblemMatchers,
   type IChildDescriptorPlan,
@@ -60,7 +64,7 @@ describe('Heft descriptor allocation', () => {
     expect(plan.fdNumber).toBe(3);
     expect(plan.env[RUSH_REPORTER_CHILD_FD_ENV_VAR]).toBe('3');
     expect(plan.stdio[3]).toBe('pipe');
-    expect(plan.stdio.slice(0, 3)).toEqual(['inherit', 'inherit', 'inherit']);
+    expect(plan.stdio.slice(0, 3)).toEqual(['inherit', 'pipe', 'pipe']);
   });
 
   it('reads or rejects the descriptor number from the environment', () => {
@@ -170,57 +174,76 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(forwarded.sourceSequence).toBe(1);
   });
 
-  it('drains the descriptor incrementally so a chatty child never blocks a full pipe', async () => {
-    // A child emitting >64 KiB of NDJSON would block on an undrained OS pipe
-    // buffer; the streaming processor drains as chunks arrive instead of
-    // waiting for the child to exit.
-    let descriptor: string = '';
-    const child: HeftChildEmitter = new HeftChildEmitter({
-      env: { [RUSH_REPORTER_CHILD_FD_ENV_VAR]: '3' },
-      childSessionId: 'child-sess',
-      source: SOURCE,
-      producerVersion: '@rushstack/heft 1.2.19',
-      now: () => '2026-01-01T00:00:00.000Z',
-      writeDescriptor: (text: string) => (descriptor += text)
-    });
-    child.sendHello();
-
+  it('drains a spawned child descriptor before the child exits and exceeds pipe capacity', async () => {
     const manager: ReporterManager = new ReporterManager();
     const recording: RecordingReporter = new RecordingReporter();
     manager.addReporter(recording);
     await manager.initializeAsync();
 
+    let childExited: boolean = false;
+    let forwardedBeforeExit: boolean = false;
     const host: HeftDescriptorHost = new HeftDescriptorHost({
       parentSessionId: 'parent-sess',
       supportedProtocolVersion: { major: 1, minor: 0 },
-      forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => manager.ingestForeignEnvelope(envelope)
+      forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => {
+        forwardedBeforeExit ||= !childExited;
+        manager.ingestForeignEnvelope(envelope);
+      }
     });
     const processor = host.createStreamProcessor();
-
-    // Write the hello, then feed events in multiple chunks (including a split
-    // record) to prove incremental decode and immediate forwarding.
-    const helloLineEnd: number = descriptor.indexOf('\n') + 1;
-    processor.write(descriptor.slice(0, helloLineEnd));
-    descriptor = descriptor.slice(helloLineEnd);
-
-    let pending: string = '';
-    for (let i: number = 0; i < 5; i++) {
-      child.emitEvent({
-        type: 'operationStatusChanged',
-        payload: { operationId: `c${i}`, status: 'success' }
+    const plan: IChildDescriptorPlan = allocateChildDescriptor();
+    const eventCount: number = 2_000;
+    const script: string = `
+      const fs = require('node:fs');
+      const fd = Number(process.env.${RUSH_REPORTER_CHILD_FD_ENV_VAR});
+      const source = ${JSON.stringify(SOURCE)};
+      fs.writeSync(fd, JSON.stringify({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 0 },
+        producerVersion: '@rushstack/heft 1.2.19',
+        capabilities: [],
+        requiredFeatures: []
+      }) + '\\n');
+      for (let i = 0; i < ${eventCount}; i++) {
+        fs.writeSync(fd, JSON.stringify({
+          protocolVersion: { major: 1, minor: 0 },
+          eventId: 'child_' + i,
+          sessionId: 'child-sess',
+          sequence: i + 1,
+          timestamp: '2026-01-01T00:00:00.000Z',
+          source,
+          privacy: 'public',
+          required: true,
+          type: 'operationStatusChanged',
+          payload: { operationId: 'operation-' + i, status: 'success', padding: 'x'.repeat(128) }
+        }) + '\\n');
+      }
+    `;
+    const spawned: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
+      env: { ...process.env, ...plan.env },
+      stdio: plan.stdio as childProcess.StdioOptions
+    });
+    const descriptor: Readable = spawned.stdio[plan.fdNumber] as Readable;
+    descriptor.setEncoding('utf8');
+    descriptor.on('data', (chunk: string) => processor.write(chunk));
+    await new Promise<void>((resolve, reject) => {
+      spawned.once('error', reject);
+      spawned.once('exit', (code: number | null) => {
+        childExited = true;
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Spawned Heft fixture exited with code ${code}.`));
+        }
       });
-    }
-    // Simulate chunked delivery: split mid-record.
-    pending = descriptor;
-    const mid: number = Math.floor(pending.length / 2);
-    processor.write(pending.slice(0, mid));
-    processor.write(pending.slice(mid));
+    });
     const result: IHeftChildResult = processor.flush();
     await manager.flushAsync();
 
     expect(result.accepted).toBe(true);
-    expect(result.eventCount).toBe(5);
-    expect(recording.reported).toHaveLength(5);
+    expect(result.eventCount).toBe(eventCount);
+    expect(recording.reported).toHaveLength(eventCount);
+    expect(forwardedBeforeExit).toBe(true);
     expect(recording.reported[0].sessionId).toBe('child-sess');
   });
 
@@ -320,9 +343,77 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(result.eventCount).toBe(1);
     expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
   });
+
+  it('rejects event envelopes whose protocol major differs from the accepted hello', () => {
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      forwardEnvelope: () => {
+        throw new Error('A mismatched protocol envelope must not be forwarded.');
+      }
+    });
+    expect(
+      host.processChildRecord({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 0 },
+        producerVersion: '@rushstack/heft 1.2.19',
+        capabilities: [],
+        requiredFeatures: []
+      })
+    ).toBe(true);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 2, minor: 0 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: true,
+        type: 'commandStarted',
+        payload: {}
+      })
+    ).toBe(false);
+    expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
 });
 
 describe('Heft old raw-stream path', () => {
+  it('pipes and relays fallback stdout and stderr while retaining the reporter descriptor', async () => {
+    const plan: IChildDescriptorPlan = allocateChildDescriptor();
+    const spawned: childProcess.ChildProcess = childProcess.spawn(
+      process.execPath,
+      ['-e', "process.stdout.write('old stdout'); process.stderr.write('old stderr');"],
+      {
+        env: { ...process.env, ...plan.env },
+        stdio: plan.stdio as childProcess.StdioOptions
+      }
+    );
+    const stdout: PassThrough = new PassThrough();
+    const stderr: PassThrough = new PassThrough();
+    let stdoutText: string = '';
+    let stderrText: string = '';
+    stdout.setEncoding('utf8').on('data', (chunk: string) => (stdoutText += chunk));
+    stderr.setEncoding('utf8').on('data', (chunk: string) => (stderrText += chunk));
+    relayHeftChildOutput({ stdout: spawned.stdout, stderr: spawned.stderr }, { stdout, stderr });
+
+    await new Promise<void>((resolve, reject) => {
+      spawned.once('error', reject);
+      spawned.once('exit', (code: number | null) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Spawned old-Heft fixture exited with code ${code}.`));
+        }
+      });
+    });
+
+    expect(stdoutText).toBe('old stdout');
+    expect(stderrText).toBe('old stderr');
+    expect(spawned.stdio[plan.fdNumber]).not.toBeNull();
+  });
+
   it('recovers diagnostics from an old Heft version through problem matchers', () => {
     // Old Heft writes raw output to stdout; Rush captures it as external output.
     let stdout: string = '';

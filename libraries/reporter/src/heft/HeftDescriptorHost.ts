@@ -236,6 +236,11 @@ export class HeftDescriptorHost {
     if (!isReporterEventRecord(record)) {
       return this._rejectMalformedStream('an event record did not contain a valid reporter envelope');
     }
+    if (record.protocolVersion.major !== this._negotiation.ack.protocolVersion.major) {
+      return this._rejectMalformedStream(
+        'an event record used a protocol major different from the negotiated stream'
+      );
+    }
     if (!isReporterEventType(record.type)) {
       if (record.required) {
         return this._rejectMalformedStream('a required event type was not recognized');
@@ -319,8 +324,7 @@ export class HeftDescriptorHost {
    * {@link HeftDescriptorHost.createStreamProcessor}.
    */
   public processChildNdjson(ndjson: string): IHeftChildResult {
-    const processor: { write(chunk: string): void; flush(): IHeftChildResult } =
-      this.createStreamProcessor();
+    const processor: { write(chunk: string): void; flush(): IHeftChildResult } = this.createStreamProcessor();
     processor.write(ndjson);
     return processor.flush();
   }

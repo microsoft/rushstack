@@ -299,11 +299,16 @@ export { ProblemMatcherRegistry } from './matchers/ProblemMatcherRegistry';
 export type { IRunProblemMatchersOptions, IProblemMatcherResult } from './matchers/ProblemMatcherRunner';
 export { runProblemMatchers } from './matchers/ProblemMatcherRunner';
 
-export type { IChildDescriptorPlan } from './heft/HeftDescriptor';
+export type {
+  IChildDescriptorPlan,
+  IHeftChildOutputStreams,
+  IHeftChildOutputTargets
+} from './heft/HeftDescriptor';
 export {
   RUSH_REPORTER_CHILD_FD_ENV_VAR,
   allocateChildDescriptor,
-  readChildDescriptorFd
+  readChildDescriptorFd,
+  relayHeftChildOutput
 } from './heft/HeftDescriptor';
 export type {
   HeftChildReporterMode,
