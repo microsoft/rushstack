@@ -877,6 +877,25 @@ describe(GlobalCommandRequestRouter.name, () => {
     expect(lifecycleOrder).toEqual(['raw:true', 'output', 'raw:false', 'result']);
   });
 
+  it('rejects interactive input requirements without stdin capability', () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
+      'invalid-interactive-input',
+      FIRST_CWD,
+      {},
+      80
+    );
+
+    expect(() =>
+      router.resolveRequest({
+        ...options,
+        terminal: { ...options.terminal, terminalRequirement: 'interactiveInput' }
+      })
+    ).toThrow('requires acceptsStdin');
+  });
+
   it('signals typed in-process fallback without executing a PTY-only command', async () => {
     const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
       new TestWorkspaceSession(TEST_REPO_ROOT)

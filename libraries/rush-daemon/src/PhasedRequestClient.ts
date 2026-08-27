@@ -7,7 +7,10 @@ import type {
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
-import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
+import type {
+  IInteractiveRequestInputSink,
+  IInteractiveRequestSession
+} from './InteractiveRequestInputRouter';
 
 /**
  * A client-scoped destination for one routed phased request.
@@ -23,6 +26,8 @@ export interface IPhasedRequestClient {
   readonly abortSignal: AbortSignal;
   /** The request-scoped stdin/control lifecycle when one was registered by the transport integration. */
   readonly interactiveSession?: IInteractiveRequestSession;
+  /** The integration-owned destination for stdin accepted by this phased request. */
+  readonly interactiveInputSink?: IInteractiveRequestInputSink;
   /** The connection session identifier used in structured event envelopes. */
   readonly sessionId: string;
 

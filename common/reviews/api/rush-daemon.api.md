@@ -245,6 +245,7 @@ export class InteractiveRequestInputRouter {
 export interface IPhasedRequestClient {
     readonly abortSignal: AbortSignal;
     getNextEventSequence(): number;
+    readonly interactiveInputSink?: IInteractiveRequestInputSink;
     readonly interactiveSession?: IInteractiveRequestSession;
     readonly sessionId: string;
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;

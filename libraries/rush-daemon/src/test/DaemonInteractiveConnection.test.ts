@@ -8,7 +8,11 @@ import type { IInteractiveRequestSession } from '../InteractiveRequestInputRoute
 
 it('cancels an unacknowledged raw-mode entry but still acknowledges restoration', async () => {
   const sentControls: DaemonControlMessage[] = [];
+  let markEnterSent: (() => void) | undefined;
   let markRestoreSent: (() => void) | undefined;
+  const enterSent: Promise<void> = new Promise((resolve) => {
+    markEnterSent = resolve;
+  });
   const restoreSent: Promise<void> = new Promise((resolve) => {
     markRestoreSent = resolve;
   });
@@ -16,8 +20,12 @@ it('cancels an unacknowledged raw-mode entry but still acknowledges restoration'
   const connection: DaemonInteractiveConnection = new DaemonInteractiveConnection(
     (message: DaemonControlMessage): Promise<void> => {
       sentControls.push(message);
-      if (message.kind === 'setRawMode' && !message.payload.enabled) {
-        markRestoreSent?.();
+      if (message.kind === 'setRawMode') {
+        if (message.payload.enabled) {
+          markEnterSent?.();
+        } else {
+          markRestoreSent?.();
+        }
       }
       return Promise.resolve();
     }
@@ -33,7 +41,7 @@ it('cancels an unacknowledged raw-mode entry but still acknowledges restoration'
   });
 
   const enterRawModePromise: Promise<void> = session.setRawModeAsync(true);
-  await Promise.resolve();
+  await enterSent;
   requestAbortController.abort(new Error('request cancelled'));
 
   await expect(enterRawModePromise).rejects.toThrow('request cancelled');

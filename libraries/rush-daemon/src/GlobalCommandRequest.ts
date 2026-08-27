@@ -184,6 +184,9 @@ function resolveTerminalProperties(
   ) {
     throw new Error('Global command terminal requirement is not recognized.');
   }
+  if (terminal.terminalRequirement === 'interactiveInput' && terminal.acceptsStdin !== true) {
+    throw new Error('Global command interactive input requires acceptsStdin to be true.');
+  }
   return Object.freeze({
     acceptsStdin: terminal.acceptsStdin ?? false,
     columns: terminal.columns,

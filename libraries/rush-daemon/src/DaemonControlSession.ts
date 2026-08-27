@@ -24,7 +24,10 @@ import {
   DaemonInteractiveConnection
 } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
-import { isInteractiveRequestInputFailure } from './InteractiveRequestInputRouter';
+import {
+  InteractiveInputRoutingError,
+  isInteractiveRequestInputFailure
+} from './InteractiveRequestInputRouter';
 
 export interface IDaemonControlSessionOptions {
   readonly daemonVersion: string;
@@ -48,7 +51,7 @@ export class DaemonControlSession {
     this._interactiveConnection = new DaemonInteractiveConnection(
       (message: DaemonControlMessage) => this._enqueueSendAsync(message)
     );
-    connection.onFrame((frame: IDaemonFrame) => this._onFrameAsync(frame));
+    connection.onFrame((frame: IDaemonFrame) => this._onFrame(frame));
     connection.onClosed((error: Error | undefined) => {
       this._interactiveConnection.close(error);
       options.onClosed(this, error);
@@ -60,7 +63,7 @@ export class DaemonControlSession {
     return this._connection.closeAsync();
   }
 
-  private async _onFrameAsync(frame: IDaemonFrame): Promise<void> {
+  private _onFrame(frame: IDaemonFrame): void {
     if (frame.kind === DaemonFrameType.stdin) {
       if (!this._handshakeComplete) {
         throw new DaemonProtocolError(
@@ -68,13 +71,7 @@ export class DaemonControlSession {
           'The first frame on a connection must be a hello control message.'
         );
       }
-      try {
-        await this._interactiveConnection.routeStdinFrameAsync(frame.payload);
-      } catch (error) {
-        if (!isInteractiveRequestInputFailure(error)) {
-          throw error;
-        }
-      }
+      void this._completeInputAsync(this._interactiveConnection.routeStdinFrameAsync(frame.payload));
       return;
     }
     if (frame.kind !== DaemonFrameType.controlJson) {
@@ -164,5 +161,18 @@ export class DaemonControlSession {
     const normalizedError: Error = error instanceof Error ? error : new Error(String(error));
     this._options.onError(normalizedError);
     await this._connection.closeAsync();
+  }
+
+  private async _completeInputAsync(inputPromise: Promise<void>): Promise<void> {
+    try {
+      await inputPromise;
+    } catch (error) {
+      if (
+        !isInteractiveRequestInputFailure(error) &&
+        !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
+      ) {
+        await this._handleSendErrorAsync(error);
+      }
+    }
   }
 }

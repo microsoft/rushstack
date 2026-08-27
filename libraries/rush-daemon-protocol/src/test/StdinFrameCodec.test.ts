@@ -67,4 +67,12 @@ it('rejects malformed request id prefixes', () => {
   expect(captureProtocolError(() => decodeDaemonStdinChunk(Uint8Array.of(SINGLE_COUNT))).code).toBe(
     'malformedPayload'
   );
+  const malformedIdPayload: Uint8Array = Uint8Array.of(
+    NON_UTF8_BYTES.length,
+    EMPTY_BYTES,
+    ...NON_UTF8_BYTES
+  );
+  expect(captureProtocolError(() => decodeDaemonStdinChunk(malformedIdPayload)).code).toBe(
+    'malformedPayload'
+  );
 });

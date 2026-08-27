@@ -109,19 +109,20 @@ export class PhasedRequestRouter {
       throw error;
     }
 
+    let inputAttachment: Disposable | undefined;
     try {
-      try {
-        return await this.#executeAdmittedAsync(
-          request,
-          client,
-          graph,
-          routingState,
-          interactiveSession
-        );
-      } catch (error) {
-        return await finishAfterRoutingErrorAsync(interactiveSession, error);
-      }
+      inputAttachment = attachInteractiveInput(request, client, interactiveSession);
+      return await this.#executeAdmittedAsync(
+        request,
+        client,
+        graph,
+        routingState,
+        interactiveSession
+      );
+    } catch (error) {
+      return await finishAfterRoutingErrorAsync(interactiveSession, error);
     } finally {
+      inputAttachment?.[Symbol.dispose]();
       lease.release();
     }
   }
@@ -309,6 +310,9 @@ function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   ) {
     throw new Error('Phased request terminal requirement is not recognized.');
   }
+  if (request.terminalRequirement === 'interactiveInput' && request.acceptsStdin !== true) {
+    throw new Error('Phased request interactive input requires acceptsStdin to be true.');
+  }
 }
 
 function validateNonemptyName(value: string, kind: string): void {
@@ -471,7 +475,24 @@ function validateInteractiveSession(
   if (request.acceptsStdin === true && !session) {
     throw new Error('The interactive phased request does not have a registered input session.');
   }
+  if (request.acceptsStdin === true && !client.interactiveInputSink) {
+    throw new Error('The interactive phased request does not have an input sink bridge.');
+  }
   return session;
+}
+
+function attachInteractiveInput(
+  request: IDaemonPhasedRequest,
+  client: IPhasedRequestClient,
+  session: IInteractiveRequestSession | undefined
+): Disposable | undefined {
+  if (request.acceptsStdin !== true) {
+    return undefined;
+  }
+  if (!session || !client.interactiveInputSink) {
+    throw new Error('The interactive phased request input bridge is unavailable.');
+  }
+  return session.attachInputSink(client.interactiveInputSink);
 }
 
 async function collectInteractiveCleanupErrorAsync(

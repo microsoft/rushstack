@@ -22,6 +22,7 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 
 import type { IInteractiveRequestSession } from '../InteractiveRequestInputRouter';
+import type { IInteractiveRequestInputSink } from '../InteractiveRequestInputRouter';
 import type { IPhasedRequestClient } from '../PhasedRequestClient';
 import type {
   IWorkspaceEngineShape,
@@ -62,6 +63,7 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public readonly sessionId: string = 'test-session';
   public readonly writes: ITestClientWrite[] = [];
   public readonly policies: IDaemonTerminalPolicyResult[] = [];
+  public interactiveInputSink: IInteractiveRequestInputSink | undefined;
   public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
   readonly #sequenceState: { next: number };

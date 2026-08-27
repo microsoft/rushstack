@@ -59,6 +59,8 @@ interface IRequestState {
   failure: Error | undefined;
   inputSink: IInteractiveRequestInputSink | undefined;
   inputTail: Promise<void>;
+  pendingInputBytes: number;
+  pendingInputFrameCount: number;
   rawModeRequested: boolean;
   rawModeTail: Promise<void>;
   requestId: string;
@@ -69,6 +71,8 @@ interface IRequestState {
 }
 
 const MAX_COMPLETED_REQUEST_IDS: number = 256;
+const MAX_PENDING_INPUT_BYTES: number = 1024 * 1024;
+const MAX_PENDING_INPUT_FRAMES: number = 256;
 const requestInputFailures: WeakSet<Error> = new WeakSet();
 
 /** @internal */
@@ -191,6 +195,8 @@ function createRequestState(options: IInteractiveRequestRegistrationOptions): IR
     inputTail: Promise.resolve(),
     onAbort: () => stopAcceptingInput(state),
     onFailure: options.onFailure,
+    pendingInputBytes: 0,
+    pendingInputFrameCount: 0,
     rawModeRequested: false,
     rawModeTail: Promise.resolve(),
     requestId: options.requestId,
@@ -202,6 +208,7 @@ function createRequestState(options: IInteractiveRequestRegistrationOptions): IR
 
 function queueInputAsync(state: IRequestState, chunk: Uint8Array): Promise<void> {
   assertAcceptingInput(state);
+  reserveInputCapacity(state, chunk.byteLength);
   const writePromise: Promise<void> = state.inputTail.then(async () => {
     assertAcceptingInput(state);
     const sink: IInteractiveRequestInputSink = await getInputSinkAsync(state);
@@ -209,18 +216,16 @@ function queueInputAsync(state: IRequestState, chunk: Uint8Array): Promise<void>
     try {
       await sink.writeInputAsync(chunk);
     } catch (error) {
-      const normalizedError: Error = normalizeError(error);
-      requestInputFailures.add(normalizedError);
+      const normalizedError: Error = createInputFailure(error);
       failState(state, normalizedError);
       throw normalizedError;
     }
   });
-  state.inputTail = writePromise.catch((error: unknown) => {
-    if (!(error instanceof InteractiveInputRoutingError) && !isInteractiveRequestInputFailure(error)) {
-      failState(state, error);
-    }
-  });
-  return writePromise;
+  const trackedPromise: Promise<void> = writePromise.finally(() =>
+    releaseInputCapacity(state, chunk.byteLength)
+  );
+  state.inputTail = trackedPromise.catch((error: unknown) => handleQueuedInputError(state, error));
+  return trackedPromise;
 }
 
 function getInputSinkAsync(state: IRequestState): Promise<IInteractiveRequestInputSink> {
@@ -275,6 +280,38 @@ function failState(state: IRequestState, error: unknown): void {
     stopAcceptingInput(state);
     state.onFailure(normalizedError);
   }
+}
+
+function reserveInputCapacity(state: IRequestState, byteLength: number): void {
+  if (
+    state.pendingInputFrameCount >= MAX_PENDING_INPUT_FRAMES ||
+    state.pendingInputBytes + byteLength > MAX_PENDING_INPUT_BYTES
+  ) {
+    const error: Error = createInputFailure(
+      new Error(`Interactive request "${state.requestId}" exceeded its pending stdin buffer limit.`)
+    );
+    failState(state, error);
+    throw error;
+  }
+  state.pendingInputBytes += byteLength;
+  state.pendingInputFrameCount++;
+}
+
+function releaseInputCapacity(state: IRequestState, byteLength: number): void {
+  state.pendingInputBytes -= byteLength;
+  state.pendingInputFrameCount--;
+}
+
+function handleQueuedInputError(state: IRequestState, error: unknown): void {
+  if (!(error instanceof InteractiveInputRoutingError) && !isInteractiveRequestInputFailure(error)) {
+    failState(state, error);
+  }
+}
+
+function createInputFailure(error: unknown): Error {
+  const normalizedError: Error = normalizeError(error);
+  requestInputFailures.add(normalizedError);
+  return normalizedError;
 }
 
 function normalizeError(error: unknown): Error {

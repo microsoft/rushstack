@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DaemonProtocolError } from './DaemonProtocolError';
-import { WIRE_TEXT_DECODER, WIRE_TEXT_ENCODER } from './DaemonWireText';
+import { WIRE_TEXT_ENCODER } from './DaemonWireText';
 import {
   MAX_REQUEST_ID_BYTES,
   REQUEST_ID_LENGTH_BYTES,
@@ -10,6 +10,9 @@ import {
 } from './FrameConstants';
 
 const LITTLE_ENDIAN: boolean = true;
+const REQUEST_ID_TEXT_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder('utf-8', {
+  fatal: true
+});
 
 /** One request-tagged chunk of raw stdin bytes. @beta */
 export interface IDaemonStdinChunk {
@@ -54,8 +57,21 @@ export function decodeDaemonStdinChunk(payload: Uint8Array): IDaemonStdinChunk {
       `Stdin frame declared a request id of ${idLength} bytes but the payload is ${payload.length} bytes.`
     );
   }
+  const idBytes: Uint8Array = payload.subarray(REQUEST_ID_LENGTH_BYTES, chunkOffset);
   return {
     chunk: payload.slice(chunkOffset),
-    requestId: WIRE_TEXT_DECODER.decode(payload.subarray(REQUEST_ID_LENGTH_BYTES, chunkOffset))
+    requestId: decodeRequestId(idBytes)
   };
+}
+
+function decodeRequestId(idBytes: Uint8Array): string {
+  try {
+    return REQUEST_ID_TEXT_DECODER.decode(idBytes);
+  } catch (error) {
+    throw new DaemonProtocolError(
+      'malformedPayload',
+      'Stdin frame request id is not valid UTF-8.',
+      { cause: error }
+    );
+  }
 }

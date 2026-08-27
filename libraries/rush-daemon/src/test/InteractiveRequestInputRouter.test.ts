@@ -183,9 +183,14 @@ describe(InteractiveRequestInputRouter.name, () => {
     const session: IInteractiveRequestSession = register(router, 'queued-abort', client).session;
     const writes: number[] = [];
     let releaseFirst: (() => void) | undefined;
+    let markFirstStarted: (() => void) | undefined;
+    const firstStarted: Promise<void> = new Promise((resolve) => {
+      markFirstStarted = resolve;
+    });
     session.attachInputSink({
       writeInputAsync: async (chunk: Uint8Array): Promise<void> => {
         writes.push(chunk[0]);
+        markFirstStarted?.();
         await new Promise<void>((resolve) => {
           releaseFirst = resolve;
         });
@@ -193,12 +198,15 @@ describe(InteractiveRequestInputRouter.name, () => {
     });
     const firstWrite: Promise<void> = routeAsync(router, 'queued-abort', Uint8Array.of(1));
     const secondWrite: Promise<void> = routeAsync(router, 'queued-abort', Uint8Array.of(2));
-    await Promise.resolve();
+    const secondWriteRejection: Promise<void> = expect(secondWrite).rejects.toMatchObject({
+      code: 'completedRequest'
+    });
+    await firstStarted;
     client.abortController.abort();
     releaseFirst?.();
 
     await firstWrite;
-    await expect(secondWrite).rejects.toMatchObject({ code: 'completedRequest' });
+    await secondWriteRejection;
     await session.finishAsync();
     expect(writes).toEqual([1]);
   });
