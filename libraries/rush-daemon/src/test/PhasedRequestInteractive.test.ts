@@ -50,6 +50,9 @@ it('restores phased-request raw mode before publishing the command result', asyn
     onFailure: (error: Error) => client.abortController.abort(error),
     requestId: 'interactive-request'
   });
+  client.interactiveInputSink = {
+    writeInputAsync: (): Promise<void> => Promise.resolve()
+  };
   client.onWriteAsync = (write): Promise<void> => {
     if (write.result) lifecycleOrder.push('result');
     return Promise.resolve();
