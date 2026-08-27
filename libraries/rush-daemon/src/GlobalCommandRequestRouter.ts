@@ -7,6 +7,7 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 
 import { createGlobalCommandResult } from './CommandResultPolicy';
+import { classifyRushCommand } from './RushCommandRequestPolicy';
 import type { IGlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
 import { GlobalCommandExecutionContext } from './GlobalCommandExecutionContext';
 import {
@@ -21,6 +22,16 @@ import {
   evaluateDaemonTerminalPolicy
 } from './DaemonTerminalPolicy';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
+import {
+  getWorkspaceRequestScheduler,
+  getRequestAdmissionErrorCode,
+  RequestAdmissionController
+} from './WorkspaceRequestAdmission';
+import {
+  type IRequestLease,
+  RequestSchedulerError,
+  RequestSchedulerErrorCode
+} from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 
 /**
@@ -93,77 +104,101 @@ export class GlobalCommandRequestRouter {
       await client.writeTerminalPolicyAsync(policy);
       throw new DaemonRequiresInProcessError(policy);
     }
-    const context: GlobalCommandExecutionContext = new GlobalCommandExecutionContext(
-      request,
-      client,
-      this.#workspaceSession
-    );
-    let executionError: unknown;
-    let executionResult: IGlobalCommandExecutionResult | undefined;
-    let aborted: boolean = context.abortSignal.aborted;
+    let admissionController: RequestAdmissionController | undefined;
+    let lease: IRequestLease;
     try {
-      if (!aborted) {
-        const executorPromise: Promise<IGlobalCommandExecutionResult> = Promise.resolve().then(() =>
-          executor(context)
-        );
-        const outcome: 'aborted' | 'completed' = await waitForExecutionAsync(
-          executorPromise,
-          context.abortSignal
-        );
-        aborted = outcome === 'aborted';
-        executionResult = await executorPromise;
-      }
-    } catch (error) {
-      executionError = error;
-      aborted = context.abortSignal.aborted;
-    }
-
-    let cleanupError: unknown;
-    try {
-      await context[Symbol.asyncDispose]();
-    } catch (error) {
-      cleanupError = error;
-    }
-    try {
-      await interactiveSession?.finishAsync();
-    } catch (error) {
-      cleanupError = combineExecutionAndCleanupErrors(cleanupError, error);
-    }
-    aborted ||= context.requestAborted;
-    const combinedError: unknown = combineExecutionAndCleanupErrors(executionError, cleanupError);
-    let result: IDaemonCommandResult;
-    try {
-      result = createGlobalCommandResult({
-        aborted,
-        error: combinedError,
-        exitCode: executionResult?.exitCode,
+      admissionController = new RequestAdmissionController({
+        admission: request.admission,
+        client,
         requestId: request.requestId
       });
+      lease = await admissionController.acquireAsync(
+        getWorkspaceRequestScheduler(this.#workspaceSession),
+        classifyRushCommand({
+          commandName: request.commandName,
+          commandOrigin: request.commandOrigin
+        })
+      );
     } catch (error) {
-      result = createGlobalCommandResult({
-        aborted: false,
-        error,
-        exitCode: undefined,
-        requestId: request.requestId
-      });
+      admissionController?.dispose();
+      return await finishAfterAdmissionErrorAsync(request.requestId, client, interactiveSession, error);
     }
 
-    function validateInteractiveSession(
-      resolvedRequest: IResolvedGlobalCommandRequest,
-      requestClient: IGlobalCommandRequestClient
-    ): IInteractiveRequestSession | undefined {
-      const session: IInteractiveRequestSession | undefined = requestClient.interactiveSession;
-      if (session && session.requestId !== resolvedRequest.requestId) {
-        throw new Error('The interactive input session does not belong to the global command request.');
+    try {
+      try {
+        return await executeAdmittedAsync(request, executor, client, interactiveSession, this.#workspaceSession);
+      } finally {
+        lease.release();
       }
-      if (resolvedRequest.terminal.acceptsStdin === true && !session) {
-        throw new Error('The interactive global command does not have a registered input session.');
-      }
-      return session;
+    } finally {
+      admissionController.dispose();
     }
-    await client.writeResultAsync(result);
-    return result;
   }
+}
+
+async function executeAdmittedAsync(
+  request: IResolvedGlobalCommandRequest,
+  executor: GlobalCommandExecutor,
+  client: IGlobalCommandRequestClient,
+  interactiveSession: IInteractiveRequestSession | undefined,
+  workspaceSession: IWorkspaceSession
+): Promise<IGlobalCommandRequestResult> {
+  const context: GlobalCommandExecutionContext = new GlobalCommandExecutionContext(
+    request,
+    client,
+    workspaceSession
+  );
+  let executionError: unknown;
+  let executionResult: IGlobalCommandExecutionResult | undefined;
+  let aborted: boolean = context.abortSignal.aborted;
+  try {
+    if (!aborted) {
+      const executorPromise: Promise<IGlobalCommandExecutionResult> = Promise.resolve().then(() =>
+        executor(context)
+      );
+      const outcome: 'aborted' | 'completed' = await waitForExecutionAsync(
+        executorPromise,
+        context.abortSignal
+      );
+      aborted = outcome === 'aborted';
+      executionResult = await executorPromise;
+    }
+  } catch (error) {
+    executionError = error;
+    aborted = context.abortSignal.aborted;
+  }
+
+  let cleanupError: unknown;
+  try {
+    await context[Symbol.asyncDispose]();
+  } catch (error) {
+    cleanupError = error;
+  }
+  try {
+    await interactiveSession?.finishAsync();
+  } catch (error) {
+    cleanupError = combineExecutionAndCleanupErrors(cleanupError, error);
+  }
+  aborted ||= context.requestAborted;
+  const combinedError: unknown = combineExecutionAndCleanupErrors(executionError, cleanupError);
+  let result: IDaemonCommandResult;
+  try {
+    result = createGlobalCommandResult({
+      aborted,
+      error: combinedError,
+      exitCode: executionResult?.exitCode,
+      requestId: request.requestId
+    });
+  } catch (error) {
+    result = createGlobalCommandResult({
+      aborted: false,
+      error,
+      exitCode: undefined,
+      requestId: request.requestId
+    });
+  }
+  await client.writeResultAsync(result);
+  return result;
 }
 
 async function waitForExecutionAsync(
@@ -207,4 +242,50 @@ function combineExecutionAndCleanupErrors(executionError: unknown, cleanupError:
     return cleanupError;
   }
   return undefined;
+}
+
+async function finishAfterAdmissionErrorAsync(
+  requestId: string,
+  client: IGlobalCommandRequestClient,
+  interactiveSession: IInteractiveRequestSession | undefined,
+  admissionError: unknown
+): Promise<IGlobalCommandRequestResult> {
+  let cleanupError: unknown;
+  try {
+    await interactiveSession?.finishAsync();
+  } catch (error) {
+    cleanupError = error;
+  }
+  if (!(admissionError instanceof RequestSchedulerError)) {
+    throw combineExecutionAndCleanupErrors(admissionError, cleanupError);
+  }
+  const aborted: boolean = admissionError.code === RequestSchedulerErrorCode.Aborted;
+  const error: unknown = aborted
+    ? cleanupError
+    : combineExecutionAndCleanupErrors(admissionError, cleanupError);
+  const result: IDaemonCommandResult = {
+    ...createGlobalCommandResult({
+      aborted,
+      error,
+      exitCode: undefined,
+      requestId
+    }),
+    admissionErrorCode: getRequestAdmissionErrorCode(admissionError)
+  };
+  await client.writeResultAsync(result);
+  return result;
+}
+
+function validateInteractiveSession(
+  resolvedRequest: IResolvedGlobalCommandRequest,
+  requestClient: IGlobalCommandRequestClient
+): IInteractiveRequestSession | undefined {
+  const session: IInteractiveRequestSession | undefined = requestClient.interactiveSession;
+  if (session && session.requestId !== resolvedRequest.requestId) {
+    throw new Error('The interactive input session does not belong to the global command request.');
+  }
+  if (resolvedRequest.terminal.acceptsStdin === true && !session) {
+    throw new Error('The interactive global command does not have a registered input session.');
+  }
+  return session;
 }

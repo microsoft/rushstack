@@ -22,6 +22,7 @@ const INPUT_BYTE: number = 0x7f;
 function createRequest(overrides: Partial<IDaemonPhasedRequest> = {}): IDaemonPhasedRequest {
   return {
     commandName: 'build',
+    commandOrigin: 'built-in',
     engineShape: TEST_ENGINE_SHAPE,
     environment: {},
     operationSelection: [{ enabledState: true, operationId: OPERATION_ID }],

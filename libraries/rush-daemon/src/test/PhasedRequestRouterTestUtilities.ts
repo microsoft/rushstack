@@ -18,6 +18,7 @@ import type { IOperationGraphOptions } from '@microsoft/rush-lib/lib/logic/opera
 import type {
   IDaemonEventEnvelope,
   IDaemonPhasedRequestResult,
+  IDaemonRequestQueuePositionMessage,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
@@ -53,6 +54,7 @@ const TEST_PHASE: IPhase = {
 export interface ITestClientWrite {
   readonly event?: IDaemonEventEnvelope;
   readonly operationId?: string;
+  readonly queuePosition?: IDaemonRequestQueuePositionMessage;
   readonly result?: IDaemonPhasedRequestResult;
   readonly stream?: 'stdout' | 'stderr';
   readonly text?: string;
@@ -61,6 +63,7 @@ export interface ITestClientWrite {
 export class TestPhasedRequestClient implements IPhasedRequestClient {
   public readonly abortController: AbortController = new AbortController();
   public readonly sessionId: string = 'test-session';
+  public readonly supportsRequestAdmission: boolean = true;
   public readonly writes: ITestClientWrite[] = [];
   public readonly policies: IDaemonTerminalPolicyResult[] = [];
   public interactiveInputSink: IInteractiveRequestInputSink | undefined;
@@ -104,6 +107,12 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
 
   public async writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void> {
     const write: ITestClientWrite = { result };
+    await this.onWriteAsync?.(write);
+    this.writes.push(write);
+  }
+
+  public async writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void> {
+    const write: ITestClientWrite = { queuePosition: message };
     await this.onWriteAsync?.(write);
     this.writes.push(write);
   }

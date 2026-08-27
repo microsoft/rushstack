@@ -12,10 +12,11 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
   'error',
   'setRawMode',
   'rawModeChanged',
-  'terminalPolicy'
+  'terminalPolicy',
+  'queuePosition'
 ] = [
   'hello', 'helloAck', 'subscribe', 'unsubscribe', 'ping', 'pong', 'error',
-  'setRawMode', 'rawModeChanged', 'terminalPolicy'
+  'setRawMode', 'rawModeChanged', 'terminalPolicy', 'queuePosition'
 ];
 
 /** The union of control message `kind` discriminants. @beta */

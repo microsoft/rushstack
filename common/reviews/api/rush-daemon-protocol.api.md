@@ -24,7 +24,8 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'error',
 'setRawMode',
 'rawModeChanged',
-'terminalPolicy'
+'terminalPolicy',
+'queuePosition'
 ];
 
 // @beta
@@ -53,10 +54,13 @@ export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 
 // @beta
+export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
+
+// @beta
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -122,6 +126,12 @@ export class DaemonProtocolError extends Error {
 export type DaemonProtocolErrorCode = 'frameTooLarge' | 'unknownFrameType' | 'malformedPayload' | 'malformedControlMessage' | 'protocolVersionMismatch';
 
 // @beta
+export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-timeout';
+
+// @beta
+export type DaemonRushCommandOrigin = 'built-in' | 'custom';
+
+// @beta
 export type DaemonTerminalPolicyDecision = 'runInDaemon' | 'requiresInProcess';
 
 // @beta
@@ -181,12 +191,14 @@ export interface IDaemonClientCaps {
     readonly columns?: number;
     readonly isTTY: boolean;
     readonly supportsInteractiveIO?: boolean;
+    readonly supportsRequestAdmission?: boolean;
     readonly verbosity?: DaemonVerbosity;
 }
 
 // @beta
 export interface IDaemonCommandResult {
     readonly aborted: boolean;
+    readonly admissionErrorCode?: DaemonRequestAdmissionErrorCode;
     readonly errorMessage?: string;
     readonly exitCode: number;
     readonly outcome: DaemonCommandOutcome;
@@ -337,7 +349,9 @@ export interface IDaemonPhasedOperationSelection {
 // @beta
 export interface IDaemonPhasedRequest {
     readonly acceptsStdin?: boolean;
+    readonly admission?: IDaemonRequestAdmissionOptions;
     readonly commandName: string;
+    readonly commandOrigin?: DaemonRushCommandOrigin;
     readonly engineShape: IDaemonPhasedEngineShape;
     readonly environment: Readonly<Record<string, string>>;
     readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
@@ -390,6 +404,23 @@ export interface IDaemonRawModeChangedMessage {
     // (undocumented)
     readonly payload: {
         readonly enabled: boolean;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestAdmissionOptions {
+    readonly noWait?: boolean;
+    readonly waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IDaemonRequestQueuePositionMessage {
+    // (undocumented)
+    readonly kind: 'queuePosition';
+    // (undocumented)
+    readonly payload: {
+        readonly position: number;
         readonly requestId: string;
     };
 }
@@ -479,6 +510,9 @@ export const LENGTH_FIELD_BYTES: number;
 export const LENGTH_FIELD_OFFSET: number;
 
 // @beta
+export const MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS: number;
+
+// @beta
 export const MAX_OPERATION_ID_BYTES: number;
 
 // @beta
@@ -535,5 +569,8 @@ export function validateDaemonControlMessage(value: unknown): void;
 
 // @beta
 export function validateDaemonEventEnvelope(value: unknown): IDaemonEventEnvelope;
+
+// @beta
+export function validateDaemonRequestAdmissionOptions(options: IDaemonRequestAdmissionOptions | undefined): void;
 
 ```
