@@ -20,6 +20,8 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
 - **Resolved phased-request contracts** — engine-agnostic request, enabled-state selection,
   and client-scoped result types for integrations that have already parsed a command and
   resolved it against a real warm operation graph.
+- **Final command result contract** — one typed success, warning, failure, or abort outcome
+  with the authoritative Rush-compatible exit code, delivered after request output drains.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

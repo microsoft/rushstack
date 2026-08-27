@@ -38,6 +38,7 @@ export { decodeDaemonLogChunk, encodeDaemonLogChunk, type IDaemonLogChunk } from
 export { createDaemonHello, createDaemonHelloAck, negotiateDaemonHello } from './DaemonHandshake';
 export type { DaemonHandshakeOutcome } from './DaemonHandshake';
 export type { DaemonJsonNull, DaemonJsonValue } from './DaemonJsonValue';
+export type { DaemonCommandOutcome, IDaemonCommandResult } from './DaemonCommandResult';
 export { DAEMON_EVENT_TYPES, isDaemonEventType, type DaemonEventType } from './DaemonEventType';
 export type { DaemonEventPrivacy, IDaemonEventEnvelope, IDaemonEventScope, IDaemonEventSource } from './DaemonEventEnvelope';
 export { isDaemonEventEnvelope, validateDaemonEventEnvelope } from './DaemonEventValidation';

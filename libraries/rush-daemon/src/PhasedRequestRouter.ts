@@ -10,7 +10,6 @@ import type {
 import { OperationStatus } from '@microsoft/rush-lib';
 import type {
   IDaemonPhasedEngineShape,
-  IDaemonPhasedOperationResult,
   IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest,
   IDaemonPhasedRequestResult
@@ -28,6 +27,11 @@ import {
 import type { IRequestLease } from './RequestScheduler';
 import type { IWorkspaceEngineShape } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import {
+  createPhasedCommandResult,
+  type IPhasedOperationOutcome,
+  parseWarningsAllowedByEnvironment
+} from './CommandResultPolicy';
 
 interface IDualEmitOperationGraph extends IOperationGraph {
   eventSink: _IOperationGraphEventSink | undefined;
@@ -80,7 +84,7 @@ export class PhasedRequestRouter {
         error instanceof RequestSchedulerError &&
         error.code === RequestSchedulerErrorCode.Aborted
       ) {
-        return createAbortedResult(request.requestId);
+        return await writeAbortedResultAsync(request.requestId, client);
       }
       throw error;
     }
@@ -102,16 +106,32 @@ export class PhasedRequestRouter {
     validateEngineShape(request.engineShape, this.#workspaceSession.engineShape);
     const operationById: ReadonlyMap<string, Operation> = indexOperations(graph.operations);
     const selection: IResolvedSelection = resolveSelection(request.operationSelection, operationById);
+    let warningsAllowedByEnvironment: boolean;
+    try {
+      warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
+    } catch (error) {
+      const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
+        aborted: client.abortSignal.aborted,
+        error,
+        graphStatus: graph.status,
+        operationOutcomes: [],
+        requestId: request.requestId,
+        scheduled: false,
+        warningsAllowedByEnvironment: false
+      });
+      await client.writeResultAsync(result);
+      return result;
+    }
 
     if (client.abortSignal.aborted) {
-      return createAbortedResult(request.requestId);
+      return await writeAbortedResultAsync(request.requestId, client);
     }
     if (graph.hasScheduledIteration || graph.status === OperationStatus.Executing) {
       throw new Error('The warm workspace operation graph is not idle.');
     }
     await this.#workspaceSession.reconcileInvalidationsAsync();
     if (client.abortSignal.aborted) {
-      return createAbortedResult(request.requestId);
+      return await writeAbortedResultAsync(request.requestId, client);
     }
 
     applySelection(graph, selection);
@@ -187,14 +207,17 @@ export class PhasedRequestRouter {
     }
     await abortTail;
     cleanupErrors.push(...abortErrors.slice(observedAbortErrorCount));
-    throwCombinedErrors(executionError, cleanupErrors);
-
-    return {
+    const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
       aborted: wasAborted || client.abortSignal.aborted,
-      operationResults: collectOperationResults(activeOperations, graph, requestSink),
+      error: combineErrors(executionError, cleanupErrors),
+      graphStatus: graph.status,
+      operationOutcomes: collectOperationOutcomes(activeOperations, graph, requestSink),
       requestId: request.requestId,
-      scheduled
-    };
+      scheduled,
+      warningsAllowedByEnvironment
+    });
+    await client.writeResultAsync(result);
+    return result;
   }
 }
 
@@ -343,12 +366,12 @@ function applySelection(graph: IOperationGraph, selection: IResolvedSelection): 
   );
 }
 
-function collectOperationResults(
+function collectOperationOutcomes(
   activeOperations: ReadonlyArray<Operation>,
   graph: IOperationGraph,
   requestSink: PhasedRequestEventSink
-): ReadonlyArray<IDaemonPhasedOperationResult> {
-  const results: IDaemonPhasedOperationResult[] = [];
+): ReadonlyArray<IPhasedOperationOutcome> {
+  const outcomes: IPhasedOperationOutcome[] = [];
   for (const operation of [...activeOperations].sort(compareOperations)) {
     const observed: ReturnType<PhasedRequestEventSink['getObservedResult']> =
       requestSink.getObservedResult(operation);
@@ -360,33 +383,51 @@ function collectOperationResults(
     const errorMessage: string | undefined = observed
       ? observed.executionResult.error?.message
       : retained?.error?.message;
-    results.push({ operationId: operation.name, status, errorMessage });
+    outcomes.push({
+      observedInCurrentIteration: observed !== undefined,
+      result: { operationId: operation.name, status, errorMessage },
+      warningsAreAllowed: operation.runner?.warningsAreAllowed ?? false
+    });
   }
-  return results;
+  return outcomes;
 }
 
 function compareOperations(left: Operation, right: Operation): number {
   return left.name.localeCompare(right.name);
 }
 
-function createAbortedResult(requestId: string): IDaemonPhasedRequestResult {
-  return { aborted: true, operationResults: [], requestId, scheduled: false };
+async function writeAbortedResultAsync(
+  requestId: string,
+  client: IPhasedRequestClient
+): Promise<IDaemonPhasedRequestResult> {
+  const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
+    aborted: true,
+    error: undefined,
+    graphStatus: OperationStatus.Aborted,
+    operationOutcomes: [],
+    requestId,
+    scheduled: false,
+    warningsAllowedByEnvironment: false
+  });
+  await client.writeResultAsync(result);
+  return result;
 }
 
-function throwCombinedErrors(executionError: unknown, cleanupErrors: unknown[]): void {
+function combineErrors(executionError: unknown, cleanupErrors: unknown[]): unknown {
   if (executionError !== undefined && cleanupErrors.length > 0) {
-    throw new AggregateError(
+    return new AggregateError(
       [executionError, ...cleanupErrors],
       'The phased request failed and could not clean up its client subscription.'
     );
   }
   if (executionError !== undefined) {
-    throw executionError;
+    return executionError;
   }
   if (cleanupErrors.length === 1) {
-    throw cleanupErrors[0];
+    return cleanupErrors[0];
   }
   if (cleanupErrors.length > 1) {
-    throw new AggregateError(cleanupErrors, 'Failed to clean up the phased request client subscription.');
+    return new AggregateError(cleanupErrors, 'Failed to clean up the phased request client subscription.');
   }
+  return undefined;
 }

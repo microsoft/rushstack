@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonCommandResult } from './DaemonCommandResult';
+
 /**
  * The enabled state assigned to one selected operation by a phased request.
  *
@@ -46,6 +48,8 @@ export interface IDaemonPhasedRequest {
   readonly commandName: string;
   /** The exact warm engine shape against which the selection was resolved. */
   readonly engineShape: IDaemonPhasedEngineShape;
+  /** The request environment used for Rush command policy without mutating the daemon process environment. */
+  readonly environment: Readonly<Record<string, string>>;
   /** The caller-resolved selected operations and their enabled states. */
   readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
   /** A client-generated identifier unique within the connection. */
@@ -71,9 +75,7 @@ export interface IDaemonPhasedOperationResult {
  *
  * @beta
  */
-export interface IDaemonPhasedRequestResult {
-  /** Whether cancellation or disconnect aborted the iteration. */
-  readonly aborted: boolean;
+export interface IDaemonPhasedRequestResult extends IDaemonCommandResult {
   /** Results only for operations enabled for this client. */
   readonly operationResults: ReadonlyArray<IDaemonPhasedOperationResult>;
   /** The identifier copied from the request. */

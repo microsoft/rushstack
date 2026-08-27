@@ -47,6 +47,9 @@ export const DAEMON_EVENT_TYPES: readonly [
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 
 // @beta
+export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
+
+// @beta
 export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage;
 
 // @beta
@@ -157,6 +160,15 @@ export interface IDaemonClientCaps {
     readonly columns?: number;
     readonly isTTY: boolean;
     readonly verbosity?: DaemonVerbosity;
+}
+
+// @beta
+export interface IDaemonCommandResult {
+    readonly aborted: boolean;
+    readonly errorMessage?: string;
+    readonly exitCode: number;
+    readonly outcome: DaemonCommandOutcome;
+    readonly requestId: string;
 }
 
 // @beta
@@ -304,13 +316,13 @@ export interface IDaemonPhasedOperationSelection {
 export interface IDaemonPhasedRequest {
     readonly commandName: string;
     readonly engineShape: IDaemonPhasedEngineShape;
+    readonly environment: Readonly<Record<string, string>>;
     readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
     readonly requestId: string;
 }
 
 // @beta
-export interface IDaemonPhasedRequestResult {
-    readonly aborted: boolean;
+export interface IDaemonPhasedRequestResult extends IDaemonCommandResult {
     readonly operationResults: ReadonlyArray<IDaemonPhasedOperationResult>;
     readonly requestId: string;
     readonly scheduled: boolean;
