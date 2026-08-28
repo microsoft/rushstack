@@ -6,6 +6,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import * as rushLib from '@microsoft/rush-lib';
+import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 import {
@@ -18,6 +19,7 @@ import {
 } from '@rushstack/rush-reporter';
 
 import { launchRushFrontendAsync, type IRushFrontendProcessLifecycle } from '../RushFrontend';
+import type { IRushFrontendLaunchOptions } from '../IRushFrontendLaunchOptions';
 import {
   initializeRushReporterHostAsync,
   type IInitializedRushReporterHost,
@@ -178,7 +180,7 @@ function emitCommandStarted(sink: IReporterEventSink): void {
 describe(launchRushFrontendAsync.name, () => {
   it('creates the authoritative host before invoking the bundled rush-lib and passes only its sink', async () => {
     const order: string[] = [];
-    let receivedOptions: Record<string, unknown> | undefined;
+    let receivedOptions: IRushFrontendLaunchOptions | undefined;
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
     const originalArgv: string[] = process.argv;
     process.argv = ['node', 'rush', 'build', '--reporter=legacy', '--json'];
@@ -195,7 +197,7 @@ describe(launchRushFrontendAsync.name, () => {
           void version;
           void selectedRushLib;
           order.push('engine');
-          receivedOptions = launchOptions as unknown as Record<string, unknown>;
+          receivedOptions = launchOptions;
           return launchOptions.reporterCloseAsync();
         },
         processLifecycle
@@ -203,15 +205,56 @@ describe(launchRushFrontendAsync.name, () => {
 
       expect(order).toEqual(['host', 'engine', 'close']);
       expect(process.argv).toEqual(['node', 'rush', 'build', '--json']);
-      expect(receivedOptions?.reporterEventSink).toEqual(
-        expect.objectContaining({ emit: expect.any(Function) }) as IReporterEventSink
-      );
+      expect(receivedOptions?.reporter).toEqual({
+        eventSink: expect.objectContaining({ emit: expect.any(Function) }),
+        sessionId: expect.any(String)
+      });
       expect(receivedOptions).not.toHaveProperty('selection');
       expect(receivedOptions).not.toHaveProperty('host');
       expect(receivedOptions).not.toHaveProperty('manager');
       expect(processLifecycle.beforeExitListener).toBeUndefined();
       expect(processLifecycle.signalListeners.size).toBe(0);
     } finally {
+      process.argv = originalArgv;
+    }
+  });
+
+  it('passes one typed reporter session through the real Rush launch boundary', async () => {
+    const order: string[] = [];
+    const initialized: IInitializedRushReporterHost = await createInitializedHostAsync(order);
+    const createSessionId: jest.Mock<string, []> = jest.fn(() => 'session-from-frontend');
+    let receivedOptions: ILaunchOptions | undefined;
+    const launchSpy: jest.SpyInstance = jest
+      .spyOn(rushLib.Rush, 'launch')
+      .mockImplementation((version, launchOptions) => {
+        void version;
+        receivedOptions = launchOptions;
+      });
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'build'];
+
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async () => initialized,
+        createSessionId,
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(launchSpy).toHaveBeenCalledTimes(1);
+      expect(createSessionId).toHaveBeenCalledTimes(1);
+      expect(receivedOptions?.reporter).toEqual({
+        eventSink: initialized.sink,
+        sessionId: 'session-from-frontend'
+      });
+      await initialized.closeAsync();
+      expect(order).toEqual(['host', 'close']);
+    } finally {
+      launchSpy.mockRestore();
       process.argv = originalArgv;
     }
   });
@@ -603,7 +646,7 @@ describe(launchRushFrontendAsync.name, () => {
         executeCurrentRush: (version, selectedRushLib, launchOptions) => {
           void version;
           void selectedRushLib;
-          emitCommandStarted(launchOptions.reporterEventSink);
+          emitCommandStarted(launchOptions.reporter.eventSink);
           return launchOptions.reporterCloseAsync();
         },
         processLifecycle: createTestProcessLifecycle()
@@ -644,7 +687,7 @@ describe(launchRushFrontendAsync.name, () => {
         executeCurrentRush: (version, selectedRushLib, launchOptions) => {
           void version;
           void selectedRushLib;
-          emitCommandStarted(launchOptions.reporterEventSink);
+          emitCommandStarted(launchOptions.reporter.eventSink);
           const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
           Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
           Object.defineProperty(parser, '_rushOptions', {
