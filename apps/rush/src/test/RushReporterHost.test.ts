@@ -415,21 +415,24 @@ describe(resolveRushReporterSelection.name, () => {
     expect(resolve(['build', '--reporter=default'], {}, true).reporter).toBe('default');
   });
 
-  it('parses output targets and preserves command-specific --json independently', () => {
-    const selection: IRushReporterSelection = resolve(
-      [
-        'list',
-        '--json',
-        '--reporter=json',
-        '--output=file://./rush.log?logLevel=debug',
-        '--output=json://./events.jsonl'
-      ],
-      {},
-      false
+  it('preserves command-specific --json as the sole stdout owner', () => {
+    expect(() => resolve(['list', '--json', '--reporter=json'])).toThrow(
+      /command-specific --json output owns stdout/
     );
 
-    expect(selection.commandJson).toBe(true);
-    expect(selection.reporter).toBe('json');
+    const selection: IRushReporterSelection = resolve(
+      ['list', '--json', '--output=file://./rush.log?logLevel=debug', '--output=json://./events.jsonl'],
+      {},
+      false,
+      true
+    );
+
+    expect(selection).toMatchObject({
+      commandJson: true,
+      reporter: 'file',
+      enabled: true,
+      reason: 'repository experiment'
+    });
     expect(selection.outputs).toEqual([
       {
         reporter: 'file',
@@ -442,6 +445,21 @@ describe(resolveRushReporterSelection.name, () => {
         params: {}
       }
     ]);
+    expect(resolve(['list', '--json', '--reporter=file']).reporter).toBe('file');
+  });
+
+  it('forces legacy selection for an incompatible Rush engine', () => {
+    expect(
+      resolveRushReporterSelection({
+        argv: ['build', '--reporter=json'],
+        env: {},
+        forceLegacy: true
+      })
+    ).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
   });
 
   it('surfaces unsupported and incomplete controls with actionable errors', () => {
@@ -588,6 +606,46 @@ describe(initializeRushReporterHostAsync.name, () => {
         'operationStreamClosed',
         'operationCompleted'
       ]);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('publishes a completed artifact before the final AI record', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-ai-artifact-'));
+    let stdoutText: string = '';
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=ai'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'build',
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        }
+      });
+
+      emitCommandStarted(initialized.sink);
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'commandResult',
+        payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+      });
+      await initialized.closeAsync();
+
+      const finalRecord: { log?: { complete?: boolean; path?: string } } = JSON.parse(
+        stdoutText.trim().split('\n').at(-1)!
+      );
+      expect(finalRecord.log).toMatchObject({
+        complete: true,
+        path: initialized.logArtifact?.path
+      });
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

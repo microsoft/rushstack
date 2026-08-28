@@ -29,6 +29,7 @@ export interface IAiDiagnostic {
   readonly code: string;
   readonly category: string;
   readonly severity: string;
+  readonly summary?: string;
   readonly remediation?: readonly IRushRemediationAction[];
 }
 
@@ -117,6 +118,9 @@ export class AiReporter implements IReporter {
   private readonly _warningDiagnostics: IAiDiagnostic[];
   private readonly _errorCodes: Set<string>;
   private readonly _diagnosticCategoryCounts: { [category: string]: number };
+  private readonly _fallbackErrorMessages: string[];
+  private _fallbackErrorCount: number;
+  private _fallbackErrorsTruncated: boolean;
   private _errorDiagnosticsTruncated: boolean;
   private _warningDiagnosticsTruncated: boolean;
   private _errorCount: number;
@@ -148,6 +152,9 @@ export class AiReporter implements IReporter {
     this._warningDiagnostics = [];
     this._errorCodes = new Set();
     this._diagnosticCategoryCounts = {};
+    this._fallbackErrorMessages = [];
+    this._fallbackErrorCount = 0;
+    this._fallbackErrorsTruncated = false;
     this._errorDiagnosticsTruncated = false;
     this._warningDiagnosticsTruncated = false;
     this._errorCount = 0;
@@ -218,6 +225,21 @@ export class AiReporter implements IReporter {
         this._collectDiagnostic(event.payload as IAiDiagnostic);
         break;
       }
+      case 'messageEmitted': {
+        const payload: { severity?: string; text?: string } = event.payload as {
+          severity?: string;
+          text?: string;
+        };
+        if (payload.severity === 'error' && payload.text) {
+          this._fallbackErrorCount++;
+          if (this._fallbackErrorMessages.length < this._maxDetailedDiagnostics) {
+            this._fallbackErrorMessages.push(payload.text.trim());
+          } else {
+            this._fallbackErrorsTruncated = true;
+          }
+        }
+        break;
+      }
       case 'artifactAvailable': {
         const payload: { role?: string; path?: string; format?: string; complete?: boolean } =
           event.payload as { role?: string; path?: string; format?: string; complete?: boolean };
@@ -271,6 +293,7 @@ export class AiReporter implements IReporter {
           code: diagnostic.code,
           category: diagnostic.category,
           severity: 'error',
+          summary: diagnostic.summary,
           remediation: diagnostic.remediation
         });
       } else {
@@ -283,6 +306,7 @@ export class AiReporter implements IReporter {
           code: diagnostic.code,
           category: diagnostic.category,
           severity: 'warning',
+          summary: diagnostic.summary,
           remediation: diagnostic.remediation
         });
       } else {
@@ -297,10 +321,31 @@ export class AiReporter implements IReporter {
     }
     this._finalEmitted = true;
 
-    const hasFailures: boolean = !succeeded || this._errorCount > 0;
+    const fallbackDiagnostics: IAiDiagnostic[] =
+      this._errorCount === 0
+        ? this._fallbackErrorMessages.map((summary) => ({
+            code: 'RUSH_COMMAND_FAILED',
+            category: 'command',
+            severity: 'error',
+            summary
+          }))
+        : [];
+    const errorDiagnostics: IAiDiagnostic[] =
+      fallbackDiagnostics.length > 0 ? fallbackDiagnostics : this._errorDiagnostics;
+    const errorCount: number =
+      this._errorCount + (fallbackDiagnostics.length > 0 ? this._fallbackErrorCount : 0);
+    const errorCodes: string[] =
+      fallbackDiagnostics.length > 0 ? ['RUSH_COMMAND_FAILED'] : [...this._errorCodes].sort();
+    const diagnosticCategoryCounts: { [category: string]: number } = {
+      ...this._diagnosticCategoryCounts
+    };
+    if (fallbackDiagnostics.length > 0) {
+      diagnosticCategoryCounts.command = (diagnosticCategoryCounts.command ?? 0) + fallbackDiagnostics.length;
+    }
+    const hasFailures: boolean = !succeeded || errorCount > 0;
     // When failures exist, warnings are represented by counts only. Warning-only
     // success may include bounded warning details.
-    const detailedSource: IAiDiagnostic[] = hasFailures ? this._errorDiagnostics : this._warningDiagnostics;
+    const detailedSource: IAiDiagnostic[] = hasFailures ? errorDiagnostics : this._warningDiagnostics;
 
     const record: {
       kind: 'ai.final';
@@ -322,13 +367,15 @@ export class AiReporter implements IReporter {
       result: succeeded ? 'succeeded' : 'failed',
       exitCode,
       scope: { commandName: this._commandName, failedProjects: [...this._failedProjects] },
-      errorCodes: [...this._errorCodes].sort(),
-      diagnosticCategoryCounts: { ...this._diagnosticCategoryCounts },
+      errorCodes,
+      diagnosticCategoryCounts,
       diagnostics: detailedSource.slice(0, this._maxDetailedDiagnostics),
-      errorCount: this._errorCount,
+      errorCount,
       warningCount: this._warningCount,
       operationCounts: { ...this._operationCounts },
-      truncated: hasFailures ? this._errorDiagnosticsTruncated : this._warningDiagnosticsTruncated
+      truncated: hasFailures
+        ? this._errorDiagnosticsTruncated || (fallbackDiagnostics.length > 0 && this._fallbackErrorsTruncated)
+        : this._warningDiagnosticsTruncated
     };
 
     if (this._logPath !== undefined) {

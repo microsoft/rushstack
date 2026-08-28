@@ -725,7 +725,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           rushConfiguration: this.rushConfiguration,
           graph,
           initialSnapshot,
-          terminal: presentationTerminal,
+          terminal,
           debounceMs: this._watchDebounceMs,
           renderStatusInPlace: !_isRushSessionOperationStreamEnabled(this.rushSession)
         });
