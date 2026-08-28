@@ -143,6 +143,52 @@ describe(HeftChildProcessReporter.name, () => {
     expect(diagnostics).toEqual([]);
   });
 
+  it('keeps raw fallback active when the child event capability is not negotiated', async () => {
+    let structuredNegotiated: boolean = false;
+    const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+      parentSessionId: 'parent-session',
+      parentRequestId: 'parent-request',
+      parentOperationId: 'project#build',
+      context: CONTEXT,
+      ingestForeignEnvelope: (envelope) => envelope.eventId,
+      onDiagnostic: () => undefined,
+      onStructuredNegotiated: () => {
+        structuredNegotiated = true;
+      }
+    });
+    const script: string = `
+      const fs = require('node:fs');
+      const eventFd = Number(process.env._RUSH_REPORTER_CHILD_FD);
+      const ackFd = Number(process.env._RUSH_REPORTER_CHILD_ACK_FD);
+      fs.writeSync(eventFd, JSON.stringify({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 2 },
+        producerVersion: '@rushstack/heft 1.2.25',
+        capabilities: [],
+        requiredFeatures: []
+      }) + '\\n');
+      fs.readFileSync(ackFd, 'utf8');
+      process.stdout.write('capability fallback');
+    `;
+    const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
+      env: { ...process.env, ...reporter.environment },
+      stdio: reporter.stdio
+    });
+    let stdout: string = '';
+    child.stdout?.setEncoding('utf8').on('data', (chunk: string) => {
+      stdout += chunk;
+    });
+
+    const [exitCode]: [number | null, void] = await Promise.all([
+      waitForCloseAsync(child),
+      reporter.attachAsync(child)
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(stdout).toBe('capability fallback');
+    expect(structuredNegotiated).toBe(false);
+  });
+
   it('surfaces unsupported requirements and retains fallback output', async () => {
     const diagnostics: IRushDiagnostic[] = [];
     const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({

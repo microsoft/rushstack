@@ -547,6 +547,25 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
   });
 
+  it('rejects a semantically invalid hello without throwing from the live host', () => {
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      forwardEnvelope: () => undefined
+    });
+
+    expect(() =>
+      host.processChildRecord({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 2 },
+        producerVersion: '',
+        capabilities: [],
+        requiredFeatures: []
+      })
+    ).not.toThrow();
+    expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
   it('rejects malformed envelopes and derives required at the host boundary', () => {
     const forwarded: IReporterEventEnvelope<unknown>[] = [];
     const host: HeftDescriptorHost = new HeftDescriptorHost({

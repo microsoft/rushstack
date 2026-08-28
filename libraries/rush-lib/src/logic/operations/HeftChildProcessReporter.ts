@@ -87,7 +87,7 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
         ackStream.end(encodeNdjsonRecord(ack));
       },
       onNegotiation: (result) => {
-        if (result.accepted) {
+        if (result.accepted && result.ack.acceptedCapabilities.includes('heft-child-events-v1')) {
           this._options.onStructuredNegotiated();
         } else {
           emitDiagnostic(result.diagnostic);

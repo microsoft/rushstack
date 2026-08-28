@@ -12,11 +12,11 @@ import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
 import { NdjsonDecoder, NdjsonInvalidRecordError, NdjsonRecordTooLargeError } from '../protocol/Ndjson';
 import {
+  InvalidReporterHelloError,
   negotiateReporterHello,
   REPORTER_KNOWN_CAPABILITIES,
   type ReporterCapability,
   type IReporterChildContext,
-  type IReporterHello,
   type IReporterHelloAck,
   type IReporterHandshakeResult
 } from '../protocol/ReporterHandshake';
@@ -40,23 +40,6 @@ function isProtocolVersion(value: unknown): value is IReporterProtocolVersion {
     return false;
   }
   return isNonNegativeInteger(value.major) && isNonNegativeInteger(value.minor);
-}
-
-function isStringArray(value: unknown): value is readonly string[] {
-  return Array.isArray(value) && value.every((item: unknown) => typeof item === 'string');
-}
-
-function isReporterHello(value: unknown): value is IReporterHello {
-  if (!isObjectRecord(value)) {
-    return false;
-  }
-  return (
-    value.kind === 'hello' &&
-    isProtocolVersion(value.protocolVersion) &&
-    typeof value.producerVersion === 'string' &&
-    isStringArray(value.capabilities) &&
-    isStringArray(value.requiredFeatures)
-  );
 }
 
 function isReporterEventType(value: string): value is ReporterEventType {
@@ -242,14 +225,19 @@ export class HeftDescriptorHost {
     }
 
     if (this._negotiation === undefined) {
-      if (!isReporterHello(record)) {
-        return this._rejectMalformedStream('the first record was not a valid hello');
+      let result: IReporterHandshakeResult;
+      try {
+        result = negotiateReporterHello(record, {
+          supportedProtocolVersion: this._supportedProtocolVersion,
+          supportedCapabilities: this._supportedCapabilities,
+          context: this._reporterContext
+        });
+      } catch (error) {
+        if (error instanceof InvalidReporterHelloError) {
+          return this._rejectMalformedStream('the first record was not a valid hello');
+        }
+        throw error;
       }
-      const result: IReporterHandshakeResult = negotiateReporterHello(record, {
-        supportedProtocolVersion: this._supportedProtocolVersion,
-        supportedCapabilities: this._supportedCapabilities,
-        context: this._reporterContext
-      });
       this._setNegotiation(result);
       return result.accepted;
     }
