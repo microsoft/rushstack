@@ -7,7 +7,7 @@ import { PassThrough, Writable } from 'node:stream';
 import type { IReporterEventEnvelope, IRushDiagnostic } from '@rushstack/rush-reporter';
 import { StringBufferTerminalProvider } from '@rushstack/terminal';
 
-import { HeftChildProcessReporter } from '../HeftChildProcessReporter';
+import { HeftChildProcessReporter, HeftChildReporterNonFatalError } from '../HeftChildProcessReporter';
 
 const CONTEXT = {
   reporter: 'json',
@@ -268,6 +268,7 @@ describe(HeftChildProcessReporter.name, () => {
 
   it('rejects exactly once when the acknowledgement pipe closes before delivery', async () => {
     let structuredNegotiationCount: number = 0;
+    const diagnostics: IRushDiagnostic[] = [];
     const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
       parentSessionId: 'parent-session',
       parentRequestId: 'parent-request',
@@ -275,7 +276,7 @@ describe(HeftChildProcessReporter.name, () => {
       iterationId: 7,
       context: CONTEXT,
       ingestForeignEnvelope: (envelope) => envelope.eventId,
-      onDiagnostic: () => undefined,
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
       onStructuredNegotiated: () => {
         structuredNegotiationCount++;
       }
@@ -302,6 +303,7 @@ describe(HeftChildProcessReporter.name, () => {
     child.stdout?.setEncoding('utf8').on('data', (chunk: string) => {
       stdout += chunk;
     });
+    const closePromise: Promise<number | null> = waitForCloseAsync(child);
     let rejectionCount: number = 0;
     const attachPromise: Promise<void> = reporter
       .attachAsync(child, new StringBufferTerminalProvider())
@@ -310,11 +312,16 @@ describe(HeftChildProcessReporter.name, () => {
         throw error;
       });
 
-    await expect(attachPromise).rejects.toThrow(/acknowledgement/);
-    expect(await waitForCloseAsync(child)).toBe(0);
+    await expect(attachPromise).rejects.toBeInstanceOf(HeftChildReporterNonFatalError);
+    expect(await closePromise).toBe(0);
     expect(stdout).toBe('raw fallback after acknowledgement close');
     expect(rejectionCount).toBe(1);
     expect(structuredNegotiationCount).toBe(0);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({
+      code: 'RUSH_PROTOCOL_INVALID_CHILD_STREAM',
+      severity: 'warning'
+    });
   });
 
   it('handles an acknowledgement write callback error followed by an EPIPE event', async () => {
@@ -499,7 +506,7 @@ describe(HeftChildProcessReporter.name, () => {
     const attachPromise: Promise<void> = reporter.attachAsync(child, new StringBufferTerminalProvider());
     const closePromise: Promise<number | null> = waitForCloseAsync(child);
 
-    await expect(attachPromise).rejects.toThrow();
+    await expect(attachPromise).rejects.toBeInstanceOf(HeftChildReporterNonFatalError);
     expect(await closePromise).toBe(0);
   });
 
