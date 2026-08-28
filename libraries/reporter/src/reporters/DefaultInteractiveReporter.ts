@@ -17,6 +17,19 @@ import {
 const HIDE_CURSOR: string = '\u001b[?25l';
 const SHOW_CURSOR: string = '\u001b[?25h';
 const MAX_FINAL_DIAGNOSTICS: number = 10;
+
+interface IWatchCycleState {
+  totalOperations: number;
+  completedOperations: number;
+  failedOperations: number;
+  readonly registeredOperations: Set<string>;
+  readonly projectByOperation: Map<string, string>;
+  readonly silentOperations: Set<string>;
+  readonly activeProjects: Map<string, string>;
+  latestActivity: string;
+  watchCompleted: boolean;
+}
+
 /**
  * The terminal an interactive reporter writes to.
  *
@@ -100,13 +113,9 @@ export class DefaultInteractiveReporter implements IReporter {
   private readonly _minRefreshIntervalMs: number;
 
   private _commandName: string | undefined;
-  private _totalOperations: number;
-  private _completedOperations: number;
-  private _failedOperations: number;
-  private readonly _registeredOperations: Set<string>;
-  private readonly _projectByOperation: Map<string, string>;
-  private readonly _silentOperations: Set<string>;
-  private readonly _activeProjects: Map<string, string>;
+  private readonly _watchCycles: Map<number, IWatchCycleState>;
+  private _legacyIterationId: number;
+  private _latestIterationId: number;
   private _latestActivity: string;
   private readonly _diagnostics: string[];
   private _result: { succeeded: boolean; exitCode: number } | undefined;
@@ -117,7 +126,6 @@ export class DefaultInteractiveReporter implements IReporter {
   private _paintedRowCount: number;
   private _cursorHidden: boolean;
   private _finalized: boolean;
-  private _resetCycleOnNextRegistration: boolean;
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
     this._terminal = options.terminal;
@@ -128,13 +136,9 @@ export class DefaultInteractiveReporter implements IReporter {
     this._minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
 
     this._commandName = undefined;
-    this._totalOperations = 0;
-    this._completedOperations = 0;
-    this._failedOperations = 0;
-    this._registeredOperations = new Set();
-    this._projectByOperation = new Map();
-    this._silentOperations = new Set();
-    this._activeProjects = new Map();
+    this._watchCycles = new Map();
+    this._legacyIterationId = 0;
+    this._latestIterationId = 0;
     this._latestActivity = '';
     this._diagnostics = [];
     this._result = undefined;
@@ -145,7 +149,6 @@ export class DefaultInteractiveReporter implements IReporter {
     this._paintedRowCount = 0;
     this._cursorHidden = false;
     this._finalized = false;
-    this._resetCycleOnNextRegistration = false;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -180,71 +183,84 @@ export class DefaultInteractiveReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string; phaseName?: string; silent?: boolean } =
-          event.payload as {
-            operationId: string;
-            projectName?: string;
-            phaseName?: string;
-            silent?: boolean;
-          };
-        if (this._resetCycleOnNextRegistration) {
-          this._resetWatchCycle();
-        }
-        if (this._registeredOperations.has(payload.operationId)) {
+        const payload: {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
+        };
+        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        if (cycle.registeredOperations.has(payload.operationId)) {
           break;
         }
-        this._registeredOperations.add(payload.operationId);
+        cycle.registeredOperations.add(payload.operationId);
         if (payload.silent) {
-          this._silentOperations.add(payload.operationId);
+          cycle.silentOperations.add(payload.operationId);
           break;
         }
-        this._silentOperations.delete(payload.operationId);
-        this._totalOperations++;
+        cycle.silentOperations.delete(payload.operationId);
+        cycle.totalOperations++;
         const projectName: string = payload.projectName ?? event.scope?.projectName ?? payload.operationId;
-        this._projectByOperation.set(
+        cycle.projectByOperation.set(
           payload.operationId,
           payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName
         );
         break;
       }
       case 'operationStatusChanged': {
-        const payload: { operationId: string; status: string; projectName?: string } = event.payload as {
+        const payload: {
           operationId: string;
           status: string;
           projectName?: string;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          status: string;
+          projectName?: string;
+          iterationId?: number;
         };
+        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
         const projectName: string =
           payload.projectName ??
           event.scope?.projectName ??
-          this._projectByOperation.get(payload.operationId) ??
+          cycle.projectByOperation.get(payload.operationId) ??
           payload.operationId;
-        if (this._silentOperations.has(payload.operationId)) {
+        if (cycle.silentOperations.has(payload.operationId)) {
           break;
         }
         if (payload.status === 'executing') {
-          this._activeProjects.set(payload.operationId, projectName);
+          cycle.activeProjects.set(payload.operationId, projectName);
         }
-        this._latestActivity = `${payload.status} ${projectName}`;
+        cycle.latestActivity = `${payload.status} ${projectName}`;
         break;
       }
       case 'operationCompleted': {
-        const payload: { operationId: string; status: string } = event.payload as {
+        const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
           operationId: string;
           status: string;
+          iterationId?: number;
         };
-        if (this._silentOperations.delete(payload.operationId)) {
+        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        if (cycle.silentOperations.delete(payload.operationId)) {
           break;
         }
         const projectName: string =
-          this._projectByOperation.get(payload.operationId) ??
+          cycle.projectByOperation.get(payload.operationId) ??
           event.scope?.projectName ??
           payload.operationId;
-        this._activeProjects.delete(payload.operationId);
-        this._completedOperations++;
+        cycle.activeProjects.delete(payload.operationId);
+        cycle.completedOperations++;
         if (payload.status === 'failure') {
-          this._failedOperations++;
+          cycle.failedOperations++;
         }
-        this._latestActivity = `${payload.status} ${projectName}`;
+        cycle.latestActivity = `${payload.status} ${projectName}`;
         break;
       }
       case 'activityChanged': {
@@ -260,12 +276,14 @@ export class DefaultInteractiveReporter implements IReporter {
           text?: string;
         };
         if (payload.text !== undefined) {
-          this._latestActivity = this._toSingleLine(payload.text);
           if (
             event.scope?.operationId === undefined &&
             (payload.severity === 'error' || payload.severity === 'warning')
           ) {
             this._diagnostics.push(payload.text.trim());
+          }
+          if (event.scope?.operationId !== undefined || payload.severity !== 'error') {
+            this._latestActivity = this._toSingleLine(payload.text);
           }
         }
         break;
@@ -305,13 +323,14 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   private _snapshot(): ILiveRegionState {
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     return {
       commandName: this._commandName,
-      totalOperations: this._totalOperations,
-      completedOperations: this._completedOperations,
-      failedOperations: this._failedOperations,
-      activeProjects: [...this._activeProjects.values()],
-      latestActivity: this._latestActivity
+      totalOperations: cycle.totalOperations,
+      completedOperations: cycle.completedOperations,
+      failedOperations: cycle.failedOperations,
+      activeProjects: [...cycle.activeProjects.values()],
+      latestActivity: cycle.latestActivity || this._latestActivity
     };
   }
 
@@ -340,29 +359,59 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   private _appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
-    const payload: { succeeded?: boolean } = event.payload as { succeeded?: boolean };
+    const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
+      succeeded?: boolean;
+      iterationId?: number;
+    };
+    const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
     const marker: string = payload.succeeded ? this._color.green('✔') : this._color.red('✖');
     const summary: string =
       `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'} - ` +
-      `${this._completedOperations}/${this._totalOperations} operations`;
+      `${cycle.completedOperations}/${cycle.totalOperations} operations`;
     this._terminal.write(`${this._clearRegion()}${summary}\n`);
     this._paintedRowCount = 0;
-    this._resetCycleOnNextRegistration = true;
+    cycle.watchCompleted = true;
+    this._pruneCompletedWatchCycles();
+    if (payload.iterationId === undefined) {
+      this._legacyIterationId++;
+    }
     if (this._terminal.isTTY) {
       this._paint();
     }
   }
 
-  private _resetWatchCycle(): void {
-    this._totalOperations = 0;
-    this._completedOperations = 0;
-    this._failedOperations = 0;
-    this._registeredOperations.clear();
-    this._projectByOperation.clear();
-    this._silentOperations.clear();
-    this._activeProjects.clear();
-    this._latestActivity = '';
-    this._resetCycleOnNextRegistration = false;
+  private _getWatchCycle(iterationId?: number): IWatchCycleState {
+    const resolvedIterationId: number = iterationId ?? this._legacyIterationId;
+    let cycle: IWatchCycleState | undefined = this._watchCycles.get(resolvedIterationId);
+    if (!cycle) {
+      cycle = {
+        totalOperations: 0,
+        completedOperations: 0,
+        failedOperations: 0,
+        registeredOperations: new Set(),
+        projectByOperation: new Map(),
+        silentOperations: new Set(),
+        activeProjects: new Map(),
+        latestActivity: '',
+        watchCompleted: false
+      };
+      this._watchCycles.set(resolvedIterationId, cycle);
+    }
+    this._latestIterationId = Math.max(this._latestIterationId, resolvedIterationId);
+    this._pruneCompletedWatchCycles();
+    return cycle;
+  }
+
+  private _getLatestWatchCycle(): IWatchCycleState {
+    return this._getWatchCycle(this._latestIterationId);
+  }
+
+  private _pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this._watchCycles) {
+      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+        this._watchCycles.delete(iterationId);
+      }
+    }
   }
 
   private _finalize(): void {
@@ -372,18 +421,19 @@ export class DefaultInteractiveReporter implements IReporter {
     this._finalized = true;
 
     const lines: string[] = [];
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     const succeeded: boolean = this._result?.succeeded ?? false;
     if (succeeded) {
       lines.push(
         `${this._color.green('✔')} ${this._commandName ?? 'rush'} succeeded — ` +
-          `${this._completedOperations}/${this._totalOperations} operations`
+          `${cycle.completedOperations}/${cycle.totalOperations} operations`
       );
       if (this._logPath !== undefined) {
         lines.push(this._color.dim(`Log: ${this._logPath}`));
       }
     } else {
       lines.push(
-        `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${this._failedOperations} failed`
+        `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${cycle.failedOperations} failed`
       );
       for (const diagnostic of this._diagnostics.slice(0, MAX_FINAL_DIAGNOSTICS)) {
         lines.push(`  ${diagnostic}`);

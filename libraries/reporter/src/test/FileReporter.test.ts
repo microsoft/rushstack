@@ -271,20 +271,24 @@ describe('FileReporter', () => {
       };
       const baselineOpenDescriptors: number | undefined = countOpenOperationDescriptors();
 
-      for (const operationId of ['completed', 'closed']) {
+      for (const [operationId, iterationId] of [
+        ['completed', 6],
+        ['closed', 7]
+      ] as const) {
         reporter.report(
           ev('operationRegistered', {
+            iterationId,
             operationId,
             projectName: operationId,
             phaseName: 'build'
           })
         );
         reporter.report({
-          ...ev('externalOutput', { stream: 'stdout', text: `${operationId}-1\n` }),
+          ...ev('externalOutput', { iterationId, stream: 'stdout', text: `${operationId}-1\n` }),
           scope: { operationId }
         });
         reporter.report({
-          ...ev('externalOutput', { stream: 'stdout', text: `${operationId}-2\n` }),
+          ...ev('externalOutput', { iterationId, stream: 'stdout', text: `${operationId}-2\n` }),
           scope: { operationId }
         });
       }
@@ -296,9 +300,14 @@ describe('FileReporter', () => {
         expect(countOpenOperationDescriptors()).toBe(baselineOpenDescriptors + 2);
       }
 
-      reporter.report(ev('operationCompleted', { operationId: 'completed', status: 'success' }));
+      reporter.report(
+        ev('operationCompleted', { iterationId: 6, operationId: 'completed', status: 'success' })
+      );
       await reporter.closeAsync();
 
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('closed-1\nclosed-2\n==[ closed: aborted ]==');
+      expect(content).not.toContain('\u0000');
       expect((await fs.promises.readdir(logsDir)).filter((entry) => entry.endsWith('.operation'))).toEqual(
         []
       );

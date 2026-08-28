@@ -205,6 +205,7 @@ export class OperationGraph implements IOperationGraph {
   /** Tracks if a graph state change notification has been scheduled for next tick. */
   private _graphStateChangeScheduled: boolean = false;
   private _status: OperationStatus = OperationStatus.Ready;
+  private _nextIterationId: number = 1;
 
   public constructor(operations: Set<Operation>, options: IOperationGraphOptions) {
     const {
@@ -533,6 +534,13 @@ export class OperationGraph implements IOperationGraph {
 
     this._currentIteration = iteration;
     this._setScheduledIteration(undefined);
+    for (const executionRecord of iteration.records.values()) {
+      iteration.eventSink?.onOperationRegistered?.(
+        executionRecord.name,
+        executionRecord.silent,
+        executionRecord.iterationId
+      );
+    }
 
     iteration.promise = this._executeInnerAsync(this._currentIteration).finally(() => {
       this._currentIteration = undefined;
@@ -645,6 +653,7 @@ export class OperationGraph implements IOperationGraph {
 
     // Convert the developer graph to the mutable execution graph
     const iterationContext: IExecutionIterationContext = {
+      iterationId: this._nextIterationId++,
       abortController,
       startTime,
       streamCollator,
@@ -712,8 +721,12 @@ export class OperationGraph implements IOperationGraph {
     }
 
     if (iterationContext.totalOperations === 0) {
-      registerOperations();
       for (const executionRecord of executionRecords.values()) {
+        eventSink?.onOperationRegistered?.(
+          executionRecord.name,
+          executionRecord.silent,
+          executionRecord.iterationId
+        );
         executionRecord.status = OperationStatus.NoOp;
         executionRecord.finalizeOperation();
         executionRecord.stdioSummarizer.close();
@@ -733,19 +746,12 @@ export class OperationGraph implements IOperationGraph {
       terminal.writeStderrLine(Colorize.red(errorMessage));
       throw e;
     }
-    registerOperations();
     if (!this._currentIteration) {
       this._setIdleTimeout();
     } else if (!this.pauseNextIteration) {
       void this.abortCurrentIterationAsync();
     }
     return iterationContext;
-
-    function registerOperations(): void {
-      for (const executionRecord of executionRecords.values()) {
-        eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent, executionRecord);
-      }
-    }
 
     function onWriterActive(writer: CollatedWriter | undefined): void {
       if (writer) {

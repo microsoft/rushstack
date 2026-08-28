@@ -35,6 +35,18 @@ interface IOperationRecord {
   spoolFailed?: boolean;
 }
 
+interface IWatchCycleState {
+  readonly operations: Map<string, IOperationRecord>;
+  total: number;
+  completed: number;
+  failed: number;
+  watchCompleted: boolean;
+}
+
+function getIterationId(payload: { iterationId?: number }, fallback: number): number {
+  return payload.iterationId ?? fallback;
+}
+
 /**
  * Options for {@link PlaintextReporter}.
  *
@@ -96,16 +108,14 @@ export class PlaintextReporter implements IReporter {
   private readonly _logLevel: ReporterLogLevel;
 
   private _commandName: string | undefined;
-  private _total: number;
-  private _completed: number;
-  private _failed: number;
   private _lastOutputMs: number;
   private _atLineStart: boolean;
   private _logPath: string | undefined;
-  private readonly _operations: Map<string, IOperationRecord>;
+  private readonly _watchCycles: Map<number, IWatchCycleState>;
   private _spoolDirectory: string | undefined;
   private _nextSpoolId: number;
-  private _resetCycleOnNextRegistration: boolean;
+  private _legacyIterationId: number;
+  private _latestIterationId: number;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -116,16 +126,14 @@ export class PlaintextReporter implements IReporter {
     this._logLevel = options.logLevel ?? 'normal';
 
     this._commandName = undefined;
-    this._total = 0;
-    this._completed = 0;
-    this._failed = 0;
     this._lastOutputMs = 0;
     this._atLineStart = true;
     this._logPath = undefined;
-    this._operations = new Map();
+    this._watchCycles = new Map();
     this._spoolDirectory = undefined;
     this._nextSpoolId = 1;
-    this._resetCycleOnNextRegistration = false;
+    this._legacyIterationId = 0;
+    this._latestIterationId = 0;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -145,26 +153,27 @@ export class PlaintextReporter implements IReporter {
           projectName?: string;
           phaseName?: string;
           silent?: boolean;
+          iterationId?: number;
         } = event.payload as {
           operationId: string;
           projectName?: string;
           phaseName?: string;
           silent?: boolean;
+          iterationId?: number;
         };
-        if (this._resetCycleOnNextRegistration) {
-          this._resetWatchCycle();
-        }
-        const previousRecord: IOperationRecord | undefined = this._operations.get(payload.operationId);
+        const iterationId: number = getIterationId(payload, this._legacyIterationId);
+        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const previousRecord: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
         if (previousRecord) {
           break;
         }
-        this._operations.set(payload.operationId, {
+        cycle.operations.set(payload.operationId, {
           projectName: payload.projectName ?? payload.operationId,
           phaseName: payload.phaseName,
           silent: payload.silent === true
         });
         if (!payload.silent) {
-          this._total++;
+          cycle.total++;
         }
         break;
       }
@@ -215,12 +224,23 @@ export class PlaintextReporter implements IReporter {
         break;
       }
       case 'watchCycleCompleted': {
-        const succeeded: boolean = (event.payload as { succeeded?: boolean }).succeeded === true;
+        const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
+          succeeded?: boolean;
+          iterationId?: number;
+        };
+        const iterationId: number = getIterationId(payload, this._legacyIterationId);
+        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const succeeded: boolean = payload.succeeded === true;
         this._writeLine(
           `Watch cycle ${succeeded ? 'succeeded' : 'failed'} ` +
-            `(${this._completed}/${this._total} operations, ${this._failed} failed)`
+            `(${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
         );
-        this._resetCycleOnNextRegistration = true;
+        this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+        cycle.watchCompleted = true;
+        this._pruneCompletedWatchCycles();
+        if (payload.iterationId === undefined) {
+          this._legacyIterationId++;
+        }
         break;
       }
       case 'commandResult': {
@@ -237,18 +257,21 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    for (const [operationId, record] of this._operations) {
-      if (!record.silent && this._variant === 'detailed') {
-        const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
-        this._writeLine('');
-        this._writeLine(`==[ ${record.projectName}${phase} ]==`);
-        this._writeSpooledOutput(record);
-        this._writeLine(this._formatStatus(record.projectName, 'aborted'));
-      } else {
-        this._deleteSpool(record);
+    for (const cycle of this._watchCycles.values()) {
+      for (const [operationId, record] of cycle.operations) {
+        if (!record.silent && this._variant === 'detailed') {
+          const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
+          this._writeLine('');
+          this._writeLine(`==[ ${record.projectName}${phase} ]==`);
+          this._writeSpooledOutput(record);
+          this._writeLine(this._formatStatus(record.projectName, 'aborted'));
+        } else {
+          this._deleteSpool(record);
+        }
+        cycle.operations.delete(operationId);
       }
-      this._operations.delete(operationId);
     }
+    this._watchCycles.clear();
     this._removeSpoolDirectory();
   }
 
@@ -257,9 +280,10 @@ export class PlaintextReporter implements IReporter {
    * last output. Returns whether a heartbeat was emitted.
    */
   public emitHeartbeatIfDue(): boolean {
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     if (this._nowMs() - this._lastOutputMs >= this._heartbeatIntervalMs) {
       this._writeLine(
-        `... ${this._commandName ?? 'rush'} still running — ${this._completed}/${this._total} operations`
+        `... ${this._commandName ?? 'rush'} still running — ${cycle.completed}/${cycle.total} operations`
       );
       return true;
     }
@@ -267,11 +291,14 @@ export class PlaintextReporter implements IReporter {
   }
 
   private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
-    const payload: { operationId: string; status: string } = event.payload as {
+    const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
       operationId: string;
       status: string;
+      iterationId?: number;
     };
-    const record: IOperationRecord | undefined = this._operations.get(payload.operationId);
+    const iterationId: number = getIterationId(payload, this._legacyIterationId);
+    const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+    const record: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
     const projectName: string = record?.projectName ?? event.scope?.projectName ?? payload.operationId;
 
     if (!TERMINAL_STATUSES.has(payload.status)) {
@@ -279,20 +306,20 @@ export class PlaintextReporter implements IReporter {
     }
     if (record?.silent) {
       this._deleteSpool(record);
-      this._operations.delete(payload.operationId);
+      cycle.operations.delete(payload.operationId);
       return;
     }
 
-    this._completed++;
+    cycle.completed++;
     if (payload.status === 'failure') {
-      this._failed++;
+      cycle.failed++;
     }
 
     if (this._logLevel === 'quiet') {
       if (record) {
         this._deleteSpool(record);
       }
-      this._operations.delete(payload.operationId);
+      cycle.operations.delete(payload.operationId);
       return;
     }
 
@@ -307,7 +334,7 @@ export class PlaintextReporter implements IReporter {
     } else {
       this._writeLine(this._formatStatus(projectName, payload.status));
     }
-    this._operations.delete(payload.operationId);
+    cycle.operations.delete(payload.operationId);
   }
 
   private _onExternalOutput(event: IReporterEventEnvelope<unknown>): void {
@@ -315,9 +342,14 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     const operationId: string | undefined = event.scope?.operationId;
-    const text: string = (event.payload as { text?: string }).text ?? '';
+    const payload: { text?: string; iterationId?: number } = event.payload as {
+      text?: string;
+      iterationId?: number;
+    };
+    const text: string = payload.text ?? '';
+    const cycle: IWatchCycleState = this._getWatchCycle(getIterationId(payload, this._legacyIterationId));
     const record: IOperationRecord | undefined =
-      operationId !== undefined ? this._operations.get(operationId) : undefined;
+      operationId !== undefined ? cycle.operations.get(operationId) : undefined;
     if (record) {
       this._spoolOutput(record, text);
     } else {
@@ -443,27 +475,49 @@ export class PlaintextReporter implements IReporter {
     this._spoolDirectory = undefined;
   }
 
-  private _resetWatchCycle(): void {
-    for (const record of this._operations.values()) {
-      this._deleteSpool(record);
+  private _getWatchCycle(iterationId: number): IWatchCycleState {
+    let cycle: IWatchCycleState | undefined = this._watchCycles.get(iterationId);
+    if (!cycle) {
+      cycle = {
+        operations: new Map(),
+        total: 0,
+        completed: 0,
+        failed: 0,
+        watchCompleted: false
+      };
+      this._watchCycles.set(iterationId, cycle);
     }
-    this._operations.clear();
-    this._total = 0;
-    this._completed = 0;
-    this._failed = 0;
-    this._resetCycleOnNextRegistration = false;
+    this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+    this._pruneCompletedWatchCycles();
+    return cycle;
+  }
+
+  private _getLatestWatchCycle(): IWatchCycleState {
+    return this._getWatchCycle(this._latestIterationId);
+  }
+
+  private _pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this._watchCycles) {
+      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+        for (const record of cycle.operations.values()) {
+          this._deleteSpool(record);
+        }
+        this._watchCycles.delete(iterationId);
+      }
+    }
   }
 
   private _onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {
     const commandName: string = payload.commandName ?? this._commandName ?? 'rush';
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     if (payload.succeeded) {
       this._writeLine(
         this._color.green(
-          `rush ${commandName} succeeded (${this._completed}/${this._total} operations, ${this._failed} failed)`
+          `rush ${commandName} succeeded (${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
         )
       );
     } else {
-      this._writeLine(this._color.red(`rush ${commandName} failed (${this._failed} failed)`));
+      this._writeLine(this._color.red(`rush ${commandName} failed (${cycle.failed} failed)`));
     }
     if (this._logPath) {
       this._writeLine(`Full log: ${this._logPath}`);

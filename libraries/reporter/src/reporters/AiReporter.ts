@@ -20,6 +20,40 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'aborted'
 ]);
 
+interface IAiDiagnosticState {
+  readonly errorDiagnostics: IAiDiagnostic[];
+  readonly warningDiagnostics: IAiDiagnostic[];
+  readonly errorCodes: Set<string>;
+  readonly diagnosticCategoryCounts: { [category: string]: number };
+  errorDiagnosticsTruncated: boolean;
+  warningDiagnosticsTruncated: boolean;
+  errorCount: number;
+  warningCount: number;
+}
+
+interface IAiWatchCycleState {
+  readonly registeredOperations: Set<string>;
+  readonly projectByOperation: Map<string, string>;
+  readonly silentOperations: Set<string>;
+  readonly operationCounts: { [status: string]: number };
+  readonly failedProjects: string[];
+  readonly diagnostics: IAiDiagnosticState;
+  watchCompleted: boolean;
+}
+
+function createDiagnosticState(): IAiDiagnosticState {
+  return {
+    errorDiagnostics: [],
+    warningDiagnostics: [],
+    errorCodes: new Set(),
+    diagnosticCategoryCounts: {},
+    errorDiagnosticsTruncated: false,
+    warningDiagnosticsTruncated: false,
+    errorCount: 0,
+    warningCount: 0
+  };
+}
+
 /**
  * A bounded diagnostic in an AI record.
  *
@@ -110,28 +144,18 @@ export class AiReporter implements IReporter {
 
   private _protocolVersion: IReporterProtocolVersion;
   private _commandName: string | undefined;
-  private readonly _registeredOperations: Set<string>;
-  private readonly _projectByOperation: Map<string, string>;
-  private readonly _silentOperations: Set<string>;
-  private readonly _operationCounts: { [status: string]: number };
-  private readonly _failedProjects: string[];
-  private readonly _errorDiagnostics: IAiDiagnostic[];
-  private readonly _warningDiagnostics: IAiDiagnostic[];
-  private readonly _errorCodes: Set<string>;
-  private readonly _diagnosticCategoryCounts: { [category: string]: number };
+  private readonly _watchCycles: Map<number, IAiWatchCycleState>;
+  private readonly _globalDiagnostics: IAiDiagnosticState;
   private readonly _fallbackErrorMessages: string[];
   private _fallbackErrorCount: number;
   private _fallbackErrorsTruncated: boolean;
-  private _errorDiagnosticsTruncated: boolean;
-  private _warningDiagnosticsTruncated: boolean;
-  private _errorCount: number;
-  private _warningCount: number;
   private _logPath: string | undefined;
   private _logFormat: string | undefined;
   private _artifactComplete: boolean;
   private _finalEmitted: boolean;
   private _pendingResult: { succeeded: boolean; exitCode: number } | undefined;
-  private _resetCycleOnNextRegistration: boolean;
+  private _legacyIterationId: number;
+  private _latestIterationId: number;
 
   public constructor(options: IAiReporterOptions) {
     this._write = options.write;
@@ -147,28 +171,18 @@ export class AiReporter implements IReporter {
 
     this._protocolVersion = REPORTER_PROTOCOL_VERSION;
     this._commandName = undefined;
-    this._registeredOperations = new Set();
-    this._projectByOperation = new Map();
-    this._silentOperations = new Set();
-    this._operationCounts = {};
-    this._failedProjects = [];
-    this._errorDiagnostics = [];
-    this._warningDiagnostics = [];
-    this._errorCodes = new Set();
-    this._diagnosticCategoryCounts = {};
+    this._watchCycles = new Map();
+    this._globalDiagnostics = createDiagnosticState();
     this._fallbackErrorMessages = [];
     this._fallbackErrorCount = 0;
     this._fallbackErrorsTruncated = false;
-    this._errorDiagnosticsTruncated = false;
-    this._warningDiagnosticsTruncated = false;
-    this._errorCount = 0;
-    this._warningCount = 0;
     this._logPath = undefined;
     this._logFormat = undefined;
     this._artifactComplete = true;
     this._finalEmitted = false;
     this._pendingResult = undefined;
-    this._resetCycleOnNextRegistration = false;
+    this._legacyIterationId = 0;
+    this._latestIterationId = 0;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -190,23 +204,27 @@ export class AiReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string; silent?: boolean } = event.payload as {
+        const payload: {
           operationId: string;
           projectName?: string;
           silent?: boolean;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          projectName?: string;
+          silent?: boolean;
+          iterationId?: number;
         };
-        if (this._resetCycleOnNextRegistration) {
-          this._resetWatchCycle();
-        }
-        if (this._registeredOperations.has(payload.operationId)) {
+        const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
+        if (cycle.registeredOperations.has(payload.operationId)) {
           break;
         }
-        this._registeredOperations.add(payload.operationId);
+        cycle.registeredOperations.add(payload.operationId);
         if (payload.silent) {
-          this._silentOperations.add(payload.operationId);
+          cycle.silentOperations.add(payload.operationId);
         }
         if (payload.projectName !== undefined) {
-          this._projectByOperation.set(payload.operationId, payload.projectName);
+          cycle.projectByOperation.set(payload.operationId, payload.projectName);
         }
         break;
       }
@@ -214,42 +232,61 @@ export class AiReporter implements IReporter {
         break;
       }
       case 'operationCompleted': {
-        const payload: { operationId: string; status: string } = event.payload as {
+        const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
           operationId: string;
           status: string;
+          iterationId?: number;
         };
-        if (this._silentOperations.has(payload.operationId)) {
-          this._silentOperations.delete(payload.operationId);
+        const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
+        if (cycle.silentOperations.has(payload.operationId)) {
+          cycle.silentOperations.delete(payload.operationId);
           break;
         }
         if (TERMINAL_STATUSES.has(payload.status)) {
-          this._operationCounts[payload.status] = (this._operationCounts[payload.status] ?? 0) + 1;
+          cycle.operationCounts[payload.status] = (cycle.operationCounts[payload.status] ?? 0) + 1;
           if (payload.status === 'failure') {
             const projectName: string =
-              this._projectByOperation.get(payload.operationId) ??
+              cycle.projectByOperation.get(payload.operationId) ??
               event.scope?.projectName ??
               payload.operationId;
-            this._failedProjects.push(projectName);
+            cycle.failedProjects.push(projectName);
           }
         }
         break;
       }
       case 'diagnosticEmitted': {
-        this._collectDiagnostic(event.payload as IAiDiagnostic);
+        const diagnostic: IAiDiagnostic & { iterationId?: number } = event.payload as IAiDiagnostic & {
+          iterationId?: number;
+        };
+        this._collectDiagnostic(
+          diagnostic,
+          diagnostic.iterationId === undefined
+            ? this._globalDiagnostics
+            : this._getWatchCycle(diagnostic.iterationId).diagnostics
+        );
         break;
       }
       case 'watchCycleCompleted': {
-        const succeeded: boolean = (event.payload as { succeeded?: boolean }).succeeded === true;
+        const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
+          succeeded?: boolean;
+          iterationId?: number;
+        };
+        const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const succeeded: boolean = payload.succeeded === true;
         this._write(
           `${JSON.stringify({
             kind: 'ai.watchCycle',
             protocolVersion: this._protocolVersion,
             succeeded,
-            operationCounts: { ...this._operationCounts },
-            failedProjects: [...this._failedProjects]
+            operationCounts: { ...cycle.operationCounts },
+            failedProjects: [...cycle.failedProjects]
           })}\n`
         );
-        this._resetCycleOnNextRegistration = true;
+        if (payload.iterationId === undefined) {
+          this._legacyIterationId++;
+        }
+        cycle.watchCompleted = true;
+        this._pruneCompletedWatchCycles();
         break;
       }
       case 'messageEmitted': {
@@ -311,16 +348,16 @@ export class AiReporter implements IReporter {
     }
   }
 
-  private _collectDiagnostic(diagnostic: IAiDiagnostic): void {
+  private _collectDiagnostic(diagnostic: IAiDiagnostic, state: IAiDiagnosticState): void {
     if (diagnostic.category !== undefined) {
-      this._diagnosticCategoryCounts[diagnostic.category] =
-        (this._diagnosticCategoryCounts[diagnostic.category] ?? 0) + 1;
+      state.diagnosticCategoryCounts[diagnostic.category] =
+        (state.diagnosticCategoryCounts[diagnostic.category] ?? 0) + 1;
     }
     if (diagnostic.severity === 'error') {
-      this._errorCount++;
-      this._errorCodes.add(diagnostic.code);
-      if (this._errorDiagnostics.length < this._maxDetailedDiagnostics) {
-        this._errorDiagnostics.push({
+      state.errorCount++;
+      state.errorCodes.add(diagnostic.code);
+      if (state.errorDiagnostics.length < this._maxDetailedDiagnostics) {
+        state.errorDiagnostics.push({
           code: diagnostic.code,
           category: diagnostic.category,
           severity: 'error',
@@ -328,12 +365,12 @@ export class AiReporter implements IReporter {
           remediation: diagnostic.remediation
         });
       } else {
-        this._errorDiagnosticsTruncated = true;
+        state.errorDiagnosticsTruncated = true;
       }
     } else if (diagnostic.severity === 'warning') {
-      this._warningCount++;
-      if (this._warningDiagnostics.length < this._maxDetailedDiagnostics) {
-        this._warningDiagnostics.push({
+      state.warningCount++;
+      if (state.warningDiagnostics.length < this._maxDetailedDiagnostics) {
+        state.warningDiagnostics.push({
           code: diagnostic.code,
           category: diagnostic.category,
           severity: 'warning',
@@ -341,20 +378,41 @@ export class AiReporter implements IReporter {
           remediation: diagnostic.remediation
         });
       } else {
-        this._warningDiagnosticsTruncated = true;
+        state.warningDiagnosticsTruncated = true;
       }
     }
   }
 
-  private _resetWatchCycle(): void {
-    this._registeredOperations.clear();
-    this._projectByOperation.clear();
-    this._silentOperations.clear();
-    for (const status of Object.keys(this._operationCounts)) {
-      delete this._operationCounts[status];
+  private _getWatchCycle(iterationId?: number): IAiWatchCycleState {
+    const resolvedIterationId: number = iterationId ?? this._legacyIterationId;
+    let cycle: IAiWatchCycleState | undefined = this._watchCycles.get(resolvedIterationId);
+    if (!cycle) {
+      cycle = {
+        registeredOperations: new Set(),
+        projectByOperation: new Map(),
+        silentOperations: new Set(),
+        operationCounts: {},
+        failedProjects: [],
+        diagnostics: createDiagnosticState(),
+        watchCompleted: false
+      };
+      this._watchCycles.set(resolvedIterationId, cycle);
     }
-    this._failedProjects.length = 0;
-    this._resetCycleOnNextRegistration = false;
+    this._latestIterationId = Math.max(this._latestIterationId, resolvedIterationId);
+    this._pruneCompletedWatchCycles();
+    return cycle;
+  }
+
+  private _getLatestWatchCycle(): IAiWatchCycleState {
+    return this._getWatchCycle(this._latestIterationId);
+  }
+
+  private _pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this._watchCycles) {
+      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+        this._watchCycles.delete(iterationId);
+      }
+    }
   }
 
   private _emitFinal(succeeded: boolean, exitCode: number): void {
@@ -363,8 +421,21 @@ export class AiReporter implements IReporter {
     }
     this._finalEmitted = true;
 
+    const cycle: IAiWatchCycleState = this._getLatestWatchCycle();
+    const cycleDiagnostics: IAiDiagnosticState = cycle.diagnostics;
+    const errorCountWithoutFallback: number =
+      this._globalDiagnostics.errorCount + cycleDiagnostics.errorCount;
+    const warningCount: number = this._globalDiagnostics.warningCount + cycleDiagnostics.warningCount;
+    const collectedErrorDiagnostics: IAiDiagnostic[] = [
+      ...this._globalDiagnostics.errorDiagnostics,
+      ...cycleDiagnostics.errorDiagnostics
+    ];
+    const collectedWarningDiagnostics: IAiDiagnostic[] = [
+      ...this._globalDiagnostics.warningDiagnostics,
+      ...cycleDiagnostics.warningDiagnostics
+    ];
     const fallbackDiagnostics: IAiDiagnostic[] =
-      this._errorCount === 0
+      errorCountWithoutFallback === 0
         ? this._fallbackErrorMessages.map((summary) => ({
             code: 'RUSH_COMMAND_FAILED',
             category: 'command',
@@ -372,22 +443,27 @@ export class AiReporter implements IReporter {
             summary
           }))
         : [];
-    const hasFallbackErrors: boolean = this._errorCount === 0 && this._fallbackErrorCount > 0;
+    const hasFallbackErrors: boolean = errorCountWithoutFallback === 0 && this._fallbackErrorCount > 0;
     const errorDiagnostics: IAiDiagnostic[] = hasFallbackErrors
       ? fallbackDiagnostics
-      : this._errorDiagnostics;
-    const errorCount: number = this._errorCount + (hasFallbackErrors ? this._fallbackErrorCount : 0);
-    const errorCodes: string[] = hasFallbackErrors ? ['RUSH_COMMAND_FAILED'] : [...this._errorCodes].sort();
+      : collectedErrorDiagnostics;
+    const errorCount: number = errorCountWithoutFallback + (hasFallbackErrors ? this._fallbackErrorCount : 0);
+    const errorCodes: string[] = hasFallbackErrors
+      ? ['RUSH_COMMAND_FAILED']
+      : [...new Set([...this._globalDiagnostics.errorCodes, ...cycleDiagnostics.errorCodes])].sort();
     const diagnosticCategoryCounts: { [category: string]: number } = {
-      ...this._diagnosticCategoryCounts
+      ...this._globalDiagnostics.diagnosticCategoryCounts
     };
+    for (const [category, count] of Object.entries(cycleDiagnostics.diagnosticCategoryCounts)) {
+      diagnosticCategoryCounts[category] = (diagnosticCategoryCounts[category] ?? 0) + count;
+    }
     if (hasFallbackErrors) {
       diagnosticCategoryCounts.command = (diagnosticCategoryCounts.command ?? 0) + this._fallbackErrorCount;
     }
     const hasFailures: boolean = !succeeded || errorCount > 0;
     // When failures exist, warnings are represented by counts only. Warning-only
     // success may include bounded warning details.
-    const detailedSource: IAiDiagnostic[] = hasFailures ? errorDiagnostics : this._warningDiagnostics;
+    const detailedSource: IAiDiagnostic[] = hasFailures ? errorDiagnostics : collectedWarningDiagnostics;
 
     const record: {
       kind: 'ai.final';
@@ -408,16 +484,18 @@ export class AiReporter implements IReporter {
       protocolVersion: this._protocolVersion,
       result: succeeded ? 'succeeded' : 'failed',
       exitCode,
-      scope: { commandName: this._commandName, failedProjects: [...this._failedProjects] },
+      scope: { commandName: this._commandName, failedProjects: [...cycle.failedProjects] },
       errorCodes,
       diagnosticCategoryCounts,
       diagnostics: detailedSource.slice(0, this._maxDetailedDiagnostics),
       errorCount,
-      warningCount: this._warningCount,
-      operationCounts: { ...this._operationCounts },
+      warningCount,
+      operationCounts: { ...cycle.operationCounts },
       truncated: hasFailures
-        ? this._errorDiagnosticsTruncated || (hasFallbackErrors && this._fallbackErrorsTruncated)
-        : this._warningDiagnosticsTruncated
+        ? this._globalDiagnostics.errorDiagnosticsTruncated ||
+          cycleDiagnostics.errorDiagnosticsTruncated ||
+          (hasFallbackErrors && this._fallbackErrorsTruncated)
+        : this._globalDiagnostics.warningDiagnosticsTruncated || cycleDiagnostics.warningDiagnosticsTruncated
     };
 
     if (this._logPath !== undefined) {

@@ -642,6 +642,7 @@ export interface _IOperationBuildCacheOptions {
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
     readonly error: Error | undefined;
+    readonly iterationId: number;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly problemCollector: IProblemCollector;
@@ -685,12 +686,12 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 // @internal
 export interface _IOperationGraphEventSink {
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
-    onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult): void;
+    onOperationChunk?(operationId: string, chunk: ITerminalChunk, iterationId: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
+    onOperationRegistered?(operationId: string, silent: boolean, iterationId: number): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
-    onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult): void;
+    onOperationStreamClosed?(operationId: string, iterationId: number): void;
 }
 
 // @alpha

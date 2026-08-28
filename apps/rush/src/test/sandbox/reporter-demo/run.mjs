@@ -144,8 +144,11 @@ const rawOutput = plaintextEvents
   .join('');
 const groupHeader = '==[ @rushstack/rush-reporter (_phase:build) ]==\n';
 const groupStart = plaintext.indexOf(groupHeader);
-const groupEnd = plaintext.indexOf('@rushstack/rush-reporter: success', groupStart);
-if (groupStart < 0 || groupEnd < 0) {
+const groupEnd = ['success', 'successWithWarnings', 'fromCache']
+  .map((status) => plaintext.indexOf(`@rushstack/rush-reporter: ${status}`, groupStart))
+  .filter((index) => index >= 0)
+  .sort((a, b) => a - b)[0];
+if (groupStart < 0 || groupEnd === undefined) {
   throw new Error('The plaintext reporter did not reconstruct the expected operation group.');
 }
 const groupedOutput = plaintext.slice(groupStart + groupHeader.length, groupEnd);
@@ -185,7 +188,10 @@ if (quiet.includes('build started') || quiet.includes('==[ @rushstack/rush-repor
 if (!verbose.includes('Incremental strategy:') || !debug.includes('Incremental strategy:')) {
   throw new Error('Verbose and debug reporter output did not preserve Rush terminal verbosity.');
 }
-if (ci.includes('\u001b') || !ci.includes('@rushstack/rush-reporter: success')) {
+if (
+  ci.includes('\u001b') ||
+  !/@rushstack\/rush-reporter: (?:success|successWithWarnings|fromCache)/.test(ci)
+) {
   throw new Error('CI output was not append-only plaintext.');
 }
 
