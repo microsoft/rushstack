@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import {
-  BOOTSTRAP_PROTOCOL_MAJOR,
   BOOTSTRAP_BUFFER_MAX_BYTES,
   BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES,
-  BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME
+  BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
+  encodeBootstrapEnvelope
 } from './BootstrapProtocol';
 import type { ReporterEventType } from '../events/ReporterEventType';
 import { chunkUtf8Text } from '../utilities/chunkUtf8Text';
@@ -192,8 +192,7 @@ export class BootstrapEventBuffer {
   public emit(input: IBootstrapEventInput): string {
     const eventId: string = `boot_${this._nextEventId++}`;
     const required: boolean = input.type !== 'activityChanged';
-    const envelope: Record<string, unknown> = {
-      protocolVersion: { major: BOOTSTRAP_PROTOCOL_MAJOR, minor: 0 },
+    const line: string = encodeBootstrapEnvelope({
       eventId,
       sessionId: this._sessionId,
       sequence: this._nextSequence++,
@@ -203,8 +202,7 @@ export class BootstrapEventBuffer {
       required,
       type: input.type,
       payload: input.payload === undefined ? {} : input.payload
-    };
-    const line: string = JSON.stringify(envelope);
+    });
     const bytes: number = Buffer.byteLength(line, 'utf8') + 1;
     const mustPreserve: boolean = required;
     const replaceable: boolean = input.type === 'activityChanged';
@@ -257,8 +255,7 @@ export class BootstrapEventBuffer {
   public serialize(): string {
     const lines: string[] = this._entries.map((entry: IBufferEntry) => entry.line);
     if (this._truncated) {
-      const notice: Record<string, unknown> = {
-        protocolVersion: { major: BOOTSTRAP_PROTOCOL_MAJOR, minor: 0 },
+      const noticeLine: string = encodeBootstrapEnvelope({
         eventId: 'boot_bufferTruncated',
         sessionId: this._sessionId,
         sequence: this._nextSequence++,
@@ -274,8 +271,7 @@ export class BootstrapEventBuffer {
           droppedRequired: this._droppedRequired,
           failed: this._failed
         }
-      };
-      const noticeLine: string = JSON.stringify(notice);
+      });
       const noticeBytes: number = Buffer.byteLength(noticeLine, 'utf8') + 1;
       if (noticeBytes > TRUNCATION_NOTICE_RESERVE_BYTES) {
         throw new Error('The bootstrap truncation notice exceeded its reserved capacity.');

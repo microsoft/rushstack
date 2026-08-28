@@ -19,6 +19,7 @@ import {
   type IBootstrapEventBufferOptions,
   type IEarlyReporterControls
 } from '../index';
+import { encodeBootstrapEnvelope } from '../bootstrap/BootstrapProtocol';
 
 function decode(ndjson: string): Record<string, unknown>[] {
   return ndjson
@@ -72,6 +73,27 @@ describe('parseEarlyReporterControls', () => {
 describe('BootstrapEventBuffer', () => {
   it('freezes a protocol major that matches the source of truth', () => {
     expect(BOOTSTRAP_PROTOCOL_MAJOR).toBe(REPORTER_PROTOCOL_VERSION.major);
+  });
+
+  it('encodes the frozen bootstrap envelope deterministically', () => {
+    expect(
+      encodeBootstrapEnvelope({
+        eventId: 'boot_1',
+        sessionId: 'sess_boot',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: { packageName: 'install-run-rush', packageVersion: '0.0.0' },
+        privacy: 'public',
+        required: true,
+        type: 'sessionStarted',
+        payload: { argv: ['build'] }
+      })
+    ).toBe(
+      '{"protocolVersion":{"major":1,"minor":0},"eventId":"boot_1","sessionId":"sess_boot",' +
+        '"sequence":1,"timestamp":"2026-01-01T00:00:00.000Z","source":{"packageName":' +
+        '"install-run-rush","packageVersion":"0.0.0"},"privacy":"public","required":true,' +
+        '"type":"sessionStarted","payload":{"argv":["build"]}}'
+    );
   });
 
   it('encodes events with assigned ids, sequence, timestamp, and protocol version', () => {
