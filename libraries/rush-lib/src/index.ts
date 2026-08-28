@@ -203,6 +203,7 @@ export {
 } from './pluginFramework/PhasedCommandHooks';
 export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
 export type {
+  IOperationChildProcessReporter as _IOperationChildProcessReporter,
   IOperationGraphEventSink as _IOperationGraphEventSink,
   IOperationActivityOptions as _IOperationActivityOptions
 } from './logic/operations/OperationEventSink';

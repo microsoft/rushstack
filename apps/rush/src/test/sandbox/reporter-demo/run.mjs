@@ -82,6 +82,13 @@ const purgeLogMatch = tempPurge.stderr.match(/^Rush full log: (.+)$/m);
 if (!purgeLogMatch || purgeLogMatch[1].startsWith(tempOverride) || !fs.existsSync(purgeLogMatch[1])) {
   throw new Error('The active purge reporter log was not preserved outside RUSH_TEMP_FOLDER.');
 }
+const heftChild = run('heft-child', [
+  'rebuild',
+  '--only',
+  '@rushstack/rush-reporter',
+  '--reporter=json',
+  '--log-level=debug'
+]).stdout;
 
 function parseNdjson(text, name) {
   if (text.includes('\u001b')) {
@@ -127,6 +134,39 @@ for (const [name, events] of [
       );
     }
   }
+}
+const heftChildEvents = heftChild
+  .split('\n')
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+const correlatedChildEvents = heftChildEvents.filter((event) => event.parentSessionId);
+if (correlatedChildEvents.length === 0) {
+  throw new Error('The current Heft child did not negotiate structured reporting.');
+}
+if (
+  correlatedChildEvents.some(
+    (event, index) => index > 0 && event.sourceSequence <= correlatedChildEvents[index - 1].sourceSequence
+  )
+) {
+  throw new Error('The current Heft child source sequence was not preserved in order.');
+}
+if (
+  correlatedChildEvents.some(
+    (event) =>
+      event.source.packageName !== '@rushstack/heft' ||
+      !event.parentRequestId ||
+      !event.parentOperationId ||
+      event.scope?.operationId !== event.parentOperationId
+  )
+) {
+  throw new Error('The current Heft child events were not correlated to their parent operation.');
+}
+if (
+  correlatedChildEvents.some(
+    (event) => event.type === 'externalOutput' && Buffer.byteLength(event.payload.text, 'utf8') > 64 * 1024
+  )
+) {
+  throw new Error('The current Heft child exceeded the external output chunk limit.');
 }
 
 const logMatch = plaintext.match(/^Full log: (.+)$/m);

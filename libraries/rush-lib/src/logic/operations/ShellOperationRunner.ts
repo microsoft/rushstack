@@ -11,6 +11,7 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
 import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
+import type { IOperationChildProcessReporter } from './OperationEventSink';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
@@ -96,6 +97,8 @@ export class ShellOperationRunner implements IOperationRunner {
         const { rushConfiguration, projectFolder } = this._rushProject;
 
         const { environment: initialEnvironment } = context;
+        const childProcessReporter: IOperationChildProcessReporter | undefined =
+          context.createChildProcessReporter();
 
         const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
           rushConfiguration: rushConfiguration,
@@ -105,8 +108,12 @@ export class ShellOperationRunner implements IOperationRunner {
           environmentPathOptions: {
             includeProjectBin: true
           },
-          initialEnvironment
+          initialEnvironment,
+          additionalEnvironment: childProcessReporter?.environment,
+          stdio: childProcessReporter?.stdio
         });
+        const reporterDrainPromise: Promise<void> =
+          childProcessReporter?.attachAsync(subProcess) ?? Promise.resolve();
 
         // Hook into events, in order to get live streaming of the log
         subProcess.stdout?.on('data', (data: Buffer) => {
@@ -119,22 +126,20 @@ export class ShellOperationRunner implements IOperationRunner {
           hasWarningOrError = true;
         });
 
-        const status: OperationStatus = await new Promise(
-          (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
+        const closePromise: Promise<{
+          readonly exitCode: number | null;
+          readonly signal: NodeJS.Signals | null;
+        }> = new Promise(
+          (
+            resolve: (result: {
+              readonly exitCode: number | null;
+              readonly signal: NodeJS.Signals | null;
+            }) => void,
+            reject: (error: OperationError) => void
+          ) => {
             subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
               try {
-                // Do NOT reject here immediately, give a chance for other logic to suppress the error
-                if (signal) {
-                  context.error = new OperationError('error', `Terminated by signal: ${signal}`);
-                  resolve(OperationStatus.Failure);
-                } else if (exitCode !== 0) {
-                  context.error = new OperationError('error', `Returned error code: ${exitCode}`);
-                  resolve(OperationStatus.Failure);
-                } else if (hasWarningOrError) {
-                  resolve(OperationStatus.SuccessWithWarning);
-                } else {
-                  resolve(OperationStatus.Success);
-                }
+                resolve({ exitCode, signal });
               } catch (error) {
                 context.error = error as OperationError;
                 reject(error as OperationError);
@@ -142,8 +147,24 @@ export class ShellOperationRunner implements IOperationRunner {
             });
           }
         );
+        const [{ exitCode, signal }]: [
+          { readonly exitCode: number | null; readonly signal: NodeJS.Signals | null },
+          void
+        ] = await Promise.all([closePromise, reporterDrainPromise]);
 
-        return status;
+        if (signal) {
+          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+          context.error = new OperationError('error', `Terminated by signal: ${signal}`);
+          return OperationStatus.Failure;
+        } else if (exitCode !== 0) {
+          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+          context.error = new OperationError('error', `Returned error code: ${exitCode}`);
+          return OperationStatus.Failure;
+        } else if (hasWarningOrError || childProcessReporter?.hasWarningOrError) {
+          return OperationStatus.SuccessWithWarning;
+        } else {
+          return OperationStatus.Success;
+        }
       },
       {
         createLogFile: true

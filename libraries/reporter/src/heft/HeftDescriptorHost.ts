@@ -10,9 +10,12 @@ import {
 } from '../events/ReporterEventType';
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
-import { NdjsonDecoder } from '../protocol/Ndjson';
+import { NdjsonDecoder, NdjsonInvalidRecordError, NdjsonRecordTooLargeError } from '../protocol/Ndjson';
 import {
   negotiateReporterHello,
+  REPORTER_KNOWN_CAPABILITIES,
+  type ReporterCapability,
+  type IReporterChildContext,
   type IReporterHello,
   type IReporterHelloAck,
   type IReporterHandshakeResult
@@ -113,6 +116,11 @@ export interface IHeftDescriptorHostOptions {
   readonly parentSessionId: string;
 
   /**
+   * The parent request id used to correlate child events.
+   */
+  readonly parentRequestId?: string;
+
+  /**
    * The parent operation id used to correlate child events.
    */
   readonly parentOperationId?: string;
@@ -125,7 +133,12 @@ export interface IHeftDescriptorHostOptions {
   /**
    * The capabilities the parent supports.
    */
-  readonly supportedCapabilities?: readonly string[];
+  readonly supportedCapabilities?: readonly ReporterCapability[];
+
+  /**
+   * Parent-owned rendering and filtering context offered to the child.
+   */
+  readonly context?: IReporterChildContext;
 
   /**
    * Forwards a correlated child envelope, typically to `ReporterManager.ingestForeignEnvelope`.
@@ -137,6 +150,11 @@ export interface IHeftDescriptorHostOptions {
    * Called once when the first record is accepted or rejected.
    */
   readonly onNegotiation?: (result: IReporterHandshakeResult) => void;
+
+  /**
+   * Sends the acknowledgement to the child immediately after processing its hello.
+   */
+  readonly sendHelloAck?: (ack: IReporterHelloAck) => void;
 }
 
 /**
@@ -184,11 +202,14 @@ export interface IHeftChildResult {
  */
 export class HeftDescriptorHost {
   private readonly _parentSessionId: string;
+  private readonly _parentRequestId: string | undefined;
   private readonly _parentOperationId: string | undefined;
   private readonly _supportedProtocolVersion: IReporterProtocolVersion;
-  private readonly _supportedCapabilities: readonly string[] | undefined;
+  private readonly _supportedCapabilities: readonly ReporterCapability[];
+  private readonly _reporterContext: IReporterChildContext | undefined;
   private readonly _forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
   private readonly _onNegotiation: ((result: IReporterHandshakeResult) => void) | undefined;
+  private readonly _sendHelloAck: ((ack: IReporterHelloAck) => void) | undefined;
 
   private _negotiation: IReporterHandshakeResult | undefined;
   private _protocolFailure: IRushDiagnostic | undefined;
@@ -196,11 +217,14 @@ export class HeftDescriptorHost {
 
   public constructor(options: IHeftDescriptorHostOptions) {
     this._parentSessionId = options.parentSessionId;
+    this._parentRequestId = options.parentRequestId;
     this._parentOperationId = options.parentOperationId;
     this._supportedProtocolVersion = options.supportedProtocolVersion;
-    this._supportedCapabilities = options.supportedCapabilities;
+    this._supportedCapabilities = options.supportedCapabilities ?? REPORTER_KNOWN_CAPABILITIES;
+    this._reporterContext = options.context;
     this._forwardEnvelope = options.forwardEnvelope;
     this._onNegotiation = options.onNegotiation;
+    this._sendHelloAck = options.sendHelloAck;
   }
 
   /**
@@ -223,10 +247,10 @@ export class HeftDescriptorHost {
       }
       const result: IReporterHandshakeResult = negotiateReporterHello(record, {
         supportedProtocolVersion: this._supportedProtocolVersion,
-        supportedCapabilities: this._supportedCapabilities
+        supportedCapabilities: this._supportedCapabilities,
+        context: this._reporterContext
       });
-      this._negotiation = result;
-      this._onNegotiation?.(result);
+      this._setNegotiation(result);
       return result.accepted;
     }
     if (!this._negotiation.accepted) {
@@ -235,6 +259,11 @@ export class HeftDescriptorHost {
 
     if (!isReporterEventRecord(record)) {
       return this._rejectMalformedStream('an event record did not contain a valid reporter envelope');
+    }
+    if (!this._negotiation.ack.acceptedCapabilities.includes('heft-child-events-v1')) {
+      return this._rejectMalformedStream(
+        'an event record was received without negotiating "heft-child-events-v1"'
+      );
     }
     if (record.protocolVersion.major !== this._negotiation.ack.protocolVersion.major) {
       return this._rejectMalformedStream(
@@ -251,7 +280,12 @@ export class HeftDescriptorHost {
     const correlated: IReporterEventEnvelope<unknown> = {
       ...record,
       parentSessionId: this._parentSessionId,
+      parentRequestId: this._parentRequestId,
       parentOperationId: this._parentOperationId,
+      scope:
+        this._parentOperationId !== undefined && record.scope?.operationId === undefined
+          ? { ...record.scope, operationId: this._parentOperationId }
+          : record.scope,
       required: isReporterEventRequired(record.type),
       type: record.type
     };
@@ -279,7 +313,16 @@ export class HeftDescriptorHost {
         let records: unknown[];
         try {
           records = decoder.decode(chunk);
-        } catch {
+        } catch (error) {
+          const decodedRecords: readonly unknown[] =
+            error instanceof NdjsonInvalidRecordError || error instanceof NdjsonRecordTooLargeError
+              ? error.decodedRecords
+              : [];
+          for (const record of decodedRecords) {
+            if (!this.processChildRecord(record)) {
+              break;
+            }
+          }
           this._rejectMalformedStream('its NDJSON could not be decoded within the protocol limits');
           return;
         }
@@ -292,7 +335,16 @@ export class HeftDescriptorHost {
           let records: unknown[];
           try {
             records = decoder.flush();
-          } catch {
+          } catch (error) {
+            const decodedRecords: readonly unknown[] =
+              error instanceof NdjsonInvalidRecordError || error instanceof NdjsonRecordTooLargeError
+                ? error.decodedRecords
+                : [];
+            for (const record of decodedRecords) {
+              if (!this.processChildRecord(record)) {
+                break;
+              }
+            }
             this._rejectMalformedStream('its trailing NDJSON record was invalid');
             return this._result();
           }
@@ -366,9 +418,14 @@ export class HeftDescriptorHost {
         },
         diagnostic: this._protocolFailure
       };
-      this._negotiation = result;
-      this._onNegotiation?.(result);
+      this._setNegotiation(result);
     }
     return false;
+  }
+
+  private _setNegotiation(result: IReporterHandshakeResult): void {
+    this._negotiation = result;
+    this._sendHelloAck?.(result.ack);
+    this._onNegotiation?.(result);
   }
 }

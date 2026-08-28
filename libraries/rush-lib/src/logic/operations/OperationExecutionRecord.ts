@@ -20,7 +20,7 @@ import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rus
 
 import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import type { IOperationChildProcessReporter, IOperationGraphEventSink } from './OperationEventSink';
 import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
@@ -284,6 +284,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    */
   public get eventSink(): IOperationGraphEventSink | undefined {
     return this._context.eventSink;
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.createChildProcessReporter}
+   */
+  public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
+    return this._context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
   }
 
   public get silent(): boolean {

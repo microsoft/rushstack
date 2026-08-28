@@ -4,7 +4,11 @@
 import { randomUUID } from 'node:crypto';
 
 import type { ILaunchOptions } from '@microsoft/rush-lib';
-import { DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS, REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
+import {
+  DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS,
+  REPORTER_PROTOCOL_VERSION,
+  resolveColorEnabled
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -163,6 +167,7 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   const reporterCloseAsync: () => Promise<void> = () =>
     reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
   const sessionId: string = createSessionId();
+  const requestId: string = sessionId;
   if (reporterHost.selection.enabled && reporterHost.logArtifact?.path) {
     reporterHost.sink.emit({
       protocolVersion: REPORTER_PROTOCOL_VERSION,
@@ -183,7 +188,23 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     reporter: {
       eventSink: reporterHost.sink,
       sessionId,
-      operationStreamEnabled: reporterHost.selection.enabled
+      operationStreamEnabled: reporterHost.selection.enabled,
+      childProcessReporter: reporterHost.selection.enabled
+        ? {
+            requestId,
+            context: {
+              reporter: reporterHost.selection.reporter,
+              logLevel: reporterHost.selection.logLevel,
+              color:
+                reporterHost.selection.reporter === 'default'
+                  ? resolveColorEnabled(process.env, process.stdout.isTTY === true)
+                  : false,
+              terminalWidth: process.stdout.columns ?? 80
+            },
+            ingestForeignEnvelope: (envelope) =>
+              reporterHost.host.manager.ingestForeignEnvelope(envelope)
+          }
+        : undefined
     },
     reporterCloseAsync
   };

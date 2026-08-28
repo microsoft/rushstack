@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Add bidirectional Heft child negotiation, parent-owned rendering context, bounded structured output, and streaming problem matcher recovery.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

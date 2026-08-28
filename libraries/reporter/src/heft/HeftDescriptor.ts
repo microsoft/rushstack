@@ -12,6 +12,15 @@ import type { Readable, Writable } from 'node:stream';
 export const RUSH_REPORTER_CHILD_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_FD' = '_RUSH_REPORTER_CHILD_FD';
 
 /**
+ * The private environment variable that communicates the inherited reporter
+ * acknowledgement file descriptor number to a child process.
+ *
+ * @beta
+ */
+export const RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_ACK_FD' =
+  '_RUSH_REPORTER_CHILD_ACK_FD';
+
+/**
  * A plan for launching a child with an inherited reporter descriptor.
  *
  * @beta
@@ -21,6 +30,11 @@ export interface IChildDescriptorPlan {
    * The inherited file descriptor number the child writes NDJSON to.
    */
   readonly fdNumber: number;
+
+  /**
+   * The inherited file descriptor number the child reads the hello acknowledgement from.
+   */
+  readonly ackFdNumber: number;
 
   /**
    * The environment additions that communicate the descriptor to the child.
@@ -76,28 +90,47 @@ export interface IHeftChildOutputTargets {
  * @remarks
  * stdout and stderr are piped so the parent can preserve and inspect old-Heft
  * fallback output before relaying it to the normal output streams. The reporter
- * descriptor is an additional pipe at `fdNumber`, whose number is communicated
- * through the private environment variable.
+ * descriptors are additional pipes at `fdNumber` and `ackFdNumber`, whose
+ * numbers are communicated through private environment variables.
  *
  * @param fdNumber - the descriptor number; defaults to 3
+ * @param ackFdNumber - the acknowledgement descriptor number; defaults to the
+ * next descriptor after `fdNumber`
  *
  * @beta
  */
-export function allocateChildDescriptor(fdNumber: number = 3): IChildDescriptorPlan {
+export function allocateChildDescriptor(
+  fdNumber: number = 3,
+  ackFdNumber: number = fdNumber + 1
+): IChildDescriptorPlan {
   if (!Number.isSafeInteger(fdNumber) || fdNumber < 3) {
     throw new RangeError(
       'The reporter file descriptor number must be an integer greater than or equal to 3.'
     );
   }
+  if (!Number.isSafeInteger(ackFdNumber) || ackFdNumber < 3) {
+    throw new RangeError(
+      'The reporter acknowledgement file descriptor number must be an integer greater than or equal to 3.'
+    );
+  }
+  if (fdNumber === ackFdNumber) {
+    throw new RangeError('The reporter event and acknowledgement file descriptors must be different.');
+  }
 
   const stdio: (string | number)[] = ['inherit', 'pipe', 'pipe'];
-  while (stdio.length < fdNumber) {
+  const highestFdNumber: number = Math.max(fdNumber, ackFdNumber);
+  while (stdio.length <= highestFdNumber) {
     stdio.push('ignore');
   }
   stdio[fdNumber] = 'pipe';
+  stdio[ackFdNumber] = 'pipe';
   return {
     fdNumber,
-    env: { [RUSH_REPORTER_CHILD_FD_ENV_VAR]: String(fdNumber) },
+    ackFdNumber,
+    env: {
+      [RUSH_REPORTER_CHILD_FD_ENV_VAR]: String(fdNumber),
+      [RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR]: String(ackFdNumber)
+    },
     stdio
   };
 }
@@ -132,6 +165,25 @@ export function relayHeftChildOutput(
  */
 export function readChildDescriptorFd(env: Record<string, string | undefined>): number | undefined {
   const raw: string | undefined = env[RUSH_REPORTER_CHILD_FD_ENV_VAR];
+  if (raw === undefined || !/^\d+$/.test(raw)) {
+    return undefined;
+  }
+  const parsed: number = Number(raw);
+  return Number.isSafeInteger(parsed) && parsed >= 3 ? parsed : undefined;
+}
+
+/**
+ * Reads the inherited reporter acknowledgement descriptor number from the environment.
+ *
+ * @remarks
+ * Returns `undefined` when acknowledgement negotiation is unavailable.
+ *
+ * @param env - the environment variables
+ *
+ * @beta
+ */
+export function readChildAckDescriptorFd(env: Record<string, string | undefined>): number | undefined {
+  const raw: string | undefined = env[RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR];
   if (raw === undefined || !/^\d+$/.test(raw)) {
     return undefined;
   }

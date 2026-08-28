@@ -10,6 +10,7 @@ import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
+import type * as child_process from 'node:child_process';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
@@ -23,6 +24,8 @@ import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IProblemCollector } from '@rushstack/terminal';
+import { IReporterChildContext } from '@rushstack/rush-reporter';
+import { IReporterEventEnvelope } from '@rushstack/rush-reporter';
 import { IReporterEventScope } from '@rushstack/rush-reporter';
 import { IReporterEventSink } from '@rushstack/rush-reporter';
 import { IRushDiagnostic } from '@rushstack/rush-reporter';
@@ -638,6 +641,18 @@ export interface _IOperationBuildCacheOptions {
     useDirectFileTransfersForBuildCache: boolean;
 }
 
+// @internal
+export interface _IOperationChildProcessReporter {
+    // (undocumented)
+    attachAsync(child: child_process.ChildProcess): Promise<void>;
+    // (undocumented)
+    readonly environment: Readonly<Record<string, string>>;
+    // (undocumented)
+    readonly hasWarningOrError: boolean;
+    // (undocumented)
+    readonly stdio: child_process.StdioOptions;
+}
+
 // @alpha
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
@@ -685,6 +700,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 
 // @internal
 export interface _IOperationGraphEventSink {
+    createChildProcessReporter?(operationId: string): _IOperationChildProcessReporter | undefined;
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;
@@ -755,6 +771,8 @@ export interface IOperationRunner {
 // @beta
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
+    // @internal
+    createChildProcessReporter(): _IOperationChildProcessReporter | undefined;
     debugMode: boolean;
     environment: IEnvironment | undefined;
     error?: Error;
@@ -1019,6 +1037,12 @@ export interface IRushSessionOptions {
 
 // @beta
 export interface IRushSessionReporterOptions {
+    // @internal
+    readonly childProcessReporter?: {
+        readonly requestId: string;
+        readonly context: IReporterChildContext;
+        readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+    };
     readonly eventSink: IReporterEventSink;
     // @internal
     readonly flushAsync?: () => Promise<void>;

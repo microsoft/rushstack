@@ -84,6 +84,7 @@ export {
   NdjsonDecoder
 } from './protocol/Ndjson';
 export type {
+  IReporterChildContext,
   IReporterHello,
   IReporterHelloAck,
   IReporterHandshakeOptions,
@@ -91,8 +92,10 @@ export type {
   ReporterCapability
 } from './protocol/ReporterHandshake';
 export {
+  InvalidReporterHelloAckError,
   InvalidReporterHelloError,
   negotiateReporterHello,
+  parseReporterHelloAck,
   parseReporterHello,
   REPORTER_KNOWN_CAPABILITIES
 } from './protocol/ReporterHandshake';
@@ -295,7 +298,7 @@ export type { IProblemMatch, IProblemMatcher } from './matchers/ProblemMatcher';
 export type { IGetMatchersOptions } from './matchers/ProblemMatcherRegistry';
 export { ProblemMatcherRegistry } from './matchers/ProblemMatcherRegistry';
 export type { IRunProblemMatchersOptions, IProblemMatcherResult } from './matchers/ProblemMatcherRunner';
-export { runProblemMatchers } from './matchers/ProblemMatcherRunner';
+export { ProblemMatcherRunner, runProblemMatchers } from './matchers/ProblemMatcherRunner';
 
 export type {
   IChildDescriptorPlan,
@@ -303,8 +306,10 @@ export type {
   IHeftChildOutputTargets
 } from './heft/HeftDescriptor';
 export {
+  RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR,
   RUSH_REPORTER_CHILD_FD_ENV_VAR,
   allocateChildDescriptor,
+  readChildAckDescriptorFd,
   readChildDescriptorFd,
   relayHeftChildOutput
 } from './heft/HeftDescriptor';

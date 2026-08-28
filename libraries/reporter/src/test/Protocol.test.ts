@@ -10,8 +10,12 @@ import {
   NdjsonDecoder,
   NdjsonInvalidRecordError,
   NdjsonRecordTooLargeError,
+  InvalidReporterHelloAckError,
   InvalidReporterHelloError,
   negotiateReporterHello,
+  parseReporterHelloAck,
+  REPORTER_KNOWN_CAPABILITIES,
+  type IReporterHelloAck,
   type IReporterHello,
   type IReporterHandshakeResult
 } from '../index';
@@ -19,7 +23,7 @@ import {
 describe('ReporterProtocol', () => {
   it('advertises protocol major 1 and the specified byte limits', () => {
     expect(REPORTER_PROTOCOL_VERSION.major).toBe(1);
-    expect(REPORTER_PROTOCOL_VERSION.minor).toBe(1);
+    expect(REPORTER_PROTOCOL_VERSION.minor).toBe(2);
     expect(REPORTER_PROTOCOL_LIMITS.bootstrapBufferBytes).toBe(1024 * 1024);
     expect(REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes).toBe(1024 * 1024);
     expect(REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes).toBe(64 * 1024);
@@ -139,6 +143,35 @@ describe('negotiateReporterHello', () => {
     expect(result.diagnostic).toBeUndefined();
   });
 
+  it('governs Heft event and reporter context capabilities', () => {
+    expect(REPORTER_KNOWN_CAPABILITIES).toEqual(['heft-child-events-v1', 'reporter-context-v1']);
+  });
+
+  it('includes validated parent context only when its capability is accepted', () => {
+    const context = {
+      reporter: 'plaintext' as const,
+      logLevel: 'verbose' as const,
+      color: false,
+      terminalWidth: 120
+    };
+    const accepted: IReporterHandshakeResult = negotiateReporterHello(
+      makeHello({ capabilities: ['reporter-context-v1'] }),
+      {
+        supportedProtocolVersion: { major: 1, minor: 0 },
+        supportedCapabilities: REPORTER_KNOWN_CAPABILITIES,
+        context
+      }
+    );
+    expect(accepted.ack.context).toEqual(context);
+
+    const notAccepted: IReporterHandshakeResult = negotiateReporterHello(makeHello(), {
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      supportedCapabilities: REPORTER_KNOWN_CAPABILITIES,
+      context
+    });
+    expect(notAccepted.ack.context).toBeUndefined();
+  });
+
   it('accepts across an additive minor difference', () => {
     const result: IReporterHandshakeResult = negotiateReporterHello(
       makeHello({ protocolVersion: { major: 1, minor: 7 } }),
@@ -194,5 +227,35 @@ describe('negotiateReporterHello', () => {
         { supportedProtocolVersion: { major: 1, minor: 0 } }
       )
     ).toThrow(/capabilities must be an array of strings/);
+  });
+
+  it('validates untrusted acknowledgements and reporter context', () => {
+    const ack: IReporterHelloAck = parseReporterHelloAck({
+      kind: 'helloAck',
+      protocolVersion: { major: 1, minor: 0 },
+      acceptedCapabilities: ['heft-child-events-v1', 'reporter-context-v1'],
+      rejectedRequiredFeatures: [],
+      context: {
+        reporter: 'ai',
+        logLevel: 'debug',
+        color: true,
+        terminalWidth: 80
+      }
+    });
+    expect(ack.context?.reporter).toBe('ai');
+
+    expect(() =>
+      parseReporterHelloAck({
+        ...ack,
+        context: { ...ack.context, terminalWidth: 0 }
+      })
+    ).toThrow(InvalidReporterHelloAckError);
+    expect(() =>
+      parseReporterHelloAck({
+        ...ack,
+        acceptedCapabilities: ['heft-child-events-v1']
+      })
+    ).toThrow(/context requires/);
+    expect(() => parseReporterHelloAck(undefined)).toThrow(InvalidReporterHelloAckError);
   });
 });

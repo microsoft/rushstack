@@ -8,6 +8,7 @@ import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { IEnvironment } from '../../utilities/Utilities';
+import type { IOperationChildProcessReporter } from './OperationEventSink';
 
 /**
  * A snapshot of a previous operation execution, passed to runners to inform incremental behavior.
@@ -80,6 +81,13 @@ export interface IOperationRunnerContext {
    * Callers should store the result rather than calling this method repeatedly.
    */
   getInvalidateCallback(): (reason: string) => void;
+
+  /**
+   * Allocates a negotiated reporter channel for a child process, when enabled.
+   *
+   * @internal
+   */
+  createChildProcessReporter(): IOperationChildProcessReporter | undefined;
 
   /**
    * Invokes the specified callback with a terminal that is associated with this operation.
