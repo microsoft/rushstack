@@ -8,7 +8,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { ILogger } from '../utilities/npmrcUtilities';
+import type { ILogger, LogPrivacyClassification } from '../utilities/npmrcUtilities';
 import {
   BOOTSTRAP_BUFFER_MAX_BYTES,
   BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
@@ -338,11 +338,11 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
     });
 
     this.logger = {
-      info: (text: string) => {
+      info: (text: string, privacy: LogPrivacyClassification = 'public') => {
         this._addEvent(
           {
             type: 'activityChanged',
-            privacy: 'public',
+            privacy,
             payload: { kind: 'bootstrap', text }
           },
           { stream: this._fallbackStdoutStream, text: `${text}\n` }
@@ -355,6 +355,9 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
         if (this._droppedRequired > droppedRequiredBefore) {
           this._stderr(`${text}\n`);
         }
+      },
+      warning: (text: string) => {
+        this._stderr(`${text}\n`);
       }
     };
     this.externalOutputHandler = (stream: BootstrapStream, text: string, wasRendered: boolean) => {

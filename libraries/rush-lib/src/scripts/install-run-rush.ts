@@ -140,7 +140,8 @@ function _run(): void {
     const lockFilePath: string | undefined = process.env[INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE];
     if (lockFilePath) {
       logger.info(
-        `Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`
+        `Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`,
+        'local-sensitive'
       );
     }
 
@@ -162,7 +163,12 @@ function _run(): void {
   } catch (error) {
     const logger: ILogger =
       bootstrap?.logger ??
-      (quiet ? { info: () => {}, error: console.error } : { info: console.log, error: console.error });
+      (quiet
+        ? { info: () => {}, error: (text: string) => console.error(text) }
+        : {
+            info: (text: string) => console.log(text),
+            error: (text: string) => console.error(text)
+          });
     logger.error(`\n\n${String(error)}\n`);
   }
 }

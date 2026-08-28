@@ -468,20 +468,64 @@ function _installPackage(
     throw new Error(`Unable to install package: ${e}`);
   } finally {
     if (capturePath !== undefined) {
-      try {
-        _readCapturedNpmOutput(capturePath, onExternalOutput!, onExternalOutputOverflow);
-      } finally {
-        _deleteFile(capturePath);
-      }
+      finalizeCapturedNpmOutput(capturePath, logger, onExternalOutput!, onExternalOutputOverflow);
     }
   }
   logger.info(`Successfully installed ${name}@${version}`);
 }
 
+function _reportCaptureDamage(logger: ILogger, capturePath: string, detail: string): void {
+  const message: string = `Warning: npm output capture ${JSON.stringify(capturePath)} ${detail}`;
+  try {
+    if (logger.warning) {
+      logger.warning(message, 'local-sensitive');
+    } else {
+      logger.error(message, 'local-sensitive');
+    }
+  } catch {
+    try {
+      process.stderr.write(`${message}\n`);
+    } catch {
+      // Capture diagnostics are best-effort and must not change the install result.
+    }
+  }
+}
+
+export function finalizeCapturedNpmOutput(
+  capturePath: string,
+  logger: ILogger,
+  onExternalOutput: (stream: 'stdout' | 'stderr', text: string, wasRendered: boolean) => void,
+  onExternalOutputOverflow: (() => void) | undefined
+): void {
+  let firstDamageDetail: string | undefined;
+  let damageCount: number = 0;
+  try {
+    _readCapturedNpmOutput(capturePath, onExternalOutput, onExternalOutputOverflow, (detail: string) => {
+      firstDamageDetail ??= detail;
+      damageCount++;
+    });
+  } catch (error) {
+    firstDamageDetail ??= `could not be read: ${String(error)}.`;
+    damageCount++;
+  }
+  if (firstDamageDetail) {
+    const additionalDamage: string =
+      damageCount > 1 ? ` ${damageCount - 1} additional capture issue(s) were discarded.` : '';
+    _reportCaptureDamage(logger, capturePath, `${firstDamageDetail}${additionalDamage}`);
+  }
+
+  try {
+    _deleteFile(capturePath);
+  } catch (error) {
+    _reportCaptureDamage(logger, capturePath, `could not be deleted: ${String(error)}.`);
+  }
+}
+
 function _readCapturedNpmOutput(
   capturePath: string,
   onExternalOutput: (stream: 'stdout' | 'stderr', text: string, wasRendered: boolean) => void,
-  onExternalOutputOverflow: (() => void) | undefined
+  onExternalOutputOverflow: (() => void) | undefined,
+  onCaptureDamage: (detail: string) => void
 ): void {
   const fileDescriptor: number = fs.openSync(capturePath, 'r');
   const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
@@ -499,12 +543,18 @@ function _readCapturedNpmOutput(
         const line: string = pending.slice(0, newlineIndex);
         pending = pending.slice(newlineIndex + 1);
         if (line) {
-          const record: {
+          let record: {
             stream?: unknown;
             text?: unknown;
             wasRendered?: unknown;
             overflow?: unknown;
-          } = JSON.parse(line);
+          };
+          try {
+            record = JSON.parse(line);
+          } catch (error) {
+            onCaptureDamage(`contains a corrupt record that was discarded: ${String(error)}.`);
+            continue;
+          }
           if (record.overflow === true) {
             onExternalOutputOverflow?.();
           } else if (
@@ -512,18 +562,15 @@ function _readCapturedNpmOutput(
             typeof record.text === 'string'
           ) {
             onExternalOutput(record.stream, record.text, record.wasRendered === true);
+          } else {
+            onCaptureDamage('contains an invalid record that was discarded.');
           }
         }
       }
     }
     pending += decoder.end();
     if (pending.trim()) {
-      const record: { overflow?: unknown } = JSON.parse(pending);
-      if (record.overflow === true) {
-        onExternalOutputOverflow?.();
-      } else {
-        throw new Error('The npm output capture ended with an incomplete record.');
-      }
+      onCaptureDamage('ended with a partial record that was discarded.');
     }
   } finally {
     fs.closeSync(fileDescriptor);
@@ -762,7 +809,10 @@ function _run(): void {
     process.exit(1);
   }
 
-  const logger: ILogger = { info: console.log, error: console.error };
+  const logger: ILogger = {
+    info: (text: string) => console.log(text),
+    error: (text: string) => console.error(text)
+  };
 
   runWithErrorAndStatusCode(logger, () => {
     const rushJsonFolder: string = findRushJsonFolder();

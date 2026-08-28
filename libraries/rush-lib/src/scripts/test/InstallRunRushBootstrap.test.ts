@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { syncNpmrc } from '../../utilities/npmrcUtilities';
 import {
   createInstallRunRushBootstrap,
   type IInstallRunRushBootstrap,
@@ -153,6 +154,68 @@ describe(createInstallRunRushBootstrap.name, () => {
       } finally {
         cwdSpy.mockRestore();
       }
+    });
+  });
+
+  it('classifies path-bearing installation activity as local-sensitive', async () => {
+    await withTempDir(async (directory: string) => {
+      const sourceFolder: string = path.join(directory, 'sentinel-source-npmrc');
+      const targetFolder: string = path.join(directory, 'sentinel-target-npmrc');
+      const lockFilePath: string = path.join(directory, 'sentinel-lockfile', 'package-lock.json');
+      await fs.promises.mkdir(sourceFolder, { recursive: true });
+      await fs.promises.writeFile(path.join(sourceFolder, '.npmrc'), 'registry=https://example.test\n');
+
+      const { options, env } = makeOptions(directory, {
+        argv: ['build', '--reporter=json']
+      });
+      const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+      bootstrap.logger.info('Installing @microsoft/rush...');
+      syncNpmrc({
+        sourceNpmrcFolder: sourceFolder,
+        targetNpmrcFolder: targetFolder,
+        logger: bootstrap.logger,
+        supportEnvVarFallbackSyntax: false
+      });
+      bootstrap.logger.info(
+        `Found INSTALL_RUN_RUSH_LOCKFILE_PATH="${lockFilePath}", installing with lockfile.`,
+        'local-sensitive'
+      );
+      await fs.promises.rm(path.join(sourceFolder, '.npmrc'));
+      syncNpmrc({
+        sourceNpmrcFolder: sourceFolder,
+        targetNpmrcFolder: targetFolder,
+        logger: bootstrap.logger,
+        supportEnvVarFallbackSyntax: false
+      });
+      bootstrap.prepareToRun?.();
+
+      const events: Record<string, unknown>[] = readHandoff(env).records.slice(1);
+      const activityEvents: Record<string, unknown>[] = events.filter(
+        (event: Record<string, unknown>) => event.type === 'activityChanged'
+      );
+      expect(
+        activityEvents.find(
+          (event: Record<string, unknown>) =>
+            (event.payload as { text?: string }).text === 'Installing @microsoft/rush...'
+        )
+      ).toMatchObject({ privacy: 'public' });
+
+      for (const sentinelPath of [sourceFolder, targetFolder, lockFilePath]) {
+        const matchingEvents: Record<string, unknown>[] = activityEvents.filter(
+          (event: Record<string, unknown>) =>
+            (event.payload as { text?: string }).text?.includes(sentinelPath) === true
+        );
+        expect(matchingEvents.length).toBeGreaterThan(0);
+        expect(
+          matchingEvents.every((event: Record<string, unknown>) => event.privacy === 'local-sensitive')
+        ).toBe(true);
+      }
+      expect(
+        activityEvents
+          .filter((event: Record<string, unknown>) => event.privacy === 'public')
+          .map((event: Record<string, unknown>) => (event.payload as { text?: string }).text)
+          .join('\n')
+      ).not.toContain(directory);
     });
   });
 
@@ -311,6 +374,26 @@ describe(createInstallRunRushBootstrap.name, () => {
 
       expect(stdout).toEqual([]);
       expect(stderr.join('')).toBe('installing Rush\nnpm stdout\nbootstrap failed\n');
+    });
+  });
+
+  it('keeps capture-damage warnings outside required handoff accounting', async () => {
+    await withTempDir(async (directory: string) => {
+      const { options, env, stderr } = makeOptions(directory, {
+        argv: ['build', '--reporter=json'],
+        maxBytes: 1200
+      });
+      const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+      for (let index: number = 0; index < 20; index++) {
+        bootstrap.logger.warning?.(
+          `Warning: npm output capture "${path.join(directory, `capture-${index}.ndjson`)}" was corrupt.`,
+          'local-sensitive'
+        );
+      }
+
+      expect(() => bootstrap.prepareToRun?.()).not.toThrow();
+      expect(readHandoff(env).records).toHaveLength(2);
+      expect(stderr).toHaveLength(20);
     });
   });
 

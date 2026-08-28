@@ -6,7 +6,8 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { NPM_OUTPUT_CAPTURE_SCRIPT } from '../install-run';
+import type { ILogger, LogPrivacyClassification } from '../../utilities/npmrcUtilities';
+import { finalizeCapturedNpmOutput, NPM_OUTPUT_CAPTURE_SCRIPT } from '../install-run';
 
 async function withTempDir(action: (directory: string) => Promise<void>): Promise<void> {
   const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'install-run-script-test-'));
@@ -115,6 +116,74 @@ describe('install-run script integration', () => {
         { stream: 'stdout', text: 'stdout\n', wasRendered: false },
         { stream: 'stderr', text: 'stderr\n', wasRendered: true }
       ]);
+    });
+  });
+
+  it('discards a partial capture record without failing a successful install', async () => {
+    await withTempDir(async (directory: string) => {
+      const capturePath: string = path.join(directory, 'partial-capture.ndjson');
+      await fs.promises.writeFile(
+        capturePath,
+        `${JSON.stringify({ stream: 'stdout', text: 'complete\n', wasRendered: true })}\n` +
+          '{"stream":"stderr","text":"partial'
+      );
+      const output: Array<{ stream: 'stdout' | 'stderr'; text: string; wasRendered: boolean }> = [];
+      const warnings: Array<{ text: string; privacy: LogPrivacyClassification | undefined }> = [];
+      const logger: ILogger = {
+        info: () => {},
+        error: () => {},
+        warning: (text: string, privacy?: LogPrivacyClassification) => {
+          warnings.push({ text, privacy });
+        }
+      };
+      const overflow: jest.Mock = jest.fn();
+
+      expect(() =>
+        finalizeCapturedNpmOutput(
+          capturePath,
+          logger,
+          (stream: 'stdout' | 'stderr', text: string, wasRendered: boolean) => {
+            output.push({ stream, text, wasRendered });
+          },
+          overflow
+        )
+      ).not.toThrow();
+
+      expect(output).toEqual([{ stream: 'stdout', text: 'complete\n', wasRendered: true }]);
+      expect(overflow).not.toHaveBeenCalled();
+      expect(warnings).toEqual([
+        {
+          text: expect.stringContaining('ended with a partial record that was discarded'),
+          privacy: 'local-sensitive'
+        }
+      ]);
+      expect(fs.existsSync(capturePath)).toBe(false);
+    });
+  });
+
+  it('never replaces the npm failure when capture finalization is damaged', async () => {
+    await withTempDir(async (directory: string) => {
+      const npmError: Error = new Error('npm install failed');
+      const warnings: string[] = [];
+      const logger: ILogger = {
+        info: () => {},
+        error: () => {},
+        warning: (text: string) => warnings.push(text)
+      };
+      let caught: unknown;
+      try {
+        try {
+          throw npmError;
+        } finally {
+          finalizeCapturedNpmOutput(directory, logger, () => {}, undefined);
+        }
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).toBe(npmError);
+      expect(warnings.length).toBeGreaterThan(0);
+      expect(warnings.join('\n')).toContain('could not be');
     });
   });
 
