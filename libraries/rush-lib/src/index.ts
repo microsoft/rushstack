@@ -20,7 +20,11 @@ export {
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
-export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+export {
+  RushConfiguration,
+  type IRushReportingConfiguration,
+  type ITryFindRushJsonLocationOptions
+} from './api/RushConfiguration';
 
 export { Subspace } from './api/Subspace';
 export { SubspacesConfiguration } from './api/SubspacesConfiguration';
