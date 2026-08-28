@@ -43,6 +43,9 @@ const json = run('json', [...commonArgs, '--reporter=json', '--log-level=debug']
 const ai = run('ai', [...commonArgs, '--reporter=ai']).stdout;
 const file = run('file', [...commonArgs, '--reporter=file']);
 const quiet = run('quiet', [...commonArgs, '--reporter=plaintext', '--log-level=quiet']).stdout;
+const verbose = run('verbose', [...commonArgs, '--reporter=plaintext', '--verbose']).stdout;
+const debug = run('debug', [...commonArgs, '--reporter=plaintext', '--log-level=debug']).stdout;
+const ci = run('ci', [...commonArgs, '--reporter=plaintext'], { CI: 'true' }).stdout;
 const failureJson = run(
   'failure-json',
   ['build', '--only', '@rushstack/does-not-exist', '--reporter=json'],
@@ -59,6 +62,26 @@ const flagOffHelp = run('help-flag-off', ['--help']).stdout;
 const help = run('help', ['--help', '--reporter=json'], { RUSH_REPORTER: 'legacy' }).stdout;
 const commandJson = run('command-json', ['list', '--json', '--reporter=file']);
 const commandJsonConflict = run('command-json-conflict', ['list', '--json', '--reporter=json'], {}, 1);
+const tempOverride = path.join(outputFolder, 'rush-temp-override');
+const tempOverrideFile = run('temp-override', [...commonArgs, '--reporter=file'], {
+  RUSH_TEMP_FOLDER: tempOverride
+});
+const tempOverrideLogMatch = tempOverrideFile.stderr.match(/^Rush full log: (.+)$/m);
+if (
+  !tempOverrideLogMatch ||
+  !tempOverrideLogMatch[1].startsWith(path.join(tempOverride, 'rush-logs')) ||
+  !fs.existsSync(tempOverrideLogMatch[1])
+) {
+  throw new Error('RUSH_TEMP_FOLDER did not own the full-detail log path.');
+}
+const tempPurge = run('temp-purge', ['purge', '--reporter=file'], { RUSH_TEMP_FOLDER: tempOverride });
+if (!tempPurge.stdout.includes(`Purging ${tempOverride}`)) {
+  throw new Error('rush purge did not use the same normalized RUSH_TEMP_FOLDER path as the reporter log.');
+}
+const purgeLogMatch = tempPurge.stderr.match(/^Rush full log: (.+)$/m);
+if (!purgeLogMatch || purgeLogMatch[1].startsWith(tempOverride) || !fs.existsSync(purgeLogMatch[1])) {
+  throw new Error('The active purge reporter log was not preserved outside RUSH_TEMP_FOLDER.');
+}
 
 function parseNdjson(text, name) {
   if (text.includes('\u001b')) {
@@ -132,6 +155,9 @@ if (groupedOutput !== rawOutput) {
 if ((rawOutput.match(/---- build started ----/g) ?? []).length !== 1) {
   throw new Error('The operation output contains a duplicated or missing build-start marker.');
 }
+if (!/build cache/i.test(rawOutput)) {
+  throw new Error('Cache-path output was not preserved in the raw operation stream.');
+}
 if (plaintext.includes('Rush Multi-Project Build Tool') || plaintext.includes('1 of 1 ]==')) {
   throw new Error('The reporter path has more than one visible terminal writer.');
 }
@@ -155,6 +181,12 @@ if (
 }
 if (quiet.includes('build started') || quiet.includes('==[ @rushstack/rush-reporter')) {
   throw new Error('Quiet output leaked detailed operation output.');
+}
+if (!verbose.includes('Incremental strategy:') || !debug.includes('Incremental strategy:')) {
+  throw new Error('Verbose and debug reporter output did not preserve Rush terminal verbosity.');
+}
+if (ci.includes('\u001b') || !ci.includes('@rushstack/rush-reporter: success')) {
+  throw new Error('CI output was not append-only plaintext.');
 }
 
 const fileLogMatch = file.stderr.match(/^Rush full log: (.+)$/m);
