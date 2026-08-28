@@ -16,9 +16,11 @@ The script runs the same `rush build --only @rushstack/rush-reporter` operation 
 plaintext, JSON, AI, file, and quiet modes, plus parser failure, help, and command-specific JSON cases.
 It verifies payload-only machine stdout, one visible writer, ordered/lossless plaintext grouping from a
 same-invocation JSON sidecar, final artifact completeness, owner-only log permissions, failure flushing,
-AI parser-error context, command-JSON ownership, CI plaintext output, cache-path output, normalized
-`RUSH_TEMP_FOLDER` log placement, matching purge-path selection, and the `RUSH_REPORTER=legacy` rollback
-transcript. Captured stdout/stderr files are written to a temporary folder.
+AI parser-error context, command-JSON ownership, exclusive sidecar destinations, and the
+`RUSH_REPORTER=legacy` rollback transcript. Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
+`RUSH_QUIET_MODE` values are removed from the self-check matrix. It also verifies CI plaintext output,
+cache-path output, normalized `RUSH_TEMP_FOLDER` log placement, and matching purge-path selection.
+Captured stdout/stderr files are written to a temporary folder.
 
 For an individual invocation:
 
@@ -53,7 +55,7 @@ The intentional missing-project AI failure preserves an actionable diagnostic an
 Structured remediation is included when the producing diagnostic supplies it; this parser failure does not
 currently provide a remediation action.
 
-Inspect the latest complete log with:
+After the demo exits, inspect the latest invocation log with:
 
 ```sh
 ls -lt common/temp/rush-logs
