@@ -40,6 +40,7 @@ describe('getEventMinimumLogLevel', () => {
   it('classifies standard lifecycle and non-required warnings as normal', () => {
     expect(getEventMinimumLogLevel(ev('commandStarted', { commandName: 'build' }))).toBe('normal');
     expect(getEventMinimumLogLevel(ev('operationStatusChanged', { status: 'success' }))).toBe('normal');
+    expect(getEventMinimumLogLevel(ev('operationCompleted', { status: 'success' }))).toBe('normal');
     expect(getEventMinimumLogLevel(ev('diagnosticEmitted', { severity: 'warning' }, false))).toBe('normal');
   });
 
@@ -47,6 +48,7 @@ describe('getEventMinimumLogLevel', () => {
     expect(getEventMinimumLogLevel(ev('operationRegistered', {}))).toBe('normal');
     expect(getEventMinimumLogLevel(ev('externalProcessStarted', {}))).toBe('verbose');
     expect(getEventMinimumLogLevel(ev('externalOutput', { stream: 'stdout', text: 'x' }))).toBe('debug');
+    expect(getEventMinimumLogLevel(ev('operationStreamClosed', {}))).toBe('debug');
     expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'debug', text: 'd' }))).toBe('debug');
     expect(getEventMinimumLogLevel(ev('extension', { name: 'a.b' }, false))).toBe('normal');
   });
