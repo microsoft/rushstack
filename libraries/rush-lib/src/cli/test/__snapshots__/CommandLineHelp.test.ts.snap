@@ -1,7 +1,10 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CommandLineHelp prints the global help 1`] = `
-"usage: rush [-h] [-d] [-q] <command> ...
+"usage: rush [-h] [-d] [-q] [--verbose]
+            [--reporter {default,ai,json,plaintext,file,legacy}]
+            [--output DESTINATION] [--log-level {quiet,normal,verbose,debug}]
+            <command> ...
 
 Rush makes life easier for JavaScript developers who develop, build, and 
 publish many packages from a central Git repo. It is designed to handle very 
@@ -81,6 +84,13 @@ Optional arguments:
   -d, --debug           Show the full call stack if an error occurs while 
                         executing the tool
   -q, --quiet           Hide rush startup information
+  --verbose             Show detailed command and reporter output
+  --reporter {default,ai,json,plaintext,file,legacy}
+                        Select the Rush output reporter
+  --output DESTINATION  Add a reporter output destination such as file://.
+                        /rush.log
+  --log-level {quiet,normal,verbose,debug}
+                        Set the reporter log level
 
 [bold]For detailed help about a specific command, use: rush <command> -h[normal]
 "
@@ -304,8 +314,8 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -v, --verbose         Display the logs during the build, rather than just 
-                        displaying the build status summary
+  -v, --verbose-build-output
+                        Display build logs instead of only status
   --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
                         dependencies), add the minimal set of phase 
                         dependencies. For example, \\"--from A\\" normally might 
@@ -409,9 +419,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
-"usage: rush check [-h] [--json] [--verbose] [--subspace SUBSPACE_NAME]
-                  [--variant VARIANT]
-                  
+"usage: rush check [-h] [--json] [--subspace SUBSPACE_NAME] [--variant VARIANT]
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
@@ -420,9 +428,6 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   --json                If this flag is specified, output will be in JSON 
                         format.
-  --verbose             If this flag is specified, long lists of package 
-                        names will not be truncated. This has no effect if 
-                        the --json flag is also specified.
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies an individual Rush subspace 
                         to check, requiring versions to be consistent only 
@@ -598,8 +603,8 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -v, --verbose         Display the logs during the build, rather than just 
-                        displaying the build status summary
+  -v, --verbose-build-output
+                        Display build logs instead of only status
   --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
                         dependencies), add the minimal set of phase 
                         dependencies. For example, \\"--from A\\" normally might 
@@ -1245,8 +1250,8 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -v, --verbose         Display the logs during the build, rather than just 
-                        displaying the build status summary
+  -v, --verbose-build-output
+                        Display build logs instead of only status
   --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
                         dependencies), add the minimal set of phase 
                         dependencies. For example, \\"--from A\\" normally might 
