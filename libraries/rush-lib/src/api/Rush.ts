@@ -14,6 +14,7 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IRushSessionReporterOptions } from '../pluginFramework/RushSession';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 import { measureAsyncFn } from '../utilities/performance';
 
@@ -58,6 +59,17 @@ export interface ILaunchOptions {
    * @internal
    */
   builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
+
+  /**
+   * Supplies the structured event sink owned by the Rush frontend.
+   *
+   * @remarks
+   * This is an internal cross-version frontend-to-engine handoff. Reporter
+   * selection and concrete reporter instances remain owned by the frontend.
+   *
+   * @internal
+   */
+  reporter?: IRushSessionReporterOptions;
 }
 
 let _rushLibPackageJsonCache: IPackageJson | undefined = undefined;
@@ -98,6 +110,7 @@ export class Rush {
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
       builtInPluginConfigurations: options.builtInPluginConfigurations,
+      reporter: options.reporter,
       reporterCloseAsync: frontendOptions.reporterCloseAsync
     });
     // CommandLineParser.executeAsync() should never reject the promise
