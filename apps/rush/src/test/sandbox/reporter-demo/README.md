@@ -19,8 +19,11 @@ same-invocation JSON sidecar, final artifact completeness, owner-only log permis
 AI parser-error context, command-JSON ownership, exclusive sidecar destinations, and the
 `RUSH_REPORTER=legacy` rollback transcript. Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
 `RUSH_QUIET_MODE` values are removed from the self-check matrix. It also verifies CI plaintext output,
-cache-path output, normalized `RUSH_TEMP_FOLDER` log placement, and matching purge-path selection.
-Captured stdout/stderr files are written to a temporary folder.
+cache-path output, a matching `RUSH_PREVIEW_VERSION`, normalized `RUSH_TEMP_FOLDER` log placement, and
+matching purge-path selection. Captured stdout/stderr files are written to a temporary folder.
+
+The final matrix case invokes `rush purge` with an isolated `RUSH_TEMP_FOLDER`. This also unlinks project
+dependencies, so run the install command again before continuing development in the checkout.
 
 For an individual invocation:
 
@@ -30,8 +33,10 @@ node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=default
 
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plaintext
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json --log-level=debug
+RUSH_PREVIEW_VERSION=$(node -p "require('./apps/rush/package.json').version") node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=ai
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=file
+RUSH_TEMP_FOLDER=./common/temp/reporter-demo-override node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=file
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plaintext --log-level=quiet
 RUSH_REPORTER=legacy node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
 node apps/rush/bin/rush list --json --reporter=file
@@ -47,8 +52,10 @@ The expected output is shape-based:
 - `default` uses a width-aware three-row live region and leaves a short final summary;
 - explicit `plaintext` groups ordered output under `project (phase)` and prints the absolute full-log path;
 - JSON stdout contains only NDJSON event envelopes;
+- a matching preview version keeps JSON stdout parseable and writes its warning to stderr;
 - AI stdout contains `ai.status` and bounded `ai.final` records;
 - file mode leaves stdout empty and writes the full-log path to stderr;
+- `RUSH_TEMP_FOLDER` moves the full log and the matching purge removes that override;
 - quiet mode retains only the final result and full-log path.
 
 The intentional missing-project AI failure preserves an actionable diagnostic and complete log reference.

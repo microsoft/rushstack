@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 const scriptFolder = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptFolder, '..', '..', '..', '..', '..', '..');
 const rushBin = path.join(repoRoot, 'apps', 'rush', 'bin', 'rush');
+const rushVersion = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, 'apps', 'rush', 'package.json'), 'utf8')
+).version;
 const outputFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-reporter-demo-'));
 const commonArgs = ['build', '--only', '@rushstack/rush-reporter'];
 const baseEnv = { ...process.env };
@@ -44,6 +47,9 @@ const plaintext = run('plaintext', [
   `--output=json://${plaintextEventsPath}?logLevel=debug`
 ]).stdout;
 const json = run('json', [...commonArgs, '--reporter=json', '--log-level=debug']).stdout;
+const previewJson = run('preview-json', [...commonArgs, '--reporter=json'], {
+  RUSH_PREVIEW_VERSION: rushVersion
+});
 const ai = run('ai', [...commonArgs, '--reporter=ai']).stdout;
 const file = run('file', [...commonArgs, '--reporter=file']);
 const quiet = run('quiet', [...commonArgs, '--reporter=plaintext', '--log-level=quiet']).stdout;
@@ -66,6 +72,18 @@ const flagOffHelp = run('help-flag-off', ['--help']).stdout;
 const help = run('help', ['--help', '--reporter=json'], { RUSH_REPORTER: 'legacy' }).stdout;
 const commandJson = run('command-json', ['list', '--json', '--reporter=file']);
 const commandJsonConflict = run('command-json-conflict', ['list', '--json', '--reporter=json'], {}, 1);
+const duplicateOutputPath = path.join(outputFolder, 'duplicate-output.jsonl');
+const outputConflict = run(
+  'output-conflict',
+  [
+    ...commonArgs,
+    '--reporter=plaintext',
+    `--output=json://${duplicateOutputPath}`,
+    `--output=file://${duplicateOutputPath}`
+  ],
+  {},
+  1
+);
 const tempOverride = path.join(outputFolder, 'rush-temp-override');
 const tempOverrideFile = run('temp-override', [...commonArgs, '--reporter=file'], {
   RUSH_TEMP_FOLDER: tempOverride
@@ -86,18 +104,6 @@ const purgeLogMatch = tempPurge.stderr.match(/^Rush full log: (.+)$/m);
 if (!purgeLogMatch || purgeLogMatch[1].startsWith(tempOverride) || !fs.existsSync(purgeLogMatch[1])) {
   throw new Error('The active purge reporter log was not preserved outside RUSH_TEMP_FOLDER.');
 }
-const duplicateOutputPath = path.join(outputFolder, 'duplicate-output.jsonl');
-const outputConflict = run(
-  'output-conflict',
-  [
-    ...commonArgs,
-    '--reporter=plaintext',
-    `--output=json://${duplicateOutputPath}`,
-    `--output=file://${duplicateOutputPath}`
-  ],
-  {},
-  1
-);
 
 function parseNdjson(text, name) {
   if (text.includes('\u001b')) {
@@ -110,6 +116,7 @@ function parseNdjson(text, name) {
 }
 
 const jsonEvents = parseNdjson(json, 'json');
+const previewJsonEvents = parseNdjson(previewJson.stdout, 'preview-json');
 const aiRecords = parseNdjson(ai, 'ai');
 const failureJsonEvents = parseNdjson(failureJson, 'failure-json');
 const failureAiRecords = parseNdjson(failureAi, 'failure-ai');
@@ -184,6 +191,12 @@ if (plaintext.includes('Rush Multi-Project Build Tool') || plaintext.includes('1
 const aiFinal = aiRecords.at(-1);
 if (aiFinal?.kind !== 'ai.final' || aiFinal.log?.complete !== true) {
   throw new Error('AI output did not include a complete full-log reference.');
+}
+if (
+  !previewJson.stderr.includes('RUSH_PREVIEW_VERSION') ||
+  !previewJsonEvents.some((event) => event.type === 'sessionCompleted')
+) {
+  throw new Error('The matching preview version did not preserve payload-only reporter stdout.');
 }
 const failureAiFinal = failureAiRecords.at(-1);
 if (
