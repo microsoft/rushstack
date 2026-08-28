@@ -40,6 +40,8 @@ async function createInitializedHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     selection: {
       reporter: 'legacy',
       logLevel: 'normal',

@@ -2,6 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
+
+import {
+  OldEngineOutputAdapter,
+  REPORTER_PROTOCOL_VERSION,
+  resolveReporterCompatibility,
+  type IReporterCompatibilityDecision
+} from '@rushstack/rush-reporter';
 
 import type { IRushFrontendLaunchOptions } from './IRushFrontendLaunchOptions';
 
@@ -37,6 +45,37 @@ export class RushCommandSelector {
     }
 
     const commandName: CommandName = _getCommandName();
+    const engineProtocolMajor: number | undefined = (
+      Rush as typeof Rush & { readonly _reporterProtocolMajor?: number }
+    )._reporterProtocolMajor;
+    const compatibility: IReporterCompatibilityDecision = resolveReporterCompatibility(
+      { protocolMajor: REPORTER_PROTOCOL_VERSION.major, hasManager: true },
+      {
+        supportsStructuredSink: engineProtocolMajor !== undefined,
+        protocolMajor: engineProtocolMajor
+      }
+    );
+    let effectiveOptions: IRushFrontendLaunchOptions = options;
+    if (compatibility.mode === 'new-frontend-old-engine' && options.reporterEnabled) {
+      _observeOldEngineOutput(options, Rush.version);
+    } else if (
+      compatibility.mode === 'old-frontend-new-engine' &&
+      engineProtocolMajor !== undefined &&
+      options.reporterEnabled
+    ) {
+      if (options.reporterSelectionReason === 'explicit --reporter') {
+        throw new Error(
+          `The selected Rush engine uses reporter protocol major ${engineProtocolMajor}, but this ` +
+            `frontend supports major ${REPORTER_PROTOCOL_VERSION.major}. Update global Rush or use ` +
+            '--reporter=legacy.'
+        );
+      }
+      effectiveOptions = {
+        ...options,
+        reporterEnabled: false,
+        reporterSelectionReason: 'bootstrap compatibility fallback'
+      };
+    }
 
     if (commandName === 'rush-pnpm') {
       if (!Rush.launchRushPnpm) {
@@ -56,11 +95,56 @@ export class RushCommandSelector {
             ` which does not support the "rushx" command`
         );
       }
-      Rush.launchRushX(launcherVersion, options);
+      Rush.launchRushX(launcherVersion, effectiveOptions);
     } else {
-      Rush.launch(launcherVersion, options);
+      Rush.launch(launcherVersion, effectiveOptions);
     }
   }
+}
+
+function _observeOldEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): void {
+  const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+    sink: options.reporterEventSink,
+    sessionId: `rush_old_engine_${process.pid}`,
+    source: { packageName: '@microsoft/rush-lib', packageVersion: engineVersion }
+  });
+  const legacyWrite: typeof process.stderr.write = process.stderr.write.bind(process.stderr);
+  _observeStream(process.stdout, 'stdout', adapter, legacyWrite);
+  _observeStream(process.stderr, 'stderr', adapter, legacyWrite);
+}
+
+function _observeStream(
+  stream: NodeJS.WriteStream,
+  streamName: 'stdout' | 'stderr',
+  adapter: OldEngineOutputAdapter,
+  legacyWrite: typeof process.stderr.write
+): void {
+  const marker: symbol = Symbol.for(`rush.reporter.old-engine-output.${streamName}`);
+  const markedStream: NodeJS.WriteStream & { [key: symbol]: boolean | undefined } =
+    stream as NodeJS.WriteStream & { [key: symbol]: boolean | undefined };
+  if (markedStream[marker]) {
+    return;
+  }
+  markedStream[marker] = true;
+
+  const decoder: StringDecoder = new StringDecoder('utf8');
+  stream.write = ((
+    chunk: string | Uint8Array,
+    encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
+    callback?: (error?: Error | null) => void
+  ): boolean => {
+    const text: string =
+      typeof chunk === 'string'
+        ? chunk
+        : decoder.write(Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength));
+    if (text) {
+      adapter.capture(streamName, text);
+    }
+    if (typeof encodingOrCallback === 'function') {
+      return legacyWrite(chunk, encodingOrCallback);
+    }
+    return legacyWrite(chunk, encodingOrCallback, callback);
+  }) as typeof stream.write;
 }
 
 function _failWithError(message: string): never {

@@ -163,7 +163,9 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
       eventSink: reporterHost.sink,
       sessionId
     },
-    reporterCloseAsync
+    reporterCloseAsync,
+    reporterEnabled: reporterHost.selection.enabled,
+    reporterSelectionReason: reporterHost.selection.reason
   };
 
   try {

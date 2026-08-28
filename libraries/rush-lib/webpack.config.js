@@ -116,32 +116,39 @@ module.exports = () => {
         }
       }
     ),
-    generateConfiguration({
-      [PathConstants.pnpmfileShimFilename]: {
-        import: `${__dirname}/lib-intermediate-esm/logic/pnpm/PnpmfileShim.js`,
-        ...SCRIPT_ENTRY_OPTIONS
+    generateConfiguration(
+      {
+        [PathConstants.pnpmfileShimFilename]: {
+          import: `${__dirname}/lib-intermediate-esm/logic/pnpm/PnpmfileShim.js`,
+          ...SCRIPT_ENTRY_OPTIONS
+        },
+        [PathConstants.subspacePnpmfileShimFilename]: {
+          import: `${__dirname}/lib-intermediate-esm/logic/pnpm/SubspaceGlobalPnpmfileShim.js`,
+          ...SCRIPT_ENTRY_OPTIONS
+        },
+        [PathConstants.installRunScriptFilename]: {
+          import: `${__dirname}/lib-intermediate-esm/scripts/install-run.js`,
+          ...SCRIPT_ENTRY_OPTIONS
+        },
+        [PathConstants.installRunRushScriptFilename]: {
+          import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rush.js`,
+          ...SCRIPT_ENTRY_OPTIONS
+        },
+        [PathConstants.installRunRushxScriptFilename]: {
+          import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rushx.js`,
+          ...SCRIPT_ENTRY_OPTIONS
+        },
+        [PathConstants.installRunRushPnpmScriptFilename]: {
+          import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rush-pnpm.js`,
+          ...SCRIPT_ENTRY_OPTIONS
+        }
       },
-      [PathConstants.subspacePnpmfileShimFilename]: {
-        import: `${__dirname}/lib-intermediate-esm/logic/pnpm/SubspaceGlobalPnpmfileShim.js`,
-        ...SCRIPT_ENTRY_OPTIONS
-      },
-      [PathConstants.installRunScriptFilename]: {
-        import: `${__dirname}/lib-intermediate-esm/scripts/install-run.js`,
-        ...SCRIPT_ENTRY_OPTIONS
-      },
-      [PathConstants.installRunRushScriptFilename]: {
-        import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rush.js`,
-        ...SCRIPT_ENTRY_OPTIONS
-      },
-      [PathConstants.installRunRushxScriptFilename]: {
-        import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rushx.js`,
-        ...SCRIPT_ENTRY_OPTIONS
-      },
-      [PathConstants.installRunRushPnpmScriptFilename]: {
-        import: `${__dirname}/lib-intermediate-esm/scripts/install-run-rush-pnpm.js`,
-        ...SCRIPT_ENTRY_OPTIONS
-      }
-    })
+      [
+        new webpack.DefinePlugin({
+          RUSH_LIB_VERSION_FOR_BOOTSTRAP: JSON.stringify(packageJson.version)
+        })
+      ]
+    )
   ];
 
   return configurations;

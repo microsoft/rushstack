@@ -39,16 +39,19 @@ export class RushVersionSelector {
     let installIsValid: boolean = await installMarker.isValidAsync();
     if (!installIsValid) {
       // Need to install Rush
-      console.log(`Rush version ${version} is not currently installed. Installing...`);
+      this._reportStartupMessage(
+        executeOptions,
+        `Rush version ${version} is not currently installed. Installing...`
+      );
 
       const resourceName: string = `rush-${version}`;
 
-      console.log(`Trying to acquire lock for ${resourceName}`);
+      this._reportStartupMessage(executeOptions, `Trying to acquire lock for ${resourceName}`);
 
       const lock: LockFile = await LockFile.acquireAsync(expectedRushPath, resourceName);
       installIsValid = await installMarker.isValidAsync();
       if (installIsValid) {
-        console.log('Another process performed the installation.');
+        this._reportStartupMessage(executeOptions, 'Another process performed the installation.');
       } else {
         await Utilities.installPackageInDirectoryAsync({
           directory: expectedRushPath,
@@ -69,7 +72,10 @@ export class RushVersionSelector {
           filterNpmIncompatibleProperties: true
         });
 
-        console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
+        this._reportStartupMessage(
+          executeOptions,
+          `Successfully installed Rush version ${version} in ${expectedRushPath}.`
+        );
 
         // If we've made it here without exception, write the flag file
         await installMarker.createAsync();
@@ -99,6 +105,21 @@ export class RushVersionSelector {
       const rushCliEntrypoint: typeof import('@microsoft/rush-lib') = require(rushLibEntrypoint);
       // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
       RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
+    }
+  }
+
+  private _reportStartupMessage(options: IRushFrontendLaunchOptions, text: string): void {
+    if (options.reporterEnabled) {
+      options.reporterEventSink.emit({
+        protocolVersion: { major: 1, minor: 0 },
+        sessionId: `rush_frontend_${process.pid}`,
+        source: { packageName: '@microsoft/rush', packageVersion: this._currentPackageVersion },
+        privacy: 'public',
+        type: 'activityChanged',
+        payload: { kind: 'version-selection', text }
+      });
+    } else {
+      console.log(text);
     }
   }
 }

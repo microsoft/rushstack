@@ -23,8 +23,12 @@ import {
   type IReporterEventEnvelope,
   type IReporterEventSink,
   type IReporterOutputTarget,
+  type IBootstrapReplayResult,
   type ReporterLogLevel,
-  type ReporterName
+  type ReporterName,
+  LegacyFallbackSink,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
 } from '@rushstack/rush-reporter';
 
 export interface IRushReporterOutputStream {
@@ -38,11 +42,15 @@ export interface IRushReporterHostOptions {
   readonly env?: Record<string, string | undefined>;
   readonly cwd?: string;
   readonly stdout?: IRushReporterOutputStream;
+  readonly stderr?: IRushReporterOutputStream;
   readonly includeDefaultFileReporter?: boolean;
   readonly commandName?: 'rush' | 'rush-pnpm' | 'rushx';
   readonly repositoryOptIn?: boolean;
   readonly forceLegacy?: boolean;
   readonly selectedRushVersion?: string;
+  readonly handoffDirectory?: string;
+  readonly handoffRetentionMs?: number;
+  readonly nowMs?: () => number;
 }
 
 export interface IRushReporterSelection {
@@ -57,7 +65,8 @@ export interface IRushReporterSelection {
     | 'explicit --reporter'
     | 'repository experiment'
     | 'RUSH_REPORTER=legacy'
-    | 'pre-major legacy default';
+    | 'pre-major legacy default'
+    | 'bootstrap compatibility fallback';
 }
 
 export interface IInitializedRushReporterHost {
@@ -65,6 +74,8 @@ export interface IInitializedRushReporterHost {
   readonly sink: IReporterEventSink;
   readonly selection: IRushReporterSelection;
   closeAsync(timeoutMs?: number): Promise<void>;
+  readonly bootstrapReplay: IBootstrapReplayResult;
+  readonly abandonedHandoffFilesDeleted: readonly string[];
 }
 
 const REPORTER_VALUE_FLAGS: ReadonlySet<string> = new Set(['--reporter', '--output', '--log-level']);
@@ -603,9 +614,23 @@ export async function initializeRushReporterHostAsync(
   options: IRushReporterHostOptions = {}
 ): Promise<IInitializedRushReporterHost> {
   const env: Record<string, string | undefined> = options.env ?? process.env;
-  const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
-  const selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
-  const host: ReporterHost = new ReporterHost({ env });
+  const stdout: IRushReporterOutputStream = options.stdout ?? {
+    isTTY: process.stdout.isTTY,
+    columns: process.stdout.columns,
+    write: process.stdout.write.bind(process.stdout)
+  };
+  const stderr: IRushReporterOutputStream = options.stderr ?? {
+    isTTY: process.stderr.isTTY,
+    columns: process.stderr.columns,
+    write: process.stderr.write.bind(process.stderr)
+  };
+  let selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
+  const host: ReporterHost = new ReporterHost({
+    env,
+    handoffDirectory: options.handoffDirectory,
+    retentionMs: options.handoffRetentionMs,
+    nowMs: options.nowMs
+  });
 
   if (selection.enabled) {
     const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
@@ -640,11 +665,48 @@ export async function initializeRushReporterHostAsync(
   }
 
   await host.manager.initializeAsync();
+  let bootstrapReplay: IBootstrapReplayResult;
+  try {
+    bootstrapReplay = await host.replayBootstrapHandoffAsync();
+  } finally {
+    delete env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
+    delete env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+  }
+  const abandonedHandoffFilesDeleted: readonly string[] = await host.cleanAbandonedHandoffFilesAsync();
+
+  let sink: IReporterEventSink = host.getSink();
+  if (bootstrapReplay.skipReason === 'incompatible-protocol') {
+    for (const output of bootstrapReplay.legacyFallbackOutput ?? []) {
+      const target: IRushReporterOutputStream =
+        selection.reason === 'explicit --reporter' ? stderr : output.stream === 'stdout' ? stdout : stderr;
+      target.write(output.text);
+    }
+    if (selection.reason === 'explicit --reporter') {
+      throw new Error(
+        'The install-run-rush bootstrap reporter protocol is incompatible with this Rush frontend. ' +
+          'Update the global Rush installation or use --reporter=legacy.'
+      );
+    }
+    selection = {
+      reporter: 'legacy',
+      logLevel: 'normal',
+      outputs: [],
+      commandJson: selection.commandJson,
+      enabled: false,
+      reporterControlsOwnedByFrontend: selection.reporterControlsOwnedByFrontend,
+      reporterValueFlagsToStrip: selection.reporterValueFlagsToStrip,
+      reason: 'bootstrap compatibility fallback'
+    };
+    sink = new LegacyFallbackSink();
+  }
+
   let closePromise: Promise<void> | undefined;
   return {
     host,
-    sink: host.getSink(),
+    sink,
     selection,
+    bootstrapReplay,
+    abandonedHandoffFilesDeleted,
     closeAsync: (timeoutMs?: number) => {
       closePromise ??= host.manager.closeAsync(timeoutMs);
       return closePromise;

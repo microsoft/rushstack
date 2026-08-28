@@ -188,6 +188,7 @@ describe('ReporterHost handoff replay', () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();
       buffer.emit({ type: 'sessionStarted', payload: {} });
+      buffer.addExternalOutput('stderr', 'legacy bootstrap output\n');
       const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
       const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
       await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
@@ -204,6 +205,7 @@ describe('ReporterHost handoff replay', () => {
       });
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
       expect(result.skipReason).toBe('incompatible-protocol');
+      expect(result.legacyFallbackOutput).toEqual([{ stream: 'stderr', text: 'legacy bootstrap output\n' }]);
     });
   });
 
@@ -267,10 +269,7 @@ describe('ReporterHost handoff replay', () => {
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
       await manager.flushAsync();
       expect(result).toMatchObject({ replayed: true, eventCount: 2, skippedEventCount: 1 });
-      expect(reporter.reported.map((event) => event.type)).toEqual([
-        'sessionStarted',
-        'diagnosticEmitted'
-      ]);
+      expect(reporter.reported.map((event) => event.type)).toEqual(['sessionStarted', 'diagnosticEmitted']);
     });
   });
 

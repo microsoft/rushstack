@@ -6,6 +6,12 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import type { IReporterEventSink } from '@rushstack/rush-reporter';
+import {
+  BootstrapEventBuffer,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
+  writeBootstrapHandoffFileAsync
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -68,9 +74,11 @@ describe(resolveRushReporterSelection.name, () => {
       enabled: true,
       reason: 'explicit --reporter'
     });
-    expect(() => resolve(['build'], { RUSH_REPORTER: 'json' })).toThrow(
-      /cannot enable the pre-major reporter path/
-    );
+    expect(resolve(['build'], { RUSH_REPORTER: 'json' })).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reason: 'pre-major legacy default'
+    });
   });
 
   it('uses deterministic non-agent selection for the repository experiment', () => {
@@ -454,6 +462,87 @@ describe(initializeRushReporterHostAsync.name, () => {
 
       expect(JSON.parse(stdoutText).type).toBe('commandStarted');
       expect(JSON.parse(await fs.promises.readFile(outputPath, 'utf8')).type).toBe('commandStarted');
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('replays and deletes a bootstrap handoff before returning the authoritative host', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({ type: 'sessionStarted', payload: { rushVersion: '5.178.1' } });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=json'],
+        env,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+      await initialized.host.manager.flushAsync();
+
+      expect(initialized.bootstrapReplay).toMatchObject({ replayed: true, eventCount: 1 });
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
+      expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBeUndefined();
+      expect(JSON.parse(stdoutText).type).toBe('sessionStarted');
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('restores ordered legacy output when repository opt-in meets an incompatible handoff', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({ type: 'activityChanged', payload: { text: 'installing Rush' } });
+      buffer.addExternalOutput('stdout', 'npm output\n');
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
+      await fs.promises.writeFile(handoffPath, contents.replace(/"major":1/g, '"major":2'));
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build'],
+        env,
+        repositoryOptIn: true,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+
+      expect(initialized.bootstrapReplay.skipReason).toBe('incompatible-protocol');
+      expect(initialized.selection).toMatchObject({
+        enabled: false,
+        reason: 'bootstrap compatibility fallback'
+      });
+      expect(stdoutText).toBe('installing Rush\nnpm output\n');
+      expect(fs.existsSync(handoffPath)).toBe(false);
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

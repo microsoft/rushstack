@@ -7,6 +7,7 @@ import * as childProcess from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
@@ -20,6 +21,61 @@ const INSTALL_RUN_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_LOCKFILE_PATH' = 'INSTALL
 const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME: string = 'node_modules';
 const PACKAGE_JSON_FILENAME: string = 'package.json';
+let _externalOutputCaptureId: number = 0;
+const NPM_OUTPUT_CAPTURE_SCRIPT: string = `
+const childProcess = require('node:child_process');
+const fs = require('node:fs');
+const { StringDecoder } = require('node:string_decoder');
+const [command, argsJson, capturePath, useShell, maxBytesText] = process.argv.slice(1);
+const child = childProcess.spawn(command, JSON.parse(argsJson), {
+  cwd: process.cwd(),
+  env: process.env,
+  shell: useShell === '1',
+  windowsVerbatimArguments: false,
+  stdio: ['inherit', 'pipe', 'pipe']
+});
+const decoders = { stdout: new StringDecoder('utf8'), stderr: new StringDecoder('utf8') };
+const maxBytes = Number(maxBytesText);
+let capturedBytes = 0;
+let overflowed = false;
+function capture(stream, text) {
+  if (!text || overflowed) {
+    return;
+  }
+  const record = JSON.stringify({ stream, text }) + '\\n';
+  const recordBytes = Buffer.byteLength(record);
+  if (capturedBytes + recordBytes <= maxBytes) {
+    fs.appendFileSync(capturePath, record);
+    capturedBytes += recordBytes;
+  } else {
+    overflowed = true;
+    fs.appendFileSync(capturePath, JSON.stringify({ overflow: true }) + '\\n');
+  }
+}
+child.stdout.on('data', (chunk) => capture('stdout', decoders.stdout.write(chunk)));
+child.stderr.on('data', (chunk) => capture('stderr', decoders.stderr.write(chunk)));
+child.on('error', (error) => {
+  process.stderr.write(String(error) + '\\n');
+  process.exitCode = 1;
+});
+child.on('close', (code, signal) => {
+  capture('stdout', decoders.stdout.end());
+  capture('stderr', decoders.stderr.end());
+  if (signal) {
+    process.stderr.write('npm was terminated by signal: ' + signal + '\\n');
+    process.exitCode = 1;
+  } else {
+    process.exitCode = code === null ? 1 : code;
+  }
+});
+`;
+
+export interface IInstallAndRunOptions {
+  readonly onExternalOutput?: (stream: 'stdout' | 'stderr', text: string) => void;
+  readonly onExternalOutputOverflow?: () => void;
+  readonly externalOutputCaptureMaxBytes?: number;
+  readonly prepareToRun?: () => void;
+}
 
 /**
  * Parse a package specifier (in the form of name\@version) into name and version parts.
@@ -352,22 +408,102 @@ function _installPackage(
   packageInstallFolder: string,
   name: string,
   version: string,
-  npmCommand: 'install' | 'ci'
+  npmCommand: 'install' | 'ci',
+  onExternalOutput: ((stream: 'stdout' | 'stderr', text: string) => void) | undefined,
+  onExternalOutputOverflow: (() => void) | undefined,
+  externalOutputCaptureMaxBytes: number | undefined
 ): void {
+  let capturePath: string | undefined;
   try {
     logger.info(`Installing ${name}...`);
-    _runNpmConfirmSuccess(
-      [npmCommand],
-      {
-        stdio: 'inherit',
-        cwd: packageInstallFolder,
-        env: process.env
-      },
-      `npm ${npmCommand}`
-    );
-    logger.info(`Successfully installed ${name}@${version}`);
+    if (onExternalOutput) {
+      capturePath = path.join(
+        packageInstallFolder,
+        `.install-run-output-${process.pid}-${_externalOutputCaptureId++}.log`
+      );
+      fs.closeSync(fs.openSync(capturePath, 'wx', 0o600));
+    }
+    if (capturePath) {
+      _runNpmWithCaptureConfirmSuccess(
+        [npmCommand],
+        {
+          stdio: 'inherit',
+          cwd: packageInstallFolder,
+          env: process.env
+        },
+        capturePath,
+        externalOutputCaptureMaxBytes ?? 1024 * 1024,
+        `npm ${npmCommand}`
+      );
+    } else {
+      _runNpmConfirmSuccess(
+        [npmCommand],
+        {
+          stdio: 'inherit',
+          cwd: packageInstallFolder,
+          env: process.env
+        },
+        `npm ${npmCommand}`
+      );
+    }
   } catch (e) {
     throw new Error(`Unable to install package: ${e}`);
+  } finally {
+    if (capturePath !== undefined) {
+      try {
+        _readCapturedNpmOutput(capturePath, onExternalOutput!, onExternalOutputOverflow);
+      } finally {
+        _deleteFile(capturePath);
+      }
+    }
+  }
+  logger.info(`Successfully installed ${name}@${version}`);
+}
+
+function _readCapturedNpmOutput(
+  capturePath: string,
+  onExternalOutput: (stream: 'stdout' | 'stderr', text: string) => void,
+  onExternalOutputOverflow: (() => void) | undefined
+): void {
+  const fileDescriptor: number = fs.openSync(capturePath, 'r');
+  const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
+  const decoder: StringDecoder = new StringDecoder('utf8');
+  let pending: string = '';
+  try {
+    for (;;) {
+      const bytesRead: number = fs.readSync(fileDescriptor, buffer, 0, buffer.length, null);
+      if (bytesRead === 0) {
+        break;
+      }
+      pending += decoder.write(buffer.subarray(0, bytesRead));
+      let newlineIndex: number;
+      while ((newlineIndex = pending.indexOf('\n')) >= 0) {
+        const line: string = pending.slice(0, newlineIndex);
+        pending = pending.slice(newlineIndex + 1);
+        if (line) {
+          const record: { stream?: unknown; text?: unknown; overflow?: unknown } = JSON.parse(line);
+          if (record.overflow === true) {
+            onExternalOutputOverflow?.();
+          } else if (
+            (record.stream === 'stdout' || record.stream === 'stderr') &&
+            typeof record.text === 'string'
+          ) {
+            onExternalOutput(record.stream, record.text);
+          }
+        }
+      }
+    }
+    pending += decoder.end();
+    if (pending.trim()) {
+      const record: { overflow?: unknown } = JSON.parse(pending);
+      if (record.overflow === true) {
+        onExternalOutputOverflow?.();
+      } else {
+        throw new Error('The npm output capture ended with an incomplete record.');
+      }
+    }
+  } finally {
+    fs.closeSync(fileDescriptor);
   }
 }
 
@@ -417,7 +553,41 @@ function _runNpmConfirmSuccess(
   } else {
     result = childProcess.spawnSync(command, args, options);
   }
+  _throwIfSpawnFailed(result, commandNameForLogging);
+  return result;
+}
 
+function _runNpmWithCaptureConfirmSuccess(
+  args: string[],
+  options: childProcess.SpawnSyncOptions,
+  capturePath: string,
+  captureMaxBytes: number,
+  commandNameForLogging: string
+): childProcess.SpawnSyncReturns<string | Buffer> {
+  const npmPath: string = getNpmPath();
+  const command: string = IS_WINDOWS ? _buildShellCommand(npmPath, args) : npmPath;
+  const commandArgs: string[] = IS_WINDOWS ? [] : args;
+  const result: childProcess.SpawnSyncReturns<string | Buffer> = childProcess.spawnSync(
+    process.execPath,
+    [
+      '-e',
+      NPM_OUTPUT_CAPTURE_SCRIPT,
+      command,
+      JSON.stringify(commandArgs),
+      capturePath,
+      IS_WINDOWS ? '1' : '0',
+      String(captureMaxBytes)
+    ],
+    options
+  );
+  _throwIfSpawnFailed(result, commandNameForLogging);
+  return result;
+}
+
+function _throwIfSpawnFailed(
+  result: childProcess.SpawnSyncReturns<string | Buffer>,
+  commandNameForLogging: string
+): void {
   if (result.status !== 0) {
     if (!result.status) {
       // Is status null or undefined?
@@ -432,8 +602,6 @@ function _runNpmConfirmSuccess(
       throw new Error(`"${commandNameForLogging}" returned error code ${result.status}`);
     }
   }
-
-  return result;
 }
 
 export function installAndRun(
@@ -442,7 +610,8 @@ export function installAndRun(
   packageVersion: string,
   packageBinName: string,
   packageBinArgs: string[],
-  lockFilePath: string | undefined = process.env[INSTALL_RUN_LOCKFILE_PATH_VARIABLE]
+  lockFilePath: string | undefined = process.env[INSTALL_RUN_LOCKFILE_PATH_VARIABLE],
+  options: IInstallAndRunOptions = {}
 ): number {
   const rushJsonFolder: string = findRushJsonFolder();
   const rushCommonFolder: string = path.join(rushJsonFolder, 'common');
@@ -470,13 +639,23 @@ export function installAndRun(
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);
     const installCommand: 'install' | 'ci' = lockFilePath ? 'ci' : 'install';
-    _installPackage(logger, packageInstallFolder, packageName, packageVersion, installCommand);
+    _installPackage(
+      logger,
+      packageInstallFolder,
+      packageName,
+      packageVersion,
+      installCommand,
+      options.onExternalOutput,
+      options.onExternalOutputOverflow,
+      options.externalOutputCaptureMaxBytes
+    );
     _writeFlagFile(packageInstallFolder);
   }
 
   const statusMessage: string = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
   const statusMessageLine: string = new Array(statusMessage.length + 1).join('-');
   logger.info('\n' + statusMessage + '\n' + statusMessageLine + '\n');
+  options.prepareToRun?.();
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');

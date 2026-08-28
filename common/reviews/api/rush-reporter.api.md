@@ -331,10 +331,17 @@ export interface IBootstrapHandoffWriteResult {
 }
 
 // @beta
+export interface IBootstrapLegacyOutput {
+    readonly stream: 'stdout' | 'stderr';
+    readonly text: string;
+}
+
+// @beta
 export interface IBootstrapReplayResult {
     readonly direct: boolean;
     readonly eventCount: number;
     readonly handoffPath?: string;
+    readonly legacyFallbackOutput?: readonly IBootstrapLegacyOutput[];
     readonly replayed: boolean;
     readonly skippedEventCount?: number;
     readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
