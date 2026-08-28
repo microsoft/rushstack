@@ -513,13 +513,17 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
 function createLegacyBootstrap(options: IInstallRunRushBootstrapOptions): IInstallRunRushBootstrap {
   const stdout: (text: string) => void = options.stdout ?? ((text: string) => process.stdout.write(text));
   const stderr: (text: string) => void = options.stderr ?? ((text: string) => process.stderr.write(text));
+  const warning: (text: string) => void = (text: string) => stderr(`${text}\n`);
   return {
     enabled: false,
+    // Legacy mode cannot create npm captures because it exposes no external output handler.
+    // Keep warning routing available so future diagnostic finalization remains stderr-only.
     logger: options.quiet
-      ? { info: () => {}, error: (text: string) => stderr(`${text}\n`) }
+      ? { info: () => {}, error: (text: string) => stderr(`${text}\n`), warning }
       : {
           info: (text: string) => stdout(`${text}\n`),
-          error: (text: string) => stderr(`${text}\n`)
+          error: (text: string) => stderr(`${text}\n`),
+          warning
         },
     externalOutputHandler: undefined,
     externalOutputCaptureMaxBytes: undefined,

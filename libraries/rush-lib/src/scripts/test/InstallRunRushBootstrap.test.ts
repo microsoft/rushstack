@@ -16,6 +16,7 @@ import {
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
 } from '../generated/BootstrapProtocol';
+import { finalizeCapturedNpmOutput } from '../install-run';
 
 async function withTempDir(action: (directory: string) => Promise<void>): Promise<void> {
   const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'install-run-rush-test-'));
@@ -95,6 +96,31 @@ describe(createInstallRunRushBootstrap.name, () => {
       expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBeUndefined();
     });
   });
+
+  it.each([false, true])(
+    'routes future capture warnings to stderr in legacy mode when quiet is %s',
+    async (quiet: boolean) => {
+      await withTempDir(async (directory: string) => {
+        const { options, env, stdout, stderr } = makeOptions(directory, { quiet });
+        const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+        const capturePath: string = path.join(directory, 'legacy-partial-capture.ndjson');
+        await fs.promises.writeFile(capturePath, '{"stream":"stdout","text":"partial');
+
+        expect(bootstrap.enabled).toBe(false);
+        expect(bootstrap.externalOutputHandler).toBeUndefined();
+        expect(() =>
+          finalizeCapturedNpmOutput(capturePath, bootstrap.logger, () => {}, undefined)
+        ).not.toThrow();
+
+        expect(stderr).toHaveLength(1);
+        expect(stderr[0]).toContain('ended with a partial record that was discarded');
+        expect(stdout).toEqual([]);
+        expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
+        expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBeUndefined();
+        expect(fs.existsSync(capturePath)).toBe(false);
+      });
+    }
+  );
 
   it('writes an ordered nonce-protected handoff for an explicit reporter', async () => {
     await withTempDir(async (directory: string) => {
