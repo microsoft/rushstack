@@ -8,8 +8,11 @@ node apps/rush/src/test/sandbox/reporter-demo/run.mjs
 ```
 
 The script runs the same `rush build --only @rushstack/rush-reporter` operation stream through legacy,
-plaintext, JSON, and AI modes. It verifies JSON/AI payload-only stdout, confirms the plaintext result
-contains an existing absolute full-log path, and writes captured stdout/stderr files to a temporary folder.
+plaintext, JSON, AI, file, and quiet modes, plus parser failure, help, and command-specific JSON cases.
+It verifies payload-only machine stdout, one visible writer, ordered/lossless plaintext grouping from a
+same-invocation JSON sidecar, final artifact completeness, owner-only log permissions, failure flushing,
+AI parser-error context, command-JSON ownership, and the `RUSH_REPORTER=legacy` rollback transcript. Captured
+stdout/stderr files are written to a temporary folder.
 
 For an individual invocation:
 
@@ -17,7 +20,10 @@ For an individual invocation:
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plaintext
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json --log-level=debug
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=ai
+node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=file
+node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plaintext --log-level=quiet
 RUSH_REPORTER=legacy node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
+node apps/rush/bin/rush list --json --reporter=file
 ```
 
 Repositories can opt in without a command-line flag by setting `"useRushReporter": true` in

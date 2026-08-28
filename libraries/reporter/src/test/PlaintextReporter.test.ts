@@ -101,6 +101,22 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('Building \nproject-a');
   });
 
+  it('streams large grouped output from disk without retaining it in the operation record', async () => {
+    const capture: ICapture = makeDetailed();
+    const chunk: string = `${'x'.repeat(256 * 1024)}\n`;
+    capture.reporter.report(
+      ev('operationRegistered', { operationId: 'op1', projectName: 'project-a', phaseName: 'build' })
+    );
+    for (let index: number = 0; index < 8; index++) {
+      capture.reporter.report(ev('externalOutput', { text: chunk }, { operationId: 'op1' }));
+    }
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
+    await capture.reporter.closeAsync();
+
+    expect(capture.getOutput()).toContain(`${'x'.repeat(1024)}x`);
+    expect(capture.getOutput()).toContain('project-a: success');
+  });
+
   it('omits silent operations and exposes the full log path', () => {
     const capture: ICapture = makeDetailed();
     capture.reporter.report(ev('commandStarted', { commandName: 'build' }));

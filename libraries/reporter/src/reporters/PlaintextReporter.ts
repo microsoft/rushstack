@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
+
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
@@ -8,6 +13,8 @@ import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
 
 const HEARTBEAT_INTERVAL_MS: number = 30000;
+const OWNER_ONLY_MODE: number = 0o600;
+const OWNER_ONLY_DIRECTORY_MODE: number = 0o700;
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'success',
   'successWithWarnings',
@@ -23,7 +30,8 @@ interface IOperationRecord {
   readonly projectName: string;
   readonly phaseName?: string;
   readonly silent: boolean;
-  readonly buffer: string[];
+  spoolPath?: string;
+  spoolFailed?: boolean;
 }
 
 /**
@@ -94,6 +102,8 @@ export class PlaintextReporter implements IReporter {
   private _atLineStart: boolean;
   private _logPath: string | undefined;
   private readonly _operations: Map<string, IOperationRecord>;
+  private _spoolDirectory: string | undefined;
+  private _nextSpoolId: number;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -111,6 +121,8 @@ export class PlaintextReporter implements IReporter {
     this._atLineStart = true;
     this._logPath = undefined;
     this._operations = new Map();
+    this._spoolDirectory = undefined;
+    this._nextSpoolId = 1;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -139,8 +151,7 @@ export class PlaintextReporter implements IReporter {
         this._operations.set(payload.operationId, {
           projectName: payload.projectName ?? payload.operationId,
           phaseName: payload.phaseName,
-          silent: payload.silent === true,
-          buffer: []
+          silent: payload.silent === true
         });
         if (!payload.silent) {
           this._total++;
@@ -212,7 +223,19 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    /* no-op */
+    for (const [operationId, record] of this._operations) {
+      if (!record.silent && this._variant === 'detailed') {
+        const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
+        this._writeLine('');
+        this._writeLine(`==[ ${record.projectName}${phase} ]==`);
+        this._writeSpooledOutput(record);
+        this._writeLine(this._formatStatus(record.projectName, 'aborted'));
+      } else {
+        this._deleteSpool(record);
+      }
+      this._operations.delete(operationId);
+    }
+    this._removeSpoolDirectory();
   }
 
   /**
@@ -241,6 +264,7 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     if (record?.silent) {
+      this._deleteSpool(record);
       this._operations.delete(payload.operationId);
       return;
     }
@@ -251,6 +275,9 @@ export class PlaintextReporter implements IReporter {
     }
 
     if (this._logLevel === 'quiet') {
+      if (record) {
+        this._deleteSpool(record);
+      }
       this._operations.delete(payload.operationId);
       return;
     }
@@ -260,8 +287,7 @@ export class PlaintextReporter implements IReporter {
       this._writeLine('');
       this._writeLine(`==[ ${projectName}${phase} ]==`);
       if (record) {
-        this._writeRaw(record.buffer.join(''));
-        record.buffer.length = 0;
+        this._writeSpooledOutput(record);
       }
       this._writeLine(this._formatStatus(projectName, payload.status));
     } else {
@@ -279,10 +305,96 @@ export class PlaintextReporter implements IReporter {
     const record: IOperationRecord | undefined =
       operationId !== undefined ? this._operations.get(operationId) : undefined;
     if (record) {
-      record.buffer.push(text);
+      this._spoolOutput(record, text);
     } else {
       this._writeRaw(text);
     }
+  }
+
+  private _spoolOutput(record: IOperationRecord, text: string): void {
+    if (record.spoolFailed) {
+      this._writeRaw(text);
+      return;
+    }
+
+    try {
+      if (!record.spoolPath) {
+        const spoolDirectory: string = this._ensureSpoolDirectory();
+        record.spoolPath = path.join(spoolDirectory, `${this._nextSpoolId++}.operation`);
+        fs.writeFileSync(record.spoolPath, '', { flag: 'wx', mode: OWNER_ONLY_MODE });
+      }
+      fs.appendFileSync(record.spoolPath, text, { encoding: 'utf8', mode: OWNER_ONLY_MODE });
+    } catch (error) {
+      if (record.spoolPath) {
+        try {
+          this._writeRaw(fs.readFileSync(record.spoolPath, 'utf8'));
+        } catch {
+          /* Preserve subsequent output even if the prior spool cannot be recovered. */
+        }
+      }
+      this._deleteSpool(record);
+      record.spoolFailed = true;
+      this._writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
+      this._writeRaw(text);
+    }
+  }
+
+  private _writeSpooledOutput(record: IOperationRecord): void {
+    if (!record.spoolPath) {
+      return;
+    }
+    let fileDescriptor: number | undefined;
+    try {
+      fileDescriptor = fs.openSync(record.spoolPath, 'r');
+      const decoder: StringDecoder = new StringDecoder('utf8');
+      const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
+      let bytesRead: number;
+      while ((bytesRead = fs.readSync(fileDescriptor, buffer, 0, buffer.length, null)) > 0) {
+        this._writeRaw(decoder.write(buffer.subarray(0, bytesRead)));
+      }
+      this._writeRaw(decoder.end());
+    } catch (error) {
+      this._writeLine(
+        `[reporter] Unable to read grouped plaintext output; see the full log: ${(error as Error).message}`
+      );
+    } finally {
+      if (fileDescriptor !== undefined) {
+        fs.closeSync(fileDescriptor);
+      }
+      this._deleteSpool(record);
+    }
+  }
+
+  private _ensureSpoolDirectory(): string {
+    if (!this._spoolDirectory) {
+      this._spoolDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-plaintext-reporter-'));
+      fs.chmodSync(this._spoolDirectory, OWNER_ONLY_DIRECTORY_MODE);
+    }
+    return this._spoolDirectory;
+  }
+
+  private _deleteSpool(record: IOperationRecord): void {
+    if (!record.spoolPath) {
+      return;
+    }
+    try {
+      fs.rmSync(record.spoolPath, { force: true });
+    } catch {
+      /* Best-effort cleanup. */
+    }
+    record.spoolPath = undefined;
+  }
+
+  private _removeSpoolDirectory(): void {
+    if (!this._spoolDirectory) {
+      return;
+    }
+    try {
+      fs.rmdirSync(this._spoolDirectory);
+    } catch {
+      /* Best-effort cleanup. */
+    }
+    this._spoolDirectory = undefined;
   }
 
   private _onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {

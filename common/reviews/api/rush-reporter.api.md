@@ -222,6 +222,8 @@ export interface IAiDiagnostic {
     readonly remediation?: readonly IRushRemediationAction[];
     // (undocumented)
     readonly severity: string;
+    // (undocumented)
+    readonly summary?: string;
 }
 
 // @beta
@@ -456,6 +458,7 @@ export interface IExternalOutputChunk {
 // @beta
 export interface IFileReporterArtifact {
     readonly available: boolean;
+    readonly complete: boolean;
     readonly path?: string;
 }
 

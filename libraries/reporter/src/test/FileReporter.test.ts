@@ -85,6 +85,7 @@ describe('FileReporter', () => {
 
       const artifact: IFileReporterArtifact = reporter.getArtifact();
       expect(artifact.available).toBe(true);
+      expect(artifact.complete).toBe(true);
       expect(artifact.path).toContain(path.join(base, RUSH_LOGS_DIR_NAME));
       expect(path.basename(artifact.path!)).toBe('2026-07-15T01-00-00-000Z-4242-build.log');
 
@@ -178,6 +179,28 @@ describe('FileReporter', () => {
     });
   });
 
+  it('does not retain a file descriptor for every registered operation', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      await reporter.initializeAsync();
+      for (let index: number = 0; index < 2000; index++) {
+        reporter.report(
+          ev('operationRegistered', {
+            operationId: `operation-${index}`,
+            projectName: `project-${index}`,
+            phaseName: 'build'
+          })
+        );
+      }
+
+      const logsDir: string = path.join(base, RUSH_LOGS_DIR_NAME);
+      expect((await fs.promises.readdir(logsDir)).filter((entry) => entry.endsWith('.operation'))).toEqual(
+        []
+      );
+      await reporter.closeAsync();
+    });
+  });
+
   it('excludes secret fields but keeps local-sensitive values', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
@@ -208,8 +231,11 @@ describe('FileReporter', () => {
 
       const oldLog: string = path.join(logsDir, 'old-1-build.log');
       await fs.promises.writeFile(oldLog, '{}\n');
+      const oldSpool: string = path.join(logsDir, 'abandoned.operation');
+      await fs.promises.writeFile(oldSpool, 'abandoned output');
       const oldTime: Date = new Date(FIXED_NOW - 20 * MS_PER_DAY);
       await fs.promises.utimes(oldLog, oldTime, oldTime);
+      await fs.promises.utimes(oldSpool, oldTime, oldTime);
 
       // Create more than the cap of recent logs.
       for (let i: number = 0; i < 22; i++) {
@@ -232,6 +258,7 @@ describe('FileReporter', () => {
       );
       expect(remaining).not.toContain('old-1-build.log');
       expect(remaining.length).toBe(20);
+      expect(fs.existsSync(oldSpool)).toBe(false);
     });
   });
 
