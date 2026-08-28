@@ -154,6 +154,71 @@ describe(resolveRushReporterSelection.name, () => {
     ).toEqual(['node', 'rush', 'list', '--json', '--quiet']);
   });
 
+  it('preserves every argument at and after the pass-through separator', () => {
+    const passThroughArguments: string[] = [
+      '--',
+      '--reporter=tool-reporter',
+      '--reporter',
+      'tool-reporter',
+      '--output=tool-output',
+      '--output',
+      'tool-output',
+      '--log-level=tool-level',
+      '--log-level',
+      'tool-level',
+      '--quiet',
+      '-q',
+      '--verbose',
+      '--debug',
+      '-d',
+      '--json',
+      'ordinary',
+      'value with spaces'
+    ];
+
+    expect(
+      stripReporterValueControls([
+        'node',
+        'rush',
+        'build',
+        '--reporter=json',
+        '--output',
+        'json://./events.jsonl',
+        '--log-level=debug',
+        ...passThroughArguments
+      ])
+    ).toEqual(['node', 'rush', 'build', ...passThroughArguments]);
+    expect(
+      stripReporterValueControls(['node', 'rush', 'build', '--reporter', ...passThroughArguments])
+    ).toEqual(['node', 'rush', 'build', ...passThroughArguments]);
+  });
+
+  it('ignores reporter controls and aliases after the pass-through separator', () => {
+    expect(
+      resolve([
+        'build',
+        '--',
+        '--reporter=unknown',
+        '--output=not-a-url',
+        '--log-level=loud',
+        '--quiet',
+        '-q',
+        '--verbose',
+        '--debug',
+        '-d',
+        '--json',
+        'ordinary'
+      ])
+    ).toMatchObject({
+      reporter: 'legacy',
+      logLevel: 'normal',
+      outputs: [],
+      commandJson: false,
+      enabled: false,
+      reason: 'pre-major legacy default'
+    });
+  });
+
   it('applies CLI log-level controls before RUSH_LOG_LEVEL and rejects contradictions', () => {
     expect(
       resolve(['build', '--reporter=plaintext', '--verbose'], { RUSH_LOG_LEVEL: 'quiet' }).logLevel
@@ -252,7 +317,7 @@ describe(initializeRushReporterHostAsync.name, () => {
 
     const sink: IReporterEventSink = initialized.sink;
     emitCommandStarted(sink);
-    await initialized.host.manager.flushAsync();
+    await initialized.closeAsync();
 
     expect(initialized.selection.enabled).toBe(false);
     expect(output).toBe('');
@@ -276,7 +341,9 @@ describe(initializeRushReporterHostAsync.name, () => {
       });
 
       emitCommandStarted(initialized.sink);
-      await initialized.host.manager.closeAsync();
+      const firstClose: Promise<void> = initialized.closeAsync();
+      expect(initialized.closeAsync()).toBe(firstClose);
+      await firstClose;
 
       expect(JSON.parse(stdoutText).type).toBe('commandStarted');
       expect(JSON.parse(await fs.promises.readFile(outputPath, 'utf8')).type).toBe('commandStarted');

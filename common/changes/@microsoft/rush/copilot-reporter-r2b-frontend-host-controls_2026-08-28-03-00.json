@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add the pre-major ReporterHost and explicit global reporter controls while preserving legacy output by default.",
+      "comment": "Add the pre-major ReporterHost, separator-safe global controls, and deterministic reporter finalization while preserving legacy output by default.",
       "type": "patch"
     }
   ],
