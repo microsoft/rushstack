@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-reporter",
-      "comment": "Add deterministic AI reporter qualification gates and privacy-safe actionable context.",
+      "comment": "Add adversarial deterministic AI reporter qualification gates and privacy-safe actionable context.",
       "type": "minor"
     }
   ],

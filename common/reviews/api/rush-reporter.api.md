@@ -195,7 +195,7 @@ export function getLogLevelRank(level: ReporterLogLevel): number;
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
 
 // @beta
-export function getQualifiedAiReporterDecision(env: Record<string, string | undefined>, configuredAgentEnvironmentVariables: readonly string[], qualification: IAiReporterQualificationResult | undefined): IQualifiedAiReporterDecision;
+export function getQualifiedAiReporterDecision(env: Record<string, string | undefined>, configuredAgentEnvironmentVariables: readonly string[], qualification: IAiReporterQualificationResult | undefined, privacyPrerequisiteAccepted?: boolean): IQualifiedAiReporterDecision;
 
 // @beta
 export function getReporterMigrationPhase(id: ReporterMigrationPhaseId): IReporterMigrationPhase;
@@ -372,9 +372,15 @@ export interface IAiReporterQualificationThresholds {
     // (undocumented)
     readonly maximumAggregateAiToPlaintextPercent: number;
     // (undocumented)
+    readonly maximumCompactCaseAiOutputBytes: number;
+    // (undocumented)
     readonly maximumOutputBytesPerCase: number;
     // (undocumented)
+    readonly maximumPerCaseAiToBaselinePercent: number;
+    // (undocumented)
     readonly minimumActionableFailurePercent: number;
+    // (undocumented)
+    readonly minimumComparableBaselineBytes: number;
     // (undocumented)
     readonly minimumControlCases: number;
     // (undocumented)
@@ -818,7 +824,7 @@ export interface IQualifiedAiReporterDecision {
     // (undocumented)
     readonly eligible: boolean;
     // (undocumented)
-    readonly reason: 'RUSH_REPORTER=legacy' | 'agent not detected' | 'qualification unavailable' | 'qualification failed' | 'qualified';
+    readonly reason: 'RUSH_REPORTER=legacy' | 'agent not detected' | 'qualification unavailable' | 'qualification failed' | 'privacy prerequisite unavailable' | 'qualified';
     // (undocumented)
     readonly reporter?: 'ai';
 }

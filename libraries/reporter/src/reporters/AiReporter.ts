@@ -27,6 +27,8 @@ interface IAiDiagnosticState {
   readonly warningDiagnostics: ICollectedAiDiagnostic[];
   readonly errorCodes: Set<string>;
   readonly diagnosticCategoryCounts: { [category: string]: number };
+  suppressedSecretErrorCount: number;
+  suppressedSecretWarningCount: number;
   errorDiagnosticsTruncated: boolean;
   warningDiagnosticsTruncated: boolean;
   errorCount: number;
@@ -49,6 +51,8 @@ function createDiagnosticState(): IAiDiagnosticState {
     warningDiagnostics: [],
     errorCodes: new Set(),
     diagnosticCategoryCounts: {},
+    suppressedSecretErrorCount: 0,
+    suppressedSecretWarningCount: 0,
     errorDiagnosticsTruncated: false,
     warningDiagnosticsTruncated: false,
     errorCount: 0,
@@ -362,9 +366,6 @@ export class AiReporter implements IReporter {
   }
 
   private _collectDiagnostic(event: IReporterEventEnvelope<unknown>, state: IAiDiagnosticState): void {
-    if (event.privacy === 'secret') {
-      return;
-    }
     const diagnostic: IAiDiagnostic & {
       readonly causeDiagnosticIds?: readonly string[];
       readonly parameters?: Readonly<Record<string, IClassifiedDiagnosticValue>>;
@@ -372,6 +373,14 @@ export class AiReporter implements IReporter {
       readonly causeDiagnosticIds?: readonly string[];
       readonly parameters?: Readonly<Record<string, IClassifiedDiagnosticValue>>;
     };
+    if (event.privacy === 'secret') {
+      if (diagnostic.severity === 'error') {
+        state.suppressedSecretErrorCount++;
+      } else if (diagnostic.severity === 'warning') {
+        state.suppressedSecretWarningCount++;
+      }
+      return;
+    }
     if (diagnostic.category !== undefined) {
       state.diagnosticCategoryCounts[diagnostic.category] =
         (state.diagnosticCategoryCounts[diagnostic.category] ?? 0) + 1;
@@ -505,7 +514,12 @@ export class AiReporter implements IReporter {
     const cycleDiagnostics: IAiDiagnosticState = cycle.diagnostics;
     const errorCountWithoutFallback: number =
       this._globalDiagnostics.errorCount + cycleDiagnostics.errorCount;
-    const warningCount: number = this._globalDiagnostics.warningCount + cycleDiagnostics.warningCount;
+    const suppressedSecretErrorCount: number =
+      this._globalDiagnostics.suppressedSecretErrorCount + cycleDiagnostics.suppressedSecretErrorCount;
+    const suppressedSecretWarningCount: number =
+      this._globalDiagnostics.suppressedSecretWarningCount + cycleDiagnostics.suppressedSecretWarningCount;
+    const warningCount: number =
+      this._globalDiagnostics.warningCount + cycleDiagnostics.warningCount + suppressedSecretWarningCount;
     const collectedErrorDiagnostics: IAiDiagnostic[] = this._orderDiagnostics([
       ...this._globalDiagnostics.errorDiagnostics,
       ...cycleDiagnostics.errorDiagnostics
@@ -527,7 +541,10 @@ export class AiReporter implements IReporter {
     const errorDiagnostics: IAiDiagnostic[] = hasFallbackErrors
       ? fallbackDiagnostics
       : collectedErrorDiagnostics;
-    const errorCount: number = errorCountWithoutFallback + (hasFallbackErrors ? this._fallbackErrorCount : 0);
+    const errorCount: number =
+      errorCountWithoutFallback +
+      suppressedSecretErrorCount +
+      (hasFallbackErrors ? this._fallbackErrorCount : 0);
     const errorCodes: string[] = hasFallbackErrors
       ? ['RUSH_COMMAND_FAILED']
       : [...new Set([...this._globalDiagnostics.errorCodes, ...cycleDiagnostics.errorCodes])].sort();
@@ -574,8 +591,11 @@ export class AiReporter implements IReporter {
       truncated: hasFailures
         ? this._globalDiagnostics.errorDiagnosticsTruncated ||
           cycleDiagnostics.errorDiagnosticsTruncated ||
+          suppressedSecretErrorCount > 0 ||
           (hasFallbackErrors && this._fallbackErrorsTruncated)
-        : this._globalDiagnostics.warningDiagnosticsTruncated || cycleDiagnostics.warningDiagnosticsTruncated
+        : this._globalDiagnostics.warningDiagnosticsTruncated ||
+          cycleDiagnostics.warningDiagnosticsTruncated ||
+          suppressedSecretWarningCount > 0
     };
 
     if (this._logPath !== undefined) {

@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import {
+  AiReporter,
   AI_REPORTER_QUALIFICATION_THRESHOLDS,
   evaluateAiReporterQualification,
   formatAiReporterQualificationFailures,
   getQualifiedAiReporterDecision,
   runAiReporterQualificationCorpusAsync,
+  type IReporterEventEnvelope,
   type IAiReporterQualificationCaseResult,
   type IAiReporterQualificationResult
 } from '../index';
@@ -37,6 +39,9 @@ describe('AI reporter deterministic qualification corpus', () => {
     expect(AI_REPORTER_QUALIFICATION_THRESHOLDS).toMatchObject({
       minimumActionableFailurePercent: 100,
       maximumOutputBytesPerCase: 64 * 1024,
+      maximumCompactCaseAiOutputBytes: 2 * 1024,
+      minimumComparableBaselineBytes: 1024,
+      maximumPerCaseAiToBaselinePercent: 100,
       maximumAggregateAiToLegacyPercent: 50,
       maximumAggregateAiToPlaintextPercent: 50,
       deterministicRunCount: 3,
@@ -76,6 +81,31 @@ describe('AI reporter deterministic qualification corpus', () => {
       'actionability: actual=90.00, required=>= 100%; cases=bootstrap-unsupported-node'
     );
   });
+
+  it('fails with an actionable case list when the AI reporter omits its log reference', async () => {
+    const originalReport: typeof AiReporter.prototype.report = AiReporter.prototype.report;
+    const reportSpy: jest.SpiedFunction<typeof AiReporter.prototype.report> = jest
+      .spyOn(AiReporter.prototype, 'report')
+      .mockImplementation(function (this: AiReporter, event: IReporterEventEnvelope<unknown>): void {
+        if (event.type !== 'artifactAvailable') {
+          originalReport.call(this, event);
+        }
+      });
+    try {
+      const failed: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
+      expect(failed.passed).toBe(false);
+      expect(formatAiReporterQualificationFailures(failed)).toContain(
+        'full-log: actual=0.00, required=>= 100%; cases='
+      );
+      expect(
+        failed.cases.every(({ failures }) =>
+          failures.includes('full log path, permissions, completeness, or correlation invalid')
+        )
+      ).toBe(true);
+    } finally {
+      reportSpy.mockRestore();
+    }
+  });
 });
 
 describe('qualified AI reporter decision', () => {
@@ -90,28 +120,44 @@ describe('qualified AI reporter decision', () => {
     };
   }
 
-  it('recognizes built-in COPILOT_CLI and configured agent variables', () => {
+  it('recognizes agent variables without activating selection before the privacy prerequisite', () => {
     expect(getQualifiedAiReporterDecision({ COPILOT_CLI: '1' }, [], passedQualification())).toMatchObject({
       agentDetected: true,
-      eligible: true,
-      reporter: 'ai'
+      eligible: false,
+      reason: 'privacy prerequisite unavailable'
     });
     expect(
       getQualifiedAiReporterDecision({ MY_AGENT: 'yes' }, ['MY_AGENT'], passedQualification())
     ).toMatchObject({
       agentDetected: true,
+      eligible: false,
+      reason: 'privacy prerequisite unavailable'
+    });
+  });
+
+  it('returns a reusable AI decision only after qualification and privacy are accepted', () => {
+    expect(
+      getQualifiedAiReporterDecision({ COPILOT_CLI: '1' }, [], passedQualification(), true)
+    ).toMatchObject({
+      agentDetected: true,
       eligible: true,
-      reporter: 'ai'
+      reporter: 'ai',
+      reason: 'qualified'
     });
   });
 
   it('blocks selection when qualification is absent or failed', () => {
-    expect(getQualifiedAiReporterDecision({ COPILOT_CLI: '1' }, [], undefined)).toMatchObject({
+    expect(getQualifiedAiReporterDecision({ COPILOT_CLI: '1' }, [], undefined, true)).toMatchObject({
       eligible: false,
       reason: 'qualification unavailable'
     });
     expect(
-      getQualifiedAiReporterDecision({ COPILOT_CLI: '1' }, [], { ...passedQualification(), passed: false })
+      getQualifiedAiReporterDecision(
+        { COPILOT_CLI: '1' },
+        [],
+        { ...passedQualification(), passed: false },
+        true
+      )
     ).toMatchObject({
       eligible: false,
       reason: 'qualification failed'
@@ -120,7 +166,12 @@ describe('qualified AI reporter decision', () => {
 
   it('keeps RUSH_REPORTER=legacy authoritative even after qualification passes', () => {
     expect(
-      getQualifiedAiReporterDecision({ COPILOT_CLI: '1', RUSH_REPORTER: 'legacy' }, [], passedQualification())
+      getQualifiedAiReporterDecision(
+        { COPILOT_CLI: '1', RUSH_REPORTER: 'legacy' },
+        [],
+        passedQualification(),
+        true
+      )
     ).toMatchObject({
       agentDetected: true,
       eligible: false,

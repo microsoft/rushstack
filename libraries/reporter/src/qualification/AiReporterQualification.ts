@@ -22,6 +22,9 @@ export interface IAiReporterQualificationThresholds {
   readonly minimumControlCases: number;
   readonly minimumActionableFailurePercent: number;
   readonly maximumOutputBytesPerCase: number;
+  readonly maximumCompactCaseAiOutputBytes: number;
+  readonly minimumComparableBaselineBytes: number;
+  readonly maximumPerCaseAiToBaselinePercent: number;
   readonly maximumAggregateAiToLegacyPercent: number;
   readonly maximumAggregateAiToPlaintextPercent: number;
   readonly deterministicRunCount: number;
@@ -41,6 +44,9 @@ export const AI_REPORTER_QUALIFICATION_THRESHOLDS: IAiReporterQualificationThres
   minimumControlCases: 2,
   minimumActionableFailurePercent: 100,
   maximumOutputBytesPerCase: REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes,
+  maximumCompactCaseAiOutputBytes: 2 * 1024,
+  minimumComparableBaselineBytes: 1024,
+  maximumPerCaseAiToBaselinePercent: 100,
   maximumAggregateAiToLegacyPercent: 50,
   maximumAggregateAiToPlaintextPercent: 50,
   deterministicRunCount: 3,
@@ -103,7 +109,11 @@ function percent(passing: number, total: number): number {
 }
 
 function ratioPercent(numerator: number, denominator: number): number {
-  return denominator === 0 ? Number.POSITIVE_INFINITY : (numerator / denominator) * 100;
+  return denominator === 0
+    ? numerator === 0
+      ? 0
+      : Number.MAX_SAFE_INTEGER
+    : (numerator / denominator) * 100;
 }
 
 function getHighestRatioCaseNames(
@@ -118,6 +128,31 @@ function getHighestRatioCaseNames(
     )
     .slice(0, 3)
     .map(({ name }) => name);
+}
+
+function createPerCaseRatioGate(
+  id: string,
+  cases: readonly IAiReporterQualificationCaseResult[],
+  getDenominator: (testCase: IAiReporterQualificationCaseResult) => number,
+  minimumComparableBaselineBytes: number,
+  maximumPercent: number
+): IAiReporterQualificationGateResult {
+  const comparableCases: readonly IAiReporterQualificationCaseResult[] = cases.filter(
+    (testCase) => getDenominator(testCase) >= minimumComparableBaselineBytes
+  );
+  const failedCases: string[] = comparableCases
+    .filter((testCase) => ratioPercent(testCase.aiOutputBytes, getDenominator(testCase)) > maximumPercent)
+    .map(({ name }) => name);
+  return {
+    id,
+    passed: failedCases.length === 0,
+    actual: Math.max(
+      0,
+      ...comparableCases.map((testCase) => ratioPercent(testCase.aiOutputBytes, getDenominator(testCase)))
+    ),
+    threshold: `<= ${maximumPercent}% when baseline >= ${minimumComparableBaselineBytes} bytes`,
+    failedCases
+  };
 }
 
 function createPercentageGate(
@@ -187,6 +222,47 @@ export function evaluateAiReporterQualification(
         .filter(({ aiOutputBytes }) => aiOutputBytes > thresholds.maximumOutputBytesPerCase)
         .map(({ name }) => name)
     },
+    {
+      id: 'size.compact-case',
+      passed: cases.every(
+        ({ aiOutputBytes, legacyOutputBytes, plaintextOutputBytes }) =>
+          Math.max(legacyOutputBytes, plaintextOutputBytes) >= thresholds.minimumComparableBaselineBytes ||
+          aiOutputBytes <= thresholds.maximumCompactCaseAiOutputBytes
+      ),
+      actual: Math.max(
+        0,
+        ...cases
+          .filter(
+            ({ legacyOutputBytes, plaintextOutputBytes }) =>
+              Math.max(legacyOutputBytes, plaintextOutputBytes) < thresholds.minimumComparableBaselineBytes
+          )
+          .map(({ aiOutputBytes }) => aiOutputBytes)
+      ),
+      threshold:
+        `<= ${thresholds.maximumCompactCaseAiOutputBytes} bytes when both baselines are below ` +
+        `${thresholds.minimumComparableBaselineBytes} bytes`,
+      failedCases: cases
+        .filter(
+          ({ aiOutputBytes, legacyOutputBytes, plaintextOutputBytes }) =>
+            Math.max(legacyOutputBytes, plaintextOutputBytes) < thresholds.minimumComparableBaselineBytes &&
+            aiOutputBytes > thresholds.maximumCompactCaseAiOutputBytes
+        )
+        .map(({ name }) => name)
+    },
+    createPerCaseRatioGate(
+      'size.per-case-vs-legacy',
+      cases,
+      ({ legacyOutputBytes }) => legacyOutputBytes,
+      thresholds.minimumComparableBaselineBytes,
+      thresholds.maximumPerCaseAiToBaselinePercent
+    ),
+    createPerCaseRatioGate(
+      'size.per-case-vs-plaintext',
+      cases,
+      ({ plaintextOutputBytes }) => plaintextOutputBytes,
+      thresholds.minimumComparableBaselineBytes,
+      thresholds.maximumPerCaseAiToBaselinePercent
+    ),
     {
       id: 'size.vs-legacy',
       passed: aggregateAiToLegacyPercent <= thresholds.maximumAggregateAiToLegacyPercent,
@@ -274,6 +350,7 @@ export interface IQualifiedAiReporterDecision {
     | 'agent not detected'
     | 'qualification unavailable'
     | 'qualification failed'
+    | 'privacy prerequisite unavailable'
     | 'qualified';
 }
 
@@ -290,7 +367,8 @@ export interface IQualifiedAiReporterDecision {
 export function getQualifiedAiReporterDecision(
   env: Record<string, string | undefined>,
   configuredAgentEnvironmentVariables: readonly string[],
-  qualification: IAiReporterQualificationResult | undefined
+  qualification: IAiReporterQualificationResult | undefined,
+  privacyPrerequisiteAccepted: boolean = false
 ): IQualifiedAiReporterDecision {
   const agentDetected: boolean = detectAgent(env, configuredAgentEnvironmentVariables);
   if (isLegacyEmergencyFallbackRequested(env)) {
@@ -304,6 +382,9 @@ export function getQualifiedAiReporterDecision(
   }
   if (!qualification.passed) {
     return { agentDetected: true, eligible: false, reason: 'qualification failed' };
+  }
+  if (!privacyPrerequisiteAccepted) {
+    return { agentDetected: true, eligible: false, reason: 'privacy prerequisite unavailable' };
   }
   return { agentDetected: true, eligible: true, reporter: 'ai', reason: 'qualified' };
 }

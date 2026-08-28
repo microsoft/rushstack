@@ -9,12 +9,13 @@ This package is released as a public beta. Exported contracts may change before 
 The network-free qualification corpus runs representative bootstrap/version, configuration, input,
 dependency-tool, operation, cache, network/auth, plugin, cancellation, and internal failures plus
 successful and warning-only controls through the AI, detailed plaintext, legacy, and full-log reporters.
+Scenario-specific external output is included only where the real failure or control would produce it.
 
 | Gate | Blocking threshold |
 | --- | --- |
 | Failure/control coverage | At least 10 failure cases and 2 successful controls |
 | Actionability | 100% of failures retain stable code, category, context, and remediation |
-| Output size | At most 64 KiB per case; aggregate AI bytes at most 50% of legacy and plaintext |
+| Output size | At most 64 KiB per case; compact cases at most 2 KiB; AI no larger than comparable per-case baselines; aggregate AI bytes at most 50% of legacy and plaintext |
 | Determinism | Byte-identical normalized AI output across 3 runs |
 | Privacy | 100% secret redaction and no private producer identity leakage |
 | Full log | 100% absolute, existing, owner-only where supported, complete, and failure-correlated |
@@ -23,8 +24,9 @@ successful and warning-only controls through the AI, detailed plaintext, legacy,
 Run `rushx build && node scripts/runAiReporterQualification.js` from this project to print the
 machine-readable result. Machine-specific paths are normalized before hashing and are not stored. Passing
 these gates only produces a reusable qualification decision; it does not enable environment-based automatic
-reporter selection. The pre-major Rush frontend remains explicit/repository-opt-in, and
-`RUSH_REPORTER=legacy` remains authoritative.
+reporter selection. That decision also requires the separate telemetry privacy prerequisite to be accepted.
+The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
+authoritative.
 
 ## Links
 

@@ -23,10 +23,19 @@ import {
 const FIXED_TIMESTAMP: string = '2026-08-28T08:45:34.000Z';
 const FIXED_TIME_MS: number = Date.parse(FIXED_TIMESTAMP);
 const FIXED_PID: number = 4242;
-const RAW_EVIDENCE: string = `deterministic external evidence ${'x'.repeat(4096)}\n`;
 const CLASSIFIED_SECRET: string = 'qualification-fake-secret-token';
+const CLASSIFIED_SECRET_PRODUCER: string = '@secret/qualification-fixture';
+const CLASSIFIED_SECRET_COMPONENT: string = 'SecretQualificationFixture';
 const PRIVATE_PRODUCER: string = '@private/example-rush-plugin';
 const PRIVATE_COMPONENT: string = 'PrivatePluginImplementation';
+
+function createExternalOutput(lines: readonly string[], repetitions: number): string {
+  const output: string[] = [];
+  for (let index: number = 0; index < repetitions; index++) {
+    output.push(lines[index % lines.length].split('{index}').join(String(index + 1)));
+  }
+  return `${output.join('\n')}\n`;
+}
 
 interface ICorpusDiagnostic {
   readonly code: string;
@@ -54,6 +63,7 @@ interface ICorpusCase {
   readonly scenario: string;
   readonly expectedResult: 'succeeded' | 'failed';
   readonly diagnostic?: ICorpusDiagnostic;
+  readonly externalOutput?: string;
   readonly operationStatus?: 'success' | 'failure' | 'aborted' | 'fromCache';
   readonly warningOnly?: boolean;
 }
@@ -131,6 +141,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'dependency-package-manager',
     scenario: 'pnpm install exits unsuccessfully',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'ERR_PNPM_FETCH_401 GET https://registry.example.test/@example/pkg: Unauthorized - 401',
+        'Progress: resolved {index}, reused 0, downloaded 0, added 0',
+        'The authorization header was rejected while resolving @example/pkg.'
+      ],
+      60
+    ),
     operationStatus: 'failure',
     diagnostic: {
       code: 'RUSH_DEPENDENCY_TOOL_FAILED',
@@ -154,6 +172,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'operation-build-failure',
     scenario: 'a project build operation fails',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'src/example-{index}.ts(12,7): error TS2322: Type string is not assignable to type number.',
+        'Found 1 error in src/example-{index}.ts',
+        'Project @example/app failed during the _phase:build operation.'
+      ],
+      66
+    ),
     operationStatus: 'failure',
     diagnostic: {
       code: 'RUSH_OPERATION_FAILED',
@@ -175,6 +201,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'cache-restore-failure',
     scenario: 'a build-cache restore is invalid and requires a local rebuild',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'Build cache entry cache-entry-42 failed integrity validation for @example/cache-consumer.',
+        'Expected archive member lib/index.js but the restored file was missing.',
+        'Discarding invalid cache entry and requiring a local rebuild ({index}).'
+      ],
+      30
+    ),
     operationStatus: 'failure',
     diagnostic: {
       code: 'RUSH_OPERATION_FAILED',
@@ -197,6 +231,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'network-auth-unauthorized',
     scenario: 'the registry returns an authentication-shaped failure',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'GET https://registry.example.test/@example/private returned 401 Unauthorized.',
+        'The registry challenge did not include credentials; refresh the configured authentication.',
+        'Request attempt {index} failed without exposing an authorization value.'
+      ],
+      24
+    ),
     diagnostic: {
       code: 'RUSH_NETWORK_AUTH_UNAUTHORIZED',
       category: 'network-auth',
@@ -218,6 +260,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'plugin-api-incompatible',
     scenario: 'a private plugin is incompatible with the current Rush API',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'Loading the configured Rush plugin from the repository plugin manifest.',
+        'Validating plugin API compatibility before invoking plugin hooks ({index}).',
+        'Plugin activation stopped because the declared Rush version range is incompatible.'
+      ],
+      15
+    ),
     diagnostic: {
       code: 'RUSH_PLUGIN_API_INCOMPATIBLE',
       category: 'configuration',
@@ -243,6 +293,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'logical-cancellation',
     scenario: 'a command is cancelled and reports an aborted operation',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'Building @example/app: completed work item {index}.',
+        'Cancellation requested; waiting for the active child process to stop.',
+        'The _phase:build operation exited before producing final outputs.'
+      ],
+      24
+    ),
     operationStatus: 'aborted',
     diagnostic: {
       code: 'RUSH_COMMAND_FAILED',
@@ -265,6 +323,14 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'internal-unexpected-error',
     scenario: 'Rush reports an unexpected internal failure',
     expectedResult: 'failed',
+    externalOutput: createExternalOutput(
+      [
+        'Unexpected internal failure while finalizing the command graph.',
+        'Diagnostic incident incident-42 was recorded for correlation.',
+        'See the owner-only full-detail log for stack frame {index}.'
+      ],
+      30
+    ),
     diagnostic: {
       code: 'RUSH_INTERNAL_UNEXPECTED',
       category: 'internal',
@@ -286,12 +352,28 @@ const CORPUS: readonly ICorpusCase[] = [
     name: 'success-no-warning',
     scenario: 'a successful operation emits no warnings',
     expectedResult: 'succeeded',
+    externalOutput: createExternalOutput(
+      [
+        'Building @example/app source file {index}.',
+        'Emitted lib/example-{index}.js and lib/example-{index}.d.ts.',
+        'Completed incremental compilation work item {index}.'
+      ],
+      42
+    ),
     operationStatus: 'success'
   },
   {
     name: 'success-warning-only',
     scenario: 'a successful command emits one bounded warning',
     expectedResult: 'succeeded',
+    externalOutput: createExternalOutput(
+      [
+        'Restored @example/app output group {index} from the local build cache.',
+        'Validated cached output metadata for work item {index}.',
+        'The deprecated option warning is represented by a structured diagnostic.'
+      ],
+      24
+    ),
     operationStatus: 'fromCache',
     warningOnly: true,
     diagnostic: {
@@ -396,21 +478,23 @@ function createEvents(testCase: ICorpusCase, logPath: string): IReporterEventEnv
       }
     );
   }
-  add(
-    'externalOutput',
-    { stream: 'stderr', text: RAW_EVIDENCE },
-    testCase.operationStatus
-      ? {
-          privacy: 'local-sensitive',
-          scope: {
-            commandName: 'build',
-            operationId: 'fixture#build',
-            projectName: '@example/app',
-            phaseName: '_phase:build'
+  if (testCase.externalOutput !== undefined) {
+    add(
+      'externalOutput',
+      { stream: 'stderr', text: testCase.externalOutput },
+      testCase.operationStatus
+        ? {
+            privacy: 'local-sensitive',
+            scope: {
+              commandName: 'build',
+              operationId: 'fixture#build',
+              projectName: '@example/app',
+              phaseName: '_phase:build'
+            }
           }
-        }
-      : { privacy: 'local-sensitive', scope: { commandName: 'build' } }
-  );
+        : { privacy: 'local-sensitive', scope: { commandName: 'build' } }
+    );
+  }
   if (testCase.operationStatus) {
     add(
       'operationStatusChanged',
@@ -471,8 +555,8 @@ function createEvents(testCase: ICorpusCase, logPath: string): IReporterEventEnv
     { name: 'private.fixture.secret', payload: { token: CLASSIFIED_SECRET } },
     {
       privacy: 'secret',
-      sourcePackage: PRIVATE_PRODUCER,
-      sourceComponent: PRIVATE_COMPONENT,
+      sourcePackage: CLASSIFIED_SECRET_PRODUCER,
+      sourceComponent: CLASSIFIED_SECRET_COMPONENT,
       scope: { commandName: 'build' }
     }
   );
@@ -560,6 +644,13 @@ async function runCaseAsync(
     : undefined;
   const expectedContextKeys: readonly string[] = diagnostic ? Object.keys(diagnostic.parameters).sort() : [];
   const actualContextKeys: readonly string[] = Object.keys(matchingDiagnostic?.context ?? {}).sort();
+  const contextValuesMatch: boolean = diagnostic
+    ? Object.entries(diagnostic.parameters).every(([name, parameter]) => {
+        const expectedValue: string | number | boolean =
+          parameter.privacy === 'public' ? parameter.value : `[${parameter.privacy}]`;
+        return matchingDiagnostic?.context?.[name] === expectedValue;
+      })
+    : true;
   const actionable: boolean =
     testCase.expectedResult === 'succeeded'
       ? true
@@ -570,17 +661,20 @@ async function runCaseAsync(
             matchingDiagnostic?.category === diagnostic.category &&
             matchingDiagnostic.summaryKey === diagnostic.summaryKey &&
             expectedContextKeys.every((key) => actualContextKeys.includes(key)) &&
+            contextValuesMatch &&
             matchingDiagnostic.remediation?.some(({ command, documentationUrl }) =>
               Boolean(command || documentationUrl)
             )
         );
 
   const artifact: IFileReporterArtifact = fileReporter.getArtifact();
-  const logExists: boolean = artifact.path !== undefined && fs.existsSync(artifact.path);
-  const logContent: string = logExists ? await fs.promises.readFile(artifact.path!, 'utf8') : '';
+  const aiLogPath: string | undefined = final?.log?.path;
+  const logExists: boolean = aiLogPath !== undefined && fs.existsSync(aiLogPath);
+  const logContent: string =
+    logExists && aiLogPath !== undefined ? await fs.promises.readFile(aiLogPath, 'utf8') : '';
   const ownerOnly: boolean =
     process.platform === 'win32' ||
-    (logExists && (await fs.promises.stat(artifact.path!)).mode % 0o1000 === 0o600);
+    (logExists && aiLogPath !== undefined && (await fs.promises.stat(aiLogPath)).mode % 0o1000 === 0o600);
   const failureCorrelated: boolean =
     testCase.expectedResult === 'succeeded' ||
     Boolean(
@@ -589,22 +683,36 @@ async function runCaseAsync(
         logContent.includes(`${testCase.name}-diagnostic`) &&
         logContent.includes(`${testCase.name}-session`)
     );
+  const localSensitiveProducerPreserved: boolean =
+    diagnostic?.sourcePackage === undefined ||
+    (logContent.includes(diagnostic.sourcePackage) &&
+      (diagnostic.sourceComponent === undefined || logContent.includes(diagnostic.sourceComponent)));
   const fullLogValid: boolean = Boolean(
-    artifact.available &&
+    final?.log &&
+      final.log.path === artifact.path &&
+      final.log.format === 'plaintext' &&
+      final.log.complete === artifact.complete &&
+      artifact.available &&
       artifact.complete &&
-      artifact.path &&
-      path.isAbsolute(artifact.path) &&
+      aiLogPath &&
+      path.isAbsolute(aiLogPath) &&
       logExists &&
       ownerOnly &&
+      logContent.includes('"type":"commandStarted"') &&
       logContent.includes('"type":"commandResult"') &&
-      logContent.includes(RAW_EVIDENCE.trim()) &&
-      failureCorrelated
+      logContent.includes('"type":"sessionCompleted"') &&
+      (testCase.externalOutput === undefined || logContent.includes(testCase.externalOutput.trim())) &&
+      failureCorrelated &&
+      localSensitiveProducerPreserved
   );
-  const combinedPresentedOutput: string = `${aiOutput}\n${plaintextOutput}\n${legacyOutput}\n${logContent}`;
+  const machinePresentedOutput: string = `${aiOutput}\n${plaintextOutput}\n${legacyOutput}`;
+  const allLocalOutput: string = `${machinePresentedOutput}\n${logContent}`;
   const privacySafe: boolean =
-    !combinedPresentedOutput.includes(CLASSIFIED_SECRET) &&
-    !combinedPresentedOutput.includes(PRIVATE_PRODUCER) &&
-    !combinedPresentedOutput.includes(PRIVATE_COMPONENT);
+    !allLocalOutput.includes(CLASSIFIED_SECRET) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_PRODUCER) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_COMPONENT) &&
+    !machinePresentedOutput.includes(PRIVATE_PRODUCER) &&
+    !machinePresentedOutput.includes(PRIVATE_COMPONENT);
   const warningContractValid: boolean =
     testCase.expectedResult === 'failed'
       ? final?.warningCount === 1 && final.diagnostics.every(({ severity }) => severity === 'error')

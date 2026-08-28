@@ -74,28 +74,28 @@ describe('JsonReporter', () => {
     expect(Buffer.byteLength(output.trim(), 'utf8')).toBeLessThanOrEqual(512);
   });
 
-  it('does not expose a private producer identity in an oversized redacted record', () => {
+  it('does not expose a secret diagnostic value in an oversized redacted record', () => {
     let output: string = '';
     const reporter: JsonReporter = new JsonReporter({
       write: (text: string) => (output += text),
       maxRecordBytes: 512
     });
     reporter.report({
-      ...ev('extension', { name: 'private.fixture', payload: 'x'.repeat(1000) }),
-      source: {
-        packageName: '@private/example-rush-plugin',
-        packageVersion: '1.0.0',
-        component: 'PrivatePluginImplementation'
-      },
+      ...ev('diagnosticEmitted', {
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        parameters: {
+          token: { value: 'qualification-fake-secret-token', privacy: 'secret' },
+          detail: { value: 'x'.repeat(1000), privacy: 'public' }
+        }
+      }),
       privacy: 'local-sensitive'
     });
 
-    expect(output).not.toContain('@private/example-rush-plugin');
-    expect(output).not.toContain('PrivatePluginImplementation');
+    expect(output).not.toContain('qualification-fake-secret-token');
     expect(parseLines(output)[0]).toMatchObject({
       source: {
-        packageName: '[private-producer]',
-        packageVersion: '[private-version]'
+        packageName: '@microsoft/rush-lib',
+        packageVersion: '5.177.2'
       },
       payload: {
         name: 'rush.reporter.record-too-large'
@@ -511,6 +511,56 @@ describe('AiReporter', () => {
         token: '[secret]'
       }
     });
+    expect(JSON.stringify(final)).not.toContain('qualification-fake-secret-token');
+  });
+
+  it('counts secret diagnostics while marking their omitted details as truncated', () => {
+    const { final } = run([
+      {
+        ...ev('diagnosticEmitted', {
+          diagnosticId: 'secret-error',
+          code: 'RUSH_INTERNAL_UNEXPECTED',
+          category: 'internal',
+          severity: 'error',
+          summary: 'qualification-fake-secret-token'
+        }),
+        privacy: 'secret'
+      },
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCount).toBe(1);
+    expect(final.errorCodes).toEqual([]);
+    expect(final.diagnosticCategoryCounts).toEqual({});
+    expect(final.diagnostics).toEqual([]);
+    expect(final.truncated).toBe(true);
+    expect(JSON.stringify(final)).not.toContain('qualification-fake-secret-token');
+  });
+
+  it('preserves fallback errors when secret diagnostics are also suppressed', () => {
+    const { final } = run([
+      {
+        ...ev('diagnosticEmitted', {
+          diagnosticId: 'secret-error',
+          code: 'RUSH_INTERNAL_UNEXPECTED',
+          category: 'internal',
+          severity: 'error',
+          summary: 'qualification-fake-secret-token'
+        }),
+        privacy: 'secret'
+      },
+      ev('messageEmitted', { severity: 'error', text: 'First visible fallback error.' }),
+      ev('messageEmitted', { severity: 'error', text: 'Second visible fallback error.' }),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCount).toBe(3);
+    expect(final.errorCodes).toEqual(['RUSH_COMMAND_FAILED']);
+    expect(final.diagnostics.map(({ summary }) => summary)).toEqual([
+      'First visible fallback error.',
+      'Second visible fallback error.'
+    ]);
+    expect(final.truncated).toBe(true);
     expect(JSON.stringify(final)).not.toContain('qualification-fake-secret-token');
   });
 

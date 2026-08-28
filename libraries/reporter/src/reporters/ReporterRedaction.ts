@@ -64,9 +64,6 @@ export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IRe
       }
       redactedDiagnostic.parameters = parameters;
     }
-    if (event.privacy !== 'public') {
-      delete redactedDiagnostic.source;
-    }
     payload = redactedDiagnostic;
   }
   return { ...event, source, payload };
