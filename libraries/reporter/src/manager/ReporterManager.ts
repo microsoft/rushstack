@@ -276,6 +276,20 @@ export class ReporterManager implements IReporterEventSink {
   }
 
   /**
+   * Flushes reporters and reports whether every lifecycle action completed before the timeout.
+   *
+   * @internal
+   */
+  public async _flushAndConfirmAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<boolean> {
+    return await this._settleAndConfirmAsync(async (entry: IReporterEntry): Promise<void> => {
+      await entry.drainPromise;
+      if (!entry.disabled) {
+        await entry.reporter.flushAsync();
+      }
+    }, timeoutMs);
+  }
+
+  /**
    * Performs a best-effort flush suitable for signal termination.
    *
    * @remarks
@@ -425,6 +439,26 @@ export class ReporterManager implements IReporterEventSink {
 
     try {
       await Promise.race([work, timeout]);
+    } finally {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+    }
+  }
+
+  private async _settleAndConfirmAsync(
+    action: (entry: IReporterEntry) => Promise<void>,
+    timeoutMs: number
+  ): Promise<boolean> {
+    const work: Promise<true> = Promise.all(
+      this._entries.map((entry: IReporterEntry) => this._scheduleLifecycleAction(entry, action))
+    ).then(() => true as const);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout: Promise<false> = new Promise<false>((resolve: (value: false) => void) => {
+      timer = setTimeout(() => resolve(false), timeoutMs);
+    });
+    try {
+      return await Promise.race([work, timeout]);
     } finally {
       if (timer !== undefined) {
         clearTimeout(timer);

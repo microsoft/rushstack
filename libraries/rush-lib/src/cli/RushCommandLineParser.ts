@@ -103,6 +103,7 @@ class ReporterTerminalProvider implements ITerminalProvider {
   private readonly _bufferedMessages: Array<{
     severity: ReporterMessageSeverity;
     text: string;
+    minimumLogLevel?: 'verbose' | 'debug';
   }> = [];
   private _reporter: IScopedReporter | undefined;
 
@@ -123,9 +124,14 @@ class ReporterTerminalProvider implements ITerminalProvider {
       return;
     }
 
-    const message: { severity: ReporterMessageSeverity; text: string } = {
+    const message: {
+      severity: ReporterMessageSeverity;
+      text: string;
+      minimumLogLevel?: 'verbose' | 'debug';
+    } = {
       severity: this._toReporterSeverity(severity),
-      text: data
+      text: data,
+      ...this._getMinimumLogLevel(severity)
     };
     if (this._reporter) {
       this._reporter.emitMessage({ ...message, privacy: 'local-sensitive' });
@@ -146,6 +152,17 @@ class ReporterTerminalProvider implements ITerminalProvider {
         return 'debug';
       default:
         return 'info';
+    }
+  }
+
+  private _getMinimumLogLevel(severity: TerminalProviderSeverity): { minimumLogLevel?: 'verbose' | 'debug' } {
+    switch (severity) {
+      case TerminalProviderSeverity.verbose:
+        return { minimumLogLevel: 'verbose' };
+      case TerminalProviderSeverity.debug:
+        return { minimumLogLevel: 'debug' };
+      default:
+        return {};
     }
   }
 }

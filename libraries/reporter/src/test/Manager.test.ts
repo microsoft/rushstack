@@ -372,6 +372,21 @@ describe('ReporterManager flush and close', () => {
     expect(true).toBe(true);
   });
 
+  it('reports whether a flush completed before its timeout', async () => {
+    let resolveFlush: (() => void) | undefined;
+    const reporter: RecordingReporter = new RecordingReporter('confirm');
+    reporter.flushAsync = () =>
+      new Promise<void>((resolve: () => void) => {
+        resolveFlush = resolve;
+      });
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    await expect(manager._flushAndConfirmAsync(10)).resolves.toBe(false);
+    resolveFlush?.();
+  });
+
   it('does not overlap close with a timed-out flush', async () => {
     let resolveFlush: (() => void) | undefined;
     let closeCount: number = 0;

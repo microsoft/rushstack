@@ -108,6 +108,7 @@ describe('AiReporter', () => {
     for (const event of events) {
       reporter.report(event);
     }
+    void reporter.closeAsync();
     const records: Record<string, unknown>[] = parseLines(output);
     return { records, final: records[records.length - 1] as unknown as IAiFinalRecord };
   }
@@ -152,6 +153,25 @@ describe('AiReporter', () => {
         summary: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
       })
     ]);
+  });
+
+  it('counts fallback errors even when detailed diagnostics are disabled', async () => {
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({
+      write: (text: string) => (output += text),
+      maxDetailedDiagnostics: 0
+    });
+    reporter.report(ev('messageEmitted', { severity: 'error', text: 'first error' }));
+    reporter.report(ev('messageEmitted', { severity: 'error', text: 'second error' }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    const final: IAiFinalRecord = parseLines(output).at(-1)! as unknown as IAiFinalRecord;
+    expect(final.errorCount).toBe(2);
+    expect(final.errorCodes).toEqual(['RUSH_COMMAND_FAILED']);
+    expect(final.diagnosticCategoryCounts.command).toBe(2);
+    expect(final.diagnostics).toEqual([]);
+    expect(final.truncated).toBe(true);
   });
 
   it('emits a status record and a bounded final record with scope, codes, and log', () => {
@@ -235,6 +255,7 @@ describe('AiReporter', () => {
     for (const event of events) {
       reporter.report(event);
     }
+    void reporter.closeAsync();
     const finalLine: string = output.trim().split('\n').pop() ?? '';
     expect(Buffer.byteLength(finalLine, 'utf8')).toBeLessThanOrEqual(512);
     expect((JSON.parse(finalLine) as IAiFinalRecord).truncated).toBe(true);
@@ -251,6 +272,7 @@ describe('AiReporter', () => {
     for (const event of events) {
       reporter.report(event);
     }
+    void reporter.closeAsync();
 
     const finalLine: string = output.trim().split('\n').pop()!;
     const final: IAiFinalRecord = JSON.parse(finalLine) as IAiFinalRecord;
@@ -299,6 +321,7 @@ describe('AiReporter', () => {
     reporter.report(ev('commandStarted', { commandName: 'build' }));
     reporter.report(ev('externalOutput', { stream: 'stdout', text: 'SENSITIVE-RAW-abc' }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    void reporter.closeAsync();
 
     expect(output).not.toContain('SENSITIVE-RAW-abc');
     // Every emitted line parses as JSON.

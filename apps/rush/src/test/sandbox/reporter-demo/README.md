@@ -11,8 +11,9 @@ The script runs the same `rush build --only @rushstack/rush-reporter` operation 
 plaintext, JSON, AI, file, and quiet modes, plus parser failure, help, and command-specific JSON cases.
 It verifies payload-only machine stdout, one visible writer, ordered/lossless plaintext grouping from a
 same-invocation JSON sidecar, final artifact completeness, owner-only log permissions, failure flushing,
-AI parser-error context, command-JSON ownership, and the `RUSH_REPORTER=legacy` rollback transcript. Captured
-stdout/stderr files are written to a temporary folder.
+AI parser-error context, command-JSON ownership, CI plaintext output, cache-path output, normalized
+`RUSH_TEMP_FOLDER` log placement, matching purge-path selection, and the `RUSH_REPORTER=legacy` rollback
+transcript. Captured stdout/stderr files are written to a temporary folder.
 
 For an individual invocation:
 

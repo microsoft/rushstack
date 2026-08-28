@@ -129,6 +129,7 @@ export class AiReporter implements IReporter {
   private _logFormat: string | undefined;
   private _artifactComplete: boolean;
   private _finalEmitted: boolean;
+  private _pendingResult: { succeeded: boolean; exitCode: number } | undefined;
 
   public constructor(options: IAiReporterOptions) {
     this._write = options.write;
@@ -163,6 +164,7 @@ export class AiReporter implements IReporter {
     this._logFormat = undefined;
     this._artifactComplete = true;
     this._finalEmitted = false;
+    this._pendingResult = undefined;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -255,13 +257,13 @@ export class AiReporter implements IReporter {
           succeeded: boolean;
           exitCode: number;
         };
-        this._emitFinal(payload.succeeded, payload.exitCode);
+        this._pendingResult = payload;
         break;
       }
       case 'sessionCompleted': {
-        if (!this._finalEmitted) {
+        if (!this._pendingResult) {
           const exitCode: number = (event.payload as { exitCode?: number }).exitCode ?? 1;
-          this._emitFinal(exitCode === 0, exitCode);
+          this._pendingResult = { succeeded: exitCode === 0, exitCode };
         }
         break;
       }
@@ -276,7 +278,11 @@ export class AiReporter implements IReporter {
 
   public async closeAsync(): Promise<void> {
     if (!this._finalEmitted) {
-      this._emitFinal(false, 1);
+      const result: { succeeded: boolean; exitCode: number } = this._pendingResult ?? {
+        succeeded: false,
+        exitCode: 1
+      };
+      this._emitFinal(result.succeeded, result.exitCode);
     }
   }
 
@@ -330,17 +336,17 @@ export class AiReporter implements IReporter {
             summary
           }))
         : [];
-    const errorDiagnostics: IAiDiagnostic[] =
-      fallbackDiagnostics.length > 0 ? fallbackDiagnostics : this._errorDiagnostics;
-    const errorCount: number =
-      this._errorCount + (fallbackDiagnostics.length > 0 ? this._fallbackErrorCount : 0);
-    const errorCodes: string[] =
-      fallbackDiagnostics.length > 0 ? ['RUSH_COMMAND_FAILED'] : [...this._errorCodes].sort();
+    const hasFallbackErrors: boolean = this._errorCount === 0 && this._fallbackErrorCount > 0;
+    const errorDiagnostics: IAiDiagnostic[] = hasFallbackErrors
+      ? fallbackDiagnostics
+      : this._errorDiagnostics;
+    const errorCount: number = this._errorCount + (hasFallbackErrors ? this._fallbackErrorCount : 0);
+    const errorCodes: string[] = hasFallbackErrors ? ['RUSH_COMMAND_FAILED'] : [...this._errorCodes].sort();
     const diagnosticCategoryCounts: { [category: string]: number } = {
       ...this._diagnosticCategoryCounts
     };
-    if (fallbackDiagnostics.length > 0) {
-      diagnosticCategoryCounts.command = (diagnosticCategoryCounts.command ?? 0) + fallbackDiagnostics.length;
+    if (hasFallbackErrors) {
+      diagnosticCategoryCounts.command = (diagnosticCategoryCounts.command ?? 0) + this._fallbackErrorCount;
     }
     const hasFailures: boolean = !succeeded || errorCount > 0;
     // When failures exist, warnings are represented by counts only. Warning-only
@@ -374,7 +380,7 @@ export class AiReporter implements IReporter {
       warningCount: this._warningCount,
       operationCounts: { ...this._operationCounts },
       truncated: hasFailures
-        ? this._errorDiagnosticsTruncated || (fallbackDiagnostics.length > 0 && this._fallbackErrorsTruncated)
+        ? this._errorDiagnosticsTruncated || (hasFallbackErrors && this._fallbackErrorsTruncated)
         : this._warningDiagnosticsTruncated
     };
 

@@ -5,7 +5,13 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { IReporterEventSink } from '@rushstack/rush-reporter';
+import {
+  ReporterManager,
+  type IReporter,
+  type IReporterContext,
+  type IReporterEventEnvelope,
+  type IReporterEventSink
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -156,6 +162,23 @@ describe(resolveRushReporterSelection.name, () => {
     });
   });
 
+  it('owns standalone log-level controls when the repository experiment is enabled', () => {
+    expect(resolve(['build', '--log-level=debug'], {}, false, true)).toMatchObject({
+      reporter: 'plaintext',
+      logLevel: 'debug',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: ['--log-level']
+    });
+    expect(resolve(['build'], { RUSH_LOG_LEVEL: 'debug' }, false, true)).toMatchObject({
+      reporter: 'plaintext',
+      logLevel: 'debug',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: []
+    });
+  });
+
   it('preserves custom value parameters when the repository experiment selects the reporter implicitly', () => {
     expect(
       resolve(
@@ -238,6 +261,14 @@ describe(resolveRushReporterSelection.name, () => {
     expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
       reporter: 'legacy',
       enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
+  it('ignores help controls after the pass-through separator', () => {
+    expect(resolve(['build', '--reporter=json', '--', '--help'])).toMatchObject({
+      reporter: 'json',
+      enabled: true,
       reporterControlsOwnedByFrontend: true
     });
   });
@@ -445,21 +476,21 @@ describe(resolveRushReporterSelection.name, () => {
         params: {}
       }
     ]);
+    expect(selection).toMatchObject({
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: ['--output', '--log-level']
+    });
     expect(resolve(['list', '--json', '--reporter=file']).reporter).toBe('file');
   });
 
   it('forces legacy selection for an incompatible Rush engine', () => {
-    expect(
+    expect(() =>
       resolveRushReporterSelection({
         argv: ['build', '--reporter=json'],
         env: {},
         forceLegacy: true
       })
-    ).toMatchObject({
-      reporter: 'legacy',
-      enabled: false,
-      reporterControlsOwnedByFrontend: true
-    });
+    ).toThrow(/cannot safely use --reporter=json/);
   });
 
   it('surfaces unsupported and incomplete controls with actionable errors', () => {
@@ -519,6 +550,52 @@ describe(initializeRushReporterHostAsync.name, () => {
         new RegExp(`^${directory.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
       );
       await initialized.closeAsync();
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('prints the file path for a parser-only failure without commandResult', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-only-'));
+    let stderrText: string = '';
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['missing-command', '--reporter=file'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'missing-command',
+        stdout: { isTTY: false, write: () => undefined },
+        stderr: {
+          write: (text: string) => {
+            stderrText += text;
+          }
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush', packageVersion: '5.178.1' },
+        privacy: 'local-sensitive',
+        type: 'artifactAvailable',
+        payload: {
+          role: 'log',
+          path: initialized.logArtifact?.path,
+          format: 'plaintext',
+          complete: false
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'sessionCompleted',
+        payload: { exitCode: 1 }
+      });
+      await initialized.closeAsync();
+
+      expect(stderrText.match(/Rush full log:/g)).toHaveLength(1);
+      expect(stderrText).toContain(initialized.logArtifact?.path);
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
@@ -632,6 +709,19 @@ describe(initializeRushReporterHostAsync.name, () => {
       initialized.sink.emit({
         protocolVersion: { major: 1, minor: 1 },
         sessionId: 'session',
+        source: { packageName: '@microsoft/rush', packageVersion: '5.178.1' },
+        privacy: 'local-sensitive',
+        type: 'artifactAvailable',
+        payload: {
+          role: 'log',
+          path: initialized.logArtifact?.path,
+          format: 'plaintext',
+          complete: false
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
         source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
         privacy: 'public',
         type: 'commandResult',
@@ -645,6 +735,72 @@ describe(initializeRushReporterHostAsync.name, () => {
       expect(finalRecord.log).toMatchObject({
         complete: true,
         path: initialized.logArtifact?.path
+      });
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('publishes artifact completeness as a frozen boolean snapshot', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-artifact-snapshot-'));
+    const reported: IReporterEventEnvelope<unknown>[] = [];
+    const manager: ReporterManager = new ReporterManager();
+    const captureReporter: IReporter = {
+      name: 'capture',
+      initializeAsync: async (context: IReporterContext) => {
+        void context;
+      },
+      report: (event: IReporterEventEnvelope<unknown>) => {
+        reported.push(event);
+      },
+      flushAsync: async () => undefined,
+      closeAsync: async () => undefined
+    };
+    manager.addReporter(captureReporter);
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=json'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'build',
+        stdout: { isTTY: false, write: () => undefined },
+        manager
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush', packageVersion: '5.178.1' },
+        privacy: 'local-sensitive',
+        type: 'artifactAvailable',
+        payload: {
+          role: 'log',
+          path: initialized.logArtifact?.path,
+          format: 'plaintext',
+          complete: false
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'commandResult',
+        payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+      });
+      await initialized.closeAsync();
+
+      const finalArtifact: IReporterEventEnvelope<unknown> = reported
+        .filter(({ type }) => type === 'artifactAvailable')
+        .at(-1)!;
+      const descriptor: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+        finalArtifact.payload as object,
+        'complete'
+      );
+      expect(descriptor).toMatchObject({ value: true, writable: false });
+      expect(typeof (finalArtifact.payload as { complete: unknown }).complete).toBe('boolean');
+      expect(finalArtifact.source).toEqual({
+        packageName: '@microsoft/rush',
+        packageVersion: '5.178.1'
       });
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });

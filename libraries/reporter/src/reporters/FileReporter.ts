@@ -42,6 +42,7 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
 interface IFileOperationRecord {
   readonly title: string;
   spoolPath?: string;
+  spoolFileDescriptor?: number;
   spoolFailed?: boolean;
 }
 
@@ -49,6 +50,11 @@ function getUserTempDirectoryName(): string {
   const identity: string =
     typeof process.getuid === 'function' ? String(process.getuid()) : os.userInfo().username;
   return `${RUSH_LOGS_DIR_NAME}-${identity.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+}
+
+function sanitizeActionName(actionName: string): string {
+  const sanitized: string = actionName.replace(/[^a-zA-Z0-9_.-]+/g, '_');
+  return sanitized === '.' || sanitized === '..' || sanitized.length === 0 ? 'rush' : sanitized;
 }
 
 /**
@@ -153,6 +159,7 @@ export class FileReporter implements IReporter {
   private _targetResolved: boolean;
   private _available: boolean;
   private _complete: boolean;
+  private _canComplete: boolean;
   private _targetPath: string | undefined;
   private _latestCopyPath: string | undefined;
   private readonly _fileName: string;
@@ -161,7 +168,7 @@ export class FileReporter implements IReporter {
   public constructor(options: IFileReporterOptions = {}) {
     this._commonTempFolder = options.commonTempFolder;
     this._osTempFolder = options.osTempFolder ?? os.tmpdir();
-    this._actionName = options.actionName ?? 'rush';
+    this._actionName = sanitizeActionName(options.actionName ?? 'rush');
     this._pid = options.pid ?? process.pid;
     this._nowMs = options.nowMs ?? (() => Date.now());
     this._retentionDays = options.retentionDays ?? DEFAULT_RETENTION_DAYS;
@@ -178,6 +185,7 @@ export class FileReporter implements IReporter {
     this._targetResolved = false;
     this._available = false;
     this._complete = false;
+    this._canComplete = true;
     this._targetPath = undefined;
     this._latestCopyPath = undefined;
     this._nextSpoolId = 1;
@@ -229,6 +237,7 @@ export class FileReporter implements IReporter {
       } catch (error) {
         this._available = false;
         this._complete = false;
+        this._canComplete = false;
         this._emergencyWarn(
           `[reporter] Unable to close the full-detail log; the artifact is unavailable: ${(error as Error).message}`
         );
@@ -237,6 +246,7 @@ export class FileReporter implements IReporter {
       }
     }
     await this._refreshLatestCopyAsync();
+    this._complete = this._available && this._canComplete;
   }
 
   /**
@@ -260,6 +270,10 @@ export class FileReporter implements IReporter {
         phaseName?: string;
       };
       const projectName: string = payload.projectName ?? payload.operationId;
+      const previousOperation: IFileOperationRecord | undefined = this._operations.get(payload.operationId);
+      if (previousOperation) {
+        return [this._formatMetadata(event)];
+      }
       this._operations.set(
         payload.operationId,
         this._createOperationRecord(payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName)
@@ -324,10 +338,11 @@ export class FileReporter implements IReporter {
     if (!operation.spoolPath) {
       operation.spoolPath = `${this._targetPath}.${this._nextSpoolId++}.operation`;
       try {
-        fs.writeFileSync(operation.spoolPath, '', { flag: 'wx', mode: OWNER_ONLY_MODE });
+        operation.spoolFileDescriptor = fs.openSync(operation.spoolPath, 'wx', OWNER_ONLY_MODE);
       } catch (error) {
         operation.spoolFailed = true;
         operation.spoolPath = undefined;
+        operation.spoolFileDescriptor = undefined;
         this._emergencyWarn(
           `[reporter] Unable to create grouped-output spool file; output will remain ungrouped: ${(error as Error).message}`
         );
@@ -336,14 +351,23 @@ export class FileReporter implements IReporter {
     }
 
     try {
-      fs.appendFileSync(operation.spoolPath, text, { encoding: 'utf8', mode: OWNER_ONLY_MODE });
+      if (operation.spoolFileDescriptor === undefined) {
+        throw new Error('The grouped-output spool descriptor is not available.');
+      }
+      fs.writeSync(operation.spoolFileDescriptor, text, null, 'utf8');
       return [];
     } catch (error) {
-      let priorOutput: string = '';
-      try {
-        priorOutput = fs.readFileSync(operation.spoolPath, 'utf8');
-      } catch {
+      const closeError: Error | undefined = this._closeOperationSpool(operation, false);
+      if (closeError) {
         this._complete = false;
+        this._canComplete = false;
+      }
+      if (operation.spoolPath) {
+        this._writeOrBuffer(`# [${operationId} ${stream}]\n`);
+        if (!this._appendSpoolFile(operation.spoolPath)) {
+          this._complete = false;
+          this._canComplete = false;
+        }
       }
       try {
         fs.rmSync(operation.spoolPath, { force: true });
@@ -355,7 +379,7 @@ export class FileReporter implements IReporter {
       this._emergencyWarn(
         `[reporter] Unable to spool grouped output for ${JSON.stringify(operationId)}; output will remain ungrouped: ${(error as Error).message}`
       );
-      return [`# [${operationId} ${stream}]\n`, priorOutput, text];
+      return [text];
     }
   }
 
@@ -366,26 +390,21 @@ export class FileReporter implements IReporter {
     }
     this._writeOrBuffer(`\n==[ ${operation.title} ]==\n`);
     if (operation.spoolPath !== undefined) {
+      const closeError: Error | undefined = this._closeOperationSpool(operation, true);
+      if (closeError) {
+        this._complete = false;
+        this._canComplete = false;
+        this._emergencyWarn(
+          `[reporter] Unable to close grouped output for ${JSON.stringify(operationId)}: ${closeError.message}`
+        );
+      }
       try {
-        if (this._fileDescriptor !== undefined) {
-          const source: number = fs.openSync(operation.spoolPath, 'r');
-          try {
-            const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
-            let bytesRead: number;
-            let lastByte: number | undefined;
-            while ((bytesRead = fs.readSync(source, buffer, 0, buffer.length, null)) > 0) {
-              fs.writeSync(this._fileDescriptor, buffer, 0, bytesRead);
-              lastByte = buffer[bytesRead - 1];
-            }
-            if (lastByte !== undefined && lastByte !== 0x0a) {
-              this._writeLine('\n');
-            }
-          } finally {
-            fs.closeSync(source);
-          }
+        if (!this._appendSpoolFile(operation.spoolPath)) {
+          throw new Error('The grouped output could not be appended to the full-detail log.');
         }
       } catch (error) {
         this._complete = false;
+        this._canComplete = false;
         this._emergencyWarn(
           `[reporter] Unable to append grouped output for ${JSON.stringify(operationId)}: ${(error as Error).message}`
         );
@@ -398,6 +417,40 @@ export class FileReporter implements IReporter {
       }
     }
     this._writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
+  }
+
+  private _appendSpoolFile(spoolPath: string): boolean {
+    if (this._fileDescriptor === undefined) {
+      return false;
+    }
+    let source: number | undefined;
+    let appended: boolean = false;
+    let closed: boolean = true;
+    try {
+      source = fs.openSync(spoolPath, 'r');
+      const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
+      let bytesRead: number;
+      let lastByte: number | undefined;
+      while ((bytesRead = fs.readSync(source, buffer, 0, buffer.length, null)) > 0) {
+        fs.writeSync(this._fileDescriptor, buffer, 0, bytesRead);
+        lastByte = buffer[bytesRead - 1];
+      }
+      if (lastByte !== undefined && lastByte !== 0x0a) {
+        this._writeLine('\n');
+      }
+      appended = true;
+    } catch {
+      appended = false;
+    } finally {
+      if (source !== undefined) {
+        try {
+          fs.closeSync(source);
+        } catch {
+          closed = false;
+        }
+      }
+    }
+    return appended && closed;
   }
 
   private _writeOrBuffer(line: string): void {
@@ -460,7 +513,12 @@ export class FileReporter implements IReporter {
     }
     this._available = false;
     this._complete = false;
+    this._canComplete = false;
     this._lines.length = 0;
+    for (const operation of this._operations.values()) {
+      this._discardOperationSpool(operation);
+      operation.spoolFailed = true;
+    }
     if (this._fileDescriptor !== undefined) {
       try {
         fs.closeSync(this._fileDescriptor);
@@ -472,6 +530,45 @@ export class FileReporter implements IReporter {
     this._emergencyWarn(
       `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${error.message}`
     );
+  }
+
+  private _closeOperationSpool(operation: IFileOperationRecord, flush: boolean): Error | undefined {
+    const fileDescriptor: number | undefined = operation.spoolFileDescriptor;
+    if (fileDescriptor === undefined) {
+      return undefined;
+    }
+    operation.spoolFileDescriptor = undefined;
+
+    let closeError: Error | undefined;
+    if (flush) {
+      try {
+        fs.fsyncSync(fileDescriptor);
+      } catch (error) {
+        closeError = error as Error;
+      }
+    }
+    try {
+      fs.closeSync(fileDescriptor);
+    } catch (error) {
+      closeError ??= error as Error;
+    }
+    return closeError;
+  }
+
+  private _discardOperationSpool(operation: IFileOperationRecord): void {
+    const closeError: Error | undefined = this._closeOperationSpool(operation, false);
+    if (closeError) {
+      this._complete = false;
+      this._canComplete = false;
+    }
+    if (operation.spoolPath) {
+      try {
+        fs.rmSync(operation.spoolPath, { force: true });
+      } catch {
+        /* Best-effort cleanup. */
+      }
+      operation.spoolPath = undefined;
+    }
   }
 
   private async _resolveTargetAsync(): Promise<void> {
@@ -502,7 +599,6 @@ export class FileReporter implements IReporter {
         this._fileDescriptor = fileDescriptor;
         this._targetPath = filePath;
         this._available = true;
-        this._complete = true;
         await this._updateLatestAsync(dir, filePath);
         await this._applyRetentionAsync(dir);
         return;
@@ -513,6 +609,7 @@ export class FileReporter implements IReporter {
 
     this._available = false;
     this._complete = false;
+    this._canComplete = false;
     this._lines.length = 0;
     this._emergencyWarn(
       `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${lastError?.message ?? 'unknown error'}`

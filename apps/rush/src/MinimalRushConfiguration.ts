@@ -3,10 +3,12 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
+import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
+import { isSupportedReporterName, type ReporterName } from '@rushstack/rush-reporter';
 
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
@@ -64,11 +66,17 @@ export class MinimalRushConfiguration {
           minimalRushConfigurationJson,
           rushJsonLocation
         );
+        const explicitReporter: ReporterName | undefined = _getExplicitReporter(process.argv.slice(2));
+        const legacyFallbackRequested: boolean =
+          explicitReporter === 'legacy' ||
+          process.env.RUSH_REPORTER?.trim().toLowerCase() === 'legacy' ||
+          _hasHelpControl(process.argv.slice(2)) ||
+          configuration.rushVersion !== PackageJsonLookup.loadOwnPackageJson(__dirname).version;
         if (
           showVerbose &&
-          !configuration.useRushReporter &&
-          !_hasExplicitNonLegacyReporter(process.argv.slice(2)) &&
-          path.dirname(rushJsonLocation) !== process.cwd()
+          (legacyFallbackRequested ||
+            (!configuration.useRushReporter &&
+              (explicitReporter === undefined || explicitReporter === 'legacy')))
         ) {
           // Preserve the legacy discovery message exactly when the reporter path is not taking ownership.
           console.log('Found configuration in ' + rushJsonLocation);
@@ -114,21 +122,45 @@ export class MinimalRushConfiguration {
    * The repository's common temp folder, used for invocation-scoped reporter logs.
    */
   public get commonTempFolder(): string {
-    return path.resolve(this._commonRushConfigFolder, '..', '..', 'temp');
+    return (
+      EnvironmentConfiguration._getRushTempFolderOverride(process.env) ??
+      path.resolve(this._commonRushConfigFolder, '..', '..', 'temp')
+    );
   }
 }
 
-function _hasExplicitNonLegacyReporter(argv: readonly string[]): boolean {
+function _getExplicitReporter(argv: readonly string[]): ReporterName | undefined {
   for (let index: number = 0; index < argv.length; index++) {
     const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
     let value: string | undefined;
     if (argument === '--reporter') {
-      value = argv[index + 1];
+      const nextArgument: string | undefined = argv[index + 1];
+      if (!nextArgument || nextArgument.startsWith('-')) {
+        continue;
+      }
+      value = nextArgument;
+      index++;
     } else if (argument.startsWith('--reporter=')) {
       value = argument.slice('--reporter='.length);
     }
     if (value !== undefined) {
-      return value.trim().toLowerCase() !== 'legacy';
+      const normalizedValue: string = value.trim().toLowerCase();
+      return isSupportedReporterName(normalizedValue) ? normalizedValue : undefined;
+    }
+  }
+  return undefined;
+}
+
+function _hasHelpControl(argv: readonly string[]): boolean {
+  for (const argument of argv) {
+    if (argument === '--') {
+      return false;
+    }
+    if (argument === '--help' || argument === '-h') {
+      return true;
     }
   }
   return false;
