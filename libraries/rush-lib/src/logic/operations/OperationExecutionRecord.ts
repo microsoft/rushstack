@@ -173,6 +173,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   private _status: OperationStatus;
   private _stateHash: string | undefined;
   private _stateHashComponents: IOperationStateHashComponents | undefined;
+  private _operationStreamClosed: boolean = false;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -281,6 +282,18 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get silent(): boolean {
     return !this.enabled || this.runner.silent;
+  }
+
+  /**
+   * Notifies observers that this iteration cannot emit more output for the operation.
+   *
+   * @internal
+   */
+  public closeOperationStream(): void {
+    if (!this._operationStreamClosed) {
+      this._operationStreamClosed = true;
+      this._context.eventSink?.onOperationStreamClosed?.(this);
+    }
   }
 
   public getStateHash(): string {
@@ -402,9 +415,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         // Tap the stream upstream of the quiet-mode discard so the sink observes
         // the exact bytes the collated writer would receive, regardless of verbosity.
         chunkTapDestinations.push(
-          new OperationChunkTap(this.name, (operationId, chunk) =>
-            eventSink.onOperationChunk?.(operationId, chunk)
-          )
+          new OperationChunkTap(this.name, (operationId, chunk) => {
+            if (operationId === this.name) {
+              eventSink.onOperationChunk?.(this, chunk);
+            }
+          })
         );
       }
 
@@ -486,9 +501,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     } finally {
       if (this.isTerminal) {
         this._collatedWriter?.close();
-        if (this._collatedWriter) {
-          this._context.eventSink?.onOperationStreamClosed?.(this.name);
-        }
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }

@@ -59,6 +59,7 @@ export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>):
     case 'sessionStarted':
     case 'commandStarted':
     case 'operationStatusChanged':
+    case 'operationCompleted':
     case 'watchCycleCompleted':
     case 'artifactAvailable':
       return 'normal';
@@ -79,6 +80,7 @@ export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>):
     case 'externalProcessCompleted':
       return 'verbose';
     case 'externalOutput':
+    case 'operationStreamClosed':
       return 'debug';
     case 'extension':
       return 'normal';
