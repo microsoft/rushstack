@@ -166,29 +166,75 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('project-a: success');
   });
 
-  it('reports watch totals per cycle and recovers from failure', () => {
+  it('keeps overlapping watch totals and grouped output isolated by iteration', () => {
     const capture: ICapture = makeDetailed();
     capture.reporter.report(ev('commandStarted', { commandName: 'build' }));
     capture.reporter.report(
-      ev('operationRegistered', { operationId: 'op1', projectName: 'project-a', phaseName: 'build' })
+      ev('operationRegistered', {
+        iterationId: 1,
+        operationId: 'op1',
+        projectName: 'project-a',
+        phaseName: 'build'
+      })
     );
-    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
-    capture.reporter.report(ev('watchCycleCompleted', { succeeded: false }));
     capture.reporter.report(
-      ev('operationRegistered', { operationId: 'op1', projectName: 'project-a', phaseName: 'build' })
+      ev('operationRegistered', {
+        iterationId: 1,
+        operationId: 'abort',
+        projectName: 'project-abort',
+        phaseName: 'build'
+      })
     );
     capture.reporter.report(
-      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+      ev('operationRegistered', {
+        iterationId: 2,
+        operationId: 'op1',
+        projectName: 'project-a',
+        phaseName: 'build'
+      })
     );
-    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
-    capture.reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'noOp' }));
-    capture.reporter.report(ev('watchCycleCompleted', { succeeded: true }));
+    capture.reporter.report(
+      ev('operationRegistered', {
+        iterationId: 2,
+        operationId: 'silent',
+        projectName: 'hidden',
+        silent: true
+      })
+    );
+    capture.reporter.report(
+      ev('externalOutput', { iterationId: 1, stream: 'stdout', text: 'OLD-CYCLE\n' }, { operationId: 'op1' })
+    );
+    capture.reporter.report(
+      ev('externalOutput', { iterationId: 2, stream: 'stdout', text: 'NEW-CYCLE\n' }, { operationId: 'op1' })
+    );
+    capture.reporter.report(
+      ev('operationCompleted', { iterationId: 1, operationId: 'op1', status: 'failure' })
+    );
+    capture.reporter.report(
+      ev('operationCompleted', { iterationId: 1, operationId: 'abort', status: 'aborted' })
+    );
+    capture.reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+    capture.reporter.report(
+      ev('operationCompleted', { iterationId: 2, operationId: 'op1', status: 'success' })
+    );
+    capture.reporter.report(
+      ev('operationCompleted', { iterationId: 2, operationId: 'silent', status: 'noOp' })
+    );
+    capture.reporter.report(ev('watchCycleCompleted', { iterationId: 2, succeeded: true }));
     capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
 
-    expect(capture.getOutput()).toContain('Watch cycle failed (1/1 operations, 1 failed)');
+    expect(capture.getOutput()).toContain('Watch cycle failed (2/2 operations, 1 failed)');
     expect(capture.getOutput()).toContain('Watch cycle succeeded (1/1 operations, 0 failed)');
     expect(capture.getOutput()).toContain('rush build succeeded (1/1 operations, 0 failed)');
     expect(capture.getOutput()).not.toContain('hidden');
+    expect(capture.getOutput().match(/OLD-CYCLE/g)).toHaveLength(1);
+    expect(capture.getOutput().match(/NEW-CYCLE/g)).toHaveLength(1);
+    expect(capture.getOutput().indexOf('OLD-CYCLE')).toBeLessThan(
+      capture.getOutput().indexOf('project-a: failure')
+    );
+    expect(capture.getOutput().indexOf('project-a: failure')).toBeLessThan(
+      capture.getOutput().indexOf('NEW-CYCLE')
+    );
   });
 
   it('emits a compact heartbeat only after the interval elapses', () => {

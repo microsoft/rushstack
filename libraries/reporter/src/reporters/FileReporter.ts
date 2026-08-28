@@ -40,6 +40,7 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
 ]);
 
 interface IFileOperationRecord {
+  readonly operationId: string;
   readonly title: string;
   spoolPath?: string;
   spoolFileDescriptor?: number;
@@ -55,6 +56,10 @@ function getUserTempDirectoryName(): string {
 function sanitizeActionName(actionName: string): string {
   const sanitized: string = actionName.replace(/[^a-zA-Z0-9_.-]+/g, '_');
   return sanitized === '.' || sanitized === '..' || sanitized.length === 0 ? 'rush' : sanitized;
+}
+
+function getOperationKey(operationId: string, iterationId: number | undefined): string {
+  return iterationId === undefined ? operationId : `${iterationId}\u0000${operationId}`;
 }
 
 /**
@@ -226,8 +231,8 @@ export class FileReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    for (const [operationId, record] of this._operations) {
-      this._writeGroupedOperation(operationId, record, 'aborted');
+    for (const record of this._operations.values()) {
+      this._writeGroupedOperation(record.operationId, record, 'aborted');
     }
     this._operations.clear();
     await this.flushAsync();
@@ -264,35 +269,43 @@ export class FileReporter implements IReporter {
         operationId: string;
         projectName?: string;
         phaseName?: string;
+        iterationId?: number;
       } = event.payload as {
         operationId: string;
         projectName?: string;
         phaseName?: string;
+        iterationId?: number;
       };
       const projectName: string = payload.projectName ?? payload.operationId;
-      const previousOperation: IFileOperationRecord | undefined = this._operations.get(payload.operationId);
+      const operationKey: string = getOperationKey(payload.operationId, payload.iterationId);
+      const previousOperation: IFileOperationRecord | undefined = this._operations.get(operationKey);
       if (previousOperation) {
         return [this._formatMetadata(event)];
       }
       this._operations.set(
-        payload.operationId,
-        this._createOperationRecord(payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName)
+        operationKey,
+        this._createOperationRecord(
+          payload.operationId,
+          payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName
+        )
       );
       return [this._formatMetadata(event)];
     }
 
     if (event.type === 'externalOutput') {
       const operationId: string | undefined = event.scope?.operationId;
-      const text: string = (event.payload as { text?: string }).text ?? '';
+      const payload: { text?: string; iterationId?: number; stream?: string } = event.payload as {
+        text?: string;
+        iterationId?: number;
+        stream?: string;
+      };
+      const text: string = payload.text ?? '';
+      const operationKey: string | undefined =
+        operationId === undefined ? undefined : getOperationKey(operationId, payload.iterationId);
       const operation: IFileOperationRecord | undefined =
-        operationId === undefined ? undefined : this._operations.get(operationId);
+        operationKey === undefined ? undefined : this._operations.get(operationKey);
       if (operationId !== undefined && operation) {
-        return this._spoolOperationOutput(
-          operationId,
-          operation,
-          (event.payload as { stream?: string }).stream ?? 'stdout',
-          text
-        );
+        return this._spoolOperationOutput(operationId, operation, payload.stream ?? 'stdout', text);
       }
       return operationId ? [`# [${operationId}]\n`, text] : [text];
     }
@@ -302,13 +315,15 @@ export class FileReporter implements IReporter {
     }
 
     if (event.type === 'operationCompleted') {
-      const payload: { operationId: string; status: string } = event.payload as {
+      const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
         operationId: string;
         status: string;
+        iterationId?: number;
       };
-      const operation: IFileOperationRecord | undefined = this._operations.get(payload.operationId);
+      const operationKey: string = getOperationKey(payload.operationId, payload.iterationId);
+      const operation: IFileOperationRecord | undefined = this._operations.get(operationKey);
       if (operation && TERMINAL_STATUSES.has(payload.status)) {
-        this._operations.delete(payload.operationId);
+        this._operations.delete(operationKey);
         this._writeGroupedOperation(payload.operationId, operation, payload.status);
         return [];
       }
@@ -321,8 +336,8 @@ export class FileReporter implements IReporter {
     return `# ${JSON.stringify(redactReporterEvent(event))}\n`;
   }
 
-  private _createOperationRecord(title: string): IFileOperationRecord {
-    return { title };
+  private _createOperationRecord(operationId: string, title: string): IFileOperationRecord {
+    return { operationId, title };
   }
 
   private _spoolOperationOutput(
