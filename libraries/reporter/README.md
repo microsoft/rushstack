@@ -32,6 +32,10 @@ AI fallback message text is emitted only for public envelopes. Non-public fallba
 and refer to the protected full-detail log. JSON oversized-record markers preserve the original privacy
 classification and omit non-public source and scope metadata.
 
+Secret envelopes retain only protocol, event identity, ordering, timing, type, privacy, and fully redacted
+source and payload fields. Contextual parent, command, operation, project, phase, and scope metadata is
+removed.
+
 ## Links
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out

@@ -10,6 +10,13 @@ import {
   type ITelemetryAggregate
 } from '../index';
 
+const SECRET_COMMAND: string = 'qualification-secret-command';
+const SECRET_OPERATION: string = 'qualification-secret-operation';
+const SECRET_PROJECT: string = '@private/qualification-secret-project';
+const SECRET_PHASE: string = 'qualification-secret-phase';
+const SECRET_PARENT_SESSION: string = 'qualification-secret-parent-session';
+const SECRET_PARENT_OPERATION: string = 'qualification-secret-parent-operation';
+
 function ev(
   type: string,
   payload: unknown = {},
@@ -169,6 +176,92 @@ describe('JsonReporter', () => {
     });
   });
 
+  it('allowlists metadata for normal and oversized secret envelopes', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({
+      write: (text: string) => (output += text),
+      maxRecordBytes: 512
+    });
+    const secretMetadata: Partial<IReporterEventEnvelope<unknown>> = {
+      parentSessionId: SECRET_PARENT_SESSION,
+      parentOperationId: SECRET_PARENT_OPERATION,
+      sourceSequence: 7,
+      source: {
+        packageName: '@private/qualification-secret-producer',
+        packageVersion: '1.0.0',
+        component: 'QualificationSecretComponent'
+      },
+      scope: {
+        commandName: SECRET_COMMAND,
+        operationId: SECRET_OPERATION,
+        projectName: SECRET_PROJECT,
+        phaseName: SECRET_PHASE
+      },
+      privacy: 'secret'
+    };
+    reporter.report({
+      ...ev('messageEmitted', {
+        severity: 'error',
+        text: 'qualification-secret-message-text'
+      }),
+      ...secretMetadata,
+      eventId: 'secret-message'
+    } as IReporterEventEnvelope<unknown>);
+    reporter.report({
+      ...ev('diagnosticEmitted', {
+        code: 'RUSH_INTERNAL_UNEXPECTED',
+        summary: 'qualification-secret-diagnostic-summary',
+        detail: 'x'.repeat(2000)
+      }),
+      ...secretMetadata,
+      eventId: 'secret-diagnostic',
+      sequence: 2
+    } as IReporterEventEnvelope<unknown>);
+
+    const records: Record<string, unknown>[] = parseLines(output);
+    expect(records).toHaveLength(2);
+    for (const record of records) {
+      expect(Object.keys(record).sort()).toEqual(
+        [
+          'eventId',
+          'payload',
+          'privacy',
+          'protocolVersion',
+          'required',
+          'sequence',
+          'sessionId',
+          'source',
+          'sourceSequence',
+          'timestamp',
+          'type'
+        ].sort()
+      );
+      expect(record).toMatchObject({
+        source: {
+          packageName: '[private-producer]',
+          packageVersion: '[private-version]'
+        },
+        privacy: 'secret',
+        payload: '[secret]'
+      });
+    }
+    for (const sentinel of [
+      SECRET_COMMAND,
+      SECRET_OPERATION,
+      SECRET_PROJECT,
+      SECRET_PHASE,
+      SECRET_PARENT_SESSION,
+      SECRET_PARENT_OPERATION,
+      '@private/qualification-secret-producer',
+      'QualificationSecretComponent',
+      'qualification-secret-message-text',
+      'qualification-secret-diagnostic-summary'
+    ]) {
+      expect(output).not.toContain(sentinel);
+    }
+    expect(output).not.toContain('rush.reporter.record-too-large');
+  });
+
   it('redacts secret diagnostic fields from stdout', () => {
     let output: string = '';
     const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
@@ -314,6 +407,14 @@ describe('AiReporter', () => {
           severity: 'error',
           text: 'qualification-secret-message'
         }),
+        parentSessionId: SECRET_PARENT_SESSION,
+        parentOperationId: SECRET_PARENT_OPERATION,
+        scope: {
+          commandName: SECRET_COMMAND,
+          operationId: SECRET_OPERATION,
+          projectName: SECRET_PROJECT,
+          phaseName: SECRET_PHASE
+        },
         privacy: 'secret'
       },
       ev('artifactAvailable', {
@@ -337,6 +438,60 @@ describe('AiReporter', () => {
     });
     expect(JSON.stringify(final)).not.toContain('qualification-local-sensitive-message');
     expect(JSON.stringify(final)).not.toContain('qualification-secret-message');
+    expect(JSON.stringify(final)).not.toContain(SECRET_COMMAND);
+    expect(JSON.stringify(final)).not.toContain(SECRET_OPERATION);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PROJECT);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PHASE);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PARENT_SESSION);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PARENT_OPERATION);
+  });
+
+  it('ignores secret lifecycle context in AI status and final scope', () => {
+    const secretEnvelope: Partial<IReporterEventEnvelope<unknown>> = {
+      parentSessionId: SECRET_PARENT_SESSION,
+      parentOperationId: SECRET_PARENT_OPERATION,
+      sourceSequence: 7,
+      scope: {
+        commandName: SECRET_COMMAND,
+        operationId: SECRET_OPERATION,
+        projectName: SECRET_PROJECT,
+        phaseName: SECRET_PHASE
+      },
+      privacy: 'secret'
+    };
+    const { records, final } = run([
+      {
+        ...ev('commandStarted', { commandName: SECRET_COMMAND }),
+        ...secretEnvelope
+      } as IReporterEventEnvelope<unknown>,
+      {
+        ...ev('operationRegistered', {
+          operationId: SECRET_OPERATION,
+          projectName: SECRET_PROJECT,
+          phaseName: SECRET_PHASE
+        }),
+        ...secretEnvelope
+      } as IReporterEventEnvelope<unknown>,
+      {
+        ...ev('operationCompleted', {
+          operationId: SECRET_OPERATION,
+          status: 'failure'
+        }),
+        ...secretEnvelope
+      } as IReporterEventEnvelope<unknown>,
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(records.filter(({ kind }) => kind === 'ai.status')).toEqual([]);
+    expect(final.scope).toEqual({ failedProjects: [] });
+    expect(final.operationCounts).toEqual({});
+    const serialized: string = JSON.stringify(records);
+    expect(serialized).not.toContain(SECRET_COMMAND);
+    expect(serialized).not.toContain(SECRET_OPERATION);
+    expect(serialized).not.toContain(SECRET_PROJECT);
+    expect(serialized).not.toContain(SECRET_PHASE);
+    expect(serialized).not.toContain(SECRET_PARENT_SESSION);
+    expect(serialized).not.toContain(SECRET_PARENT_OPERATION);
   });
 
   it('counts fallback errors even when detailed diagnostics are disabled', async () => {
@@ -630,6 +785,14 @@ describe('AiReporter', () => {
           severity: 'error',
           summary: 'qualification-fake-secret-token'
         }),
+        parentSessionId: SECRET_PARENT_SESSION,
+        parentOperationId: SECRET_PARENT_OPERATION,
+        scope: {
+          commandName: SECRET_COMMAND,
+          operationId: SECRET_OPERATION,
+          projectName: SECRET_PROJECT,
+          phaseName: SECRET_PHASE
+        },
         privacy: 'secret'
       },
       ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
@@ -641,6 +804,12 @@ describe('AiReporter', () => {
     expect(final.diagnostics).toEqual([]);
     expect(final.truncated).toBe(true);
     expect(JSON.stringify(final)).not.toContain('qualification-fake-secret-token');
+    expect(JSON.stringify(final)).not.toContain(SECRET_COMMAND);
+    expect(JSON.stringify(final)).not.toContain(SECRET_OPERATION);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PROJECT);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PHASE);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PARENT_SESSION);
+    expect(JSON.stringify(final)).not.toContain(SECRET_PARENT_OPERATION);
   });
 
   it('preserves fallback errors when secret diagnostics are also suppressed', () => {

@@ -27,6 +27,14 @@ const FIXED_PID: number = 4242;
 const CLASSIFIED_SECRET: string = 'qualification-fake-secret-token';
 const CLASSIFIED_SECRET_PRODUCER: string = '@secret/qualification-fixture';
 const CLASSIFIED_SECRET_COMPONENT: string = 'SecretQualificationFixture';
+const CLASSIFIED_SECRET_COMMAND: string = 'qualification-secret-command';
+const CLASSIFIED_SECRET_OPERATION: string = 'qualification-secret-operation';
+const CLASSIFIED_SECRET_PROJECT: string = '@private/qualification-secret-project';
+const CLASSIFIED_SECRET_PHASE: string = 'qualification-secret-phase';
+const CLASSIFIED_SECRET_PARENT_SESSION: string = 'qualification-secret-parent-session';
+const CLASSIFIED_SECRET_PARENT_OPERATION: string = 'qualification-secret-parent-operation';
+const CLASSIFIED_SECRET_MESSAGE: string = 'qualification-secret-message-text';
+const CLASSIFIED_SECRET_DIAGNOSTIC: string = 'qualification-secret-diagnostic-summary';
 const PRIVATE_PRODUCER: string = '@private/example-rush-plugin';
 const PRIVATE_COMPONENT: string = 'PrivatePluginImplementation';
 const LOCAL_SENSITIVE_FALLBACK_MESSAGE: string = 'qualification-local-sensitive-fallback-message';
@@ -637,6 +645,74 @@ function createEvents(testCase: ICorpusCase, logPath: string): IReporterEventEnv
   return events;
 }
 
+function createSecretProjectionProbeEvents(testCase: ICorpusCase): IReporterEventEnvelope<unknown>[] {
+  const createProbe = (
+    eventId: string,
+    sequence: number,
+    type: IReporterEventEnvelope<unknown>['type'],
+    payload: unknown,
+    scope: IReporterEventEnvelope<unknown>['scope'] = {
+      commandName: CLASSIFIED_SECRET_COMMAND,
+      operationId: CLASSIFIED_SECRET_OPERATION,
+      projectName: CLASSIFIED_SECRET_PROJECT,
+      phaseName: CLASSIFIED_SECRET_PHASE
+    }
+  ): IReporterEventEnvelope<unknown> => ({
+    protocolVersion: { major: 1, minor: 1 },
+    eventId,
+    sessionId: `${testCase.name}-session`,
+    parentSessionId: CLASSIFIED_SECRET_PARENT_SESSION,
+    parentOperationId: CLASSIFIED_SECRET_PARENT_OPERATION,
+    sequence,
+    sourceSequence: sequence - 10000,
+    timestamp: FIXED_TIMESTAMP,
+    source: {
+      packageName: CLASSIFIED_SECRET_PRODUCER,
+      packageVersion: '1.0.0',
+      component: CLASSIFIED_SECRET_COMPONENT
+    },
+    scope,
+    privacy: 'secret',
+    required: true,
+    type,
+    payload
+  });
+
+  return [
+    createProbe(
+      `${testCase.name}-secret-command`,
+      10001,
+      'commandStarted',
+      {
+        commandName: CLASSIFIED_SECRET_COMMAND
+      },
+      {
+        commandName: CLASSIFIED_SECRET_COMMAND
+      }
+    ),
+    createProbe(`${testCase.name}-secret-operation-registered`, 10002, 'operationRegistered', {
+      operationId: CLASSIFIED_SECRET_OPERATION,
+      projectName: CLASSIFIED_SECRET_PROJECT,
+      phaseName: CLASSIFIED_SECRET_PHASE
+    }),
+    createProbe(`${testCase.name}-secret-operation-completed`, 10003, 'operationCompleted', {
+      operationId: CLASSIFIED_SECRET_OPERATION,
+      status: 'failure'
+    }),
+    createProbe(`${testCase.name}-secret-message`, 10004, 'messageEmitted', {
+      severity: 'info',
+      text: CLASSIFIED_SECRET_MESSAGE
+    }),
+    createProbe(`${testCase.name}-secret-diagnostic`, 10005, 'diagnosticEmitted', {
+      diagnosticId: `${testCase.name}-secret-diagnostic`,
+      code: 'RUSH_INTERNAL_UNEXPECTED',
+      category: 'internal',
+      severity: 'info',
+      summary: CLASSIFIED_SECRET_DIAGNOSTIC
+    })
+  ];
+}
+
 async function runCaseAsync(
   testCase: ICorpusCase,
   caseDirectory: string,
@@ -677,6 +753,15 @@ async function runCaseAsync(
     jsonReporter.report(event);
     plaintextReporter.report(event);
     legacyReporter.report(event);
+  }
+  for (const event of createSecretProjectionProbeEvents(testCase)) {
+    // Operation grouping is a separate file-sidecar policy. Exercise shared
+    // file redaction with records that do not enter the grouping path.
+    if (event.type === 'messageEmitted' || event.type === 'diagnosticEmitted') {
+      fileReporter.report(event);
+    }
+    aiReporter.report(event);
+    jsonReporter.report(event);
   }
   await fileReporter.closeAsync();
   await aiReporter.closeAsync();
@@ -820,6 +905,14 @@ async function runCaseAsync(
     !allLocalOutput.includes(CLASSIFIED_SECRET) &&
     !allLocalOutput.includes(CLASSIFIED_SECRET_PRODUCER) &&
     !allLocalOutput.includes(CLASSIFIED_SECRET_COMPONENT) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_COMMAND) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_OPERATION) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_PROJECT) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_PHASE) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_PARENT_SESSION) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_PARENT_OPERATION) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_MESSAGE) &&
+    !allLocalOutput.includes(CLASSIFIED_SECRET_DIAGNOSTIC) &&
     !machinePresentedOutput.includes(LOCAL_SENSITIVE_FALLBACK_MESSAGE) &&
     !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_VALUE) &&
     !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_PRODUCER) &&

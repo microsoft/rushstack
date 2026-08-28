@@ -32,6 +32,14 @@ describe('AI reporter deterministic qualification corpus', () => {
     const serialized: string = JSON.stringify(qualification);
     expect(serialized).not.toContain('rush-ai-reporter-qualification-');
     expect(serialized).not.toContain('qualification-fake-secret-token');
+    expect(serialized).not.toContain('qualification-secret-command');
+    expect(serialized).not.toContain('qualification-secret-operation');
+    expect(serialized).not.toContain('@private/qualification-secret-project');
+    expect(serialized).not.toContain('qualification-secret-phase');
+    expect(serialized).not.toContain('qualification-secret-parent-session');
+    expect(serialized).not.toContain('qualification-secret-parent-operation');
+    expect(serialized).not.toContain('qualification-secret-message-text');
+    expect(serialized).not.toContain('qualification-secret-diagnostic-summary');
     expect(serialized).not.toContain('qualification-local-sensitive-fallback-message');
     expect(serialized).not.toContain('qualification-oversized-local-sensitive-value');
     expect(serialized).not.toContain('@private/oversized-qualification-fixture');

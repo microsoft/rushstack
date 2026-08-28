@@ -205,6 +205,17 @@ export class AiReporter implements IReporter {
 
   public report(event: IReporterEventEnvelope<unknown>): void {
     this._protocolVersion = event.protocolVersion;
+    if (event.privacy === 'secret') {
+      switch (event.type) {
+        case 'diagnosticEmitted':
+        case 'messageEmitted':
+        case 'commandResult':
+        case 'sessionCompleted':
+          break;
+        default:
+          return;
+      }
+    }
     switch (event.type) {
       case 'commandStarted': {
         this._commandName = (event.payload as { commandName: string }).commandName;
