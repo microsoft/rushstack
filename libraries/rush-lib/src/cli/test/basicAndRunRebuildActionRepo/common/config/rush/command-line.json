@@ -1,0 +1,18 @@
+{
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "custom-reporter-flag",
+      "summary": "Exercises a value-less custom reporter flag.",
+      "shellCommand": "node custom-reporter-flag.js"
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "flag",
+      "longName": "--reporter",
+      "description": "Custom reporter flag.",
+      "associatedCommands": ["custom-reporter-flag"]
+    }
+  ]
+}

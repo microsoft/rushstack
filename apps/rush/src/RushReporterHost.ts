@@ -213,7 +213,8 @@ export function stripReporterValueControls(
 
 function parseReporterControls(
   argv: readonly string[],
-  includeOutputAndLogLevelControls: boolean
+  includeOutputAndLogLevelControls: boolean,
+  tolerateMissingReporterValue: boolean = false
 ): IParsedReporterControls {
   const reporters: string[] = [];
   const logLevels: string[] = [];
@@ -226,6 +227,13 @@ function parseReporterControls(
     const argument: string = argv[index];
     if (argument === '--') {
       break;
+    }
+    if (
+      tolerateMissingReporterValue &&
+      argument === '--reporter' &&
+      (!argv[index + 1] || argv[index + 1].startsWith('-'))
+    ) {
+      continue;
     }
     const reporter: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
       argv,
@@ -302,7 +310,8 @@ function hasReporterOutputControl(argv: readonly string[]): boolean {
 function resolveLogLevel(
   controls: IParsedReporterControls,
   env: Record<string, string | undefined>,
-  includeEnvironment: boolean
+  includeEnvironment: boolean,
+  useLegacyAliasPrecedence: boolean = false
 ): ReporterLogLevel {
   const requestedLevels: ReporterLogLevel[] = [];
   const explicitLogLevel: string | undefined = controls.logLevels[0];
@@ -314,6 +323,17 @@ function resolveLogLevel(
       );
     }
     requestedLevels.push(explicitLogLevel);
+  }
+  if (useLegacyAliasPrecedence && explicitLogLevel === undefined) {
+    if (controls.debug) {
+      return 'debug';
+    }
+    if (controls.verbose) {
+      return 'verbose';
+    }
+    if (controls.quiet) {
+      return 'quiet';
+    }
   }
   if (controls.quiet) {
     requestedLevels.push('quiet');
@@ -405,11 +425,14 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
   const cwd: string = options.cwd ?? process.cwd();
   const commandJson: boolean = separateJsonControls(argv).commandJson;
 
-  const selectionControls: IParsedReporterControls = parseReporterControls(argv, false);
+  const reporterProbe: IParsedReporterControls = parseReporterControls(argv, false, true);
   const reporterOwnershipEstablished: boolean =
     options.repositoryOptIn === true ||
     hasReporterOutputControl(argv) ||
-    selectionControls.reporters.some((reporter: string) => isSupportedReporterName(reporter));
+    reporterProbe.reporters.some((reporter: string) => isSupportedReporterName(reporter));
+  const selectionControls: IParsedReporterControls = reporterOwnershipEstablished
+    ? parseReporterControls(argv, false)
+    : reporterProbe;
   if (reporterOwnershipEstablished) {
     validateReporterControlMultiplicity(selectionControls, false);
   }
@@ -487,7 +510,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
       return {
         reporter: isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
-        logLevel: resolveLogLevel(selectionControls, env, true),
+        logLevel: resolveLogLevel(selectionControls, env, true, true),
         outputs: [],
         commandJson,
         enabled: true,

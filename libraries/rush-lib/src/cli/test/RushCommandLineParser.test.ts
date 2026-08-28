@@ -170,6 +170,20 @@ describe('RushCommandLineParser', () => {
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
         });
       });
+
+      describe("'custom-reporter-flag' action", () => {
+        it('preserves a value-less custom reporter flag', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunRebuildActionRepo',
+            'custom-reporter-flag'
+          );
+          process.argv.push('--reporter');
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-reporter-flag-args.json`)).toEqual(['--reporter']);
+        });
+      });
     });
 
     describe("in repo with 'rebuild' command overridden", () => {
