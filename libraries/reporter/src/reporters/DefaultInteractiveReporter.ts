@@ -17,16 +17,6 @@ import {
 const HIDE_CURSOR: string = '\u001b[?25l';
 const SHOW_CURSOR: string = '\u001b[?25h';
 const MAX_FINAL_DIAGNOSTICS: number = 10;
-const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
-  'success',
-  'successWithWarnings',
-  'failure',
-  'blocked',
-  'skipped',
-  'fromCache',
-  'noOp'
-]);
-
 /**
  * The terminal an interactive reporter writes to.
  *
@@ -114,6 +104,7 @@ export class DefaultInteractiveReporter implements IReporter {
   private _completedOperations: number;
   private _failedOperations: number;
   private readonly _projectByOperation: Map<string, string>;
+  private readonly _silentOperations: Set<string>;
   private readonly _activeProjects: Map<string, string>;
   private _latestActivity: string;
   private readonly _diagnostics: string[];
@@ -139,6 +130,7 @@ export class DefaultInteractiveReporter implements IReporter {
     this._completedOperations = 0;
     this._failedOperations = 0;
     this._projectByOperation = new Map();
+    this._silentOperations = new Set();
     this._activeProjects = new Map();
     this._latestActivity = '';
     this._diagnostics = [];
@@ -184,14 +176,23 @@ export class DefaultInteractiveReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string } = event.payload as {
-          operationId: string;
-          projectName?: string;
-        };
+        const payload: { operationId: string; projectName?: string; phaseName?: string; silent?: boolean } =
+          event.payload as {
+            operationId: string;
+            projectName?: string;
+            phaseName?: string;
+            silent?: boolean;
+          };
+        if (payload.silent) {
+          this._silentOperations.add(payload.operationId);
+          break;
+        }
+        this._silentOperations.delete(payload.operationId);
         this._totalOperations++;
+        const projectName: string = payload.projectName ?? event.scope?.projectName ?? payload.operationId;
         this._projectByOperation.set(
           payload.operationId,
-          payload.projectName ?? event.scope?.projectName ?? payload.operationId
+          payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName
         );
         break;
       }
@@ -206,14 +207,31 @@ export class DefaultInteractiveReporter implements IReporter {
           event.scope?.projectName ??
           this._projectByOperation.get(payload.operationId) ??
           payload.operationId;
+        if (this._silentOperations.has(payload.operationId)) {
+          break;
+        }
         if (payload.status === 'executing') {
           this._activeProjects.set(payload.operationId, projectName);
-        } else if (TERMINAL_STATUSES.has(payload.status)) {
-          this._activeProjects.delete(payload.operationId);
-          this._completedOperations++;
-          if (payload.status === 'failure') {
-            this._failedOperations++;
-          }
+        }
+        this._latestActivity = `${payload.status} ${projectName}`;
+        break;
+      }
+      case 'operationCompleted': {
+        const payload: { operationId: string; status: string } = event.payload as {
+          operationId: string;
+          status: string;
+        };
+        if (this._silentOperations.delete(payload.operationId)) {
+          break;
+        }
+        const projectName: string =
+          this._projectByOperation.get(payload.operationId) ??
+          event.scope?.projectName ??
+          payload.operationId;
+        this._activeProjects.delete(payload.operationId);
+        this._completedOperations++;
+        if (payload.status === 'failure') {
+          this._failedOperations++;
         }
         this._latestActivity = `${payload.status} ${projectName}`;
         break;
@@ -222,6 +240,22 @@ export class DefaultInteractiveReporter implements IReporter {
         const payload: { kind?: string; text?: string } = event.payload as { kind?: string; text?: string };
         if (payload.text !== undefined) {
           this._latestActivity = payload.text;
+        }
+        break;
+      }
+      case 'messageEmitted': {
+        const payload: { severity?: string; text?: string } = event.payload as {
+          severity?: string;
+          text?: string;
+        };
+        if (payload.text !== undefined) {
+          this._latestActivity = payload.text;
+          if (
+            event.scope?.operationId === undefined &&
+            (payload.severity === 'error' || payload.severity === 'warning')
+          ) {
+            this._diagnostics.push(payload.text.trim());
+          }
         }
         break;
       }
@@ -310,6 +344,9 @@ export class DefaultInteractiveReporter implements IReporter {
         `${this._color.green('✔')} ${this._commandName ?? 'rush'} succeeded — ` +
           `${this._completedOperations}/${this._totalOperations} operations`
       );
+      if (this._logPath !== undefined) {
+        lines.push(this._color.dim(`Log: ${this._logPath}`));
+      }
     } else {
       lines.push(
         `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${this._failedOperations} failed`
