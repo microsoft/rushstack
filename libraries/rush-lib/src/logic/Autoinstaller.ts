@@ -16,6 +16,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { Utilities } from '../utilities/Utilities';
+import { getNpmrcEnvironmentVariables } from '../utilities/npmrcUtilities';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
 import { InstallHelpers } from './installManager/InstallHelpers';
@@ -143,7 +144,10 @@ export class Autoinstaller {
         Utilities.syncNpmrc({
           sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
           targetNpmrcFolder: autoinstallerFullPath,
-          supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
+          supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm,
+          moveSensitiveSettingsToEnvironment: InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(
+            this._rushConfiguration
+          )
         });
 
         this._logIfConsoleOutputIsNotRestricted(
@@ -154,6 +158,7 @@ export class Autoinstaller {
           command: this._rushConfiguration.packageManagerToolFilename,
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
+          environment: this._getPackageManagerEnvironment(autoinstallerFullPath),
           keepEnvironment: true
         });
 
@@ -229,13 +234,17 @@ export class Autoinstaller {
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
       targetNpmrcFolder: this.folderFullPath,
-      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
+      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm,
+      moveSensitiveSettingsToEnvironment: InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(
+        this._rushConfiguration
+      )
     });
 
     await Utilities.executeCommandAsync({
       command: this._rushConfiguration.packageManagerToolFilename,
       args: ['install'],
       workingDirectory: this.folderFullPath,
+      environment: this._getPackageManagerEnvironment(this.folderFullPath),
       keepEnvironment: true
     });
 
@@ -277,5 +286,22 @@ export class Autoinstaller {
       // eslint-disable-next-line no-console
       console.log(message ?? '');
     }
+  }
+
+  /**
+   * Returns the environment to invoke the package manager with, or `undefined` to inherit this
+   * process's environment. See the `provideNpmrcCredentialsViaEnvironment` experiment.
+   */
+  private _getPackageManagerEnvironment(npmrcFolder: string): NodeJS.ProcessEnv | undefined {
+    if (!InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this._rushConfiguration)) {
+      return undefined;
+    }
+
+    const npmrcEnvironmentVariables: Record<string, string> | undefined = getNpmrcEnvironmentVariables({
+      npmrcFolder,
+      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
+    });
+
+    return npmrcEnvironmentVariables && { ...process.env, ...npmrcEnvironmentVariables };
   }
 }

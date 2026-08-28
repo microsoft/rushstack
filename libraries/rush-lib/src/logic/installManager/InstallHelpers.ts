@@ -21,6 +21,7 @@ import type { IConfigurationEnvironment } from '../base/BasePackageManagerOption
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { merge } from '../../utilities/objectUtilities';
+import { getNpmrcEnvironmentVariables } from '../../utilities/npmrcUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
 
@@ -377,10 +378,29 @@ export class InstallHelpers {
     };
   }
 
+  /**
+   * Returns true if Rush (rather than PNPM) should expand the `${VAR}` tokens that appear in
+   * credentials and registry URLs in the `.npmrc` file. See the
+   * `provideNpmrcCredentialsViaEnvironment` experiment.
+   */
+  public static shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration: RushConfiguration): boolean {
+    // Only PNPM refuses to expand these tokens, and only PNPM's "npm_config_*" environment variable
+    // name normalization has been validated here.
+    return (
+      rushConfiguration.isPnpm &&
+      !!rushConfiguration.experimentsConfiguration.configuration.provideNpmrcCredentialsViaEnvironment
+    );
+  }
+
+  /**
+   * Returns the environment that the package manager should be invoked with, including any
+   * credentials that were moved out of the generated `.npmrc` file in `npmrcFolder`.
+   */
   public static getPackageManagerEnvironment(
     rushConfiguration: RushConfiguration,
     options: {
       debug?: boolean;
+      npmrcFolder?: string;
     } = {}
   ): NodeJS.ProcessEnv {
     let configurationEnvironment: IConfigurationEnvironment | undefined = undefined;
@@ -393,7 +413,26 @@ export class InstallHelpers {
       configurationEnvironment = rushConfiguration.yarnOptions?.environmentVariables;
     }
 
-    return _mergeEnvironmentVariables(process.env, configurationEnvironment, options);
+    const packageManagerEnvironment: NodeJS.ProcessEnv = _mergeEnvironmentVariables(
+      process.env,
+      configurationEnvironment,
+      options
+    );
+
+    const { npmrcFolder } = options;
+    const shouldProvideCredentials: boolean =
+      InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration);
+    if (npmrcFolder !== undefined && shouldProvideCredentials) {
+      Object.assign(
+        packageManagerEnvironment,
+        getNpmrcEnvironmentVariables({
+          npmrcFolder,
+          supportEnvVarFallbackSyntax: rushConfiguration.isPnpm
+        })
+      );
+    }
+
+    return packageManagerEnvironment;
   }
 
   /**

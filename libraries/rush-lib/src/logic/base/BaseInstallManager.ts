@@ -559,7 +559,10 @@ export abstract class BaseInstallManager {
       targetNpmrcFolder: subspace.getSubspaceTempFolderPath(),
       linesToPrepend: extraNpmrcLines,
       createIfMissing: this.rushConfiguration.subspacesFeatureEnabled,
-      supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
+      supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm,
+      moveSensitiveSettingsToEnvironment: InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(
+        this.rushConfiguration
+      )
     });
     this._syncNpmrcAlreadyCalled = true;
 

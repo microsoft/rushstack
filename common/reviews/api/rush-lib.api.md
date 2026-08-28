@@ -489,6 +489,7 @@ export interface IExperimentsJson {
     omitAppleDoubleFilesFromBuildCache?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
+    provideNpmrcCredentialsViaEnvironment?: boolean;
     rushAlerts?: boolean;
     strictChangefileValidation?: boolean;
     trimRushEnvironmentVariablesForOperations?: boolean;

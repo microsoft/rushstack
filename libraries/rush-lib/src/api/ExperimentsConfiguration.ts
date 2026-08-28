@@ -162,6 +162,20 @@ export interface IExperimentsJson {
    * variables.
    */
   trimRushEnvironmentVariablesForOperations?: boolean;
+
+  /**
+   * If true, when using PNPM, Rush resolves the `${VAR}` tokens that appear in credentials and
+   * registry URLs in the `.npmrc` file, instead of relying on PNPM to expand them. Credentials are
+   * passed to PNPM using `npm_config_*` environment variables and are not written to the generated
+   * `.npmrc` file.
+   *
+   * @remarks
+   * PNPM 10.34.2 and newer ignore `${VAR}` tokens in credentials and registry URLs that come from a
+   * project or workspace `.npmrc` file, because such files are normally committed to Git. Rush
+   * generates `common/temp/.npmrc`, which PNPM classifies as a project file even though it is not
+   * committed, so without this experiment PNPM discards those settings and prints a warning.
+   */
+  provideNpmrcCredentialsViaEnvironment?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
