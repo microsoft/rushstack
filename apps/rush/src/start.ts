@@ -31,6 +31,7 @@ import * as rushLib from '@microsoft/rush-lib';
 
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 import { launchRushFrontendAsync } from './RushFrontend';
+import { getRushPreviewVersion } from './RushPreviewVersion';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined =
@@ -40,7 +41,7 @@ const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dir
 
 let rushVersionToLoad: string | undefined = undefined;
 
-const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
+const previewVersion: string | undefined = getRushPreviewVersion();
 
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
