@@ -61,10 +61,12 @@ describe('OperationStreamEmitter', () => {
   it('emits registration, status, output, and result with operation scope', () => {
     const sink: CapturingSink = new CapturingSink();
     const emitter: OperationStreamEmitter = makeEmitter(sink);
-    emitter.registerOperation('op1', 'project-a', 'build');
-    emitter.changeStatus('op1', 'executing');
+    emitter.registerOperation('op1', 'project-a', 'build', false);
+    emitter.changeStatus('op1', 'executing', 0, 'queued');
     emitter.writeOutput('op1', 'stdout', 'hello\n');
-    emitter.changeStatus('op1', 'success', 100);
+    emitter.changeStatus('op1', 'success', 100, 'executing');
+    emitter.closeOperationStream('op1');
+    emitter.completeOperation('op1', 'success', 100);
     emitter.completeCommand('build', true, 0, { success: 1 });
 
     expect(sink.inputs.map((i) => i.type)).toEqual([
@@ -72,13 +74,43 @@ describe('OperationStreamEmitter', () => {
       'operationStatusChanged',
       'externalOutput',
       'operationStatusChanged',
+      'operationStreamClosed',
+      'operationCompleted',
       'commandResult'
     ]);
     expect(sink.inputs[2].scope).toEqual({ commandName: 'build', operationId: 'op1' });
     expect(sink.inputs[2].privacy).toBe('local-sensitive');
-    expect(sink.inputs[3].payload).toMatchObject({ operationId: 'op1', status: 'success', durationMs: 100 });
+    expect(sink.inputs[0].payload).toMatchObject({ operationId: 'op1', silent: false });
+    expect(sink.inputs[3].payload).toMatchObject({
+      operationId: 'op1',
+      previousStatus: 'executing',
+      status: 'success',
+      durationMs: 100
+    });
     // externalOutput is protected (never coalesced/dropped); the manager derives `required`.
     expect(isReporterEventRequired('externalOutput')).toBe(true);
+  });
+
+  it('records silent metadata and orders close before completion', () => {
+    const sink: CapturingSink = new CapturingSink();
+    const emitter: OperationStreamEmitter = makeEmitter(sink);
+    emitter.registerOperation('silent-op', 'project-a', '_phase:synthetic', true);
+    emitter.changeStatus('silent-op', 'noOp', 0, 'ready');
+    emitter.closeOperationStream('silent-op');
+    emitter.completeOperation('silent-op', 'noOp', 0);
+
+    expect(sink.inputs.map(({ type }) => type)).toEqual([
+      'operationRegistered',
+      'operationStatusChanged',
+      'operationStreamClosed',
+      'operationCompleted'
+    ]);
+    expect(sink.inputs[0].payload).toEqual({
+      operationId: 'silent-op',
+      projectName: 'project-a',
+      phaseName: '_phase:synthetic',
+      silent: true
+    });
   });
 
   it('splits raw output into uncollated chunks', () => {

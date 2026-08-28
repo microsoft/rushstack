@@ -676,9 +676,7 @@ export class OperationGraph implements IOperationGraph {
         operation,
         iterationContext
       );
-
       executionRecords.set(operation, executionRecord);
-      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent, executionRecord);
     }
 
     for (const [operation, record] of executionRecords) {
@@ -715,6 +713,10 @@ export class OperationGraph implements IOperationGraph {
 
     if (iterationContext.totalOperations === 0) {
       return;
+    }
+
+    for (const executionRecord of executionRecords.values()) {
+      eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
     }
 
     this._setScheduledIteration(iterationContext);
@@ -961,6 +963,8 @@ export class OperationGraph implements IOperationGraph {
       }
     }
     for (const record of executionRecords.values()) {
+      record.closeOperationStream();
+      eventSink?.onOperationCompleted?.(record);
       record.stdioSummarizer.close();
       record.problemCollector.close();
     }

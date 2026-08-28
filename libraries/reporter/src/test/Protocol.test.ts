@@ -18,6 +18,7 @@ import {
 describe('ReporterProtocol', () => {
   it('advertises protocol major 1 and the specified byte limits', () => {
     expect(REPORTER_PROTOCOL_VERSION.major).toBe(1);
+    expect(REPORTER_PROTOCOL_VERSION.minor).toBe(1);
     expect(REPORTER_PROTOCOL_LIMITS.bootstrapBufferBytes).toBe(1024 * 1024);
     expect(REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes).toBe(1024 * 1024);
     expect(REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes).toBe(64 * 1024);
@@ -175,10 +176,7 @@ describe('negotiateReporterHello', () => {
 
   it('rejects a malformed wire hello with a predictable validation error', () => {
     expect(() =>
-      negotiateReporterHello(
-        { kind: 'hello' },
-        { supportedProtocolVersion: { major: 1, minor: 0 } }
-      )
+      negotiateReporterHello({ kind: 'hello' }, { supportedProtocolVersion: { major: 1, minor: 0 } })
     ).toThrow(InvalidReporterHelloError);
     expect(() =>
       negotiateReporterHello(

@@ -5,6 +5,7 @@ import { InternalError, PackageJsonLookup, type IPackageJson } from '@rushstack/
 import {
   LifecycleEmitter,
   LegacyErrorBridge,
+  OperationStreamEmitter,
   RushSessionReporting,
   TelemetrySubscriber,
   isReporterEventRequired,
@@ -49,6 +50,17 @@ export interface IRushSessionReporterOptions {
    * The identifier assigned to this Rush session by the frontend.
    */
   readonly sessionId: string;
+
+  /**
+   * Enables raw semantic operation events for the pre-major reporter opt-in path.
+   *
+   * @remarks
+   * When false or omitted, Rush retains the shadow lifecycle-only behavior and
+   * does not tap operation output.
+   *
+   * @internal
+   */
+  readonly operationStreamEnabled?: boolean;
 }
 
 /**
@@ -293,6 +305,22 @@ function _createLifecycleEmitter(
   });
 }
 
+function _createOperationStreamEmitter(
+  state: IRushSessionReportingState | undefined,
+  scope?: IReporterEventScope
+): OperationStreamEmitter | undefined {
+  if (!state) {
+    return undefined;
+  }
+
+  return new OperationStreamEmitter({
+    sink: state.eventSink,
+    sessionId: state.sessionId,
+    source: state.source,
+    scope: scope ? { ...scope } : undefined
+  });
+}
+
 function _getSessionState(rushSession: RushSession): IRushSessionState {
   const state: IRushSessionState | undefined = _rushSessionStates.get(rushSession);
   if (!state) {
@@ -449,6 +477,21 @@ export function _getRushSessionLifecycleEmitter(
   scope?: IReporterEventScope
 ): LifecycleEmitter | undefined {
   return _createLifecycleEmitter(_getSessionState(rushSession).reporting, scope);
+}
+
+/**
+ * Creates the raw operation stream emitter only for the pre-major opt-in path.
+ *
+ * @internal
+ */
+export function _getRushSessionOperationStreamEmitter(
+  rushSession: RushSession,
+  scope?: IReporterEventScope
+): OperationStreamEmitter | undefined {
+  const state: IRushSessionState = _getSessionState(rushSession);
+  return state.options.reporter?.operationStreamEnabled
+    ? _createOperationStreamEmitter(state.reporting, scope)
+    : undefined;
 }
 
 /**

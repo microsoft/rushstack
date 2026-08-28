@@ -605,17 +605,31 @@ export interface IOldEngineOutputAdapterOptions {
 }
 
 // @beta
+export interface IOperationCompletedPayload {
+    readonly durationMs?: number;
+    readonly operationId: string;
+    readonly status: OperationStatus;
+}
+
+// @beta
 export interface IOperationRegisteredPayload {
     readonly operationId: string;
     readonly phaseName?: string;
     readonly projectName?: string;
+    readonly silent?: boolean;
 }
 
 // @beta
 export interface IOperationStatusChangedPayload {
     readonly durationMs?: number;
     readonly operationId: string;
+    readonly previousStatus?: OperationStatus;
     readonly status: OperationStatus;
+}
+
+// @beta
+export interface IOperationStreamClosedPayload {
+    readonly operationId: string;
 }
 
 // @beta
@@ -1251,11 +1265,13 @@ export type OperationStatus = 'ready' | 'waiting' | 'queued' | 'executing' | 'su
 // @beta
 export class OperationStreamEmitter {
     constructor(options: IOperationStreamEmitterOptions);
-    changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string;
+    changeStatus(operationId: string, status: OperationStatus, durationMs?: number, previousStatus?: OperationStatus): string;
+    closeOperationStream(operationId: string): string;
     completeCommand(commandName: string, succeeded: boolean, exitCode: number, operationCounts?: {
         readonly [status: string]: number;
     }): string;
-    registerOperation(operationId: string, projectName?: string, phaseName?: string): string;
+    completeOperation(operationId: string, status: OperationStatus, durationMs?: number): string;
+    registerOperation(operationId: string, projectName?: string, phaseName?: string, silent?: boolean): string;
     writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[];
 }
 
@@ -1328,7 +1344,7 @@ export function renderActiveProjectsRow(projects: readonly string[], width: numb
 export function renderLiveRegion(state: ILiveRegionState, options: IRenderLiveRegionOptions): string[];
 
 // @beta
-export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension"];
+export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension", "operationStreamClosed", "operationCompleted"];
 
 // @beta
 export const REPORTER_KNOWN_CAPABILITIES: readonly [];

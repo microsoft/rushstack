@@ -161,7 +161,8 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     ...launchOptions,
     reporter: {
       eventSink: reporterHost.sink,
-      sessionId
+      sessionId,
+      operationStreamEnabled: reporterHost.selection.enabled
     },
     reporterCloseAsync
   };

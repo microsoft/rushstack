@@ -30,6 +30,8 @@
  * | `artifactAvailable` | yes | `normal` |
  * | `commandResult` | yes | `quiet` |
  * | `extension` | yes | `normal` |
+ * | `operationStreamClosed` | yes | `debug` |
+ * | `operationCompleted` | yes | `normal` |
  *
  * Coalescing a replaceable `activityChanged` event under queue pressure leaves
  * gaps in the delivered `sequence` values; gaps are legal and are not a
@@ -57,7 +59,9 @@ export const REPORTER_EVENT_TYPES = [
   'externalProcessCompleted',
   'artifactAvailable',
   'commandResult',
-  'extension'
+  'extension',
+  'operationStreamClosed',
+  'operationCompleted'
 ] as const;
 
 /**

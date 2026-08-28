@@ -27,7 +27,9 @@ describe('ReporterEventType', () => {
       'externalProcessCompleted',
       'artifactAvailable',
       'commandResult',
-      'extension'
+      'extension',
+      'operationStreamClosed',
+      'operationCompleted'
     ]);
   });
 

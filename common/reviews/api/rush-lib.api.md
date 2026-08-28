@@ -684,6 +684,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 export interface _IOperationGraphEventSink {
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
+    onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
     onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
@@ -1016,6 +1017,8 @@ export interface IRushSessionOptions {
 // @beta
 export interface IRushSessionReporterOptions {
     readonly eventSink: IReporterEventSink;
+    // @internal
+    readonly operationStreamEnabled?: boolean;
     readonly sessionId: string;
 }
 
