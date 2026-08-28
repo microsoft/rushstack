@@ -383,6 +383,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/rush-reporter':
+        specifier: workspace:*
+        version: link:../../libraries/reporter
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
@@ -4205,6 +4208,9 @@ importers:
       '@rushstack/rush-pnpm-kit-v9':
         specifier: workspace:*
         version: link:../rush-pnpm-kit-v9
+      '@rushstack/rush-reporter':
+        specifier: workspace:*
+        version: link:../reporter
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
