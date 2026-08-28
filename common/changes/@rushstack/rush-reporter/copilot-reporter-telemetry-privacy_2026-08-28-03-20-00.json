@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-reporter",
-      "comment": "Prevent non-public reporter events from contributing unvalidated or unbounded values to telemetry aggregates.",
+      "comment": "Prevent non-public reporter events from contributing unvalidated or unbounded values to telemetry aggregates, including producer identity and protocol metadata.",
       "type": "patch"
     }
   ],

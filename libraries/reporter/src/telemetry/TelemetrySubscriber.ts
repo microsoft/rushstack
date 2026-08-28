@@ -14,15 +14,47 @@ import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
 import type { ITelemetryAggregate, TelemetryResult } from './TelemetryAggregate';
 
 const OTHER_DIAGNOSTIC_CATEGORY: 'other' = 'other';
+const TRUSTED_PRODUCER_PREFIXES: readonly string[] = ['@microsoft/', '@rushstack/'];
+const REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = new Map(
+  RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
+    (definition: IRushDiagnosticCodeDefinition): readonly [string, IRushDiagnosticCodeDefinition] => [
+      definition.code,
+      definition
+    ]
+  )
+);
 const KNOWN_DIAGNOSTIC_CATEGORIES: ReadonlySet<string> = new Set(
   RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
     (definition: IRushDiagnosticCodeDefinition): string => definition.category
   )
 );
 
-function compareDiagnosticCodeCandidates(
-  left: readonly [code: string, registered: boolean],
-  right: readonly [code: string, registered: boolean]
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isDiagnosticPayloadEffectivelyPublic(payload: unknown): boolean {
+  if (!isRecord(payload)) {
+    return false;
+  }
+  const parameters: unknown = payload.parameters;
+  if (parameters === undefined) {
+    return true;
+  }
+  if (!isRecord(parameters)) {
+    return false;
+  }
+  for (const parameter of Object.values(parameters)) {
+    if (!isRecord(parameter) || parameter.privacy !== 'public') {
+      return false;
+    }
+  }
+  return true;
+}
+
+function comparePrioritizedCandidates(
+  left: readonly [value: string, preferred: boolean],
+  right: readonly [value: string, preferred: boolean]
 ): number {
   if (left[1] !== right[1]) {
     return left[1] ? -1 : 1;
@@ -30,16 +62,51 @@ function compareDiagnosticCodeCandidates(
   return left[0] < right[0] ? -1 : left[0] > right[0] ? 1 : 0;
 }
 
+function recordBoundedPrioritizedValue(
+  values: Map<string, boolean>,
+  value: string,
+  preferred: boolean,
+  maximumCount: number
+): void {
+  const existingPriority: boolean | undefined = values.get(value);
+  if (existingPriority !== undefined) {
+    if (preferred && !existingPriority) {
+      values.set(value, true);
+    }
+    return;
+  }
+
+  if (values.size < maximumCount) {
+    values.set(value, preferred);
+    return;
+  }
+
+  let worstCandidate: readonly [value: string, preferred: boolean] | undefined;
+  for (const candidate of values) {
+    if (worstCandidate === undefined || comparePrioritizedCandidates(candidate, worstCandidate) > 0) {
+      worstCandidate = candidate;
+    }
+  }
+
+  const newCandidate: readonly [value: string, preferred: boolean] = [value, preferred];
+  if (worstCandidate !== undefined && comparePrioritizedCandidates(newCandidate, worstCandidate) < 0) {
+    values.delete(worstCandidate[0]);
+    values.set(value, preferred);
+  }
+}
+
 /**
  * Consumes canonical events and produces the allowlisted telemetry aggregate.
  *
  * @remarks
  * The subscriber runs before reporter filtering, so it observes every event. It
- * projects envelope metadata and lifecycle values only from public events. From
- * a diagnostic it keeps the explicitly public code and category regardless of
- * the envelope privacy floor, but never parameters, remediation, or templates.
- * It ignores all other values from non-public events, messages, raw external
- * output, and command arguments entirely.
+ * projects envelope metadata and lifecycle values only from effectively public
+ * events. A diagnostic containing any non-public parameter is treated as
+ * non-public even when its envelope floor is `public`. From a non-public
+ * diagnostic it keeps only a registered code and that code's registry category,
+ * never parameters, remediation, or templates. It ignores all other values from
+ * non-public events, messages, raw external output, and command arguments
+ * entirely.
  *
  * @beta
  */
@@ -53,13 +120,13 @@ export class TelemetrySubscriber {
   private readonly _operationStatuses: Map<string, IOperationStatusChangedPayload['status']>;
   private readonly _diagnosticCategoryCounts: { [category: string]: number };
   private readonly _diagnosticCodes: Map<string, boolean>;
-  private readonly _producerVersions: Set<string>;
+  private readonly _producerVersions: Map<string, boolean>;
 
   public constructor() {
     this._operationStatuses = new Map();
     this._diagnosticCategoryCounts = {};
     this._diagnosticCodes = new Map();
-    this._producerVersions = new Set();
+    this._producerVersions = new Map();
   }
 
   /**
@@ -73,35 +140,41 @@ export class TelemetrySubscriber {
    * Ingests one event, extracting only allowlisted values.
    */
   public ingest(event: IReporterEventEnvelope<unknown>): void {
-    const isPublicEnvelope: boolean = event.privacy === 'public';
-    if (isPublicEnvelope) {
-      this._protocolVersion = event.protocolVersion;
-      this._producerVersions.add(`${event.source.packageName}@${event.source.packageVersion}`);
+    const isEffectivelyPublicEnvelope: boolean =
+      event.privacy === 'public' &&
+      (event.type !== 'diagnosticEmitted' || isDiagnosticPayloadEffectivelyPublic(event.payload));
+    if (isEffectivelyPublicEnvelope) {
+      if (event.parentSessionId === undefined) {
+        this._protocolVersion = event.protocolVersion;
+      }
+      this._recordProducerVersion(event.source.packageName, event.source.packageVersion);
     }
 
     if (event.type === 'diagnosticEmitted') {
       // Code and category are public schema fields even when classified
       // parameters make the diagnostic envelope non-public.
-      const payload: { code?: string; category?: string } = event.payload as {
-        code?: string;
-        category?: string;
-      };
-      if (typeof payload.code === 'string' && isValidRushDiagnosticCode(payload.code)) {
-        const registeredDefinition: IRushDiagnosticCodeDefinition | undefined =
-          RUSH_DIAGNOSTIC_CODE_DEFINITIONS.find(
-            (definition: IRushDiagnosticCodeDefinition): boolean => definition.code === payload.code
-          );
-        if (isPublicEnvelope || registeredDefinition !== undefined) {
+      const payload: { code?: unknown; category?: unknown } = isRecord(event.payload) ? event.payload : {};
+      const registeredDefinition: IRushDiagnosticCodeDefinition | undefined =
+        typeof payload.code === 'string'
+          ? REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS.get(payload.code)
+          : undefined;
+      if (isEffectivelyPublicEnvelope) {
+        if (typeof payload.code === 'string' && isValidRushDiagnosticCode(payload.code)) {
           this._recordDiagnosticCode(payload.code, registeredDefinition !== undefined);
         }
-      }
-      if (typeof payload.category === 'string') {
-        this._recordDiagnosticCategory(payload.category);
+        if (typeof payload.category === 'string') {
+          this._recordDiagnosticCategory(
+            KNOWN_DIAGNOSTIC_CATEGORIES.has(payload.category) ? payload.category : OTHER_DIAGNOSTIC_CATEGORY
+          );
+        }
+      } else if (registeredDefinition !== undefined) {
+        this._recordDiagnosticCode(registeredDefinition.code, true);
+        this._recordDiagnosticCategory(registeredDefinition.category);
       }
       return;
     }
 
-    if (!isPublicEnvelope) {
+    if (!isEffectivelyPublicEnvelope) {
       return;
     }
 
@@ -184,6 +257,10 @@ export class TelemetrySubscriber {
     for (const status of this._operationStatuses.values()) {
       operationStatusCounts[status] = (operationStatusCounts[status] ?? 0) + 1;
     }
+    const diagnosticCategoryCounts: { [category: string]: number } = {};
+    for (const category of Object.keys(this._diagnosticCategoryCounts).sort()) {
+      diagnosticCategoryCounts[category] = this._diagnosticCategoryCounts[category];
+    }
 
     const aggregate: {
       commandName?: string;
@@ -199,8 +276,8 @@ export class TelemetrySubscriber {
     } = {
       operationStatusCounts,
       diagnosticCodes: [...this._diagnosticCodes.keys()].sort(),
-      diagnosticCategoryCounts: { ...this._diagnosticCategoryCounts },
-      producerVersions: [...this._producerVersions].sort()
+      diagnosticCategoryCounts,
+      producerVersions: [...this._producerVersions.keys()].sort()
     };
 
     if (this._commandName !== undefined) {
@@ -226,45 +303,39 @@ export class TelemetrySubscriber {
   }
 
   private _recordDiagnosticCode(code: string, registered: boolean): void {
-    const existingRegistration: boolean | undefined = this._diagnosticCodes.get(code);
-    if (existingRegistration !== undefined) {
-      if (registered && !existingRegistration) {
-        this._diagnosticCodes.set(code, true);
-      }
-      return;
-    }
-
-    if (this._diagnosticCodes.size < REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes) {
-      this._diagnosticCodes.set(code, registered);
-      return;
-    }
-
-    let worstCandidate: readonly [code: string, registered: boolean] | undefined;
-    for (const candidate of this._diagnosticCodes) {
-      if (worstCandidate === undefined || compareDiagnosticCodeCandidates(candidate, worstCandidate) > 0) {
-        worstCandidate = candidate;
-      }
-    }
-
-    const newCandidate: readonly [code: string, registered: boolean] = [code, registered];
-    if (worstCandidate !== undefined && compareDiagnosticCodeCandidates(newCandidate, worstCandidate) < 0) {
-      this._diagnosticCodes.delete(worstCandidate[0]);
-      this._diagnosticCodes.set(code, registered);
-    }
+    recordBoundedPrioritizedValue(
+      this._diagnosticCodes,
+      code,
+      registered,
+      REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes
+    );
   }
 
   private _recordDiagnosticCategory(category: string): void {
-    let safeCategory: string = KNOWN_DIAGNOSTIC_CATEGORIES.has(category)
-      ? category
-      : OTHER_DIAGNOSTIC_CATEGORY;
-    if (
-      this._diagnosticCategoryCounts[safeCategory] === undefined &&
-      Object.keys(this._diagnosticCategoryCounts).length >=
-        REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCategories
-    ) {
-      safeCategory = OTHER_DIAGNOSTIC_CATEGORY;
+    const existingCount: number | undefined = this._diagnosticCategoryCounts[category];
+    if (existingCount !== undefined) {
+      this._diagnosticCategoryCounts[category] = existingCount + 1;
+      return;
     }
-    this._diagnosticCategoryCounts[safeCategory] = (this._diagnosticCategoryCounts[safeCategory] ?? 0) + 1;
+    if (
+      Object.keys(this._diagnosticCategoryCounts).length <
+      REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCategories
+    ) {
+      this._diagnosticCategoryCounts[category] = 1;
+    }
+  }
+
+  private _recordProducerVersion(packageName: string, packageVersion: string): void {
+    const producerVersion: string = `${packageName}@${packageVersion}`;
+    if (producerVersion.length > REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersionLength) {
+      return;
+    }
+    recordBoundedPrioritizedValue(
+      this._producerVersions,
+      producerVersion,
+      TRUSTED_PRODUCER_PREFIXES.some((prefix: string): boolean => packageName.startsWith(prefix)),
+      REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions
+    );
   }
 }
 

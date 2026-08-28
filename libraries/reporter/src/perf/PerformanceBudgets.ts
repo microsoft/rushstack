@@ -57,6 +57,18 @@ export interface IReporterPerformanceBudgets {
    * aggregate. Defaults to `20`.
    */
   readonly maxTelemetryDiagnosticCategories: number;
+
+  /**
+   * The maximum number of distinct producer versions retained in a telemetry
+   * aggregate. Defaults to `20`.
+   */
+  readonly maxTelemetryProducerVersions: number;
+
+  /**
+   * The maximum character length of one `packageName@packageVersion` telemetry
+   * entry. Longer entries are omitted. Defaults to `256`.
+   */
+  readonly maxTelemetryProducerVersionLength: number;
 }
 
 /**
@@ -82,7 +94,9 @@ export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets = {
   maxAiOutputBytes: 64 * BYTES_PER_KIB,
   maxAiDetailedDiagnostics: 20,
   maxTelemetryDiagnosticCodes: 20,
-  maxTelemetryDiagnosticCategories: 20
+  maxTelemetryDiagnosticCategories: 20,
+  maxTelemetryProducerVersions: 20,
+  maxTelemetryProducerVersionLength: 256
 };
 
 /**

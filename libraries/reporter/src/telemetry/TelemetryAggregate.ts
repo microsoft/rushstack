@@ -67,7 +67,14 @@ export interface ITelemetryAggregate {
   readonly protocolVersion?: IReporterProtocolVersion;
 
   /**
-   * The distinct `packageName@packageVersion` producers observed on public envelopes, sorted.
+   * The distinct `packageName@packageVersion` producers observed on effectively
+   * public envelopes, sorted.
+   *
+   * @remarks
+   * The list is bounded by the reporter telemetry budgets. Trusted
+   * `@microsoft/` and `@rushstack/` producers are retained before other
+   * producers, remaining entries are selected lexicographically, and entries
+   * over the per-entry length budget are omitted.
    */
   readonly producerVersions: readonly string[];
 }
