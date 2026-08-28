@@ -39,14 +39,10 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationRegistered(
-    operationId: string,
-    silent: boolean,
-    result?: IOperationExecutionResult
-  ): void {
-    this.#workspaceSink?.onOperationRegistered?.(operationId, silent, result);
+  public onOperationRegistered(operationId: string, silent: boolean, iterationId: number): void {
+    this.#workspaceSink?.onOperationRegistered?.(operationId, silent, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationRegistered?.(operationId, silent, result);
+      requestSink.onOperationRegistered?.(operationId, silent, iterationId);
     }
   }
 
@@ -64,21 +60,17 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationChunk(
-    operationId: string,
-    chunk: ITerminalChunk,
-    result?: IOperationExecutionResult
-  ): void {
-    this.#workspaceSink?.onOperationChunk?.(operationId, chunk, result);
+  public onOperationChunk(operationId: string, chunk: ITerminalChunk, iterationId: number): void {
+    this.#workspaceSink?.onOperationChunk?.(operationId, chunk, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationChunk?.(operationId, chunk, result);
+      requestSink.onOperationChunk?.(operationId, chunk, iterationId);
     }
   }
 
-  public onOperationStreamClosed(operationId: string, result?: IOperationExecutionResult): void {
-    this.#workspaceSink?.onOperationStreamClosed?.(operationId, result);
+  public onOperationStreamClosed(operationId: string, iterationId: number): void {
+    this.#workspaceSink?.onOperationStreamClosed?.(operationId, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationStreamClosed?.(operationId, result);
+      requestSink.onOperationStreamClosed?.(operationId, iterationId);
     }
   }
 
