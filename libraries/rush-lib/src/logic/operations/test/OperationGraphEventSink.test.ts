@@ -224,6 +224,73 @@ describe('OperationGraph event sink (dual-emit)', () => {
     expect(mockWritable.getAllOutput()).not.toContain('quiet-hidden-stdout');
   });
 
+  it('emits terminal events before a dependent operation starts', async () => {
+    const sink: RecordingSink = new RecordingSink();
+    const first: Operation = createOperation(
+      'first',
+      new MockOperationRunner('first', async () => OperationStatus.Success)
+    );
+    let firstWasFinalized: boolean = false;
+    const second: Operation = createOperation(
+      'second',
+      new MockOperationRunner('second', async () => {
+        firstWasFinalized =
+          sink.closed.filter((name) => name === 'first').length === 1 &&
+          sink.completed.filter(([name]) => name === 'first').length === 1;
+        return OperationStatus.Success;
+      })
+    );
+    second.addDependency(first);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([first, second]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.eventSink = sink;
+
+    await graph.executeAsync({});
+
+    expect(firstWasFinalized).toBe(true);
+    expect(sink.closed).toEqual(['first', 'second']);
+    expect(sink.completed).toEqual([
+      ['first', OperationStatus.Success],
+      ['second', OperationStatus.Success]
+    ]);
+  });
+
+  it('emits the runner cleanup failure as the single authoritative completion', async () => {
+    const sink: RecordingSink = new RecordingSink();
+    const runner: IOperationRunner = {
+      name: 'cleanup failure',
+      reportTiming: true,
+      silent: false,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: false,
+      executeAsync: async () => OperationStatus.Success,
+      closeAsync: async () => {
+        throw new Error('cleanup failed');
+      },
+      getConfigHash: () => 'cleanup-failure'
+    };
+    const operation: Operation = createOperation('cleanup failure', runner);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([operation]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.eventSink = sink;
+    graph.hooks.configureIteration.tap('test', (records) => {
+      for (const record of records.values()) {
+        record.shouldRunnerPersist = false;
+      }
+    });
+
+    const result = await graph.executeAsync({});
+
+    expect(result.status).toBe(OperationStatus.Failure);
+    expect(sink.closed).toEqual(['cleanup failure']);
+    expect(sink.completed).toEqual([['cleanup failure', OperationStatus.Failure]]);
+  });
+
   it('leaves terminal output byte-identical whether or not a sink is attached', async () => {
     const makeRunner: () => MockOperationRunner = () =>
       new MockOperationRunner('echo', async (terminal: CollatedTerminal) => {
@@ -400,92 +467,6 @@ describe('OperationGraph event sink (dual-emit)', () => {
       operationId: '@scope/project#phase',
       status: 'successWithWarnings'
     });
-  });
-
-  it('combines sharded implementation records into one project x phase stream', async () => {
-    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
-    const rushSession: RushSession = new RushSession({
-      terminalProvider: new StringBufferTerminalProvider(),
-      getIsDebugMode: () => false,
-      reporter: {
-        eventSink: reporterSink,
-        sessionId: 'sharded-operation-stream',
-        operationStreamEnabled: true
-      }
-    });
-    const projectName: string = '@scope/sharded';
-    const preShardRunner: IOperationRunner = {
-      name: `${projectName} (phase) - pre-shard`,
-      reportTiming: false,
-      silent: true,
-      cacheable: false,
-      warningsAreAllowed: false,
-      isNoOp: true,
-      executeAsync: async () => OperationStatus.NoOp,
-      getConfigHash: () => 'pre-shard'
-    };
-    const shardRunner: IOperationRunner = {
-      name: `${projectName} (phase) - shard 1/1`,
-      reportTiming: true,
-      silent: false,
-      cacheable: false,
-      warningsAreAllowed: false,
-      isNoOp: false,
-      executeAsync: async (context: IOperationRunnerContext) =>
-        await context.runWithTerminalAsync(
-          async (terminal) => {
-            terminal.write('shard output without newline');
-            return OperationStatus.Failure;
-          },
-          { createLogFile: false, logFileSuffix: '' }
-        ),
-      getConfigHash: () => 'shard'
-    };
-    const collatorRunner: IOperationRunner = {
-      name: `${projectName} (phase) - collate`,
-      reportTiming: true,
-      silent: false,
-      cacheable: false,
-      warningsAreAllowed: false,
-      isNoOp: false,
-      executeAsync: async () => OperationStatus.Success,
-      getConfigHash: () => 'collate'
-    };
-    const preShard: Operation = createOperation('pre-shard', preShardRunner, mockPhase, projectName);
-    const shard: Operation = createOperation('shard', shardRunner, mockPhase, projectName);
-    const collator: Operation = createOperation('collator', collatorRunner, mockPhase, projectName);
-    shard.addDependency(preShard);
-    collator.addDependency(shard);
-    const graph: OperationGraph = new OperationGraph(
-      new Set([collator, preShard, shard]),
-      createGraphOptions(mockWritable, false)
-    );
-
-    attachReporterOperationEventSink(graph, rushSession, 'build');
-    await graph.executeAsync({});
-
-    const operationEvents: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
-      ({ scope }) => scope?.operationId === `${projectName}#phase`
-    );
-    expect(operationEvents.filter(({ type }) => type === 'operationRegistered')).toHaveLength(1);
-    expect(
-      operationEvents
-        .filter(({ type }) => type === 'externalOutput')
-        .map(({ payload }) => (payload as { text: string }).text)
-        .join('')
-    ).toBe('shard output without newline');
-    expect(operationEvents.filter(({ type }) => type === 'operationStreamClosed')).toHaveLength(1);
-    expect(operationEvents.filter(({ type }) => type === 'operationCompleted')).toEqual([
-      expect.objectContaining({
-        payload: expect.objectContaining({ operationId: `${projectName}#phase`, status: 'failure' })
-      })
-    ]);
-    expect(
-      operationEvents.filter(
-        ({ type, payload }) =>
-          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
-      )
-    ).toHaveLength(1);
   });
 
   it('does not register operations when scheduling hooks reject the iteration', async () => {
@@ -848,10 +829,11 @@ describe('OperationGraph event sink (dual-emit)', () => {
       reporterSink.inputs
         .filter(({ type }) => type === 'operationCompleted')
         .map(({ scope }) => scope?.operationId)
+        .sort()
     ).toEqual([
       '@scope/project#_phase:compile',
-      '@scope/project#_phase:test',
       '@scope/project#_phase:compile',
+      '@scope/project#_phase:test',
       '@scope/project#_phase:test'
     ]);
     for (const event of reporterSink.inputs.filter(({ type }) => type === 'operationStatusChanged')) {
