@@ -72,7 +72,10 @@ export interface IInstallRunRushBootstrap {
   readonly enabled: boolean;
   readonly logger: ILogger;
   readonly externalOutputCaptureMaxBytes: number | undefined;
-  readonly externalOutputHandler: ((stream: BootstrapStream, text: string) => void) | undefined;
+  readonly externalOutputHandler:
+    | ((stream: BootstrapStream, text: string, wasRendered: boolean) => void)
+    | undefined;
+  readonly externalOutputLiveStreams: Readonly<{ stdout: boolean; stderr: boolean }> | undefined;
   readonly externalOutputOverflowHandler: (() => void) | undefined;
   readonly prepareToRun: (() => void) | undefined;
 }
@@ -82,6 +85,9 @@ function readSingleFlagValue(argv: readonly string[], flag: string): string | un
   const prefix: string = `${flag}=`;
   for (let index: number = 0; index < argv.length; index++) {
     const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
     let value: string | undefined;
     if (argument.startsWith(prefix)) {
       value = argument.slice(prefix.length);
@@ -273,7 +279,12 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
   public readonly enabled: boolean = true;
   public readonly logger: ILogger;
   public readonly externalOutputCaptureMaxBytes: number;
-  public readonly externalOutputHandler: (stream: BootstrapStream, text: string) => void;
+  public readonly externalOutputHandler: (
+    stream: BootstrapStream,
+    text: string,
+    wasRendered: boolean
+  ) => void;
+  public readonly externalOutputLiveStreams: Readonly<{ stdout: boolean; stderr: boolean }>;
   public readonly externalOutputOverflowHandler: () => void;
   public readonly prepareToRun: () => void;
 
@@ -288,6 +299,7 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
   private readonly _sessionId: string;
   private readonly _sourceVersion: string;
   private readonly _entryLimit: number;
+  private readonly _fallbackStdoutStream: BootstrapStream;
   private _usedBytes: number;
   private _nextSequence: number;
   private _nextEventNumber: number;
@@ -295,7 +307,7 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
   private _droppedRequired: number;
   private _failureFlushed: boolean;
 
-  public constructor(options: IInstallRunRushBootstrapOptions) {
+  public constructor(options: IInstallRunRushBootstrapOptions, liveStdout: boolean) {
     this._entries = [];
     this._env = options.env;
     this._stdout = options.stdout ?? ((text: string) => process.stdout.write(text));
@@ -307,6 +319,7 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
     this._sessionId = `rush_bootstrap_${process.pid}_${this._randomUUID()}`;
     this._sourceVersion = options.bootstrapVersion;
     this._entryLimit = this._maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
+    this._fallbackStdoutStream = liveStdout ? 'stdout' : 'stderr';
     if (this._entryLimit <= 0) {
       throw new RangeError(`maxBytes must be greater than ${TRUNCATION_NOTICE_RESERVE_BYTES}.`);
     }
@@ -317,15 +330,11 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
     this._droppedRequired = 0;
     this._failureFlushed = false;
     this.externalOutputCaptureMaxBytes = this._maxBytes;
+    this.externalOutputLiveStreams = { stdout: liveStdout, stderr: true };
     this._addEvent({
       type: 'sessionStarted',
       privacy: 'public',
-      payload: { rushVersion: options.rushVersion, cwd: process.cwd() }
-    });
-    this._addEvent({
-      type: 'commandStarted',
-      privacy: 'public',
-      payload: { commandName: options.argv[0] ?? 'unknown', argv: options.argv }
+      payload: { rushVersion: options.rushVersion }
     });
 
     this.logger = {
@@ -336,20 +345,20 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
             privacy: 'public',
             payload: { kind: 'bootstrap', text }
           },
-          { stream: 'stdout', text: `${text}\n` }
+          { stream: this._fallbackStdoutStream, text: `${text}\n` }
         );
       },
       error: (text: string) => {
         const droppedRequiredBefore: number = this._droppedRequired;
-        this._addExternalOutput('stderr', `${text}\n`);
+        this._addExternalOutput('stderr', `${text}\n`, false);
         this._flushFailureOutput();
         if (this._droppedRequired > droppedRequiredBefore) {
           this._stderr(`${text}\n`);
         }
       }
     };
-    this.externalOutputHandler = (stream: BootstrapStream, text: string) => {
-      this._addExternalOutput(stream, text);
+    this.externalOutputHandler = (stream: BootstrapStream, text: string, wasRendered: boolean) => {
+      this._addExternalOutput(stream, text, wasRendered);
     };
     this.externalOutputOverflowHandler = () => {
       this._droppedRequired++;
@@ -406,7 +415,7 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
     }
   }
 
-  private _addExternalOutput(stream: BootstrapStream, text: string): void {
+  private _addExternalOutput(stream: BootstrapStream, text: string, wasRendered: boolean): void {
     if (!text) {
       return;
     }
@@ -415,9 +424,11 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
         {
           type: 'externalOutput',
           privacy: 'local-sensitive',
-          payload: { stream, text: chunk }
+          payload: { stream, text: chunk, ...(wasRendered ? { wasRendered: true } : {}) }
         },
-        { stream, text: chunk }
+        wasRendered
+          ? undefined
+          : { stream: stream === 'stdout' ? this._fallbackStdoutStream : stream, text: chunk }
       );
     }
   }
@@ -509,6 +520,7 @@ function createLegacyBootstrap(options: IInstallRunRushBootstrapOptions): IInsta
         },
     externalOutputHandler: undefined,
     externalOutputCaptureMaxBytes: undefined,
+    externalOutputLiveStreams: undefined,
     externalOutputOverflowHandler: undefined,
     prepareToRun: undefined
   };
@@ -568,5 +580,5 @@ export function createInstallRunRushBootstrap(
     return createLegacyBootstrap(options);
   }
 
-  return new InstallRunRushBootstrap(options);
+  return new InstallRunRushBootstrap(options, explicitReporter !== 'json' && explicitReporter !== 'ai');
 }

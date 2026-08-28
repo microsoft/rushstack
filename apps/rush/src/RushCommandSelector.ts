@@ -57,6 +57,7 @@ export class RushCommandSelector {
       }
     );
     let effectiveOptions: IRushFrontendLaunchOptions = options;
+    let restoreOldEngineOutput: (() => void) | undefined;
     if (compatibility.mode !== 'structured' && engineProtocolMajor !== undefined && options.reporterEnabled) {
       if (options.reporterSelectionReason === 'explicit --reporter') {
         throw new Error(
@@ -72,60 +73,92 @@ export class RushCommandSelector {
         reporterSelectionReason: 'bootstrap compatibility fallback'
       };
     } else if (compatibility.mode === 'new-frontend-old-engine' && options.reporterEnabled) {
-      _observeOldEngineOutput(options, Rush.version);
+      restoreOldEngineOutput = _observeOldEngineOutput(options, Rush.version);
     }
 
-    if (commandName === 'rush-pnpm') {
-      if (!Rush.launchRushPnpm) {
-        _failWithError(
-          `This repository is using Rush version ${Rush.version}` +
-            ` which does not support the "rush-pnpm" command`
-        );
+    try {
+      if (commandName === 'rush-pnpm') {
+        if (!Rush.launchRushPnpm) {
+          _failWithError(
+            `This repository is using Rush version ${Rush.version}` +
+              ` which does not support the "rush-pnpm" command`
+          );
+        }
+        Rush.launchRushPnpm(launcherVersion, {
+          isManaged: options.isManaged,
+          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        });
+      } else if (commandName === 'rushx') {
+        if (!Rush.launchRushX) {
+          _failWithError(
+            `This repository is using Rush version ${Rush.version}` +
+              ` which does not support the "rushx" command`
+          );
+        }
+        Rush.launchRushX(launcherVersion, effectiveOptions);
+      } else {
+        Rush.launch(launcherVersion, effectiveOptions);
       }
-      Rush.launchRushPnpm(launcherVersion, {
-        isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-      });
-    } else if (commandName === 'rushx') {
-      if (!Rush.launchRushX) {
-        _failWithError(
-          `This repository is using Rush version ${Rush.version}` +
-            ` which does not support the "rushx" command`
-        );
-      }
-      Rush.launchRushX(launcherVersion, effectiveOptions);
-    } else {
-      Rush.launch(launcherVersion, effectiveOptions);
+    } catch (error) {
+      restoreOldEngineOutput?.();
+      throw error;
     }
   }
 }
 
-function _observeOldEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): void {
+function _observeOldEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): () => void {
   const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
     sink: options.reporterEventSink,
     sessionId: `rush_old_engine_${process.pid}`,
     source: { packageName: '@microsoft/rush-lib', packageVersion: engineVersion }
   });
-  const legacyWrite: typeof process.stderr.write = process.stderr.write.bind(process.stderr);
-  _observeStream(process.stdout, 'stdout', adapter, legacyWrite);
-  _observeStream(process.stderr, 'stderr', adapter, legacyWrite);
+  const restoreStdout: () => void = _observeStream(
+    process.stdout,
+    'stdout',
+    adapter,
+    process.stdout.write.bind(process.stdout),
+    options.reporterStdoutIsMachineReadable !== true
+  );
+  const restoreStderr: () => void = _observeStream(
+    process.stderr,
+    'stderr',
+    adapter,
+    process.stderr.write.bind(process.stderr),
+    true
+  );
+  let restored: boolean = false;
+  const restore: () => void = () => {
+    if (restored) {
+      return;
+    }
+    restored = true;
+    process.removeListener('beforeExit', restore);
+    process.removeListener('exit', restore);
+    restoreStdout();
+    restoreStderr();
+  };
+  process.once('beforeExit', restore);
+  process.once('exit', restore);
+  return restore;
 }
 
 function _observeStream(
   stream: NodeJS.WriteStream,
   streamName: 'stdout' | 'stderr',
   adapter: OldEngineOutputAdapter,
-  legacyWrite: typeof process.stderr.write
-): void {
+  legacyWrite: typeof process.stdout.write,
+  renderLive: boolean
+): () => void {
   const marker: symbol = Symbol.for(`rush.reporter.old-engine-output.${streamName}`);
   const markedStream: NodeJS.WriteStream & { [key: symbol]: boolean | undefined } =
     stream as NodeJS.WriteStream & { [key: symbol]: boolean | undefined };
   if (markedStream[marker]) {
-    return;
+    return () => {};
   }
   markedStream[marker] = true;
 
   const decoder: StringDecoder = new StringDecoder('utf8');
+  const originalWrite: typeof stream.write = stream.write;
   stream.write = ((
     chunk: string | Uint8Array,
     encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
@@ -136,13 +169,29 @@ function _observeStream(
         ? chunk
         : decoder.write(Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength));
     if (text) {
-      adapter.capture(streamName, text);
+      adapter.capture(streamName, text, renderLive);
+    }
+    if (!renderLive) {
+      const writeCallback: ((error?: Error | null) => void) | undefined =
+        typeof encodingOrCallback === 'function' ? encodingOrCallback : callback;
+      if (writeCallback) {
+        process.nextTick(writeCallback);
+      }
+      return true;
     }
     if (typeof encodingOrCallback === 'function') {
       return legacyWrite(chunk, encodingOrCallback);
     }
     return legacyWrite(chunk, encodingOrCallback, callback);
   }) as typeof stream.write;
+  return () => {
+    const remaining: string = decoder.end();
+    if (remaining) {
+      adapter.capture(streamName, remaining, renderLive);
+    }
+    stream.write = originalWrite;
+    delete markedStream[marker];
+  };
 }
 
 function _failWithError(message: string): never {

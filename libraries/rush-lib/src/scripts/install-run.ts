@@ -22,11 +22,19 @@ const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME: string = 'node_modules';
 const PACKAGE_JSON_FILENAME: string = 'package.json';
 let _externalOutputCaptureId: number = 0;
-const NPM_OUTPUT_CAPTURE_SCRIPT: string = `
+export const NPM_OUTPUT_CAPTURE_SCRIPT: string = `
 const childProcess = require('node:child_process');
 const fs = require('node:fs');
 const { StringDecoder } = require('node:string_decoder');
-const [command, argsJson, capturePath, useShell, maxBytesText] = process.argv.slice(1);
+const [
+  command,
+  argsJson,
+  capturePath,
+  useShell,
+  maxBytesText,
+  renderStdoutText,
+  renderStderrText
+] = process.argv.slice(1);
 const child = childProcess.spawn(command, JSON.parse(argsJson), {
   cwd: process.cwd(),
   env: process.env,
@@ -38,11 +46,12 @@ const decoders = { stdout: new StringDecoder('utf8'), stderr: new StringDecoder(
 const maxBytes = Number(maxBytesText);
 let capturedBytes = 0;
 let overflowed = false;
+const renderedStreams = { stdout: renderStdoutText === '1', stderr: renderStderrText === '1' };
 function capture(stream, text) {
   if (!text || overflowed) {
     return;
   }
-  const record = JSON.stringify({ stream, text }) + '\\n';
+  const record = JSON.stringify({ stream, text, wasRendered: renderedStreams[stream] }) + '\\n';
   const recordBytes = Buffer.byteLength(record);
   if (capturedBytes + recordBytes <= maxBytes) {
     fs.appendFileSync(capturePath, record);
@@ -52,8 +61,14 @@ function capture(stream, text) {
     fs.appendFileSync(capturePath, JSON.stringify({ overflow: true }) + '\\n');
   }
 }
-child.stdout.on('data', (chunk) => capture('stdout', decoders.stdout.write(chunk)));
-child.stderr.on('data', (chunk) => capture('stderr', decoders.stderr.write(chunk)));
+function forwardAndCapture(stream, chunk) {
+  if (renderedStreams[stream]) {
+    (stream === 'stdout' ? process.stdout : process.stderr).write(chunk);
+  }
+  capture(stream, decoders[stream].write(chunk));
+}
+child.stdout.on('data', (chunk) => forwardAndCapture('stdout', chunk));
+child.stderr.on('data', (chunk) => forwardAndCapture('stderr', chunk));
 child.on('error', (error) => {
   process.stderr.write(String(error) + '\\n');
   process.exitCode = 1;
@@ -71,9 +86,10 @@ child.on('close', (code, signal) => {
 `;
 
 export interface IInstallAndRunOptions {
-  readonly onExternalOutput?: (stream: 'stdout' | 'stderr', text: string) => void;
+  readonly onExternalOutput?: (stream: 'stdout' | 'stderr', text: string, wasRendered: boolean) => void;
   readonly onExternalOutputOverflow?: () => void;
   readonly externalOutputCaptureMaxBytes?: number;
+  readonly externalOutputLiveStreams?: Readonly<{ stdout: boolean; stderr: boolean }>;
   readonly prepareToRun?: () => void;
 }
 
@@ -409,9 +425,10 @@ function _installPackage(
   name: string,
   version: string,
   npmCommand: 'install' | 'ci',
-  onExternalOutput: ((stream: 'stdout' | 'stderr', text: string) => void) | undefined,
+  onExternalOutput: ((stream: 'stdout' | 'stderr', text: string, wasRendered: boolean) => void) | undefined,
   onExternalOutputOverflow: (() => void) | undefined,
-  externalOutputCaptureMaxBytes: number | undefined
+  externalOutputCaptureMaxBytes: number | undefined,
+  externalOutputLiveStreams: Readonly<{ stdout: boolean; stderr: boolean }> | undefined
 ): void {
   let capturePath: string | undefined;
   try {
@@ -433,6 +450,7 @@ function _installPackage(
         },
         capturePath,
         externalOutputCaptureMaxBytes ?? 1024 * 1024,
+        externalOutputLiveStreams ?? { stdout: true, stderr: true },
         `npm ${npmCommand}`
       );
     } else {
@@ -462,7 +480,7 @@ function _installPackage(
 
 function _readCapturedNpmOutput(
   capturePath: string,
-  onExternalOutput: (stream: 'stdout' | 'stderr', text: string) => void,
+  onExternalOutput: (stream: 'stdout' | 'stderr', text: string, wasRendered: boolean) => void,
   onExternalOutputOverflow: (() => void) | undefined
 ): void {
   const fileDescriptor: number = fs.openSync(capturePath, 'r');
@@ -481,14 +499,19 @@ function _readCapturedNpmOutput(
         const line: string = pending.slice(0, newlineIndex);
         pending = pending.slice(newlineIndex + 1);
         if (line) {
-          const record: { stream?: unknown; text?: unknown; overflow?: unknown } = JSON.parse(line);
+          const record: {
+            stream?: unknown;
+            text?: unknown;
+            wasRendered?: unknown;
+            overflow?: unknown;
+          } = JSON.parse(line);
           if (record.overflow === true) {
             onExternalOutputOverflow?.();
           } else if (
             (record.stream === 'stdout' || record.stream === 'stderr') &&
             typeof record.text === 'string'
           ) {
-            onExternalOutput(record.stream, record.text);
+            onExternalOutput(record.stream, record.text, record.wasRendered === true);
           }
         }
       }
@@ -562,6 +585,7 @@ function _runNpmWithCaptureConfirmSuccess(
   options: childProcess.SpawnSyncOptions,
   capturePath: string,
   captureMaxBytes: number,
+  liveStreams: Readonly<{ stdout: boolean; stderr: boolean }>,
   commandNameForLogging: string
 ): childProcess.SpawnSyncReturns<string | Buffer> {
   const npmPath: string = getNpmPath();
@@ -576,7 +600,9 @@ function _runNpmWithCaptureConfirmSuccess(
       JSON.stringify(commandArgs),
       capturePath,
       IS_WINDOWS ? '1' : '0',
-      String(captureMaxBytes)
+      String(captureMaxBytes),
+      liveStreams.stdout ? '1' : '0',
+      liveStreams.stderr ? '1' : '0'
     ],
     options
   );
@@ -647,12 +673,16 @@ export function installAndRun(
       installCommand,
       options.onExternalOutput,
       options.onExternalOutputOverflow,
-      options.externalOutputCaptureMaxBytes
+      options.externalOutputCaptureMaxBytes,
+      options.externalOutputLiveStreams
     );
     _writeFlagFile(packageInstallFolder);
   }
 
-  const statusMessage: string = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
+  const invocation: string = options.onExternalOutput
+    ? packageBinName
+    : `${packageBinName} ${packageBinArgs.join(' ')}`;
+  const statusMessage: string = `Invoking "${invocation}"`;
   const statusMessageLine: string = new Array(statusMessage.length + 1).join('-');
   logger.info('\n' + statusMessage + '\n' + statusMessageLine + '\n');
   options.prepareToRun?.();

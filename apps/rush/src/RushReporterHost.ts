@@ -122,6 +122,40 @@ class LogLevelReporter implements IReporter {
   }
 }
 
+class VisibleBootstrapOutputFilterReporter implements IReporter {
+  public readonly name: string;
+
+  private readonly _reporter: IReporter;
+
+  public constructor(reporter: IReporter) {
+    this._reporter = reporter;
+    this.name = reporter.name;
+  }
+
+  public initializeAsync(context: IReporterContext): Promise<void> {
+    return this._reporter.initializeAsync(context);
+  }
+
+  public report(event: IReporterEventEnvelope<unknown>): void {
+    const payload: { readonly wasRendered?: unknown } | undefined =
+      typeof event.payload === 'object' && event.payload !== null
+        ? (event.payload as { readonly wasRendered?: unknown })
+        : undefined;
+    if (event.type === 'externalOutput' && payload?.wasRendered === true) {
+      return;
+    }
+    this._reporter.report(event);
+  }
+
+  public flushAsync(): Promise<void> {
+    return this._reporter.flushAsync();
+  }
+
+  public closeAsync(): Promise<void> {
+    return this._reporter.closeAsync();
+  }
+}
+
 class ExplicitOutputReporter implements IReporter {
   public readonly name: string;
 
@@ -639,9 +673,15 @@ export async function initializeRushReporterHostAsync(
     if (selection.enabled) {
       const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
       if (primaryReporter) {
-        host.manager.addReporter(new LogLevelReporter(primaryReporter, selection.logLevel), {
-          destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
-        });
+        const filteredReporter: IReporter = new LogLevelReporter(primaryReporter, selection.logLevel);
+        host.manager.addReporter(
+          selection.reporter === 'default' || selection.reporter === 'plaintext'
+            ? new VisibleBootstrapOutputFilterReporter(filteredReporter)
+            : filteredReporter,
+          {
+            destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
+          }
+        );
       }
 
       const hasExplicitFileOutput: boolean = selection.outputs.some(

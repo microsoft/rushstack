@@ -1246,7 +1246,7 @@ export function normalizeAnsi(text: string): string;
 // @beta
 export class OldEngineOutputAdapter {
     constructor(options: IOldEngineOutputAdapterOptions);
-    capture(stream: 'stdout' | 'stderr', text: string): string[];
+    capture(stream: 'stdout' | 'stderr', text: string, wasRendered?: boolean): string[];
 }
 
 // @beta

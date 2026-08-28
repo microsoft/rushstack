@@ -74,7 +74,7 @@ export class OldEngineOutputAdapter {
    * @param stream - the originating stream
    * @param text - the raw output text
    */
-  public capture(stream: 'stdout' | 'stderr', text: string): string[] {
+  public capture(stream: 'stdout' | 'stderr', text: string, wasRendered: boolean = true): string[] {
     const eventIds: string[] = [];
     for (const chunk of chunkUtf8Text(text, this._maxChunkBytes)) {
       eventIds.push(
@@ -84,7 +84,7 @@ export class OldEngineOutputAdapter {
           source: this._source,
           privacy: 'local-sensitive',
           type: 'externalOutput',
-          payload: { stream, text: chunk }
+          payload: { stream, text: chunk, ...(wasRendered ? { wasRendered: true } : {}) }
         })
       );
     }

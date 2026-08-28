@@ -178,7 +178,8 @@ function getLegacyFallbackOutput(events: readonly unknown[]): IBootstrapLegacyOu
     if (
       event.type === 'externalOutput' &&
       (event.payload.stream === 'stdout' || event.payload.stream === 'stderr') &&
-      typeof event.payload.text === 'string'
+      typeof event.payload.text === 'string' &&
+      event.payload.wasRendered !== true
     ) {
       output.push({ stream: event.payload.stream, text: event.payload.text });
     } else if (event.type === 'activityChanged' && typeof event.payload.text === 'string') {

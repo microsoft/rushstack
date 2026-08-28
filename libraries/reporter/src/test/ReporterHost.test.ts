@@ -209,6 +209,36 @@ describe('ReporterHost handoff replay', () => {
     });
   });
 
+  it('does not duplicate already-rendered output during legacy fallback', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'live output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
+      await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
+
+      const manager: ReporterManager = new ReporterManager();
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+
+      expect(result.skipReason).toBe('incompatible-protocol');
+      expect(result.legacyFallbackOutput).toBeUndefined();
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    });
+  });
+
   it('replays a valid prefix before a malformed trailing record', async () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();

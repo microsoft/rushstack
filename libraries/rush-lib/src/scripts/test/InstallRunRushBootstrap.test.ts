@@ -103,27 +103,76 @@ describe(createInstallRunRushBootstrap.name, () => {
       const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
 
       bootstrap.logger.info('resolving Rush');
-      bootstrap.externalOutputHandler?.('stdout', 'npm line 1\nnpm line 2\n');
+      bootstrap.externalOutputHandler?.('stdout', 'npm line 1\nnpm line 2\n', false);
       bootstrap.logger.info('invoking Rush');
       bootstrap.prepareToRun?.();
 
       const handoff = readHandoff(env);
       expect(bootstrap.enabled).toBe(true);
+      expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: false, stderr: true });
       expect(stdout).toEqual([]);
       expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBe(
         (handoff.records[0] as { nonce?: string }).nonce
       );
       expect(handoff.records.slice(1).map((record: Record<string, unknown>) => record.type)).toEqual([
         'sessionStarted',
-        'commandStarted',
         'activityChanged',
         'externalOutput',
         'activityChanged'
       ]);
-      expect((handoff.records[4].payload as { text: string }).text).toBe('npm line 1\nnpm line 2\n');
+      expect((handoff.records[3].payload as { text: string }).text).toBe('npm line 1\nnpm line 2\n');
+      expect((handoff.records[3].payload as { wasRendered?: boolean }).wasRendered).toBeUndefined();
       if (process.platform !== 'win32') {
         expect(fs.statSync(handoff.path).mode % 0o1000).toBe(0o600);
       }
+    });
+  });
+
+  it('does not publish the working directory or full argv as public bootstrap data', async () => {
+    await withTempDir(async (directory: string) => {
+      const secretArgument: string = '--token=bootstrap-secret-value';
+      const secretCwd: string = path.join(directory, 'secret-worktree-name');
+      const cwdSpy: jest.SpyInstance = jest.spyOn(process, 'cwd').mockReturnValue(secretCwd);
+      try {
+        const { options, env } = makeOptions(directory, {
+          argv: ['build', '--reporter=json', secretArgument]
+        });
+        const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+        bootstrap.prepareToRun?.();
+
+        const handoff = readHandoff(env);
+        const serialized: string = fs.readFileSync(handoff.path, 'utf8');
+        expect(serialized).not.toContain(secretArgument);
+        expect(serialized).not.toContain(secretCwd);
+        expect(handoff.records[1]).toMatchObject({
+          privacy: 'public',
+          type: 'sessionStarted',
+          payload: { rushVersion: '5.178.1' }
+        });
+        expect(handoff.records).toHaveLength(2);
+      } finally {
+        cwdSpy.mockRestore();
+      }
+    });
+  });
+
+  it('stops parsing reporter controls at the pass-through separator', async () => {
+    await withTempDir(async (directory: string) => {
+      expect(
+        createInstallRunRushBootstrap(
+          makeOptions(directory, {
+            argv: ['build', '--', '--reporter=unknown', '--log-level=invalid']
+          }).options
+        ).enabled
+      ).toBe(false);
+
+      expect(
+        createInstallRunRushBootstrap(
+          makeOptions(directory, {
+            argv: ['build', '--reporter=json', '--', '--reporter=unknown', '--log-level=invalid']
+          }).options
+        ).enabled
+      ).toBe(true);
     });
   });
 
@@ -239,13 +288,29 @@ describe(createInstallRunRushBootstrap.name, () => {
         maxBytes: 800
       });
       const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
-      bootstrap.externalOutputHandler?.('stdout', 'x'.repeat(2000));
+      bootstrap.externalOutputHandler?.('stdout', 'x'.repeat(2000), true);
 
       expect(() => bootstrap.prepareToRun?.()).toThrow(/could not preserve/);
       bootstrap.logger.error('bootstrap failed');
 
       expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
       expect(stderr.join('')).toContain('bootstrap failed');
+      expect(stderr.join('')).not.toContain('xxx');
+    });
+  });
+
+  it('keeps machine-reporter failure fallback off stdout', async () => {
+    await withTempDir(async (directory: string) => {
+      const { options, stdout, stderr } = makeOptions(directory, {
+        argv: ['build', '--reporter=json']
+      });
+      const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+      bootstrap.logger.info('installing Rush');
+      bootstrap.externalOutputHandler?.('stdout', 'npm stdout\n', false);
+      bootstrap.logger.error('bootstrap failed');
+
+      expect(stdout).toEqual([]);
+      expect(stderr.join('')).toBe('installing Rush\nnpm stdout\nbootstrap failed\n');
     });
   });
 

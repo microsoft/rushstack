@@ -67,8 +67,6 @@ function _getBin(scriptName: string): 'rush' | 'rush-pnpm' | 'rushx' {
 }
 
 function _run(): void {
-  _validateBundledBootstrapProtocol();
-
   const [
     nodePath /* Ex: /bin/node */,
     scriptPath /* /repo/common/scripts/install-run-rush.js */,
@@ -89,7 +87,9 @@ function _run(): void {
   let quiet: boolean = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
 
   for (const arg of packageBinArgs) {
-    if (arg === '-q' || arg === '--quiet') {
+    if (arg === '--') {
+      break;
+    } else if (arg === '-q' || arg === '--quiet') {
       // The -q/--quiet flag is supported by both `rush` and `rushx`, and will suppress
       // any normal informational/diagnostic information printed during startup.
       //
@@ -116,11 +116,12 @@ function _run(): void {
     process.exit(1);
   }
 
-  const rushJsonFolder: string = findRushJsonFolder();
-  const rushVersion: { readonly version: string; readonly sourceMessage?: string } = _getRushVersion();
   let bootstrap: IInstallRunRushBootstrap | undefined;
   process.exitCode = 1;
   try {
+    _validateBundledBootstrapProtocol();
+    const rushJsonFolder: string = findRushJsonFolder();
+    const rushVersion: { readonly version: string; readonly sourceMessage?: string } = _getRushVersion();
     bootstrap = createInstallRunRushBootstrap({
       argv: packageBinArgs,
       env: process.env,
@@ -154,6 +155,7 @@ function _run(): void {
         onExternalOutput: bootstrap.externalOutputHandler,
         onExternalOutputOverflow: bootstrap.externalOutputOverflowHandler,
         externalOutputCaptureMaxBytes: bootstrap.externalOutputCaptureMaxBytes,
+        externalOutputLiveStreams: bootstrap.externalOutputLiveStreams,
         prepareToRun: bootstrap.prepareToRun
       }
     );

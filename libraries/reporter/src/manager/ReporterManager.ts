@@ -352,10 +352,14 @@ export class ReporterManager implements IReporterEventSink {
       entry.queue.push(envelope);
     }
 
-    if (!entry.draining) {
-      entry.draining = true;
-      entry.drainPromise = this._drainEntryAsync(entry);
+    if (entry.draining) {
+      if (!this._isCoalescibleStatusEvent(envelope)) {
+        this._drainQueuedEventsSynchronously(entry);
+      }
+      return;
     }
+    entry.draining = true;
+    entry.drainPromise = this._drainEntryAsync(entry);
   }
 
   private async _drainEntryAsync(entry: IReporterEntry): Promise<void> {
@@ -367,8 +371,11 @@ export class ReporterManager implements IReporterEventSink {
           entry.queue.length = 0;
           break;
         }
-        // Yield so producers and coalescing can interleave with delivery.
-        await Promise.resolve();
+        // Only replaceable status updates need to yield for coalescing. Protected
+        // events are delivered synchronously so a hard process exit cannot strand them.
+        if (this._isCoalescibleStatusEvent(envelope)) {
+          await Promise.resolve();
+        }
       }
     } finally {
       entry.draining = false;
@@ -380,6 +387,17 @@ export class ReporterManager implements IReporterEventSink {
       entry.reporter.report(envelope);
     } catch (error) {
       this._handleReporterFailure(entry, error as Error);
+    }
+  }
+
+  private _drainQueuedEventsSynchronously(entry: IReporterEntry): void {
+    while (entry.queue.length > 0) {
+      const envelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
+      this._deliverEnvelope(entry, envelope);
+      if (entry.disabled) {
+        entry.queue.length = 0;
+        break;
+      }
     }
   }
 
