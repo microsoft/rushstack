@@ -71,10 +71,10 @@ export interface ITelemetryAggregate {
    * public envelopes, sorted.
    *
    * @remarks
-   * The list is bounded by the reporter telemetry budgets. Trusted
-   * `@microsoft/` and `@rushstack/` producers are retained before other
-   * producers, remaining entries are selected lexicographically, and entries
-   * over the per-entry length budget are omitted.
+   * The list is bounded by the reporter telemetry budgets. Parent-session
+   * producers are retained before child-session producers, remaining entries
+   * are selected lexicographically, and entries over the per-entry length
+   * budget are omitted. Package namespace text does not confer priority.
    */
   readonly producerVersions: readonly string[];
 }

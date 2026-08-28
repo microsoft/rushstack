@@ -416,68 +416,113 @@ describe('TelemetrySubscriber', () => {
     });
   });
 
-  it('bounds foreign producer versions by priority, order, and entry length', async () => {
-    const untrustedSources: IReporterEventSource[] = [];
+  it('protects parent producers from root-first and root-last spoofed-prefix floods', async () => {
+    const childSources: IReporterEventSource[] = [];
     for (
       let index: number = 0;
       index < REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions * 3;
       index++
     ) {
-      untrustedSources.push({
-        packageName: `@foreign/plugin-${String(index).padStart(3, '0')}`,
+      childSources.push({
+        packageName:
+          index % 2 === 0
+            ? `@microsoft/spoof-${String(index).padStart(3, '0')}`
+            : `@rushstack/spoof-${String(index).padStart(3, '0')}`,
         packageVersion: '1.0.0'
       });
     }
-    const trustedSources: IReporterEventSource[] = [
-      { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
-      { packageName: '@rushstack/heft', packageVersion: '1.2.19' }
+    const parentSources: IReporterEventSource[] = [
+      { packageName: 'zz-parent-owned-a', packageVersion: '1.0.0' },
+      { packageName: 'zz-parent-owned-b', packageVersion: '2.0.0' }
     ];
-    const oversizedSource: IReporterEventSource = {
+    const oversizedChildSource: IReporterEventSource = {
       packageName: `@microsoft/${'x'.repeat(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersionLength)}`,
       packageVersion: '1.0.0'
     };
-    const sources: IReporterEventSource[] = [...untrustedSources, oversizedSource, ...trustedSources];
+    const oversizedParentSource: IReporterEventSource = {
+      packageName: 'z'.repeat(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersionLength),
+      packageVersion: '1.0.0'
+    };
 
     async function aggregateSources(
-      orderedSources: readonly IReporterEventSource[]
+      rootFirst: boolean,
+      reverseChildren: boolean
     ): Promise<ITelemetryAggregate> {
       const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
       const manager: ReporterManager = new ReporterManager();
       manager.addReporter(createTelemetryReporter(telemetry));
       await manager.initializeAsync();
-      orderedSources.forEach((source: IReporterEventSource, index: number) => {
-        manager.ingestForeignEnvelope(
-          foreignEnvelope(
-            index + 1,
-            'extension',
-            { name: 'foreign.public.event' },
-            {
-              source,
-              parentSessionId: 'sess',
-              protocolVersion: { major: 50 + index, minor: 0 }
-            }
-          )
-        );
-      });
+
+      const emitParentSources = (): void => {
+        for (const source of [...parentSources, oversizedParentSource]) {
+          manager.emit({
+            ...rawInput('extension', { name: 'parent.public.event' }),
+            source
+          });
+        }
+      };
+      const emitChildSources = (): void => {
+        const orderedChildren: IReporterEventSource[] = [
+          ...(reverseChildren ? [...childSources].reverse() : childSources),
+          oversizedChildSource
+        ];
+        orderedChildren.forEach((source: IReporterEventSource, index: number) => {
+          manager.ingestForeignEnvelope(
+            foreignEnvelope(
+              index + 1,
+              'extension',
+              { name: 'foreign.public.event' },
+              {
+                source,
+                parentSessionId: 'sess',
+                protocolVersion: { major: 50 + index, minor: 0 }
+              }
+            )
+          );
+        });
+      };
+
+      if (rootFirst) {
+        emitParentSources();
+        emitChildSources();
+      } else {
+        emitChildSources();
+        emitParentSources();
+      }
       await manager.flushAsync();
       return telemetry.buildAggregate();
     }
 
-    const forward: ITelemetryAggregate = await aggregateSources(sources);
-    const reverse: ITelemetryAggregate = await aggregateSources([...sources].reverse());
-    expect(reverse.producerVersions).toEqual(forward.producerVersions);
-    expect(forward.producerVersions).toHaveLength(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions);
-    expect(forward.producerVersions).toContain('@microsoft/rush-lib@5.177.2');
-    expect(forward.producerVersions).toContain('@rushstack/heft@1.2.19');
-    expect(forward.producerVersions).not.toContain(
-      `${oversizedSource.packageName}@${oversizedSource.packageVersion}`
+    const rootFirstForward: ITelemetryAggregate = await aggregateSources(true, false);
+    const rootFirstReverse: ITelemetryAggregate = await aggregateSources(true, true);
+    const rootLastForward: ITelemetryAggregate = await aggregateSources(false, false);
+    const rootLastReverse: ITelemetryAggregate = await aggregateSources(false, true);
+    expect(rootFirstReverse.producerVersions).toEqual(rootFirstForward.producerVersions);
+    expect(rootLastForward.producerVersions).toEqual(rootFirstForward.producerVersions);
+    expect(rootLastReverse.producerVersions).toEqual(rootFirstForward.producerVersions);
+    expect(rootFirstForward.producerVersions).toHaveLength(
+      REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions
     );
-    for (const producerVersion of forward.producerVersions) {
+    for (const source of parentSources) {
+      expect(rootFirstForward.producerVersions).toContain(`${source.packageName}@${source.packageVersion}`);
+    }
+    expect(rootFirstForward.producerVersions).not.toContain(
+      `${oversizedChildSource.packageName}@${oversizedChildSource.packageVersion}`
+    );
+    expect(rootFirstForward.producerVersions).not.toContain(
+      `${oversizedParentSource.packageName}@${oversizedParentSource.packageVersion}`
+    );
+    expect(
+      rootFirstForward.producerVersions.filter((producerVersion: string): boolean =>
+        producerVersion.startsWith('@microsoft/spoof-')
+      )
+    ).toHaveLength(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions - parentSources.length);
+    for (const producerVersion of rootFirstForward.producerVersions) {
       expect(producerVersion.length).toBeLessThanOrEqual(
         REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersionLength
       );
     }
-    expect(forward.protocolVersion).toBeUndefined();
+    expect(rootFirstForward.protocolVersion).toEqual({ major: 1, minor: 0 });
   });
 
   it('does not admit producer metadata for lifecycle diagnostics with mixed privacy', async () => {

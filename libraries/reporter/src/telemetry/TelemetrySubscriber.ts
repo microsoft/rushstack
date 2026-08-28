@@ -14,7 +14,6 @@ import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
 import type { ITelemetryAggregate, TelemetryResult } from './TelemetryAggregate';
 
 const OTHER_DIAGNOSTIC_CATEGORY: 'other' = 'other';
-const TRUSTED_PRODUCER_PREFIXES: readonly string[] = ['@microsoft/', '@rushstack/'];
 const REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = new Map(
   RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
     (definition: IRushDiagnosticCodeDefinition): readonly [string, IRushDiagnosticCodeDefinition] => [
@@ -147,7 +146,11 @@ export class TelemetrySubscriber {
       if (event.parentSessionId === undefined) {
         this._protocolVersion = event.protocolVersion;
       }
-      this._recordProducerVersion(event.source.packageName, event.source.packageVersion);
+      this._recordProducerVersion(
+        event.source.packageName,
+        event.source.packageVersion,
+        event.parentSessionId === undefined
+      );
     }
 
     if (event.type === 'diagnosticEmitted') {
@@ -325,7 +328,11 @@ export class TelemetrySubscriber {
     }
   }
 
-  private _recordProducerVersion(packageName: string, packageVersion: string): void {
+  private _recordProducerVersion(
+    packageName: string,
+    packageVersion: string,
+    isParentSessionProducer: boolean
+  ): void {
     const producerVersion: string = `${packageName}@${packageVersion}`;
     if (producerVersion.length > REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersionLength) {
       return;
@@ -333,7 +340,7 @@ export class TelemetrySubscriber {
     recordBoundedPrioritizedValue(
       this._producerVersions,
       producerVersion,
-      TRUSTED_PRODUCER_PREFIXES.some((prefix: string): boolean => packageName.startsWith(prefix)),
+      isParentSessionProducer,
       REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions
     );
   }
