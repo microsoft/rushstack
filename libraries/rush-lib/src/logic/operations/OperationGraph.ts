@@ -715,10 +715,6 @@ export class OperationGraph implements IOperationGraph {
       return;
     }
 
-    for (const executionRecord of executionRecords.values()) {
-      eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
-    }
-
     this._setScheduledIteration(iterationContext);
     // Notify listeners that an iteration has been scheduled with the planned operation records
     try {
@@ -729,6 +725,9 @@ export class OperationGraph implements IOperationGraph {
       eventSink?.onActivity?.(errorMessage, { stderr: true });
       terminal.writeStderrLine(Colorize.red(errorMessage));
       throw e;
+    }
+    for (const executionRecord of executionRecords.values()) {
+      eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
     }
     if (!this._currentIteration) {
       this._setIdleTimeout();
@@ -877,12 +876,26 @@ export class OperationGraph implements IOperationGraph {
     terminal.writeStdoutLine(parallelismLine);
     eventSink?.onActivity?.(parallelismLine);
 
-    const bailStatus: OperationStatus | undefined | void = abortSignal.aborted
-      ? OperationStatus.Aborted
-      : await measureAsyncFn(
-          `${PERF_PREFIX}:beforeExecuteIterationAsync`,
-          async () => await hooks.beforeExecuteIterationAsync.promise(executionRecords, iterationOptions)
-        );
+    let bailStatus: OperationStatus | undefined | void;
+    try {
+      bailStatus = abortSignal.aborted
+        ? OperationStatus.Aborted
+        : await measureAsyncFn(
+            `${PERF_PREFIX}:beforeExecuteIterationAsync`,
+            async () => await hooks.beforeExecuteIterationAsync.promise(executionRecords, iterationOptions)
+          );
+    } catch (error) {
+      for (const record of executionRecords.values()) {
+        if (!record.isTerminal) {
+          record.status = OperationStatus.Aborted;
+        }
+        record.closeOperationStream();
+        eventSink?.onOperationCompleted?.(record);
+        record.stdioSummarizer.close();
+        record.problemCollector.close();
+      }
+      throw error;
+    }
 
     if (bailStatus) {
       // A tap short-circuited the iteration. If it bailed with a successful status (e.g. the
