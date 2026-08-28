@@ -94,6 +94,7 @@ describe(resolveRushReporterSelection.name, () => {
       enabled: true,
       reason: 'repository experiment'
     });
+    expect(resolve(['build', '--quiet', '--verbose', '--debug'], {}, false, true).logLevel).toBe('debug');
   });
 
   it('allows reporter controls with the repository experiment', () => {
@@ -323,6 +324,24 @@ describe(resolveRushReporterSelection.name, () => {
     });
   });
 
+  it('probes value-less custom reporter flags without claiming ownership', () => {
+    expect(resolve(['custom', '--reporter'])).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: false
+    });
+    expect(resolve(['custom', '--reporter', '--verbose'])).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: false
+    });
+    expect(() => resolve(['custom', '--reporter'], {}, false, true)).toThrow(/--reporter requires a value/);
+    expect(() => resolve(['custom', '--reporter', '--output=json://./events.jsonl'])).toThrow(
+      /--reporter requires a value/
+    );
+    expect(() => resolve(['custom', '--reporter=json', '--reporter'])).toThrow(/--reporter requires a value/);
+  });
+
   it('rejects explicit non-legacy reporters for incompatible selected engines', () => {
     expect(() => resolve(['build', '--reporter=json'], {}, false, true, true)).toThrow(
       /selected Rush engine 5\.177\.0 cannot safely use --reporter=json/
@@ -372,9 +391,11 @@ describe(resolveRushReporterSelection.name, () => {
   });
 
   it('surfaces unsupported and incomplete controls with actionable errors', () => {
-    expect(() => resolve(['build', '--reporter'])).toThrow(/--reporter requires a value/);
     expect(() => resolve(['build', '--reporter=json', '--reporter=ai'])).toThrow(
       /may be specified only once/
+    );
+    expect(() => resolve(['build', '--reporter=json', '--log-level=quiet', '--debug'])).toThrow(
+      /Contradictory reporter verbosity/
     );
     expect(() => resolve(['build', '--reporter=json', '--output=plaintext://./output.txt'])).toThrow(
       /supports file:\/\/ and json:\/\//
