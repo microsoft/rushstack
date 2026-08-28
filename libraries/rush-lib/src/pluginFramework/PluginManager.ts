@@ -9,7 +9,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
 import type { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
-import type { RushSession } from './RushSession';
+import { _createRushSessionForPlugin, type RushSession } from './RushSession';
 import type { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
@@ -205,7 +205,7 @@ export class PluginManager {
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       this._loadedPluginNames.add(pluginName);
       if (plugin) {
-        this._applyPlugin(plugin, pluginName);
+        this._applyPlugin(plugin, pluginLoader);
       }
     }
   }
@@ -227,9 +227,15 @@ export class PluginManager {
     });
   }
 
-  private _applyPlugin(plugin: IRushPlugin, pluginName: string): void {
+  private _applyPlugin(plugin: IRushPlugin, pluginLoader: PluginLoaderBase): void {
+    const { packageName, pluginName } = pluginLoader;
     try {
-      plugin.apply(this._rushSession, this._rushConfiguration);
+      const pluginSession: RushSession = _createRushSessionForPlugin(this._rushSession, () => ({
+        packageName,
+        packageVersion: pluginLoader.packageVersion,
+        component: pluginName
+      }));
+      plugin.apply(pluginSession, this._rushConfiguration);
     } catch (e) {
       throw new InternalError(`Error applying "${pluginName}": ${e}`);
     }
