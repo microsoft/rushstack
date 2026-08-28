@@ -40,7 +40,7 @@ export interface IOperationGraphEventSink {
   /**
    * Invoked when an operation is prepared for an iteration.
    */
-  onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
+  onOperationRegistered?(operationId: string, silent: boolean, iterationId: number): void;
 
   /**
    * Invoked synchronously on every operation status transition. The result's
@@ -59,14 +59,14 @@ export interface IOperationGraphEventSink {
    * Invoked for each chunk of an operation's raw output, upstream of any
    * newline normalization or quiet-mode filtering.
    */
-  onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult): void;
+  onOperationChunk?(operationId: string, chunk: ITerminalChunk, iterationId: number): void;
 
   /**
    * Invoked when an operation's collated output stream is closed at the end of
    * its execution, after all status lines and output have been written. This
    * is the authoritative "no more output for this operation" signal.
    */
-  onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult): void;
+  onOperationStreamClosed?(operationId: string, iterationId: number): void;
 
   /**
    * Invoked after the operation stream is closed and the final outcome is authoritative.
