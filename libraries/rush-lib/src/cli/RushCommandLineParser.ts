@@ -57,7 +57,7 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
 import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
-import { RushSession } from '../pluginFramework/RushSession';
+import { type IRushSessionReporterOptions, RushSession } from '../pluginFramework/RushSession';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
@@ -72,6 +72,7 @@ export interface IRushCommandLineParserOptions {
   cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
+  reporter?: IRushSessionReporterOptions;
   reporterCloseAsync?: () => Promise<void>;
 }
 
@@ -131,7 +132,7 @@ export class RushCommandLineParser extends CommandLineParser {
     const terminal: Terminal = new Terminal(this._terminalProvider);
     this._terminal = terminal;
     this._rushOptions = this._normalizeOptions(options || {});
-    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this._rushOptions;
+    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations, reporter } = this._rushOptions;
 
     let rushJsonFilePath: string | undefined;
     try {
@@ -159,7 +160,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.rushSession = new RushSession({
       getIsDebugMode: () => this.isDebug,
-      terminalProvider
+      terminalProvider,
+      reporter
     });
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
@@ -338,6 +340,7 @@ export class RushCommandLineParser extends CommandLineParser {
       cwd: options.cwd || process.cwd(),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
+      reporter: options.reporter,
       reporterCloseAsync: options.reporterCloseAsync
     };
   }
