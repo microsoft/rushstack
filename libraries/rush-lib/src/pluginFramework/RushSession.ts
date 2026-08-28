@@ -61,6 +61,13 @@ export interface IRushSessionReporterOptions {
    * @internal
    */
   readonly operationStreamEnabled?: boolean;
+
+  /**
+   * Flushes and closes the frontend-owned reporters before an explicit process exit.
+   *
+   * @internal
+   */
+  readonly flushAsync?: () => Promise<void>;
 }
 
 /**
@@ -492,6 +499,24 @@ export function _getRushSessionOperationStreamEmitter(
   return state.options.reporter?.operationStreamEnabled
     ? _createOperationStreamEmitter(state.reporting, scope)
     : undefined;
+}
+
+/**
+ * Returns whether the frontend enabled reporter-owned operation presentation.
+ *
+ * @internal
+ */
+export function _isRushSessionOperationStreamEnabled(rushSession: RushSession): boolean {
+  return _getSessionState(rushSession).options.reporter?.operationStreamEnabled === true;
+}
+
+/**
+ * Flushes the frontend-owned reporter host, when available.
+ *
+ * @internal
+ */
+export function _flushRushSessionReporterAsync(rushSession: RushSession): Promise<void> {
+  return _getSessionState(rushSession).options.reporter?.flushAsync?.() ?? Promise.resolve();
 }
 
 /**

@@ -33,6 +33,7 @@ describe(MinimalRushConfiguration.name, () => {
         MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       expect(config.rushVersion).toEqual('4.0.0');
       expect(config.useRushReporter).toBe(true);
+      expect(config.commonTempFolder).toBe(path.resolve(__dirname, 'sandbox', 'repo', 'common', 'temp'));
     });
   });
 });

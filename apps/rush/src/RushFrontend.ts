@@ -4,7 +4,10 @@
 import { randomUUID } from 'node:crypto';
 
 import type { ILaunchOptions } from '@microsoft/rush-lib';
-import { DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS } from '@rushstack/rush-reporter';
+import {
+  DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS,
+  REPORTER_PROTOCOL_VERSION
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -139,10 +142,13 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     processLifecycle = createProcessLifecycle()
   } = options;
 
+  const engineArgv: string[] = stripReporterValueControls(process.argv.slice(2));
   const reporterHost: IInitializedRushReporterHost = await initializeReporterHostAsync({
     repositoryOptIn: configuration?.useRushReporter,
     forceLegacy: rushVersionToLoad !== undefined && rushVersionToLoad !== currentPackageVersion,
-    selectedRushVersion: rushVersionToLoad
+    selectedRushVersion: rushVersionToLoad,
+    commonTempFolder: configuration?.commonTempFolder,
+    actionName: engineArgv.find((argument: string) => !argument.startsWith('-'))
   });
   const reporterLifecycle: RushFrontendReporterLifecycle | undefined = reporterHost.selection.enabled
     ? new RushFrontendReporterLifecycle(reporterHost, processLifecycle)
@@ -157,6 +163,21 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   const reporterCloseAsync: () => Promise<void> = () =>
     reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
   const sessionId: string = createSessionId();
+  if (reporterHost.selection.enabled && reporterHost.logArtifact?.path) {
+    reporterHost.sink.emit({
+      protocolVersion: REPORTER_PROTOCOL_VERSION,
+      sessionId,
+      source: { packageName: '@microsoft/rush', packageVersion: currentPackageVersion },
+      privacy: 'local-sensitive',
+      type: 'artifactAvailable',
+      payload: {
+        role: 'log',
+        path: reporterHost.logArtifact.path,
+        format: 'plaintext',
+        complete: false
+      }
+    });
+  }
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
     ...launchOptions,
     reporter: {

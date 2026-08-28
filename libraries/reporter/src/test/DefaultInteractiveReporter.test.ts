@@ -155,6 +155,7 @@ describe('DefaultInteractiveReporter', () => {
     reporter.report(
       ev('operationStatusChanged', { operationId: 'op1', status: 'success' }, { projectName: 'p' })
     );
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
     await reporter.closeAsync();
 
@@ -170,12 +171,38 @@ describe('DefaultInteractiveReporter', () => {
       color: false,
       nowMs: () => 0
     });
-    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(
+      ev('operationRegistered', {
+        operationId: 'op1',
+        projectName: 'project-a',
+        phaseName: '_phase:build'
+      })
+    );
     reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'executing' }));
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     await reporter.flushAsync();
 
-    expect(terminal.output).toContain('project-a');
+    expect(terminal.output).toContain('project-a (_phase:build)');
     expect(terminal.output).not.toContain('executing op1');
+  });
+
+  it('omits silent operations from progress totals', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    reporter.report(
+      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+    );
+    reporter.report(ev('operationStatusChanged', { operationId: 'silent', status: 'success' }));
+    reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'success' }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    await reporter.closeAsync();
+
+    expect(terminal.output).toContain('0/0 operations');
+    expect(terminal.output).not.toContain('hidden');
   });
 
   it('appends a bounded diagnostic block and log path on failure', async () => {
@@ -191,6 +218,7 @@ describe('DefaultInteractiveReporter', () => {
     reporter.report(
       ev('operationStatusChanged', { operationId: 'op1', status: 'failure' }, { projectName: 'p' })
     );
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
     reporter.report(ev('diagnosticEmitted', { code: 'RUSH_OPERATION_FAILED', severity: 'error' }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
     await reporter.closeAsync();

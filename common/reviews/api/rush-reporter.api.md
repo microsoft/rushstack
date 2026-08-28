@@ -646,6 +646,7 @@ export interface IOperationStreamEmitterOptions {
 export interface IPlaintextReporterOptions {
     readonly color?: boolean;
     readonly heartbeatIntervalMs?: number;
+    readonly logLevel?: ReporterLogLevel;
     readonly nowMs?: () => number;
     readonly variant?: PlaintextVariant;
     readonly write: (text: string) => void;

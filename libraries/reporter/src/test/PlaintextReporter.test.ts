@@ -46,6 +46,7 @@ describe('PlaintextReporter', () => {
     capture.reporter.report(ev('commandStarted', { commandName: 'build' }));
     capture.reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
     capture.reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
 
     // No escape sequences of any kind (no color, no cursor movement).
@@ -58,10 +59,12 @@ describe('PlaintextReporter', () => {
     capture.reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
     capture.reporter.report(ev('operationRegistered', { operationId: 'op2', projectName: 'project-b' }));
     capture.reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     capture.reporter.report(
       ev('diagnosticEmitted', { code: 'RUSH_INPUT_UNKNOWN_PROJECT', severity: 'warning' })
     );
     capture.reporter.report(ev('operationStatusChanged', { operationId: 'op2', status: 'failure' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op2', status: 'failure' }));
     capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
 
     expect(capture.getOutput()).toMatchSnapshot();
@@ -78,6 +81,7 @@ describe('PlaintextReporter', () => {
       ev('externalOutput', { stream: 'stdout', text: 'Building project-a...\n' }, { operationId: 'op1' })
     );
     capture.reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
 
     expect(capture.getOutput()).toMatchSnapshot();
@@ -91,9 +95,40 @@ describe('PlaintextReporter', () => {
     capture.reporter.report(ev('externalOutput', { text: 'Building ' }, { operationId: 'op1' }));
     capture.reporter.report(ev('externalOutput', { text: 'project-a' }, { operationId: 'op1' }));
     capture.reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
 
     expect(capture.getOutput()).toContain('Building project-a\nproject-a: success');
     expect(capture.getOutput()).not.toContain('Building \nproject-a');
+  });
+
+  it('omits silent operations and exposes the full log path', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(ev('commandStarted', { commandName: 'build' }));
+    capture.reporter.report(
+      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+    );
+    capture.reporter.report(ev('operationStatusChanged', { operationId: 'silent', status: 'aborted' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'aborted' }));
+    capture.reporter.report(
+      ev('artifactAvailable', { role: 'log', path: '/abs/common/temp/rush-logs/build.log' })
+    );
+    capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+
+    expect(capture.getOutput()).toContain('0/0 operations');
+    expect(capture.getOutput()).toContain('Full log: /abs/common/temp/rush-logs/build.log');
+    expect(capture.getOutput()).not.toContain('hidden');
+  });
+
+  it('uses operationCompleted as the authoritative final outcome', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('operationRegistered', { operationId: 'op1', projectName: 'project-a', phaseName: 'build' })
+    );
+    capture.reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'success' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
+
+    expect(capture.getOutput()).toContain('project-a: failure');
+    expect(capture.getOutput()).not.toContain('project-a: success');
   });
 
   it('emits a compact heartbeat only after the interval elapses', () => {

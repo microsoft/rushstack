@@ -57,7 +57,7 @@ describe('FileReporter', () => {
     });
   });
 
-  it('writes a debug NDJSON log with owner-only permissions and a latest.log pointer', async () => {
+  it('writes a grouped full-detail log with owner-only permissions and a latest.log pointer', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({
         commonTempFolder: base,
@@ -65,8 +65,21 @@ describe('FileReporter', () => {
         pid: 4242,
         nowMs: () => FIXED_NOW
       });
+      await reporter.initializeAsync();
       reporter.report(ev('commandStarted', { commandName: 'build' }));
-      reporter.report(ev('externalOutput', { stream: 'stdout', text: 'Building...\n' }));
+      reporter.report(
+        ev('operationRegistered', {
+          operationId: 'project#build',
+          projectName: 'project',
+          phaseName: 'build'
+        })
+      );
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stdout', text: 'Building...\n' }),
+        scope: { operationId: 'project#build' }
+      });
+      reporter.report(ev('operationStatusChanged', { operationId: 'project#build', status: 'success' }));
+      reporter.report(ev('operationCompleted', { operationId: 'project#build', status: 'success' }));
       reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
       await reporter.closeAsync();
 
@@ -76,11 +89,10 @@ describe('FileReporter', () => {
       expect(path.basename(artifact.path!)).toBe('2026-07-15T01-00-00-000Z-4242-build.log');
 
       const content: string = await fs.promises.readFile(artifact.path!, 'utf8');
-      const records: Record<string, unknown>[] = content
-        .trim()
-        .split('\n')
-        .map((line: string) => JSON.parse(line) as Record<string, unknown>);
-      expect(records.map((r) => r.type)).toEqual(['commandStarted', 'externalOutput', 'commandResult']);
+      expect(content).toContain('"type":"commandStarted"');
+      expect(content).toContain('==[ project (build) ]==');
+      expect(content).toContain('Building...\n==[ project#build: success ]==');
+      expect(content).toContain('"type":"commandResult"');
 
       const latestPath: string = path.join(base, RUSH_LOGS_DIR_NAME, LATEST_LOG_NAME);
       expect(fs.existsSync(latestPath)).toBe(true);
@@ -125,6 +137,44 @@ describe('FileReporter', () => {
       } finally {
         symlinkSpy.mockRestore();
       }
+    });
+  });
+
+  it('preserves stdout and stderr chunk order while grouping parallel operations', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      await reporter.initializeAsync();
+      for (const operationId of ['a', 'b']) {
+        reporter.report(
+          ev('operationRegistered', {
+            operationId,
+            projectName: `project-${operationId}`,
+            phaseName: 'build'
+          })
+        );
+      }
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stdout', text: 'a-out\n' }),
+        scope: { operationId: 'a' }
+      });
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stdout', text: 'b-out\n' }),
+        scope: { operationId: 'b' }
+      });
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stderr', text: 'a-err\n' }),
+        scope: { operationId: 'a' }
+      });
+      reporter.report(ev('operationStatusChanged', { operationId: 'a', status: 'failure' }));
+      reporter.report(ev('operationCompleted', { operationId: 'a', status: 'failure' }));
+      reporter.report(ev('operationStatusChanged', { operationId: 'b', status: 'blocked' }));
+      reporter.report(ev('operationCompleted', { operationId: 'b', status: 'blocked' }));
+      await reporter.closeAsync();
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('a-out\na-err\n==[ a: failure ]==');
+      expect(content).toContain('b-out\n==[ b: blocked ]==');
+      expect(content.indexOf('a-out')).toBeLessThan(content.indexOf('a-err'));
     });
   });
 

@@ -16,7 +16,8 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'blocked',
   'skipped',
   'fromCache',
-  'noOp'
+  'noOp',
+  'aborted'
 ]);
 
 /**
@@ -109,6 +110,7 @@ export class AiReporter implements IReporter {
   private _protocolVersion: IReporterProtocolVersion;
   private _commandName: string | undefined;
   private readonly _projectByOperation: Map<string, string>;
+  private readonly _silentOperations: Set<string>;
   private readonly _operationCounts: { [status: string]: number };
   private readonly _failedProjects: string[];
   private readonly _errorDiagnostics: IAiDiagnostic[];
@@ -139,6 +141,7 @@ export class AiReporter implements IReporter {
     this._protocolVersion = REPORTER_PROTOCOL_VERSION;
     this._commandName = undefined;
     this._projectByOperation = new Map();
+    this._silentOperations = new Set();
     this._operationCounts = {};
     this._failedProjects = [];
     this._errorDiagnostics = [];
@@ -174,20 +177,31 @@ export class AiReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string } = event.payload as {
+        const payload: { operationId: string; projectName?: string; silent?: boolean } = event.payload as {
           operationId: string;
           projectName?: string;
+          silent?: boolean;
         };
+        if (payload.silent) {
+          this._silentOperations.add(payload.operationId);
+        }
         if (payload.projectName !== undefined) {
           this._projectByOperation.set(payload.operationId, payload.projectName);
         }
         break;
       }
       case 'operationStatusChanged': {
+        break;
+      }
+      case 'operationCompleted': {
         const payload: { operationId: string; status: string } = event.payload as {
           operationId: string;
           status: string;
         };
+        if (this._silentOperations.has(payload.operationId)) {
+          this._silentOperations.delete(payload.operationId);
+          break;
+        }
         if (TERMINAL_STATUSES.has(payload.status)) {
           this._operationCounts[payload.status] = (this._operationCounts[payload.status] ?? 0) + 1;
           if (payload.status === 'failure') {
@@ -220,6 +234,13 @@ export class AiReporter implements IReporter {
           exitCode: number;
         };
         this._emitFinal(payload.succeeded, payload.exitCode);
+        break;
+      }
+      case 'sessionCompleted': {
+        if (!this._finalEmitted) {
+          const exitCode: number = (event.payload as { exitCode?: number }).exitCode ?? 1;
+          this._emitFinal(exitCode === 0, exitCode);
+        }
         break;
       }
       default:

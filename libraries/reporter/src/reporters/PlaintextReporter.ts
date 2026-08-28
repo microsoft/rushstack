@@ -4,6 +4,7 @@
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
+import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
 
 const HEARTBEAT_INTERVAL_MS: number = 30000;
@@ -14,12 +15,14 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'blocked',
   'skipped',
   'fromCache',
-  'noOp'
+  'noOp',
+  'aborted'
 ]);
 
 interface IOperationRecord {
   readonly projectName: string;
   readonly phaseName?: string;
+  readonly silent: boolean;
   readonly buffer: string[];
 }
 
@@ -54,6 +57,11 @@ export interface IPlaintextReporterOptions {
    * The heartbeat interval in milliseconds. Defaults to 30000.
    */
   readonly heartbeatIntervalMs?: number;
+
+  /**
+   * The selected reporter log level. Defaults to `normal`.
+   */
+  readonly logLevel?: ReporterLogLevel;
 }
 
 /**
@@ -76,6 +84,7 @@ export class PlaintextReporter implements IReporter {
   private readonly _color: IColorizer;
   private readonly _nowMs: () => number;
   private readonly _heartbeatIntervalMs: number;
+  private readonly _logLevel: ReporterLogLevel;
 
   private _commandName: string | undefined;
   private _total: number;
@@ -83,6 +92,7 @@ export class PlaintextReporter implements IReporter {
   private _failed: number;
   private _lastOutputMs: number;
   private _atLineStart: boolean;
+  private _logPath: string | undefined;
   private readonly _operations: Map<string, IOperationRecord>;
 
   public constructor(options: IPlaintextReporterOptions) {
@@ -91,6 +101,7 @@ export class PlaintextReporter implements IReporter {
     this._color = createColorizer(options.color ?? false);
     this._nowMs = options.nowMs ?? (() => Date.now());
     this._heartbeatIntervalMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
+    this._logLevel = options.logLevel ?? 'normal';
 
     this._commandName = undefined;
     this._total = 0;
@@ -98,6 +109,7 @@ export class PlaintextReporter implements IReporter {
     this._failed = 0;
     this._lastOutputMs = 0;
     this._atLineStart = true;
+    this._logPath = undefined;
     this._operations = new Map();
   }
 
@@ -113,21 +125,33 @@ export class PlaintextReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string; phaseName?: string } = event.payload as {
+        const payload: {
           operationId: string;
           projectName?: string;
           phaseName?: string;
+          silent?: boolean;
+        } = event.payload as {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
         };
         this._operations.set(payload.operationId, {
           projectName: payload.projectName ?? payload.operationId,
           phaseName: payload.phaseName,
+          silent: payload.silent === true,
           buffer: []
         });
-        this._total++;
+        if (!payload.silent) {
+          this._total++;
+        }
         break;
       }
       case 'operationStatusChanged': {
-        this._onStatusChanged(event);
+        break;
+      }
+      case 'operationCompleted': {
+        this._onOperationCompleted(event);
         break;
       }
       case 'externalOutput': {
@@ -141,6 +165,31 @@ export class PlaintextReporter implements IReporter {
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
           this._writeLine(this._formatDiagnostic(payload.severity, payload.code ?? 'unknown'));
+        }
+        break;
+      }
+      case 'artifactAvailable': {
+        const payload: { role?: string; path?: string } = event.payload as {
+          role?: string;
+          path?: string;
+        };
+        if (payload.role === 'log') {
+          this._logPath = payload.path;
+        }
+        break;
+      }
+      case 'messageEmitted': {
+        if (event.scope?.operationId === undefined) {
+          const payload: { severity?: string; text?: string } = event.payload as {
+            severity?: string;
+            text?: string;
+          };
+          if (
+            payload.text &&
+            (this._logLevel !== 'quiet' || payload.severity === 'warning' || payload.severity === 'error')
+          ) {
+            this._writeRaw(payload.text.endsWith('\n') ? payload.text : `${payload.text}\n`);
+          }
         }
         break;
       }
@@ -180,7 +229,7 @@ export class PlaintextReporter implements IReporter {
     return false;
   }
 
-  private _onStatusChanged(event: IReporterEventEnvelope<unknown>): void {
+  private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
     const payload: { operationId: string; status: string } = event.payload as {
       operationId: string;
       status: string;
@@ -191,10 +240,19 @@ export class PlaintextReporter implements IReporter {
     if (!TERMINAL_STATUSES.has(payload.status)) {
       return;
     }
+    if (record?.silent) {
+      this._operations.delete(payload.operationId);
+      return;
+    }
 
     this._completed++;
     if (payload.status === 'failure') {
       this._failed++;
+    }
+
+    if (this._logLevel === 'quiet') {
+      this._operations.delete(payload.operationId);
+      return;
     }
 
     if (this._variant === 'detailed') {
@@ -237,6 +295,9 @@ export class PlaintextReporter implements IReporter {
       );
     } else {
       this._writeLine(this._color.red(`rush ${commandName} failed (${this._failed} failed)`));
+    }
+    if (this._logPath) {
+      this._writeLine(`Full log: ${this._logPath}`);
     }
   }
 

@@ -178,6 +178,8 @@ describe('reporter parity with StreamCollator', () => {
     emitter.writeOutput('op2', 'stdout', 'B2\n');
     emitter.changeStatus('op1', 'success', 100);
     emitter.changeStatus('op2', 'success', 200);
+    emitter.completeOperation('op1', 'success', 100);
+    emitter.completeOperation('op2', 'success', 200);
     emitter.completeCommand('build', true, 0);
 
     let output: string = '';
@@ -204,6 +206,7 @@ describe('reporter parity with StreamCollator', () => {
     emitter.changeStatus('op1', 'executing');
     emitter.writeOutput('op1', 'stdout', 'RAW-PROJECT-OUTPUT\n');
     emitter.changeStatus('op1', 'success', 100);
+    emitter.completeOperation('op1', 'success', 100);
     emitter.completeCommand('build', true, 0);
 
     const terminal: FakeTerminal = new FakeTerminal();

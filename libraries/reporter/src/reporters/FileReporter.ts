@@ -28,6 +28,22 @@ const DEFAULT_MAX_SESSIONS: number = 20;
 const OWNER_ONLY_MODE: number = 0o600;
 const OWNER_ONLY_DIRECTORY_MODE: number = 0o700;
 const MS_PER_DAY: number = 24 * 60 * 60 * 1000;
+const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
+  'success',
+  'successWithWarnings',
+  'failure',
+  'blocked',
+  'skipped',
+  'fromCache',
+  'noOp',
+  'aborted'
+]);
+
+interface IFileOperationRecord {
+  readonly title: string;
+  readonly spoolPath?: string;
+  readonly spoolFileDescriptor?: number;
+}
 
 function getUserTempDirectoryName(): string {
   const identity: string =
@@ -127,12 +143,14 @@ export class FileReporter implements IReporter {
   private readonly _emergencyWarn: (message: string) => void;
 
   private readonly _lines: string[];
+  private readonly _operations: Map<string, IFileOperationRecord>;
   private _fileDescriptor: number | undefined;
   private _targetResolved: boolean;
   private _available: boolean;
   private _targetPath: string | undefined;
   private _latestCopyPath: string | undefined;
   private readonly _fileName: string;
+  private _nextSpoolId: number;
 
   public constructor(options: IFileReporterOptions = {}) {
     this._commonTempFolder = options.commonTempFolder;
@@ -149,11 +167,13 @@ export class FileReporter implements IReporter {
       });
 
     this._lines = [];
+    this._operations = new Map();
     this._fileDescriptor = undefined;
     this._targetResolved = false;
     this._available = false;
     this._targetPath = undefined;
     this._latestCopyPath = undefined;
+    this._nextSpoolId = 1;
 
     const timestamp: string = new Date(this._nowMs()).toISOString().replace(/[:.]/g, '-');
     this._fileName = `${timestamp}-${this._pid}-${this._actionName}.log`;
@@ -165,14 +185,16 @@ export class FileReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    const line: string = this._formatLine(event);
-    if (this._fileDescriptor === undefined) {
-      if (!this._targetResolved) {
-        this._lines.push(line);
+    const lines: readonly string[] = this._formatEvent(event);
+    for (const line of lines) {
+      if (this._fileDescriptor === undefined) {
+        if (!this._targetResolved) {
+          this._lines.push(line);
+        }
+      } else {
+        this._writeLine(line);
       }
-      return;
     }
-    this._writeLine(line);
   }
 
   public async flushAsync(): Promise<void> {
@@ -189,6 +211,10 @@ export class FileReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
+    for (const [operationId, record] of this._operations) {
+      this._writeGroupedOperation(operationId, record, 'aborted');
+    }
+    this._operations.clear();
     await this.flushAsync();
     if (this._fileDescriptor !== undefined) {
       try {
@@ -214,8 +240,136 @@ export class FileReporter implements IReporter {
       : { available: this._available };
   }
 
-  private _formatLine(event: IReporterEventEnvelope<unknown>): string {
-    return `${JSON.stringify(redactReporterEvent(event))}\n`;
+  private _formatEvent(event: IReporterEventEnvelope<unknown>): readonly string[] {
+    if (event.type === 'operationRegistered') {
+      const payload: {
+        operationId: string;
+        projectName?: string;
+        phaseName?: string;
+      } = event.payload as {
+        operationId: string;
+        projectName?: string;
+        phaseName?: string;
+      };
+      const projectName: string = payload.projectName ?? payload.operationId;
+      this._operations.set(
+        payload.operationId,
+        this._createOperationRecord(payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName)
+      );
+      return [this._formatMetadata(event)];
+    }
+
+    if (event.type === 'externalOutput') {
+      const operationId: string | undefined = event.scope?.operationId;
+      const text: string = (event.payload as { text?: string }).text ?? '';
+      const operation: IFileOperationRecord | undefined =
+        operationId === undefined ? undefined : this._operations.get(operationId);
+      if (operation?.spoolFileDescriptor !== undefined) {
+        try {
+          fs.writeSync(operation.spoolFileDescriptor, text);
+        } catch (error) {
+          this._emergencyWarn(
+            `[reporter] Unable to spool grouped output for ${JSON.stringify(operationId)}: ${(error as Error).message}`
+          );
+          return [`# [${operationId} ${(event.payload as { stream?: string }).stream ?? 'stdout'}]\n`, text];
+        }
+        return [];
+      }
+      return operationId ? [`# [${operationId}]\n`, text] : [text];
+    }
+
+    if (event.type === 'operationStatusChanged') {
+      return [this._formatMetadata(event)];
+    }
+
+    if (event.type === 'operationCompleted') {
+      const payload: { operationId: string; status: string } = event.payload as {
+        operationId: string;
+        status: string;
+      };
+      const operation: IFileOperationRecord | undefined = this._operations.get(payload.operationId);
+      if (operation && TERMINAL_STATUSES.has(payload.status)) {
+        this._operations.delete(payload.operationId);
+        this._writeGroupedOperation(payload.operationId, operation, payload.status);
+        return [];
+      }
+    }
+
+    return [this._formatMetadata(event)];
+  }
+
+  private _formatMetadata(event: IReporterEventEnvelope<unknown>): string {
+    return `# ${JSON.stringify(redactReporterEvent(event))}\n`;
+  }
+
+  private _createOperationRecord(title: string): IFileOperationRecord {
+    if (this._targetPath) {
+      const spoolPath: string = `${this._targetPath}.${this._nextSpoolId++}.operation`;
+      try {
+        const spoolFileDescriptor: number = fs.openSync(spoolPath, 'w+', OWNER_ONLY_MODE);
+        return { title, spoolPath, spoolFileDescriptor };
+      } catch (error) {
+        this._emergencyWarn(
+          `[reporter] Unable to create grouped-output spool file; output will remain ungrouped: ${(error as Error).message}`
+        );
+      }
+    }
+    return { title };
+  }
+
+  private _writeGroupedOperation(operationId: string, operation: IFileOperationRecord, status: string): void {
+    this._writeOrBuffer(`\n==[ ${operation.title} ]==\n`);
+    if (operation.spoolFileDescriptor !== undefined) {
+      try {
+        fs.fsyncSync(operation.spoolFileDescriptor);
+        fs.closeSync(operation.spoolFileDescriptor);
+        if (operation.spoolPath && this._fileDescriptor !== undefined) {
+          const source: number = fs.openSync(operation.spoolPath, 'r');
+          try {
+            const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
+            let bytesRead: number;
+            let lastByte: number | undefined;
+            while ((bytesRead = fs.readSync(source, buffer, 0, buffer.length, null)) > 0) {
+              fs.writeSync(this._fileDescriptor, buffer, 0, bytesRead);
+              lastByte = buffer[bytesRead - 1];
+            }
+            if (lastByte !== undefined && lastByte !== 0x0a) {
+              this._writeLine('\n');
+            }
+          } finally {
+            fs.closeSync(source);
+          }
+        }
+      } catch (error) {
+        this._emergencyWarn(
+          `[reporter] Unable to append grouped output for ${JSON.stringify(operationId)}: ${(error as Error).message}`
+        );
+      } finally {
+        try {
+          fs.closeSync(operation.spoolFileDescriptor);
+        } catch {
+          /* It was already closed after a successful spool flush. */
+        }
+        if (operation.spoolPath) {
+          try {
+            fs.rmSync(operation.spoolPath, { force: true });
+          } catch {
+            /* Best-effort cleanup. */
+          }
+        }
+      }
+    }
+    this._writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
+  }
+
+  private _writeOrBuffer(line: string): void {
+    if (this._fileDescriptor === undefined) {
+      if (!this._targetResolved) {
+        this._lines.push(line);
+      }
+    } else {
+      this._writeLine(line);
+    }
   }
 
   private async _ensureTargetAsync(): Promise<void> {

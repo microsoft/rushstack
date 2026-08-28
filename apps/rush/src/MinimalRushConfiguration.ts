@@ -52,14 +52,29 @@ export class MinimalRushConfiguration {
   }
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
+    const showVerbose: boolean = !RushCommandLineParser.shouldRestrictConsoleOutput();
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-      showVerbose: !RushCommandLineParser.shouldRestrictConsoleOutput()
+      showVerbose: false
     });
     if (rushJsonLocation) {
       const minimalRushConfigurationJson: IMinimalRushConfigurationJson | undefined =
         _loadConfigurationJson(rushJsonLocation);
       if (minimalRushConfigurationJson) {
-        return new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonLocation);
+        const configuration: MinimalRushConfiguration = new MinimalRushConfiguration(
+          minimalRushConfigurationJson,
+          rushJsonLocation
+        );
+        if (
+          showVerbose &&
+          !configuration.useRushReporter &&
+          !_hasExplicitNonLegacyReporter(process.argv.slice(2)) &&
+          path.dirname(rushJsonLocation) !== process.cwd()
+        ) {
+          // Preserve the legacy discovery message exactly when the reporter path is not taking ownership.
+          console.log('Found configuration in ' + rushJsonLocation);
+          console.log('');
+        }
+        return configuration;
       }
       return undefined;
     } else {
@@ -94,6 +109,29 @@ export class MinimalRushConfiguration {
   public get useRushReporter(): boolean {
     return this._useRushReporter;
   }
+
+  /**
+   * The repository's common temp folder, used for invocation-scoped reporter logs.
+   */
+  public get commonTempFolder(): string {
+    return path.resolve(this._commonRushConfigFolder, '..', '..', 'temp');
+  }
+}
+
+function _hasExplicitNonLegacyReporter(argv: readonly string[]): boolean {
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    let value: string | undefined;
+    if (argument === '--reporter') {
+      value = argv[index + 1];
+    } else if (argument.startsWith('--reporter=')) {
+      value = argument.slice('--reporter='.length);
+    }
+    if (value !== undefined) {
+      return value.trim().toLowerCase() !== 'legacy';
+    }
+  }
+  return false;
 }
 
 function _loadConfigurationJson(rushJsonFilename: string): IMinimalRushConfigurationJson | undefined {

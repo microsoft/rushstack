@@ -143,6 +143,36 @@ describe('RushCommandLineParser', () => {
           }
           expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
         });
+
+        it('makes the opted-in reporter stream the sole visible operation writer', async () => {
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const stdoutSpy: jest.SpiedFunction<typeof process.stdout.write> = jest
+            .spyOn(process.stdout, 'write')
+            .mockImplementation(() => true);
+          const stderrSpy: jest.SpiedFunction<typeof process.stderr.write> = jest
+            .spyOn(process.stderr, 'write')
+            .mockImplementation(() => true);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-visible-cutover',
+                operationStreamEnabled: true
+              }
+            );
+
+            await expect(parser.executeAsync()).resolves.toEqual(true);
+
+            expect(stdoutSpy).not.toHaveBeenCalled();
+            expect(stderrSpy).not.toHaveBeenCalled();
+            expect(reporterSink.inputs.some(({ type }) => type === 'operationCompleted')).toBe(true);
+          } finally {
+            stdoutSpy.mockRestore();
+            stderrSpy.mockRestore();
+          }
+        });
       });
 
       describe("'custom-output' action", () => {

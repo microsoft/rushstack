@@ -123,11 +123,22 @@ describe('AiReporter', () => {
     expect(final.exitCode).toBe(1);
   });
 
+  it('uses sessionCompleted as the parser-only fallback result', () => {
+    const { final } = run([
+      ev('sessionStarted', { rushVersion: '5.178.1' }),
+      ev('sessionCompleted', { exitCode: 0 })
+    ]);
+
+    expect(final.result).toBe('succeeded');
+    expect(final.exitCode).toBe(0);
+  });
+
   it('emits a status record and a bounded final record with scope, codes, and log', () => {
     const { records, final } = run([
       ev('commandStarted', { commandName: 'build' }),
       ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }),
       ev('operationStatusChanged', { operationId: 'op1', status: 'failure' }),
+      ev('operationCompleted', { operationId: 'op1', status: 'failure' }),
       ev('diagnosticEmitted', {
         code: 'RUSH_OPERATION_FAILED',
         category: 'operation',
@@ -148,6 +159,21 @@ describe('AiReporter', () => {
     expect(final.diagnostics[0].remediation?.[0].command).toBe('rush rebuild');
     expect(final.operationCounts).toEqual({ failure: 1 });
     expect(final.log).toEqual({ path: '/abs/rush.log', format: 'plaintext', complete: true });
+  });
+
+  it('excludes silent operations from AI result counts', () => {
+    const { final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      ev('operationRegistered', { operationId: 'hidden', projectName: 'hidden', silent: true }),
+      ev('operationStatusChanged', { operationId: 'hidden', status: 'success' }),
+      ev('operationCompleted', { operationId: 'hidden', status: 'success' }),
+      ev('operationRegistered', { operationId: 'visible', projectName: 'visible' }),
+      ev('operationStatusChanged', { operationId: 'visible', status: 'fromCache' }),
+      ev('operationCompleted', { operationId: 'visible', status: 'fromCache' }),
+      ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 })
+    ]);
+
+    expect(final.operationCounts).toEqual({ fromCache: 1 });
   });
 
   it('caps detailed diagnostics at 20 and marks the record truncated', () => {
