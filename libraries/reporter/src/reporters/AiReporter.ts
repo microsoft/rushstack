@@ -110,6 +110,7 @@ export class AiReporter implements IReporter {
 
   private _protocolVersion: IReporterProtocolVersion;
   private _commandName: string | undefined;
+  private readonly _registeredOperations: Set<string>;
   private readonly _projectByOperation: Map<string, string>;
   private readonly _silentOperations: Set<string>;
   private readonly _operationCounts: { [status: string]: number };
@@ -130,6 +131,7 @@ export class AiReporter implements IReporter {
   private _artifactComplete: boolean;
   private _finalEmitted: boolean;
   private _pendingResult: { succeeded: boolean; exitCode: number } | undefined;
+  private _resetCycleOnNextRegistration: boolean;
 
   public constructor(options: IAiReporterOptions) {
     this._write = options.write;
@@ -145,6 +147,7 @@ export class AiReporter implements IReporter {
 
     this._protocolVersion = REPORTER_PROTOCOL_VERSION;
     this._commandName = undefined;
+    this._registeredOperations = new Set();
     this._projectByOperation = new Map();
     this._silentOperations = new Set();
     this._operationCounts = {};
@@ -165,6 +168,7 @@ export class AiReporter implements IReporter {
     this._artifactComplete = true;
     this._finalEmitted = false;
     this._pendingResult = undefined;
+    this._resetCycleOnNextRegistration = false;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -191,6 +195,13 @@ export class AiReporter implements IReporter {
           projectName?: string;
           silent?: boolean;
         };
+        if (this._resetCycleOnNextRegistration) {
+          this._resetWatchCycle();
+        }
+        if (this._registeredOperations.has(payload.operationId)) {
+          break;
+        }
+        this._registeredOperations.add(payload.operationId);
         if (payload.silent) {
           this._silentOperations.add(payload.operationId);
         }
@@ -225,6 +236,20 @@ export class AiReporter implements IReporter {
       }
       case 'diagnosticEmitted': {
         this._collectDiagnostic(event.payload as IAiDiagnostic);
+        break;
+      }
+      case 'watchCycleCompleted': {
+        const succeeded: boolean = (event.payload as { succeeded?: boolean }).succeeded === true;
+        this._write(
+          `${JSON.stringify({
+            kind: 'ai.watchCycle',
+            protocolVersion: this._protocolVersion,
+            succeeded,
+            operationCounts: { ...this._operationCounts },
+            failedProjects: [...this._failedProjects]
+          })}\n`
+        );
+        this._resetCycleOnNextRegistration = true;
         break;
       }
       case 'messageEmitted': {
@@ -319,6 +344,17 @@ export class AiReporter implements IReporter {
         this._warningDiagnosticsTruncated = true;
       }
     }
+  }
+
+  private _resetWatchCycle(): void {
+    this._registeredOperations.clear();
+    this._projectByOperation.clear();
+    this._silentOperations.clear();
+    for (const status of Object.keys(this._operationCounts)) {
+      delete this._operationCounts[status];
+    }
+    this._failedProjects.length = 0;
+    this._resetCycleOnNextRegistration = false;
   }
 
   private _emitFinal(succeeded: boolean, exitCode: number): void {

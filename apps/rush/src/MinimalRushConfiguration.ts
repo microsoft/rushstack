@@ -10,6 +10,8 @@ import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 import { isSupportedReporterName, type ReporterName } from '@rushstack/rush-reporter';
 
+import { getRushPreviewVersion } from './RushPreviewVersion';
+
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
   rushVersion?: string;
@@ -67,11 +69,13 @@ export class MinimalRushConfiguration {
           rushJsonLocation
         );
         const explicitReporter: ReporterName | undefined = _getExplicitReporter(process.argv.slice(2));
+        const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+        const effectiveRushVersion: string = getRushPreviewVersion() ?? configuration.rushVersion;
         const legacyFallbackRequested: boolean =
           explicitReporter === 'legacy' ||
           process.env.RUSH_REPORTER?.trim().toLowerCase() === 'legacy' ||
           _hasHelpControl(process.argv.slice(2)) ||
-          configuration.rushVersion !== PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+          effectiveRushVersion !== currentPackageVersion;
         if (
           showVerbose &&
           (legacyFallbackRequested ||

@@ -70,12 +70,12 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          this.terminal.writeLine(
-            Colorize.red(`Another Rush command is already running in this repository.`)
-          );
+          const message: string = 'Another Rush command is already running in this repository.';
           if (_isRushSessionOperationStreamEnabled(this.rushSession)) {
+            this.terminal.writeErrorLine(message);
             throw new AlreadyReportedError();
           }
+          this.terminal.writeLine(Colorize.red(message));
           process.exit(1);
         }
       }
