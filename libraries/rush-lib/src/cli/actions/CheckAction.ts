@@ -11,7 +11,6 @@ import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
   private readonly _jsonFlag: CommandLineFlagParameter;
-  private readonly _verboseFlag: CommandLineFlagParameter;
   private readonly _subspaceParameter: CommandLineStringParameter | undefined;
   private readonly _variantParameter: CommandLineStringParameter;
 
@@ -31,12 +30,6 @@ export class CheckAction extends BaseRushAction {
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
-    });
-    this._verboseFlag = this.defineFlagParameter({
-      parameterLongName: '--verbose',
-      description:
-        'If this flag is specified, long lists of package names will not be truncated. ' +
-        `This has no effect if the ${this._jsonFlag.longName} flag is also specified.`
     });
     this._subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
@@ -75,7 +68,7 @@ export class CheckAction extends BaseRushAction {
     VersionMismatchFinder.rushCheck(this.rushConfiguration, this.terminal, {
       variant,
       printAsJson: this._jsonFlag.value,
-      truncateLongPackageNameLists: !this._verboseFlag.value,
+      truncateLongPackageNameLists: !this.parser.isVerbose,
       subspace: this._subspaceParameter?.value
         ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
         : this.rushConfiguration.defaultSubspace

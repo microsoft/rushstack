@@ -1,0 +1,227 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
+import type { IReporterEventSink } from '@rushstack/rush-reporter';
+
+import {
+  initializeRushReporterHostAsync,
+  resolveRushReporterSelection,
+  stripReporterValueControls,
+  type IRushReporterOutputStream,
+  type IRushReporterSelection
+} from '../RushReporterHost';
+
+function resolve(
+  argv: readonly string[],
+  env: Record<string, string | undefined> = {},
+  isTTY: boolean = false
+): IRushReporterSelection {
+  return resolveRushReporterSelection({
+    argv,
+    env,
+    cwd: '/repo',
+    stdout: { isTTY, columns: 100, write: () => undefined }
+  });
+}
+
+function emitCommandStarted(sink: IReporterEventSink): void {
+  sink.emit({
+    protocolVersion: { major: 1, minor: 0 },
+    sessionId: 'session',
+    source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+    privacy: 'public',
+    type: 'commandStarted',
+    payload: { commandName: 'build' }
+  });
+}
+
+describe(resolveRushReporterSelection.name, () => {
+  it('preserves the legacy path without an explicit opt-in in TTY, non-TTY, CI, and agent environments', () => {
+    for (const testCase of [
+      { env: {}, isTTY: true },
+      { env: {}, isTTY: false },
+      { env: { CI: 'true' }, isTTY: false },
+      { env: { COPILOT_CLI: '1' }, isTTY: true }
+    ]) {
+      expect(resolve(['build'], testCase.env, testCase.isTTY)).toMatchObject({
+        reporter: 'legacy',
+        enabled: false,
+        reason: 'pre-major legacy default'
+      });
+    }
+  });
+
+  it('requires an explicit non-legacy --reporter to opt in', () => {
+    expect(resolve(['build', '--reporter=json'], { CI: 'true' }, false)).toMatchObject({
+      reporter: 'json',
+      enabled: true,
+      reason: 'explicit --reporter'
+    });
+    expect(() => resolve(['build'], { RUSH_REPORTER: 'json' })).toThrow(
+      /cannot enable the pre-major reporter path/
+    );
+  });
+
+  it('does not consume rush-pnpm or rushx reporter arguments', () => {
+    expect(
+      resolveRushReporterSelection({
+        argv: ['install', '--reporter=append-only'],
+        env: { RUSH_REPORTER: 'json' },
+        commandName: 'rush-pnpm'
+      })
+    ).toMatchObject({ reporter: 'legacy', enabled: false });
+    expect(
+      resolveRushReporterSelection({
+        argv: ['build', '--reporter=custom-script-value'],
+        env: { RUSH_REPORTER: 'json' },
+        commandName: 'rushx'
+      })
+    ).toMatchObject({ reporter: 'legacy', enabled: false });
+  });
+
+  it('keeps RUSH_REPORTER=legacy as an emergency override', () => {
+    expect(resolve(['build', '--reporter=json'], { RUSH_REPORTER: ' LEGACY ' })).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reason: 'RUSH_REPORTER=legacy'
+    });
+  });
+
+  it('removes reporter-only value controls before invoking a legacy engine', () => {
+    expect(
+      stripReporterValueControls([
+        'node',
+        'rush',
+        'list',
+        '--json',
+        '--reporter=json',
+        '--output',
+        'file://./rush.log',
+        '--log-level=debug',
+        '--quiet'
+      ])
+    ).toEqual(['node', 'rush', 'list', '--json', '--quiet']);
+  });
+
+  it('applies CLI log-level controls before RUSH_LOG_LEVEL and rejects contradictions', () => {
+    expect(
+      resolve(['build', '--reporter=plaintext', '--verbose'], { RUSH_LOG_LEVEL: 'quiet' }).logLevel
+    ).toBe('verbose');
+    expect(resolve(['build', '--reporter=plaintext'], { RUSH_LOG_LEVEL: 'debug' }).logLevel).toBe('debug');
+    expect(() => resolve(['build', '--reporter=plaintext', '--quiet', '--debug'])).toThrow(
+      /Contradictory reporter verbosity/
+    );
+  });
+
+  it('ignores reporter environment selection before the gate but validates explicit controls', () => {
+    expect(resolve(['build'], { RUSH_LOG_LEVEL: 'not-a-level' }).enabled).toBe(false);
+    expect(() => resolve(['build', '--reporter=unknown'])).toThrow(/Unsupported reporter/);
+    expect(() => resolve(['build', '--reporter=json', '--log-level=loud'])).toThrow(/Unsupported log level/);
+    expect(() => resolve(['build', '--output=json:\/\/events.jsonl'])).toThrow(
+      /require an explicit non-legacy --reporter/
+    );
+  });
+
+  it('rejects an interactive reporter on non-TTY output', () => {
+    expect(() => resolve(['build', '--reporter=default'], {}, false)).toThrow(/requires an interactive TTY/);
+    expect(resolve(['build', '--reporter=default'], {}, true).reporter).toBe('default');
+  });
+
+  it('parses output targets and preserves command-specific --json independently', () => {
+    const selection: IRushReporterSelection = resolve(
+      [
+        'list',
+        '--json',
+        '--reporter=json',
+        '--output=file://./rush.log?logLevel=debug',
+        '--output=json://./events.jsonl'
+      ],
+      {},
+      false
+    );
+
+    expect(selection.commandJson).toBe(true);
+    expect(selection.reporter).toBe('json');
+    expect(selection.outputs).toEqual([
+      {
+        reporter: 'file',
+        target: path.resolve('/repo', 'rush.log'),
+        params: { logLevel: 'debug' }
+      },
+      {
+        reporter: 'json',
+        target: path.resolve('/repo', 'events.jsonl'),
+        params: {}
+      }
+    ]);
+  });
+
+  it('surfaces unsupported and incomplete controls with actionable errors', () => {
+    expect(() => resolve(['build', '--reporter'])).toThrow(/--reporter requires a value/);
+    expect(() => resolve(['build', '--reporter=json', '--reporter=ai'])).toThrow(
+      /may be specified only once/
+    );
+    expect(() => resolve(['build', '--reporter=json', '--output=plaintext://./output.txt'])).toThrow(
+      /supports file:\/\/ and json:\/\//
+    );
+    expect(() => resolve(['build', '--reporter=json', '--output=file://./output.txt?unknown=value'])).toThrow(
+      /only supported query parameter is logLevel/
+    );
+  });
+});
+
+describe(initializeRushReporterHostAsync.name, () => {
+  it('hands callers a typed sink while leaving no-opt-in output unchanged', async () => {
+    let output: string = '';
+    const stdout: IRushReporterOutputStream = {
+      isTTY: false,
+      write: (text: string) => {
+        output += text;
+      }
+    };
+    const initialized = await initializeRushReporterHostAsync({
+      argv: ['build'],
+      env: { CI: 'true', COPILOT_CLI: '1' },
+      stdout,
+      includeDefaultFileReporter: false
+    });
+
+    const sink: IReporterEventSink = initialized.sink;
+    emitCommandStarted(sink);
+    await initialized.host.manager.flushAsync();
+
+    expect(initialized.selection.enabled).toBe(false);
+    expect(output).toBe('');
+  });
+
+  it('initializes the explicitly selected reporter and output destinations', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const outputPath: string = path.join(directory, 'events.jsonl');
+    let stdoutText: string = '';
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=json', `--output=json://${outputPath}`],
+        env: {},
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+
+      emitCommandStarted(initialized.sink);
+      await initialized.host.manager.closeAsync();
+
+      expect(JSON.parse(stdoutText).type).toBe('commandStarted');
+      expect(JSON.parse(await fs.promises.readFile(outputPath, 'utf8')).type).toBe('commandStarted');
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+});
