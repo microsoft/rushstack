@@ -386,10 +386,13 @@ export class InstallHelpers {
   public static shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration: RushConfiguration): boolean {
     // Only PNPM refuses to expand these tokens, and only PNPM's "npm_config_*" environment variable
     // name normalization has been validated here.
-    return (
-      rushConfiguration.isPnpm &&
-      !!rushConfiguration.experimentsConfiguration.configuration.provideNpmrcCredentialsViaEnvironment
-    );
+    const {
+      isPnpm,
+      experimentsConfiguration: {
+        configuration: { provideNpmrcCredentialsViaEnvironment = false }
+      }
+    } = rushConfiguration;
+    return isPnpm && provideNpmrcCredentialsViaEnvironment;
   }
 
   /**
