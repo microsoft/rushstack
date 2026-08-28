@@ -9,11 +9,15 @@ const repoRoot = path.resolve(scriptFolder, '..', '..', '..', '..', '..', '..');
 const rushBin = path.join(repoRoot, 'apps', 'rush', 'bin', 'rush');
 const outputFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-reporter-demo-'));
 const commonArgs = ['build', '--only', '@rushstack/rush-reporter'];
+const baseEnv = { ...process.env };
+delete baseEnv.RUSH_REPORTER;
+delete baseEnv.RUSH_LOG_LEVEL;
+delete baseEnv.RUSH_QUIET_MODE;
 
 function run(name, args, env = {}, expectedStatus = 0) {
   const result = spawnSync(process.execPath, [rushBin, ...args], {
     cwd: repoRoot,
-    env: { ...process.env, ...env },
+    env: { ...baseEnv, ...env },
     encoding: 'utf8'
   });
   fs.writeFileSync(path.join(outputFolder, `${name}.stdout`), result.stdout);
@@ -82,6 +86,18 @@ const purgeLogMatch = tempPurge.stderr.match(/^Rush full log: (.+)$/m);
 if (!purgeLogMatch || purgeLogMatch[1].startsWith(tempOverride) || !fs.existsSync(purgeLogMatch[1])) {
   throw new Error('The active purge reporter log was not preserved outside RUSH_TEMP_FOLDER.');
 }
+const duplicateOutputPath = path.join(outputFolder, 'duplicate-output.jsonl');
+const outputConflict = run(
+  'output-conflict',
+  [
+    ...commonArgs,
+    '--reporter=plaintext',
+    `--output=json://${duplicateOutputPath}`,
+    `--output=file://${duplicateOutputPath}`
+  ],
+  {},
+  1
+);
 
 function parseNdjson(text, name) {
   if (text.includes('\u001b')) {
@@ -216,6 +232,9 @@ if (
   !commandJsonConflict.stderr.includes('command-specific --json output owns stdout')
 ) {
   throw new Error('Command-specific JSON ownership arbitration failed.');
+}
+if (outputConflict.stdout !== '' || !outputConflict.stderr.includes('is already owned by another reporter')) {
+  throw new Error('Duplicate reporter output destinations were not rejected.');
 }
 
 console.log(`Reporter demo outputs: ${outputFolder}`);

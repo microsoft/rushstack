@@ -79,11 +79,17 @@ privacy-redacted NDJSON event records. A `file://` destination defaults to
 Explicit CLI verbosity takes precedence over `RUSH_LOG_LEVEL`.
 `RUSH_QUIET_MODE=1` and `RUSH_QUIET_MODE=true` remain quiet aliases.
 Different explicit verbosity levels are rejected; for example,
-`--quiet --debug` is invalid on the reporter path. Repeating the same effective
-level is allowed.
+`--quiet --debug` is invalid on the reporter path. `--log-level` itself may be
+specified only once. Equivalent controls such as `--quiet --log-level=quiet`
+are allowed. The compatibility aliases are global Rush options and must precede
+the command name; for example, `rush --quiet build --reporter=plaintext`. The
+short `-v` flag is not a reporter verbosity alias because existing Rush commands
+retain their established `-v` meanings.
 
 `--output` and `--log-level` require an explicit non-legacy `--reporter` or the
 repository experiment. They are not supported with `--reporter=legacy`.
+Each resolved `--output` destination must be unique. Two sidecars cannot own
+the same path, even when one uses `file://` and the other uses `json://`.
 
 A command-specific `--json` option owns stdout. It can be combined with
 `--reporter=file`, which leaves stdout to the command and prints the full-log
@@ -127,8 +133,10 @@ Every enabled reporter invocation attempts to create:
 <repo>/common/temp/rush-logs/<UTC timestamp>-<pid>-<action>.log
 ```
 
-`common/temp/rush-logs/latest.log` points to, or copies, the latest completed
-invocation. Logs older than 14 days are removed and each location retains at
+`common/temp/rush-logs/latest.log` points to, or copies, the current or latest
+successfully opened invocation log. It can be incomplete while Rush is still
+running; after the command exits, it contains the finalized log when logging
+succeeded. Logs older than 14 days are removed and each location retains at
 most 20 sessions. `rush purge` removes the repository log directory.
 
 On platforms that support POSIX permissions, invocation logs and operation
@@ -217,7 +225,9 @@ node apps/rush/src/test/sandbox/reporter-demo/run.mjs
 The self-checking script prints a temporary output directory and the full-detail
 log path. It exercises the legacy baseline, detailed plaintext, JSON, AI, file,
 quiet, rollback, parser failure, help, explicit sidecar output, and
-command-specific JSON ownership.
+command-specific JSON ownership. It removes inherited `RUSH_REPORTER`,
+`RUSH_LOG_LEVEL`, and `RUSH_QUIET_MODE` values so those controls do not change
+the matrix.
 
 The following individual commands are useful when reviewing each shape:
 
@@ -241,7 +251,7 @@ node apps/rush/bin/rush build --only @rushstack/does-not-exist --reporter=ai
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=file
 
 # Final result and log path without operation output
-node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plaintext --quiet
+node apps/rush/bin/rush --quiet build --only @rushstack/rush-reporter --reporter=plaintext
 
 # Emergency rollback, even though a different reporter was requested
 RUSH_REPORTER=legacy node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
@@ -285,6 +295,7 @@ grouped by project and phase.
 | --- | --- |
 | `--reporter=default requires an interactive TTY` | Use `--reporter=plaintext` in CI, a pipe, or redirected output. |
 | `--output` or `--log-level` requires an opt-in | Add an explicit non-legacy `--reporter`, or enable `useRushReporter`. |
+| A destination is already owned by another reporter | Give each repeatable `--output` sidecar a different resolved path. URI scheme differences do not permit sharing one path. |
 | Command-specific `--json` owns stdout | Use `--reporter=file` or omit the reporter. Do not combine it with a stdout reporter. |
 | `RUSH_REPORTER=<non-legacy>` cannot enable the pre-major path | Use `--reporter=<name>`. Only `RUSH_REPORTER=legacy` is active before the auto-selection gates pass. |
 | The full-detail log cannot be written | Check the stderr warning and permissions for `common/temp/rush-logs` and the OS temp directory. The Rush command itself continues. |
