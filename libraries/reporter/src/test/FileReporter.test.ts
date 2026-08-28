@@ -105,6 +105,22 @@ describe('FileReporter', () => {
     });
   });
 
+  it('sanitizes action names so the log cannot escape rush-logs', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({
+        commonTempFolder: base,
+        actionName: 'x/../../../../victim',
+        nowMs: () => FIXED_NOW
+      });
+      await reporter.initializeAsync();
+      await reporter.closeAsync();
+
+      const artifactPath: string = reporter.getArtifact().path!;
+      expect(path.dirname(artifactPath)).toBe(path.join(base, RUSH_LOGS_DIR_NAME));
+      expect(path.basename(artifactPath)).not.toContain('/');
+    });
+  });
+
   it('maintains latest.log for a failed command too', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({
@@ -179,6 +195,33 @@ describe('FileReporter', () => {
     });
   });
 
+  it('treats duplicate active registration as idempotent without losing spooled output', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      await reporter.initializeAsync();
+      const registration = ev('operationRegistered', {
+        operationId: 'duplicate',
+        projectName: 'project',
+        phaseName: 'build'
+      });
+      reporter.report(registration);
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stdout', text: 'first\n' }),
+        scope: { operationId: 'duplicate' }
+      });
+      reporter.report(registration);
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stdout', text: 'second\n' }),
+        scope: { operationId: 'duplicate' }
+      });
+      reporter.report(ev('operationCompleted', { operationId: 'duplicate', status: 'success' }));
+      await reporter.closeAsync();
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('first\nsecond\n==[ duplicate: success ]==');
+    });
+  });
+
   it('does not retain a file descriptor for every registered operation', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
@@ -198,6 +241,70 @@ describe('FileReporter', () => {
         []
       );
       await reporter.closeAsync();
+    });
+  });
+
+  it('keeps bounded persistent spool descriptors and closes each one exactly once', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({
+        commonTempFolder: base,
+        nowMs: () => FIXED_NOW
+      });
+      await reporter.initializeAsync();
+      const logsDir: string = path.join(base, RUSH_LOGS_DIR_NAME);
+      const countOpenOperationDescriptors = (): number | undefined => {
+        const processFdFolder: string = '/proc/self/fd';
+        if (!fs.existsSync(processFdFolder)) {
+          return undefined;
+        }
+        let count: number = 0;
+        for (const entry of fs.readdirSync(processFdFolder)) {
+          try {
+            if (fs.readlinkSync(path.join(processFdFolder, entry)).endsWith('.operation')) {
+              count++;
+            }
+          } catch {
+            /* Ignore descriptors that close during enumeration. */
+          }
+        }
+        return count;
+      };
+      const baselineOpenDescriptors: number | undefined = countOpenOperationDescriptors();
+
+      for (const operationId of ['completed', 'closed']) {
+        reporter.report(
+          ev('operationRegistered', {
+            operationId,
+            projectName: operationId,
+            phaseName: 'build'
+          })
+        );
+        reporter.report({
+          ...ev('externalOutput', { stream: 'stdout', text: `${operationId}-1\n` }),
+          scope: { operationId }
+        });
+        reporter.report({
+          ...ev('externalOutput', { stream: 'stdout', text: `${operationId}-2\n` }),
+          scope: { operationId }
+        });
+      }
+
+      expect(
+        (await fs.promises.readdir(logsDir)).filter((entry) => entry.endsWith('.operation'))
+      ).toHaveLength(2);
+      if (baselineOpenDescriptors !== undefined) {
+        expect(countOpenOperationDescriptors()).toBe(baselineOpenDescriptors + 2);
+      }
+
+      reporter.report(ev('operationCompleted', { operationId: 'completed', status: 'success' }));
+      await reporter.closeAsync();
+
+      expect((await fs.promises.readdir(logsDir)).filter((entry) => entry.endsWith('.operation'))).toEqual(
+        []
+      );
+      if (baselineOpenDescriptors !== undefined) {
+        expect(countOpenOperationDescriptors()).toBe(baselineOpenDescriptors);
+      }
     });
   });
 

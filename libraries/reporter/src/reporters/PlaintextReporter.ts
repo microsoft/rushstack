@@ -31,6 +31,7 @@ interface IOperationRecord {
   readonly phaseName?: string;
   readonly silent: boolean;
   spoolPath?: string;
+  spoolFileDescriptor?: number;
   spoolFailed?: boolean;
 }
 
@@ -148,6 +149,10 @@ export class PlaintextReporter implements IReporter {
           phaseName?: string;
           silent?: boolean;
         };
+        const previousRecord: IOperationRecord | undefined = this._operations.get(payload.operationId);
+        if (previousRecord) {
+          break;
+        }
         this._operations.set(payload.operationId, {
           projectName: payload.projectName ?? payload.operationId,
           phaseName: payload.phaseName,
@@ -321,18 +326,15 @@ export class PlaintextReporter implements IReporter {
       if (!record.spoolPath) {
         const spoolDirectory: string = this._ensureSpoolDirectory();
         record.spoolPath = path.join(spoolDirectory, `${this._nextSpoolId++}.operation`);
-        fs.writeFileSync(record.spoolPath, '', { flag: 'wx', mode: OWNER_ONLY_MODE });
+        record.spoolFileDescriptor = fs.openSync(record.spoolPath, 'wx', OWNER_ONLY_MODE);
       }
-      fs.appendFileSync(record.spoolPath, text, { encoding: 'utf8', mode: OWNER_ONLY_MODE });
+      if (record.spoolFileDescriptor === undefined) {
+        throw new Error('The grouped plaintext spool descriptor is not available.');
+      }
+      fs.writeSync(record.spoolFileDescriptor, text, null, 'utf8');
     } catch (error) {
-      if (record.spoolPath) {
-        try {
-          this._writeRaw(fs.readFileSync(record.spoolPath, 'utf8'));
-        } catch {
-          /* Preserve subsequent output even if the prior spool cannot be recovered. */
-        }
-      }
-      this._deleteSpool(record);
+      this._closeSpool(record, false);
+      this._writeSpooledOutput(record);
       record.spoolFailed = true;
       this._writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
       this._writeRaw(text);
@@ -343,7 +345,12 @@ export class PlaintextReporter implements IReporter {
     if (!record.spoolPath) {
       return;
     }
+    const spoolCloseError: Error | undefined = this._closeSpool(record, true);
+    if (spoolCloseError) {
+      this._writeLine(`[reporter] Unable to close grouped plaintext output: ${spoolCloseError.message}`);
+    }
     let fileDescriptor: number | undefined;
+    let readCloseError: Error | undefined;
     try {
       fileDescriptor = fs.openSync(record.spoolPath, 'r');
       const decoder: StringDecoder = new StringDecoder('utf8');
@@ -359,9 +366,16 @@ export class PlaintextReporter implements IReporter {
       );
     } finally {
       if (fileDescriptor !== undefined) {
-        fs.closeSync(fileDescriptor);
+        try {
+          fs.closeSync(fileDescriptor);
+        } catch (error) {
+          readCloseError = error as Error;
+        }
       }
       this._deleteSpool(record);
+      if (readCloseError) {
+        this._writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
+      }
     }
   }
 
@@ -374,6 +388,7 @@ export class PlaintextReporter implements IReporter {
   }
 
   private _deleteSpool(record: IOperationRecord): void {
+    this._closeSpool(record, false);
     if (!record.spoolPath) {
       return;
     }
@@ -383,6 +398,28 @@ export class PlaintextReporter implements IReporter {
       /* Best-effort cleanup. */
     }
     record.spoolPath = undefined;
+  }
+
+  private _closeSpool(record: IOperationRecord, flush: boolean): Error | undefined {
+    const fileDescriptor: number | undefined = record.spoolFileDescriptor;
+    if (fileDescriptor === undefined) {
+      return undefined;
+    }
+    record.spoolFileDescriptor = undefined;
+    let closeError: Error | undefined;
+    if (flush) {
+      try {
+        fs.fsyncSync(fileDescriptor);
+      } catch (error) {
+        closeError = error as Error;
+      }
+    }
+    try {
+      fs.closeSync(fileDescriptor);
+    } catch (error) {
+      closeError ??= error as Error;
+    }
+    return closeError;
   }
 
   private _removeSpoolDirectory(): void {

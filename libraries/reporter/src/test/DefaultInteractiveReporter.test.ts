@@ -186,6 +186,21 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).not.toContain('executing op1');
   });
 
+  it('normalizes multiline activity to one live-region row', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(ev('messageEmitted', { severity: 'info', text: 'first line\nsecond line\n' }));
+    await reporter.flushAsync();
+
+    expect(terminal.output).toContain('second line');
+    expect(terminal.output).not.toContain('first line\nsecond line');
+  });
+
   it('omits silent operations from progress totals', async () => {
     const terminal: FakeTerminal = new FakeTerminal();
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
