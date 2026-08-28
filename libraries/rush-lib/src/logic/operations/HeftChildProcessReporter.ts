@@ -4,6 +4,7 @@
 import type * as child_process from 'node:child_process';
 import type { Readable, Writable } from 'node:stream';
 
+import { type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 import {
   allocateChildDescriptor,
   encodeNdjsonRecord,
@@ -52,7 +53,10 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
     this.stdio = ['ignore', ...this._plan.stdio.slice(1)] as child_process.StdioOptions;
   }
 
-  public async attachAsync(child: child_process.ChildProcess): Promise<void> {
+  public async attachAsync(
+    child: child_process.ChildProcess,
+    structuredOutputTerminalProvider: ITerminalProvider
+  ): Promise<void> {
     const eventStream: Readable | null = child.stdio[this._plan.fdNumber] as Readable | null;
     const ackStream: Writable | null = child.stdio[this._plan.ackFdNumber] as Writable | null;
     if (!eventStream || !ackStream) {
@@ -78,8 +82,21 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           const payload: { severity?: unknown } = envelope.payload as { severity?: unknown };
           this._hasWarningOrError ||= payload.severity === 'warning' || payload.severity === 'error';
         } else if (envelope.type === 'externalOutput') {
-          const payload: { stream?: unknown } = envelope.payload as { stream?: unknown };
+          const payload: { stream?: unknown; text?: unknown } = envelope.payload as {
+            stream?: unknown;
+            text?: unknown;
+          };
+          if (
+            (payload.stream !== 'stdout' && payload.stream !== 'stderr') ||
+            typeof payload.text !== 'string'
+          ) {
+            throw new Error('The validated child output envelope contained an invalid payload.');
+          }
           this._hasWarningOrError ||= payload.stream === 'stderr';
+          structuredOutputTerminalProvider.write(
+            payload.text,
+            payload.stream === 'stderr' ? TerminalProviderSeverity.error : TerminalProviderSeverity.log
+          );
         }
         this._options.ingestForeignEnvelope(envelope);
       },

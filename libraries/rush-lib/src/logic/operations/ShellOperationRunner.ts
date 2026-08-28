@@ -76,7 +76,11 @@ export class ShellOperationRunner implements IOperationRunner {
     lastState?: IOperationLastState
   ): Promise<OperationStatus> {
     return await context.runWithTerminalAsync(
-      async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
+      async (
+        terminal: ITerminal,
+        terminalProvider: ITerminalProvider,
+        structuredChildOutputTerminalProvider: ITerminalProvider
+      ) => {
         let hasWarningOrError: boolean = false;
 
         // Log any ignored parameters
@@ -113,7 +117,8 @@ export class ShellOperationRunner implements IOperationRunner {
           stdio: childProcessReporter?.stdio
         });
         const reporterDrainPromise: Promise<void> =
-          childProcessReporter?.attachAsync(subProcess) ?? Promise.resolve();
+          childProcessReporter?.attachAsync(subProcess, structuredChildOutputTerminalProvider) ??
+          Promise.resolve();
 
         // Hook into events, in order to get live streaming of the log
         subProcess.stdout?.on('data', (data: Buffer) => {

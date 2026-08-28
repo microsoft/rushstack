@@ -23,6 +23,7 @@ import {
   type IRushSessionChildProcessReporter,
   type RushSession
 } from '../../pluginFramework/RushSession';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type {
   IOperationChildProcessReporter,
@@ -314,7 +315,8 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
     const childProcessReporter: IRushSessionChildProcessReporter | undefined =
       _getRushSessionChildProcessReporter(this._rushSession);
-    if (!operation?.streamEmitter || !childProcessReporter) {
+    // Windows lifecycle commands run through a shell that does not preserve Node's fd mapping.
+    if (IS_WINDOWS || !operation?.streamEmitter || !childProcessReporter) {
       return undefined;
     }
 

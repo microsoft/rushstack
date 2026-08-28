@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as childProcess from 'node:child_process';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import type { Readable, Writable } from 'node:stream';
 
 import { HeftChildReporter } from './HeftChildReporter';
@@ -9,6 +12,28 @@ import { HeftChildReporter } from './HeftChildReporter';
 describe(HeftChildReporter.name, () => {
   it('preserves standalone behavior when no parent descriptors are present', () => {
     expect(HeftChildReporter.tryInitialize({})).toBeUndefined();
+  });
+
+  it('does not write to or close descriptors that are not pipes', () => {
+    const folderPath: string = fs.mkdtempSync(path.join(os.tmpdir(), 'heft-child-reporter-'));
+    const eventPath: string = path.join(folderPath, 'event');
+    const acknowledgementPath: string = path.join(folderPath, 'ack');
+    const eventFd: number = fs.openSync(eventPath, 'w+');
+    const acknowledgementFd: number = fs.openSync(acknowledgementPath, 'w+');
+    try {
+      expect(
+        HeftChildReporter.tryInitialize({
+          _RUSH_REPORTER_CHILD_FD: String(eventFd),
+          _RUSH_REPORTER_CHILD_ACK_FD: String(acknowledgementFd)
+        })
+      ).toBeUndefined();
+      expect(fs.readFileSync(eventPath, 'utf8')).toBe('');
+      expect(() => fs.writeSync(acknowledgementFd, 'still open')).not.toThrow();
+    } finally {
+      fs.closeSync(eventFd);
+      fs.closeSync(acknowledgementFd);
+      fs.rmSync(folderPath, { recursive: true });
+    }
   });
 
   it('negotiates context and emits ordered structured output and diagnostics', async () => {

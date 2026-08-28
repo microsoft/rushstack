@@ -95,7 +95,11 @@ export interface IOperationRunnerContext {
    * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
    */
   runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
       logFileSuffix?: string;

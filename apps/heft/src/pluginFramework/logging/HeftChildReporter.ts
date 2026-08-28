@@ -43,6 +43,15 @@ function readDescriptorFd(env: Record<string, string | undefined>, name: string)
   return Number.isSafeInteger(parsed) && parsed >= 3 ? parsed : undefined;
 }
 
+function isReporterPipe(fd: number): boolean {
+  try {
+    const stats: fs.Stats = fs.fstatSync(fd);
+    return stats.isFIFO() || stats.isSocket();
+  } catch {
+    return false;
+  }
+}
+
 function encodeRecord(value: unknown): string {
   const json: string = JSON.stringify(value);
   if (Buffer.byteLength(json, 'utf8') > MAX_RECORD_BYTES) {
@@ -189,7 +198,13 @@ export class HeftChildReporter implements ITerminalProvider {
     const ackDescriptorFd: number | undefined = readDescriptorFd(env, CHILD_ACK_FD_ENV_VAR);
     delete env[CHILD_FD_ENV_VAR];
     delete env[CHILD_ACK_FD_ENV_VAR];
-    if (descriptorFd === undefined || ackDescriptorFd === undefined || descriptorFd === ackDescriptorFd) {
+    if (
+      descriptorFd === undefined ||
+      ackDescriptorFd === undefined ||
+      descriptorFd === ackDescriptorFd ||
+      !isReporterPipe(descriptorFd) ||
+      !isReporterPipe(ackDescriptorFd)
+    ) {
       return undefined;
     }
 

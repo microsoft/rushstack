@@ -11,6 +11,7 @@ import {
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
 import { NdjsonDecoder, NdjsonInvalidRecordError, NdjsonRecordTooLargeError } from '../protocol/Ndjson';
+import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
 import {
   InvalidReporterHelloError,
   negotiateReporterHello,
@@ -197,6 +198,8 @@ export class HeftDescriptorHost {
   private _negotiation: IReporterHandshakeResult | undefined;
   private _protocolFailure: IRushDiagnostic | undefined;
   private _eventCount: number = 0;
+  private _childSessionId: string | undefined;
+  private _lastSourceSequence: number = -1;
 
   public constructor(options: IHeftDescriptorHostOptions) {
     this._parentSessionId = options.parentSessionId;
@@ -258,11 +261,33 @@ export class HeftDescriptorHost {
         'an event record used a protocol major different from the negotiated stream'
       );
     }
+    if (this._childSessionId !== undefined && record.sessionId !== this._childSessionId) {
+      return this._rejectMalformedStream('the child session id changed within one reporter stream');
+    }
+    if (record.sequence <= this._lastSourceSequence) {
+      return this._rejectMalformedStream('the child event sequence was not strictly increasing');
+    }
+    this._childSessionId ??= record.sessionId;
+    this._lastSourceSequence = record.sequence;
     if (!isReporterEventType(record.type)) {
       if (record.required) {
         return this._rejectMalformedStream('a required event type was not recognized');
       }
       return true;
+    }
+    if (record.type === 'externalOutput') {
+      if (
+        !isObjectRecord(record.payload) ||
+        (record.payload.stream !== 'stdout' && record.payload.stream !== 'stderr') ||
+        typeof record.payload.text !== 'string'
+      ) {
+        return this._rejectMalformedStream('an external output event contained an invalid payload');
+      }
+      if (
+        Buffer.byteLength(record.payload.text, 'utf8') > REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes
+      ) {
+        return this._rejectMalformedStream('an external output event exceeded the protocol chunk limit');
+      }
     }
 
     const correlated: IReporterEventEnvelope<unknown> = {

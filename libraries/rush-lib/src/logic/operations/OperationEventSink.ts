@@ -3,7 +3,7 @@
 
 import type * as child_process from 'node:child_process';
 
-import type { ITerminalChunk } from '@rushstack/terminal';
+import type { ITerminalChunk, ITerminalProvider } from '@rushstack/terminal';
 
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationStatus } from './OperationStatus';
@@ -33,7 +33,10 @@ export interface IOperationChildProcessReporter {
   readonly environment: Readonly<Record<string, string>>;
   readonly hasWarningOrError: boolean;
   readonly stdio: child_process.StdioOptions;
-  attachAsync(child: child_process.ChildProcess): Promise<void>;
+  attachAsync(
+    child: child_process.ChildProcess,
+    structuredOutputTerminalProvider: ITerminalProvider
+  ): Promise<void>;
 }
 
 /**

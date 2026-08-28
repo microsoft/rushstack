@@ -640,6 +640,58 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
   });
 
+  it('rejects child session changes, non-monotonic sequence, and oversized output chunks', () => {
+    const makeHost = (): HeftDescriptorHost => {
+      const host: HeftDescriptorHost = new HeftDescriptorHost({
+        parentSessionId: 'parent-sess',
+        supportedProtocolVersion: { major: 1, minor: 0 },
+        forwardEnvelope: () => undefined
+      });
+      expect(
+        host.processChildRecord({
+          kind: 'hello',
+          protocolVersion: { major: 1, minor: 0 },
+          producerVersion: '@rushstack/heft 1.2.19',
+          capabilities: ['heft-child-events-v1'],
+          requiredFeatures: []
+        })
+      ).toBe(true);
+      return host;
+    };
+    const makeOutput = (sessionId: string, sequence: number, text: string): Record<string, unknown> => ({
+      protocolVersion: { major: 1, minor: 0 },
+      eventId: `child_${sequence}`,
+      sessionId,
+      sequence,
+      timestamp: '2026-01-01T00:00:00.000Z',
+      source: SOURCE,
+      privacy: 'local-sensitive',
+      required: false,
+      type: 'externalOutput',
+      payload: { stream: 'stdout', text }
+    });
+
+    const changedSessionHost: HeftDescriptorHost = makeHost();
+    expect(changedSessionHost.processChildRecord(makeOutput('child-a', 1, 'a'))).toBe(true);
+    expect(changedSessionHost.processChildRecord(makeOutput('child-b', 2, 'b'))).toBe(false);
+    expect(changedSessionHost.processChildRecords([]).diagnostic?.code).toBe(
+      'RUSH_PROTOCOL_INVALID_CHILD_STREAM'
+    );
+
+    const reorderedHost: HeftDescriptorHost = makeHost();
+    expect(reorderedHost.processChildRecord(makeOutput('child-a', 2, 'a'))).toBe(true);
+    expect(reorderedHost.processChildRecord(makeOutput('child-a', 1, 'b'))).toBe(false);
+    expect(reorderedHost.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+
+    const oversizedHost: HeftDescriptorHost = makeHost();
+    expect(
+      oversizedHost.processChildRecord(
+        makeOutput('child-a', 1, 'x'.repeat(REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes + 1))
+      )
+    ).toBe(false);
+    expect(oversizedHost.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
   it('drops unknown optional events and rejects unknown required events or invalid privacy', () => {
     const host: HeftDescriptorHost = new HeftDescriptorHost({
       parentSessionId: 'parent-sess',

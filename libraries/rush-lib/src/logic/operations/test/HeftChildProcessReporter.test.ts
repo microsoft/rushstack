@@ -4,6 +4,7 @@
 import * as childProcess from 'node:child_process';
 
 import type { IReporterEventEnvelope, IRushDiagnostic } from '@rushstack/rush-reporter';
+import { StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { HeftChildProcessReporter } from '../HeftChildProcessReporter';
 
@@ -74,10 +75,11 @@ describe(HeftChildProcessReporter.name, () => {
       env: { ...process.env, ...reporter.environment },
       stdio: reporter.stdio
     });
+    const structuredOutputTerminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
 
     const [exitCode]: [number | null, void] = await Promise.all([
       waitForCloseAsync(child),
-      reporter.attachAsync(child)
+      reporter.attachAsync(child, structuredOutputTerminalProvider)
     ]);
 
     expect(exitCode).toBe(0);
@@ -100,6 +102,8 @@ describe(HeftChildProcessReporter.name, () => {
       'project#build',
       'project#build'
     ]);
+    expect(structuredOutputTerminalProvider.getOutput()).toBe('1');
+    expect(structuredOutputTerminalProvider.getErrorOutput()).toBe('2');
   });
 
   it('preserves old child stdout and stderr when no hello is sent', async () => {
@@ -134,7 +138,7 @@ describe(HeftChildProcessReporter.name, () => {
 
     const [exitCode]: [number | null, void] = await Promise.all([
       waitForCloseAsync(child),
-      reporter.attachAsync(child)
+      reporter.attachAsync(child, new StringBufferTerminalProvider())
     ]);
 
     expect(exitCode).toBe(0);
@@ -181,7 +185,7 @@ describe(HeftChildProcessReporter.name, () => {
 
     const [exitCode]: [number | null, void] = await Promise.all([
       waitForCloseAsync(child),
-      reporter.attachAsync(child)
+      reporter.attachAsync(child, new StringBufferTerminalProvider())
     ]);
 
     expect(exitCode).toBe(0);
@@ -227,7 +231,7 @@ describe(HeftChildProcessReporter.name, () => {
 
     const [exitCode]: [number | null, void] = await Promise.all([
       waitForCloseAsync(child),
-      reporter.attachAsync(child)
+      reporter.attachAsync(child, new StringBufferTerminalProvider())
     ]);
 
     expect(exitCode).toBe(0);
@@ -268,7 +272,7 @@ describe(HeftChildProcessReporter.name, () => {
 
     const [exitCode]: [number | null, void] = await Promise.all([
       waitForCloseAsync(child),
-      reporter.attachAsync(child)
+      reporter.attachAsync(child, new StringBufferTerminalProvider())
     ]);
 
     expect(exitCode).toBe(7);

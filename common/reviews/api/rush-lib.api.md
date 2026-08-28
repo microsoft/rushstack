@@ -644,7 +644,7 @@ export interface _IOperationBuildCacheOptions {
 // @internal
 export interface _IOperationChildProcessReporter {
     // (undocumented)
-    attachAsync(child: child_process.ChildProcess): Promise<void>;
+    attachAsync(child: child_process.ChildProcess, structuredOutputTerminalProvider: ITerminalProvider): Promise<void>;
     // (undocumented)
     readonly environment: Readonly<Record<string, string>>;
     // (undocumented)
@@ -780,7 +780,7 @@ export interface IOperationRunnerContext {
     // @internal
     _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
-    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider, structuredChildOutputTerminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
