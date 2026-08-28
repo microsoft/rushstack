@@ -19,14 +19,17 @@ function resolve(
   argv: readonly string[],
   env: Record<string, string | undefined> = {},
   isTTY: boolean = false,
-  repositoryOptIn: boolean = false
+  repositoryOptIn: boolean = false,
+  forceLegacy: boolean = false
 ): IRushReporterSelection {
   return resolveRushReporterSelection({
     argv,
     env,
     cwd: '/repo',
     stdout: { isTTY, columns: 100, write: () => undefined },
-    repositoryOptIn
+    repositoryOptIn,
+    forceLegacy,
+    selectedRushVersion: forceLegacy ? '5.177.0' : undefined
   });
 }
 
@@ -52,6 +55,8 @@ describe(resolveRushReporterSelection.name, () => {
       expect(resolve(['build'], testCase.env, testCase.isTTY)).toMatchObject({
         reporter: 'legacy',
         enabled: false,
+        reporterControlsOwnedByFrontend: false,
+        reporterValueFlagsToStrip: [],
         reason: 'pre-major legacy default'
       });
     }
@@ -93,7 +98,12 @@ describe(resolveRushReporterSelection.name, () => {
 
   it('allows reporter controls with the repository experiment', () => {
     expect(
-      resolve(['build', '--log-level=debug', '--output=json://./events.jsonl'], {}, false, true)
+      resolve(
+        ['build', '--reporter=plaintext', '--log-level=debug', '--output=json://./events.jsonl'],
+        {},
+        false,
+        true
+      )
     ).toMatchObject({
       reporter: 'plaintext',
       logLevel: 'debug',
@@ -103,6 +113,24 @@ describe(resolveRushReporterSelection.name, () => {
           target: path.resolve('/repo', 'events.jsonl')
         }
       ]
+    });
+  });
+
+  it('preserves custom value parameters when the repository experiment selects the reporter implicitly', () => {
+    expect(
+      resolve(
+        ['custom', '--output', 'artifact.zip', '--log-level', 'custom-level', '--verbose'],
+        {},
+        false,
+        true
+      )
+    ).toMatchObject({
+      reporter: 'plaintext',
+      logLevel: 'verbose',
+      outputs: [],
+      enabled: true,
+      reporterControlsOwnedByFrontend: false,
+      reporterValueFlagsToStrip: []
     });
   });
 
@@ -134,6 +162,7 @@ describe(resolveRushReporterSelection.name, () => {
     ).toMatchObject({
       reporter: 'legacy',
       enabled: false,
+      reporterValueFlagsToStrip: ['--reporter', '--output', '--log-level'],
       reason: 'RUSH_REPORTER=legacy'
     });
   });
@@ -233,22 +262,41 @@ describe(resolveRushReporterSelection.name, () => {
     expect(resolve(['build', '--quiet', '--debug'])).toMatchObject({
       reporter: 'legacy',
       logLevel: 'normal',
-      enabled: false
+      enabled: false,
+      reporterControlsOwnedByFrontend: false
     });
     expect(resolve(['build', '--reporter=legacy', '--quiet', '--debug'])).toMatchObject({
       reporter: 'legacy',
       logLevel: 'normal',
-      enabled: false
+      enabled: false,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: ['--reporter']
     });
   });
 
-  it('ignores reporter environment selection before the gate but validates explicit controls', () => {
+  it('ignores reporter environment selection before the gate and preserves custom value controls', () => {
     expect(resolve(['build'], { RUSH_LOG_LEVEL: 'not-a-level' }).enabled).toBe(false);
     expect(() => resolve(['build', '--reporter=unknown'])).toThrow(/Unsupported reporter/);
     expect(() => resolve(['build', '--reporter=json', '--log-level=loud'])).toThrow(/Unsupported log level/);
-    expect(() => resolve(['build', '--output=json:\/\/events.jsonl'])).toThrow(
-      /require an explicit non-legacy --reporter/
+    expect(resolve(['custom', '--output=json://events.jsonl', '--log-level=custom'])).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: false
+    });
+  });
+
+  it('rejects explicit non-legacy reporters for incompatible selected engines', () => {
+    expect(() => resolve(['build', '--reporter=json'], {}, false, true, true)).toThrow(
+      /selected Rush engine 5\.177\.0 does not support --reporter=json/
     );
+    expect(resolve(['build', '--verbose'], {}, false, true, true)).toMatchObject({
+      reporter: 'legacy',
+      logLevel: 'normal',
+      enabled: false,
+      reporterControlsOwnedByFrontend: false,
+      reporterValueFlagsToStrip: [],
+      reason: 'pre-major legacy default'
+    });
   });
 
   it('rejects an interactive reporter on non-TTY output', () => {
