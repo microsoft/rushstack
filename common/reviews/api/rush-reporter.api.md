@@ -583,6 +583,7 @@ export interface ILiveRegionState {
 
 // @beta
 export interface IMessageEmittedPayload {
+    readonly minimumLogLevel?: ReporterLogLevel;
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
     readonly text: string;
@@ -1037,6 +1038,7 @@ export interface IScopedLogger {
 
 // @beta
 export interface IScopedMessageOptions {
+    readonly minimumLogLevel?: ReporterLogLevel;
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
     readonly text: string;
@@ -1409,6 +1411,8 @@ export class ReporterManager implements IReporterEventSink {
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
+    // @internal
+    _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;
     flushAsync(timeoutMs?: number): Promise<void>;
     getPendingEventCount(): number;
     ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string;
