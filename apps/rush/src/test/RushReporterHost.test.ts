@@ -165,6 +165,33 @@ describe(resolveRushReporterSelection.name, () => {
       reporterValueFlagsToStrip: ['--reporter', '--output', '--log-level'],
       reason: 'RUSH_REPORTER=legacy'
     });
+
+    const legacySelection: IRushReporterSelection = resolve(
+      ['custom', '--reporter=legacy', '--output', 'custom.zip', '--log-level', 'custom', '--verbose'],
+      { RUSH_REPORTER: 'legacy' }
+    );
+    expect(legacySelection).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterValueFlagsToStrip: ['--reporter'],
+      reason: 'RUSH_REPORTER=legacy'
+    });
+    expect(
+      stripReporterValueControls(
+        [
+          'node',
+          'rush',
+          'custom',
+          '--reporter=legacy',
+          '--output',
+          'custom.zip',
+          '--log-level',
+          'custom',
+          '--verbose'
+        ],
+        new Set(legacySelection.reporterValueFlagsToStrip)
+      )
+    ).toEqual(['node', 'rush', 'custom', '--output', 'custom.zip', '--log-level', 'custom', '--verbose']);
   });
 
   it('removes reporter-only value controls before invoking a legacy engine', () => {
@@ -276,7 +303,18 @@ describe(resolveRushReporterSelection.name, () => {
 
   it('ignores reporter environment selection before the gate and preserves custom value controls', () => {
     expect(resolve(['build'], { RUSH_LOG_LEVEL: 'not-a-level' }).enabled).toBe(false);
-    expect(() => resolve(['build', '--reporter=unknown'])).toThrow(/Unsupported reporter/);
+    expect(resolve(['custom', '--reporter=junit'])).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: false,
+      reporterValueFlagsToStrip: []
+    });
+    expect(() => resolve(['custom', '--reporter=junit'], {}, false, true)).toThrow(
+      /Unsupported reporter "junit"/
+    );
+    expect(() => resolve(['custom', '--reporter=junit', '--output=json://./events.jsonl'])).toThrow(
+      /Unsupported reporter "junit"/
+    );
     expect(() => resolve(['build', '--reporter=json', '--log-level=loud'])).toThrow(/Unsupported log level/);
     expect(resolve(['custom', '--output=json://events.jsonl', '--log-level=custom'])).toMatchObject({
       reporter: 'legacy',
@@ -287,9 +325,9 @@ describe(resolveRushReporterSelection.name, () => {
 
   it('rejects explicit non-legacy reporters for incompatible selected engines', () => {
     expect(() => resolve(['build', '--reporter=json'], {}, false, true, true)).toThrow(
-      /selected Rush engine 5\.177\.0 does not support --reporter=json/
+      /selected Rush engine 5\.177\.0 cannot safely use --reporter=json/
     );
-    expect(resolve(['build', '--verbose'], {}, false, true, true)).toMatchObject({
+    expect(resolve(['custom', '--reporter=junit', '--verbose'], {}, false, false, true)).toMatchObject({
       reporter: 'legacy',
       logLevel: 'normal',
       enabled: false,

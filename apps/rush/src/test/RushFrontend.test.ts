@@ -6,6 +6,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import * as rushLib from '@microsoft/rush-lib';
+import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 import {
   ReporterHost,
@@ -242,7 +243,7 @@ describe(launchRushFrontendAsync.name, () => {
           createVersionSelector,
           processLifecycle
         })
-      ).rejects.toThrow(/selected Rush engine 5\.177\.0 does not support --reporter=json/);
+      ).rejects.toThrow(/selected Rush engine 5\.177\.0 cannot safely use --reporter=json/);
 
       expect(createVersionSelector).not.toHaveBeenCalled();
       expect(processLifecycle.beforeExitListener).toBeUndefined();
@@ -299,6 +300,209 @@ describe(launchRushFrontendAsync.name, () => {
       expect(receivedArgv).toEqual(process.argv);
       expect(processLifecycle.beforeExitListener).toBeUndefined();
       expect(processLifecycle.signalListeners.size).toBe(0);
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
+  it.each([
+    {
+      name: 'unsupported custom reporter',
+      reporter: 'junit',
+      expectedArgv: [
+        'node',
+        'rush',
+        'custom',
+        '--reporter',
+        'junit',
+        '--output',
+        'custom.zip',
+        '--log-level',
+        'custom',
+        '--verbose'
+      ]
+    },
+    {
+      name: 'explicit legacy reporter',
+      reporter: 'legacy',
+      expectedArgv: ['node', 'rush', 'custom', '--output', 'custom.zip', '--log-level', 'custom', '--verbose']
+    }
+  ])('preserves the old-engine $name escape path', async ({ reporter, expectedArgv }) => {
+    const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
+    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
+    let receivedArgv: string[] | undefined;
+    versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
+      void version;
+      void configuration;
+      receivedArgv = [...process.argv];
+      await launchOptions.reporterCloseAsync();
+    };
+    const originalArgv: string[] = process.argv;
+    process.argv = [
+      'node',
+      'rush',
+      'custom',
+      '--reporter',
+      reporter,
+      '--output',
+      'custom.zip',
+      '--log-level',
+      'custom',
+      '--verbose'
+    ];
+
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: '5.177.0',
+        configuration: undefined,
+        launchOptions: { isManaged: true },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: (options) =>
+          initializeRushReporterHostAsync({
+            ...options,
+            argv: process.argv.slice(2),
+            env: {},
+            stdout: { isTTY: false, write: () => undefined },
+            includeDefaultFileReporter: false
+          }),
+        createVersionSelector: () => versionSelector,
+        processLifecycle
+      });
+
+      expect(receivedArgv).toEqual(expectedArgv);
+      expect(processLifecycle.beforeExitListener).toBeUndefined();
+      expect(processLifecycle.signalListeners.size).toBe(0);
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
+  it.each([
+    {
+      name: 'unsupported reporter as a custom value',
+      reporter: 'junit',
+      env: {},
+      expectedArguments: [
+        '--reporter',
+        'junit',
+        '--output',
+        'custom.zip',
+        '--log-level',
+        'custom',
+        '--verbose'
+      ],
+      expectedEnabled: false
+    },
+    {
+      name: 'supported reporter as frontend ownership',
+      reporter: 'json',
+      env: {},
+      expectedArguments: ['--verbose'],
+      expectedEnabled: true
+    },
+    {
+      name: 'explicit legacy under the emergency override',
+      reporter: 'legacy',
+      env: { RUSH_REPORTER: 'legacy' },
+      expectedArguments: ['--output', 'custom.zip', '--log-level', 'custom', '--verbose'],
+      expectedEnabled: false
+    }
+  ])('runs the real custom command fixture with $name', async (testCase) => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-custom-command-'));
+    const repoPath: string = path.join(directory, 'repo');
+    const fixturePath: string = path.resolve(
+      __dirname,
+      '../../../../libraries/rush-lib/src/cli/test/basicAndRunBuildActionRepo'
+    );
+    await fs.promises.cp(fixturePath, repoPath, { recursive: true });
+    const reporterOutputPath: string = path.join(directory, 'reporter.jsonl');
+    const outputValue: string = testCase.reporter === 'json' ? `json://${reporterOutputPath}` : 'custom.zip';
+    const logLevelValue: string = testCase.reporter === 'json' ? 'debug' : 'custom';
+    const originalArgv: string[] = process.argv;
+    const originalExitCode: string | number | null | undefined = process.exitCode;
+    process.argv = [
+      'node',
+      'rush',
+      'custom-output',
+      '--reporter',
+      testCase.reporter,
+      '--output',
+      outputValue
+    ];
+    if (testCase.reporter !== 'json') {
+      process.argv.push('--log-level', logLevelValue);
+    }
+    process.argv.push('--verbose');
+    let selection: IRushReporterSelection | undefined;
+
+    try {
+      EnvironmentConfiguration.reset();
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: true },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async (options) => {
+          const initialized: IInitializedRushReporterHost = await initializeRushReporterHostAsync({
+            ...options,
+            argv: process.argv.slice(2),
+            cwd: repoPath,
+            env: testCase.env,
+            stdout: { isTTY: false, write: () => undefined },
+            includeDefaultFileReporter: false
+          });
+          selection = initialized.selection;
+          return initialized;
+        },
+        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+          void version;
+          void selectedRushLib;
+          const parser: RushCommandLineParser = new RushCommandLineParser({
+            cwd: repoPath,
+            reporterCloseAsync: launchOptions.reporterCloseAsync
+          });
+          return parser.executeAsync().then(() => undefined);
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(selection?.enabled).toBe(testCase.expectedEnabled);
+      expect(
+        JSON.parse(await fs.promises.readFile(path.join(repoPath, 'custom-output-args.json'), 'utf8'))
+      ).toEqual(testCase.expectedArguments);
+    } finally {
+      EnvironmentConfiguration.reset();
+      process.argv = originalArgv;
+      process.exitCode = originalExitCode;
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects an unsupported reporter typo when repository opt-in establishes ownership', async () => {
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'custom-output', '--reporter=junit'];
+
+    try {
+      await expect(
+        launchRushFrontendAsync({
+          currentPackageVersion: '5.178.1',
+          rushVersionToLoad: undefined,
+          configuration: { useRushReporter: true } as MinimalRushConfiguration,
+          launchOptions: { isManaged: true },
+          currentRushLib: rushLib,
+          initializeReporterHostAsync: (options) =>
+            initializeRushReporterHostAsync({
+              ...options,
+              argv: process.argv.slice(2),
+              env: {},
+              stdout: { isTTY: false, write: () => undefined },
+              includeDefaultFileReporter: false
+            }),
+          processLifecycle: createTestProcessLifecycle()
+        })
+      ).rejects.toThrow('Unsupported reporter "junit"');
     } finally {
       process.argv = originalArgv;
     }
@@ -598,6 +802,8 @@ describe(launchRushFrontendAsync.name, () => {
         'node',
         commandName,
         'custom',
+        '--reporter',
+        'junit',
         '--output',
         'custom.zip',
         '--log-level',

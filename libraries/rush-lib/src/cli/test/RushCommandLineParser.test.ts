@@ -120,11 +120,21 @@ describe('RushCommandLineParser', () => {
             'basicAndRunBuildActionRepo',
             'custom-output'
           );
-          process.argv.push('--output', 'custom-artifact.zip', '--log-level', 'custom-level', '--verbose');
+          process.argv.push(
+            '--reporter',
+            'junit',
+            '--output',
+            'custom-artifact.zip',
+            '--log-level',
+            'custom-level',
+            '--verbose'
+          );
 
           await expect(parser.executeAsync()).resolves.toEqual(true);
 
           expect(JsonFile.load(`${repoPath}/custom-output-args.json`)).toEqual([
+            '--reporter',
+            'junit',
             '--output',
             'custom-artifact.zip',
             '--log-level',

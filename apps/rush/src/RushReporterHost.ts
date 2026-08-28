@@ -265,14 +265,38 @@ function parseReporterControls(
     debug ||= argument === '--debug' || argument === '-d';
   }
 
-  if (reporters.length > 1) {
+  return { reporters, logLevels, outputs, quiet, verbose, debug };
+}
+
+function validateReporterControlMultiplicity(
+  controls: IParsedReporterControls,
+  includeOutputAndLogLevelControls: boolean
+): void {
+  if (controls.reporters.length > 1) {
     throw new Error('--reporter may be specified only once.');
   }
-  if (logLevels.length > 1) {
+  if (includeOutputAndLogLevelControls && controls.logLevels.length > 1) {
     throw new Error('--log-level may be specified only once.');
   }
+}
 
-  return { reporters, logLevels, outputs, quiet, verbose, debug };
+function hasReporterOutputControl(argv: readonly string[]): boolean {
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    const prefix: string = '--output=';
+    const value: string | undefined = argument.startsWith(prefix)
+      ? argument.slice(prefix.length)
+      : argument === '--output' && argv[index + 1] && !argv[index + 1].startsWith('-')
+        ? argv[index + 1]
+        : undefined;
+    if (value && /^(?:file|json):\/\//.test(value)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function resolveLogLevel(
@@ -382,15 +406,31 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
   const commandJson: boolean = separateJsonControls(argv).commandJson;
 
   const selectionControls: IParsedReporterControls = parseReporterControls(argv, false);
-  const requestedReporter: string | undefined = selectionControls.reporters[0];
-  if (requestedReporter !== undefined && !isSupportedReporterName(requestedReporter)) {
+  const reporterOwnershipEstablished: boolean =
+    options.repositoryOptIn === true ||
+    hasReporterOutputControl(argv) ||
+    selectionControls.reporters.some((reporter: string) => isSupportedReporterName(reporter));
+  if (reporterOwnershipEstablished) {
+    validateReporterControlMultiplicity(selectionControls, false);
+  }
+  const reporterValue: string | undefined = reporterOwnershipEstablished
+    ? selectionControls.reporters[0]
+    : undefined;
+  if (reporterValue !== undefined && !isSupportedReporterName(reporterValue)) {
     throw new Error(
-      `Unsupported reporter ${JSON.stringify(requestedReporter)}. ` +
+      `Unsupported reporter ${JSON.stringify(reporterValue)}. ` +
         'Supported values are default, ai, json, plaintext, file, and legacy.'
     );
   }
+  const requestedReporter: ReporterName | undefined = reporterValue;
 
   if (isLegacyEmergencyFallbackRequested(env)) {
+    const reporterValueFlagsToStrip: readonly string[] =
+      requestedReporter === 'legacy'
+        ? REPORTER_SELECTION_FLAG
+        : requestedReporter === undefined
+          ? []
+          : ALL_REPORTER_VALUE_FLAGS;
     return {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -398,7 +438,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       commandJson,
       enabled: false,
       reporterControlsOwnedByFrontend: requestedReporter !== undefined,
-      reporterValueFlagsToStrip: requestedReporter === undefined ? [] : ALL_REPORTER_VALUE_FLAGS,
+      reporterValueFlagsToStrip,
       reason: 'RUSH_REPORTER=legacy'
     };
   }
@@ -407,8 +447,9 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     if (requestedReporter !== undefined && requestedReporter !== 'legacy') {
       throw new Error(
         `The selected Rush engine${options.selectedRushVersion ? ` ${options.selectedRushVersion}` : ''} ` +
-          `does not support --reporter=${requestedReporter}. Remove the explicit reporter request or use ` +
-          'the Rush version bundled with this frontend.'
+          `cannot safely use --reporter=${requestedReporter} because this frontend cannot verify its ` +
+          'reporter close contract. Remove the explicit reporter request or use the Rush version bundled ' +
+          'with this frontend.'
       );
     }
     return {
@@ -481,6 +522,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
   }
 
   const controls: IParsedReporterControls = parseReporterControls(argv, true);
+  validateReporterControlMultiplicity(controls, true);
   const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
   if (requestedReporter === 'default' && !stdout.isTTY) {
     throw new Error(
