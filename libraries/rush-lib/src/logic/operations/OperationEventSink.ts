@@ -57,8 +57,7 @@ export interface IOperationGraphEventSink {
 
   /**
    * Invoked for each chunk of an operation's raw output, upstream of any
-   * quiet-mode filtering. Concatenated chunks for one operation exactly match
-   * what the collated sink receives for that operation.
+   * newline normalization or quiet-mode filtering.
    */
   onOperationChunk?(result: IOperationExecutionResult, chunk: ITerminalChunk): void;
 

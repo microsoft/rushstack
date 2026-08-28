@@ -302,8 +302,8 @@ describe('OperationGraph event sink (dual-emit)', () => {
   });
 
   it('emits the opted-in canonical stream without duplicating or losing operation chunks', async () => {
-    const stdoutText: string = `${'a'.repeat(64 * 1024 + 7)}\n`;
-    const stderrText: string = 'stderr detail\n';
+    const stdoutText: string = `${'a'.repeat(64 * 1024 + 7)}\rprogress`;
+    const stderrText: string = 'stderr detail\r';
     const createOutputRunner = (): IOperationRunner => ({
       name: '@scope/project (_phase:build)',
       reportTiming: true,
@@ -400,6 +400,126 @@ describe('OperationGraph event sink (dual-emit)', () => {
       operationId: '@scope/project#phase',
       status: 'successWithWarnings'
     });
+  });
+
+  it('combines sharded implementation records into one project x phase stream', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: {
+        eventSink: reporterSink,
+        sessionId: 'sharded-operation-stream',
+        operationStreamEnabled: true
+      }
+    });
+    const projectName: string = '@scope/sharded';
+    const preShardRunner: IOperationRunner = {
+      name: `${projectName} (phase) - pre-shard`,
+      reportTiming: false,
+      silent: true,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: true,
+      executeAsync: async () => OperationStatus.NoOp,
+      getConfigHash: () => 'pre-shard'
+    };
+    const shardRunner: IOperationRunner = {
+      name: `${projectName} (phase) - shard 1/1`,
+      reportTiming: true,
+      silent: false,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: false,
+      executeAsync: async (context: IOperationRunnerContext) =>
+        await context.runWithTerminalAsync(
+          async (terminal) => {
+            terminal.write('shard output without newline');
+            return OperationStatus.Failure;
+          },
+          { createLogFile: false, logFileSuffix: '' }
+        ),
+      getConfigHash: () => 'shard'
+    };
+    const collatorRunner: IOperationRunner = {
+      name: `${projectName} (phase) - collate`,
+      reportTiming: true,
+      silent: false,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: false,
+      executeAsync: async () => OperationStatus.Success,
+      getConfigHash: () => 'collate'
+    };
+    const preShard: Operation = createOperation('pre-shard', preShardRunner, mockPhase, projectName);
+    const shard: Operation = createOperation('shard', shardRunner, mockPhase, projectName);
+    const collator: Operation = createOperation('collator', collatorRunner, mockPhase, projectName);
+    shard.addDependency(preShard);
+    collator.addDependency(shard);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([collator, preShard, shard]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+
+    const operationEvents: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
+      ({ scope }) => scope?.operationId === `${projectName}#phase`
+    );
+    expect(operationEvents.filter(({ type }) => type === 'operationRegistered')).toHaveLength(1);
+    expect(
+      operationEvents
+        .filter(({ type }) => type === 'externalOutput')
+        .map(({ payload }) => (payload as { text: string }).text)
+        .join('')
+    ).toBe('shard output without newline');
+    expect(operationEvents.filter(({ type }) => type === 'operationStreamClosed')).toHaveLength(1);
+    expect(operationEvents.filter(({ type }) => type === 'operationCompleted')).toEqual([
+      expect.objectContaining({
+        payload: expect.objectContaining({ operationId: `${projectName}#phase`, status: 'failure' })
+      })
+    ]);
+    expect(
+      operationEvents.filter(
+        ({ type, payload }) =>
+          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
+      )
+    ).toHaveLength(1);
+  });
+
+  it('does not register operations when scheduling hooks reject the iteration', async () => {
+    const sink: RecordingSink = new RecordingSink();
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('hook failure', new MockOperationRunner('hook failure'))]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.eventSink = sink;
+    graph.hooks.onIterationScheduled.tap('test', () => {
+      throw new Error('schedule rejected');
+    });
+
+    await expect(graph.executeAsync({})).rejects.toThrow('schedule rejected');
+    expect(sink.registered).toEqual([]);
+    expect(sink.closed).toEqual([]);
+    expect(sink.completed).toEqual([]);
+  });
+
+  it('finalizes registered operations when the pre-execution hook rejects', async () => {
+    const sink: RecordingSink = new RecordingSink();
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('hook failure', new MockOperationRunner('hook failure'))]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.eventSink = sink;
+    graph.hooks.beforeExecuteIterationAsync.tapPromise('test', async () => {
+      throw new Error('pre-execution rejected');
+    });
+
+    await expect(graph.executeAsync({})).rejects.toThrow('pre-execution rejected');
+    expect(sink.registered).toEqual([['hook failure', false]]);
+    expect(sink.closed).toEqual(['hook failure']);
+    expect(sink.completed).toEqual([['hook failure', OperationStatus.Aborted]]);
   });
 
   it('reports silent operation metadata and outcomes on the opted-in stream', async () => {
