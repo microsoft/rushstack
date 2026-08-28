@@ -234,6 +234,14 @@ describe(resolveRushReporterSelection.name, () => {
     ).toEqual(['node', 'rush', 'custom', '--output', 'custom.zip', '--log-level', 'custom', '--verbose']);
   });
 
+  it('keeps help on the legacy parser-only path', () => {
+    expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
   it('removes reporter-only value controls before invoking a legacy engine', () => {
     expect(
       stripReporterValueControls([
@@ -323,6 +331,13 @@ describe(resolveRushReporterSelection.name, () => {
     expect(() => resolve(['build', '--reporter=plaintext', '--quiet', '--debug'])).toThrow(
       /Contradictory reporter verbosity/
     );
+  });
+
+  it('preserves RUSH_QUIET_MODE as a quiet reporter alias', () => {
+    expect(resolve(['build', '--reporter=plaintext'], { RUSH_QUIET_MODE: 'true' }).logLevel).toBe('quiet');
+    expect(() =>
+      resolve(['build', '--reporter=plaintext'], { RUSH_QUIET_MODE: '1', RUSH_LOG_LEVEL: 'debug' })
+    ).toThrow(/contradicts RUSH_LOG_LEVEL/);
   });
 
   it('preserves legacy verbosity combinations when the reporter path is disabled', () => {
@@ -466,7 +481,59 @@ describe(initializeRushReporterHostAsync.name, () => {
     await initialized.closeAsync();
 
     expect(initialized.selection.enabled).toBe(false);
+    expect(initialized.logArtifact).toBeUndefined();
     expect(output).toBe('');
+  });
+
+  it('always creates a repository full-detail log on the enabled path', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-full-log-'));
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=plaintext'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'build',
+        stdout: { isTTY: false, write: () => undefined }
+      });
+
+      expect(initialized.logArtifact).toMatchObject({ available: true });
+      expect(initialized.logArtifact?.path).toMatch(
+        new RegExp(`^${directory.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+      );
+      await initialized.closeAsync();
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('does not render operation output at quiet plaintext log level', async () => {
+    let output: string = '';
+    const quietHost = await initializeRushReporterHostAsync({
+      argv: ['build', '--reporter=plaintext', '--log-level=quiet'],
+      env: {},
+      stdout: {
+        isTTY: false,
+        write: (text: string) => {
+          output += text;
+        }
+      },
+      includeDefaultFileReporter: false
+    });
+
+    emitCommandStarted(quietHost.sink);
+    emitOperationEvents(quietHost.sink);
+    quietHost.sink.emit({
+      protocolVersion: { major: 1, minor: 1 },
+      sessionId: 'session',
+      source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+      privacy: 'public',
+      type: 'commandResult',
+      payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+    });
+    await quietHost.closeAsync();
+
+    expect(output).not.toContain('raw operation output');
+    expect(output).toContain('rush build succeeded');
   });
 
   it('initializes the explicitly selected reporter and output destinations', async () => {
@@ -505,7 +572,14 @@ describe(initializeRushReporterHostAsync.name, () => {
         .trim()
         .split('\n')
         .map((line: string) => JSON.parse(line) as Record<string, unknown>);
-      expect(stdoutEvents.map(({ type }) => type)).toEqual(['commandStarted']);
+      expect(stdoutEvents.map(({ type }) => type)).toEqual([
+        'commandStarted',
+        'operationRegistered',
+        'operationStatusChanged',
+        'externalOutput',
+        'operationStreamClosed',
+        'operationCompleted'
+      ]);
       expect(fileEvents.map(({ type }) => type)).toEqual([
         'commandStarted',
         'operationRegistered',

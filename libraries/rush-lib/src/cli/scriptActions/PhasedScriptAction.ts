@@ -6,7 +6,14 @@ import { once } from 'node:events';
 import type { AsyncSeriesHook } from 'tapable';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { type ITerminal, Terminal, Colorize, StdioWritable } from '@rushstack/terminal';
+import {
+  type ITerminal,
+  Terminal,
+  Colorize,
+  StdioWritable,
+  CallbackWritable,
+  NoOpTerminalProvider
+} from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
   CommandLineParameter,
@@ -63,6 +70,7 @@ import { TrimRushEnvironmentVariablesPlugin } from '../../logic/operations/TrimR
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 import { attachReporterOperationEventSink } from '../../logic/operations/ReporterOperationEventSink';
+import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
 
@@ -388,6 +396,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     const hooks: PhasedCommandHooks = this.hooks;
     const terminal: ITerminal = this._terminal;
+    const presentationTerminal: ITerminal = _isRushSessionOperationStreamEnabled(this.rushSession)
+      ? new Terminal(new NoOpTerminalProvider())
+      : terminal;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
@@ -423,7 +434,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           /* webpackChunkName: 'ConsoleTimelinePlugin' */
           '../../logic/operations/ConsoleTimelinePlugin'
         );
-        new ConsoleTimelinePlugin(terminal).apply(this.hooks);
+        new ConsoleTimelinePlugin(presentationTerminal).apply(this.hooks);
       }
 
       const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
@@ -434,7 +445,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       }
 
       // Enable the standard summary
-      new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
+      new OperationResultSummarizerPlugin(presentationTerminal).apply(this.hooks);
     });
 
     const { hooks: sessionHooks } = this.rushSession;
@@ -606,7 +617,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       const [getInputsSnapshotAsync, initialSnapshot] = await measureAsyncFn(
         `${PERF_PREFIX}:analyzeRepoState`,
         async () => {
-          terminal.write('Analyzing repo state... ');
+          presentationTerminal.write('Analyzing repo state... ');
           const repoStateStopwatch: Stopwatch = new Stopwatch();
           repoStateStopwatch.start();
 
@@ -623,8 +634,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             : undefined;
 
           repoStateStopwatch.stop();
-          terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
-          terminal.writeLine();
+          presentationTerminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+          presentationTerminal.writeLine();
           return [innerGetInputsSnapshotAsync, innerInitialSnapshot];
         }
       );
@@ -652,7 +663,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       const graphOptions: IOperationGraphOptions = {
         quietMode: isQuietMode,
         debugMode: this.parser.isDebug,
-        destinations: [StdioWritable.instance],
+        destinations: [
+          _isRushSessionOperationStreamEnabled(this.rushSession)
+            ? new CallbackWritable({ onWriteChunk: () => undefined })
+            : StdioWritable.instance
+        ],
         parallelism,
         maxParallelism,
         allowOversubscription: this._allowOversubscription,
@@ -678,14 +693,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       await measureAsyncFn(`${PERF_PREFIX}:executionManager`, async () => {
         await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
-      attachReporterOperationEventSink(graph, this.rushSession, this.actionName);
+      attachReporterOperationEventSink(graph, this.rushSession, this.actionName, isWatch);
 
       const executeOptions: IExecuteOperationsOptions = {
         graph,
         ignoreHooks: !!this._ignoreHooksParameter.value,
         isWatch,
         stopwatch,
-        terminal
+        terminal: presentationTerminal
       };
 
       const initialIterationOptions: IOperationGraphIterationOptions = {
@@ -710,8 +725,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           rushConfiguration: this.rushConfiguration,
           graph,
           initialSnapshot,
-          terminal,
-          debounceMs: this._watchDebounceMs
+          terminal: presentationTerminal,
+          debounceMs: this._watchDebounceMs,
+          renderStatusInPlace: !_isRushSessionOperationStreamEnabled(this.rushSession)
         });
         watcher.clearStatus();
 
