@@ -10,6 +10,13 @@
   "parameters": [
     {
       "parameterKind": "string",
+      "longName": "--reporter",
+      "argumentName": "REPORTER",
+      "description": "Custom reporter value.",
+      "associatedCommands": ["custom-output"]
+    },
+    {
+      "parameterKind": "string",
       "longName": "--output",
       "argumentName": "OUTPUT",
       "description": "Custom output value.",
