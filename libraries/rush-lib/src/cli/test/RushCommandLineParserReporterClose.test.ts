@@ -147,4 +147,29 @@ describe('RushCommandLineParser reporter close', () => {
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith('[reporter] Unable to finalize reporters: close failed\n');
   });
+
+  it('shares one reporter close operation across failure and finalization paths', async () => {
+    let resolveClose: (() => void) | undefined;
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      () =>
+        new Promise<void>((resolve: () => void) => {
+          resolveClose = resolve;
+        })
+    );
+    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
+    Object.defineProperty(parser, '_rushOptions', { value: { reporterCloseAsync: closeAsync } });
+
+    const closeReporterAsync: () => Promise<void> = (
+      parser as unknown as {
+        _closeReporterAsync(): Promise<void>;
+      }
+    )._closeReporterAsync.bind(parser);
+    const firstClose: Promise<void> = closeReporterAsync();
+    const secondClose: Promise<void> = closeReporterAsync();
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    resolveClose!();
+    await expect(Promise.all([firstClose, secondClose])).resolves.toEqual([undefined, undefined]);
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+  });
 });

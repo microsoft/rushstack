@@ -6,10 +6,12 @@ import * as path from 'node:path';
 import type { PerformanceEntry } from 'node:perf_hooks';
 
 import { FileSystem, type FileSystemStats, JsonFile } from '@rushstack/node-core-library';
+import type { ITelemetryAggregate } from '@rushstack/rush-reporter';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
 import type { RushSession } from '../pluginFramework/RushSession';
+import { _getRushSessionTelemetryAggregate } from '../pluginFramework/RushSession';
 import { collectPerformanceEntries } from '../utilities/performance';
 
 /**
@@ -138,6 +140,16 @@ export interface ITelemetryData {
    * This is an array of `PerformanceEntry` objects, which can include marks, measures, and function timings.
    */
   readonly performanceEntries?: readonly PerformanceEntry[];
+
+  /**
+   * The allowlisted projection derived from shadow reporter events.
+   *
+   * @remarks
+   * This is present only when the Rush frontend supplied a reporter event sink.
+   * It never contains messages, paths, arguments, raw output, remediation
+   * parameters, stack traces, or non-public envelope metadata.
+   */
+  readonly reporterData?: ITelemetryAggregate;
 }
 
 const MAX_FILE_COUNT: number = 100;
@@ -166,9 +178,30 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
+    const reporterAggregate: ITelemetryAggregate | undefined = _getRushSessionTelemetryAggregate(
+      this._rushSession
+    );
+    const processExitCode: number =
+      typeof process.exitCode === 'number' ? process.exitCode : Number(process.exitCode);
     const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
+      reporterData: reporterAggregate
+        ? {
+            ...reporterAggregate,
+            commandName: reporterAggregate.commandName ?? telemetryData.name,
+            result:
+              reporterAggregate.result ?? (telemetryData.result === 'Succeeded' ? 'succeeded' : 'failed'),
+            exitCode:
+              reporterAggregate.exitCode ??
+              (telemetryData.result === 'Succeeded'
+                ? 0
+                : Number.isFinite(processExitCode)
+                  ? processExitCode
+                  : 1),
+            durationMs: reporterAggregate.durationMs ?? telemetryData.durationInSeconds * 1000
+          }
+        : telemetryData.reporterData,
       performanceEntries:
         telemetryData.performanceEntries || collectPerformanceEntries(this._telemetryStartTime),
       machineInfo: telemetryData.machineInfo || {
