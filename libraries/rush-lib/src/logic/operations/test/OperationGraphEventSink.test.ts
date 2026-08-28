@@ -480,4 +480,90 @@ describe('OperationGraph event sink (dual-emit)', () => {
     expect(countEvents('operationRegistered')).toBe(registrationCount);
     expect(countEvents('operationStatusChanged')).toBe(statusCount);
   });
+
+  it('keeps project x phase identities stable across repeated watch-style iterations', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'operation-retries' }
+    });
+    const compilePhase: IPhase = {
+      ...mockPhase,
+      name: '_phase:compile',
+      logFilenameIdentifier: '_phase_compile'
+    };
+    const testPhase: IPhase = {
+      ...mockPhase,
+      name: '_phase:test',
+      logFilenameIdentifier: '_phase_test'
+    };
+    const graph: OperationGraph = new OperationGraph(
+      new Set([
+        createOperation(
+          '@scope/project compile',
+          new MockOperationRunner('@scope/project (_phase:compile)'),
+          compilePhase,
+          '@scope/project'
+        ),
+        createOperation(
+          '@scope/project test',
+          new MockOperationRunner('@scope/project (_phase:test)'),
+          testPhase,
+          '@scope/project'
+        )
+      ]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+    graph.invalidateOperations(undefined, 'watch iteration');
+    await graph.executeAsync({});
+
+    const registrations: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
+      ({ type }) => type === 'operationRegistered'
+    );
+    expect(registrations.map(({ scope }) => scope?.operationId)).toEqual([
+      '@scope/project#_phase:compile',
+      '@scope/project#_phase:test',
+      '@scope/project#_phase:compile',
+      '@scope/project#_phase:test'
+    ]);
+    for (const event of reporterSink.inputs.filter(({ type }) => type === 'operationStatusChanged')) {
+      expect(event.scope?.operationId).toBe(`@scope/project#${event.scope?.phaseName}`);
+      expect((event.payload as { operationId: string }).operationId).toBe(event.scope?.operationId);
+    }
+  });
+
+  it('leaves stdout, stderr, and StreamCollator rendering byte-identical with shadow reporting', async () => {
+    const createOutputRunner = (): MockOperationRunner =>
+      new MockOperationRunner('output', async (terminal: CollatedTerminal) => {
+        terminal.writeStdoutLine('shadow parity stdout');
+        terminal.writeStderrLine('shadow parity stderr');
+        return OperationStatus.Success;
+      });
+
+    const plainWritable: MockWritable = new MockWritable();
+    await new OperationGraph(
+      new Set([createOperation('output', createOutputRunner())]),
+      createGraphOptions(plainWritable, false)
+    ).executeAsync({});
+
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'output-parity' }
+    });
+    const shadowWritable: MockWritable = new MockWritable();
+    const shadowGraph: OperationGraph = new OperationGraph(
+      new Set([createOperation('output', createOutputRunner())]),
+      createGraphOptions(shadowWritable, false)
+    );
+    attachReporterOperationEventSink(shadowGraph, rushSession, 'build');
+    await shadowGraph.executeAsync({});
+    expect(shadowWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+  });
 });
