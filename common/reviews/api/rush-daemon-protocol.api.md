@@ -25,7 +25,11 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'setRawMode',
 'rawModeChanged',
 'terminalPolicy',
-'queuePosition'
+'queuePosition',
+'requestStart',
+'requestCancel',
+'requestRejected',
+'requestResult'
 ];
 
 // @beta
@@ -57,10 +61,13 @@ export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
+
+// @beta
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -129,6 +136,9 @@ export type DaemonProtocolErrorCode = 'frameTooLarge' | 'unknownFrameType' | 'ma
 export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-timeout';
 
 // @beta
+export type DaemonRequestRejectionCode = 'invalidRequest' | 'routingFailed' | 'unsupported' | 'workspaceRecreationRequired';
+
+// @beta
 export type DaemonRushCommandOrigin = 'built-in' | 'custom';
 
 // @beta
@@ -192,6 +202,7 @@ export interface IDaemonClientCaps {
     readonly isTTY: boolean;
     readonly supportsInteractiveIO?: boolean;
     readonly supportsRequestAdmission?: boolean;
+    readonly supportsRequestLifecycle?: boolean;
     readonly verbosity?: DaemonVerbosity;
 }
 
@@ -415,6 +426,28 @@ export interface IDaemonRequestAdmissionOptions {
 }
 
 // @beta
+export interface IDaemonRequestCancelMessage {
+    // (undocumented)
+    readonly kind: 'requestCancel';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestEnvelope {
+    readonly admission?: IDaemonRequestAdmissionOptions;
+    readonly argv: ReadonlyArray<string>;
+    readonly commandName: string;
+    readonly commandOrigin: DaemonRushCommandOrigin;
+    readonly cwd: string;
+    readonly environment: Readonly<Record<string, string>>;
+    readonly requestId: string;
+    readonly terminal: IDaemonRequestTerminal;
+}
+
+// @beta
 export interface IDaemonRequestQueuePositionMessage {
     // (undocumented)
     readonly kind: 'queuePosition';
@@ -423,6 +456,43 @@ export interface IDaemonRequestQueuePositionMessage {
         readonly position: number;
         readonly requestId: string;
     };
+}
+
+// @beta
+export interface IDaemonRequestRejectedMessage {
+    // (undocumented)
+    readonly kind: 'requestRejected';
+    // (undocumented)
+    readonly payload: {
+        readonly code: DaemonRequestRejectionCode;
+        readonly message: string;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestResultMessage {
+    // (undocumented)
+    readonly kind: 'requestResult';
+    // (undocumented)
+    readonly payload: IDaemonCommandResult | IDaemonPhasedRequestResult;
+}
+
+// @beta
+export interface IDaemonRequestStartMessage {
+    // (undocumented)
+    readonly kind: 'requestStart';
+    // (undocumented)
+    readonly payload: IDaemonRequestEnvelope;
+}
+
+// @beta
+export interface IDaemonRequestTerminal {
+    readonly acceptsStdin?: boolean;
+    readonly columns?: number;
+    readonly isTTY: boolean;
+    readonly supportsColor: boolean;
+    readonly terminalRequirement?: DaemonTerminalRequirement;
 }
 
 // @beta

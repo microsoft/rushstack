@@ -16,6 +16,8 @@ import type {
 
 import { DaemonControlSession } from './DaemonControlSession';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
+import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
+import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
@@ -32,6 +34,8 @@ export interface IRushDaemonHostOptions {
   readonly daemonVersion: string;
   /** Reports connection-level failures. */
   readonly onError?: (error: Error) => void;
+  /** Resolves validated wire envelopes into existing typed phased or global requests. */
+  readonly requestResolver?: IDaemonRequestResolver;
   /** Receives the request-scoped interactive broker owned by each accepted connection. */
   readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   /** The repository root containing rush.json. */
@@ -52,6 +56,7 @@ export class RushDaemonHost {
   private readonly _sessions: Set<DaemonControlSession>;
   private readonly _workspaceSessionProvider: WorkspaceSessionProvider;
   private readonly _lifecycle: { closing: boolean };
+  private readonly _requestDispatcher: DaemonRequestDispatcher;
   public readonly paths: IDaemonPaths;
   private _closePromise: Promise<void> | undefined;
 
@@ -60,12 +65,14 @@ export class RushDaemonHost {
     paths: IDaemonPaths,
     sessions: Set<DaemonControlSession>,
     lifecycle: { closing: boolean },
+    requestDispatcher: DaemonRequestDispatcher,
     workspaceSessionProvider: WorkspaceSessionProvider
   ) {
     this._listener = listener;
     this.paths = paths;
     this._sessions = sessions;
     this._lifecycle = lifecycle;
+    this._requestDispatcher = requestDispatcher;
     this._workspaceSessionProvider = workspaceSessionProvider;
   }
 
@@ -89,7 +96,11 @@ export class RushDaemonHost {
       }
     );
     const startedAtMs: number = Date.now();
-    await workspaceSessionProvider.getSessionAsync();
+    const workspaceSession: IWorkspaceSession = await workspaceSessionProvider.getSessionAsync();
+    const requestDispatcher: DaemonRequestDispatcher = new DaemonRequestDispatcher(
+      workspaceSession,
+      options.requestResolver
+    );
     let listener: DaemonFrameListener;
     try {
       listener = await DaemonFrameListener.listenAsync(paths, {
@@ -98,6 +109,7 @@ export class RushDaemonHost {
         onConnection: (connection: DaemonFrameConnection) => {
           const session: DaemonControlSession = new DaemonControlSession(connection, {
             daemonVersion: options.daemonVersion,
+            dispatcher: requestDispatcher,
             startedAtMs,
             onInteractiveConnection: options.onInteractiveConnection,
             onClosed: (closedSession: DaemonControlSession, error: Error | undefined) => {
@@ -115,11 +127,20 @@ export class RushDaemonHost {
         }
       });
     } catch (error) {
+      const cleanupErrors: unknown[] = [];
+      try {
+        await requestDispatcher[Symbol.asyncDispose]();
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
       try {
         await workspaceSessionProvider[Symbol.asyncDispose]();
       } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
+      if (cleanupErrors.length > 0) {
         throw new AggregateError(
-          [error, cleanupError],
+          [error, ...cleanupErrors],
           'Failed to bind the daemon listener and dispose its workspace session.'
         );
       }
@@ -130,6 +151,7 @@ export class RushDaemonHost {
       paths,
       sessions,
       lifecycle,
+      requestDispatcher,
       workspaceSessionProvider
     );
   }
@@ -148,15 +170,23 @@ export class RushDaemonHost {
   private async _closeOnceAsync(): Promise<void> {
     this._lifecycle.closing = true;
     const errors: unknown[] = [];
-    try {
-      await Promise.all(
-        Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync())
-      );
-    } catch (error) {
-      errors.push(error);
+    const listenerClosePromise: Promise<unknown | undefined> = this._listener
+      .closeAsync()
+      .then(() => undefined, (error: unknown) => error);
+    const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
+      Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync())
+    );
+    for (const settlement of sessionSettlements) {
+      if (settlement.status === 'rejected') {
+        errors.push(settlement.reason);
+      }
+    }
+    const listenerError: unknown | undefined = await listenerClosePromise;
+    if (listenerError !== undefined) {
+      errors.push(listenerError);
     }
     try {
-      await this._listener.closeAsync();
+      await this._requestDispatcher[Symbol.asyncDispose]();
     } catch (error) {
       errors.push(error);
     }

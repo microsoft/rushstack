@@ -16,6 +16,7 @@ import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonRequestQueuePositionMessage } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonSetRawModeMessage } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protocol';
@@ -32,6 +33,25 @@ export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEng
 
 // @beta
 export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSessionComponentsOptions) => Promise<IWorkspaceSessionComponents>;
+
+// @beta
+export class DaemonRequestDispatcher implements AsyncDisposable {
+    // (undocumented)
+    [Symbol.asyncDispose](): Promise<void>;
+    constructor(workspaceSession: IWorkspaceSession, resolver?: IDaemonRequestResolver);
+    // (undocumented)
+    dispatchAsync(envelope: IDaemonRequestEnvelope, client: IDaemonRequestDispatchClient): Promise<void>;
+}
+
+// @beta
+export class DaemonRequestDispatchError extends Error {
+    constructor(code: DaemonRequestDispatchErrorCode, message: string, options?: ErrorOptions);
+    // (undocumented)
+    readonly code: DaemonRequestDispatchErrorCode;
+}
+
+// @beta
+export type DaemonRequestDispatchErrorCode = 'invalidRequest' | 'routingFailed' | 'unsupported';
 
 // @beta
 export class DaemonRequiresInProcessError extends Error {
@@ -98,6 +118,40 @@ export interface IDaemonInteractiveRequestOptions {
     readonly onFailure: (error: Error) => void;
     // (undocumented)
     readonly requestId: string;
+}
+
+// @beta
+export interface IDaemonRequestDispatchClient {
+    // (undocumented)
+    readonly abortSignal: AbortSignal;
+    // (undocumented)
+    getNextEventSequence(): number;
+    // (undocumented)
+    readonly interactiveSession: IInteractiveRequestSession;
+    // (undocumented)
+    readonly sessionId: string;
+    // (undocumented)
+    readonly supportsRequestAdmission: boolean;
+    // (undocumented)
+    writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
+    // (undocumented)
+    writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+    // (undocumented)
+    writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+    // (undocumented)
+    writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void>;
+    // (undocumented)
+    writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+    // (undocumented)
+    writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
+}
+
+// @beta
+export interface IDaemonRequestResolver {
+    // (undocumented)
+    readonly [Symbol.asyncDispose]?: () => Promise<void>;
+    // (undocumented)
+    resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
 }
 
 // @beta
@@ -236,10 +290,12 @@ export class InteractiveInputRoutingError extends Error {
 }
 
 // @beta
-export type InteractiveInputRoutingErrorCode = 'duplicateRequest' | 'unknownRequest' | 'completedRequest' | 'nonInteractiveRequest';
+export type InteractiveInputRoutingErrorCode = 'duplicateRequest' | 'unknownRequest' | 'completedRequest' | 'nonInteractiveRequest' | 'requestLimitExceeded';
 
 // @beta
 export class InteractiveRequestInputRouter {
+    // @internal
+    markRequestCompleted(requestId: string): void;
     // (undocumented)
     register(options: IInteractiveRequestRegistrationOptions): IInteractiveRequestSession;
     // (undocumented)
@@ -276,6 +332,31 @@ export interface IRequestSchedulerAcquireOptions {
     noWait?: boolean;
     onQueuePositionChanged?: (position: number) => void;
     waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IResolveDaemonRequestOptions {
+    readonly abortSignal: AbortSignal;
+    // (undocumented)
+    readonly envelope: IDaemonRequestEnvelope;
+    // (undocumented)
+    readonly workspaceSession: IWorkspaceSession;
+}
+
+// @beta
+export interface IResolvedDaemonGlobalRequest {
+    // (undocumented)
+    readonly executor: GlobalCommandExecutor;
+    // (undocumented)
+    readonly kind: 'global';
+}
+
+// @beta
+export interface IResolvedDaemonPhasedRequest {
+    // (undocumented)
+    readonly kind: 'phased';
+    // (undocumented)
+    readonly request: IDaemonPhasedRequest;
 }
 
 // @beta
@@ -321,6 +402,7 @@ export interface IRushDaemonHostOptions {
     readonly onError?: (error: Error) => void;
     readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
     readonly repoRoot: string;
+    readonly requestResolver?: IDaemonRequestResolver;
     readonly rushVersion: string;
     readonly startupOptions?: Readonly<Record<string, unknown>>;
 }
@@ -496,6 +578,9 @@ export enum RequestSchedulerErrorCode {
     // (undocumented)
     WaitTimeout = "WAIT_TIMEOUT"
 }
+
+// @beta
+export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaemonGlobalRequest;
 
 // @beta
 export class RushDaemonHost {

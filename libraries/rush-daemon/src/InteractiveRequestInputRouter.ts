@@ -4,12 +4,15 @@
 import { decodeDaemonStdinChunk } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonSetRawModeMessage } from '@rushstack/rush-daemon-protocol';
 
+import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
+
 /** Why an incoming stdin frame cannot be routed. @beta */
 export type InteractiveInputRoutingErrorCode =
   | 'duplicateRequest'
   | 'unknownRequest'
   | 'completedRequest'
-  | 'nonInteractiveRequest';
+  | 'nonInteractiveRequest'
+  | 'requestLimitExceeded';
 
 /** A request-scoped stdin routing failure. @beta */
 export class InteractiveInputRoutingError extends Error {
@@ -70,7 +73,6 @@ interface IRequestState {
   }>;
 }
 
-const MAX_COMPLETED_REQUEST_IDS: number = 256;
 const MAX_PENDING_INPUT_BYTES: number = 1024 * 1024;
 const MAX_PENDING_INPUT_FRAMES: number = 256;
 const requestInputFailures: WeakSet<Error> = new WeakSet();
@@ -153,9 +155,23 @@ export class InteractiveRequestInputRouter {
     if (this.#stateByRequestId.has(options.requestId) || this.#completedRequestIds.has(options.requestId)) {
       throw createRoutingError('duplicateRequest', options.requestId);
     }
+    this.#assertRequestCapacity(options.requestId);
     const state: IRequestState = createRequestState(options);
     this.#stateByRequestId.set(options.requestId, state);
     return new InteractiveRequestSession(state, () => this.#completeRequest(options.requestId, state));
+  }
+
+  /** Records a request rejected before an interactive session was created. @internal */
+  public markRequestCompleted(requestId: string): void {
+    validateRequestId(requestId);
+    if (this.#stateByRequestId.has(requestId)) {
+      throw createRoutingError('duplicateRequest', requestId);
+    }
+    if (this.#completedRequestIds.has(requestId)) {
+      return;
+    }
+    this.#assertRequestCapacity(requestId);
+    this.#completedRequestIds.add(requestId);
   }
 
   public async routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
@@ -175,12 +191,12 @@ export class InteractiveRequestInputRouter {
       return;
     }
     this.#stateByRequestId.delete(requestId);
-    this.#completedRequestIds.add(requestId);
-    if (this.#completedRequestIds.size > MAX_COMPLETED_REQUEST_IDS) {
-      const oldestRequestId: string | undefined = this.#completedRequestIds.values().next().value;
-      if (oldestRequestId !== undefined) {
-        this.#completedRequestIds.delete(oldestRequestId);
-      }
+    this.markRequestCompleted(requestId);
+  }
+
+  #assertRequestCapacity(requestId: string): void {
+    if (this.#stateByRequestId.size + this.#completedRequestIds.size >= MAX_REQUESTS_PER_CONNECTION) {
+      throw createRoutingError('requestLimitExceeded', requestId);
     }
   }
 }
@@ -336,5 +352,9 @@ function createRoutingError(
   code: InteractiveInputRoutingErrorCode,
   requestId: string
 ): InteractiveInputRoutingError {
-  return new InteractiveInputRoutingError(code, `Cannot route stdin for request "${requestId}": ${code}.`);
+  const message: string =
+    code === 'requestLimitExceeded'
+      ? `Cannot register request "${requestId}": the connection request limit was exceeded.`
+      : `Cannot route stdin for request "${requestId}": ${code}.`;
+  return new InteractiveInputRoutingError(code, message);
 }

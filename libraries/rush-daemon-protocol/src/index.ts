@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * The wire layer every rushd client speaks: the frame taxonomy and
- * length-prefixed binary codec, the event envelope contract, and the
+ * The wire layer every rushd client speaks: the frame taxonomy and length-prefixed binary codec, the event envelope contract, and the
  * connection handshake with version negotiation.
  *
  * @remarks
@@ -12,22 +11,20 @@
  * mirrors `@rushstack/reporter`'s envelope as a placeholder until it merges.
  * @packageDocumentation
  */
-
 export type { IDaemonFrame } from './DaemonFrame';
 export { DaemonFrameType, isDaemonFrameType } from './DaemonFrameType';
 export {
   DEFAULT_MAX_PAYLOAD_BYTES, FRAME_HEADER_BYTES, LENGTH_FIELD_BYTES, LENGTH_FIELD_OFFSET,
   MAX_OPERATION_ID_BYTES, MAX_REQUEST_ID_BYTES, OPERATION_ID_LENGTH_BYTES, OPERATION_ID_LENGTH_OFFSET,
-  PAYLOAD_OFFSET, REQUEST_ID_LENGTH_BYTES, REQUEST_ID_LENGTH_OFFSET,
-  TYPE_FIELD_BYTES, TYPE_FIELD_OFFSET
+  PAYLOAD_OFFSET, REQUEST_ID_LENGTH_BYTES, REQUEST_ID_LENGTH_OFFSET, TYPE_FIELD_BYTES, TYPE_FIELD_OFFSET
 } from './FrameConstants';
 export { encodeDaemonFrame, encodeDaemonFrames } from './FrameEncoder';
 export { DaemonFrameDecoder, type IDaemonFrameDecoderOptions } from './FrameDecoder';
 export { DaemonProtocolError, ProtocolVersionMismatchError } from './DaemonProtocolError';
 export type { DaemonProtocolErrorCode, IDaemonProtocolErrorOptions } from './DaemonProtocolError';
 export {
-  DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
-  DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
+  DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR, DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
+  DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   isDaemonProtocolCompatible
 } from './DaemonProtocolVersion';
@@ -44,7 +41,8 @@ export type {
   IDaemonTerminalPolicyMessage
 } from './DaemonInteractiveControl';
 export type { IDaemonPongMessage } from './DaemonPongMessage';
-export { isDaemonControlRecord, validateDaemonControlMessage } from './ControlMessageValidation';
+export { isDaemonControlRecord } from './ControlRecord';
+export { validateDaemonControlMessage } from './ControlMessageValidation';
 export { decodeDaemonControlMessage, encodeDaemonControlMessage } from './ControlFrameCodec';
 export { decodeDaemonLogChunk, encodeDaemonLogChunk, type IDaemonLogChunk } from './LogFrameCodec';
 export { createDaemonHello, createDaemonHelloAck, negotiateDaemonHello } from './DaemonHandshake';
@@ -55,6 +53,14 @@ export {
   MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS,
   validateDaemonRequestAdmissionOptions
 } from './DaemonRequestAdmission';
+export type {
+  DaemonRequestRejectionCode,
+  IDaemonRequestCancelMessage,
+  IDaemonRequestRejectedMessage,
+  IDaemonRequestResultMessage,
+  IDaemonRequestStartMessage
+} from './DaemonRequestControl';
+export type { IDaemonRequestEnvelope, IDaemonRequestTerminal } from './DaemonRequestEnvelope';
 export type {
   DaemonRequestAdmissionErrorCode,
   IDaemonRequestAdmissionOptions,

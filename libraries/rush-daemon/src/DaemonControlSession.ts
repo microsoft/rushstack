@@ -4,8 +4,10 @@
 import { randomUUID } from 'node:crypto';
 
 import {
-  DAEMON_PROTOCOL_VERSION,
   DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_PROTOCOL_VERSION,
+  DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
+  DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
   decodeDaemonControlMessage,
@@ -14,92 +16,158 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonControlMessage,
+  DaemonRequestRejectionCode,
   IDaemonErrorMessage,
   IDaemonFrame,
-  IDaemonPongMessage
+  IDaemonPongMessage,
+  IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
-import {
-  DaemonInteractiveConnection
-} from './DaemonInteractiveConnection';
+import { DaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
+import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
+import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
+import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
+import { DaemonWireRequestClient } from './DaemonWireRequestClient';
 import {
   InteractiveInputRoutingError,
   isInteractiveRequestInputFailure
 } from './InteractiveRequestInputRouter';
+import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
+import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
 
 export interface IDaemonControlSessionOptions {
   readonly daemonVersion: string;
+  readonly dispatcher: DaemonRequestDispatcher;
   readonly startedAtMs: number;
   readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   readonly onClosed: (session: DaemonControlSession, error: Error | undefined) => void;
   readonly onError: (error: Error) => void;
 }
 
+interface IRequestState {
+  readonly abortController: AbortController;
+  readonly client: DaemonWireRequestClient;
+  completion: Promise<void>;
+}
+
+interface IClassifiedRejection {
+  readonly code: DaemonRequestRejectionCode;
+  readonly message: string;
+}
+
+const CLOSE_DRAIN_TIMEOUT_MS: number = 5000;
+
 export class DaemonControlSession {
-  private readonly _connection: DaemonFrameConnection;
-  private readonly _interactiveConnection: DaemonInteractiveConnection;
-  private readonly _options: IDaemonControlSessionOptions;
-  private _handshakeComplete: boolean = false;
-  private _peerSupportsInteractiveProtocol: boolean = false;
-  private _sendQueue: Promise<void> = Promise.resolve();
+  readonly #connection: DaemonFrameConnection;
+  readonly #interactiveConnection: DaemonInteractiveConnection;
+  readonly #options: IDaemonControlSessionOptions;
+  readonly #requestById: Map<string, IRequestState> = new Map();
+  readonly #completedRequestIds: Set<string> = new Set();
+  readonly #closedPromise: Promise<void>;
+  readonly #resolveClosed: () => void;
+  #closePromise: Promise<void> | undefined;
+  #connectionClosed: boolean = false;
+  #handshakeComplete: boolean = false;
+  #isClosing: boolean = false;
+  #nextEventSequence: number = 1;
+  #peerSupportsInteractiveProtocol: boolean = false;
+  #peerSupportsRequestAdmission: boolean = false;
+  #peerSupportsRequestLifecycle: boolean = false;
+  #sendQueue: Promise<void> = Promise.resolve();
+  #sessionId: string | undefined;
+  #subscribed: boolean = false;
 
   public constructor(connection: DaemonFrameConnection, options: IDaemonControlSessionOptions) {
-    this._connection = connection;
-    this._options = options;
-    this._interactiveConnection = new DaemonInteractiveConnection(
-      (message: DaemonControlMessage) => this._enqueueSendAsync(message)
+    this.#connection = connection;
+    this.#options = options;
+    const closed: ReturnType<typeof createDeferred> = createDeferred();
+    this.#closedPromise = closed.promise;
+    this.#resolveClosed = closed.resolve;
+    this.#interactiveConnection = new DaemonInteractiveConnection((message: DaemonControlMessage) =>
+      this.#enqueueControlAsync(message)
     );
-    connection.onFrame((frame: IDaemonFrame) => this._onFrame(frame));
+    connection.onFrame((frame: IDaemonFrame) => this.#handleFrameSafelyAsync(frame));
     connection.onClosed((error: Error | undefined) => {
-      this._interactiveConnection.close(error);
-      options.onClosed(this, error);
+      void this.#handleConnectionClosedAsync(error);
     });
-    options.onInteractiveConnection?.(this._interactiveConnection);
+    options.onInteractiveConnection?.(this.#interactiveConnection);
   }
 
   public closeAsync(): Promise<void> {
-    return this._connection.closeAsync();
+    this.#closePromise ??= this.#closeOnceAsync();
+    return this.#closePromise;
   }
 
-  private _onFrame(frame: IDaemonFrame): void {
+  async #handleFrameSafelyAsync(frame: IDaemonFrame): Promise<void> {
+    try {
+      await this.#onFrameAsync(frame);
+    } catch (error) {
+      await this.#handleProtocolFailureAsync(normalizeProtocolError(error));
+    }
+  }
+
+  async #onFrameAsync(frame: IDaemonFrame): Promise<void> {
+    if (this.#isClosing) {
+      throw new DaemonProtocolError('malformedControlMessage', 'The daemon session is closing.');
+    }
     if (frame.kind === DaemonFrameType.stdin) {
-      if (!this._handshakeComplete) {
-        throw new DaemonProtocolError(
-          'malformedControlMessage',
-          'The first frame on a connection must be a hello control message.'
-        );
-      }
-      void this._completeInputAsync(this._interactiveConnection.routeStdinFrameAsync(frame.payload));
+      this.#assertHandshakeComplete();
+      void this.#completeInputAsync(this.#interactiveConnection.routeStdinFrameAsync(frame.payload));
       return;
     }
     if (frame.kind !== DaemonFrameType.controlJson) {
       throw new DaemonProtocolError(
         'malformedControlMessage',
-        'A daemon control connection only accepts control frames.'
+        'A daemon control connection only accepts control and stdin frames.'
       );
     }
     const message: DaemonControlMessage = decodeDaemonControlMessage(frame.payload);
-    if (!this._handshakeComplete) {
-      this._handleHello(message);
-    } else if (this._interactiveConnection.handleControlMessage(message)) {
+    if (!this.#handshakeComplete) {
+      this.#handleHello(message);
       return;
-    } else if (message.kind === 'subscribe') {
-      this._interactiveConnection.setEnabled(
-        this._peerSupportsInteractiveProtocol && message.payload.supportsInteractiveIO === true
-      );
-    } else if (message.kind === 'ping') {
-      this._send(this._createPong());
-    } else {
-      throw new DaemonProtocolError(
-        'malformedControlMessage',
-        `Control message "${message.kind}" is not valid in this daemon host state.`
-      );
+    }
+    await this.#handleEstablishedControlAsync(message);
+  }
+
+  async #completeInputAsync(inputPromise: Promise<void>): Promise<void> {
+    try {
+      await inputPromise;
+    } catch (error) {
+      if (
+        !isInteractiveRequestInputFailure(error) &&
+        !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
+      ) {
+        await this.#handleProtocolFailureAsync(normalizeProtocolError(error));
+      }
     }
   }
 
-  private _handleHello(message: DaemonControlMessage): void {
+  async #handleEstablishedControlAsync(message: DaemonControlMessage): Promise<void> {
+    if (this.#interactiveConnection.handleControlMessage(message)) return;
+    switch (message.kind) {
+      case 'subscribe':
+        this.#handleSubscribe(message.payload);
+        return;
+      case 'ping':
+        this.#send(this.#createPong());
+        return;
+      case 'requestStart':
+        this.#startRequest(message.payload);
+        return;
+      case 'requestCancel':
+        this.#cancelRequest(message.payload.requestId);
+        return;
+      default:
+        throw new DaemonProtocolError(
+          'malformedControlMessage',
+          `Control message "${message.kind}" is not valid in this daemon host state.`
+        );
+    }
+  }
+
+  #handleHello(message: DaemonControlMessage): void {
     if (message.kind !== 'hello') {
       throw new DaemonProtocolError(
         'malformedControlMessage',
@@ -111,68 +179,313 @@ export class DaemonControlSession {
       DAEMON_PROTOCOL_VERSION,
       randomUUID()
     );
-    if (outcome.accepted) {
-      this._handshakeComplete = true;
-      this._peerSupportsInteractiveProtocol =
-        message.payload.protocolVersion.minor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
-      this._send(outcome.ack);
-    } else {
-      const errorMessage: IDaemonErrorMessage = {
-        kind: 'error',
-        payload: { code: outcome.error.code, message: outcome.error.message }
-      };
-      this._send(errorMessage, true);
+    if (!outcome.accepted) {
+      this.#send(
+        { kind: 'error', payload: { code: outcome.error.code, message: outcome.error.message } },
+        true
+      );
+      return;
+    }
+    this.#handshakeComplete = true;
+    this.#sessionId = outcome.ack.payload.sessionId;
+    const peerMinor: number = message.payload.protocolVersion.minor;
+    this.#peerSupportsInteractiveProtocol = peerMinor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
+    this.#peerSupportsRequestAdmission = peerMinor >= DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR;
+    this.#peerSupportsRequestLifecycle = peerMinor >= DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR;
+    this.#send(outcome.ack);
+  }
+
+  #handleSubscribe(payload: Extract<DaemonControlMessage, { kind: 'subscribe' }>['payload']): void {
+    if (this.#subscribed) {
+      throw new DaemonProtocolError('malformedControlMessage', 'A daemon session may subscribe only once.');
+    }
+    this.#subscribed = true;
+    this.#peerSupportsInteractiveProtocol =
+      this.#peerSupportsInteractiveProtocol && payload.supportsInteractiveIO === true;
+    this.#peerSupportsRequestAdmission =
+      this.#peerSupportsRequestAdmission && payload.supportsRequestAdmission === true;
+    this.#peerSupportsRequestLifecycle =
+      this.#peerSupportsRequestLifecycle && payload.supportsRequestLifecycle === true;
+    this.#interactiveConnection.setEnabled(this.#peerSupportsInteractiveProtocol);
+  }
+
+  #startRequest(envelope: IDaemonRequestEnvelope): void {
+    this.#assertRequestLifecycleReady();
+    const requestId: string = envelope.requestId;
+    if (this.#requestById.has(requestId) || this.#completedRequestIds.has(requestId)) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        `Request id "${requestId}" has already been used on this connection.`
+      );
+    }
+    if (this.#requestById.size + this.#completedRequestIds.size >= MAX_REQUESTS_PER_CONNECTION) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        `A daemon control connection accepts at most ${MAX_REQUESTS_PER_CONNECTION} distinct request ids; reconnect before starting request "${requestId}".`
+      );
+    }
+    if (this.#requestById.size > 0) {
+      this.#interactiveConnection.markRequestCompleted(requestId);
+      this.#completedRequestIds.add(requestId);
+      this.#send({
+        kind: 'requestRejected',
+        payload: {
+          code: 'invalidRequest',
+          message: 'A daemon control connection may run only one request at a time.',
+          requestId
+        }
+      });
+      return;
+    }
+    const abortController: AbortController = new AbortController();
+    const interactiveSession: IInteractiveRequestSession = this.#interactiveConnection.registerRequest({
+      abortSignal: abortController.signal,
+      acceptsStdin: envelope.terminal.acceptsStdin === true,
+      onFailure: (error: Error) => abortController.abort(error),
+      requestId
+    });
+    const sessionId: string = this.#sessionId!;
+    const client: DaemonWireRequestClient = new DaemonWireRequestClient({
+      abortSignal: abortController.signal,
+      getNextEventSequence: () => this.#getNextEventSequence(),
+      interactiveSession,
+      requestId,
+      sendControlAsync: (message: DaemonControlMessage) => this.#enqueueControlAsync(message),
+      sendFrameAsync: (frame: IDaemonFrame) => this.#enqueueFrameAsync(frame),
+      sessionId,
+      supportsRequestAdmission: this.#peerSupportsRequestAdmission
+    });
+    const state: IRequestState = { abortController, client, completion: Promise.resolve() };
+    this.#requestById.set(requestId, state);
+    state.completion = Promise.resolve().then(() => this.#dispatchRequestAsync(envelope, state));
+  }
+
+  #getNextEventSequence(): number {
+    const sequence: number = this.#nextEventSequence;
+    this.#nextEventSequence = sequence + 1;
+    return sequence;
+  }
+
+  #cancelRequest(requestId: string): void {
+    const state: IRequestState | undefined = this.#requestById.get(requestId);
+    if (!state) {
+      const kind: string = this.#completedRequestIds.has(requestId) ? 'completed' : 'unknown';
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        `Cannot cancel ${kind} request "${requestId}".`
+      );
+    }
+    state.abortController.abort(new Error(`Request "${requestId}" was cancelled by the client.`));
+  }
+
+  async #dispatchRequestAsync(envelope: IDaemonRequestEnvelope, state: IRequestState): Promise<void> {
+    let dispatchError: unknown;
+    try {
+      await this.#options.dispatcher.dispatchAsync(envelope, state.client);
+      if (!state.client.terminalOutcomeSent) {
+        throw new DaemonRequestDispatchError(
+          'routingFailed',
+          'The request integration completed without a terminal outcome.'
+        );
+      }
+    } catch (error) {
+      dispatchError = error;
+    }
+    try {
+      await state.client.interactiveSession.finishAsync();
+    } catch (cleanupError) {
+      dispatchError = combineErrors(dispatchError, cleanupError);
+    }
+    if (dispatchError !== undefined && !state.client.terminalOutcomeSent && !this.#connectionClosed) {
+      const rejection: IClassifiedRejection = classifyRejection(dispatchError);
+      await state.client.writeRejectionAsync(rejection.code, rejection.message);
+    }
+    this.#completeRequest(envelope.requestId, state);
+  }
+
+  #completeRequest(requestId: string, state: IRequestState): void {
+    if (this.#requestById.get(requestId) !== state) return;
+    this.#requestById.delete(requestId);
+    this.#completedRequestIds.add(requestId);
+  }
+
+  #assertHandshakeComplete(): void {
+    if (!this.#handshakeComplete) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'The first frame on a connection must be a hello control message.'
+      );
     }
   }
 
-  private _createPong(): IDaemonPongMessage {
+  #assertRequestLifecycleReady(): void {
+    if (!this.#subscribed || !this.#peerSupportsRequestLifecycle) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'Request execution requires a subscribed request-lifecycle capable client.'
+      );
+    }
+  }
+
+  #createPong(): IDaemonPongMessage {
     return {
       kind: 'pong',
       payload: {
-        daemonVersion: this._options.daemonVersion,
+        daemonVersion: this.#options.daemonVersion,
         protocolVersion: DAEMON_PROTOCOL_VERSION,
-        uptimeMs: Date.now() - this._options.startedAtMs
+        uptimeMs: Date.now() - this.#options.startedAtMs
       }
     };
   }
 
-  private _send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
-    void this._enqueueSendAsync(message, closeAfterSend).catch((error: unknown) =>
-      this._handleSendErrorAsync(error)
+  #send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
+    void this.#enqueueControlAsync(message, closeAfterSend).catch((error: unknown) =>
+      this.#handleSendFailureAsync(error)
     );
   }
 
-  private _enqueueSendAsync(
+  #enqueueControlAsync(
     message: DaemonControlMessage,
     closeAfterSend: boolean = false
   ): Promise<void> {
-    const frame: IDaemonFrame = {
-      kind: DaemonFrameType.controlJson,
-      payload: encodeDaemonControlMessage(message)
-    };
-    const sendPromise: Promise<void> = this._sendQueue
-      .then(() => this._connection.sendFrameAsync(frame))
-      .then(() => (closeAfterSend ? this._connection.closeAsync() : undefined));
-    this._sendQueue = sendPromise.catch(() => undefined);
+    return this.#enqueueFrameAsync(
+      { kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message) },
+      closeAfterSend
+    );
+  }
+
+  #enqueueFrameAsync(frame: IDaemonFrame, closeAfterSend: boolean = false): Promise<void> {
+    const sendPromise: Promise<void> = this.#sendQueue
+      .then(() => this.#connection.sendFrameAsync(frame))
+      .then(() => (closeAfterSend ? this.#connection.closeAsync() : undefined));
+    this.#sendQueue = sendPromise.catch(() => undefined);
     return sendPromise;
   }
 
-  private async _handleSendErrorAsync(error: unknown): Promise<void> {
-    const normalizedError: Error = error instanceof Error ? error : new Error(String(error));
-    this._options.onError(normalizedError);
-    await this._connection.closeAsync();
+  async #handleProtocolFailureAsync(error: DaemonProtocolError): Promise<void> {
+    this.#options.onError(error);
+    this.#markClosing(error);
+    const message: IDaemonErrorMessage = {
+      kind: 'error',
+      payload: { code: error.code, message: error.message }
+    };
+    const sendPromise: Promise<void> = this.#enqueueControlAsync(message);
+    if (!(await settlesWithinAsync(sendPromise, CLOSE_DRAIN_TIMEOUT_MS))) {
+      this.#connection.abort(error);
+    }
+    try {
+      await sendPromise;
+    } catch {
+      // The transport failure is reported by the close path.
+    }
+    await this.#closeWithReasonAsync(error);
   }
 
-  private async _completeInputAsync(inputPromise: Promise<void>): Promise<void> {
-    try {
-      await inputPromise;
-    } catch (error) {
-      if (
-        !isInteractiveRequestInputFailure(error) &&
-        !(error instanceof InteractiveInputRoutingError && error.code === 'completedRequest')
-      ) {
-        await this._handleSendErrorAsync(error);
-      }
+  async #handleSendFailureAsync(error: unknown): Promise<void> {
+    const normalizedError: Error = normalizeError(error);
+    this.#options.onError(normalizedError);
+    await this.#closeWithReasonAsync(normalizedError);
+  }
+
+  #closeWithReasonAsync(reason: Error): Promise<void> {
+    this.#markClosing(reason);
+    this.#closePromise ??= this.#closeOnceAsync();
+    return this.#closePromise;
+  }
+
+  #markClosing(reason: Error): void {
+    if (this.#isClosing) return;
+    this.#isClosing = true;
+    this.#interactiveConnection.close(reason);
+    for (const state of this.#requestById.values()) {
+      state.abortController.abort(reason);
     }
   }
+
+  async #closeOnceAsync(): Promise<void> {
+    const closeReason: Error = new Error('The daemon control session is closing.');
+    this.#markClosing(closeReason);
+    const drainPromise: Promise<void> = Promise.all([
+      Promise.allSettled(
+        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
+      ),
+      this.#sendQueue
+    ]).then(() => undefined);
+    if (!(await settlesWithinAsync(drainPromise, CLOSE_DRAIN_TIMEOUT_MS))) {
+      this.#connection.abort(closeReason);
+    }
+    await drainPromise;
+    if (!this.#connectionClosed) await this.#connection.closeAsync();
+    await this.#closedPromise;
+  }
+
+  async #handleConnectionClosedAsync(error: Error | undefined): Promise<void> {
+    if (this.#connectionClosed) return;
+    this.#connectionClosed = true;
+    this.#markClosing(error ?? new Error('The daemon client connection closed.'));
+    const settlements: PromiseSettledResult<void>[] = await Promise.allSettled(
+      Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
+    );
+    const cleanupErrors: Error[] = settlements
+      .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+      .map((result: PromiseRejectedResult) => normalizeError(result.reason));
+    const finalError: Error | undefined = combineCloseErrors(error, cleanupErrors);
+    if (cleanupErrors.length > 0) this.#options.onError(finalError!);
+    this.#options.onClosed(this, finalError);
+    this.#resolveClosed();
+  }
+
+}
+
+function createDeferred(): { promise: Promise<void>; resolve: () => void } {
+  let resolvePromise: () => void = () => undefined;
+  const promise: Promise<void> = new Promise((resolve) => {
+    resolvePromise = resolve;
+  });
+  return { promise, resolve: resolvePromise };
+}
+
+function normalizeProtocolError(error: unknown): DaemonProtocolError {
+  if (error instanceof DaemonProtocolError) return error;
+  return new DaemonProtocolError('malformedControlMessage', normalizeError(error).message, {
+    cause: error
+  });
+}
+
+function normalizeError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function combineErrors(primary: unknown, cleanup: unknown): unknown {
+  if (primary === undefined) return cleanup;
+  return new AggregateError([primary, cleanup], 'The request failed and could not clean up.');
+}
+
+function classifyRejection(error: unknown): IClassifiedRejection {
+  if (error instanceof WorkspaceEngineRecreationRequiredError) {
+    return { code: 'workspaceRecreationRequired', message: error.message };
+  }
+  if (error instanceof DaemonRequestDispatchError) {
+    return { code: error.code, message: error.message };
+  }
+  return { code: 'routingFailed', message: normalizeError(error).message };
+}
+
+function combineCloseErrors(error: Error | undefined, cleanupErrors: ReadonlyArray<Error>): Error | undefined {
+  if (cleanupErrors.length === 0) return error;
+  return new AggregateError(
+    error ? [error, ...cleanupErrors] : cleanupErrors,
+    'The daemon connection closed with request cleanup failures.'
+  );
+}
+
+async function settlesWithinAsync(promise: Promise<void>, timeoutMs: number): Promise<boolean> {
+  let timeout: NodeJS.Timeout | undefined;
+  const timeoutPromise: Promise<boolean> = new Promise((resolve) => {
+    timeout = setTimeout(() => resolve(false), timeoutMs);
+    timeout.unref();
+  });
+  const settled: boolean = await Promise.race([promise.then(() => true, () => true), timeoutPromise]);
+  if (timeout) clearTimeout(timeout);
+  return settled;
 }

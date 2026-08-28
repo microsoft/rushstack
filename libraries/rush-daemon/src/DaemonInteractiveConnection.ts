@@ -80,6 +80,10 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     return this.#inputRouter.register({ ...options, client });
   }
 
+  public markRequestCompleted(requestId: string): void {
+    this.#inputRouter.markRequestCompleted(requestId);
+  }
+
   public async routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
     this.#assertEnabled();
     await this.#inputRouter.routeStdinFrameAsync(payload);

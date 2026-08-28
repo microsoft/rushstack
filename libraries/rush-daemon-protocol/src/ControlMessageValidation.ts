@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { isDaemonControlRecord } from './ControlRecord';
 import { isDaemonControlMessageKind } from './DaemonControlKinds';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { isDaemonVerbosity } from './DaemonVerbosity';
@@ -9,14 +10,9 @@ import {
   validateRawModeControl,
   validateTerminalPolicyControl
 } from './InteractiveControlValidation';
-import {
-  validateRequestAdmissionCapability,
-  validateRequestQueuePositionControl
-} from './RequestAdmissionControlValidation';
-/** Returns `true` when `value` is a non-null control record. @beta */
-export function isDaemonControlRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+import { validateRequestAdmissionCapability, validateRequestQueuePositionControl } from './RequestAdmissionControlValidation';
+import { validateRequestCancelControl, validateRequestRejectedControl, validateRequestResultControl, validateRequestStartControl } from './RequestControlValidation';
+import { validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);
 }
@@ -57,6 +53,7 @@ function validateSubscribe(payload: Record<string, unknown>): void {
   }
   validateInteractiveCapability(payload);
   validateRequestAdmissionCapability(payload);
+  validateRequestLifecycleCapability(payload);
   requireSubscribeVerbosity(payload);
 }
 function requireSubscribeVerbosity(payload: Record<string, unknown>): void {
@@ -69,7 +66,6 @@ function validateError(payload: Record<string, unknown>): void {
   requireStringField(payload, 'message');
 }
 type ControlValidator = (payload: Record<string, unknown>) => void;
-
 const noopValidator: ControlValidator = () => undefined;
 
 const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
@@ -83,7 +79,11 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   setRawMode: validateRawModeControl,
   rawModeChanged: validateRawModeControl,
   terminalPolicy: validateTerminalPolicyControl,
-  queuePosition: validateRequestQueuePositionControl
+  queuePosition: validateRequestQueuePositionControl,
+  requestStart: validateRequestStartControl,
+  requestCancel: validateRequestCancelControl,
+  requestRejected: validateRequestRejectedControl,
+  requestResult: validateRequestResultControl
 };
 
 /** Structurally validates a parsed control message. @beta */

@@ -4,6 +4,17 @@
 /// <reference types="node" preserve="true" />
 
 export {
+  DaemonRequestDispatchError,
+  type DaemonRequestDispatchErrorCode,
+  DaemonRequestDispatcher,
+  type IDaemonRequestDispatchClient,
+  type IDaemonRequestResolver,
+  type IResolvedDaemonGlobalRequest,
+  type IResolvedDaemonPhasedRequest,
+  type IResolveDaemonRequestOptions,
+  type ResolvedDaemonRequest
+} from './DaemonRequestDispatcher';
+export {
   type IDaemonInteractiveConnection,
   type IDaemonInteractiveRequestOptions
 } from './DaemonInteractiveConnection';
