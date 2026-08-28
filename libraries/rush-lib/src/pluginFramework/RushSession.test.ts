@@ -3,16 +3,27 @@
 
 import * as os from 'node:os';
 
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type {
   IReporterEmitEventInput,
   IReporterEventSource,
   IReporterEventSink
 } from '@rushstack/rush-reporter';
+import { createRushDiagnostic } from '@rushstack/rush-reporter';
 import { StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { Rush } from '../api/Rush';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { _createRushSessionForPlugin, type IRushSessionReporterOptions, RushSession } from './RushSession';
+import {
+  _correlateRushSessionError,
+  _createRushSessionForPlugin,
+  _getRushSessionDerivedExitStatus,
+  _getRushSessionLifecycleEmitter,
+  _getRushSessionTelemetryAggregate,
+  _isRushSessionErrorRepresented,
+  type IRushSessionReporterOptions,
+  RushSession
+} from './RushSession';
 
 class CapturingSink implements IReporterEventSink {
   public readonly inputs: IReporterEmitEventInput<unknown>[] = [];
@@ -148,5 +159,87 @@ describe(RushSession.name, () => {
     expect(action?.reporter).toBeDefined();
     action!.reporter!.emitMessage({ severity: 'debug', text: 'action' });
     expect(sink.inputs[0].scope).toEqual({ commandName: 'list' });
+  });
+
+  it('observes shadow lifecycle, diagnostics, telemetry, and legacy correlation without terminal output', () => {
+    const sink: CapturingSink = new CapturingSink();
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    const session: RushSession = new RushSession({
+      getIsDebugMode: () => false,
+      terminalProvider,
+      reporter: { eventSink: sink, sessionId: 'session-shadow' }
+    });
+    const emitter = _getRushSessionLifecycleEmitter(session, { commandName: 'build' })!;
+    const error: AlreadyReportedError = new AlreadyReportedError();
+
+    emitter.emitSessionStarted({ rushVersion: Rush.version });
+    emitter.emitCommandStarted({ commandName: 'build' });
+    emitter.emitOperationRegistered({
+      operationId: '@scope/project#_phase:test',
+      projectName: '@scope/project',
+      phaseName: '_phase:test'
+    });
+    emitter.emitOperationStatusChanged({
+      operationId: '@scope/project#_phase:test',
+      status: 'failure'
+    });
+    const diagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED', {
+      parameters: {
+        projectName: { value: '@scope/project', privacy: 'public' }
+      }
+    });
+    emitter.emitDiagnostic(diagnostic);
+    _correlateRushSessionError(session, error, diagnostic.diagnosticId);
+    emitter.emitCommandResult({ commandName: 'build', succeeded: false, exitCode: 1 });
+    emitter.emitCommandCompleted({ commandName: 'build', exitCode: 1, durationMs: 25 });
+    emitter.emitSessionCompleted({ exitCode: 1, durationMs: 30 });
+
+    expect(sink.inputs.map(({ type }) => type)).toEqual([
+      'sessionStarted',
+      'commandStarted',
+      'operationRegistered',
+      'operationStatusChanged',
+      'diagnosticEmitted',
+      'commandResult',
+      'commandCompleted',
+      'sessionCompleted'
+    ]);
+    expect(_isRushSessionErrorRepresented(session, error)).toBe(true);
+    expect(_getRushSessionDerivedExitStatus(session)).toEqual({ exitCode: 1, outcome: 'failed' });
+    expect(_getRushSessionTelemetryAggregate(session)).toMatchObject({
+      commandName: 'build',
+      result: 'failed',
+      exitCode: 1,
+      operationStatusCounts: { failure: 1 },
+      diagnosticCodes: ['RUSH_OPERATION_FAILED'],
+      diagnosticCategoryCounts: { operation: 1 }
+    });
+    expect(terminalProvider.getAllOutput(false)).toEqual({
+      log: '',
+      warning: '',
+      error: '',
+      verbose: '',
+      debug: ''
+    });
+  });
+
+  it('excludes non-public plugin envelopes from the shadow telemetry projection', () => {
+    const sink: CapturingSink = new CapturingSink();
+    const session: RushSession = createSession({ eventSink: sink, sessionId: 'session-private' });
+    const pluginSession: RushSession = _createRushSessionForPlugin(session, () => ({
+      packageName: '@private/plugin',
+      packageVersion: '1.0.0'
+    }));
+
+    pluginSession.getReporter()!.emitMessage({
+      severity: 'info',
+      text: '/local/private/path'
+    });
+    _getRushSessionLifecycleEmitter(session)!.emitSessionStarted({ rushVersion: Rush.version });
+
+    const aggregate = _getRushSessionTelemetryAggregate(session)!;
+    expect(JSON.stringify(aggregate)).not.toContain('@private/plugin');
+    expect(JSON.stringify(aggregate)).not.toContain('/local/private/path');
+    expect(aggregate.producerVersions).toEqual([`@microsoft/rush-lib@${Rush.version}`]);
   });
 });

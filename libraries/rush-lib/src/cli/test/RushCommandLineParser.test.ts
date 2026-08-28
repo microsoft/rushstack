@@ -31,6 +31,7 @@ import './mockRushCommandLineParser';
 import type { SpawnOptions } from 'node:child_process';
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import {
@@ -46,6 +47,15 @@ import { IS_WINDOWS } from '../../utilities/executionUtilities';
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
 // we only reference the one that is common.
 const SPAWN_ARG_OPTIONS: number = 2;
+
+class CapturingReporterSink implements IReporterEventSink {
+  public readonly inputs: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.inputs.push(event);
+    return `event-${this.inputs.length}`;
+  }
+}
 
 function spawnOptionEquals<TOption extends keyof SpawnOptions, TExepcted>(
   spawnCall: SpawnMockCall,
@@ -93,7 +103,11 @@ describe('RushCommandLineParser', () => {
       describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
-          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(repoName, 'build');
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(repoName, 'build', {
+            eventSink: reporterSink,
+            sessionId: 'parser-shadow'
+          });
 
           await expect(parser.executeAsync()).resolves.toEqual(true);
 
@@ -111,6 +125,23 @@ describe('RushCommandLineParser', () => {
           const secondSpawn: SpawnMockArgs = spawnMock.mock.calls[1];
           expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
+
+          const eventTypes: string[] = reporterSink.inputs.map(({ type }) => type);
+          expect(eventTypes[0]).toBe('sessionStarted');
+          expect(eventTypes[1]).toBe('commandStarted');
+          expect(eventTypes).toContain('operationRegistered');
+          expect(eventTypes).toContain('operationStatusChanged');
+          expect(eventTypes.slice(-3)).toEqual(['commandResult', 'commandCompleted', 'sessionCompleted']);
+          expect(reporterSink.inputs.at(-3)?.payload).toMatchObject({
+            commandName: 'build',
+            succeeded: true,
+            exitCode: 0
+          });
+          for (const event of reporterSink.inputs.filter(({ type }) => type === 'operationRegistered')) {
+            const scope = event.scope!;
+            expect(scope.operationId).toBe(`${scope.projectName}#${scope.phaseName}`);
+          }
+          expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
         });
       });
 

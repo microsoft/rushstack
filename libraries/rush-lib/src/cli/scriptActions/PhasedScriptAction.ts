@@ -62,6 +62,7 @@ import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParameter
 import { TrimRushEnvironmentVariablesPlugin } from '../../logic/operations/TrimRushEnvironmentVariablesPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
+import { attachReporterOperationEventSink } from '../../logic/operations/ReporterOperationEventSink';
 
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
 
@@ -677,6 +678,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       await measureAsyncFn(`${PERF_PREFIX}:executionManager`, async () => {
         await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
+      attachReporterOperationEventSink(graph, this.rushSession, this.actionName);
 
       const executeOptions: IExecuteOperationsOptions = {
         graph,

@@ -2,12 +2,22 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile } from '@rushstack/node-core-library';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import { Telemetry, type ITelemetryData, type ITelemetryMachineInfo } from '../Telemetry';
-import { RushSession } from '../../pluginFramework/RushSession';
+import { _getRushSessionLifecycleEmitter, RushSession } from '../../pluginFramework/RushSession';
+
+class CapturingSink implements IReporterEventSink {
+  public readonly inputs: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.inputs.push(event);
+    return `event-${this.inputs.length}`;
+  }
+}
 
 interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
   _flushAsyncTasks: Map<symbol, Promise<void>>;
@@ -134,6 +144,38 @@ describe(Telemetry.name, () => {
     expect(result.platform).toEqual(process.platform);
     expect(result.rushVersion).toEqual(Rush.version);
     expect(result.timestampMs).toBeDefined();
+  });
+
+  it('projects public shadow events into legacy telemetry without exposing command arguments', () => {
+    const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const sink: CapturingSink = new CapturingSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new ConsoleTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: sink, sessionId: 'telemetry-shadow' }
+    });
+    const emitter = _getRushSessionLifecycleEmitter(rushSession, { commandName: 'build' })!;
+    emitter.emitCommandStarted({ commandName: 'build', argv: ['--auth-token=secret'] });
+    emitter.emitOperationStatusChanged({ operationId: '@scope/project#_phase:build', status: 'success' });
+
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    telemetry.log({
+      name: 'build',
+      durationInSeconds: 2,
+      result: 'Succeeded',
+      machineInfo: {} as ITelemetryMachineInfo,
+      performanceEntries: []
+    });
+
+    expect(telemetry.store[0].reporterData).toMatchObject({
+      commandName: 'build',
+      result: 'succeeded',
+      exitCode: 0,
+      durationMs: 2000,
+      operationStatusCounts: { success: 1 }
+    });
+    expect(JSON.stringify(telemetry.store[0].reporterData)).not.toContain('--auth-token=secret');
   });
 
   it('calls custom flush telemetry', async () => {
