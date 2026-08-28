@@ -12,7 +12,7 @@
  * Per-type policy (the contract the manager, log-level filters, and reporters
  * implement):
  *
- * | type | never dropped | minimum log level |
+ * | type | required on wire | minimum log level |
  * | --- | --- | --- |
  * | `sessionStarted` | yes | `normal` |
  * | `sessionCompleted` | yes | `quiet` |
@@ -30,8 +30,8 @@
  * | `artifactAvailable` | yes | `normal` |
  * | `commandResult` | yes | `quiet` |
  * | `extension` | yes | `normal` |
- * | `operationStreamClosed` | yes | `debug` |
- * | `operationCompleted` | yes | `normal` |
+ * | `operationStreamClosed` | additive optional | `debug` |
+ * | `operationCompleted` | additive optional | `normal` |
  *
  * Coalescing a replaceable `activityChanged` event under queue pressure leaves
  * gaps in the delivered `sequence` values; gaps are legal and are not a
@@ -72,19 +72,38 @@ export const REPORTER_EVENT_TYPES = [
  */
 export type ReporterEventType = (typeof REPORTER_EVENT_TYPES)[number];
 
+const REQUIRED_REPORTER_EVENT_TYPES: ReadonlySet<ReporterEventType> = new Set([
+  'sessionStarted',
+  'sessionCompleted',
+  'commandStarted',
+  'commandCompleted',
+  'operationRegistered',
+  'operationStatusChanged',
+  'watchCycleCompleted',
+  'diagnosticEmitted',
+  'messageEmitted',
+  'externalProcessStarted',
+  'externalOutput',
+  'externalProcessCompleted',
+  'artifactAvailable',
+  'commandResult',
+  'extension'
+]);
+
 /**
  * Returns `true` if events of this type are correctness-critical and must
  * never be dropped or coalesced.
  *
  * @remarks
  * The manager derives the envelope `required` flag from this policy;
- * producers never set it. Only `activityChanged` is replaceable — every other
- * type, including `extension`, must be delivered.
+ * producers never set it. The required set is frozen to the protocol 1.0 event
+ * types so a same-major older peer can skip event types introduced by a newer
+ * minor version without discarding the stream.
  *
  * @param type - the event type to check
  *
  * @beta
  */
 export function isReporterEventRequired(type: ReporterEventType): boolean {
-  return type !== 'activityChanged';
+  return REQUIRED_REPORTER_EVENT_TYPES.has(type);
 }

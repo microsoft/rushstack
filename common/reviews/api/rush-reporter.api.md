@@ -819,6 +819,7 @@ export interface IReporterHostOptions {
     readonly manager?: ReporterManager;
     readonly nowMs?: () => number;
     readonly retentionMs?: number;
+    readonly supportedProtocolVersion?: IReporterProtocolVersion;
 }
 
 // @beta

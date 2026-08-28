@@ -5,6 +5,7 @@ import {
   REPORTER_PROTOCOL_VERSION,
   REPORTER_PROTOCOL_LIMITS,
   isReporterProtocolCompatible,
+  isReporterEventRequired,
   encodeNdjsonRecord,
   NdjsonDecoder,
   NdjsonInvalidRecordError,
@@ -27,6 +28,12 @@ describe('ReporterProtocol', () => {
   it('treats an equal major as compatible regardless of minor', () => {
     expect(isReporterProtocolCompatible({ major: 1, minor: 0 }, { major: 1, minor: 9 })).toBe(true);
     expect(isReporterProtocolCompatible({ major: 1, minor: 0 }, { major: 2, minor: 0 })).toBe(false);
+  });
+
+  it('marks event types added in protocol 1.1 as optional for protocol 1.0 consumers', () => {
+    expect(isReporterEventRequired('operationStreamClosed')).toBe(false);
+    expect(isReporterEventRequired('operationCompleted')).toBe(false);
+    expect(isReporterEventRequired('commandResult')).toBe(true);
   });
 });
 
