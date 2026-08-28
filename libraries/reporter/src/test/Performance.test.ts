@@ -118,6 +118,8 @@ describe('reporter performance budgets', () => {
     expect(REPORTER_PERFORMANCE_BUDGETS.maxInteractiveRefreshHz).toBe(10);
     expect(REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes).toBe(64 * 1024);
     expect(REPORTER_PERFORMANCE_BUDGETS.maxAiDetailedDiagnostics).toBe(20);
+    expect(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes).toBe(20);
+    expect(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCategories).toBe(20);
   });
 
   it('evaluates wall-time regression against the 3 percent budget', () => {

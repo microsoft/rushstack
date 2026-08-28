@@ -5,6 +5,7 @@ import {
   TelemetrySubscriber,
   createTelemetryReporter,
   createBeforeLogAdapter,
+  REPORTER_PERFORMANCE_BUDGETS,
   TELEMETRY_AGGREGATE_KEYS,
   LifecycleEmitter,
   ReporterManager,
@@ -47,6 +48,25 @@ function rawInput(type: string, payload: unknown): IReporterEmitEventInput<unkno
     source: SOURCE,
     privacy: 'public',
     type: type as IReporterEmitEventInput<unknown>['type'],
+    payload
+  };
+}
+
+function foreignDiagnosticEnvelope(
+  sequence: number,
+  privacy: IReporterEventEnvelope<unknown>['privacy'],
+  payload: unknown
+): IReporterEventEnvelope<unknown> {
+  return {
+    protocolVersion: { major: 1, minor: 0 },
+    eventId: `foreign_${sequence}`,
+    sessionId: 'foreign-session',
+    sequence,
+    timestamp: '2026-08-28T00:00:00.000Z',
+    source: { packageName: '@foreign/reporter-plugin', packageVersion: '1.0.0' },
+    privacy,
+    required: true,
+    type: 'diagnosticEmitted',
     payload
   };
 }
@@ -150,6 +170,174 @@ describe('TelemetrySubscriber', () => {
     ]) {
       expect(serialized).not.toContain(forbidden);
     }
+  });
+
+  it('rejects hostile non-public diagnostic fields from foreign envelopes', async () => {
+    const TOKEN_CODE: string = 'ghp_super_secret_token';
+    const TOKEN_CATEGORY: string = 'token=super-secret-value';
+    const PATH_CODE: string = '/home/user/private/.npmrc';
+    const PATH_CATEGORY: string = 'C:\\Users\\private\\rush.json';
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(1, 'local-sensitive', {
+        code: PATH_CODE,
+        category: TOKEN_CATEGORY
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(2, 'secret', {
+        code: TOKEN_CODE,
+        category: PATH_CATEGORY
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(3, 'local-sensitive', {
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation'
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(4, 'secret', {
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        category: 'dependency-tool'
+      })
+    );
+    await manager.flushAsync();
+
+    const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
+    expect(aggregate.diagnosticCodes).toEqual(['RUSH_DEPENDENCY_TOOL_FAILED', 'RUSH_OPERATION_FAILED']);
+    expect(aggregate.diagnosticCategoryCounts).toEqual({
+      other: 2,
+      operation: 1,
+      'dependency-tool': 1
+    });
+    const serialized: string = JSON.stringify(aggregate);
+    for (const forbidden of [TOKEN_CODE, TOKEN_CATEGORY, PATH_CODE, PATH_CATEGORY]) {
+      expect(serialized).not.toContain(forbidden);
+    }
+  });
+
+  it('preserves allowlisted diagnostics across mixed privacy ordering', async () => {
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(1, 'secret', {
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        category: 'dependency-tool'
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(2, 'public', {
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation'
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(3, 'local-sensitive', {
+        code: 'RUSH_CONFIG_INVALID_JSON',
+        category: 'configuration'
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(4, 'secret', {
+        code: 'RUSH_NOT_REGISTERED_PRIVATE',
+        category: 'future-private-category'
+      })
+    );
+    manager.ingestForeignEnvelope(
+      foreignDiagnosticEnvelope(5, 'public', {
+        code: 'RUSH_FUTURE_PUBLIC_CODE',
+        category: 'future-public-category'
+      })
+    );
+    await manager.flushAsync();
+
+    expect(telemetry.buildAggregate()).toMatchObject({
+      diagnosticCodes: [
+        'RUSH_CONFIG_INVALID_JSON',
+        'RUSH_DEPENDENCY_TOOL_FAILED',
+        'RUSH_FUTURE_PUBLIC_CODE',
+        'RUSH_OPERATION_FAILED'
+      ],
+      diagnosticCategoryCounts: {
+        configuration: 1,
+        'dependency-tool': 1,
+        operation: 1,
+        other: 2
+      }
+    });
+  });
+
+  it('bounds diagnostic dimensions deterministically under cardinality flooding', async () => {
+    const publicCodes: string[] = [];
+    for (
+      let index: number = 0;
+      index < REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes * 3;
+      index++
+    ) {
+      publicCodes.push(`RUSH_FOREIGN_CODE${String(index).padStart(3, '0')}`);
+    }
+    const hostilePrivateCodes: string[] = publicCodes.map((code: string): string => `${code}_PRIVATE`);
+    const payloads: Array<{
+      privacy: IReporterEventEnvelope<unknown>['privacy'];
+      code: string;
+      category: string;
+    }> = [
+      ...publicCodes.map((code: string, index: number) => ({
+        privacy: 'public' as const,
+        code,
+        category: `/private/category/${index}`
+      })),
+      ...hostilePrivateCodes.map((code: string, index: number) => ({
+        privacy: index % 2 === 0 ? ('local-sensitive' as const) : ('secret' as const),
+        code,
+        category: `token-${index}`
+      })),
+      { privacy: 'secret', code: 'RUSH_OPERATION_FAILED', category: 'operation' },
+      {
+        privacy: 'local-sensitive',
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        category: 'dependency-tool'
+      }
+    ];
+
+    async function aggregatePayloads(orderedPayloads: typeof payloads): Promise<ITelemetryAggregate> {
+      const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+      const manager: ReporterManager = new ReporterManager();
+      manager.addReporter(createTelemetryReporter(telemetry));
+      await manager.initializeAsync();
+      orderedPayloads.forEach((payload, index: number) => {
+        manager.ingestForeignEnvelope(
+          foreignDiagnosticEnvelope(index + 1, payload.privacy, {
+            code: payload.code,
+            category: payload.category
+          })
+        );
+      });
+      await manager.flushAsync();
+      return telemetry.buildAggregate();
+    }
+
+    const forward: ITelemetryAggregate = await aggregatePayloads(payloads);
+    const reverse: ITelemetryAggregate = await aggregatePayloads([...payloads].reverse());
+    expect(reverse.diagnosticCodes).toEqual(forward.diagnosticCodes);
+    expect(forward.diagnosticCodes).toHaveLength(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes);
+    expect(forward.diagnosticCodes).toContain('RUSH_OPERATION_FAILED');
+    expect(forward.diagnosticCodes).toContain('RUSH_DEPENDENCY_TOOL_FAILED');
+    expect(forward.diagnosticCodes).not.toContain(hostilePrivateCodes[0]);
+    expect(forward.diagnosticCategoryCounts).toEqual({
+      other: publicCodes.length + hostilePrivateCodes.length,
+      operation: 1,
+      'dependency-tool': 1
+    });
+    expect(Object.keys(forward.diagnosticCategoryCounts)).toHaveLength(3);
   });
 
   it('projects public envelopes while preserving allowlisted diagnostic fields deterministically', async () => {

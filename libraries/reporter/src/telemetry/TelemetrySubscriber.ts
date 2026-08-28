@@ -5,7 +5,30 @@ import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import type { IOperationStatusChangedPayload } from '../lifecycle/LifecycleEvents';
+import {
+  isValidRushDiagnosticCode,
+  RUSH_DIAGNOSTIC_CODE_DEFINITIONS,
+  type IRushDiagnosticCodeDefinition
+} from '../diagnostics/RushDiagnosticCodeRegistry';
+import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
 import type { ITelemetryAggregate, TelemetryResult } from './TelemetryAggregate';
+
+const OTHER_DIAGNOSTIC_CATEGORY: 'other' = 'other';
+const KNOWN_DIAGNOSTIC_CATEGORIES: ReadonlySet<string> = new Set(
+  RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
+    (definition: IRushDiagnosticCodeDefinition): string => definition.category
+  )
+);
+
+function compareDiagnosticCodeCandidates(
+  left: readonly [code: string, registered: boolean],
+  right: readonly [code: string, registered: boolean]
+): number {
+  if (left[1] !== right[1]) {
+    return left[1] ? -1 : 1;
+  }
+  return left[0] < right[0] ? -1 : left[0] > right[0] ? 1 : 0;
+}
 
 /**
  * Consumes canonical events and produces the allowlisted telemetry aggregate.
@@ -29,13 +52,13 @@ export class TelemetrySubscriber {
   private _protocolVersion: IReporterProtocolVersion | undefined;
   private readonly _operationStatuses: Map<string, IOperationStatusChangedPayload['status']>;
   private readonly _diagnosticCategoryCounts: { [category: string]: number };
-  private readonly _diagnosticCodes: Set<string>;
+  private readonly _diagnosticCodes: Map<string, boolean>;
   private readonly _producerVersions: Set<string>;
 
   public constructor() {
     this._operationStatuses = new Map();
     this._diagnosticCategoryCounts = {};
-    this._diagnosticCodes = new Set();
+    this._diagnosticCodes = new Map();
     this._producerVersions = new Set();
   }
 
@@ -63,12 +86,17 @@ export class TelemetrySubscriber {
         code?: string;
         category?: string;
       };
-      if (payload.code !== undefined) {
-        this._diagnosticCodes.add(payload.code);
+      if (typeof payload.code === 'string' && isValidRushDiagnosticCode(payload.code)) {
+        const registeredDefinition: IRushDiagnosticCodeDefinition | undefined =
+          RUSH_DIAGNOSTIC_CODE_DEFINITIONS.find(
+            (definition: IRushDiagnosticCodeDefinition): boolean => definition.code === payload.code
+          );
+        if (isPublicEnvelope || registeredDefinition !== undefined) {
+          this._recordDiagnosticCode(payload.code, registeredDefinition !== undefined);
+        }
       }
-      if (payload.category !== undefined) {
-        this._diagnosticCategoryCounts[payload.category] =
-          (this._diagnosticCategoryCounts[payload.category] ?? 0) + 1;
+      if (typeof payload.category === 'string') {
+        this._recordDiagnosticCategory(payload.category);
       }
       return;
     }
@@ -170,7 +198,7 @@ export class TelemetrySubscriber {
       producerVersions: string[];
     } = {
       operationStatusCounts,
-      diagnosticCodes: [...this._diagnosticCodes].sort(),
+      diagnosticCodes: [...this._diagnosticCodes.keys()].sort(),
       diagnosticCategoryCounts: { ...this._diagnosticCategoryCounts },
       producerVersions: [...this._producerVersions].sort()
     };
@@ -195,6 +223,48 @@ export class TelemetrySubscriber {
     }
 
     return aggregate;
+  }
+
+  private _recordDiagnosticCode(code: string, registered: boolean): void {
+    const existingRegistration: boolean | undefined = this._diagnosticCodes.get(code);
+    if (existingRegistration !== undefined) {
+      if (registered && !existingRegistration) {
+        this._diagnosticCodes.set(code, true);
+      }
+      return;
+    }
+
+    if (this._diagnosticCodes.size < REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes) {
+      this._diagnosticCodes.set(code, registered);
+      return;
+    }
+
+    let worstCandidate: readonly [code: string, registered: boolean] | undefined;
+    for (const candidate of this._diagnosticCodes) {
+      if (worstCandidate === undefined || compareDiagnosticCodeCandidates(candidate, worstCandidate) > 0) {
+        worstCandidate = candidate;
+      }
+    }
+
+    const newCandidate: readonly [code: string, registered: boolean] = [code, registered];
+    if (worstCandidate !== undefined && compareDiagnosticCodeCandidates(newCandidate, worstCandidate) < 0) {
+      this._diagnosticCodes.delete(worstCandidate[0]);
+      this._diagnosticCodes.set(code, registered);
+    }
+  }
+
+  private _recordDiagnosticCategory(category: string): void {
+    let safeCategory: string = KNOWN_DIAGNOSTIC_CATEGORIES.has(category)
+      ? category
+      : OTHER_DIAGNOSTIC_CATEGORY;
+    if (
+      this._diagnosticCategoryCounts[safeCategory] === undefined &&
+      Object.keys(this._diagnosticCategoryCounts).length >=
+        REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCategories
+    ) {
+      safeCategory = OTHER_DIAGNOSTIC_CATEGORY;
+    }
+    this._diagnosticCategoryCounts[safeCategory] = (this._diagnosticCategoryCounts[safeCategory] ?? 0) + 1;
   }
 }
 

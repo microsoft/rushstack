@@ -852,6 +852,8 @@ export interface IReporterPerformanceBudgets {
     readonly maxAiDetailedDiagnostics: number;
     readonly maxAiOutputBytes: number;
     readonly maxInteractiveRefreshHz: number;
+    readonly maxTelemetryDiagnosticCategories: number;
+    readonly maxTelemetryDiagnosticCodes: number;
     readonly maxWallTimeRegressionPercent: number;
 }
 

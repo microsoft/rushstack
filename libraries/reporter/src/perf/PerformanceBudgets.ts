@@ -45,6 +45,18 @@ export interface IReporterPerformanceBudgets {
    * before summarizing the remainder. Defaults to `20`.
    */
   readonly maxAiDetailedDiagnostics: number;
+
+  /**
+   * The maximum number of distinct diagnostic codes retained in a telemetry
+   * aggregate. Defaults to `20`.
+   */
+  readonly maxTelemetryDiagnosticCodes: number;
+
+  /**
+   * The maximum number of diagnostic category buckets retained in a telemetry
+   * aggregate. Defaults to `20`.
+   */
+  readonly maxTelemetryDiagnosticCategories: number;
 }
 
 /**
@@ -68,7 +80,9 @@ export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets = {
   maxAdditionalPeakMemoryBytes: 32 * BYTES_PER_MIB,
   maxInteractiveRefreshHz: 10,
   maxAiOutputBytes: 64 * BYTES_PER_KIB,
-  maxAiDetailedDiagnostics: 20
+  maxAiDetailedDiagnostics: 20,
+  maxTelemetryDiagnosticCodes: 20,
+  maxTelemetryDiagnosticCategories: 20
 };
 
 /**
