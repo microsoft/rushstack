@@ -244,6 +244,27 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).toContain('Log: /tmp/rush-logs/latest.log');
   });
 
+  it('preserves actionable lock contention text on failure', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(
+      ev('messageEmitted', {
+        severity: 'error',
+        text: 'Another Rush command is already running in this repository.\n'
+      })
+    );
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    expect(terminal.output).toContain('Another Rush command is already running in this repository.');
+  });
+
   it('fails closed when commandResult is missing', async () => {
     const terminal: FakeTerminal = new FakeTerminal();
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
@@ -260,7 +281,7 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).not.toContain('build succeeded');
   });
 
-  it('appends one summary per completed watch cycle while keeping the live region', async () => {
+  it('reports watch totals per cycle and recovers from failure', async () => {
     const terminal: FakeTerminal = new FakeTerminal();
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
       terminal,
@@ -269,9 +290,23 @@ describe('DefaultInteractiveReporter', () => {
     });
     await reporter.initializeAsync();
     reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
+    reporter.report(ev('watchCycleCompleted', { succeeded: false }));
+    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(
+      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+    );
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'noOp' }));
     reporter.report(ev('watchCycleCompleted', { succeeded: true }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    await reporter.closeAsync();
 
-    expect(terminal.output).toContain('watch cycle succeeded');
+    expect(terminal.output).toContain('watch cycle failed - 1/1 operations');
+    expect(terminal.output).toContain('watch cycle succeeded - 1/1 operations');
+    expect(terminal.output).not.toContain('2/2 operations');
+    expect(terminal.output).not.toContain('hidden');
   });
 
   it('does not paint a live region on a non-TTY but still writes the final summary', async () => {

@@ -103,6 +103,7 @@ export class DefaultInteractiveReporter implements IReporter {
   private _totalOperations: number;
   private _completedOperations: number;
   private _failedOperations: number;
+  private readonly _registeredOperations: Set<string>;
   private readonly _projectByOperation: Map<string, string>;
   private readonly _silentOperations: Set<string>;
   private readonly _activeProjects: Map<string, string>;
@@ -116,6 +117,7 @@ export class DefaultInteractiveReporter implements IReporter {
   private _paintedRowCount: number;
   private _cursorHidden: boolean;
   private _finalized: boolean;
+  private _resetCycleOnNextRegistration: boolean;
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
     this._terminal = options.terminal;
@@ -129,6 +131,7 @@ export class DefaultInteractiveReporter implements IReporter {
     this._totalOperations = 0;
     this._completedOperations = 0;
     this._failedOperations = 0;
+    this._registeredOperations = new Set();
     this._projectByOperation = new Map();
     this._silentOperations = new Set();
     this._activeProjects = new Map();
@@ -142,6 +145,7 @@ export class DefaultInteractiveReporter implements IReporter {
     this._paintedRowCount = 0;
     this._cursorHidden = false;
     this._finalized = false;
+    this._resetCycleOnNextRegistration = false;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -183,6 +187,13 @@ export class DefaultInteractiveReporter implements IReporter {
             phaseName?: string;
             silent?: boolean;
           };
+        if (this._resetCycleOnNextRegistration) {
+          this._resetWatchCycle();
+        }
+        if (this._registeredOperations.has(payload.operationId)) {
+          break;
+        }
+        this._registeredOperations.add(payload.operationId);
         if (payload.silent) {
           this._silentOperations.add(payload.operationId);
           break;
@@ -331,12 +342,27 @@ export class DefaultInteractiveReporter implements IReporter {
   private _appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
     const payload: { succeeded?: boolean } = event.payload as { succeeded?: boolean };
     const marker: string = payload.succeeded ? this._color.green('✔') : this._color.red('✖');
-    const summary: string = `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'}`;
+    const summary: string =
+      `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'} - ` +
+      `${this._completedOperations}/${this._totalOperations} operations`;
     this._terminal.write(`${this._clearRegion()}${summary}\n`);
     this._paintedRowCount = 0;
+    this._resetCycleOnNextRegistration = true;
     if (this._terminal.isTTY) {
       this._paint();
     }
+  }
+
+  private _resetWatchCycle(): void {
+    this._totalOperations = 0;
+    this._completedOperations = 0;
+    this._failedOperations = 0;
+    this._registeredOperations.clear();
+    this._projectByOperation.clear();
+    this._silentOperations.clear();
+    this._activeProjects.clear();
+    this._latestActivity = '';
+    this._resetCycleOnNextRegistration = false;
   }
 
   private _finalize(): void {
