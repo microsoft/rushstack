@@ -73,6 +73,7 @@ export interface IRushCommandLineParserOptions {
   cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
+  reporterCloseAsync?: () => Promise<void>;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
@@ -245,6 +246,9 @@ export class RushCommandLineParser extends CommandLineParser {
 
     for (let i: number = 2; i < process.argv.length; i++) {
       const arg: string = process.argv[i];
+      if (arg === '--') {
+        break;
+      }
       if (arg === '-q' || arg === '--quiet' || arg === '--json') {
         return true;
       }
@@ -264,14 +268,23 @@ export class RushCommandLineParser extends CommandLineParser {
 
   public override async executeAsync(args?: string[]): Promise<boolean> {
     // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
+    const passThroughSeparatorIndex: number = process.argv.indexOf('--', 2);
+    const rushArgv: string[] =
+      passThroughSeparatorIndex < 0
+        ? process.argv.slice(2)
+        : process.argv.slice(2, passThroughSeparatorIndex);
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
-      process.argv.indexOf('--debug') >= 0;
+      rushArgv.includes('--debug') || rushArgv.includes('-d');
 
-    await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
-      this.pluginManager.tryInitializeUnassociatedPluginsAsync()
-    );
+    try {
+      await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
+        this.pluginManager.tryInitializeUnassociatedPluginsAsync()
+      );
 
-    return await super.executeAsync(args);
+      return await super.executeAsync(args);
+    } finally {
+      await this._closeReporterAsync();
+    }
   }
 
   protected override async onExecuteAsync(): Promise<void> {
@@ -338,7 +351,8 @@ export class RushCommandLineParser extends CommandLineParser {
     return {
       cwd: options.cwd || process.cwd(),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
-      builtInPluginConfigurations: options.builtInPluginConfigurations || []
+      builtInPluginConfigurations: options.builtInPluginConfigurations || [],
+      reporterCloseAsync: options.reporterCloseAsync
     };
   }
 
@@ -577,10 +591,32 @@ export class RushCommandLineParser extends CommandLineParser {
       }
     };
 
-    if (this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()) {
-      this.telemetry.ensureFlushedAsync().then(handleExit).catch(handleExit);
+    const reporterCloseAsync: (() => Promise<void>) | undefined = this._rushOptions.reporterCloseAsync;
+    const telemetryFlushAsync: Promise<void> | undefined =
+      this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()
+        ? this.telemetry.ensureFlushedAsync()
+        : undefined;
+
+    if (reporterCloseAsync || telemetryFlushAsync) {
+      const pendingFlushes: Promise<unknown>[] = [];
+      if (reporterCloseAsync) {
+        pendingFlushes.push(reporterCloseAsync());
+      }
+      if (telemetryFlushAsync) {
+        pendingFlushes.push(telemetryFlushAsync);
+      }
+      void Promise.allSettled(pendingFlushes).then(handleExit);
     } else {
       handleExit();
+    }
+  }
+
+  private async _closeReporterAsync(): Promise<void> {
+    try {
+      await this._rushOptions.reporterCloseAsync?.();
+    } catch (error) {
+      process.exitCode = 1;
+      throw error;
     }
   }
 }
