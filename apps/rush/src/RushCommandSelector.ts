@@ -5,6 +5,7 @@ import * as path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 
 import {
+  LegacyFallbackSink,
   OldEngineOutputAdapter,
   REPORTER_PROTOCOL_VERSION,
   resolveReporterCompatibility,
@@ -56,13 +57,7 @@ export class RushCommandSelector {
       }
     );
     let effectiveOptions: IRushFrontendLaunchOptions = options;
-    if (compatibility.mode === 'new-frontend-old-engine' && options.reporterEnabled) {
-      _observeOldEngineOutput(options, Rush.version);
-    } else if (
-      compatibility.mode === 'old-frontend-new-engine' &&
-      engineProtocolMajor !== undefined &&
-      options.reporterEnabled
-    ) {
+    if (compatibility.mode !== 'structured' && engineProtocolMajor !== undefined && options.reporterEnabled) {
       if (options.reporterSelectionReason === 'explicit --reporter') {
         throw new Error(
           `The selected Rush engine uses reporter protocol major ${engineProtocolMajor}, but this ` +
@@ -72,9 +67,12 @@ export class RushCommandSelector {
       }
       effectiveOptions = {
         ...options,
+        reporterEventSink: new LegacyFallbackSink(),
         reporterEnabled: false,
         reporterSelectionReason: 'bootstrap compatibility fallback'
       };
+    } else if (compatibility.mode === 'new-frontend-old-engine' && options.reporterEnabled) {
+      _observeOldEngineOutput(options, Rush.version);
     }
 
     if (commandName === 'rush-pnpm') {

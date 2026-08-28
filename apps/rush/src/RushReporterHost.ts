@@ -624,92 +624,104 @@ export async function initializeRushReporterHostAsync(
     columns: process.stderr.columns,
     write: process.stderr.write.bind(process.stderr)
   };
-  let selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
   const host: ReporterHost = new ReporterHost({
     env,
     handoffDirectory: options.handoffDirectory,
     retentionMs: options.handoffRetentionMs,
     nowMs: options.nowMs
   });
+  let handoffReplayAttempted: boolean = false;
+  let closePromise: Promise<void> | undefined;
 
-  if (selection.enabled) {
-    const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
-    if (primaryReporter) {
-      host.manager.addReporter(new LogLevelReporter(primaryReporter, selection.logLevel), {
-        destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
-      });
-    }
-
-    const hasExplicitFileOutput: boolean = selection.outputs.some(
-      (output: IReporterOutputTarget) => output.reporter === 'file'
-    );
-    if (
-      options.includeDefaultFileReporter !== false &&
-      selection.reporter !== 'file' &&
-      !hasExplicitFileOutput
-    ) {
-      host.manager.addReporter(new FileReporter(), { destination: 'file:auto' });
-    }
-
-    for (const output of selection.outputs) {
-      const outputLogLevel: ReporterLogLevel =
-        output.params.logLevel && isSupportedLogLevel(output.params.logLevel)
-          ? output.params.logLevel
-          : output.reporter === 'file'
-            ? 'debug'
-            : selection.logLevel;
-      host.manager.addReporter(new ExplicitOutputReporter(output.reporter, output.target, outputLogLevel), {
-        destination: output.target
-      });
-    }
-  }
-
-  await host.manager.initializeAsync();
-  let bootstrapReplay: IBootstrapReplayResult;
   try {
-    bootstrapReplay = await host.replayBootstrapHandoffAsync();
+    let selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
+
+    if (selection.enabled) {
+      const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
+      if (primaryReporter) {
+        host.manager.addReporter(new LogLevelReporter(primaryReporter, selection.logLevel), {
+          destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
+        });
+      }
+
+      const hasExplicitFileOutput: boolean = selection.outputs.some(
+        (output: IReporterOutputTarget) => output.reporter === 'file'
+      );
+      if (
+        options.includeDefaultFileReporter !== false &&
+        selection.reporter !== 'file' &&
+        !hasExplicitFileOutput
+      ) {
+        host.manager.addReporter(new FileReporter(), { destination: 'file:auto' });
+      }
+
+      for (const output of selection.outputs) {
+        const outputLogLevel: ReporterLogLevel =
+          output.params.logLevel && isSupportedLogLevel(output.params.logLevel)
+            ? output.params.logLevel
+            : output.reporter === 'file'
+              ? 'debug'
+              : selection.logLevel;
+        host.manager.addReporter(new ExplicitOutputReporter(output.reporter, output.target, outputLogLevel), {
+          destination: output.target
+        });
+      }
+    }
+
+    await host.manager.initializeAsync();
+    const bootstrapReplay: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+    handoffReplayAttempted = true;
+    const abandonedHandoffFilesDeleted: readonly string[] = await host.cleanAbandonedHandoffFilesAsync();
+
+    let sink: IReporterEventSink = host.getSink();
+    if (
+      bootstrapReplay.skipReason === 'incompatible-protocol' ||
+      bootstrapReplay.skipReason === 'unsupported-required-event'
+    ) {
+      for (const output of bootstrapReplay.legacyFallbackOutput ?? []) {
+        const target: IRushReporterOutputStream =
+          selection.reason === 'explicit --reporter' ? stderr : output.stream === 'stdout' ? stdout : stderr;
+        target.write(output.text);
+      }
+      if (selection.reason === 'explicit --reporter') {
+        const incompatibility: string =
+          bootstrapReplay.skipReason === 'incompatible-protocol'
+            ? 'protocol is incompatible'
+            : 'contains an unsupported required event';
+        throw new Error(
+          `The install-run-rush bootstrap reporter ${incompatibility} with this Rush frontend. ` +
+            'Update the global Rush installation or use --reporter=legacy.'
+        );
+      }
+      selection = {
+        reporter: 'legacy',
+        logLevel: 'normal',
+        outputs: [],
+        commandJson: selection.commandJson,
+        enabled: false,
+        reporterControlsOwnedByFrontend: selection.reporterControlsOwnedByFrontend,
+        reporterValueFlagsToStrip: selection.reporterValueFlagsToStrip,
+        reason: 'bootstrap compatibility fallback'
+      };
+      sink = new LegacyFallbackSink();
+    }
+
+    return {
+      host,
+      sink,
+      selection,
+      bootstrapReplay,
+      abandonedHandoffFilesDeleted,
+      closeAsync: (timeoutMs?: number) => {
+        closePromise ??= host.manager.closeAsync(timeoutMs);
+        return closePromise;
+      }
+    };
   } finally {
+    if (!handoffReplayAttempted) {
+      await host.discardBootstrapHandoffAsync();
+    }
     delete env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
     delete env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
   }
-  const abandonedHandoffFilesDeleted: readonly string[] = await host.cleanAbandonedHandoffFilesAsync();
-
-  let sink: IReporterEventSink = host.getSink();
-  if (bootstrapReplay.skipReason === 'incompatible-protocol') {
-    for (const output of bootstrapReplay.legacyFallbackOutput ?? []) {
-      const target: IRushReporterOutputStream =
-        selection.reason === 'explicit --reporter' ? stderr : output.stream === 'stdout' ? stdout : stderr;
-      target.write(output.text);
-    }
-    if (selection.reason === 'explicit --reporter') {
-      throw new Error(
-        'The install-run-rush bootstrap reporter protocol is incompatible with this Rush frontend. ' +
-          'Update the global Rush installation or use --reporter=legacy.'
-      );
-    }
-    selection = {
-      reporter: 'legacy',
-      logLevel: 'normal',
-      outputs: [],
-      commandJson: selection.commandJson,
-      enabled: false,
-      reporterControlsOwnedByFrontend: selection.reporterControlsOwnedByFrontend,
-      reporterValueFlagsToStrip: selection.reporterValueFlagsToStrip,
-      reason: 'bootstrap compatibility fallback'
-    };
-    sink = new LegacyFallbackSink();
-  }
-
-  let closePromise: Promise<void> | undefined;
-  return {
-    host,
-    sink,
-    selection,
-    bootstrapReplay,
-    abandonedHandoffFilesDeleted,
-    closeAsync: (timeoutMs?: number) => {
-      closePromise ??= host.manager.closeAsync(timeoutMs);
-      return closePromise;
-    }
-  };
 }

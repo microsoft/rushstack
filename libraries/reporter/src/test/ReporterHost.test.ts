@@ -300,7 +300,45 @@ describe('ReporterHost handoff replay', () => {
       });
 
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
-      expect(result).toMatchObject({ replayed: false, skipReason: 'invalid-event' });
+      expect(result).toMatchObject({ replayed: false, skipReason: 'unsupported-required-event' });
+    });
+  });
+});
+
+describe('ReporterHost handoff discard', () => {
+  it('deletes only the current authenticated handoff', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+
+      await host.discardBootstrapHandoffAsync();
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    });
+  });
+
+  it('does not delete a handoff with a mismatched nonce', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'wrong-nonce'
+        },
+        handoffDirectory: directory
+      });
+
+      await host.discardBootstrapHandoffAsync();
+      expect(fs.existsSync(handoffPath)).toBe(true);
     });
   });
 });

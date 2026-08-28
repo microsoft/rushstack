@@ -103,6 +103,7 @@ export interface IBootstrapReplayResult {
     | 'invalid-path'
     | 'nonce-mismatch'
     | 'invalid-event'
+    | 'unsupported-required-event'
     | 'incompatible-protocol';
 
   /**
@@ -305,13 +306,15 @@ export class ReporterHost {
       }
       if (!isReporterEventEnvelope(event)) {
         if (isRecord(event) && event.required === true) {
+          const legacyFallbackOutput: IBootstrapLegacyOutput[] = getLegacyFallbackOutput(events);
           await deleteBootstrapHandoffFileAsync(handoffPath);
           return {
             direct: false,
             replayed: false,
             eventCount: 0,
             handoffPath,
-            skipReason: 'invalid-event'
+            skipReason: 'unsupported-required-event',
+            ...(legacyFallbackOutput.length > 0 ? { legacyFallbackOutput } : {})
           };
         }
         skippedEventCount++;
@@ -346,6 +349,34 @@ export class ReporterHost {
       handoffPath,
       ...(skippedEventCount > 0 ? { skippedEventCount } : {})
     };
+  }
+
+  /**
+   * Deletes the current authenticated bootstrap handoff without replaying it.
+   *
+   * @remarks
+   * This is used when frontend initialization fails before replay can begin.
+   * Paths outside the configured handoff directory and nonce mismatches are
+   * rejected without deleting the referenced file.
+   *
+   */
+  public async discardBootstrapHandoffAsync(): Promise<void> {
+    const handoffPath: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
+    const expectedNonce: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+    if (!handoffPath || !expectedNonce || !this._isOwnedHandoffPath(handoffPath)) {
+      return;
+    }
+
+    try {
+      const { header } = await readBootstrapHandoffFileAsync(handoffPath);
+      if (header?.nonce !== expectedNonce) {
+        return;
+      }
+    } catch {
+      // Match replay behavior for an unreadable file at an authenticated private path.
+    }
+
+    await deleteBootstrapHandoffFileAsync(handoffPath);
   }
 
   /**

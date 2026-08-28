@@ -344,7 +344,7 @@ export interface IBootstrapReplayResult {
     readonly legacyFallbackOutput?: readonly IBootstrapLegacyOutput[];
     readonly replayed: boolean;
     readonly skippedEventCount?: number;
-    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
+    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'unsupported-required-event' | 'incompatible-protocol';
 }
 
 // @beta
@@ -1373,6 +1373,7 @@ export type ReporterExtensionEventName = `${string}.${string}` & {
 export class ReporterHost {
     constructor(options?: IReporterHostOptions);
     cleanAbandonedHandoffFilesAsync(): Promise<string[]>;
+    discardBootstrapHandoffAsync(): Promise<void>;
     getSink(): IReporterEventSink;
     get manager(): ReporterManager;
     replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult>;

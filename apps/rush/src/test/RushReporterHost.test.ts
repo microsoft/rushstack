@@ -547,4 +547,131 @@ describe(initializeRushReporterHostAsync.name, () => {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
+
+  it('falls back when repository opt-in meets an unsupported required bootstrap event', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.addExternalOutput('stdout', 'npm output\n');
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      const requiredEvent: Record<string, unknown> = {
+        ...(JSON.parse(lines[1]) as Record<string, unknown>),
+        eventId: 'future-required',
+        type: 'futureRequiredEvent',
+        required: true,
+        protocolVersion: { major: 1, minor: 1 }
+      };
+      lines.push(JSON.stringify(requiredEvent));
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build'],
+        env,
+        repositoryOptIn: true,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+
+      expect(initialized.bootstrapReplay.skipReason).toBe('unsupported-required-event');
+      expect(initialized.selection).toMatchObject({
+        enabled: false,
+        reason: 'bootstrap compatibility fallback'
+      });
+      expect(stdoutText).toBe('npm output\n');
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('fails an explicit reporter request for an unsupported required bootstrap event', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stderrText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.addExternalOutput('stdout', 'npm output\n');
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      const requiredEvent: Record<string, unknown> = {
+        ...(JSON.parse(lines[1]) as Record<string, unknown>),
+        eventId: 'future-required',
+        type: 'futureRequiredEvent',
+        required: true,
+        protocolVersion: { major: 1, minor: 1 }
+      };
+      lines.push(JSON.stringify(requiredEvent));
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: ['build', '--reporter=json'],
+          env,
+          handoffDirectory: directory,
+          stdout: { isTTY: false, write: () => undefined },
+          stderr: {
+            write: (text: string) => {
+              stderrText += text;
+            }
+          },
+          includeDefaultFileReporter: false
+        })
+      ).rejects.toThrow(/unsupported required event/);
+
+      expect(stderrText).toBe('npm output\n');
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('deletes an authenticated handoff when explicit reporter validation fails', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: ['build', '--reporter=default'],
+          env,
+          handoffDirectory: directory,
+          stdout: { isTTY: false, write: () => undefined },
+          includeDefaultFileReporter: false
+        })
+      ).rejects.toThrow(/requires an interactive TTY/);
+
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
+      expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBeUndefined();
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
 });

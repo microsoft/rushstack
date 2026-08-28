@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ReporterManager, type IReporter, type IReporterEventEnvelope } from '@rushstack/rush-reporter';
+import {
+  LegacyFallbackSink,
+  ReporterManager,
+  type IReporter,
+  type IReporterEventEnvelope
+} from '@rushstack/rush-reporter';
 
 import { RushCommandSelector } from '../RushCommandSelector';
 import type { IRushFrontendLaunchOptions } from '../IRushFrontendLaunchOptions';
@@ -145,6 +150,26 @@ describe(RushCommandSelector.name, () => {
     );
   });
 
+  it('fails an explicit reporter request for an incompatible older engine protocol', () => {
+    const options: IRushFrontendLaunchOptions = {
+      isManaged: true,
+      reporterEventSink: new ReporterManager(),
+      reporterEnabled: true,
+      reporterSelectionReason: 'explicit --reporter'
+    };
+    const incompatibleRushLib = {
+      Rush: {
+        version: '5.177.0',
+        _reporterProtocolMajor: 0,
+        launch: () => undefined
+      }
+    } as unknown as typeof import('@microsoft/rush-lib');
+
+    expect(() => RushCommandSelector.execute('5.178.1', incompatibleRushLib, options)).toThrow(
+      /reporter protocol major 0/
+    );
+  });
+
   it('falls back to legacy engine rendering for an implicit incompatible protocol', () => {
     let receivedOptions: IRushFrontendLaunchOptions | undefined;
     const options: IRushFrontendLaunchOptions = {
@@ -169,5 +194,33 @@ describe(RushCommandSelector.name, () => {
       reporterEnabled: false,
       reporterSelectionReason: 'bootstrap compatibility fallback'
     });
+    expect(receivedOptions?.reporterEventSink).toBeInstanceOf(LegacyFallbackSink);
+  });
+
+  it('falls back to legacy engine rendering for an implicit older protocol', () => {
+    let receivedOptions: IRushFrontendLaunchOptions | undefined;
+    const options: IRushFrontendLaunchOptions = {
+      isManaged: true,
+      reporterEventSink: new ReporterManager(),
+      reporterEnabled: true,
+      reporterSelectionReason: 'repository experiment'
+    };
+    const incompatibleRushLib = {
+      Rush: {
+        version: '5.177.0',
+        _reporterProtocolMajor: 0,
+        launch: (launcherVersion: string, launchOptions: IRushFrontendLaunchOptions) => {
+          void launcherVersion;
+          receivedOptions = launchOptions;
+        }
+      }
+    } as unknown as typeof import('@microsoft/rush-lib');
+
+    RushCommandSelector.execute('5.178.1', incompatibleRushLib, options);
+    expect(receivedOptions).toMatchObject({
+      reporterEnabled: false,
+      reporterSelectionReason: 'bootstrap compatibility fallback'
+    });
+    expect(receivedOptions?.reporterEventSink).toBeInstanceOf(LegacyFallbackSink);
   });
 });
