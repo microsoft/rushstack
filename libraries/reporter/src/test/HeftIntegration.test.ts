@@ -25,6 +25,7 @@ import {
   type IReporterEventEnvelope,
   type IReporterEventSource
 } from '../index';
+import { validateReporterChildContext } from '../protocol/ReporterHandshake';
 
 const SOURCE: IReporterEventSource = { packageName: '@rushstack/heft', packageVersion: '1.2.19' };
 
@@ -272,6 +273,11 @@ describe('HeftDescriptorHost new descriptor path', () => {
       parentRequestId: 'parent-request',
       parentOperationId: 'op-42',
       supportedProtocolVersion: { major: 1, minor: 0 },
+      trustedSource: {
+        packageName: '@rushstack/heft',
+        packageVersion: 'trusted'
+      },
+      trustedPrivacy: 'local-sensitive',
       context: {
         reporter: 'plaintext',
         logLevel: 'normal',
@@ -289,7 +295,8 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(child.context?.terminalWidth).toBe(120);
     child.emitEvent({
       type: 'operationStatusChanged',
-      privacy: 'local-sensitive',
+      privacy: 'public',
+      scope: { operationId: 'child-selected-operation' },
       payload: { operationId: 'c1', status: 'success' }
     });
     child.emitEvent({
@@ -307,6 +314,11 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(forwarded.parentSessionId).toBe('parent-sess');
     expect(forwarded.parentRequestId).toBe('parent-request');
     expect(forwarded.parentOperationId).toBe('op-42');
+    expect(forwarded.scope?.operationId).toBe('op-42');
+    expect(forwarded.source).toEqual({
+      packageName: '@rushstack/heft',
+      packageVersion: 'trusted'
+    });
     expect(forwarded.sourceSequence).toBe(1);
     expect(forwarded.privacy).toBe('local-sensitive');
     expect(recording.reported[1].sourceSequence).toBe(2);
@@ -431,7 +443,7 @@ describe('HeftDescriptorHost new descriptor path', () => {
         kind: 'hello',
         protocolVersion: { major: 1, minor: 1 },
         producerVersion: '@rushstack/heft 1.2.19',
-        capabilities: [],
+        capabilities: ['heft-child-events-v1'],
         requiredFeatures: []
       })
     ).toBe(true);
@@ -690,6 +702,72 @@ describe('HeftDescriptorHost new descriptor path', () => {
       )
     ).toBe(false);
     expect(oversizedHost.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
+  it('uses parent-trusted source and a parent privacy floor for forwarded child events', () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      trustedSource: { packageName: '@rushstack/heft', packageVersion: 'trusted' },
+      trustedPrivacy: 'local-sensitive',
+      forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => forwarded.push(envelope)
+    });
+    host.processChildRecord({
+      kind: 'hello',
+      protocolVersion: { major: 1, minor: 0 },
+      producerVersion: 'spoofed producer',
+      capabilities: ['heft-child-events-v1'],
+      requiredFeatures: []
+    });
+    const makeEvent = (sequence: number, privacy: 'public' | 'secret'): Record<string, unknown> => ({
+      protocolVersion: { major: 1, minor: 0 },
+      eventId: `child_${sequence}`,
+      sessionId: 'child-sess',
+      sequence,
+      timestamp: '2026-01-01T00:00:00.000Z',
+      source: { packageName: '@malicious/spoof', packageVersion: '999.0.0' },
+      privacy,
+      required: false,
+      type: 'externalOutput',
+      payload: { stream: 'stdout', text: `${sequence}\n` }
+    });
+
+    expect(host.processChildRecord(makeEvent(1, 'public'))).toBe(true);
+    expect(host.processChildRecord(makeEvent(2, 'secret'))).toBe(true);
+    expect(forwarded.map(({ source }) => source)).toEqual([
+      { packageName: '@rushstack/heft', packageVersion: 'trusted' },
+      { packageName: '@rushstack/heft', packageVersion: 'trusted' }
+    ]);
+    expect(forwarded.map(({ privacy }) => privacy)).toEqual(['local-sensitive', 'secret']);
+  });
+
+  it('validates parent reporter context once and rejects zero terminal width', () => {
+    expect(
+      () =>
+        new HeftDescriptorHost({
+          parentSessionId: 'parent-sess',
+          supportedProtocolVersion: { major: 1, minor: 0 },
+          context: {
+            reporter: 'json',
+            logLevel: 'normal',
+            color: false,
+            terminalWidth: 0
+          },
+          forwardEnvelope: () => undefined
+        })
+    ).toThrow(/terminalWidth must be a positive integer/);
+  });
+
+  it('rejects malformed parent reporter context', () => {
+    expect(() =>
+      validateReporterChildContext({
+        reporter: 'json',
+        logLevel: 'normal',
+        color: false,
+        terminalWidth: 'wide'
+      })
+    ).toThrow(/terminalWidth must be a positive integer/);
   });
 
   it('drops unknown optional events and rejects unknown required events or invalid privacy', () => {

@@ -326,6 +326,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       parentSessionId: childProcessReporter.parentSessionId,
       parentRequestId: childProcessReporter.parentRequestId,
       parentOperationId: operation.operationId,
+      iterationId,
       context: childProcessReporter.context,
       ingestForeignEnvelope: childProcessReporter.ingestForeignEnvelope,
       onDiagnostic: (diagnostic: IRushDiagnostic) =>

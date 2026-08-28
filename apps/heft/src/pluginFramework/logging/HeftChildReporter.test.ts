@@ -159,4 +159,66 @@ describe(HeftChildReporter.name, () => {
     expect(exitCode).toBe(0);
     expect(descriptorText).toContain('structured with defaults');
   });
+
+  it.each([0, 'wide'])(
+    'falls back safely for invalid parent terminal width %p',
+    async (terminalWidth: unknown) => {
+      const modulePath: string = require.resolve('./HeftChildReporter');
+      const childScript: string = `
+      const { HeftChildReporter } = require(process.argv[1]);
+      const reporter = HeftChildReporter.tryInitialize(process.env);
+      if (reporter) process.exit(2);
+      process.stdout.write('context fallback');
+    `;
+      const child: childProcess.ChildProcess = childProcess.spawn(
+        process.execPath,
+        ['-e', childScript, modulePath],
+        {
+          env: {
+            ...process.env,
+            _RUSH_REPORTER_CHILD_FD: '3',
+            _RUSH_REPORTER_CHILD_ACK_FD: '4'
+          },
+          stdio: ['ignore', 'pipe', 'pipe', 'pipe', 'pipe']
+        }
+      );
+      const descriptor: Readable = child.stdio[3] as Readable;
+      const acknowledgement: Writable = child.stdio[4] as Writable;
+      let descriptorText: string = '';
+      let acknowledgementSent: boolean = false;
+      descriptor.setEncoding('utf8');
+      descriptor.on('data', (chunk: string) => {
+        descriptorText += chunk;
+        if (!acknowledgementSent && descriptorText.includes('\n')) {
+          acknowledgementSent = true;
+          acknowledgement.end(
+            `${JSON.stringify({
+              kind: 'helloAck',
+              protocolVersion: { major: 1, minor: 2 },
+              acceptedCapabilities: ['heft-child-events-v1', 'reporter-context-v1'],
+              rejectedRequiredFeatures: [],
+              context: {
+                reporter: 'json',
+                logLevel: 'normal',
+                color: false,
+                terminalWidth
+              }
+            })}\n`
+          );
+        }
+      });
+      let stdout: string = '';
+      child.stdout?.setEncoding('utf8').on('data', (chunk: string) => {
+        stdout += chunk;
+      });
+
+      const exitCode: number | null = await new Promise((resolve, reject) => {
+        child.once('error', reject);
+        child.once('close', resolve);
+      });
+
+      expect(exitCode).toBe(0);
+      expect(stdout).toBe('context fallback');
+    }
+  );
 });

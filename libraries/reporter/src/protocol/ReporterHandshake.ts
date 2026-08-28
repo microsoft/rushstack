@@ -223,7 +223,7 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item: unknown) => typeof item === 'string');
 }
 
-function parseReporterChildContext(value: unknown): IReporterChildContext {
+export function validateReporterChildContext(value: unknown): IReporterChildContext {
   if (!isRecord(value)) {
     throw new InvalidReporterHelloAckError('context must be an object.');
   }
@@ -312,7 +312,7 @@ export function parseReporterHelloAck(value: unknown): IReporterHelloAck {
     throw new InvalidReporterHelloAckError('rejectedRequiredFeatures must be an array of strings.');
   }
   const context: IReporterChildContext | undefined =
-    value.context === undefined ? undefined : parseReporterChildContext(value.context);
+    value.context === undefined ? undefined : validateReporterChildContext(value.context);
   if (context !== undefined && !value.acceptedCapabilities.includes('reporter-context-v1')) {
     throw new InvalidReporterHelloAckError(
       'context requires the "reporter-context-v1" capability to be accepted.'
@@ -365,7 +365,7 @@ export function negotiateReporterHello(
   const accepted: boolean = majorSupported && rejectedRequiredFeatures.length === 0;
   const context: IReporterChildContext | undefined =
     acceptedCapabilities.includes('reporter-context-v1') && options.context !== undefined
-      ? parseReporterChildContext(options.context)
+      ? validateReporterChildContext(options.context)
       : undefined;
 
   const ack: IReporterHelloAck = {

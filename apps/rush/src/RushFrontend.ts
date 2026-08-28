@@ -168,6 +168,11 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
   const sessionId: string = createSessionId();
   const requestId: string = sessionId;
+  const stdoutColumns: number | undefined = process.stdout.columns;
+  const terminalWidth: number =
+    stdoutColumns !== undefined && Number.isSafeInteger(stdoutColumns) && stdoutColumns > 0
+      ? stdoutColumns
+      : 80;
   if (reporterHost.selection.enabled && reporterHost.logArtifact?.path) {
     reporterHost.sink.emit({
       protocolVersion: REPORTER_PROTOCOL_VERSION,
@@ -199,10 +204,9 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
                 reporterHost.selection.reporter === 'default'
                   ? resolveColorEnabled(process.env, process.stdout.isTTY === true)
                   : false,
-              terminalWidth: process.stdout.columns ?? 80
+              terminalWidth
             },
-            ingestForeignEnvelope: (envelope) =>
-              reporterHost.host.manager.ingestForeignEnvelope(envelope)
+            ingestForeignEnvelope: (envelope) => reporterHost.host.manager.ingestForeignEnvelope(envelope)
           }
         : undefined
     },

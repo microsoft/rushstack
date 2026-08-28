@@ -544,6 +544,8 @@ export interface IHeftDescriptorHostOptions {
     readonly sendHelloAck?: (ack: IReporterHelloAck) => void;
     readonly supportedCapabilities?: readonly ReporterCapability[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
+    readonly trustedPrivacy?: ReporterPrivacyClassification;
+    readonly trustedSource?: IReporterEventSource;
 }
 
 // @beta

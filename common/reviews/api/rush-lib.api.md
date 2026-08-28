@@ -700,7 +700,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 
 // @internal
 export interface _IOperationGraphEventSink {
-    createChildProcessReporter?(operationId: string): _IOperationChildProcessReporter | undefined;
+    createChildProcessReporter?(operationId: string, iterationId: number): _IOperationChildProcessReporter | undefined;
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;

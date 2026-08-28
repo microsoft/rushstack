@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
-import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
+import type { IReporterEventEnvelope, IReporterEventSource } from '../events/IReporterEventEnvelope';
+import type { ReporterPrivacyClassification } from '../events/ReporterPrivacyClassification';
 import {
   REPORTER_EVENT_TYPES,
   isReporterEventRequired,
@@ -16,6 +17,7 @@ import {
   InvalidReporterHelloError,
   negotiateReporterHello,
   REPORTER_KNOWN_CAPABILITIES,
+  validateReporterChildContext,
   type ReporterCapability,
   type IReporterChildContext,
   type IReporterHelloAck,
@@ -88,6 +90,19 @@ function isReporterEventRecord(value: unknown): value is IWireReporterEventEnvel
   );
 }
 
+function applyPrivacyFloor(
+  privacy: ReporterPrivacyClassification,
+  floor: ReporterPrivacyClassification | undefined
+): ReporterPrivacyClassification {
+  if (floor === undefined || privacy === 'secret' || privacy === floor) {
+    return privacy;
+  }
+  if (floor === 'secret' || privacy === 'public') {
+    return floor;
+  }
+  return privacy;
+}
+
 /**
  * Options for constructing a {@link HeftDescriptorHost}.
  *
@@ -123,6 +138,17 @@ export interface IHeftDescriptorHostOptions {
    * Parent-owned rendering and filtering context offered to the child.
    */
   readonly context?: IReporterChildContext;
+
+  /**
+   * A parent-trusted source identity that replaces the child-provided source.
+   */
+  readonly trustedSource?: IReporterEventSource;
+
+  /**
+   * A parent-trusted privacy floor that prevents child events from claiming a less restrictive
+   * classification.
+   */
+  readonly trustedPrivacy?: ReporterPrivacyClassification;
 
   /**
    * Forwards a correlated child envelope, typically to `ReporterManager.ingestForeignEnvelope`.
@@ -191,6 +217,8 @@ export class HeftDescriptorHost {
   private readonly _supportedProtocolVersion: IReporterProtocolVersion;
   private readonly _supportedCapabilities: readonly ReporterCapability[];
   private readonly _reporterContext: IReporterChildContext | undefined;
+  private readonly _trustedSource: IReporterEventSource | undefined;
+  private readonly _trustedPrivacy: ReporterPrivacyClassification | undefined;
   private readonly _forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
   private readonly _onNegotiation: ((result: IReporterHandshakeResult) => void) | undefined;
   private readonly _sendHelloAck: ((ack: IReporterHelloAck) => void) | undefined;
@@ -207,7 +235,10 @@ export class HeftDescriptorHost {
     this._parentOperationId = options.parentOperationId;
     this._supportedProtocolVersion = options.supportedProtocolVersion;
     this._supportedCapabilities = options.supportedCapabilities ?? REPORTER_KNOWN_CAPABILITIES;
-    this._reporterContext = options.context;
+    this._reporterContext =
+      options.context === undefined ? undefined : validateReporterChildContext(options.context);
+    this._trustedSource = options.trustedSource;
+    this._trustedPrivacy = options.trustedPrivacy;
     this._forwardEnvelope = options.forwardEnvelope;
     this._onNegotiation = options.onNegotiation;
     this._sendHelloAck = options.sendHelloAck;
@@ -295,10 +326,12 @@ export class HeftDescriptorHost {
       parentSessionId: this._parentSessionId,
       parentRequestId: this._parentRequestId,
       parentOperationId: this._parentOperationId,
+      source: this._trustedSource ?? record.source,
       scope:
-        this._parentOperationId !== undefined && record.scope?.operationId === undefined
+        this._parentOperationId !== undefined
           ? { ...record.scope, operationId: this._parentOperationId }
           : record.scope,
+      privacy: applyPrivacyFloor(record.privacy, this._trustedPrivacy),
       required: isReporterEventRequired(record.type),
       type: record.type
     };

@@ -62,6 +62,13 @@ const flagOffHelp = run('help-flag-off', ['--help']).stdout;
 const help = run('help', ['--help', '--reporter=json'], { RUSH_REPORTER: 'legacy' }).stdout;
 const commandJson = run('command-json', ['list', '--json', '--reporter=file']);
 const commandJsonConflict = run('command-json-conflict', ['list', '--json', '--reporter=json'], {}, 1);
+const heftChild = run('heft-child', [
+  'rebuild',
+  '--only',
+  '@rushstack/rush-reporter',
+  '--reporter=json',
+  '--log-level=debug'
+]).stdout;
 const tempOverride = path.join(outputFolder, 'rush-temp-override');
 const tempOverrideFile = run('temp-override', [...commonArgs, '--reporter=file'], {
   RUSH_TEMP_FOLDER: tempOverride
@@ -82,13 +89,6 @@ const purgeLogMatch = tempPurge.stderr.match(/^Rush full log: (.+)$/m);
 if (!purgeLogMatch || purgeLogMatch[1].startsWith(tempOverride) || !fs.existsSync(purgeLogMatch[1])) {
   throw new Error('The active purge reporter log was not preserved outside RUSH_TEMP_FOLDER.');
 }
-const heftChild = run('heft-child', [
-  'rebuild',
-  '--only',
-  '@rushstack/rush-reporter',
-  '--reporter=json',
-  '--log-level=debug'
-]).stdout;
 
 function parseNdjson(text, name) {
   if (text.includes('\u001b')) {
