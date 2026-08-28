@@ -61,6 +61,7 @@ export interface IInitializedRushReporterHost {
   readonly host: ReporterHost;
   readonly sink: IReporterEventSink;
   readonly selection: IRushReporterSelection;
+  closeAsync(timeoutMs?: number): Promise<void>;
 }
 
 const REPORTER_VALUE_FLAGS: ReadonlySet<string> = new Set(['--reporter', '--output', '--log-level']);
@@ -185,13 +186,17 @@ export function stripReporterValueControls(argv: readonly string[]): string[] {
   const result: string[] = [];
   for (let index: number = 0; index < argv.length; index++) {
     const argument: string = argv[index];
+    if (argument === '--') {
+      result.push(...argv.slice(index));
+      break;
+    }
     const equalsIndex: number = argument.indexOf('=');
     const flagName: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
     if (!REPORTER_VALUE_FLAGS.has(flagName)) {
       result.push(argument);
       continue;
     }
-    if (equalsIndex < 0 && index + 1 < argv.length) {
+    if (equalsIndex < 0 && index + 1 < argv.length && argv[index + 1] !== '--') {
       index++;
     }
   }
@@ -208,6 +213,9 @@ function parseReporterControls(argv: readonly string[]): IParsedReporterControls
 
   for (let index: number = 0; index < argv.length; index++) {
     const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
     const reporter: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
       argv,
       index,
@@ -539,5 +547,14 @@ export async function initializeRushReporterHostAsync(
   }
 
   await host.manager.initializeAsync();
-  return { host, sink: host.getSink(), selection };
+  let closePromise: Promise<void> | undefined;
+  return {
+    host,
+    sink: host.getSink(),
+    selection,
+    closeAsync: (timeoutMs?: number) => {
+      closePromise ??= host.manager.closeAsync(timeoutMs);
+      return closePromise;
+    }
+  };
 }

@@ -3,8 +3,6 @@
 
 import * as path from 'node:path';
 
-import { Colorize } from '@rushstack/terminal';
-
 import type { IRushFrontendLaunchOptions } from './IRushFrontendLaunchOptions';
 
 type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
@@ -66,8 +64,7 @@ export class RushCommandSelector {
 }
 
 function _failWithError(message: string): never {
-  console.log(Colorize.red(message));
-  return process.exit(1);
+  throw new Error(message);
 }
 
 function _getCommandName(): CommandName {

@@ -14,4 +14,5 @@ import type { IReporterEventSink } from '@rushstack/rush-reporter';
  */
 export interface IRushFrontendLaunchOptions extends ILaunchOptions {
   readonly reporterEventSink: IReporterEventSink;
+  readonly reporterCloseAsync: () => Promise<void>;
 }

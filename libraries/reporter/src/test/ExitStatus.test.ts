@@ -149,4 +149,13 @@ describe('separateJsonControls', () => {
       reporterJson: false
     });
   });
+
+  it('stops scanning at the pass-through separator', () => {
+    expect(
+      separateJsonControls(['build', '--json', '--', '--json', '--reporter=json', '--reporter', 'json'])
+    ).toEqual<IJsonControls>({
+      commandJson: true,
+      reporterJson: false
+    });
+  });
 });
