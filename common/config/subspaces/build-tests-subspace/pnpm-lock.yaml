@@ -1027,6 +1027,14 @@ packages:
     resolution: {directory: ../../../libraries/rush-pnpm-kit-v9, type: directory}
     engines: {node: '>=20.9.0'}
 
+  '@rushstack/rush-reporter@file:../../../libraries/reporter':
+    resolution: {directory: ../../../libraries/reporter, type: directory}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   '@rushstack/rush-sdk@file:../../../libraries/rush-sdk':
     resolution: {directory: ../../../libraries/rush-sdk, type: directory}
     engines: {node: '>=20.9.0'}
@@ -4357,6 +4365,7 @@ snapshots:
       '@rushstack/rush-pnpm-kit-v10': file:../../../libraries/rush-pnpm-kit-v10
       '@rushstack/rush-pnpm-kit-v8': file:../../../libraries/rush-pnpm-kit-v8
       '@rushstack/rush-pnpm-kit-v9': file:../../../libraries/rush-pnpm-kit-v9
+      '@rushstack/rush-reporter': file:../../../libraries/reporter(@types/node@20.17.19)
       '@rushstack/stream-collator': file:../../../libraries/stream-collator(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
@@ -4967,6 +4976,12 @@ snapshots:
       '@pnpm/dependency-path-pnpm-v9': '@pnpm/dependency-path@5.1.7'
       '@pnpm/lockfile.fs-pnpm-lock-v9': '@pnpm/lockfile.fs@1001.1.32(@pnpm/logger@1001.0.1)'
       '@pnpm/logger': 1001.0.1
+
+  '@rushstack/rush-reporter@file:../../../libraries/reporter(@types/node@20.17.19)':
+    dependencies:
+      semver: 7.7.4
+    optionalDependencies:
+      '@types/node': 20.17.19
 
   '@rushstack/rush-sdk@file:../../../libraries/rush-sdk(@types/node@20.17.19)':
     dependencies:
