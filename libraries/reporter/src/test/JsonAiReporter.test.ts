@@ -133,6 +133,27 @@ describe('AiReporter', () => {
     expect(final.exitCode).toBe(0);
   });
 
+  it('preserves an actionable parser error when no structured diagnostic was emitted', () => {
+    const { final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      ev('messageEmitted', {
+        severity: 'error',
+        text: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
+      }),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCodes).toEqual(['RUSH_COMMAND_FAILED']);
+    expect(final.errorCount).toBe(1);
+    expect(final.diagnostics).toEqual([
+      expect.objectContaining({
+        category: 'command',
+        severity: 'error',
+        summary: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
+      })
+    ]);
+  });
+
   it('emits a status record and a bounded final record with scope, codes, and log', () => {
     const { records, final } = run([
       ev('commandStarted', { commandName: 'build' }),
