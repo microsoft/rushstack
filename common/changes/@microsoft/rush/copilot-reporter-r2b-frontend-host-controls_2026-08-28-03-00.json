@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add the pre-major ReporterHost, separator-safe global controls, and deterministic reporter finalization while preserving legacy output by default.",
+      "comment": "Add pre-major frontend reporter controls with legacy command compatibility, selected-engine gating, and deterministic reporter finalization.",
       "type": "patch"
     }
   ],

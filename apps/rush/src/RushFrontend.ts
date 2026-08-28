@@ -69,13 +69,7 @@ class RushFrontendReporterLifecycle {
       this._disposeSignalHandlers.push(
         this._processLifecycle.registerSignal(signal, () => {
           this._disposeSignals();
-          void this.closeAsync(DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS)
-            .catch((error: Error) => {
-              this._processLifecycle.reportCloseError(error);
-            })
-            .finally(() => {
-              this._processLifecycle.terminate(signal);
-            });
+          void this._closeForSignalAsync(signal);
         })
       );
     }
@@ -101,6 +95,31 @@ class RushFrontendReporterLifecycle {
       dispose();
     }
   }
+
+  private async _closeForSignalAsync(signal: RushTerminationSignal): Promise<void> {
+    const closeResult: Promise<Error | undefined> = this.closeAsync(DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS).then(
+      () => undefined,
+      (error: Error) => error
+    );
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const deadline: Promise<'deadline'> = new Promise((resolve: (value: 'deadline') => void) => {
+      timeout = setTimeout(() => resolve('deadline'), DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS);
+    });
+
+    const result: Error | 'deadline' | undefined = await Promise.race([closeResult, deadline]);
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+    }
+    if (result === 'deadline') {
+      this._processLifecycle.reportCloseError(
+        new Error(`Reporter close exceeded the ${DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS}ms signal deadline.`)
+      );
+    } else if (result) {
+      this._processLifecycle.reportCloseError(result);
+    }
+    this._dispose();
+    this._processLifecycle.terminate(signal);
+  }
 }
 
 export async function launchRushFrontendAsync(options: IRushFrontendOptions): Promise<void> {
@@ -117,20 +136,26 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   } = options;
 
   const reporterHost: IInitializedRushReporterHost = await initializeReporterHostAsync({
-    repositoryOptIn: configuration?.useRushReporter
+    repositoryOptIn: configuration?.useRushReporter,
+    forceLegacy: rushVersionToLoad !== undefined && rushVersionToLoad !== currentPackageVersion,
+    selectedRushVersion: rushVersionToLoad
   });
-  const reporterLifecycle: RushFrontendReporterLifecycle = new RushFrontendReporterLifecycle(
-    reporterHost,
-    processLifecycle
-  );
-  reporterLifecycle.start();
+  const reporterLifecycle: RushFrontendReporterLifecycle | undefined = reporterHost.selection.enabled
+    ? new RushFrontendReporterLifecycle(reporterHost, processLifecycle)
+    : undefined;
+  reporterLifecycle?.start();
   if (reporterHost.selection.reporterControlsOwnedByFrontend) {
-    process.argv = stripReporterValueControls(process.argv);
+    process.argv = stripReporterValueControls(
+      process.argv,
+      new Set(reporterHost.selection.reporterValueFlagsToStrip)
+    );
   }
+  const reporterCloseAsync: () => Promise<void> = () =>
+    reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
     ...launchOptions,
     reporterEventSink: reporterHost.sink,
-    reporterCloseAsync: () => reporterLifecycle.closeAsync()
+    reporterCloseAsync
   };
 
   try {
@@ -146,9 +171,10 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     }
   } catch (error) {
     try {
-      await reporterLifecycle.closeAsync();
+      await reporterCloseAsync();
     } catch (closeError) {
-      throw new AggregateError([error, closeError], 'Rush failed and the reporter host could not close.');
+      processLifecycle.reportCloseError(closeError as Error);
+      processLifecycle.setExitCode(1);
     }
     throw error;
   }
