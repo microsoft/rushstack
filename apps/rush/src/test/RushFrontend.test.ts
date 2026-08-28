@@ -24,6 +24,7 @@ async function createInitializedHostAsync(
       outputs: [],
       commandJson: false,
       enabled: false,
+      reporterControlsOwnedByFrontend: true,
       reason
     }
   };
@@ -77,17 +78,37 @@ describe(launchRushFrontendAsync.name, () => {
         .reporterEventSink;
     };
 
-    await launchRushFrontendAsync({
-      currentPackageVersion: '5.178.1',
-      rushVersionToLoad: '5.177.0',
-      configuration: undefined,
-      launchOptions: { isManaged: true },
-      currentRushLib: rushLib,
-      initializeReporterHostAsync: () => createInitializedHostAsync(order),
-      createVersionSelector: () => versionSelector
-    });
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'build', '--reporter=json', '--log-level=debug'];
 
-    expect(order).toEqual(['host', 'version-selection']);
-    expect(receivedSink).toEqual(expect.objectContaining({ emit: expect.any(Function) }));
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: '5.177.0',
+        configuration: undefined,
+        launchOptions: { isManaged: true },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async () => {
+          const initialized: IInitializedRushReporterHost = await createInitializedHostAsync(order);
+          return {
+            ...initialized,
+            selection: {
+              ...initialized.selection,
+              reporter: 'json',
+              logLevel: 'debug',
+              enabled: true,
+              reason: 'explicit --reporter'
+            }
+          };
+        },
+        createVersionSelector: () => versionSelector
+      });
+
+      expect(order).toEqual(['host', 'version-selection']);
+      expect(process.argv).toEqual(['node', 'rush', 'build']);
+      expect(receivedSink).toEqual(expect.objectContaining({ emit: expect.any(Function) }));
+    } finally {
+      process.argv = originalArgv;
+    }
   });
 });

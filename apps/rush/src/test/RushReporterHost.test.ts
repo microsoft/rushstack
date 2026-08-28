@@ -18,13 +18,15 @@ import {
 function resolve(
   argv: readonly string[],
   env: Record<string, string | undefined> = {},
-  isTTY: boolean = false
+  isTTY: boolean = false,
+  repositoryOptIn: boolean = false
 ): IRushReporterSelection {
   return resolveRushReporterSelection({
     argv,
     env,
     cwd: '/repo',
-    stdout: { isTTY, columns: 100, write: () => undefined }
+    stdout: { isTTY, columns: 100, write: () => undefined },
+    repositoryOptIn
   });
 }
 
@@ -66,6 +68,44 @@ describe(resolveRushReporterSelection.name, () => {
     );
   });
 
+  it('uses deterministic non-agent selection for the repository experiment', () => {
+    expect(resolve(['build'], {}, true, true)).toMatchObject({
+      reporter: 'default',
+      enabled: true,
+      reason: 'repository experiment'
+    });
+    expect(resolve(['build'], { CI: 'true' }, true, true)).toMatchObject({
+      reporter: 'plaintext',
+      enabled: true,
+      reason: 'repository experiment'
+    });
+    expect(resolve(['build'], {}, false, true)).toMatchObject({
+      reporter: 'plaintext',
+      enabled: true,
+      reason: 'repository experiment'
+    });
+    expect(resolve(['build'], { COPILOT_CLI: '1' }, false, true)).toMatchObject({
+      reporter: 'plaintext',
+      enabled: true,
+      reason: 'repository experiment'
+    });
+  });
+
+  it('allows reporter controls with the repository experiment', () => {
+    expect(
+      resolve(['build', '--log-level=debug', '--output=json://./events.jsonl'], {}, false, true)
+    ).toMatchObject({
+      reporter: 'plaintext',
+      logLevel: 'debug',
+      outputs: [
+        {
+          reporter: 'json',
+          target: path.resolve('/repo', 'events.jsonl')
+        }
+      ]
+    });
+  });
+
   it('does not consume rush-pnpm or rushx reporter arguments', () => {
     expect(
       resolveRushReporterSelection({
@@ -84,7 +124,14 @@ describe(resolveRushReporterSelection.name, () => {
   });
 
   it('keeps RUSH_REPORTER=legacy as an emergency override', () => {
-    expect(resolve(['build', '--reporter=json'], { RUSH_REPORTER: ' LEGACY ' })).toMatchObject({
+    expect(
+      resolve(
+        ['build', '--reporter=json', '--quiet', '--debug', '--log-level=invalid'],
+        { RUSH_REPORTER: ' LEGACY ' },
+        false,
+        true
+      )
+    ).toMatchObject({
       reporter: 'legacy',
       enabled: false,
       reason: 'RUSH_REPORTER=legacy'
@@ -115,6 +162,19 @@ describe(resolveRushReporterSelection.name, () => {
     expect(() => resolve(['build', '--reporter=plaintext', '--quiet', '--debug'])).toThrow(
       /Contradictory reporter verbosity/
     );
+  });
+
+  it('preserves legacy verbosity combinations when the reporter path is disabled', () => {
+    expect(resolve(['build', '--quiet', '--debug'])).toMatchObject({
+      reporter: 'legacy',
+      logLevel: 'normal',
+      enabled: false
+    });
+    expect(resolve(['build', '--reporter=legacy', '--quiet', '--debug'])).toMatchObject({
+      reporter: 'legacy',
+      logLevel: 'normal',
+      enabled: false
+    });
   });
 
   it('ignores reporter environment selection before the gate but validates explicit controls', () => {

@@ -19,6 +19,7 @@ describe(MinimalRushConfiguration.name, () => {
       const config: MinimalRushConfiguration =
         MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       expect(config.rushVersion).toEqual('2.5.0');
+      expect(config.useRushReporter).toBe(false);
     });
   });
 
@@ -31,6 +32,7 @@ describe(MinimalRushConfiguration.name, () => {
       const config: MinimalRushConfiguration =
         MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       expect(config.rushVersion).toEqual('4.0.0');
+      expect(config.useRushReporter).toBe(true);
     });
   });
 });

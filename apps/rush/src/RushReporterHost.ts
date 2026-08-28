@@ -40,6 +40,7 @@ export interface IRushReporterHostOptions {
   readonly stdout?: IRushReporterOutputStream;
   readonly includeDefaultFileReporter?: boolean;
   readonly commandName?: 'rush' | 'rush-pnpm' | 'rushx';
+  readonly repositoryOptIn?: boolean;
 }
 
 export interface IRushReporterSelection {
@@ -48,7 +49,12 @@ export interface IRushReporterSelection {
   readonly outputs: readonly IReporterOutputTarget[];
   readonly commandJson: boolean;
   readonly enabled: boolean;
-  readonly reason: 'explicit --reporter' | 'RUSH_REPORTER=legacy' | 'pre-major legacy default';
+  readonly reporterControlsOwnedByFrontend: boolean;
+  readonly reason:
+    | 'explicit --reporter'
+    | 'repository experiment'
+    | 'RUSH_REPORTER=legacy'
+    | 'pre-major legacy default';
 }
 
 export interface IInitializedRushReporterHost {
@@ -345,24 +351,27 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       outputs: [],
       commandJson: separateJsonControls(argv).commandJson,
       enabled: false,
+      reporterControlsOwnedByFrontend: false,
       reason: 'pre-major legacy default'
     };
   }
 
   const cwd: string = options.cwd ?? process.cwd();
-  const controls: IParsedReporterControls = parseReporterControls(argv);
   const commandJson: boolean = separateJsonControls(argv).commandJson;
 
   if (isLegacyEmergencyFallbackRequested(env)) {
     return {
       reporter: 'legacy',
-      logLevel: resolveLogLevel(controls, env, false),
+      logLevel: 'normal',
       outputs: [],
       commandJson,
       enabled: false,
+      reporterControlsOwnedByFrontend: true,
       reason: 'RUSH_REPORTER=legacy'
     };
   }
+
+  const controls: IParsedReporterControls = parseReporterControls(argv);
 
   function getCommandName(): 'rush' | 'rush-pnpm' | 'rushx' {
     const executableName: string = path.basename(process.argv[1] ?? '').toLowerCase();
@@ -385,14 +394,32 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       );
     }
     if (controls.outputs.length > 0 || controls.logLevels.length > 0) {
-      throw new Error('--output and --log-level require an explicit non-legacy --reporter selection.');
+      if (!options.repositoryOptIn) {
+        throw new Error(
+          '--output and --log-level require an explicit non-legacy --reporter selection or the ' +
+            'useRushReporter repository experiment.'
+        );
+      }
+    }
+    if (options.repositoryOptIn) {
+      const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
+      return {
+        reporter: isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
+        logLevel: resolveLogLevel(controls, env, true),
+        outputs: resolveOutputs(controls.outputs, cwd),
+        commandJson,
+        enabled: true,
+        reporterControlsOwnedByFrontend: true,
+        reason: 'repository experiment'
+      };
     }
     return {
       reporter: 'legacy',
-      logLevel: resolveLogLevel(controls, env, false),
+      logLevel: 'normal',
       outputs: [],
       commandJson,
       enabled: false,
+      reporterControlsOwnedByFrontend: true,
       reason: 'pre-major legacy default'
     };
   }
@@ -410,10 +437,11 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     }
     return {
       reporter: 'legacy',
-      logLevel: resolveLogLevel(controls, env, false),
+      logLevel: 'normal',
       outputs: [],
       commandJson,
       enabled: false,
+      reporterControlsOwnedByFrontend: true,
       reason: 'explicit --reporter'
     };
   }
@@ -431,6 +459,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     outputs: resolveOutputs(controls.outputs, cwd),
     commandJson,
     enabled: true,
+    reporterControlsOwnedByFrontend: true,
     reason: 'explicit --reporter'
   };
 }

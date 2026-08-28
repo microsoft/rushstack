@@ -6,6 +6,7 @@ import type { ILaunchOptions } from '@microsoft/rush-lib';
 import {
   initializeRushReporterHostAsync,
   stripReporterValueControls,
+  type IRushReporterHostOptions,
   type IInitializedRushReporterHost
 } from './RushReporterHost';
 import { RushCommandSelector } from './RushCommandSelector';
@@ -19,7 +20,9 @@ export interface IRushFrontendOptions {
   readonly configuration: MinimalRushConfiguration | undefined;
   readonly launchOptions: ILaunchOptions;
   readonly currentRushLib: typeof import('@microsoft/rush-lib');
-  readonly initializeReporterHostAsync?: () => Promise<IInitializedRushReporterHost>;
+  readonly initializeReporterHostAsync?: (
+    options: IRushReporterHostOptions
+  ) => Promise<IInitializedRushReporterHost>;
   readonly createVersionSelector?: (currentPackageVersion: string) => RushVersionSelector;
   readonly executeCurrentRush?: (
     currentPackageVersion: string,
@@ -40,8 +43,10 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     executeCurrentRush = RushCommandSelector.execute
   } = options;
 
-  const reporterHost: IInitializedRushReporterHost = await initializeReporterHostAsync();
-  if (!reporterHost.selection.enabled && reporterHost.selection.reason !== 'pre-major legacy default') {
+  const reporterHost: IInitializedRushReporterHost = await initializeReporterHostAsync({
+    repositoryOptIn: configuration?.useRushReporter
+  });
+  if (reporterHost.selection.reporterControlsOwnedByFrontend) {
     process.argv = stripReporterValueControls(process.argv);
   }
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
