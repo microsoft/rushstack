@@ -3,8 +3,9 @@
 
 import * as path from 'node:path';
 
-import type { ILaunchOptions } from '@microsoft/rush-lib/lib/index';
 import { Colorize } from '@rushstack/terminal';
+
+import type { IRushFrontendLaunchOptions } from './IRushFrontendLaunchOptions';
 
 type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
 
@@ -28,7 +29,7 @@ export class RushCommandSelector {
   public static execute(
     launcherVersion: string,
     selectedRushLib: typeof import('@microsoft/rush-lib'),
-    options: ILaunchOptions
+    options: IRushFrontendLaunchOptions
   ): void {
     const { Rush } = selectedRushLib;
 

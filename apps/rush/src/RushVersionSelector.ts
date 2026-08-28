@@ -7,9 +7,10 @@ import * as semver from 'semver';
 
 import { LockFile, Import } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { _FlagFile, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
+import { _FlagFile, _RushGlobalFolder } from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
+import type { IRushFrontendLaunchOptions } from './IRushFrontendLaunchOptions';
 import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
@@ -26,7 +27,7 @@ export class RushVersionSelector {
   public async ensureRushVersionInstalledAsync(
     version: string,
     configuration: MinimalRushConfiguration | undefined,
-    executeOptions: ILaunchOptions
+    executeOptions: IRushFrontendLaunchOptions
   ): Promise<void> {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);

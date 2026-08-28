@@ -148,7 +148,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
   private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
-  private readonly _verboseParameter: CommandLineFlagParameter;
+  private readonly _legacyVerboseParameter: CommandLineFlagParameter;
   private readonly _parallelismParameter: CommandLineStringParameter | undefined;
   private readonly _ignoreHooksParameter: CommandLineFlagParameter;
   private readonly _watchParameter: CommandLineFlagParameter | undefined;
@@ -234,10 +234,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       cwd: this.parser.cwd
     });
 
-    this._verboseParameter = this.defineFlagParameter({
-      parameterLongName: '--verbose',
+    this._legacyVerboseParameter = this.defineFlagParameter({
+      parameterLongName: '--verbose-build-output',
       parameterShortName: '-v',
-      description: 'Display the logs during the build, rather than just displaying the build status summary'
+      description: 'Display build logs instead of only status'
     });
 
     this._includePhaseDeps = this.defineFlagParameter({
@@ -455,7 +455,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       });
     }
 
-    const isQuietMode: boolean = !this._verboseParameter.value;
+    const isQuietMode: boolean = !(this.parser.isVerbose || this._legacyVerboseParameter.value);
 
     const changedProjectsOnly: boolean = !!this._changedProjectsOnlyParameter?.value;
 
