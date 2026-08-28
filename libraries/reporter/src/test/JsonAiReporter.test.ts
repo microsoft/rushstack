@@ -217,20 +217,41 @@ describe('AiReporter', () => {
     expect(final.operationCounts).toEqual({ fromCache: 1 });
   });
 
-  it('reports AI watch totals per cycle and recovers from failure', async () => {
+  it('keeps overlapping AI watch iterations and final recovery scope coherent', async () => {
     let output: string = '';
     const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
     reporter.report(ev('commandStarted', { commandName: 'build' }));
-    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
-    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
-    reporter.report(ev('watchCycleCompleted', { succeeded: false }));
-    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
     reporter.report(
-      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+      ev('operationRegistered', { iterationId: 1, operationId: 'op1', projectName: 'project-a' })
     );
-    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
-    reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'noOp' }));
-    reporter.report(ev('watchCycleCompleted', { succeeded: true }));
+    reporter.report(
+      ev('operationRegistered', { iterationId: 1, operationId: 'abort', projectName: 'project-abort' })
+    );
+    reporter.report(
+      ev('operationRegistered', { iterationId: 2, operationId: 'op1', projectName: 'project-a' })
+    );
+    reporter.report(
+      ev('operationRegistered', {
+        iterationId: 2,
+        operationId: 'silent',
+        projectName: 'hidden',
+        silent: true
+      })
+    );
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'op1', status: 'failure' }));
+    reporter.report(
+      ev('diagnosticEmitted', {
+        iterationId: 1,
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error'
+      })
+    );
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'abort', status: 'aborted' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'silent', status: 'noOp' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 2, succeeded: true }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
     await reporter.closeAsync();
 
@@ -253,7 +274,7 @@ describe('AiReporter', () => {
     ).toEqual([
       {
         succeeded: false,
-        operationCounts: { failure: 1 },
+        operationCounts: { failure: 1, aborted: 1 },
         failedProjects: ['project-a']
       },
       {
@@ -262,7 +283,12 @@ describe('AiReporter', () => {
         failedProjects: []
       }
     ]);
-    expect((records.at(-1) as unknown as IAiFinalRecord).operationCounts).toEqual({ success: 1 });
+    const final: IAiFinalRecord = records.at(-1) as unknown as IAiFinalRecord;
+    expect(final.operationCounts).toEqual({ success: 1 });
+    expect(final.scope.failedProjects).toEqual([]);
+    expect(final.errorCount).toBe(0);
+    expect(final.errorCodes).toEqual([]);
+    expect(final.diagnostics).toEqual([]);
   });
 
   it('caps detailed diagnostics at 20 and marks the record truncated', () => {

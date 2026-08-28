@@ -450,6 +450,7 @@ export interface IEngineSinkResolution {
 
 // @beta
 export interface IExternalOutputChunk {
+    readonly iterationId?: number;
     readonly operationId?: string;
     readonly stream: string;
     readonly text: string;
@@ -611,12 +612,14 @@ export interface IOldEngineOutputAdapterOptions {
 // @beta
 export interface IOperationCompletedPayload {
     readonly durationMs?: number;
+    readonly iterationId?: number;
     readonly operationId: string;
     readonly status: OperationStatus;
 }
 
 // @beta
 export interface IOperationRegisteredPayload {
+    readonly iterationId?: number;
     readonly operationId: string;
     readonly phaseName?: string;
     readonly projectName?: string;
@@ -626,6 +629,7 @@ export interface IOperationRegisteredPayload {
 // @beta
 export interface IOperationStatusChangedPayload {
     readonly durationMs?: number;
+    readonly iterationId?: number;
     readonly operationId: string;
     readonly previousStatus?: OperationStatus;
     readonly status: OperationStatus;
@@ -633,6 +637,7 @@ export interface IOperationStatusChangedPayload {
 
 // @beta
 export interface IOperationStreamClosedPayload {
+    readonly iterationId?: number;
     readonly operationId: string;
 }
 
@@ -946,6 +951,7 @@ export interface IRushDiagnostic {
     readonly code: RushDiagnosticCode;
     readonly detailKey?: string;
     readonly diagnosticId: string;
+    readonly iterationId?: number;
     readonly parameters?: {
         readonly [name: string]: IClassifiedDiagnosticValue;
     };
@@ -1136,6 +1142,7 @@ export function iterateExternalOutput(events: readonly IReporterEventEnvelope<un
 // @beta
 export interface IWatchCycleCompletedPayload {
     readonly changedProjects?: readonly string[];
+    readonly iterationId?: number;
     readonly succeeded: boolean;
 }
 
@@ -1272,14 +1279,14 @@ export type OperationStatus = 'ready' | 'waiting' | 'queued' | 'executing' | 'su
 // @beta
 export class OperationStreamEmitter {
     constructor(options: IOperationStreamEmitterOptions);
-    changeStatus(operationId: string, status: OperationStatus, durationMs?: number, previousStatus?: OperationStatus): string;
-    closeOperationStream(operationId: string): string;
+    changeStatus(operationId: string, status: OperationStatus, durationMs?: number, previousStatus?: OperationStatus, iterationId?: number): string;
+    closeOperationStream(operationId: string, iterationId?: number): string;
     completeCommand(commandName: string, succeeded: boolean, exitCode: number, operationCounts?: {
         readonly [status: string]: number;
     }): string;
-    completeOperation(operationId: string, status: OperationStatus, durationMs?: number): string;
-    registerOperation(operationId: string, projectName?: string, phaseName?: string, silent?: boolean): string;
-    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[];
+    completeOperation(operationId: string, status: OperationStatus, durationMs?: number, iterationId?: number): string;
+    registerOperation(operationId: string, projectName?: string, phaseName?: string, silent?: boolean, iterationId?: number): string;
+    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string, iterationId?: number): string[];
 }
 
 // @beta

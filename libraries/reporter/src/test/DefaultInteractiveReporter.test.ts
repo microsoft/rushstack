@@ -262,7 +262,9 @@ describe('DefaultInteractiveReporter', () => {
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
     await reporter.closeAsync();
 
-    expect(terminal.output).toContain('Another Rush command is already running in this repository.');
+    expect(
+      terminal.output.match(/Another Rush command is already running in this repository\./g)
+    ).toHaveLength(1);
   });
 
   it('fails closed when commandResult is missing', async () => {
@@ -281,7 +283,7 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).not.toContain('build succeeded');
   });
 
-  it('reports watch totals per cycle and recovers from failure', async () => {
+  it('reports overlapping watch iterations independently and recovers from failure', async () => {
     const terminal: FakeTerminal = new FakeTerminal();
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
       terminal,
@@ -290,22 +292,35 @@ describe('DefaultInteractiveReporter', () => {
     });
     await reporter.initializeAsync();
     reporter.report(ev('commandStarted', { commandName: 'build' }));
-    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
-    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
-    reporter.report(ev('watchCycleCompleted', { succeeded: false }));
-    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
     reporter.report(
-      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+      ev('operationRegistered', { iterationId: 1, operationId: 'op1', projectName: 'project-a' })
     );
-    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
-    reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'noOp' }));
-    reporter.report(ev('watchCycleCompleted', { succeeded: true }));
+    reporter.report(
+      ev('operationRegistered', { iterationId: 1, operationId: 'abort', projectName: 'project-abort' })
+    );
+    reporter.report(
+      ev('operationRegistered', { iterationId: 2, operationId: 'op1', projectName: 'project-a' })
+    );
+    reporter.report(
+      ev('operationRegistered', {
+        iterationId: 2,
+        operationId: 'silent',
+        projectName: 'hidden',
+        silent: true
+      })
+    );
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'op1', status: 'failure' }));
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'abort', status: 'aborted' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'silent', status: 'noOp' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 2, succeeded: true }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
     await reporter.closeAsync();
 
-    expect(terminal.output).toContain('watch cycle failed - 1/1 operations');
+    expect(terminal.output).toContain('watch cycle failed - 2/2 operations');
     expect(terminal.output).toContain('watch cycle succeeded - 1/1 operations');
-    expect(terminal.output).not.toContain('2/2 operations');
+    expect(terminal.output).not.toContain('3/3 operations');
     expect(terminal.output).not.toContain('hidden');
   });
 
