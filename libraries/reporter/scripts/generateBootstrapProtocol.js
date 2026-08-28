@@ -57,7 +57,7 @@ function checkGeneratedFile() {
   const expected = renderGeneratedFile();
   let actual;
   try {
-    actual = fs.readFileSync(TARGET_PATH, 'utf8');
+    actual = fs.readFileSync(TARGET_PATH, 'utf8').replace(/\r\n/g, '\n');
   } catch (error) {
     if (error && error.code === 'ENOENT') {
       throw new Error(
