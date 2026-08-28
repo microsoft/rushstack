@@ -217,6 +217,54 @@ describe('AiReporter', () => {
     expect(final.operationCounts).toEqual({ fromCache: 1 });
   });
 
+  it('reports AI watch totals per cycle and recovers from failure', async () => {
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
+    reporter.report(ev('watchCycleCompleted', { succeeded: false }));
+    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(
+      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+    );
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'noOp' }));
+    reporter.report(ev('watchCycleCompleted', { succeeded: true }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    await reporter.closeAsync();
+
+    const records: Record<string, unknown>[] = parseLines(output);
+    const cycles: Array<{
+      succeeded: boolean;
+      operationCounts: Record<string, number>;
+      failedProjects: string[];
+    }> = records.filter(({ kind }) => kind === 'ai.watchCycle') as Array<{
+      succeeded: boolean;
+      operationCounts: Record<string, number>;
+      failedProjects: string[];
+    }>;
+    expect(
+      cycles.map(({ succeeded, operationCounts, failedProjects }) => ({
+        succeeded,
+        operationCounts,
+        failedProjects
+      }))
+    ).toEqual([
+      {
+        succeeded: false,
+        operationCounts: { failure: 1 },
+        failedProjects: ['project-a']
+      },
+      {
+        succeeded: true,
+        operationCounts: { success: 1 },
+        failedProjects: []
+      }
+    ]);
+    expect((records.at(-1) as unknown as IAiFinalRecord).operationCounts).toEqual({ success: 1 });
+  });
+
   it('caps detailed diagnostics at 20 and marks the record truncated', () => {
     const events: IReporterEventEnvelope<unknown>[] = [ev('commandStarted', { commandName: 'build' })];
     for (let i: number = 0; i < 25; i++) {

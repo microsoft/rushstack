@@ -29,7 +29,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 import './mockRushCommandLineParser';
 
 import type { SpawnOptions } from 'node:child_process';
-import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import { Autoinstaller } from '../../logic/Autoinstaller';
@@ -171,6 +171,43 @@ describe('RushCommandLineParser', () => {
           } finally {
             stdoutSpy.mockRestore();
             stderrSpy.mockRestore();
+          }
+        });
+
+        it('preserves the actionable lock contention reason in reporter mode', async () => {
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockReturnValue(undefined);
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-conflict',
+                operationStreamEnabled: true
+              }
+            );
+
+            await parser.executeAsync();
+            await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+            expect(reporterSink.inputs).toContainEqual(
+              expect.objectContaining({
+                type: 'messageEmitted',
+                payload: expect.objectContaining({
+                  severity: 'error',
+                  text: expect.stringContaining('Another Rush command is already running')
+                })
+              })
+            );
+          } finally {
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
           }
         });
       });
