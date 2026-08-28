@@ -74,6 +74,35 @@ describe('JsonReporter', () => {
     expect(Buffer.byteLength(output.trim(), 'utf8')).toBeLessThanOrEqual(512);
   });
 
+  it('does not expose a private producer identity in an oversized redacted record', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({
+      write: (text: string) => (output += text),
+      maxRecordBytes: 512
+    });
+    reporter.report({
+      ...ev('extension', { name: 'private.fixture', payload: 'x'.repeat(1000) }),
+      source: {
+        packageName: '@private/example-rush-plugin',
+        packageVersion: '1.0.0',
+        component: 'PrivatePluginImplementation'
+      },
+      privacy: 'local-sensitive'
+    });
+
+    expect(output).not.toContain('@private/example-rush-plugin');
+    expect(output).not.toContain('PrivatePluginImplementation');
+    expect(parseLines(output)[0]).toMatchObject({
+      source: {
+        packageName: '[private-producer]',
+        packageVersion: '[private-version]'
+      },
+      payload: {
+        name: 'rush.reporter.record-too-large'
+      }
+    });
+  });
+
   it('redacts secret diagnostic fields from stdout', () => {
     let output: string = '';
     const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
@@ -436,6 +465,53 @@ describe('AiReporter', () => {
     const { final } = run(events, { maxBytes: 1024 });
     expect(final.diagnostics).toEqual([]);
     expect(final.truncated).toBe(false);
+  });
+
+  it('orders root-cause diagnostics before diagnostics that reference them', () => {
+    const { final } = run([
+      ev('diagnosticEmitted', {
+        diagnosticId: 'outer',
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error',
+        causeDiagnosticIds: ['root']
+      }),
+      ev('diagnosticEmitted', {
+        diagnosticId: 'root',
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        category: 'dependency-tool',
+        severity: 'error'
+      }),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.diagnostics.map(({ diagnosticId }) => diagnosticId)).toEqual(['root', 'outer']);
+  });
+
+  it('projects classified context without exposing secret values', () => {
+    const { final } = run([
+      ev('diagnosticEmitted', {
+        diagnosticId: 'auth',
+        code: 'RUSH_NETWORK_AUTH_UNAUTHORIZED',
+        category: 'network-auth',
+        severity: 'error',
+        summaryKey: 'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary',
+        parameters: {
+          registryUrl: { value: 'https://registry.example.test/', privacy: 'public' },
+          token: { value: 'qualification-fake-secret-token', privacy: 'secret' }
+        }
+      }),
+      ev('commandResult', { commandName: 'install', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.diagnostics[0]).toMatchObject({
+      summaryKey: 'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary',
+      context: {
+        registryUrl: 'https://registry.example.test/',
+        token: '[secret]'
+      }
+    });
+    expect(JSON.stringify(final)).not.toContain('qualification-fake-secret-token');
   });
 
   it('excludes raw external output and keeps stdout pure JSON', () => {

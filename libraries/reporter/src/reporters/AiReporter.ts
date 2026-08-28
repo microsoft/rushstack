@@ -3,8 +3,10 @@
 
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
+import type { ReporterJsonValue } from '../events/ReporterJsonValue';
 import type { IReporter } from '../manager/IReporter';
 import type { IRushRemediationAction } from '../diagnostics/IRushRemediationAction';
+import type { IClassifiedDiagnosticValue } from '../diagnostics/IClassifiedDiagnosticValue';
 import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
 import { REPORTER_PROTOCOL_VERSION } from '../protocol/ReporterProtocol';
 
@@ -21,8 +23,8 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
 ]);
 
 interface IAiDiagnosticState {
-  readonly errorDiagnostics: IAiDiagnostic[];
-  readonly warningDiagnostics: IAiDiagnostic[];
+  readonly errorDiagnostics: ICollectedAiDiagnostic[];
+  readonly warningDiagnostics: ICollectedAiDiagnostic[];
   readonly errorCodes: Set<string>;
   readonly diagnosticCategoryCounts: { [category: string]: number };
   errorDiagnosticsTruncated: boolean;
@@ -60,11 +62,19 @@ function createDiagnosticState(): IAiDiagnosticState {
  * @beta
  */
 export interface IAiDiagnostic {
+  readonly diagnosticId?: string;
   readonly code: string;
   readonly category: string;
   readonly severity: string;
   readonly summary?: string;
+  readonly summaryKey?: string;
+  readonly detailKey?: string;
+  readonly context?: Readonly<Record<string, ReporterJsonValue | '[local-sensitive]' | '[secret]'>>;
   readonly remediation?: readonly IRushRemediationAction[];
+}
+
+interface ICollectedAiDiagnostic extends IAiDiagnostic {
+  readonly causeDiagnosticIds?: readonly string[];
 }
 
 /**
@@ -255,11 +265,11 @@ export class AiReporter implements IReporter {
         break;
       }
       case 'diagnosticEmitted': {
-        const diagnostic: IAiDiagnostic & { iterationId?: number } = event.payload as IAiDiagnostic & {
-          iterationId?: number;
+        const diagnostic: { readonly iterationId?: number } = event.payload as {
+          readonly iterationId?: number;
         };
         this._collectDiagnostic(
-          diagnostic,
+          event,
           diagnostic.iterationId === undefined
             ? this._globalDiagnostics
             : this._getWatchCycle(diagnostic.iterationId).diagnostics
@@ -294,7 +304,7 @@ export class AiReporter implements IReporter {
           severity?: string;
           text?: string;
         };
-        if (payload.severity === 'error' && payload.text) {
+        if (event.privacy !== 'secret' && payload.severity === 'error' && payload.text) {
           this._fallbackErrorCount++;
           if (
             event.privacy === 'public' &&
@@ -351,35 +361,45 @@ export class AiReporter implements IReporter {
     }
   }
 
-  private _collectDiagnostic(diagnostic: IAiDiagnostic, state: IAiDiagnosticState): void {
+  private _collectDiagnostic(event: IReporterEventEnvelope<unknown>, state: IAiDiagnosticState): void {
+    if (event.privacy === 'secret') {
+      return;
+    }
+    const diagnostic: IAiDiagnostic & {
+      readonly causeDiagnosticIds?: readonly string[];
+      readonly parameters?: Readonly<Record<string, IClassifiedDiagnosticValue>>;
+    } = event.payload as IAiDiagnostic & {
+      readonly causeDiagnosticIds?: readonly string[];
+      readonly parameters?: Readonly<Record<string, IClassifiedDiagnosticValue>>;
+    };
     if (diagnostic.category !== undefined) {
       state.diagnosticCategoryCounts[diagnostic.category] =
         (state.diagnosticCategoryCounts[diagnostic.category] ?? 0) + 1;
     }
+    const collected: ICollectedAiDiagnostic = {
+      diagnosticId: diagnostic.diagnosticId,
+      code: diagnostic.code,
+      category: diagnostic.category,
+      severity: diagnostic.severity,
+      summary: diagnostic.summary,
+      summaryKey: diagnostic.summaryKey,
+      detailKey: diagnostic.detailKey,
+      context: this._projectDiagnosticContext(diagnostic.parameters),
+      remediation: diagnostic.remediation,
+      causeDiagnosticIds: diagnostic.causeDiagnosticIds
+    };
     if (diagnostic.severity === 'error') {
       state.errorCount++;
       state.errorCodes.add(diagnostic.code);
       if (state.errorDiagnostics.length < this._maxDetailedDiagnostics) {
-        state.errorDiagnostics.push({
-          code: diagnostic.code,
-          category: diagnostic.category,
-          severity: 'error',
-          summary: diagnostic.summary,
-          remediation: diagnostic.remediation
-        });
+        state.errorDiagnostics.push(collected);
       } else {
         state.errorDiagnosticsTruncated = true;
       }
     } else if (diagnostic.severity === 'warning') {
       state.warningCount++;
       if (state.warningDiagnostics.length < this._maxDetailedDiagnostics) {
-        state.warningDiagnostics.push({
-          code: diagnostic.code,
-          category: diagnostic.category,
-          severity: 'warning',
-          summary: diagnostic.summary,
-          remediation: diagnostic.remediation
-        });
+        state.warningDiagnostics.push(collected);
       } else {
         state.warningDiagnosticsTruncated = true;
       }
@@ -418,6 +438,63 @@ export class AiReporter implements IReporter {
     }
   }
 
+  private _projectDiagnosticContext(
+    parameters: Readonly<Record<string, IClassifiedDiagnosticValue>> | undefined
+  ): Readonly<Record<string, ReporterJsonValue | '[local-sensitive]' | '[secret]'>> | undefined {
+    if (!parameters) {
+      return undefined;
+    }
+    const context: Record<string, ReporterJsonValue | '[local-sensitive]' | '[secret]'> = {};
+    for (const name of Object.keys(parameters).sort()) {
+      const parameter: IClassifiedDiagnosticValue = parameters[name];
+      context[name] = parameter.privacy === 'public' ? parameter.value : (`[${parameter.privacy}]` as const);
+    }
+    return Object.keys(context).length > 0 ? context : undefined;
+  }
+
+  private _orderDiagnostics(diagnostics: readonly ICollectedAiDiagnostic[]): IAiDiagnostic[] {
+    const byId: Map<string, ICollectedAiDiagnostic> = new Map();
+    for (const diagnostic of diagnostics) {
+      if (diagnostic.diagnosticId) {
+        byId.set(diagnostic.diagnosticId, diagnostic);
+      }
+    }
+
+    const ordered: IAiDiagnostic[] = [];
+    const visited: Set<ICollectedAiDiagnostic> = new Set();
+    const visiting: Set<ICollectedAiDiagnostic> = new Set();
+    const visit = (diagnostic: ICollectedAiDiagnostic): void => {
+      if (visited.has(diagnostic) || visiting.has(diagnostic)) {
+        return;
+      }
+      visiting.add(diagnostic);
+      for (const causeId of diagnostic.causeDiagnosticIds ?? []) {
+        const cause: ICollectedAiDiagnostic | undefined = byId.get(causeId);
+        if (cause) {
+          visit(cause);
+        }
+      }
+      visiting.delete(diagnostic);
+      visited.add(diagnostic);
+      ordered.push({
+        diagnosticId: diagnostic.diagnosticId,
+        code: diagnostic.code,
+        category: diagnostic.category,
+        severity: diagnostic.severity,
+        summary: diagnostic.summary,
+        summaryKey: diagnostic.summaryKey,
+        detailKey: diagnostic.detailKey,
+        context: diagnostic.context,
+        remediation: diagnostic.remediation
+      });
+    };
+
+    for (const diagnostic of diagnostics) {
+      visit(diagnostic);
+    }
+    return ordered;
+  }
+
   private _emitFinal(succeeded: boolean, exitCode: number): void {
     if (this._finalEmitted) {
       return;
@@ -429,14 +506,14 @@ export class AiReporter implements IReporter {
     const errorCountWithoutFallback: number =
       this._globalDiagnostics.errorCount + cycleDiagnostics.errorCount;
     const warningCount: number = this._globalDiagnostics.warningCount + cycleDiagnostics.warningCount;
-    const collectedErrorDiagnostics: IAiDiagnostic[] = [
+    const collectedErrorDiagnostics: IAiDiagnostic[] = this._orderDiagnostics([
       ...this._globalDiagnostics.errorDiagnostics,
       ...cycleDiagnostics.errorDiagnostics
-    ];
-    const collectedWarningDiagnostics: IAiDiagnostic[] = [
+    ]);
+    const collectedWarningDiagnostics: IAiDiagnostic[] = this._orderDiagnostics([
       ...this._globalDiagnostics.warningDiagnostics,
       ...cycleDiagnostics.warningDiagnostics
-    ];
+    ]);
     const fallbackDiagnostics: IAiDiagnostic[] =
       errorCountWithoutFallback === 0
         ? this._fallbackErrorMessages.map((summary) => ({
