@@ -41,7 +41,7 @@ describe(TrimRushEnvironmentVariablesPlugin.name, () => {
     );
 
     const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
-    const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
+    const commandLineJson: ICommandLineJson = await JsonFile.loadAsync(commandLineJsonFile);
 
     const commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
     const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
@@ -67,16 +67,13 @@ describe(TrimRushEnvironmentVariablesPlugin.name, () => {
 
     const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
-      fakeCreateOperationsContext as unknown as ICreateOperationsContext
+      fakeCreateOperationsContext as ICreateOperationsContext
     );
 
     // Set up a mock graph and invoke onGraphCreatedAsync so the plugin registers its graph hooks
     const graphHooks: OperationGraphHooks = new OperationGraphHooks();
-    const fakeGraph: IOperationGraph = { hooks: graphHooks } as unknown as IOperationGraph;
-    await hooks.onGraphCreatedAsync.promise(
-      fakeGraph,
-      fakeCreateOperationsContext as unknown as IOperationGraphContext
-    );
+    const fakeGraph: IOperationGraph = { hooks: graphHooks } as IOperationGraph;
+    await hooks.onGraphCreatedAsync.promise(fakeGraph, fakeCreateOperationsContext as IOperationGraphContext);
 
     const operation = Array.from(operations)[0];
     expect(operation).toBeDefined();
