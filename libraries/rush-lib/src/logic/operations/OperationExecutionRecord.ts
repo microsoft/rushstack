@@ -296,6 +296,29 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     }
   }
 
+  /**
+   * Adds the reporter's lossless operation-output tap ahead of any legacy presentation transforms.
+   *
+   * @internal
+   */
+  public addOperationChunkTap(destination: TerminalWritable): TerminalWritable {
+    const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
+    if (!eventSink?.onOperationChunk) {
+      return destination;
+    }
+
+    return new SplitterTransform({
+      destinations: [
+        destination,
+        new OperationChunkTap(this.name, (operationId, chunk) => {
+          if (operationId === this.name) {
+            eventSink.onOperationChunk?.(this, chunk);
+          }
+        })
+      ]
+    });
+  }
+
   public getStateHash(): string {
     if (this._stateHash === undefined) {
       const { dependencies, local, config } = this.getStateHashComponents();
@@ -409,27 +432,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         newlineKind: NewlineKind.Lf // for StdioSummarizer
       });
 
-      const chunkTapDestinations: TerminalWritable[] = [];
-      const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
-      if (eventSink?.onOperationChunk) {
-        // Tap the stream upstream of the quiet-mode discard so the sink observes
-        // the exact bytes the collated writer would receive, regardless of verbosity.
-        chunkTapDestinations.push(
-          new OperationChunkTap(this.name, (operationId, chunk) => {
-            if (operationId === this.name) {
-              eventSink.onOperationChunk?.(this, chunk);
-            }
-          })
-        );
-      }
-
       const splitterTransform1: SplitterTransform = new SplitterTransform({
         destinations: [
           this.quietMode
             ? new DiscardStdoutTransform({ destination: this.collatedWriter })
             : this.collatedWriter,
-          stderrLineTransform,
-          ...chunkTapDestinations
+          stderrLineTransform
         ]
       });
 
@@ -439,7 +447,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         ensureNewlineAtEnd: true
       });
 
-      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(
+        this.addOperationChunkTap(normalizeNewlineTransform)
+      );
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
