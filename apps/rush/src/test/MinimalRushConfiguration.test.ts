@@ -11,6 +11,7 @@ import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
 describe(MinimalRushConfiguration.name, () => {
   const originalArgv: string[] = process.argv;
   const originalRushTempFolder: string | undefined = process.env.RUSH_TEMP_FOLDER;
+  const originalRushPreviewVersion: string | undefined = process.env.RUSH_PREVIEW_VERSION;
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -19,6 +20,11 @@ describe(MinimalRushConfiguration.name, () => {
       delete process.env.RUSH_TEMP_FOLDER;
     } else {
       process.env.RUSH_TEMP_FOLDER = originalRushTempFolder;
+    }
+    if (originalRushPreviewVersion === undefined) {
+      delete process.env.RUSH_PREVIEW_VERSION;
+    } else {
+      process.env.RUSH_PREVIEW_VERSION = originalRushPreviewVersion;
     }
     EnvironmentConfiguration.reset();
   });
@@ -180,5 +186,23 @@ describe(MinimalRushConfiguration.name, () => {
       [`Found configuration in ${path.join(legacyRepo, 'rush.json')}`],
       ['']
     ]);
+  });
+
+  it('uses the effective preview version when deciding discovery ownership', () => {
+    const repo: string = path.join(__dirname, 'sandbox', 'repo');
+    const consoleLog: jest.SpiedFunction<typeof console.log> = jest
+      .spyOn(console, 'log')
+      .mockImplementation(() => undefined);
+    jest.spyOn(PackageJsonLookup, 'loadOwnPackageJson').mockReturnValue({
+      name: '@microsoft/rush',
+      version: '5.178.1'
+    });
+    jest.spyOn(process, 'cwd').mockReturnValue(path.join(repo, 'project'));
+    process.argv = ['node', 'rush', 'build', '--reporter=json'];
+    process.env.RUSH_PREVIEW_VERSION = '5.178.1';
+
+    MinimalRushConfiguration.loadFromDefaultLocation();
+
+    expect(consoleLog).not.toHaveBeenCalled();
   });
 });

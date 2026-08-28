@@ -105,6 +105,7 @@ export class PlaintextReporter implements IReporter {
   private readonly _operations: Map<string, IOperationRecord>;
   private _spoolDirectory: string | undefined;
   private _nextSpoolId: number;
+  private _resetCycleOnNextRegistration: boolean;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -124,6 +125,7 @@ export class PlaintextReporter implements IReporter {
     this._operations = new Map();
     this._spoolDirectory = undefined;
     this._nextSpoolId = 1;
+    this._resetCycleOnNextRegistration = false;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -149,6 +151,9 @@ export class PlaintextReporter implements IReporter {
           phaseName?: string;
           silent?: boolean;
         };
+        if (this._resetCycleOnNextRegistration) {
+          this._resetWatchCycle();
+        }
         const previousRecord: IOperationRecord | undefined = this._operations.get(payload.operationId);
         if (previousRecord) {
           break;
@@ -211,7 +216,11 @@ export class PlaintextReporter implements IReporter {
       }
       case 'watchCycleCompleted': {
         const succeeded: boolean = (event.payload as { succeeded?: boolean }).succeeded === true;
-        this._writeLine(`Watch cycle ${succeeded ? 'succeeded' : 'failed'}`);
+        this._writeLine(
+          `Watch cycle ${succeeded ? 'succeeded' : 'failed'} ` +
+            `(${this._completed}/${this._total} operations, ${this._failed} failed)`
+        );
+        this._resetCycleOnNextRegistration = true;
         break;
       }
       case 'commandResult': {
@@ -432,6 +441,17 @@ export class PlaintextReporter implements IReporter {
       /* Best-effort cleanup. */
     }
     this._spoolDirectory = undefined;
+  }
+
+  private _resetWatchCycle(): void {
+    for (const record of this._operations.values()) {
+      this._deleteSpool(record);
+    }
+    this._operations.clear();
+    this._total = 0;
+    this._completed = 0;
+    this._failed = 0;
+    this._resetCycleOnNextRegistration = false;
   }
 
   private _onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {
