@@ -49,11 +49,11 @@ export interface IOperationStreamEmitterOptions {
  *
  * @remarks
  * The operation scheduler uses this to publish operation registration, status
- * transitions, raw output chunks, and the aggregate command result. Output
- * chunks are emitted immediately in call order and are never collated, so the
- * concise reporter can derive activity without buffering, the detailed and file
- * reporters can own grouping, and problem matchers can consume the same
- * uncollated source stream.
+ * transitions, raw output chunks, stream close, operation completion, and the
+ * aggregate command result. Output chunks are emitted immediately in call order
+ * and are never collated, so the concise reporter can derive activity without
+ * buffering, the detailed and file reporters can own grouping, and problem
+ * matchers can consume the same uncollated source stream.
  *
  * @beta
  */
@@ -71,8 +71,7 @@ export class OperationStreamEmitter {
     this._source = options.source;
     this._scope = options.scope;
     this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
-    const maxChunkBytes: number =
-      options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
+    const maxChunkBytes: number = options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
     if (
       !Number.isInteger(maxChunkBytes) ||
       maxChunkBytes < 4 ||
@@ -88,10 +87,20 @@ export class OperationStreamEmitter {
   /**
    * Emits an operation registration event.
    */
-  public registerOperation(operationId: string, projectName?: string, phaseName?: string): string {
+  public registerOperation(
+    operationId: string,
+    projectName?: string,
+    phaseName?: string,
+    silent?: boolean
+  ): string {
     return this._emit(
       'operationRegistered',
-      { operationId, projectName, phaseName },
+      {
+        operationId,
+        projectName,
+        phaseName,
+        ...(silent === undefined ? {} : { silent })
+      },
       { operationId, projectName, phaseName },
       'public'
     );
@@ -100,10 +109,20 @@ export class OperationStreamEmitter {
   /**
    * Emits an operation status transition.
    */
-  public changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string {
+  public changeStatus(
+    operationId: string,
+    status: OperationStatus,
+    durationMs?: number,
+    previousStatus?: OperationStatus
+  ): string {
     return this._emit(
       'operationStatusChanged',
-      { operationId, status, durationMs },
+      {
+        operationId,
+        status,
+        ...(previousStatus === undefined ? {} : { previousStatus }),
+        ...(durationMs === undefined ? {} : { durationMs })
+      },
       { operationId },
       'public'
     );
@@ -147,6 +166,25 @@ export class OperationStreamEmitter {
   }
 
   /**
+   * Emits the authoritative signal that no more output will be emitted for an operation.
+   */
+  public closeOperationStream(operationId: string): string {
+    return this._emit('operationStreamClosed', { operationId }, { operationId }, 'public');
+  }
+
+  /**
+   * Emits the final outcome of an operation.
+   */
+  public completeOperation(operationId: string, status: OperationStatus, durationMs?: number): string {
+    return this._emit(
+      'operationCompleted',
+      { operationId, status, ...(durationMs === undefined ? {} : { durationMs }) },
+      { operationId },
+      'public'
+    );
+  }
+
+  /**
    * Emits the aggregate command result.
    */
   public completeCommand(
@@ -164,7 +202,13 @@ export class OperationStreamEmitter {
   }
 
   private _emit(
-    type: 'operationRegistered' | 'operationStatusChanged' | 'externalOutput' | 'commandResult',
+    type:
+      | 'operationRegistered'
+      | 'operationStatusChanged'
+      | 'operationStreamClosed'
+      | 'operationCompleted'
+      | 'externalOutput'
+      | 'commandResult',
     payload: unknown,
     scopeOverride: IReporterEventScope,
     privacy: 'public' | 'local-sensitive' | 'secret'
