@@ -1018,6 +1018,8 @@ export interface IRushSessionOptions {
 export interface IRushSessionReporterOptions {
     readonly eventSink: IReporterEventSink;
     // @internal
+    readonly flushAsync?: () => Promise<void>;
+    // @internal
     readonly operationStreamEnabled?: boolean;
     readonly sessionId: string;
 }
