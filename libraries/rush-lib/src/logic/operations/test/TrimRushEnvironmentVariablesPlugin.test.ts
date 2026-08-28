@@ -83,7 +83,7 @@ describe(TrimRushEnvironmentVariablesPlugin.name, () => {
     const initialEnvironment: IEnvironment = {
       ...process.env,
       RUSH_TEMP_FOLDER: 'some-temp-folder',
-      Rush_Some_Mixed_Case_Var: 'should also be trimmed',
+      rush_someMixedCaseVar: 'should also be trimmed',
       RUSHSTACK_FILE_ERROR_BASE_FOLDER: 'should be preserved',
       PATH: process.env.PATH,
       SOME_OTHER_VAR: 'should be preserved'
@@ -92,7 +92,7 @@ describe(TrimRushEnvironmentVariablesPlugin.name, () => {
     const env: IEnvironment = graphHooks.createEnvironmentForOperation.call(initialEnvironment, mockRecord);
 
     expect(env.RUSH_TEMP_FOLDER).toBeUndefined();
-    expect(env.Rush_Some_Mixed_Case_Var).toBeUndefined();
+    expect(env.rush_someMixedCaseVar).toBeUndefined();
     expect(env.RUSHSTACK_FILE_ERROR_BASE_FOLDER).toBe('should be preserved');
     expect(env.SOME_OTHER_VAR).toBe('should be preserved');
   });
