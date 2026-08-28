@@ -26,12 +26,12 @@ import {
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import {
+  type IRequestLease,
   RequestExclusivityClass,
   RequestScheduler,
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
-import type { IRequestLease } from './RequestScheduler';
 import {
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler,
@@ -50,24 +50,52 @@ interface IDualEmitOperationGraph extends IOperationGraph {
 }
 
 interface IResolvedSelection {
+  readonly activeOperations: ReadonlyArray<Operation>;
   readonly enabledOperations: ReadonlyArray<Operation>;
   readonly ignoreDependencyOperations: ReadonlyArray<Operation>;
 }
 
 interface IGraphRoutingState {
-  readonly graphExecutionScheduler: RequestScheduler;
+  readonly coordinator: PhasedRequestBatchCoordinator;
   readonly multiplexer: PhasedRequestEventMultiplexer;
 }
 
+interface IPreparedPhasedRequest {
+  readonly client: IPhasedRequestClient;
+  readonly exclusivityClass: RequestExclusivityClass;
+  readonly interactiveSession: IInteractiveRequestSession | undefined;
+  readonly request: IDaemonPhasedRequest;
+  readonly selection: IResolvedSelection;
+  readonly warningsAllowedByEnvironment: boolean;
+}
+
+interface IBatchEntry extends IPreparedPhasedRequest {
+  abortListener: (() => void) | undefined;
+  abortRequested: boolean;
+  completed: boolean;
+  executionStarted: boolean;
+  outputError: unknown;
+  participated: boolean;
+  reject: (error: unknown) => void;
+  requestSink: PhasedRequestEventSink | undefined;
+  resolve: (result: IDaemonPhasedRequestResult) => void;
+  unsubscribe: (() => void) | undefined;
+}
+
 const ROUTING_STATE_BY_GRAPH: WeakMap<IOperationGraph, IGraphRoutingState> = new WeakMap();
+const OBSERVED_STATUS_OVERRIDES_RETAINED: ReadonlySet<OperationStatus> = new Set([
+  OperationStatus.Aborted,
+  OperationStatus.Blocked,
+  OperationStatus.Skipped
+]);
 
 /**
  * Routes one caller-resolved phased request through a real warm workspace operation graph.
  *
  * @remarks
- * Command parsing, plugin loading, and graph construction remain integration-owned. Requests are serialized because
- * shared-build selection merging is a later layer. Cancellation aborts only the current iteration and never closes
- * the daemon-owned graph or its runners.
+ * Command parsing, plugin loading, and graph construction remain integration-owned. Compatible shared-build requests
+ * admitted before an iteration starts are merged into one graph execution. Cancellation never closes the daemon-owned
+ * graph or its runners.
  *
  * @beta
  */
@@ -98,7 +126,11 @@ export class PhasedRequestRouter {
       throw new DaemonRequiresInProcessError(policy);
     }
     const graph: IDualEmitOperationGraph = getDualEmitGraph(this.#workspaceSession);
-    const routingState: IGraphRoutingState = getGraphRoutingState(graph);
+    const routingState: IGraphRoutingState = getGraphRoutingState(graph, this.#workspaceSession);
+    const exclusivityClass: RequestExclusivityClass = classifyRushCommand({
+      commandName: request.commandName,
+      commandOrigin: request.commandOrigin
+    });
     let admissionController: RequestAdmissionController | undefined;
     let admissionLease: IRequestLease;
     try {
@@ -109,10 +141,7 @@ export class PhasedRequestRouter {
       });
       admissionLease = await admissionController.acquireAsync(
         getWorkspaceRequestScheduler(this.#workspaceSession),
-        classifyRushCommand({
-          commandName: request.commandName,
-          commandOrigin: request.commandOrigin
-        })
+        exclusivityClass
       );
     } catch (error) {
       admissionController?.dispose();
@@ -120,164 +149,431 @@ export class PhasedRequestRouter {
     }
 
     try {
-      let graphLease: IRequestLease;
-      try {
-        graphLease = await admissionController.acquireAsync(
-          routingState.graphExecutionScheduler,
-          RequestExclusivityClass.Exclusive
-        );
-      } catch (error) {
-        return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
-      }
       let inputAttachment: Disposable | undefined;
       try {
         inputAttachment = attachInteractiveInput(request, client, interactiveSession);
         try {
-          return await this.#executeAdmittedAsync(
-            request,
-            client,
-            graph,
-            routingState,
-            interactiveSession
+          validateEngineShape(request.engineShape, this.#workspaceSession.engineShape);
+          const operationById: ReadonlyMap<string, Operation> = indexOperations(graph.operations);
+          const selection: IResolvedSelection = resolveSelection(request.operationSelection, operationById);
+          let warningsAllowedByEnvironment: boolean;
+          try {
+            warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
+          } catch (error) {
+            const cleanupErrors: unknown[] = [];
+            await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
+            const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
+              aborted: client.abortSignal.aborted,
+              error: combineErrors(error, cleanupErrors),
+              graphStatus: graph.status,
+              operationOutcomes: [],
+              requestId: request.requestId,
+              scheduled: false,
+              warningsAllowedByEnvironment: false
+            });
+            await client.writeResultAsync(result);
+            return result;
+          }
+          if (client.abortSignal.aborted) {
+            return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
+          }
+          return await routingState.coordinator.enqueueAsync(
+            {
+              client,
+              exclusivityClass,
+              interactiveSession,
+              request,
+              selection,
+              warningsAllowedByEnvironment
+            },
+            admissionController
           );
         } catch (error) {
+          if (error instanceof RequestSchedulerError) {
+            return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
+          }
           return await finishAfterRoutingErrorAsync(interactiveSession, error);
         }
       } finally {
         inputAttachment?.[Symbol.dispose]();
-        graphLease.release();
       }
     } finally {
       admissionLease.release();
       admissionController.dispose();
     }
   }
+}
 
-  async #executeAdmittedAsync(
-    request: IDaemonPhasedRequest,
-    client: IPhasedRequestClient,
+class PhasedRequestBatchCoordinator {
+  readonly #graph: IDualEmitOperationGraph;
+  readonly #graphExecutionScheduler: RequestScheduler;
+  readonly #multiplexer: PhasedRequestEventMultiplexer;
+  readonly #pending: IBatchEntry[] = [];
+  readonly #workspaceSession: IWorkspaceSession;
+  readonly #abortErrors: unknown[] = [];
+  #abortTail: Promise<void> = Promise.resolve();
+  #acceptingCurrentBatch: boolean = false;
+  #currentBatch: ReadonlyArray<IBatchEntry> | undefined;
+  #drainScheduled: boolean = false;
+  #nextGraphLeasePromise: Promise<IRequestLease> | undefined;
+  #running: boolean = false;
+
+  public constructor(
     graph: IDualEmitOperationGraph,
-    routingState: IGraphRoutingState,
-    interactiveSession: IInteractiveRequestSession | undefined
+    graphExecutionScheduler: RequestScheduler,
+    multiplexer: PhasedRequestEventMultiplexer,
+    workspaceSession: IWorkspaceSession
+  ) {
+    this.#graph = graph;
+    this.#graphExecutionScheduler = graphExecutionScheduler;
+    this.#multiplexer = multiplexer;
+    this.#workspaceSession = workspaceSession;
+  }
+
+  public async enqueueAsync(
+    request: IPreparedPhasedRequest,
+    admissionController: RequestAdmissionController
   ): Promise<IDaemonPhasedRequestResult> {
-    validateEngineShape(request.engineShape, this.#workspaceSession.engineShape);
-    const operationById: ReadonlyMap<string, Operation> = indexOperations(graph.operations);
-    const selection: IResolvedSelection = resolveSelection(request.operationSelection, operationById);
-    let warningsAllowedByEnvironment: boolean;
-    try {
-      warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
-    } catch (error) {
-      const cleanupErrors: unknown[] = [];
-      await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
-      const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
-        aborted: client.abortSignal.aborted,
-        error: combineErrors(error, cleanupErrors),
-        graphStatus: graph.status,
-        operationOutcomes: [],
-        requestId: request.requestId,
-        scheduled: false,
-        warningsAllowedByEnvironment: false
-      });
-      await client.writeResultAsync(result);
-      return result;
+    if (!this.#canJoinCurrentBatch(request)) {
+      const graphExclusivityClass: RequestExclusivityClass =
+        request.exclusivityClass === RequestExclusivityClass.SharedBuild
+          ? RequestExclusivityClass.SharedBuild
+          : RequestExclusivityClass.Exclusive;
+      const graphWaitLease: IRequestLease = await admissionController.acquireAsync(
+        this.#graphExecutionScheduler,
+        graphExclusivityClass
+      );
+      graphWaitLease.release();
     }
-
-    if (client.abortSignal.aborted) {
-      return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
-    }
-    if (graph.hasScheduledIteration || graph.status === OperationStatus.Executing) {
-      throw new Error('The warm workspace operation graph is not idle.');
-    }
-    await this.#workspaceSession.reconcileInvalidationsAsync();
-    if (client.abortSignal.aborted) {
-      return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
-    }
-
-    applySelection(graph, selection);
-    const activeOperations: ReadonlyArray<Operation> = Array.from(graph.operations).filter(
-      (operation: Operation) => operation.enabled !== false
-    );
-    const activeOperationIds: ReadonlySet<string> = new Set(
-      activeOperations.map((operation: Operation) => operation.name)
-    );
-
-    let abortTail: Promise<void> = Promise.resolve();
-    const abortErrors: unknown[] = [];
-    let wasAborted: boolean = false;
-    const abortIteration = (): void => {
-      wasAborted = true;
-      abortTail = abortTail
-        .then(() => graph.abortCurrentIterationAsync())
-        .catch((error: unknown) => {
-          abortErrors.push(error);
-        });
-    };
-    const previousPauseNextIteration: boolean = graph.pauseNextIteration;
-    const requestSink: PhasedRequestEventSink = new PhasedRequestEventSink({
-      activeOperationIds,
-      client,
-      getNextSequence: () => client.getNextEventSequence(),
-      onWriteFailure: abortIteration,
-      rushVersion: this.#workspaceSession.metadata.rushVersion
+    return new Promise<IDaemonPhasedRequestResult>((resolve, reject) => {
+      const entry: IBatchEntry = {
+        ...request,
+        abortListener: undefined,
+        abortRequested: false,
+        completed: false,
+        executionStarted: false,
+        outputError: undefined,
+        participated: false,
+        reject,
+        requestSink: undefined,
+        resolve,
+        unsubscribe: undefined
+      };
+      entry.abortListener = () => this.#deactivateEntry(entry, true);
+      request.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
+      this.#pending.push(entry);
+      this.#scheduleDrain();
     });
-    const unsubscribe: () => void = routingState.multiplexer.subscribe(requestSink);
-    setPauseNextIteration(graph, true);
-    client.abortSignal.addEventListener('abort', abortIteration, { once: true });
+  }
 
-    let scheduled: boolean = false;
-    let executionError: unknown;
-    const iterationCleanupErrors: unknown[] = [];
+  #scheduleDrain(): void {
+    if (this.#running || this.#drainScheduled) {
+      return;
+    }
+    this.#drainScheduled = true;
+    this.#nextGraphLeasePromise = this.#graphExecutionScheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    setImmediate(() => {
+      this.#drainScheduled = false;
+      void this.#drainAsync();
+    });
+  }
+
+  async #drainAsync(): Promise<void> {
+    if (this.#running) {
+      return;
+    }
+    this.#running = true;
     try {
-      scheduled = await graph.scheduleIterationAsync({
-        inputsSnapshot: this.#workspaceSession.inputsSnapshot
-      });
-      if (scheduled) {
-        const executionPromise: Promise<boolean> = graph.executeScheduledIterationAsync();
-        if (wasAborted || client.abortSignal.aborted) {
-          await Promise.resolve();
-          abortIteration();
-        }
-        await executionPromise;
+      if (this.#pending.length === 0) {
+        const unusedGraphLeasePromise: Promise<IRequestLease> | undefined =
+          this.#nextGraphLeasePromise;
+        this.#nextGraphLeasePromise = undefined;
+        (await unusedGraphLeasePromise)?.release();
+        return;
       }
-    } catch (error) {
-      executionError = error;
-      if (graph.hasScheduledIteration) {
+      while (this.#pending.length > 0) {
+        const first: IBatchEntry = this.#pending.shift()!;
+        const batch: IBatchEntry[] = [first];
+        if (first.exclusivityClass === RequestExclusivityClass.SharedBuild) {
+          this.#takeCompatiblePending(batch);
+        }
+        this.#currentBatch = batch;
+        this.#acceptingCurrentBatch =
+          first.exclusivityClass === RequestExclusivityClass.SharedBuild;
+        for (const entry of batch) {
+          entry.executionStarted = true;
+        }
         try {
-          const failedExecutionPromise: Promise<boolean> = graph.executeScheduledIterationAsync();
-          await Promise.resolve();
-          abortIteration();
-          await failedExecutionPromise;
-        } catch (cleanupError) {
-          iterationCleanupErrors.push(cleanupError);
+          await this.#executeBatchAsync(batch);
+        } catch (error) {
+          await Promise.all(batch.map((entry: IBatchEntry) => this.#rejectEntryAsync(entry, error)));
+        } finally {
+          this.#acceptingCurrentBatch = false;
+          this.#currentBatch = undefined;
         }
+      }
+    } finally {
+      this.#running = false;
+      if (this.#pending.length > 0) {
+        this.#scheduleDrain();
+      }
+    }
+  }
+
+  #canJoinCurrentBatch(request: IPreparedPhasedRequest): boolean {
+    if (request.exclusivityClass !== RequestExclusivityClass.SharedBuild) {
+      return false;
+    }
+    if (!this.#running) {
+      return true;
+    }
+    return (
+      this.#acceptingCurrentBatch &&
+      this.#currentBatch?.[0]?.exclusivityClass === RequestExclusivityClass.SharedBuild
+    );
+  }
+
+  #takeCompatiblePending(batch: IBatchEntry[]): void {
+    for (let index: number = 0; index < this.#pending.length; ) {
+      const entry: IBatchEntry = this.#pending[index];
+      if (entry.exclusivityClass === RequestExclusivityClass.SharedBuild) {
+        this.#pending.splice(index, 1);
+        entry.executionStarted = true;
+        batch.push(entry);
+      } else {
+        index++;
+      }
+    }
+  }
+
+  async #executeBatchAsync(batch: IBatchEntry[]): Promise<void> {
+    const graphLeasePromise: Promise<IRequestLease> =
+      this.#nextGraphLeasePromise ??
+      this.#graphExecutionScheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive
+      });
+    this.#nextGraphLeasePromise = undefined;
+    const graphLease: IRequestLease = await graphLeasePromise;
+    try {
+      if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
+        throw new Error('The warm workspace operation graph is not idle.');
+      }
+      await this.#workspaceSession.reconcileInvalidationsAsync();
+
+      if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
+        this.#takeCompatiblePending(batch);
+      }
+      this.#acceptingCurrentBatch = false;
+      const participants: IBatchEntry[] = batch.filter((entry: IBatchEntry) =>
+        this.#isEntryLive(entry)
+      );
+      if (participants.length === 0) {
+        await Promise.all(
+          batch.map((entry: IBatchEntry) => this.#finishEntryAsync(entry, false, undefined))
+        );
+        return;
+      }
+
+      applySelections(
+        this.#graph,
+        participants.map((entry: IBatchEntry) => entry.selection)
+      );
+      for (const entry of participants) {
+        entry.participated = true;
+        const activeOperationIds: ReadonlySet<string> = new Set(
+          entry.selection.activeOperations.map((operation: Operation) => operation.name)
+        );
+        entry.requestSink = new PhasedRequestEventSink({
+          activeOperationIds,
+          client: entry.client,
+          getNextSequence: () => entry.client.getNextEventSequence(),
+          onWriteFailure: (error: Error) => this.#deactivateEntry(entry, false, error),
+          rushVersion: this.#workspaceSession.metadata.rushVersion
+        });
+        entry.unsubscribe = this.#multiplexer.subscribe(entry.requestSink);
+      }
+
+      const previousPauseNextIteration: boolean = this.#graph.pauseNextIteration;
+      setPauseNextIteration(this.#graph, true);
+      let scheduled: boolean = false;
+      let executionError: unknown;
+      const iterationCleanupErrors: unknown[] = [];
+      try {
+        scheduled = await this.#graph.scheduleIterationAsync({
+          inputsSnapshot: this.#workspaceSession.inputsSnapshot
+        });
+        if (scheduled) {
+          await Promise.all(
+            participants.map(async (entry: IBatchEntry) => {
+              try {
+                await entry.requestSink?.flushAsync();
+              } catch {
+                // The sink already recorded the write error and deactivated this client.
+              }
+            })
+          );
+          const executionPromise: Promise<boolean> = this.#graph.executeScheduledIterationAsync();
+          if (!participants.some((entry: IBatchEntry) => this.#isEntryLive(entry))) {
+            // Let executeScheduledIterationAsync promote the scheduled iteration before aborting it.
+            await Promise.resolve();
+            this.#requestIterationAbort();
+            await this.#abortTail;
+          }
+          await executionPromise;
+        }
+      } catch (error) {
+        executionError = error;
+        if (this.#graph.hasScheduledIteration) {
+          try {
+            const failedExecutionPromise: Promise<boolean> =
+              this.#graph.executeScheduledIterationAsync();
+            await Promise.resolve();
+            this.#requestIterationAbort();
+            await this.#abortTail;
+            await failedExecutionPromise;
+          } catch (cleanupError) {
+            iterationCleanupErrors.push(cleanupError);
+          }
+        }
+      } finally {
+        for (const entry of participants) {
+          entry.unsubscribe?.();
+          entry.unsubscribe = undefined;
+        }
+        setPauseNextIteration(this.#graph, previousPauseNextIteration);
+      }
+
+      await this.#abortTail;
+      iterationCleanupErrors.push(...this.#abortErrors.splice(0));
+      await Promise.all(
+        batch.map((entry: IBatchEntry) =>
+          this.#finishEntryAsync(entry, scheduled, executionError, iterationCleanupErrors)
+        )
+      );
+    } finally {
+      graphLease.release();
+    }
+  }
+
+  #deactivateEntry(entry: IBatchEntry, aborted: boolean, outputError?: Error): void {
+    if (entry.completed) {
+      return;
+    }
+    if (aborted) {
+      entry.abortRequested = true;
+    } else {
+      entry.outputError ??= outputError ?? new Error('The phased request client output failed.');
+    }
+    entry.unsubscribe?.();
+    entry.unsubscribe = undefined;
+
+    if (!entry.executionStarted) {
+      const pendingIndex: number = this.#pending.indexOf(entry);
+      if (pendingIndex >= 0) {
+        this.#pending.splice(pendingIndex, 1);
+        void this.#finishEntryAsync(entry, false, undefined).catch((error: unknown) => {
+          this.#completeEntry(entry);
+          entry.reject(error);
+        });
+        return;
       }
     }
 
-    await abortTail;
-    unsubscribe();
-    setPauseNextIteration(graph, previousPauseNextIteration);
-    client.abortSignal.removeEventListener('abort', abortIteration);
-    const cleanupErrors: unknown[] = [...iterationCleanupErrors, ...abortErrors];
-    const observedAbortErrorCount: number = abortErrors.length;
-    try {
-      await requestSink.flushAsync();
-    } catch (error) {
-      cleanupErrors.push(error);
+    if (
+      entry.executionStarted &&
+      this.#currentBatch &&
+      (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) &&
+      !this.#currentBatch.some((candidate: IBatchEntry) => this.#isEntryLive(candidate))
+    ) {
+      this.#requestIterationAbort();
     }
-    await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);
-    await abortTail;
-    cleanupErrors.push(...abortErrors.slice(observedAbortErrorCount));
+  }
+
+  #isEntryLive(entry: IBatchEntry): boolean {
+    return !entry.abortRequested && !entry.client.abortSignal.aborted && entry.outputError === undefined;
+  }
+
+  #requestIterationAbort(): void {
+    const abortPromise: Promise<void> = this.#graph.abortCurrentIterationAsync();
+    this.#abortTail = Promise.all([this.#abortTail, abortPromise])
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        this.#abortErrors.push(error);
+      });
+  }
+
+  async #finishEntryAsync(
+    entry: IBatchEntry,
+    batchScheduled: boolean,
+    executionError: unknown,
+    batchCleanupErrors: ReadonlyArray<unknown> = []
+  ): Promise<void> {
+    if (entry.completed) {
+      return;
+    }
+    const cleanupErrors: unknown[] = [...batchCleanupErrors];
+    if (entry.requestSink) {
+      try {
+        await entry.requestSink.flushAsync();
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    }
+    await collectInteractiveCleanupErrorAsync(entry.interactiveSession, cleanupErrors);
+    const aborted: boolean = entry.abortRequested || entry.client.abortSignal.aborted;
+    const operationOutcomes: ReadonlyArray<IPhasedOperationOutcome> = entry.requestSink
+      ? collectOperationOutcomes(
+          entry.selection.activeOperations,
+          this.#graph,
+          entry.requestSink,
+          aborted && entry.participated
+        )
+      : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
-      aborted: wasAborted || client.abortSignal.aborted,
+      aborted,
       error: combineErrors(executionError, cleanupErrors),
-      graphStatus: graph.status,
-      operationOutcomes: collectOperationOutcomes(activeOperations, graph, requestSink),
-      requestId: request.requestId,
-      scheduled,
-      warningsAllowedByEnvironment
+      graphStatus: getClientGraphStatus(aborted, operationOutcomes),
+      operationOutcomes,
+      requestId: entry.request.requestId,
+      scheduled: entry.participated && batchScheduled,
+      warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
     });
-    await client.writeResultAsync(result);
-    return result;
+    try {
+      await entry.client.writeResultAsync(result);
+      this.#completeEntry(entry);
+      entry.resolve(result);
+    } catch (error) {
+      this.#completeEntry(entry);
+      entry.reject(error);
+    }
+  }
+
+  async #rejectEntryAsync(entry: IBatchEntry, error: unknown): Promise<void> {
+    if (entry.completed) {
+      return;
+    }
+    entry.unsubscribe?.();
+    entry.unsubscribe = undefined;
+    const cleanupErrors: unknown[] = [];
+    if (entry.requestSink) {
+      try {
+        await entry.requestSink.flushAsync();
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
+    }
+    this.#completeEntry(entry);
+    entry.reject(combineErrors(error, cleanupErrors));
+  }
+
+  #completeEntry(entry: IBatchEntry): void {
+    entry.completed = true;
+    if (entry.abortListener) {
+      entry.client.abortSignal.removeEventListener('abort', entry.abortListener);
+      entry.abortListener = undefined;
+    }
   }
 }
 
@@ -307,14 +603,26 @@ function setPauseNextIteration(graph: IOperationGraph, pauseNextIteration: boole
   graph.pauseNextIteration = pauseNextIteration;
 }
 
-function getGraphRoutingState(graph: IDualEmitOperationGraph): IGraphRoutingState {
+function getGraphRoutingState(
+  graph: IDualEmitOperationGraph,
+  workspaceSession: IWorkspaceSession
+): IGraphRoutingState {
   let state: IGraphRoutingState | undefined = ROUTING_STATE_BY_GRAPH.get(graph);
   if (!state) {
     const multiplexer: PhasedRequestEventMultiplexer = new PhasedRequestEventMultiplexer(
       getGraphEventSink(graph)
     );
+    graph.hooks.onIterationScheduled.tap('rushd request event multiplexer', (records) => {
+      multiplexer.onIterationScheduled(records.values());
+    });
+    const graphExecutionScheduler: RequestScheduler = new RequestScheduler();
     state = {
-      graphExecutionScheduler: new RequestScheduler(),
+      coordinator: new PhasedRequestBatchCoordinator(
+        graph,
+        graphExecutionScheduler,
+        multiplexer,
+        workspaceSession
+      ),
       multiplexer
     };
     ROUTING_STATE_BY_GRAPH.set(graph, state);
@@ -417,7 +725,11 @@ function resolveSelection(
     }
     addSelectedOperation(selection.enabledState, operation, enabledOperations, ignoreDependencyOperations);
   }
-  return { enabledOperations, ignoreDependencyOperations };
+  return {
+    activeOperations: collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
+    enabledOperations,
+    ignoreDependencyOperations
+  };
 }
 
 function addSelectedOperation(
@@ -435,16 +747,53 @@ function addSelectedOperation(
   }
 }
 
-function applySelection(graph: IOperationGraph, selection: IResolvedSelection): void {
-  graph.setEnabledStates(graph.operations, false, 'unsafe');
-  graph.setEnabledStates(
-    selection.ignoreDependencyOperations,
-    'ignore-dependency-changes',
-    'safe'
+function collectSelectionClosure(
+  enabledOperations: ReadonlyArray<Operation>,
+  ignoreDependencyOperations: ReadonlyArray<Operation>
+): ReadonlyArray<Operation> {
+  const activeOperations: Set<Operation> = new Set([
+    ...enabledOperations,
+    ...ignoreDependencyOperations
+  ]);
+  for (const operation of activeOperations) {
+    for (const dependency of operation.dependencies) {
+      activeOperations.add(dependency);
+    }
+  }
+  return Array.from(activeOperations);
+}
+
+function applySelections(
+  graph: IOperationGraph,
+  selections: ReadonlyArray<IResolvedSelection>
+): void {
+  const enabledOperations: ReadonlyArray<Operation> = selections.flatMap(
+    (selection: IResolvedSelection) => selection.enabledOperations
   );
-  graph.setEnabledStates(selection.enabledOperations, true, 'safe');
+  const ignoreDependencyOperations: ReadonlyArray<Operation> = selections.flatMap(
+    (selection: IResolvedSelection) => selection.ignoreDependencyOperations
+  );
+  const enabledClosureBySelection: ReadonlyArray<ReadonlySet<Operation>> = selections.map(
+    (selection: IResolvedSelection) =>
+      new Set(collectSelectionClosure(selection.enabledOperations, []))
+  );
+  const effectiveIgnoreDependencyOperations: Operation[] = [];
+  selections.forEach((selection: IResolvedSelection, selectionIndex: number) => {
+    for (const operation of selection.ignoreDependencyOperations) {
+      const requiredByAnotherSelection: boolean = enabledClosureBySelection.some(
+        (enabledClosure: ReadonlySet<Operation>, enabledSelectionIndex: number) =>
+          enabledSelectionIndex !== selectionIndex && enabledClosure.has(operation)
+      );
+      if (!requiredByAnotherSelection) {
+        effectiveIgnoreDependencyOperations.push(operation);
+      }
+    }
+  });
+  graph.setEnabledStates(graph.operations, false, 'unsafe');
+  graph.setEnabledStates(ignoreDependencyOperations, 'ignore-dependency-changes', 'safe');
+  graph.setEnabledStates(enabledOperations, true, 'safe');
   graph.setEnabledStates(
-    selection.ignoreDependencyOperations,
+    effectiveIgnoreDependencyOperations,
     'ignore-dependency-changes',
     'unsafe'
   );
@@ -453,20 +802,30 @@ function applySelection(graph: IOperationGraph, selection: IResolvedSelection): 
 function collectOperationOutcomes(
   activeOperations: ReadonlyArray<Operation>,
   graph: IOperationGraph,
-  requestSink: PhasedRequestEventSink
+  requestSink: PhasedRequestEventSink,
+  fillMissingAsAborted: boolean = false
 ): ReadonlyArray<IPhasedOperationOutcome> {
   const outcomes: IPhasedOperationOutcome[] = [];
   for (const operation of [...activeOperations].sort(compareOperations)) {
     const observed: ReturnType<PhasedRequestEventSink['getObservedResult']> =
       requestSink.getObservedResult(operation);
     const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
-    const status: string | undefined = observed?.status ?? retained?.status;
+    let status: string | undefined;
+    let errorMessage: string | undefined;
+    if (
+      observed !== undefined &&
+      (retained === undefined || OBSERVED_STATUS_OVERRIDES_RETAINED.has(observed.status))
+    ) {
+      status = observed.status;
+      errorMessage = observed.executionResult.error?.message;
+    } else {
+      status = retained?.status ?? observed?.status;
+      errorMessage = retained?.error?.message ?? observed?.executionResult.error?.message;
+    }
+    status ??= fillMissingAsAborted ? OperationStatus.Aborted : undefined;
     if (status === undefined) {
       continue;
     }
-    const errorMessage: string | undefined = observed
-      ? observed.executionResult.error?.message
-      : retained?.error?.message;
     outcomes.push({
       observedInCurrentIteration: observed !== undefined,
       result: { operationId: operation.name, status, errorMessage },
@@ -478,6 +837,38 @@ function collectOperationOutcomes(
 
 function compareOperations(left: Operation, right: Operation): number {
   return left.name.localeCompare(right.name);
+}
+
+function getClientGraphStatus(
+  aborted: boolean,
+  operationOutcomes: ReadonlyArray<IPhasedOperationOutcome>
+): OperationStatus {
+  if (
+    operationOutcomes.some(
+      ({ result }: IPhasedOperationOutcome) =>
+        result.status === OperationStatus.Failure || result.status === OperationStatus.Blocked
+    )
+  ) {
+    return OperationStatus.Failure;
+  }
+  if (aborted) {
+    return OperationStatus.Aborted;
+  }
+  if (
+    operationOutcomes.some(
+      ({ result }: IPhasedOperationOutcome) => result.status === OperationStatus.Aborted
+    )
+  ) {
+    return OperationStatus.Aborted;
+  }
+  if (
+    operationOutcomes.some(
+      ({ result }: IPhasedOperationOutcome) => result.status === OperationStatus.SuccessWithWarning
+    )
+  ) {
+    return OperationStatus.SuccessWithWarning;
+  }
+  return OperationStatus.Success;
 }
 
 async function writeAbortedResultAsync(

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Merge compatible shared-build requests into one warm operation-graph iteration.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "mojazayeri@users.noreply.github.com"
+}
