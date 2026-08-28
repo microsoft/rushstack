@@ -132,7 +132,8 @@ export interface IReporterEventEnvelope<TPayload = unknown> {
   readonly privacy: ReporterPrivacyClassification;
 
   /**
-   * Whether this event is correctness-critical and must never be dropped.
+   * Whether an older same-major consumer must reject the stream if it does not
+   * recognize this event. Event types added in a minor version are optional.
    */
   readonly required: boolean;
 

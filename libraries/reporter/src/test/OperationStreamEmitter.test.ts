@@ -89,6 +89,8 @@ describe('OperationStreamEmitter', () => {
     });
     // externalOutput is protected (never coalesced/dropped); the manager derives `required`.
     expect(isReporterEventRequired('externalOutput')).toBe(true);
+    expect(isReporterEventRequired('operationStreamClosed')).toBe(false);
+    expect(isReporterEventRequired('operationCompleted')).toBe(false);
   });
 
   it('records silent metadata and orders close before completion', () => {
