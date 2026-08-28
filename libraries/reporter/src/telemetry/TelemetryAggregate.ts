@@ -67,7 +67,7 @@ export interface ITelemetryAggregate {
   readonly protocolVersion?: IReporterProtocolVersion;
 
   /**
-   * The distinct `packageName@packageVersion` producers observed, sorted.
+   * The distinct `packageName@packageVersion` producers observed on public envelopes, sorted.
    */
   readonly producerVersions: readonly string[];
 }

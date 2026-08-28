@@ -110,6 +110,131 @@ describe('TelemetrySubscriber', () => {
     }
   });
 
+  it('does not collect producer identities from local-sensitive or secret extension events', async () => {
+    const LOCAL_PRIVATE_SOURCE: IReporterEventSource = {
+      packageName: '@private/local-reporter-plugin',
+      packageVersion: '1.2.3-private'
+    };
+    const SECRET_PRIVATE_SOURCE: IReporterEventSource = {
+      packageName: '@private/secret-reporter-plugin',
+      packageVersion: '4.5.6-secret'
+    };
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.emit({
+      ...rawInput('extension', { name: 'private.local.event', privateField: 'local-private-value' }),
+      source: LOCAL_PRIVATE_SOURCE,
+      privacy: 'local-sensitive'
+    });
+    manager.emit({
+      ...rawInput('extension', { name: 'private.secret.event', secretField: 'secret-private-value' }),
+      source: SECRET_PRIVATE_SOURCE,
+      privacy: 'secret'
+    });
+    await manager.flushAsync();
+
+    const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
+    const serialized: string = JSON.stringify(aggregate);
+    expect(aggregate.producerVersions).toEqual([]);
+    expect(aggregate.protocolVersion).toBeUndefined();
+    for (const forbidden of [
+      LOCAL_PRIVATE_SOURCE.packageName,
+      LOCAL_PRIVATE_SOURCE.packageVersion,
+      SECRET_PRIVATE_SOURCE.packageName,
+      SECRET_PRIVATE_SOURCE.packageVersion,
+      'local-private-value',
+      'secret-private-value'
+    ]) {
+      expect(serialized).not.toContain(forbidden);
+    }
+  });
+
+  it('projects only public envelopes while aggregating public producers deterministically', async () => {
+    const PUBLIC_EXTENSION_SOURCE: IReporterEventSource = {
+      packageName: '@rushstack/public-reporter-plugin',
+      packageVersion: '1.2.3'
+    };
+    const PRIVATE_FIRST_PARTY_SOURCE: IReporterEventSource = {
+      packageName: '@microsoft/internal-build-plugin',
+      packageVersion: '9.8.7-private'
+    };
+    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(createTelemetryReporter(telemetry));
+    await manager.initializeAsync();
+
+    manager.emit({
+      ...rawInput('commandResult', {
+        commandName: 'private-command',
+        succeeded: false,
+        exitCode: 97
+      }),
+      source: PRIVATE_FIRST_PARTY_SOURCE,
+      privacy: 'local-sensitive',
+      protocolVersion: { major: 7, minor: 0 }
+    });
+    manager.emit({
+      ...rawInput('extension', { name: 'public.plugin.event' }),
+      source: PUBLIC_EXTENSION_SOURCE
+    });
+    manager.emit(rawInput('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    manager.emit({
+      ...rawInput('extension', { name: 'public.plugin.event' }),
+      source: PUBLIC_EXTENSION_SOURCE
+    });
+    manager.emit(rawInput('diagnosticEmitted', { code: 'RUSH_OPERATION_FAILED', category: 'operation' }));
+    manager.emit({
+      ...rawInput('operationStatusChanged', {
+        operationId: 'private-operation',
+        status: 'failure'
+      }),
+      source: PRIVATE_FIRST_PARTY_SOURCE,
+      privacy: 'local-sensitive'
+    });
+    manager.emit({
+      ...rawInput('diagnosticEmitted', {
+        code: 'PRIVATE_INTERNAL_DIAGNOSTIC',
+        category: 'private-category'
+      }),
+      source: PRIVATE_FIRST_PARTY_SOURCE,
+      privacy: 'secret'
+    });
+    manager.emit(rawInput('operationStatusChanged', { operationId: 'public-operation', status: 'success' }));
+    manager.emit({
+      ...rawInput('extension', { name: 'private.secret.event' }),
+      source: PRIVATE_FIRST_PARTY_SOURCE,
+      privacy: 'secret',
+      protocolVersion: { major: 99, minor: 0 }
+    });
+    await manager.flushAsync();
+
+    const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
+    expect(aggregate).toMatchObject({
+      commandName: 'build',
+      result: 'succeeded',
+      exitCode: 0,
+      operationStatusCounts: { success: 1 },
+      diagnosticCodes: ['RUSH_OPERATION_FAILED'],
+      diagnosticCategoryCounts: { operation: 1 },
+      protocolVersion: { major: 1, minor: 0 },
+      producerVersions: ['@microsoft/rush-lib@5.177.2', '@rushstack/public-reporter-plugin@1.2.3']
+    });
+    const serialized: string = JSON.stringify(aggregate);
+    for (const forbidden of [
+      PRIVATE_FIRST_PARTY_SOURCE.packageName,
+      PRIVATE_FIRST_PARTY_SOURCE.packageVersion,
+      'private-command',
+      'PRIVATE_INTERNAL_DIAGNOSTIC',
+      'private-category',
+      'private-operation'
+    ]) {
+      expect(serialized).not.toContain(forbidden);
+    }
+  });
+
   it('never leaks messages, paths, arguments, remediation, raw output, or secret values', async () => {
     const SECRET: string = 'sk-super-secret-value';
     const LOG_PATH: string = '/home/user/secret/install.log';
