@@ -15,7 +15,7 @@ import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion
  */
 export const REPORTER_PROTOCOL_VERSION: IReporterProtocolVersion = {
   major: 1,
-  minor: 0
+  minor: 1
 };
 
 /**
