@@ -152,7 +152,7 @@ describe('TelemetrySubscriber', () => {
     }
   });
 
-  it('projects only public envelopes while aggregating public producers deterministically', async () => {
+  it('projects public envelopes while preserving allowlisted diagnostic fields deterministically', async () => {
     const PUBLIC_EXTENSION_SOURCE: IReporterEventSource = {
       packageName: '@rushstack/public-reporter-plugin',
       packageVersion: '1.2.3'
@@ -196,8 +196,11 @@ describe('TelemetrySubscriber', () => {
     });
     manager.emit({
       ...rawInput('diagnosticEmitted', {
-        code: 'PRIVATE_INTERNAL_DIAGNOSTIC',
-        category: 'private-category'
+        code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+        category: 'dependency-tool',
+        parameters: {
+          token: { value: 'private-secret-value', privacy: 'secret' }
+        }
       }),
       source: PRIVATE_FIRST_PARTY_SOURCE,
       privacy: 'secret'
@@ -217,8 +220,8 @@ describe('TelemetrySubscriber', () => {
       result: 'succeeded',
       exitCode: 0,
       operationStatusCounts: { success: 1 },
-      diagnosticCodes: ['RUSH_OPERATION_FAILED'],
-      diagnosticCategoryCounts: { operation: 1 },
+      diagnosticCodes: ['RUSH_DEPENDENCY_TOOL_FAILED', 'RUSH_OPERATION_FAILED'],
+      diagnosticCategoryCounts: { operation: 1, 'dependency-tool': 1 },
       protocolVersion: { major: 1, minor: 0 },
       producerVersions: ['@microsoft/rush-lib@5.177.2', '@rushstack/public-reporter-plugin@1.2.3']
     });
@@ -227,8 +230,7 @@ describe('TelemetrySubscriber', () => {
       PRIVATE_FIRST_PARTY_SOURCE.packageName,
       PRIVATE_FIRST_PARTY_SOURCE.packageVersion,
       'private-command',
-      'PRIVATE_INTERNAL_DIAGNOSTIC',
-      'private-category',
+      'private-secret-value',
       'private-operation'
     ]) {
       expect(serialized).not.toContain(forbidden);

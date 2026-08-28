@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-reporter",
-      "comment": "Prevent local-sensitive and secret reporter events from contributing producer identities or other values to telemetry aggregates.",
+      "comment": "Prevent non-public reporter events from contributing producer identities or other non-public values to telemetry aggregates.",
       "type": "patch"
     }
   ],

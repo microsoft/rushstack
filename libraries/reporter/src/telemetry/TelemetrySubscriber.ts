@@ -13,9 +13,10 @@ import type { ITelemetryAggregate, TelemetryResult } from './TelemetryAggregate'
  * @remarks
  * The subscriber runs before reporter filtering, so it observes every event. It
  * projects envelope metadata and lifecycle values only from public events. From
- * a local-sensitive diagnostic it may keep the explicitly public code and
- * category, but never parameters, remediation, or templates. It ignores secret
- * events, messages, raw external output, and command arguments entirely.
+ * a diagnostic it keeps the explicitly public code and category regardless of
+ * the envelope privacy floor, but never parameters, remediation, or templates.
+ * It ignores all other values from non-public events, messages, raw external
+ * output, and command arguments entirely.
  *
  * @beta
  */
@@ -56,20 +57,18 @@ export class TelemetrySubscriber {
     }
 
     if (event.type === 'diagnosticEmitted') {
-      if (event.privacy !== 'secret') {
-        // Code and category are public schema fields even when classified
-        // parameters make the diagnostic envelope local-sensitive.
-        const payload: { code?: string; category?: string } = event.payload as {
-          code?: string;
-          category?: string;
-        };
-        if (payload.code !== undefined) {
-          this._diagnosticCodes.add(payload.code);
-        }
-        if (payload.category !== undefined) {
-          this._diagnosticCategoryCounts[payload.category] =
-            (this._diagnosticCategoryCounts[payload.category] ?? 0) + 1;
-        }
+      // Code and category are public schema fields even when classified
+      // parameters make the diagnostic envelope non-public.
+      const payload: { code?: string; category?: string } = event.payload as {
+        code?: string;
+        category?: string;
+      };
+      if (payload.code !== undefined) {
+        this._diagnosticCodes.add(payload.code);
+      }
+      if (payload.category !== undefined) {
+        this._diagnosticCategoryCounts[payload.category] =
+          (this._diagnosticCategoryCounts[payload.category] ?? 0) + 1;
       }
       return;
     }
