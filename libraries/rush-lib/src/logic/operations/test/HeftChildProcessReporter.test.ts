@@ -72,6 +72,30 @@ describe(HeftChildProcessReporter.name, () => {
           payload: { stream: sequence === 1 ? 'stdout' : 'stderr', text: String(sequence) }
         }) + '\\n');
       }
+      fs.writeSync(eventFd, JSON.stringify({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_3',
+        sessionId: 'child-session',
+        sequence: 3,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: { packageName: '@rushstack/heft', packageVersion: '1.2.25' },
+        privacy: 'public',
+        required: true,
+        type: 'diagnosticEmitted',
+        payload: {
+          diagnosticId: 'diagnostic-1',
+          code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+          category: 'operation',
+          severity: 'error',
+          summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+          parameters: {
+            tool: { value: 'typescript', privacy: 'public' },
+            code: { value: 'TS1005', privacy: 'public' },
+            message: { value: 'semicolon expected', privacy: 'local-sensitive' }
+          },
+          source: { kind: 'file', file: 'src/index.ts', line: 4, column: 2, toolName: 'typescript' }
+        }
+      }) + '\\n');
     `;
     const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
       env: { ...process.env, ...reporter.environment },
@@ -96,33 +120,44 @@ describe(HeftChildProcessReporter.name, () => {
     expect(exitCode).toBe(0);
     expect(structuredNegotiated).toBe(true);
     expect(reporter.hasWarningOrError).toBe(true);
-    expect(envelopes.map((envelope) => envelope.sequence)).toEqual([1, 2]);
+    expect(envelopes.map((envelope) => envelope.sequence)).toEqual([1, 2, 3]);
     expect(envelopes.map((envelope) => envelope.parentSessionId)).toEqual([
+      'parent-session',
       'parent-session',
       'parent-session'
     ]);
     expect(envelopes.map((envelope) => envelope.parentRequestId)).toEqual([
       'parent-request',
+      'parent-request',
       'parent-request'
     ]);
     expect(envelopes.map((envelope) => envelope.parentOperationId)).toEqual([
+      'project#build',
       'project#build',
       'project#build'
     ]);
     expect(envelopes.map((envelope) => envelope.scope?.operationId)).toEqual([
       'project#build',
+      'project#build',
       'project#build'
     ]);
     expect(envelopes.map((envelope) => envelope.source)).toEqual([
       { packageName: '@rushstack/heft', packageVersion: 'unknown' },
+      { packageName: '@rushstack/heft', packageVersion: 'unknown' },
       { packageName: '@rushstack/heft', packageVersion: 'unknown' }
     ]);
-    expect(envelopes.map((envelope) => envelope.privacy)).toEqual(['local-sensitive', 'local-sensitive']);
+    expect(envelopes.map((envelope) => envelope.privacy)).toEqual([
+      'local-sensitive',
+      'local-sensitive',
+      'local-sensitive'
+    ]);
     expect(envelopes.map((envelope) => (envelope.payload as { iterationId?: number }).iterationId)).toEqual([
-      7, 7
+      7, 7, 7
     ]);
     expect(structuredOutputTerminalProvider.getOutput()).toBe('1');
-    expect(structuredOutputTerminalProvider.getErrorOutput()).toBe('2');
+    expect(structuredOutputTerminalProvider.getErrorOutput({ normalizeSpecialCharacters: false })).toBe(
+      '2[typescript] error (TS1005): src/index.ts:4:2 - semicolon expected\n'
+    );
     expect(eventStream?.listenerCount('data')).toBe(initialListenerCounts.eventData);
     expect(eventStream?.listenerCount('error')).toBe(initialListenerCounts.eventError);
     expect(eventStream?.listenerCount('end')).toBe(initialListenerCounts.eventEnd);

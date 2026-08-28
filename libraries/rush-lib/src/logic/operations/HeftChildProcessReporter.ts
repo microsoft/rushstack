@@ -21,6 +21,29 @@ import {
 
 import type { IOperationChildProcessReporter } from './OperationEventSink';
 
+function formatDiagnosticForOperationLog(diagnostic: IRushDiagnostic): string {
+  const toolParameter: unknown = diagnostic.parameters?.tool?.value;
+  const codeParameter: unknown = diagnostic.parameters?.code?.value;
+  const messageParameter: unknown = diagnostic.parameters?.message?.value;
+  const toolName: string =
+    typeof toolParameter === 'string' ? toolParameter : (diagnostic.source?.toolName ?? '@rushstack/heft');
+  const code: string = typeof codeParameter === 'string' && codeParameter ? ` (${codeParameter})` : '';
+  const message: string =
+    typeof messageParameter === 'string' && messageParameter ? messageParameter : diagnostic.code;
+  let location: string = '';
+  if (diagnostic.source?.kind === 'file') {
+    location = diagnostic.source.file;
+    if (diagnostic.source.line !== undefined) {
+      location += `:${diagnostic.source.line}`;
+      if (diagnostic.source.column !== undefined) {
+        location += `:${diagnostic.source.column}`;
+      }
+    }
+    location += ' - ';
+  }
+  return `[${toolName}] ${diagnostic.severity}${code}: ${location}${message}\n`;
+}
+
 /**
  * An acknowledgement transport failure that must not change the child process result.
  *
@@ -165,8 +188,12 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
       const forwardEnvelope = (envelope: IReporterEventEnvelope<unknown>): void => {
         let forwardedEnvelope: IReporterEventEnvelope<unknown> = envelope;
         if (envelope.type === 'diagnosticEmitted') {
-          const payload: { severity?: unknown } = envelope.payload as { severity?: unknown };
+          const payload: IRushDiagnostic = envelope.payload as IRushDiagnostic;
           this._hasWarningOrError ||= payload.severity === 'warning' || payload.severity === 'error';
+          structuredOutputTerminalProvider.write(
+            formatDiagnosticForOperationLog(payload),
+            payload.severity === 'warning' ? TerminalProviderSeverity.warning : TerminalProviderSeverity.error
+          );
           if (typeof envelope.payload === 'object' && envelope.payload !== null) {
             forwardedEnvelope = {
               ...envelope,
