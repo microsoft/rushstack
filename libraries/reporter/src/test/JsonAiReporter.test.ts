@@ -57,21 +57,36 @@ describe('JsonReporter', () => {
     let output: string = '';
     const reporter: JsonReporter = new JsonReporter({
       write: (text: string) => (output += text),
-      maxRecordBytes: 512
+      maxRecordBytes: 768
     });
-    reporter.report(ev('externalOutput', { stream: 'stdout', text: 'x'.repeat(1000) }));
+    reporter.report({
+      ...ev(
+        'externalOutput',
+        { stream: 'stdout', text: 'x'.repeat(1000) },
+        { operationId: 'operation-a', projectName: '@example/project' }
+      ),
+      sessionId: 'child-session',
+      parentSessionId: 'parent-session',
+      parentOperationId: 'parent-operation',
+      sourceSequence: 3
+    });
 
     const records: Record<string, unknown>[] = parseLines(output);
     expect(records).toHaveLength(1);
     expect((records[0].payload as { name: string }).name).toBe('rush.reporter.record-too-large');
     expect(records[0]).toMatchObject({
       timestamp: '2026-01-01T00:00:00.000Z',
+      sessionId: 'child-session',
+      parentSessionId: 'parent-session',
+      parentOperationId: 'parent-operation',
+      sourceSequence: 3,
       source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
+      scope: { operationId: 'operation-a', projectName: '@example/project' },
       privacy: 'public',
       required: true,
       type: 'extension'
     });
-    expect(Buffer.byteLength(output.trim(), 'utf8')).toBeLessThanOrEqual(512);
+    expect(Buffer.byteLength(output.trim(), 'utf8')).toBeLessThanOrEqual(768);
   });
 
   it('does not expose a secret diagnostic value in an oversized redacted record', () => {
@@ -88,17 +103,68 @@ describe('JsonReporter', () => {
           detail: { value: 'x'.repeat(1000), privacy: 'public' }
         }
       }),
+      source: {
+        packageName: '@private/oversized-reporter',
+        packageVersion: '1.0.0',
+        component: 'OversizedPrivateComponent'
+      },
+      scope: {
+        operationId: 'oversized-private-operation',
+        projectName: '@private/oversized-project'
+      },
       privacy: 'local-sensitive'
     });
 
     expect(output).not.toContain('qualification-fake-secret-token');
+    expect(output).not.toContain('@private/oversized-reporter');
+    expect(output).not.toContain('OversizedPrivateComponent');
+    expect(output).not.toContain('oversized-private-operation');
+    expect(output).not.toContain('@private/oversized-project');
+    expect(parseLines(output)[0]).toMatchObject({
+      source: {
+        packageName: '[private-producer]',
+        packageVersion: '[private-version]'
+      },
+      privacy: 'local-sensitive',
+      payload: {
+        name: 'rush.reporter.record-too-large'
+      }
+    });
+    expect(parseLines(output)[0].scope).toBeUndefined();
+  });
+
+  it('redacts local-sensitive message text from JSON stdout without dropping envelope metadata', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
+    reporter.report({
+      ...ev(
+        'messageEmitted',
+        {
+          severity: 'error',
+          text: 'qualification-local-sensitive-message'
+        },
+        {
+          operationId: 'operation-a',
+          projectName: '@example/project'
+        }
+      ),
+      privacy: 'local-sensitive'
+    });
+
+    expect(output).not.toContain('qualification-local-sensitive-message');
     expect(parseLines(output)[0]).toMatchObject({
       source: {
         packageName: '@microsoft/rush-lib',
         packageVersion: '5.177.2'
       },
+      scope: {
+        operationId: 'operation-a',
+        projectName: '@example/project'
+      },
+      privacy: 'local-sensitive',
       payload: {
-        name: 'rush.reporter.record-too-large'
+        severity: 'error',
+        text: '[local-sensitive]'
       }
     });
   });
@@ -231,6 +297,46 @@ describe('AiReporter', () => {
         summary: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
       })
     ]);
+  });
+
+  it('counts non-public fallback errors without exposing their message text', () => {
+    const { final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      {
+        ...ev('messageEmitted', {
+          severity: 'error',
+          text: 'qualification-local-sensitive-message'
+        }),
+        privacy: 'local-sensitive'
+      },
+      {
+        ...ev('messageEmitted', {
+          severity: 'error',
+          text: 'qualification-secret-message'
+        }),
+        privacy: 'secret'
+      },
+      ev('artifactAvailable', {
+        role: 'log',
+        path: '/protected/rush.log',
+        format: 'plaintext',
+        complete: true
+      }),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCodes).toEqual(['RUSH_COMMAND_FAILED']);
+    expect(final.errorCount).toBe(2);
+    expect(final.diagnosticCategoryCounts.command).toBe(2);
+    expect(final.diagnostics).toEqual([]);
+    expect(final.truncated).toBe(true);
+    expect(final.log).toEqual({
+      path: '/protected/rush.log',
+      format: 'plaintext',
+      complete: true
+    });
+    expect(JSON.stringify(final)).not.toContain('qualification-local-sensitive-message');
+    expect(JSON.stringify(final)).not.toContain('qualification-secret-message');
   });
 
   it('counts fallback errors even when detailed diagnostics are disabled', async () => {

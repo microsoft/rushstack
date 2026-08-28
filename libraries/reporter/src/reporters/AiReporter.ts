@@ -308,7 +308,7 @@ export class AiReporter implements IReporter {
           severity?: string;
           text?: string;
         };
-        if (event.privacy !== 'secret' && payload.severity === 'error' && payload.text) {
+        if (payload.severity === 'error' && payload.text) {
           this._fallbackErrorCount++;
           if (
             event.privacy === 'public' &&

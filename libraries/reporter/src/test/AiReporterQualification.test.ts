@@ -26,12 +26,15 @@ describe('AI reporter deterministic qualification corpus', () => {
       throw new Error(formatAiReporterQualificationFailures(qualification));
     }
     expect(qualification.schemaVersion).toBe('1.0');
-    expect(qualification.cases).toHaveLength(12);
-    expect(qualification.cases.filter(({ expectedResult }) => expectedResult === 'failed')).toHaveLength(10);
+    expect(qualification.cases).toHaveLength(13);
+    expect(qualification.cases.filter(({ expectedResult }) => expectedResult === 'failed')).toHaveLength(11);
     expect(qualification.cases.every(({ failures }) => failures.length === 0)).toBe(true);
     const serialized: string = JSON.stringify(qualification);
     expect(serialized).not.toContain('rush-ai-reporter-qualification-');
     expect(serialized).not.toContain('qualification-fake-secret-token');
+    expect(serialized).not.toContain('qualification-local-sensitive-fallback-message');
+    expect(serialized).not.toContain('qualification-oversized-local-sensitive-value');
+    expect(serialized).not.toContain('@private/oversized-qualification-fixture');
     expect(serialized).not.toContain('@private/example-rush-plugin');
   });
 
@@ -78,7 +81,7 @@ describe('AI reporter deterministic qualification corpus', () => {
 
     expect(failed.passed).toBe(false);
     expect(formatAiReporterQualificationFailures(failed)).toContain(
-      'actionability: actual=90.00, required=>= 100%; cases=bootstrap-unsupported-node'
+      'actionability: actual=90.91, required=>= 100%; cases=bootstrap-unsupported-node'
     );
   });
 

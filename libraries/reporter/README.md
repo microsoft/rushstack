@@ -28,6 +28,10 @@ reporter selection. That decision also requires the separate telemetry privacy p
 The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
 authoritative.
 
+AI fallback message text is emitted only for public envelopes. Non-public fallback errors remain countable
+and refer to the protected full-detail log. JSON oversized-record markers preserve the original privacy
+classification and omit non-public source and scope metadata.
+
 ## Links
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out

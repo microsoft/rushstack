@@ -11,6 +11,7 @@ import type { ReporterPrivacyClassification } from '../events/ReporterPrivacyCla
 import type { IAiDiagnostic, IAiFinalRecord } from '../reporters/AiReporter';
 import { AiReporter } from '../reporters/AiReporter';
 import { FileReporter, type IFileReporterArtifact } from '../reporters/FileReporter';
+import { JsonReporter } from '../reporters/JsonReporter';
 import { LegacyReporter } from '../reporters/LegacyReporter';
 import { PlaintextReporter } from '../reporters/PlaintextReporter';
 import {
@@ -28,6 +29,11 @@ const CLASSIFIED_SECRET_PRODUCER: string = '@secret/qualification-fixture';
 const CLASSIFIED_SECRET_COMPONENT: string = 'SecretQualificationFixture';
 const PRIVATE_PRODUCER: string = '@private/example-rush-plugin';
 const PRIVATE_COMPONENT: string = 'PrivatePluginImplementation';
+const LOCAL_SENSITIVE_FALLBACK_MESSAGE: string = 'qualification-local-sensitive-fallback-message';
+const OVERSIZED_LOCAL_SENSITIVE_VALUE: string = 'qualification-oversized-local-sensitive-value';
+const OVERSIZED_LOCAL_SENSITIVE_PRODUCER: string = '@private/oversized-qualification-fixture';
+const OVERSIZED_LOCAL_SENSITIVE_COMPONENT: string = 'OversizedPrivateQualificationFixture';
+const OVERSIZED_LOCAL_SENSITIVE_SCOPE: string = '@private/oversized-qualification-project';
 
 function createExternalOutput(lines: readonly string[], repetitions: number): string {
   const output: string[] = [];
@@ -64,6 +70,10 @@ interface ICorpusCase {
   readonly expectedResult: 'succeeded' | 'failed';
   readonly diagnostic?: ICorpusDiagnostic;
   readonly externalOutput?: string;
+  readonly fallbackMessages?: readonly {
+    readonly text: string;
+    readonly privacy: ReporterPrivacyClassification;
+  }[];
   readonly operationStatus?: 'success' | 'failure' | 'aborted' | 'fromCache';
   readonly warningOnly?: boolean;
 }
@@ -349,6 +359,21 @@ const CORPUS: readonly ICorpusCase[] = [
     }
   },
   {
+    name: 'fallback-mixed-privacy',
+    scenario: 'legacy parser errors include public and local-sensitive fallback messages',
+    expectedResult: 'failed',
+    fallbackMessages: [
+      {
+        text: 'The requested command could not be parsed.',
+        privacy: 'public'
+      },
+      {
+        text: LOCAL_SENSITIVE_FALLBACK_MESSAGE,
+        privacy: 'local-sensitive'
+      }
+    ]
+  },
+  {
     name: 'success-no-warning',
     scenario: 'a successful operation emits no warnings',
     expectedResult: 'succeeded',
@@ -532,6 +557,19 @@ function createEvents(testCase: ICorpusCase, logPath: string): IReporterEventEnv
       }
     );
   }
+  for (const message of testCase.fallbackMessages ?? []) {
+    add(
+      'messageEmitted',
+      {
+        severity: 'error',
+        text: message.text
+      },
+      {
+        privacy: message.privacy,
+        scope: { commandName: 'build' }
+      }
+    );
+  }
   if (testCase.expectedResult === 'failed') {
     add(
       'diagnosticEmitted',
@@ -550,6 +588,23 @@ function createEvents(testCase: ICorpusCase, logPath: string): IReporterEventEnv
       { scope: { commandName: 'build' } }
     );
   }
+  add(
+    'extension',
+    {
+      name: 'qualification.oversized-local-sensitive',
+      payload: OVERSIZED_LOCAL_SENSITIVE_VALUE.repeat(128)
+    },
+    {
+      privacy: 'local-sensitive',
+      sourcePackage: OVERSIZED_LOCAL_SENSITIVE_PRODUCER,
+      sourceComponent: OVERSIZED_LOCAL_SENSITIVE_COMPONENT,
+      scope: {
+        commandName: 'build',
+        operationId: 'oversized-local-sensitive-operation',
+        projectName: OVERSIZED_LOCAL_SENSITIVE_SCOPE
+      }
+    }
+  );
   add(
     'extension',
     { name: 'private.fixture.secret', payload: { token: CLASSIFIED_SECRET } },
@@ -588,6 +643,7 @@ async function runCaseAsync(
   tempRoot: string
 ): Promise<ICaseRun> {
   let aiOutput: string = '';
+  let jsonOutput: string = '';
   let plaintextOutput: string = '';
   let legacyOutput: string = '';
   const fileReporter: FileReporter = new FileReporter({
@@ -597,6 +653,10 @@ async function runCaseAsync(
     nowMs: () => FIXED_TIME_MS
   });
   const aiReporter: AiReporter = new AiReporter({ write: (text: string) => (aiOutput += text) });
+  const jsonReporter: JsonReporter = new JsonReporter({
+    write: (text: string) => (jsonOutput += text),
+    maxRecordBytes: 1024
+  });
   const plaintextReporter: PlaintextReporter = new PlaintextReporter({
     write: (text: string) => (plaintextOutput += text),
     variant: 'detailed',
@@ -614,11 +674,13 @@ async function runCaseAsync(
   for (const event of events) {
     fileReporter.report(event);
     aiReporter.report(event);
+    jsonReporter.report(event);
     plaintextReporter.report(event);
     legacyReporter.report(event);
   }
   await fileReporter.closeAsync();
   await aiReporter.closeAsync();
+  await jsonReporter.closeAsync();
   await plaintextReporter.closeAsync();
   await legacyReporter.closeAsync();
 
@@ -637,6 +699,10 @@ async function runCaseAsync(
     readonly records: readonly Record<string, unknown>[];
     readonly valid: boolean;
   } = parseAiOutput(aiOutput);
+  const parsedJson: {
+    readonly records: readonly Record<string, unknown>[];
+    readonly valid: boolean;
+  } = parseAiOutput(jsonOutput);
   const final: IAiFinalRecord | undefined = parsedAi.records.at(-1) as IAiFinalRecord | undefined;
   const diagnostic: ICorpusDiagnostic | undefined = testCase.diagnostic;
   const matchingDiagnostic: IAiDiagnostic | undefined = diagnostic
@@ -651,21 +717,41 @@ async function runCaseAsync(
         return matchingDiagnostic?.context?.[name] === expectedValue;
       })
     : true;
+  const fallbackMessages: readonly {
+    readonly text: string;
+    readonly privacy: ReporterPrivacyClassification;
+  }[] = testCase.fallbackMessages ?? [];
+  const publicFallbackMessages: readonly string[] = fallbackMessages
+    .filter(({ privacy }) => privacy === 'public')
+    .map(({ text }) => text);
   const actionable: boolean =
     testCase.expectedResult === 'succeeded'
       ? true
-      : Boolean(
-          final?.result === 'failed' &&
-            diagnostic &&
-            final.errorCodes.includes(diagnostic.code) &&
-            matchingDiagnostic?.category === diagnostic.category &&
-            matchingDiagnostic.summaryKey === diagnostic.summaryKey &&
-            expectedContextKeys.every((key) => actualContextKeys.includes(key)) &&
-            contextValuesMatch &&
-            matchingDiagnostic.remediation?.some(({ command, documentationUrl }) =>
-              Boolean(command || documentationUrl)
-            )
-        );
+      : diagnostic
+        ? Boolean(
+            final?.result === 'failed' &&
+              final.errorCodes.includes(diagnostic.code) &&
+              matchingDiagnostic?.category === diagnostic.category &&
+              matchingDiagnostic.summaryKey === diagnostic.summaryKey &&
+              expectedContextKeys.every((key) => actualContextKeys.includes(key)) &&
+              contextValuesMatch &&
+              matchingDiagnostic.remediation?.some(({ command, documentationUrl }) =>
+                Boolean(command || documentationUrl)
+              )
+          )
+        : Boolean(
+            fallbackMessages.length > 0 &&
+              final?.result === 'failed' &&
+              final.errorCodes.includes('RUSH_COMMAND_FAILED') &&
+              final.errorCount === fallbackMessages.length &&
+              final.diagnosticCategoryCounts.command === fallbackMessages.length &&
+              final.diagnostics.length === publicFallbackMessages.length &&
+              final.diagnostics.every(
+                ({ category, severity, summary }, index) =>
+                  category === 'command' && severity === 'error' && summary === publicFallbackMessages[index]
+              ) &&
+              final.truncated
+          );
 
   const artifact: IFileReporterArtifact = fileReporter.getArtifact();
   const aiLogPath: string | undefined = final?.log?.path;
@@ -677,12 +763,13 @@ async function runCaseAsync(
     (logExists && aiLogPath !== undefined && (await fs.promises.stat(aiLogPath)).mode % 0o1000 === 0o600);
   const failureCorrelated: boolean =
     testCase.expectedResult === 'succeeded' ||
-    Boolean(
-      diagnostic &&
-        logContent.includes(diagnostic.code) &&
+    (diagnostic
+      ? logContent.includes(diagnostic.code) &&
         logContent.includes(`${testCase.name}-diagnostic`) &&
         logContent.includes(`${testCase.name}-session`)
-    );
+      : fallbackMessages.length > 0 &&
+        fallbackMessages.every(({ text }) => logContent.includes(text)) &&
+        logContent.includes(`${testCase.name}-session`));
   const localSensitiveProducerPreserved: boolean =
     diagnostic?.sourcePackage === undefined ||
     (logContent.includes(diagnostic.sourcePackage) &&
@@ -703,16 +790,45 @@ async function runCaseAsync(
       logContent.includes('"type":"sessionCompleted"') &&
       (testCase.externalOutput === undefined || logContent.includes(testCase.externalOutput.trim())) &&
       failureCorrelated &&
-      localSensitiveProducerPreserved
+      localSensitiveProducerPreserved &&
+      logContent.includes(OVERSIZED_LOCAL_SENSITIVE_VALUE) &&
+      logContent.includes(OVERSIZED_LOCAL_SENSITIVE_PRODUCER) &&
+      logContent.includes(OVERSIZED_LOCAL_SENSITIVE_COMPONENT) &&
+      logContent.includes(OVERSIZED_LOCAL_SENSITIVE_SCOPE)
   );
-  const machinePresentedOutput: string = `${aiOutput}\n${plaintextOutput}\n${legacyOutput}`;
-  const allLocalOutput: string = `${machinePresentedOutput}\n${logContent}`;
+  const oversizedMarker: Record<string, unknown> | undefined = parsedJson.records.find(
+    ({ payload }) =>
+      (
+        payload as
+          | { readonly name?: string; readonly payload?: { readonly originalType?: string } }
+          | undefined
+      )?.name === 'rush.reporter.record-too-large' &&
+      (payload as { readonly payload?: { readonly originalType?: string } }).payload?.originalType ===
+        'extension'
+  );
+  const oversizedMarkerValid: boolean =
+    oversizedMarker?.privacy === 'local-sensitive' &&
+    oversizedMarker.scope === undefined &&
+    (oversizedMarker.source as { readonly packageName?: string; readonly packageVersion?: string })
+      ?.packageName === '[private-producer]' &&
+    (oversizedMarker.source as { readonly packageName?: string; readonly packageVersion?: string })
+      ?.packageVersion === '[private-version]';
+  const machinePresentedOutput: string = `${aiOutput}\n${jsonOutput}`;
+  const humanPresentedOutput: string = `${plaintextOutput}\n${legacyOutput}`;
+  const allLocalOutput: string = `${machinePresentedOutput}\n${humanPresentedOutput}\n${logContent}`;
   const privacySafe: boolean =
     !allLocalOutput.includes(CLASSIFIED_SECRET) &&
     !allLocalOutput.includes(CLASSIFIED_SECRET_PRODUCER) &&
     !allLocalOutput.includes(CLASSIFIED_SECRET_COMPONENT) &&
-    !machinePresentedOutput.includes(PRIVATE_PRODUCER) &&
-    !machinePresentedOutput.includes(PRIVATE_COMPONENT);
+    !machinePresentedOutput.includes(LOCAL_SENSITIVE_FALLBACK_MESSAGE) &&
+    !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_VALUE) &&
+    !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_PRODUCER) &&
+    !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_COMPONENT) &&
+    !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_SCOPE) &&
+    !aiOutput.includes(PRIVATE_PRODUCER) &&
+    !aiOutput.includes(PRIVATE_COMPONENT) &&
+    !humanPresentedOutput.includes(PRIVATE_PRODUCER) &&
+    !humanPresentedOutput.includes(PRIVATE_COMPONENT);
   const warningContractValid: boolean =
     testCase.expectedResult === 'failed'
       ? final?.warningCount === 1 && final.diagnostics.every(({ severity }) => severity === 'error')
@@ -723,7 +839,9 @@ async function runCaseAsync(
   if (!actionable) failures.push('missing stable code/category/context/remediation');
   if (!privacySafe) failures.push('classified secret or private producer identity leaked');
   if (!fullLogValid) failures.push('full log path, permissions, completeness, or correlation invalid');
-  if (!parsedAi.valid) failures.push('AI stdout was not payload-only NDJSON');
+  if (!parsedAi.valid || !parsedJson.valid || !oversizedMarkerValid) {
+    failures.push('machine stdout or oversized-record marker contract regressed');
+  }
   if (!warningContractValid) failures.push('warning suppression/detail contract regressed');
 
   return {
@@ -740,7 +858,7 @@ async function runCaseAsync(
       actionable,
       privacySafe,
       fullLogValid,
-      stdoutContractValid: parsedAi.valid,
+      stdoutContractValid: parsedAi.valid && parsedJson.valid && oversizedMarkerValid,
       warningContractValid,
       failures
     }
