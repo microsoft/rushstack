@@ -375,6 +375,122 @@ describe(HeftChildProcessReporter.name, () => {
     expect(rejectionCount).toBe(1);
   });
 
+  it('does not forward records after a preclosed acknowledgement stream rejects negotiation', async () => {
+    const envelopes: IReporterEventEnvelope<unknown>[] = [];
+    const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+      parentSessionId: 'parent-session',
+      parentRequestId: 'parent-request',
+      parentOperationId: 'project#build',
+      iterationId: 7,
+      context: CONTEXT,
+      ingestForeignEnvelope: (envelope) => {
+        envelopes.push(envelope);
+        return envelope.eventId;
+      },
+      onDiagnostic: () => undefined,
+      onStructuredNegotiated: () => undefined
+    });
+    const eventStream: PassThrough = new PassThrough();
+    const acknowledgementStream: PassThrough = new PassThrough();
+    acknowledgementStream.destroy();
+    const child = {
+      stdio: [null, null, null, eventStream, acknowledgementStream]
+    } as unknown as childProcess.ChildProcess;
+    const provider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    const attachPromise: Promise<void> = reporter.attachAsync(child, provider);
+
+    eventStream.end(
+      [
+        {
+          kind: 'hello',
+          protocolVersion: { major: 1, minor: 2 },
+          producerVersion: '@rushstack/heft 1.2.25',
+          capabilities: ['heft-child-events-v1'],
+          requiredFeatures: []
+        },
+        {
+          protocolVersion: { major: 1, minor: 2 },
+          eventId: 'child_1',
+          sessionId: 'child-session',
+          sequence: 1,
+          timestamp: '2026-01-01T00:00:00.000Z',
+          source: { packageName: '@rushstack/heft', packageVersion: '1.2.25' },
+          privacy: 'local-sensitive',
+          required: false,
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'must not forward' }
+        }
+      ]
+        .map((record) => JSON.stringify(record))
+        .join('\n') + '\n'
+    );
+
+    await expect(attachPromise).rejects.toBeInstanceOf(HeftChildReporterNonFatalError);
+    expect(envelopes).toEqual([]);
+    expect(provider.getOutput()).toBe('');
+  });
+
+  it('does not replace a fatal forwarding failure with an acknowledgement warning', async () => {
+    const diagnostics: IRushDiagnostic[] = [];
+    const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+      parentSessionId: 'parent-session',
+      parentRequestId: 'parent-request',
+      parentOperationId: 'project#build',
+      iterationId: 7,
+      context: CONTEXT,
+      ingestForeignEnvelope: () => {
+        throw new Error('foreign envelope rejected');
+      },
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+      onStructuredNegotiated: () => undefined
+    });
+    const eventStream: PassThrough = new PassThrough();
+    const acknowledgementStream: Writable = new Writable({
+      write(
+        chunk: Buffer | string,
+        encoding: BufferEncoding,
+        callback: (error?: Error | null) => void
+      ): void {
+        void chunk;
+        void encoding;
+        setImmediate(callback);
+      }
+    });
+    const child = {
+      stdio: [null, null, null, eventStream, acknowledgementStream]
+    } as unknown as childProcess.ChildProcess;
+    const attachPromise: Promise<void> = reporter.attachAsync(child, new StringBufferTerminalProvider());
+
+    eventStream.end(
+      [
+        {
+          kind: 'hello',
+          protocolVersion: { major: 1, minor: 2 },
+          producerVersion: '@rushstack/heft 1.2.25',
+          capabilities: ['heft-child-events-v1'],
+          requiredFeatures: []
+        },
+        {
+          protocolVersion: { major: 1, minor: 2 },
+          eventId: 'child_1',
+          sessionId: 'child-session',
+          sequence: 1,
+          timestamp: '2026-01-01T00:00:00.000Z',
+          source: { packageName: '@rushstack/heft', packageVersion: '1.2.25' },
+          privacy: 'local-sensitive',
+          required: false,
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'trigger forwarding failure' }
+        }
+      ]
+        .map((record) => JSON.stringify(record))
+        .join('\n') + '\n'
+    );
+
+    await expect(attachPromise).rejects.toThrow('foreign envelope rejected');
+    expect(diagnostics).toEqual([]);
+  });
+
   it('rejects stream callback failures without an uncaught process error', async () => {
     const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
       parentSessionId: 'parent-session',

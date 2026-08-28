@@ -7,6 +7,7 @@ import type { Readable, Writable } from 'node:stream';
 import { type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 import {
   allocateChildDescriptor,
+  createRushDiagnostic,
   encodeNdjsonRecord,
   HeftDescriptorHost,
   REPORTER_PROTOCOL_VERSION,
@@ -19,6 +20,18 @@ import {
 } from '@rushstack/rush-reporter';
 
 import type { IOperationChildProcessReporter } from './OperationEventSink';
+
+/**
+ * An acknowledgement transport failure that must not change the child process result.
+ *
+ * @internal
+ */
+export class HeftChildReporterNonFatalError extends Error {
+  public constructor(message: string) {
+    super(message);
+    this.name = HeftChildReporterNonFatalError.name;
+  }
+}
 
 export interface IHeftChildProcessReporterOptions {
   readonly parentSessionId: string;
@@ -120,12 +133,26 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           complete();
         }
       };
-      function onAcknowledgementError(error: Error): void {
-        fail(new Error(`The Heft reporter acknowledgement failed: ${error.message}`));
+      function onAcknowledgementError(error: Error): HeftChildReporterNonFatalError {
+        const transportError: HeftChildReporterNonFatalError = new HeftChildReporterNonFatalError(
+          `The Heft reporter acknowledgement failed: ${error.message}`
+        );
+        if (!settled) {
+          emitDiagnostic(
+            createRushDiagnostic('RUSH_PROTOCOL_INVALID_CHILD_STREAM', {
+              severity: 'warning',
+              parameters: {
+                reason: { value: transportError.message, privacy: 'public' }
+              }
+            })
+          );
+          fail(transportError);
+        }
+        return transportError;
       }
       function onAcknowledgementClose(): void {
-        if (acknowledgementStarted && !acknowledgementCompleted) {
-          fail(new Error('The Heft reporter acknowledgement closed before it was delivered.'));
+        if (!settled && acknowledgementStarted && !acknowledgementCompleted) {
+          onAcknowledgementError(new Error('The acknowledgement stream closed before it was delivered.'));
         }
         reporterAckStream.off('error', onAcknowledgementError);
       }
@@ -195,7 +222,9 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
             }
             acknowledgementStarted = true;
             if (reporterAckStream.destroyed) {
-              throw new Error('The Heft reporter acknowledgement stream closed before negotiation.');
+              throw onAcknowledgementError(
+                new Error('The acknowledgement stream closed before negotiation.')
+              );
             }
             reporterAckStream.end(encodeNdjsonRecord(ack), (error?: Error | null) => {
               if (error) {

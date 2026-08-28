@@ -16,6 +16,8 @@ import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { Utilities } from '../../../utilities/Utilities';
 import type { IOperationRunnerContext } from '../IOperationRunner';
+import type { IOperationChildProcessReporter } from '../OperationEventSink';
+import { HeftChildReporterNonFatalError } from '../HeftChildProcessReporter';
 import { OperationStatus } from '../OperationStatus';
 import { ShellOperationRunner, convertSlashesForWindows, isHeftCommand } from '../ShellOperationRunner';
 
@@ -107,6 +109,69 @@ describe(convertSlashesForWindows.name, () => {
       try {
         await expect(runner.executeAsync(context)).resolves.toBe(OperationStatus.Success);
         expect(createChildProcessReporter).not.toHaveBeenCalled();
+      } finally {
+        executeSpy.mockRestore();
+      }
+    });
+
+    it('does not fail a successful Heft operation for a nonfatal acknowledgement error', async () => {
+      if (process.platform === 'win32') {
+        return;
+      }
+      const stdout: PassThrough = new PassThrough();
+      const stderr: PassThrough = new PassThrough();
+      const child: childProcess.ChildProcess = Object.assign(new EventEmitter(), {
+        stdout,
+        stderr,
+        stdio: []
+      }) as unknown as childProcess.ChildProcess;
+      const executeSpy = jest.spyOn(Utilities, 'executeLifecycleCommandAsync').mockImplementation(() => {
+        queueMicrotask(() => {
+          stdout.end();
+          stderr.end();
+          child.emit('close', 0, null);
+        });
+        return child;
+      });
+      const childReporter: IOperationChildProcessReporter = {
+        environment: {},
+        hasWarningOrError: false,
+        stdio: ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'],
+        attachAsync: async () => {
+          throw new HeftChildReporterNonFatalError('acknowledgement failed');
+        }
+      };
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+      const context = {
+        environment: undefined,
+        error: undefined,
+        createChildProcessReporter: () => childReporter,
+        async runWithTerminalAsync<T>(
+          callback: (
+            terminal: ITerminal,
+            operationTerminalProvider: ITerminalProvider,
+            structuredChildOutputTerminalProvider: ITerminalProvider
+          ) => Promise<T>
+        ): Promise<T> {
+          return await callback(new Terminal(terminalProvider), terminalProvider, terminalProvider);
+        }
+      } as unknown as IOperationRunnerContext;
+      const runner: ShellOperationRunner = new ShellOperationRunner({
+        phase: { allowWarningsOnSuccess: false } as IPhase,
+        rushProject: {
+          projectFolder: process.cwd(),
+          rushConfiguration: { commonTempFolder: process.cwd() }
+        } as RushConfigurationProject,
+        displayName: 'nonfatal reporter error',
+        initialCommand: 'heft build',
+        incrementalCommand: undefined,
+        commandForHash: 'heft build',
+        ignoredParameterValues: []
+      });
+
+      try {
+        await expect(runner.executeAsync(context)).resolves.toBe(OperationStatus.Success);
+        expect(context.error).toBeUndefined();
       } finally {
         executeSpy.mockRestore();
       }

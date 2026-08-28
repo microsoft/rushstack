@@ -14,6 +14,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
 import type { IOperationChildProcessReporter } from './OperationEventSink';
+import { HeftChildReporterNonFatalError } from './HeftChildProcessReporter';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
@@ -165,17 +166,17 @@ export class ShellOperationRunner implements IOperationRunner {
           void
         ] = await Promise.all([closePromise, reporterDrainPromise]);
 
-        if (reporterError) {
-          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
-          context.error = new OperationError('error', reporterError.message);
-          return OperationStatus.Failure;
-        } else if (signal) {
+        if (signal) {
           // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
           context.error = new OperationError('error', `Terminated by signal: ${signal}`);
           return OperationStatus.Failure;
         } else if (exitCode !== 0) {
           // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
           context.error = new OperationError('error', `Returned error code: ${exitCode}`);
+          return OperationStatus.Failure;
+        } else if (reporterError && !(reporterError instanceof HeftChildReporterNonFatalError)) {
+          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+          context.error = new OperationError('error', reporterError.message);
           return OperationStatus.Failure;
         } else if (hasWarningOrError || childProcessReporter?.hasWarningOrError) {
           return OperationStatus.SuccessWithWarning;
