@@ -239,7 +239,7 @@ export class DefaultInteractiveReporter implements IReporter {
       case 'activityChanged': {
         const payload: { kind?: string; text?: string } = event.payload as { kind?: string; text?: string };
         if (payload.text !== undefined) {
-          this._latestActivity = payload.text;
+          this._latestActivity = this._toSingleLine(payload.text);
         }
         break;
       }
@@ -249,7 +249,7 @@ export class DefaultInteractiveReporter implements IReporter {
           text?: string;
         };
         if (payload.text !== undefined) {
-          this._latestActivity = payload.text;
+          this._latestActivity = this._toSingleLine(payload.text);
           if (
             event.scope?.operationId === undefined &&
             (payload.severity === 'error' || payload.severity === 'warning')
@@ -283,6 +283,14 @@ export class DefaultInteractiveReporter implements IReporter {
       default:
         break;
     }
+  }
+
+  private _toSingleLine(text: string): string {
+    const lines: string[] = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return lines.at(-1) ?? '';
   }
 
   private _snapshot(): ILiveRegionState {

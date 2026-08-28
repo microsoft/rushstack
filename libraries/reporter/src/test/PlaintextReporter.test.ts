@@ -101,6 +101,25 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('Building \nproject-a');
   });
 
+  it('treats duplicate active registration as idempotent', () => {
+    const capture: ICapture = makeDetailed();
+    const registration: IReporterEventEnvelope<unknown> = ev('operationRegistered', {
+      operationId: 'op1',
+      projectName: 'project-a',
+      phaseName: 'build'
+    });
+    capture.reporter.report(ev('commandStarted', { commandName: 'build' }));
+    capture.reporter.report(registration);
+    capture.reporter.report(ev('externalOutput', { text: 'first\n' }, { operationId: 'op1' }));
+    capture.reporter.report(registration);
+    capture.reporter.report(ev('externalOutput', { text: 'second\n' }, { operationId: 'op1' }));
+    capture.reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
+    capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+
+    expect(capture.getOutput()).toContain('first\nsecond\nproject-a: success');
+    expect(capture.getOutput()).toContain('rush build succeeded (1/1 operations');
+  });
+
   it('streams large grouped output from disk without retaining it in the operation record', async () => {
     const capture: ICapture = makeDetailed();
     const chunk: string = `${'x'.repeat(256 * 1024)}\n`;
