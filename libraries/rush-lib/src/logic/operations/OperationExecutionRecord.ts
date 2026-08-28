@@ -174,6 +174,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   private _stateHash: string | undefined;
   private _stateHashComponents: IOperationStateHashComponents | undefined;
   private _operationStreamClosed: boolean = false;
+  private _operationCompleted: boolean = false;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -294,6 +295,28 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       this._operationStreamClosed = true;
       this._context.eventSink?.onOperationStreamClosed?.(this);
     }
+  }
+
+  /**
+   * Emits the ordered terminal stream events exactly once.
+   *
+   * @internal
+   */
+  public finalizeOperation(): void {
+    this.closeOperationStream();
+    if (!this._operationCompleted) {
+      this._operationCompleted = true;
+      this._context.eventSink?.onOperationCompleted?.(this);
+    }
+  }
+
+  /**
+   * Whether this record has emitted its terminal completion event.
+   *
+   * @internal
+   */
+  public get isOperationCompleted(): boolean {
+    return this._operationCompleted;
   }
 
   /**
@@ -511,6 +534,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     } finally {
       if (this.isTerminal) {
         this._collatedWriter?.close();
+        this.finalizeOperation();
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }

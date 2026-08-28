@@ -799,6 +799,7 @@ export class OperationGraph implements IOperationGraph {
     this._setStatus(OperationStatus.Executing);
 
     const { hooks } = this;
+    const graph: OperationGraph = this;
 
     const { abortController, records: executionRecords, terminal, totalOperations } = iterationContext;
 
@@ -885,12 +886,14 @@ export class OperationGraph implements IOperationGraph {
             async () => await hooks.beforeExecuteIterationAsync.promise(executionRecords, iterationOptions)
           );
     } catch (error) {
+      await closeRunnersAndReportFailuresAsync(
+        [...executionRecords.values()].filter((record) => !record.shouldRunnerPersist)
+      );
       for (const record of executionRecords.values()) {
         if (!record.isTerminal) {
           record.status = OperationStatus.Aborted;
         }
-        record.closeOperationStream();
-        eventSink?.onOperationCompleted?.(record);
+        record.finalizeOperation();
         record.stdioSummarizer.close();
         record.problemCollector.close();
       }
@@ -943,21 +946,20 @@ export class OperationGraph implements IOperationGraph {
       });
     }
 
-    const recordsToClose: OperationExecutionRecord[] = [];
-    for (const record of executionRecords.values()) {
-      if (!record.shouldRunnerPersist) {
-        recordsToClose.push(record);
-      }
-    }
     function reportRunnerCleanupFailure(record: OperationExecutionRecord, error: Error): void {
       record.error = error;
       record.status = OperationStatus.Failure;
       _reportOperationErrorIfAny(record);
       state.hasAnyFailures = true;
     }
-    if (recordsToClose.length > 0) {
+    async function closeRunnersAndReportFailuresAsync(
+      recordsToClose: readonly OperationExecutionRecord[]
+    ): Promise<void> {
+      if (recordsToClose.length === 0) {
+        return;
+      }
       try {
-        await this.closeRunnersAsync(recordsToClose.map((record) => record.operation));
+        await graph.closeRunnersAsync(recordsToClose.map((record) => record.operation));
       } catch (e) {
         if (e instanceof AggregateError) {
           for (const error of e.errors) {
@@ -975,9 +977,17 @@ export class OperationGraph implements IOperationGraph {
         }
       }
     }
+    const incompleteRecordsToClose: OperationExecutionRecord[] = [];
     for (const record of executionRecords.values()) {
-      record.closeOperationStream();
-      eventSink?.onOperationCompleted?.(record);
+      if (!record.shouldRunnerPersist && !record.isOperationCompleted) {
+        incompleteRecordsToClose.push(record);
+      }
+    }
+    await closeRunnersAndReportFailuresAsync(incompleteRecordsToClose);
+    for (const record of executionRecords.values()) {
+      if (!record.isOperationCompleted) {
+        record.finalizeOperation();
+      }
       record.stdioSummarizer.close();
       record.problemCollector.close();
     }
@@ -1135,6 +1145,9 @@ export class OperationGraph implements IOperationGraph {
           _reportOperationErrorIfAny(record);
           record.error = e;
           record.status = OperationStatus.Failure;
+        }
+        if (!record.shouldRunnerPersist) {
+          await closeRunnersAndReportFailuresAsync([record]);
         }
         _onOperationComplete(record, state);
       }
