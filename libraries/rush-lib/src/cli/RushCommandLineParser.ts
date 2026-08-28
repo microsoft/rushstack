@@ -8,7 +8,6 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
-import { SUPPORTED_LOG_LEVELS, SUPPORTED_REPORTER_NAMES } from '@rushstack/rush-reporter';
 import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
@@ -85,7 +84,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private readonly _debugParameter: CommandLineFlagParameter;
   private readonly _quietParameter: CommandLineFlagParameter;
-  private readonly _verboseParameter: CommandLineFlagParameter;
   private readonly _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
@@ -124,29 +122,6 @@ export class RushCommandLineParser extends CommandLineParser {
       parameterLongName: '--quiet',
       parameterShortName: '-q',
       description: 'Hide rush startup information'
-    });
-
-    this._verboseParameter = this.defineFlagParameter({
-      parameterLongName: '--verbose',
-      description: 'Show detailed command and reporter output'
-    });
-
-    this.defineChoiceParameter({
-      parameterLongName: '--reporter',
-      alternatives: [...SUPPORTED_REPORTER_NAMES],
-      description: 'Select the Rush output reporter'
-    });
-
-    this.defineStringListParameter({
-      parameterLongName: '--output',
-      argumentName: 'DESTINATION',
-      description: 'Add a reporter output destination such as file://./rush.log'
-    });
-
-    this.defineChoiceParameter({
-      parameterLongName: '--log-level',
-      alternatives: [...SUPPORTED_LOG_LEVELS],
-      description: 'Set the reporter log level'
     });
 
     const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
@@ -226,10 +201,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
   public get isQuiet(): boolean {
     return this._quietParameter.value;
-  }
-
-  public get isVerbose(): boolean {
-    return this._verboseParameter.value;
   }
 
   public get terminal(): ITerminal {
@@ -591,16 +562,15 @@ export class RushCommandLineParser extends CommandLineParser {
       }
     };
 
-    const reporterCloseAsync: (() => Promise<void>) | undefined = this._rushOptions.reporterCloseAsync;
     const telemetryFlushAsync: Promise<void> | undefined =
       this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()
         ? this.telemetry.ensureFlushedAsync()
         : undefined;
 
-    if (reporterCloseAsync || telemetryFlushAsync) {
+    if (this._rushOptions.reporterCloseAsync || telemetryFlushAsync) {
       const pendingFlushes: Promise<unknown>[] = [];
-      if (reporterCloseAsync) {
-        pendingFlushes.push(reporterCloseAsync());
+      if (this._rushOptions.reporterCloseAsync) {
+        pendingFlushes.push(this._closeReporterAsync());
       }
       if (telemetryFlushAsync) {
         pendingFlushes.push(telemetryFlushAsync);
@@ -616,7 +586,7 @@ export class RushCommandLineParser extends CommandLineParser {
       await this._rushOptions.reporterCloseAsync?.();
     } catch (error) {
       process.exitCode = 1;
-      throw error;
+      process.stderr.write(`[reporter] Unable to finalize reporters: ${(error as Error).message}\n`);
     }
   }
 }

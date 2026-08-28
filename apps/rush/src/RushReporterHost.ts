@@ -41,6 +41,8 @@ export interface IRushReporterHostOptions {
   readonly includeDefaultFileReporter?: boolean;
   readonly commandName?: 'rush' | 'rush-pnpm' | 'rushx';
   readonly repositoryOptIn?: boolean;
+  readonly forceLegacy?: boolean;
+  readonly selectedRushVersion?: string;
 }
 
 export interface IRushReporterSelection {
@@ -50,6 +52,7 @@ export interface IRushReporterSelection {
   readonly commandJson: boolean;
   readonly enabled: boolean;
   readonly reporterControlsOwnedByFrontend: boolean;
+  readonly reporterValueFlagsToStrip: readonly string[];
   readonly reason:
     | 'explicit --reporter'
     | 'repository experiment'
@@ -65,6 +68,8 @@ export interface IInitializedRushReporterHost {
 }
 
 const REPORTER_VALUE_FLAGS: ReadonlySet<string> = new Set(['--reporter', '--output', '--log-level']);
+const ALL_REPORTER_VALUE_FLAGS: readonly string[] = ['--reporter', '--output', '--log-level'];
+const REPORTER_SELECTION_FLAG: readonly string[] = ['--reporter'];
 
 interface IParsedReporterControls {
   readonly reporters: readonly string[];
@@ -182,7 +187,10 @@ function readValue(
   return { value, consumedNext: true };
 }
 
-export function stripReporterValueControls(argv: readonly string[]): string[] {
+export function stripReporterValueControls(
+  argv: readonly string[],
+  valueFlagsToStrip: ReadonlySet<string> = REPORTER_VALUE_FLAGS
+): string[] {
   const result: string[] = [];
   for (let index: number = 0; index < argv.length; index++) {
     const argument: string = argv[index];
@@ -192,7 +200,7 @@ export function stripReporterValueControls(argv: readonly string[]): string[] {
     }
     const equalsIndex: number = argument.indexOf('=');
     const flagName: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
-    if (!REPORTER_VALUE_FLAGS.has(flagName)) {
+    if (!valueFlagsToStrip.has(flagName)) {
       result.push(argument);
       continue;
     }
@@ -203,7 +211,10 @@ export function stripReporterValueControls(argv: readonly string[]): string[] {
   return result;
 }
 
-function parseReporterControls(argv: readonly string[]): IParsedReporterControls {
+function parseReporterControls(
+  argv: readonly string[],
+  includeOutputAndLogLevelControls: boolean
+): IParsedReporterControls {
   const reporters: string[] = [];
   const logLevels: string[] = [];
   const outputs: string[] = [];
@@ -226,25 +237,27 @@ function parseReporterControls(argv: readonly string[]): IParsedReporterControls
       index += reporter.consumedNext ? 1 : 0;
       continue;
     }
-    const logLevel: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
-      argv,
-      index,
-      '--log-level'
-    );
-    if (logLevel) {
-      logLevels.push(logLevel.value);
-      index += logLevel.consumedNext ? 1 : 0;
-      continue;
-    }
-    const output: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
-      argv,
-      index,
-      '--output'
-    );
-    if (output) {
-      outputs.push(output.value);
-      index += output.consumedNext ? 1 : 0;
-      continue;
+    if (includeOutputAndLogLevelControls) {
+      const logLevel: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
+        argv,
+        index,
+        '--log-level'
+      );
+      if (logLevel) {
+        logLevels.push(logLevel.value);
+        index += logLevel.consumedNext ? 1 : 0;
+        continue;
+      }
+      const output: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
+        argv,
+        index,
+        '--output'
+      );
+      if (output) {
+        outputs.push(output.value);
+        index += output.consumedNext ? 1 : 0;
+        continue;
+      }
     }
 
     quiet ||= argument === '--quiet' || argument === '-q';
@@ -360,12 +373,22 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       commandJson: separateJsonControls(argv).commandJson,
       enabled: false,
       reporterControlsOwnedByFrontend: false,
+      reporterValueFlagsToStrip: [],
       reason: 'pre-major legacy default'
     };
   }
 
   const cwd: string = options.cwd ?? process.cwd();
   const commandJson: boolean = separateJsonControls(argv).commandJson;
+
+  const selectionControls: IParsedReporterControls = parseReporterControls(argv, false);
+  const requestedReporter: string | undefined = selectionControls.reporters[0];
+  if (requestedReporter !== undefined && !isSupportedReporterName(requestedReporter)) {
+    throw new Error(
+      `Unsupported reporter ${JSON.stringify(requestedReporter)}. ` +
+        'Supported values are default, ai, json, plaintext, file, and legacy.'
+    );
+  }
 
   if (isLegacyEmergencyFallbackRequested(env)) {
     return {
@@ -374,12 +397,31 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       outputs: [],
       commandJson,
       enabled: false,
-      reporterControlsOwnedByFrontend: true,
+      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
+      reporterValueFlagsToStrip: requestedReporter === undefined ? [] : ALL_REPORTER_VALUE_FLAGS,
       reason: 'RUSH_REPORTER=legacy'
     };
   }
 
-  const controls: IParsedReporterControls = parseReporterControls(argv);
+  if (options.forceLegacy) {
+    if (requestedReporter !== undefined && requestedReporter !== 'legacy') {
+      throw new Error(
+        `The selected Rush engine${options.selectedRushVersion ? ` ${options.selectedRushVersion}` : ''} ` +
+          `does not support --reporter=${requestedReporter}. Remove the explicit reporter request or use ` +
+          'the Rush version bundled with this frontend.'
+      );
+    }
+    return {
+      reporter: 'legacy',
+      logLevel: 'normal',
+      outputs: [],
+      commandJson,
+      enabled: false,
+      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
+      reporterValueFlagsToStrip: requestedReporter === undefined ? [] : REPORTER_SELECTION_FLAG,
+      reason: requestedReporter === undefined ? 'pre-major legacy default' : 'explicit --reporter'
+    };
+  }
 
   function getCommandName(): 'rush' | 'rush-pnpm' | 'rushx' {
     const executableName: string = path.basename(process.argv[1] ?? '').toLowerCase();
@@ -392,7 +434,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     return 'rush';
   }
 
-  const requestedReporter: string | undefined = controls.reporters[0];
   if (requestedReporter === undefined) {
     const environmentReporter: string | undefined = env.RUSH_REPORTER;
     if (environmentReporter?.trim()) {
@@ -401,23 +442,16 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
           'Use an explicit --reporter option, or set RUSH_REPORTER=legacy for the emergency fallback.'
       );
     }
-    if (controls.outputs.length > 0 || controls.logLevels.length > 0) {
-      if (!options.repositoryOptIn) {
-        throw new Error(
-          '--output and --log-level require an explicit non-legacy --reporter selection or the ' +
-            'useRushReporter repository experiment.'
-        );
-      }
-    }
     if (options.repositoryOptIn) {
       const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
       return {
         reporter: isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
-        logLevel: resolveLogLevel(controls, env, true),
-        outputs: resolveOutputs(controls.outputs, cwd),
+        logLevel: resolveLogLevel(selectionControls, env, true),
+        outputs: [],
         commandJson,
         enabled: true,
-        reporterControlsOwnedByFrontend: true,
+        reporterControlsOwnedByFrontend: false,
+        reporterValueFlagsToStrip: [],
         reason: 'repository experiment'
       };
     }
@@ -427,22 +461,13 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       outputs: [],
       commandJson,
       enabled: false,
-      reporterControlsOwnedByFrontend: true,
+      reporterControlsOwnedByFrontend: false,
+      reporterValueFlagsToStrip: [],
       reason: 'pre-major legacy default'
     };
   }
 
-  if (!isSupportedReporterName(requestedReporter)) {
-    throw new Error(
-      `Unsupported reporter ${JSON.stringify(requestedReporter)}. ` +
-        'Supported values are default, ai, json, plaintext, file, and legacy.'
-    );
-  }
-
   if (requestedReporter === 'legacy') {
-    if (controls.outputs.length > 0 || controls.logLevels.length > 0) {
-      throw new Error('--output and --log-level are not supported with --reporter=legacy.');
-    }
     return {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -450,10 +475,12 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       commandJson,
       enabled: false,
       reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: REPORTER_SELECTION_FLAG,
       reason: 'explicit --reporter'
     };
   }
 
+  const controls: IParsedReporterControls = parseReporterControls(argv, true);
   const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
   if (requestedReporter === 'default' && !stdout.isTTY) {
     throw new Error(
@@ -468,6 +495,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     commandJson,
     enabled: true,
     reporterControlsOwnedByFrontend: true,
+    reporterValueFlagsToStrip: ALL_REPORTER_VALUE_FLAGS,
     reason: 'explicit --reporter'
   };
 }

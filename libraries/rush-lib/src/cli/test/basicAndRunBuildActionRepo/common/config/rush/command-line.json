@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "custom-output",
+      "summary": "Exercises custom parameters that overlap reporter controls.",
+      "shellCommand": "node custom-output.js"
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "string",
+      "longName": "--output",
+      "argumentName": "OUTPUT",
+      "description": "Custom output value.",
+      "associatedCommands": ["custom-output"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--log-level",
+      "argumentName": "LEVEL",
+      "description": "Custom log level.",
+      "associatedCommands": ["custom-output"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--verbose",
+      "description": "Custom verbose flag.",
+      "associatedCommands": ["custom-output"]
+    }
+  ]
+}

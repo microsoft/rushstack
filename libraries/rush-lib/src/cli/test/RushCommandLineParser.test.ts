@@ -114,6 +114,26 @@ describe('RushCommandLineParser', () => {
         });
       });
 
+      describe("'custom-output' action", () => {
+        it('preserves custom parameters that overlap reporter controls', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'custom-output'
+          );
+          process.argv.push('--output', 'custom-artifact.zip', '--log-level', 'custom-level', '--verbose');
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-output-args.json`)).toEqual([
+            '--output',
+            'custom-artifact.zip',
+            '--log-level',
+            'custom-level',
+            '--verbose'
+          ]);
+        });
+      });
+
       describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
