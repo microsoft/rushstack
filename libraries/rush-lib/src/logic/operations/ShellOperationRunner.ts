@@ -213,6 +213,9 @@ export function isHeftCommand(command: string): boolean {
       continue;
     }
     if (quote) {
+      if (quote === '"' && (character === '$' || character === '`')) {
+        return false;
+      }
       if (character === quote) {
         quote = undefined;
       }

@@ -2,7 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
-import type { IReporterEventEnvelope, IReporterEventSource } from '../events/IReporterEventEnvelope';
+import type {
+  IReporterEventEnvelope,
+  IReporterEventScope,
+  IReporterEventSource
+} from '../events/IReporterEventEnvelope';
 import type { ReporterPrivacyClassification } from '../events/ReporterPrivacyClassification';
 import {
   REPORTER_EVENT_TYPES,
@@ -11,6 +15,7 @@ import {
 } from '../events/ReporterEventType';
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
+import { isValidRushDiagnosticCode } from '../diagnostics/RushDiagnosticCode';
 import { NdjsonDecoder, NdjsonInvalidRecordError, NdjsonRecordTooLargeError } from '../protocol/Ndjson';
 import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
 import {
@@ -25,6 +30,10 @@ import {
 } from '../protocol/ReporterHandshake';
 
 const REPORTER_EVENT_TYPE_SET: ReadonlySet<string> = new Set(REPORTER_EVENT_TYPES);
+const HEFT_CHILD_EVENT_TYPES: ReadonlySet<ReporterEventType> = new Set([
+  'diagnosticEmitted',
+  'externalOutput'
+]);
 
 type IWireReporterEventEnvelope = Omit<IReporterEventEnvelope<unknown>, 'type'> & {
   readonly type: string;
@@ -88,6 +97,148 @@ function isReporterEventRecord(value: unknown): value is IWireReporterEventEnvel
     typeof value.type === 'string' &&
     Object.prototype.hasOwnProperty.call(value, 'payload')
   );
+}
+
+function isDiagnosticRecord(value: unknown): boolean {
+  if (!isObjectRecord(value)) {
+    return false;
+  }
+  if (
+    typeof value.diagnosticId !== 'string' ||
+    value.diagnosticId.length === 0 ||
+    typeof value.code !== 'string' ||
+    !isValidRushDiagnosticCode(value.code) ||
+    typeof value.category !== 'string' ||
+    value.category.length === 0 ||
+    (value.severity !== 'warning' && value.severity !== 'error') ||
+    typeof value.summaryKey !== 'string' ||
+    value.summaryKey.length === 0 ||
+    (value.detailKey !== undefined && typeof value.detailKey !== 'string') ||
+    (value.retryable !== undefined && typeof value.retryable !== 'boolean')
+  ) {
+    return false;
+  }
+  if (value.parameters !== undefined) {
+    if (!isObjectRecord(value.parameters)) {
+      return false;
+    }
+    for (const parameter of Object.values(value.parameters)) {
+      if (
+        !isObjectRecord(parameter) ||
+        !Object.prototype.hasOwnProperty.call(parameter, 'value') ||
+        (parameter.privacy !== 'public' &&
+          parameter.privacy !== 'local-sensitive' &&
+          parameter.privacy !== 'secret')
+      ) {
+        return false;
+      }
+    }
+  }
+  for (const key of ['causeDiagnosticIds', 'relatedArtifactIds']) {
+    const identifiers: unknown = value[key];
+    if (
+      identifiers !== undefined &&
+      (!Array.isArray(identifiers) ||
+        !identifiers.every((identifier: unknown) => typeof identifier === 'string'))
+    ) {
+      return false;
+    }
+  }
+  if (value.remediation !== undefined) {
+    if (!Array.isArray(value.remediation)) {
+      return false;
+    }
+    for (const action of value.remediation) {
+      if (
+        !isObjectRecord(action) ||
+        typeof action.descriptionKey !== 'string' ||
+        action.descriptionKey.length === 0 ||
+        (action.command !== undefined && typeof action.command !== 'string') ||
+        (action.documentationUrl !== undefined && typeof action.documentationUrl !== 'string') ||
+        (action.automatedExecutionSafety !== 'safe' &&
+          action.automatedExecutionSafety !== 'requires-confirmation' &&
+          action.automatedExecutionSafety !== 'unsafe')
+      ) {
+        return false;
+      }
+    }
+  }
+  if (value.source !== undefined) {
+    if (!isObjectRecord(value.source)) {
+      return false;
+    }
+    if (value.source.kind === 'file') {
+      if (
+        typeof value.source.file !== 'string' ||
+        (value.source.line !== undefined && !isNonNegativeInteger(value.source.line)) ||
+        (value.source.column !== undefined && !isNonNegativeInteger(value.source.column)) ||
+        (value.source.toolName !== undefined && typeof value.source.toolName !== 'string')
+      ) {
+        return false;
+      }
+    } else if (value.source.kind === 'tool') {
+      if (typeof value.source.toolName !== 'string') {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+function sanitizeDiagnosticRecord(
+  value: Record<string, unknown>,
+  envelopePrivacy: ReporterPrivacyClassification
+): Record<string, unknown> {
+  const parameters: Record<string, unknown> | undefined = isObjectRecord(value.parameters)
+    ? Object.fromEntries(
+        Object.entries(value.parameters).map(([name, parameter]: [string, unknown]) => {
+          const classified: Record<string, unknown> = parameter as Record<string, unknown>;
+          const redact: boolean = envelopePrivacy === 'secret' || classified.privacy === 'secret';
+          return [
+            name,
+            {
+              privacy: classified.privacy,
+              value: redact ? '[secret]' : classified.value
+            }
+          ];
+        })
+      )
+    : undefined;
+  let source: Record<string, unknown> | undefined;
+  if (envelopePrivacy !== 'secret' && isObjectRecord(value.source)) {
+    source =
+      value.source.kind === 'file'
+        ? {
+            kind: 'file',
+            file: value.source.file,
+            ...(value.source.line === undefined ? {} : { line: value.source.line }),
+            ...(value.source.column === undefined ? {} : { column: value.source.column }),
+            ...(value.source.toolName === undefined ? {} : { toolName: value.source.toolName })
+          }
+        : {
+            kind: 'tool',
+            toolName: value.source.toolName
+          };
+  }
+  return {
+    diagnosticId: value.diagnosticId,
+    code: value.code,
+    category: value.category,
+    severity: value.severity,
+    summaryKey: value.summaryKey,
+    ...(value.detailKey === undefined ? {} : { detailKey: value.detailKey }),
+    ...(parameters === undefined ? {} : { parameters }),
+    ...(source === undefined ? {} : { source }),
+    ...(value.causeDiagnosticIds === undefined
+      ? {}
+      : { causeDiagnosticIds: [...(value.causeDiagnosticIds as string[])] }),
+    ...(value.retryable === undefined ? {} : { retryable: value.retryable }),
+    ...(value.relatedArtifactIds === undefined
+      ? {}
+      : { relatedArtifactIds: [...(value.relatedArtifactIds as string[])] })
+  };
 }
 
 function applyPrivacyFloor(
@@ -306,6 +457,12 @@ export class HeftDescriptorHost {
       }
       return true;
     }
+    if (!HEFT_CHILD_EVENT_TYPES.has(record.type)) {
+      if (isReporterEventRequired(record.type)) {
+        return this._rejectMalformedStream('a required event type is not permitted from a Heft child');
+      }
+      return true;
+    }
     if (record.type === 'externalOutput') {
       if (
         !isObjectRecord(record.payload) ||
@@ -319,21 +476,61 @@ export class HeftDescriptorHost {
       ) {
         return this._rejectMalformedStream('an external output event exceeded the protocol chunk limit');
       }
+    } else if (record.type === 'diagnosticEmitted' && !isDiagnosticRecord(record.payload)) {
+      return this._rejectMalformedStream('a diagnostic event contained an invalid payload');
     }
 
+    const privacy: ReporterPrivacyClassification = applyPrivacyFloor(record.privacy, this._trustedPrivacy);
+    const payload: unknown =
+      record.type === 'externalOutput'
+        ? {
+            stream: (record.payload as Record<string, unknown>).stream,
+            text:
+              privacy === 'secret'
+                ? '[secret child output omitted]'
+                : (record.payload as Record<string, unknown>).text
+          }
+        : record.type === 'diagnosticEmitted'
+          ? sanitizeDiagnosticRecord(record.payload as Record<string, unknown>, privacy)
+          : record.payload;
+    const source: IReporterEventSource = this._trustedSource
+      ? { ...this._trustedSource }
+      : {
+          packageName: record.source.packageName,
+          packageVersion: record.source.packageVersion,
+          ...(record.source.component === undefined ? {} : { component: record.source.component })
+        };
+    const scope: IReporterEventScope | undefined =
+      record.scope === undefined && this._parentOperationId === undefined
+        ? undefined
+        : {
+            ...(record.scope?.commandName === undefined ? {} : { commandName: record.scope.commandName }),
+            ...(record.scope?.projectName === undefined ? {} : { projectName: record.scope.projectName }),
+            ...(record.scope?.phaseName === undefined ? {} : { phaseName: record.scope.phaseName }),
+            ...(this._parentOperationId !== undefined
+              ? { operationId: this._parentOperationId }
+              : record.scope?.operationId === undefined
+                ? {}
+                : { operationId: record.scope.operationId })
+          };
     const correlated: IReporterEventEnvelope<unknown> = {
-      ...record,
+      protocolVersion: {
+        major: record.protocolVersion.major,
+        minor: record.protocolVersion.minor
+      },
+      eventId: record.eventId,
+      sessionId: record.sessionId,
       parentSessionId: this._parentSessionId,
       parentRequestId: this._parentRequestId,
       parentOperationId: this._parentOperationId,
-      source: this._trustedSource ?? record.source,
-      scope:
-        this._parentOperationId !== undefined
-          ? { ...record.scope, operationId: this._parentOperationId }
-          : record.scope,
-      privacy: applyPrivacyFloor(record.privacy, this._trustedPrivacy),
+      sequence: record.sequence,
+      timestamp: record.timestamp,
+      source,
+      scope,
+      privacy,
       required: isReporterEventRequired(record.type),
-      type: record.type
+      type: record.type,
+      payload
     };
     this._forwardEnvelope(correlated);
     this._eventCount++;

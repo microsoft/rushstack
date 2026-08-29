@@ -294,14 +294,14 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(child.mode).toBe('structured');
     expect(child.context?.terminalWidth).toBe(120);
     child.emitEvent({
-      type: 'operationStatusChanged',
+      type: 'externalOutput',
       privacy: 'public',
       scope: { operationId: 'child-selected-operation' },
-      payload: { operationId: 'c1', status: 'success' }
+      payload: { stream: 'stdout', text: 'one' }
     });
     child.emitEvent({
-      type: 'activityChanged',
-      payload: { operationId: 'c1' }
+      type: 'externalOutput',
+      payload: { stream: 'stderr', text: 'two' }
     });
     const result: IHeftChildResult = host.processChildNdjson(descriptor);
     await manager.flushAsync();
@@ -360,9 +360,9 @@ describe('HeftDescriptorHost new descriptor path', () => {
           timestamp: '2026-01-01T00:00:00.000Z',
           source,
           privacy: 'public',
-          required: true,
-          type: 'operationStatusChanged',
-          payload: { operationId: 'operation-' + i, status: 'success', padding: 'x'.repeat(128) }
+          required: false,
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'operation-' + i + ' ' + 'x'.repeat(128) }
         }) + '\\n');
       }
     `;
@@ -470,9 +470,9 @@ describe('HeftDescriptorHost new descriptor path', () => {
         timestamp: '2026-01-01T00:00:00.001Z',
         source: SOURCE,
         privacy: 'public',
-        required: true,
-        type: 'commandCompleted',
-        payload: { commandName: 'build', exitCode: 0 }
+        required: false,
+        type: 'externalOutput',
+        payload: { stream: 'stdout', text: 'known after future' }
       })
     ).toBe(true);
 
@@ -605,11 +605,11 @@ describe('HeftDescriptorHost new descriptor path', () => {
         source: SOURCE,
         privacy: 'public',
         required: true,
-        type: 'activityChanged',
-        payload: {}
+        type: 'externalOutput',
+        payload: { stream: 'stdout', text: 'valid' }
       })
     ).toBe(true);
-    expect(forwarded[0].required).toBe(false);
+    expect(forwarded[0].required).toBe(true);
 
     expect(host.processChildRecord(null)).toBe(false);
     const result: IHeftChildResult = host.processChildRecords([]);
@@ -734,12 +734,126 @@ describe('HeftDescriptorHost new descriptor path', () => {
     });
 
     expect(host.processChildRecord(makeEvent(1, 'public'))).toBe(true);
-    expect(host.processChildRecord(makeEvent(2, 'secret'))).toBe(true);
+    expect(
+      host.processChildRecord({
+        ...makeEvent(2, 'secret'),
+        leaked: 'TOP_LEVEL_SECRET',
+        scope: { operationId: 'child-operation', leaked: 'SCOPE_SECRET' },
+        payload: { stream: 'stdout', text: 'TOP_SECRET_OUTPUT', leaked: 'TOP_SECRET_EXTRA' }
+      })
+    ).toBe(true);
     expect(forwarded.map(({ source }) => source)).toEqual([
       { packageName: '@rushstack/heft', packageVersion: 'trusted' },
       { packageName: '@rushstack/heft', packageVersion: 'trusted' }
     ]);
     expect(forwarded.map(({ privacy }) => privacy)).toEqual(['local-sensitive', 'secret']);
+    expect((forwarded[1].payload as { text?: string }).text).toBe('[secret child output omitted]');
+    expect((forwarded[1].payload as { leaked?: string }).leaked).toBeUndefined();
+    expect((forwarded[1] as IReporterEventEnvelope<unknown> & { leaked?: string }).leaked).toBeUndefined();
+    expect((forwarded[1].scope as { leaked?: string } | undefined)?.leaked).toBeUndefined();
+  });
+
+  it('redacts output when the parent raises the effective privacy to secret', () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      trustedPrivacy: 'secret',
+      forwardEnvelope: (envelope) => forwarded.push(envelope)
+    });
+    host.processChildRecord({
+      kind: 'hello',
+      protocolVersion: { major: 1, minor: 2 },
+      producerVersion: '@rushstack/heft 1.2.25',
+      capabilities: ['heft-child-events-v1'],
+      requiredFeatures: []
+    });
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: true,
+        type: 'externalOutput',
+        payload: { stream: 'stdout', text: 'TOP_SECRET_OUTPUT' }
+      })
+    ).toBe(true);
+    expect(forwarded[0].privacy).toBe('secret');
+    expect((forwarded[0].payload as { text?: string }).text).toBe('[secret child output omitted]');
+  });
+
+  it('redacts secret diagnostic parameters and removes child remediation commands', () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      trustedSource: { packageName: '@rushstack/heft', packageVersion: 'trusted' },
+      trustedPrivacy: 'local-sensitive',
+      forwardEnvelope: (envelope) => forwarded.push(envelope)
+    });
+    host.processChildRecord({
+      kind: 'hello',
+      protocolVersion: { major: 1, minor: 2 },
+      producerVersion: '@rushstack/heft 1.2.25',
+      capabilities: ['heft-child-events-v1'],
+      requiredFeatures: []
+    });
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'local-sensitive',
+        required: true,
+        type: 'diagnosticEmitted',
+        payload: {
+          diagnosticId: 'diagnostic-1',
+          code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+          category: 'operation',
+          severity: 'error',
+          summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+          parameters: {
+            message: { value: 'TOP_SECRET_MESSAGE', privacy: 'secret', leaked: 'TOP_SECRET_EXTRA' }
+          },
+          source: {
+            kind: 'file',
+            file: 'src/index.ts',
+            line: 1,
+            column: 2,
+            toolName: 'typescript',
+            leaked: 'TOP_SECRET_SOURCE'
+          },
+          remediation: [
+            {
+              descriptionKey: 'malicious.action',
+              command: 'run-untrusted-command',
+              automatedExecutionSafety: 'safe'
+            }
+          ]
+        }
+      })
+    ).toBe(true);
+
+    const diagnostic: {
+      parameters?: { message?: { value?: string; leaked?: string } };
+      source?: { leaked?: string };
+      remediation?: unknown;
+    } = forwarded[0].payload as {
+      parameters?: { message?: { value?: string; leaked?: string } };
+      source?: { leaked?: string };
+      remediation?: unknown;
+    };
+    expect(diagnostic.parameters?.message?.value).toBe('[secret]');
+    expect(diagnostic.parameters?.message?.leaked).toBeUndefined();
+    expect(diagnostic.source?.leaked).toBeUndefined();
+    expect(diagnostic.remediation).toBeUndefined();
   });
 
   it('validates parent reporter context once and rejects zero terminal width', () => {
@@ -778,6 +892,7 @@ describe('HeftDescriptorHost new descriptor path', () => {
         throw new Error('Unknown events must not be forwarded.');
       }
     });
+
     expect(
       host.processChildRecord({
         kind: 'hello',
@@ -823,6 +938,127 @@ describe('HeftDescriptorHost new descriptor path', () => {
         privacy: 'private'
       })
     ).toBe(false);
+  });
+
+  it('rejects a malformed structured diagnostic before forwarding it', () => {
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      forwardEnvelope: () => {
+        throw new Error('Malformed diagnostics must not be forwarded.');
+      }
+    });
+    expect(
+      host.processChildRecord({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 2 },
+        producerVersion: '@rushstack/heft 1.2.25',
+        capabilities: ['heft-child-events-v1'],
+        requiredFeatures: []
+      })
+    ).toBe(true);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'local-sensitive',
+        required: true,
+        type: 'diagnosticEmitted',
+        payload: null
+      })
+    ).toBe(false);
+    expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
+  it('rejects malformed diagnostic identifier arrays without parameters', () => {
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      forwardEnvelope: () => {
+        throw new Error('Malformed diagnostics must not be forwarded.');
+      }
+    });
+    host.processChildRecord({
+      kind: 'hello',
+      protocolVersion: { major: 1, minor: 2 },
+      producerVersion: '@rushstack/heft 1.2.25',
+      capabilities: ['heft-child-events-v1'],
+      requiredFeatures: []
+    });
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'local-sensitive',
+        required: true,
+        type: 'diagnosticEmitted',
+        payload: {
+          diagnosticId: 'diagnostic-1',
+          code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+          category: 'operation',
+          severity: 'error',
+          summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+          causeDiagnosticIds: [123]
+        }
+      })
+    ).toBe(false);
+    expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
+  it('does not let child events drive parent lifecycle presentation', () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      forwardEnvelope: (envelope) => forwarded.push(envelope)
+    });
+    expect(
+      host.processChildRecord({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 2 },
+        producerVersion: '@rushstack/heft 1.2.25',
+        capabilities: ['heft-child-events-v1'],
+        requiredFeatures: []
+      })
+    ).toBe(true);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_1',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: false,
+        type: 'activityChanged',
+        payload: { text: 'child activity' }
+      })
+    ).toBe(true);
+    expect(forwarded).toEqual([]);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_2',
+        sessionId: 'child-sess',
+        sequence: 2,
+        timestamp: '2026-01-01T00:00:00.001Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: true,
+        type: 'commandResult',
+        payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+      })
+    ).toBe(false);
+    expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
   });
 });
 

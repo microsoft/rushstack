@@ -96,6 +96,18 @@ describe(HeftChildProcessReporter.name, () => {
           source: { kind: 'file', file: 'src/index.ts', line: 4, column: 2, toolName: 'typescript' }
         }
       }) + '\\n');
+      fs.writeSync(eventFd, JSON.stringify({
+        protocolVersion: { major: 1, minor: 2 },
+        eventId: 'child_4',
+        sessionId: 'child-session',
+        sequence: 4,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: { packageName: '@rushstack/heft', packageVersion: '1.2.25' },
+        privacy: 'secret',
+        required: true,
+        type: 'externalOutput',
+        payload: { stream: 'stdout', text: 'TOP_SECRET_CHILD_OUTPUT' }
+      }) + '\\n');
     `;
     const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
       env: { ...process.env, ...reporter.environment },
@@ -120,8 +132,9 @@ describe(HeftChildProcessReporter.name, () => {
     expect(exitCode).toBe(0);
     expect(structuredNegotiated).toBe(true);
     expect(reporter.hasWarningOrError).toBe(true);
-    expect(envelopes.map((envelope) => envelope.sequence)).toEqual([1, 2, 3]);
+    expect(envelopes.map((envelope) => envelope.sequence)).toEqual([1, 2, 3, 4]);
     expect(envelopes.map((envelope) => envelope.parentSessionId)).toEqual([
+      'parent-session',
       'parent-session',
       'parent-session',
       'parent-session'
@@ -129,9 +142,11 @@ describe(HeftChildProcessReporter.name, () => {
     expect(envelopes.map((envelope) => envelope.parentRequestId)).toEqual([
       'parent-request',
       'parent-request',
+      'parent-request',
       'parent-request'
     ]);
     expect(envelopes.map((envelope) => envelope.parentOperationId)).toEqual([
+      'project#build',
       'project#build',
       'project#build',
       'project#build'
@@ -139,9 +154,11 @@ describe(HeftChildProcessReporter.name, () => {
     expect(envelopes.map((envelope) => envelope.scope?.operationId)).toEqual([
       'project#build',
       'project#build',
+      'project#build',
       'project#build'
     ]);
     expect(envelopes.map((envelope) => envelope.source)).toEqual([
+      { packageName: '@rushstack/heft', packageVersion: 'unknown' },
       { packageName: '@rushstack/heft', packageVersion: 'unknown' },
       { packageName: '@rushstack/heft', packageVersion: 'unknown' },
       { packageName: '@rushstack/heft', packageVersion: 'unknown' }
@@ -149,11 +166,13 @@ describe(HeftChildProcessReporter.name, () => {
     expect(envelopes.map((envelope) => envelope.privacy)).toEqual([
       'local-sensitive',
       'local-sensitive',
-      'local-sensitive'
+      'local-sensitive',
+      'secret'
     ]);
     expect(envelopes.map((envelope) => (envelope.payload as { iterationId?: number }).iterationId)).toEqual([
-      7, 7, 7
+      7, 7, 7, 7
     ]);
+    expect((envelopes[3].payload as { text?: string }).text).toBe('[secret child output omitted]');
     expect(structuredOutputTerminalProvider.getOutput()).toBe('1');
     expect(structuredOutputTerminalProvider.getErrorOutput({ normalizeSpecialCharacters: false })).toBe(
       '2[typescript] error (TS1005): src/index.ts:4:2 - semicolon expected\n'

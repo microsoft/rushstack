@@ -22,9 +22,12 @@ import {
 import type { IOperationChildProcessReporter } from './OperationEventSink';
 
 function formatDiagnosticForOperationLog(diagnostic: IRushDiagnostic): string {
-  const toolParameter: unknown = diagnostic.parameters?.tool?.value;
-  const codeParameter: unknown = diagnostic.parameters?.code?.value;
-  const messageParameter: unknown = diagnostic.parameters?.message?.value;
+  const toolParameter: unknown =
+    diagnostic.parameters?.tool?.privacy === 'secret' ? '[secret]' : diagnostic.parameters?.tool?.value;
+  const codeParameter: unknown =
+    diagnostic.parameters?.code?.privacy === 'secret' ? '[secret]' : diagnostic.parameters?.code?.value;
+  const messageParameter: unknown =
+    diagnostic.parameters?.message?.privacy === 'secret' ? '[secret]' : diagnostic.parameters?.message?.value;
   const toolName: string =
     typeof toolParameter === 'string' ? toolParameter : (diagnostic.source?.toolName ?? '@rushstack/heft');
   const code: string = typeof codeParameter === 'string' && codeParameter ? ` (${codeParameter})` : '';
@@ -190,10 +193,14 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
         if (envelope.type === 'diagnosticEmitted') {
           const payload: IRushDiagnostic = envelope.payload as IRushDiagnostic;
           this._hasWarningOrError ||= payload.severity === 'warning' || payload.severity === 'error';
-          structuredOutputTerminalProvider.write(
-            formatDiagnosticForOperationLog(payload),
-            payload.severity === 'warning' ? TerminalProviderSeverity.warning : TerminalProviderSeverity.error
-          );
+          if (envelope.privacy !== 'secret') {
+            structuredOutputTerminalProvider.write(
+              formatDiagnosticForOperationLog(payload),
+              payload.severity === 'warning'
+                ? TerminalProviderSeverity.warning
+                : TerminalProviderSeverity.error
+            );
+          }
           if (typeof envelope.payload === 'object' && envelope.payload !== null) {
             forwardedEnvelope = {
               ...envelope,
@@ -212,10 +219,12 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
             throw new Error('The validated child output envelope contained an invalid payload.');
           }
           this._hasWarningOrError ||= payload.stream === 'stderr';
-          structuredOutputTerminalProvider.write(
-            payload.text,
-            payload.stream === 'stderr' ? TerminalProviderSeverity.error : TerminalProviderSeverity.log
-          );
+          if (envelope.privacy !== 'secret') {
+            structuredOutputTerminalProvider.write(
+              payload.text,
+              payload.stream === 'stderr' ? TerminalProviderSeverity.error : TerminalProviderSeverity.log
+            );
+          }
           forwardedEnvelope = {
             ...envelope,
             payload: { ...payload, iterationId: this._options.iterationId }

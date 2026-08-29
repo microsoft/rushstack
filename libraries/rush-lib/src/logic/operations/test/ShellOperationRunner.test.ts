@@ -49,6 +49,9 @@ describe(convertSlashesForWindows.name, () => {
       ['heft build &', false],
       ['heft build > output.log', false],
       ['heft build `node spawn-grandchild.js`', false],
+      ['heft build "$(node spawn-grandchild.js)"', false],
+      ['heft build "`node spawn-grandchild.js`"', false],
+      ["heft build '$(literal)'", true],
       ['heft build "unterminated', false]
     ])('classifies %s', (command: string, expected: boolean) => {
       expect(isHeftCommand(command)).toBe(expected);
