@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { trimNpmrcFileLines } from '../npmrcUtilities';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
+import { getNpmrcEnvironmentVariables, syncNpmrc, trimNpmrcFileLines } from '../npmrcUtilities';
 
 describe('npmrcUtilities', () => {
   function runTests(supportEnvVarFallbackSyntax: boolean): void {
@@ -256,14 +260,17 @@ describe('npmrcUtilities', () => {
         ]);
       });
 
-      it('expands settings whose names cannot round-trip through an environment variable', () => {
+      it('rejects credentials whose names cannot round-trip through an environment variable', () => {
         // PNPM splits an "npm_config_*" variable name on its FIRST colon, so a registry URL that
         // includes an explicit port cannot be expressed as an environment variable
         expect(
-          trimLines(['//registry.example.com:8080/:_authToken=${NPM_AUTH_TOKEN}'], {
-            NPM_AUTH_TOKEN: 'token123'
-          })
-        ).toEqual(['//registry.example.com:8080/:_authToken=token123']);
+          () =>
+            trimLines(['//registry.example.com:8080/:_authToken=${NPM_AUTH_TOKEN}'], {
+              NPM_AUTH_TOKEN: 'token123'
+            })
+        ).toThrow(
+          'The .npmrc credential setting "//registry.example.com:8080/:_authToken" cannot be provided via an environment variable'
+        );
       });
 
       it('expands request destinations in the file', () => {
@@ -321,6 +328,60 @@ describe('npmrcUtilities', () => {
           '//registry.example.com/npm/:_authToken=${NPM_AUTH_TOKEN}'
         ]);
       });
+    });
+  });
+
+  describe(getNpmrcEnvironmentVariables.name, () => {
+    it('returns credentials moved by syncNpmrc', () => {
+      const tempFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-npmrc-'));
+      const sourceFolder: string = path.join(tempFolder, 'source');
+      const targetFolder: string = path.join(tempFolder, 'target');
+      fs.mkdirSync(sourceFolder);
+      fs.writeFileSync(
+        path.join(sourceFolder, '.npmrc'),
+        [
+          '//registry.example.com/npm/:_authToken=${NPM_AUTH_TOKEN}',
+          '//other.example.com/npm/:_password=${NPM_PASSWORD:-fallbackPassword}'
+        ].join('\n')
+      );
+
+      try {
+        syncNpmrc({
+          sourceNpmrcFolder: sourceFolder,
+          targetNpmrcFolder: targetFolder,
+          supportEnvVarFallbackSyntax: true,
+          moveSensitiveSettingsToEnvironment: true,
+          env: { NPM_AUTH_TOKEN: 'token123' },
+          logger: { info: () => {}, error: () => {} }
+        });
+
+        expect(
+          getNpmrcEnvironmentVariables({
+            npmrcFolder: targetFolder,
+            supportEnvVarFallbackSyntax: true,
+            env: { NPM_AUTH_TOKEN: 'token123' }
+          })
+        ).toEqual({
+          'npm_config_//registry.example.com/npm/:_authToken': 'token123',
+          'npm_config_//other.example.com/npm/:_password': 'fallbackPassword'
+        });
+      } finally {
+        fs.rmSync(tempFolder, { recursive: true, force: true });
+      }
+    });
+
+    it('returns undefined when the generated .npmrc file is missing', () => {
+      const tempFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-npmrc-'));
+      try {
+        expect(
+          getNpmrcEnvironmentVariables({
+            npmrcFolder: tempFolder,
+            supportEnvVarFallbackSyntax: true
+          })
+        ).toBeUndefined();
+      } finally {
+        fs.rmSync(tempFolder, { recursive: true, force: true });
+      }
     });
   });
 });

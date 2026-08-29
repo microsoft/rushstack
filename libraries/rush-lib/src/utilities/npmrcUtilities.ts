@@ -366,10 +366,10 @@ function _classifySensitiveNpmrcLine(
       };
     }
 
-    // The setting name cannot survive PNPM's environment variable name normalization, so fall back
-    // to writing the expanded value into the generated .npmrc file. This is less desirable, but the
-    // generated file is not committed to Git.
-    return { kind: 'expand', expandedLine: `${expandedName.expandedText}=${expandedValue.expandedText}` };
+    throw new Error(
+      `The .npmrc credential setting "${expandedName.expandedText}" cannot be provided via an ` +
+        'environment variable because PNPM cannot round-trip this setting name.'
+    );
   }
 
   const isRequestDestination: boolean =
