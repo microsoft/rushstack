@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade the `pnpm-sync-lib` dependency to `0.3.5` to unblock support of pnpm 11.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "martinnaj@users.noreply.github.com"
+}

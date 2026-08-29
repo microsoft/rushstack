@@ -3074,8 +3074,8 @@ packages:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
 
-  pnpm-sync-lib@0.3.4:
-    resolution: {integrity: sha512-ZgRR+j6B+VUrolPBswPvXBnCyxg39Zfw3ShNCTuCrOFG1V29V4EyXaA1rDDMjdhpF85QYp2NEUjeHAm02A2E/A==}
+  pnpm-sync-lib@0.3.5:
+    resolution: {integrity: sha512-6QXYyNpZYJQwnobDXc5bQlTJ7QoRf+n9qVO4ufbbZGOQlNocFZKl1/WkD6qeweFQthTSUuVBA8Le+31XOHlVmA==}
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -4370,7 +4370,7 @@ snapshots:
       js-yaml: 4.1.1
       npm-package-arg: 6.1.1
       object-hash: 3.0.0
-      pnpm-sync-lib: 0.3.4
+      pnpm-sync-lib: 0.3.5
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.7.4
@@ -7589,7 +7589,7 @@ snapshots:
 
   pirates@4.0.7: {}
 
-  pnpm-sync-lib@0.3.4:
+  pnpm-sync-lib@0.3.5:
     dependencies:
       '@pnpm/dependency-path-pnpm-v10': '@pnpm/dependency-path@1000.0.9'
       '@pnpm/dependency-path-pnpm-v8': '@pnpm/dependency-path@2.1.8'
