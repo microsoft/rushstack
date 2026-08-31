@@ -23,9 +23,11 @@ export class DeclarationReferenceGenerator {
   public static readonly unknownReference: string = '?';
 
   private _collector: Collector;
+  private readonly _packageNamesBySourceFile: ReadonlyMap<ts.SourceFile, string>;
 
   public constructor(collector: Collector) {
     this._collector = collector;
+    this._packageNamesBySourceFile = TypeScriptInternals.getPackageNamesBySourceFile(collector.program);
   }
 
   /**
@@ -265,6 +267,11 @@ export class DeclarationReferenceGenerator {
 
   private _getPackageName(sourceFile: ts.SourceFile): string {
     if (this._collector.program.isSourceFileFromExternalLibrary(sourceFile)) {
+      const resolvedPackageName: string | undefined = this._packageNamesBySourceFile.get(sourceFile);
+      if (resolvedPackageName) {
+        return resolvedPackageName;
+      }
+
       const packageJson: INodePackageJson | undefined =
         this._collector.packageJsonLookup.tryLoadNodePackageJsonFor(sourceFile.fileName);
 
