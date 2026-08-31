@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Prevent prototype pollution when Objects.mergeWith() processes attacker-controlled properties.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "mojazayeri@users.noreply.github.com"
+}
