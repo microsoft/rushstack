@@ -153,6 +153,15 @@ export interface IExperimentsJson {
    * effect; otherwise it falls back to the buffer-based approach.
    */
   useDirectFileTransfersForBuildCache?: boolean;
+
+  /**
+   * By default, Rush forwards its entire process environment (minus a small denylist) to the shell
+   * commands it invokes for operations (e.g. "build", "test"). If true, environment variables whose
+   * names begin with `RUSH_` will additionally be omitted from that forwarded environment. This can
+   * help prevent operation scripts from accidentally depending on Rush's own internal environment
+   * variables.
+   */
+  trimRushEnvironmentVariablesForOperations?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
