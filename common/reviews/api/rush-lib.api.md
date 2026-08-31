@@ -491,6 +491,7 @@ export interface IExperimentsJson {
     printEventHooksOutputToConsole?: boolean;
     rushAlerts?: boolean;
     strictChangefileValidation?: boolean;
+    trimRushEnvironmentVariablesForOperations?: boolean;
     useDirectFileTransfersForBuildCache?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;

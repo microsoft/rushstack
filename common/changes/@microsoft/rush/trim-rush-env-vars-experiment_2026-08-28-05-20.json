@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new `trimRushEnvironmentVariablesForOperations` experiment that, when enabled, omits environment variables whose names begin with `RUSH_` from the environment forwarded to operation processes (e.g. \"build\", \"test\").",
+      "type": "minor"
+    }
+  ]
+}
