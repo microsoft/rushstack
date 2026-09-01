@@ -54,35 +54,35 @@ export type IPrefixProxyTerminalProviderOptions =
  * @beta
  */
 export class PrefixProxyTerminalProvider implements ITerminalProvider {
-  private readonly _parentTerminalProvider: ITerminalProvider;
-  private readonly _getPrefix: () => string;
-  private readonly _newlineRegex: RegExp;
-  private _isOnNewline: boolean;
+  readonly #parentTerminalProvider: ITerminalProvider;
+  readonly #getPrefix: () => string;
+  readonly #newlineRegex: RegExp;
+  #isOnNewline: boolean;
 
   public constructor(options: IPrefixProxyTerminalProviderOptions) {
     const { terminalProvider } = options;
 
-    this._parentTerminalProvider = terminalProvider;
+    this.#parentTerminalProvider = terminalProvider;
 
     if ((options as IStaticPrefixProxyTerminalProviderOptions).prefix !== undefined) {
       const { prefix } = options as IStaticPrefixProxyTerminalProviderOptions;
-      this._getPrefix = () => prefix;
+      this.#getPrefix = () => prefix;
     } else {
       const { getPrefix } = options as IDynamicPrefixProxyTerminalProviderOptions;
-      this._getPrefix = getPrefix;
+      this.#getPrefix = getPrefix;
     }
 
-    this._isOnNewline = true;
+    this.#isOnNewline = true;
 
-    this._newlineRegex = new RegExp(`${Text.escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
+    this.#newlineRegex = new RegExp(`${Text.escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
   }
 
   public get supportsColor(): boolean {
-    return this._parentTerminalProvider.supportsColor;
+    return this.#parentTerminalProvider.supportsColor;
   }
 
   public get eolCharacter(): string {
-    return this._parentTerminalProvider.eolCharacter;
+    return this.#parentTerminalProvider.eolCharacter;
   }
 
   public write(data: string, severity: TerminalProviderSeverity): void {
@@ -90,24 +90,24 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
     let currentIndex: number = 0;
     let newlineMatch: RegExpExecArray | null;
 
-    while ((newlineMatch = this._newlineRegex.exec(data))) {
+    while ((newlineMatch = this.#newlineRegex.exec(data))) {
       // Extract the line, add the prefix, and write it out with the newline
       const newlineIndex: number = newlineMatch.index;
       const newIndex: number = newlineIndex + newlineMatch[0].length;
-      const prefix: string = this._isOnNewline ? this._getPrefix() : '';
+      const prefix: string = this.#isOnNewline ? this.#getPrefix() : '';
       const dataToWrite: string = `${prefix}${data.substring(currentIndex, newIndex)}`;
-      this._parentTerminalProvider.write(dataToWrite, severity);
+      this.#parentTerminalProvider.write(dataToWrite, severity);
       // Update the currentIndex to start the search from the char after the newline
       currentIndex = newIndex;
-      this._isOnNewline = true;
+      this.#isOnNewline = true;
     }
 
     // The remaining data is not postfixed by a newline, so write out the data and set _isNewline to false
     const remainingData: string = data.substring(currentIndex);
     if (remainingData.length) {
-      const prefix: string = this._isOnNewline ? this._getPrefix() : '';
-      this._parentTerminalProvider.write(`${prefix}${remainingData}`, severity);
-      this._isOnNewline = false;
+      const prefix: string = this.#isOnNewline ? this.#getPrefix() : '';
+      this.#parentTerminalProvider.write(`${prefix}${remainingData}`, severity);
+      this.#isOnNewline = false;
     }
   }
 }

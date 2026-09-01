@@ -130,14 +130,14 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  * @public
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
-  private readonly _tsdocConfiguration: TSDocConfiguration;
-  private readonly _projectFolderUrl?: string;
+  readonly #tsdocConfiguration: TSDocConfiguration;
+  readonly #projectFolderUrl?: string;
 
   public constructor(options: IApiPackageOptions) {
     super(options);
 
-    this._tsdocConfiguration = options.tsdocConfiguration;
-    this._projectFolderUrl = options.projectFolderUrl;
+    this.#tsdocConfiguration = options.tsdocConfiguration;
+    this.#projectFolderUrl = options.projectFolderUrl;
   }
 
   public static override onDeserializeInto(
@@ -244,11 +244,11 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
    * in the .api.json file so that doc comments can be parsed accurately when loading the file.
    */
   public get tsdocConfiguration(): TSDocConfiguration {
-    return this._tsdocConfiguration;
+    return this.#tsdocConfiguration;
   }
 
   public get projectFolderUrl(): string | undefined {
-    return this._projectFolderUrl;
+    return this.#projectFolderUrl;
   }
 
   public override addMember(member: ApiEntryPoint): void {

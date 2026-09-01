@@ -32,12 +32,12 @@ export interface ISourceLocationOptions {
  * @public
  */
 export class SourceLocation {
-  private readonly _projectFolderUrl?: string;
-  private readonly _fileUrlPath?: string;
+  readonly #projectFolderUrl?: string;
+  readonly #fileUrlPath?: string;
 
   public constructor(options: ISourceLocationOptions) {
-    this._projectFolderUrl = options.projectFolderUrl;
-    this._fileUrlPath = options.fileUrlPath;
+    this.#projectFolderUrl = options.projectFolderUrl;
+    this.#fileUrlPath = options.fileUrlPath;
   }
 
   /**
@@ -45,16 +45,16 @@ export class SourceLocation {
    * cannot be determined.
    */
   public get fileUrl(): string | undefined {
-    if (this._projectFolderUrl === undefined || this._fileUrlPath === undefined) {
+    if (this.#projectFolderUrl === undefined || this.#fileUrlPath === undefined) {
       return undefined;
     }
 
-    let projectFolderUrl: string = this._projectFolderUrl;
+    let projectFolderUrl: string = this.#projectFolderUrl;
     if (!projectFolderUrl.endsWith('/')) {
       projectFolderUrl += '/';
     }
 
-    const url: URL = new URL(this._fileUrlPath, projectFolderUrl);
+    const url: URL = new URL(this.#fileUrlPath, projectFolderUrl);
     return url.href;
   }
 }

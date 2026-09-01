@@ -67,10 +67,11 @@ export interface IGetSourceLocationOptions {
 
 export class SourceMapper {
   // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
-  private _sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private fields yet.
+  #sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
 
   // Cache the FileSystem.exists() result for mapped .ts files
-  private _originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
+  #originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
 
   /**
    * Given a `.d.ts` source file and a specific position within the file, return the corresponding
@@ -90,11 +91,11 @@ export class SourceMapper {
       return sourceLocation;
     }
 
-    const mappedSourceLocation: ISourceLocation | undefined = this._getMappedSourceLocation(sourceLocation);
+    const mappedSourceLocation: ISourceLocation | undefined = this.#getMappedSourceLocation(sourceLocation);
     return mappedSourceLocation || sourceLocation;
   }
 
-  private _getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
+  #getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
     const { sourceFilePath, sourceFileLine, sourceFileColumn } = sourceLocation;
 
     if (!FileSystem.exists(sourceFilePath)) {
@@ -102,7 +103,7 @@ export class SourceMapper {
       throw new InternalError('The referenced path was not found: ' + sourceFilePath);
     }
 
-    const sourceMap: ISourceMap | null = this._getSourceMap(sourceFilePath);
+    const sourceMap: ISourceMap | null = this.#getSourceMap(sourceFilePath);
     if (!sourceMap) return;
 
     const nearestMappingItem: MappingItem | undefined = _findNearestMappingItem(sourceMap.mappingItems, {
@@ -115,7 +116,7 @@ export class SourceMapper {
     const mappedFilePath: string = path.resolve(path.dirname(sourceFilePath), nearestMappingItem.source);
 
     // Does the mapped filename exist?  Use a cache to remember the answer.
-    let originalFileInfo: IOriginalFileInfo | undefined = this._originalFileInfoByPath.get(mappedFilePath);
+    let originalFileInfo: IOriginalFileInfo | undefined = this.#originalFileInfoByPath.get(mappedFilePath);
     if (originalFileInfo === undefined) {
       originalFileInfo = {
         fileExists: FileSystem.exists(mappedFilePath),
@@ -132,7 +133,7 @@ export class SourceMapper {
         originalFileInfo.maxColumnForLine.unshift(0); // Extra item since lines are 1-based
       }
 
-      this._originalFileInfoByPath.set(mappedFilePath, originalFileInfo);
+      this.#originalFileInfoByPath.set(mappedFilePath, originalFileInfo);
     }
 
     // Don't translate coordinates to a file that doesn't exist
@@ -167,17 +168,18 @@ export class SourceMapper {
     }
   }
 
-  private _getSourceMap(sourceFilePath: string): ISourceMap | null {
-    let sourceMap: ISourceMap | null | undefined = this._sourceMapByFilePath.get(sourceFilePath);
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private fields yet.
+  #getSourceMap(sourceFilePath: string): ISourceMap | null {
+    let sourceMap: ISourceMap | null | undefined = this.#sourceMapByFilePath.get(sourceFilePath);
 
     if (sourceMap === undefined) {
       // Normalize the path and redo the lookup
       const normalizedPath: string = FileSystem.getRealPath(sourceFilePath);
 
-      sourceMap = this._sourceMapByFilePath.get(normalizedPath);
+      sourceMap = this.#sourceMapByFilePath.get(normalizedPath);
       if (sourceMap !== undefined) {
         // Copy the result from the normalized to the non-normalized key
-        this._sourceMapByFilePath.set(sourceFilePath, sourceMap);
+        this.#sourceMapByFilePath.set(sourceFilePath, sourceMap);
       } else {
         // Given "folder/file.d.ts", check for a corresponding "folder/file.d.ts.map"
         const sourceMapPath: string = normalizedPath + '.map';
@@ -209,10 +211,10 @@ export class SourceMapper {
           sourceMap = null;
         }
 
-        this._sourceMapByFilePath.set(normalizedPath, sourceMap);
+        this.#sourceMapByFilePath.set(normalizedPath, sourceMap);
         if (sourceFilePath !== normalizedPath) {
           // Add both keys to the map
-          this._sourceMapByFilePath.set(sourceFilePath, sourceMap);
+          this.#sourceMapByFilePath.set(sourceFilePath, sourceMap);
         }
       }
     }

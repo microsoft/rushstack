@@ -21,7 +21,7 @@ export interface IAddToArchiveOptions {
 }
 
 export class ArchiveManager {
-  private _zip: JSZip = new JSZip();
+  #zip: JSZip = new JSZip();
 
   public async addToArchiveAsync(options: IAddToArchiveOptions): Promise<void> {
     const { filePath, fileData, archivePath } = options;
@@ -48,14 +48,14 @@ export class ArchiveManager {
 
     // Replace backslashes for Unix compat
     const addPath: string = Path.convertToSlashes(archivePath);
-    this._zip.file(addPath, data, {
+    this.#zip.file(addPath, data, {
       unixPermissions: permissions,
       dir: false
     });
   }
 
   public async createArchiveAsync(archiveFilePath: string): Promise<void> {
-    const zipContent: Buffer = await this._zip.generateAsync({
+    const zipContent: Buffer = await this.#zip.generateAsync({
       type: 'nodebuffer',
       platform: 'UNIX'
     });

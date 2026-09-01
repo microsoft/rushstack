@@ -90,12 +90,12 @@ const LONGEST_SEVERITY_NAME_LENGTH: number = Object.keys(TerminalProviderSeverit
  * @beta
  */
 export class StringBufferTerminalProvider implements ITerminalProvider {
-  private _standardBuffer: StringBuilder = new StringBuilder();
-  private _verboseBuffer: StringBuilder = new StringBuilder();
-  private _debugBuffer: StringBuilder = new StringBuilder();
-  private _warningBuffer: StringBuilder = new StringBuilder();
-  private _errorBuffer: StringBuilder = new StringBuilder();
-  private _allOutputChunks: IOutputChunk[] = [];
+  #standardBuffer: StringBuilder = new StringBuilder();
+  #verboseBuffer: StringBuilder = new StringBuilder();
+  #debugBuffer: StringBuilder = new StringBuilder();
+  #warningBuffer: StringBuilder = new StringBuilder();
+  #errorBuffer: StringBuilder = new StringBuilder();
+  #allOutputChunks: IOutputChunk[] = [];
 
   /**
    * {@inheritDoc ITerminalProvider.supportsColor}
@@ -114,11 +114,11 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
       severity
     ] as TerminalProviderSeverityName;
 
-    const lastChunk: IOutputChunk | undefined = this._allOutputChunks[this._allOutputChunks.length - 1];
+    const lastChunk: IOutputChunk | undefined = this.#allOutputChunks[this.#allOutputChunks.length - 1];
     if (lastChunk && lastChunk.severity === severityName) {
       lastChunk.text += text;
     } else {
-      this._allOutputChunks.push({
+      this.#allOutputChunks.push({
         text,
         severity: severityName
       });
@@ -126,28 +126,28 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
 
     switch (severity) {
       case TerminalProviderSeverity.warning: {
-        this._warningBuffer.append(text);
+        this.#warningBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.error: {
-        this._errorBuffer.append(text);
+        this.#errorBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.verbose: {
-        this._verboseBuffer.append(text);
+        this.#verboseBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.debug: {
-        this._debugBuffer.append(text);
+        this.#debugBuffer.append(text);
         break;
       }
 
       case TerminalProviderSeverity.log:
       default: {
-        this._standardBuffer.append(text);
+        this.#standardBuffer.append(text);
         break;
       }
     }
@@ -164,7 +164,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    * Get everything that has been written at log-level severity.
    */
   public getOutput(options?: IStringBufferOutputOptions): string {
-    return _normalizeOutput(this._standardBuffer.toString(), options);
+    return _normalizeOutput(this.#standardBuffer.toString(), options);
   }
 
   /**
@@ -178,28 +178,28 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    * Get everything that has been written at verbose-level severity.
    */
   public getVerboseOutput(options?: IStringBufferOutputOptions): string {
-    return _normalizeOutput(this._verboseBuffer.toString(), options);
+    return _normalizeOutput(this.#verboseBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at debug-level severity.
    */
   public getDebugOutput(options?: IStringBufferOutputOptions): string {
-    return _normalizeOutput(this._debugBuffer.toString(), options);
+    return _normalizeOutput(this.#debugBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at error-level severity.
    */
   public getErrorOutput(options?: IStringBufferOutputOptions): string {
-    return _normalizeOutput(this._errorBuffer.toString(), options);
+    return _normalizeOutput(this.#errorBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at warning-level severity.
    */
   public getWarningOutput(options?: IStringBufferOutputOptions): string {
-    return _normalizeOutput(this._warningBuffer.toString(), options);
+    return _normalizeOutput(this.#warningBuffer.toString(), options);
   }
 
   /**
@@ -255,7 +255,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     if (asLines) {
       const lines: `[${string}] ${string}`[] = [];
 
-      for (const { text: rawText, severity: rawSeverity } of this._allOutputChunks) {
+      for (const { text: rawText, severity: rawSeverity } of this.#allOutputChunks) {
         const severity: string = (rawSeverity as TerminalProviderSeverityName).padStart(
           LONGEST_SEVERITY_NAME_LENGTH,
           ' '
@@ -287,7 +287,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
 
       return lines;
     } else {
-      return this._allOutputChunks.map(({ text: rawText, severity }) => {
+      return this.#allOutputChunks.map(({ text: rawText, severity }) => {
         const text: string = _normalizeOutputInner(rawText, normalizeSpecialCharacters);
         return {
           text,

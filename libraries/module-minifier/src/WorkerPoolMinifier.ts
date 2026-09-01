@@ -50,16 +50,16 @@ export interface IWorkerPoolMinifierOptions {
  * @public
  */
 export class WorkerPoolMinifier implements IModuleMinifier {
-  private readonly _pool: WorkerPool;
-  private readonly _verbose: boolean;
-  private readonly _configHash: string;
+  readonly #pool: WorkerPool;
+  readonly #verbose: boolean;
+  readonly #configHash: string;
 
-  private _refCount: number;
-  private _deduped: number;
-  private _minified: number;
+  #refCount: number;
+  #deduped: number;
+  #minified: number;
 
-  private readonly _resultCache: Map<string, IModuleMinificationResult>;
-  private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
+  readonly #resultCache: Map<string, IModuleMinificationResult>;
+  readonly #activeRequests: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(options: IWorkerPoolMinifierOptions) {
     const {
@@ -81,28 +81,28 @@ export class WorkerPoolMinifier implements IModuleMinifier {
 
     const { version: terserVersion } = require('terser/package.json');
 
-    this._configHash = createHash('sha256')
+    this.#configHash = createHash('sha256')
       .update(WorkerPoolMinifier.name, 'utf8')
       .update(`terser@${terserVersion}`)
       .update(serialize(terserOptions))
       .digest('base64');
 
-    this._activeRequests = activeRequests;
-    this._refCount = 0;
-    this._resultCache = resultCache;
-    this._pool = terserPool;
-    this._verbose = verbose;
+    this.#activeRequests = activeRequests;
+    this.#refCount = 0;
+    this.#resultCache = resultCache;
+    this.#pool = terserPool;
+    this.#verbose = verbose;
 
-    this._deduped = 0;
-    this._minified = 0;
+    this.#deduped = 0;
+    this.#minified = 0;
   }
 
   public get maxThreads(): number {
-    return this._pool.maxWorkers;
+    return this.#pool.maxWorkers;
   }
 
   public set maxThreads(threads: number) {
-    this._pool.maxWorkers = threads;
+    this.#pool.maxWorkers = threads;
   }
 
   /**
@@ -113,47 +113,46 @@ export class WorkerPoolMinifier implements IModuleMinifier {
   public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
     const { hash } = request;
 
-    const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
+    const cached: IModuleMinificationResult | undefined = this.#resultCache.get(hash);
     if (cached) {
-      ++this._deduped;
+      ++this.#deduped;
       return callback(cached);
     }
 
-    const { _activeRequests: activeRequests } = this;
-    const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(hash);
+    const callbacks: IModuleMinificationCallback[] | undefined = this.#activeRequests.get(hash);
     if (callbacks) {
-      ++this._deduped;
+      ++this.#deduped;
       callbacks.push(callback);
       return;
     }
 
-    activeRequests.set(hash, [callback]);
-    ++this._minified;
+    this.#activeRequests.set(hash, [callback]);
+    ++this.#minified;
 
-    this._pool
+    this.#pool
       .checkoutWorkerAsync(true)
       .then((worker) => {
         const cb: (message: IModuleMinificationResult) => void = (
           message: IModuleMinificationResult
         ): void => {
           worker.off('message', cb);
-          const workerCallbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(
+          const workerCallbacks: IModuleMinificationCallback[] | undefined = this.#activeRequests.get(
             message.hash
           )!;
-          activeRequests.delete(message.hash);
-          this._resultCache.set(message.hash, message);
+          this.#activeRequests.delete(message.hash);
+          this.#resultCache.set(message.hash, message);
           for (const workerCallback of workerCallbacks) {
             workerCallback(message);
           }
           // This should always be the last thing done with the worker
-          this._pool.checkinWorker(worker);
+          this.#pool.checkinWorker(worker);
         };
 
         worker.on('message', cb);
         worker.postMessage(request);
       })
       .catch((error: Error) => {
-        const errorCallbacks: IModuleMinificationCallback[] = activeRequests.get(hash)!;
+        const errorCallbacks: IModuleMinificationCallback[] = this.#activeRequests.get(hash)!;
         for (const errorCallback of errorCallbacks) {
           errorCallback({
             hash,
@@ -169,30 +168,30 @@ export class WorkerPoolMinifier implements IModuleMinifier {
    * {@inheritdoc IModuleMinifier.connectAsync}
    */
   public async connectAsync(): Promise<IMinifierConnection> {
-    if (++this._refCount === 1) {
-      this._pool.reset();
+    if (++this.#refCount === 1) {
+      this.#pool.reset();
     }
 
     const disconnectAsync: IMinifierConnection['disconnectAsync'] = async () => {
-      if (--this._refCount === 0) {
-        if (this._verbose) {
+      if (--this.#refCount === 0) {
+        if (this.#verbose) {
           // eslint-disable-next-line no-console
           console.log(`Shutting down minifier worker pool`);
         }
-        await this._pool.finishAsync();
-        this._resultCache.clear();
-        this._activeRequests.clear();
-        if (this._verbose) {
+        await this.#pool.finishAsync();
+        this.#resultCache.clear();
+        this.#activeRequests.clear();
+        if (this.#verbose) {
           // eslint-disable-next-line no-console
-          console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
+          console.log(`Module minification: ${this.#deduped} Deduped, ${this.#minified} Processed`);
         }
       }
-      this._deduped = 0;
-      this._minified = 0;
+      this.#deduped = 0;
+      this.#minified = 0;
     };
 
     return {
-      configHash: this._configHash,
+      configHash: this.#configHash,
 
       disconnectAsync,
       disconnect: disconnectAsync

@@ -38,14 +38,14 @@ export interface ICertificateStoreOptions {
  * @public
  */
 export class CertificateStore {
-  private readonly _caCertificatePath: string;
-  private readonly _certificatePath: string;
-  private readonly _keyPath: string;
-  private readonly _storePath: string;
+  readonly #caCertificatePath: string;
+  readonly #certificatePath: string;
+  readonly #keyPath: string;
+  readonly #storePath: string;
 
-  private _caCertificateData: string | undefined;
-  private _certificateData: string | undefined;
-  private _keyData: string | undefined;
+  #caCertificateData: string | undefined;
+  #certificateData: string | undefined;
+  #keyData: string | undefined;
 
   public constructor(options: ICertificateStoreOptions = {}) {
     const requestedStorePath: string | undefined = options.storePath;
@@ -113,47 +113,47 @@ export class CertificateStore {
       options.keyFilename ?? debugCertificateManagerConfig?.keyFilename ?? 'rushstack-serve.key'
     );
 
-    this._storePath = storePath;
-    this._caCertificatePath = caCertificatePath;
-    this._certificatePath = certificatePath;
-    this._keyPath = keyPath;
+    this.#storePath = storePath;
+    this.#caCertificatePath = caCertificatePath;
+    this.#certificatePath = certificatePath;
+    this.#keyPath = keyPath;
   }
 
   /**
    * Path to the directory where the debug certificates are stored.
    */
   public get storePath(): string {
-    return this._storePath;
+    return this.#storePath;
   }
 
   /**
    * Path to the saved debug CA certificate
    */
   public get caCertificatePath(): string {
-    return this._caCertificatePath;
+    return this.#caCertificatePath;
   }
 
   /**
    * Path to the saved debug TLS certificate
    */
   public get certificatePath(): string {
-    return this._certificatePath;
+    return this.#certificatePath;
   }
 
   /**
    * Path to the saved debug TLS key
    */
   public get keyPath(): string {
-    return this._keyPath;
+    return this.#keyPath;
   }
 
   /**
    * Debug Certificate Authority certificate pem file contents.
    */
   public get caCertificateData(): string | undefined {
-    if (!this._caCertificateData) {
+    if (!this.#caCertificateData) {
       try {
-        this._caCertificateData = FileSystem.readFile(this._caCertificatePath);
+        this.#caCertificateData = FileSystem.readFile(this.#caCertificatePath);
       } catch (err) {
         if (!FileSystem.isNotExistError(err)) {
           throw err;
@@ -161,26 +161,26 @@ export class CertificateStore {
       }
     }
 
-    return this._caCertificateData;
+    return this.#caCertificateData;
   }
 
   public set caCertificateData(certificate: string | undefined) {
     if (certificate) {
-      FileSystem.writeFile(this._caCertificatePath, certificate);
-    } else if (FileSystem.exists(this._caCertificatePath)) {
-      FileSystem.deleteFile(this._caCertificatePath);
+      FileSystem.writeFile(this.#caCertificatePath, certificate);
+    } else if (FileSystem.exists(this.#caCertificatePath)) {
+      FileSystem.deleteFile(this.#caCertificatePath);
     }
 
-    this._caCertificateData = certificate;
+    this.#caCertificateData = certificate;
   }
 
   /**
    * Debug TLS Server certificate pem file contents.
    */
   public get certificateData(): string | undefined {
-    if (!this._certificateData) {
+    if (!this.#certificateData) {
       try {
-        this._certificateData = FileSystem.readFile(this._certificatePath);
+        this.#certificateData = FileSystem.readFile(this.#certificatePath);
       } catch (err) {
         if (!FileSystem.isNotExistError(err)) {
           throw err;
@@ -188,26 +188,26 @@ export class CertificateStore {
       }
     }
 
-    return this._certificateData;
+    return this.#certificateData;
   }
 
   public set certificateData(certificate: string | undefined) {
     if (certificate) {
-      FileSystem.writeFile(this._certificatePath, certificate);
-    } else if (FileSystem.exists(this._certificatePath)) {
-      FileSystem.deleteFile(this._certificatePath);
+      FileSystem.writeFile(this.#certificatePath, certificate);
+    } else if (FileSystem.exists(this.#certificatePath)) {
+      FileSystem.deleteFile(this.#certificatePath);
     }
 
-    this._certificateData = certificate;
+    this.#certificateData = certificate;
   }
 
   /**
    * Key used to sign the debug pem certificate.
    */
   public get keyData(): string | undefined {
-    if (!this._keyData) {
+    if (!this.#keyData) {
       try {
-        this._keyData = FileSystem.readFile(this._keyPath);
+        this.#keyData = FileSystem.readFile(this.#keyPath);
       } catch (err) {
         if (!FileSystem.isNotExistError(err)) {
           throw err;
@@ -215,16 +215,16 @@ export class CertificateStore {
       }
     }
 
-    return this._keyData;
+    return this.#keyData;
   }
 
   public set keyData(key: string | undefined) {
     if (key) {
-      FileSystem.writeFile(this._keyPath, key);
-    } else if (FileSystem.exists(this._keyPath)) {
-      FileSystem.deleteFile(this._keyPath);
+      FileSystem.writeFile(this.#keyPath, key);
+    } else if (FileSystem.exists(this.#keyPath)) {
+      FileSystem.deleteFile(this.#keyPath);
     }
 
-    this._keyData = key;
+    this.#keyData = key;
   }
 }

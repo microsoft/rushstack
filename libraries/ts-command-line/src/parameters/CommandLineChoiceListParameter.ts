@@ -15,7 +15,7 @@ export class CommandLineChoiceListParameter<
   /** {@inheritDoc ICommandLineChoiceListDefinition.alternatives} */
   public readonly alternatives: ReadonlySet<TChoice>;
 
-  private _values: TChoice[] = [];
+  #values: TChoice[] = [];
 
   /** {@inheritDoc ICommandLineChoiceListDefinition.completions} */
   public readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
@@ -54,7 +54,7 @@ export class CommandLineChoiceListParameter<
           this.reportInvalidData(data);
         }
       }
-      this._values = data;
+      this.#values = data;
       return;
     }
 
@@ -71,14 +71,14 @@ export class CommandLineChoiceListParameter<
           }
         }
 
-        this._values = values as TChoice[];
+        this.#values = values as TChoice[];
         return;
       }
     }
 
     // (No default value for choice lists)
 
-    this._values = [];
+    this.#values = [];
   }
 
   /**
@@ -89,7 +89,7 @@ export class CommandLineChoiceListParameter<
    * or if the parameter was omitted and has no default value.
    */
   public get values(): ReadonlyArray<TChoice> {
-    return this._values;
+    return this.#values;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */
