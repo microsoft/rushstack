@@ -8,7 +8,7 @@ import type { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
 export class LinkAction extends BaseRushAction {
-  private readonly _force: CommandLineFlagParameter;
+  readonly #force: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -22,7 +22,7 @@ export class LinkAction extends BaseRushAction {
       parser
     });
 
-    this._force = this.defineFlagParameter({
+    this.#force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
       description:
@@ -39,6 +39,6 @@ export class LinkAction extends BaseRushAction {
     const linkManager: BaseLinkManager = linkManagerFactoryModule.LinkManagerFactory.getLinkManager(
       this.rushConfiguration
     );
-    await linkManager.createSymlinksForProjectsAsync(this._force.value);
+    await linkManager.createSymlinksForProjectsAsync(this.#force.value);
   }
 }

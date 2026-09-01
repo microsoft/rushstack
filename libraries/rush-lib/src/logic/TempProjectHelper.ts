@@ -17,19 +17,19 @@ import type { Subspace } from '../api/Subspace';
 /* eslint-disable no-bitwise */
 
 export class TempProjectHelper {
-  private _rushConfiguration: RushConfiguration;
-  private _subspace: Subspace;
+  #rushConfiguration: RushConfiguration;
+  #subspace: Subspace;
 
   public constructor(rushConfiguration: RushConfiguration, subspace: Subspace) {
-    this._rushConfiguration = rushConfiguration;
-    this._subspace = subspace;
+    this.#rushConfiguration = rushConfiguration;
+    this.#subspace = subspace;
   }
 
   /**
    * Deletes the existing tarball and creates a tarball for the given rush project
    */
   public createTempProjectTarball(rushProject: RushConfigurationProject): void {
-    FileSystem.ensureFolder(path.resolve(this._subspace.getSubspaceTempFolderPath(), 'projects'));
+    FileSystem.ensureFolder(path.resolve(this.#subspace.getSubspaceTempFolderPath(), 'projects'));
     const tarballFile: string = this.getTarballFilePath(rushProject);
     const tempProjectFolder: string = this.getTempProjectFolder(rushProject);
 
@@ -49,7 +49,7 @@ export class TempProjectHelper {
       prefix: npmPackageFolder,
       filter: (tarPath: string, stat: Stats): boolean => {
         if (
-          !this._rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
+          !this.#rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
         ) {
           stat.mode =
             (stat.mode & ~0x1ff) | PosixModeBits.AllRead | PosixModeBits.UserWrite | PosixModeBits.AllExecute;
@@ -67,7 +67,7 @@ export class TempProjectHelper {
    */
   public getTarballFilePath(project: RushConfigurationProject): string {
     return path.join(
-      this._subspace.getSubspaceTempFolderPath(),
+      this.#subspace.getSubspaceTempFolderPath(),
       RushConstants.rushTempProjectsFolderName,
       `${project.unscopedTempProjectName}.tgz`
     );
@@ -76,7 +76,7 @@ export class TempProjectHelper {
   public getTempProjectFolder(rushProject: RushConfigurationProject): string {
     const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
     return path.join(
-      this._subspace.getSubspaceTempFolderPath(),
+      this.#subspace.getSubspaceTempFolderPath(),
       RushConstants.rushTempProjectsFolderName,
       unscopedTempProjectName
     );

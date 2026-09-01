@@ -98,12 +98,12 @@ interface ITryGetLogOnlyOperationBuildCacheOptions
 }
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
-  private _buildCacheContextByOperation: Map<Operation, IOperationBuildCacheContext> = new Map();
+  #buildCacheContextByOperation: Map<Operation, IOperationBuildCacheContext> = new Map();
 
-  private readonly _options: ICacheableOperationPluginOptions;
+  readonly #options: ICacheableOperationPluginOptions;
 
   public constructor(options: ICacheableOperationPluginOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -113,7 +113,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       cobuildConfiguration,
       excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache
-    } = this._options;
+    } = this.#options;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
       graph.hooks.beforeExecuteIterationAsync.tap(
@@ -187,11 +187,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isCacheReadAttempted: false
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
-            this._buildCacheContextByOperation.set(operation, buildCacheContext);
+            this.#buildCacheContextByOperation.set(operation, buildCacheContext);
           }
 
           if (disjointSet) {
-            clusterOperations(disjointSet, this._buildCacheContextByOperation);
+            clusterOperations(disjointSet, this.#buildCacheContextByOperation);
             for (const operationSet of disjointSet.getAllSets()) {
               if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
                 // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
@@ -214,7 +214,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 // Assign same cluster id to all operations in the same cluster.
                 for (const record of groupedOperations) {
                   const buildCacheContext: IOperationBuildCacheContext =
-                    this._getBuildCacheContextByOperationOrThrow(record);
+                    this.#getBuildCacheContextByOperationOrThrow(record);
                   buildCacheContext.cobuildClusterId = cobuildClusterId;
                 }
               }
@@ -228,12 +228,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         async (
           runnerContext: IOperationRunnerContext & IOperationExecutionResult
         ): Promise<OperationStatus | undefined> => {
-          if (this._buildCacheContextByOperation.size === 0) {
+          if (this.#buildCacheContextByOperation.size === 0) {
             return;
           }
 
           const buildCacheContext: IOperationBuildCacheContext | undefined =
-            this._getBuildCacheContextByOperation(runnerContext.operation);
+            this.#getBuildCacheContextByOperation(runnerContext.operation);
 
           if (!buildCacheContext) {
             return;
@@ -260,7 +260,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             ) {
               // The writable does not exist or has been closed, re-create one
               // eslint-disable-next-line require-atomic-updates
-              buildCacheContext.buildCacheTerminal = await this._createBuildCacheTerminalAsync({
+              buildCacheContext.buildCacheTerminal = await this.#createBuildCacheTerminalAsync({
                 record,
                 buildCacheContext,
                 buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
@@ -273,7 +273,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             const buildCacheTerminal: ITerminal = buildCacheContext.buildCacheTerminal;
 
-            let operationBuildCache: OperationBuildCache | undefined = this._tryGetOperationBuildCache({
+            let operationBuildCache: OperationBuildCache | undefined = this.#tryGetOperationBuildCache({
               buildCacheContext,
               buildCacheConfiguration,
               terminal: buildCacheTerminal,
@@ -292,7 +292,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               ) {
                 // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
                 // a log files only project build cache
-                operationBuildCache = await this._tryGetLogOnlyOperationBuildCacheAsync({
+                operationBuildCache = await this.#tryGetLogOnlyOperationBuildCacheAsync({
                   buildCacheConfiguration,
                   cobuildConfiguration,
                   buildCacheContext,
@@ -312,7 +312,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 }
               }
 
-              cobuildLock = await this._tryGetCobuildLockAsync({
+              cobuildLock = await this.#tryGetCobuildLockAsync({
                 buildCacheContext,
                 operationBuildCache,
                 cobuildConfiguration,
@@ -448,7 +448,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
 
           const buildCacheContext: IOperationBuildCacheContext | undefined =
-            this._getBuildCacheContextByOperation(operation);
+            this.#getBuildCacheContextByOperation(operation);
 
           if (!buildCacheContext) {
             return;
@@ -549,7 +549,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         (record: IOperationRunnerContext & IOperationExecutionResult): void => {
           const { operation } = record;
           const buildCacheContext: IOperationBuildCacheContext | undefined =
-            this._buildCacheContextByOperation.get(operation);
+            this.#buildCacheContextByOperation.get(operation);
           // Status changes to direct dependents
           let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
 
@@ -565,7 +565,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (blockCacheWrite) {
             for (const consumer of operation.consumers) {
               const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
-                this._getBuildCacheContextByOperation(consumer);
+                this.#getBuildCacheContextByOperation(consumer);
               if (consumerBuildCacheContext) {
                 consumerBuildCacheContext.isCacheWriteAllowed = false;
               }
@@ -575,21 +575,21 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       );
 
       graph.hooks.afterExecuteIterationAsync.tap(PLUGIN_NAME, (status: OperationStatus) => {
-        this._buildCacheContextByOperation.clear();
+        this.#buildCacheContextByOperation.clear();
         return status;
       });
     });
   }
 
-  private _getBuildCacheContextByOperation(operation: Operation): IOperationBuildCacheContext | undefined {
+  #getBuildCacheContextByOperation(operation: Operation): IOperationBuildCacheContext | undefined {
     const buildCacheContext: IOperationBuildCacheContext | undefined =
-      this._buildCacheContextByOperation.get(operation);
+      this.#buildCacheContextByOperation.get(operation);
     return buildCacheContext;
   }
 
-  private _getBuildCacheContextByOperationOrThrow(operation: Operation): IOperationBuildCacheContext {
+  #getBuildCacheContextByOperationOrThrow(operation: Operation): IOperationBuildCacheContext {
     const buildCacheContext: IOperationBuildCacheContext | undefined =
-      this._getBuildCacheContextByOperation(operation);
+      this.#getBuildCacheContextByOperation(operation);
     if (!buildCacheContext) {
       // This should not happen
       throw new InternalError(`Build cache context for operation ${operation.name} should be defined`);
@@ -597,7 +597,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext;
   }
 
-  private _tryGetOperationBuildCache(
+  #tryGetOperationBuildCache(
     options: ITryGetOperationBuildCacheOptions
   ): OperationBuildCache | undefined {
     const {
@@ -632,7 +632,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   }
 
   // Get an OperationBuildCache only cache/restore log files
-  private async _tryGetLogOnlyOperationBuildCacheAsync(
+  async #tryGetLogOnlyOperationBuildCacheAsync(
     options: ITryGetLogOnlyOperationBuildCacheOptions
   ): Promise<OperationBuildCache | undefined> {
     const {
@@ -682,7 +682,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return operationBuildCache;
   }
 
-  private async _tryGetCobuildLockAsync({
+  async #tryGetCobuildLockAsync({
     cobuildConfiguration,
     buildCacheContext,
     operationBuildCache,
@@ -714,7 +714,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext.cobuildLock;
   }
 
-  private async _createBuildCacheTerminalAsync({
+  async #createBuildCacheTerminalAsync({
     record,
     buildCacheContext,
     buildCacheEnabled,
@@ -741,7 +741,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     // This creates the writer, only do this if necessary.
     const collatedWriter: CollatedWriter = record.collatedWriter;
     const cacheProjectLogWritable: TerminalWritable | undefined =
-      await this._tryGetBuildCacheTerminalWritableAsync({
+      await this.#tryGetBuildCacheTerminalWritableAsync({
         buildCacheContext,
         buildCacheEnabled,
         rushProject,
@@ -781,7 +781,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return new Terminal(buildCacheTerminalProvider);
   }
 
-  private async _tryGetBuildCacheTerminalWritableAsync({
+  async #tryGetBuildCacheTerminalWritableAsync({
     buildCacheEnabled,
     rushProject,
     buildCacheContext,

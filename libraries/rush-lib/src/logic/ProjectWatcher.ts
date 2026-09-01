@@ -66,36 +66,36 @@ const KEYBIND_HELP: string =
  * signal is needed; actual change detection is deferred to `getInputsSnapshotAsync`.
  */
 export class ProjectWatcher {
-  private readonly _debounceMs: number;
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _terminal: ITerminal;
-  private readonly _graph: IOperationGraph;
+  readonly #debounceMs: number;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #terminal: ITerminal;
+  readonly #graph: IOperationGraph;
 
-  private _repoRoot: string | undefined;
-  private _watchers: Map<string, fs.FSWatcher> | undefined;
-  private _closePromises: Promise<void>[] = [];
-  private _debounceHandle: NodeJS.Timeout | undefined;
-  private _isWatching: boolean = false;
-  private _lastStatus: string | undefined;
-  private _renderedStatusLines: number = 0;
-  private _lastSnapshot: IInputsSnapshot | undefined;
-  private _stdinListening: boolean = false;
-  private _stdinHadRawMode: boolean | undefined;
-  private _onStdinDataBound: ((chunk: Buffer | string) => void) | undefined;
+  #repoRoot: string | undefined;
+  #watchers: Map<string, fs.FSWatcher> | undefined;
+  #closePromises: Promise<void>[] = [];
+  #debounceHandle: NodeJS.Timeout | undefined;
+  #isWatching: boolean = false;
+  #lastStatus: string | undefined;
+  #renderedStatusLines: number = 0;
+  #lastSnapshot: IInputsSnapshot | undefined;
+  #stdinListening: boolean = false;
+  #stdinHadRawMode: boolean | undefined;
+  #onStdinDataBound: ((chunk: Buffer | string) => void) | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
     const { graph, debounceMs, rushConfiguration, terminal, initialSnapshot } = options;
-    this._graph = graph;
-    this._debounceMs = debounceMs;
-    this._rushConfiguration = rushConfiguration;
-    this._terminal = terminal;
-    this._lastSnapshot = initialSnapshot; // Seed snapshot
+    this.#graph = graph;
+    this.#debounceMs = debounceMs;
+    this.#rushConfiguration = rushConfiguration;
+    this.#terminal = terminal;
+    this.#lastSnapshot = initialSnapshot; // Seed snapshot
 
     const gitPath: string = new Git(rushConfiguration).getGitPathOrThrow();
-    this._repoRoot = Path.convertToSlashes(getRepoRoot(rushConfiguration.rushJsonFolder, gitPath));
+    this.#repoRoot = Path.convertToSlashes(getRepoRoot(rushConfiguration.rushJsonFolder, gitPath));
 
     // Initialize stdin listener early so keybinds are available immediately
-    this._ensureStdin();
+    this.#ensureStdin();
 
     // Capture snapshot (if provided) prior to executing next iteration (will replace initial snapshot)
     graph.hooks.beforeExecuteIterationAsync.tapPromise(
@@ -105,21 +105,21 @@ export class ProjectWatcher {
         iterationOptions: IOperationGraphIterationOptions
       ): Promise<void> => {
         this.clearStatus();
-        this._lastSnapshot = iterationOptions.inputsSnapshot;
-        await this._stopWatchingAsync();
+        this.#lastSnapshot = iterationOptions.inputsSnapshot;
+        await this.#stopWatchingAsync();
       }
     );
 
     // Start watching once execution loop enters waiting state
     graph.hooks.onIdle.tap('ProjectWatcher', () => {
-      this._startWatching();
+      this.#startWatching();
     });
 
     // Dispose stdin listener when session aborts
     graph.abortController.signal.addEventListener(
       'abort',
       () => {
-        this._disposeStdin();
+        this.#disposeStdin();
       },
       { once: true }
     );
@@ -130,14 +130,14 @@ export class ProjectWatcher {
    * to overwrite previously rendered lines.
    */
   public clearStatus(): void {
-    this._renderedStatusLines = 0;
+    this.#renderedStatusLines = 0;
   }
 
   /**
    * Re-renders the most recent status line (or a default) in place.
    */
   public rerenderStatus(): void {
-    this._setStatus(this._lastStatus ?? 'Waiting for changes...');
+    this.#setStatus(this.#lastStatus ?? 'Waiting for changes...');
   }
 
   /**
@@ -145,14 +145,14 @@ export class ProjectWatcher {
    * and keybind help when stdin is active. Overwrites previously rendered status lines
    * when not mid-execution.
    */
-  private _setStatus(status: string): void {
-    const graph: IOperationGraph = this._graph;
+  #setStatus(status: string): void {
+    const graph: IOperationGraph = this.#graph;
     const isPaused: boolean = graph.pauseNextIteration === true;
     const hasScheduledIteration: boolean = graph.hasScheduledIteration;
     const modeLabel: string = isPaused ? 'PAUSED' : 'WATCHING';
     const pendingLabel: string = hasScheduledIteration ? ' PENDING' : '';
     const statusLines: string[] = [`[${modeLabel}${pendingLabel}] Watch Status: ${status}`];
-    if (this._stdinListening) {
+    if (this.#stdinListening) {
       const lines: string[] = [];
       // First line: modes
       lines.push(
@@ -164,15 +164,15 @@ export class ProjectWatcher {
     }
     if (graph.status !== OperationStatus.Executing) {
       // If rendering during execution, don't try to clean previous output.
-      if (this._renderedStatusLines > 0) {
+      if (this.#renderedStatusLines > 0) {
         readline.cursorTo(process.stdout, 0);
-        readline.moveCursor(process.stdout, 0, -this._renderedStatusLines);
+        readline.moveCursor(process.stdout, 0, -this.#renderedStatusLines);
         readline.clearScreenDown(process.stdout);
       }
-      this._renderedStatusLines = statusLines.length;
+      this.#renderedStatusLines = statusLines.length;
     }
-    this._lastStatus = status;
-    this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
+    this.#lastStatus = status;
+    this.#terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
   }
 
   /**
@@ -180,15 +180,15 @@ export class ProjectWatcher {
    * On platforms without native recursive watch support (Linux), enumerates nested
    * folders from the last snapshot to set up individual watchers.
    */
-  private _startWatching(): void {
-    if (this._isWatching) {
+  #startWatching(): void {
+    if (this.#isWatching) {
       return;
     }
-    this._isWatching = true;
-    const sessionAbortSignal: AbortSignal = this._graph.abortController.signal;
-    const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
+    this.#isWatching = true;
+    const sessionAbortSignal: AbortSignal = this.#graph.abortController.signal;
+    const repoRoot: string = Path.convertToSlashes(this.#rushConfiguration.rushJsonFolder);
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
-    const operations: ReadonlySet<Operation> = this._graph.operations;
+    const operations: ReadonlySet<Operation> = this.#graph.operations;
 
     const projectFolders: Set<string> = new Set();
     for (const op of operations) {
@@ -197,17 +197,17 @@ export class ProjectWatcher {
 
     // Derive nested folder list if on Linux (no native recursive) and snapshot available
     let foldersToWatch: Set<string> = new Set();
-    if (!useNativeRecursiveWatch && this._lastSnapshot) {
+    if (!useNativeRecursiveWatch && this.#lastSnapshot) {
       for (const op of operations) {
         const { associatedProject: rushProject } = op;
         const tracked: ReadonlyMap<string, string> | undefined =
-          this._lastSnapshot.getTrackedFileHashesForOperation(rushProject);
+          this.#lastSnapshot.getTrackedFileHashesForOperation(rushProject);
         if (!tracked) {
           continue;
         }
         const prefixLength: number = rushProject.projectFolder.length - repoRoot.length - 1;
         for (const relPrefix of _enumeratePathsToWatch(tracked.keys(), prefixLength)) {
-          foldersToWatch.add(`${this._repoRoot}/${relPrefix}`);
+          foldersToWatch.add(`${this.#repoRoot}/${relPrefix}`);
         }
       }
     }
@@ -216,7 +216,7 @@ export class ProjectWatcher {
       foldersToWatch = projectFolders;
     }
 
-    const watchers: Map<string, fs.FSWatcher> = (this._watchers = new Map());
+    const watchers: Map<string, fs.FSWatcher> = (this.#watchers = new Map());
 
     const addWatcher = (watchedPath: string, recursive: boolean): void => {
       if (watchers.has(watchedPath)) {
@@ -230,10 +230,10 @@ export class ProjectWatcher {
             recursive: recursive && useNativeRecursiveWatch,
             signal: sessionAbortSignal
           },
-          (eventType, fileName) => this._onFsEvent(fileName)
+          (eventType, fileName) => this.#onFsEvent(fileName)
         );
         watchers.set(watchedPath, watcher);
-        this._closePromises.push(
+        this.#closePromises.push(
           once(watcher, 'close').then(() => {
             watchers.delete(watchedPath);
             watcher.removeAllListeners();
@@ -241,13 +241,13 @@ export class ProjectWatcher {
           })
         );
       } catch (e) {
-        this._terminal.writeDebugLine(`Failed to watch path ${watchedPath}: ${(e as Error).message}`);
+        this.#terminal.writeDebugLine(`Failed to watch path ${watchedPath}: ${(e as Error).message}`);
       }
     };
 
     // Always watch repo root and common config
     addWatcher(repoRoot, false);
-    addWatcher(Path.convertToSlashes(this._rushConfiguration.commonRushConfigFolder), false);
+    addWatcher(Path.convertToSlashes(this.#rushConfiguration.commonRushConfigFolder), false);
     if (useNativeRecursiveWatch) {
       for (const folder of projectFolders) {
         addWatcher(folder, true);
@@ -257,55 +257,56 @@ export class ProjectWatcher {
         addWatcher(folder, true);
       }
     }
-    this._setStatus('Waiting for changes...');
+    this.#setStatus('Waiting for changes...');
   }
 
   /**
    * Closes all active file system watchers and waits for their close events to settle.
    */
-  private async _stopWatchingAsync(): Promise<void> {
-    if (!this._isWatching) {
+  async #stopWatchingAsync(): Promise<void> {
+    if (!this.#isWatching) {
       return;
     }
-    this._isWatching = false;
-    if (this._debounceHandle) {
-      clearTimeout(this._debounceHandle);
-      this._debounceHandle = undefined;
+    this.#isWatching = false;
+    if (this.#debounceHandle) {
+      clearTimeout(this.#debounceHandle);
+      this.#debounceHandle = undefined;
     }
-    if (this._watchers) {
-      for (const watcher of this._watchers.values()) {
+    if (this.#watchers) {
+      for (const watcher of this.#watchers.values()) {
         watcher.close();
       }
     }
-    await Promise.all(this._closePromises);
-    this._closePromises = [];
-    this._watchers = undefined;
-    this._terminal.writeDebugLine('ProjectWatcher: watchers stopped');
+    await Promise.all(this.#closePromises);
+    this.#closePromises = [];
+    this.#watchers = undefined;
+    this.#terminal.writeDebugLine('ProjectWatcher: watchers stopped');
   }
 
   /**
    * Handles a raw file system event by debouncing and scheduling an iteration.
    * Ignores changes to `.git` and `node_modules`.
    */
-  private _onFsEvent(fileName: string | null): void {
+  // eslint-disable-next-line @rushstack/no-new-null -- The decoupled ESLint plugin does not recognize native private methods yet.
+  #onFsEvent(fileName: string | null): void {
     if (fileName === '.git' || fileName === 'node_modules') {
       return;
     }
-    if (this._debounceHandle) {
-      clearTimeout(this._debounceHandle);
+    if (this.#debounceHandle) {
+      clearTimeout(this.#debounceHandle);
     }
-    this._debounceHandle = setTimeout(() => this._scheduleIteration(), this._debounceMs);
+    this.#debounceHandle = setTimeout(() => this.#scheduleIteration(), this.#debounceMs);
   }
 
   /**
    * Schedules a new execution iteration on the graph in response to detected file changes.
    */
-  private _scheduleIteration(): void {
-    this._setStatus('File change detected. Queuing new iteration...');
-    this._graph
+  #scheduleIteration(): void {
+    this.#setStatus('File change detected. Queuing new iteration...');
+    this.#graph
       .scheduleIterationAsync({})
       .catch((e: unknown) =>
-        this._terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`)
+        this.#terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`)
       );
   }
 
@@ -313,14 +314,14 @@ export class ProjectWatcher {
    * Sets up a raw-mode stdin listener so the user can interact with the watch session
    * via single-key keybinds. Captures the previous raw-mode state for restoration on dispose.
    */
-  private _ensureStdin(): void {
-    if (this._stdinListening || !process.stdin.isTTY) {
+  #ensureStdin(): void {
+    if (this.#stdinListening || !process.stdin.isTTY) {
       return;
     }
     const stdin: NodeJS.ReadStream = process.stdin as NodeJS.ReadStream;
     // Node's ReadStream has an undocumented isRaw property when setRawMode has been used.
     // Capture it in a type-safe way.
-    this._stdinHadRawMode =
+    this.#stdinHadRawMode =
       typeof (stdin as unknown as { isRaw?: boolean }).isRaw === 'boolean'
         ? (stdin as unknown as { isRaw?: boolean }).isRaw
         : undefined; // capture existing raw state
@@ -331,39 +332,39 @@ export class ProjectWatcher {
     }
     stdin.resume();
     stdin.setEncoding('utf8');
-    const handler = (chunk: Buffer | string): void => this._onStdinData(chunk.toString());
+    const handler = (chunk: Buffer | string): void => this.#onStdinData(chunk.toString());
     stdin.on('data', handler);
-    this._onStdinDataBound = handler;
-    this._stdinListening = true;
+    this.#onStdinDataBound = handler;
+    this.#stdinListening = true;
   }
 
   /**
    * Removes the stdin listener and restores the previous raw-mode state.
    */
-  private _disposeStdin(): void {
-    if (!this._stdinListening) {
+  #disposeStdin(): void {
+    if (!this.#stdinListening) {
       return;
     }
     const stdin: NodeJS.ReadStream = process.stdin as NodeJS.ReadStream;
-    if (this._onStdinDataBound) {
-      stdin.off('data', this._onStdinDataBound);
-      this._onStdinDataBound = undefined;
+    if (this.#onStdinDataBound) {
+      stdin.off('data', this.#onStdinDataBound);
+      this.#onStdinDataBound = undefined;
     }
     try {
-      stdin.setRawMode?.(!!this._stdinHadRawMode);
+      stdin.setRawMode?.(!!this.#stdinHadRawMode);
     } catch {
       // ignore
     }
     stdin.unref();
-    this._stdinListening = false;
+    this.#stdinListening = false;
   }
 
   /**
    * Processes a chunk of stdin data, dispatching each character to the appropriate
    * keybind action on the operation graph.
    */
-  private _onStdinData(chunk: string): void {
-    const graph: IOperationGraph = this._graph;
+  #onStdinData(chunk: string): void {
+    const graph: IOperationGraph = this.#graph;
     if (!chunk) return;
     for (const ch of chunk) {
       // Once aborted, only respond to Ctrl+C (force exit)
@@ -376,49 +377,49 @@ export class ProjectWatcher {
       switch (ch) {
         case '\u0003':
         case KEY_QUIT: {
-          this._terminal.writeLine('Aborting watch session... (Ctrl+C to force exit)');
+          this.#terminal.writeLine('Aborting watch session... (Ctrl+C to force exit)');
           graph.abortController.abort();
           break;
         }
         case KEY_ABORT: {
           void graph.abortCurrentIterationAsync().then(() => {
-            this._setStatus('Current iteration aborted');
+            this.#setStatus('Current iteration aborted');
           });
           break;
         }
         case KEY_INVALIDATE: {
           graph.invalidateOperations(undefined, 'manual-invalidation');
-          this._setStatus('All operations invalidated');
+          this.#setStatus('All operations invalidated');
           break;
         }
         case KEY_CLOSE_RUNNERS: {
           void graph.closeRunnersAsync().then(() => {
-            this._setStatus('Closed all runners');
+            this.#setStatus('Closed all runners');
           });
           break;
         }
         case KEY_DEBUG: {
           graph.debugMode = !graph.debugMode;
-          this._setStatus(`Debug mode ${graph.debugMode ? 'enabled' : 'disabled'}`);
+          this.#setStatus(`Debug mode ${graph.debugMode ? 'enabled' : 'disabled'}`);
           break;
         }
         case KEY_VERBOSE: {
           graph.quietMode = !graph.quietMode;
-          this._setStatus(`Verbose mode ${!graph.quietMode ? 'enabled' : 'disabled'}`);
+          this.#setStatus(`Verbose mode ${!graph.quietMode ? 'enabled' : 'disabled'}`);
           break;
         }
         case KEY_PAUSE_RESUME: {
           graph.pauseNextIteration = !graph.pauseNextIteration;
-          this._setStatus(graph.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
+          this.#setStatus(graph.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
           break;
         }
         case KEY_PARALLELISM_UP:
         case '=': {
-          this._adjustParallelism(1);
+          this.#adjustParallelism(1);
           break;
         }
         case KEY_PARALLELISM_DOWN: {
-          this._adjustParallelism(-1);
+          this.#adjustParallelism(-1);
           break;
         }
         case KEY_BUILD: {
@@ -427,9 +428,9 @@ export class ProjectWatcher {
               if (graph.pauseNextIteration === true) {
                 void graph.executeScheduledIterationAsync();
               }
-              this._setStatus('Build iteration queued');
+              this.#setStatus('Build iteration queued');
             } else {
-              this._setStatus('No work to queue');
+              this.#setStatus('No work to queue');
             }
           });
           break;
@@ -446,12 +447,12 @@ export class ProjectWatcher {
    * Adjusts the parallelism on the operation graph by the given delta
    * and reports the result.
    */
-  private _adjustParallelism(delta: number): void {
-    const graph: IOperationGraph = this._graph;
+  #adjustParallelism(delta: number): void {
+    const graph: IOperationGraph = this.#graph;
     const previous: number = graph.parallelism;
     graph.parallelism = previous + delta; // setter will clamp/normalize
     const effective: number = graph.parallelism;
-    this._setStatus(`Parallelism ${effective !== previous ? 'set to' : 'remains'} ${effective}`);
+    this.#setStatus(`Parallelism ${effective !== previous ? 'set to' : 'remains'} ${effective}`);
   }
 }
 

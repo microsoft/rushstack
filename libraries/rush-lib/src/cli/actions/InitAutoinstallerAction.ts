@@ -10,7 +10,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class InitAutoinstallerAction extends BaseRushAction {
-  private readonly _name: IRequiredCommandLineStringParameter;
+  readonly #name: IRequiredCommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -23,7 +23,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
       parser
     });
 
-    this._name = this.defineStringParameter({
+    this.#name = this.defineStringParameter({
       parameterLongName: '--name',
       argumentName: 'AUTOINSTALLER_NAME',
       required: true,
@@ -33,7 +33,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const autoinstallerName: string = this._name.value;
+    const autoinstallerName: string = this.#name.value;
 
     const autoinstaller: Autoinstaller = new Autoinstaller({
       autoinstallerName,

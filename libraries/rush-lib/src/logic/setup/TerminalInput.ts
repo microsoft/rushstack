@@ -82,23 +82,23 @@ class YesNoKeyboardLoop extends KeyboardLoop {
 }
 
 class PasswordKeyboardLoop extends KeyboardLoop {
-  private readonly _options: IPromptPasswordOptions;
-  private _passwordCharacter: string;
-  private _startX: number = 0;
-  private _printedY: number = 0;
-  private _lastPrintedLength: number = 0;
+  readonly #options: IPromptPasswordOptions;
+  #passwordCharacter: string;
+  #startX: number = 0;
+  #printedY: number = 0;
+  #lastPrintedLength: number = 0;
 
   public result: string = '';
 
   public constructor(options: IPromptPasswordOptions) {
     super();
-    this._options = options;
+    this.#options = options;
 
-    this._passwordCharacter =
-      this._options.passwordCharacter === undefined ? '*' : this._options.passwordCharacter.substr(0, 1);
+    this.#passwordCharacter =
+      this.#options.passwordCharacter === undefined ? '*' : this.#options.passwordCharacter.substr(0, 1);
   }
 
-  private _getLineWrapWidth(): number {
+  #getLineWrapWidth(): number {
     return this.stderr.columns ? this.stderr.columns : 80;
   }
 
@@ -107,7 +107,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
 
     readline.cursorTo(this.stderr, 0);
     readline.clearLine(this.stderr, 1);
-    const prefix: string = Colorize.green('==>') + ' ' + Colorize.bold(this._options.message) + ' ';
+    const prefix: string = Colorize.green('==>') + ' ' + Colorize.bold(this.#options.message) + ' ';
 
     this.stderr.write(prefix);
     let lineStartIndex: number = prefix.lastIndexOf('\n');
@@ -115,24 +115,24 @@ class PasswordKeyboardLoop extends KeyboardLoop {
       lineStartIndex = 0;
     }
     const line: string = prefix.substring(lineStartIndex);
-    this._startX = AnsiEscape.removeCodes(line).length % this._getLineWrapWidth();
+    this.#startX = AnsiEscape.removeCodes(line).length % this.#getLineWrapWidth();
   }
 
   protected override onKeypress(character: string, key: readline.Key): void {
     switch (key.name) {
       case 'enter':
       case 'return':
-        if (this._passwordCharacter !== '') {
+        if (this.#passwordCharacter !== '') {
           // To avoid disclosing the length of the password, after the user presses ENTER,
           // replace the "*********" sequence with exactly three stars ("***").
-          this._render(this._passwordCharacter.repeat(3));
+          this.#render(this.#passwordCharacter.repeat(3));
         }
         this.stderr.write('\n');
         this.resolveAsync();
         return;
       case 'backspace':
         this.result = this.result.substring(0, this.result.length - 1);
-        this._render(this.result);
+        this.#render(this.result);
         break;
       default:
         let printable: boolean = true;
@@ -146,50 +146,50 @@ class PasswordKeyboardLoop extends KeyboardLoop {
 
         if (printable) {
           this.result += character;
-          this._render(this.result);
+          this.#render(this.result);
         }
     }
   }
 
-  private _render(text: string): void {
+  #render(text: string): void {
     // Optimize rendering when we don't need to erase anything
-    const needsClear: boolean = text.length < this._lastPrintedLength;
-    this._lastPrintedLength = text.length;
+    const needsClear: boolean = text.length < this.#lastPrintedLength;
+    this.#lastPrintedLength = text.length;
 
     this.hideCursor();
 
     // Restore Y
-    while (this._printedY > 0) {
+    while (this.#printedY > 0) {
       readline.cursorTo(this.stderr, 0);
       if (needsClear) {
         readline.clearLine(this.stderr, 1);
       }
       readline.moveCursor(this.stderr, 0, -1);
-      --this._printedY;
+      --this.#printedY;
     }
 
     // Restore X
-    readline.cursorTo(this.stderr, this._startX);
+    readline.cursorTo(this.stderr, this.#startX);
 
     let i: number = 0;
-    let column: number = this._startX;
-    this._printedY = 0;
+    let column: number = this.#startX;
+    this.#printedY = 0;
     let buffer: string = '';
 
     while (i < text.length) {
-      if (this._passwordCharacter === '') {
+      if (this.#passwordCharacter === '') {
         buffer += text.substr(i, 1);
       } else {
-        buffer += this._passwordCharacter;
+        buffer += this.#passwordCharacter;
       }
 
       ++i;
       ++column;
 
       // -1 to avoid weird TTY behavior in final column
-      if (column >= this._getLineWrapWidth() - 1) {
+      if (column >= this.#getLineWrapWidth() - 1) {
         column = 0;
-        ++this._printedY;
+        ++this.#printedY;
         buffer += '\n';
       }
     }

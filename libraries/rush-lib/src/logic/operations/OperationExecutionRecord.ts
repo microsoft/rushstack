@@ -167,12 +167,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public logFilePaths: ILogFilePaths | undefined;
 
-  private readonly _context: IOperationExecutionRecordContext;
+  readonly #context: IOperationExecutionRecordContext;
 
-  private _collatedWriter: CollatedWriter | undefined = undefined;
-  private _status: OperationStatus;
-  private _stateHash: string | undefined;
-  private _stateHashComponents: IOperationStateHashComponents | undefined;
+  #collatedWriter: CollatedWriter | undefined = undefined;
+  #status: OperationStatus;
+  #stateHash: string | undefined;
+  #stateHashComponents: IOperationStateHashComponents | undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -195,10 +195,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       operation
     });
 
-    this._context = context;
-    this._status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
-    this._stateHash = undefined;
-    this._stateHashComponents = undefined;
+    this.#context = context;
+    this.#status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
+    this.#stateHash = undefined;
+    this.#stateHashComponents = undefined;
   }
 
   public get name(): string {
@@ -206,19 +206,19 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public get debugMode(): boolean {
-    return this._context.debugMode;
+    return this.#context.debugMode;
   }
 
   public get quietMode(): boolean {
-    return this._context.quietMode;
+    return this.#context.quietMode;
   }
 
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
-    if (!this._collatedWriter) {
-      this._collatedWriter = this._context.streamCollator.registerTask(this.name);
+    if (!this.#collatedWriter) {
+      this.#collatedWriter = this.#context.streamCollator.registerTask(this.name);
     }
-    return this._collatedWriter;
+    return this.#collatedWriter;
   }
 
   public get nonCachedDurationMs(): number | undefined {
@@ -232,12 +232,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public get environment(): IEnvironment | undefined {
-    return this._context.createEnvironment?.(this);
+    return this.#context.createEnvironment?.(this);
   }
 
   public getInvalidateCallback(): (reason: string) => void {
     const invalidateFn: ((operations: Iterable<Operation>, reason: string) => void) | undefined =
-      this._context.invalidate;
+      this.#context.invalidate;
     const operations: [Operation] = [this.operation];
     return (reason: string) => {
       invalidateFn?.(operations, reason);
@@ -259,16 +259,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * 'failure'.
    */
   public get status(): OperationStatus {
-    return this._status;
+    return this.#status;
   }
   public set status(newStatus: OperationStatus) {
-    if (newStatus === this._status) {
+    if (newStatus === this.#status) {
       return;
     }
-    const previousStatus: OperationStatus = this._status;
-    this._status = newStatus;
-    this._context.eventSink?.onOperationStatusChanged?.(this, previousStatus);
-    this._context.onOperationStateChanged?.(this);
+    const previousStatus: OperationStatus = this.#status;
+    this.#status = newStatus;
+    this.#context.eventSink?.onOperationStatusChanged?.(this, previousStatus);
+    this.#context.onOperationStateChanged?.(this);
   }
 
   /**
@@ -276,7 +276,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * @internal
    */
   public get eventSink(): IOperationGraphEventSink | undefined {
-    return this._context.eventSink;
+    return this.#context.eventSink;
   }
 
   public get silent(): boolean {
@@ -284,7 +284,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public getStateHash(): string {
-    if (this._stateHash === undefined) {
+    if (this.#stateHash === undefined) {
       const { dependencies, local, config } = this.getStateHashComponents();
 
       const hasher: crypto.Hash = crypto.createHash('sha1');
@@ -295,14 +295,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
 
       const hash: string = hasher.digest('hex');
-      this._stateHash = hash;
+      this.#stateHash = hash;
     }
-    return this._stateHash;
+    return this.#stateHash;
   }
 
   public getStateHashComponents(): IOperationStateHashComponents {
-    if (!this._stateHashComponents) {
-      const { inputsSnapshot } = this._context;
+    if (!this.#stateHashComponents) {
+      const { inputsSnapshot } = this.#context;
 
       if (!inputsSnapshot) {
         throw new Error(`Cannot calculate state hash without git.`);
@@ -332,9 +332,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // - CLI parameters (ShellOperationRunner)
       const config: string = this.runner.getConfigHash();
 
-      this._stateHashComponents = { dependencies, local, config };
+      this.#stateHashComponents = { dependencies, local, config };
     }
-    return this._stateHashComponents;
+    return this.#stateHashComponents;
   }
 
   /**
@@ -366,7 +366,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     if (logFilePaths) {
       // Only assign if it won't clear an existing value; stopgap until we support multiple sets of log files per operation.
       this.logFilePaths = logFilePaths;
-      this._context.onOperationStateChanged?.(this);
+      this.#context.onOperationStateChanged?.(this);
     }
 
     try {
@@ -397,7 +397,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       });
 
       const chunkTapDestinations: TerminalWritable[] = [];
-      const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
+      const eventSink: IOperationGraphEventSink | undefined = this.#context.eventSink;
       if (eventSink?.onOperationChunk) {
         // Tap the stream upstream of the quiet-mode discard so the sink observes
         // the exact bytes the collated writer would receive, regardless of verbosity.
@@ -485,9 +485,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       await executeContext.onResultAsync(this);
     } finally {
       if (this.isTerminal) {
-        this._collatedWriter?.close();
-        if (this._collatedWriter) {
-          this._context.eventSink?.onOperationStreamClosed?.(this.name);
+        this.#collatedWriter?.close();
+        if (this.#collatedWriter) {
+          this.#context.eventSink?.onOperationStreamClosed?.(this.name);
         }
         this.stdioSummarizer.close();
         this.problemCollector.close();

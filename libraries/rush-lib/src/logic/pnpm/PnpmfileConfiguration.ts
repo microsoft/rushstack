@@ -21,11 +21,11 @@ import type { Subspace } from '../../api/Subspace';
  * optionally utilizing a pnpmfile shim to inject preferred versions.
  */
 export class PnpmfileConfiguration {
-  private _context: IPnpmfileContext | undefined;
+  #context: IPnpmfileContext | undefined;
 
   private constructor(context: IPnpmfileContext) {
     pnpmfile.reset();
-    this._context = context;
+    this.#context = context;
   }
 
   public static async initializeAsync(
@@ -88,10 +88,10 @@ export class PnpmfileConfiguration {
    * @returns the transformed object, or the original input if pnpmfile.js was not found.
    */
   public transform(packageJson: IPackageJson): IPackageJson {
-    if (!pnpmfile.hooks?.readPackage || !this._context) {
+    if (!pnpmfile.hooks?.readPackage || !this.#context) {
       return packageJson;
     } else {
-      return pnpmfile.hooks.readPackage(packageJson, this._context);
+      return pnpmfile.hooks.readPackage(packageJson, this.#context);
     }
   }
 }
