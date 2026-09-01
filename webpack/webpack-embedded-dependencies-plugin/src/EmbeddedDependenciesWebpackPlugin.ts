@@ -148,19 +148,19 @@ type DefaultLicenseTemplate = `<hr />${string}<br /><br />${string}`;
  * and their licenses.
  */
 export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
-  private readonly _outputFileName: string;
-  private readonly _generateLicenseFile: boolean;
-  private readonly _generateLicenseFileFunction: LicenseFileGeneratorFunction;
-  private readonly _generatedLicenseFilename: LicenseFileName;
-  private readonly _packageFilterFunction: (packageJson: IPackageData, filePath: string) => boolean;
+  readonly #outputFileName: string;
+  readonly #generateLicenseFile: boolean;
+  readonly #generateLicenseFileFunction: LicenseFileGeneratorFunction;
+  readonly #generatedLicenseFilename: LicenseFileName;
+  readonly #packageFilterFunction: (packageJson: IPackageData, filePath: string) => boolean;
 
   public constructor(options?: IEmbeddedDependenciesWebpackPluginOptions) {
-    this._outputFileName = options?.outputFileName || DEFAULT_EMBEDDED_DEPENDENCIES_FILE_NAME;
-    this._generateLicenseFile = options?.generateLicenseFile || false;
-    this._generateLicenseFileFunction =
-      options?.generateLicenseFileFunction || this._defaultLicenseFileGenerator;
-    this._generatedLicenseFilename = options?.generatedLicenseFilename || DEFAULT_GENERATED_LICENSE_FILE_NAME;
-    this._packageFilterFunction = options?.packageFilterPredicate || DEFAULT_PACKAGE_FILTER_FUNCTION;
+    this.#outputFileName = options?.outputFileName || DEFAULT_EMBEDDED_DEPENDENCIES_FILE_NAME;
+    this.#generateLicenseFile = options?.generateLicenseFile || false;
+    this.#generateLicenseFileFunction =
+      options?.generateLicenseFileFunction || this.#defaultLicenseFileGenerator;
+    this.#generatedLicenseFilename = options?.generatedLicenseFilename || DEFAULT_GENERATED_LICENSE_FILE_NAME;
+    this.#packageFilterFunction = options?.packageFilterPredicate || DEFAULT_PACKAGE_FILTER_FUNCTION;
   }
 
   /**
@@ -188,7 +188,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
         if (
           pkg &&
           filePath &&
-          this._packageFilterFunction(pkg, filePath) &&
+          this.#packageFilterFunction(pkg, filePath) &&
           filePath?.includes('node_modules')
         ) {
           const key: PackageNameAndVersion = makePackageMapKeyForPackage(pkg);
@@ -210,12 +210,12 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
                 const { name, version } = data;
                 let licenseSource: string | undefined;
                 const license: string | undefined = parseLicense(data);
-                const licensePath: string | undefined = await this._getLicenseFilePathAsync(dir, compiler);
+                const licensePath: string | undefined = await this.#getLicenseFilePathAsync(dir, compiler);
                 if (licensePath) {
                   licenseSource = await FileSystem.readFileAsync(licensePath);
 
                   const copyright: string | undefined =
-                    this._parseCopyright(licenseSource) || parsePackageAuthor(data);
+                    this.#parseCopyright(licenseSource) || parsePackageAuthor(data);
 
                   packages.push({
                     name,
@@ -238,7 +238,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
               }
             );
           } catch (error) {
-            this._emitWebpackError(compilation, 'Failed to process embedded dependencies', error);
+            this.#emitWebpackError(compilation, 'Failed to process embedded dependencies', error);
           } finally {
             Sort.sortBy(packages, (pkg) => pkg.name);
           }
@@ -247,17 +247,17 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
             embeddedDependencies: packages
           };
 
-          compilation.emitAsset(this._outputFileName, new sources.RawSource(JSON.stringify(dataToStringify)));
+          compilation.emitAsset(this.#outputFileName, new sources.RawSource(JSON.stringify(dataToStringify)));
 
-          if (this._generateLicenseFile) {
+          if (this.#generateLicenseFile) {
             // We should try catch here because generator function can be output from user config
             try {
               compilation.emitAsset(
-                this._generatedLicenseFilename,
-                new sources.RawSource(this._generateLicenseFileFunction(packages))
+                this.#generatedLicenseFilename,
+                new sources.RawSource(this.#generateLicenseFileFunction(packages))
               );
             } catch (error: unknown) {
-              this._emitWebpackError(compilation, 'Failed to generate license file', error);
+              this.#emitWebpackError(compilation, 'Failed to generate license file', error);
             }
           }
 
@@ -287,7 +287,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    * }
    * ```
    */
-  private _emitWebpackError(compilation: Compilation, errorMessage: string, error: unknown): void {
+  #emitWebpackError(compilation: Compilation, errorMessage: string, error: unknown): void {
     let emittedError: WebpackError;
     const { WebpackError } = compilation.compiler.webpack;
     // If the error is a string, we can just emit it as is with message prefix and error message
@@ -311,7 +311,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   /**
    * Searches a third party package directory for a license file.
    */
-  private async _getLicenseFilePathAsync(
+  async #getLicenseFilePathAsync(
     modulePath: string,
     compiler: Compiler
   ): Promise<string | undefined> {
@@ -344,7 +344,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   /**
    * Given a module path, try to parse the module's copyright attribution.
    */
-  private _parseCopyright(licenseSource: string): string | undefined {
+  #parseCopyright(licenseSource: string): string | undefined {
     const match: RegExpMatchArray | null = licenseSource.match(COPYRIGHT_REGEX);
 
     if (match) {
@@ -354,7 +354,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     return undefined;
   }
 
-  private _defaultLicenseFileGenerator(packages: IPackageData[]): string {
+  #defaultLicenseFileGenerator(packages: IPackageData[]): string {
     const licenseContent = (pkg: IPackageData): string =>
       pkg.licenseSource || pkg.copyright || 'License or Copyright not found';
 

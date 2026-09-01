@@ -33,10 +33,10 @@ interface ICacheEntry<TEntry> {
  * instance.
  */
 export class TypeScriptCachedFileSystem {
-  private _statsCache: Map<string, ICacheEntry<FileSystemStats>> = new Map();
-  private _readFolderCache: Map<string, ICacheEntry<IReadFolderFilesAndDirectoriesResult>> = new Map();
-  private _readFileCache: Map<string, ICacheEntry<Buffer>> = new Map();
-  private _realPathCache: Map<string, ICacheEntry<string>> = new Map();
+  #statsCache: Map<string, ICacheEntry<FileSystemStats>> = new Map();
+  #readFolderCache: Map<string, ICacheEntry<IReadFolderFilesAndDirectoriesResult>> = new Map();
+  #readFileCache: Map<string, ICacheEntry<Buffer>> = new Map();
+  #realPathCache: Map<string, ICacheEntry<string>> = new Map();
 
   public exists: (path: string) => boolean = (path: string) => {
     try {
@@ -65,20 +65,20 @@ export class TypeScriptCachedFileSystem {
   };
 
   public getStatistics: (path: string) => FileSystemStats = (path: string) => {
-    return this._withCaching(path, FileSystem.getStatistics, this._statsCache);
+    return this.#withCaching(path, FileSystem.getStatistics, this.#statsCache);
   };
 
   public ensureFolder: (folderPath: string) => void = (folderPath: string) => {
-    if (!this._readFolderCache.get(folderPath)?.entry && !this._statsCache.get(folderPath)?.entry) {
+    if (!this.#readFolderCache.get(folderPath)?.entry && !this.#statsCache.get(folderPath)?.entry) {
       FileSystem.ensureFolder(folderPath);
-      this._invalidateCacheEntry(folderPath);
+      this.#invalidateCacheEntry(folderPath);
     }
   };
 
   public ensureFolderAsync: (folderPath: string) => Promise<void> = async (folderPath: string) => {
-    if (!this._readFolderCache.get(folderPath)?.entry && !this._statsCache.get(folderPath)?.entry) {
+    if (!this.#readFolderCache.get(folderPath)?.entry && !this.#statsCache.get(folderPath)?.entry) {
       await FileSystem.ensureFolderAsync(folderPath);
-      this._invalidateCacheEntry(folderPath);
+      this.#invalidateCacheEntry(folderPath);
     }
   };
 
@@ -92,7 +92,7 @@ export class TypeScriptCachedFileSystem {
     options?: IFileSystemWriteFileOptions | undefined
   ) => {
     FileSystem.writeFile(filePath, contents, options);
-    this._invalidateCacheEntry(filePath);
+    this.#invalidateCacheEntry(filePath);
   };
 
   public readFile: (filePath: string, options?: IFileSystemReadFileOptions | undefined) => string = (
@@ -108,24 +108,24 @@ export class TypeScriptCachedFileSystem {
   };
 
   public readFileToBuffer: (filePath: string) => Buffer = (filePath: string) => {
-    return this._withCaching(filePath, FileSystem.readFileToBuffer, this._readFileCache);
+    return this.#withCaching(filePath, FileSystem.readFileToBuffer, this.#readFileCache);
   };
 
   public copyFileAsync: (options: IFileSystemCopyFileOptions) => Promise<void> = async (
     options: IFileSystemCopyFileOptions
   ) => {
     await FileSystem.copyFileAsync(options);
-    this._invalidateCacheEntry(options.destinationPath);
+    this.#invalidateCacheEntry(options.destinationPath);
   };
 
   public deleteFile: (filePath: string, options?: IFileSystemDeleteFileOptions | undefined) => void = (
     filePath: string,
     options?: IFileSystemDeleteFileOptions | undefined
   ) => {
-    const cachedError: Error | undefined = this._statsCache.get(filePath)?.error;
+    const cachedError: Error | undefined = this.#statsCache.get(filePath)?.error;
     if (!cachedError || !FileSystem.isFileDoesNotExistError(cachedError)) {
       FileSystem.deleteFile(filePath);
-      this._invalidateCacheEntry(filePath);
+      this.#invalidateCacheEntry(filePath);
     } else if (options?.throwIfNotExists) {
       throw cachedError;
     }
@@ -135,11 +135,11 @@ export class TypeScriptCachedFileSystem {
     options: IFileSystemCreateLinkOptions
   ) => {
     await FileSystem.createHardLinkAsync(options);
-    this._invalidateCacheEntry(options.newLinkPath);
+    this.#invalidateCacheEntry(options.newLinkPath);
   };
 
   public getRealPath: (linkPath: string) => string = (linkPath: string) => {
-    return this._withCaching(
+    return this.#withCaching(
       linkPath,
       (path: string) => {
         try {
@@ -153,24 +153,24 @@ export class TypeScriptCachedFileSystem {
           }
         }
       },
-      this._realPathCache
+      this.#realPathCache
     );
   };
 
   public readFolderFilesAndDirectories: (folderPath: string) => IReadFolderFilesAndDirectoriesResult = (
     folderPath: string
   ) => {
-    return this._withCaching(
+    return this.#withCaching(
       folderPath,
       (path: string) => {
         const folderEntries: FolderItem[] = FileSystem.readFolderItems(path);
-        return this._sortFolderEntries(folderEntries);
+        return this.#sortFolderEntries(folderEntries);
       },
-      this._readFolderCache
+      this.#readFolderCache
     );
   };
 
-  private _sortFolderEntries(folderEntries: FolderItem[]): IReadFolderFilesAndDirectoriesResult {
+  #sortFolderEntries(folderEntries: FolderItem[]): IReadFolderFilesAndDirectoriesResult {
     // TypeScript expects entries sorted ordinally by name
     // In practice this might not matter
     folderEntries.sort((a, b) => Sort.compareByValue(a, b));
@@ -188,7 +188,7 @@ export class TypeScriptCachedFileSystem {
     return { files, directories };
   }
 
-  private _withCaching<TResult>(
+  #withCaching<TResult>(
     path: string,
     fn: (path: string) => TResult,
     cache: Map<string, ICacheEntry<TResult>>
@@ -211,10 +211,10 @@ export class TypeScriptCachedFileSystem {
     }
   }
 
-  private _invalidateCacheEntry(path: string): void {
-    this._statsCache.delete(path);
-    this._readFolderCache.delete(path);
-    this._readFileCache.delete(path);
-    this._realPathCache.delete(path);
+  #invalidateCacheEntry(path: string): void {
+    this.#statsCache.delete(path);
+    this.#readFolderCache.delete(path);
+    this.#readFileCache.delete(path);
+    this.#realPathCache.delete(path);
   }
 }
