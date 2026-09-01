@@ -82,6 +82,13 @@ export const EnvironmentVariableNames = {
   RUSH_PNPM_STORE_PATH: 'RUSH_PNPM_STORE_PATH',
 
   /**
+   * When using PNPM as the package manager, this variable can be used to enable PNPM's global
+   * virtual store for workspace installs. The value of this environment variable must be `1` (for
+   * true) or `0` (for false). If not specified, PNPM's global virtual store is not enabled by Rush.
+   */
+  RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: 'RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE',
+
+  /**
    * When using PNPM as the package manager, this variable can be used to control whether or not PNPM
    * validates the integrity of the PNPM store during installation. The value of this environment variable must be
    * `1` (for true) or `0` (for false). If not specified, defaults to the value in .npmrc.
@@ -255,12 +262,6 @@ export const EnvironmentVariableNames = {
   RUSH_QUIET_MODE: 'RUSH_QUIET_MODE'
 } as const;
 
-/**
- * Matches the names of environment variables that are reserved for use by Rush itself.
- * @internal
- */
-export const RUSH_ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^RUSH_/i;
-
 let _hasBeenValidated: boolean = false;
 
 let _rushTempFolderOverride: string | undefined;
@@ -272,6 +273,8 @@ let _allowUnsupportedNodeVersion: boolean = false;
 let _allowWarningsInSuccessfulBuild: boolean = false;
 
 let _pnpmStorePathOverride: string | undefined;
+
+let _pnpmGlobalVirtualStore: boolean = false;
 
 let _pnpmVerifyStoreIntegrity: boolean | undefined;
 
@@ -361,6 +364,15 @@ export class EnvironmentConfiguration {
   public static get pnpmStorePathOverride(): string | undefined {
     _ensureValidated();
     return _pnpmStorePathOverride;
+  }
+
+  /**
+   * If true, enables PNPM's global virtual store during workspace installs.
+   * See {@link EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE}
+   */
+  public static get pnpmGlobalVirtualStore(): boolean {
+    _ensureValidated();
+    return _pnpmGlobalVirtualStore;
   }
 
   /**
@@ -502,7 +514,7 @@ export class EnvironmentConfiguration {
 
     const unknownEnvVariables: string[] = [];
     for (const envVarName in process.env) {
-      if (process.env.hasOwnProperty(envVarName) && envVarName.match(RUSH_ENVIRONMENT_VARIABLE_NAME_REGEXP)) {
+      if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
         const value: string | undefined = process.env[envVarName];
         // Environment variables are only case-insensitive on Windows
         const normalizedEnvVarName: string = IS_WINDOWS ? envVarName.toUpperCase() : envVarName;
@@ -553,6 +565,15 @@ export class EnvironmentConfiguration {
               value && !options.doNotNormalizePaths
                 ? _normalizeDeepestParentFolderPath(value) || value
                 : value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: {
+            _pnpmGlobalVirtualStore =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE,
+                value
+              ) ?? false;
             break;
           }
 
@@ -691,6 +712,7 @@ export class EnvironmentConfiguration {
   public static reset(): void {
     _rushTempFolderOverride = undefined;
     _pnpmStorePathOverride = undefined;
+    _pnpmGlobalVirtualStore = false;
     _quietMode = false;
     _gitBinaryPath = undefined;
     _tarBinaryPath = undefined;
