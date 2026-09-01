@@ -200,13 +200,6 @@ export class Collector {
       throw new Error('DtsRollupGenerator.analyze() was already called');
     }
 
-    // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
-    // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
-    // compile errors that would result from a full compilation.
-    for (const diagnostic of this._program.getSemanticDiagnostics()) {
-      this.messageRouter.addCompilerDiagnostic(diagnostic);
-    }
-
     const sourceFiles: readonly ts.SourceFile[] = this.program.getSourceFiles();
 
     if (this.messageRouter.showDiagnostics) {
@@ -291,6 +284,25 @@ export class Collector {
     for (const { sourceFile, isExternal } of visitedAstModules) {
       if (!nonExternalSourceFiles.has(sourceFile) && !isExternal) {
         nonExternalSourceFiles.add(sourceFile);
+      }
+    }
+
+    // Report compiler diagnostics, but only for the source files that are reachable from the entry
+    // point: the files that contribute an analyzed declaration, plus the intermediate re-export
+    // files that were visited while resolving exports.  API Extractor analyzes the compiler's `.d.ts`
+    // outputs and (by default) does not enable `skipLibCheck`, so running `getSemanticDiagnostics()`
+    // across the entire program would bind-and-check every transitively reachable declaration file,
+    // including deep dependencies that are not part of the API surface.  Scoping the diagnostics to
+    // the analyzed files avoids that cost while still surfacing every error that pertains to the
+    // exported API.  (Binding, which the analysis relies on, happens eagerly for all files when the
+    // type checker is created, so this does not affect the analysis itself.)
+    const diagnosticSourceFiles: Set<ts.SourceFile> = this.astSymbolTable.collectAnalyzedSourceFiles();
+    for (const sourceFile of nonExternalSourceFiles) {
+      diagnosticSourceFiles.add(sourceFile);
+    }
+    for (const sourceFile of diagnosticSourceFiles) {
+      for (const diagnostic of this._program.getSemanticDiagnostics(sourceFile)) {
+        this.messageRouter.addCompilerDiagnostic(diagnostic);
       }
     }
 
