@@ -134,15 +134,15 @@ interface ITimeEntry {
  * to initialize `watchpack`.
  */
 export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
-  private _files: Map<string, number> = new Map();
-  private _contexts: Map<string, number> = new Map();
-  private _missing: Map<string, number> = new Map();
+  #files: Map<string, number> = new Map();
+  #contexts: Map<string, number> = new Map();
+  #missing: Map<string, number> = new Map();
 
-  private _watcher: Watchpack | undefined;
+  #watcher: Watchpack | undefined;
 
-  private _lastFiles: Map<string, number> | undefined;
-  private _lastQueryTime: number | undefined;
-  private _times: Map<string, ITimeEntry> | undefined;
+  #lastFiles: Map<string, number> | undefined;
+  #lastQueryTime: number | undefined;
+  #times: Map<string, ITimeEntry> | undefined;
 
   /** { @inheritdoc fs.readdirSync } */
   public readdirSync: IWatchFileSystemAdapter['readdirSync'] = ((
@@ -154,15 +154,15 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     try {
       if (options?.withFileTypes) {
         const results: fs.Dirent[] = fs.readdirSync(filePath, options);
-        this._contexts.set(filePath, Date.now());
+        this.#contexts.set(filePath, Date.now());
         return results;
       } else {
         const results: string[] = fs.readdirSync(filePath);
-        this._contexts.set(filePath, Date.now());
+        this.#contexts.set(filePath, Date.now());
         return results;
       }
     } catch (err) {
-      this._missing.set(filePath, Date.now());
+      this.#missing.set(filePath, Date.now());
       throw err;
     }
   }) as IWatchFileSystemAdapter['readdirSync'];
@@ -185,18 +185,18 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     if (options?.withFileTypes) {
       fs.readdir(filePath, options, (err: NodeJS.ErrnoException | null, entries: fs.Dirent[]) => {
         if (err) {
-          this._missing.set(filePath, Date.now());
+          this.#missing.set(filePath, Date.now());
         } else {
-          this._contexts.set(filePath, Date.now());
+          this.#contexts.set(filePath, Date.now());
         }
         (callback as ReaddirDirentCallback)(err, entries);
       });
     } else {
       fs.readdir(filePath, (err: NodeJS.ErrnoException | null, entries: string[]) => {
         if (err) {
-          this._missing.set(filePath, Date.now());
+          this.#missing.set(filePath, Date.now());
         } else {
-          this._contexts.set(filePath, Date.now());
+          this.#contexts.set(filePath, Date.now());
         }
         (callback as ReaddirStringCallback)(err, entries);
       });
@@ -208,9 +208,9 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     fs.lstat(filePath, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
       if (err) {
-        this._missing.set(filePath, Date.now());
+        this.#missing.set(filePath, Date.now());
       } else {
-        this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
+        this.#files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       }
       callback(err, stats);
     });
@@ -221,10 +221,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.lstatSync(filePath);
-      this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
+      this.#files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       return stats;
     } catch (err) {
-      this._missing.set(filePath, Date.now());
+      this.#missing.set(filePath, Date.now());
       throw err;
     }
   };
@@ -234,9 +234,9 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     fs.stat(filePath, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
       if (err) {
-        this._missing.set(filePath, Date.now());
+        this.#missing.set(filePath, Date.now());
       } else {
-        this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
+        this.#files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       }
       callback(err, stats);
     });
@@ -247,10 +247,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.statSync(filePath);
-      this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
+      this.#files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       return stats;
     } catch (err) {
-      this._missing.set(filePath, Date.now());
+      this.#missing.set(filePath, Date.now());
       throw err;
     }
   };
@@ -259,13 +259,13 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
    * @inheritdoc
    */
   public setBaseline(): void {
-    this._lastQueryTime = Date.now();
+    this.#lastQueryTime = Date.now();
 
-    if (this._watcher) {
+    if (this.#watcher) {
       const times: Map<string, { timestamp: number; safeTime: number }> = new Map();
-      this._watcher.pause();
-      this._watcher.collectTimeInfoEntries(times, times);
-      this._times = times;
+      this.#watcher.pause();
+      this.#watcher.collectTimeInfoEntries(times, times);
+      this.#times = times;
     }
   }
 
@@ -273,7 +273,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
    * @inheritdoc
    */
   public watch(onChange: () => void): void {
-    if (this._files.size === 0 && this._contexts.size === 0 && this._missing.size === 0) {
+    if (this.#files.size === 0 && this.#contexts.size === 0 && this.#missing.size === 0) {
       return;
     }
 
@@ -282,18 +282,18 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       followSymlinks: false
     });
 
-    this._watcher = watcher;
+    this.#watcher = watcher;
     watcher.watch({
-      files: this._files.keys(),
-      directories: this._contexts.keys(),
-      missing: this._missing.keys(),
-      startTime: this._lastQueryTime
+      files: this.#files.keys(),
+      directories: this.#contexts.keys(),
+      missing: this.#missing.keys(),
+      startTime: this.#lastQueryTime
     });
 
-    this._lastFiles = this._files;
-    this._files = new Map();
-    this._contexts.clear();
-    this._missing.clear();
+    this.#lastFiles = this.#files;
+    this.#files = new Map();
+    this.#contexts.clear();
+    this.#missing.clear();
 
     watcher.once('aggregated', onChange);
   }
@@ -303,8 +303,8 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
    */
   public async getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState> {
     const normalizedSourcePath: string = path.normalize(filePath);
-    const oldTime: number | undefined = this._lastFiles?.get(normalizedSourcePath);
-    let newTimeEntry: ITimeEntry | undefined = this._times?.get(normalizedSourcePath);
+    const oldTime: number | undefined = this.#lastFiles?.get(normalizedSourcePath);
+    let newTimeEntry: ITimeEntry | undefined = this.#times?.get(normalizedSourcePath);
 
     if (!newTimeEntry) {
       // Need to record a timestamp, otherwise first rerun will select everything
@@ -316,15 +316,15 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
           safeTime: rounded
         };
       } catch (err) {
-        this._missing.set(normalizedSourcePath, Date.now());
+        this.#missing.set(normalizedSourcePath, Date.now());
       }
     }
 
     const newTime: number | undefined =
-      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || this._lastQueryTime;
+      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || this.#lastQueryTime;
 
     if (newTime) {
-      this._files.set(normalizedSourcePath, newTime);
+      this.#files.set(normalizedSourcePath, newTime);
     }
 
     return {
@@ -337,8 +337,8 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
    */
   public getStateAndTrack(filePath: string): IWatchedFileState {
     const normalizedSourcePath: string = path.normalize(filePath);
-    const oldTime: number | undefined = this._lastFiles?.get(normalizedSourcePath);
-    let newTimeEntry: ITimeEntry | undefined = this._times?.get(normalizedSourcePath);
+    const oldTime: number | undefined = this.#lastFiles?.get(normalizedSourcePath);
+    let newTimeEntry: ITimeEntry | undefined = this.#times?.get(normalizedSourcePath);
 
     if (!newTimeEntry) {
       // Need to record a timestamp, otherwise first rerun will select everything
@@ -350,15 +350,15 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
           safeTime: rounded
         };
       } else {
-        this._missing.set(normalizedSourcePath, Date.now());
+        this.#missing.set(normalizedSourcePath, Date.now());
       }
     }
 
     const newTime: number | undefined =
-      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || this._lastQueryTime;
+      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || this.#lastQueryTime;
 
     if (newTime) {
-      this._files.set(normalizedSourcePath, newTime);
+      this.#files.set(normalizedSourcePath, newTime);
     }
 
     return {
