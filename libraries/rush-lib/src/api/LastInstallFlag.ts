@@ -7,6 +7,7 @@ import { JsonFile, type JsonObject, Path, type IPackageJson, Objects } from '@ru
 
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from './EnvironmentConfiguration';
 import * as objectUtilities from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
 import { Selection } from '../logic/Selection';
@@ -42,6 +43,10 @@ export interface ILastInstallFlagJson {
    * Same with pnpmOptions.pnpmStorePath in rush.json
    */
   storePath?: string;
+  /**
+   * True when RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE is enabled.
+   */
+  pnpmGlobalVirtualStore?: boolean;
   /**
    * An experimental flag used by cleanInstallAfterNpmrcChanges
    */
@@ -149,6 +154,22 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
                   `New Path: ${normalizedNewStorePath}`
               );
             }
+            const oldPnpmGlobalVirtualStore: boolean = oldState.pnpmGlobalVirtualStore === true;
+            const newPnpmGlobalVirtualStore: boolean = newState.pnpmGlobalVirtualStore === true;
+            if (oldPnpmGlobalVirtualStore !== newPnpmGlobalVirtualStore) {
+              throw new Error(
+                'Current PNPM global virtual store setting does not match the last one used. ' +
+                  'This may cause inconsistency in your builds.\n\n' +
+                  `If you wish to install with the new global virtual store setting, please run ` +
+                  `"rush ${rushVerb} --purge"\n\n` +
+                  `Old ${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE}: ${
+                    oldPnpmGlobalVirtualStore ? '1' : '0'
+                  }\n` +
+                  `New ${EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE}: ${
+                    newPnpmGlobalVirtualStore ? '1' : '0'
+                  }`
+              );
+            }
           }
           // check whether new selected projects are installed
           if (newState.selectedProjectNames) {
@@ -207,6 +228,9 @@ export function getCommonTempFlag(
 
   if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
     currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+    if (EnvironmentConfiguration.pnpmGlobalVirtualStore) {
+      currentState.pnpmGlobalVirtualStore = true;
+    }
     if (rushConfiguration.pnpmOptions.useWorkspaces) {
       currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
     }
