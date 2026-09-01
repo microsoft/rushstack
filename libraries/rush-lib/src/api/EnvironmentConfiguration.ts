@@ -325,6 +325,12 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'
 } as const;
 
+/**
+ * Matches the names of environment variables that are reserved for use by Rush itself.
+ * @internal
+ */
+export const RUSH_ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^RUSH_/i;
+
 let _hasBeenValidated: boolean = false;
 
 let _rushTempFolderOverride: string | undefined;
@@ -590,7 +596,7 @@ export class EnvironmentConfiguration {
 
     const unknownEnvVariables: string[] = [];
     for (const envVarName in process.env) {
-      if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
+      if (process.env.hasOwnProperty(envVarName) && envVarName.match(RUSH_ENVIRONMENT_VARIABLE_NAME_REGEXP)) {
         const value: string | undefined = process.env[envVarName];
         // Environment variables are only case-insensitive on Windows
         const normalizedEnvVarName: string = IS_WINDOWS ? envVarName.toUpperCase() : envVarName;
