@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Build tool for rush start",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server"
+}
