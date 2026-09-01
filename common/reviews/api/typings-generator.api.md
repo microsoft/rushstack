@@ -5,11 +5,13 @@
 ```ts
 
 import { ITerminal } from '@rushstack/terminal';
+import { SourceMapSegment } from '@jridgewell/sourcemap-codec';
 
 // @public
 export interface IDeclarationMapping {
     generatedColumn: number;
     generatedLine: number;
+    sourceIndex?: number;
     sourcePosition: ISourcePosition;
 }
 
@@ -104,11 +106,18 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string
     parseAndGenerateTypings: (fileContents: TFileContents, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
 }
 
+// @public
+export function originalPositionFor(decoded: readonly SourceMapSegment[][], line: number, column: number): {
+    sourceIndex: number;
+    line: number;
+    column: number;
+} | undefined;
+
 // @public (undocumented)
 export type ReadFile<TFileContents = string> = (filePath: string, relativePath: string) => Promise<TFileContents> | TFileContents;
 
 // @public
-export function serializeDeclarationMap(mappings: readonly IDeclarationMapping[], generatedFileName: string, sourcePath: string, generatedLineOffset: number): string;
+export function serializeDeclarationMap(mappings: readonly IDeclarationMapping[], generatedFileName: string, sources: string | readonly string[], generatedLineOffset: number): string;
 
 // @public
 export class StringValuesTypingsGenerator<TFileContents = string> extends TypingsGenerator<TFileContents> {

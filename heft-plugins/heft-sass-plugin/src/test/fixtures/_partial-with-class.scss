@@ -1,0 +1,5 @@
+// Sass partial that declares a class, used to verify that a declaration map resolves a class
+// back into the partial that declares it rather than the file that imports it.
+.fromPartial {
+  color: green;
+}

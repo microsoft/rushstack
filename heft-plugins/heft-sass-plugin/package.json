@@ -49,7 +49,9 @@
     "@rushstack/heft": "^1.2.25"
   },
   "dependencies": {
+    "@jridgewell/sourcemap-codec": "~1.5.5",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/typings-generator": "workspace:*",
     "@types/tapable": "1.0.6",
     "postcss": "~8.5.10",
     "postcss-modules": "~6.0.0",

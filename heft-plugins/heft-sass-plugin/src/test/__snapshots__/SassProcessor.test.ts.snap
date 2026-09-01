@@ -366,6 +366,82 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor declaration maps does not emit a map when the option is disabled: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor declaration maps does not emit a map when the option is disabled: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "declare interface IStyles {
+  themeColor: string;
+  spacing: string;
+  root: string;
+  highlighted: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+}
+`;
+
+exports[`SassProcessor declaration maps maps every class in a compound or element-qualified selector: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor declaration maps maps every class in a compound or element-qualified selector: written-files 1`] = `
+Map {
+  "/fake/output/dts/compound-selectors.module.scss.d.ts" => "export const primary: string;
+export const secondary: string;
+export const qualified: string;",
+  "/fake/output/dts/compound-selectors.module.scss.d.ts.map" => "{\\"version\\":3,\\"file\\":\\"compound-selectors.module.scss.d.ts\\",\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/compound-selectors.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAAA,aAEA;aAAA;aAIA\\"}",
+}
+`;
+
+exports[`SassProcessor declaration maps resolves a class declared in a partial into that partial: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor declaration maps resolves a class declared in a partial into that partial: written-files 1`] = `
+Map {
+  "/fake/output/dts/partial-class.module.scss.d.ts" => "export const fromPartial: string;
+export const localClass: string;",
+  "/fake/output/dts/partial-class.module.scss.d.ts.map" => "{\\"version\\":3,\\"file\\":\\"partial-class.module.scss.d.ts\\",\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/partial-class.module.scss\\",\\"fixtures/_partial-with-class.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAAA,aCEA;aDEA\\"}",
+}
+`;
+
+exports[`SassProcessor declaration maps resolves each declaration to the rule that declares it: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor declaration maps resolves each declaration to the rule that declares it: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "export const themeColor: string;
+export const spacing: string;
+export const root: string;
+export const highlighted: string;",
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts.map" => "{\\"version\\":3,\\"file\\":\\"classes-and-exports.module.scss.d.ts\\",\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAAA;;aACA;aAKA\\"}",
+}
+`;
+
 exports[`SassProcessor doNotTrimOriginalFileExtension preserves the source extension when doNotTrimOriginalFileExtension is true: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",

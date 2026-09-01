@@ -9,7 +9,12 @@
  * @packageDocumentation
  */
 
-export { type ISourcePosition, type IDeclarationMapping, serializeDeclarationMap } from './DeclarationMap';
+export {
+  type ISourcePosition,
+  type IDeclarationMapping,
+  serializeDeclarationMap,
+  originalPositionFor
+} from './DeclarationMap';
 
 export {
   type ReadFile,
