@@ -10,6 +10,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { type ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
+import * as path from 'path';
 
 export class InitSubspaceAction extends BaseRushAction {
   private readonly _subspaceNameParameter: IRequiredCommandLineStringParameter;
@@ -59,7 +60,10 @@ export class InitSubspaceAction extends BaseRushAction {
     }
 
     const subspaceConfigPath: string = `${this.rushConfiguration.commonFolder}/config/subspaces/${newSubspaceName}`;
-    const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
+    const defaultAssetsSubfolder: string = `${assetsFolderPath}/rush-init`;
+    const userDefinedAssetsFolder: string | undefined = subspacesConfiguration.subspaceInitAssetsFolder
+      ? `${this.rushConfiguration.rushJsonFolder}/${subspacesConfiguration.subspaceInitAssetsFolder}`
+      : undefined;
     const templateFilePaths: string[] = [
       '[dot]npmrc',
       '.pnpmfile.cjs',
@@ -71,9 +75,14 @@ export class InitSubspaceAction extends BaseRushAction {
     await Async.forEachAsync(
       templateFilePaths,
       async (templateFilePath) => {
-        const sourcePath: string = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
+        const defaultAssetSourcePath: string = `${defaultAssetsSubfolder}/common/config/rush/${templateFilePath}`;
         const destinationPath: string = `${subspaceConfigPath}/${templateFilePath.replace('[dot]', '.')}`;
-        await copyTemplateFileAsync(sourcePath, destinationPath, true);
+        await copyTemplateFileAsync(defaultAssetSourcePath, destinationPath, true);
+        if (userDefinedAssetsFolder) {
+          // if user provided their own assets file for subspace initiation
+          // we just copy and overwrite the default files
+          await copyTemplateFileAsync(userDefinedAssetsFolder, destinationPath, true);
+        }
       },
       { concurrency: 10 }
     );
