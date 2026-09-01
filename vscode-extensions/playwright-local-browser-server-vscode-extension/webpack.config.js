@@ -3,17 +3,14 @@
 
 'use strict';
 
-const {
-  createExtensionConfig
-} = require('@rushstack/heft-vscode-extension-rig/profiles/default/webpack.config.base');
-const path = require('node:path');
+const { createExtensionConfig } = require('local-vscode-extension-rig/profiles/default/webpack.config.base');
 
 function createConfig({ production, webpack }) {
   const config = createExtensionConfig({
     production: false,
     webpack,
     entry: {
-      extension: './lib/extension.js'
+      extension: './lib-esm/extension.js'
     },
     outputPath: `${__dirname}/dist/vsix/unpacked`
   });

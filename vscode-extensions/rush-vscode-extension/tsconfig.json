@@ -1,3 +1,8 @@
 {
-  "extends": "./node_modules/@rushstack/heft-vscode-extension-rig/profiles/default/tsconfig-base.json"
+  "extends": "./node_modules/local-vscode-extension-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    // This project provides VS Code integration tests that run under Mocha (via @vscode/test-electron),
+    // so override the rig's default Jest typings to avoid colliding ambient test globals (describe/it/beforeEach).
+    "types": ["mocha", "node"]
+  }
 }

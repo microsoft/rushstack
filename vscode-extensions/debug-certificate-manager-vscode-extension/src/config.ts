@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as vscode from 'vscode';
 import * as path from 'node:path';
+
+import * as vscode from 'vscode';
+
 import type { ITerminal } from '@rushstack/terminal';
 import type { ICertificateStoreOptions } from '@rushstack/debug-certificate-manager';
+
 import {
   CONFIG_AUTOSYNC,
   CONFIG_SECTION,
@@ -29,8 +32,7 @@ export function getConfig(terminal: ITerminal): IExtensionConfig {
     config.get(CONFIG_CERTIFICATE_FILENAME) || 'rushstack-serve.pem';
   const keyFilename: string | undefined = config.get(CONFIG_KEY_FILENAME) || 'rushstack-serve.key';
   const autoSync: boolean = config.get(CONFIG_AUTOSYNC) ?? false;
-  const homeDirectory: string | undefined =
-    config.get<string>(CONFIG_HOME_DIRECTORY) || undefined;
+  const homeDirectory: string | undefined = config.get<string>(CONFIG_HOME_DIRECTORY) || undefined;
   let storePath: string | undefined = undefined;
 
   const platformMap: Record<string, keyof StorePaths> = {

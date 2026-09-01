@@ -1,0 +1,21 @@
+{
+  "name": "local-vscode-extension-rig",
+  "version": "1.0.0",
+  "description": "A rig package for VSCode extension projects that build using Heft inside the RushStack repository.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "",
+    "_phase:build": ""
+  },
+  "dependencies": {
+    "@rushstack/heft-vscode-extension-plugin": "workspace:*",
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-eslint-config": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.8.2"
+  }
+}
