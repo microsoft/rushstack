@@ -556,7 +556,7 @@ function _mergeEnvironmentVariables(
     debug?: boolean;
   } = {}
 ): NodeJS.ProcessEnv {
-  const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
+  const packageManagerEnv: NodeJS.ProcessEnv = { ...baseEnv };
 
   if (environmentVariables) {
     // eslint-disable-next-line guard-for-in

@@ -10,6 +10,22 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 
 describe(InstallHelpers.name, () => {
+  describe(InstallHelpers.getPackageManagerEnvironment.name, () => {
+    it('does not modify process.env', () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const environmentVariableName: string = 'RUSH_TEST_PACKAGE_MANAGER_ENVIRONMENT';
+      const originalValue: string | undefined = process.env[environmentVariableName];
+
+      const packageManagerEnvironment: NodeJS.ProcessEnv =
+        InstallHelpers.getPackageManagerEnvironment(rushConfiguration);
+      packageManagerEnvironment[environmentVariableName] = 'test value';
+
+      expect(process.env[environmentVariableName]).toBe(originalValue);
+    });
+  });
+
   describe(InstallHelpers.generateCommonPackageJsonAsync.name, () => {
     let mockJsonFileSaveAsync: jest.SpyInstance;
     let terminal: Terminal;
