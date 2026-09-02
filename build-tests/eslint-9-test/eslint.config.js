@@ -7,6 +7,9 @@ const nodeTrustedToolProfile = require('local-node-rig/profiles/default/includes
 const friendlyLocalsMixin = require('local-node-rig/profiles/default/includes/eslint/flat/mixins/friendly-locals');
 
 module.exports = [
+  {
+    ignores: ['coverage/**']
+  },
   ...nodeTrustedToolProfile,
   ...friendlyLocalsMixin,
   {
@@ -24,6 +27,12 @@ module.exports = [
       parserOptions: {
         tsconfigRootDir: __dirname
       }
+    }
+  },
+  {
+    files: ['**/*.custom'],
+    rules: {
+      'no-undef': 'warn'
     }
   }
 ];

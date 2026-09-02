@@ -25,9 +25,17 @@ export interface ILinterBaseOptions {
   tsProgram: IExtendedProgram;
   fix?: boolean;
   sarifLogPath?: string;
+  additionalFileIgnorePatterns?: string[];
 }
 
-export interface IRunLinterOptions {
+export interface IAdditionalLintFile {
+  kind: 'additional';
+  fileName: string;
+  text: string;
+  version: string;
+}
+
+export interface IRunLinterOptions<TAdditionalLintFile extends IAdditionalLintFile = never> {
   tsProgram: IExtendedProgram;
 
   /**
@@ -39,6 +47,11 @@ export interface IRunLinterOptions {
    * The set of files that TypeScript has compiled since the last compilation.
    */
   changedFiles: ReadonlySet<IExtendedSourceFile>;
+
+  /**
+   * Files selected by the linter configuration that are not part of the TypeScript program.
+   */
+  additionalFiles?: ReadonlySet<TAdditionalLintFile>;
 }
 
 interface ILinterCacheData {
@@ -61,7 +74,7 @@ interface ILinterCacheData {
   filesHash?: string;
 }
 
-export abstract class LinterBase<TLintResult> {
+export abstract class LinterBase<TLintResult, TAdditionalLintFile extends IAdditionalLintFile = never> {
   protected readonly _scopedLogger: IScopedLogger;
   protected readonly _terminal: ITerminal;
   protected readonly _buildFolderPath: string;
@@ -85,7 +98,7 @@ export abstract class LinterBase<TLintResult> {
 
   public abstract printVersionHeader(): void;
 
-  public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
+  public async performLintingAsync(options: IRunLinterOptions<TAdditionalLintFile>): Promise<void> {
     const startTime: number = performance.now();
     let fileCount: number = 0;
 
@@ -95,7 +108,12 @@ export abstract class LinterBase<TLintResult> {
 
     // Collect and sort file paths for stable hashing
     const relativePathsArray: string[] = [];
-    for (const file of options.typeScriptFilenames) {
+    const lintFilenames: Set<string> = new Set(options.typeScriptFilenames);
+    for (const additionalFile of options.additionalFiles || []) {
+      lintFilenames.add(additionalFile.fileName);
+    }
+
+    for (const file of lintFilenames) {
       // Need to use relative paths to ensure portability.
       const relative: string = Path.convertToSlashes(path.relative(commonDirectory, file));
       relativePaths.set(file, relative);
@@ -167,7 +185,14 @@ export abstract class LinterBase<TLintResult> {
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
     const lintResults: TLintResult[] = [];
-    for (const sourceFile of options.tsProgram.getSourceFiles()) {
+    const sourceFiles: (IExtendedSourceFile | TAdditionalLintFile)[] = [
+      ...options.tsProgram.getSourceFiles(),
+      ...(options.additionalFiles || [])
+    ];
+    const changedFilePaths: Set<string> = new Set(
+      Array.from(options.changedFiles, (sourceFile: IExtendedSourceFile) => sourceFile.fileName)
+    );
+    for (const sourceFile of sourceFiles) {
       const filePath: string = sourceFile.fileName;
       const relative: string | undefined = relativePaths.get(filePath);
 
@@ -181,7 +206,7 @@ export abstract class LinterBase<TLintResult> {
         cachedVersion === '' ||
         version === '' ||
         cachedVersion !== version ||
-        options.changedFiles.has(sourceFile)
+        changedFilePaths.has(filePath)
       ) {
         fileCount++;
         const results: TLintResult[] = await this.lintFileAsync(sourceFile);
@@ -219,7 +244,9 @@ export abstract class LinterBase<TLintResult> {
     this._terminal.writeVerboseLine(`Lint: ${duration}ms (${fileCount} files)`);
   }
 
-  protected async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
+  protected async getSourceFileHashAsync(
+    sourceFile: IExtendedSourceFile | TAdditionalLintFile
+  ): Promise<string> {
     // TypeScript only computes the version during an incremental build.
     let version: string = sourceFile.version;
     if (!version) {
@@ -234,7 +261,9 @@ export abstract class LinterBase<TLintResult> {
 
   protected abstract getCacheVersionAsync(): Promise<string>;
 
-  protected abstract lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TLintResult[]>;
+  protected abstract lintFileAsync(
+    sourceFile: IExtendedSourceFile | TAdditionalLintFile
+  ): Promise<TLintResult[]>;
 
   protected abstract lintingFinishedAsync(lintResults: TLintResult[]): Promise<void>;
 
