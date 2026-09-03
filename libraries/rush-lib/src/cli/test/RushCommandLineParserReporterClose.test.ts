@@ -3,6 +3,7 @@
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 describe('RushCommandLineParser reporter close', () => {
   const originalExitCode: string | number | null | undefined = process.exitCode;
@@ -86,10 +87,40 @@ describe('RushCommandLineParser reporter close', () => {
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
     expect(exitSpy).not.toHaveBeenCalled();
+    process.exitCode = 0;
 
     resolveClose!();
     await new Promise<void>((resolve: () => void) => setImmediate(resolve));
 
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('does not execute after an initialization failure', async () => {
+    let resolveClose: (() => void) | undefined;
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      () =>
+        new Promise<void>((resolve: () => void) => {
+          resolveClose = resolve;
+        })
+    );
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('configuration failed');
+    });
+    const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    const executePromise: Promise<boolean> = parser.executeAsync();
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    resolveClose!();
+    await expect(executePromise).resolves.toBe(false);
+    await new Promise<void>((resolve: () => void) => setImmediate(resolve));
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 

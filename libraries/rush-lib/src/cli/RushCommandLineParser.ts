@@ -89,6 +89,8 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
   private readonly _autocreateBuildCommand: boolean;
+  private _initializationFailed: boolean = false;
+  private _reporterClosePromise: Promise<void> | undefined;
 
   /**
    * The current working directory that was used to find the Rush configuration.
@@ -144,7 +146,7 @@ export class RushCommandLineParser extends CommandLineParser {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
       }
     } catch (error) {
-      this._reportErrorAndSetExitCode(error as Error);
+      this._reportInitializationErrorAndSetExitCode(error as Error);
     }
 
     NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -167,6 +169,10 @@ export class RushCommandLineParser extends CommandLineParser {
       restrictConsoleOutput: this._restrictConsoleOutput,
       rushGlobalFolder: this.rushGlobalFolder
     });
+    if (this._initializationFailed) {
+      this._autocreateBuildCommand = true;
+      return;
+    }
 
     const pluginCommandLineConfigurations: ICustomCommandLineConfigurationInfo[] =
       this.pluginManager.tryGetCustomCommandLineConfigurationInfos();
@@ -179,18 +185,22 @@ export class RushCommandLineParser extends CommandLineParser {
     this._autocreateBuildCommand = !hasBuildCommandInPlugin;
 
     this._populateActions();
+    if (this._initializationFailed) {
+      return;
+    }
 
     for (const { commandLineConfiguration, pluginLoader } of pluginCommandLineConfigurations) {
       try {
         this._addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
-        this._reportErrorAndSetExitCode(
+        this._reportInitializationErrorAndSetExitCode(
           new Error(
             `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
               e as Error
             ).toString()}`
           )
         );
+        return;
       }
     }
   }
@@ -238,6 +248,11 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   public override async executeAsync(args?: string[]): Promise<boolean> {
+    if (this._initializationFailed) {
+      await this._closeReporterAsync();
+      return false;
+    }
+
     // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
     const passThroughSeparatorIndex: number = process.argv.indexOf('--', 2);
     const rushArgv: string[] =
@@ -373,7 +388,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       this._populateScriptActions();
     } catch (error) {
-      this._reportErrorAndSetExitCode(error as Error);
+      this._reportInitializationErrorAndSetExitCode(error as Error);
     }
   }
 
@@ -548,6 +563,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.flushTelemetry();
 
+    const exitCode: string | number = process.exitCode ?? 1;
     const handleExit = (): never => {
       // Ideally we want to eliminate all calls to process.exit() from our code, and replace them
       // with normal control flow that properly cleans up its data structures.
@@ -555,11 +571,7 @@ export class RushCommandLineParser extends CommandLineParser {
       // performs nontrivial work that can throw an exception.  Either the Rush class would need
       // to handle reporting for those exceptions, or else _populateActions() should be moved
       // to a RushCommandLineParser lifecycle stage that can handle it.
-      if (process.exitCode !== undefined) {
-        process.exit(process.exitCode);
-      } else {
-        process.exit(1);
-      }
+      process.exit(exitCode);
     };
 
     const telemetryFlushAsync: Promise<void> | undefined =
@@ -581,12 +593,22 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private async _closeReporterAsync(): Promise<void> {
-    try {
-      await this._rushOptions.reporterCloseAsync?.();
-    } catch (error) {
-      process.exitCode = 1;
-      process.stderr.write(`[reporter] Unable to finalize reporters: ${(error as Error).message}\n`);
+  private _reportInitializationErrorAndSetExitCode(error: Error): void {
+    this._initializationFailed = true;
+    this._reportErrorAndSetExitCode(error);
+  }
+
+  private _closeReporterAsync(): Promise<void> {
+    if (!this._reporterClosePromise) {
+      this._reporterClosePromise = (async (): Promise<void> => {
+        try {
+          await this._rushOptions.reporterCloseAsync?.();
+        } catch (error) {
+          process.exitCode = 1;
+          process.stderr.write(`[reporter] Unable to finalize reporters: ${(error as Error).message}\n`);
+        }
+      })();
     }
+    return this._reporterClosePromise;
   }
 }
