@@ -8,9 +8,15 @@ interface IClassifiedValue {
   readonly privacy: string;
 }
 
-export function redactReporterEvent(
-  event: IReporterEventEnvelope<unknown>
-): IReporterEventEnvelope<unknown> {
+export function getHumanReadableMessageText(event: IReporterEventEnvelope<unknown>): string | undefined {
+  if (event.privacy === 'secret') {
+    return '[secret]';
+  }
+  const text: unknown = (event.payload as { readonly text?: unknown }).text;
+  return typeof text === 'string' ? text : undefined;
+}
+
+export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IReporterEventEnvelope<unknown> {
   let payload: unknown = event.payload;
   if (event.privacy === 'secret') {
     payload = '[secret]';
