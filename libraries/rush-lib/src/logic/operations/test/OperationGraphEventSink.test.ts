@@ -86,8 +86,8 @@ class RecordingSink implements IOperationGraphEventSink {
   public readonly activities: string[] = [];
   public readonly chunks: Map<string, string[]> = new Map();
 
-  public onOperationRegistered(operationId: string, silent: boolean): void {
-    this.registered.push([operationId, silent]);
+  public onOperationRegistered(result: IOperationExecutionResult, silent: boolean): void {
+    this.registered.push([result.operation.name, silent]);
   }
   public onOperationStatusChanged(result: IOperationExecutionResult): void {
     this.transitions.push([result.operation.name, result.status]);
@@ -386,6 +386,52 @@ describe('OperationGraph event sink (dual-emit)', () => {
       outcome: 'succeeded'
     });
     expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+  });
+
+  it('isolates diagnostics when the next watch iteration registers before abort completes', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'overlapping-operation-shadow' }
+    });
+    let runCount: number = 0;
+    let resolveFirstRun: ((status: OperationStatus) => void) | undefined;
+    let markFirstRunStarted: (() => void) | undefined;
+    const firstRunStarted: Promise<void> = new Promise<void>((resolve: () => void) => {
+      markFirstRunStarted = resolve;
+    });
+    const runner: MockOperationRunner = new MockOperationRunner('@scope/overlap (phase)', async () => {
+      runCount++;
+      if (runCount === 1) {
+        markFirstRunStarted!();
+        return await new Promise<OperationStatus>((resolve: (status: OperationStatus) => void) => {
+          resolveFirstRun = resolve;
+        });
+      }
+      return OperationStatus.Failure;
+    });
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('overlap', runner, mockPhase, '@scope/overlap')]),
+      { ...createGraphOptions(mockWritable, false), pauseNextIteration: true }
+    );
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+
+    await graph.scheduleIterationAsync({});
+    const firstExecution: Promise<boolean> = graph.executeScheduledIterationAsync();
+    await firstRunStarted;
+    await graph.scheduleIterationAsync({});
+    const abortPromise: Promise<void> = graph.abortCurrentIterationAsync();
+    resolveFirstRun!(OperationStatus.Failure);
+    await Promise.all([firstExecution, abortPromise]);
+    await graph.executeScheduledIterationAsync();
+
+    expect(
+      reporterSink.inputs.filter(
+        ({ type, payload }) =>
+          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
+      )
+    ).toHaveLength(2);
   });
 
   it('recomputes grouped silence for each watch-style iteration', async () => {
