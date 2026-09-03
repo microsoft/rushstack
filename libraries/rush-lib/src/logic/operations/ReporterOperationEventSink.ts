@@ -45,9 +45,11 @@ interface IReporterOperationCycle {
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
   public readonly onOperationChunk:
-    | ((result: IOperationExecutionResult, chunk: ITerminalChunk) => void)
+    | ((operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult) => void)
     | undefined;
-  public readonly onOperationStreamClosed: ((result: IOperationExecutionResult) => void) | undefined;
+  public readonly onOperationStreamClosed:
+    | ((operationId: string, result?: IOperationExecutionResult) => void)
+    | undefined;
   public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
   private readonly _operationsByLegacyId: Map<string, IReporterOperation> = new Map();
@@ -99,8 +101,10 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
 
     if (Array.from(this._operationsByLegacyId.values()).some(({ streamEmitter }) => !!streamEmitter)) {
-      this.onOperationChunk = (result, chunk) => this._onOperationChunk(result, chunk);
-      this.onOperationStreamClosed = (result) => this._onOperationStreamClosed(result);
+      this.onOperationChunk = (operationId, chunk, result) =>
+        this._onOperationChunk(operationId, chunk, result);
+      this.onOperationStreamClosed = (operationId, result) =>
+        this._onOperationStreamClosed(operationId, result);
       this.onOperationCompleted = (result) => this._onOperationCompleted(result);
     } else {
       this.onOperationChunk = undefined;
@@ -220,9 +224,13 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
   }
 
-  private _onOperationChunk(result: IOperationExecutionResult, chunk: ITerminalChunk): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
-    if (!operation?.streamEmitter || !this._cyclesByResult.has(result)) {
+  private _onOperationChunk(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult
+  ): void {
+    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    if (!operation?.streamEmitter || !result || !this._cyclesByResult.has(result)) {
       return;
     }
 
@@ -233,10 +241,9 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
   }
 
-  private _onOperationStreamClosed(result: IOperationExecutionResult): void {
-    const operationId: string = result.operation.name;
+  private _onOperationStreamClosed(operationId: string, result?: IOperationExecutionResult): void {
     const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
-    const cycle: IReporterOperationCycle | undefined = this._cyclesByResult.get(result);
+    const cycle: IReporterOperationCycle | undefined = result ? this._cyclesByResult.get(result) : undefined;
     if (!operation?.streamEmitter || !cycle || cycle.streamClosed) {
       return;
     }
@@ -271,9 +278,11 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
 
 class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
   public readonly onOperationChunk:
-    | ((result: IOperationExecutionResult, chunk: ITerminalChunk) => void)
+    | ((operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult) => void)
     | undefined;
-  public readonly onOperationStreamClosed: ((result: IOperationExecutionResult) => void) | undefined;
+  public readonly onOperationStreamClosed:
+    | ((operationId: string, result?: IOperationExecutionResult) => void)
+    | undefined;
   public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
   private readonly _first: IOperationGraphEventSink;
@@ -284,16 +293,16 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     this._second = second;
     this.onOperationChunk =
       first.onOperationChunk || second.onOperationChunk
-        ? (result, chunk) => {
-            first.onOperationChunk?.(result, chunk);
-            second.onOperationChunk?.(result, chunk);
+        ? (operationId, chunk, result) => {
+            first.onOperationChunk?.(operationId, chunk, result);
+            second.onOperationChunk?.(operationId, chunk, result);
           }
         : undefined;
     this.onOperationStreamClosed =
       first.onOperationStreamClosed || second.onOperationStreamClosed
-        ? (result) => {
-            first.onOperationStreamClosed?.(result);
-            second.onOperationStreamClosed?.(result);
+        ? (operationId, result) => {
+            first.onOperationStreamClosed?.(operationId, result);
+            second.onOperationStreamClosed?.(operationId, result);
           }
         : undefined;
     this.onOperationCompleted =
