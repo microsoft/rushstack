@@ -340,6 +340,43 @@ describe('FileReporter', () => {
     });
   });
 
+  it('never groups or spools secret operation values', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      reporter.report(
+        ev(
+          'operationRegistered',
+          { operationId: 'secret-operation', projectName: '@secret/project', phaseName: 'secret-phase' },
+          'secret'
+        )
+      );
+      reporter.report({
+        ...ev('externalOutput', { stream: 'stdout', text: 'TOP_SECRET_OUTPUT' }, 'secret'),
+        scope: { operationId: 'secret-operation' }
+      });
+      reporter.report(
+        ev('operationCompleted', { operationId: 'secret-operation', status: 'failure' }, 'secret')
+      );
+      reporter.report(
+        ev(
+          'operationRegistered',
+          { operationId: 'unfinished-secret', projectName: '@secret/unfinished' },
+          'secret'
+        )
+      );
+      await reporter.closeAsync();
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('[secret]');
+      expect(content).not.toContain('secret-operation');
+      expect(content).not.toContain('@secret/project');
+      expect(content).not.toContain('secret-phase');
+      expect(content).not.toContain('TOP_SECRET_OUTPUT');
+      expect(content).not.toContain('unfinished-secret');
+      expect(content).not.toContain('@secret/unfinished');
+    });
+  });
+
   it('deletes logs older than the retention window and caps the session count', async () => {
     await withTempDir(async (base: string) => {
       const logsDir: string = path.join(base, RUSH_LOGS_DIR_NAME);
