@@ -3,6 +3,7 @@
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
+import { getHumanReadableMessageText } from './ReporterRedaction';
 import {
   SPINNER_FRAMES,
   MIN_REFRESH_INTERVAL_MS,
@@ -271,19 +272,19 @@ export class DefaultInteractiveReporter implements IReporter {
         break;
       }
       case 'messageEmitted': {
-        const payload: { severity?: string; text?: string } = event.payload as {
+        const payload: { severity?: string } = event.payload as {
           severity?: string;
-          text?: string;
         };
-        if (payload.text !== undefined) {
+        const text: string | undefined = getHumanReadableMessageText(event);
+        if (text !== undefined) {
           if (
             event.scope?.operationId === undefined &&
             (payload.severity === 'error' || payload.severity === 'warning')
           ) {
-            this._diagnostics.push(payload.text.trim());
+            this._diagnostics.push(text.trim());
           }
           if (event.scope?.operationId !== undefined || payload.severity !== 'error') {
-            this._latestActivity = this._toSingleLine(payload.text);
+            this._latestActivity = this._toSingleLine(text);
           }
         }
         break;
