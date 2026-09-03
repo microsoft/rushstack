@@ -46,10 +46,7 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationStatusChanged(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void {
+  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
     this.#workspaceSink?.onOperationStatusChanged?.(result, previousStatus);
     for (const requestSink of this.#requestSinks) {
       requestSink.onOperationStatusChanged?.(result, previousStatus);
@@ -74,6 +71,13 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     this.#workspaceSink?.onOperationStreamClosed?.(operationId);
     for (const requestSink of this.#requestSinks) {
       requestSink.onOperationStreamClosed?.(operationId);
+    }
+  }
+
+  public onOperationCompleted(result: IOperationExecutionResult): void {
+    this.#workspaceSink?.onOperationCompleted?.(result);
+    for (const requestSink of this.#requestSinks) {
+      requestSink.onOperationCompleted?.(result);
     }
   }
 
