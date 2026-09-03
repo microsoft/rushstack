@@ -172,9 +172,10 @@ if (aiFinal?.kind !== 'ai.final' || aiFinal.log?.complete !== true) {
 const failureAiFinal = failureAiRecords.at(-1);
 if (
   failureAiFinal?.result !== 'failed' ||
-  !failureAiFinal.diagnostics?.some((diagnostic) => diagnostic.summary?.includes('does not exist'))
+  failureAiFinal.errorCount < 1 ||
+  JSON.stringify(failureAiFinal).includes('does not exist')
 ) {
-  throw new Error('AI failure output did not preserve the actionable parser error.');
+  throw new Error('AI failure output did not count and redact the parser error.');
 }
 if (
   !failureJsonEvents.some((event) => event.type === 'commandResult' && event.payload?.exitCode === 1) ||
