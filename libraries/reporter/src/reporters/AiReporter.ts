@@ -296,7 +296,10 @@ export class AiReporter implements IReporter {
         };
         if (payload.severity === 'error' && payload.text) {
           this._fallbackErrorCount++;
-          if (this._fallbackErrorMessages.length < this._maxDetailedDiagnostics) {
+          if (
+            event.privacy === 'public' &&
+            this._fallbackErrorMessages.length < this._maxDetailedDiagnostics
+          ) {
             this._fallbackErrorMessages.push(payload.text.trim());
           } else {
             this._fallbackErrorsTruncated = true;

@@ -13,7 +13,8 @@ import {
 function ev(
   type: string,
   payload: unknown = {},
-  scope?: { operationId?: string; projectName?: string }
+  scope?: { operationId?: string; projectName?: string },
+  privacy: IReporterEventEnvelope<unknown>['privacy'] = 'public'
 ): IReporterEventEnvelope<unknown> {
   return {
     protocolVersion: { major: 1, minor: 0 },
@@ -22,7 +23,7 @@ function ev(
     sequence: 1,
     timestamp: '2026-01-01T00:00:00.000Z',
     source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
-    privacy: 'public',
+    privacy,
     required: true,
     type,
     payload,
@@ -90,6 +91,17 @@ describe('JsonReporter', () => {
     expect(output).toContain('[secret]');
     expect(output).toContain('/tmp/log');
   });
+
+  it('redacts local-sensitive message text from machine output', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
+    reporter.report(
+      ev('messageEmitted', { severity: 'error', text: '/private/path' }, undefined, 'local-sensitive')
+    );
+
+    expect(output).toContain('[local-sensitive]');
+    expect(output).not.toContain('/private/path');
+  });
 });
 
 describe('AiReporter', () => {
@@ -122,6 +134,16 @@ describe('AiReporter', () => {
     const final: Record<string, unknown> = parseLines(output).at(-1)!;
     expect(final.result).toBe('failed');
     expect(final.exitCode).toBe(1);
+  });
+
+  it('counts secret fallback errors without rendering their text', () => {
+    const { final } = run([
+      ev('messageEmitted', { severity: 'error', text: 'TOP_SECRET_VALUE' }, undefined, 'secret'),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCount).toBe(1);
+    expect(JSON.stringify(final)).not.toContain('TOP_SECRET_VALUE');
   });
 
   it('uses sessionCompleted as the parser-only fallback result', () => {
