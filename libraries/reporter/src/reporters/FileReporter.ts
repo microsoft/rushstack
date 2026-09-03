@@ -264,6 +264,10 @@ export class FileReporter implements IReporter {
   }
 
   private _formatEvent(event: IReporterEventEnvelope<unknown>): readonly string[] {
+    if (event.privacy === 'secret') {
+      return [this._formatMetadata(event)];
+    }
+
     if (event.type === 'operationRegistered') {
       const payload: {
         operationId: string;
