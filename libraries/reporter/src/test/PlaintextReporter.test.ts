@@ -6,9 +6,10 @@ import { PlaintextReporter, type IReporterEventEnvelope } from '../index';
 function ev(
   type: string,
   payload: unknown = {},
-  scope?: { operationId?: string; projectName?: string }
+  scope?: { operationId?: string; projectName?: string },
+  privacy: IReporterEventEnvelope<unknown>['privacy'] = 'public'
 ): IReporterEventEnvelope<unknown> {
-  return { type, payload, scope, required: true } as unknown as IReporterEventEnvelope<unknown>;
+  return { type, payload, scope, privacy, required: true } as unknown as IReporterEventEnvelope<unknown>;
 }
 
 interface ICapture {
@@ -85,6 +86,16 @@ describe('PlaintextReporter', () => {
     capture.reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
 
     expect(capture.getOutput()).toMatchSnapshot();
+  });
+
+  it('redacts secret message text', () => {
+    const capture: ICapture = makeConcise();
+    capture.reporter.report(
+      ev('messageEmitted', { severity: 'error', text: 'TOP_SECRET_VALUE' }, undefined, 'secret')
+    );
+
+    expect(capture.getOutput()).toContain('[secret]');
+    expect(capture.getOutput()).not.toContain('TOP_SECRET_VALUE');
   });
 
   it('preserves partial-line chunks within grouped output', () => {

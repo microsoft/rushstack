@@ -8,6 +8,7 @@ import { StringDecoder } from 'node:string_decoder';
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
+import { getHumanReadableMessageText } from './ReporterRedaction';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
 import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
@@ -210,15 +211,15 @@ export class PlaintextReporter implements IReporter {
       }
       case 'messageEmitted': {
         if (event.scope?.operationId === undefined) {
-          const payload: { severity?: string; text?: string } = event.payload as {
+          const payload: { severity?: string } = event.payload as {
             severity?: string;
-            text?: string;
           };
+          const text: string | undefined = getHumanReadableMessageText(event);
           if (
-            payload.text &&
+            text &&
             (this._logLevel !== 'quiet' || payload.severity === 'warning' || payload.severity === 'error')
           ) {
-            this._writeRaw(payload.text.endsWith('\n') ? payload.text : `${payload.text}\n`);
+            this._writeRaw(text.endsWith('\n') ? text : `${text}\n`);
           }
         }
         break;

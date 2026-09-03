@@ -34,9 +34,10 @@ class FakeTerminal implements IInteractiveTerminal {
 function ev(
   type: string,
   payload: unknown = {},
-  scope?: { projectName?: string }
+  scope?: { projectName?: string },
+  privacy: IReporterEventEnvelope<unknown>['privacy'] = 'public'
 ): IReporterEventEnvelope<unknown> {
-  return { type, payload, scope, required: true } as unknown as IReporterEventEnvelope<unknown>;
+  return { type, payload, scope, privacy, required: true } as unknown as IReporterEventEnvelope<unknown>;
 }
 
 describe('interactive rendering helpers', () => {
@@ -265,6 +266,25 @@ describe('DefaultInteractiveReporter', () => {
     expect(
       terminal.output.match(/Another Rush command is already running in this repository\./g)
     ).toHaveLength(1);
+  });
+
+  it('redacts secret message text', async () => {
+    const terminal: FakeTerminal = new FakeTerminal(80, false);
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(
+      ev('messageEmitted', { severity: 'error', text: 'TOP_SECRET_VALUE' }, undefined, 'secret')
+    );
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    expect(terminal.output).toContain('[secret]');
+    expect(terminal.output).not.toContain('TOP_SECRET_VALUE');
   });
 
   it('fails closed when commandResult is missing', async () => {
