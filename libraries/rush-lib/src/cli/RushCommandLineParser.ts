@@ -621,9 +621,6 @@ export class RushCommandLineParser extends CommandLineParser {
       console.error(`\n${error.stack}`);
     }
 
-    this._emitReporterCompletion(_getNumericProcessExitCode(1));
-    this.flushTelemetry();
-
     const configuredExitCode: string | number | undefined = process.exitCode;
     const numericExitCode: number = Number(configuredExitCode);
     const exitCode: number =
@@ -631,6 +628,9 @@ export class RushCommandLineParser extends CommandLineParser {
         ? numericExitCode
         : 1;
     process.exitCode = exitCode;
+    this._emitReporterCompletion(exitCode);
+    this.flushTelemetry();
+
     const handleExit = (): never => {
       // Ideally we want to eliminate all calls to process.exit() from our code, and replace them
       // with normal control flow that properly cleans up its data structures.
