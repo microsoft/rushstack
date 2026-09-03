@@ -17,10 +17,27 @@ export function getHumanReadableMessageText(event: IReporterEventEnvelope<unknow
 }
 
 export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IReporterEventEnvelope<unknown> {
-  let payload: unknown = event.payload;
   if (event.privacy === 'secret') {
-    payload = '[secret]';
-  } else if (event.type === 'diagnosticEmitted') {
+    return {
+      protocolVersion: event.protocolVersion,
+      eventId: event.eventId,
+      sessionId: event.sessionId,
+      sequence: event.sequence,
+      sourceSequence: event.sourceSequence,
+      timestamp: event.timestamp,
+      source: {
+        packageName: '[private-producer]',
+        packageVersion: '[private-version]'
+      },
+      privacy: 'secret',
+      required: event.required,
+      type: event.type,
+      payload: '[secret]'
+    };
+  }
+
+  let payload: unknown = event.payload;
+  if (event.type === 'diagnosticEmitted') {
     const diagnostic: { readonly parameters?: Readonly<Record<string, IClassifiedValue>> } =
       event.payload as {
         readonly parameters?: Readonly<Record<string, IClassifiedValue>>;

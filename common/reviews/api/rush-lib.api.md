@@ -686,12 +686,12 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 // @internal
 export interface _IOperationGraphEventSink {
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
-    onOperationChunk?(operationId: string, chunk: ITerminalChunk, iterationId: number): void;
+    onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(operationId: string, silent: boolean, iterationId: number): void;
+    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
-    onOperationStreamClosed?(operationId: string, iterationId: number): void;
+    onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult, iterationId?: number): void;
 }
 
 // @alpha

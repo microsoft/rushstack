@@ -538,6 +538,7 @@ export class OperationGraph implements IOperationGraph {
       iteration.eventSink?.onOperationRegistered?.(
         executionRecord.name,
         executionRecord.silent,
+        executionRecord,
         executionRecord.iterationId
       );
     }
@@ -725,6 +726,7 @@ export class OperationGraph implements IOperationGraph {
         eventSink?.onOperationRegistered?.(
           executionRecord.name,
           executionRecord.silent,
+          executionRecord,
           executionRecord.iterationId
         );
         executionRecord.status = OperationStatus.NoOp;

@@ -298,7 +298,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public closeOperationStream(): void {
     if (!this._operationStreamClosed) {
       this._operationStreamClosed = true;
-      this._context.eventSink?.onOperationStreamClosed?.(this.name, this.iterationId);
+      this._context.eventSink?.onOperationStreamClosed?.(this.name, this, this.iterationId);
     }
   }
 
@@ -339,7 +339,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       destinations: [
         destination,
         new OperationChunkTap(this.name, (operationId, chunk) =>
-          eventSink.onOperationChunk?.(operationId, chunk, this.iterationId)
+          eventSink.onOperationChunk?.(operationId, chunk, this, this.iterationId)
         )
       ]
     });
