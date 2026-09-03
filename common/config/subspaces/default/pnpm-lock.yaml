@@ -4070,6 +4070,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
 
   ../../../libraries/rig-package:
     dependencies:

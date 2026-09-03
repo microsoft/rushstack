@@ -12,6 +12,16 @@
       "cleanFiles": [{ "includeGlobs": ["lib-intermediate-commonjs", "lib-intermediate-esm"] }],
 
       "tasksByName": {
+        "check-bootstrap-protocol": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "../reporter/scripts/generateBootstrapProtocol.js"
+            }
+          }
+        },
+
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {

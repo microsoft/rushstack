@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { assertSelfContainedBootstrapSource } from '../../scripts/generateBootstrapProtocol';
 import {
   parseEarlyReporterControls,
   BootstrapEventBuffer,
@@ -37,6 +38,34 @@ function makeBuffer(overrides?: Partial<IBootstrapEventBufferOptions>): Bootstra
     ...overrides
   });
 }
+
+describe('bootstrap protocol generation', () => {
+  it.each([
+    { description: 'static imports', source: "import { value } from 'pkg';" },
+    { description: 'import-equals declarations', source: "import value = require('pkg');" },
+    { description: 'import types', source: "type Value = import('pkg').Value;" },
+    { description: 'dynamic imports', source: "const value = import('pkg');" },
+    { description: 'export-from declarations', source: "export { value } from 'pkg';" },
+    { description: 'export-all declarations', source: "export * from 'pkg';" },
+    { description: 'import.meta expressions', source: 'const url = import.meta.url;' },
+    { description: 'require calls', source: "const value = require('pkg');" },
+    { description: 'require property calls', source: "const path = require.resolve('pkg');" }
+  ])('rejects $description', ({ source }: { source: string }) => {
+    expect(() => assertSelfContainedBootstrapSource(source)).toThrow(
+      'The generated bootstrap protocol must be self-contained'
+    );
+  });
+
+  it('allows import-like text without module edges', () => {
+    const source: string = [
+      "/* import { value } from 'pkg'; */",
+      `const message: string = "import('pkg')";`,
+      'export const value: string = message;'
+    ].join('\n');
+
+    expect(() => assertSelfContainedBootstrapSource(source)).not.toThrow();
+  });
+});
 
 describe('parseEarlyReporterControls', () => {
   it('reads the reporter and log level from flags', () => {

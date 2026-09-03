@@ -2,12 +2,72 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const ts = require('typescript');
 
 const SOURCE_START_MARKER = '// BEGIN GENERATED BOOTSTRAP PROTOCOL';
 const SOURCE_END_MARKER = '// END GENERATED BOOTSTRAP PROTOCOL';
 const SOURCE_PATH = path.resolve(__dirname, '../src/bootstrap/BootstrapProtocol.ts');
 const PROTOCOL_SOURCE_PATH = path.resolve(__dirname, '../src/protocol/ReporterProtocol.ts');
 const TARGET_PATH = path.resolve(__dirname, '../../rush-lib/src/scripts/generated/BootstrapProtocol.ts');
+
+function getModuleEdgeKind(node) {
+  if (ts.isImportDeclaration(node)) {
+    return 'an import declaration';
+  }
+  if (ts.isImportEqualsDeclaration(node)) {
+    return 'an import-equals declaration';
+  }
+  if (ts.isImportTypeNode(node)) {
+    return 'an import type';
+  }
+  if (ts.isExportDeclaration(node) && node.moduleSpecifier) {
+    return 'an export-from declaration';
+  }
+  if (ts.isMetaProperty(node) && node.keywordToken === ts.SyntaxKind.ImportKeyword) {
+    return 'an import.meta expression';
+  }
+  if (ts.isCallExpression(node)) {
+    if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+      return 'a dynamic import';
+    }
+    if (ts.isIdentifier(node.expression) && node.expression.text === 'require') {
+      return 'a require() call';
+    }
+    if (
+      ts.isPropertyAccessExpression(node.expression) &&
+      ts.isIdentifier(node.expression.expression) &&
+      node.expression.expression.text === 'require'
+    ) {
+      return 'a require property call';
+    }
+  }
+
+  return undefined;
+}
+
+function assertSelfContainedBootstrapSource(source) {
+  const sourceFile = ts.createSourceFile(
+    'BootstrapProtocol.generated.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS
+  );
+
+  function visit(node) {
+    const moduleEdgeKind = getModuleEdgeKind(node);
+    if (moduleEdgeKind) {
+      const location = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+      throw new Error(
+        `The generated bootstrap protocol must be self-contained; found ${moduleEdgeKind} at ` +
+          `line ${location.line + 1}, column ${location.character + 1}.`
+      );
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+}
 
 function renderGeneratedFile() {
   const source = fs.readFileSync(SOURCE_PATH, 'utf8').replace(/\r\n/g, '\n');
@@ -19,9 +79,7 @@ function renderGeneratedFile() {
   }
 
   const generatedSource = source.slice(startIndex + SOURCE_START_MARKER.length, endIndex).trim();
-  if (/^\s*import\b/m.test(generatedSource) || /\brequire\s*\(/.test(generatedSource)) {
-    throw new Error('The generated bootstrap protocol must not contain imports or require() calls.');
-  }
+  assertSelfContainedBootstrapSource(generatedSource);
 
   const bootstrapMajorMatch = generatedSource.match(/export const BOOTSTRAP_PROTOCOL_MAJOR: number = (\d+);/);
   const reporterMajorMatch = protocolSource.match(/REPORTER_PROTOCOL_VERSION:[^=]+=\s*\{\s*major:\s*(\d+),/);
@@ -77,6 +135,7 @@ function checkGeneratedFile() {
 }
 
 module.exports = {
+  assertSelfContainedBootstrapSource,
   runAsync: async ({
     heftTaskSession: {
       logger: { terminal }
