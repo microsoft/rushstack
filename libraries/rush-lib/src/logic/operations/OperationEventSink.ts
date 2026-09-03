@@ -40,7 +40,7 @@ export interface IOperationGraphEventSink {
   /**
    * Invoked when an operation is prepared for an iteration.
    */
-  onOperationRegistered?(result: IOperationExecutionResult, silent: boolean): void;
+  onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
 
   /**
    * Invoked synchronously on every operation status transition. The result's

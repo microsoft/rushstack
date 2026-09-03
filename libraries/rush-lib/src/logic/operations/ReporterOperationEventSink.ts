@@ -81,10 +81,13 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     return this._operationsByLegacyId.size > 0;
   }
 
-  public onOperationRegistered(result: IOperationExecutionResult, silent: boolean): void {
-    const operationId: string = result.operation.name;
+  public onOperationRegistered(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult
+  ): void {
     const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
-    if (!operation) {
+    if (!operation || !result) {
       return;
     }
 
@@ -190,9 +193,13 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
         : undefined;
   }
 
-  public onOperationRegistered(result: IOperationExecutionResult, silent: boolean): void {
-    this._first.onOperationRegistered?.(result, silent);
-    this._second.onOperationRegistered?.(result, silent);
+  public onOperationRegistered(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult
+  ): void {
+    this._first.onOperationRegistered?.(operationId, silent, result);
+    this._second.onOperationRegistered?.(operationId, silent, result);
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
