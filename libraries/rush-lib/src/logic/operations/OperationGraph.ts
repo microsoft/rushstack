@@ -712,6 +712,7 @@ export class OperationGraph implements IOperationGraph {
     }
 
     if (iterationContext.totalOperations === 0) {
+      registerOperations();
       return;
     }
 
@@ -726,15 +727,19 @@ export class OperationGraph implements IOperationGraph {
       terminal.writeStderrLine(Colorize.red(errorMessage));
       throw e;
     }
-    for (const executionRecord of executionRecords.values()) {
-      eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
-    }
+    registerOperations();
     if (!this._currentIteration) {
       this._setIdleTimeout();
     } else if (!this.pauseNextIteration) {
       void this.abortCurrentIterationAsync();
     }
     return iterationContext;
+
+    function registerOperations(): void {
+      for (const executionRecord of executionRecords.values()) {
+        eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
+      }
+    }
 
     function onWriterActive(writer: CollatedWriter | undefined): void {
       if (writer) {
