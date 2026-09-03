@@ -49,7 +49,10 @@ describe('bootstrap protocol generation', () => {
     { description: 'export-all declarations', source: "export * from 'pkg';" },
     { description: 'import.meta expressions', source: 'const url = import.meta.url;' },
     { description: 'require calls', source: "const value = require('pkg');" },
-    { description: 'require property calls', source: "const path = require.resolve('pkg');" }
+    { description: 'require property calls', source: "const path = require.resolve('pkg');" },
+    { description: 'parenthesized require calls', source: "const value = (require)('pkg');" },
+    { description: 'require element-access calls', source: "const path = require['resolve']('pkg');" },
+    { description: 'nested require property calls', source: "const paths = require.resolve.paths('pkg');" }
   ])('rejects $description', ({ source }: { source: string }) => {
     expect(() => assertSelfContainedBootstrapSource(source)).toThrow(
       'The generated bootstrap protocol must be self-contained'

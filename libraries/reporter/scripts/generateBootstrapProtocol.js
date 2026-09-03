@@ -10,6 +10,35 @@ const SOURCE_PATH = path.resolve(__dirname, '../src/bootstrap/BootstrapProtocol.
 const PROTOCOL_SOURCE_PATH = path.resolve(__dirname, '../src/protocol/ReporterProtocol.ts');
 const TARGET_PATH = path.resolve(__dirname, '../../rush-lib/src/scripts/generated/BootstrapProtocol.ts');
 
+function unwrapExpression(expression) {
+  let current = expression;
+  while (
+    ts.isParenthesizedExpression(current) ||
+    ts.isAsExpression(current) ||
+    ts.isTypeAssertionExpression(current) ||
+    ts.isNonNullExpression(current) ||
+    ts.isSatisfiesExpression(current)
+  ) {
+    current = current.expression;
+  }
+  return current;
+}
+
+function isRequireRootedExpression(expression) {
+  let current = expression;
+  for (;;) {
+    current = unwrapExpression(current);
+    if (ts.isIdentifier(current)) {
+      return current.text === 'require';
+    }
+    if (ts.isPropertyAccessExpression(current) || ts.isElementAccessExpression(current)) {
+      current = current.expression;
+      continue;
+    }
+    return false;
+  }
+}
+
 function getModuleEdgeKind(node) {
   if (ts.isImportDeclaration(node)) {
     return 'an import declaration';
@@ -30,15 +59,8 @@ function getModuleEdgeKind(node) {
     if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
       return 'a dynamic import';
     }
-    if (ts.isIdentifier(node.expression) && node.expression.text === 'require') {
-      return 'a require() call';
-    }
-    if (
-      ts.isPropertyAccessExpression(node.expression) &&
-      ts.isIdentifier(node.expression.expression) &&
-      node.expression.expression.text === 'require'
-    ) {
-      return 'a require property call';
+    if (isRequireRootedExpression(node.expression)) {
+      return 'a require-rooted call';
     }
   }
 
