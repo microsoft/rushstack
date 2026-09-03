@@ -44,8 +44,10 @@ interface IReporterOperationCycle {
 }
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
-  public readonly onOperationChunk: ((operationId: string, chunk: ITerminalChunk) => void) | undefined;
-  public readonly onOperationStreamClosed: ((operationId: string) => void) | undefined;
+  public readonly onOperationChunk:
+    | ((result: IOperationExecutionResult, chunk: ITerminalChunk) => void)
+    | undefined;
+  public readonly onOperationStreamClosed: ((result: IOperationExecutionResult) => void) | undefined;
   public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
   private readonly _operationsByLegacyId: Map<string, IReporterOperation> = new Map();
@@ -97,8 +99,8 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
 
     if (Array.from(this._operationsByLegacyId.values()).some(({ streamEmitter }) => !!streamEmitter)) {
-      this.onOperationChunk = (operationId, chunk) => this._onOperationChunk(operationId, chunk);
-      this.onOperationStreamClosed = (operationId) => this._onOperationStreamClosed(operationId);
+      this.onOperationChunk = (result, chunk) => this._onOperationChunk(result, chunk);
+      this.onOperationStreamClosed = (result) => this._onOperationStreamClosed(result);
       this.onOperationCompleted = (result) => this._onOperationCompleted(result);
     } else {
       this.onOperationChunk = undefined;
@@ -219,9 +221,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
   }
 
   private _onOperationChunk(result: IOperationExecutionResult, chunk: ITerminalChunk): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(
-      result.operation.name
-    );
+    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
     if (!operation?.streamEmitter || !this._cyclesByResult.has(result)) {
       return;
     }
