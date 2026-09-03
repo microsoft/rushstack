@@ -37,13 +37,7 @@ export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IRe
   }
 
   let payload: unknown = event.payload;
-  const source: IReporterEventEnvelope<unknown>['source'] =
-    event.privacy === 'public'
-      ? event.source
-      : {
-          packageName: '[private-producer]',
-          packageVersion: '[private-version]'
-        };
+  const source: IReporterEventEnvelope<unknown>['source'] = event.source;
   if (event.type === 'diagnosticEmitted') {
     const diagnostic: {
       readonly parameters?: Readonly<Record<string, IClassifiedValue>>;
