@@ -59,14 +59,14 @@ export interface IOperationGraphEventSink {
    * Invoked for each chunk of an operation's raw output, upstream of any
    * newline normalization or quiet-mode filtering.
    */
-  onOperationChunk?(result: IOperationExecutionResult, chunk: ITerminalChunk): void;
+  onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult): void;
 
   /**
    * Invoked when an operation's collated output stream is closed at the end of
    * its execution, after all status lines and output have been written. This
    * is the authoritative "no more output for this operation" signal.
    */
-  onOperationStreamClosed?(result: IOperationExecutionResult): void;
+  onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult): void;
 
   /**
    * Invoked after the operation stream is closed and the final outcome is authoritative.

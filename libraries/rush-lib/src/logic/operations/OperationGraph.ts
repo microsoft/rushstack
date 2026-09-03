@@ -737,7 +737,7 @@ export class OperationGraph implements IOperationGraph {
 
     function registerOperations(): void {
       for (const executionRecord of executionRecords.values()) {
-        eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
+        eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent, executionRecord);
       }
     }
 
