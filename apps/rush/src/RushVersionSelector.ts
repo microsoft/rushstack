@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import * as semver from 'semver';
 
 import { LockFile, Import } from '@rushstack/node-core-library';
+import { REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { _FlagFile, _RushGlobalFolder } from '@microsoft/rush-lib';
 
@@ -110,9 +111,9 @@ export class RushVersionSelector {
 
   private _reportStartupMessage(options: IRushFrontendLaunchOptions, text: string): void {
     if (options.reporterEnabled) {
-      options.reporterEventSink.emit({
-        protocolVersion: { major: 1, minor: 0 },
-        sessionId: `rush_frontend_${process.pid}`,
+      options.reporter.eventSink.emit({
+        protocolVersion: REPORTER_PROTOCOL_VERSION,
+        sessionId: options.reporter.sessionId,
         source: { packageName: '@microsoft/rush', packageVersion: this._currentPackageVersion },
         privacy: 'public',
         type: 'activityChanged',

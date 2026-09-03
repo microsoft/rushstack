@@ -4,9 +4,11 @@
 import {
   LegacyFallbackSink,
   ReporterManager,
+  REPORTER_PROTOCOL_VERSION,
   type IReporter,
   type IReporterEventEnvelope
 } from '@rushstack/rush-reporter';
+import { Rush } from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from '../RushCommandSelector';
 import type { IRushFrontendLaunchOptions } from '../IRushFrontendLaunchOptions';
@@ -19,6 +21,22 @@ class RecordingReporter implements IReporter {
 
   public report(event: IReporterEventEnvelope<unknown>): void {
     this.events.push(event);
+  }
+
+  public async flushAsync(): Promise<void> {}
+
+  public async closeAsync(): Promise<void> {}
+}
+
+class WritingReporter implements IReporter {
+  public readonly name: string = 'writing';
+  public reportCount: number = 0;
+
+  public async initializeAsync(): Promise<void> {}
+
+  public report(): void {
+    this.reportCount++;
+    process.stdout.write('reporter output\n');
   }
 
   public async flushAsync(): Promise<void> {}
@@ -48,6 +66,91 @@ function restoreObservedOutput(
 }
 
 describe(RushCommandSelector.name, () => {
+  it('publishes the current engine reporter protocol major', () => {
+    expect((Rush as typeof Rush & { readonly _reporterProtocolMajor?: number })._reporterProtocolMajor).toBe(
+      REPORTER_PROTOCOL_VERSION.major
+    );
+  });
+
+  it('does not observe output from a matching structured engine', () => {
+    const manager: ReporterManager = new ReporterManager();
+    const options: IRushFrontendLaunchOptions = {
+      isManaged: true,
+      reporter: { eventSink: manager, sessionId: 'test-session' },
+      reporterCloseAsync: async () => {},
+      reporterEnabled: true,
+      reporterSelectionReason: 'explicit --reporter'
+    };
+    const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
+    let receivedOptions: IRushFrontendLaunchOptions | undefined;
+    const currentRushLib = {
+      Rush: {
+        version: '5.178.1',
+        _reporterProtocolMajor: REPORTER_PROTOCOL_VERSION.major,
+        launch: (launcherVersion: string, launchOptions: IRushFrontendLaunchOptions) => {
+          void launcherVersion;
+          receivedOptions = launchOptions;
+        }
+      }
+    } as unknown as typeof import('@microsoft/rush-lib');
+
+    RushCommandSelector.execute('5.178.1', currentRushLib, options);
+
+    expect(process.stdout.write).toBe(originalStdoutWrite);
+    expect(receivedOptions?.reporter).toBe(options.reporter);
+  });
+
+  it('does not recapture reporter output while observing an old engine', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: WritingReporter = new WritingReporter();
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    const originalArgv: string[] = process.argv;
+    const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
+    const originalStderrWrite: typeof process.stderr.write = process.stderr.write;
+    let stdoutText: string = '';
+    process.argv = ['node', 'rush', 'build'];
+    process.stdout.write = ((text: string): boolean => {
+      stdoutText += text;
+      return true;
+    }) as typeof process.stdout.write;
+    process.stderr.write = (() => true) as typeof process.stderr.write;
+    const previousBeforeExitListeners: readonly BeforeExitListener[] = process.listeners(
+      'beforeExit'
+    ) as BeforeExitListener[];
+
+    try {
+      RushCommandSelector.execute(
+        '5.178.1',
+        {
+          Rush: {
+            version: '5.177.0',
+            launch: () => process.stdout.write('legacy output\n')
+          }
+        } as unknown as typeof import('@microsoft/rush-lib'),
+        {
+          isManaged: true,
+          reporter: { eventSink: manager, sessionId: 'test-session' },
+          reporterCloseAsync: async () => {},
+          reporterEnabled: true,
+          reporterSelectionReason: 'explicit --reporter'
+        }
+      );
+      restoreObservedOutput(previousBeforeExitListeners);
+      await manager.flushAsync();
+    } finally {
+      restoreObservedOutput(previousBeforeExitListeners, false);
+      process.stdout.write = originalStdoutWrite;
+      process.stderr.write = originalStderrWrite;
+      process.argv = originalArgv;
+    }
+
+    expect(reporter.reportCount).toBe(1);
+    expect(stdoutText.match(/reporter output/g)).toHaveLength(1);
+    expect(stdoutText.match(/legacy output/g)).toHaveLength(1);
+  });
+
   it('keeps ordered old-engine stdout and stderr on their original streams', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter();
@@ -76,7 +179,7 @@ describe(RushCommandSelector.name, () => {
 
     const options: IRushFrontendLaunchOptions = {
       isManaged: true,
-      reporterEventSink: manager,
+      reporter: { eventSink: manager, sessionId: 'test-session' },
       reporterCloseAsync: async () => {},
       reporterEnabled: true,
       reporterSelectionReason: 'explicit --reporter'
@@ -150,7 +253,7 @@ describe(RushCommandSelector.name, () => {
         } as unknown as typeof import('@microsoft/rush-lib'),
         {
           isManaged: true,
-          reporterEventSink: manager,
+          reporter: { eventSink: manager, sessionId: 'test-session' },
           reporterCloseAsync: async () => {},
           reporterEnabled: true,
           reporterSelectionReason: 'explicit --reporter'
@@ -206,7 +309,7 @@ describe(RushCommandSelector.name, () => {
         } as unknown as typeof import('@microsoft/rush-lib'),
         {
           isManaged: true,
-          reporterEventSink: manager,
+          reporter: { eventSink: manager, sessionId: 'test-session' },
           reporterCloseAsync: async () => {},
           reporterEnabled: true,
           reporterStdoutIsMachineReadable: true,
@@ -261,7 +364,7 @@ describe(RushCommandSelector.name, () => {
     try {
       RushCommandSelector.execute('5.178.1', oldRushLib, {
         isManaged: true,
-        reporterEventSink: manager,
+        reporter: { eventSink: manager, sessionId: 'test-session' },
         reporterCloseAsync: async () => {},
         reporterEnabled: true,
         reporterSelectionReason: 'explicit --reporter'
@@ -307,7 +410,7 @@ describe(RushCommandSelector.name, () => {
           } as unknown as typeof import('@microsoft/rush-lib'),
           {
             isManaged: true,
-            reporterEventSink: new ReporterManager(),
+            reporter: { eventSink: new ReporterManager(), sessionId: 'test-session' },
             reporterCloseAsync: async () => {},
             reporterEnabled: true,
             reporterSelectionReason: 'explicit --reporter'
@@ -326,7 +429,7 @@ describe(RushCommandSelector.name, () => {
   it('fails an explicit reporter request for an incompatible new engine protocol', () => {
     const options: IRushFrontendLaunchOptions = {
       isManaged: true,
-      reporterEventSink: new ReporterManager(),
+      reporter: { eventSink: new ReporterManager(), sessionId: 'test-session' },
       reporterCloseAsync: async () => {},
       reporterEnabled: true,
       reporterSelectionReason: 'explicit --reporter'
@@ -347,7 +450,7 @@ describe(RushCommandSelector.name, () => {
   it('fails an explicit reporter request for an incompatible older engine protocol', () => {
     const options: IRushFrontendLaunchOptions = {
       isManaged: true,
-      reporterEventSink: new ReporterManager(),
+      reporter: { eventSink: new ReporterManager(), sessionId: 'test-session' },
       reporterCloseAsync: async () => {},
       reporterEnabled: true,
       reporterSelectionReason: 'explicit --reporter'
@@ -369,7 +472,7 @@ describe(RushCommandSelector.name, () => {
     let receivedOptions: IRushFrontendLaunchOptions | undefined;
     const options: IRushFrontendLaunchOptions = {
       isManaged: true,
-      reporterEventSink: new ReporterManager(),
+      reporter: { eventSink: new ReporterManager(), sessionId: 'test-session' },
       reporterCloseAsync: async () => {},
       reporterEnabled: true,
       reporterSelectionReason: 'repository experiment'
@@ -390,14 +493,14 @@ describe(RushCommandSelector.name, () => {
       reporterEnabled: false,
       reporterSelectionReason: 'bootstrap compatibility fallback'
     });
-    expect(receivedOptions?.reporterEventSink).toBeInstanceOf(LegacyFallbackSink);
+    expect(receivedOptions?.reporter.eventSink).toBeInstanceOf(LegacyFallbackSink);
   });
 
   it('falls back to legacy engine rendering for an implicit older protocol', () => {
     let receivedOptions: IRushFrontendLaunchOptions | undefined;
     const options: IRushFrontendLaunchOptions = {
       isManaged: true,
-      reporterEventSink: new ReporterManager(),
+      reporter: { eventSink: new ReporterManager(), sessionId: 'test-session' },
       reporterCloseAsync: async () => {},
       reporterEnabled: true,
       reporterSelectionReason: 'repository experiment'
@@ -418,6 +521,6 @@ describe(RushCommandSelector.name, () => {
       reporterEnabled: false,
       reporterSelectionReason: 'bootstrap compatibility fallback'
     });
-    expect(receivedOptions?.reporterEventSink).toBeInstanceOf(LegacyFallbackSink);
+    expect(receivedOptions?.reporter.eventSink).toBeInstanceOf(LegacyFallbackSink);
   });
 });

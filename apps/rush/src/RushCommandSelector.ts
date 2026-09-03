@@ -68,7 +68,10 @@ export class RushCommandSelector {
       }
       effectiveOptions = {
         ...options,
-        reporterEventSink: new LegacyFallbackSink(),
+        reporter: {
+          ...options.reporter,
+          eventSink: new LegacyFallbackSink()
+        },
         reporterEnabled: false,
         reporterSelectionReason: 'bootstrap compatibility fallback'
       };
@@ -108,8 +111,8 @@ export class RushCommandSelector {
 
 function _observeOldEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): () => void {
   const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
-    sink: options.reporterEventSink,
-    sessionId: `rush_old_engine_${process.pid}`,
+    sink: options.reporter.eventSink,
+    sessionId: options.reporter.sessionId,
     source: { packageName: '@microsoft/rush-lib', packageVersion: engineVersion }
   });
   const restoreStdout: () => void = _observeStream(
@@ -157,6 +160,7 @@ function _observeStream(
   }
   markedStream[marker] = true;
 
+  let captureInProgress: boolean = false;
   const decoder: StringDecoder = new StringDecoder('utf8');
   const originalWrite: typeof stream.write = stream.write;
   stream.write = ((
@@ -168,8 +172,13 @@ function _observeStream(
       typeof chunk === 'string'
         ? chunk
         : decoder.write(Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength));
-    if (text) {
-      adapter.capture(streamName, text, renderLive);
+    if (text && !captureInProgress) {
+      captureInProgress = true;
+      try {
+        adapter.capture(streamName, text, renderLive);
+      } finally {
+        captureInProgress = false;
+      }
     }
     if (!renderLive) {
       const writeCallback: ((error?: Error | null) => void) | undefined =

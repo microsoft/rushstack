@@ -217,7 +217,14 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     const operationId: string | undefined = event.scope?.operationId;
-    const text: string = (event.payload as { text?: string }).text ?? '';
+    const payload: { text?: string; wasRendered?: boolean } = event.payload as {
+      text?: string;
+      wasRendered?: boolean;
+    };
+    if (payload.wasRendered === true) {
+      return;
+    }
+    const text: string = payload.text ?? '';
     const record: IOperationRecord | undefined =
       operationId !== undefined ? this._operations.get(operationId) : undefined;
     if (record) {
