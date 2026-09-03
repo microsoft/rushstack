@@ -678,7 +678,7 @@ export class OperationGraph implements IOperationGraph {
       );
 
       executionRecords.set(operation, executionRecord);
-      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent);
+      eventSink?.onOperationRegistered?.(executionRecord, executionRecord.silent);
     }
 
     for (const [operation, record] of executionRecords) {
@@ -1295,10 +1295,9 @@ function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatef
 function _handleOperationSuccess(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
-    record.eventSink?.onActivity?.(
-      `"${record.name}" completed successfully in ${stopwatch.toString()}.`,
-      { operationId: record.name }
-    );
+    record.eventSink?.onActivity?.(`"${record.name}" completed successfully in ${stopwatch.toString()}.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" completed successfully in ${stopwatch.toString()}.`)
     );
@@ -1315,10 +1314,10 @@ function _handleOperationSuccessWithWarning(
 ): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
-    record.eventSink?.onActivity?.(
-      `"${record.name}" completed with warnings in ${stopwatch.toString()}.`,
-      { operationId: record.name, stderr: true }
-    );
+    record.eventSink?.onActivity?.(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`, {
+      operationId: record.name,
+      stderr: true
+    });
     record.collatedWriter.terminal.writeStderrLine(
       Colorize.yellow(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`)
     );
