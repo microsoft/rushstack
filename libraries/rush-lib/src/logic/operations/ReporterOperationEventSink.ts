@@ -26,15 +26,21 @@ interface IReporterOperation {
   readonly operationId: string;
   readonly phaseName: string;
   readonly projectName: string;
+  registrationCycle: IReporterOperationCycle | undefined;
+}
+
+interface IReporterOperationCycle {
   readonly registeredOperationIds: Set<string>;
   readonly statuses: Map<string, OperationStatus>;
+  diagnosed: boolean;
   lastEmittedStatus: ReporterOperationStatus | undefined;
   silent: boolean;
 }
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
   private readonly _operationsByLegacyId: Map<string, IReporterOperation> = new Map();
-  private readonly _diagnosedOperations: Set<string> = new Set();
+  private readonly _cyclesByResult: WeakMap<IOperationExecutionResult, IReporterOperationCycle> =
+    new WeakMap();
   private readonly _rushSession: RushSession;
 
   public constructor(rushSession: RushSession, commandName: string, operations: Iterable<Operation>) {
@@ -62,15 +68,11 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
           operationId,
           phaseName,
           projectName,
-          registeredOperationIds: new Set(),
-          statuses: new Map(),
-          lastEmittedStatus: undefined,
-          silent: true
+          registrationCycle: undefined
         };
         operationsByReporterId.set(operationId, reporterOperation);
       }
       reporterOperation.legacyOperationIds.add(operation.name);
-      reporterOperation.silent &&= !operation.enabled || operation.runner?.silent === true;
       this._operationsByLegacyId.set(operation.name, reporterOperation);
     }
   }
@@ -79,23 +81,29 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     return this._operationsByLegacyId.size > 0;
   }
 
-  public onOperationRegistered(operationId: string, silent: boolean): void {
+  public onOperationRegistered(result: IOperationExecutionResult, silent: boolean): void {
+    const operationId: string = result.operation.name;
     const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
     if (!operation) {
       return;
     }
 
-    if (operation.registeredOperationIds.size === operation.legacyOperationIds.size) {
-      operation.registeredOperationIds.clear();
-      operation.statuses.clear();
-      operation.lastEmittedStatus = undefined;
-      operation.silent = true;
-      this._diagnosedOperations.delete(operation.operationId);
+    let cycle: IReporterOperationCycle | undefined = operation.registrationCycle;
+    if (!cycle || cycle.registeredOperationIds.size === operation.legacyOperationIds.size) {
+      cycle = {
+        registeredOperationIds: new Set(),
+        statuses: new Map(),
+        diagnosed: false,
+        lastEmittedStatus: undefined,
+        silent: true
+      };
+      operation.registrationCycle = cycle;
     }
 
-    operation.registeredOperationIds.add(operationId);
-    operation.silent &&= silent;
-    if (operation.registeredOperationIds.size !== operation.legacyOperationIds.size || operation.silent) {
+    this._cyclesByResult.set(result, cycle);
+    cycle.registeredOperationIds.add(operationId);
+    cycle.silent &&= silent;
+    if (cycle.registeredOperationIds.size !== operation.legacyOperationIds.size || cycle.silent) {
       return;
     }
 
@@ -111,17 +119,21 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     if (!operation) {
       return;
     }
+    const cycle: IReporterOperationCycle | undefined = this._cyclesByResult.get(result);
+    if (!cycle) {
+      return;
+    }
 
     if (
       result.status === OperationStatus.Ready &&
-      operation.registeredOperationIds.size === operation.legacyOperationIds.size
+      cycle.registeredOperationIds.size === operation.legacyOperationIds.size
     ) {
       return;
     }
 
-    operation.statuses.set(result.operation.name, result.status);
-    if (result.status === OperationStatus.Failure && !this._diagnosedOperations.has(operation.operationId)) {
-      this._diagnosedOperations.add(operation.operationId);
+    cycle.statuses.set(result.operation.name, result.status);
+    if (result.status === OperationStatus.Failure && !cycle.diagnosed) {
+      cycle.diagnosed = true;
       const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED', {
         parameters: {
           projectName: { value: operation.projectName, privacy: 'public' }
@@ -133,12 +145,12 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       }
     }
 
-    const status: ReporterOperationStatus | undefined = _getAggregateStatus(operation);
-    if (status === undefined || status === operation.lastEmittedStatus) {
+    const status: ReporterOperationStatus | undefined = _getAggregateStatus(operation, cycle);
+    if (status === undefined || status === cycle.lastEmittedStatus) {
       return;
     }
-    operation.lastEmittedStatus = status;
-    if (!operation.silent) {
+    cycle.lastEmittedStatus = status;
+    if (!cycle.silent) {
       const durationMs: number | undefined =
         operation.legacyOperationIds.size === 1 && result.stopwatch.startTime !== undefined
           ? result.stopwatch.duration * 1000
@@ -178,9 +190,9 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
         : undefined;
   }
 
-  public onOperationRegistered(operationId: string, silent: boolean): void {
-    this._first.onOperationRegistered?.(operationId, silent);
-    this._second.onOperationRegistered?.(operationId, silent);
+  public onOperationRegistered(result: IOperationExecutionResult, silent: boolean): void {
+    this._first.onOperationRegistered?.(result, silent);
+    this._second.onOperationRegistered?.(result, silent);
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
@@ -252,21 +264,24 @@ function _toReporterStatus(status: OperationStatus): ReporterOperationStatus {
   }
 }
 
-function _getAggregateStatus(operation: IReporterOperation): ReporterOperationStatus | undefined {
-  const statuses: readonly OperationStatus[] = [...operation.statuses.values()];
+function _getAggregateStatus(
+  operation: IReporterOperation,
+  cycle: IReporterOperationCycle
+): ReporterOperationStatus | undefined {
+  const statuses: readonly OperationStatus[] = [...cycle.statuses.values()];
   if (
     statuses.some((status) => status === OperationStatus.Executing) ||
-    operation.lastEmittedStatus === 'executing'
+    cycle.lastEmittedStatus === 'executing'
   ) {
     if (
-      operation.statuses.size !== operation.legacyOperationIds.size ||
+      cycle.statuses.size !== operation.legacyOperationIds.size ||
       statuses.some((status) => !_isTerminalStatus(status))
     ) {
       return 'executing';
     }
   }
   if (
-    operation.statuses.size === operation.legacyOperationIds.size &&
+    cycle.statuses.size === operation.legacyOperationIds.size &&
     statuses.every((status) => _isTerminalStatus(status))
   ) {
     return _getAggregateTerminalStatus(statuses);
