@@ -94,9 +94,14 @@ class RecordingSink implements IOperationGraphEventSink {
   public readonly closed: string[] = [];
   public readonly completed: [string, string][] = [];
 
-  public onOperationRegistered(operationId: string, silent: boolean, iterationId: number): void {
+  public onOperationRegistered(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
     this.registered.push([operationId, silent]);
-    this.registeredIterations.push(iterationId);
+    this.registeredIterations.push(iterationId ?? result?.iterationId ?? -1);
   }
   public onOperationStatusChanged(result: IOperationExecutionResult): void {
     this.transitions.push([result.operation.name, result.status]);
