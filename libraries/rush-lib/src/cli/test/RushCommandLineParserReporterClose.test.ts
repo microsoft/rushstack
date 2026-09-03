@@ -6,8 +6,13 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
 describe('RushCommandLineParser reporter close', () => {
-  const originalExitCode: string | number | null | undefined = process.exitCode;
+  let originalExitCode: string | number | undefined;
   const originalArgv: string[] = process.argv;
+
+  beforeEach(() => {
+    originalExitCode = process.exitCode;
+    process.exitCode = undefined;
+  });
 
   afterEach(() => {
     process.exitCode = originalExitCode;
@@ -76,7 +81,7 @@ describe('RushCommandLineParser reporter close', () => {
       .spyOn(process, 'exit')
       .mockImplementation(() => undefined as never);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    process.exitCode = 1;
+    process.exitCode = 0;
 
     const reportErrorAndSetExitCode: (error: Error) => void = (
       parser as unknown as {
