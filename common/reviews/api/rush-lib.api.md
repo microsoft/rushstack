@@ -685,7 +685,7 @@ export interface _IOperationGraphEventSink {
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(result: IOperationExecutionResult, silent: boolean): void;
+    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
     onOperationStreamClosed?(operationId: string): void;
 }
