@@ -105,7 +105,8 @@ class RecordingSink implements IOperationGraphEventSink {
   public onActivity(text: string): void {
     this.activities.push(text);
   }
-  public onOperationChunk(operationId: string, chunk: ITerminalChunk): void {
+  public onOperationChunk(result: IOperationExecutionResult, chunk: ITerminalChunk): void {
+    const operationId: string = result.operation.name;
     let chunks: string[] | undefined = this.chunks.get(operationId);
     if (!chunks) {
       chunks = [];
@@ -113,8 +114,8 @@ class RecordingSink implements IOperationGraphEventSink {
     }
     chunks.push(chunk.text);
   }
-  public onOperationStreamClosed(operationId: string): void {
-    this.closed.push(operationId);
+  public onOperationStreamClosed(result: IOperationExecutionResult): void {
+    this.closed.push(result.operation.name);
   }
   public onOperationCompleted(result: IOperationExecutionResult): void {
     this.completed.push([result.operation.name, result.status]);
