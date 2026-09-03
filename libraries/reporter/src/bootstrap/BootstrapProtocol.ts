@@ -70,7 +70,7 @@ export function encodeBootstrapEnvelope(input: IBootstrapEnvelopeInput): string 
     privacy: input.privacy,
     required: input.required,
     type: input.type,
-    payload: input.payload
+    payload: input.payload === undefined ? {} : input.payload
   });
 }
 

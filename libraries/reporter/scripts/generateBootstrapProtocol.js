@@ -28,6 +28,10 @@ function isRequireRootedExpression(expression) {
   let current = expression;
   for (;;) {
     current = unwrapExpression(current);
+    if (ts.isBinaryExpression(current) && current.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+      current = current.right;
+      continue;
+    }
     if (ts.isIdentifier(current)) {
       return current.text === 'require';
     }
@@ -62,6 +66,9 @@ function getModuleEdgeKind(node) {
     if (isRequireRootedExpression(node.expression)) {
       return 'a require-rooted call';
     }
+  }
+  if (ts.isNewExpression(node) && isRequireRootedExpression(node.expression)) {
+    return 'a require-rooted constructor';
   }
 
   return undefined;
