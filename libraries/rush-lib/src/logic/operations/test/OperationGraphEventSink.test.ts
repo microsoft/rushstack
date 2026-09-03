@@ -555,6 +555,49 @@ describe('OperationGraph event sink (dual-emit)', () => {
     );
   });
 
+  it('finalizes every registered operation for an all-silent iteration', async () => {
+    const silentRunner: IOperationRunner = {
+      name: 'silent only',
+      reportTiming: false,
+      silent: true,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: false,
+      executeAsync: async () => OperationStatus.Success,
+      getConfigHash: () => 'silent-only'
+    };
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: {
+        eventSink: reporterSink,
+        sessionId: 'silent-only',
+        operationStreamEnabled: true
+      }
+    });
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('silent only', silentRunner, mockPhase, '@scope/silent')]),
+      createGraphOptions(mockWritable, false)
+    );
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+
+    await graph.executeAsync({});
+    await graph.executeAsync({});
+
+    const operationEvents: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
+      ({ scope }) => scope?.operationId === '@scope/silent#phase'
+    );
+    expect(operationEvents.filter(({ type }) => type === 'operationRegistered')).toHaveLength(2);
+    expect(operationEvents.filter(({ type }) => type === 'operationStreamClosed')).toHaveLength(2);
+    expect(operationEvents.filter(({ type }) => type === 'operationCompleted')).toHaveLength(2);
+    expect(
+      operationEvents
+        .filter(({ type }) => type === 'operationCompleted')
+        .map(({ payload }) => (payload as { status: string }).status)
+    ).toEqual(['noOp', 'noOp']);
+  });
+
   it('does not attach an operation adapter when the session has no reporter sink', () => {
     const rushSession: RushSession = new RushSession({
       terminalProvider: new StringBufferTerminalProvider(),

@@ -713,6 +713,12 @@ export class OperationGraph implements IOperationGraph {
 
     if (iterationContext.totalOperations === 0) {
       registerOperations();
+      for (const executionRecord of executionRecords.values()) {
+        executionRecord.status = OperationStatus.NoOp;
+        executionRecord.finalizeOperation();
+        executionRecord.stdioSummarizer.close();
+        executionRecord.problemCollector.close();
+      }
       return;
     }
 
