@@ -21,9 +21,9 @@ describe(PhasedRequestEventMultiplexer.name, () => {
     };
     const multiplexer: PhasedRequestEventMultiplexer = new PhasedRequestEventMultiplexer(workspaceSink);
     multiplexer.subscribe(requestSink);
-    const result: IOperationExecutionResult = {} as IOperationExecutionResult;
+    const result: IOperationExecutionResult = { iterationId: 1 } as IOperationExecutionResult;
 
-    multiplexer.onOperationStreamClosed('operation', 1);
+    multiplexer.onOperationStreamClosed('operation', result, 1);
     multiplexer.onOperationCompleted(result);
 
     expect(events).toEqual([

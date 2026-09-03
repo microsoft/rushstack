@@ -39,10 +39,15 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationRegistered(operationId: string, silent: boolean, iterationId: number): void {
-    this.#workspaceSink?.onOperationRegistered?.(operationId, silent, iterationId);
+  public onOperationRegistered(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    this.#workspaceSink?.onOperationRegistered?.(operationId, silent, result, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationRegistered?.(operationId, silent, iterationId);
+      requestSink.onOperationRegistered?.(operationId, silent, result, iterationId);
     }
   }
 
@@ -60,17 +65,26 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationChunk(operationId: string, chunk: ITerminalChunk, iterationId: number): void {
-    this.#workspaceSink?.onOperationChunk?.(operationId, chunk, iterationId);
+  public onOperationChunk(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    this.#workspaceSink?.onOperationChunk?.(operationId, chunk, result, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationChunk?.(operationId, chunk, iterationId);
+      requestSink.onOperationChunk?.(operationId, chunk, result, iterationId);
     }
   }
 
-  public onOperationStreamClosed(operationId: string, iterationId: number): void {
-    this.#workspaceSink?.onOperationStreamClosed?.(operationId, iterationId);
+  public onOperationStreamClosed(
+    operationId: string,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    this.#workspaceSink?.onOperationStreamClosed?.(operationId, result, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationStreamClosed?.(operationId, iterationId);
+      requestSink.onOperationStreamClosed?.(operationId, result, iterationId);
     }
   }
 
