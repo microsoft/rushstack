@@ -563,7 +563,13 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.flushTelemetry();
 
-    const exitCode: string | number = process.exitCode ?? 1;
+    const configuredExitCode: string | number | undefined = process.exitCode;
+    const numericExitCode: number = Number(configuredExitCode);
+    const exitCode: number =
+      configuredExitCode !== undefined && Number.isInteger(numericExitCode) && numericExitCode !== 0
+        ? numericExitCode
+        : 1;
+    process.exitCode = exitCode;
     const handleExit = (): never => {
       // Ideally we want to eliminate all calls to process.exit() from our code, and replace them
       // with normal control flow that properly cleans up its data structures.
