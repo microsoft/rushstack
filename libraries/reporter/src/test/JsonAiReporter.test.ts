@@ -102,6 +102,33 @@ describe('JsonReporter', () => {
     expect(output).toContain('[local-sensitive]');
     expect(output).not.toContain('/private/path');
   });
+
+  it('removes secret envelope metadata from machine output', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
+    reporter.report({
+      ...ev(
+        'messageEmitted',
+        { severity: 'error', text: 'TOP_SECRET_VALUE' },
+        { operationId: 'private-operation', projectName: '@private/project' },
+        'secret'
+      ),
+      source: { packageName: '@private/producer', packageVersion: '1.0.0' },
+      parentSessionId: 'private-parent-session',
+      parentOperationId: 'private-parent-operation'
+    });
+
+    const record: Record<string, unknown> = parseLines(output)[0];
+    expect(record.source).toEqual({
+      packageName: '[private-producer]',
+      packageVersion: '[private-version]'
+    });
+    expect(record.scope).toBeUndefined();
+    expect(record.parentSessionId).toBeUndefined();
+    expect(record.parentOperationId).toBeUndefined();
+    expect(output).not.toContain('TOP_SECRET_VALUE');
+    expect(output).not.toContain('@private/project');
+  });
 });
 
 describe('AiReporter', () => {
