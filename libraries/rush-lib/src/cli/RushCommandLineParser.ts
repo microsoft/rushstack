@@ -770,7 +770,9 @@ export class RushCommandLineParser extends CommandLineParser {
     const pendingFlushes: Promise<unknown>[] = [
       this._rushOptions.reporterCloseAsync
         ? this._closeReporterAsync()
-        : _flushRushSessionReporterAsync(rushSession)
+        : rushSession
+          ? _flushRushSessionReporterAsync(rushSession)
+          : Promise.resolve()
     ];
     if (telemetryFlushAsync) {
       pendingFlushes.push(telemetryFlushAsync);
