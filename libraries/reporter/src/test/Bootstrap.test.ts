@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { assertSelfContainedBootstrapSource } from '../../scripts/generateBootstrapProtocol';
 import {
   parseEarlyReporterControls,
   BootstrapEventBuffer,
@@ -19,6 +20,7 @@ import {
   type IBootstrapEventBufferOptions,
   type IEarlyReporterControls
 } from '../index';
+import { encodeBootstrapEnvelope } from '../bootstrap/BootstrapProtocol';
 
 function decode(ndjson: string): Record<string, unknown>[] {
   return ndjson
@@ -36,6 +38,40 @@ function makeBuffer(overrides?: Partial<IBootstrapEventBufferOptions>): Bootstra
     ...overrides
   });
 }
+
+describe('bootstrap protocol generation', () => {
+  it.each([
+    { description: 'static imports', source: "import { value } from 'pkg';" },
+    { description: 'import-equals declarations', source: "import value = require('pkg');" },
+    { description: 'import types', source: "type Value = import('pkg').Value;" },
+    { description: 'dynamic imports', source: "const value = import('pkg');" },
+    { description: 'export-from declarations', source: "export { value } from 'pkg';" },
+    { description: 'export-all declarations', source: "export * from 'pkg';" },
+    { description: 'import.meta expressions', source: 'const url = import.meta.url;' },
+    { description: 'require calls', source: "const value = require('pkg');" },
+    { description: 'require property calls', source: "const path = require.resolve('pkg');" },
+    { description: 'parenthesized require calls', source: "const value = (require)('pkg');" },
+    { description: 'require element-access calls', source: "const path = require['resolve']('pkg');" },
+    { description: 'nested require property calls', source: "const paths = require.resolve.paths('pkg');" },
+    { description: 'require constructors', source: "const value = new require('pkg');" },
+    { description: 'parenthesized require constructors', source: "const value = new (require)('pkg');" },
+    { description: 'comma-expression require calls', source: "const value = (0, require)('pkg');" }
+  ])('rejects $description', ({ source }: { source: string }) => {
+    expect(() => assertSelfContainedBootstrapSource(source)).toThrow(
+      'The generated bootstrap protocol must be self-contained'
+    );
+  });
+
+  it('allows import-like text without module edges', () => {
+    const source: string = [
+      "/* import { value } from 'pkg'; */",
+      `const message: string = "import('pkg')";`,
+      'export const value: string = message;'
+    ].join('\n');
+
+    expect(() => assertSelfContainedBootstrapSource(source)).not.toThrow();
+  });
+});
 
 describe('parseEarlyReporterControls', () => {
   it('reads the reporter and log level from flags', () => {
@@ -72,6 +108,46 @@ describe('parseEarlyReporterControls', () => {
 describe('BootstrapEventBuffer', () => {
   it('freezes a protocol major that matches the source of truth', () => {
     expect(BOOTSTRAP_PROTOCOL_MAJOR).toBe(REPORTER_PROTOCOL_VERSION.major);
+  });
+
+  it('encodes the frozen bootstrap envelope deterministically', () => {
+    expect(
+      encodeBootstrapEnvelope({
+        eventId: 'boot_1',
+        sessionId: 'sess_boot',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: { packageName: 'install-run-rush', packageVersion: '0.0.0' },
+        privacy: 'public',
+        required: true,
+        type: 'sessionStarted',
+        payload: { argv: ['build'] }
+      })
+    ).toBe(
+      '{"protocolVersion":{"major":1,"minor":0},"eventId":"boot_1","sessionId":"sess_boot",' +
+        '"sequence":1,"timestamp":"2026-01-01T00:00:00.000Z","source":{"packageName":' +
+        '"install-run-rush","packageVersion":"0.0.0"},"privacy":"public","required":true,' +
+        '"type":"sessionStarted","payload":{"argv":["build"]}}'
+    );
+  });
+
+  it('preserves the payload field when the input payload is undefined', () => {
+    const envelope: Record<string, unknown> = JSON.parse(
+      encodeBootstrapEnvelope({
+        eventId: 'boot_1',
+        sessionId: 'sess_boot',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: { packageName: 'install-run-rush', packageVersion: '0.0.0' },
+        privacy: 'public',
+        required: true,
+        type: 'sessionStarted',
+        payload: undefined
+      })
+    ) as Record<string, unknown>;
+
+    expect(Object.hasOwn(envelope, 'payload')).toBe(true);
+    expect(envelope.payload).toEqual({});
   });
 
   it('encodes events with assigned ids, sequence, timestamp, and protocol version', () => {
