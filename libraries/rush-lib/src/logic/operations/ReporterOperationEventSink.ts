@@ -378,9 +378,9 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     if (cycle.streamClosed) {
       return;
     }
-    const matcherKey: string = `${iterationId}:${operationId}`;
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
     for (const diagnostic of operation.problemMatcherRunnersByLegacyId.get(matcherKey)?.flush() ?? []) {
-      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId });
+      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: resolvedIterationId });
     }
     operation.problemMatcherRunnersByLegacyId.delete(matcherKey);
     cycle.closedOperationIds.add(operationId);
