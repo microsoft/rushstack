@@ -382,7 +382,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
     });
 
-    it('excludeVersionOnlyChanges excludes dependency ranges generated for locally bumped projects', async () => {
+    it('excludeVersionOnlyChanges excludes arbitrary peer dependency changes with a version bump', async () => {
       const rootDir: string = resolve(__dirname, 'repo');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
         resolve(rootDir, 'rush.json')
@@ -391,20 +391,14 @@ describe(ProjectChangeAnalyzer.name, () => {
       mockGetRepoChanges.mockReturnValue(
         new Map<string, IFileDiffStatus>([
           [
-            'a/package.json',
-            { mode: 'modified', newhash: 'newhash-a', oldhash: 'oldhash-a', status: 'M' }
-          ],
-          [
             'b/package.json',
             { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }
           ]
         ])
       );
       const packageJsonByHash: Record<string, object> = {
-        'oldhash-a': { name: 'a', version: '1.0.0' },
-        'newhash-a': { name: 'a', version: '1.0.1' },
-        'oldhash-b': { name: 'b', version: '2.0.0', peerDependencies: { a: '1.0.0' } },
-        'newhash-b': { name: 'b', version: '2.0.1', peerDependencies: { a: '1.0.1' } }
+        'oldhash-b': { name: 'b', version: '2.0.0', peerDependencies: { external: '^1.0.0' } },
+        'newhash-b': { name: 'b', version: '2.0.1', peerDependencies: { external: '>=3.0.0' } }
       };
       mockGetBlobContentAsync.mockImplementation(({ blobSpec }) =>
         Promise.resolve(JSON.stringify(packageJsonByHash[blobSpec]!))
@@ -1275,151 +1269,76 @@ describe(ProjectChangeAnalyzer.name, () => {
   });
 
   describe('isPackageJsonVersionBumpChange', () => {
-    function expectGeneratedPeerDependencyRange(oldRange: string, newRange: string): void {
+    it('accepts arbitrary peer dependency changes with a version bump', () => {
       expect(
         isPackageJsonVersionBumpChange(
           {
             name: 'consumer',
             version: '1.0.0',
-            peerDependencies: { dependency: oldRange }
+            peerDependencies: { dependency: '^1.0.0' }
           },
           {
             name: 'consumer',
             version: '1.0.1',
-            peerDependencies: { dependency: newRange }
-          },
-          new Map([['dependency', '1.0.1']])
-        )
-      ).toBe(true);
-    }
-
-    it('accepts a generated exact peer dependency range', () => {
-      expectGeneratedPeerDependencyRange('1.0.0', '1.0.1');
-    });
-
-    it('accepts a generated caret peer dependency range', () => {
-      expectGeneratedPeerDependencyRange('^1.0.0', '^1.0.1');
-    });
-
-    it('accepts generated ranges in every dependency section updated by VersionManager', () => {
-      expect(
-        isPackageJsonVersionBumpChange(
-          {
-            name: 'consumer',
-            version: '1.0.0',
-            dependencies: { exact: '1.0.0' },
-            devDependencies: { tilde: '~2.0.0' },
             peerDependencies: {
-              range: '>=3.0.0 <4.0.0',
-              workspace: 'workspace:^4.0.0'
+              anotherDependency: 'workspace:*',
+              dependency: 'file:../dependency'
             }
-          },
-          {
-            name: 'consumer',
-            version: '1.0.1',
-            dependencies: { exact: '1.0.1' },
-            devDependencies: { tilde: '~2.0.1' },
-            peerDependencies: {
-              range: '>=3.0.1 <4.0.0',
-              workspace: 'workspace:^4.0.1'
-            }
-          },
-          new Map([
-            ['exact', '1.0.1'],
-            ['tilde', '2.0.1'],
-            ['range', '3.0.1'],
-            ['workspace', '4.0.1']
-          ])
+          }
         )
       ).toBe(true);
     });
 
-    it('rejects an unrelated dependency edit', () => {
+    it('rejects peer dependency changes without a version bump', () => {
       expect(
         isPackageJsonVersionBumpChange(
           {
             name: 'consumer',
             version: '1.0.0',
-            dependencies: { dependency: '^1.0.0', unrelated: '^2.0.0' }
+            peerDependencies: { dependency: '^1.0.0' }
           },
           {
             name: 'consumer',
-            version: '1.0.1',
-            dependencies: { dependency: '^1.0.1', unrelated: '^2.1.0' }
-          },
-          new Map([['dependency', '1.0.1']])
+            version: '1.0.0',
+            peerDependencies: { dependency: '^2.0.0' }
+          }
         )
       ).toBe(false);
     });
 
-    it('rejects a semver-compatible range that Rush would not generate', () => {
+    it.each(['dependencies', 'devDependencies', 'optionalDependencies'] as const)(
+      'rejects a version bump with a %s change',
+      (dependencyFieldName) => {
+        expect(
+          isPackageJsonVersionBumpChange(
+            {
+              name: 'consumer',
+              version: '1.0.0',
+              [dependencyFieldName]: { dependency: '^1.0.0' }
+            },
+            {
+              name: 'consumer',
+              version: '1.0.1',
+              [dependencyFieldName]: { dependency: '^2.0.0' }
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it('rejects a version bump with an unrelated field change', () => {
       expect(
         isPackageJsonVersionBumpChange(
           {
             name: 'consumer',
             version: '1.0.0',
-            dependencies: { dependency: '^1.0.0' }
+            description: 'Old description'
           },
           {
             name: 'consumer',
             version: '1.0.1',
-            dependencies: { dependency: '>=1.0.1 <2.0.0' }
-          },
-          new Map([['dependency', '1.0.1']])
-        )
-      ).toBe(false);
-    });
-
-    it('rejects an optional dependency edit because VersionManager does not generate it', () => {
-      expect(
-        isPackageJsonVersionBumpChange(
-          {
-            name: 'consumer',
-            version: '1.0.0',
-            optionalDependencies: { dependency: '^1.0.0' }
-          },
-          {
-            name: 'consumer',
-            version: '1.0.1',
-            optionalDependencies: { dependency: '^1.0.1' }
-          },
-          new Map([['dependency', '1.0.1']])
-        )
-      ).toBe(false);
-    });
-
-    it('rejects a generated dependency range when the consumer version was not bumped', () => {
-      expect(
-        isPackageJsonVersionBumpChange(
-          {
-            name: 'consumer',
-            version: '1.0.0',
-            dependencies: { dependency: '^1.0.0' }
-          },
-          {
-            name: 'consumer',
-            version: '1.0.0',
-            dependencies: { dependency: '^1.0.1' }
-          },
-          new Map([['dependency', '1.0.1']])
-        )
-      ).toBe(false);
-    });
-
-    it('rejects a dependency edit when the referenced local project was not bumped', () => {
-      expect(
-        isPackageJsonVersionBumpChange(
-          {
-            name: 'consumer',
-            version: '1.0.0',
-            dependencies: { dependency: '^1.0.0' }
-          },
-          {
-            name: 'consumer',
-            version: '1.0.1',
-            dependencies: { dependency: '^1.0.1' }
-          },
-          new Map()
+            description: 'New description'
+          }
         )
       ).toBe(false);
     });
