@@ -211,7 +211,7 @@ export class SassProcessor {
   private _configFilePath: string | undefined;
 
   public constructor(options: ISassProcessorOptions) {
-    const { silenceDeprecations, excludeFiles } = options;
+    const { silenceDeprecations, excludeFiles, ignoreDeprecationsInDependencies } = options;
 
     const { isFileModule, allFileExtensions } = buildExtensionClassifier(options);
 
@@ -261,6 +261,7 @@ export class SassProcessor {
     this._resolutions = new Map();
     this._options = options;
     this._realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
+    const { terminal } = options.logger;
     this._scssOptions = {
       style: 'expanded', // leave minification to clean-css
       importers: [
@@ -270,7 +271,17 @@ export class SassProcessor {
           load: loadAsync
         }
       ],
+      logger: {
+        warn: (message, { deprecation }) => {
+          if (deprecation) {
+            terminal.writeWarningLine(`Deprecation Warning: ${message}`);
+          } else {
+            terminal.writeWarningLine(`Warning: ${message}`);
+          }
+        }
+      },
       silenceDeprecations: deprecationsToSilence,
+      quietDeps: ignoreDeprecationsInDependencies,
       ...(options.sourceMap && { sourceMap: true, sourceMapIncludeSources: true })
     };
   }
