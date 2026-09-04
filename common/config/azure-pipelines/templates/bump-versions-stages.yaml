@@ -102,6 +102,14 @@ stages:
               DisplayName: 'Generate change files'
               Condition: "and(succeeded(), eq(variables.HasChanges, 'true'))"
 
+          - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+            parameters:
+              Arguments: >
+                change
+                --verify
+              DisplayName: 'Verify generated change files'
+              Condition: "and(succeeded(), eq(variables.HasChanges, 'true'))"
+
           - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
             displayName: 'Prepublish workaround for rush-lib'
 
