@@ -494,8 +494,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
       this.rushConfiguration,
-      this.options
+      { ...this.options, npmrcFolder: subspace.getSubspaceTempFolderPath() }
     );
+    const keepEnvironment: boolean =
+      InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.rushConfiguration);
     if (ConsoleTerminalProvider.supportsColor) {
       packageManagerEnv.FORCE_COLOR = '1';
     }
@@ -596,6 +598,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             args: installArgs,
             workingDirectory: subspace.getSubspaceTempFolderPath(),
             environment: packageManagerEnv,
+            keepEnvironment,
             suppressOutput: false,
             onStdoutStreamChunk: onPnpmStdoutChunk
           },

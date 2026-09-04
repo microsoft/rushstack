@@ -502,8 +502,10 @@ export class RushInstallManager extends BaseInstallManager {
 
     const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
       this.rushConfiguration,
-      this.options
+      { ...this.options, npmrcFolder: subspace.getSubspaceTempFolderPath() }
     );
+    const keepEnvironment: boolean =
+      InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.rushConfiguration);
 
     const commonNodeModulesFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -622,6 +624,7 @@ export class RushInstallManager extends BaseInstallManager {
         args: installArgs,
         workingDirectory: this.rushConfiguration.commonTempFolder,
         environment: packageManagerEnv,
+        keepEnvironment,
         suppressOutput: false
       },
       this.options.maxInstallAttempts,

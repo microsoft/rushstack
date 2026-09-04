@@ -21,6 +21,7 @@ import type { IConfigurationEnvironment } from '../base/BasePackageManagerOption
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { merge } from '../../utilities/objectUtilities';
+import { getNpmrcEnvironmentVariables } from '../../utilities/npmrcUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
 
@@ -377,10 +378,41 @@ export class InstallHelpers {
     };
   }
 
+  /**
+   * Returns true if Rush (rather than PNPM) should expand the `${VAR}` tokens that appear in
+   * credentials and registry URLs in the `.npmrc` file. See the
+   * `provideNpmrcCredentialsViaEnvironment` experiment.
+   */
+  public static shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration: RushConfiguration): boolean {
+    const {
+      isPnpm,
+      packageManagerToolVersion,
+      experimentsConfiguration: {
+        configuration: { provideNpmrcCredentialsViaEnvironment = false }
+      }
+    } = rushConfiguration;
+    if (!isPnpm || !provideNpmrcCredentialsViaEnvironment) {
+      return false;
+    }
+
+    // PNPM 11.6.0 added URL-scoped `pnpm_config_//...` credentials, which let CI bind a token to
+    // a registry without deriving that trusted binding from repository-controlled configuration.
+    // Keep this compatibility workaround only for patched versions that lack that native path.
+    return (
+      (semver.gte(packageManagerToolVersion, '10.34.2') && semver.lt(packageManagerToolVersion, '11.0.0')) ||
+      (semver.gte(packageManagerToolVersion, '11.5.3') && semver.lt(packageManagerToolVersion, '11.6.0'))
+    );
+  }
+
+  /**
+   * Returns the environment that the package manager should be invoked with, including any
+   * credentials that were moved out of the generated `.npmrc` file in `npmrcFolder`.
+   */
   public static getPackageManagerEnvironment(
     rushConfiguration: RushConfiguration,
     options: {
       debug?: boolean;
+      npmrcFolder?: string;
     } = {}
   ): NodeJS.ProcessEnv {
     let configurationEnvironment: IConfigurationEnvironment | undefined = undefined;
@@ -393,7 +425,26 @@ export class InstallHelpers {
       configurationEnvironment = rushConfiguration.yarnOptions?.environmentVariables;
     }
 
-    return _mergeEnvironmentVariables(process.env, configurationEnvironment, options);
+    const packageManagerEnvironment: NodeJS.ProcessEnv = _mergeEnvironmentVariables(
+      process.env,
+      configurationEnvironment,
+      options
+    );
+
+    const { npmrcFolder } = options;
+    const shouldProvideCredentials: boolean =
+      InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration);
+    if (npmrcFolder !== undefined && shouldProvideCredentials) {
+      Object.assign(
+        packageManagerEnvironment,
+        getNpmrcEnvironmentVariables({
+          npmrcFolder,
+          supportEnvVarFallbackSyntax: rushConfiguration.isPnpm
+        })
+      );
+    }
+
+    return packageManagerEnvironment;
   }
 
   /**
@@ -514,7 +565,7 @@ function _mergeEnvironmentVariables(
     debug?: boolean;
   } = {}
 ): NodeJS.ProcessEnv {
-  const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
+  const packageManagerEnv: NodeJS.ProcessEnv = { ...baseEnv };
 
   if (environmentVariables) {
     // eslint-disable-next-line guard-for-in
