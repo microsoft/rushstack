@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-daemon-protocol",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Wire protocol for the Rush daemon (rushd): frame taxonomy, length-prefixed binary codec, and version negotiation. (public beta)",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

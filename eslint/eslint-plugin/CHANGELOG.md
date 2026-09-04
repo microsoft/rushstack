@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Sep 2026 20:50:50 GMT and should not be manually modified.
+
+## 0.23.4
+Fri, 04 Sep 2026 20:50:50 GMT
+
+### Patches
+
+- Fix no-new-null false positives for ECMAScript private class members.
 
 ## 0.23.3
 Thu, 20 Aug 2026 00:16:38 GMT
