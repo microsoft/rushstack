@@ -154,6 +154,21 @@ export interface IRushVariantOptionsJson {
   description: string;
 }
 
+interface IRushReportingConfigurationJson {
+  agentEnvironmentVariables?: string[];
+}
+
+/**
+ * Repository settings used by the Rush reporter system.
+ * @beta
+ */
+export interface IRushReportingConfiguration {
+  /**
+   * Additional environment variable names that identify an agent environment.
+   */
+  readonly agentEnvironmentVariables: readonly string[];
+}
+
 /**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
@@ -184,6 +199,7 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
+  reporting?: IRushReportingConfigurationJson;
 }
 
 /**
@@ -524,6 +540,12 @@ export class RushConfiguration {
   public readonly telemetryEnabled: boolean;
 
   /**
+   * Repository settings used by the Rush reporter system.
+   * @beta
+   */
+  public readonly reportingConfiguration: IRushReportingConfiguration;
+
+  /**
    * {@inheritDoc NpmOptionsConfiguration}
    */
   public readonly npmOptions: NpmOptionsConfiguration;
@@ -853,6 +875,9 @@ export class RushConfiguration {
     }
 
     this.telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
+    this.reportingConfiguration = {
+      agentEnvironmentVariables: rushConfigurationJson.reporting?.agentEnvironmentVariables || []
+    };
     this.eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
     this.versionPolicyConfigurationFilePath = path.join(
