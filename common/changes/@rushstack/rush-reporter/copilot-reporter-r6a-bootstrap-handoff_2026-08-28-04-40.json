@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Preserve ordered legacy fallback output when a bootstrap handoff protocol is incompatible.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

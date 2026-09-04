@@ -108,6 +108,24 @@ describe('ReporterManager ordering and assignment', () => {
     expect(reporter.reported[0].timestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
+  it('delivers protected events synchronously so hard exits cannot strand output', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('a');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    manager.emit(makeInput('activityChanged', { text: 'status' }));
+    manager.emit(makeInput('externalOutput', { text: 'first' }));
+    manager.emit(makeInput('externalOutput', { text: 'second' }));
+
+    expect(reporter.reported.map((event: IReporterEventEnvelope<unknown>) => event.payload)).toEqual([
+      { text: 'status' },
+      { text: 'first' },
+      { text: 'second' }
+    ]);
+    expect(manager.getPendingEventCount()).toBe(0);
+  });
+
   it('derives the required flag from the event type, ignoring producer input', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter('a');
@@ -152,9 +170,10 @@ describe('ReporterManager ordering and assignment', () => {
     manager.ingestForeignEnvelope(foreign);
     await manager.flushAsync();
 
-    const byIdentity: [string, string][] = reporter.reported.map(
-      (e: IReporterEventEnvelope<unknown>) => [e.sessionId, e.eventId]
-    );
+    const byIdentity: [string, string][] = reporter.reported.map((e: IReporterEventEnvelope<unknown>) => [
+      e.sessionId,
+      e.eventId
+    ]);
     expect(byIdentity).toEqual([
       ['sess', 'evt_1'],
       ['child', 'evt_1']

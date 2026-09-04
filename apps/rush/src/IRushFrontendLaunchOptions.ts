@@ -14,4 +14,12 @@ import type { ILaunchOptions, IRushSessionReporterOptions } from '@microsoft/rus
 export interface IRushFrontendLaunchOptions extends ILaunchOptions {
   readonly reporter: IRushSessionReporterOptions;
   readonly reporterCloseAsync: () => Promise<void>;
+  readonly reporterEnabled: boolean;
+  readonly reporterStdoutIsMachineReadable?: boolean;
+  readonly reporterSelectionReason:
+    | 'explicit --reporter'
+    | 'repository experiment'
+    | 'RUSH_REPORTER=legacy'
+    | 'pre-major legacy default'
+    | 'bootstrap compatibility fallback';
 }

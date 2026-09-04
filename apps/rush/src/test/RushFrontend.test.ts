@@ -40,6 +40,8 @@ async function createInitializedHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     selection: {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -68,6 +70,8 @@ async function createEnabledHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -105,6 +109,8 @@ async function createPhaseHangingHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     selection: {
       reporter: 'json',
       logLevel: 'normal',

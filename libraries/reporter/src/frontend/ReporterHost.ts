@@ -11,10 +11,7 @@ import type { ReporterEventType } from '../events/ReporterEventType';
 import type { IReporterEventSink } from '../producers/IReporterEventSink';
 import { REPORTER_EVENT_TYPES } from '../events/ReporterEventType';
 import { ReporterManager } from '../manager/ReporterManager';
-import {
-  REPORTER_PROTOCOL_VERSION,
-  isReporterProtocolCompatible
-} from '../protocol/ReporterProtocol';
+import { REPORTER_PROTOCOL_VERSION, isReporterProtocolCompatible } from '../protocol/ReporterProtocol';
 import {
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
@@ -101,7 +98,36 @@ export interface IBootstrapReplayResult {
    * The reason no events were replayed, when a handoff path was present.
    * `nonce-mismatch` means the file failed authentication and was rejected.
    */
-  readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
+  readonly skipReason?:
+    | 'unreadable'
+    | 'invalid-path'
+    | 'nonce-mismatch'
+    | 'invalid-event'
+    | 'unsupported-required-event'
+    | 'incompatible-protocol';
+
+  /**
+   * Ordered raw output that a legacy fallback can render when the handoff
+   * protocol is incompatible.
+   */
+  readonly legacyFallbackOutput?: readonly IBootstrapLegacyOutput[];
+}
+
+/**
+ * A raw bootstrap write retained for legacy-visible fallback.
+ *
+ * @beta
+ */
+export interface IBootstrapLegacyOutput {
+  /**
+   * The original output stream.
+   */
+  readonly stream: 'stdout' | 'stderr';
+
+  /**
+   * The unmodified output text.
+   */
+  readonly text: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -141,6 +167,26 @@ function isReporterEventEnvelope(value: unknown): value is IReporterEventEnvelop
     REPORTER_EVENT_TYPES.includes(value.type as ReporterEventType) &&
     Object.hasOwn(value, 'payload')
   );
+}
+
+function getLegacyFallbackOutput(events: readonly unknown[]): IBootstrapLegacyOutput[] {
+  const output: IBootstrapLegacyOutput[] = [];
+  for (const event of events) {
+    if (!isRecord(event) || !isRecord(event.payload)) {
+      continue;
+    }
+    if (
+      event.type === 'externalOutput' &&
+      (event.payload.stream === 'stdout' || event.payload.stream === 'stderr') &&
+      typeof event.payload.text === 'string' &&
+      event.payload.wasRendered !== true
+    ) {
+      output.push({ stream: event.payload.stream, text: event.payload.text });
+    } else if (event.type === 'activityChanged' && typeof event.payload.text === 'string') {
+      output.push({ stream: 'stdout', text: `${event.payload.text}\n` });
+    }
+  }
+  return output;
 }
 
 /**
@@ -247,28 +293,29 @@ export class ReporterHost {
     let skippedEventCount: number = discardedRecordCount;
     for (const event of events) {
       const protocolVersion: IReporterProtocolVersion | undefined = getProtocolVersion(event);
-      if (
-        protocolVersion &&
-        !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)
-      ) {
+      if (protocolVersion && !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)) {
+        const legacyFallbackOutput: IBootstrapLegacyOutput[] = getLegacyFallbackOutput(events);
         await deleteBootstrapHandoffFileAsync(handoffPath);
         return {
           direct: false,
           replayed: false,
           eventCount: 0,
           handoffPath,
-          skipReason: 'incompatible-protocol'
+          skipReason: 'incompatible-protocol',
+          ...(legacyFallbackOutput.length > 0 ? { legacyFallbackOutput } : {})
         };
       }
       if (!isReporterEventEnvelope(event)) {
         if (isRecord(event) && event.required === true) {
+          const legacyFallbackOutput: IBootstrapLegacyOutput[] = getLegacyFallbackOutput(events);
           await deleteBootstrapHandoffFileAsync(handoffPath);
           return {
             direct: false,
             replayed: false,
             eventCount: 0,
             handoffPath,
-            skipReason: 'invalid-event'
+            skipReason: 'unsupported-required-event',
+            ...(legacyFallbackOutput.length > 0 ? { legacyFallbackOutput } : {})
           };
         }
         skippedEventCount++;
@@ -303,6 +350,34 @@ export class ReporterHost {
       handoffPath,
       ...(skippedEventCount > 0 ? { skippedEventCount } : {})
     };
+  }
+
+  /**
+   * Deletes the current authenticated bootstrap handoff without replaying it.
+   *
+   * @remarks
+   * This is used when frontend initialization fails before replay can begin.
+   * Paths outside the configured handoff directory and nonce mismatches are
+   * rejected without deleting the referenced file.
+   *
+   */
+  public async discardBootstrapHandoffAsync(): Promise<void> {
+    const handoffPath: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
+    const expectedNonce: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+    if (!handoffPath || !expectedNonce || !this._isOwnedHandoffPath(handoffPath)) {
+      return;
+    }
+
+    try {
+      const { header } = await readBootstrapHandoffFileAsync(handoffPath);
+      if (header?.nonce !== expectedNonce) {
+        return;
+      }
+    } catch {
+      // Match replay behavior for an unreadable file at an authenticated private path.
+    }
+
+    await deleteBootstrapHandoffFileAsync(handoffPath);
   }
 
   /**

@@ -188,6 +188,7 @@ describe('ReporterHost handoff replay', () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();
       buffer.emit({ type: 'sessionStarted', payload: {} });
+      buffer.addExternalOutput('stderr', 'legacy bootstrap output\n');
       const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
       const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
       await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
@@ -204,6 +205,37 @@ describe('ReporterHost handoff replay', () => {
       });
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
       expect(result.skipReason).toBe('incompatible-protocol');
+      expect(result.legacyFallbackOutput).toEqual([{ stream: 'stderr', text: 'legacy bootstrap output\n' }]);
+    });
+  });
+
+  it('does not duplicate already-rendered output during legacy fallback', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'live output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
+      await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
+
+      const manager: ReporterManager = new ReporterManager();
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+
+      expect(result.skipReason).toBe('incompatible-protocol');
+      expect(result.legacyFallbackOutput).toBeUndefined();
+      expect(fs.existsSync(handoffPath)).toBe(false);
     });
   });
 
@@ -267,10 +299,7 @@ describe('ReporterHost handoff replay', () => {
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
       await manager.flushAsync();
       expect(result).toMatchObject({ replayed: true, eventCount: 2, skippedEventCount: 1 });
-      expect(reporter.reported.map((event) => event.type)).toEqual([
-        'sessionStarted',
-        'diagnosticEmitted'
-      ]);
+      expect(reporter.reported.map((event) => event.type)).toEqual(['sessionStarted', 'diagnosticEmitted']);
     });
   });
 
@@ -301,7 +330,45 @@ describe('ReporterHost handoff replay', () => {
       });
 
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
-      expect(result).toMatchObject({ replayed: false, skipReason: 'invalid-event' });
+      expect(result).toMatchObject({ replayed: false, skipReason: 'unsupported-required-event' });
+    });
+  });
+});
+
+describe('ReporterHost handoff discard', () => {
+  it('deletes only the current authenticated handoff', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+
+      await host.discardBootstrapHandoffAsync();
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    });
+  });
+
+  it('does not delete a handoff with a mismatched nonce', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'wrong-nonce'
+        },
+        handoffDirectory: directory
+      });
+
+      await host.discardBootstrapHandoffAsync();
+      expect(fs.existsSync(handoffPath)).toBe(true);
     });
   });
 });

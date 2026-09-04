@@ -331,13 +331,20 @@ export interface IBootstrapHandoffWriteResult {
 }
 
 // @beta
+export interface IBootstrapLegacyOutput {
+    readonly stream: 'stdout' | 'stderr';
+    readonly text: string;
+}
+
+// @beta
 export interface IBootstrapReplayResult {
     readonly direct: boolean;
     readonly eventCount: number;
     readonly handoffPath?: string;
+    readonly legacyFallbackOutput?: readonly IBootstrapLegacyOutput[];
     readonly replayed: boolean;
     readonly skippedEventCount?: number;
-    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
+    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'unsupported-required-event' | 'incompatible-protocol';
 }
 
 // @beta
@@ -1239,7 +1246,7 @@ export function normalizeAnsi(text: string): string;
 // @beta
 export class OldEngineOutputAdapter {
     constructor(options: IOldEngineOutputAdapterOptions);
-    capture(stream: 'stdout' | 'stderr', text: string): string[];
+    capture(stream: 'stdout' | 'stderr', text: string, wasRendered?: boolean): string[];
 }
 
 // @beta
@@ -1366,6 +1373,7 @@ export type ReporterExtensionEventName = `${string}.${string}` & {
 export class ReporterHost {
     constructor(options?: IReporterHostOptions);
     cleanAbandonedHandoffFilesAsync(): Promise<string[]>;
+    discardBootstrapHandoffAsync(): Promise<void>;
     getSink(): IReporterEventSink;
     get manager(): ReporterManager;
     replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult>;

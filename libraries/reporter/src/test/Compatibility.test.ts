@@ -139,7 +139,8 @@ describe('OldEngineOutputAdapter', () => {
     expect(event.privacy).toBe('local-sensitive');
     expect(event.payload).toEqual({
       stream: 'stdout',
-      text: 'Building project-a...\nproject-a done.\n'
+      text: 'Building project-a...\nproject-a done.\n',
+      wasRendered: true
     });
   });
 
@@ -175,14 +176,13 @@ describe('OldEngineOutputAdapter', () => {
   });
 
   it('rejects a chunk limit smaller than one UTF-8 code point', () => {
-    expect(
-      () =>
-        new OldEngineOutputAdapter({
-          sink: new ReporterManager(),
-          sessionId: 'sess',
-          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.60.0' },
-          maxChunkBytes: 1
-        }).capture('stdout', '😀')
+    expect(() =>
+      new OldEngineOutputAdapter({
+        sink: new ReporterManager(),
+        sessionId: 'sess',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.60.0' },
+        maxChunkBytes: 1
+      }).capture('stdout', '😀')
     ).toThrow(/at least 4/);
   });
 });

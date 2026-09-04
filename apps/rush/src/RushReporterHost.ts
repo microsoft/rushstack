@@ -23,8 +23,12 @@ import {
   type IReporterEventEnvelope,
   type IReporterEventSink,
   type IReporterOutputTarget,
+  type IBootstrapReplayResult,
   type ReporterLogLevel,
-  type ReporterName
+  type ReporterName,
+  LegacyFallbackSink,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
 } from '@rushstack/rush-reporter';
 
 export interface IRushReporterOutputStream {
@@ -38,11 +42,15 @@ export interface IRushReporterHostOptions {
   readonly env?: Record<string, string | undefined>;
   readonly cwd?: string;
   readonly stdout?: IRushReporterOutputStream;
+  readonly stderr?: IRushReporterOutputStream;
   readonly includeDefaultFileReporter?: boolean;
   readonly commandName?: 'rush' | 'rush-pnpm' | 'rushx';
   readonly repositoryOptIn?: boolean;
   readonly forceLegacy?: boolean;
   readonly selectedRushVersion?: string;
+  readonly handoffDirectory?: string;
+  readonly handoffRetentionMs?: number;
+  readonly nowMs?: () => number;
 }
 
 export interface IRushReporterSelection {
@@ -57,7 +65,8 @@ export interface IRushReporterSelection {
     | 'explicit --reporter'
     | 'repository experiment'
     | 'RUSH_REPORTER=legacy'
-    | 'pre-major legacy default';
+    | 'pre-major legacy default'
+    | 'bootstrap compatibility fallback';
 }
 
 export interface IInitializedRushReporterHost {
@@ -65,6 +74,8 @@ export interface IInitializedRushReporterHost {
   readonly sink: IReporterEventSink;
   readonly selection: IRushReporterSelection;
   closeAsync(timeoutMs?: number): Promise<void>;
+  readonly bootstrapReplay: IBootstrapReplayResult;
+  readonly abandonedHandoffFilesDeleted: readonly string[];
 }
 
 const REPORTER_VALUE_FLAGS: ReadonlySet<string> = new Set(['--reporter', '--output', '--log-level']);
@@ -100,6 +111,40 @@ class LogLevelReporter implements IReporter {
     if (shouldRenderAtLogLevel(this._logLevel, event)) {
       this._reporter.report(event);
     }
+  }
+
+  public flushAsync(): Promise<void> {
+    return this._reporter.flushAsync();
+  }
+
+  public closeAsync(): Promise<void> {
+    return this._reporter.closeAsync();
+  }
+}
+
+class VisibleBootstrapOutputFilterReporter implements IReporter {
+  public readonly name: string;
+
+  private readonly _reporter: IReporter;
+
+  public constructor(reporter: IReporter) {
+    this._reporter = reporter;
+    this.name = reporter.name;
+  }
+
+  public initializeAsync(context: IReporterContext): Promise<void> {
+    return this._reporter.initializeAsync(context);
+  }
+
+  public report(event: IReporterEventEnvelope<unknown>): void {
+    const payload: { readonly wasRendered?: unknown } | undefined =
+      typeof event.payload === 'object' && event.payload !== null
+        ? (event.payload as { readonly wasRendered?: unknown })
+        : undefined;
+    if (event.type === 'externalOutput' && payload?.wasRendered === true) {
+      return;
+    }
+    this._reporter.report(event);
   }
 
   public flushAsync(): Promise<void> {
@@ -603,51 +648,120 @@ export async function initializeRushReporterHostAsync(
   options: IRushReporterHostOptions = {}
 ): Promise<IInitializedRushReporterHost> {
   const env: Record<string, string | undefined> = options.env ?? process.env;
-  const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
-  const selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
-  const host: ReporterHost = new ReporterHost({ env });
-
-  if (selection.enabled) {
-    const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
-    if (primaryReporter) {
-      host.manager.addReporter(new LogLevelReporter(primaryReporter, selection.logLevel), {
-        destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
-      });
-    }
-
-    const hasExplicitFileOutput: boolean = selection.outputs.some(
-      (output: IReporterOutputTarget) => output.reporter === 'file'
-    );
-    if (
-      options.includeDefaultFileReporter !== false &&
-      selection.reporter !== 'file' &&
-      !hasExplicitFileOutput
-    ) {
-      host.manager.addReporter(new FileReporter(), { destination: 'file:auto' });
-    }
-
-    for (const output of selection.outputs) {
-      const outputLogLevel: ReporterLogLevel =
-        output.params.logLevel && isSupportedLogLevel(output.params.logLevel)
-          ? output.params.logLevel
-          : output.reporter === 'file'
-            ? 'debug'
-            : selection.logLevel;
-      host.manager.addReporter(new ExplicitOutputReporter(output.reporter, output.target, outputLogLevel), {
-        destination: output.target
-      });
-    }
-  }
-
-  await host.manager.initializeAsync();
-  let closePromise: Promise<void> | undefined;
-  return {
-    host,
-    sink: host.getSink(),
-    selection,
-    closeAsync: (timeoutMs?: number) => {
-      closePromise ??= host.manager.closeAsync(timeoutMs);
-      return closePromise;
-    }
+  const stdout: IRushReporterOutputStream = options.stdout ?? {
+    isTTY: process.stdout.isTTY,
+    columns: process.stdout.columns,
+    write: process.stdout.write.bind(process.stdout)
   };
+  const stderr: IRushReporterOutputStream = options.stderr ?? {
+    isTTY: process.stderr.isTTY,
+    columns: process.stderr.columns,
+    write: process.stderr.write.bind(process.stderr)
+  };
+  const host: ReporterHost = new ReporterHost({
+    env,
+    handoffDirectory: options.handoffDirectory,
+    retentionMs: options.handoffRetentionMs,
+    nowMs: options.nowMs
+  });
+  let handoffReplayAttempted: boolean = false;
+  let closePromise: Promise<void> | undefined;
+
+  try {
+    let selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
+
+    if (selection.enabled) {
+      const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
+      if (primaryReporter) {
+        const filteredReporter: IReporter = new LogLevelReporter(primaryReporter, selection.logLevel);
+        host.manager.addReporter(
+          selection.reporter === 'default' || selection.reporter === 'plaintext'
+            ? new VisibleBootstrapOutputFilterReporter(filteredReporter)
+            : filteredReporter,
+          {
+            destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
+          }
+        );
+      }
+
+      const hasExplicitFileOutput: boolean = selection.outputs.some(
+        (output: IReporterOutputTarget) => output.reporter === 'file'
+      );
+      if (
+        options.includeDefaultFileReporter !== false &&
+        selection.reporter !== 'file' &&
+        !hasExplicitFileOutput
+      ) {
+        host.manager.addReporter(new FileReporter(), { destination: 'file:auto' });
+      }
+
+      for (const output of selection.outputs) {
+        const outputLogLevel: ReporterLogLevel =
+          output.params.logLevel && isSupportedLogLevel(output.params.logLevel)
+            ? output.params.logLevel
+            : output.reporter === 'file'
+              ? 'debug'
+              : selection.logLevel;
+        host.manager.addReporter(new ExplicitOutputReporter(output.reporter, output.target, outputLogLevel), {
+          destination: output.target
+        });
+      }
+    }
+
+    await host.manager.initializeAsync();
+    const bootstrapReplay: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+    handoffReplayAttempted = true;
+    const abandonedHandoffFilesDeleted: readonly string[] = await host.cleanAbandonedHandoffFilesAsync();
+
+    let sink: IReporterEventSink = host.getSink();
+    if (
+      bootstrapReplay.skipReason === 'incompatible-protocol' ||
+      bootstrapReplay.skipReason === 'unsupported-required-event'
+    ) {
+      for (const output of bootstrapReplay.legacyFallbackOutput ?? []) {
+        const target: IRushReporterOutputStream =
+          selection.reason === 'explicit --reporter' ? stderr : output.stream === 'stdout' ? stdout : stderr;
+        target.write(output.text);
+      }
+      if (selection.reason === 'explicit --reporter') {
+        const incompatibility: string =
+          bootstrapReplay.skipReason === 'incompatible-protocol'
+            ? 'protocol is incompatible'
+            : 'contains an unsupported required event';
+        throw new Error(
+          `The install-run-rush bootstrap reporter ${incompatibility} with this Rush frontend. ` +
+            'Update the global Rush installation or use --reporter=legacy.'
+        );
+      }
+      selection = {
+        reporter: 'legacy',
+        logLevel: 'normal',
+        outputs: [],
+        commandJson: selection.commandJson,
+        enabled: false,
+        reporterControlsOwnedByFrontend: selection.reporterControlsOwnedByFrontend,
+        reporterValueFlagsToStrip: selection.reporterValueFlagsToStrip,
+        reason: 'bootstrap compatibility fallback'
+      };
+      sink = new LegacyFallbackSink();
+    }
+
+    return {
+      host,
+      sink,
+      selection,
+      bootstrapReplay,
+      abandonedHandoffFilesDeleted,
+      closeAsync: (timeoutMs?: number) => {
+        closePromise ??= host.manager.closeAsync(timeoutMs);
+        return closePromise;
+      }
+    };
+  } finally {
+    if (!handoffReplayAttempted) {
+      await host.discardBootstrapHandoffAsync();
+    }
+    delete env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
+    delete env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+  }
 }
