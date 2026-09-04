@@ -40,6 +40,10 @@ extends:
   parameters:
     settings:
       networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3,DefaultDeny
+    sdl:
+      sourceRepositoriesToScan:
+        include:
+          - repository: rushstackGitHubApp
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
       os: windows
