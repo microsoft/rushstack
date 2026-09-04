@@ -29,6 +29,11 @@ resources:
       type: git
       name: 1ESPipelineTemplates/1ESPipelineTemplates
       ref: refs/tags/release
+    - repository: rushstackGitHubApp
+      type: github
+      name: microsoft/rushstack
+      endpoint: GitHubProjects
+      ref: refs/heads/main
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
@@ -44,6 +49,7 @@ extends:
           VersionPolicyName: rush
           StageName: BumpRushVersions
           StageDisplayName: 'Bump Rush Versions and Create PR'
+          CheckoutRepository: rushstackGitHubApp
           FeatureBranch: 'automated/bump-versions-rush'
           PrTitle: 'Bump Rush package versions'
           PrDescription: |

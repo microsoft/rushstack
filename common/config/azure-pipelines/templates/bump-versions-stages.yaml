@@ -12,6 +12,9 @@ parameters:
     type: string
   - name: StageDisplayName
     type: string
+  - name: CheckoutRepository
+    type: string
+    default: self
   - name: FeatureBranch
     type: string
   - name: PrTitle
@@ -50,12 +53,19 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/package-versions
               artifactName: package-versions
         steps:
-          - checkout: self
+          # Keep the repository at the traditional single-checkout location so existing scripts and
+          # $(Build.SourcesDirectory) continue to resolve to the Rush Stack repository root.
+          - checkout: ${{ parameters.CheckoutRepository }}
+            path: s
             persistCredentials: true
 
           - template: /common/config/azure-pipelines/templates/configure-git-user.yaml@self
 
           - bash: |
+              # Repository resources resolve independently from the self trigger. Restore the exact
+              # commit that selected this pipeline YAML before creating the automated branch.
+              git fetch --no-tags origin "$(Build.SourceVersion)"
+              git checkout --detach "$(Build.SourceVersion)"
               git checkout -b ${{ parameters.FeatureBranch }}
               echo "Created feature branch: ${{ parameters.FeatureBranch }}"
             displayName: 'Create Feature Branch'
