@@ -117,7 +117,11 @@ import { resolve } from 'node:path';
 import type { IDetailedRepoState, IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { ProjectChangeAnalyzer, isPackageJsonVersionOnlyChange } from '../ProjectChangeAnalyzer';
+import {
+  ProjectChangeAnalyzer,
+  isPackageJsonVersionBumpChange,
+  isPackageJsonVersionOnlyChange
+} from '../ProjectChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type {
   IInputsSnapshot,
@@ -376,6 +380,41 @@ describe(ProjectChangeAnalyzer.name, () => {
         excludeVersionOnlyChanges: true
       });
       expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(true);
+    });
+
+    it('excludeVersionOnlyChanges excludes arbitrary peer dependency changes with a version bump', async () => {
+      const rootDir: string = resolve(__dirname, 'repo');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          [
+            'b/package.json',
+            { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }
+          ]
+        ])
+      );
+      const packageJsonByHash: Record<string, object> = {
+        'oldhash-b': { name: 'b', version: '2.0.0', peerDependencies: { external: '^1.0.0' } },
+        'newhash-b': { name: 'b', version: '2.0.1', peerDependencies: { external: '>=3.0.0' } }
+      };
+      mockGetBlobContentAsync.mockImplementation(({ blobSpec }) =>
+        Promise.resolve(JSON.stringify(packageJsonByHash[blobSpec]!))
+      );
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+      const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal,
+        excludeVersionOnlyChanges: true
+      });
+
+      expect(changedProjects.size).toBe(0);
     });
 
     it('excludeVersionOnlyChanges does not exclude projects when package.json and other files changed', async () => {
@@ -1226,6 +1265,82 @@ describe(ProjectChangeAnalyzer.name, () => {
       });
 
       expect(isPackageJsonVersionOnlyChange(oldContent, newContent)).toBe(true);
+    });
+  });
+
+  describe('isPackageJsonVersionBumpChange', () => {
+    it('accepts arbitrary peer dependency changes with a version bump', () => {
+      expect(
+        isPackageJsonVersionBumpChange(
+          {
+            name: 'consumer',
+            version: '1.0.0',
+            peerDependencies: { dependency: '^1.0.0' }
+          },
+          {
+            name: 'consumer',
+            version: '1.0.1',
+            peerDependencies: {
+              anotherDependency: 'workspace:*',
+              dependency: 'file:../dependency'
+            }
+          }
+        )
+      ).toBe(true);
+    });
+
+    it('rejects peer dependency changes without a version bump', () => {
+      expect(
+        isPackageJsonVersionBumpChange(
+          {
+            name: 'consumer',
+            version: '1.0.0',
+            peerDependencies: { dependency: '^1.0.0' }
+          },
+          {
+            name: 'consumer',
+            version: '1.0.0',
+            peerDependencies: { dependency: '^2.0.0' }
+          }
+        )
+      ).toBe(false);
+    });
+
+    it.each(['dependencies', 'devDependencies', 'optionalDependencies'] as const)(
+      'rejects a version bump with a %s change',
+      (dependencyFieldName) => {
+        expect(
+          isPackageJsonVersionBumpChange(
+            {
+              name: 'consumer',
+              version: '1.0.0',
+              [dependencyFieldName]: { dependency: '^1.0.0' }
+            },
+            {
+              name: 'consumer',
+              version: '1.0.1',
+              [dependencyFieldName]: { dependency: '^2.0.0' }
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it('rejects a version bump with an unrelated field change', () => {
+      expect(
+        isPackageJsonVersionBumpChange(
+          {
+            name: 'consumer',
+            version: '1.0.0',
+            description: 'Old description'
+          },
+          {
+            name: 'consumer',
+            version: '1.0.1',
+            description: 'New description'
+          }
+        )
+      ).toBe(false);
     });
   });
 });
