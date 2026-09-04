@@ -29,6 +29,7 @@ import { IRushDiagnostic } from '@rushstack/rush-reporter';
 import { IScopedLogger } from '@rushstack/rush-reporter';
 import { IScopedMessageOptions } from '@rushstack/rush-reporter';
 import { IScopedReporter } from '@rushstack/rush-reporter';
+import type { ITelemetryAggregate } from '@rushstack/rush-reporter';
 import { ITerminal } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
@@ -684,7 +685,7 @@ export interface _IOperationGraphEventSink {
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(operationId: string, silent: boolean): void;
+    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
     onOperationStreamClosed?(operationId: string): void;
 }
@@ -1044,6 +1045,7 @@ export interface ITelemetryData {
     readonly operationResults?: Record<string, ITelemetryOperationResult>;
     readonly performanceEntries?: readonly PerformanceEntry_2[];
     readonly platform?: string;
+    readonly reporterData?: ITelemetryAggregate;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;
     readonly timestampMs?: number;

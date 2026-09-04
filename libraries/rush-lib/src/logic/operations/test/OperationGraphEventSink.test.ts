@@ -34,7 +34,8 @@ jest.mock('../ProjectLogWritable', () => {
   };
 });
 
-import { MockWritable, type ITerminalChunk } from '@rushstack/terminal';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+import { MockWritable, StringBufferTerminalProvider, type ITerminalChunk } from '@rushstack/terminal';
 import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
@@ -46,6 +47,13 @@ import { OperationStatus } from '../OperationStatus';
 import { Operation } from '../Operation';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import { MockOperationRunner } from './MockOperationRunner';
+import {
+  _getRushSessionDerivedExitStatus,
+  _getRushSessionLifecycleEmitter,
+  _getRushSessionTelemetryAggregate,
+  RushSession
+} from '../../../pluginFramework/RushSession';
+import { attachReporterOperationEventSink } from '../ReporterOperationEventSink';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -57,12 +65,17 @@ const mockPhase: IPhase = {
   missingScriptBehavior: 'silent'
 };
 
-function createOperation(name: string, runner: IOperationRunner): Operation {
+function createOperation(
+  name: string,
+  runner: IOperationRunner,
+  phase: IPhase = mockPhase,
+  projectName: string = name
+): Operation {
   return new Operation({
     runner,
     logFilenameIdentifier: name,
-    phase: mockPhase,
-    project: { packageName: name } as unknown as RushConfigurationProject
+    phase,
+    project: { packageName: projectName } as unknown as RushConfigurationProject
   });
 }
 
@@ -92,6 +105,15 @@ class RecordingSink implements IOperationGraphEventSink {
       this.chunks.set(operationId, chunks);
     }
     chunks.push(chunk.text);
+  }
+}
+
+class CapturingReporterSink implements IReporterEventSink {
+  public readonly inputs: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.inputs.push(event);
+    return `event-${this.inputs.length}`;
   }
 }
 
@@ -206,5 +228,256 @@ describe('OperationGraph event sink (dual-emit)', () => {
     await tappedGraph.executeAsync({});
 
     expect(tappedWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+  });
+
+  it('emits phase-aware status and diagnostic events without routing operation chunks', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'operation-shadow' }
+    });
+    const createFailingOperation = (): Operation =>
+      createOperation(
+        '@scope/project',
+        new MockOperationRunner('@scope/project (phase)', async () => OperationStatus.Failure)
+      );
+    const plainWritable: MockWritable = new MockWritable();
+    await new OperationGraph(
+      new Set([createFailingOperation()]),
+      createGraphOptions(plainWritable, false)
+    ).executeAsync({});
+
+    const operation: Operation = createFailingOperation();
+    const graph: OperationGraph = new OperationGraph(
+      new Set([operation]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+
+    const operationEvents: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
+      ({ type }) => type === 'operationRegistered' || type === 'operationStatusChanged'
+    );
+    expect(operationEvents.length).toBeGreaterThan(1);
+    for (const event of operationEvents) {
+      expect(event.scope).toMatchObject({
+        commandName: 'build',
+        operationId: '@scope/project#phase',
+        projectName: '@scope/project',
+        phaseName: 'phase'
+      });
+    }
+    expect(reporterSink.inputs).toContainEqual(
+      expect.objectContaining({
+        type: 'diagnosticEmitted',
+        payload: expect.objectContaining({ code: 'RUSH_OPERATION_FAILED' })
+      })
+    );
+    expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+    expect(mockWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+  });
+
+  it('aggregates sharded records across mixed outcomes and repeated watch-style iterations', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'sharded-operation-shadow' }
+    });
+    const projectName: string = '@scope/sharded';
+    const preShardRunner: IOperationRunner = {
+      name: `${projectName} (phase) - pre-shard`,
+      reportTiming: false,
+      silent: true,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: true,
+      executeAsync: async () => OperationStatus.NoOp,
+      getConfigHash: () => 'pre-shard'
+    };
+    const shardOneRunner: MockOperationRunner = new MockOperationRunner(
+      `${projectName} (phase) - shard 1/2`,
+      async () => OperationStatus.Success
+    );
+    let shardTwoOutcome: OperationStatus = OperationStatus.Failure;
+    const shardTwoRunner: MockOperationRunner = new MockOperationRunner(
+      `${projectName} (phase) - shard 2/2`,
+      async () => shardTwoOutcome
+    );
+    const collatorRunner: MockOperationRunner = new MockOperationRunner(
+      `${projectName} (phase) - collate`,
+      async () => OperationStatus.Success
+    );
+    const preShard: Operation = createOperation('pre-shard', preShardRunner, mockPhase, projectName);
+    const shardOne: Operation = createOperation('shard-one', shardOneRunner, mockPhase, projectName);
+    const shardTwo: Operation = createOperation('shard-two', shardTwoRunner, mockPhase, projectName);
+    const collator: Operation = createOperation('collator', collatorRunner, mockPhase, projectName);
+    shardOne.addDependency(preShard);
+    shardTwo.addDependency(preShard);
+    collator.addDependency(shardOne);
+    collator.addDependency(shardTwo);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([collator, preShard, shardOne, shardTwo]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+
+    const reporterOperationId: string = `${projectName}#phase`;
+    const operationEvents = (): IReporterEmitEventInput<unknown>[] =>
+      reporterSink.inputs.filter(({ scope }) => scope?.operationId === reporterOperationId);
+    expect(operationEvents().filter(({ type }) => type === 'operationRegistered')).toHaveLength(1);
+    expect(
+      operationEvents()
+        .filter(({ type }) => type === 'operationStatusChanged')
+        .at(-1)?.payload
+    ).toMatchObject({ operationId: reporterOperationId, status: 'failure' });
+    expect(
+      operationEvents().filter(
+        ({ type, payload }) =>
+          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
+      )
+    ).toHaveLength(1);
+    expect(_getRushSessionTelemetryAggregate(rushSession)?.operationStatusCounts).toEqual({
+      failure: 1
+    });
+    expect(_getRushSessionDerivedExitStatus(rushSession)).toEqual({
+      exitCode: 1,
+      outcome: 'failed'
+    });
+
+    shardTwoOutcome = OperationStatus.Success;
+    graph.invalidateOperations(undefined, 'watch iteration');
+    await graph.executeAsync({});
+
+    expect(
+      operationEvents()
+        .filter(({ type }) => type === 'operationRegistered')
+        .map(({ scope }) => scope?.operationId)
+    ).toEqual([reporterOperationId, reporterOperationId]);
+    expect(
+      operationEvents()
+        .filter(({ type }) => type === 'operationStatusChanged')
+        .at(-1)?.payload
+    ).toMatchObject({ operationId: reporterOperationId, status: 'success' });
+    expect(
+      operationEvents().filter(
+        ({ type, payload }) =>
+          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
+      )
+    ).toHaveLength(1);
+    expect(_getRushSessionTelemetryAggregate(rushSession)?.operationStatusCounts).toEqual({
+      success: 1
+    });
+    expect(_getRushSessionDerivedExitStatus(rushSession)).toEqual({
+      exitCode: 0,
+      outcome: 'succeeded'
+    });
+
+    const lifecycleEmitter = _getRushSessionLifecycleEmitter(rushSession, { commandName: 'build' })!;
+    lifecycleEmitter.emitCommandResult({ commandName: 'build', succeeded: true, exitCode: 0 });
+    lifecycleEmitter.emitCommandCompleted({ commandName: 'build', exitCode: 0 });
+    lifecycleEmitter.emitSessionCompleted({ exitCode: 0 });
+    expect(_getRushSessionDerivedExitStatus(rushSession)).toEqual({
+      exitCode: 0,
+      outcome: 'succeeded'
+    });
+    expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+  });
+
+  it('isolates diagnostics when the next watch iteration registers before abort completes', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'overlapping-operation-shadow' }
+    });
+    let runCount: number = 0;
+    let resolveFirstRun: ((status: OperationStatus) => void) | undefined;
+    let markFirstRunStarted: (() => void) | undefined;
+    const firstRunStarted: Promise<void> = new Promise<void>((resolve: () => void) => {
+      markFirstRunStarted = resolve;
+    });
+    const runner: MockOperationRunner = new MockOperationRunner('@scope/overlap (phase)', async () => {
+      runCount++;
+      if (runCount === 1) {
+        markFirstRunStarted!();
+        return await new Promise<OperationStatus>((resolve: (status: OperationStatus) => void) => {
+          resolveFirstRun = resolve;
+        });
+      }
+      return OperationStatus.Failure;
+    });
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('overlap', runner, mockPhase, '@scope/overlap')]),
+      { ...createGraphOptions(mockWritable, false), pauseNextIteration: true }
+    );
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+
+    await graph.scheduleIterationAsync({});
+    const firstExecution: Promise<boolean> = graph.executeScheduledIterationAsync();
+    await firstRunStarted;
+    await graph.scheduleIterationAsync({});
+    const abortPromise: Promise<void> = graph.abortCurrentIterationAsync();
+    resolveFirstRun!(OperationStatus.Failure);
+    await Promise.all([firstExecution, abortPromise]);
+    await graph.executeScheduledIterationAsync();
+
+    expect(
+      reporterSink.inputs.filter(
+        ({ type, payload }) =>
+          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
+      )
+    ).toHaveLength(2);
+  });
+
+  it('recomputes grouped silence for each watch-style iteration', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'grouped-silence-shadow' }
+    });
+    const projectName: string = '@scope/silence';
+    const first: Operation = createOperation(
+      'first',
+      new MockOperationRunner(`${projectName} (phase) - first`),
+      mockPhase,
+      projectName
+    );
+    const second: Operation = createOperation(
+      'second',
+      new MockOperationRunner(`${projectName} (phase) - second`),
+      mockPhase,
+      projectName
+    );
+    const graph: OperationGraph = new OperationGraph(
+      new Set([first, second]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+
+    const operationId: string = `${projectName}#phase`;
+    const countEvents = (type: IReporterEmitEventInput<unknown>['type']): number =>
+      reporterSink.inputs.filter(
+        ({ type: eventType, scope }) => eventType === type && scope?.operationId === operationId
+      ).length;
+    const registrationCount: number = countEvents('operationRegistered');
+    const statusCount: number = countEvents('operationStatusChanged');
+    expect(registrationCount).toBe(1);
+    expect(statusCount).toBeGreaterThan(0);
+
+    first.enabled = false;
+    second.enabled = false;
+    graph.invalidateOperations(undefined, 'disable group');
+    await graph.executeAsync({});
+
+    expect(countEvents('operationRegistered')).toBe(registrationCount);
+    expect(countEvents('operationStatusChanged')).toBe(statusCount);
   });
 });

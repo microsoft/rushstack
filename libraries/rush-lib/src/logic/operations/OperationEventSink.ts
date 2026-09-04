@@ -40,16 +40,13 @@ export interface IOperationGraphEventSink {
   /**
    * Invoked when an operation is prepared for an iteration.
    */
-  onOperationRegistered?(operationId: string, silent: boolean): void;
+  onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
 
   /**
    * Invoked synchronously on every operation status transition. The result's
    * `status`, `error`, and `stopwatch` reflect the new state.
    */
-  onOperationStatusChanged?(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void;
+  onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
 
   /**
    * Invoked when an operation's collated output is about to be displayed,
