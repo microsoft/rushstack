@@ -34,9 +34,10 @@ class FakeTerminal implements IInteractiveTerminal {
 function ev(
   type: string,
   payload: unknown = {},
-  scope?: { projectName?: string }
+  scope?: { projectName?: string },
+  privacy: IReporterEventEnvelope<unknown>['privacy'] = 'public'
 ): IReporterEventEnvelope<unknown> {
-  return { type, payload, scope, required: true } as unknown as IReporterEventEnvelope<unknown>;
+  return { type, payload, scope, privacy, required: true } as unknown as IReporterEventEnvelope<unknown>;
 }
 
 describe('interactive rendering helpers', () => {
@@ -155,6 +156,7 @@ describe('DefaultInteractiveReporter', () => {
     reporter.report(
       ev('operationStatusChanged', { operationId: 'op1', status: 'success' }, { projectName: 'p' })
     );
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
     await reporter.closeAsync();
 
@@ -170,12 +172,53 @@ describe('DefaultInteractiveReporter', () => {
       color: false,
       nowMs: () => 0
     });
-    reporter.report(ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }));
+    reporter.report(
+      ev('operationRegistered', {
+        operationId: 'op1',
+        projectName: 'project-a',
+        phaseName: '_phase:build'
+      })
+    );
     reporter.report(ev('operationStatusChanged', { operationId: 'op1', status: 'executing' }));
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'success' }));
     await reporter.flushAsync();
 
-    expect(terminal.output).toContain('project-a');
+    expect(terminal.output).toContain('project-a (_phase:build)');
     expect(terminal.output).not.toContain('executing op1');
+  });
+
+  it('normalizes multiline activity to one live-region row', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(ev('messageEmitted', { severity: 'info', text: 'first line\nsecond line\n' }));
+    await reporter.flushAsync();
+
+    expect(terminal.output).toContain('second line');
+    expect(terminal.output).not.toContain('first line\nsecond line');
+  });
+
+  it('omits silent operations from progress totals', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    reporter.report(
+      ev('operationRegistered', { operationId: 'silent', projectName: 'hidden', silent: true })
+    );
+    reporter.report(ev('operationStatusChanged', { operationId: 'silent', status: 'success' }));
+    reporter.report(ev('operationCompleted', { operationId: 'silent', status: 'success' }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    await reporter.closeAsync();
+
+    expect(terminal.output).toContain('0/0 operations');
+    expect(terminal.output).not.toContain('hidden');
   });
 
   it('appends a bounded diagnostic block and log path on failure', async () => {
@@ -191,6 +234,7 @@ describe('DefaultInteractiveReporter', () => {
     reporter.report(
       ev('operationStatusChanged', { operationId: 'op1', status: 'failure' }, { projectName: 'p' })
     );
+    reporter.report(ev('operationCompleted', { operationId: 'op1', status: 'failure' }));
     reporter.report(ev('diagnosticEmitted', { code: 'RUSH_OPERATION_FAILED', severity: 'error' }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
     await reporter.closeAsync();
@@ -199,6 +243,48 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).toContain('build failed — 1 failed');
     expect(terminal.output).toContain('[error] RUSH_OPERATION_FAILED');
     expect(terminal.output).toContain('Log: /tmp/rush-logs/latest.log');
+  });
+
+  it('preserves actionable lock contention text on failure', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(
+      ev('messageEmitted', {
+        severity: 'error',
+        text: 'Another Rush command is already running in this repository.\n'
+      })
+    );
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    expect(
+      terminal.output.match(/Another Rush command is already running in this repository\./g)
+    ).toHaveLength(1);
+  });
+
+  it('redacts secret message text', async () => {
+    const terminal: FakeTerminal = new FakeTerminal(80, false);
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(
+      ev('messageEmitted', { severity: 'error', text: 'TOP_SECRET_VALUE' }, undefined, 'secret')
+    );
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    expect(terminal.output).toContain('[secret]');
+    expect(terminal.output).not.toContain('TOP_SECRET_VALUE');
   });
 
   it('fails closed when commandResult is missing', async () => {
@@ -217,7 +303,7 @@ describe('DefaultInteractiveReporter', () => {
     expect(terminal.output).not.toContain('build succeeded');
   });
 
-  it('appends one summary per completed watch cycle while keeping the live region', async () => {
+  it('reports overlapping watch iterations independently and recovers from failure', async () => {
     const terminal: FakeTerminal = new FakeTerminal();
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
       terminal,
@@ -226,9 +312,36 @@ describe('DefaultInteractiveReporter', () => {
     });
     await reporter.initializeAsync();
     reporter.report(ev('commandStarted', { commandName: 'build' }));
-    reporter.report(ev('watchCycleCompleted', { succeeded: true }));
+    reporter.report(
+      ev('operationRegistered', { iterationId: 1, operationId: 'op1', projectName: 'project-a' })
+    );
+    reporter.report(
+      ev('operationRegistered', { iterationId: 1, operationId: 'abort', projectName: 'project-abort' })
+    );
+    reporter.report(
+      ev('operationRegistered', { iterationId: 2, operationId: 'op1', projectName: 'project-a' })
+    );
+    reporter.report(
+      ev('operationRegistered', {
+        iterationId: 2,
+        operationId: 'silent',
+        projectName: 'hidden',
+        silent: true
+      })
+    );
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'op1', status: 'failure' }));
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'abort', status: 'aborted' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'silent', status: 'noOp' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 2, succeeded: true }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    await reporter.closeAsync();
 
-    expect(terminal.output).toContain('watch cycle succeeded');
+    expect(terminal.output).toContain('watch cycle failed - 2/2 operations');
+    expect(terminal.output).toContain('watch cycle succeeded - 1/1 operations');
+    expect(terminal.output).not.toContain('3/3 operations');
+    expect(terminal.output).not.toContain('hidden');
   });
 
   it('does not paint a live region on a non-TTY but still writes the final summary', async () => {

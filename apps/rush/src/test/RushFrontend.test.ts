@@ -40,6 +40,7 @@ async function createInitializedHostAsync(
   return {
     host,
     sink: host.getSink(),
+    logArtifact: undefined,
     selection: {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -68,6 +69,7 @@ async function createEnabledHostAsync(
   return {
     host,
     sink: host.getSink(),
+    logArtifact: undefined,
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -105,6 +107,7 @@ async function createPhaseHangingHostAsync(
   return {
     host,
     sink: host.getSink(),
+    logArtifact: undefined,
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -257,6 +260,43 @@ describe(launchRushFrontendAsync.name, () => {
       expect(order).toEqual(['host', 'close']);
     } finally {
       launchSpy.mockRestore();
+      process.argv = originalArgv;
+    }
+  });
+
+  it('keeps an active purge reporter log outside the temp folder being purged', async () => {
+    const order: string[] = [];
+    let commonTempFolder: string | undefined = 'not-captured';
+    let actionName: string | undefined;
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'purge', '--reporter=file'];
+
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: {
+          commonTempFolder: '/repo/common/temp',
+          useRushReporter: false
+        } as MinimalRushConfiguration,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async (options) => {
+          commonTempFolder = options.commonTempFolder;
+          actionName = options.actionName;
+          return createInitializedHostAsync(order, 'explicit --reporter');
+        },
+        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+          void version;
+          void selectedRushLib;
+          return launchOptions.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(actionName).toBe('purge');
+      expect(commonTempFolder).toBeUndefined();
+    } finally {
       process.argv = originalArgv;
     }
   });

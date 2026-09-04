@@ -23,6 +23,7 @@ export interface IProjectWatcherOptions {
   debounceMs: number;
   rushConfiguration: RushConfiguration;
   terminal: ITerminal;
+  renderStatusInPlace?: boolean;
   /** Initial inputs snapshot; required so watcher can enumerate nested folders immediately */
   initialSnapshot: IInputsSnapshot;
 }
@@ -70,6 +71,7 @@ export class ProjectWatcher {
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _terminal: ITerminal;
   private readonly _graph: IOperationGraph;
+  private readonly _renderStatusInPlace: boolean;
 
   private _repoRoot: string | undefined;
   private _watchers: Map<string, fs.FSWatcher> | undefined;
@@ -84,11 +86,19 @@ export class ProjectWatcher {
   private _onStdinDataBound: ((chunk: Buffer | string) => void) | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { graph, debounceMs, rushConfiguration, terminal, initialSnapshot } = options;
+    const {
+      graph,
+      debounceMs,
+      rushConfiguration,
+      terminal,
+      initialSnapshot,
+      renderStatusInPlace = true
+    } = options;
     this._graph = graph;
     this._debounceMs = debounceMs;
     this._rushConfiguration = rushConfiguration;
     this._terminal = terminal;
+    this._renderStatusInPlace = renderStatusInPlace;
     this._lastSnapshot = initialSnapshot; // Seed snapshot
 
     const gitPath: string = new Git(rushConfiguration).getGitPathOrThrow();
@@ -162,7 +172,7 @@ export class ProjectWatcher {
       lines.push(` keys(active): ${KEYBIND_HELP}`);
       statusLines.push(...lines.map((l) => `  ${l}`));
     }
-    if (graph.status !== OperationStatus.Executing) {
+    if (this._renderStatusInPlace && graph.status !== OperationStatus.Executing) {
       // If rendering during execution, don't try to clean previous output.
       if (this._renderedStatusLines > 0) {
         readline.cursorTo(process.stdout, 0);

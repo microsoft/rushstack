@@ -96,7 +96,7 @@ export class Rush {
     options = _normalizeLaunchOptions(options);
     const frontendOptions: IRushFrontendLaunchOptions = options;
 
-    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+    if (!options.reporter?.operationStreamEnabled && !RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
     }
 

@@ -1,12 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
+
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
+import { getHumanReadableMessageText } from './ReporterRedaction';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
+import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
 
 const HEARTBEAT_INTERVAL_MS: number = 30000;
+const OWNER_ONLY_MODE: number = 0o600;
+const OWNER_ONLY_DIRECTORY_MODE: number = 0o700;
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'success',
   'successWithWarnings',
@@ -14,13 +23,29 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'blocked',
   'skipped',
   'fromCache',
-  'noOp'
+  'noOp',
+  'aborted'
 ]);
 
 interface IOperationRecord {
   readonly projectName: string;
   readonly phaseName?: string;
-  readonly buffer: string[];
+  readonly silent: boolean;
+  spoolPath?: string;
+  spoolFileDescriptor?: number;
+  spoolFailed?: boolean;
+}
+
+interface IWatchCycleState {
+  readonly operations: Map<string, IOperationRecord>;
+  total: number;
+  completed: number;
+  failed: number;
+  watchCompleted: boolean;
+}
+
+function getIterationId(payload: { iterationId?: number }, fallback: number): number {
+  return payload.iterationId ?? fallback;
 }
 
 /**
@@ -54,6 +79,11 @@ export interface IPlaintextReporterOptions {
    * The heartbeat interval in milliseconds. Defaults to 30000.
    */
   readonly heartbeatIntervalMs?: number;
+
+  /**
+   * The selected reporter log level. Defaults to `normal`.
+   */
+  readonly logLevel?: ReporterLogLevel;
 }
 
 /**
@@ -76,14 +106,17 @@ export class PlaintextReporter implements IReporter {
   private readonly _color: IColorizer;
   private readonly _nowMs: () => number;
   private readonly _heartbeatIntervalMs: number;
+  private readonly _logLevel: ReporterLogLevel;
 
   private _commandName: string | undefined;
-  private _total: number;
-  private _completed: number;
-  private _failed: number;
   private _lastOutputMs: number;
   private _atLineStart: boolean;
-  private readonly _operations: Map<string, IOperationRecord>;
+  private _logPath: string | undefined;
+  private readonly _watchCycles: Map<number, IWatchCycleState>;
+  private _spoolDirectory: string | undefined;
+  private _nextSpoolId: number;
+  private _legacyIterationId: number;
+  private _latestIterationId: number;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -91,14 +124,17 @@ export class PlaintextReporter implements IReporter {
     this._color = createColorizer(options.color ?? false);
     this._nowMs = options.nowMs ?? (() => Date.now());
     this._heartbeatIntervalMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
+    this._logLevel = options.logLevel ?? 'normal';
 
     this._commandName = undefined;
-    this._total = 0;
-    this._completed = 0;
-    this._failed = 0;
     this._lastOutputMs = 0;
     this._atLineStart = true;
-    this._operations = new Map();
+    this._logPath = undefined;
+    this._watchCycles = new Map();
+    this._spoolDirectory = undefined;
+    this._nextSpoolId = 1;
+    this._legacyIterationId = 0;
+    this._latestIterationId = 0;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -113,21 +149,40 @@ export class PlaintextReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string; phaseName?: string } = event.payload as {
+        const payload: {
           operationId: string;
           projectName?: string;
           phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
         };
-        this._operations.set(payload.operationId, {
+        const iterationId: number = getIterationId(payload, this._legacyIterationId);
+        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const previousRecord: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
+        if (previousRecord) {
+          break;
+        }
+        cycle.operations.set(payload.operationId, {
           projectName: payload.projectName ?? payload.operationId,
           phaseName: payload.phaseName,
-          buffer: []
+          silent: payload.silent === true
         });
-        this._total++;
+        if (!payload.silent) {
+          cycle.total++;
+        }
         break;
       }
       case 'operationStatusChanged': {
-        this._onStatusChanged(event);
+        break;
+      }
+      case 'operationCompleted': {
+        this._onOperationCompleted(event);
         break;
       }
       case 'externalOutput': {
@@ -144,9 +199,49 @@ export class PlaintextReporter implements IReporter {
         }
         break;
       }
+      case 'artifactAvailable': {
+        const payload: { role?: string; path?: string } = event.payload as {
+          role?: string;
+          path?: string;
+        };
+        if (payload.role === 'log') {
+          this._logPath = payload.path;
+        }
+        break;
+      }
+      case 'messageEmitted': {
+        if (event.scope?.operationId === undefined) {
+          const payload: { severity?: string } = event.payload as {
+            severity?: string;
+          };
+          const text: string | undefined = getHumanReadableMessageText(event);
+          if (
+            text &&
+            (this._logLevel !== 'quiet' || payload.severity === 'warning' || payload.severity === 'error')
+          ) {
+            this._writeRaw(text.endsWith('\n') ? text : `${text}\n`);
+          }
+        }
+        break;
+      }
       case 'watchCycleCompleted': {
-        const succeeded: boolean = (event.payload as { succeeded?: boolean }).succeeded === true;
-        this._writeLine(`Watch cycle ${succeeded ? 'succeeded' : 'failed'}`);
+        const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
+          succeeded?: boolean;
+          iterationId?: number;
+        };
+        const iterationId: number = getIterationId(payload, this._legacyIterationId);
+        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const succeeded: boolean = payload.succeeded === true;
+        this._writeLine(
+          `Watch cycle ${succeeded ? 'succeeded' : 'failed'} ` +
+            `(${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
+        );
+        this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+        cycle.watchCompleted = true;
+        this._pruneCompletedWatchCycles();
+        if (payload.iterationId === undefined) {
+          this._legacyIterationId++;
+        }
         break;
       }
       case 'commandResult': {
@@ -163,7 +258,22 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    /* no-op */
+    for (const cycle of this._watchCycles.values()) {
+      for (const [operationId, record] of cycle.operations) {
+        if (!record.silent && this._variant === 'detailed') {
+          const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
+          this._writeLine('');
+          this._writeLine(`==[ ${record.projectName}${phase} ]==`);
+          this._writeSpooledOutput(record);
+          this._writeLine(this._formatStatus(record.projectName, 'aborted'));
+        } else {
+          this._deleteSpool(record);
+        }
+        cycle.operations.delete(operationId);
+      }
+    }
+    this._watchCycles.clear();
+    this._removeSpoolDirectory();
   }
 
   /**
@@ -171,30 +281,47 @@ export class PlaintextReporter implements IReporter {
    * last output. Returns whether a heartbeat was emitted.
    */
   public emitHeartbeatIfDue(): boolean {
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     if (this._nowMs() - this._lastOutputMs >= this._heartbeatIntervalMs) {
       this._writeLine(
-        `... ${this._commandName ?? 'rush'} still running — ${this._completed}/${this._total} operations`
+        `... ${this._commandName ?? 'rush'} still running — ${cycle.completed}/${cycle.total} operations`
       );
       return true;
     }
     return false;
   }
 
-  private _onStatusChanged(event: IReporterEventEnvelope<unknown>): void {
-    const payload: { operationId: string; status: string } = event.payload as {
+  private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
+    const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
       operationId: string;
       status: string;
+      iterationId?: number;
     };
-    const record: IOperationRecord | undefined = this._operations.get(payload.operationId);
+    const iterationId: number = getIterationId(payload, this._legacyIterationId);
+    const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+    const record: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
     const projectName: string = record?.projectName ?? event.scope?.projectName ?? payload.operationId;
 
     if (!TERMINAL_STATUSES.has(payload.status)) {
       return;
     }
+    if (record?.silent) {
+      this._deleteSpool(record);
+      cycle.operations.delete(payload.operationId);
+      return;
+    }
 
-    this._completed++;
+    cycle.completed++;
     if (payload.status === 'failure') {
-      this._failed++;
+      cycle.failed++;
+    }
+
+    if (this._logLevel === 'quiet') {
+      if (record) {
+        this._deleteSpool(record);
+      }
+      cycle.operations.delete(payload.operationId);
+      return;
     }
 
     if (this._variant === 'detailed') {
@@ -202,14 +329,13 @@ export class PlaintextReporter implements IReporter {
       this._writeLine('');
       this._writeLine(`==[ ${projectName}${phase} ]==`);
       if (record) {
-        this._writeRaw(record.buffer.join(''));
-        record.buffer.length = 0;
+        this._writeSpooledOutput(record);
       }
       this._writeLine(this._formatStatus(projectName, payload.status));
     } else {
       this._writeLine(this._formatStatus(projectName, payload.status));
     }
-    this._operations.delete(payload.operationId);
+    cycle.operations.delete(payload.operationId);
   }
 
   private _onExternalOutput(event: IReporterEventEnvelope<unknown>): void {
@@ -217,26 +343,185 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     const operationId: string | undefined = event.scope?.operationId;
-    const text: string = (event.payload as { text?: string }).text ?? '';
+    const payload: { text?: string; iterationId?: number } = event.payload as {
+      text?: string;
+      iterationId?: number;
+    };
+    const text: string = payload.text ?? '';
+    const cycle: IWatchCycleState = this._getWatchCycle(getIterationId(payload, this._legacyIterationId));
     const record: IOperationRecord | undefined =
-      operationId !== undefined ? this._operations.get(operationId) : undefined;
+      operationId !== undefined ? cycle.operations.get(operationId) : undefined;
     if (record) {
-      record.buffer.push(text);
+      this._spoolOutput(record, text);
     } else {
       this._writeRaw(text);
     }
   }
 
+  private _spoolOutput(record: IOperationRecord, text: string): void {
+    if (record.spoolFailed) {
+      this._writeRaw(text);
+      return;
+    }
+
+    try {
+      if (!record.spoolPath) {
+        const spoolDirectory: string = this._ensureSpoolDirectory();
+        record.spoolPath = path.join(spoolDirectory, `${this._nextSpoolId++}.operation`);
+        record.spoolFileDescriptor = fs.openSync(record.spoolPath, 'wx', OWNER_ONLY_MODE);
+      }
+      if (record.spoolFileDescriptor === undefined) {
+        throw new Error('The grouped plaintext spool descriptor is not available.');
+      }
+      fs.writeSync(record.spoolFileDescriptor, text, null, 'utf8');
+    } catch (error) {
+      this._closeSpool(record, false);
+      this._writeSpooledOutput(record);
+      record.spoolFailed = true;
+      this._writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
+      this._writeRaw(text);
+    }
+  }
+
+  private _writeSpooledOutput(record: IOperationRecord): void {
+    if (!record.spoolPath) {
+      return;
+    }
+    const spoolCloseError: Error | undefined = this._closeSpool(record, true);
+    if (spoolCloseError) {
+      this._writeLine(`[reporter] Unable to close grouped plaintext output: ${spoolCloseError.message}`);
+    }
+    let fileDescriptor: number | undefined;
+    let readCloseError: Error | undefined;
+    try {
+      fileDescriptor = fs.openSync(record.spoolPath, 'r');
+      const decoder: StringDecoder = new StringDecoder('utf8');
+      const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
+      let bytesRead: number;
+      while ((bytesRead = fs.readSync(fileDescriptor, buffer, 0, buffer.length, null)) > 0) {
+        this._writeRaw(decoder.write(buffer.subarray(0, bytesRead)));
+      }
+      this._writeRaw(decoder.end());
+    } catch (error) {
+      this._writeLine(
+        `[reporter] Unable to read grouped plaintext output; see the full log: ${(error as Error).message}`
+      );
+    } finally {
+      if (fileDescriptor !== undefined) {
+        try {
+          fs.closeSync(fileDescriptor);
+        } catch (error) {
+          readCloseError = error as Error;
+        }
+      }
+      this._deleteSpool(record);
+      if (readCloseError) {
+        this._writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
+      }
+    }
+  }
+
+  private _ensureSpoolDirectory(): string {
+    if (!this._spoolDirectory) {
+      this._spoolDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-plaintext-reporter-'));
+      fs.chmodSync(this._spoolDirectory, OWNER_ONLY_DIRECTORY_MODE);
+    }
+    return this._spoolDirectory;
+  }
+
+  private _deleteSpool(record: IOperationRecord): void {
+    this._closeSpool(record, false);
+    if (!record.spoolPath) {
+      return;
+    }
+    try {
+      fs.rmSync(record.spoolPath, { force: true });
+    } catch {
+      /* Best-effort cleanup. */
+    }
+    record.spoolPath = undefined;
+  }
+
+  private _closeSpool(record: IOperationRecord, flush: boolean): Error | undefined {
+    const fileDescriptor: number | undefined = record.spoolFileDescriptor;
+    if (fileDescriptor === undefined) {
+      return undefined;
+    }
+    record.spoolFileDescriptor = undefined;
+    let closeError: Error | undefined;
+    if (flush) {
+      try {
+        fs.fsyncSync(fileDescriptor);
+      } catch (error) {
+        closeError = error as Error;
+      }
+    }
+    try {
+      fs.closeSync(fileDescriptor);
+    } catch (error) {
+      closeError ??= error as Error;
+    }
+    return closeError;
+  }
+
+  private _removeSpoolDirectory(): void {
+    if (!this._spoolDirectory) {
+      return;
+    }
+    try {
+      fs.rmdirSync(this._spoolDirectory);
+    } catch {
+      /* Best-effort cleanup. */
+    }
+    this._spoolDirectory = undefined;
+  }
+
+  private _getWatchCycle(iterationId: number): IWatchCycleState {
+    let cycle: IWatchCycleState | undefined = this._watchCycles.get(iterationId);
+    if (!cycle) {
+      cycle = {
+        operations: new Map(),
+        total: 0,
+        completed: 0,
+        failed: 0,
+        watchCompleted: false
+      };
+      this._watchCycles.set(iterationId, cycle);
+    }
+    this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+    this._pruneCompletedWatchCycles();
+    return cycle;
+  }
+
+  private _getLatestWatchCycle(): IWatchCycleState {
+    return this._getWatchCycle(this._latestIterationId);
+  }
+
+  private _pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this._watchCycles) {
+      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+        for (const record of cycle.operations.values()) {
+          this._deleteSpool(record);
+        }
+        this._watchCycles.delete(iterationId);
+      }
+    }
+  }
+
   private _onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {
     const commandName: string = payload.commandName ?? this._commandName ?? 'rush';
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     if (payload.succeeded) {
       this._writeLine(
         this._color.green(
-          `rush ${commandName} succeeded (${this._completed}/${this._total} operations, ${this._failed} failed)`
+          `rush ${commandName} succeeded (${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
         )
       );
     } else {
-      this._writeLine(this._color.red(`rush ${commandName} failed (${this._failed} failed)`));
+      this._writeLine(this._color.red(`rush ${commandName} failed (${cycle.failed} failed)`));
+    }
+    if (this._logPath) {
+      this._writeLine(`Full log: ${this._logPath}`);
     }
   }
 

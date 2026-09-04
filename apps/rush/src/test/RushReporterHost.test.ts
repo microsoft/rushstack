@@ -5,7 +5,13 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { IReporterEventSink } from '@rushstack/rush-reporter';
+import {
+  ReporterManager,
+  type IReporter,
+  type IReporterContext,
+  type IReporterEventEnvelope,
+  type IReporterEventSink
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -156,6 +162,23 @@ describe(resolveRushReporterSelection.name, () => {
     });
   });
 
+  it('owns standalone log-level controls when the repository experiment is enabled', () => {
+    expect(resolve(['build', '--log-level=debug'], {}, false, true)).toMatchObject({
+      reporter: 'plaintext',
+      logLevel: 'debug',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: ['--log-level']
+    });
+    expect(resolve(['build'], { RUSH_LOG_LEVEL: 'debug' }, false, true)).toMatchObject({
+      reporter: 'plaintext',
+      logLevel: 'debug',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: []
+    });
+  });
+
   it('preserves custom value parameters when the repository experiment selects the reporter implicitly', () => {
     expect(
       resolve(
@@ -232,6 +255,22 @@ describe(resolveRushReporterSelection.name, () => {
         new Set(legacySelection.reporterValueFlagsToStrip)
       )
     ).toEqual(['node', 'rush', 'custom', '--output', 'custom.zip', '--log-level', 'custom', '--verbose']);
+  });
+
+  it('keeps help on the legacy parser-only path', () => {
+    expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
+  it('ignores help controls after the pass-through separator', () => {
+    expect(resolve(['build', '--reporter=json', '--', '--help'])).toMatchObject({
+      reporter: 'json',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true
+    });
   });
 
   it('removes reporter-only value controls before invoking a legacy engine', () => {
@@ -325,6 +364,13 @@ describe(resolveRushReporterSelection.name, () => {
     );
   });
 
+  it('preserves RUSH_QUIET_MODE as a quiet reporter alias', () => {
+    expect(resolve(['build', '--reporter=plaintext'], { RUSH_QUIET_MODE: 'true' }).logLevel).toBe('quiet');
+    expect(() =>
+      resolve(['build', '--reporter=plaintext'], { RUSH_QUIET_MODE: '1', RUSH_LOG_LEVEL: 'debug' })
+    ).toThrow(/contradicts RUSH_LOG_LEVEL/);
+  });
+
   it('preserves legacy verbosity combinations when the reporter path is disabled', () => {
     expect(resolve(['build', '--quiet', '--debug'])).toMatchObject({
       reporter: 'legacy',
@@ -400,21 +446,24 @@ describe(resolveRushReporterSelection.name, () => {
     expect(resolve(['build', '--reporter=default'], {}, true).reporter).toBe('default');
   });
 
-  it('parses output targets and preserves command-specific --json independently', () => {
-    const selection: IRushReporterSelection = resolve(
-      [
-        'list',
-        '--json',
-        '--reporter=json',
-        '--output=file://./rush.log?logLevel=debug',
-        '--output=json://./events.jsonl'
-      ],
-      {},
-      false
+  it('preserves command-specific --json as the sole stdout owner', () => {
+    expect(() => resolve(['list', '--json', '--reporter=json'])).toThrow(
+      /command-specific --json output owns stdout/
     );
 
-    expect(selection.commandJson).toBe(true);
-    expect(selection.reporter).toBe('json');
+    const selection: IRushReporterSelection = resolve(
+      ['list', '--json', '--output=file://./rush.log?logLevel=debug', '--output=json://./events.jsonl'],
+      {},
+      false,
+      true
+    );
+
+    expect(selection).toMatchObject({
+      commandJson: true,
+      reporter: 'file',
+      enabled: true,
+      reason: 'repository experiment'
+    });
     expect(selection.outputs).toEqual([
       {
         reporter: 'file',
@@ -427,6 +476,21 @@ describe(resolveRushReporterSelection.name, () => {
         params: {}
       }
     ]);
+    expect(selection).toMatchObject({
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: ['--output', '--log-level']
+    });
+    expect(resolve(['list', '--json', '--reporter=file']).reporter).toBe('file');
+  });
+
+  it('forces legacy selection for an incompatible Rush engine', () => {
+    expect(() =>
+      resolveRushReporterSelection({
+        argv: ['build', '--reporter=json'],
+        env: {},
+        forceLegacy: true
+      })
+    ).toThrow(/cannot safely use --reporter=json/);
   });
 
   it('surfaces unsupported and incomplete controls with actionable errors', () => {
@@ -466,7 +530,105 @@ describe(initializeRushReporterHostAsync.name, () => {
     await initialized.closeAsync();
 
     expect(initialized.selection.enabled).toBe(false);
+    expect(initialized.logArtifact).toBeUndefined();
     expect(output).toBe('');
+  });
+
+  it('always creates a repository full-detail log on the enabled path', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-full-log-'));
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=plaintext'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'build',
+        stdout: { isTTY: false, write: () => undefined }
+      });
+
+      expect(initialized.logArtifact).toMatchObject({ available: true });
+      expect(initialized.logArtifact?.path).toMatch(
+        new RegExp(`^${directory.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+      );
+      await initialized.closeAsync();
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('prints the file path for a parser-only failure without commandResult', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-only-'));
+    let stderrText: string = '';
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['missing-command', '--reporter=file'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'missing-command',
+        stdout: { isTTY: false, write: () => undefined },
+        stderr: {
+          write: (text: string) => {
+            stderrText += text;
+          }
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush', packageVersion: '5.178.1' },
+        privacy: 'local-sensitive',
+        type: 'artifactAvailable',
+        payload: {
+          role: 'log',
+          path: initialized.logArtifact?.path,
+          format: 'plaintext',
+          complete: false
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'sessionCompleted',
+        payload: { exitCode: 1 }
+      });
+      await initialized.closeAsync();
+
+      expect(stderrText.match(/Rush full log:/g)).toHaveLength(1);
+      expect(stderrText).toContain(initialized.logArtifact?.path);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('does not render operation output at quiet plaintext log level', async () => {
+    let output: string = '';
+    const quietHost = await initializeRushReporterHostAsync({
+      argv: ['build', '--reporter=plaintext', '--log-level=quiet'],
+      env: {},
+      stdout: {
+        isTTY: false,
+        write: (text: string) => {
+          output += text;
+        }
+      },
+      includeDefaultFileReporter: false
+    });
+
+    emitCommandStarted(quietHost.sink);
+    emitOperationEvents(quietHost.sink);
+    quietHost.sink.emit({
+      protocolVersion: { major: 1, minor: 1 },
+      sessionId: 'session',
+      source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+      privacy: 'public',
+      type: 'commandResult',
+      payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+    });
+    await quietHost.closeAsync();
+
+    expect(output).not.toContain('raw operation output');
+    expect(output).toContain('rush build succeeded');
   });
 
   it('initializes the explicitly selected reporter and output destinations', async () => {
@@ -505,7 +667,14 @@ describe(initializeRushReporterHostAsync.name, () => {
         .trim()
         .split('\n')
         .map((line: string) => JSON.parse(line) as Record<string, unknown>);
-      expect(stdoutEvents.map(({ type }) => type)).toEqual(['commandStarted']);
+      expect(stdoutEvents.map(({ type }) => type)).toEqual([
+        'commandStarted',
+        'operationRegistered',
+        'operationStatusChanged',
+        'externalOutput',
+        'operationStreamClosed',
+        'operationCompleted'
+      ]);
       expect(fileEvents.map(({ type }) => type)).toEqual([
         'commandStarted',
         'operationRegistered',
@@ -514,6 +683,125 @@ describe(initializeRushReporterHostAsync.name, () => {
         'operationStreamClosed',
         'operationCompleted'
       ]);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('publishes a completed artifact before the final AI record', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-ai-artifact-'));
+    let stdoutText: string = '';
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=ai'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'build',
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        }
+      });
+
+      emitCommandStarted(initialized.sink);
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush', packageVersion: '5.178.1' },
+        privacy: 'local-sensitive',
+        type: 'artifactAvailable',
+        payload: {
+          role: 'log',
+          path: initialized.logArtifact?.path,
+          format: 'plaintext',
+          complete: false
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'commandResult',
+        payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+      });
+      await initialized.closeAsync();
+
+      const finalRecord: { log?: { complete?: boolean; path?: string } } = JSON.parse(
+        stdoutText.trim().split('\n').at(-1)!
+      );
+      expect(finalRecord.log).toMatchObject({
+        complete: true,
+        path: initialized.logArtifact?.path
+      });
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('publishes artifact completeness as a frozen boolean snapshot', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-artifact-snapshot-'));
+    const reported: IReporterEventEnvelope<unknown>[] = [];
+    const manager: ReporterManager = new ReporterManager();
+    const captureReporter: IReporter = {
+      name: 'capture',
+      initializeAsync: async (context: IReporterContext) => {
+        void context;
+      },
+      report: (event: IReporterEventEnvelope<unknown>) => {
+        reported.push(event);
+      },
+      flushAsync: async () => undefined,
+      closeAsync: async () => undefined
+    };
+    manager.addReporter(captureReporter);
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=json'],
+        env: {},
+        commonTempFolder: directory,
+        actionName: 'build',
+        stdout: { isTTY: false, write: () => undefined },
+        manager
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush', packageVersion: '5.178.1' },
+        privacy: 'local-sensitive',
+        type: 'artifactAvailable',
+        payload: {
+          role: 'log',
+          path: initialized.logArtifact?.path,
+          format: 'plaintext',
+          complete: false
+        }
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'commandResult',
+        payload: { commandName: 'build', succeeded: true, exitCode: 0 }
+      });
+      await initialized.closeAsync();
+
+      const finalArtifact: IReporterEventEnvelope<unknown> = reported
+        .filter(({ type }) => type === 'artifactAvailable')
+        .at(-1)!;
+      const descriptor: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+        finalArtifact.payload as object,
+        'complete'
+      );
+      expect(descriptor).toMatchObject({ value: true, writable: false });
+      expect(typeof (finalArtifact.payload as { complete: unknown }).complete).toBe('boolean');
+      expect(finalArtifact.source).toEqual({
+        packageName: '@microsoft/rush',
+        packageVersion: '5.178.1'
+      });
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

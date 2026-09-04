@@ -8,13 +8,36 @@ interface IClassifiedValue {
   readonly privacy: string;
 }
 
-export function redactReporterEvent(
-  event: IReporterEventEnvelope<unknown>
-): IReporterEventEnvelope<unknown> {
-  let payload: unknown = event.payload;
+export function getHumanReadableMessageText(event: IReporterEventEnvelope<unknown>): string | undefined {
   if (event.privacy === 'secret') {
-    payload = '[secret]';
-  } else if (event.type === 'diagnosticEmitted') {
+    return '[secret]';
+  }
+  const text: unknown = (event.payload as { readonly text?: unknown }).text;
+  return typeof text === 'string' ? text : undefined;
+}
+
+export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IReporterEventEnvelope<unknown> {
+  if (event.privacy === 'secret') {
+    return {
+      protocolVersion: event.protocolVersion,
+      eventId: event.eventId,
+      sessionId: event.sessionId,
+      sequence: event.sequence,
+      sourceSequence: event.sourceSequence,
+      timestamp: event.timestamp,
+      source: {
+        packageName: '[private-producer]',
+        packageVersion: '[private-version]'
+      },
+      privacy: 'secret',
+      required: event.required,
+      type: event.type,
+      payload: '[secret]'
+    };
+  }
+
+  let payload: unknown = event.payload;
+  if (event.type === 'diagnosticEmitted') {
     const diagnostic: { readonly parameters?: Readonly<Record<string, IClassifiedValue>> } =
       event.payload as {
         readonly parameters?: Readonly<Record<string, IClassifiedValue>>;

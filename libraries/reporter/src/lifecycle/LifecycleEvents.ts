@@ -100,6 +100,11 @@ export interface ICommandCompletedPayload {
  */
 export interface IOperationRegisteredPayload {
   /**
+   * The graph iteration that owns this event.
+   */
+  readonly iterationId?: number;
+
+  /**
    * The operation id.
    */
   readonly operationId: string;
@@ -126,6 +131,11 @@ export interface IOperationRegisteredPayload {
  * @beta
  */
 export interface IOperationStatusChangedPayload {
+  /**
+   * The graph iteration that owns this event.
+   */
+  readonly iterationId?: number;
+
   /**
    * The operation id.
    */
@@ -154,6 +164,11 @@ export interface IOperationStatusChangedPayload {
  */
 export interface IOperationStreamClosedPayload {
   /**
+   * The graph iteration that owns this event.
+   */
+  readonly iterationId?: number;
+
+  /**
    * The operation whose output stream has closed.
    */
   readonly operationId: string;
@@ -165,6 +180,11 @@ export interface IOperationStreamClosedPayload {
  * @beta
  */
 export interface IOperationCompletedPayload {
+  /**
+   * The graph iteration that owns this event.
+   */
+  readonly iterationId?: number;
+
   /**
    * The completed operation.
    */
@@ -214,6 +234,11 @@ export interface ICommandResultPayload {
  * @beta
  */
 export interface IWatchCycleCompletedPayload {
+  /**
+   * The completed graph iteration.
+   */
+  readonly iterationId?: number;
+
   /**
    * Whether the watch cycle succeeded.
    */

@@ -91,7 +91,8 @@ export class OperationStreamEmitter {
     operationId: string,
     projectName?: string,
     phaseName?: string,
-    silent?: boolean
+    silent?: boolean,
+    iterationId?: number
   ): string {
     return this._emit(
       'operationRegistered',
@@ -99,7 +100,8 @@ export class OperationStreamEmitter {
         operationId,
         projectName,
         phaseName,
-        ...(silent === undefined ? {} : { silent })
+        ...(silent === undefined ? {} : { silent }),
+        ...(iterationId === undefined ? {} : { iterationId })
       },
       { operationId, projectName, phaseName },
       'public'
@@ -113,7 +115,8 @@ export class OperationStreamEmitter {
     operationId: string,
     status: OperationStatus,
     durationMs?: number,
-    previousStatus?: OperationStatus
+    previousStatus?: OperationStatus,
+    iterationId?: number
   ): string {
     return this._emit(
       'operationStatusChanged',
@@ -121,7 +124,8 @@ export class OperationStreamEmitter {
         operationId,
         status,
         ...(previousStatus === undefined ? {} : { previousStatus }),
-        ...(durationMs === undefined ? {} : { durationMs })
+        ...(durationMs === undefined ? {} : { durationMs }),
+        ...(iterationId === undefined ? {} : { iterationId })
       },
       { operationId },
       'public'
@@ -136,7 +140,12 @@ export class OperationStreamEmitter {
    * @param text - the raw output text
    * @returns the emitted event ids
    */
-  public writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[] {
+  public writeOutput(
+    operationId: string,
+    stream: 'stdout' | 'stderr',
+    text: string,
+    iterationId?: number
+  ): string[] {
     const eventIds: string[] = [];
     let offset: number = 0;
     while (offset < text.length) {
@@ -158,7 +167,12 @@ export class OperationStreamEmitter {
       }
       const chunk: string = text.slice(offset, end);
       eventIds.push(
-        this._emit('externalOutput', { stream, text: chunk }, { operationId }, 'local-sensitive')
+        this._emit(
+          'externalOutput',
+          { stream, text: chunk, ...(iterationId === undefined ? {} : { iterationId }) },
+          { operationId },
+          'local-sensitive'
+        )
       );
       offset = end;
     }
@@ -168,17 +182,32 @@ export class OperationStreamEmitter {
   /**
    * Emits the authoritative signal that no more output will be emitted for an operation.
    */
-  public closeOperationStream(operationId: string): string {
-    return this._emit('operationStreamClosed', { operationId }, { operationId }, 'public');
+  public closeOperationStream(operationId: string, iterationId?: number): string {
+    return this._emit(
+      'operationStreamClosed',
+      { operationId, ...(iterationId === undefined ? {} : { iterationId }) },
+      { operationId },
+      'public'
+    );
   }
 
   /**
    * Emits the final outcome of an operation.
    */
-  public completeOperation(operationId: string, status: OperationStatus, durationMs?: number): string {
+  public completeOperation(
+    operationId: string,
+    status: OperationStatus,
+    durationMs?: number,
+    iterationId?: number
+  ): string {
     return this._emit(
       'operationCompleted',
-      { operationId, status, ...(durationMs === undefined ? {} : { durationMs }) },
+      {
+        operationId,
+        status,
+        ...(durationMs === undefined ? {} : { durationMs }),
+        ...(iterationId === undefined ? {} : { iterationId })
+      },
       { operationId },
       'public'
     );

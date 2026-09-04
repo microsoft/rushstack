@@ -3,6 +3,7 @@
 
 import type { ReporterPrivacyClassification } from './ReporterPrivacyClassification';
 import type { ReporterMessageSeverity } from '../producers/IScopedReporter';
+import type { ReporterLogLevel } from '../config/ReporterNames';
 
 /**
  * The payload of a `messageEmitted` event: a human-oriented message from a
@@ -29,6 +30,11 @@ export interface IMessageEmittedPayload {
    * The human-readable message text.
    */
   readonly text: string;
+
+  /**
+   * An optional minimum reporter log level for this message.
+   */
+  readonly minimumLogLevel?: ReporterLogLevel;
 
   /**
    * The privacy classification of {@link IMessageEmittedPayload.text}.

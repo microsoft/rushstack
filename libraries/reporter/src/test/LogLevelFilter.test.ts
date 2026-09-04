@@ -50,6 +50,11 @@ describe('getEventMinimumLogLevel', () => {
     expect(getEventMinimumLogLevel(ev('externalOutput', { stream: 'stdout', text: 'x' }))).toBe('debug');
     expect(getEventMinimumLogLevel(ev('operationStreamClosed', {}))).toBe('debug');
     expect(getEventMinimumLogLevel(ev('messageEmitted', { severity: 'debug', text: 'd' }))).toBe('debug');
+    expect(
+      getEventMinimumLogLevel(
+        ev('messageEmitted', { severity: 'debug', text: 'v', minimumLogLevel: 'verbose' })
+      )
+    ).toBe('verbose');
     expect(getEventMinimumLogLevel(ev('extension', { name: 'a.b' }, false))).toBe('normal');
   });
 });

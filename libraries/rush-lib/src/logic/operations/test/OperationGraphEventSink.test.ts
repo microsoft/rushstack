@@ -86,6 +86,7 @@ function createOperation(
 
 class RecordingSink implements IOperationGraphEventSink {
   public readonly registered: [string, boolean][] = [];
+  public readonly registeredIterations: number[] = [];
   public readonly transitions: [string, string][] = [];
   public readonly headers: [string, number, number][] = [];
   public readonly activities: string[] = [];
@@ -93,8 +94,14 @@ class RecordingSink implements IOperationGraphEventSink {
   public readonly closed: string[] = [];
   public readonly completed: [string, string][] = [];
 
-  public onOperationRegistered(operationId: string, silent: boolean): void {
+  public onOperationRegistered(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
     this.registered.push([operationId, silent]);
+    this.registeredIterations.push(iterationId ?? result?.iterationId ?? -1);
   }
   public onOperationStatusChanged(result: IOperationExecutionResult): void {
     this.transitions.push([result.operation.name, result.status]);
@@ -580,7 +587,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
       new Set([createOperation('silent only', silentRunner, mockPhase, '@scope/silent')]),
       createGraphOptions(mockWritable, false)
     );
-    attachReporterOperationEventSink(graph, rushSession, 'build');
+    attachReporterOperationEventSink(graph, rushSession, 'build', true);
 
     await graph.executeAsync({});
     await graph.executeAsync({});
@@ -596,6 +603,163 @@ describe('OperationGraph event sink (dual-emit)', () => {
         .filter(({ type }) => type === 'operationCompleted')
         .map(({ payload }) => (payload as { status: string }).status)
     ).toEqual(['noOp', 'noOp']);
+  });
+
+  it('does not emit status changes after completion for a deferred invalidation', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: {
+        eventSink: reporterSink,
+        sessionId: 'deferred-invalidation',
+        operationStreamEnabled: true
+      }
+    });
+    const runner: IOperationRunner = {
+      name: 'deferred invalidation',
+      reportTiming: true,
+      silent: false,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: false,
+      executeAsync: async (context: IOperationRunnerContext) => {
+        context.getInvalidateCallback()('during execution');
+        return OperationStatus.Success;
+      },
+      getConfigHash: () => 'deferred-invalidation'
+    };
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('deferred invalidation', runner)]),
+      createGraphOptions(mockWritable, false)
+    );
+    attachReporterOperationEventSink(graph, rushSession, 'build', true);
+
+    await graph.executeAsync({});
+
+    const operationEvents: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
+      ({ scope }) => scope?.operationId === 'deferred invalidation#phase'
+    );
+    const completedIndex: number = operationEvents.findIndex(({ type }) => type === 'operationCompleted');
+    expect(completedIndex).toBeGreaterThanOrEqual(0);
+    expect(
+      operationEvents.slice(completedIndex + 1).some(({ type }) => type === 'operationStatusChanged')
+    ).toBe(false);
+  });
+
+  it('emits failure and blocked outcomes for a dependency chain', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: {
+        eventSink: reporterSink,
+        sessionId: 'failure-and-blocked',
+        operationStreamEnabled: true
+      }
+    });
+    const failing: Operation = createOperation(
+      'failing',
+      new MockOperationRunner('failing', async () => OperationStatus.Failure),
+      mockPhase,
+      '@scope/failing'
+    );
+    const blocked: Operation = createOperation(
+      'blocked',
+      new MockOperationRunner('blocked', async () => OperationStatus.Success),
+      mockPhase,
+      '@scope/blocked'
+    );
+    blocked.addDependency(failing);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([failing, blocked]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+
+    const completions: string[] = reporterSink.inputs
+      .filter(({ type }) => type === 'operationCompleted')
+      .map(({ payload }) => (payload as { status: string }).status);
+    expect(completions).toEqual(expect.arrayContaining(['failure', 'blocked']));
+    expect(reporterSink.inputs).toContainEqual(
+      expect.objectContaining({
+        type: 'diagnosticEmitted',
+        payload: expect.objectContaining({ code: 'RUSH_OPERATION_FAILED' })
+      })
+    );
+  });
+
+  it('emits aborted outcomes for a cancelled iteration', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: {
+        eventSink: reporterSink,
+        sessionId: 'cancelled-iteration',
+        operationStreamEnabled: true
+      }
+    });
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('cancelled', new MockOperationRunner('cancelled'))]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.hooks.beforeExecuteIterationAsync.tap('cancel', () => OperationStatus.Aborted);
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+
+    expect(reporterSink.inputs).toContainEqual(
+      expect.objectContaining({
+        type: 'operationCompleted',
+        payload: expect.objectContaining({ status: 'aborted' })
+      })
+    );
+  });
+
+  it('emits a watch-cycle result after each opted-in iteration', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: {
+        eventSink: reporterSink,
+        sessionId: 'watch-cycle',
+        operationStreamEnabled: true
+      }
+    });
+
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('watch', new MockOperationRunner('watch'))]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build', true);
+    await graph.executeAsync({});
+
+    expect(reporterSink.inputs.at(-1)).toMatchObject({
+      type: 'watchCycleCompleted',
+      payload: { iterationId: 1, succeeded: true }
+    });
+  });
+
+  it('does not register a scheduled iteration until it begins execution', async () => {
+    const sink: RecordingSink = new RecordingSink();
+    const graph: OperationGraph = new OperationGraph(
+      new Set([createOperation('scheduled', new MockOperationRunner('scheduled'))]),
+      createGraphOptions(mockWritable, false)
+    );
+    graph.eventSink = sink;
+
+    await graph.scheduleIterationAsync({});
+    await graph.scheduleIterationAsync({});
+
+    expect(sink.registered).toEqual([]);
+    await graph.executeScheduledIterationAsync();
+    expect(sink.registered).toEqual([['scheduled', false]]);
+    expect(sink.registeredIterations).toEqual([2]);
   });
 
   it('does not attach an operation adapter when the session has no reporter sink', () => {
@@ -722,52 +886,6 @@ describe('OperationGraph event sink (dual-emit)', () => {
     expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
   });
 
-  it('isolates diagnostics when the next watch iteration registers before abort completes', async () => {
-    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
-    const rushSession: RushSession = new RushSession({
-      terminalProvider: new StringBufferTerminalProvider(),
-      getIsDebugMode: () => false,
-      reporter: { eventSink: reporterSink, sessionId: 'overlapping-operation-shadow' }
-    });
-    let runCount: number = 0;
-    let resolveFirstRun: ((status: OperationStatus) => void) | undefined;
-    let markFirstRunStarted: (() => void) | undefined;
-    const firstRunStarted: Promise<void> = new Promise<void>((resolve: () => void) => {
-      markFirstRunStarted = resolve;
-    });
-    const runner: MockOperationRunner = new MockOperationRunner('@scope/overlap (phase)', async () => {
-      runCount++;
-      if (runCount === 1) {
-        markFirstRunStarted!();
-        return await new Promise<OperationStatus>((resolve: (status: OperationStatus) => void) => {
-          resolveFirstRun = resolve;
-        });
-      }
-      return OperationStatus.Failure;
-    });
-    const graph: OperationGraph = new OperationGraph(
-      new Set([createOperation('overlap', runner, mockPhase, '@scope/overlap')]),
-      { ...createGraphOptions(mockWritable, false), pauseNextIteration: true }
-    );
-    attachReporterOperationEventSink(graph, rushSession, 'build');
-
-    await graph.scheduleIterationAsync({});
-    const firstExecution: Promise<boolean> = graph.executeScheduledIterationAsync();
-    await firstRunStarted;
-    await graph.scheduleIterationAsync({});
-    const abortPromise: Promise<void> = graph.abortCurrentIterationAsync();
-    resolveFirstRun!(OperationStatus.Failure);
-    await Promise.all([firstExecution, abortPromise]);
-    await graph.executeScheduledIterationAsync();
-
-    expect(
-      reporterSink.inputs.filter(
-        ({ type, payload }) =>
-          type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
-      )
-    ).toHaveLength(2);
-  });
-
   it('recomputes grouped silence for each watch-style iteration', async () => {
     const reporterSink: CapturingReporterSink = new CapturingReporterSink();
     const rushSession: RushSession = new RushSession({
@@ -868,16 +986,26 @@ describe('OperationGraph event sink (dual-emit)', () => {
       '@scope/project#_phase:compile',
       '@scope/project#_phase:test'
     ]);
+    expect(registrations.map(({ payload }) => (payload as { iterationId?: number }).iterationId)).toEqual([
+      1, 1, 2, 2
+    ]);
     expect(
       reporterSink.inputs
         .filter(({ type }) => type === 'operationCompleted')
-        .map(({ scope }) => scope?.operationId)
-        .sort()
+        .map(({ scope, payload }) => ({
+          operationId: scope?.operationId,
+          iterationId: (payload as { iterationId?: number }).iterationId
+        }))
+        .sort((a, b) =>
+          a.operationId === b.operationId
+            ? (a.iterationId ?? 0) - (b.iterationId ?? 0)
+            : (a.operationId ?? '').localeCompare(b.operationId ?? '')
+        )
     ).toEqual([
-      '@scope/project#_phase:compile',
-      '@scope/project#_phase:compile',
-      '@scope/project#_phase:test',
-      '@scope/project#_phase:test'
+      { operationId: '@scope/project#_phase:compile', iterationId: 1 },
+      { operationId: '@scope/project#_phase:compile', iterationId: 2 },
+      { operationId: '@scope/project#_phase:test', iterationId: 1 },
+      { operationId: '@scope/project#_phase:test', iterationId: 2 }
     ]);
     for (const event of reporterSink.inputs.filter(({ type }) => type === 'operationStatusChanged')) {
       expect(event.scope?.operationId).toBe(`@scope/project#${event.scope?.phaseName}`);

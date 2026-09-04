@@ -29,7 +29,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 import './mockRushCommandLineParser';
 
 import type { SpawnOptions } from 'node:child_process';
-import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import { Autoinstaller } from '../../logic/Autoinstaller';
@@ -142,6 +142,73 @@ describe('RushCommandLineParser', () => {
             expect(scope.operationId).toBe(`${scope.projectName}#${scope.phaseName}`);
           }
           expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+        });
+
+        it('makes the opted-in reporter stream the sole visible operation writer', async () => {
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const stdoutSpy: jest.SpiedFunction<typeof process.stdout.write> = jest
+            .spyOn(process.stdout, 'write')
+            .mockImplementation(() => true);
+          const stderrSpy: jest.SpiedFunction<typeof process.stderr.write> = jest
+            .spyOn(process.stderr, 'write')
+            .mockImplementation(() => true);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-visible-cutover',
+                operationStreamEnabled: true
+              }
+            );
+
+            await expect(parser.executeAsync()).resolves.toEqual(true);
+
+            expect(stdoutSpy).not.toHaveBeenCalled();
+            expect(stderrSpy).not.toHaveBeenCalled();
+            expect(reporterSink.inputs.some(({ type }) => type === 'operationCompleted')).toBe(true);
+          } finally {
+            stdoutSpy.mockRestore();
+            stderrSpy.mockRestore();
+          }
+        });
+
+        it('preserves the actionable lock contention reason in reporter mode', async () => {
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockReturnValue(undefined);
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-conflict',
+                operationStreamEnabled: true
+              }
+            );
+
+            await parser.executeAsync();
+            await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+            expect(reporterSink.inputs).toContainEqual(
+              expect.objectContaining({
+                type: 'messageEmitted',
+                payload: expect.objectContaining({
+                  severity: 'error',
+                  text: expect.stringContaining('Another Rush command is already running')
+                })
+              })
+            );
+          } finally {
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
+          }
         });
       });
 
