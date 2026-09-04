@@ -44,6 +44,45 @@ function emitCommandStarted(sink: IReporterEventSink): void {
   });
 }
 
+function emitOperationEvents(sink: IReporterEventSink): void {
+  const base = {
+    protocolVersion: { major: 1, minor: 1 },
+    sessionId: 'session',
+    source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+    scope: { commandName: 'build', operationId: 'project#phase' }
+  } as const;
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationRegistered',
+    payload: { operationId: 'project#phase', projectName: 'project', phaseName: 'phase' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationStatusChanged',
+    payload: { operationId: 'project#phase', previousStatus: 'queued', status: 'executing' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'local-sensitive',
+    type: 'externalOutput',
+    payload: { stream: 'stdout', text: 'raw operation output\n' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationStreamClosed',
+    payload: { operationId: 'project#phase' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationCompleted',
+    payload: { operationId: 'project#phase', status: 'success' }
+  });
+}
+
 describe(resolveRushReporterSelection.name, () => {
   it('preserves the legacy path without an explicit opt-in in TTY, non-TTY, CI, and agent environments', () => {
     for (const testCase of [
@@ -436,7 +475,12 @@ describe(initializeRushReporterHostAsync.name, () => {
     let stdoutText: string = '';
     try {
       const initialized = await initializeRushReporterHostAsync({
-        argv: ['build', '--reporter=json', `--output=json://${outputPath}`],
+        argv: [
+          'build',
+          '--reporter=json',
+          '--log-level=debug',
+          `--output=json://${outputPath}?logLevel=debug`
+        ],
         env: {},
         stdout: {
           isTTY: false,
@@ -448,12 +492,28 @@ describe(initializeRushReporterHostAsync.name, () => {
       });
 
       emitCommandStarted(initialized.sink);
+      emitOperationEvents(initialized.sink);
       const firstClose: Promise<void> = initialized.closeAsync();
       expect(initialized.closeAsync()).toBe(firstClose);
       await firstClose;
 
-      expect(JSON.parse(stdoutText).type).toBe('commandStarted');
-      expect(JSON.parse(await fs.promises.readFile(outputPath, 'utf8')).type).toBe('commandStarted');
+      const stdoutEvents: Record<string, unknown>[] = stdoutText
+        .trim()
+        .split('\n')
+        .map((line: string) => JSON.parse(line) as Record<string, unknown>);
+      const fileEvents: Record<string, unknown>[] = (await fs.promises.readFile(outputPath, 'utf8'))
+        .trim()
+        .split('\n')
+        .map((line: string) => JSON.parse(line) as Record<string, unknown>);
+      expect(stdoutEvents.map(({ type }) => type)).toEqual(['commandStarted']);
+      expect(fileEvents.map(({ type }) => type)).toEqual([
+        'commandStarted',
+        'operationRegistered',
+        'operationStatusChanged',
+        'externalOutput',
+        'operationStreamClosed',
+        'operationCompleted'
+      ]);
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

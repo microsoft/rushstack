@@ -23,6 +23,7 @@ import {
   type IReporterEventEnvelope,
   type IReporterEventSink,
   type IReporterOutputTarget,
+  type ReporterEventType,
   type ReporterLogLevel,
   type ReporterName
 } from '@rushstack/rush-reporter';
@@ -70,6 +71,13 @@ export interface IInitializedRushReporterHost {
 const REPORTER_VALUE_FLAGS: ReadonlySet<string> = new Set(['--reporter', '--output', '--log-level']);
 const ALL_REPORTER_VALUE_FLAGS: readonly string[] = ['--reporter', '--output', '--log-level'];
 const REPORTER_SELECTION_FLAG: readonly string[] = ['--reporter'];
+const DEFERRED_OPERATION_EVENT_TYPES: ReadonlySet<ReporterEventType> = new Set([
+  'operationRegistered',
+  'operationStatusChanged',
+  'operationStreamClosed',
+  'operationCompleted',
+  'externalOutput'
+]);
 
 interface IParsedReporterControls {
   readonly reporters: readonly string[];
@@ -98,6 +106,38 @@ class LogLevelReporter implements IReporter {
 
   public report(event: IReporterEventEnvelope<unknown>): void {
     if (shouldRenderAtLogLevel(this._logLevel, event)) {
+      this._reporter.report(event);
+    }
+  }
+
+  public flushAsync(): Promise<void> {
+    return this._reporter.flushAsync();
+  }
+
+  public closeAsync(): Promise<void> {
+    return this._reporter.closeAsync();
+  }
+}
+
+/**
+ * Keeps operation presentation on the legacy collator until R5B transfers terminal ownership.
+ */
+class DeferredOperationPresentationReporter implements IReporter {
+  public readonly name: string;
+
+  private readonly _reporter: IReporter;
+
+  public constructor(reporter: IReporter) {
+    this._reporter = reporter;
+    this.name = reporter.name;
+  }
+
+  public initializeAsync(context: IReporterContext): Promise<void> {
+    return this._reporter.initializeAsync(context);
+  }
+
+  public report(event: IReporterEventEnvelope<unknown>): void {
+    if (!DEFERRED_OPERATION_EVENT_TYPES.has(event.type)) {
       this._reporter.report(event);
     }
   }
@@ -610,7 +650,11 @@ export async function initializeRushReporterHostAsync(
   if (selection.enabled) {
     const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
     if (primaryReporter) {
-      host.manager.addReporter(new LogLevelReporter(primaryReporter, selection.logLevel), {
+      const presentationReporter: IReporter =
+        selection.reporter === 'file'
+          ? primaryReporter
+          : new DeferredOperationPresentationReporter(primaryReporter);
+      host.manager.addReporter(new LogLevelReporter(presentationReporter, selection.logLevel), {
         destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
       });
     }

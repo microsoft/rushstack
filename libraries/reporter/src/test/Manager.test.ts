@@ -117,12 +117,16 @@ describe('ReporterManager ordering and assignment', () => {
     manager.emit(makeInput('activityChanged'));
     manager.emit(makeInput('messageEmitted'));
     manager.emit(makeInput('commandStarted'));
+    manager.emit(makeInput('operationStreamClosed'));
+    manager.emit(makeInput('operationCompleted'));
     await manager.flushAsync();
 
     expect(reporter.reported.map((e: IReporterEventEnvelope<unknown>) => e.required)).toEqual([
       false,
       true,
-      true
+      true,
+      false,
+      false
     ]);
   });
 
@@ -152,9 +156,10 @@ describe('ReporterManager ordering and assignment', () => {
     manager.ingestForeignEnvelope(foreign);
     await manager.flushAsync();
 
-    const byIdentity: [string, string][] = reporter.reported.map(
-      (e: IReporterEventEnvelope<unknown>) => [e.sessionId, e.eventId]
-    );
+    const byIdentity: [string, string][] = reporter.reported.map((e: IReporterEventEnvelope<unknown>) => [
+      e.sessionId,
+      e.eventId
+    ]);
     expect(byIdentity).toEqual([
       ['sess', 'evt_1'],
       ['child', 'evt_1']

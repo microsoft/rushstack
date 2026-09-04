@@ -113,6 +113,11 @@ export interface IOperationRegisteredPayload {
    * The phase the operation belongs to.
    */
   readonly phaseName?: string;
+
+  /**
+   * Whether the operation is architectural and normally omitted from visible summaries.
+   */
+  readonly silent?: boolean;
 }
 
 /**
@@ -132,7 +137,46 @@ export interface IOperationStatusChangedPayload {
   readonly status: OperationStatus;
 
   /**
+   * The status immediately preceding this transition.
+   */
+  readonly previousStatus?: OperationStatus;
+
+  /**
    * The operation duration in milliseconds when known.
+   */
+  readonly durationMs?: number;
+}
+
+/**
+ * The payload of an `operationStreamClosed` event.
+ *
+ * @beta
+ */
+export interface IOperationStreamClosedPayload {
+  /**
+   * The operation whose output stream has closed.
+   */
+  readonly operationId: string;
+}
+
+/**
+ * The payload of an `operationCompleted` event.
+ *
+ * @beta
+ */
+export interface IOperationCompletedPayload {
+  /**
+   * The completed operation.
+   */
+  readonly operationId: string;
+
+  /**
+   * The terminal operation status.
+   */
+  readonly status: OperationStatus;
+
+  /**
+   * The final operation duration in milliseconds when known.
    */
   readonly durationMs?: number;
 }

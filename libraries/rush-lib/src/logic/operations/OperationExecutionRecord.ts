@@ -173,6 +173,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   private _status: OperationStatus;
   private _stateHash: string | undefined;
   private _stateHashComponents: IOperationStateHashComponents | undefined;
+  private _operationStreamClosed: boolean = false;
+  private _operationCompleted: boolean = false;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -281,6 +283,63 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get silent(): boolean {
     return !this.enabled || this.runner.silent;
+  }
+
+  /**
+   * Notifies observers that this iteration cannot emit more output for the operation.
+   *
+   * @internal
+   */
+  public closeOperationStream(): void {
+    if (!this._operationStreamClosed) {
+      this._operationStreamClosed = true;
+      this._context.eventSink?.onOperationStreamClosed?.(this.name, this);
+    }
+  }
+
+  /**
+   * Emits the ordered terminal stream events exactly once.
+   *
+   * @internal
+   */
+  public finalizeOperation(): void {
+    this.closeOperationStream();
+    if (!this._operationCompleted) {
+      this._operationCompleted = true;
+      this._context.eventSink?.onOperationCompleted?.(this);
+    }
+  }
+
+  /**
+   * Whether this record has emitted its terminal completion event.
+   *
+   * @internal
+   */
+  public get isOperationCompleted(): boolean {
+    return this._operationCompleted;
+  }
+
+  /**
+   * Adds the reporter's lossless operation-output tap ahead of any legacy presentation transforms.
+   *
+   * @internal
+   */
+  public addOperationChunkTap(destination: TerminalWritable): TerminalWritable {
+    const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
+    if (!eventSink?.onOperationChunk) {
+      return destination;
+    }
+
+    return new SplitterTransform({
+      destinations: [
+        destination,
+        new OperationChunkTap(this.name, (operationId, chunk) => {
+          if (operationId === this.name) {
+            eventSink.onOperationChunk?.(operationId, chunk, this);
+          }
+        })
+      ]
+    });
   }
 
   public getStateHash(): string {
@@ -396,25 +455,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         newlineKind: NewlineKind.Lf // for StdioSummarizer
       });
 
-      const chunkTapDestinations: TerminalWritable[] = [];
-      const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
-      if (eventSink?.onOperationChunk) {
-        // Tap the stream upstream of the quiet-mode discard so the sink observes
-        // the exact bytes the collated writer would receive, regardless of verbosity.
-        chunkTapDestinations.push(
-          new OperationChunkTap(this.name, (operationId, chunk) =>
-            eventSink.onOperationChunk?.(operationId, chunk)
-          )
-        );
-      }
-
       const splitterTransform1: SplitterTransform = new SplitterTransform({
         destinations: [
           this.quietMode
             ? new DiscardStdoutTransform({ destination: this.collatedWriter })
             : this.collatedWriter,
-          stderrLineTransform,
-          ...chunkTapDestinations
+          stderrLineTransform
         ]
       });
 
@@ -424,7 +470,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         ensureNewlineAtEnd: true
       });
 
-      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(
+        this.addOperationChunkTap(normalizeNewlineTransform)
+      );
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
@@ -486,9 +534,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     } finally {
       if (this.isTerminal) {
         this._collatedWriter?.close();
-        if (this._collatedWriter) {
-          this._context.eventSink?.onOperationStreamClosed?.(this.name);
-        }
+        this.finalizeOperation();
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }
