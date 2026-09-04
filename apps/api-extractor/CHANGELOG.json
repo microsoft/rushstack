@@ -2,6 +2,27 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.59.1",
+      "tag": "@microsoft/api-extractor_v7.59.1",
+      "date": "Fri, 04 Sep 2026 15:17:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.59.0",
       "tag": "@microsoft/api-extractor_v7.59.0",
       "date": "Fri, 21 Aug 2026 15:16:34 GMT",
