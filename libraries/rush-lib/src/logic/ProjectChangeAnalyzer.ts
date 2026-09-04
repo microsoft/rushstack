@@ -6,7 +6,17 @@ import * as path from 'node:path';
 import ignore, { type Ignore } from 'ignore';
 
 import type { IReadonlyLookupByPath, LookupByPath, IPrefixMatch } from '@rushstack/lookup-by-path';
-import { Path, FileSystem, Async, AlreadyReportedError, Sort, JsonFile } from '@rushstack/node-core-library';
+import {
+  Path,
+  FileSystem,
+  Async,
+  AlreadyReportedError,
+  Sort,
+  JsonFile,
+  FileConstants,
+  Objects,
+  type IPackageJson
+} from '@rushstack/node-core-library';
 import {
   getRepoChanges,
   getRepoRoot,
@@ -24,6 +34,7 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { Git } from './Git';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
+import { PublishUtilities } from './PublishUtilities';
 import type { IPnpmOptionsJson, PnpmOptionsConfiguration } from './pnpm/PnpmOptionsConfiguration';
 import {
   type IInputsSnapshotProjectMetadata,
@@ -55,7 +66,7 @@ export interface IGetChangedProjectsOptions {
 
   /**
    * If set to `true`, excludes projects where the only changes are:
-   * - A version-only change to `package.json` (only the "version" field differs)
+   * - A generated version bump in `package.json`, including generated local dependency range rewrites
    * - Changes to `CHANGELOG.md` and/or `CHANGELOG.json` files
    *
    * This prevents `rush version --bump` from triggering `rush change --verify` to request change files
@@ -123,6 +134,9 @@ export class ProjectChangeAnalyzer {
     > = this.getChangesByProject(lookup, changedFiles);
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
+    const changedProjectVersions: ReadonlyMap<string, string> = excludeVersionOnlyChanges
+      ? await getChangedProjectVersionsAsync(rushConfiguration, changedFiles, repoRoot, this._git)
+      : new Map();
 
     await Async.forEachAsync(
       changesByProject,
@@ -165,7 +179,9 @@ export class ProjectChangeAnalyzer {
             const isVersionOnlyChange: boolean = await isVersionOnlyChangeAsync(
               diffStatus,
               repoRoot,
-              this._git
+              this._git,
+              rushConfiguration.projectsByName,
+              changedProjectVersions
             );
             if (isVersionOnlyChange) {
               continue; // Skip version-only package.json changes
@@ -638,7 +654,9 @@ export class ProjectChangeAnalyzer {
 async function isVersionOnlyChangeAsync(
   diffStatus: IFileDiffStatus,
   repoRoot: string,
-  git: Git
+  git: Git,
+  rushProjectsByName: ReadonlyMap<string, RushConfigurationProject>,
+  changedProjectVersions: ReadonlyMap<string, string>
 ): Promise<boolean> {
   try {
     // Only check modified files, not additions or deletions
@@ -658,11 +676,67 @@ async function isVersionOnlyChangeAsync(
       })
     ]);
 
-    return isPackageJsonVersionOnlyChange(oldPackageJsonContent, currentPackageJsonContent);
+    return isPackageJsonVersionOnlyChange(
+      oldPackageJsonContent,
+      currentPackageJsonContent,
+      rushProjectsByName,
+      changedProjectVersions
+    );
   } catch (error) {
     // If we can't read the file or parse it, assume it's not a version-only change
     return false;
   }
+}
+
+async function getChangedProjectVersionsAsync(
+  rushConfiguration: RushConfiguration,
+  changedFiles: ReadonlyMap<string, IFileDiffStatus>,
+  repoRoot: string,
+  git: Git
+): Promise<ReadonlyMap<string, string>> {
+  const changedProjectVersions: Map<string, string> = new Map();
+
+  await Async.forEachAsync(
+    rushConfiguration.projects,
+    async (project: RushConfigurationProject) => {
+      const packageJsonPath: string = Path.convertToSlashes(
+        path.relative(repoRoot, path.join(project.projectFolder, FileConstants.PackageJson))
+      );
+      const diffStatus: IFileDiffStatus | undefined = changedFiles.get(packageJsonPath);
+      if (diffStatus?.status !== 'M') {
+        return;
+      }
+
+      try {
+        const [oldPackageJsonContent, newPackageJsonContent] = await Promise.all([
+          git.getBlobContentAsync({
+            blobSpec: diffStatus.oldhash,
+            repositoryRoot: repoRoot
+          }),
+          git.getBlobContentAsync({
+            blobSpec: diffStatus.newhash,
+            repositoryRoot: repoRoot
+          })
+        ]);
+        const oldPackageJson: Partial<IPackageJson> = JSON.parse(oldPackageJsonContent);
+        const newPackageJson: Partial<IPackageJson> = JSON.parse(newPackageJsonContent);
+        if (
+          oldPackageJson.name === project.packageName &&
+          newPackageJson.name === project.packageName &&
+          oldPackageJson.version &&
+          newPackageJson.version &&
+          oldPackageJson.version !== newPackageJson.version
+        ) {
+          changedProjectVersions.set(project.packageName, newPackageJson.version);
+        }
+      } catch (error) {
+        // A malformed or unreadable package.json cannot qualify for this exemption.
+      }
+    },
+    { concurrency: 10 }
+  );
+
+  return changedProjectVersions;
 }
 
 interface IAdditionalGlob {
@@ -739,31 +813,75 @@ async function getAdditionalFilesFromRushProjectConfigurationAsync(
 }
 
 /**
- * Compares two package.json file contents and determines if the only difference is the "version" field.
+ * Compares two package.json file contents and determines if the changes could have been generated by
+ * `rush version --bump`: a version change and, optionally, corresponding local dependency range rewrites.
  * @param oldPackageJsonContent - The old package.json content as a string
  * @param newPackageJsonContent - The new package.json content as a string
- * @returns true if the only difference is the version field, false otherwise
+ * @returns true if all differences are generated version bump changes, false otherwise
  */
 export function isPackageJsonVersionOnlyChange(
   oldPackageJsonContent: string,
-  newPackageJsonContent: string
+  newPackageJsonContent: string,
+  rushProjectsByName: ReadonlyMap<string, RushConfigurationProject> = new Map(),
+  changedProjectVersions: ReadonlyMap<string, string> = new Map()
 ): boolean {
   try {
-    // Parse both versions - use specific type since we only care about version field
-    const oldPackageJson: { version?: string } = JSON.parse(oldPackageJsonContent);
-    const newPackageJson: { version?: string } = JSON.parse(newPackageJsonContent);
+    const oldPackageJson: Partial<IPackageJson> = JSON.parse(oldPackageJsonContent);
+    const newPackageJson: Partial<IPackageJson> = JSON.parse(newPackageJsonContent);
 
-    // Ensure both have a version field
-    if (!oldPackageJson.version || !newPackageJson.version) {
+    if (
+      !oldPackageJson.version ||
+      !newPackageJson.version ||
+      oldPackageJson.version === newPackageJson.version
+    ) {
       return false;
     }
 
-    // Remove the version field from both (no need to clone, these are fresh objects from JSON.parse)
-    oldPackageJson.version = undefined;
-    newPackageJson.version = undefined;
+    const dependencySections: ReadonlyArray<'dependencies' | 'devDependencies' | 'peerDependencies'> = [
+      'dependencies',
+      'devDependencies',
+      'peerDependencies'
+    ];
 
-    // Compare the objects without the version field
-    return JSON.stringify(oldPackageJson) === JSON.stringify(newPackageJson);
+    for (const dependencySection of dependencySections) {
+      const oldDependencies: Record<string, string> | undefined = oldPackageJson[dependencySection];
+      const newDependencies: Record<string, string> | undefined = newPackageJson[dependencySection];
+      if (!oldDependencies && !newDependencies) {
+        continue;
+      }
+      if (
+        !oldDependencies ||
+        !newDependencies ||
+        !Objects.areDeepEqual(Object.keys(oldDependencies).sort(), Object.keys(newDependencies).sort())
+      ) {
+        return false;
+      }
+
+      for (const dependencyName of Object.keys(oldDependencies)) {
+        const oldDependencyVersion: string = oldDependencies[dependencyName];
+        const newDependencyVersion: string = newDependencies[dependencyName];
+        if (oldDependencyVersion === newDependencyVersion) {
+          continue;
+        }
+
+        const newLocalVersion: string | undefined = changedProjectVersions.get(dependencyName);
+        if (
+          !newLocalVersion ||
+          !rushProjectsByName.has(dependencyName) ||
+          newDependencyVersion !==
+            PublishUtilities.getNewDependencyVersion(oldDependencies, dependencyName, newLocalVersion)
+        ) {
+          return false;
+        }
+      }
+
+      delete oldPackageJson[dependencySection];
+      delete newPackageJson[dependencySection];
+    }
+
+    delete oldPackageJson.version;
+    delete newPackageJson.version;
+    return Objects.areDeepEqual(oldPackageJson, newPackageJson);
   } catch (error) {
     // If we can't parse the JSON, assume it's not a version-only change
     return false;

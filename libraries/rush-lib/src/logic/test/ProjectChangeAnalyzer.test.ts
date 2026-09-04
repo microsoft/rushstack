@@ -305,6 +305,47 @@ describe(ProjectChangeAnalyzer.name, () => {
       expect(changedProjectsWithExclude.has(rushConfiguration.getProjectByName('a')!)).toBe(false);
     });
 
+    it('excludeVersionOnlyChanges excludes generated local dependency rewrites', async () => {
+      const rootDir: string = resolve(__dirname, 'repo');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(rootDir, 'rush.json')
+      );
+      const blobs: Record<string, object> = {
+        'old-a': { name: 'a', version: '1.0.0' },
+        'new-a': { name: 'a', version: '1.1.0' },
+        'old-b': {
+          name: 'b',
+          version: '2.0.0',
+          peerDependencies: { a: '^1.0.0' }
+        },
+        'new-b': {
+          name: 'b',
+          version: '2.0.1',
+          peerDependencies: { a: '^1.1.0' }
+        }
+      };
+
+      mockGetRepoChanges.mockReturnValue(
+        new Map<string, IFileDiffStatus>([
+          ['a/package.json', { mode: 'modified', newhash: 'new-a', oldhash: 'old-a', status: 'M' }],
+          ['b/package.json', { mode: 'modified', newhash: 'new-b', oldhash: 'old-b', status: 'M' }]
+        ])
+      );
+      mockGetBlobContentAsync.mockImplementation(({ blobSpec }) =>
+        Promise.resolve(JSON.stringify(blobs[blobSpec]))
+      );
+
+      const changedProjects = await new ProjectChangeAnalyzer(rushConfiguration).getChangedProjectsAsync({
+        enableFiltering: false,
+        includeExternalDependencies: false,
+        targetBranchName: 'main',
+        terminal: new Terminal(new StringBufferTerminalProvider(true)),
+        excludeVersionOnlyChanges: true
+      });
+
+      expect(changedProjects.size).toBe(0);
+    });
+
     it('excludeVersionOnlyChanges does not exclude projects with non-version changes', async () => {
       const rootDir: string = resolve(__dirname, 'repo');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
@@ -1140,6 +1181,24 @@ describe(ProjectChangeAnalyzer.name, () => {
   });
 
   describe('isPackageJsonVersionOnlyChange', () => {
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      resolve(__dirname, 'repo', 'rush.json')
+    );
+    const changedProjectVersions: ReadonlyMap<string, string> = new Map([['a', '1.1.0']]);
+
+    function isVersionBump(
+      oldPackageJson: object,
+      newPackageJson: object,
+      bumpedVersions: ReadonlyMap<string, string> = changedProjectVersions
+    ): boolean {
+      return isPackageJsonVersionOnlyChange(
+        JSON.stringify(oldPackageJson),
+        JSON.stringify(newPackageJson),
+        rushConfiguration.projectsByName,
+        bumpedVersions
+      );
+    }
+
     it('returns true when only version field changed', () => {
       const oldContent = JSON.stringify({
         name: 'test-package',
@@ -1172,6 +1231,88 @@ describe(ProjectChangeAnalyzer.name, () => {
       });
 
       expect(isPackageJsonVersionOnlyChange(oldContent, newContent)).toBe(false);
+    });
+
+    it.each([
+      ['dependencies', '1.0.0', '1.1.0'],
+      ['devDependencies', '~1.0.0', '~1.1.0'],
+      ['peerDependencies (exact)', '1.0.0', '1.1.0'],
+      ['peerDependencies (caret)', '^1.0.0', '^1.1.0']
+    ])('returns true for a generated %s rewrite', (label, oldRange, newRange) => {
+      const dependencySection: string = label.split(' ')[0];
+      expect(
+        isVersionBump(
+          {
+            name: 'consumer',
+            version: '2.0.0',
+            [dependencySection]: { a: oldRange }
+          },
+          {
+            name: 'consumer',
+            version: '2.0.1',
+            [dependencySection]: { a: newRange }
+          }
+        )
+      ).toBe(true);
+    });
+
+    it('returns false for an arbitrary local dependency range edit', () => {
+      expect(
+        isVersionBump(
+          { name: 'consumer', version: '2.0.0', dependencies: { a: '^1.0.0' } },
+          { name: 'consumer', version: '2.0.1', dependencies: { a: '~1.1.0' } }
+        )
+      ).toBe(false);
+    });
+
+    it.each([
+      [{ a: '1.0.0' }, { a: '1.1.0', b: '2.0.0' }],
+      [{ a: '1.0.0', b: '2.0.0' }, { a: '1.1.0' }]
+    ])('returns false for dependency additions or removals', (oldDependencies, newDependencies) => {
+      expect(
+        isVersionBump(
+          { name: 'consumer', version: '2.0.0', dependencies: oldDependencies },
+          { name: 'consumer', version: '2.0.1', dependencies: newDependencies }
+        )
+      ).toBe(false);
+    });
+
+    it('returns false when an unrelated package field changes', () => {
+      expect(
+        isVersionBump(
+          { name: 'consumer', version: '2.0.0', description: 'old', dependencies: { a: '1.0.0' } },
+          { name: 'consumer', version: '2.0.1', description: 'new', dependencies: { a: '1.1.0' } }
+        )
+      ).toBe(false);
+    });
+
+    it('returns false for a non-local dependency rewrite', () => {
+      expect(
+        isVersionBump(
+          { name: 'consumer', version: '2.0.0', dependencies: { external: '1.0.0' } },
+          { name: 'consumer', version: '2.0.1', dependencies: { external: '1.1.0' } },
+          new Map([['external', '1.1.0']])
+        )
+      ).toBe(false);
+    });
+
+    it('returns false for a local dependency whose version did not change', () => {
+      expect(
+        isVersionBump(
+          { name: 'consumer', version: '2.0.0', dependencies: { a: '1.0.0' } },
+          { name: 'consumer', version: '2.0.1', dependencies: { a: '1.1.0' } },
+          new Map()
+        )
+      ).toBe(false);
+    });
+
+    it('returns false when the package version did not change', () => {
+      expect(
+        isVersionBump(
+          { name: 'consumer', version: '2.0.0', dependencies: { a: '1.0.0' } },
+          { name: 'consumer', version: '2.0.0', dependencies: { a: '1.1.0' } }
+        )
+      ).toBe(false);
     });
 
     it('returns false when version field is missing in old content', () => {
