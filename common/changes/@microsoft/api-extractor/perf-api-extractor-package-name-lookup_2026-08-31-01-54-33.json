@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve API Extractor performance by reusing TypeScript package resolution metadata when identifying external package names",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "322952417+gwosti@users.noreply.github.com"
+}

@@ -14,6 +14,30 @@ export interface IGlobalVariableAnalyzer {
   hasGlobalName(name: string): boolean;
 }
 
+interface IProgramInternals {
+  forEachResolvedModule?(
+    callback: (
+      resolution: ts.ResolvedModuleWithFailedLookupLocations,
+      moduleName: string,
+      mode: ts.ResolutionMode,
+      filePath: ts.Path
+    ) => void,
+    file?: ts.SourceFile
+  ): void;
+
+  forEachResolvedTypeReferenceDirective?(
+    callback: (
+      resolution: ts.ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
+      moduleName: string,
+      mode: ts.ResolutionMode,
+      filePath: ts.Path
+    ) => void,
+    file?: ts.SourceFile
+  ): void;
+
+  getAutomaticTypeDirectiveResolutions?(): ts.ModeAwareCache<ts.ResolvedTypeReferenceDirectiveWithFailedLookupLocations>;
+}
+
 export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
@@ -96,6 +120,57 @@ export class TypeScriptInternals {
       mode
     );
     return result?.resolvedModule;
+  }
+
+  /**
+   * Builds a mapping from SourceFiles to their package names using the compiler's cached module resolutions.
+   */
+  public static getPackageNamesBySourceFile(program: ts.Program): ReadonlyMap<ts.SourceFile, string> {
+    const packageNamesBySourceFile: Map<ts.SourceFile, string> = new Map<ts.SourceFile, string>();
+    const ambiguousSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
+
+    const collectPackageName = (
+      resolvedFileName: string | undefined,
+      packageId: ts.PackageId | undefined
+    ): void => {
+      if (!resolvedFileName || !packageId?.name) {
+        return;
+      }
+
+      const sourceFile: ts.SourceFile | undefined = program.getSourceFile(resolvedFileName);
+      if (!sourceFile || ambiguousSourceFiles.has(sourceFile)) {
+        return;
+      }
+
+      const existingPackageName: string | undefined = packageNamesBySourceFile.get(sourceFile);
+      if (existingPackageName === undefined) {
+        packageNamesBySourceFile.set(sourceFile, packageId.name);
+      } else if (existingPackageName !== packageId.name) {
+        packageNamesBySourceFile.delete(sourceFile);
+        ambiguousSourceFiles.add(sourceFile);
+      }
+    };
+
+    const programInternals: IProgramInternals = program as IProgramInternals;
+    programInternals.forEachResolvedModule?.(({ resolvedModule }) => {
+      collectPackageName(resolvedModule?.resolvedFileName, resolvedModule?.packageId);
+    });
+    programInternals.forEachResolvedTypeReferenceDirective?.(({ resolvedTypeReferenceDirective }) => {
+      collectPackageName(
+        resolvedTypeReferenceDirective?.resolvedFileName,
+        resolvedTypeReferenceDirective?.packageId
+      );
+    });
+    programInternals
+      .getAutomaticTypeDirectiveResolutions?.()
+      .forEach(({ resolvedTypeReferenceDirective }) => {
+        collectPackageName(
+          resolvedTypeReferenceDirective?.resolvedFileName,
+          resolvedTypeReferenceDirective?.packageId
+        );
+      });
+
+    return packageNamesBySourceFile;
   }
 
   /**
