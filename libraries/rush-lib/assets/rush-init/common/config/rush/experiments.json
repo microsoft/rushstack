@@ -153,13 +153,17 @@
   /*[LINE "HYPOTHETICAL"]*/ "trimRushEnvironmentVariablesForOperations": true,
 
   /**
-   * PNPM 10.34.2 and newer ignore "${VAR}" tokens that appear in credentials and registry URLs in a
-   * project or workspace .npmrc file, because such files are normally committed to Git. Rush generates
-   * "common/temp/.npmrc", which PNPM classifies as a project file even though it is not committed, so
-   * PNPM discards those settings and prints a warning. If true, when using PNPM, Rush expands those
-   * tokens itself: credentials are passed to PNPM using "npm_config_*" environment variables instead of
-   * being written to the generated .npmrc file, and non-secret settings such as registry URLs are
-   * written to the generated file with their values already expanded.
+   * PNPM 10.34.2 through 10.x and PNPM 11.5.3 through versions earlier than 11.6.0 ignore "${VAR}"
+   * tokens that appear in credentials and registry URLs in a project or workspace .npmrc file. If
+   * true for those versions, Rush expands the tokens itself: credentials are passed using
+   * "npm_config_*" environment variables instead of being written to the generated .npmrc file, and
+   * non-secret settings such as registry URLs are written with their values already expanded. PNPM
+   * 11.6.0 and newer support URL-scoped "pnpm_config_//..." environment variables, which should
+   * instead be supplied directly by CI so the trusted environment binds each credential to its
+   * registry. For example, supply an environment variable named
+   * "pnpm_config_//registry.npmjs.org/:_authToken" whose value is the registry token. Dynamic
+   * registry and proxy settings must likewise be supplied through trusted user, global, CLI, or
+   * environment configuration rather than a project .npmrc.
    */
   /*[LINE "HYPOTHETICAL"]*/ "provideNpmrcCredentialsViaEnvironment": true
 }

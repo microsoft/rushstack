@@ -170,10 +170,11 @@ export interface IExperimentsJson {
    * `.npmrc` file.
    *
    * @remarks
-   * PNPM 10.34.2 and newer ignore `${VAR}` tokens in credentials and registry URLs that come from a
-   * project or workspace `.npmrc` file, because such files are normally committed to Git. Rush
-   * generates `common/temp/.npmrc`, which PNPM classifies as a project file even though it is not
-   * committed, so without this experiment PNPM discards those settings and prints a warning.
+   * This compatibility workaround applies to PNPM 10.34.2 through 10.x and PNPM 11.5.3 through
+   * versions earlier than 11.6.0. PNPM 11.6.0 and newer support URL-scoped `pnpm_config_//...`
+   * environment variables, which should be supplied directly by CI so the trusted environment binds
+   * each credential to its registry. Dynamic registry and proxy settings must likewise be supplied
+   * through trusted user, global, CLI, or environment configuration rather than a project `.npmrc`.
    */
   provideNpmrcCredentialsViaEnvironment?: boolean;
 }

@@ -1,13 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
-
+import { FileSystem } from '@rushstack/node-core-library';
 import { getNpmrcEnvironmentVariables, syncNpmrc, trimNpmrcFileLines } from '../npmrcUtilities';
 
 describe('npmrcUtilities', () => {
+  describe(trimNpmrcFileLines.name, () => {
+    it('collects project settings with environment variables that PNPM ignores', () => {
+      const environmentVariableSettingNames: Set<string> = new Set();
+      trimNpmrcFileLines(
+        [
+          'registry=https://${REGISTRY_HOST}/npm/',
+          '@scope:registry=https://${REGISTRY_HOST}/npm/',
+          'https-proxy=https://${PROXY_HOST}/',
+          '//registry.example.com/:_authToken=${NPM_TOKEN}',
+          '//${REGISTRY_HOST}/:always-auth=true',
+          'store-dir=${STORE_DIR}',
+          '; //ignored.example.com/:_authToken=${IGNORED_TOKEN}'
+        ],
+        {},
+        true,
+        false,
+        false,
+        environmentVariableSettingNames
+      );
+
+      expect(Array.from(environmentVariableSettingNames)).toEqual([
+        'registry',
+        '@scope:registry',
+        'https-proxy',
+        '//registry.example.com/:_authToken',
+        '//${REGISTRY_HOST}/:always-auth'
+      ]);
+    });
+  });
+
   function runTests(supportEnvVarFallbackSyntax: boolean): void {
     it('handles empty input', () => {
       expect(trimNpmrcFileLines([], {}, supportEnvVarFallbackSyntax)).toEqual([]);
@@ -263,11 +290,10 @@ describe('npmrcUtilities', () => {
       it('rejects credentials whose names cannot round-trip through an environment variable', () => {
         // PNPM splits an "npm_config_*" variable name on its FIRST colon, so a registry URL that
         // includes an explicit port cannot be expressed as an environment variable
-        expect(
-          () =>
-            trimLines(['//registry.example.com:8080/:_authToken=${NPM_AUTH_TOKEN}'], {
-              NPM_AUTH_TOKEN: 'token123'
-            })
+        expect(() =>
+          trimLines(['//registry.example.com:8080/:_authToken=${NPM_AUTH_TOKEN}'], {
+            NPM_AUTH_TOKEN: 'token123'
+          })
         ).toThrow(
           'The .npmrc credential setting "//registry.example.com:8080/:_authToken" cannot be provided via an environment variable'
         );
@@ -332,17 +358,18 @@ describe('npmrcUtilities', () => {
   });
 
   describe(getNpmrcEnvironmentVariables.name, () => {
-    it('returns credentials moved by syncNpmrc', () => {
-      const tempFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-npmrc-'));
-      const sourceFolder: string = path.join(tempFolder, 'source');
-      const targetFolder: string = path.join(tempFolder, 'target');
-      fs.mkdirSync(sourceFolder);
-      fs.writeFileSync(
-        path.join(sourceFolder, '.npmrc'),
+    it('returns credentials moved by syncNpmrc', async () => {
+      const tempFolder: string = `${__dirname}/../../../../temp/test/npmrcUtilities/roundtrip`;
+      const sourceFolder: string = `${tempFolder}/source`;
+      const targetFolder: string = `${tempFolder}/target`;
+      await FileSystem.deleteFolderAsync(tempFolder);
+      await FileSystem.writeFileAsync(
+        `${sourceFolder}/.npmrc`,
         [
           '//registry.example.com/npm/:_authToken=${NPM_AUTH_TOKEN}',
           '//other.example.com/npm/:_password=${NPM_PASSWORD:-fallbackPassword}'
-        ].join('\n')
+        ].join('\n'),
+        { ensureFolderExists: true }
       );
 
       try {
@@ -366,12 +393,14 @@ describe('npmrcUtilities', () => {
           'npm_config_//other.example.com/npm/:_password': 'fallbackPassword'
         });
       } finally {
-        fs.rmSync(tempFolder, { recursive: true, force: true });
+        await FileSystem.deleteFolderAsync(tempFolder);
       }
     });
 
-    it('returns undefined when the generated .npmrc file is missing', () => {
-      const tempFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-npmrc-'));
+    it('returns undefined when the generated .npmrc file is missing', async () => {
+      const tempFolder: string = `${__dirname}/../../../../temp/test/npmrcUtilities/missing`;
+      await FileSystem.deleteFolderAsync(tempFolder);
+      await FileSystem.ensureFolderAsync(tempFolder);
       try {
         expect(
           getNpmrcEnvironmentVariables({
@@ -380,7 +409,7 @@ describe('npmrcUtilities', () => {
           })
         ).toBeUndefined();
       } finally {
-        fs.rmSync(tempFolder, { recursive: true, force: true });
+        await FileSystem.deleteFolderAsync(tempFolder);
       }
     });
   });

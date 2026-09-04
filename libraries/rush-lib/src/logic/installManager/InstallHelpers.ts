@@ -384,15 +384,24 @@ export class InstallHelpers {
    * `provideNpmrcCredentialsViaEnvironment` experiment.
    */
   public static shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration: RushConfiguration): boolean {
-    // Only PNPM refuses to expand these tokens, and only PNPM's "npm_config_*" environment variable
-    // name normalization has been validated here.
     const {
       isPnpm,
+      packageManagerToolVersion,
       experimentsConfiguration: {
         configuration: { provideNpmrcCredentialsViaEnvironment = false }
       }
     } = rushConfiguration;
-    return isPnpm && provideNpmrcCredentialsViaEnvironment;
+    if (!isPnpm || !provideNpmrcCredentialsViaEnvironment) {
+      return false;
+    }
+
+    // PNPM 11.6.0 added URL-scoped `pnpm_config_//...` credentials, which let CI bind a token to
+    // a registry without deriving that trusted binding from repository-controlled configuration.
+    // Keep this compatibility workaround only for patched versions that lack that native path.
+    return (
+      (semver.gte(packageManagerToolVersion, '10.34.2') && semver.lt(packageManagerToolVersion, '11.0.0')) ||
+      (semver.gte(packageManagerToolVersion, '11.5.3') && semver.lt(packageManagerToolVersion, '11.6.0'))
+    );
   }
 
   /**

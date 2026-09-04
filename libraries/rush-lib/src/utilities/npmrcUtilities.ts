@@ -28,6 +28,7 @@ function _trimNpmrcFile(
     | 'supportEnvVarFallbackSyntax'
     | 'filterNpmIncompatibleProperties'
     | 'moveSensitiveSettingsToEnvironment'
+    | 'environmentVariableSettingNames'
     | 'env'
   >
 ): string {
@@ -38,6 +39,7 @@ function _trimNpmrcFile(
     supportEnvVarFallbackSyntax,
     filterNpmIncompatibleProperties,
     moveSensitiveSettingsToEnvironment,
+    environmentVariableSettingNames,
     env = process.env
   } = options;
 
@@ -61,7 +63,8 @@ function _trimNpmrcFile(
     env,
     supportEnvVarFallbackSyntax,
     filterNpmIncompatibleProperties,
-    moveSensitiveSettingsToEnvironment
+    moveSensitiveSettingsToEnvironment,
+    environmentVariableSettingNames
   );
 
   const combinedNpmrc: string = resultLines.join('\n');
@@ -113,6 +116,9 @@ const PROPERTY_NAME_REGEX: RegExp = /^([^=\[\s]+)/;
  *   nameString:-fallbackString -> group 1: nameString,    group 2: fallbackString
  */
 const ENV_VAR_WITH_FALLBACK_REGEX: RegExp = /^(?<name>[^:-]+)(?::?-(?<fallback>.+))?$/;
+
+// Matches an environment variable reference such as "${NPM_TOKEN}" anywhere in a setting.
+const ENVIRONMENT_VARIABLE_DETECTION_REGEX: RegExp = /\$\{[^\}]+\}/;
 
 /**
  * The comment marker that is written in place of an .npmrc setting whose value was moved into an
@@ -185,6 +191,35 @@ function _isRequestDestinationSettingName(settingName: string): boolean {
  */
 function _isRequestDestinationValueSettingName(settingName: string): boolean {
   return _isRegistrySettingName(settingName) || REQUEST_DESTINATION_SETTING_NAMES.has(settingName);
+}
+
+interface IParsedNpmrcSetting {
+  line: string;
+  name: string;
+  value: string;
+}
+
+function _tryParseNpmrcSetting(line: string): IParsedNpmrcSetting | undefined {
+  const equalsIndex: number = line.indexOf('=');
+  if (equalsIndex < 0) {
+    return undefined;
+  }
+
+  return {
+    line,
+    name: line.substring(0, equalsIndex),
+    value: line.substring(equalsIndex + 1)
+  };
+}
+
+function _hasIgnoredEnvironmentVariable(setting: IParsedNpmrcSetting): boolean {
+  const { name, value } = setting;
+  return (
+    (ENVIRONMENT_VARIABLE_DETECTION_REGEX.test(name) &&
+      (_isRequestDestinationSettingName(name) || _isAuthValueSettingName(name))) ||
+    (ENVIRONMENT_VARIABLE_DETECTION_REGEX.test(value) &&
+      (_isRequestDestinationValueSettingName(name) || _isAuthValueSettingName(name)))
+  );
 }
 
 /**
@@ -300,7 +335,7 @@ function _expandEnvironmentVariables(
 
 /**
  * Describes how a .npmrc setting containing `${VAR}` tokens must be transformed so that PNPM will
- * honor it. See {@link _classifySensitiveNpmrcLine}.
+ * honor it. See {@link _classifySensitiveNpmrcSetting}.
  */
 type ISensitiveNpmrcLineAction =
   | {
@@ -326,19 +361,12 @@ type ISensitiveNpmrcLineAction =
  * so that PNPM 10.34.2 and newer will honor it. Returns `undefined` if PNPM expands the line's
  * environment variables itself, in which case the line is left alone.
  */
-function _classifySensitiveNpmrcLine(
-  line: string,
+function _classifySensitiveNpmrcSetting(
+  setting: IParsedNpmrcSetting,
   env: NodeJS.ProcessEnv,
   supportEnvVarFallbackSyntax: boolean
 ): ISensitiveNpmrcLineAction | undefined {
-  const equalsIndex: number = line.indexOf('=');
-  if (equalsIndex < 0) {
-    // Not a "name=value" setting
-    return undefined;
-  }
-
-  const settingName: string = line.substring(0, equalsIndex);
-  const settingValue: string = line.substring(equalsIndex + 1);
+  const { name: settingName, value: settingValue } = setting;
 
   const expandedName: IEnvironmentVariableExpansionResult = _expandEnvironmentVariables(
     settingName,
@@ -389,12 +417,12 @@ function _classifySensitiveNpmrcLine(
  * if the line does not need to be rewritten.
  */
 function _rewriteSensitiveNpmrcLine(
-  line: string,
+  setting: IParsedNpmrcSetting,
   env: NodeJS.ProcessEnv,
   supportEnvVarFallbackSyntax: boolean
 ): string | undefined {
-  const action: ISensitiveNpmrcLineAction | undefined = _classifySensitiveNpmrcLine(
-    line,
+  const action: ISensitiveNpmrcLineAction | undefined = _classifySensitiveNpmrcSetting(
+    setting,
     env,
     supportEnvVarFallbackSyntax
   );
@@ -402,7 +430,7 @@ function _rewriteSensitiveNpmrcLine(
     case 'environment':
       // Example output:
       // "; PROVIDED VIA ENVIRONMENT: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-      return PROVIDED_VIA_ENVIRONMENT_PREFIX + line;
+      return PROVIDED_VIA_ENVIRONMENT_PREFIX + setting.line;
     case 'expand':
       return action.expandedLine;
     default:
@@ -419,6 +447,8 @@ function _rewriteSensitiveNpmrcLine(
  * @param moveSensitiveSettingsToEnvironment Whether to replace settings that PNPM refuses to expand
  * environment variables in with a `; PROVIDED VIA ENVIRONMENT: ` comment. See
  * {@link getNpmrcEnvironmentVariables}.
+ * @param environmentVariableSettingNames If provided, collects settings containing environment
+ * variable references that PNPM ignores in a project `.npmrc`.
  * @returns An array of processed npmrc file lines with undefined environment variables and npm-incompatible properties commented out
  */
 export function trimNpmrcFileLines(
@@ -426,7 +456,8 @@ export function trimNpmrcFileLines(
   env: NodeJS.ProcessEnv,
   supportEnvVarFallbackSyntax: boolean,
   filterNpmIncompatibleProperties: boolean = false,
-  moveSensitiveSettingsToEnvironment: boolean = false
+  moveSensitiveSettingsToEnvironment: boolean = false,
+  environmentVariableSettingNames?: Set<string>
 ): string[] {
   const resultLines: string[] = [];
 
@@ -446,6 +477,11 @@ export function trimNpmrcFileLines(
 
     // Ignore comment lines
     if (!commentRegExp.test(line)) {
+      const parsedSetting: IParsedNpmrcSetting | undefined = _tryParseNpmrcSetting(line);
+      if (environmentVariableSettingNames && parsedSetting && _hasIgnoredEnvironmentVariable(parsedSetting)) {
+        environmentVariableSettingNames.add(parsedSetting.name);
+      }
+
       // Check if this is a property that npm doesn't understand
       if (filterNpmIncompatibleProperties) {
         // Extract the property name (everything before the '=' or '[')
@@ -488,9 +524,9 @@ export function trimNpmrcFileLines(
         if (hasUndefinedVariable) {
           lineShouldBeTrimmed = true;
           trimReason = 'MISSING_ENVIRONMENT_VARIABLE';
-        } else if (hasVariable && moveSensitiveSettingsToEnvironment) {
+        } else if (hasVariable && moveSensitiveSettingsToEnvironment && parsedSetting) {
           const rewrittenLine: string | undefined = _rewriteSensitiveNpmrcLine(
-            line,
+            parsedSetting,
             env,
             supportEnvVarFallbackSyntax
           );
@@ -544,6 +580,11 @@ interface INpmrcTrimOptions {
   supportEnvVarFallbackSyntax: boolean;
   filterNpmIncompatibleProperties?: boolean;
   moveSensitiveSettingsToEnvironment?: boolean;
+  /**
+   * If provided, collects settings containing environment variable references that PNPM ignores
+   * when they come from a project `.npmrc`.
+   */
+  environmentVariableSettingNames?: Set<string>;
   env?: NodeJS.ProcessEnv;
 }
 
@@ -587,6 +628,11 @@ export interface ISyncNpmrcOptions {
    * registry URLs are written to the generated .npmrc file with their values already expanded.
    */
   moveSensitiveSettingsToEnvironment?: boolean;
+  /**
+   * If provided, collects settings containing environment variable references that PNPM ignores
+   * when they come from a project `.npmrc`.
+   */
+  environmentVariableSettingNames?: Set<string>;
   env?: NodeJS.ProcessEnv;
 }
 
@@ -700,11 +746,10 @@ export function getNpmrcEnvironmentVariables(
       continue;
     }
 
-    const action: ISensitiveNpmrcLineAction | undefined = _classifySensitiveNpmrcLine(
-      trimmedLine.substring(PROVIDED_VIA_ENVIRONMENT_PREFIX.length),
-      env,
-      supportEnvVarFallbackSyntax
-    );
+    const originalLine: string = trimmedLine.substring(PROVIDED_VIA_ENVIRONMENT_PREFIX.length);
+    const parsedSetting: IParsedNpmrcSetting | undefined = _tryParseNpmrcSetting(originalLine);
+    const action: ISensitiveNpmrcLineAction | undefined =
+      parsedSetting && _classifySensitiveNpmrcSetting(parsedSetting, env, supportEnvVarFallbackSyntax);
     if (action?.kind === 'environment') {
       environmentVariables ??= {};
       environmentVariables[action.variableName] = action.variableValue;

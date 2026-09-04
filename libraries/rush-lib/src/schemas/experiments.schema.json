@@ -99,7 +99,7 @@
       "type": "boolean"
     },
     "provideNpmrcCredentialsViaEnvironment": {
-      "description": "If true, when using PNPM, Rush resolves the \"${VAR}\" tokens that appear in credentials and registry URLs in the .npmrc file, instead of relying on PNPM to expand them. Credentials are passed to PNPM using \"npm_config_*\" environment variables and are not written to the generated .npmrc file. PNPM 10.34.2 and newer ignore such tokens in a project .npmrc file, which otherwise breaks the recommended practice of supplying registry credentials via environment variables in CI.",
+      "description": "If true, when using PNPM 10.34.2 through 10.x or PNPM 11.5.3 through versions earlier than 11.6.0, Rush resolves the \"${VAR}\" tokens that appear in credentials and registry URLs in the .npmrc file, instead of relying on PNPM to expand them. Credentials are passed to PNPM using \"npm_config_*\" environment variables and are not written to the generated .npmrc file. PNPM 11.6.0 and newer support URL-scoped \"pnpm_config_//...\" environment variables, which should instead be supplied directly by CI so the trusted environment binds each credential to its registry. Dynamic registry and proxy settings must likewise come from trusted user, global, CLI, or environment configuration.",
       "type": "boolean"
     }
   },

@@ -10,6 +10,50 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 
 describe(InstallHelpers.name, () => {
+  describe(InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment.name, () => {
+    let rushConfiguration: RushConfiguration;
+    let experimentsConfigurationMock: ReturnType<typeof jest.replaceProperty>;
+
+    beforeAll(() => {
+      rushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/pnpmConfig/rush.json`);
+      experimentsConfigurationMock = jest.replaceProperty(
+        rushConfiguration.experimentsConfiguration,
+        'configuration',
+        { provideNpmrcCredentialsViaEnvironment: true }
+      );
+    });
+
+    afterAll(() => {
+      experimentsConfigurationMock.restore();
+    });
+
+    it.each([
+      ['10.34.1', false],
+      ['10.34.2', true],
+      ['10.35.0-rc.1', true],
+      ['10.99.0', true],
+      ['11.5.2', false],
+      ['11.5.3', true],
+      ['11.6.0-rc.1', true],
+      ['11.6.0', false],
+      ['12.0.0', false]
+    ])('for PNPM version %s returns %s', (pnpmVersion: string, expectedResult: boolean) => {
+      const packageManagerToolVersionMock = jest.replaceProperty(
+        rushConfiguration,
+        'packageManagerToolVersion',
+        pnpmVersion
+      );
+
+      try {
+        expect(InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration)).toBe(
+          expectedResult
+        );
+      } finally {
+        packageManagerToolVersionMock.restore();
+      }
+    });
+  });
+
   describe(InstallHelpers.getPackageManagerEnvironment.name, () => {
     it('does not modify process.env', () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;

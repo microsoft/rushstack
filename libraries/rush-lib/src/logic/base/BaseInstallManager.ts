@@ -554,6 +554,17 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
+    const {
+      isPnpm,
+      packageManagerToolVersion,
+      experimentsConfiguration: {
+        configuration: { provideNpmrcCredentialsViaEnvironment }
+      }
+    } = this.rushConfiguration;
+    const shouldWarnAboutIgnoredEnvironmentVariables: boolean | undefined =
+      isPnpm && provideNpmrcCredentialsViaEnvironment && semver.gte(packageManagerToolVersion, '11.6.0');
+    const environmentVariableSettingNames: Set<string> | undefined =
+      shouldWarnAboutIgnoredEnvironmentVariables ? new Set() : undefined;
     const npmrcText: string | undefined = Utilities.syncNpmrc({
       sourceNpmrcFolder: subspace.getSubspaceConfigFolderPath(),
       targetNpmrcFolder: subspace.getSubspaceTempFolderPath(),
@@ -562,9 +573,21 @@ export abstract class BaseInstallManager {
       supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm,
       moveSensitiveSettingsToEnvironment: InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(
         this.rushConfiguration
-      )
+      ),
+      environmentVariableSettingNames
     });
     this._syncNpmrcAlreadyCalled = true;
+
+    if (environmentVariableSettingNames?.size) {
+      terminal.writeWarningLine(
+        `The "provideNpmrcCredentialsViaEnvironment" experiment does not translate project ` +
+          `.npmrc settings for PNPM ${packageManagerToolVersion}. PNPM will ignore environment ` +
+          `variables in these settings: ${Array.from(environmentVariableSettingNames).join(', ')}. ` +
+          `Supply credentials using URL-scoped "pnpm_config_//..." environment variables, or move ` +
+          `the settings to trusted user, global, CLI, or environment configuration. See the PNPM ` +
+          `11.6.0 section in the Rush upgrade notes.`
+      );
+    }
 
     const npmrcHash: string | undefined = npmrcText
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
