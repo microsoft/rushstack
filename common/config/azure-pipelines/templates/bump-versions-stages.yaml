@@ -53,10 +53,7 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/package-versions
               artifactName: package-versions
         steps:
-          # Keep the repository at the traditional single-checkout location so existing scripts and
-          # $(Build.SourcesDirectory) continue to resolve to the Rush Stack repository root.
           - checkout: ${{ parameters.CheckoutRepository }}
-            path: s
             persistCredentials: true
 
           - template: /common/config/azure-pipelines/templates/configure-git-user.yaml@self
