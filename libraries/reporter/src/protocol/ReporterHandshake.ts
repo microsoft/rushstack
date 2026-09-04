@@ -4,6 +4,8 @@
 import type { IReporterProtocolVersion } from '../events/ReporterProtocolVersion';
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
+import type { ReporterName, ReporterLogLevel } from '../config/ReporterNames';
+import { isSupportedReporterName, isSupportedLogLevel } from '../config/ReporterNames';
 import { isReporterProtocolCompatible } from './ReporterProtocol';
 
 /**
@@ -52,6 +54,37 @@ export class InvalidReporterHelloError extends Error {
 }
 
 /**
+ * Parent-owned rendering and filtering context shared with a child producer.
+ *
+ * @remarks
+ * This context is advisory and read-only. A child must not use it to select or
+ * create the parent's reporters.
+ *
+ * @beta
+ */
+export interface IReporterChildContext {
+  /**
+   * The parent's selected primary reporter.
+   */
+  readonly reporter: ReporterName;
+
+  /**
+   * The parent's selected log level.
+   */
+  readonly logLevel: ReporterLogLevel;
+
+  /**
+   * Whether the parent renders color.
+   */
+  readonly color: boolean;
+
+  /**
+   * The parent's terminal width in columns.
+   */
+  readonly terminalWidth: number;
+}
+
+/**
  * The consumer's reply that accepts capabilities and reports unsupported required features.
  *
  * @beta
@@ -76,6 +109,25 @@ export interface IReporterHelloAck {
    * The producer's required features the consumer does not support.
    */
   readonly rejectedRequiredFeatures: readonly string[];
+
+  /**
+   * Parent-owned rendering and filtering context, present only when the
+   * `reporter-context-v1` capability was accepted.
+   */
+  readonly context?: IReporterChildContext;
+}
+
+/**
+ * Thrown when an untrusted wire value is not a valid reporter hello acknowledgement.
+ *
+ * @beta
+ */
+export class InvalidReporterHelloAckError extends Error {
+  public constructor(reason: string) {
+    super(`Invalid reporter hello acknowledgement: ${reason}`);
+    this.name = 'InvalidReporterHelloAckError';
+    Object.setPrototypeOf(this, InvalidReporterHelloAckError.prototype);
+  }
 }
 
 /**
@@ -88,12 +140,10 @@ export interface IReporterHelloAck {
  * ignored and unknown required features cause rejection, per protocol rules.
  * This registry makes the Rush-known set explicit; additions go through API
  * review like every other contract change. The registry is intentionally
- * empty until the first negotiated capability ships.
- *
  * @beta
  */
 // eslint-disable-next-line @typescript-eslint/typedef -- literal inference feeds the derived ReporterCapability type
-export const REPORTER_KNOWN_CAPABILITIES = [] as const;
+export const REPORTER_KNOWN_CAPABILITIES = ['heft-child-events-v1', 'reporter-context-v1'] as const;
 
 /**
  * A wire capability name. Known members keep autocomplete; unknown members
@@ -120,6 +170,11 @@ export interface IReporterHandshakeOptions {
    * an unknown optional capability and is simply not accepted.
    */
   readonly supportedCapabilities?: readonly ReporterCapability[];
+
+  /**
+   * Parent-owned context to include when `reporter-context-v1` is accepted.
+   */
+  readonly context?: IReporterChildContext;
 }
 
 /**
@@ -168,6 +223,34 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item: unknown) => typeof item === 'string');
 }
 
+export function validateReporterChildContext(value: unknown): IReporterChildContext {
+  if (!isRecord(value)) {
+    throw new InvalidReporterHelloAckError('context must be an object.');
+  }
+  if (typeof value.reporter !== 'string' || !isSupportedReporterName(value.reporter)) {
+    throw new InvalidReporterHelloAckError('context.reporter must be a supported reporter name.');
+  }
+  if (typeof value.logLevel !== 'string' || !isSupportedLogLevel(value.logLevel)) {
+    throw new InvalidReporterHelloAckError('context.logLevel must be a supported reporter log level.');
+  }
+  if (typeof value.color !== 'boolean') {
+    throw new InvalidReporterHelloAckError('context.color must be a boolean.');
+  }
+  if (
+    typeof value.terminalWidth !== 'number' ||
+    !Number.isSafeInteger(value.terminalWidth) ||
+    value.terminalWidth < 1
+  ) {
+    throw new InvalidReporterHelloAckError('context.terminalWidth must be a positive integer.');
+  }
+  return {
+    reporter: value.reporter,
+    logLevel: value.logLevel,
+    color: value.color,
+    terminalWidth: value.terminalWidth
+  };
+}
+
 /**
  * Validates and parses an untrusted wire value as a reporter hello message.
  *
@@ -206,6 +289,49 @@ export function parseReporterHello(value: unknown): IReporterHello {
 }
 
 /**
+ * Validates and parses an untrusted wire value as a reporter hello acknowledgement.
+ *
+ * @param value - the decoded NDJSON value
+ * @throws {@link InvalidReporterHelloAckError} if the value is malformed
+ *
+ * @beta
+ */
+export function parseReporterHelloAck(value: unknown): IReporterHelloAck {
+  if (!isRecord(value) || value.kind !== 'helloAck') {
+    throw new InvalidReporterHelloAckError('expected kind "helloAck".');
+  }
+  if (!isProtocolVersion(value.protocolVersion)) {
+    throw new InvalidReporterHelloAckError(
+      'protocolVersion must contain nonnegative integer major and minor.'
+    );
+  }
+  if (!isStringArray(value.acceptedCapabilities)) {
+    throw new InvalidReporterHelloAckError('acceptedCapabilities must be an array of strings.');
+  }
+  if (!isStringArray(value.rejectedRequiredFeatures)) {
+    throw new InvalidReporterHelloAckError('rejectedRequiredFeatures must be an array of strings.');
+  }
+  const context: IReporterChildContext | undefined =
+    value.context === undefined ? undefined : validateReporterChildContext(value.context);
+  if (context !== undefined && !value.acceptedCapabilities.includes('reporter-context-v1')) {
+    throw new InvalidReporterHelloAckError(
+      'context requires the "reporter-context-v1" capability to be accepted.'
+    );
+  }
+
+  return {
+    kind: 'helloAck',
+    protocolVersion: {
+      major: value.protocolVersion.major,
+      minor: value.protocolVersion.minor
+    },
+    acceptedCapabilities: [...value.acceptedCapabilities],
+    rejectedRequiredFeatures: [...value.rejectedRequiredFeatures],
+    ...(context === undefined ? {} : { context })
+  };
+}
+
+/**
  * Negotiates a producer's hello against the consumer's supported protocol.
  *
  * @remarks
@@ -237,12 +363,17 @@ export function negotiateReporterHello(
 
   const majorSupported: boolean = isReporterProtocolCompatible(consumerVersion, hello.protocolVersion);
   const accepted: boolean = majorSupported && rejectedRequiredFeatures.length === 0;
+  const context: IReporterChildContext | undefined =
+    acceptedCapabilities.includes('reporter-context-v1') && options.context !== undefined
+      ? validateReporterChildContext(options.context)
+      : undefined;
 
   const ack: IReporterHelloAck = {
     kind: 'helloAck',
     protocolVersion: consumerVersion,
     acceptedCapabilities,
-    rejectedRequiredFeatures
+    rejectedRequiredFeatures,
+    ...(context === undefined ? {} : { context })
   };
 
   if (accepted) {

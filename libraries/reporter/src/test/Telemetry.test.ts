@@ -85,7 +85,7 @@ describe('TelemetrySubscriber', () => {
     expect(aggregate.diagnosticCodes).toEqual(['RUSH_OPERATION_FAILED']);
     expect(aggregate.diagnosticCategoryCounts).toEqual({ operation: 1 });
     expect(aggregate.reporterMode).toBe('default');
-    expect(aggregate.protocolVersion).toEqual({ major: 1, minor: 1 });
+    expect(aggregate.protocolVersion).toEqual({ major: 1, minor: 2 });
     expect(aggregate.producerVersions).toEqual(['@microsoft/rush-lib@5.177.2']);
 
     // The subscriber runs alongside a rendering reporter and does not consume events from it.

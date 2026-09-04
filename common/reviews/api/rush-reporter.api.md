@@ -23,7 +23,7 @@ export class AiReporter implements IReporter {
 }
 
 // @beta
-export function allocateChildDescriptor(fdNumber?: number): IChildDescriptorPlan;
+export function allocateChildDescriptor(fdNumber?: number, ackFdNumber?: number): IChildDescriptorPlan;
 
 // @beta
 export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError';
@@ -191,14 +191,18 @@ export function getSignalExitCode(signal: NodeJS.Signals): number;
 // @beta
 export class HeftChildEmitter {
     constructor(options: IHeftChildEmitterOptions);
+    acceptHelloAck(value: unknown): boolean;
+    get context(): IReporterChildContext | undefined;
     emitEvent(input: IHeftChildEventInput): string | undefined;
-    readonly mode: HeftChildReporterMode;
+    emitOutput(stream: 'stdout' | 'stderr', text: string, scope?: IReporterEventScope): readonly string[];
+    handleAckDescriptorClose(): void;
+    get mode(): HeftChildReporterMode;
     sendHello(): boolean;
     writeRaw(stream: 'stdout' | 'stderr', text: string): void;
 }
 
 // @beta
-export type HeftChildReporterMode = 'structured' | 'raw-fallback';
+export type HeftChildReporterMode = 'negotiation-pending' | 'structured' | 'raw-fallback';
 
 // @beta
 export class HeftDescriptorHost {
@@ -353,6 +357,7 @@ export interface IBootstrapTruncation {
 
 // @beta
 export interface IChildDescriptorPlan {
+    readonly ackFdNumber: number;
     readonly env: Record<string, string>;
     readonly fdNumber: number;
     readonly stdio: (string | number)[];
@@ -530,12 +535,17 @@ export interface IHeftChildResult {
 
 // @beta
 export interface IHeftDescriptorHostOptions {
+    readonly context?: IReporterChildContext;
     readonly forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
     readonly onNegotiation?: (result: IReporterHandshakeResult) => void;
     readonly parentOperationId?: string;
+    readonly parentRequestId?: string;
     readonly parentSessionId: string;
-    readonly supportedCapabilities?: readonly string[];
+    readonly sendHelloAck?: (ack: IReporterHelloAck) => void;
+    readonly supportedCapabilities?: readonly ReporterCapability[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
+    readonly trustedPrivacy?: ReporterPrivacyClassification;
+    readonly trustedSource?: IReporterEventSource;
 }
 
 // @beta
@@ -593,6 +603,11 @@ export interface IMessageEmittedPayload {
 // @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
+}
+
+// @beta
+export class InvalidReporterHelloAckError extends Error {
+    constructor(reason: string);
 }
 
 // @beta
@@ -719,6 +734,14 @@ export interface IReporter {
 }
 
 // @beta
+export interface IReporterChildContext {
+    readonly color: boolean;
+    readonly logLevel: ReporterLogLevel;
+    readonly reporter: ReporterName;
+    readonly terminalWidth: number;
+}
+
+// @beta
 export interface IReporterCompatibilityDecision {
     readonly engineRendersLegacy: boolean;
     readonly legacyRenderingVisible: boolean;
@@ -746,6 +769,7 @@ export interface IReporterEngineDescriptor {
 export interface IReporterEventEnvelope<TPayload = unknown> {
     readonly eventId: string;
     readonly parentOperationId?: string;
+    readonly parentRequestId?: string;
     readonly parentSessionId?: string;
     readonly payload: TPayload;
     readonly privacy: ReporterPrivacyClassification;
@@ -794,6 +818,7 @@ export interface IReporterFrontendDescriptor {
 
 // @beta
 export interface IReporterHandshakeOptions {
+    readonly context?: IReporterChildContext;
     readonly supportedCapabilities?: readonly ReporterCapability[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
 }
@@ -817,6 +842,7 @@ export interface IReporterHello {
 // @beta
 export interface IReporterHelloAck {
     readonly acceptedCapabilities: readonly string[];
+    readonly context?: IReporterChildContext;
     readonly kind: 'helloAck';
     readonly protocolVersion: IReporterProtocolVersion;
     readonly rejectedRequiredFeatures: readonly string[];
@@ -942,6 +968,7 @@ export interface IResolveExitStatusOptions {
 // @beta
 export interface IRunProblemMatchersOptions {
     readonly maxDuplicates?: number;
+    readonly maxPartialLineBytes?: number;
 }
 
 // @beta
@@ -1302,6 +1329,9 @@ export function parseReporterExtensionEventName(name: string): ReporterExtension
 export function parseReporterHello(value: unknown): IReporterHello;
 
 // @beta
+export function parseReporterHelloAck(value: unknown): IReporterHelloAck;
+
+// @beta
 export class PlaintextReporter implements IReporter {
     constructor(options: IPlaintextReporterOptions);
     // (undocumented)
@@ -1333,11 +1363,26 @@ export class ProblemMatcherRegistry {
 }
 
 // @beta
+export class ProblemMatcherRunner {
+    constructor(matchers: readonly IProblemMatcher[], options?: IRunProblemMatchersOptions);
+    flush(): readonly IRushDiagnostic[];
+    get matchedLineCount(): number;
+    get result(): IProblemMatcherResult;
+    get suppressedDuplicateCount(): number;
+    get unmatchedLineCount(): number;
+    write(event: IReporterEventEnvelope<unknown>): readonly IRushDiagnostic[];
+    writeOutput(text: string, operationId?: string, stream?: string): readonly IRushDiagnostic[];
+}
+
+// @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<{
     header: IBootstrapHandoffHeader | undefined;
     events: unknown[];
     discardedRecordCount: number;
 }>;
+
+// @beta
+export function readChildAckDescriptorFd(env: Record<string, string | undefined>): number | undefined;
 
 // @beta
 export function readChildDescriptorFd(env: Record<string, string | undefined>): number | undefined;
@@ -1361,7 +1406,7 @@ export function renderLiveRegion(state: ILiveRegionState, options: IRenderLiveRe
 export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension", "operationStreamClosed", "operationCompleted"];
 
 // @beta
-export const REPORTER_KNOWN_CAPABILITIES: readonly [];
+export const REPORTER_KNOWN_CAPABILITIES: readonly ["heft-child-events-v1", "reporter-context-v1"];
 
 // @beta
 export const REPORTER_MIGRATION_PHASES: readonly IReporterMigrationPhase[];
@@ -1563,6 +1608,9 @@ export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NONCE';
+
+// @beta
+export const RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_ACK_FD';
 
 // @beta
 export const RUSH_REPORTER_CHILD_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_FD';

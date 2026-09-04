@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminalChunk } from '@rushstack/terminal';
+import type * as child_process from 'node:child_process';
+
+import type { ITerminalChunk, ITerminalProvider } from '@rushstack/terminal';
 
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationStatus } from './OperationStatus';
@@ -20,6 +22,21 @@ export interface IOperationActivityOptions {
    * True when the line was written to stderr.
    */
   readonly stderr?: boolean;
+}
+
+/**
+ * A negotiated reporter channel allocated for one operation child process.
+ *
+ * @internal
+ */
+export interface IOperationChildProcessReporter {
+  readonly environment: Readonly<Record<string, string>>;
+  readonly hasWarningOrError: boolean;
+  readonly stdio: child_process.StdioOptions;
+  attachAsync(
+    child: child_process.ChildProcess,
+    structuredOutputTerminalProvider: ITerminalProvider
+  ): Promise<void>;
 }
 
 /**
@@ -92,4 +109,12 @@ export interface IOperationGraphEventSink {
    * carrying the plain (pre-colorization) text.
    */
   onActivity?(text: string, options?: IOperationActivityOptions): void;
+
+  /**
+   * Allocates a reporter channel for a child spawned by the specified operation.
+   */
+  createChildProcessReporter?(
+    operationId: string,
+    iterationId: number
+  ): IOperationChildProcessReporter | undefined;
 }

@@ -10,7 +10,12 @@ import {
   type CommandLineAction
 } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
+import {
+  Terminal,
+  ConsoleTerminalProvider,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -23,6 +28,7 @@ import type { IHeftActionOptions } from './actions/IHeftAction';
 import { AliasAction } from './actions/AliasAction';
 import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
 import { Constants } from '../utilities/Constants';
+import { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -41,7 +47,8 @@ export class HeftCommandLineParser extends CommandLineParser {
   private readonly _debugFlag: CommandLineFlagParameter;
   private readonly _unmanagedFlag: CommandLineFlagParameter;
   private readonly _debug: boolean;
-  private readonly _terminalProvider: ConsoleTerminalProvider;
+  private readonly _terminalProvider: ITerminalProvider;
+  private readonly _childReporter: HeftChildReporter | undefined;
   private readonly _loggingManager: LoggingManager;
   private readonly _metricsCollector: MetricsCollector;
   private readonly _heftConfiguration: HeftConfiguration;
@@ -77,12 +84,22 @@ export class HeftCommandLineParser extends CommandLineParser {
     this._debug = !!preInitializationArgumentValues.debug;
 
     // Enable debug and verbose logging if the "--debug" flag is set
-    this._terminalProvider = new ConsoleTerminalProvider({
-      debugEnabled: this._debug,
-      verboseEnabled: this._debug
-    });
+    this._childReporter = HeftChildReporter.tryInitialize();
+    this._terminalProvider =
+      this._childReporter ??
+      new ConsoleTerminalProvider({
+        debugEnabled: this._debug,
+        verboseEnabled: this._debug
+      });
+    if (this._debug && this._childReporter) {
+      this._childReporter.debugEnabled = true;
+      this._childReporter.verboseEnabled = true;
+    }
     this.globalTerminal = new Terminal(this._terminalProvider);
-    this._loggingManager = new LoggingManager({ terminalProvider: this._terminalProvider });
+    this._loggingManager = new LoggingManager({
+      terminalProvider: this._terminalProvider,
+      childReporter: this._childReporter
+    });
     if (this._debug) {
       // Enable printing stacktraces if the "--debug" flag is set
       this._loggingManager.enablePrintStacks();
@@ -197,6 +214,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         commandName,
         unaliasedCommandName
       };
+      this._childReporter?.setCommandName(commandName);
       await super.onExecuteAsync();
     } catch (e) {
       await this._reportErrorAndSetExitCodeAsync(e as Error);
@@ -241,7 +259,11 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   private async _reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
-      this.globalTerminal.writeErrorLine(error.toString());
+      if (this._childReporter) {
+        this._childReporter.emitDiagnostic(Constants.heftPackageName, error, 'error');
+      } else {
+        this.globalTerminal.writeErrorLine(error.toString());
+      }
     }
 
     if (this._debug) {

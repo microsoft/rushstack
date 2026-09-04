@@ -3,24 +3,37 @@
 
 import {
   createRushDiagnostic,
+  ProblemMatcherRegistry,
+  ProblemMatcherRunner,
   type IRushDiagnostic,
+  type IProblemMatch,
+  type IProblemMatcher,
   type LifecycleEmitter,
   type OperationStreamEmitter,
   type OperationStatus as ReporterOperationStatus
 } from '@rushstack/rush-reporter';
+import { FileError } from '@rushstack/node-core-library';
 import { TerminalChunkKind, type ITerminalChunk } from '@rushstack/terminal';
 
-import type { RushSession } from '../../pluginFramework/RushSession';
 import {
   _correlateRushSessionError,
+  _getRushSessionChildProcessReporter,
   _getRushSessionLifecycleEmitter,
-  _getRushSessionOperationStreamEmitter
+  _getRushSessionOperationStreamEmitter,
+  type IRushSessionChildProcessReporter,
+  type RushSession
 } from '../../pluginFramework/RushSession';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { IOperationGraphEventSink, IOperationActivityOptions } from './OperationEventSink';
+import type {
+  IOperationChildProcessReporter,
+  IOperationGraphEventSink,
+  IOperationActivityOptions
+} from './OperationEventSink';
 import type { Operation } from './Operation';
 import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import type { OperationGraph } from './OperationGraph';
+import { HeftChildProcessReporter } from './HeftChildProcessReporter';
 
 interface IReporterOperation {
   readonly emitter: LifecycleEmitter;
@@ -28,6 +41,7 @@ interface IReporterOperation {
   readonly operationId: string;
   readonly phaseName: string;
   readonly projectName: string;
+  readonly problemMatcherRunnersByLegacyId: Map<string, ProblemMatcherRunner | undefined>;
   readonly streamEmitter: OperationStreamEmitter | undefined;
   readonly cycles: Map<number, IReporterOperationCycle>;
   latestCompletedIterationId: number | undefined;
@@ -41,6 +55,40 @@ interface IReporterOperationCycle {
   lastEmittedStatus: ReporterOperationStatus | undefined;
   silent: boolean;
   streamClosed: boolean;
+}
+
+function createFileErrorMatcher(
+  name: string,
+  format: 'Unix' | 'VisualStudio',
+  severity: 'error' | 'warning'
+): IProblemMatcher {
+  const definition: { readonly regexp: string } = FileError.getProblemMatcher({ format });
+  const severityWord: string = severity === 'error' ? 'Error' : 'Warning';
+  return {
+    name,
+    tool: 'heft',
+    severity,
+    enabledByDefault: true,
+    pattern: new RegExp(definition.regexp.replace('(Error|Warning)', `(${severityWord})`)),
+    extract(match: RegExpMatchArray): IProblemMatch {
+      return {
+        file: match[2],
+        line: Number(match[3]),
+        column: Number(match[4]),
+        code: match[5],
+        message: match[6]
+      };
+    }
+  };
+}
+
+function createProblemMatcherRunner(): ProblemMatcherRunner {
+  const registry: ProblemMatcherRegistry = new ProblemMatcherRegistry();
+  registry.register(createFileErrorMatcher('heft-file-error-unix', 'Unix', 'error'));
+  registry.register(createFileErrorMatcher('heft-file-warning-unix', 'Unix', 'warning'));
+  registry.register(createFileErrorMatcher('heft-file-error-visualstudio', 'VisualStudio', 'error'));
+  registry.register(createFileErrorMatcher('heft-file-warning-visualstudio', 'VisualStudio', 'warning'));
+  return new ProblemMatcherRunner(registry.getMatchers('heft'));
 }
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
@@ -98,6 +146,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
           operationId,
           phaseName,
           projectName,
+          problemMatcherRunnersByLegacyId: new Map(),
           streamEmitter,
           cycles: new Map(),
           latestCompletedIterationId: undefined
@@ -142,8 +191,12 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     if (!operation || resolvedIterationId === undefined) {
       return;
     }
-
     const cycle: IReporterOperationCycle = this._getCycle(operation, resolvedIterationId);
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
+    operation.problemMatcherRunnersByLegacyId.set(
+      matcherKey,
+      operation.streamEmitter ? createProblemMatcherRunner() : undefined
+    );
 
     cycle.registeredOperationIds.add(operationId);
     cycle.silent &&= silent;
@@ -255,6 +308,35 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       });
   }
 
+  public createChildProcessReporter(
+    operationId: string,
+    iterationId: number
+  ): IOperationChildProcessReporter | undefined {
+    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const childProcessReporter: IRushSessionChildProcessReporter | undefined =
+      _getRushSessionChildProcessReporter(this._rushSession);
+    // Windows lifecycle commands run through a shell that does not preserve Node's fd mapping.
+    if (IS_WINDOWS || !operation?.streamEmitter || !childProcessReporter) {
+      return undefined;
+    }
+
+    const matcherKey: string = `${iterationId}:${operationId}`;
+    operation.problemMatcherRunnersByLegacyId.set(matcherKey, createProblemMatcherRunner());
+    return new HeftChildProcessReporter({
+      parentSessionId: childProcessReporter.parentSessionId,
+      parentRequestId: childProcessReporter.parentRequestId,
+      parentOperationId: operation.operationId,
+      iterationId,
+      context: childProcessReporter.context,
+      ingestForeignEnvelope: childProcessReporter.ingestForeignEnvelope,
+      onDiagnostic: (diagnostic: IRushDiagnostic) =>
+        operation.emitter.emitDiagnostic({ ...diagnostic, iterationId }),
+      onStructuredNegotiated: () => {
+        operation.problemMatcherRunnersByLegacyId.set(matcherKey, undefined);
+      }
+    });
+  }
+
   private _onOperationChunk(
     operationId: string,
     chunk: ITerminalChunk,
@@ -272,6 +354,14 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     } else if (chunk.kind === TerminalChunkKind.Stderr) {
       operation.streamEmitter.writeOutput(operation.operationId, 'stderr', chunk.text, resolvedIterationId);
     }
+
+    const stream: 'stdout' | 'stderr' = chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout';
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
+    for (const diagnostic of operation.problemMatcherRunnersByLegacyId
+      .get(matcherKey)
+      ?.writeOutput(chunk.text, operation.operationId, stream) ?? []) {
+      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: resolvedIterationId });
+    }
   }
 
   private _onOperationStreamClosed(
@@ -288,6 +378,11 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     if (cycle.streamClosed) {
       return;
     }
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
+    for (const diagnostic of operation.problemMatcherRunnersByLegacyId.get(matcherKey)?.flush() ?? []) {
+      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: resolvedIterationId });
+    }
+    operation.problemMatcherRunnersByLegacyId.delete(matcherKey);
     cycle.closedOperationIds.add(operationId);
     if (cycle.closedOperationIds.size === operation.legacyOperationIds.size) {
       cycle.streamClosed = true;
@@ -403,6 +498,16 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
   public onActivity(text: string, options?: IOperationActivityOptions): void {
     this._first.onActivity?.(text, options);
     this._second.onActivity?.(text, options);
+  }
+
+  public createChildProcessReporter(
+    operationId: string,
+    iterationId: number
+  ): IOperationChildProcessReporter | undefined {
+    return (
+      this._second.createChildProcessReporter?.(operationId, iterationId) ??
+      this._first.createChildProcessReporter?.(operationId, iterationId)
+    );
   }
 }
 
