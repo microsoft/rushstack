@@ -1,0 +1,304 @@
+{
+  "suppressions": [
+    {
+      "file": "src/AmazonS3BuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AmazonS3BuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AmazonS3BuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AmazonS3BuildCacheProvider.ts",
+      "scopeId": ".AmazonS3BuildCacheProvider._getS3ClientAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3BuildCacheProvider.ts",
+      "scopeId": ".AmazonS3BuildCacheProvider._getS3ClientAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/AmazonS3BuildCacheProvider.ts",
+      "scopeId": ".AmazonS3BuildCacheProvider._getS3ClientAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client.UriEncode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client.UriEncode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._buildSignedRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._buildSignedRequest",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._buildSignedRequest",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._getIsoDateString",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._handleGetResponseAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._handleGetResponseAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._handleGetResponseAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._makeSignedRequestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._makeSignedRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._makeSignedRequestAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync.retry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync.retry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._validateEndpoint",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._validateEndpoint",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".AmazonS3Client._validateEndpoint",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AmazonS3Client.ts",
+      "scopeId": ".storageRetryOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Credentials.ts",
+      "scopeId": ".fromAmazonEnv",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AmazonS3Credentials.ts",
+      "scopeId": ".fromRushEnv",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AmazonS3Credentials.ts",
+      "scopeId": ".fromRushEnv",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushAmazonS3BuildCachePlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/RushAmazonS3BuildCachePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushAmazonS3BuildCachePlugin.ts",
+      "scopeId": ".RushAmazonS3BuildCachePlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushAmazonS3BuildCachePlugin.ts",
+      "scopeId": ".RushAmazonS3BuildCachePlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushAmazonS3BuildCachePlugin.ts",
+      "scopeId": ".RushAmazonS3BuildCachePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmazonS3BuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AmazonS3BuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmazonS3BuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/AmazonS3BuildCacheProvider.test.ts",
+      "scopeId": ".testCredentialCache",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".MockedDate.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeFileGetRequestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeFileGetRequestAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeGetRequestAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeS3ClientRequestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeS3ClientRequestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeS3ClientRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeS3ClientRequestAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".makeUploadRequestAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".registerGetTests",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".registerGetTests",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmazonS3Client.test.ts",
+      "scopeId": ".registerUploadTests",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AmazonS3Credentials.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/AmazonS3Credentials.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AmazonS3Credentials.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

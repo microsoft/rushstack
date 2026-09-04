@@ -1,0 +1,1359 @@
+{
+  "suppressions": [
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner._executeOnceAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner._generateOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner._generateOperations",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner._generateOperations",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner.defineParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner.defineParameters",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".HeftActionRunner.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": "._getOrCreateTaskOperation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": "._startLifecycleAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": "._startLifecycleAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": "._startLifecycleAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".ensureCliAbortSignal",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".initializeHeft",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".runWithLoggingAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".runWithLoggingAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".runWithLoggingAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftActionRunner.ts",
+      "scopeId": ".runWithLoggingAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser._reportErrorAndSetExitCodeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser._reportErrorAndSetExitCodeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser.executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.ts",
+      "scopeId": ".HeftCommandLineParser.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/AliasAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/actions/CleanAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/CleanAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/actions/CleanAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/actions/CleanAction.ts",
+      "scopeId": ".CleanAction._cleanFilesAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/actions/CleanAction.ts",
+      "scopeId": ".CleanAction._cleanFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/CleanAction.ts",
+      "scopeId": ".CleanAction.selectedPhases",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/IHeftAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/PhaseAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/PhaseAction.ts",
+      "scopeId": ".PhaseAction.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/PhaseAction.ts",
+      "scopeId": ".PhaseAction.selectedPhases",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".RunAction.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".RunAction.selectedPhases",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".expandPhases",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".expandPhases",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/actions/RunAction.ts",
+      "scopeId": ".expandPhases",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".HeftConfiguration._checkForRigAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".HeftConfiguration.initialize",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".HeftConfiguration.projectConfigFolderPath",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".HeftConfiguration.rigPackageResolver",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".HeftConfiguration.slashNormalizedBuildFolderPath",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftConfiguration.ts",
+      "scopeId": ".HeftConfiguration.tempFolderPath",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration._getLifecyclePluginDefinitions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration._getTaskPluginDefinitions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration._validate",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration._validate",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration.getPluginDefinitionBySpecifier",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration.getPluginDefinitionBySpecifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration.tryGetLifecyclePluginDefinitionByName",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftPluginConfiguration.ts",
+      "scopeId": ".HeftPluginConfiguration.tryGetTaskPluginDefinitionByName",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".HeftPluginDefinitionBase.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".HeftPluginDefinitionBase.loadPluginAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".HeftPluginDefinitionBase.loadPluginAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/configuration/HeftPluginDefinition.ts",
+      "scopeId": ".HeftPluginDefinitionBase.validateOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/RigPackageResolver.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/configuration/RigPackageResolver.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/configuration/RigPackageResolver.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/configuration/RigPackageResolver.ts",
+      "scopeId": ".RigPackageResolver._resolvePackageInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/configuration/RigPackageResolver.ts",
+      "scopeId": ".RigPackageResolver._resolvePackageInnerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".MetricsCollector.recordAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".MetricsCollector.recordAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".MetricsCollector.recordAsync.metricData",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".MetricsCollector.setStartTime",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/metrics/MetricsCollector.ts",
+      "scopeId": ".MetricsCollector.setStartTime",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/operations/runners/PhaseOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/operations/runners/PhaseOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/operations/runners/PhaseOperationRunner.ts",
+      "scopeId": ".PhaseOperationRunner.executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/operations/runners/PhaseOperationRunner.ts",
+      "scopeId": ".PhaseOperationRunner.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".TaskOperationRunner._executeTaskAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".TaskOperationRunner._executeTaskAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/operations/runners/TaskOperationRunner.ts",
+      "scopeId": ".TaskOperationRunner._executeTaskAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".HeftLifecycle.applyPluginsInternalAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".HeftLifecycle.applyPluginsInternalAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".HeftLifecycle.applyPluginsInternalAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".HeftLifecycle.applyPluginsInternalAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".HeftLifecycle.ensureInitializedAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycle.ts",
+      "scopeId": ".HeftLifecycle.ensureInitializedAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycleSession.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycleSession.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/HeftLifecycleSession.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".HeftParameterManager._addParametersToProvider",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".HeftParameterManager._addParametersToProvider",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".HeftParameterManager.defaultParameters",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".HeftParameterManager.getParametersForPlugin",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftParameterManager.ts",
+      "scopeId": ".HeftParameterManager.getParametersForPlugin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".HeftPhase._ensureTasks",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".HeftPhase.cleanFiles",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".HeftPhase.consumingPhases",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhase.ts",
+      "scopeId": ".HeftPhase.dependencyPhases",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhaseSession.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhaseSession.ts",
+      "scopeId": ".HeftPhaseSession.applyPluginsInternalAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhaseSession.ts",
+      "scopeId": ".HeftPhaseSession.applyPluginsInternalAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftPhaseSession.ts",
+      "scopeId": ".HeftPhaseSession.applyPluginsInternalAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/HeftPluginHost.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftPluginHost.ts",
+      "scopeId": ".HeftPluginHost.requestAccessToPluginByName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftPluginHost.ts",
+      "scopeId": ".HeftPluginHost.resolvePluginAccessRequests",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".HeftTask.consumingTasks",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".HeftTask.dependencyTasks",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/HeftTask.ts",
+      "scopeId": ".HeftTask.getPluginAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/HeftTaskSession.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/HeftTaskSession.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/HeftTaskSession.ts",
+      "scopeId": ".HeftTaskSession.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/IHeftPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".deserializeBuildInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".deserializeBuildInfo",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".deserializeBuildInfo",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".serializeBuildInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".serializeBuildInfo",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/pluginFramework/IncrementalBuildInfo.ts",
+      "scopeId": ".serializeBuildInfo",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".InternalHeftSession._ensurePhases",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".InternalHeftSession.actionReferencesByAlias",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".InternalHeftSession.initializeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".InternalHeftSession.initializeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".InternalHeftSession.initializeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/InternalHeftSession.ts",
+      "scopeId": ".InternalHeftSession.lifecycle",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/StaticFileSystemAdapter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/pluginFramework/StaticFileSystemAdapter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/StaticFileSystemAdapter.ts",
+      "scopeId": ".StaticFileSystemAdapter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/StaticFileSystemAdapter.ts",
+      "scopeId": ".StaticFileSystemAdapter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/StaticFileSystemAdapter.ts",
+      "scopeId": ".StaticFileSystemAdapter.addFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/StaticFileSystemAdapter.ts",
+      "scopeId": ".StaticFileSystemAdapter.addFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/logging/LoggingManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/logging/MockScopedLogger.ts",
+      "scopeId": ".MockScopedLogger.hasErrors",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pluginFramework/logging/ScopedLogger.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/logging/ScopedLogger.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pluginFramework/logging/ScopedLogger.ts",
+      "scopeId": ".ScopedLogger.hasErrors",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pluginFramework/tests/IncrementalBuildInfo.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/tests/IncrementalBuildInfo.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/tests/IncrementalBuildInfo.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": "._copyFilesInnerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": "._copyFilesInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": "._copyFilesInnerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": "._getCopyDescriptorsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": "._getCopyDescriptorsAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": "._getCopyDescriptorsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/CopyFilesPlugin.ts",
+      "scopeId": ".copyFilesAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": "._deleteFilesInnerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": "._deleteFilesInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": "._deleteFilesInnerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/DeleteFilesPlugin.ts",
+      "scopeId": "._getPathsToDeleteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".getFileSelectionSpecifierPathsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".getIncludedGlobPatterns",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".getIncludedGlobPatterns",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/FileGlobSpecifier.ts",
+      "scopeId": ".getIncludedGlobPatterns",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._loadStageConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._loadStageConfigurationAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._loadStageConfigurationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._startChild",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._startChild",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._stopChildAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin._stopChildAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/plugins/NodeServicePlugin.ts",
+      "scopeId": ".NodeServicePlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugins/RunScriptPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/plugins/RunScriptPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/startWithVersionSelector.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/startWithVersionSelector.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/startWithVersionSelector.ts",
+      "scopeId": ".tryGetPackageFolderFor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/startWithVersionSelector.ts",
+      "scopeId": ".tryStartLocalHeft",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/startWithVersionSelector.ts",
+      "scopeId": ".tryStartLocalHeft",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/CliUtilities.ts",
+      "scopeId": ".getToolParameterNamesFromArgs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/Constants.ts",
+      "scopeId": ".Constants",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".CoreConfigFiles.loadHeftConfigurationFileForProjectAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".CoreConfigFiles.loadHeftConfigurationFileForProjectAsync",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".CoreConfigFiles.loadHeftConfigurationFileForProjectAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".CoreConfigFiles.loadHeftConfigurationFileForProjectAsync.pluginPackageResolver",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".CoreConfigFiles.loadHeftConfigurationFileForProjectAsync.pluginPackageResolver",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/CoreConfigFiles.ts",
+      "scopeId": ".CoreConfigFiles.tryLoadNodeServiceConfigurationFileAsync",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._ensureGitMinimumVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._executeGitCommandAndCaptureOutputAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._executeGitCommandAndCaptureOutputAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._executeGitCommandAndCaptureOutputAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._findIgnoreMatcherForFilePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._findIgnoreMatcherForFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._findIgnoreMatcherForFilePath",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._getIgnoreMatchersAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._getIgnoreMatchersAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._getIgnoreMatchersAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._getIgnoreMatchersAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._parseGitVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._tryReadGitIgnoreFileAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities._tryReadGitIgnoreFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities.getGitInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities.getGitVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities.getGitVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities.isPathUnderGitWorkingTree",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities.isPathUnderGitWorkingTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/GitUtilities.ts",
+      "scopeId": ".GitUtilities.tryCreateGitignoreFilterAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.getStateAndTrack",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.getStateAndTrackAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.lstat",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.lstatSync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.readdir",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.readdir",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.stat",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.statSync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.watch",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.watch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/test/GitUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

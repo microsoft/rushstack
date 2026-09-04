@@ -1,0 +1,194 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".ISourceMap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".serializeDeclarationMap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".serializeDeclarationMap",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeclarationMap.ts",
+      "scopeId": ".serializeDeclarationMap",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".convertToTypingsGeneratorOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".convertToTypingsGeneratorOptions",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".convertToTypingsGeneratorOptions.parseAndGenerateTypingsOuter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StringValuesTypingsGenerator.ts",
+      "scopeId": ".convertToTypingsGeneratorOptions.parseAndGenerateTypingsOuter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator._parseFileAndGenerateTypingsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator._parseFileAndGenerateTypingsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator._parseFileAndGenerateTypingsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator._reprocessFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator._reprocessFilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.runWatcherAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.runWatcherAsync.onChange",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".decodeMappings",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".generateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DeclarationMap.test.ts",
+      "scopeId": ".isMappedSegment",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/StringValuesTypingsGenerator.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/StringValuesTypingsGenerator.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/StringValuesTypingsGenerator.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/StringValuesTypingsGenerator.test.ts",
+      "scopeId": ".runTests",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "suppressions": [
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown._spawnLauncherAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown._spawnLauncherAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown._spawnLauncherAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown.invokeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown.writeInspectReport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown.writeInspectReport",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown.writeInspectReport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown.writeSnapshotReport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/BaseReportAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/InspectAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/RundownCommandLine.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/SnapshotAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".Launcher._sendIpcTraceBatch",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".Launcher.installHook",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".Launcher.installHook.hookedRequire",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".Launcher.installHook.hookedRequire",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".Launcher.installHook.hookedRequire",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

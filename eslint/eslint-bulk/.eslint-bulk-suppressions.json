@@ -1,0 +1,39 @@
+{
+  "suppressions": [
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".findPatchPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".findPatchPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".findPatchPath",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

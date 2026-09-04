@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Wire the eslint-bulk-suppressions patch into the project eslint config and record pre-existing strict-codegen violations. No shipping code changes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport"
+}

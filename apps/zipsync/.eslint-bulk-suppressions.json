@@ -1,0 +1,604 @@
+{
+  "suppressions": [
+    {
+      "file": "src/cli/ZipSyncCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/ZipSyncCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/ZipSyncCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/ZipSyncCommandLineParser.ts",
+      "scopeId": ".ZipSyncCommandLineParser.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/ZipSyncCommandLineParser.ts",
+      "scopeId": ".ZipSyncCommandLineParser.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/ZipSyncCommandLineParser.ts",
+      "scopeId": ".ZipSyncCommandLineParser.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/compress.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/compress.ts",
+      "scopeId": ".createIncrementalZlib",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/compress.ts",
+      "scopeId": ".createIncrementalZlib",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/compress.ts",
+      "scopeId": ".createIncrementalZlib.update.processInputChunk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/compress.ts",
+      "scopeId": ".createIncrementalZlib.update.processInputChunk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/compress.ts",
+      "scopeId": ".createIncrementalZlib.update.processInputChunk",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/crc32.ts",
+      "scopeId": ".fallbackCrc32",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/crc32.ts",
+      "scopeId": ".initCrcTable",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/crc32.ts",
+      "scopeId": ".initCrcTable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/fs.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/fs.ts",
+      "scopeId": ".rmdirSync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/fs.ts",
+      "scopeId": ".unlinkSync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/hash.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/hash.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/hash.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/hash.ts",
+      "scopeId": ".computeFileHash",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/hash.ts",
+      "scopeId": ".computeFileHash",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack.writeChunkToZip",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack.writeChunkToZip",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack.writeFileEntry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack.writeFileEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack.writeFileEntry",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pack.ts",
+      "scopeId": ".pack.writeFileEntry.readInputInChunks",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".handleMessage",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".handleMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/packWorker.ts",
+      "scopeId": ".handleMessage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/packWorkerAsync.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/packWorkerAsync.ts",
+      "scopeId": ".packWorkerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/packWorkerAsync.ts",
+      "scopeId": ".packWorkerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/perf.ts",
+      "scopeId": ".emitSummary",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/perf.ts",
+      "scopeId": ".emitSummary",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/perf.ts",
+      "scopeId": ".formatDuration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/perf.ts",
+      "scopeId": ".getDuration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".bench",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".bench",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".bench",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".bench.verifyUnpack",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".bench.verifyUnpack",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".bench.verifyUnpack.buildMap.walk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".benchZipSyncScenario",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".benchZipSyncScenario",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".buildGroupTable",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".buildGroupTable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".buildGroupTable",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".buildGroupTable.formatBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".buildGroupTable.formatBytes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".detectIterations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".detectIterations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".isZipAvailable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".percentile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/benchmark.test.ts",
+      "scopeId": ".setupDemoDataAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/crc32.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/testUtils.ts",
+      "scopeId": ".getDemoDataDirectoryDisposable",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/workerAsync.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/workerAsync.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack.extractFileFromZip",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack.extractFileFromZip",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack.extractFileFromZip",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack.shouldExtract",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/unpack.ts",
+      "scopeId": ".unpack.shouldExtract",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/unpackWorker.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/unpackWorker.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/unpackWorker.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/unpackWorker.ts",
+      "scopeId": ".handleMessage",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/unpackWorker.ts",
+      "scopeId": ".handleMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/unpackWorker.ts",
+      "scopeId": ".handleMessage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/unpackWorkerAsync.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/unpackWorkerAsync.ts",
+      "scopeId": ".unpackWorkerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/unpackWorkerAsync.ts",
+      "scopeId": ".unpackWorkerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/zipSyncUtils.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".dosDateTime",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".findEndOfCentralDirectory",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".getFileFromZip",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".parseCentralDirectoryHeader",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".parseCentralDirectoryHeader",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".parseCentralDirectoryHeader.header",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".parseLocalFileHeader",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".parseLocalFileHeader.header",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".writeCentralDirectoryHeader",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".writeCentralDirectoryHeader",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".writeDataDescriptor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".writeEndOfCentralDirectory",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".writeLocalFileHeader",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/zipUtils.ts",
+      "scopeId": ".writeLocalFileHeader",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

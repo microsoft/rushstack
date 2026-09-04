@@ -1,0 +1,2464 @@
+{
+  "suppressions": [
+    {
+      "file": "src/aedoc/PackageDocComment.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/aedoc/PackageDocComment.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/aedoc/PackageDocComment.ts",
+      "scopeId": ".PackageDocComment.tryFindInSourceFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/aedoc/PackageDocComment.ts",
+      "scopeId": ".PackageDocComment.tryFindInSourceFile",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/aedoc/PackageDocComment.ts",
+      "scopeId": ".PackageDocComment.tryFindInSourceFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration._notifyReferencedAstEntity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration.findChildrenWithName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration.findChildrenWithName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration.getDump",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration.isSupportedSyntaxKind",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstDeclaration.ts",
+      "scopeId": ".AstDeclaration.isSupportedSyntaxKind",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstImport.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/AstImport.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/AstImport.ts",
+      "scopeId": ".AstImport.getKey",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/AstImport.ts",
+      "scopeId": ".AstImport.getKey",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstModule.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/AstNamespaceImport.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectDeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectUsingIndexSelector",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectUsingIndexSelector",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectUsingIndexSelector",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectUsingSystemSelector",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectUsingSystemSelector",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._selectUsingSystemSelector",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver._tryDisambiguateAncillaryMatches",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver.resolve",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver.resolve",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstReferenceResolver.ts",
+      "scopeId": ".AstReferenceResolver.resolve",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstSymbol.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._analyzeAstSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._analyzeAstSymbol",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._analyzeChildTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._analyzeChildTree",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._analyzeChildTree",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._fetchAstDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._fetchAstDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._fetchAstSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._fetchAstSymbol",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._fetchAstSymbol",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable._fetchEntityForNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable.constructor",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable.getChildAstDeclarationByNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable.getLocalNameForSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable.getLocalNameForSymbol",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/AstSymbolTable.ts",
+      "scopeId": ".AstSymbolTable.getLocalNameForSymbol",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._collectAllExportsRecursive",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._collectAllExportsRecursive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._collectAllExportsRecursive",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._collectAllExportsRecursive",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._fetchAstImport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._fetchSpecifierAstModule",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._fetchSpecifierAstModule",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._getModuleSymbolFromSourceFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._getModuleSymbolFromSourceFile",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._getModuleSymbolFromSourceFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._getModuleSymbolFromSourceFile",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._getModuleSymbolFromSourceFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._isExternalModulePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._isExternalModulePath",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._tryGetExportOfAstModule",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._tryGetExportOfAstModule",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._tryMatchExportDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._tryMatchExportDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._tryMatchImportDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer._tryMatchImportDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchAstModuleFromSourceFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchAstModuleFromSourceFile",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchAstModuleFromSourceFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntity",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntity",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntity",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntityFromImportTypeNode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntityFromImportTypeNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/ExportAnalyzer.ts",
+      "scopeId": ".ExportAnalyzer.fetchReferencedAstEntityFromImportTypeNode",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": ".PackageMetadataManager.tryFetchPackageMetadata",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": ".PackageMetadataManager.tryFetchPackageMetadata",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._resolveTsdocMetadataPathFromPackageJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromExportsField",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromExportsField",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromExportsField",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromExportsField",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromTypesVersionsField",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromTypesVersionsField",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromTypesVersionsField",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/PackageMetadataManager.ts",
+      "scopeId": "._tryResolveTsdocMetadataFromTypesVersionsField",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/SourceFileLocationFormatter.ts",
+      "scopeId": ".SourceFileLocationFormatter.formatDeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/SourceFileLocationFormatter.ts",
+      "scopeId": ".SourceFileLocationFormatter.formatPath",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/SourceFileLocationFormatter.ts",
+      "scopeId": ".SourceFileLocationFormatter.formatPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/SourceFileLocationFormatter.ts",
+      "scopeId": ".SourceFileLocationFormatter.formatPath",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._getTrimmed",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._writeModifiedText",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._writeModifiedText",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._writeModifiedText",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span._writeModifiedText",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.constructor",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.getDump",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.getLastInnerSeparator",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.getModifiedDump",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.getModifiedDump",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.prefix",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".Span.suffix",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".SpanModification.prefix",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/Span.ts",
+      "scopeId": ".SpanModification.suffix",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/SyntaxHelpers.ts",
+      "scopeId": ".SyntaxHelpers.isSafeUnquotedMemberIdentifier",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/SyntaxHelpers.ts",
+      "scopeId": ".SyntaxHelpers.isSafeUnquotedMemberIdentifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/SyntaxHelpers.ts",
+      "scopeId": ".SyntaxHelpers.makeCamelCaseIdentifier",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/SyntaxHelpers.ts",
+      "scopeId": ".SyntaxHelpers.makeCamelCaseIdentifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.findFirstChildNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.followAliases",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.getModuleSpecifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.isAmbient",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.isAmbient",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.isFollowableAlias",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.matchAncestor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.matchAncestor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.tryDecodeWellKnownSymbolName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/TypeScriptHelpers.ts",
+      "scopeId": ".TypeScriptHelpers.tryGetADeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/TypeScriptInternals.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/analyzer/TypeScriptInternals.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/TypeScriptInternals.ts",
+      "scopeId": ".TypeScriptInternals.getGlobalVariableAnalyzer",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/TypeScriptInternals.ts",
+      "scopeId": ".TypeScriptInternals.tryGetSymbolForDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/analyzer/test/PackageMetadataManager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/analyzer/test/PackageMetadataManager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/analyzer/test/PackageMetadataManager.test.ts",
+      "scopeId": ".firstArgument",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/analyzer/test/SyntaxHelpers.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": ".CompilerState.create",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": ".CompilerState.create",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": ".CompilerState.create",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": "._createCompilerHost",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": "._createCompilerHost",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": "._createCompilerHost",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": "._createCompilerHost",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/CompilerState.ts",
+      "scopeId": "._generateFilePathsForAnalysis",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": ".Extractor.invoke",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": ".Extractor.invoke",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": ".Extractor.invoke",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": "._checkCompilerCompatibility",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": "._checkCompilerCompatibility",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": "._writeApiReport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": "._writeApiReport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/Extractor.ts",
+      "scopeId": "._writeApiReport",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.getDiagnosticDump",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.loadFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.loadFile",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.loadFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.prepare",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.prepare",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.prepare",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.prepare",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.tryLoadForFolder",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.tryLoadForFolder",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": ".ExtractorConfig.tryLoadForFolder",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._expandStringWithTokens",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._expandStringWithTokens",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._expandStringWithTokens",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._rejectAnyTokensInPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._rejectAnyTokensInPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._resolveConfigFileRelativePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._resolveConfigFileRelativePaths",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._resolveConfigFileRelativePaths",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._validateTagsToReport",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._validateTagsToReport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorConfig.ts",
+      "scopeId": "._validateTagsToReport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/api/ExtractorMessage.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/api/ExtractorMessage.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/api/ExtractorMessage.ts",
+      "scopeId": ".ExtractorMessage.formatMessageWithLocation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/api/ExtractorMessage.ts",
+      "scopeId": ".ExtractorMessage.logLevel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/api/ExtractorMessageId.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/api/IConfigFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/api/test/Extractor-custom-tags.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/ApiExtractorCommandLine.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/ApiExtractorCommandLine.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/ApiExtractorCommandLine.ts",
+      "scopeId": ".ApiExtractorCommandLine.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/InitAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".RunAction.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".RunAction.onExecuteAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".RunAction.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/RunAction.ts",
+      "scopeId": ".RunAction.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/ApiItemMetadata.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/collector/ApiItemMetadata.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._addAncillaryDeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._addAncillaryDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._addAncillaryDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._calculateApiItemMetadata",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._calculateApiItemMetadata",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._calculateApiItemMetadata",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._calculateDeclarationMetadataForDeclarations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._calculateDeclarationMetadataForDeclarations",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._calculateDeclarationMetadataForDeclarations",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._collectReferenceDirectivesFromSourceFiles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._collectReferenceDirectivesFromSourceFiles",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._collectReferenceDirectivesFromSourceFiles",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._createCollectorEntity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._fetchSymbolMetadata",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._fetchSymbolMetadata",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._makeUniqueNames",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._makeUniqueNames",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._makeUniqueNames",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._makeUniqueNames",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._parseTsdocForAstDeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._parseTsdocForAstDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._parseTsdocForAstDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._recursivelyCreateEntities",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector._recursivelyCreateEntities",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.analyze",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.analyze",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.analyze",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.getOverloadIndex",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.getOverloadIndex",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.getSortKeyIgnoringUnderscore",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": ".Collector.tryFetchMetadataForAstEntity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": "._resolveBundledPackagePatterns",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": "._resolveBundledPackagePatterns",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": "._resolveBundledPackagePatterns",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/collector/Collector.ts",
+      "scopeId": "._resolveBundledPackagePatterns",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.addExportName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.consumable",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.consumable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.exported",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.exported",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.exportedFromEntryPoint",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.getFirstExportingConsumableParent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.getFirstExportingConsumableParent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.getSortKey",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/collector/CollectorEntity.ts",
+      "scopeId": ".CollectorEntity.shouldInlineExport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter._applyMessagesConfig",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter._applyMessagesConfig",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter._getRuleForMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter._handleMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter._handleMessage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter._sortMessagesForOutput",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.addAnalyzerIssue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.addAnalyzerIssueForPosition",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.addCompilerDiagnostic",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.addCompilerDiagnostic",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.buildJsonDumpObject",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.fetchAssociatedMessagesForReviewFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.fetchUnassociatedMessagesForReviewFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": ".MessageRouter.handleRemainingNonConsoleMessages",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": "._buildJsonDumpObject",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": "._buildJsonDumpObject",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/collector/MessageRouter.ts",
+      "scopeId": "._buildJsonDumpObject",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper._getMappedSourceLocation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper._getMappedSourceLocation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper._getMappedSourceLocation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper._getSourceMap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper._getSourceMap",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper._getSourceMap",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": ".SourceMapper.getSourceLocation.sourceLocation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": "._compareMappingItem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": "._findNearestMappingItem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/collector/SourceMapper.ts",
+      "scopeId": "._findNearestMappingItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._analyzeApiItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._analyzeNeedsDocumentation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._analyzeNeedsDocumentation",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._analyzeNeedsDocumentation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._analyzeNeedsDocumentation",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._analyzeNeedsDocumentation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._applyInheritDoc",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._applyInheritDoc",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._checkForBrokenLinksRecursive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer._checkForBrokenLinksRecursive",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/enhancers/DocCommentEnhancer.ts",
+      "scopeId": ".DocCommentEnhancer.analyze",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": ".ValidationEnhancer.analyze",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": ".ValidationEnhancer.analyze",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": ".ValidationEnhancer.analyze",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkForInconsistentReleaseTags",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkForInconsistentReleaseTags",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkForInternalUnderscore",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkForInternalUnderscore",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkForInternalUnderscore",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkReferences",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkReferences",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._checkReferences",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._isEcmaScriptSymbol",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._isEcmaScriptSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/enhancers/ValidationEnhancer.ts",
+      "scopeId": "._isEcmaScriptSymbol",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._captureParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._captureTypeParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._isReadonly",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._isReadonly",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiCallSignature",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiClass",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiClass",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiClass",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiClass",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiConstructSignature",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiConstructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiConstructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiEnum",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiEnumMember",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiFunction",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiFunction",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiIndexSignature",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiInterface",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiInterface",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiInterface",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiMethod",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiMethod",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiMethod",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiMethodSignature",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiMethodSignature",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiNamespace",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiProperty",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiProperty",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiProperty",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiPropertySignature",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiPropertySignature",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiTypeAlias",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiVariable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processApiVariable",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processAstEntity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processAstEntity",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processAstNamespaceImport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processDeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator._processDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiModelGenerator.ts",
+      "scopeId": ".ApiModelGenerator.buildApiPackage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".ApiReportGenerator.generateReviewFileContent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".ApiReportGenerator.generateReviewFileContent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".ApiReportGenerator.generateReviewFileContent",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".ApiReportGenerator.generateReviewFileContent",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": ".ApiReportGenerator.generateReviewFileContent.capitalizeFirstLetter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._getAedocSynopsis",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._getAedocSynopsis",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._getAedocSynopsis",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._getAedocSynopsis",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpanForPreapproved",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._modifySpanForPreapproved",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._shouldIncludeDeclaration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ApiReportGenerator.ts",
+      "scopeId": "._shouldIncludeReleaseTag",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._getNavigationToSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._getNavigationToSymbol",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._getPackageName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._getParentReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._getParentReference",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._sourceFileToModuleSource",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._symbolToDeclarationReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._symbolToDeclarationReference",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator._symbolToDeclarationReference",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": ".DeclarationReferenceGenerator.getDeclarationReferenceForIdentifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": "._getMeaningOfSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": "._getMeaningOfSymbol",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": "._isInExpressionContext",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DeclarationReferenceGenerator.ts",
+      "scopeId": "._isSameSymbol",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.emitImport",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.emitImport",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.emitImport",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.emitStarExports",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.forEachParameterToNormalize",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.forEachParameterToNormalize",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.forEachParameterToNormalize",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.isExportKeywordInNamespaceExportDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.modifyImportTypeSpan",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.modifyImportTypeSpan",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.modifyImportTypeSpan",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DtsEmitHelpers.ts",
+      "scopeId": ".DtsEmitHelpers.normalizeParameterNames",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._generateTypingsFileContent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._generateTypingsFileContent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._generateTypingsFileContent",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._generateTypingsFileContent",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._modifySpan",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/generators/DtsRollupGenerator.ts",
+      "scopeId": "._shouldIncludeReleaseTag",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": ".ExcerptBuilder.addBlankLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": ".ExcerptBuilder.addDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": ".ExcerptBuilder.addDeclaration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": "._appendToken",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": "._buildSpan",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": "._buildSpan",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": "._buildSpan",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/ExcerptBuilder.ts",
+      "scopeId": "._isDeclaration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeLinePart",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeLinePart",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeNewLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeNewLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.constructor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.increaseIndent",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.peekLastCharacter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.peekSecondLastCharacter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.peekSecondLastCharacter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/condenseTokens.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/condenseTokens.ts",
+      "scopeId": ".condenseTokens",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/condenseTokens.ts",
+      "scopeId": ".condenseTokens",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/condenseTokens.ts",
+      "scopeId": ".condenseTokens",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/test/IndentedWriter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".condenseTokensReference",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".condenseTokensReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".condenseTokensReference",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".makeToken",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".makeToken",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/generators/test/condenseTokens.test.ts",
+      "scopeId": ".nextRandom",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    }
+  ]
+}

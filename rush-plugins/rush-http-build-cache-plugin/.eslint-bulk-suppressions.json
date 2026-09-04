@@ -1,0 +1,149 @@
+{
+  "suppressions": [
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._getFailureType",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._getFailureType",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._getFailureType",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._makeHttpCoreRequestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._makeHttpCoreRequestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._makeHttpCoreRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._makeHttpRequestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._reportFailure",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._reportFailure",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._reportFailure",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._tryGetCredentialsAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._tryGetCredentialsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider._tryGetCredentialsFromCacheAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider.tryUploadCacheEntryFromFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider.tryUploadCacheEntryFromFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider.updateCachedCredentialInteractiveAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider.updateCachedCredentialInteractiveAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushHttpBuildCachePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/HttpBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/HttpBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/HttpBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/HttpBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/HttpBuildCacheProvider.test.ts",
+      "scopeId": ".FetchFnType",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/HttpBuildCacheProvider.test.ts",
+      "scopeId": ".StreamFetchFnType",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

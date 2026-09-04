@@ -1,0 +1,234 @@
+{
+  "suppressions": [
+    {
+      "file": "src/Constants.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".getAllComments",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".getAllComments",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.addCommentExtraction",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.onFileMinified",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".defaultRehydrateAssets",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".isMethodShorthandFormat",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".isMethodShorthandFormat",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.types.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.types.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".extractSegmentFromSource",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/AmdExternals.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AmdExternals.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/AmdExternals.test.ts",
+      "scopeId": ".amdExternalsTest",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/MockMinifier.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/MockMinifier.ts",
+      "scopeId": ".MockMinifier.minify",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/MultipleRuntimes.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/MultipleRuntimes.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/MultipleRuntimes.test.ts",
+      "scopeId": ".multipleRuntimesTest",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RecordMetadataPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RecordMetadataPlugin.ts",
+      "scopeId": ".RecordMetadataPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RecordMetadataPlugin.ts",
+      "scopeId": ".RecordMetadataPlugin.apply",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/test/RecordMetadataPlugin.ts",
+      "scopeId": ".RecordMetadataPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".runWebpackWithEnvironment",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WebpackOutputFormats.test.ts",
+      "scopeId": ".runWebpackWithEnvironment",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

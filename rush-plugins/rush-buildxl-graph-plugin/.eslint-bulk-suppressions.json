@@ -1,0 +1,164 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DropBuildGraphPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DropBuildGraphPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DropBuildGraphPlugin.ts",
+      "scopeId": ".DropBuildGraphPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DropBuildGraphPlugin.ts",
+      "scopeId": ".DropBuildGraphPlugin.apply.handleCreateOperationsForCommandAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DropBuildGraphPlugin.ts",
+      "scopeId": ".DropBuildGraphPlugin.apply.handleCreateOperationsForCommandAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor._operationAsHashedEntry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor._operationAsHashedEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor._operationAsHashedEntry",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor._pruneNoOps",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor._pruneNoOps.getNonEmptyDependencies",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor._pruneNoOps.getNonEmptyDependencies",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor.validateGraph",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphProcessor.ts",
+      "scopeId": ".GraphProcessor.validateGraph",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForDebug",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForDebug",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForDebug",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForDebug",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForTesting",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForTesting",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/debugGraphFiltering.ts",
+      "scopeId": ".filterObjectForTesting",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/dropGraph.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/dropGraph.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/dropGraph.ts",
+      "scopeId": ".dropGraphAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/dropGraph.ts",
+      "scopeId": ".dropGraphAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GraphProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/GraphProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GraphProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/GraphProcessor.test.ts",
+      "scopeId": ".sortGraphNodes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".ServerlessStackPlugin._runServerlessStackAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".ServerlessStackPlugin._runServerlessStackAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".ServerlessStackPlugin._runServerlessStackAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".ServerlessStackPlugin.apply",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}
