@@ -504,8 +504,9 @@ export class RushInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       { ...this.options, npmrcFolder: subspace.getSubspaceTempFolderPath() }
     );
-    const keepEnvironment: boolean =
-      InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.rushConfiguration);
+    const keepEnvironment: boolean = InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(
+      this.rushConfiguration
+    );
 
     const commonNodeModulesFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -560,8 +561,7 @@ export class RushInstallManager extends BaseInstallManager {
           // eslint-disable-next-line no-console
           console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
           // Glob can't handle Windows paths
-          const normalizedPathToDeleteWithoutStar: string =
-            Path.convertToSlashes(pathToDeleteWithoutStar);
+          const normalizedPathToDeleteWithoutStar: string = Path.convertToSlashes(pathToDeleteWithoutStar);
 
           const { default: glob } = await import('fast-glob');
           const tempModulePaths: string[] = await glob(
