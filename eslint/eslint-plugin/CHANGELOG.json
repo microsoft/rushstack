@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.23.4",
+      "tag": "@rushstack/eslint-plugin_v0.23.4",
+      "date": "Fri, 04 Sep 2026 18:55:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix no-new-null false positives for ECMAScript private class members."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.23.3",
       "tag": "@rushstack/eslint-plugin_v0.23.3",
       "date": "Thu, 20 Aug 2026 00:16:38 GMT",

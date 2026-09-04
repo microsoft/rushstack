@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rush-mcp-docs-plugin
 
-This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Sep 2026 18:55:19 GMT and should not be manually modified.
+
+## 0.3.26
+Fri, 04 Sep 2026 18:55:19 GMT
+
+_Version update only_
 
 ## 0.3.25
 Fri, 21 Aug 2026 15:16:34 GMT

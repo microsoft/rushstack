@@ -1,6 +1,17 @@
 # Change Log - @rushstack/rush-daemon-protocol
 
-This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Sep 2026 18:55:18 GMT and should not be manually modified.
+
+## 0.4.0
+Fri, 04 Sep 2026 18:55:18 GMT
+
+### Minor changes
+
+- Add a typed final daemon command result with Rush-compatible outcome and exit-code semantics.
+- Add request-scoped stdin, raw-mode control, and terminal fallback contracts.
+- Add typed resolved phased-request, enabled-state selection, engine-shape, and client-scoped operation result contracts.
+- Add parsed command origin, request admission options, queue progress messages, and typed admission failures.
+- Add validated request start, cancellation, rejection, and terminal result wire controls.
 
 ## 0.3.1
 Fri, 21 Aug 2026 15:16:34 GMT

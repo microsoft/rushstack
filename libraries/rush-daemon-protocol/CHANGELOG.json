@@ -2,6 +2,35 @@
   "name": "@rushstack/rush-daemon-protocol",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/rush-daemon-protocol_v0.4.0",
+      "date": "Fri, 04 Sep 2026 18:55:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a typed final daemon command result with Rush-compatible outcome and exit-code semantics."
+          },
+          {
+            "comment": "Add request-scoped stdin, raw-mode control, and terminal fallback contracts."
+          },
+          {
+            "comment": "Add typed resolved phased-request, enabled-state selection, engine-shape, and client-scoped operation result contracts."
+          },
+          {
+            "comment": "Add parsed command origin, request admission options, queue progress messages, and typed admission failures."
+          },
+          {
+            "comment": "Add validated request start, cancellation, rejection, and terminal result wire controls."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.1",
       "tag": "@rushstack/rush-daemon-protocol_v0.3.1",
       "date": "Fri, 21 Aug 2026 15:16:34 GMT",
