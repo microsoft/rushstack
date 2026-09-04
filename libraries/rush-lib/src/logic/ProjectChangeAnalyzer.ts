@@ -828,14 +828,14 @@ export function isPackageJsonVersionBumpChange(
 
   const oldPackageJsonWithoutBumpFields: Partial<IPackageJson> = { ...oldPackageJson };
   const newPackageJsonWithoutBumpFields: Partial<IPackageJson> = { ...newPackageJson };
-  delete oldPackageJsonWithoutBumpFields.version;
-  delete newPackageJsonWithoutBumpFields.version;
+  oldPackageJsonWithoutBumpFields.version = undefined;
+  newPackageJsonWithoutBumpFields.version = undefined;
 
   for (const dependencyFieldName of dependencyFieldNames) {
     const oldDependencies: IPackageJsonDependencyTable | undefined = oldPackageJson[dependencyFieldName];
     const newDependencies: IPackageJsonDependencyTable | undefined = newPackageJson[dependencyFieldName];
-    delete oldPackageJsonWithoutBumpFields[dependencyFieldName];
-    delete newPackageJsonWithoutBumpFields[dependencyFieldName];
+    oldPackageJsonWithoutBumpFields[dependencyFieldName] = undefined;
+    newPackageJsonWithoutBumpFields[dependencyFieldName] = undefined;
 
     if (!oldDependencies && !newDependencies) {
       continue;
