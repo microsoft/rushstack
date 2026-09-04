@@ -30,6 +30,8 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 import { Utilities } from '../utilities/Utilities';
+import { getNpmrcEnvironmentVariables } from '../utilities/npmrcUtilities';
+import { InstallHelpers } from '../logic/installManager/InstallHelpers';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { PnpmWorkspaceFile } from '../logic/pnpm/PnpmWorkspaceFile';
@@ -473,6 +475,18 @@ export class RushPnpmCommandLineParser {
             pnpmEnvironmentMap.set(envKey, envValue);
           }
         }
+      }
+    }
+
+    // Provide any credentials that "rush install" moved out of the generated .npmrc file.
+    // See the "provideNpmrcCredentialsViaEnvironment" experiment.
+    if (InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration)) {
+      const npmrcEnvironmentVariables: Record<string, string> | undefined = getNpmrcEnvironmentVariables({
+        npmrcFolder: workspaceFolder,
+        supportEnvVarFallbackSyntax: rushConfiguration.isPnpm
+      });
+      for (const [envKey, envValue] of Object.entries(npmrcEnvironmentVariables ?? {})) {
+        pnpmEnvironmentMap.set(envKey, envValue);
       }
     }
 

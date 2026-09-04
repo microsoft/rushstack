@@ -43,6 +43,8 @@
   },
   "scripts": {
     "build": "heft build --clean",
+    "generate-bootstrap-protocol": "node scripts/generateBootstrapProtocol.js --write",
+    "check-bootstrap-protocol": "node scripts/generateBootstrapProtocol.js --check",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },
@@ -50,7 +52,8 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
-    "@types/semver": "7.7.1"
+    "@types/semver": "7.7.1",
+    "typescript": "~5.8.2"
   },
   "peerDependencies": {
     "@types/node": "*"

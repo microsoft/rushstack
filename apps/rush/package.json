@@ -38,6 +38,7 @@
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-reporter": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "semver": "~7.7.4"
   },
