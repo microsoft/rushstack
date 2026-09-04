@@ -12,6 +12,9 @@ parameters:
     type: string
   - name: StageDisplayName
     type: string
+  - name: CheckoutRepository
+    type: string
+    default: self
   - name: FeatureBranch
     type: string
   - name: PrTitle
@@ -50,12 +53,16 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/package-versions
               artifactName: package-versions
         steps:
-          - checkout: self
+          - checkout: ${{ parameters.CheckoutRepository }}
             persistCredentials: true
 
           - template: /common/config/azure-pipelines/templates/configure-git-user.yaml@self
 
           - bash: |
+              # Repository resources resolve independently from the self trigger. Restore the exact
+              # commit that selected this pipeline YAML before creating the automated branch.
+              git fetch --no-tags origin "$(Build.SourceVersion)"
+              git checkout --detach "$(Build.SourceVersion)"
               git checkout -b ${{ parameters.FeatureBranch }}
               echo "Created feature branch: ${{ parameters.FeatureBranch }}"
             displayName: 'Create Feature Branch'
@@ -84,6 +91,24 @@ stages:
                 echo "##vso[task.setvariable variable=HasChanges]false"
               fi
             displayName: 'Commit Version Bumps'
+
+          - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+            parameters:
+              Arguments: >
+                change
+                --bulk
+                --bump-type none
+                --commit-message "chore: generate change files for version bump"
+              DisplayName: 'Generate change files'
+              Condition: "and(succeeded(), eq(variables.HasChanges, 'true'))"
+
+          - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+            parameters:
+              Arguments: >
+                change
+                --verify
+              DisplayName: 'Verify generated change files'
+              Condition: "and(succeeded(), eq(variables.HasChanges, 'true'))"
 
           - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
             displayName: 'Prepublish workaround for rush-lib'
