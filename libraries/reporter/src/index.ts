@@ -337,6 +337,22 @@ export {
   isWithinMemoryBudget
 } from './perf/PerformanceBudgets';
 
+export type {
+  IAiReporterQualificationThresholds,
+  IAiReporterQualificationCaseResult,
+  IAiReporterQualificationGateResult,
+  IAiReporterQualificationResult,
+  IQualifiedAiReporterDecision
+} from './qualification/AiReporterQualification';
+export {
+  AI_REPORTER_QUALIFICATION_SCHEMA_VERSION,
+  AI_REPORTER_QUALIFICATION_THRESHOLDS,
+  evaluateAiReporterQualification,
+  formatAiReporterQualificationFailures,
+  getQualifiedAiReporterDecision
+} from './qualification/AiReporterQualification';
+export { runAiReporterQualificationCorpusAsync } from './qualification/AiReporterQualificationCorpus';
+
 export type { ReporterMigrationPhaseId, IReporterMigrationPhase } from './migration/MigrationPhase';
 export { REPORTER_MIGRATION_PHASES, getReporterMigrationPhase } from './migration/MigrationPhase';
 export type {

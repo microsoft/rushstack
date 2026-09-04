@@ -37,19 +37,28 @@ export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IRe
   }
 
   let payload: unknown = event.payload;
+  const source: IReporterEventEnvelope<unknown>['source'] = event.source;
   if (event.type === 'diagnosticEmitted') {
-    const diagnostic: { readonly parameters?: Readonly<Record<string, IClassifiedValue>> } =
-      event.payload as {
-        readonly parameters?: Readonly<Record<string, IClassifiedValue>>;
-      };
+    const diagnostic: {
+      readonly parameters?: Readonly<Record<string, IClassifiedValue>>;
+      readonly source?: unknown;
+    } = event.payload as {
+      readonly parameters?: Readonly<Record<string, IClassifiedValue>>;
+      readonly source?: unknown;
+    };
+    const redactedDiagnostic: {
+      parameters?: Record<string, IClassifiedValue>;
+      source?: unknown;
+    } = { ...diagnostic };
     if (diagnostic.parameters) {
       const parameters: Record<string, IClassifiedValue> = {};
       for (const [name, classified] of Object.entries(diagnostic.parameters)) {
         parameters[name] =
           classified.privacy === 'secret' ? { value: '[secret]', privacy: 'secret' } : classified;
       }
-      payload = { ...diagnostic, parameters };
+      redactedDiagnostic.parameters = parameters;
     }
+    payload = redactedDiagnostic;
   }
-  return { ...event, payload };
+  return { ...event, source, payload };
 }

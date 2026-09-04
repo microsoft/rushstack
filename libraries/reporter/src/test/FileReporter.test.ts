@@ -377,6 +377,37 @@ describe('FileReporter', () => {
     });
   });
 
+  it('retains local-sensitive producer identity but redacts secret producer identity', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      reporter.report({
+        ...ev('extension', { name: 'local.plugin.event' }, 'local-sensitive'),
+        source: {
+          packageName: '@private/example-rush-plugin',
+          packageVersion: '1.0.0',
+          component: 'PrivatePluginImplementation'
+        }
+      });
+      reporter.report({
+        ...ev('extension', { name: 'secret.plugin.event' }, 'secret'),
+        source: {
+          packageName: '@secret/example-rush-plugin',
+          packageVersion: '2.0.0',
+          component: 'SecretPluginImplementation'
+        }
+      });
+      await reporter.closeAsync();
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('@private/example-rush-plugin');
+      expect(content).toContain('PrivatePluginImplementation');
+      expect(content).not.toContain('@secret/example-rush-plugin');
+      expect(content).not.toContain('SecretPluginImplementation');
+      expect(content).toContain('[private-producer]');
+      expect(content).toContain('[private-version]');
+    });
+  });
+
   it('deletes logs older than the retention window and caps the session count', async () => {
     await withTempDir(async (base: string) => {
       const logsDir: string = path.join(base, RUSH_LOGS_DIR_NAME);
