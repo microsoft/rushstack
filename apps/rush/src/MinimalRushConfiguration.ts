@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
@@ -13,6 +13,10 @@ interface IMinimalRushConfigurationJson {
   rushVersion?: string;
 }
 
+interface IMinimalExperimentsConfigurationJson {
+  useRushReporter?: boolean;
+}
+
 /**
  * Represents a minimal subset of the rush.json configuration file. It provides the information necessary to
  * decide which version of Rush should be installed/used.
@@ -20,6 +24,7 @@ interface IMinimalRushConfigurationJson {
 export class MinimalRushConfiguration {
   private _rushVersion: string;
   private _commonRushConfigFolder: string;
+  private _useRushReporter: boolean;
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
     this._rushVersion =
@@ -30,6 +35,20 @@ export class MinimalRushConfiguration {
       'config',
       'rush'
     );
+
+    const experimentsJsonFilename: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.experimentsFilename
+    );
+    const experimentsConfiguration: IMinimalExperimentsConfigurationJson | undefined =
+      _loadExperimentsConfigurationJson(experimentsJsonFilename);
+    if (
+      experimentsConfiguration?.useRushReporter !== undefined &&
+      typeof experimentsConfiguration.useRushReporter !== 'boolean'
+    ) {
+      throw new Error(`The "useRushReporter" setting in "${experimentsJsonFilename}" must be true or false.`);
+    }
+    this._useRushReporter = experimentsConfiguration?.useRushReporter === true;
   }
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
@@ -68,6 +87,13 @@ export class MinimalRushConfiguration {
   public get commonRushConfigFolder(): string {
     return this._commonRushConfigFolder;
   }
+
+  /**
+   * Whether the repository explicitly opted in to the experimental Rush reporter frontend.
+   */
+  public get useRushReporter(): boolean {
+    return this._useRushReporter;
+  }
 }
 
 function _loadConfigurationJson(rushJsonFilename: string): IMinimalRushConfigurationJson | undefined {
@@ -75,5 +101,18 @@ function _loadConfigurationJson(rushJsonFilename: string): IMinimalRushConfigura
     return JsonFile.load(rushJsonFilename);
   } catch (e) {
     return undefined;
+  }
+}
+
+function _loadExperimentsConfigurationJson(
+  experimentsJsonFilename: string
+): IMinimalExperimentsConfigurationJson | undefined {
+  try {
+    return JsonFile.load(experimentsJsonFilename);
+  } catch (e) {
+    if (FileSystem.isNotExistError(e)) {
+      return undefined;
+    }
+    throw e;
   }
 }
