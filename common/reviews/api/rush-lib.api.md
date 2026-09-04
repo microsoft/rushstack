@@ -13,14 +13,22 @@ import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
+import { createRushDiagnostic } from '@rushstack/rush-reporter';
 import { CredentialCache } from '@rushstack/credential-cache';
 import { HookMap } from 'tapable';
+import { ICreateRushDiagnosticOptions } from '@rushstack/rush-reporter';
 import { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { ICredentialCacheOptions } from '@rushstack/credential-cache';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IProblemCollector } from '@rushstack/terminal';
+import { IReporterEventScope } from '@rushstack/rush-reporter';
+import { IReporterEventSink } from '@rushstack/rush-reporter';
+import { IRushDiagnostic } from '@rushstack/rush-reporter';
+import { IScopedLogger } from '@rushstack/rush-reporter';
+import { IScopedMessageOptions } from '@rushstack/rush-reporter';
+import { IScopedReporter } from '@rushstack/rush-reporter';
 import { ITerminal } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
@@ -28,7 +36,11 @@ import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import { parseReporterExtensionEventName } from '@rushstack/rush-reporter';
 import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
+import { ReporterExtensionEventName } from '@rushstack/rush-reporter';
+import { ReporterJsonValue } from '@rushstack/rush-reporter';
+import { ReporterPrivacyClassification } from '@rushstack/rush-reporter';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -147,6 +159,8 @@ export class CommonVersionsConfiguration {
     save(): boolean;
     saveAsync(): Promise<boolean>;
 }
+
+export { createRushDiagnostic }
 
 export { CredentialCache }
 
@@ -439,6 +453,8 @@ export interface ICreateOperationsContext {
     readonly rushConfiguration: RushConfiguration;
 }
 
+export { ICreateRushDiagnosticOptions }
+
 export { ICredentialCacheEntry }
 
 export { ICredentialCacheOptions }
@@ -557,6 +573,8 @@ export interface ILaunchOptions {
     // @internal
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
+    // @internal
+    reporter?: IRushSessionReporterOptions;
     terminalProvider?: ITerminalProvider;
 }
 
@@ -911,6 +929,10 @@ export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
     phaseName: string;
 };
 
+export { IReporterEventScope }
+
+export { IReporterEventSink }
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -942,6 +964,8 @@ export interface IRushCommandLineSpec {
 
 // @beta (undocumented)
 export type IRushConfigurationProjectForSnapshot = Pick<RushConfigurationProject, 'projectFolder' | 'projectRelativeFolder'>;
+
+export { IRushDiagnostic }
 
 // @alpha (undocumented)
 export interface IRushPhaseSharding {
@@ -983,9 +1007,22 @@ export interface IRushReportingConfiguration {
 export interface IRushSessionOptions {
     // (undocumented)
     getIsDebugMode: () => boolean;
+    reporter?: IRushSessionReporterOptions;
     // (undocumented)
     terminalProvider: ITerminalProvider;
 }
+
+// @beta
+export interface IRushSessionReporterOptions {
+    readonly eventSink: IReporterEventSink;
+    readonly sessionId: string;
+}
+
+export { IScopedLogger }
+
+export { IScopedMessageOptions }
+
+export { IScopedReporter }
 
 // @beta
 export interface IStopwatchResult {
@@ -1288,6 +1325,8 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 // @beta
 export type Parallelism = number | IParallelismScalar;
 
+export { parseReporterExtensionEventName }
+
 // @alpha
 export class PhasedCommandHooks {
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
@@ -1364,6 +1403,12 @@ export class ProjectChangeAnalyzer {
     // @internal
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
+
+export { ReporterExtensionEventName }
+
+export { ReporterJsonValue }
+
+export { ReporterPrivacyClassification }
 
 // @public
 export class RepoStateFile {
@@ -1702,6 +1747,8 @@ export class RushSession {
     getCobuildLockProviderFactory(cobuildLockProviderName: string): CobuildLockProviderFactory | undefined;
     // (undocumented)
     getLogger(name: string): ILogger;
+    getReporter(scope?: IReporterEventScope): IScopedReporter | undefined;
+    getScopedLogger(scope?: IReporterEventScope): IScopedLogger | undefined;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)

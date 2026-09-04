@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { randomUUID } from 'node:crypto';
+
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS } from '@rushstack/rush-reporter';
 
@@ -30,6 +32,7 @@ export interface IRushFrontendOptions {
     currentRushLib: typeof import('@microsoft/rush-lib'),
     launchOptions: IRushFrontendLaunchOptions
   ) => void | Promise<void>;
+  readonly createSessionId?: () => string;
   readonly processLifecycle?: IRushFrontendProcessLifecycle;
 }
 
@@ -132,6 +135,7 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     initializeReporterHostAsync = initializeRushReporterHostAsync,
     createVersionSelector = (version: string) => new RushVersionSelector(version),
     executeCurrentRush = RushCommandSelector.execute,
+    createSessionId = randomUUID,
     processLifecycle = createProcessLifecycle()
   } = options;
 
@@ -152,9 +156,13 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   }
   const reporterCloseAsync: () => Promise<void> = () =>
     reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
+  const sessionId: string = createSessionId();
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
     ...launchOptions,
-    reporterEventSink: reporterHost.sink,
+    reporter: {
+      eventSink: reporterHost.sink,
+      sessionId
+    },
     reporterCloseAsync
   };
 
