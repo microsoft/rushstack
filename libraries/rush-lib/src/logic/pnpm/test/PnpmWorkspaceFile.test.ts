@@ -554,4 +554,45 @@ describe(PnpmWorkspaceFile.name, () => {
       expect(writtenContent).not.toContain('minimumReleaseAgeExclude');
     });
   });
+
+  describe('global virtual store functionality', () => {
+    it('generates workspace file with enableGlobalVirtualStore', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+      workspaceFile.enableGlobalVirtualStore = true;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('generates workspace file with enableGlobalVirtualStore, allowBuilds, and catalogs', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+
+      workspaceFile.catalogs = {
+        default: {
+          react: '^18.0.0'
+        }
+      };
+      workspaceFile.allowBuilds = {
+        esbuild: true
+      };
+      workspaceFile.enableGlobalVirtualStore = true;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toMatchSnapshot();
+    });
+
+    it('omits enableGlobalVirtualStore when disabled', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
+      workspaceFile.addPackage(`${projectsDir}/app1`);
+      workspaceFile.enableGlobalVirtualStore = false;
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).not.toContain('enableGlobalVirtualStore');
+    });
+  });
 });
