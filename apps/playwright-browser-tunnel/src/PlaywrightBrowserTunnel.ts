@@ -84,6 +84,15 @@ interface IBrowserServerProxy {
 }
 
 /**
+ * Thrown internally to settle a connection wait that was still pending when the tunnel was stopped.
+ */
+class TunnelStoppedError extends Error {
+  public constructor() {
+    super('The tunnel was stopped while waiting for a connection');
+  }
+}
+
+/**
  * Hosts a Playwright browser server and forwards traffic over a WebSocket tunnel.
  * @beta
  */
@@ -97,6 +106,10 @@ export class PlaywrightTunnel {
   private readonly _playwrightInstallPath: string;
   private _status: TunnelStatus = 'stopped';
   private _initWsPromise?: Promise<WebSocket>;
+  private _cancelPollConnection?: (error: Error) => void;
+  /// Bumped whenever polling starts or is cancelled, so an attempt that resolves
+  /// after a stop or restart can recognise that it no longer owns the shared state.
+  private _pollGeneration: number = 0;
   private _keepRunning: boolean = false;
   private _ws?: WebSocket;
   private _mode: TunnelMode;
@@ -163,7 +176,14 @@ export class PlaywrightTunnel {
       } else {
         terminal.writeLine(`Tunnel is already running with status: ${this.status}`);
       }
-      await this.waitForCloseAsync();
+      try {
+        await this.waitForCloseAsync();
+      } catch (error) {
+        // stopAsync() settles a pending connection wait; that is an ordinary shutdown, not a failure
+        if (this._keepRunning || !(error instanceof TunnelStoppedError)) {
+          throw error;
+        }
+      }
     }
   }
 
@@ -173,9 +193,28 @@ export class PlaywrightTunnel {
       clearInterval(this._pollInterval);
       this._pollInterval = undefined;
     }
-    await this._initWsPromise?.finally(() => {
-      this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
-    });
+    this._pendingConnectionAttempt = undefined;
+
+    // In poll-connection mode the init promise only settles once a client connects. Clearing the
+    // interval stops the polling but leaves that promise pending forever, so stopping before any
+    // client arrived would never complete. Settle it explicitly as part of the teardown.
+    const cancelPollConnection: ((error: Error) => void) | undefined = this._cancelPollConnection;
+    this._cancelPollConnection = undefined;
+    cancelPollConnection?.(new TunnelStoppedError());
+
+    const initWsPromise: Promise<WebSocket> | undefined = this._initWsPromise;
+    this._initWsPromise = undefined;
+    try {
+      await initWsPromise?.finally(() => {
+        this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
+      });
+    } catch (error) {
+      if (!(error instanceof TunnelStoppedError)) {
+        throw error;
+      }
+    }
+
+    this.status = 'stopped';
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
@@ -271,7 +310,20 @@ export class PlaywrightTunnel {
   // Need to support multiple simultaneous connections for parallel tests.
   private async _pollConnectionAsync(): Promise<WebSocket> {
     this._terminal.writeLine(`Waiting for WebSocket connection`);
+    const generation: number = ++this._pollGeneration;
+    const ownsPollState = (): boolean => this._pollGeneration === generation;
     return await new Promise((resolve, reject) => {
+      this._cancelPollConnection = (error: Error): void => {
+        // Retire this generation so an attempt still in flight cannot clear the
+        // interval or the canceller belonging to whatever starts next.
+        this._pollGeneration += 1;
+        if (this._pollInterval) {
+          clearInterval(this._pollInterval);
+          this._pollInterval = undefined;
+        }
+        this._pendingConnectionAttempt = undefined;
+        reject(error);
+      };
       this._pollInterval = setInterval(() => {
         if (this._pendingConnectionAttempt) {
           return; // Skip if a connection attempt is already in progress
@@ -280,15 +332,25 @@ export class PlaywrightTunnel {
         this._pendingConnectionAttempt = connectionPromise;
         connectionPromise
           .then((ws: WebSocket) => {
+            if (!ownsPollState()) {
+              // Stopped or restarted while this attempt was in flight: the socket
+              // belongs to nobody now, so close it rather than leave it open.
+              ws.removeAllListeners();
+              ws.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
+              return;
+            }
             clearInterval(this._pollInterval);
             this._pollInterval = undefined;
             ws.removeAllListeners();
             this._pendingConnectionAttempt = undefined;
+            this._cancelPollConnection = undefined;
             resolve(ws);
           })
           .catch(() => {
             // no-op - will retry on next interval
-            this._pendingConnectionAttempt = undefined;
+            if (ownsPollState()) {
+              this._pendingConnectionAttempt = undefined;
+            }
           });
       }, 500);
     });
