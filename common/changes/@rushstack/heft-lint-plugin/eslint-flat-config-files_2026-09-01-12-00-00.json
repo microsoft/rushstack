@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Lint files selected by ESLint flat config even when they are not part of the TypeScript program.",
+      "type": "minor"
+    }
+  ]
+}

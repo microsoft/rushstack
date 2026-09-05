@@ -19,7 +19,7 @@ import type {
 } from '@rushstack/heft-typescript-plugin';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
-import type { LinterBase } from './LinterBase';
+import type { IAdditionalLintFile } from './LinterBase';
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
@@ -42,6 +42,8 @@ interface ILintOptions {
   fix?: boolean;
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
+  includeAdditionalFiles: boolean;
+  additionalFileIgnorePatterns: string[];
 }
 
 function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
@@ -134,6 +136,13 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
+      const additionalFileIgnorePatterns: string[] = this._getTypeScriptOutputIgnorePatterns(
+        heftConfiguration,
+        typescriptChangedFiles.map(
+          ([tsProgram]: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>]) => tsProgram
+        )
+      );
+      let includeAdditionalFiles: boolean = true;
       for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
         try {
           await this._lintAsync({
@@ -142,13 +151,17 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             tsProgram,
             changedFiles,
             fix,
-            sarifLogPath
+            sarifLogPath,
+            includeAdditionalFiles,
+            additionalFileIgnorePatterns
           });
         } catch (error) {
           if (!(error instanceof AlreadyReportedError)) {
             taskSession.logger.emitError(error as Error);
           }
         }
+
+        includeAdditionalFiles = false;
       }
 
       // Clear the changed files so that we don't lint them again if the task is executed again
@@ -222,13 +235,22 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   }
 
   private async _lintAsync(options: ILintOptions): Promise<void> {
-    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix, sarifLogPath } = options;
+    const {
+      taskSession,
+      heftConfiguration,
+      tsProgram,
+      changedFiles,
+      fix,
+      sarifLogPath,
+      includeAdditionalFiles,
+      additionalFileIgnorePatterns
+    } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
     await this._ensureInitializedAsync(taskSession, heftConfiguration);
 
-    const linters: LinterBase<unknown>[] = [];
+    const lintPromises: Promise<void>[] = [];
     if (this._eslintConfigFilePath && this._eslintToolPath) {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
@@ -238,9 +260,21 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         linterToolPath: this._eslintToolPath,
         linterConfigFilePath: this._eslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
-        buildMetadataFolderPath: taskSession.tempFolderPath
+        buildMetadataFolderPath: taskSession.tempFolderPath,
+        additionalFileIgnorePatterns
       });
-      linters.push(eslintLinter);
+      const additionalFiles: ReadonlySet<IAdditionalLintFile> | undefined = includeAdditionalFiles
+        ? await eslintLinter.getAdditionalLintFilesAsync()
+        : undefined;
+      eslintLinter.printVersionHeader();
+      lintPromises.push(
+        eslintLinter.performLintingAsync({
+          tsProgram,
+          typeScriptFilenames: new Set(tsProgram.getRootFileNames()),
+          changedFiles: changedFiles || new Set(tsProgram.getSourceFiles()),
+          additionalFiles
+        })
+      );
     }
 
     if (this._tslintConfigFilePath && this._tslintToolPath) {
@@ -253,25 +287,43 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath
       });
-      linters.push(tslintLinter);
+      tslintLinter.printVersionHeader();
+      lintPromises.push(
+        tslintLinter.performLintingAsync({
+          tsProgram,
+          typeScriptFilenames: new Set(tsProgram.getRootFileNames()),
+          changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
+        })
+      );
     }
 
     // Now that we know we have initialized properly, run the linter(s)
-    await Promise.all(linters.map((linter) => this._runLinterAsync(linter, tsProgram, changedFiles)));
+    await Promise.all(lintPromises);
   }
 
-  private async _runLinterAsync(
-    linter: LinterBase<unknown>,
-    tsProgram: IExtendedProgram,
-    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
-  ): Promise<void> {
-    linter.printVersionHeader();
+  private _getTypeScriptOutputIgnorePatterns(
+    heftConfiguration: HeftConfiguration,
+    tsPrograms: IExtendedProgram[]
+  ): string[] {
+    const outputFolderPaths: Set<string> = new Set();
+    for (const tsProgram of tsPrograms) {
+      const { outDir, declarationDir } = tsProgram.getCompilerOptions();
+      if (outDir) {
+        outputFolderPaths.add(outDir);
+      }
 
-    const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
-    await linter.performLintingAsync({
-      tsProgram,
-      typeScriptFilenames,
-      changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
-    });
+      if (declarationDir) {
+        outputFolderPaths.add(declarationDir);
+      }
+    }
+
+    const { buildFolderPath } = heftConfiguration;
+    return Array.from(outputFolderPaths, (outputFolderPath: string) => {
+      const relativePath: string = path.relative(buildFolderPath, outputFolderPath).replaceAll('\\', '/');
+      return `${relativePath}/**`;
+    }).filter(
+      (relativePath: string) =>
+        relativePath !== '/**' && relativePath !== '../**' && !relativePath.startsWith('../')
+    );
   }
 }
