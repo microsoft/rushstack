@@ -4842,7 +4842,6 @@ snapshots:
   '@rushstack/heft-lint-plugin@file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)':
     dependencies:
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
-      '@rushstack/heft-typescript-plugin': file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@file:../../../apps/heft(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       json-stable-stringify-without-jsonify: 1.0.1
       semver: 7.7.4

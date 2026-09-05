@@ -22,12 +22,12 @@
     "@rushstack/heft": "1.2.25"
   },
   "dependencies": {
-    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "json-stable-stringify-without-jsonify": "1.0.1",
     "semver": "~7.7.4"
   },
   "devDependencies": {
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/eslint": "9.6.1",

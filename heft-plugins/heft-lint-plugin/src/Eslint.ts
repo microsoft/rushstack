@@ -81,6 +81,7 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
   LEGACY_ESLINTRC_JS_FILENAME,
   LEGACY_ESLINTRC_CJS_FILENAME
 ]);
+const ESLINT_DEFAULT_EXTENSIONS: Set<string> = new Set(['.js', '.mjs', '.cjs']);
 
 export class Eslint extends LinterBase<
   TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
@@ -97,6 +98,8 @@ export class Eslint extends LinterBase<
     TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[]
   > = new Map();
+  private readonly _additionalLintResults: Set<TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult> =
+    new Set();
   private readonly _sarifLogPath: string | undefined;
   private readonly _configHashMap: WeakMap<object, string> = new WeakMap();
   private readonly _fileEnumerator: TEslint.ESLint | undefined;
@@ -297,7 +300,8 @@ export class Eslint extends LinterBase<
       lintResults
         .filter(
           (lintResult: TEslint.ESLint.LintResult) =>
-            !this._typeScriptFilenames.has(path.resolve(lintResult.filePath))
+            !this._typeScriptFilenames.has(path.resolve(lintResult.filePath)) &&
+            !ESLINT_DEFAULT_EXTENSIONS.has(path.extname(lintResult.filePath))
         )
         .map(async (lintResult: TEslint.ESLint.LintResult): Promise<IAdditionalLintFile> => {
           return {
@@ -350,6 +354,12 @@ export class Eslint extends LinterBase<
       this._currentFixMessages.splice(0);
     if (lintResults.length === 1) {
       this._fixMessagesByResult.set(lintResults[0], fixMessages);
+    }
+
+    if (linter === this._additionalFilesLinter) {
+      for (const lintResult of lintResults) {
+        this._additionalLintResults.add(lintResult);
+      }
     }
 
     this._fixesPossible ||=
@@ -415,9 +425,18 @@ export class Eslint extends LinterBase<
 
     const sarifLogPath: string | undefined = this._sarifLogPath;
     if (sarifLogPath) {
+      const primaryLintResults: TEslint.ESLint.LintResult[] = [];
+      const additionalLintResults: TEslint.ESLint.LintResult[] = [];
+      for (const lintResult of lintResults) {
+        const resultSet: TEslint.ESLint.LintResult[] = this._additionalLintResults.has(lintResult)
+          ? additionalLintResults
+          : primaryLintResults;
+        resultSet.push(lintResult);
+      }
+
       const rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'] = {
-        ...this._linter.getRulesMetaForResults(lintResults),
-        ...this._additionalFilesLinter?.getRulesMetaForResults(lintResults)
+        ...this._linter.getRulesMetaForResults(primaryLintResults),
+        ...this._additionalFilesLinter?.getRulesMetaForResults(additionalLintResults)
       };
       const { formatEslintResultsAsSARIF } = await import('./SarifFormatter');
       const sarifString: string = JSON.stringify(

@@ -15,10 +15,8 @@ import type {
 import type {
   TypeScriptPluginName,
   IChangedFilesHookOptions,
-  ITypeScriptPluginAccessor,
-  ITypeScriptConfigurationJson
+  ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
-import { loadTypeScriptConfigurationFileAsync } from '@rushstack/heft-typescript-plugin';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import type { IAdditionalLintFile } from './LinterBase';
@@ -138,9 +136,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
-      const additionalFileIgnorePatterns: string[] = await this._getTypeScriptOutputIgnorePatternsAsync(
+      const additionalFileIgnorePatterns: string[] = this._getTypeScriptOutputIgnorePatterns(
         heftConfiguration,
-        taskSession,
         typescriptChangedFiles.map(
           ([tsProgram]: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>]) => tsProgram
         )
@@ -304,11 +301,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     await Promise.all(lintPromises);
   }
 
-  private async _getTypeScriptOutputIgnorePatternsAsync(
+  private _getTypeScriptOutputIgnorePatterns(
     heftConfiguration: HeftConfiguration,
-    taskSession: IHeftTaskSession,
     tsPrograms: IExtendedProgram[]
-  ): Promise<string[]> {
+  ): string[] {
     const outputFolderPaths: Set<string> = new Set();
     for (const tsProgram of tsPrograms) {
       const { outDir, declarationDir } = tsProgram.getCompilerOptions();
@@ -319,12 +315,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       if (declarationDir) {
         outputFolderPaths.add(declarationDir);
       }
-    }
-
-    const typeScriptConfiguration: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
-    for (const additionalModuleKind of typeScriptConfiguration?.additionalModuleKindsToEmit || []) {
-      outputFolderPaths.add(additionalModuleKind.outFolderName);
     }
 
     const { buildFolderPath } = heftConfiguration;
