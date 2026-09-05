@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.24.1",
+      "tag": "@rushstack/node-core-library_v5.24.1",
+      "date": "Sat, 05 Sep 2026 00:50:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Prevent prototype pollution when Objects.mergeWith() processes attacker-controlled properties."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.0",
       "tag": "@rushstack/node-core-library_v5.24.0",
       "date": "Thu, 20 Aug 2026 00:16:38 GMT",
