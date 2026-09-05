@@ -70,7 +70,7 @@
     "patch"
   ],
   "devDependencies": {
-    "@rushstack/heft": "1.2.23",
+    "@rushstack/heft": "1.2.25",
     "@types/eslint-8": "npm:@types/eslint@8.56.10",
     "@types/eslint-9": "npm:@types/eslint@9.6.1",
     "@typescript-eslint/types": "~8.56.1",
