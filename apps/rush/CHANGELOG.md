@@ -1,6 +1,34 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 05 Aug 2026 19:31:07 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+
+## 5.179.0
+Sat, 05 Sep 2026 00:15:08 GMT
+
+### Minor changes
+
+- Add early validation to `rush install`/`rush update` that immediately fails with a meaningful error message if an undeclared cycle is detected among workspace packages, specifying the cycle path.
+- Add a per-iteration, host-driven runner persist policy so IPC runners can be kept hot or torn down per operation per iteration, instead of fixing persistence at plugin construction.
+- Add a new `provideNpmrcCredentialsViaEnvironment` experiment for PNPM 10.34.2 through 10.x and PNPM 11.5.3 through versions earlier than 11.6.0. For these versions, Rush expands `${VAR}` tokens from the generated `.npmrc`, passing credentials using `npm_config_*` environment variables instead of writing them to disk. PNPM 11.6.0 and newer should instead receive URL-scoped `pnpm_config_//...` credentials directly from CI.
+- Add a new `trimRushEnvironmentVariablesForOperations` experiment that, when enabled, omits environment variables whose names begin with `RUSH_` from the environment forwarded to operation processes (e.g. "build", "test").
+
+### Patches
+
+- In PnpmShrinkwrapFile getIntegrityForImporter, remove the external filter and include workspace-local link: dependencies by recursing into their importer entries, so shrinkwrap-deps.json hashes cover the full dependency tree.
+- Embed the generated zero-dependency Rush reporter bootstrap protocol in the install-run-rush bundle.
+- Add the rush-reporter package dependency to the Rush frontend and engine without changing default output.
+- Fix cross-subspace `workspace:*` dependency failures with pnpm 11.
+- Fix `rush change --verify` to ignore peer dependency updates that accompany package version bumps.
+- Fix `file:` dependency context resolution to use canonical dependency keys for pnpm v9/v10.
+- Allow Rush plugin manifests to declare an optional supported Rush version range.
+- Allow Ctrl+A and Command+A to select text in Rush serve dashboard fields.
+- Add an optional internal IOperationGraphEventSink dual-emit hook to OperationGraph/OperationExecutionRecord: structured operation registration/status/header/activity events and an id-tagged per-operation raw output tap, with no change to existing terminal output.
+
+### Updates
+
+- Update class field declarations for ES2022 emit semantics.
+- Add support for Node 26.
+- Require Node.js 20.9 or newer for the Rush bootstrap and runtime.
 
 ## 5.178.1
 Wed, 05 Aug 2026 19:31:07 GMT
