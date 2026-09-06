@@ -276,6 +276,20 @@ export class ReporterManager implements IReporterEventSink {
   }
 
   /**
+   * Flushes reporters and reports whether every lifecycle action completed before the timeout.
+   *
+   * @internal
+   */
+  public async _flushAndConfirmAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<boolean> {
+    return await this._settleAndConfirmAsync(async (entry: IReporterEntry): Promise<void> => {
+      await entry.drainPromise;
+      if (!entry.disabled) {
+        await entry.reporter.flushAsync();
+      }
+    }, timeoutMs);
+  }
+
+  /**
    * Performs a best-effort flush suitable for signal termination.
    *
    * @remarks
@@ -352,10 +366,14 @@ export class ReporterManager implements IReporterEventSink {
       entry.queue.push(envelope);
     }
 
-    if (!entry.draining) {
-      entry.draining = true;
-      entry.drainPromise = this._drainEntryAsync(entry);
+    if (entry.draining) {
+      if (!this._isCoalescibleStatusEvent(envelope)) {
+        this._drainQueuedEventsSynchronously(entry);
+      }
+      return;
     }
+    entry.draining = true;
+    entry.drainPromise = this._drainEntryAsync(entry);
   }
 
   private async _drainEntryAsync(entry: IReporterEntry): Promise<void> {
@@ -367,8 +385,11 @@ export class ReporterManager implements IReporterEventSink {
           entry.queue.length = 0;
           break;
         }
-        // Yield so producers and coalescing can interleave with delivery.
-        await Promise.resolve();
+        // Only replaceable status updates need to yield for coalescing. Protected
+        // events are delivered synchronously so a hard process exit cannot strand them.
+        if (this._isCoalescibleStatusEvent(envelope)) {
+          await Promise.resolve();
+        }
       }
     } finally {
       entry.draining = false;
@@ -380,6 +401,17 @@ export class ReporterManager implements IReporterEventSink {
       entry.reporter.report(envelope);
     } catch (error) {
       this._handleReporterFailure(entry, error as Error);
+    }
+  }
+
+  private _drainQueuedEventsSynchronously(entry: IReporterEntry): void {
+    while (entry.queue.length > 0) {
+      const envelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
+      this._deliverEnvelope(entry, envelope);
+      if (entry.disabled) {
+        entry.queue.length = 0;
+        break;
+      }
     }
   }
 
@@ -425,6 +457,26 @@ export class ReporterManager implements IReporterEventSink {
 
     try {
       await Promise.race([work, timeout]);
+    } finally {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+    }
+  }
+
+  private async _settleAndConfirmAsync(
+    action: (entry: IReporterEntry) => Promise<void>,
+    timeoutMs: number
+  ): Promise<boolean> {
+    const work: Promise<true> = Promise.all(
+      this._entries.map((entry: IReporterEntry) => this._scheduleLifecycleAction(entry, action))
+    ).then(() => true as const);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout: Promise<false> = new Promise<false>((resolve: (value: false) => void) => {
+      timer = setTimeout(() => resolve(false), timeoutMs);
+    });
+    try {
+      return await Promise.race([work, timeout]);
     } finally {
       if (timer !== undefined) {
         clearTimeout(timer);

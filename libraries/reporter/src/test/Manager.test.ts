@@ -108,6 +108,24 @@ describe('ReporterManager ordering and assignment', () => {
     expect(reporter.reported[0].timestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
+  it('delivers protected events synchronously so hard exits cannot strand output', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('a');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    manager.emit(makeInput('activityChanged', { text: 'status' }));
+    manager.emit(makeInput('externalOutput', { text: 'first' }));
+    manager.emit(makeInput('externalOutput', { text: 'second' }));
+
+    expect(reporter.reported.map((event: IReporterEventEnvelope<unknown>) => event.payload)).toEqual([
+      { text: 'status' },
+      { text: 'first' },
+      { text: 'second' }
+    ]);
+    expect(manager.getPendingEventCount()).toBe(0);
+  });
+
   it('derives the required flag from the event type, ignoring producer input', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter('a');
@@ -117,12 +135,16 @@ describe('ReporterManager ordering and assignment', () => {
     manager.emit(makeInput('activityChanged'));
     manager.emit(makeInput('messageEmitted'));
     manager.emit(makeInput('commandStarted'));
+    manager.emit(makeInput('operationStreamClosed'));
+    manager.emit(makeInput('operationCompleted'));
     await manager.flushAsync();
 
     expect(reporter.reported.map((e: IReporterEventEnvelope<unknown>) => e.required)).toEqual([
       false,
       true,
-      true
+      true,
+      false,
+      false
     ]);
   });
 
@@ -152,9 +174,10 @@ describe('ReporterManager ordering and assignment', () => {
     manager.ingestForeignEnvelope(foreign);
     await manager.flushAsync();
 
-    const byIdentity: [string, string][] = reporter.reported.map(
-      (e: IReporterEventEnvelope<unknown>) => [e.sessionId, e.eventId]
-    );
+    const byIdentity: [string, string][] = reporter.reported.map((e: IReporterEventEnvelope<unknown>) => [
+      e.sessionId,
+      e.eventId
+    ]);
     expect(byIdentity).toEqual([
       ['sess', 'evt_1'],
       ['child', 'evt_1']
@@ -365,6 +388,21 @@ describe('ReporterManager flush and close', () => {
     manager.emit(makeInput('commandStarted'));
     await manager.flushAsync(50);
     expect(true).toBe(true);
+  });
+
+  it('reports whether a flush completed before its timeout', async () => {
+    let resolveFlush: (() => void) | undefined;
+    const reporter: RecordingReporter = new RecordingReporter('confirm');
+    reporter.flushAsync = () =>
+      new Promise<void>((resolve: () => void) => {
+        resolveFlush = resolve;
+      });
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    await expect(manager._flushAndConfirmAsync(10)).resolves.toBe(false);
+    resolveFlush?.();
   });
 
   it('does not overlap close with a timed-out flush', async () => {

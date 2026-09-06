@@ -7,7 +7,7 @@
 import * as rushLib from '@microsoft/rush-lib';
 import { PackageJsonLookup, Import } from '@rushstack/node-core-library';
 
-import { RushCommandSelector } from './RushCommandSelector';
+import { launchRushFrontendAsync } from './RushFrontend';
 
 const builtInPluginConfigurations: rushLib._IBuiltInPluginConfiguration[] = [];
 
@@ -34,8 +34,17 @@ includePlugin('rush-serve-plugin');
 includePlugin('rush-azure-interactive-auth-plugin', '@rushstack/rush-azure-storage-build-cache-plugin');
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
-RushCommandSelector.execute(currentPackageVersion, rushLib, {
-  isManaged: false,
-  alreadyReportedNodeTooNewError: false,
-  builtInPluginConfigurations
+launchRushFrontendAsync({
+  currentPackageVersion,
+  rushVersionToLoad: undefined,
+  configuration: undefined,
+  launchOptions: {
+    isManaged: false,
+    alreadyReportedNodeTooNewError: false,
+    builtInPluginConfigurations
+  },
+  currentRushLib: rushLib
+}).catch((error: Error) => {
+  process.exitCode = 1;
+  console.error(error);
 });

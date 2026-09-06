@@ -37,6 +37,9 @@ export function separateJsonControls(argv: readonly string[]): IJsonControls {
 
   for (let index: number = 0; index < argv.length; index++) {
     const arg: string = argv[index];
+    if (arg === '--') {
+      break;
+    }
     if (arg === '--json') {
       commandJson = true;
     } else if (arg === '--reporter=json') {

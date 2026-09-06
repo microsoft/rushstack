@@ -20,7 +20,7 @@ import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rus
 
 import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import type { IOperationChildProcessReporter, IOperationGraphEventSink } from './OperationEventSink';
 import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
@@ -44,6 +44,7 @@ import {
  * @internal
  */
 export interface IOperationExecutionRecordContext {
+  iterationId: number;
   streamCollator: StreamCollator;
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
@@ -173,6 +174,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   private _status: OperationStatus;
   private _stateHash: string | undefined;
   private _stateHashComponents: IOperationStateHashComponents | undefined;
+  private _operationStreamClosed: boolean = false;
+  private _operationCompleted: boolean = false;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -203,6 +206,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get name(): string {
     return this.runner.name;
+  }
+
+  public get iterationId(): number {
+    return this._context.iterationId;
   }
 
   public get debugMode(): boolean {
@@ -279,8 +286,70 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this._context.eventSink;
   }
 
+  /**
+   * {@inheritdoc IOperationRunnerContext.createChildProcessReporter}
+   */
+  public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
+    return this._context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
+  }
+
   public get silent(): boolean {
     return !this.enabled || this.runner.silent;
+  }
+
+  /**
+   * Notifies observers that this iteration cannot emit more output for the operation.
+   *
+   * @internal
+   */
+  public closeOperationStream(): void {
+    if (!this._operationStreamClosed) {
+      this._operationStreamClosed = true;
+      this._context.eventSink?.onOperationStreamClosed?.(this.name, this, this.iterationId);
+    }
+  }
+
+  /**
+   * Emits the ordered terminal stream events exactly once.
+   *
+   * @internal
+   */
+  public finalizeOperation(): void {
+    this.closeOperationStream();
+    if (!this._operationCompleted) {
+      this._operationCompleted = true;
+      this._context.eventSink?.onOperationCompleted?.(this);
+    }
+  }
+
+  /**
+   * Whether this record has emitted its terminal completion event.
+   *
+   * @internal
+   */
+  public get isOperationCompleted(): boolean {
+    return this._operationCompleted;
+  }
+
+  /**
+   * Adds the reporter's lossless operation-output tap ahead of any legacy presentation transforms.
+   *
+   * @internal
+   */
+  public addOperationChunkTap(destination: TerminalWritable): TerminalWritable {
+    const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
+    if (!eventSink?.onOperationChunk) {
+      return destination;
+    }
+
+    return new SplitterTransform({
+      destinations: [
+        destination,
+        new OperationChunkTap(this.name, (operationId, chunk) =>
+          eventSink.onOperationChunk?.(operationId, chunk, this, this.iterationId)
+        )
+      ]
+    });
   }
 
   public getStateHash(): string {
@@ -341,10 +410,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
   public async runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
-      logFileSuffix: string;
+      logFileSuffix?: string;
     }
   ): Promise<T> {
     const { associatedProject, stdioSummarizer, problemCollector } = this;
@@ -396,25 +469,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         newlineKind: NewlineKind.Lf // for StdioSummarizer
       });
 
-      const chunkTapDestinations: TerminalWritable[] = [];
-      const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
-      if (eventSink?.onOperationChunk) {
-        // Tap the stream upstream of the quiet-mode discard so the sink observes
-        // the exact bytes the collated writer would receive, regardless of verbosity.
-        chunkTapDestinations.push(
-          new OperationChunkTap(this.name, (operationId, chunk) =>
-            eventSink.onOperationChunk?.(operationId, chunk)
-          )
-        );
-      }
-
       const splitterTransform1: SplitterTransform = new SplitterTransform({
         destinations: [
           this.quietMode
             ? new DiscardStdoutTransform({ destination: this.collatedWriter })
             : this.collatedWriter,
-          stderrLineTransform,
-          ...chunkTapDestinations
+          stderrLineTransform
         ]
       });
 
@@ -424,14 +484,22 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         ensureNewlineAtEnd: true
       });
 
-      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(
+        this.addOperationChunkTap(normalizeNewlineTransform)
+      );
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
+      const structuredChildOutputTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        new CollatedTerminal(normalizeNewlineTransform),
+        {
+          debugEnabled: this.debugMode
+        }
+      );
       const terminal: Terminal = new Terminal(terminalProvider);
       //#endregion
 
-      const result: T = await callback(terminal, terminalProvider);
+      const result: T = await callback(terminal, terminalProvider, structuredChildOutputTerminalProvider);
 
       normalizeNewlineTransform.close();
 
@@ -486,9 +554,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     } finally {
       if (this.isTerminal) {
         this._collatedWriter?.close();
-        if (this._collatedWriter) {
-          this._context.eventSink?.onOperationStreamClosed?.(this.name);
-        }
+        this.finalizeOperation();
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }

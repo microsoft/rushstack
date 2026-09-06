@@ -74,8 +74,6 @@ export function encodeBootstrapEnvelope(input: IBootstrapEnvelopeInput): string 
   });
 }
 
-// END GENERATED BOOTSTRAP PROTOCOL
-
 /**
  * The maximum size of the buffered bootstrap event stream, in bytes (1 MiB).
  *
@@ -120,3 +118,5 @@ export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NO
  */
 export const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: 'rush.reporter.buffer-truncated' =
   'rush.reporter.buffer-truncated';
+
+// END GENERATED BOOTSTRAP PROTOCOL

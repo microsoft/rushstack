@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'node:child_process';
+import * as path from 'node:path';
 
 import { Path } from '@rushstack/node-core-library';
 import { type ITerminal, type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
@@ -10,7 +11,10 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
+import type { IOperationChildProcessReporter } from './OperationEventSink';
+import { HeftChildReporterNonFatalError } from './HeftChildProcessReporter';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
@@ -75,7 +79,11 @@ export class ShellOperationRunner implements IOperationRunner {
     lastState?: IOperationLastState
   ): Promise<OperationStatus> {
     return await context.runWithTerminalAsync(
-      async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
+      async (
+        terminal: ITerminal,
+        terminalProvider: ITerminalProvider,
+        structuredChildOutputTerminalProvider: ITerminalProvider
+      ) => {
         let hasWarningOrError: boolean = false;
 
         // Log any ignored parameters
@@ -96,6 +104,8 @@ export class ShellOperationRunner implements IOperationRunner {
         const { rushConfiguration, projectFolder } = this._rushProject;
 
         const { environment: initialEnvironment } = context;
+        const childProcessReporter: IOperationChildProcessReporter | undefined =
+          !IS_WINDOWS && isHeftCommand(commandToRun) ? context.createChildProcessReporter() : undefined;
 
         const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
           rushConfiguration: rushConfiguration,
@@ -105,8 +115,19 @@ export class ShellOperationRunner implements IOperationRunner {
           environmentPathOptions: {
             includeProjectBin: true
           },
-          initialEnvironment
+          initialEnvironment,
+          additionalEnvironment: childProcessReporter?.environment,
+          stdio: childProcessReporter?.stdio
         });
+        let reporterError: Error | undefined;
+        const reporterDrainPromise: Promise<void> = childProcessReporter
+          ? childProcessReporter
+              .attachAsync(subProcess, structuredChildOutputTerminalProvider)
+              .catch((error) => {
+                reporterError =
+                  error instanceof Error ? error : new Error('The Heft child reporter channel failed.');
+              })
+          : Promise.resolve();
 
         // Hook into events, in order to get live streaming of the log
         subProcess.stdout?.on('data', (data: Buffer) => {
@@ -119,22 +140,20 @@ export class ShellOperationRunner implements IOperationRunner {
           hasWarningOrError = true;
         });
 
-        const status: OperationStatus = await new Promise(
-          (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
+        const closePromise: Promise<{
+          readonly exitCode: number | null;
+          readonly signal: NodeJS.Signals | null;
+        }> = new Promise(
+          (
+            resolve: (result: {
+              readonly exitCode: number | null;
+              readonly signal: NodeJS.Signals | null;
+            }) => void,
+            reject: (error: OperationError) => void
+          ) => {
             subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
               try {
-                // Do NOT reject here immediately, give a chance for other logic to suppress the error
-                if (signal) {
-                  context.error = new OperationError('error', `Terminated by signal: ${signal}`);
-                  resolve(OperationStatus.Failure);
-                } else if (exitCode !== 0) {
-                  context.error = new OperationError('error', `Returned error code: ${exitCode}`);
-                  resolve(OperationStatus.Failure);
-                } else if (hasWarningOrError) {
-                  resolve(OperationStatus.SuccessWithWarning);
-                } else {
-                  resolve(OperationStatus.Success);
-                }
+                resolve({ exitCode, signal });
               } catch (error) {
                 context.error = error as OperationError;
                 reject(error as OperationError);
@@ -142,8 +161,28 @@ export class ShellOperationRunner implements IOperationRunner {
             });
           }
         );
+        const [{ exitCode, signal }]: [
+          { readonly exitCode: number | null; readonly signal: NodeJS.Signals | null },
+          void
+        ] = await Promise.all([closePromise, reporterDrainPromise]);
 
-        return status;
+        if (signal) {
+          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+          context.error = new OperationError('error', `Terminated by signal: ${signal}`);
+          return OperationStatus.Failure;
+        } else if (exitCode !== 0) {
+          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+          context.error = new OperationError('error', `Returned error code: ${exitCode}`);
+          return OperationStatus.Failure;
+        } else if (reporterError && !(reporterError instanceof HeftChildReporterNonFatalError)) {
+          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+          context.error = new OperationError('error', reporterError.message);
+          return OperationStatus.Failure;
+        } else if (hasWarningOrError || childProcessReporter?.hasWarningOrError) {
+          return OperationStatus.SuccessWithWarning;
+        } else {
+          return OperationStatus.Success;
+        }
       },
       {
         createLogFile: true
@@ -154,6 +193,63 @@ export class ShellOperationRunner implements IOperationRunner {
   public getConfigHash(): string {
     return this._commandForHash;
   }
+}
+
+/**
+ * Returns whether a lifecycle command directly launches Heft.
+ *
+ * @internal
+ */
+export function isHeftCommand(command: string): boolean {
+  let quote: "'" | '"' | undefined;
+  let escaped: boolean = false;
+  for (const character of command) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === '\\' && quote !== "'") {
+      escaped = true;
+      continue;
+    }
+    if (quote) {
+      if (quote === '"' && (character === '$' || character === '`')) {
+        return false;
+      }
+      if (character === quote) {
+        quote = undefined;
+      }
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if ('&|;<>()`$\r\n'.includes(character)) {
+      return false;
+    }
+  }
+  if (quote || escaped) {
+    return false;
+  }
+
+  const tokens: string[] =
+    command
+      .match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)
+      ?.map((token: string) => token.replace(/^(['"])(.*)\1$/, '$2')) ?? [];
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  const executableName: string = path.basename(tokens[0].replace(/\\/g, '/')).toLowerCase();
+  if (executableName === 'heft' || executableName === 'heft.cmd' || executableName === 'heft.exe') {
+    return true;
+  }
+  if ((executableName === 'node' || executableName === 'node.exe') && tokens.length > 1) {
+    const scriptName: string = path.basename(tokens[1].replace(/\\/g, '/')).toLowerCase();
+    return scriptName === 'heft' || scriptName === 'heft.js';
+  }
+  return false;
 }
 
 /**

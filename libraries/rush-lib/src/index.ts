@@ -20,7 +20,11 @@ export {
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
-export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+export {
+  RushConfiguration,
+  type IRushReportingConfiguration,
+  type ITryFindRushJsonLocationOptions
+} from './api/RushConfiguration';
 
 export { Subspace } from './api/Subspace';
 export { SubspacesConfiguration } from './api/SubspacesConfiguration';
@@ -164,9 +168,25 @@ export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 export {
   RushSession,
   type IRushSessionOptions,
+  type IRushSessionReporterOptions,
   type CloudBuildCacheProviderFactory,
   type CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
+
+export {
+  createRushDiagnostic,
+  parseReporterExtensionEventName,
+  type ICreateRushDiagnosticOptions,
+  type IReporterEventScope,
+  type IReporterEventSink,
+  type IRushDiagnostic,
+  type IScopedLogger,
+  type IScopedMessageOptions,
+  type IScopedReporter,
+  type ReporterExtensionEventName,
+  type ReporterJsonValue,
+  type ReporterPrivacyClassification
+} from '@rushstack/rush-reporter';
 
 export {
   type IRushCommand,
@@ -183,6 +203,7 @@ export {
 } from './pluginFramework/PhasedCommandHooks';
 export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
 export type {
+  IOperationChildProcessReporter as _IOperationChildProcessReporter,
   IOperationGraphEventSink as _IOperationGraphEventSink,
   IOperationActivityOptions as _IOperationActivityOptions
 } from './logic/operations/OperationEventSink';
