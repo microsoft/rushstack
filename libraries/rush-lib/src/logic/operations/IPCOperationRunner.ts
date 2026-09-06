@@ -239,7 +239,7 @@ export class IPCOperationRunner implements IOperationRunner {
         command: 'exit'
       };
       subProcess.send(exitCommand);
-      await once(subProcess, 'exit');
+      await once(subProcess, 'close');
     }
   }
 }

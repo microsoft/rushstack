@@ -157,6 +157,7 @@ export interface IOperationRunner {
 
   /**
    * If this runner performs any background work to optimize future runs, this method will clean it up.
+   * Must be safe to call again after the resources have been released.
    */
   closeAsync?(): Promise<void>;
 }
