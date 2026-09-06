@@ -10,6 +10,10 @@ Routing precedence:
 3. `RUSH_DAEMON` overrides `rush.json`'s `daemon.enabled`; the default is false.
 4. Auto-start is considered only after selecting daemon execution.
 
+Explicit reporter/output/log-level controls retain the native frontend reporter path.
+The current daemon client renders the legacy operation stream; it does not silently
+reinterpret requests for JSON, AI, file, or other reporter formats.
+
 `install`, `update`, package mutation, publishing, setup, management, and other
 administrative commands are never forwarded as execution requests. Rushx script names
 are not interpreted as Rush built-ins. Arguments after `--` are preserved.
@@ -17,10 +21,19 @@ Request cwd, environment, argv, width and color are captured before connecting.
 The protocol currently expresses request color as a boolean; subscriptions carry
 the corresponding color level. There is no SIGWINCH forwarding.
 
-The current standalone host rejects execution as typed `unsupported` because it
-has no request resolver or warm graph. That rejection and a controlling-terminal
-requirement fall back in-process. Unknown rejections, transport loss after sending
-a request, and output failures do not replay the command.
+The standalone host now binds native `build`/`rebuild` requests to a reusable
+all-project graph. Native Rush parsing, project selection, graph plugins, and
+incremental/cache semantics are reused rather than spawning another Rush CLI.
+The client renders operation headers, collated text, and activity events; global
+command byte streams remain byte-preserving. A `rushx build` script never claims
+to be a workspace build.
+
+The initial engine is pinned to its startup environment, first command, and
+non-selection parameters. External plugins, inherited/rig configuration, `.env`,
+watch/install options, and unsupported event-hook scripts still use typed
+pre-execution fallback. The current engine retains the native Rush lock until
+disposal, so stop it before native administrative commands. Unknown rejections,
+transport loss after sending a request, and output failures never replay work.
 
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
 not read input until the command attaches an input destination, and sends bounded

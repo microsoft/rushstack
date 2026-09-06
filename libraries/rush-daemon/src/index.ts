@@ -18,10 +18,7 @@ export {
   type IDaemonInteractiveConnection,
   type IDaemonInteractiveRequestOptions
 } from './DaemonInteractiveConnection';
-export {
-  DaemonRequiresInProcessError,
-  evaluateDaemonTerminalPolicy
-} from './DaemonTerminalPolicy';
+export { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 export {
   type IInteractiveRequestControlClient,
   type IInteractiveRequestInputSink,
@@ -89,3 +86,4 @@ export {
 } from './WorkspaceInvalidationTracker';
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
+export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';

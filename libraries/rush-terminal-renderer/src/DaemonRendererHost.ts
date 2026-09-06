@@ -23,8 +23,6 @@ function toChunkKind(stream: 'stdout' | 'stderr'): TerminalChunkKind {
   return stream === 'stderr' ? TerminalChunkKind.Stderr : TerminalChunkKind.Stdout;
 }
 
-const CHUNK_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder('utf8', { fatal: false });
-
 /**
  * The CLI client's presentation host: routes decoded daemon frames to the
  * per-operation collator and to the event renderer.
@@ -69,10 +67,7 @@ export class DaemonRendererHost {
       // filtering, without mutating the shared stream.
       return;
     }
-    this._streams.writeChunk(operationId, {
-      kind: toChunkKind(stream),
-      text: CHUNK_DECODER.decode(chunk)
-    });
+    this._streams.writeBytes(operationId, toChunkKind(stream), chunk);
   }
 
   /** Flushes and closes the renderer. */

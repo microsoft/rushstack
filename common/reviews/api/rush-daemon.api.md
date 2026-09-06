@@ -356,6 +356,7 @@ export interface IResolvedDaemonGlobalRequest {
 
 // @beta
 export interface IResolvedDaemonPhasedRequest {
+    readonly exactSelection?: boolean;
     // (undocumented)
     readonly kind: 'phased';
     // (undocumented)
@@ -428,6 +429,7 @@ export interface IWorkspaceEngineComponentFactoryOptions {
     readonly isEngineRecreationRequiredAsync?: IsWorkspaceEngineRecreationRequiredAsync;
     // (undocumented)
     readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
+    readonly refreshInputsOnEveryRequest?: boolean;
     // (undocumented)
     readonly shape: IWorkspaceEngineShape;
 }
@@ -483,6 +485,7 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
 export interface IWorkspaceSession extends AsyncDisposable {
     // (undocumented)
     readonly engineShape: IWorkspaceEngineShape | undefined;
+    initializeEngineAsync?(factory: CreateWorkspaceSessionComponentsAsync): Promise<void>;
     // (undocumented)
     readonly inputsSnapshot: IInputsSnapshot | undefined;
     // (undocumented)
@@ -546,7 +549,13 @@ export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspace
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean): Promise<IDaemonPhasedRequestResult>;
+}
+
+// @beta
+export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
+    // (undocumented)
+    resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
 }
 
 // @public
@@ -631,6 +640,7 @@ export class WorkspaceSession implements IWorkspaceSession {
     static createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession>;
     // (undocumented)
     get engineShape(): IWorkspaceEngineShape | undefined;
+    initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void>;
     // (undocumented)
     get inputsSnapshot(): IInputsSnapshot | undefined;
     // (undocumented)
@@ -638,12 +648,12 @@ export class WorkspaceSession implements IWorkspaceSession {
     // (undocumented)
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
-    readonly operationGraph: IOperationGraph | undefined;
+    get operationGraph(): IOperationGraph | undefined;
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)
-    readonly rushSession: RushSession | undefined;
+    get rushSession(): RushSession | undefined;
 }
 
 // @beta

@@ -9,6 +9,7 @@ import { resolveDaemonConfiguration, type IDaemonConfigurationJson } from '@micr
 
 import { serveRushDaemonAsync } from './serveRushDaemon';
 import type { IRushDaemonServeOptions } from './serveRushDaemon';
+import { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
 
 const RUSH_JSON_FILENAME: string = 'rush.json';
 
@@ -45,6 +46,7 @@ export async function launchRushDaemonAsync(startingFolder: string = process.cwd
     daemonVersion: packageJson.version,
     repoRoot: workspace.repoRoot,
     rushVersion: workspace.rushVersion,
+    requestResolver: new ProductionDaemonRequestResolver(),
     idleTimeoutSeconds: configuration.idleTimeoutSeconds,
     onError: (error: Error) => process.stderr.write(`${error.stack ?? error.message}\n`),
     onReady: (host) => {

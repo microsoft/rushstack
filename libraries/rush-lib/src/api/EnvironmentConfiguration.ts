@@ -214,6 +214,12 @@ export const EnvironmentVariableNames = {
    */
   RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
 
+  /** Reporter selection is interpreted by the frontend, not the execution engine. */
+  RUSH_REPORTER: 'RUSH_REPORTER',
+
+  /** Reporter verbosity is interpreted by the frontend, not the execution engine. */
+  RUSH_LOG_LEVEL: 'RUSH_LOG_LEVEL',
+
   /**
    * Internal variable used by `rushx` when recursively invoking another `rushx` process, to avoid
    * nesting event hooks.
@@ -691,6 +697,8 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
+          case EnvironmentVariableNames.RUSH_REPORTER:
+          case EnvironmentVariableNames.RUSH_LOG_LEVEL:
             // Handled by @microsoft/rush front end
             break;
 

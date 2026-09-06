@@ -47,12 +47,19 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     ...(separator < 0 ? [] : options.argv.slice(separator))
   ];
   const commandName: string | undefined = argv[0];
+  const reporterControls: boolean =
+    options.environment.RUSH_LOG_LEVEL !== undefined ||
+    (options.environment.RUSH_REPORTER !== undefined && options.environment.RUSH_REPORTER !== 'legacy') ||
+    prefix.some((arg) =>
+      ['--reporter', '--output', '--log-level'].some((name) => arg === name || arg.startsWith(`${name}=`))
+    );
   const ci: boolean = ['CI', 'TF_BUILD', 'GITHUB_ACTIONS', 'JENKINS_URL', 'TEAMCITY_VERSION'].some((key) => {
     const value: string | undefined = options.environment[key];
     return value !== undefined && value !== '' && value !== '0' && value !== 'false';
   });
   const daemon: boolean =
     options.enabled &&
+    !reporterControls &&
     !noDaemon &&
     !!commandName &&
     !commandName.startsWith('-') &&

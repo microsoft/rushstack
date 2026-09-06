@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { once } from 'node:events';
+import * as path from 'node:path';
 
 import type { AsyncSeriesHook } from 'tapable';
 
@@ -27,7 +28,11 @@ import {
   PhasedCommandHooks,
   type ICreateOperationsContext
 } from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationGraphIterationOptions } from '../../logic/operations/IOperationGraph';
+import type {
+  IOperationGraph,
+  IOperationGraphIterationOptions
+} from '../../logic/operations/IOperationGraph';
+import type { IPhasedCommandEngine } from '../../api/PhasedCommandEngine';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
@@ -39,7 +44,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
-import type { Operation } from '../../logic/operations/Operation';
+import type { Operation, OperationEnabledState } from '../../logic/operations/Operation';
 import { associateParametersByPhase } from '../parsing/associateParametersByPhase';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
@@ -337,6 +342,81 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   public async runAsync(): Promise<void> {
+    await this._runAsync();
+  }
+
+  public validateEngineCommand(): void {
+    if (
+      this._alwaysWatch ||
+      this._watchParameter?.value ||
+      this._alwaysInstall ||
+      this._installParameter?.value ||
+      this._nodeDiagnosticDirParameter.value ||
+      this._variantParameter?.value
+    ) {
+      throw new Error('Watch, install, variant and diagnostic-directory options require --no-daemon.');
+    }
+    if (
+      !this._ignoreHooksParameter.value &&
+      (this.rushConfiguration.eventHooks.get(Event.preRushBuild).length ||
+        this.rushConfiguration.eventHooks.get(Event.postRushBuild).length)
+    ) {
+      throw new Error('Build event-hook scripts require --no-daemon (or an explicit --ignore-hooks).');
+    }
+  }
+
+  public getEngineParameterIdentity(): string {
+    const selectionNames: ReadonlySet<string> = this._selectionParameters.parameterNames;
+    return JSON.stringify([
+      this.actionName,
+      this.parser.getParameterStringMap(),
+      Object.entries(this.getParameterStringMap()).filter(([name]) => !selectionNames.has(name))
+    ]);
+  }
+
+  public async selectEngineOperationsAsync(
+    graph: IOperationGraph
+  ): Promise<ReadonlyMap<Operation, OperationEnabledState>> {
+    const projects: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
+      this._terminal
+    );
+    const includePhaseDeps: boolean = !!this._includePhaseDeps?.value;
+    const phases: Set<string> = new Set(
+      Array.from(includePhaseDeps ? this._originalPhases : this._initialPhases, (phase) => phase.name)
+    );
+    const selected: Map<Operation, OperationEnabledState> = new Map();
+    for (const operation of graph.operations) {
+      if (projects.has(operation.associatedProject) && phases.has(operation.associatedPhase.name)) {
+        selected.set(operation, true);
+      }
+    }
+    if (includePhaseDeps) {
+      for (const operation of selected.keys()) {
+        for (const dependency of operation.dependencies) selected.set(dependency, true);
+      }
+    }
+    if (this._changedProjectsOnlyParameter?.value) {
+      for (const operation of selected.keys()) {
+        if (!operation.settings?.ignoreChangedProjectsOnlyFlag) {
+          selected.set(operation, 'ignore-dependency-changes');
+        }
+      }
+    }
+    return selected;
+  }
+
+  public async createEngineAsync(): Promise<IPhasedCommandEngine> {
+    this.validateEngineCommand();
+    await this.initializePluginsAsync();
+    let engine: IPhasedCommandEngine | undefined;
+    await this._runAsync((result) => {
+      engine = result;
+    });
+    if (!engine) throw new Error('Native command preparation did not produce an operation graph.');
+    return engine;
+  }
+
+  private async _runAsync(onEngine?: (engine: IPhasedCommandEngine) => void): Promise<void> {
     // Initialize the stopwatch's start time at 0 (process startup).
     const stopwatch: Stopwatch = Stopwatch.start(0);
 
@@ -396,9 +476,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     const hooks: PhasedCommandHooks = this.hooks;
     const terminal: ITerminal = this._terminal;
-    const presentationTerminal: ITerminal = _isRushSessionOperationStreamEnabled(this.rushSession)
-      ? new Terminal(new NoOpTerminalProvider())
-      : terminal;
+    const presentationTerminal: ITerminal =
+      onEngine || _isRushSessionOperationStreamEnabled(this.rushSession)
+        ? new Terminal(new NoOpTerminalProvider())
+        : terminal;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
@@ -490,12 +571,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
 
     const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
-    const generateFullGraph: boolean = isWatch && this._includeAllProjectsInWatchGraph;
+    const generateFullGraph: boolean = !!onEngine || (isWatch && this._includeAllProjectsInWatchGraph);
+    let transferredEngine: boolean = false;
+    let ownedGraph: OperationGraph | undefined;
 
     try {
       const projectSelection: Set<RushConfigurationProject> = await measureAsyncFn(
         `${PERF_PREFIX}:getSelectedProjects`,
-        () => this._selectionParameters.getSelectedProjectsAsync(terminal, generateFullGraph)
+        () =>
+          onEngine
+            ? Promise.resolve(new Set(this.rushConfiguration.projects))
+            : this._selectionParameters.getSelectedProjectsAsync(terminal, generateFullGraph)
       );
 
       const customParametersByName: Map<string, CommandLineParameter> = new Map();
@@ -570,9 +656,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         }
 
         if (isPnpm && usePnpmSyncForInjectedDependencies) {
-          const { PnpmSyncCopyOperationPlugin } = await import(
-            '../../logic/operations/PnpmSyncCopyOperationPlugin'
-          );
+          const { PnpmSyncCopyOperationPlugin } =
+            await import('../../logic/operations/PnpmSyncCopyOperationPlugin');
           new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
         }
       });
@@ -664,7 +749,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         quietMode: isQuietMode,
         debugMode: this.parser.isDebug,
         destinations: [
-          _isRushSessionOperationStreamEnabled(this.rushSession)
+          onEngine || _isRushSessionOperationStreamEnabled(this.rushSession)
             ? new CallbackWritable({ onWriteChunk: () => undefined })
             : StdioWritable.instance
         ],
@@ -672,26 +757,64 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         maxParallelism,
         allowOversubscription: this._allowOversubscription,
         isWatch,
-        pauseNextIteration: false,
+        pauseNextIteration: !!onEngine,
         getInputsSnapshotAsync,
         abortController: this.sessionAbortController,
+        closeRunnersOnAbort: !onEngine,
         telemetry: executionTelemetryHandler
       };
 
       const graph: OperationGraph = new OperationGraph(operations, graphOptions);
+      ownedGraph = graph;
+      if (onEngine) {
+        // BaseRushAction prepends the repository bin directory by mutating PATH. Engine hosts
+        // instead supply that same prefix only to operation environments, before plugin transforms.
+        graph.hooks.createEnvironmentForOperation.tap(
+          { name: 'PhasedCommandEngine', stage: -Infinity },
+          (environment) => ({
+            ...environment,
+            PATH: `${path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin')}${path.delimiter}${environment.PATH ?? ''}`
+          })
+        );
+      }
 
       const graphContext: IOperationGraphContext = {
         ...createOperationsContext,
         initialSnapshot
       };
 
+      await measureAsyncFn(`${PERF_PREFIX}:executionManager`, async () => {
+        await hooks.onGraphCreatedAsync.promise(graph, graphContext);
+      });
+      if (onEngine) {
+        if (!getInputsSnapshotAsync || !initialSnapshot) {
+          throw new Error('The daemon engine requires a Git-backed workspace inputs snapshot.');
+        }
+        let disposePromise: Promise<void> | undefined;
+        onEngine({
+          operationGraph: graph,
+          rushSession: this.rushSession,
+          inputsSnapshot: initialSnapshot,
+          getInputsSnapshotAsync,
+          isIncremental: this._isIncrementalBuildAllowed,
+          phaseNames: Array.from(new Set(Array.from(operations, (op) => op.associatedPhase.name))).sort(),
+          pluginNames: Array.from(
+            new Set([
+              ...this.parser.pluginManager.loadedPluginNames,
+              ...hooks.createOperationsAsync.taps.map((tap) => tap.name),
+              ...hooks.onGraphCreatedAsync.taps.map((tap) => tap.name)
+            ])
+          ).sort(),
+          [Symbol.asyncDispose]: () =>
+            (disposePromise ??= disposeEngineGraphAsync(graph, cobuildConfiguration))
+        });
+        transferredEngine = true;
+        return;
+      }
+
       const abortPromise: Promise<void> = once(this.sessionAbortController.signal, 'abort').then(async () => {
         terminal.writeLine(`Shutting down Rush...`);
         return await graph.abortCurrentIterationAsync();
-      });
-
-      await measureAsyncFn(`${PERF_PREFIX}:executionManager`, async () => {
-        await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
       attachReporterOperationEventSink(graph, this.rushSession, this.actionName, isWatch);
 
@@ -746,7 +869,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         );
       }
     } finally {
-      if (cobuildConfiguration) {
+      if (onEngine && !transferredEngine && ownedGraph) {
+        await disposeEngineGraphAsync(ownedGraph, cobuildConfiguration);
+      } else if (cobuildConfiguration && !transferredEngine) {
         await cobuildConfiguration.destroyLockProviderAsync();
       }
     }
@@ -831,5 +956,32 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       return;
     }
     this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
+  }
+}
+
+async function disposeEngineGraphAsync(
+  graph: OperationGraph,
+  cobuildConfiguration: CobuildConfiguration | undefined
+): Promise<void> {
+  graph.abortController.abort();
+  const errors: unknown[] = [];
+  for (const cleanupAsync of [
+    () => graph.abortCurrentIterationAsync(),
+    () => graph.closeRunnersAsync(),
+    async () => {
+      await cobuildConfiguration?.destroyLockProviderAsync();
+    }
+  ]) {
+    try {
+      await cleanupAsync();
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length === 1) {
+    throw errors[0];
+  }
+  if (errors.length > 1) {
+    throw new AggregateError(errors, 'Failed to dispose native phased engine resources.');
   }
 }

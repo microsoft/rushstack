@@ -53,6 +53,7 @@ interface IResolvedSelection {
   readonly activeOperations: ReadonlyArray<Operation>;
   readonly enabledOperations: ReadonlyArray<Operation>;
   readonly ignoreDependencyOperations: ReadonlyArray<Operation>;
+  readonly exact: boolean;
 }
 
 interface IGraphRoutingState {
@@ -109,7 +110,8 @@ export class PhasedRequestRouter {
   /** Validates and executes one resolved phased request against the warm graph. */
   public async executeAsync(
     request: IDaemonPhasedRequest,
-    client: IPhasedRequestClient
+    client: IPhasedRequestClient,
+    exactSelection: boolean = false
   ): Promise<IDaemonPhasedRequestResult> {
     validateRequestIdentity(request);
     const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
@@ -155,7 +157,11 @@ export class PhasedRequestRouter {
         try {
           validateEngineShape(request.engineShape, this.#workspaceSession.engineShape);
           const operationById: ReadonlyMap<string, Operation> = indexOperations(graph.operations);
-          const selection: IResolvedSelection = resolveSelection(request.operationSelection, operationById);
+          const selection: IResolvedSelection = resolveSelection(
+            request.operationSelection,
+            operationById,
+            exactSelection
+          );
           let warningsAllowedByEnvironment: boolean;
           try {
             warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
@@ -705,9 +711,10 @@ function indexOperations(operations: ReadonlySet<Operation>): ReadonlyMap<string
 
 function resolveSelection(
   requestedSelection: ReadonlyArray<IDaemonPhasedOperationSelection>,
-  operationById: ReadonlyMap<string, Operation>
+  operationById: ReadonlyMap<string, Operation>,
+  exact: boolean
 ): IResolvedSelection {
-  if (requestedSelection.length === 0) {
+  if (!exact && requestedSelection.length === 0) {
     throw new Error('A phased request must select at least one operation.');
   }
   const selectedIds: Set<string> = new Set();
@@ -726,9 +733,12 @@ function resolveSelection(
     addSelectedOperation(selection.enabledState, operation, enabledOperations, ignoreDependencyOperations);
   }
   return {
-    activeOperations: collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
+    activeOperations: exact
+      ? [...enabledOperations, ...ignoreDependencyOperations]
+      : collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
     enabledOperations,
-    ignoreDependencyOperations
+    ignoreDependencyOperations,
+    exact
   };
 }
 
@@ -767,15 +777,13 @@ function applySelections(
   graph: IOperationGraph,
   selections: ReadonlyArray<IResolvedSelection>
 ): void {
-  const enabledOperations: ReadonlyArray<Operation> = selections.flatMap(
-    (selection: IResolvedSelection) => selection.enabledOperations
-  );
-  const ignoreDependencyOperations: ReadonlyArray<Operation> = selections.flatMap(
-    (selection: IResolvedSelection) => selection.ignoreDependencyOperations
-  );
   const enabledClosureBySelection: ReadonlyArray<ReadonlySet<Operation>> = selections.map(
     (selection: IResolvedSelection) =>
-      new Set(collectSelectionClosure(selection.enabledOperations, []))
+      new Set(
+        selection.exact
+          ? selection.enabledOperations
+          : collectSelectionClosure(selection.enabledOperations, [])
+      )
   );
   const effectiveIgnoreDependencyOperations: Operation[] = [];
   selections.forEach((selection: IResolvedSelection, selectionIndex: number) => {
@@ -790,8 +798,16 @@ function applySelections(
     }
   });
   graph.setEnabledStates(graph.operations, false, 'unsafe');
-  graph.setEnabledStates(ignoreDependencyOperations, 'ignore-dependency-changes', 'safe');
-  graph.setEnabledStates(enabledOperations, true, 'safe');
+  for (const selection of selections) {
+    graph.setEnabledStates(
+      selection.ignoreDependencyOperations,
+      'ignore-dependency-changes',
+      selection.exact ? 'unsafe' : 'safe'
+    );
+  }
+  for (const selection of selections) {
+    graph.setEnabledStates(selection.enabledOperations, true, selection.exact ? 'unsafe' : 'safe');
+  }
   graph.setEnabledStates(
     effectiveIgnoreDependencyOperations,
     'ignore-dependency-changes',

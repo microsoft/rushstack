@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Bind positively identified native build/rebuild requests to a production all-project warm engine, preserve exact native selections and cache behavior, refresh inputs between requests, and reject incompatible command shapes or environments before execution.",
+      "type": "minor"
+    }
+  ]
+}

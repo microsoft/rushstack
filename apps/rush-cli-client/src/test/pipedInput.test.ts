@@ -74,7 +74,10 @@ describe('standalone client piped input', () => {
       : path.join(path.dirname(require.resolve('@microsoft/rush/package.json')), 'bin/rushx');
     const child = spawn(process.execPath, [entry, 'sample'], {
       cwd: project,
-      env: { ...process.env, RUSH_DAEMON: '1', CI: 'false', TF_BUILD: 'false', GITHUB_ACTIONS: 'false' },
+      env: {
+        ...process.env, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy',
+        CI: 'false', TF_BUILD: 'false', GITHUB_ACTIONS: 'false'
+      },
       stdio: 'pipe'
     });
     const stdout: Buffer[] = [];

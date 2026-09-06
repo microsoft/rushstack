@@ -41,8 +41,43 @@ or integration-classified plugin graph inputs fail closed with `WorkspaceEngineR
 the input baseline advances or the invalidation is acknowledged. The startup watcher-registration boundary has
 no paths to classify and therefore remains a full invalidation. The routing layer must replace the complete
 workspace session rather than run a stale graph.
-The default daemon executable does not construct or route this graph while the command-independent plugin shape and per-iteration runner
-lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.
+The default daemon executable installs `ProductionDaemonRequestResolver`. Its first supported request binds a real
+all-project graph lazily, without replacing the session watcher or discarding retained invalidations. Embedded hosts
+can install the same resolver explicitly; omitting a resolver from `RushDaemonHost` retains the unsupported behavior.
+
+### Bounded native engine integration
+
+`PhasedCommandEngine` in `rush-lib` parses native `build` and `rebuild` commands without invoking CLI execution,
+initializing `.env`, changing the process working directory, or mutating `process.env`. Graph preparation reuses
+`PhasedScriptAction`'s standard operation, sharding, shell-runner, validation, cache/legacy-skip, and situational
+plugin pipeline. It does not launch a Rush CLI subprocess. The graph includes every project, and native
+`SelectionParameterSet` results are applied at request time. In particular, `--only` and the impacted-project
+selectors do not accidentally enable omitted dependencies; `--include-phase-deps` explicitly expands them.
+
+The first command and its non-selection parameters pin the engine identity. Compatible selections reuse the same
+graph and completed records; an unchanged successful build schedules no work. Rebuild deliberately invalidates
+the graph on each request. Input snapshots refresh at every request, even if watcher callbacks have not arrived,
+and native operation hashes decide which inputs changed. Graph-defining changes reject execution before advancing
+the baseline. Command/parameter/environment changes are rejected rather than reusing stale runner definitions or
+automatically retrying a possibly executed request.
+
+This first integration supports Git-backed workspaces with direct project configuration and ordinary native phases.
+External Rush plugins, inherited or rig-based project configuration, `.env` initialization, watch/install/variant
+and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global/rushx
+commands are rejected, not silently bypassed. The complete request environment must match the daemon startup
+environment, including Rush/cache policy variables. These restrictions remain until the corresponding initialization,
+environment, and resource-lifetime contracts are request-scoped.
+
+The native Rush lock is held from graph construction until successful disposal. Stop the daemon before using
+native mutation commands or switching to `--no-daemon`; restarting is required for another command shape, parameters,
+environment, or graph configuration. Disposal aborts the graph lifetime, awaits the current iteration and runner
+cleanup, disposes the owned cobuild provider, and only then releases the native lock. A cleanup failure retains it.
+The existing operation-completion cleanup is unchanged.
+
+**Client integration boundary:** the resolver currently requires `commandOrigin: "built-in"` for native
+`build`/`rebuild`. A `rushx build` envelope must never be mistaken for a workspace build. The WS4 client at this
+baseline labels all commands `"custom"` and therefore still receives `unsupported` until its Rush-versus-rushx
+discrimination is wired. This adapter intentionally does not guess from identical `argv` or weaken that boundary.
 
 `PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
 integration parses the command and supplies its built-in/custom origin, an explicit phase/plugin shape, and operation enabled-state selection;
@@ -65,10 +100,9 @@ to its own closure and derives its final result only from that subset. Requests 
 a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
 clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
 
-This layer deliberately does not reconstruct `PhasedScriptAction` command/plugin initialization. The typed phased
-request contract begins after an integration has produced a validated selection for the exact warm engine shape;
-full command parsing remains blocked by
-[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895).
+The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
+validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure
+selection mode by default. Native empty project selections are successful no-op requests.
 
 `GlobalCommandRequestRouter` is the corresponding opt-in boundary for caller-resolved global command logic. It
 canonicalizes and confines the request working directory to the workspace, snapshots its environment, creates a
@@ -94,9 +128,9 @@ scheduler and phased batch coordinator, so compatible selections can execute in 
 
 The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
 typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle
-when cancellation, disconnect, or host shutdown aborts it. Without that resolver, the standalone executable continues
-to start, answer ping, and reject request execution with the typed `unsupported` outcome; it never constructs an empty
-graph or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
+when cancellation, disconnect, or host shutdown aborts it. An embedded host without that resolver continues to start,
+answer ping, and reject request execution with the typed `unsupported` outcome; it never constructs an empty graph
+or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
 reported as `workspaceRecreationRequired` before scheduling. Replacing the warm session is intentionally deferred to
 WS3.
 

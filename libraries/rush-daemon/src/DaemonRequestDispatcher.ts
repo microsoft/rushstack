@@ -27,6 +27,8 @@ export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaem
 export interface IResolvedDaemonPhasedRequest {
   readonly kind: 'phased';
   readonly request: IDaemonPhasedRequest;
+  /** Native selection has already resolved all required project/phase dependencies. */
+  readonly exactSelection?: boolean;
 }
 
 /** A resolver outcome that uses the existing isolated global executor contract. @beta */
@@ -114,7 +116,11 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
     });
     if (resolved.kind === 'phased') {
       validateResolvedPhasedRequest(envelope, resolved.request);
-      await this.#phasedRouter.executeAsync(resolved.request, createPhasedClient(client));
+      await this.#phasedRouter.executeAsync(
+        resolved.request,
+        createPhasedClient(client),
+        resolved.exactSelection
+      );
       return;
     }
     const request: IResolvedGlobalCommandRequest = this.#globalRouter.resolveRequest({

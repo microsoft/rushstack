@@ -299,6 +299,8 @@ export const EnvironmentVariableNames: {
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
+    readonly RUSH_REPORTER: "RUSH_REPORTER";
+    readonly RUSH_LOG_LEVEL: "RUSH_LOG_LEVEL";
     readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
     readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
@@ -867,6 +869,18 @@ export interface IParallelismScalar {
 }
 
 // @alpha
+export interface IParsePhasedCommandOptions {
+    // (undocumented)
+    readonly argv: ReadonlyArray<string>;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+    // (undocumented)
+    readonly terminalProvider: ITerminalProvider;
+}
+
+// @alpha
 export interface IPhase {
     allowWarningsOnSuccess: boolean;
     associatedParameters: Set<CommandLineParameter>;
@@ -890,6 +904,26 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
     // @alpha
     readonly sessionAbortController: AbortController;
+}
+
+// @alpha
+export interface IPhasedCommandEngine extends AsyncDisposable {
+    // (undocumented)
+    [Symbol.asyncDispose](): Promise<void>;
+    // (undocumented)
+    readonly getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
+    // (undocumented)
+    readonly inputsSnapshot: IInputsSnapshot;
+    // (undocumented)
+    readonly isIncremental: boolean;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph;
+    // (undocumented)
+    readonly phaseNames: ReadonlyArray<string>;
+    // (undocumented)
+    readonly pluginNames: ReadonlyArray<string>;
+    // (undocumented)
+    readonly rushSession: RushSession;
 }
 
 // @alpha
@@ -1386,6 +1420,18 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 export type Parallelism = number | IParallelismScalar;
 
 export { parseReporterExtensionEventName }
+
+// @alpha
+export class PhasedCommandEngine {
+    // (undocumented)
+    readonly commandName: string;
+    createEngineAsync(): Promise<IPhasedCommandEngine>;
+    // (undocumented)
+    readonly parameterIdentity: string;
+    // (undocumented)
+    static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
+    selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
+}
 
 // @alpha
 export class PhasedCommandHooks {

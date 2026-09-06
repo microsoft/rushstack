@@ -164,6 +164,8 @@ export interface IWorkspaceEngineComponentFactoryOptions {
   readonly isEngineRecreationRequiredAsync?: IsWorkspaceEngineRecreationRequiredAsync;
   readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly shape: IWorkspaceEngineShape;
+  /** Refresh inputs even without a watcher notification (for request-time freshness). */
+  readonly refreshInputsOnEveryRequest?: boolean;
 }
 
 interface IWorkspaceEngineLifecycleOptions {
@@ -173,6 +175,7 @@ interface IWorkspaceEngineLifecycleOptions {
   readonly isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly rushConfiguration: RushConfiguration;
+  readonly refreshInputsOnEveryRequest: boolean;
 }
 
 interface IGraphDefiningPaths {
@@ -187,6 +190,7 @@ class WorkspaceEngineLifecycle {
   readonly #isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly #mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly #rushConfiguration: RushConfiguration;
+  readonly #refreshInputsOnEveryRequest: boolean;
   #currentInputsSnapshot: IInputsSnapshot;
   #disposePromise: Promise<void> | undefined;
   #isDisposing: boolean = false;
@@ -201,6 +205,7 @@ class WorkspaceEngineLifecycle {
     this.#isEngineRecreationRequiredAsync = options.isEngineRecreationRequiredAsync;
     this.#mapInvalidationsToOperationsAsync = options.mapInvalidationsToOperationsAsync;
     this.#rushConfiguration = options.rushConfiguration;
+    this.#refreshInputsOnEveryRequest = options.refreshInputsOnEveryRequest;
   }
 
   public get inputsSnapshot(): IInputsSnapshot {
@@ -236,7 +241,11 @@ class WorkspaceEngineLifecycle {
       this.#requiresFullInvalidation ||
       invalidationSnapshot.hasUnknownChanges ||
       !invalidationSnapshot.isWatcherHealthy;
-    if (!isFullInvalidation && invalidationSnapshot.changedPaths.length === 0) {
+    if (
+      !this.#refreshInputsOnEveryRequest &&
+      !isFullInvalidation &&
+      invalidationSnapshot.changedPaths.length === 0
+    ) {
       return {
         inputsSnapshot: this.#currentInputsSnapshot,
         invalidatedOperationCount: 0,
@@ -245,8 +254,7 @@ class WorkspaceEngineLifecycle {
       };
     }
 
-    const nextInputsSnapshot: IInputsSnapshot | undefined =
-      await this.#components.getInputsSnapshotAsync();
+    const nextInputsSnapshot: IInputsSnapshot | undefined = await this.#components.getInputsSnapshotAsync();
     if (!nextInputsSnapshot) {
       throw new Error('Rush could not capture the next workspace inputs snapshot.');
     }
@@ -257,13 +265,12 @@ class WorkspaceEngineLifecycle {
       operationGraph.invalidateOperations(undefined, INVALIDATION_REASON);
       invalidatedOperationCount = operationGraph.operations.size;
     } else {
-      const mappedOperations: Iterable<Operation> =
-        await this.#mapInvalidationsToOperationsAsync({
-          changedPaths: invalidationSnapshot.changedPaths,
-          currentInputsSnapshot: this.#currentInputsSnapshot,
-          nextInputsSnapshot,
-          operationGraph
-        });
+      const mappedOperations: Iterable<Operation> = await this.#mapInvalidationsToOperationsAsync({
+        changedPaths: invalidationSnapshot.changedPaths,
+        currentInputsSnapshot: this.#currentInputsSnapshot,
+        nextInputsSnapshot,
+        operationGraph
+      });
       const invalidatedOperations: ReadonlySet<Operation> = validateMappedOperations(
         mappedOperations,
         operationGraph
@@ -275,6 +282,7 @@ class WorkspaceEngineLifecycle {
     this.#currentInputsSnapshot = nextInputsSnapshot;
     this.#invalidations.acknowledgeThrough(invalidationSnapshot.sequence);
     this.#requiresFullInvalidation =
+      !this.#refreshInputsOnEveryRequest &&
       this.#invalidations.getSnapshot().sequence > invalidationSnapshot.sequence;
     return {
       inputsSnapshot: nextInputsSnapshot,
@@ -299,10 +307,7 @@ class WorkspaceEngineLifecycle {
     ) {
       return false;
     }
-    if (
-      this.#invalidations.hasUnattributedUnknownChanges ||
-      !invalidationSnapshot.isWatcherHealthy
-    ) {
+    if (this.#invalidations.hasUnattributedUnknownChanges || !invalidationSnapshot.isWatcherHealthy) {
       return true;
     }
 
@@ -340,6 +345,7 @@ export class WorkspaceEngineComponentFactory {
   readonly #createEngineComponentsAsync: CreateWorkspaceEngineComponentsAsync;
   readonly #isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly #mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
+  readonly #refreshInputsOnEveryRequest: boolean;
 
   public readonly createAsync: CreateWorkspaceSessionComponentsAsync;
   public readonly shape: IWorkspaceEngineShape;
@@ -348,6 +354,7 @@ export class WorkspaceEngineComponentFactory {
     this.#createEngineComponentsAsync = options.createEngineComponentsAsync;
     this.#isEngineRecreationRequiredAsync = options.isEngineRecreationRequiredAsync;
     this.#mapInvalidationsToOperationsAsync = options.mapInvalidationsToOperationsAsync;
+    this.#refreshInputsOnEveryRequest = options.refreshInputsOnEveryRequest ?? false;
     this.shape = normalizeShape(options.shape);
     this.createAsync = (createOptions: ICreateWorkspaceSessionComponentsOptions) =>
       this.#createAsync(createOptions);
@@ -357,9 +364,7 @@ export class WorkspaceEngineComponentFactory {
     options: ICreateWorkspaceSessionComponentsOptions
   ): Promise<IWorkspaceSessionComponents> {
     const projects: ReadonlySet<RushConfigurationProject> = new Set(options.rushConfiguration.projects);
-    const graphDefiningPaths: IGraphDefiningPaths = createGraphDefiningPaths(
-      options.rushConfiguration
-    );
+    const graphDefiningPaths: IGraphDefiningPaths = createGraphDefiningPaths(options.rushConfiguration);
     const components: IWorkspaceEngineComponents = await this.#createEngineComponentsAsync({
       phaseNames: this.shape.phaseNames,
       pluginNames: this.shape.pluginNames,
@@ -379,7 +384,8 @@ export class WorkspaceEngineComponentFactory {
       invalidations: options.invalidations,
       isEngineRecreationRequiredAsync: this.#isEngineRecreationRequiredAsync,
       mapInvalidationsToOperationsAsync: this.#mapInvalidationsToOperationsAsync,
-      rushConfiguration: options.rushConfiguration
+      rushConfiguration: options.rushConfiguration,
+      refreshInputsOnEveryRequest: this.#refreshInputsOnEveryRequest
     });
     return {
       [Symbol.asyncDispose]: () => lifecycle[Symbol.asyncDispose](),
@@ -432,9 +438,7 @@ function isPathInside(candidatePath: string, folderPath: string): boolean {
   const relativePath: string = path.relative(path.resolve(folderPath), candidatePath);
   return (
     relativePath === '' ||
-    (!path.isAbsolute(relativePath) &&
-      relativePath !== '..' &&
-      !relativePath.startsWith(`..${path.sep}`))
+    (!path.isAbsolute(relativePath) && relativePath !== '..' && !relativePath.startsWith(`..${path.sep}`))
   );
 }
 
@@ -477,9 +481,7 @@ function validateComponents(
     throw new Error('The reusable workspace operation graph must not be empty.');
   }
 
-  const configuredProjects: ReadonlySet<RushConfigurationProject> = new Set(
-    rushConfiguration.projects
-  );
+  const configuredProjects: ReadonlySet<RushConfigurationProject> = new Set(rushConfiguration.projects);
   const representedProjects: Set<RushConfigurationProject> = new Set();
   const phaseNames: ReadonlySet<string> = new Set(shape.phaseNames);
   for (const operation of operations) {
