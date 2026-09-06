@@ -46,12 +46,12 @@ export class DaemonFrameListener {
     await listenWithReclaimAsync(server, paths);
     // Lockfile after bind: a pre-existing stale record must read as dead, not
     // as a live owner that would make reclaim refuse.
-    writeDaemonLockfile(paths.lockfilePath, {
-      pid: process.pid,
-      protocolVersion: options.protocolVersion,
-      startedAt: options.startedAt ?? new Date().toISOString(),
-      socketPath: paths.socketPath
-    });
+    try {
+      writeListenerLockfile(paths, options);
+    } catch (error) {
+      await new DaemonListenerLifetime(server, paths).stopAcceptingAsync();
+      throw error;
+    }
     return new DaemonFrameListener(server, paths);
   }
 
@@ -63,4 +63,13 @@ export class DaemonFrameListener {
   public stopAcceptingAsync(): Promise<void> {
     return this._lifetime.stopAcceptingAsync();
   }
+}
+
+function writeListenerLockfile(paths: IDaemonPaths, options: IDaemonListenerOptions): void {
+  writeDaemonLockfile(paths.lockfilePath, {
+    pid: process.pid,
+    protocolVersion: options.protocolVersion,
+    startedAt: options.startedAt ?? new Date().toISOString(),
+    socketPath: paths.socketPath
+  });
 }
