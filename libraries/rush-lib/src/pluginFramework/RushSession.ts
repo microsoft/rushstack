@@ -11,6 +11,7 @@ import {
   isReporterEventRequired,
   resolveExitStatus as resolveRushExitStatus,
   type IReporterEmitEventInput,
+  type IReporterChildContext,
   type IReporterEventEnvelope,
   type IReporterEventScope,
   type IReporterEventSink,
@@ -61,6 +62,17 @@ export interface IRushSessionReporterOptions {
    * @internal
    */
   readonly operationStreamEnabled?: boolean;
+
+  /**
+   * Enables negotiated reporting for compatible child processes.
+   *
+   * @internal
+   */
+  readonly childProcessReporter?: {
+    readonly requestId: string;
+    readonly context: IReporterChildContext;
+    readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+  };
 
   /**
    * Flushes and closes the frontend-owned reporters before an explicit process exit.
@@ -115,6 +127,18 @@ interface IRushSessionReportingState {
   readonly source: IReporterEventSource;
   readonly sessionReporting: RushSessionReporting;
   readonly observer: IRushSessionShadowEventObserver;
+}
+
+/**
+ * Parent-owned state used to correlate a negotiated child reporter stream.
+ *
+ * @internal
+ */
+export interface IRushSessionChildProcessReporter {
+  readonly parentSessionId: string;
+  readonly parentRequestId: string;
+  readonly context: IReporterChildContext;
+  readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
 }
 
 interface IRushSessionShadowEventObserver {
@@ -508,6 +532,34 @@ export function _getRushSessionOperationStreamEmitter(
  */
 export function _isRushSessionOperationStreamEnabled(rushSession: RushSession): boolean {
   return _getSessionState(rushSession).options.reporter?.operationStreamEnabled === true;
+}
+
+/**
+ * Returns the parent-owned child reporter channel for the opt-in operation stream.
+ *
+ * @internal
+ */
+export function _getRushSessionChildProcessReporter(
+  rushSession: RushSession
+): IRushSessionChildProcessReporter | undefined {
+  const reporterOptions: IRushSessionReporterOptions | undefined =
+    _getSessionState(rushSession).options.reporter;
+  const childProcessReporter:
+    | {
+        readonly requestId: string;
+        readonly context: IReporterChildContext;
+        readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+      }
+    | undefined = reporterOptions?.childProcessReporter;
+  if (!reporterOptions?.operationStreamEnabled || !childProcessReporter) {
+    return undefined;
+  }
+  return {
+    parentSessionId: reporterOptions.sessionId,
+    parentRequestId: childProcessReporter.requestId,
+    context: childProcessReporter.context,
+    ingestForeignEnvelope: childProcessReporter.ingestForeignEnvelope
+  };
 }
 
 /**

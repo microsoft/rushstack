@@ -20,7 +20,7 @@ import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rus
 
 import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import type { IOperationChildProcessReporter, IOperationGraphEventSink } from './OperationEventSink';
 import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
@@ -286,6 +286,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this._context.eventSink;
   }
 
+  /**
+   * {@inheritdoc IOperationRunnerContext.createChildProcessReporter}
+   */
+  public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
+    return this._context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
+  }
+
   public get silent(): boolean {
     return !this.enabled || this.runner.silent;
   }
@@ -403,10 +410,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
   public async runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
-      logFileSuffix: string;
+      logFileSuffix?: string;
     }
   ): Promise<T> {
     const { associatedProject, stdioSummarizer, problemCollector } = this;
@@ -479,10 +490,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
+      const structuredChildOutputTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        new CollatedTerminal(normalizeNewlineTransform),
+        {
+          debugEnabled: this.debugMode
+        }
+      );
       const terminal: Terminal = new Terminal(terminalProvider);
       //#endregion
 
-      const result: T = await callback(terminal, terminalProvider);
+      const result: T = await callback(terminal, terminalProvider, structuredChildOutputTerminalProvider);
 
       normalizeNewlineTransform.close();
 
