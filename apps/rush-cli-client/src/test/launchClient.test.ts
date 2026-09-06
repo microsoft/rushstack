@@ -137,7 +137,8 @@ describe('standalone rushx fallback', () => {
         daemonVersion: daemonPackage.version
       });
       expect(status.uptimeMs).toEqual(expect.any(Number));
-      expect(status).not.toHaveProperty('pid');
+      expect(status.pid).toBe(process.pid);
+      expect(status.residentMemoryBytes).toEqual(expect.any(Number));
       expect(status).not.toHaveProperty('warmProjects');
     }
   }, 15000);
@@ -178,13 +179,48 @@ describe('standalone rushx fallback', () => {
     expect(stopped.code).toBe(1);
   }, 15000);
 
-  it('rejects stop/restart until the host has negotiated lifecycle controls', async () => {
+  it('does not start an absent daemon when stop or restart cannot be acknowledged', async () => {
     for (const verb of ['stop', 'restart']) {
       const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', verb]);
       expect(result.code).toBe(1);
-      expect(result.stderr).toContain('requires negotiated host lifecycle controls');
+      expect(result.stderr).toContain('Could not connect to daemon');
     }
   });
+
+  it('restarts only after acknowledged shutdown and original process exit, then stops the successor', async () => {
+    const rushJsonPath: string = path.join(folder, 'rush.json');
+    const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+    fs.writeFileSync(
+      rushJsonPath,
+      JSON.stringify({
+        ...config,
+        daemon: { enabled: false, autoStart: false, idleTimeoutSeconds: 5 }
+      })
+    );
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    try {
+      const started: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
+      expect(started.code).toBe(0);
+      const originalLock: { startedAt: string } = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
+      const restarted: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'restart']);
+      expect(restarted.stderr).toBe('');
+      expect(restarted.code).toBe(0);
+      expect(JSON.parse(restarted.stdout)).toMatchObject({
+        state: 'ready',
+        pid: expect.any(Number),
+        residentMemoryBytes: expect.any(Number)
+      });
+      const successorLock: { startedAt: string } = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
+      expect(successorLock.startedAt).not.toBe(originalLock.startedAt);
+      const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop']);
+      expect(stopped.code).toBe(0);
+      expect(JSON.parse(stopped.stdout)).toMatchObject({ state: 'shutdownAccepted' });
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    }
+  }, 30000);
 
   it('rejects extra management arguments without silently ignoring them', async () => {
     const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status', 'extra']);

@@ -32,6 +32,11 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
   readonly paths: IDaemonPaths;
   /** Omit to connect without auto-start. */
   readonly startCommand?: IDaemonStartCommand;
+  /**
+   * After acknowledged shutdown, wait for this attested predecessor PID to exit before reusing or starting
+   * an endpoint. A live or reused PID fails closed at the startup deadline; it is never killed.
+   */
+  readonly previousDaemonPid?: number;
   /** Total startup/retry deadline. Defaults to 15000 milliseconds. */
   readonly startupTimeoutMs?: number;
 }
@@ -50,6 +55,7 @@ export async function connectOrStartDaemonAsync(
     throw new RangeError('startupTimeoutMs must be an integer between 1 and 2147483647.');
   }
   const deadline: number = Date.now() + timeoutMs;
+  await waitForPreviousDaemonAsync(options.previousDaemonPid, deadline);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
   if (!options.startCommand) {
@@ -75,8 +81,10 @@ export async function connectOrStartDaemonAsync(
   try {
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
+    if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
     assertNoLiveOwner(options.paths);
     await reclaimStaleDaemonAsync(options.paths);
+    if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     const child: ChildProcess = await spawnDetachedAsync(options);
     backoffMs = 50;
     while (Date.now() < deadline) {
@@ -152,16 +160,39 @@ function assertNoLiveOwner(paths: IDaemonPaths): void {
       `Invalid daemon PID in ${paths.lockfilePath}; refusing automatic reclaim.`
     );
   }
-  try {
-    process.kill(record.pid, 0);
-  } catch (error) {
-    if (hasErrorCode(error, 'ESRCH')) return;
-    throw error;
-  }
+  if (!isProcessAlive(record.pid)) return;
   throw new DaemonClientError(
     'startupFailed',
     `PID ${record.pid} still exists but the daemon is not ready. It may be a reused PID; refusing to kill it or remove ${paths.lockfilePath}.`
   );
+}
+
+async function waitForPreviousDaemonAsync(pid: number | undefined, deadline: number): Promise<void> {
+  if (pid === undefined) return;
+  if (!Number.isSafeInteger(pid) || pid <= 0) {
+    throw new RangeError('previousDaemonPid must be a positive safe integer.');
+  }
+  let backoffMs: number = 50;
+  while (isProcessAlive(pid)) {
+    if (Date.now() >= deadline) {
+      throw new DaemonClientError(
+        'timeout',
+        `The previous daemon PID ${pid} still exists; cleanup completion cannot be established. No PID was killed and no ownership record was reclaimed.`
+      );
+    }
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
+    backoffMs = Math.min(500, backoffMs * 2);
+  }
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if (hasErrorCode(error, 'ESRCH')) return false;
+    throw error;
+  }
 }
 
 async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promise<ChildProcess> {

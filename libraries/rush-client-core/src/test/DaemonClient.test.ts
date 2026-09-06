@@ -269,6 +269,57 @@ describe('DaemonClient', () => {
     expect(controls.some((message) => message.kind === 'subscribe')).toBe(false);
   });
 
+  it('waits for both shutdown acknowledgement and EOF', async () => {
+    let acknowledged: () => void = () => {};
+    const ack: Promise<void> = new Promise((resolve) => {
+      acknowledged = resolve;
+    });
+    onRequest = async (message) => {
+      if (message.kind === 'shutdown') {
+        await sendAsync({ kind: 'shutdownAck', payload: {} });
+        acknowledged();
+      }
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    expect(client.protocolVersion.minor).toBeGreaterThanOrEqual(6);
+    let completed: boolean = false;
+    const shutdown: Promise<void> = client.shutdownAsync().then(() => {
+      completed = true;
+    });
+    await ack;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(completed).toBe(false);
+    await connection!.closeAsync();
+    await shutdown;
+    expect(completed).toBe(true);
+    expect(controls.filter((message) => message.kind === 'shutdown')).toHaveLength(1);
+  });
+
+  it('rejects shutdown before sending a frame to a protocol 0.5 peer', async () => {
+    peerVersion = { major: 0, minor: 5 };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.shutdownAsync()).rejects.toThrow('protocol 0.6');
+    expect(controls.some((message) => message.kind === 'shutdown')).toBe(false);
+  });
+
+  it('does not mistake an unacknowledged EOF for successful shutdown', async () => {
+    onRequest = async (message) => {
+      if (message.kind === 'shutdown') await connection!.closeAsync();
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.shutdownAsync()).rejects.toThrow('before acknowledging shutdown');
+  });
+
+  it('bounds the wait when an acknowledged shutdown does not close', async () => {
+    onRequest = async (message) => {
+      if (message.kind === 'shutdown') await sendAsync({ kind: 'shutdownAck', payload: {} });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.shutdownAsync(40)).rejects.toThrow(
+      'Timed out waiting for shutdown acknowledgement and EOF'
+    );
+  });
+
   it('does not send an already cancelled request or leak a rejected completion promise', async () => {
     const client = await DaemonClient.connectAsync({ socketPath: address });
     expect(await client.executeAsync({ request: request(), abortSignal: AbortSignal.abort() })).toMatchObject(

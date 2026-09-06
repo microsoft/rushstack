@@ -48,8 +48,8 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   });
   const selectedVersion: string = environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? Rush.version;
   if (!rushx && route.commandName === 'daemon') {
-    if (route.argv[1] === 'start' && process.argv.includes('--no-daemon')) {
-      throw new Error('--no-daemon cannot be combined with daemon start.');
+    if ((route.argv[1] === 'start' || route.argv[1] === 'restart') && process.argv.includes('--no-daemon')) {
+      throw new Error(`--no-daemon cannot be combined with daemon ${route.argv[1]}.`);
     }
     await executeDaemonCommandAsync({
       argv: route.argv.slice(1),

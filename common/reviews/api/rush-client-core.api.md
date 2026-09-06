@@ -9,6 +9,7 @@ import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
+import { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 import { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonRequestRejectedMessage } from '@rushstack/rush-daemon-protocol';
 import type { Readable } from 'node:stream';
@@ -26,6 +27,8 @@ export class DaemonClient {
     // (undocumented)
     static connectAsync(options: IDaemonClientConnectOptions): Promise<DaemonClient>;
     executeAsync(options: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
+    get protocolVersion(): IDaemonProtocolVersion;
+    shutdownAsync(timeoutMs?: number): Promise<void>;
     get status(): Promise<IDaemonPongMessage['payload']>;
 }
 
@@ -64,6 +67,7 @@ export interface ICaptureDaemonRequestOptions extends Omit<IDaemonRequestEnvelop
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
     // (undocumented)
     readonly paths: IDaemonPaths;
+    readonly previousDaemonPid?: number;
     readonly startCommand?: IDaemonStartCommand;
     readonly startupTimeoutMs?: number;
 }
