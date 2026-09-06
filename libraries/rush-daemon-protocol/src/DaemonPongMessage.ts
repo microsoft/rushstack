@@ -11,6 +11,10 @@ export interface IDaemonPongMessage {
     readonly daemonVersion?: string;
     /** The daemon wire protocol version, when reported by protocol 0.2 or newer. */
     readonly protocolVersion?: IDaemonProtocolVersion;
+    /** The daemon process ID, when reported by protocol 0.6 or newer. */
+    readonly pid?: number;
+    /** The process's resident memory in bytes, when reported by protocol 0.6 or newer. */
+    readonly residentMemoryBytes?: number;
     readonly uptimeMs: number;
   };
 }

@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 
 import {
   DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
@@ -45,6 +46,7 @@ export interface IDaemonControlSessionOptions {
   readonly onClosed: (session: DaemonControlSession, error: Error | undefined) => void;
   readonly onError: (error: Error) => void;
   readonly onRequestStarted?: () => () => void;
+  readonly onShutdownRequested: () => void;
 }
 
 interface IRequestState {
@@ -74,6 +76,7 @@ export class DaemonControlSession {
   #isClosing: boolean = false;
   #nextEventSequence: number = 1;
   #peerSupportsInteractiveProtocol: boolean = false;
+  #peerSupportsDaemonLifecycle: boolean = false;
   #peerSupportsRequestAdmission: boolean = false;
   #peerSupportsRequestLifecycle: boolean = false;
   #sendQueue: Promise<void> = Promise.resolve();
@@ -154,6 +157,9 @@ export class DaemonControlSession {
       case 'ping':
         this.#send(this.#createPong());
         return;
+      case 'shutdown':
+        await this.#shutdownHostAsync();
+        return;
       case 'requestStart':
         this.#startRequest(message.payload);
         return;
@@ -191,6 +197,7 @@ export class DaemonControlSession {
     this.#sessionId = outcome.ack.payload.sessionId;
     const peerMinor: number = message.payload.protocolVersion.minor;
     this.#peerSupportsInteractiveProtocol = peerMinor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
+    this.#peerSupportsDaemonLifecycle = peerMinor >= DAEMON_LIFECYCLE_PROTOCOL_MINOR;
     this.#peerSupportsRequestAdmission = peerMinor >= DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR;
     this.#peerSupportsRequestLifecycle = peerMinor >= DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR;
     this.#send(outcome.ack);
@@ -200,6 +207,7 @@ export class DaemonControlSession {
     if (this.#subscribed) {
       throw new DaemonProtocolError('malformedControlMessage', 'A daemon session may subscribe only once.');
     }
+
     this.#subscribed = true;
     this.#peerSupportsInteractiveProtocol =
       this.#peerSupportsInteractiveProtocol && payload.supportsInteractiveIO === true;
@@ -208,6 +216,17 @@ export class DaemonControlSession {
     this.#peerSupportsRequestLifecycle =
       this.#peerSupportsRequestLifecycle && payload.supportsRequestLifecycle === true;
     this.#interactiveConnection.setEnabled(this.#peerSupportsInteractiveProtocol);
+  }
+
+  async #shutdownHostAsync(): Promise<void> {
+    if (!this.#peerSupportsDaemonLifecycle) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'Daemon shutdown requires a lifecycle-capable protocol version.'
+      );
+    }
+    await this.#enqueueControlAsync({ kind: 'shutdownAck', payload: {} });
+    this.#options.onShutdownRequested();
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
@@ -340,6 +359,8 @@ export class DaemonControlSession {
       payload: {
         daemonVersion: this.#options.daemonVersion,
         protocolVersion: DAEMON_PROTOCOL_VERSION,
+        pid: process.pid,
+        residentMemoryBytes: process.memoryUsage().rss,
         uptimeMs: Date.now() - this.#options.startedAtMs
       }
     };

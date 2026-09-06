@@ -133,7 +133,8 @@ export class RushDaemonHost {
               }
             },
             onError: (error: Error) => options.onError?.(error),
-            onRequestStarted: () => idleTimer.acquire()
+            onRequestStarted: () => idleTimer.acquire(),
+            onShutdownRequested: requestShutdown
           });
           sessions.add(session);
           if (lifecycle.closing) {
@@ -170,12 +171,13 @@ export class RushDaemonHost {
       workspaceSessionProvider,
       idleTimer
     );
-    idleTimer.start(() => {
+    function requestShutdown(): void {
       void host.closeAsync().catch((error: Error) => {
         if (options.onError) options.onError(error);
         else process.emitWarning(error);
       });
-    });
+    }
+    idleTimer.start(requestShutdown);
     return host;
   }
 

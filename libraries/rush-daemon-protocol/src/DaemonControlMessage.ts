@@ -7,6 +7,7 @@ import type {
   IDaemonSetRawModeMessage,
   IDaemonTerminalPolicyMessage
 } from './DaemonInteractiveControl';
+import type { IDaemonShutdownAckMessage, IDaemonShutdownMessage } from './DaemonLifecycleControl';
 import type { IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
@@ -78,6 +79,8 @@ export type DaemonControlMessage =
   | IDaemonUnsubscribeMessage
   | IDaemonPingMessage
   | IDaemonPongMessage
+  | IDaemonShutdownMessage
+  | IDaemonShutdownAckMessage
   | IDaemonErrorMessage
   | IDaemonSetRawModeMessage
   | IDaemonRawModeChangedMessage

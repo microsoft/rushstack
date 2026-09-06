@@ -29,6 +29,10 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
 - **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
   typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
   and Rush action construction remain outside the protocol.
+- **Daemon lifecycle controls (0.6)** — after a compatible `hello`, a client can send
+  `shutdown` and receive `shutdownAck` before connection closure. Clients must negotiate at least
+  `DAEMON_LIFECYCLE_PROTOCOL_MINOR` before sending this control. `pong` can also report the daemon's
+  PID and resident memory in bytes; older peers may omit these fields.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).
