@@ -143,6 +143,7 @@ async function executeAdmittedAsync(
   interactiveSession: IInteractiveRequestSession | undefined,
   workspaceSession: IWorkspaceSession
 ): Promise<IGlobalCommandRequestResult> {
+  workspaceSession.assertActive?.();
   const context: GlobalCommandExecutionContext = new GlobalCommandExecutionContext(
     request,
     client,

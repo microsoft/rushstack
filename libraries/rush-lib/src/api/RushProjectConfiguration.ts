@@ -312,6 +312,7 @@ export class RushProjectConfiguration {
   public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
   private readonly _validationCache: WeakSet<object> = new WeakSet();
+  private readonly _jsonForFingerprint: string;
 
   private constructor(
     project: RushConfigurationProject,
@@ -319,9 +320,15 @@ export class RushProjectConfiguration {
     operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings>
   ) {
     this.project = project;
+    this._jsonForFingerprint = JSON.stringify(rushProjectJson);
     this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs || [];
     this.disableBuildCacheForProject = rushProjectJson.disableBuildCacheForProject || false;
     this.operationSettingsByOperationName = operationSettingsByOperationName;
+  }
+
+  /** @internal */
+  public _getJsonForFingerprint(): string {
+    return this._jsonForFingerprint;
   }
 
   /**

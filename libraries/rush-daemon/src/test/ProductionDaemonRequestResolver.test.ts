@@ -23,11 +23,21 @@ import {
   type IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
 import { NoOpTerminalProvider, Terminal, TerminalProviderSeverity } from '@rushstack/terminal';
+import { StandardScriptUpdater } from '@microsoft/rush-lib/lib/logic/StandardScriptUpdater';
+import { RushConfiguration as InternalRushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { WorkspaceSession } from '../WorkspaceSession';
+import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
+import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
+import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
+import type {
+  GetWorkspaceSuccessorLaunchAsync,
+  IWorkspaceProcessRestartResult
+} from '../WorkspaceProcessRestart';
+import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import { TestPhasedRequestClient } from './PhasedRequestRouterTestUtilities';
 import {
@@ -54,9 +64,16 @@ interface IFixture extends AsyncDisposable {
   readonly client: DaemonRequestWireClient;
 }
 
+interface IFixtureOptions {
+  readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
+  readonly onSessionCreated?: (session: WorkspaceSession) => void;
+  readonly resolver?: ProductionDaemonRequestResolver;
+}
+
 async function createFixtureAsync(
   cache: boolean = false,
-  configurationKind: 'direct' | 'rig' | 'inherited' = 'direct'
+  configurationKind: 'direct' | 'rig' | 'inherited' = 'direct',
+  options: IFixtureOptions = {}
 ): Promise<IFixture> {
   const repoRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-native-engine-'));
   const cacheNamespace: string = path.basename(repoRoot);
@@ -212,9 +229,11 @@ if (input === 'failure') process.exitCode = 7;
       repoRoot,
       rushVersion: RUSH_VERSION,
       daemonVersion: 'native-engine-test',
-      requestResolver: new ProductionDaemonRequestResolver(),
-      createWorkspaceSessionAsync: async (options) => {
-        session = await WorkspaceSession.createAsync(options);
+      requestResolver: options.resolver ?? new ProductionDaemonRequestResolver(),
+      getSuccessorLaunchAsync: options.getSuccessorLaunchAsync,
+      createWorkspaceSessionAsync: async (sessionOptions) => {
+        session = await WorkspaceSession.createAsync(sessionOptions);
+        options.onSessionCreated?.(session);
         return session;
       }
     });
@@ -224,7 +243,9 @@ if (input === 'failure') process.exitCode = 7;
     return {
       repoRoot,
       host,
-      session: session!,
+      get session(): WorkspaceSession {
+        return session!;
+      },
       client,
       [Symbol.asyncDispose]: async () => {
         try {
@@ -281,7 +302,288 @@ function logText(exchange: ITerminalExchange): string {
     .join('');
 }
 
+function requestEnvironment(): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
+  );
+}
+
 describe('native production daemon engine', () => {
+  it('keeps tier0 session and graph identity for unchanged content, including metadata touches', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      const session: WorkspaceSession = fixture.session;
+      const graph: IOperationGraph | undefined = session.operationGraph;
+      const filename: string = path.join(fixture.repoRoot, 'projects/a/config/rush-project.json');
+      fs.writeFileSync(filename, fs.readFileSync(filename));
+      expect((await runAsync(fixture, 'unchanged', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(fixture.session).toBe(session);
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('replaces configuration and command shape in-process without using a disposed generation', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      const first: WorkspaceSession = fixture.session;
+      const firstGraph: IOperationGraph = first.operationGraph!;
+      const firstGeneration: number = fixture.host.workspaceGeneration;
+      const packageFile: string = path.join(fixture.repoRoot, 'projects/a/package.json');
+      const packageJson: { scripts: Record<string, string> } = JSON.parse(
+        fs.readFileSync(packageFile, 'utf8')
+      );
+      packageJson.scripts['_phase:compile'] = 'node build.cjs --new-definition';
+      fs.writeFileSync(packageFile, JSON.stringify(packageJson));
+      expect((await runAsync(fixture, 'configuration', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(fixture.session).not.toBe(first);
+      expect(fixture.session.operationGraph).not.toBe(firstGraph);
+      expect(firstGraph.abortController.signal.aborted).toBe(true);
+      await expect(first.acquireExecutionLeaseAsync()).rejects.toThrow('disposed');
+      expect(fixture.host.workspaceGeneration).toBeGreaterThan(firstGeneration);
+      expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
+      const second: WorkspaceSession = fixture.session;
+      expect((await runAsync(fixture, 'shape', ['rebuild', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(fixture.session).not.toBe(second);
+      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--new-definition', 'a:one:--new-definition']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('never executes an old resolved graph after a racing configuration reload', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const entered: IDeferred<void> = createDeferred();
+    const release: IDeferred<void> = createDeferred();
+    let second: DaemonRequestWireClient | undefined;
+    let oldRequest: Promise<ITerminalExchange> | undefined;
+    let newRequest: Promise<ITerminalExchange> | undefined;
+    let delayed: boolean = false;
+    try {
+      await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      const oldSession: WorkspaceSession = fixture.session;
+      const resolveAsync: ProductionDaemonRequestResolver['resolveRequestAsync'] =
+        ProductionDaemonRequestResolver.prototype.resolveRequestAsync;
+      jest
+        .spyOn(ProductionDaemonRequestResolver.prototype, 'resolveRequestAsync')
+        .mockImplementation(async function (
+          this: ProductionDaemonRequestResolver,
+          options: IResolveDaemonRequestOptions
+        ) {
+          const resolved: ResolvedDaemonRequest = await resolveAsync.call(this, options);
+          if (options.envelope.requestId === 'old' && !delayed) {
+            delayed = true;
+            entered.resolve();
+            await release.promise;
+          }
+          return resolved;
+        });
+      oldRequest = runAsync(fixture, 'old', ['build', '--only', 'a']);
+      await entered.promise;
+      const packageFile: string = path.join(fixture.repoRoot, 'projects/a/package.json');
+      const packageJson: { scripts: Record<string, string> } = JSON.parse(
+        fs.readFileSync(packageFile, 'utf8')
+      );
+      packageJson.scripts['_phase:compile'] = 'node build.cjs --raced-definition';
+      fs.writeFileSync(packageFile, JSON.stringify(packageJson));
+      second = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
+      await second.handshakeAsync();
+      await second.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('new', 'build', fixture.repoRoot, {
+          commandOrigin: 'built-in',
+          argv: ['build', '--only', 'a'],
+          environment: requestEnvironment()
+        })
+      });
+      expect((await second.readControlAsync()).kind).toBe('queuePosition');
+      newRequest = second.readTerminalAsync('new');
+      expect(oldSession.operationGraph!.abortController.signal.aborted).toBe(false);
+      release.resolve();
+      for (const result of await Promise.all([oldRequest, newRequest])) {
+        expect(result.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      }
+      expect(oldSession.operationGraph!.abortController.signal.aborted).toBe(true);
+      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--raced-definition']);
+    } finally {
+      release.resolve();
+      await oldRequest;
+      await newRequest;
+      jest.restoreAllMocks();
+      await second?.closeAsync();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('restarts a hard environment change in a new process without replaying the triggering request', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+      getSuccessorLaunchAsync: getInstalledWorkspaceSuccessorLaunchAsync
+    });
+    let successor: DaemonRequestWireClient | undefined;
+    try {
+      await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      const oldGraph: IOperationGraph = fixture.session.operationGraph!;
+      const environment: Record<string, string> = {
+        ...requestEnvironment(),
+        RUSH_PARALLELISM: process.env.RUSH_PARALLELISM === '1' ? '2' : '1'
+      };
+      expect(
+        (await runAsync(fixture, 'hard', ['build', '--only', 'a'], { environment })).terminal
+      ).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          exitCode: 1,
+          errorMessage: expect.stringContaining('No operation was scheduled or executed')
+        }
+      });
+      const restarted: IWorkspaceProcessRestartResult | undefined = await fixture.host.restartCompleted;
+      expect(restarted?.pid).not.toBe(process.pid);
+      expect(restarted?.pid).toBe(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid);
+      expect(oldGraph.abortController.signal.aborted).toBe(true);
+      expect(runs(fixture)).toEqual(['a:one:']);
+      successor = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
+      await successor.handshakeAsync();
+      expect(
+        (
+          await runAsync({ ...fixture, client: successor }, 'explicit-next', ['build', '--only', 'a'], {
+            environment
+          })
+        ).terminal
+      ).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+    } finally {
+      await successor?.closeAsync();
+      await stopSuccessorAsync(fixture.host.paths);
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('refuses an unavailable selected Rush version without executing the current engine as that version', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+      getSuccessorLaunchAsync: getInstalledWorkspaceSuccessorLaunchAsync
+    });
+    try {
+      await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      const filename: string = path.join(fixture.repoRoot, 'rush.json');
+      const json: { rushVersion: string } = JSON.parse(fs.readFileSync(filename, 'utf8'));
+      json.rushVersion = '5.999.0';
+      fs.writeFileSync(filename, JSON.stringify(json));
+      expect(
+        (await runAsync(fixture, 'unsupported-version', ['build', '--only', 'a'])).terminal
+      ).toMatchObject({
+        kind: 'requestRejected',
+        payload: { message: expect.stringContaining('Cannot launch selected Rush 5.999.0') }
+      });
+      expect(runs(fixture)).toEqual(['a:one:']);
+      expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  for (const commandName of ['install', 'update']) {
+    it(`drains the real ${commandName} worker result before cleanup and successor startup, including partial failure`, async () => {
+      const resultReceived: IDeferred<void> = createDeferred();
+      const disposalEntered: IDeferred<void> = createDeferred();
+      const allowDisposal: IDeferred<void> = createDeferred();
+      const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+        getSuccessorLaunchAsync: getInstalledWorkspaceSuccessorLaunchAsync,
+        onSessionCreated: (session) => {
+          const dispose: () => Promise<void> = session[Symbol.asyncDispose].bind(session);
+          jest.spyOn(session, Symbol.asyncDispose).mockImplementation(async () => {
+            if (session.operationGraph) {
+              disposalEntered.resolve();
+              await resultReceived.promise;
+              await allowDisposal.promise;
+            }
+            await dispose();
+          });
+        }
+      });
+      let successor: DaemonRequestWireClient | undefined;
+      try {
+        await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+        await StandardScriptUpdater.updateAsync(
+          InternalRushConfiguration.loadFromConfigurationFile(path.join(fixture.repoRoot, 'rush.json'))
+        );
+        const oldGraph: IOperationGraph = fixture.session.operationGraph!;
+        const scriptPath: string = path.join(fixture.repoRoot, 'common/temp/mutate.cjs');
+        fs.writeFileSync(
+          scriptPath,
+          `
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '../..');
+const file = path.join(root, 'projects/a/package.json');
+const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+json.scripts['_phase:compile'] = 'node build.cjs --post-mutation';
+fs.writeFileSync(file, JSON.stringify(json));
+fs.appendFileSync(path.join(root, 'common/temp/mutation-count.txt'), 'once\\n');
+console.log('native-mutation-applied');
+process.exit(23);
+`
+        );
+        const rushJsonPath: string = path.join(fixture.repoRoot, 'rush.json');
+        const json: { eventHooks?: object } = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+        json.eventHooks = { preRushInstall: [`"${process.execPath}" "${scriptPath}"`] };
+        fs.writeFileSync(rushJsonPath, JSON.stringify(json));
+        const result: ITerminalExchange = await runAsync(fixture, 'mutation', [
+          commandName,
+          '--bypass-policy',
+          '--max-install-attempts',
+          '0'
+        ]);
+        expect(result.terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 1, outcome: 'failure', aborted: false }
+        });
+        resultReceived.resolve();
+        await disposalEntered.promise;
+        expect(oldGraph.abortController.signal.aborted).toBe(false);
+        expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
+        allowDisposal.resolve();
+        const restarted: IWorkspaceProcessRestartResult | undefined = await fixture.host.restartCompleted;
+        expect(restarted?.pid).not.toBe(process.pid);
+        expect(oldGraph.abortController.signal.aborted).toBe(true);
+        successor = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
+        await successor.handshakeAsync();
+        expect(
+          (await runAsync({ ...fixture, client: successor }, 'post-mutation', ['build', '--only', 'a']))
+            .terminal
+        ).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
+        });
+        expect(runs(fixture)).toEqual(['a:one:', 'a:one:--post-mutation']);
+        expect(fs.readFileSync(path.join(fixture.repoRoot, 'common/temp/mutation-count.txt'), 'utf8')).toBe(
+          'once\n'
+        );
+      } finally {
+        resultReceived.resolve();
+        allowDisposal.resolve();
+        await successor?.closeAsync();
+        await stopSuccessorAsync(fixture.host.paths);
+        await fixture[Symbol.asyncDispose]();
+        jest.restoreAllMocks();
+      }
+    });
+  }
+
   it('releases the lock before reporting an idle result so a real native Rush action can run', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
@@ -289,6 +591,7 @@ describe('native production daemon engine', () => {
         kind: 'requestResult',
         payload: { exitCode: 0 }
       });
+
       const graph: IOperationGraph | undefined = fixture.session.operationGraph;
       const native: INativeCommandResult = await runNativeCommandAsync(fixture.repoRoot, [
         'rebuild',
@@ -522,7 +825,7 @@ describe('native production daemon engine', () => {
   });
 
   for (const kind of ['rig', 'inherited'] as const) {
-    it(`uses real ${kind} configuration and native cache, and rejects unwatched configuration changes`, async () => {
+    it(`uses real ${kind} configuration and native cache, and reloads unwatched configuration changes`, async () => {
       const fixture: IFixture = await createFixtureAsync(true, kind);
       try {
         const initial: ITerminalExchange = await runAsync(fixture, 'initial', ['build', '--only', 'a']);
@@ -559,13 +862,15 @@ describe('native production daemon engine', () => {
             ]
           })
         );
+        const oldGraph: IOperationGraph | undefined = fixture.session.operationGraph;
         expect(
           (await runAsync(fixture, 'configuration-changed', ['build', '--only', 'a'])).terminal
         ).toMatchObject({
-          kind: 'requestRejected',
-          payload: { code: 'workspaceRecreationRequired' }
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
         });
-        expect(runs(fixture)).toHaveLength(2);
+        expect(fixture.session.operationGraph).not.toBe(oldGraph);
+        expect(runs(fixture)).toHaveLength(3);
       } finally {
         await fixture[Symbol.asyncDispose]();
       }
@@ -599,7 +904,7 @@ describe('native production daemon engine', () => {
         payload: { exitCode: 0 }
       });
       const operation: Operation | undefined = Array.from(fixture.session.operationGraph!.operations).find(
-        (candidate) => candidate.associatedProject === project
+        (candidate) => candidate.associatedProject.packageName === project.packageName
       );
       expect(operation!.settings!.disableBuildCacheForOperation).toBe(true);
       expect(await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal)).toBe(cached);
@@ -729,7 +1034,7 @@ describe('native production daemon engine', () => {
     await expect(fixture.session.reconcileInvalidationsAsync()).rejects.toThrow('disposed');
   });
 
-  it('does not expand unsafe --only selection and rejects incompatible parameters, environment and ambiguous rushx', async () => {
+  it('does not expand unsafe --only selection and reloads changed parameters while rejecting ambiguous rushx', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
       const first: ITerminalExchange = await runAsync(fixture, 'only', [
@@ -743,9 +1048,12 @@ describe('native production daemon engine', () => {
         payload: { exitCode: 0, operationResults: [{ operationId: 'b (compile)' }] }
       });
       expect(runs(fixture)).toEqual(['b:one:--production']);
+      const originalGraph: IOperationGraph | undefined = fixture.session.operationGraph;
       expect((await runAsync(fixture, 'parameters', ['build', '--only', 'b'])).terminal).toMatchObject({
-        kind: 'requestRejected'
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
       });
+      expect(fixture.session.operationGraph).not.toBe(originalGraph);
       expect(
         (
           await runAsync(fixture, 'environment', ['build', '--only', 'b', '--production'], {
@@ -756,7 +1064,7 @@ describe('native production daemon engine', () => {
       expect(
         (await runAsync(fixture, 'rushx', ['build'], { commandOrigin: 'custom' })).terminal
       ).toMatchObject({ kind: 'requestRejected' });
-      expect(runs(fixture)).toHaveLength(1);
+      expect(runs(fixture)).toEqual(['b:one:--production', 'b:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }
@@ -810,7 +1118,7 @@ describe('native production daemon engine', () => {
     }
   });
 
-  it('runs rebuild scripts on every request and refuses changed graph definitions', async () => {
+  it('runs rebuild scripts on every request and reloads changed graph definitions', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
       for (const id of ['rebuild-one', 'rebuild-two']) {
@@ -824,9 +1132,11 @@ describe('native production daemon engine', () => {
         path.join(fixture.repoRoot, 'projects/a/package.json'),
         '{"name":"a","version":"1.0.0","scripts":{"_phase:compile":"echo wrong"}}'
       );
+      const oldGraph: IOperationGraph | undefined = fixture.session.operationGraph;
       expect(
-        (await runAsync(fixture, 'changed-definition', ['rebuild', '--only', 'a'])).terminal.kind
-      ).not.toBe('requestResult');
+        (await runAsync(fixture, 'changed-definition', ['rebuild', '--only', 'a'])).terminal
+      ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(fixture.session.operationGraph).not.toBe(oldGraph);
       expect(runs(fixture)).toHaveLength(2);
     } finally {
       await fixture[Symbol.asyncDispose]();

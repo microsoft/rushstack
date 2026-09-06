@@ -19,6 +19,8 @@ import type {
  * @beta
  */
 export interface IWorkspaceSessionMetadata {
+  /** Host-local session generation. It changes only when a new session is installed. */
+  readonly generation?: number;
   readonly projectCount: number;
   readonly projectNames: ReadonlyArray<string>;
   readonly repoRoot: string;
@@ -87,6 +89,7 @@ export type CreateWorkspaceSessionComponentsAsync = (
  * @beta
  */
 export interface IWorkspaceSessionOptions {
+  readonly generation?: number;
   readonly createComponentsAsync?: CreateWorkspaceSessionComponentsAsync;
   readonly onError?: (error: Error) => void;
   readonly repoRoot: string;
@@ -99,6 +102,10 @@ export interface IWorkspaceSessionOptions {
  * @beta
  */
 export interface IWorkspaceSession extends AsyncDisposable {
+  /** Rejects work retained beyond this session's lifetime. */
+  assertActive?(): void;
+  /** Stops admission without starting resource cleanup, allowing an already produced result to drain. */
+  retire?(): void;
   /** Optional execution lease retained through the coalesced iteration's output and resource cleanup. */
   acquireExecutionLeaseAsync?(): Promise<AsyncDisposable | undefined>;
   readonly engineShape: IWorkspaceEngineShape | undefined;
@@ -172,6 +179,15 @@ export class WorkspaceSession implements IWorkspaceSession {
     return this.#inputsSnapshot;
   }
 
+  public assertActive(): void {
+    if (this.#isDisposing)
+      throw new Error('This workspace generation has been disposed; execution has not begun.');
+  }
+
+  public retire(): void {
+    this.#isDisposing = true;
+  }
+
   /** Installs one all-project engine without replacing the watcher or losing retained invalidations. */
   public async initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {
     if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
@@ -232,7 +248,10 @@ export class WorkspaceSession implements IWorkspaceSession {
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
     let sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
     try {
-      const metadata: IWorkspaceSessionMetadata = createMetadata(rushConfiguration, options.rushVersion);
+      const metadata: IWorkspaceSessionMetadata = {
+        ...createMetadata(rushConfiguration, options.rushVersion),
+        generation: options.generation ?? 1
+      };
       if (!projectWatcher) {
         projectWatcher = new WorkspaceSessionFileWatcher({
           onError: (error: Error) => {

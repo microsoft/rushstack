@@ -100,14 +100,19 @@ export class PhasedCommandEngine {
    * Creates the all-project graph through the native CLI preparation pipeline.
    * Releases the preparation lock before returning. Hosts must acquire an execution lease around each iteration.
    */
-  public async createEngineAsync(): Promise<IPhasedCommandEngine> {
+  public async createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine> {
     if (this._created) {
       throw new Error('This parsed command has already created its engine.');
     }
-    const lock: LockFile | undefined = LockFile.tryAcquire(
-      this._parser.rushConfiguration.commonTempFolder,
-      'rush'
-    );
+    const lockFolder: string = this._parser.rushConfiguration.commonTempFolder;
+    if (
+      preparationLock &&
+      (preparationLock.isReleased ||
+        preparationLock.filePath !== LockFile.getLockFilePath(lockFolder, 'rush'))
+    ) {
+      throw new Error('The borrowed preparation lock is not held for this workspace.');
+    }
+    const lock: LockFile | undefined = preparationLock ?? LockFile.tryAcquire(lockFolder, 'rush');
     if (!lock) throw new PhasedCommandEngineBusyError();
     this._created = true;
     let engine: IPhasedCommandEngine | undefined;
@@ -115,8 +120,10 @@ export class PhasedCommandEngine {
     try {
       await this._parser.pluginManager.tryInitializeUnassociatedPluginsAsync();
       engine = await this._action.createEngineAsync();
-      releaseAttempted = true;
-      lock.release();
+      if (!preparationLock) {
+        releaseAttempted = true;
+        lock.release();
+      }
       const execution: PhasedCommandEngineExecution = new PhasedCommandEngineExecution(
         engine,
         this._parser.rushConfiguration.commonTempFolder
@@ -135,7 +142,7 @@ export class PhasedCommandEngine {
           cleanupErrors.push(cleanupError);
         }
       }
-      if (!releaseAttempted) {
+      if (!preparationLock && !releaseAttempted) {
         try {
           lock.release();
         } catch (cleanupError) {

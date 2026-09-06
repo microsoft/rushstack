@@ -3,6 +3,7 @@
 
 import * as path from 'node:path';
 
+import type { LockFile } from '@rushstack/node-core-library';
 import {
   PhasedCommandEngine,
   PhasedCommandEngineBusyError,
@@ -46,56 +47,40 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   #parameterIdentity: string | undefined;
   #workspaceSession: IWorkspaceSession | undefined;
   readonly #environmentIdentity: string = environmentIdentity(process.env);
+  readonly #preparationLock: LockFile | undefined;
+  readonly #validateGraphInputsAsync: (() => Promise<void>) | undefined;
+
+  public constructor(options?: {
+    readonly preparationLock?: LockFile;
+    readonly validateGraphInputsAsync?: () => Promise<void>;
+  }) {
+    this.#preparationLock = options?.preparationLock;
+    this.#validateGraphInputsAsync = options?.validateGraphInputsAsync;
+  }
+
+  /** Creates an unbound resolver for a replacement session without carrying old runner definitions. */
+  public createForSession(
+    preparationLock?: LockFile,
+    validateGraphInputsAsync?: () => Promise<void>
+  ): ProductionDaemonRequestResolver {
+    return new ProductionDaemonRequestResolver({ preparationLock, validateGraphInputsAsync });
+  }
+
+  /** Inspects the native command shape without constructing or executing an operation graph. */
+  public async getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string> {
+    return (await this.#parseCommandAsync(options, new EngineTerminalProvider())).parameterIdentity;
+  }
 
   public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
-    const { envelope, workspaceSession, abortSignal } = options;
-    if (!['build', 'rebuild'].includes(envelope.commandName) || envelope.commandOrigin !== 'built-in') {
-      throw new DaemonRequestDispatchError(
-        'unsupported',
-        'The production daemon requires an explicitly identified native build/rebuild request. Ambiguous custom/rushx requests require --no-daemon.'
-      );
-    }
-    if (
-      environmentIdentity(envelope.environment) !== this.#environmentIdentity ||
-      environmentIdentity(process.env) !== this.#environmentIdentity
-    ) {
-      throw new DaemonRequestDispatchError(
-        'unsupported',
-        'The request environment differs from the daemon startup environment. Restart the daemon from this environment or use --no-daemon.'
-      );
-    }
+    const { envelope, workspaceSession } = options;
     const terminal: EngineTerminalProvider = new EngineTerminalProvider();
-    let command: PhasedCommandEngine;
-    try {
-      command = await PhasedCommandEngine.parseAsync({
-        argv: envelope.argv,
-        cwd: envelope.cwd,
-        rushConfiguration: workspaceSession.rushConfiguration,
-        terminalProvider: terminal
-      });
-    } catch (error) {
-      throw new DaemonRequestDispatchError('unsupported', terminal.describeError(error), { cause: error });
-    }
-    if (command.commandName !== envelope.commandName) {
-      throw new DaemonRequestDispatchError(
-        'invalidRequest',
-        'The command name does not match the native parsed argv.'
-      );
-    }
-    if (abortSignal.aborted)
-      throw new DaemonRequestDispatchError(
-        'routingFailed',
-        'The request was cancelled before engine initialization.'
-      );
+    const command: PhasedCommandEngine = await this.#parseCommandAsync(options, terminal);
     if (this.#binding) {
       if (
         this.#parameterIdentity !== command.parameterIdentity ||
         this.#workspaceSession !== workspaceSession
       ) {
-        throw new DaemonRequestDispatchError(
-          'unsupported',
-          'This warm engine is bound to different command parameters. Restart the daemon or use --no-daemon.'
-        );
+        throw new WorkspaceEngineRecreationRequiredError();
       }
     } else {
       this.#parameterIdentity = command.parameterIdentity;
@@ -140,6 +125,51 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     };
   }
 
+  async #parseCommandAsync(
+    options: IResolveDaemonRequestOptions,
+    terminal: EngineTerminalProvider
+  ): Promise<PhasedCommandEngine> {
+    const { envelope, workspaceSession, abortSignal } = options;
+    if (!['build', 'rebuild'].includes(envelope.commandName) || envelope.commandOrigin !== 'built-in') {
+      throw new DaemonRequestDispatchError(
+        'unsupported',
+        'The production daemon requires an explicitly identified native build/rebuild request. Ambiguous custom/rushx requests require --no-daemon.'
+      );
+    }
+    if (
+      environmentIdentity(envelope.environment) !== this.#environmentIdentity ||
+      environmentIdentity(process.env) !== this.#environmentIdentity
+    ) {
+      throw new DaemonRequestDispatchError(
+        'unsupported',
+        'The request environment differs from the daemon startup environment. Restart the daemon from this environment or use --no-daemon.'
+      );
+    }
+    let command: PhasedCommandEngine;
+    try {
+      command = await PhasedCommandEngine.parseAsync({
+        argv: envelope.argv,
+        cwd: envelope.cwd,
+        rushConfiguration: workspaceSession.rushConfiguration,
+        terminalProvider: terminal
+      });
+    } catch (error) {
+      throw new DaemonRequestDispatchError('unsupported', terminal.describeError(error), { cause: error });
+    }
+    if (command.commandName !== envelope.commandName) {
+      throw new DaemonRequestDispatchError(
+        'invalidRequest',
+        'The command name does not match the native parsed argv.'
+      );
+    }
+    if (abortSignal.aborted)
+      throw new DaemonRequestDispatchError(
+        'routingFailed',
+        'The request was cancelled before engine initialization.'
+      );
+    return command;
+  }
+
   async #bindAsync(
     command: PhasedCommandEngine,
     terminal: EngineTerminalProvider,
@@ -149,7 +179,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     await session.initializeEngineAsync(async (options) => {
       let engine: IPhasedCommandEngine;
       try {
-        engine = await command.createEngineAsync();
+        engine = await command.createEngineAsync(this.#preparationLock);
       } catch (error) {
         if (error instanceof PhasedCommandEngineBusyError) throw error;
         throw new Error(terminal.describeError(error), { cause: error });
@@ -169,12 +199,14 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
                 }
                 throw error;
               }
-              if (snapshot) assertCompatibleInputs(engine.inputsSnapshot, snapshot);
+              if (snapshot && !this.#validateGraphInputsAsync)
+                assertCompatibleInputs(engine.inputsSnapshot, snapshot);
               return snapshot;
             }
           }),
           shape: engine,
           refreshInputsOnEveryRequest: true,
+          validateGraphInputsAsync: this.#validateGraphInputsAsync,
           mapInvalidationsToOperationsAsync: async (invalidationOptions) =>
             getChangedOperations(invalidationOptions)
         });
@@ -213,7 +245,6 @@ function environmentIdentity(environment: Readonly<Record<string, string | undef
 
 function getChangedOperations(options: IMapWorkspaceInvalidationsOptions): Iterable<Operation> {
   const { currentInputsSnapshot: current, nextInputsSnapshot: next, operationGraph } = options;
-  assertCompatibleInputs(current, next);
   return Array.from(operationGraph.operations).filter(
     (operation) =>
       current.getOperationOwnStateHash(operation.associatedProject, operation.associatedPhase.name) !==

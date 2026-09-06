@@ -9,6 +9,9 @@ export {
   DaemonRequestDispatcher,
   type IDaemonRequestDispatchClient,
   type IDaemonRequestResolver,
+  type IDaemonRequestLifecycle,
+  type IDispatchWorkspaceRequestOptions,
+  type DispatchWorkspaceRequestAsync,
   type IResolvedDaemonGlobalRequest,
   type IResolvedDaemonPhasedRequest,
   type IResolveDaemonRequestOptions,
@@ -87,3 +90,9 @@ export {
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+export {
+  type GetWorkspaceSuccessorLaunchAsync,
+  type IWorkspaceProcessRestartContext,
+  type IWorkspaceProcessRestartResult,
+  type IWorkspaceSuccessorLaunch
+} from './WorkspaceProcessRestart';

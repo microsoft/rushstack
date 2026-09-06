@@ -168,6 +168,8 @@ export interface IWorkspaceEngineComponentFactoryOptions {
   readonly shape: IWorkspaceEngineShape;
   /** Refresh inputs even without a watcher notification (for request-time freshness). */
   readonly refreshInputsOnEveryRequest?: boolean;
+  /** Authoritative graph-definition validation, awaited on every reconciliation before trusting path hints. */
+  readonly validateGraphInputsAsync?: () => Promise<void>;
 }
 
 interface IWorkspaceEngineLifecycleOptions {
@@ -178,6 +180,7 @@ interface IWorkspaceEngineLifecycleOptions {
   readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly rushConfiguration: RushConfiguration;
   readonly refreshInputsOnEveryRequest: boolean;
+  readonly validateGraphInputsAsync: (() => Promise<void>) | undefined;
 }
 
 interface IGraphDefiningPaths {
@@ -193,6 +196,7 @@ class WorkspaceEngineLifecycle {
   readonly #mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly #rushConfiguration: RushConfiguration;
   readonly #refreshInputsOnEveryRequest: boolean;
+  readonly #validateGraphInputsAsync: (() => Promise<void>) | undefined;
   #currentInputsSnapshot: IInputsSnapshot;
   #disposePromise: Promise<void> | undefined;
   #isDisposing: boolean = false;
@@ -208,6 +212,7 @@ class WorkspaceEngineLifecycle {
     this.#mapInvalidationsToOperationsAsync = options.mapInvalidationsToOperationsAsync;
     this.#rushConfiguration = options.rushConfiguration;
     this.#refreshInputsOnEveryRequest = options.refreshInputsOnEveryRequest;
+    this.#validateGraphInputsAsync = options.validateGraphInputsAsync;
   }
 
   public get inputsSnapshot(): IInputsSnapshot {
@@ -235,6 +240,7 @@ class WorkspaceEngineLifecycle {
   }
 
   async #reconcileOnceAsync(): Promise<IWorkspaceInvalidationReconciliation> {
+    await this.#validateGraphInputsAsync?.();
     const invalidationSnapshot: IWorkspaceInvalidationSnapshot = this.#invalidations.getSnapshot();
     if (await this.#requiresEngineRecreationAsync(invalidationSnapshot)) {
       throw new WorkspaceEngineRecreationRequiredError();
@@ -314,6 +320,7 @@ class WorkspaceEngineLifecycle {
     }
 
     if (
+      !this.#validateGraphInputsAsync &&
       invalidationSnapshot.changedPaths.some((changedPath: string) =>
         isBuiltInGraphDefiningPath(
           changedPath,
@@ -348,6 +355,7 @@ export class WorkspaceEngineComponentFactory {
   readonly #isEngineRecreationRequiredAsync: IsWorkspaceEngineRecreationRequiredAsync | undefined;
   readonly #mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly #refreshInputsOnEveryRequest: boolean;
+  readonly #validateGraphInputsAsync: (() => Promise<void>) | undefined;
 
   public readonly createAsync: CreateWorkspaceSessionComponentsAsync;
   public readonly shape: IWorkspaceEngineShape;
@@ -357,6 +365,7 @@ export class WorkspaceEngineComponentFactory {
     this.#isEngineRecreationRequiredAsync = options.isEngineRecreationRequiredAsync;
     this.#mapInvalidationsToOperationsAsync = options.mapInvalidationsToOperationsAsync;
     this.#refreshInputsOnEveryRequest = options.refreshInputsOnEveryRequest ?? false;
+    this.#validateGraphInputsAsync = options.validateGraphInputsAsync;
     this.shape = normalizeShape(options.shape);
     this.createAsync = (createOptions: ICreateWorkspaceSessionComponentsOptions) =>
       this.#createAsync(createOptions);
@@ -387,7 +396,8 @@ export class WorkspaceEngineComponentFactory {
       isEngineRecreationRequiredAsync: this.#isEngineRecreationRequiredAsync,
       mapInvalidationsToOperationsAsync: this.#mapInvalidationsToOperationsAsync,
       rushConfiguration: options.rushConfiguration,
-      refreshInputsOnEveryRequest: this.#refreshInputsOnEveryRequest
+      refreshInputsOnEveryRequest: this.#refreshInputsOnEveryRequest,
+      validateGraphInputsAsync: this.#validateGraphInputsAsync
     });
     return {
       [Symbol.asyncDispose]: () => lifecycle[Symbol.asyncDispose](),

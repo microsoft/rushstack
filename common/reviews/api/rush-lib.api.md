@@ -38,6 +38,7 @@ import type { ITerminalChunk } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { LockFile } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import { parseReporterExtensionEventName } from '@rushstack/rush-reporter';
@@ -116,10 +117,19 @@ export enum BumpType {
     'prerelease' = 1
 }
 
+// @alpha
+export function captureProjectConfigurationFingerprintAsync(rushConfiguration: RushConfiguration, terminal: ITerminal): Promise<string>;
+
+// @alpha
+export function captureWorkspaceInputFingerprintAsync(options: IWorkspaceInputFingerprintOptions): Promise<IWorkspaceInputFingerprint>;
+
 // @public
 export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
+
+// @alpha
+export function classifyWorkspaceInputChange(current: IWorkspaceInputFingerprint, next: IWorkspaceInputFingerprint): WorkspaceInputChangeTier;
 
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
@@ -1187,6 +1197,30 @@ export interface IVersionPolicyJson {
     policyName: string;
 }
 
+// @alpha
+export interface IWorkspaceInputFingerprint {
+    // (undocumented)
+    readonly configurationHash: string;
+    // (undocumented)
+    readonly environmentHash: string;
+    // (undocumented)
+    readonly installationHash: string;
+    // (undocumented)
+    readonly runtimeHash: string;
+    // (undocumented)
+    readonly selectedRushVersion: string;
+}
+
+// @alpha
+export interface IWorkspaceInputFingerprintOptions {
+    // (undocumented)
+    readonly environment: Readonly<Record<string, string | undefined>>;
+    readonly runtimeCache?: WorkspaceRuntimeFingerprintCache;
+    readonly runtimePaths?: ReadonlyArray<string>;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+}
+
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
@@ -1428,7 +1462,7 @@ export { parseReporterExtensionEventName }
 export class PhasedCommandEngine {
     // (undocumented)
     readonly commandName: string;
-    createEngineAsync(): Promise<IPhasedCommandEngine>;
+    createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
     // (undocumented)
     readonly parameterIdentity: string;
     // (undocumented)
@@ -1851,6 +1885,8 @@ export class RushProjectConfiguration {
         phaseName: string;
         isNoOp: boolean;
     }): string | undefined;
+    // @internal (undocumented)
+    _getJsonForFingerprint(): string;
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
@@ -2002,6 +2038,24 @@ export enum VersionPolicyDefinitionName {
     'individualVersion' = 1,
     // (undocumented)
     'lockStepVersion' = 0
+}
+
+// @alpha
+export enum WorkspaceInputChangeTier {
+    // (undocumented)
+    Reload = 1,
+    // (undocumented)
+    Restart = 2,
+    // (undocumented)
+    Reuse = 0
+}
+
+// @alpha
+export class WorkspaceRuntimeFingerprintCache {
+    // @internal (undocumented)
+    get changedPaths(): ReadonlyArray<string>;
+    // @internal (undocumented)
+    _hashPaths(paths: ReadonlyArray<string>): string;
 }
 
 // @public

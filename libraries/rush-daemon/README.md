@@ -54,26 +54,39 @@ plugin pipeline. It does not launch a Rush CLI subprocess. The graph includes ev
 `SelectionParameterSet` results are applied at request time. In particular, `--only` and the impacted-project
 selectors do not accidentally enable omitted dependencies; `--include-phase-deps` explicitly expands them.
 
-The first command and its non-selection parameters pin the engine identity. Compatible selections reuse the same
-graph and completed records; an unchanged successful build schedules no work. Rebuild deliberately invalidates
-the graph on each request. Input snapshots refresh at every request, even if watcher callbacks have not arrived,
-and native operation hashes decide which inputs changed. Graph-defining changes reject execution before advancing
-the baseline. Command/parameter/environment changes are rejected rather than reusing stale runner definitions or
-automatically retrying a possibly executed request.
+The host uses stable fingerprints to classify native requests:
+
+| Tier | Inputs | Action |
+| --- | --- | --- |
+| 0 | Unchanged definitions/parameters, or ordinary project source changes | Retain session, graph, plugins, and completed records; reconcile operation inputs |
+| 1 | Rush/project configuration, effective rig/inherited settings, command shape, or unhealthy invalidation tracking | Drain the old generation, dispose it, and construct a new session and real graph in the same process |
+| 2 | Environment, installed dependency state, implementation content, or selected Rush version | Finish a pre-execution failure result, close the old host completely, and launch an available successor process |
+
+Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
+file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
+Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
+still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
+
+A generation lease spans resolution through final output. Reload also takes exclusive workspace admission and
+the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before
+publishing the replacement. The initiating request atomically downgrades its admission so another reload cannot
+dispose the newly selected graph before it runs. Watch requests are cancelled and drained before their generation
+is replaced. A race detected before scheduling may be re-resolved; once scheduling starts, or a terminal result has
+been attempted, the request is never replayed.
 
 This integration supports Git-backed workspaces with direct, inherited, or rig-based project configuration and ordinary native phases.
 Engine configuration snapshots use private native configuration-file loaders and non-caching rig resolution, including
 the normal native inheritance merge and schema validation. Git selectors likewise read request-owned ignore-glob
 configuration. The engine does not clear, read, or populate the process-wide project/rig configuration caches.
-Before each iteration, it reloads the effective project configuration under the native execution lease and compares
-the graph/cache settings with the construction snapshot. Changed inherited or rig-provided settings reject execution
-even when their files are outside the watcher roots or ignored by Git, including files under `node_modules`.
+Before each iteration, it reloads effective project configuration under the native execution lease and compares
+the graph/cache settings with the construction snapshot. Changed inherited or rig-provided settings trigger a
+generation reload before execution, even outside watcher roots or in ignored `node_modules` files.
 The retained graph and its cache policy are never patched in place.
 
 External Rush plugins, `.env` initialization, watch/install/variant
 and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global/rushx
-commands are rejected, not silently bypassed. The complete request environment must match the daemon startup
-environment, including Rush/cache policy variables. These restrictions remain until the corresponding initialization,
+commands are rejected, not silently bypassed. A changed request environment requires a new process, including
+Rush/cache policy variables. These restrictions remain until the corresponding initialization,
 environment, and resource-lifetime contracts are request-scoped.
 
 The native Rush lock is held only during graph preparation and each coalesced iteration, not while the warm daemon
@@ -87,9 +100,33 @@ A real native command holding the lock causes preparation or execution to be ref
 automatic retry. A later explicit request can retry after contention ends, including contention during the first
 engine initialization. A dirty native lock left by another command invalidates retained successes so the native
 incremental/cache pipeline can reconcile possibly changed ignored outputs. Installation validity is also checked on
-every snapshot refresh. Another command shape, parameters, environment, or changed graph configuration still requires
-engine recreation. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
+every snapshot refresh. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
 runner/provider cleanup. The existing operation-completion cleanup is unchanged.
+
+### Process restart and isolated install/update
+
+`serveRushDaemonAsync` supplies a successor selector for the currently installed daemon/Rush version.
+Embedded `RushDaemonHost` users can provide `getSuccessorLaunchAsync`, returning the existing core
+`IDaemonStartCommand` plus the expected daemon implementation version. Selection is validated before shutdown;
+an unavailable selected Rush version fails explicitly and is never run by the current engine under a false version.
+The default entrypoint supports the `rush.json` version, not a separate preview-version namespace.
+
+Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
+resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
+`restartCompleted` reports completion or failure. There is no automatic request replay. A hard-change retry hint
+explicitly says no operation was scheduled or executed; the caller must reconnect and submit a new request.
+
+Positively identified built-in `install` and `update` requests execute in `NativeMutationWorker`, a single-shot
+native Rush parser process owned by `GlobalCommandExecutionContext`. This is not the phased warm engine.
+Native arguments, policies, hooks, stdin/EOF, output and numeric exit status are preserved. Even a failed mutation
+may have changed files: its exact result is drained before old generation cleanup and successor startup.
+Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
+launched, the host stops without silently starting an incorrect successor. No mutation is replayed.
+
+The CLI admission/allowlist is separate from this server API; this package does not enable forwarding additional
+administrative commands in a client. Client-originated graph-reference fencing also needs a protocol/client
+generation token. Server-resolved requests are fenced here; operation names alone cannot identify which snapshot
+a client previously observed. Graph controls do not migrate a prepared iteration across a generation replacement.
 
 **Client integration boundary:** the resolver requires `commandOrigin: "built-in"` for native
 `build`/`rebuild`. The standalone client identifies these workspace commands while leaving
@@ -148,8 +185,8 @@ typed phased request or isolated global executor contracts. Resolvers receive th
 when cancellation, disconnect, or host shutdown aborts it. An embedded host without that resolver continues to start,
 answer ping, and reject ordinary command execution with the typed `unsupported` outcome; it never constructs an empty graph
 or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
-reported as `workspaceRecreationRequired` before scheduling. Replacing the warm session is intentionally deferred to
-WS3.
+reported as `workspaceRecreationRequired` before scheduling for unmanaged integrations. The production lifecycle
+instead replaces the generation and re-resolves a phased request only while execution is proven not to have begun.
 
 ### Experimental graph requests
 

@@ -19,10 +19,12 @@ import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-prot
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonRequestQueuePositionMessage } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonSetRawModeMessage } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonStartCommand } from '@rushstack/rush-client-core';
 import type { IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import type { IOperationGraph } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
+import type { LockFile } from '@rushstack/node-core-library';
 import type { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
@@ -38,7 +40,7 @@ export type CreateWorkspaceSessionComponentsAsync = (options: ICreateWorkspaceSe
 export class DaemonRequestDispatcher implements AsyncDisposable {
     // (undocumented)
     [Symbol.asyncDispose](): Promise<void>;
-    constructor(workspaceSession: IWorkspaceSession, resolver?: IDaemonRequestResolver);
+    constructor(workspaceSession: IWorkspaceSession, resolver?: IDaemonRequestResolver, lifecycle?: IDaemonRequestLifecycle);
     // (undocumented)
     dispatchAsync(envelope: IDaemonRequestEnvelope, client: IDaemonRequestDispatchClient): Promise<void>;
 }
@@ -61,7 +63,13 @@ export class DaemonRequiresInProcessError extends Error {
 }
 
 // @beta
+export type DispatchWorkspaceRequestAsync = (options: IDispatchWorkspaceRequestOptions) => Promise<IDaemonCommandResult | undefined>;
+
+// @beta
 export function evaluateDaemonTerminalPolicy(requestId: string, requirement?: DaemonTerminalRequirement): IDaemonTerminalPolicyResult;
+
+// @beta
+export type GetWorkspaceSuccessorLaunchAsync = (context: IWorkspaceProcessRestartContext) => Promise<IWorkspaceSuccessorLaunch>;
 
 // @beta
 export type GlobalCommandExecutor = (context: IGlobalCommandExecutionContext) => Promise<IGlobalCommandExecutionResult>;
@@ -147,11 +155,31 @@ export interface IDaemonRequestDispatchClient {
 }
 
 // @beta
+export interface IDaemonRequestLifecycle extends AsyncDisposable {
+    // (undocumented)
+    dispatchAsync(envelope: IDaemonRequestEnvelope, client: IDaemonRequestDispatchClient, dispatchAsync: DispatchWorkspaceRequestAsync): Promise<void>;
+}
+
+// @beta
 export interface IDaemonRequestResolver {
     // (undocumented)
     readonly [Symbol.asyncDispose]?: () => Promise<void>;
     // (undocumented)
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
+}
+
+// @beta
+export interface IDispatchWorkspaceRequestOptions {
+    // (undocumented)
+    readonly client: IDaemonRequestDispatchClient;
+    // (undocumented)
+    readonly envelope: IDaemonRequestEnvelope;
+    // (undocumented)
+    readonly onExecutionStarting?: () => void;
+    // (undocumented)
+    readonly resolver: IDaemonRequestResolver | undefined;
+    // (undocumented)
+    readonly workspaceSession: IWorkspaceSession;
 }
 
 // @beta
@@ -403,6 +431,7 @@ export interface IResolveGlobalCommandRequestOptions {
 export interface IRushDaemonHostOptions {
     readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
     readonly daemonVersion: string;
+    readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
     readonly idleTimeoutSeconds?: number;
     readonly onError?: (error: Error) => void;
     readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
@@ -432,6 +461,7 @@ export interface IWorkspaceEngineComponentFactoryOptions {
     readonly refreshInputsOnEveryRequest?: boolean;
     // (undocumented)
     readonly shape: IWorkspaceEngineShape;
+    readonly validateGraphInputsAsync?: () => Promise<void>;
 }
 
 // @beta
@@ -483,8 +513,29 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
 }
 
 // @beta
+export interface IWorkspaceProcessRestartContext {
+    // (undocumented)
+    readonly environment: Readonly<Record<string, string>>;
+    // (undocumented)
+    readonly reason: 'hard-input-change' | 'native-mutation';
+    // (undocumented)
+    readonly repoRoot: string;
+    // (undocumented)
+    readonly rushVersion: string;
+}
+
+// @beta
+export interface IWorkspaceProcessRestartResult {
+    // (undocumented)
+    readonly pid: number;
+    // (undocumented)
+    readonly rushVersion: string;
+}
+
+// @beta
 export interface IWorkspaceSession extends AsyncDisposable {
     acquireExecutionLeaseAsync?(): Promise<AsyncDisposable | undefined>;
+    assertActive?(): void;
     // (undocumented)
     readonly engineShape: IWorkspaceEngineShape | undefined;
     initializeEngineAsync?(factory: CreateWorkspaceSessionComponentsAsync): Promise<void>;
@@ -498,6 +549,7 @@ export interface IWorkspaceSession extends AsyncDisposable {
     readonly operationGraph: IOperationGraph | undefined;
     // (undocumented)
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
+    retire?(): void;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)
@@ -522,6 +574,7 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
 
 // @beta
 export interface IWorkspaceSessionMetadata {
+    readonly generation?: number;
     // (undocumented)
     readonly projectCount: number;
     // (undocumented)
@@ -539,6 +592,8 @@ export interface IWorkspaceSessionOptions {
     // (undocumented)
     readonly createComponentsAsync?: CreateWorkspaceSessionComponentsAsync;
     // (undocumented)
+    readonly generation?: number;
+    // (undocumented)
     readonly onError?: (error: Error) => void;
     // (undocumented)
     readonly repoRoot: string;
@@ -547,16 +602,30 @@ export interface IWorkspaceSessionOptions {
 }
 
 // @beta
+export interface IWorkspaceSuccessorLaunch {
+    // (undocumented)
+    readonly daemonVersion: string;
+    // (undocumented)
+    readonly startCommand: IDaemonStartCommand;
+}
+
+// @beta
 export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspaceInvalidationsOptions) => Promise<Iterable<Operation>>;
 
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void): Promise<IDaemonPhasedRequestResult>;
 }
 
 // @beta
 export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
+    constructor(options?: {
+        readonly preparationLock?: LockFile;
+        readonly validateGraphInputsAsync?: () => Promise<void>;
+    });
+    createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): ProductionDaemonRequestResolver;
+    getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
     // (undocumented)
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
 }
@@ -575,6 +644,7 @@ export enum RequestExclusivityClass {
 export class RequestScheduler {
     acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease>;
     get activeRequestCount(): number;
+    downgradeExclusiveLease(lease: IRequestLease, target: RequestExclusivityClass.SharedBuild | RequestExclusivityClass.SharedRead): void;
     get queuedRequestCount(): number;
 }
 
@@ -605,7 +675,9 @@ export class RushDaemonHost {
     getWorkspaceSessionAsync(): Promise<IWorkspaceSession>;
     // (undocumented)
     readonly paths: IDaemonPaths;
+    readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
     static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
+    get workspaceGeneration(): number;
 }
 
 // @beta
@@ -643,6 +715,8 @@ export class WorkspaceSession implements IWorkspaceSession {
     [Symbol.asyncDispose](): Promise<void>;
     // (undocumented)
     acquireExecutionLeaseAsync(): Promise<AsyncDisposable | undefined>;
+    // (undocumented)
+    assertActive(): void;
     static createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession>;
     // (undocumented)
     get engineShape(): IWorkspaceEngineShape | undefined;
@@ -656,6 +730,8 @@ export class WorkspaceSession implements IWorkspaceSession {
     // (undocumented)
     get operationGraph(): IOperationGraph | undefined;
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
+    // (undocumented)
+    retire(): void;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)

@@ -4172,6 +4172,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/rush-client-core':
+        specifier: workspace:*
+        version: link:../rush-client-core
       '@rushstack/rush-daemon-protocol':
         specifier: workspace:*
         version: link:../rush-daemon-protocol

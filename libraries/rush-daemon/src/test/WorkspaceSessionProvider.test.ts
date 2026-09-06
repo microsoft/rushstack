@@ -11,6 +11,49 @@ const OPTIONS: IWorkspaceSessionOptions = {
 };
 
 describe(WorkspaceSessionProvider.name, () => {
+  it('waits for complete cleanup before publishing a replacement generation', async () => {
+    let finishDisposal: (() => void) | undefined;
+    const first: IWorkspaceSession = new TestWorkspaceSession(
+      OPTIONS.repoRoot,
+      () =>
+        new Promise<void>((resolve) => {
+          finishDisposal = resolve;
+        })
+    );
+    const second: IWorkspaceSession = new TestWorkspaceSession(OPTIONS.repoRoot);
+    let calls: number = 0;
+    const provider: WorkspaceSessionProvider = new WorkspaceSessionProvider(
+      async () => (++calls === 1 ? first : second),
+      OPTIONS
+    );
+    await provider.getSessionAsync();
+    const reload: Promise<IWorkspaceSession> = provider.reloadAsync();
+    const pendingRead: Promise<IWorkspaceSession> = provider.getSessionAsync();
+    expect(calls).toBe(1);
+    expect(provider.generation).toBe(1);
+    finishDisposal?.();
+    expect(await reload).toBe(second);
+    expect(await pendingRead).toBe(second);
+    expect(provider.generation).toBe(2);
+    await provider[Symbol.asyncDispose]();
+  });
+
+  it('never constructs a new generation after old cleanup fails', async () => {
+    const session: IWorkspaceSession = new TestWorkspaceSession(OPTIONS.repoRoot, async () => {
+      throw new Error('old cleanup failed');
+    });
+    let calls: number = 0;
+    const provider: WorkspaceSessionProvider = new WorkspaceSessionProvider(async () => {
+      calls++;
+      return session;
+    }, OPTIONS);
+    await provider.getSessionAsync();
+    await expect(provider.reloadAsync()).rejects.toThrow('old cleanup failed');
+    await expect(provider.getSessionAsync()).rejects.toThrow('old cleanup failed');
+    expect(calls).toBe(1);
+    await expect(provider[Symbol.asyncDispose]()).rejects.toThrow('old cleanup failed');
+  });
+
   it('shares concurrent initialization and reuses the result', async () => {
     const session: IWorkspaceSession = new TestWorkspaceSession(OPTIONS.repoRoot);
     let resolveFactory: ((value: IWorkspaceSession) => void) | undefined;
@@ -107,12 +150,9 @@ describe(WorkspaceSessionProvider.name, () => {
 
     const initialization: Promise<IWorkspaceSession> = provider.getSessionAsync();
     const disposal: Promise<void> = provider[Symbol.asyncDispose]();
-    const initializationExpectation: Promise<void> = expect(initialization).rejects.toThrow(
-      'session cleanup failed'
-    );
-    const disposalExpectation: Promise<void> = expect(disposal).rejects.toThrow(
-      'session cleanup failed'
-    );
+    const initializationExpectation: Promise<void> =
+      expect(initialization).rejects.toThrow('session cleanup failed');
+    const disposalExpectation: Promise<void> = expect(disposal).rejects.toThrow('session cleanup failed');
     await Promise.resolve();
     resolveFactory?.(session);
 
