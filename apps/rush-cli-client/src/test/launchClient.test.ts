@@ -10,6 +10,8 @@ import * as path from 'node:path';
 import { Rush } from '@microsoft/rush-lib';
 import { RushDaemonHost } from '@rushstack/rush-daemon';
 
+import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+
 interface IInvocationResult {
   readonly code: number | undefined;
   readonly stdout: string;
@@ -31,6 +33,7 @@ describe('standalone rushx fallback', () => {
       JSON.stringify({
         rushVersion: Rush.version,
         pnpmVersion: '10.27.0',
+        daemon: { enabled: false, autoStart: false },
         projects: [{ packageName: 'sample', projectFolder: 'project' }],
         projectFolderMinDepth: 1
       })
@@ -58,24 +61,25 @@ describe('standalone rushx fallback', () => {
   async function invokeAsync(
     client: boolean,
     optIn: boolean,
-    fakeTty: boolean = false
+    fakeTty: boolean = false,
+    managementArgs?: ReadonlyArray<string>
   ): Promise<IInvocationResult> {
     const entry: string = client
-      ? path.resolve(__dirname, '../../bin/rushx-client')
+      ? path.resolve(__dirname, managementArgs ? '../../bin/rush-client' : '../../bin/rushx-client')
       : path.resolve(path.dirname(require.resolve('@microsoft/rush/package.json')), 'bin/rushx');
     const args: string[] = fakeTty
       ? [
           '-e',
           `Object.defineProperty(process.stdin, 'isTTY', { value: true }); process.argv = [process.execPath, ${JSON.stringify(entry)}, 'sample']; require(${JSON.stringify(entry)});`
         ]
-      : [entry, ...(client ? ['--no-daemon'] : []), 'sample'];
+      : [entry, ...(managementArgs ?? [...(client ? ['--no-daemon'] : []), 'sample'])];
     const child: ChildProcess = spawn(process.execPath, args, {
       cwd: project,
       env: {
         ...process.env,
         CLIENT_MARKER: 'script-output',
         RUSH_DAEMON: optIn ? '1' : '0',
-        CI: 'false',
+        CI: managementArgs ? 'true' : 'false',
         TF_BUILD: 'false',
         GITHUB_ACTIONS: 'false'
       },
@@ -113,4 +117,70 @@ describe('standalone rushx fallback', () => {
     expect(client.stderr).toContain('using in-process Rush');
     expect(client.stderr).toContain(native.stderr);
   }, 15000);
+
+  it('starts idempotently and reports real readiness in CI without execution opt-in', async () => {
+    const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+    host = await RushDaemonHost.startAsync({
+      repoRoot: folder,
+      rushVersion: Rush.version,
+      daemonVersion: daemonPackage.version
+    });
+    for (const verb of ['start', 'start', 'status']) {
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', verb]);
+      expect(result.code).toBe(0);
+      expect(result.stderr).toBe('');
+      const status: Record<string, unknown> = JSON.parse(result.stdout);
+      expect(status).toMatchObject({
+        state: 'ready',
+        socketPath: host.paths.socketPath,
+        daemonVersion: daemonPackage.version
+      });
+      expect(status.uptimeMs).toEqual(expect.any(Number));
+      expect(status).not.toHaveProperty('pid');
+      expect(status).not.toHaveProperty('warmProjects');
+    }
+  }, 15000);
+
+  it('status never starts an absent daemon or falls back to command execution', async () => {
+    const result: IInvocationResult = await invokeAsync(true, true, false, ['daemon', 'status']);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toBe('');
+    expect(result.stderr).toContain('Could not connect to daemon');
+    expect(result.stderr).not.toContain('using in-process');
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+  });
+
+  it('rejects stop/restart until the host has negotiated lifecycle controls', async () => {
+    for (const verb of ['stop', 'restart']) {
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', verb]);
+      expect(result.code).toBe(1);
+      expect(result.stderr).toContain('requires negotiated host lifecycle controls');
+    }
+  });
+
+  it('rejects extra management arguments without silently ignoring them', async () => {
+    const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status', 'extra']);
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain('Usage: rush-client daemon start|status');
+  });
+
+  it('does not guess a daemon launcher for a different selected Rush version', async () => {
+    const rushJsonPath: string = path.join(folder, 'rush.json');
+    const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+    fs.writeFileSync(rushJsonPath, JSON.stringify({ ...config, rushVersion: '0.0.0' }));
+    const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain('no version-selected daemon launcher');
+  });
+
+  it('rejects explicit startup combined with --no-daemon', async () => {
+    const result: IInvocationResult = await invokeAsync(true, false, false, [
+      'daemon',
+      'start',
+      '--no-daemon'
+    ]);
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain('--no-daemon cannot be combined with daemon start');
+  });
 });

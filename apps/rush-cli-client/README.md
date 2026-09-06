@@ -11,7 +11,7 @@ Routing precedence:
 4. Auto-start is considered only after selecting daemon execution.
 
 `install`, `update`, package mutation, publishing, setup, management, and other
-administrative commands never run through this initial client. Rushx script names
+administrative commands are never forwarded as execution requests. Rushx script names
 are not interpreted as Rush built-ins. Arguments after `--` are preserved.
 Request cwd, environment, argv, width and color are captured before connecting.
 The protocol currently expresses request color as a boolean; subscriptions carry
@@ -41,7 +41,7 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | --- | --- | --- | --- |
 | `enabled` | `RUSH_DAEMON` | false | Client routing |
 | `autoStart` | `RUSH_DAEMON_AUTO_START` | true | Only after opt-in |
-| `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Requires WS3 host idle-timeout integration |
+| `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Forwarded at startup for the WS3 host to enforce |
 | `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Sent through existing admission contract |
 | `watch` | `RUSH_DAEMON_WATCH` | false | Validated, inactive integration seam |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Validated, inactive integration seam |
@@ -54,7 +54,27 @@ accepts zero and is rounded down to milliseconds. Memory budget must be positive
 and no larger than JavaScript's maximum safe integer. Project count must be a
 positive safe integer. No warm-set setting changes build correctness.
 
-`daemon start|stop|restart|status|logs` and
+## Management
+
+`rush-client daemon start` explicitly requests startup, independently of
+`daemon.enabled`, `autoStart`, or CI execution routing. It conflicts with
+`--no-daemon`. It is idempotent: an existing compatible daemon is reused, not
+reconfigured. Startup uses the same detached, locked launcher as automatic
+startup and fails rather than guessing a launcher for another Rush version.
+
+`rush-client daemon status` only connects and checks hello/pong. It never starts
+a process, reclaims files, or treats a PID file as evidence of readiness. Both
+commands print one JSON object with `state: "ready"`, `socketPath`, and the actual
+pong fields (`uptimeMs` and available versions). Exit code 0 means protocol
+readiness, not build support. An unreachable/incompatible endpoint, invalid
+arguments, or startup failure returns exit code 1 with a diagnostic.
+
+PID identity, warm projects, reload tier, and memory are not reported because
+the current pong does not attest them. Status can inspect a protocol-compatible
+daemon with a different implementation version; start requires the bundled
+version to match.
+
+`daemon stop|restart|logs` and
 `daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume` require
 host lifecycle/graph protocol integration and currently fail explicitly. Setting
 `RUSH_DAEMON_EXPERIMENTAL=1` does not make absent graph contracts available.
