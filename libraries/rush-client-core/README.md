@@ -33,13 +33,19 @@ the existing `shutdown` control and resolves only after `shutdownAck` and EOF,
 with a bounded timeout. This is acceptance plus connection closure, **not** proof
 of successful workspace disposal.
 
-After acknowledged shutdown, `previousDaemonPid` on `connectOrStartDaemonAsync()`
-waits for the original PID reported by pong to exit before touching transport
-ownership or starting a successor. Signal 0 is only a liveness probe; no process
-is killed. A live/reused PID times out conservatively. This stronger barrier is
-needed because the current host removes transport artifacts before workspace
-disposal finishes. Embedded hosts that keep their process alive cannot use this
-restart path without a future cleanup-completion contract.
+After acknowledged shutdown, `previousDaemon` on `connectOrStartDaemonAsync()`
+identifies the original ownership record by its `pid` and `startedAt`, captured
+before sending shutdown. Startup waits until that record disappears, another
+owner replaces it, or its owner is demonstrably dead. A new owner is checked by
+hello/ping; it is never blindly reclaimed. Signal 0 is only a liveness probe; no
+process is killed. A live/reused owner times out conservatively, while corrupt or
+unreadable metadata fails closed.
+
+This relies on the two-phase host close contract: admission stops first, ownership
+is retained through workspace disposal, and successful cleanup releases it.
+Failed cleanup retains live ownership and prevents restart. Embedded hosts may
+therefore release a workspace without exiting their process, and late repeated
+close calls cannot remove successor artifacts.
 
 ## Integration boundaries
 

@@ -9,7 +9,9 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
-import { RushDaemonHost } from '@rushstack/rush-daemon';
+import { DaemonClient, connectOrStartDaemonAsync } from '@rushstack/rush-client-core';
+import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
+import { readDaemonLockfile, removeDaemonArtifacts } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
 
@@ -187,40 +189,96 @@ describe('standalone rushx fallback', () => {
     }
   });
 
-  it('restarts only after acknowledged shutdown and original process exit, then stops the successor', async () => {
-    const rushJsonPath: string = path.join(folder, 'rush.json');
-    const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
-    fs.writeFileSync(
-      rushJsonPath,
-      JSON.stringify({
-        ...config,
-        daemon: { enabled: false, autoStart: false, idleTimeoutSeconds: 5 }
-      })
-    );
-    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+  it.each([false, true])(
+    'restarts after ownership release and stops the successor (embedded: %s)',
+    async (embedded) => {
+      const rushJsonPath: string = path.join(folder, 'rush.json');
+      const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+      fs.writeFileSync(
+        rushJsonPath,
+        JSON.stringify({
+          ...config,
+          daemon: { enabled: false, autoStart: false, idleTimeoutSeconds: 5 }
+        })
+      );
+      const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+      try {
+        if (embedded) {
+          const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+          host = await RushDaemonHost.startAsync({
+            repoRoot: folder,
+            rushVersion: Rush.version,
+            daemonVersion: daemonPackage.version
+          });
+        } else {
+          const started: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
+          expect(started.code).toBe(0);
+        }
+        const originalLock: { startedAt: string } = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
+        const restarted: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'restart']);
+        expect(restarted.stderr).toBe('');
+        expect(restarted.code).toBe(0);
+        expect(JSON.parse(restarted.stdout)).toMatchObject({
+          state: 'ready',
+          pid: expect.any(Number),
+          residentMemoryBytes: expect.any(Number)
+        });
+        const successorLock: { startedAt: string } = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
+        expect(successorLock.startedAt).not.toBe(originalLock.startedAt);
+        await host?.closeAsync();
+        expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+        const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop']);
+        expect(stopped.code).toBe(0);
+        expect(JSON.parse(stopped.stdout)).toMatchObject({ state: 'shutdownAccepted' });
+      } finally {
+        const deadline: number = Date.now() + 7000;
+        while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+        expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+      }
+    },
+    30000
+  );
+
+  it('bounds restart after failed workspace cleanup without deleting live ownership', async () => {
+    const errors: Error[] = [];
+    const failedHost: RushDaemonHost = await RushDaemonHost.startAsync({
+      repoRoot: folder,
+      rushVersion: Rush.version,
+      daemonVersion: 'cleanup-failure-test',
+      onError: (error) => {
+        errors.push(error);
+      },
+      createWorkspaceSessionAsync: async (sessionOptions) =>
+        WorkspaceSession.createAsync({
+          ...sessionOptions,
+          createComponentsAsync: async () => ({
+            [Symbol.asyncDispose]: async () => {
+              throw new Error('workspace cleanup failed');
+            }
+          })
+        })
+    });
+    const originalRecord: string = fs.readFileSync(failedHost.paths.lockfilePath, 'utf8');
+    const previousDaemon = readDaemonLockfile(failedHost.paths.lockfilePath)!;
+    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: failedHost.paths.socketPath });
     try {
-      const started: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
-      expect(started.code).toBe(0);
-      const originalLock: { startedAt: string } = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
-      const restarted: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'restart']);
-      expect(restarted.stderr).toBe('');
-      expect(restarted.code).toBe(0);
-      expect(JSON.parse(restarted.stdout)).toMatchObject({
-        state: 'ready',
-        pid: expect.any(Number),
-        residentMemoryBytes: expect.any(Number)
-      });
-      const successorLock: { startedAt: string } = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
-      expect(successorLock.startedAt).not.toBe(originalLock.startedAt);
-      const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop']);
-      expect(stopped.code).toBe(0);
-      expect(JSON.parse(stopped.stdout)).toMatchObject({ state: 'shutdownAccepted' });
+      await client.shutdownAsync();
+      await failedHost.closed;
+      await expect(failedHost.closeAsync()).rejects.toThrow('workspace cleanup failed');
+      expect(errors).toHaveLength(1);
+      await expect(
+        connectOrStartDaemonAsync({
+          ...getDaemonConnectionOptions(folder, Rush.version, {}, true),
+          previousDaemon,
+          startupTimeoutMs: 40
+        })
+      ).rejects.toThrow('previous daemon still owns');
+      expect(fs.readFileSync(failedHost.paths.lockfilePath, 'utf8')).toBe(originalRecord);
     } finally {
-      const deadline: number = Date.now() + 7000;
-      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
-      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+      await client.closeAsync();
+      removeDaemonArtifacts(failedHost.paths.lockfilePath, failedHost.paths.socketPath);
     }
-  }, 30000);
+  });
 
   it('rejects extra management arguments without silently ignoring them', async () => {
     const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status', 'extra']);

@@ -82,18 +82,21 @@ unsupported protocol, missing acknowledgement, or timeout returns exit code 1.
 It does not auto-start anything.
 
 `rush-client daemon restart` first verifies that the selected Rush version has a
-launcher and that the daemon reports a positive PID, then performs acknowledged
-shutdown. It waits for that original PID to exit before calling the existing
-locked starter. This guards against the current host releasing sockets and
-lockfiles before workspace cleanup. A live/reused PID fails closed at the startup
-deadline; no PID is killed and no live ownership record is deleted. A newly
+launcher and captures the original lock's PID/start timestamp, checking that it
+matches pong's positive PID and the selected endpoint, then performs acknowledged
+shutdown. It waits for original ownership release or a demonstrably dead owner
+before calling the existing locked starter. A live/reused owner fails closed at
+the startup deadline; no PID is killed and no live ownership record is deleted.
+A newly
 started/reused successor must pass hello/ping before reporting `state: "ready"`.
 An absent daemon must be started explicitly with `daemon start`.
 
 Restart is explicit even when automatic startup or CI execution routing is
-disabled, but conflicts with `--no-daemon`. Embedded hosts that keep the process
-alive after closing their workspace require a future cleanup-completion contract;
-this conservative restart path will time out instead of racing their cleanup.
+disabled, but conflicts with `--no-daemon`. The two-phase host retains ownership
+until workspace disposal succeeds, so embedded hosts can restart a workspace
+without exiting their process. Failed cleanup retains the live lock and causes a
+bounded restart failure, even if the socket has already disappeared. A changed
+owner is reconnected and validated, not overwritten.
 
 `daemon logs` and
 `daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume` require

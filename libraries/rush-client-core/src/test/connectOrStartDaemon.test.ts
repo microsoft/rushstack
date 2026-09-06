@@ -8,7 +8,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type { IDaemonLockfile, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClient } from '../DaemonClient';
 import { captureDaemonRequest } from '../captureDaemonRequest';
@@ -92,7 +92,7 @@ describe('detached daemon startup', () => {
   });
 
   it('never reclaims a live or reused PID', async () => {
-    const record: string = JSON.stringify({ pid: process.pid });
+    const record: string = JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() });
     fs.writeFileSync(paths.lockfilePath, record);
     await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('may be a reused PID');
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
@@ -104,28 +104,73 @@ describe('detached daemon startup', () => {
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('not json');
   });
 
-  it('does not start while the acknowledged predecessor PID remains alive, even without a lockfile', async () => {
-    await expect(
-      connectOrStartDaemonAsync({
-        ...options,
-        previousDaemonPid: process.pid,
-        startupTimeoutMs: 40
-      })
-    ).rejects.toThrow('previous daemon PID');
-    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  it('starts after ownership release even while the original process remains alive', async () => {
+    const client = await connectOrStartDaemonAsync({
+      ...options,
+      previousDaemon: { pid: process.pid, startedAt: new Date().toISOString() }
+    });
+    await client.closeAsync();
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(true);
   });
 
   it('preserves a live predecessor lock when restart times out', async () => {
-    const record: string = JSON.stringify({ pid: process.pid });
+    const previousDaemon = { pid: process.pid, startedAt: new Date().toISOString() };
+    const record: string = JSON.stringify(previousDaemon);
     fs.writeFileSync(paths.lockfilePath, record);
     await expect(
       connectOrStartDaemonAsync({
         ...options,
-        previousDaemonPid: process.pid,
+        previousDaemon,
         startupTimeoutMs: 40
       })
-    ).rejects.toThrow('previous daemon PID');
+    ).rejects.toThrow('previous daemon still owns');
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
+  });
+
+  it('waits for disposal to release the original lock before starting', async () => {
+    const previousDaemon = { pid: process.pid, startedAt: new Date().toISOString() };
+    fs.writeFileSync(paths.lockfilePath, JSON.stringify(previousDaemon));
+    const pending = connectOrStartDaemonAsync({ ...options, previousDaemon });
+    await delayAsync(100);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    fs.unlinkSync(paths.lockfilePath);
+    const client = await pending;
+    await client.closeAsync();
+  });
+
+  it('reconnects to a new owner even if it uses the same PID as the predecessor', async () => {
+    const first = await connectOrStartDaemonAsync(options);
+    await first.closeAsync();
+    const owner: IDaemonLockfile = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
+    const client = await connectOrStartDaemonAsync({
+      ...options,
+      previousDaemon: {
+        pid: owner.pid,
+        startedAt: new Date(Date.parse(owner.startedAt) - 1000).toISOString()
+      }
+    });
+    await client.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  it('safely reclaims a dead predecessor without requiring lockfile removal', async () => {
+    const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
+    const previousDaemon = { pid: exited.pid!, startedAt: new Date().toISOString() };
+    await once(exited, 'exit');
+    fs.writeFileSync(paths.lockfilePath, JSON.stringify(previousDaemon));
+    const client = await connectOrStartDaemonAsync({ ...options, previousDaemon });
+    await client.closeAsync();
+  });
+
+  it('does not treat an unreadable ownership record as released', async () => {
+    fs.writeFileSync(paths.lockfilePath, 'corrupt');
+    await expect(
+      connectOrStartDaemonAsync({
+        ...options,
+        previousDaemon: { pid: process.pid, startedAt: new Date().toISOString() }
+      })
+    ).rejects.toThrow('Cannot safely read');
+    expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('corrupt');
   });
 
   it('reports spawn failures and releases the start lock for another invocation', async () => {

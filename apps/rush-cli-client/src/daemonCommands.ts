@@ -11,6 +11,7 @@ import {
   type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
 import { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol';
+import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from './daemonConnectionOptions';
 import { writeStreamAsync } from './writeStreamAsync';
@@ -96,8 +97,25 @@ async function restartDaemonAsync(
       'The daemon must report a positive PID before safe restart is possible.'
     );
   }
+  const lockfile: IDaemonLockfile | undefined = readDaemonLockfile(options.paths.lockfilePath);
+  if (
+    !lockfile ||
+    lockfile.pid !== pid ||
+    lockfile.socketPath !== options.paths.socketPath ||
+    typeof lockfile.startedAt !== 'string' ||
+    !Number.isFinite(Date.parse(lockfile.startedAt))
+  ) {
+    throw new DaemonClientError(
+      'startupFailed',
+      'The daemon ownership record is missing, unreadable, or changed; shutdown was not sent.'
+    );
+  }
+  const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> = {
+    pid,
+    startedAt: lockfile.startedAt
+  };
   await client.shutdownAsync();
-  return await connectOrStartDaemonAsync({ ...options, previousDaemonPid: pid });
+  return await connectOrStartDaemonAsync({ ...options, previousDaemon });
 }
 
 function writeStatusAsync(status: object): Promise<void> {
