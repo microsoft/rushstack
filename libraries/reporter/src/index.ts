@@ -138,7 +138,11 @@ export {
 export type { IEarlyReporterControls } from './bootstrap/EarlyReporterControls';
 export { parseEarlyReporterControls } from './bootstrap/EarlyReporterControls';
 
-export type { IReporterHostOptions, IBootstrapReplayResult } from './frontend/ReporterHost';
+export type {
+  IReporterHostOptions,
+  IBootstrapReplayResult,
+  IBootstrapLegacyOutput
+} from './frontend/ReporterHost';
 export { ReporterHost, DEFAULT_HANDOFF_RETENTION_MS } from './frontend/ReporterHost';
 
 export type {

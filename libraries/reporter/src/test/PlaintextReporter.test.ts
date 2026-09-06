@@ -98,6 +98,15 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('TOP_SECRET_VALUE');
   });
 
+  it('does not replay old-engine output that was already rendered', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('externalOutput', { stream: 'stdout', text: 'already rendered\n', wasRendered: true })
+    );
+
+    expect(capture.getOutput()).toBe('');
+  });
+
   it('preserves partial-line chunks within grouped output', () => {
     const capture: ICapture = makeDetailed();
     capture.reporter.report(

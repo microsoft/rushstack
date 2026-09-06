@@ -343,10 +343,14 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     const operationId: string | undefined = event.scope?.operationId;
-    const payload: { text?: string; iterationId?: number } = event.payload as {
+    const payload: { text?: string; iterationId?: number; wasRendered?: boolean } = event.payload as {
       text?: string;
       iterationId?: number;
+      wasRendered?: boolean;
     };
+    if (payload.wasRendered === true) {
+      return;
+    }
     const text: string = payload.text ?? '';
     const cycle: IWatchCycleState = this._getWatchCycle(getIterationId(payload, this._legacyIterationId));
     const record: IOperationRecord | undefined =
