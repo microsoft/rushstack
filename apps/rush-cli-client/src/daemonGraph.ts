@@ -33,6 +33,7 @@ async function runGraphAsync(options: IDaemonCommandOptions): Promise<void> {
     commandOrigin: 'built-in',
     cwd: process.cwd(),
     environment: options.environment,
+    admission: options.admission,
     terminal: { isTTY: false, supportsColor: false, acceptsStdin: false }
   });
   const connection: IConnectOrStartDaemonOptions = getDaemonConnectionOptions(

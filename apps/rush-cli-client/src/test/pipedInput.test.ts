@@ -8,6 +8,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
+import { captureDaemonRequest, DaemonClient } from '@rushstack/rush-client-core';
 import {
   DaemonRequestDispatchError,
   RushDaemonHost,
@@ -68,11 +69,15 @@ describe('standalone client piped input', () => {
     });
   }
 
-  async function invokeAsync(input: Buffer, useClient: boolean = true): Promise<IPipedResult> {
+  async function invokeAsync(
+    input: Buffer,
+    useClient: boolean = true,
+    admissionArgs: ReadonlyArray<string> = []
+  ): Promise<IPipedResult> {
     const entry: string = useClient
       ? path.resolve(__dirname, '../../bin/rushx-client')
       : path.join(path.dirname(require.resolve('@microsoft/rush/package.json')), 'bin/rushx');
-    const child = spawn(process.execPath, [entry, 'sample'], {
+    const child = spawn(process.execPath, [entry, 'sample', ...admissionArgs], {
       cwd: project,
       env: {
         ...process.env, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy',
@@ -114,6 +119,51 @@ describe('standalone client piped input', () => {
     },
     15000
   );
+
+  it.each([
+    { args: ['--no-wait'], admission: { noWait: true }, reason: 'no-wait' },
+    { args: ['--wait-timeout=0.01'], admission: { waitTimeoutMs: 10 }, reason: 'wait-timeout' }
+  ])('forwards $args without leaking queue flags to scripts', async ({ args, admission, reason }) => {
+    let started: () => void = () => {};
+    let release: () => void = () => {};
+    const running: Promise<void> = new Promise((resolve) => { started = resolve; });
+    const released: Promise<void> = new Promise((resolve) => { release = resolve; });
+    const runScriptAsync = jest.fn(async () => ({ exitCode: 0 }));
+    const holdAsync: GlobalCommandExecutor = async () => {
+      started();
+      await released;
+      return { exitCode: 0 };
+    };
+    await startHostAsync({
+      resolveRequestAsync: async ({ envelope }) => {
+        if (envelope.commandName === 'hold') return { kind: 'global', executor: holdAsync };
+        expect(envelope.argv).toEqual(['sample']);
+        expect(envelope.admission).toEqual(admission);
+        return { kind: 'global', executor: runScriptAsync };
+      }
+    });
+    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: host!.paths.socketPath });
+    const holding = client.executeAsync({
+      request: captureDaemonRequest({
+        argv: ['hold'], commandName: 'hold', commandOrigin: 'custom', cwd: project,
+        environment: {}, terminal: { isTTY: false, supportsColor: false }
+      })
+    });
+    try {
+      await Promise.race([
+        running,
+        holding.then(() => { throw new Error('The holding request finished before acquiring admission.'); })
+      ]);
+      const result: IPipedResult = await invokeAsync(Buffer.alloc(0), true, args);
+      expect(result.code).toBe(1);
+      expect(result.stderr.toString()).toContain(`daemon admission failed (${reason})`);
+      expect(runScriptAsync).not.toHaveBeenCalled();
+    } finally {
+      release();
+      await holding;
+      await client.closeAsync();
+    }
+  }, 15000);
 
   it('preserves every byte for native fallback when the host rejects before execution', async () => {
     await startHostAsync({

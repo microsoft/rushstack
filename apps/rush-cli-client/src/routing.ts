@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+
+import { parseClientAdmissionControls, type IClientAdmissionControls } from './ClientAdmissionControls';
+
 const neverDaemonize: ReadonlySet<string> = new Set([
   'add',
   'change',
@@ -35,16 +39,18 @@ export interface IClientRoute {
   readonly argv: ReadonlyArray<string>;
   readonly daemon: boolean;
   readonly commandName: string | undefined;
+  readonly admission: IDaemonRequestAdmissionOptions | undefined;
 }
 
 /** Routing never parses action parameters or relabels a custom command as a built-in. */
 export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
-  const separator: number = options.argv.indexOf('--');
-  const prefix: ReadonlyArray<string> = separator < 0 ? options.argv : options.argv.slice(0, separator);
+  const controls: IClientAdmissionControls = parseClientAdmissionControls(options.argv);
+  const separator: number = controls.argv.indexOf('--');
+  const prefix: ReadonlyArray<string> = separator < 0 ? controls.argv : controls.argv.slice(0, separator);
   const noDaemon: boolean = prefix.includes('--no-daemon');
   const argv: ReadonlyArray<string> = [
     ...prefix.filter((arg) => arg !== '--no-daemon'),
-    ...(separator < 0 ? [] : options.argv.slice(separator))
+    ...(separator < 0 ? [] : controls.argv.slice(separator))
   ];
   const commandName: string | undefined = argv[0];
   const reporterControls: boolean =
@@ -66,5 +72,5 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     (options.rushx || !neverDaemonize.has(commandName)) &&
     !(prefix.includes('--help') || prefix.includes('-h')) &&
     (!ci || options.environment.RUSH_DAEMON === '1');
-  return { argv, commandName, daemon };
+  return { argv, commandName, daemon, admission: controls.admission };
 }

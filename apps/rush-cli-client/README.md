@@ -10,6 +10,18 @@ Routing precedence:
 3. `RUSH_DAEMON` overrides `rush.json`'s `daemon.enabled`; the default is false.
 4. Auto-start is considered only after selecting daemon execution.
 
+`--no-wait` fails immediately when daemon admission is unavailable.
+`--wait-timeout SECONDS` (or `--wait-timeout=SECONDS`) overrides the configured queue
+timeout; finite nonnegative decimal seconds up to 2147483.647 are accepted and
+rounded down to milliseconds. These controls are mutually exclusive and are
+consumed before forwarding, never appended to a project script. Arguments after
+`--` remain literal script arguments.
+
+Admission controls also apply to experimental graph requests, but not
+`start|stop|restart|status|logs`. They affect daemon admission only; native fallback
+retains native command behavior. Waiting positions are shown on interactive stderr,
+and admission failures report their typed reason and a nonzero exit code.
+
 Explicit reporter/output/log-level controls retain the native frontend reporter path.
 The current daemon client renders the legacy operation stream; it does not silently
 reinterpret requests for JSON, AI, file, or other reporter formats.

@@ -56,7 +56,8 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       argv: route.argv.slice(1),
       environment,
       rushJsonPath,
-      rushVersion: selectedVersion
+      rushVersion: selectedVersion,
+      admission: route.admission
     });
     return;
   }
@@ -88,7 +89,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       columns: process.stdout.columns,
       acceptsStdin: true
     },
-    admission: { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) }
+    admission: route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) }
   });
   let client: DaemonClient;
   try {
@@ -137,6 +138,11 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       onStdoutAsync: (bytes, operationId) => renderer.writeLogAsync(bytes, operationId, 'stdout'),
       onStderrAsync: (bytes, operationId) => renderer.writeLogAsync(bytes, operationId, 'stderr'),
       onEventAsync: (event) => renderer.writeEventAsync(event),
+      onQueuePositionAsync: process.stderr.isTTY
+        ? (position) => writeStreamAsync(
+          process.stderr, Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
+        )
+        : undefined,
       stdin: process.stdin,
       requiresStdinEnd: !process.stdin.isTTY,
       cancelOnCtrlC: !!process.stdin.isTTY,
@@ -154,6 +160,12 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   }
   if (outcome.kind === 'result') {
     process.exitCode = outcome.result.exitCode;
+    if (outcome.result.admissionErrorCode) {
+      await writeStreamAsync(
+        process.stderr,
+        Buffer.from(`rush-client: daemon admission failed (${outcome.result.admissionErrorCode}).\n`)
+      );
+    }
   } else if (outcome.kind === 'rejected') {
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
   } else if (abort.signal.aborted) {

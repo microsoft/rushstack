@@ -11,6 +11,7 @@ import {
   type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
 import type { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
 import { getDaemonConnectionOptions } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
@@ -22,10 +23,14 @@ export interface IDaemonCommandOptions {
   readonly environment: Readonly<NodeJS.ProcessEnv>;
   readonly rushJsonPath?: string;
   readonly rushVersion: string;
+  readonly admission?: IDaemonRequestAdmissionOptions;
 }
 
 export async function executeDaemonCommandAsync(options: IDaemonCommandOptions): Promise<void> {
   const command: string | undefined = options.argv[0];
+  if (options.admission && command !== 'graph') {
+    throw new Error('Daemon admission controls apply to command execution or graph requests, not lifecycle commands.');
+  }
   if (command === 'graph') {
     await executeDaemonGraphCommandAsync(options);
     return;
