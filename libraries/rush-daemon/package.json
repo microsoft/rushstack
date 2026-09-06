@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-daemon",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "The long-lived Rush workspace daemon host",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -48,7 +48,8 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-daemon-protocol": "workspace:*",
-    "@rushstack/rush-daemon-transport": "workspace:*"
+    "@rushstack/rush-daemon-transport": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

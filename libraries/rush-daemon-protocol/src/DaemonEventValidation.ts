@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { isDaemonControlRecord } from './ControlMessageValidation';
+import { isDaemonControlRecord } from './ControlRecord';
 import type { IDaemonEventEnvelope, IDaemonEventSource } from './DaemonEventEnvelope';
 import { isDaemonEventType } from './DaemonEventType';
 import { DaemonProtocolError } from './DaemonProtocolError';
@@ -62,10 +62,7 @@ export function isDaemonEventEnvelope(value: unknown): value is IDaemonEventEnve
  */
 export function validateDaemonEventEnvelope(value: unknown): IDaemonEventEnvelope {
   if (!isDaemonEventEnvelope(value)) {
-    throw new DaemonProtocolError(
-      'malformedPayload',
-      'Event frame payload is not a valid event envelope.'
-    );
+    throw new DaemonProtocolError('malformedPayload', 'Event frame payload is not a valid event envelope.');
   }
   return value;
 }

@@ -6,19 +6,27 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
+import type { ILogger } from '../utilities/npmrcUtilities';
+import { BOOTSTRAP_PROTOCOL_MAJOR, encodeBootstrapEnvelope } from './generated/BootstrapProtocol';
+
 const {
   installAndRun,
   findRushJsonFolder,
   RUSH_JSON_FILENAME,
   runWithErrorAndStatusCode
 }: typeof import('./install-run') = __non_webpack_require__('./install-run');
-import type { ILogger } from '../utilities/npmrcUtilities';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
 const RUSH_QUIET_MODE: string = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_RUSH_LOCKFILE_PATH' =
   'INSTALL_RUN_RUSH_LOCKFILE_PATH';
+
+function _validateBundledBootstrapProtocol(): void {
+  if (BOOTSTRAP_PROTOCOL_MAJOR < 1 || typeof encodeBootstrapEnvelope !== 'function') {
+    throw new Error('The bundled Rush reporter bootstrap protocol is invalid.');
+  }
+}
 
 function _getRushVersion(logger: ILogger): string {
   const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
@@ -58,6 +66,8 @@ function _getBin(scriptName: string): string {
 }
 
 function _run(): void {
+  _validateBundledBootstrapProtocol();
+
   const [
     nodePath /* Ex: /bin/node */,
     scriptPath /* /repo/common/scripts/install-run-rush.js */,

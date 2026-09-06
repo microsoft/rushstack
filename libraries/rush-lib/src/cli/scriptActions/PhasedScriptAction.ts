@@ -59,6 +59,7 @@ import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
 import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
 import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParametersPlugin';
+import { TrimRushEnvironmentVariablesPlugin } from '../../logic/operations/TrimRushEnvironmentVariablesPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 
@@ -403,6 +404,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       new ShellOperationRunnerPlugin().apply(hooks);
       // Verifies correctness of rush-project.json entries for the graph
       new ValidateOperationsPlugin(terminal).apply(hooks);
+
+      if (
+        this.rushConfiguration.experimentsConfiguration.configuration
+          .trimRushEnvironmentVariablesForOperations
+      ) {
+        // Trim RUSH_-prefixed environment variables before forwarding to operation processes
+        new TrimRushEnvironmentVariablesPlugin().apply(hooks);
+      }
 
       // Forward ignored parameters to child processes as an environment variable
       new IgnoredParametersPlugin().apply(hooks);

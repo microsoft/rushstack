@@ -4,6 +4,31 @@
 /// <reference types="node" preserve="true" />
 
 export {
+  DaemonRequestDispatchError,
+  type DaemonRequestDispatchErrorCode,
+  DaemonRequestDispatcher,
+  type IDaemonRequestDispatchClient,
+  type IDaemonRequestResolver,
+  type IResolvedDaemonGlobalRequest,
+  type IResolvedDaemonPhasedRequest,
+  type IResolveDaemonRequestOptions,
+  type ResolvedDaemonRequest
+} from './DaemonRequestDispatcher';
+export {
+  type IDaemonInteractiveConnection,
+  type IDaemonInteractiveRequestOptions
+} from './DaemonInteractiveConnection';
+export { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+export {
+  type IInteractiveRequestControlClient,
+  type IInteractiveRequestInputSink,
+  type IInteractiveRequestRegistrationOptions,
+  type IInteractiveRequestSession,
+  InteractiveInputRoutingError,
+  type InteractiveInputRoutingErrorCode,
+  InteractiveRequestInputRouter
+} from './InteractiveRequestInputRouter';
+export {
   type IRequestLease,
   type IRequestSchedulerAcquireOptions,
   RequestExclusivityClass,
@@ -11,8 +36,39 @@ export {
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
+export {
+  type IGlobalCommandExecutionContext,
+  type IGlobalCommandSpawnOptions
+} from './GlobalCommandExecutionContext';
+export {
+  type IGlobalCommandEnvironment,
+  type IGlobalCommandTerminalProperties,
+  type IResolvedGlobalCommandRequest,
+  type IResolveGlobalCommandRequestOptions
+} from './GlobalCommandRequest';
+export { type IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+export {
+  type GlobalCommandExecutor,
+  GlobalCommandRequestRouter,
+  type IGlobalCommandExecutionResult,
+  type IGlobalCommandRequestResult
+} from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
+export {
+  WorkspaceEngineComponentFactory,
+  WorkspaceEngineRecreationRequiredError,
+  type CreateWorkspaceEngineComponentsAsync,
+  type IClassifyWorkspaceInvalidationsOptions,
+  type ICreateWorkspaceEngineComponentsOptions,
+  type IMapWorkspaceInvalidationsOptions,
+  type IWorkspaceEngineComponentFactoryOptions,
+  type IWorkspaceEngineComponents,
+  type IWorkspaceEngineShape,
+  type IWorkspaceInvalidationReconciliation,
+  type IsWorkspaceEngineRecreationRequiredAsync,
+  type MapWorkspaceInvalidationsToOperationsAsync
+} from './WorkspaceEngineComponentFactory';
 export {
   WorkspaceSession,
   type CreateWorkspaceSessionComponentsAsync,
@@ -28,3 +84,5 @@ export {
   WorkspaceInvalidationTracker,
   type IWorkspaceInvalidationSnapshot
 } from './WorkspaceInvalidationTracker';
+export { type IPhasedRequestClient } from './PhasedRequestClient';
+export { PhasedRequestRouter } from './PhasedRequestRouter';

@@ -3622,6 +3622,11 @@
     },
     {
       "file": "src/logic/ProjectChangeAnalyzer.ts",
+      "scopeId": ".isPackageJsonVersionBumpChange",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/logic/ProjectChangeAnalyzer.ts",
       "scopeId": ".isPackageJsonVersionOnlyChange",
       "rule": "complexity"
     },
@@ -5087,6 +5092,11 @@
     },
     {
       "file": "src/logic/installManager/InstallHelpers.ts",
+      "scopeId": ".InstallHelpers.getPackageManagerEnvironment",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/logic/installManager/InstallHelpers.ts",
       "scopeId": ".InstallHelpers.resolvePnpmSettings",
       "rule": "complexity"
     },
@@ -5099,6 +5109,11 @@
       "file": "src/logic/installManager/InstallHelpers.ts",
       "scopeId": ".InstallHelpers.resolvePnpmSettings",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/logic/installManager/InstallHelpers.ts",
+      "scopeId": ".InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment",
+      "rule": "complexity"
     },
     {
       "file": "src/logic/installManager/InstallHelpers.ts",
@@ -6779,6 +6794,16 @@
       "file": "src/logic/operations/test/ShellOperationRunnerPlugin.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/logic/operations/test/TrimRushEnvironmentVariablesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/logic/operations/test/TrimRushEnvironmentVariablesPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/logic/pnpm/IPnpmfile.ts",
@@ -8521,6 +8546,11 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/scripts/install-run-rush.ts",
+      "scopeId": "._validateBundledBootstrapProtocol",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/scripts/install-run.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
@@ -9382,12 +9412,77 @@
     },
     {
       "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._classifySensitiveNpmrcSetting",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._classifySensitiveNpmrcSetting",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._environmentVariableSuffixToSettingName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._expandEnvironmentVariables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._expandEnvironmentVariables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._expandEnvironmentVariables",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._hasIgnoredEnvironmentVariable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._isAuthValueSettingName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._normalizeSettingNamePart",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._rewriteSensitiveNpmrcLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
       "scopeId": "._trimNpmrcFile",
       "rule": "complexity"
     },
     {
       "file": "src/utilities/npmrcUtilities.ts",
       "scopeId": "._trimNpmrcFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": "._tryParseNpmrcSetting",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": ".getNpmrcEnvironmentVariables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": ".getNpmrcEnvironmentVariables",
       "rule": "max-lines-per-function"
     },
     {
@@ -9419,6 +9514,11 @@
       "file": "src/utilities/npmrcUtilities.ts",
       "scopeId": ".trimNpmrcFileLines",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/npmrcUtilities.ts",
+      "scopeId": ".trimNpmrcFileLines",
+      "rule": "max-params"
     },
     {
       "file": "src/utilities/objectUtilities.ts",

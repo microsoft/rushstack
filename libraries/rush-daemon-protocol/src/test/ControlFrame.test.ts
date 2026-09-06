@@ -14,7 +14,16 @@ const DAEMON_VERSION: string = '5.178.1';
 const MESSAGES: readonly DaemonControlMessage[] = [
   { kind: 'hello', payload: { protocolVersion: DAEMON_PROTOCOL_VERSION } },
   { kind: 'helloAck', payload: { protocolVersion: DAEMON_PROTOCOL_VERSION, sessionId: 's-1' } },
-  { kind: 'subscribe', payload: { isTTY: true, verbosity: 'verbose', columns: COLUMNS } },
+  {
+    kind: 'subscribe',
+    payload: {
+      isTTY: true,
+      supportsInteractiveIO: true,
+      supportsRequestAdmission: true,
+      verbosity: 'verbose',
+      columns: COLUMNS
+    }
+  },
   { kind: 'unsubscribe', payload: {} },
   { kind: 'ping', payload: {} },
   { kind: 'pong', payload: { uptimeMs: UPTIME_MS } },
@@ -26,6 +35,7 @@ const MESSAGES: readonly DaemonControlMessage[] = [
       uptimeMs: UPTIME_MS
     }
   },
+  { kind: 'queuePosition', payload: { position: 1, requestId: 'request-1' } },
   { kind: 'error', payload: { code: 'malformedPayload', message: 'bad' } }
 ];
 
@@ -66,6 +76,22 @@ it('rejects a hello without a version', () => {
 
 it('rejects a subscribe with an unknown verbosity', () => {
   const json: string = '{"kind":"subscribe","payload":{"isTTY":true,"verbosity":"loud"}}';
+  const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
+    decodeDaemonControlMessage(Buffer.from(json))
+  );
+  expect(error.code).toBe('malformedControlMessage');
+});
+
+it('rejects an invalid request-admission capability', () => {
+  const json: string = '{"kind":"subscribe","payload":{"isTTY":true,"supportsRequestAdmission":"yes"}}';
+  const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
+    decodeDaemonControlMessage(Buffer.from(json))
+  );
+  expect(error.code).toBe('malformedControlMessage');
+});
+
+it('rejects an invalid queue position', () => {
+  const json: string = '{"kind":"queuePosition","payload":{"position":0,"requestId":"request-1"}}';
   const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
     decodeDaemonControlMessage(Buffer.from(json))
   );

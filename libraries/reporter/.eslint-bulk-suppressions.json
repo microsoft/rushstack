@@ -1,0 +1,2199 @@
+{
+  "suppressions": [
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer._evictToFit",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer._evictToFit",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.emit",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.emit",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.emit",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.serialize",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapEventBuffer.ts",
+      "scopeId": ".BootstrapEventBuffer.serialize",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".readBootstrapHandoffFileAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".readBootstrapHandoffFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".readBootstrapHandoffFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".readBoundedUtf8FileAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapHandoff.ts",
+      "scopeId": ".writeBootstrapHandoffFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/BootstrapProtocol.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/BootstrapProtocol.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/bootstrap/EarlyReporterControls.ts",
+      "scopeId": ".parseEarlyReporterControls",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/bootstrap/EarlyReporterControls.ts",
+      "scopeId": ".parseEarlyReporterControls",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/bootstrap/EarlyReporterControls.ts",
+      "scopeId": ".readFlagValue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/bootstrap/EarlyReporterControls.ts",
+      "scopeId": ".readFlagValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/compat/LegacyErrorBridge.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/compat/LegacyErrorBridge.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/compat/LegacyErrorBridge.ts",
+      "scopeId": ".LegacyErrorBridge.shouldSuppressRendering",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/compat/LegacyErrorBridge.ts",
+      "scopeId": ".isAlreadyReportedSentinel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/compat/LegacyFallbackSink.ts",
+      "scopeId": ".LegacyFallbackSink",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/compat/OldEngineOutputAdapter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/compat/OldEngineOutputAdapter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/compat/ReporterCompatibility.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/compat/ReporterCompatibility.ts",
+      "scopeId": ".resolveReporterCompatibility",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/compat/ReporterCompatibility.ts",
+      "scopeId": ".resolveReporterCompatibility",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/compat/ReporterCompatibility.ts",
+      "scopeId": ".resolveReporterCompatibility",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/config/AgentDetection.ts",
+      "scopeId": ".detectAgent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/AgentDetection.ts",
+      "scopeId": ".isAgentVariableActive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/AutomaticReporterMatrix.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/config/AutomaticReporterMatrix.ts",
+      "scopeId": ".toEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/LogLevelFilter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/config/LogLevelFilter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/config/LogLevelFilter.ts",
+      "scopeId": ".getEventMinimumLogLevel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/LogLevelFilter.ts",
+      "scopeId": ".getEventMinimumLogLevel",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/config/OutputControl.ts",
+      "scopeId": ".parseOutputControl",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/config/OutputControl.ts",
+      "scopeId": ".parseOutputControl",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".readAllFlagValues",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".readAllFlagValues",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".readFlagValue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".readFlagValue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".resolveLogLevel",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".resolveLogLevel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".resolveLogLevel",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".resolvePrimaryReporter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/config/ReporterSelection.ts",
+      "scopeId": ".resolvePrimaryReporter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/diagnostics/DiagnosticPrivacy.ts",
+      "scopeId": ".computeEnvelopePrivacyFloor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/diagnostics/IRushDiagnostic.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCode.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCode.ts",
+      "scopeId": ".isUppercaseSegmentCharacter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCode.ts",
+      "scopeId": ".isUppercaseSegmentCharacter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCode.ts",
+      "scopeId": ".isValidRushDiagnosticCode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCode.ts",
+      "scopeId": ".isValidRushDiagnosticCode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCodeRegistry.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/diagnostics/RushDiagnosticCodeRegistry.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/diagnostics/createRushDiagnostic.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/diagnostics/createRushDiagnostic.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/diagnostics/createRushDiagnostic.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/diagnostics/createRushDiagnostic.ts",
+      "scopeId": ".createRushDiagnostic",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/diagnostics/createRushDiagnostic.ts",
+      "scopeId": ".createRushDiagnostic",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/diagnostics/templates/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/events/IMessageEmittedPayload.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/events/IReporterEventEnvelope.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/events/IReporterEventEnvelope.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/exit/CommandJson.ts",
+      "scopeId": ".separateJsonControls",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/exit/CommandJson.ts",
+      "scopeId": ".separateJsonControls",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".getSignalExitCode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".resolveExitStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".resolveExitStatusFromEvents",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".resolveExitStatusFromEvents",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/exit/ExitStatus.ts",
+      "scopeId": ".resolveExitStatusFromEvents",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".ReporterHost.cleanAbandonedHandoffFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".ReporterHost.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".ReporterHost.replayBootstrapHandoffAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".ReporterHost.replayBootstrapHandoffAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".ReporterHost.replayBootstrapHandoffAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".getProtocolVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/frontend/ReporterHost.ts",
+      "scopeId": ".isReporterEventEnvelope",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftChildEmitter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/heft/HeftChildEmitter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/heft/HeftChildEmitter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/heft/HeftChildEmitter.ts",
+      "scopeId": ".HeftChildEmitter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftChildEmitter.ts",
+      "scopeId": ".HeftChildEmitter.emitEvent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftChildEmitter.ts",
+      "scopeId": ".HeftChildEmitter.writeRaw",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/heft/HeftDescriptor.ts",
+      "scopeId": ".allocateChildDescriptor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/heft/HeftDescriptor.ts",
+      "scopeId": ".allocateChildDescriptor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptor.ts",
+      "scopeId": ".readChildDescriptorFd",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/heft/HeftDescriptor.ts",
+      "scopeId": ".readChildDescriptorFd",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptor.ts",
+      "scopeId": ".relayHeftChildOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost._rejectMalformedStream",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost._rejectMalformedStream",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost._result",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost.createStreamProcessor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost.createStreamProcessor.flush",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost.createStreamProcessor.write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost.processChildRecord",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".HeftDescriptorHost.processChildRecord",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".isNonNegativeInteger",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".isReporterEventRecord",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".isReporterEventRecord",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".isReporterEventSource",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/heft/HeftDescriptorHost.ts",
+      "scopeId": ".isReporterHello",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/lifecycle/LifecycleEmitter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/lifecycle/LifecycleEmitter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/lifecycle/LifecycleEmitter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/lifecycle/LifecycleEmitter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/lifecycle/LifecycleEvents.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".deriveExitCodeFromEvents",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".deriveExitCodeFromEvents",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".summarizeShadowResult",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".summarizeShadowResult",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/lifecycle/ShadowParity.ts",
+      "scopeId": ".summarizeShadowResult",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/manager/IReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._drainEntryAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._enqueue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._enqueue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._handleReporterFailure",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._handleReporterFailure",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager.addReporter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager.closeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterMultiplexer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRegistry.ts",
+      "scopeId": ".ProblemMatcherRegistry.getMatchers",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".buildDiagnostic",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".runProblemMatchers",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".runProblemMatchers",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".runProblemMatchers",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".runProblemMatchers.processLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/matchers/ProblemMatcherRunner.ts",
+      "scopeId": ".runProblemMatchers.processLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/migration/DaemonAlignedMajorDefaults.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/migration/DaemonAlignedMajorDefaults.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/migration/DaemonAlignedMajorDefaults.ts",
+      "scopeId": ".isAutomaticSelectionEnabled",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/migration/DaemonAlignedMajorDefaults.ts",
+      "scopeId": ".isTerminalApiRemoved",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/migration/MigrationPhase.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/migration/PluginApplyGate.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/perf/PerformanceBudgets.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/perf/PerformanceBudgets.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/perf/PerformanceBudgets.ts",
+      "scopeId": ".REPORTER_PERFORMANCE_BUDGETS",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/perf/PerformanceBudgets.ts",
+      "scopeId": ".computeWallTimeRegressionPercent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/producers/IScopedReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/protocol/Ndjson.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/protocol/Ndjson.ts",
+      "scopeId": ".NdjsonDecoder._processLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/protocol/Ndjson.ts",
+      "scopeId": ".NdjsonDecoder._processLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/protocol/Ndjson.ts",
+      "scopeId": ".NdjsonDecoder.decode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/protocol/Ndjson.ts",
+      "scopeId": ".NdjsonDecoder.flush",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/protocol/Ndjson.ts",
+      "scopeId": ".encodeNdjsonRecord",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".isProtocolVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".isProtocolVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".negotiateReporterHello",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".negotiateReporterHello",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".negotiateReporterHello",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".parseReporterHello",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/protocol/ReporterHandshake.ts",
+      "scopeId": ".parseReporterHello",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/protocol/ReporterProtocol.ts",
+      "scopeId": ".REPORTER_PROTOCOL_LIMITS",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._collectDiagnostic",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._collectDiagnostic",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._collectDiagnostic",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._emitFinal",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._emitFinal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._emitFinal",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._emitFinal.record",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter.closeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter.report",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter.report",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter.report",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._appendWatchSummary",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._clearRegion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._finalize",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._finalize",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._finalize",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._update",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter._update",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter.report",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._applyRetentionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._applyRetentionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._markUnavailable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._refreshLatestCopyAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._resolveTargetAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._resolveTargetAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._writeBufferedLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter._writeBufferedLines",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/FileReporter.ts",
+      "scopeId": ".FileReporter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".createColorizer.bold",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".createColorizer.cyan",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".createColorizer.dim",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".createColorizer.green",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".createColorizer.red",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".createColorizer.yellow",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".getGraphemeWidth",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".getGraphemeWidth",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".isFullWidthCodePoint",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".isFullWidthCodePoint",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".renderActiveProjectsRow",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".renderActiveProjectsRow",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".renderLiveRegion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".resolveColorEnabled",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".splitGraphemes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".splitGraphemes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".truncateToWidth",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/InteractiveRendering.ts",
+      "scopeId": ".truncateToWidth",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/JsonReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/reporters/JsonReporter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._header",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._onResult",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._onResult",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._onStatusChanged",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._onStatusChanged",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._onStatusChanged.record",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._seconds",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._summaryHeader",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._writeStatusGroup",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter._writeStatusGroup",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter.report",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/LegacyReporter.ts",
+      "scopeId": ".LegacyReporter.report",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter._onExternalOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter._onResult",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter._onStatusChanged",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter._onStatusChanged",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter._writeRaw",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter.report",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter.report",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/ReporterRedaction.ts",
+      "scopeId": ".redactReporterEvent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/scheduler/OperationOutputGrouping.ts",
+      "scopeId": ".iterateExternalOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/scheduler/OperationOutputGrouping.ts",
+      "scopeId": ".regroupOperationOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".OperationStreamEmitter.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".OperationStreamEmitter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".OperationStreamEmitter.writeOutput",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/scheduler/OperationStreamEmitter.ts",
+      "scopeId": ".OperationStreamEmitter.writeOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/session/PluginApi.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/session/PluginApi.ts",
+      "scopeId": ".isRushVersionSupported",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/session/PluginApi.ts",
+      "scopeId": ".isRushVersionSupported",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/session/RushSessionReporting.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/session/RushSessionReporting.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/session/RushSessionReporting.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/session/ScopedReporterFactory.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/session/ScopedReporterFactory.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/session/ScopedReporterFactory.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/session/ScopedReporterFactory.ts",
+      "scopeId": ".createScopedReporter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/telemetry/BeforeLogAdapter.ts",
+      "scopeId": ".createBeforeLogAdapter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/telemetry/BeforeLogAdapter.ts",
+      "scopeId": ".createBeforeLogAdapter",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/telemetry/BeforeLogAdapter.ts",
+      "scopeId": ".createBeforeLogAdapter.record",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/telemetry/BeforeLogAdapter.ts",
+      "scopeId": ".createBeforeLogAdapter.record.extraData",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".TelemetrySubscriber.buildAggregate",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".TelemetrySubscriber.buildAggregate",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".TelemetrySubscriber.buildAggregate",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".TelemetrySubscriber.ingest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".TelemetrySubscriber.ingest",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/telemetry/TelemetrySubscriber.ts",
+      "scopeId": ".TelemetrySubscriber.ingest",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AutomaticReporterMatrix.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AutomaticReporterMatrix.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".decode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Bootstrap.test.ts",
+      "scopeId": ".payload",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Compatibility.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Compatibility.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Compatibility.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Compatibility.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DefaultInteractiveReporter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DefaultInteractiveReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DefaultInteractiveReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DefaultInteractiveReporter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DefaultInteractiveReporter.test.ts",
+      "scopeId": ".FakeTerminal.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DefaultInteractiveReporter.test.ts",
+      "scopeId": ".nowMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Diagnostics.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Diagnostics.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Diagnostics.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Diagnostics.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ExitStatus.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ExitStatus.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ExitStatus.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ExitStatus.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/FileReporter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FileReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/FileReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/FileReporter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Goldens.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Goldens.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Goldens.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/HeftIntegration.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/HeftIntegration.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/HeftIntegration.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/HeftIntegration.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/HeftIntegration.test.ts",
+      "scopeId": ".TSC_MATCHER.extract",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/IReporterEventEnvelope.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/IReporterEventEnvelope.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/IReporterEventEnvelope.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/IReporterEventEnvelope.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".parseLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".run",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LegacyErrorBridge.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LegacyErrorBridge.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LegacyErrorBridge.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/LegacyReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LegacyReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LegacyReporter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/LegacyReporter.test.ts",
+      "scopeId": ".runSuccess",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Lifecycle.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Lifecycle.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Lifecycle.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Lifecycle.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/LogLevelFilter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LogLevelFilter.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/LogLevelFilter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LogLevelFilter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LogLevelFilter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Manager.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Manager.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/Manager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Manager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Manager.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Manager.test.ts",
+      "scopeId": ".RecordingReporter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Migration.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Migration.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Migration.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Migration.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OperationStreamEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationStreamEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OperationStreamEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OperationStreamEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OperationStreamEmitter.test.ts",
+      "scopeId": ".FakeTerminal",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationStreamEmitter.test.ts",
+      "scopeId": ".nowMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".CountingReporter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".CountingReporter.report",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".measureRepresentativeWorkload",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Performance.test.ts",
+      "scopeId": ".measureRepresentativeWorkload",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PlaintextReporter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PlaintextReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PlaintextReporter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PlaintextReporter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PlaintextReporter.test.ts",
+      "scopeId": ".makeConcise.nowMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PlaintextReporter.test.ts",
+      "scopeId": ".makeDetailed.nowMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".TSC_ERROR_MATCHER.extract",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProblemMatchers.test.ts",
+      "scopeId": ".oldHeft.matchesVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProducerApi.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProducerApi.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProducerApi.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProducerApi.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Protocol.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Protocol.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/Protocol.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Protocol.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Protocol.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ReporterHost.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ReporterHost.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ReporterHost.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ReporterHost.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ReporterHost.test.ts",
+      "scopeId": ".unknownEvent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ReporterSelection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ReporterSelection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ReporterSelection.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ReporterSelection.test.ts",
+      "scopeId": ".selection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/Session.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Session.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/Session.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Session.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Session.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/Telemetry.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Telemetry.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Telemetry.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Telemetry.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/utilities/chunkUtf8Text.ts",
+      "scopeId": ".chunkUtf8Text",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/chunkUtf8Text.ts",
+      "scopeId": ".chunkUtf8Text",
+      "rule": "complexity"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
   `\\.\pipe\rushd-<key>` named pipes on Windows.
 - **`net` listener and connector** — framed with
   [`@rushstack/rush-daemon-protocol`](https://www.npmjs.com/package/@rushstack/rush-daemon-protocol),
-  with backpressure-aware writes.
+  with backpressure-aware writes and serialized async frame handlers for inbound flow control.
 - **PID/lockfile handling** — stale sockets and dead PIDs are detected (two-factor: PID liveness
   plus a connect probe) and reclaimed without manual cleanup.
 

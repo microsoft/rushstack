@@ -21,7 +21,15 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'unsubscribe',
 'ping',
 'pong',
-'error'
+'error',
+'setRawMode',
+'rawModeChanged',
+'terminalPolicy',
+'queuePosition',
+'requestStart',
+'requestCancel',
+'requestRejected',
+'requestResult'
 ];
 
 // @beta
@@ -44,10 +52,22 @@ export const DAEMON_EVENT_TYPES: readonly [
 ];
 
 // @beta
+export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage;
+export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
+
+// @beta
+export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
+
+// @beta
+export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
+
+// @beta
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -101,6 +121,9 @@ export type DaemonJsonValue = string | number | boolean | DaemonJsonNull | reado
 };
 
 // @beta
+export type DaemonPhasedOperationEnabledState = true | 'ignore-dependency-changes';
+
+// @beta
 export class DaemonProtocolError extends Error {
     constructor(code: DaemonProtocolErrorCode, message: string, options?: IDaemonProtocolErrorOptions);
     readonly code: DaemonProtocolErrorCode;
@@ -108,6 +131,24 @@ export class DaemonProtocolError extends Error {
 
 // @beta
 export type DaemonProtocolErrorCode = 'frameTooLarge' | 'unknownFrameType' | 'malformedPayload' | 'malformedControlMessage' | 'protocolVersionMismatch';
+
+// @beta
+export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-timeout';
+
+// @beta
+export type DaemonRequestRejectionCode = 'invalidRequest' | 'routingFailed' | 'unsupported' | 'workspaceRecreationRequired';
+
+// @beta
+export type DaemonRushCommandOrigin = 'built-in' | 'custom';
+
+// @beta
+export type DaemonTerminalPolicyDecision = 'runInDaemon' | 'requiresInProcess';
+
+// @beta
+export type DaemonTerminalPolicyReason = 'controllingTerminalRequired';
+
+// @beta
+export type DaemonTerminalRequirement = 'none' | 'interactiveInput' | 'controllingTerminal';
 
 // @beta
 export type DaemonVerbosity = 'quiet' | 'normal' | 'verbose' | 'debug';
@@ -120,6 +161,9 @@ export function decodeDaemonEventFrame(payload: Uint8Array): IDaemonEventEnvelop
 
 // @beta
 export function decodeDaemonLogChunk(payload: Uint8Array): IDaemonLogChunk;
+
+// @beta
+export function decodeDaemonStdinChunk(payload: Uint8Array): IDaemonStdinChunk;
 
 // @beta
 export const DEFAULT_MAX_PAYLOAD_BYTES: number;
@@ -140,6 +184,9 @@ export function encodeDaemonFrames(frames: readonly IDaemonFrame[]): Uint8Array[
 export function encodeDaemonLogChunk(log: IDaemonLogChunk): Uint8Array;
 
 // @beta
+export function encodeDaemonStdinChunk(input: IDaemonStdinChunk): Uint8Array;
+
+// @beta
 export const FRAME_HEADER_BYTES: number;
 
 // @beta
@@ -153,7 +200,20 @@ export interface IDaemonClientCaps {
     readonly colorLevel?: number;
     readonly columns?: number;
     readonly isTTY: boolean;
+    readonly supportsInteractiveIO?: boolean;
+    readonly supportsRequestAdmission?: boolean;
+    readonly supportsRequestLifecycle?: boolean;
     readonly verbosity?: DaemonVerbosity;
+}
+
+// @beta
+export interface IDaemonCommandResult {
+    readonly aborted: boolean;
+    readonly admissionErrorCode?: DaemonRequestAdmissionErrorCode;
+    readonly errorMessage?: string;
+    readonly exitCode: number;
+    readonly outcome: DaemonCommandOutcome;
+    readonly requestId: string;
 }
 
 // @beta
@@ -279,6 +339,45 @@ export interface IDaemonOperationStreamClosedPayload {
 }
 
 // @beta
+export interface IDaemonPhasedEngineShape {
+    readonly phaseNames: ReadonlyArray<string>;
+    readonly pluginNames: ReadonlyArray<string>;
+}
+
+// @beta
+export interface IDaemonPhasedOperationResult {
+    readonly errorMessage?: string;
+    readonly operationId: string;
+    readonly status: string;
+}
+
+// @beta
+export interface IDaemonPhasedOperationSelection {
+    readonly enabledState: DaemonPhasedOperationEnabledState;
+    readonly operationId: string;
+}
+
+// @beta
+export interface IDaemonPhasedRequest {
+    readonly acceptsStdin?: boolean;
+    readonly admission?: IDaemonRequestAdmissionOptions;
+    readonly commandName: string;
+    readonly commandOrigin?: DaemonRushCommandOrigin;
+    readonly engineShape: IDaemonPhasedEngineShape;
+    readonly environment: Readonly<Record<string, string>>;
+    readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
+    readonly requestId: string;
+    readonly terminalRequirement?: DaemonTerminalRequirement;
+}
+
+// @beta
+export interface IDaemonPhasedRequestResult extends IDaemonCommandResult {
+    readonly operationResults: ReadonlyArray<IDaemonPhasedOperationResult>;
+    readonly requestId: string;
+    readonly scheduled: boolean;
+}
+
+// @beta
 export interface IDaemonPingMessage {
     // (undocumented)
     readonly kind: 'ping';
@@ -310,11 +409,133 @@ export interface IDaemonProtocolVersion {
 }
 
 // @beta
+export interface IDaemonRawModeChangedMessage {
+    // (undocumented)
+    readonly kind: 'rawModeChanged';
+    // (undocumented)
+    readonly payload: {
+        readonly enabled: boolean;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestAdmissionOptions {
+    readonly noWait?: boolean;
+    readonly waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IDaemonRequestCancelMessage {
+    // (undocumented)
+    readonly kind: 'requestCancel';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestEnvelope {
+    readonly admission?: IDaemonRequestAdmissionOptions;
+    readonly argv: ReadonlyArray<string>;
+    readonly commandName: string;
+    readonly commandOrigin: DaemonRushCommandOrigin;
+    readonly cwd: string;
+    readonly environment: Readonly<Record<string, string>>;
+    readonly requestId: string;
+    readonly terminal: IDaemonRequestTerminal;
+}
+
+// @beta
+export interface IDaemonRequestQueuePositionMessage {
+    // (undocumented)
+    readonly kind: 'queuePosition';
+    // (undocumented)
+    readonly payload: {
+        readonly position: number;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestRejectedMessage {
+    // (undocumented)
+    readonly kind: 'requestRejected';
+    // (undocumented)
+    readonly payload: {
+        readonly code: DaemonRequestRejectionCode;
+        readonly message: string;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonRequestResultMessage {
+    // (undocumented)
+    readonly kind: 'requestResult';
+    // (undocumented)
+    readonly payload: IDaemonCommandResult | IDaemonPhasedRequestResult;
+}
+
+// @beta
+export interface IDaemonRequestStartMessage {
+    // (undocumented)
+    readonly kind: 'requestStart';
+    // (undocumented)
+    readonly payload: IDaemonRequestEnvelope;
+}
+
+// @beta
+export interface IDaemonRequestTerminal {
+    readonly acceptsStdin?: boolean;
+    readonly columns?: number;
+    readonly isTTY: boolean;
+    readonly supportsColor: boolean;
+    readonly terminalRequirement?: DaemonTerminalRequirement;
+}
+
+// @beta
+export interface IDaemonSetRawModeMessage {
+    // (undocumented)
+    readonly kind: 'setRawMode';
+    // (undocumented)
+    readonly payload: {
+        readonly enabled: boolean;
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonStdinChunk {
+    readonly chunk: Uint8Array;
+    readonly requestId: string;
+}
+
+// @beta
 export interface IDaemonSubscribeMessage {
     // (undocumented)
     readonly kind: 'subscribe';
     // (undocumented)
     readonly payload: IDaemonClientCaps;
+}
+
+// @beta
+export interface IDaemonTerminalPolicyMessage {
+    // (undocumented)
+    readonly kind: 'terminalPolicy';
+    // (undocumented)
+    readonly payload: IDaemonTerminalPolicyResult;
+}
+
+// @beta
+export interface IDaemonTerminalPolicyResult {
+    // (undocumented)
+    readonly decision: DaemonTerminalPolicyDecision;
+    // (undocumented)
+    readonly reason?: DaemonTerminalPolicyReason;
+    // (undocumented)
+    readonly requestId: string;
 }
 
 // @beta
@@ -359,7 +580,13 @@ export const LENGTH_FIELD_BYTES: number;
 export const LENGTH_FIELD_OFFSET: number;
 
 // @beta
+export const MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS: number;
+
+// @beta
 export const MAX_OPERATION_ID_BYTES: number;
+
+// @beta
+export const MAX_REQUEST_ID_BYTES: number;
 
 // @beta
 export function negotiateDaemonHello(hello: IDaemonHelloMessage, localVersion: IDaemonProtocolVersion, sessionId: string): DaemonHandshakeOutcome;
@@ -379,6 +606,12 @@ export class ProtocolVersionMismatchError extends DaemonProtocolError {
     readonly actualMajor: number;
     readonly expectedMajor: number;
 }
+
+// @beta
+export const REQUEST_ID_LENGTH_BYTES: number;
+
+// @beta
+export const REQUEST_ID_LENGTH_OFFSET: number;
 
 // @beta
 export const RUSHD_EXTENSION_NAMESPACE: 'rushd';
@@ -406,5 +639,8 @@ export function validateDaemonControlMessage(value: unknown): void;
 
 // @beta
 export function validateDaemonEventEnvelope(value: unknown): IDaemonEventEnvelope;
+
+// @beta
+export function validateDaemonRequestAdmissionOptions(options: IDaemonRequestAdmissionOptions | undefined): void;
 
 ```

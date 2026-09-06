@@ -1,0 +1,70 @@
+{
+  "name": "@rushstack/rush-reporter",
+  "version": "0.2.0",
+  "description": "Canonical event protocol, reporter manager, and built-in reporters for Rush (public beta).",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/rush-reporter.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rush-reporter.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/*": {
+      "types": "./lib-dts/*.d.ts",
+      "node": "./lib-commonjs/*.js",
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
+  "keywords": [
+    "rush",
+    "reporter",
+    "reporting",
+    "events",
+    "ndjson",
+    "diagnostics"
+  ],
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/reporter"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "generate-bootstrap-protocol": "node scripts/generateBootstrapProtocol.js --write",
+    "check-bootstrap-protocol": "node scripts/generateBootstrapProtocol.js --check",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*",
+    "@types/semver": "7.7.1",
+    "typescript": "~5.8.2"
+  },
+  "peerDependencies": {
+    "@types/node": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "semver": "~7.7.4"
+  }
+}

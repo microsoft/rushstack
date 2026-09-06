@@ -1,0 +1,156 @@
+# Shared stage definition for the "esrp publish" pipelines.
+#
+# There is one publish pipeline per version policy. Each of them is triggered when the version bump
+# PR produced by the matching bump pipeline is merged to main; it locates the originating bump
+# pipeline run (via the "bump-versions|<sha>" build tag) and publishes the tarballs that were packed
+# by that run to the npm feed via ESRP.
+
+parameters:
+  # Definition ID of the bump pipeline that packed the tarballs to publish.
+  - name: BumpPipelineId
+    type: number
+  # Azure DevOps team project that hosts the bump pipeline.
+  - name: BumpPipelineProject
+    type: string
+  - name: StageNameSuffix
+    type: string
+  - name: DisplayNameSuffix
+    type: string
+  - name: PublishToNpmFeed
+    type: boolean
+  - name: NpmTag
+    type: string
+  - name: DryRun
+    type: boolean
+  - name: CommitShaOverride
+    type: string
+
+stages:
+  - stage: Prepare${{ parameters.StageNameSuffix }}
+    dependsOn: []
+    displayName: 'Prepare ${{ parameters.DisplayNameSuffix }} NPM Publish'
+    jobs:
+      - job: PrepareNpmPublish
+        displayName: 'Prepare ${{ parameters.DisplayNameSuffix }} NPM Publish'
+        pool:
+          name: publish-rushstack
+          os: linux
+        templateContext:
+          outputParentDirectory: $(Build.ArtifactStagingDirectory)
+          outputs:
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/published-versions
+              artifactName: published-versions
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/json-schemas
+              artifactName: json-schemas
+            - output: pipelineArtifact
+              targetPath: $(Build.ArtifactStagingDirectory)/api
+              artifactName: api
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+          - bash: |
+              mkdir -p "$(Build.ArtifactStagingDirectory)/published-versions"
+              mkdir -p "$(Build.ArtifactStagingDirectory)/json-schemas"
+              mkdir -p "$(Build.ArtifactStagingDirectory)/api"
+            displayName: 'Initialize artifact staging directories'
+            condition: always()
+
+          - template: /common/config/azure-pipelines/templates/find-bump-pipeline-run.yaml@self
+            parameters:
+              PipelineId: ${{ parameters.BumpPipelineId }}
+              CommitSha: ${{ coalesce(parameters.CommitShaOverride, '$(Build.SourceVersion)') }}
+              TeamProject: ${{ parameters.BumpPipelineProject }}
+              Name: FindBumpRun
+              WorkingDirectory: $(Build.SourcesDirectory)
+
+          - task: DownloadPipelineArtifact@2
+            condition: eq(variables['FindBumpRun.IsVersionBumpMerge'], 'true')
+            inputs:
+              artifactName: package-versions
+              targetPath: $(Agent.TempDirectory)/package-versions
+              project: ${{ parameters.BumpPipelineProject }}
+              definition: $(FindBumpRun.BumpPipelineDefinitionId)
+              pipelineId: $(FindBumpRun.BumpPipelineRunId)
+              buildType: specific
+              buildVersionToDownload: specific
+            displayName: 'Download package versions'
+
+          - bash: |
+              cp "$(Agent.TempDirectory)/package-versions"/*.json "$(Build.ArtifactStagingDirectory)/published-versions/"
+            condition: eq(variables['FindBumpRun.IsVersionBumpMerge'], 'true')
+            displayName: 'Stage published versions artifact'
+
+          - task: DownloadPipelineArtifact@2
+            condition: eq(variables['FindBumpRun.IsVersionBumpMerge'], 'true')
+            inputs:
+              artifactName: json-schemas
+              targetPath: $(Build.ArtifactStagingDirectory)/json-schemas
+              project: ${{ parameters.BumpPipelineProject }}
+              definition: $(FindBumpRun.BumpPipelineDefinitionId)
+              pipelineId: $(FindBumpRun.BumpPipelineRunId)
+              buildType: specific
+              buildVersionToDownload: specific
+            displayName: 'Download JSON schema artifact'
+
+          - task: DownloadPipelineArtifact@2
+            condition: eq(variables['FindBumpRun.IsVersionBumpMerge'], 'true')
+            inputs:
+              artifactName: api
+              targetPath: $(Build.ArtifactStagingDirectory)/api
+              project: ${{ parameters.BumpPipelineProject }}
+              definition: $(FindBumpRun.BumpPipelineDefinitionId)
+              pipelineId: $(FindBumpRun.BumpPipelineRunId)
+              buildType: specific
+              buildVersionToDownload: specific
+            displayName: 'Download API review artifact'
+
+  - ${{ if eq(parameters.PublishToNpmFeed, true) }}:
+      - stage: Publish${{ parameters.StageNameSuffix }}
+        displayName: 'Publish ${{ parameters.DisplayNameSuffix }} NPM Packages'
+        dependsOn:
+          - Prepare${{ parameters.StageNameSuffix }}
+        condition: and(succeeded('Prepare${{ parameters.StageNameSuffix }}'), eq(dependencies.Prepare${{ parameters.StageNameSuffix }}.outputs['PrepareNpmPublish.FindBumpRun.IsVersionBumpMerge'], 'true'))
+        jobs:
+          - job: PublishNpmPackages
+            displayName: 'Publish ${{ parameters.DisplayNameSuffix }} NPM Packages'
+            pool:
+              name: publish-rushstack
+              os: linux
+            variables:
+              - name: BumpPipelineRunId
+                value: $[ stageDependencies.Prepare${{ parameters.StageNameSuffix }}.PrepareNpmPublish.outputs['FindBumpRun.BumpPipelineRunId'] ]
+              - name: BumpPipelineDefinitionId
+                value: $[ stageDependencies.Prepare${{ parameters.StageNameSuffix }}.PrepareNpmPublish.outputs['FindBumpRun.BumpPipelineDefinitionId'] ]
+            templateContext:
+              type: releaseJob
+              isProduction: true
+            steps:
+              - checkout: none
+
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
+
+              - task: 1ES.DownloadPipelineArtifact@1
+                inputs:
+                  artifactName: packages
+                  targetPath: $(PackagesPath)
+                  project: ${{ parameters.BumpPipelineProject }}
+                  definition: $(BumpPipelineDefinitionId)
+                  pipelineId: $(BumpPipelineRunId)
+                  buildType: specific
+                  buildVersionToDownload: specific
+                displayName: 'Download packed npm packages'
+
+              - bash: |
+                  ls -la "$(PackagesPath)"
+                displayName: 'List downloaded packages'
+
+              - template: /common/config/azure-pipelines/templates/esrp-release.yaml@publishConfig
+                parameters:
+                  packagesPath: $(PackagesPath)
+                  npmTag: ${{ parameters.NpmTag }}
+                  dryRun: ${{ parameters.DryRun }}

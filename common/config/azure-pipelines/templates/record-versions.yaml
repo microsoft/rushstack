@@ -1,0 +1,13 @@
+parameters:
+  - name: RepoPath
+    type: string
+    default: '$(Build.SourcesDirectory)'
+
+steps:
+  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+    parameters:
+      Arguments: >
+        record-published-versions
+        --output-path $(Build.ArtifactStagingDirectory)/package-versions/published-versions.json
+      DisplayName: 'Record Published Versions'
+      RepoPath: '${{ parameters.RepoPath }}'

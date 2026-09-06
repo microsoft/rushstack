@@ -153,6 +153,30 @@ export interface IExperimentsJson {
    * effect; otherwise it falls back to the buffer-based approach.
    */
   useDirectFileTransfersForBuildCache?: boolean;
+
+  /**
+   * By default, Rush forwards its entire process environment (minus a small denylist) to the shell
+   * commands it invokes for operations (e.g. "build", "test"). If true, environment variables whose
+   * names begin with `RUSH_` will additionally be omitted from that forwarded environment. This can
+   * help prevent operation scripts from accidentally depending on Rush's own internal environment
+   * variables.
+   */
+  trimRushEnvironmentVariablesForOperations?: boolean;
+
+  /**
+   * If true, when using PNPM, Rush resolves the `${VAR}` tokens that appear in credentials and
+   * registry URLs in the `.npmrc` file, instead of relying on PNPM to expand them. Credentials are
+   * passed to PNPM using `npm_config_*` environment variables and are not written to the generated
+   * `.npmrc` file.
+   *
+   * @remarks
+   * This compatibility workaround applies to PNPM 10.34.2 through 10.x and PNPM 11.5.3 through
+   * versions earlier than 11.6.0. PNPM 11.6.0 and newer support URL-scoped `pnpm_config_//...`
+   * environment variables, which should be supplied directly by CI so the trusted environment binds
+   * each credential to its registry. Dynamic registry and proxy settings must likewise be supplied
+   * through trusted user, global, CLI, or environment configuration rather than a project `.npmrc`.
+   */
+  provideNpmrcCredentialsViaEnvironment?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

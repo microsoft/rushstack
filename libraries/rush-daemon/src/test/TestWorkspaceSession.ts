@@ -4,16 +4,13 @@
 import * as path from 'node:path';
 
 import { RushConfiguration } from '@microsoft/rush-lib';
-import type {
-  IInputsSnapshot,
-  IOperationGraph,
-  RushSession
-} from '@microsoft/rush-lib';
+import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/rush-lib';
 
 import type {
-  IWorkspaceSession,
-  IWorkspaceSessionMetadata
-} from '../WorkspaceSession';
+  IWorkspaceEngineShape,
+  IWorkspaceInvalidationReconciliation
+} from '../WorkspaceEngineComponentFactory';
+import type { IWorkspaceSession, IWorkspaceSessionMetadata } from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
 
 export const TEST_REPO_ROOT: string = path.resolve(__dirname, '../../../..');
@@ -24,6 +21,7 @@ export const TEST_RUSH_CONFIGURATION: RushConfiguration = RushConfiguration.load
 export class TestWorkspaceSession implements IWorkspaceSession {
   readonly #onDispose: (() => unknown) | undefined;
 
+  public readonly engineShape: IWorkspaceEngineShape | undefined;
   public readonly inputsSnapshot: IInputsSnapshot | undefined;
   public readonly invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
   public readonly metadata: IWorkspaceSessionMetadata;
@@ -44,5 +42,9 @@ export class TestWorkspaceSession implements IWorkspaceSession {
 
   public async [Symbol.asyncDispose](): Promise<void> {
     await this.#onDispose?.();
+  }
+
+  public reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined> {
+    return Promise.resolve(undefined);
   }
 }

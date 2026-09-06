@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-terminal-renderer
 
-This log was last generated on Fri, 21 Aug 2026 15:16:34 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+
+## 0.2.3
+Sat, 05 Sep 2026 00:15:08 GMT
+
+### Patches
+
+- Use authoritative daemon operation-header counters when collating partial warm iterations.
 
 ## 0.2.2
 Fri, 21 Aug 2026 15:16:34 GMT

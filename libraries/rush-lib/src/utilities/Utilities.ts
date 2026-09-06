@@ -736,7 +736,10 @@ function _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushComm
   }
 
   for (const key of Object.getOwnPropertyNames(options.initialEnvironment)) {
-    const normalizedKey: string = IS_WINDOWS ? key.toUpperCase() : key;
+    // URL-scoped PNPM configuration embeds a registry path in the variable name. Preserve its
+    // casing because registry paths may be case-sensitive even on Windows.
+    const preserveKeyCasing: boolean = /^pnpm_config_\/\//i.test(key);
+    const normalizedKey: string = IS_WINDOWS && !preserveKeyCasing ? key.toUpperCase() : key;
 
     // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
     // with Rush's installations.  If we actually want it, we will set it explicitly below.

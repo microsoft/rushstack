@@ -27,6 +27,7 @@ export interface IRushPluginManifest {
   optionsSchema?: string;
   associatedCommands?: string[];
   commandLineJsonFilePath?: string;
+  rushVersionRange?: string;
 }
 
 export interface IRushPluginManifestJson {
