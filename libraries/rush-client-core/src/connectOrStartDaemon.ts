@@ -13,6 +13,7 @@ import {
   DaemonTransportErrorCode,
   ensureDaemonRuntimeDir,
   reclaimStaleDaemonAsync,
+  type IDaemonLockfile,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
@@ -33,10 +34,10 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
   /** Omit to connect without auto-start. */
   readonly startCommand?: IDaemonStartCommand;
   /**
-   * After acknowledged shutdown, wait for this attested predecessor PID to exit before reusing or starting
-   * an endpoint. A live or reused PID fails closed at the startup deadline; it is never killed.
+   * Ownership captured before acknowledged shutdown. Wait for this record to disappear, change owner,
+   * or have a demonstrably dead owner before connecting or starting. A live/reused owner times out safely.
    */
-  readonly previousDaemonPid?: number;
+  readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
   /** Total startup/retry deadline. Defaults to 15000 milliseconds. */
   readonly startupTimeoutMs?: number;
 }
@@ -55,7 +56,7 @@ export async function connectOrStartDaemonAsync(
     throw new RangeError('startupTimeoutMs must be an integer between 1 and 2147483647.');
   }
   const deadline: number = Date.now() + timeoutMs;
-  await waitForPreviousDaemonAsync(options.previousDaemonPid, deadline);
+  await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
   if (!options.startCommand) {
@@ -128,56 +129,82 @@ async function tryConnectAsync(
 }
 
 function assertNoLiveOwner(paths: IDaemonPaths): void {
-  let record: unknown;
-  try {
-    record = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
-  } catch (error) {
-    if (hasErrorCode(error, 'ENOENT')) {
-      if (process.platform !== 'win32' && fs.existsSync(paths.socketPath)) {
-        throw new DaemonClientError(
-          'startupFailed',
-          `Socket ${paths.socketPath} has no ownership record; refusing automatic reclaim.`
-        );
-      }
-      return;
+  const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = readDaemonOwnership(
+    paths.lockfilePath
+  );
+  if (!owner) {
+    if (process.platform !== 'win32' && fs.existsSync(paths.socketPath)) {
+      throw new DaemonClientError(
+        'startupFailed',
+        `Socket ${paths.socketPath} has no ownership record; refusing automatic reclaim.`
+      );
     }
-    throw new DaemonClientError(
-      'startupFailed',
-      `Cannot safely read ${paths.lockfilePath}; refusing automatic reclaim.`,
-      { cause: error }
-    );
+    return;
   }
-  if (
-    typeof record !== 'object' ||
-    record === null ||
-    !('pid' in record) ||
-    typeof record.pid !== 'number' ||
-    !Number.isSafeInteger(record.pid) ||
-    record.pid <= 0
-  ) {
-    throw new DaemonClientError(
-      'startupFailed',
-      `Invalid daemon PID in ${paths.lockfilePath}; refusing automatic reclaim.`
-    );
-  }
-  if (!isProcessAlive(record.pid)) return;
+  if (!isProcessAlive(owner.pid)) return;
   throw new DaemonClientError(
     'startupFailed',
-    `PID ${record.pid} still exists but the daemon is not ready. It may be a reused PID; refusing to kill it or remove ${paths.lockfilePath}.`
+    `PID ${owner.pid} still exists but the daemon is not ready. It may be a reused PID; refusing to kill it or remove ${paths.lockfilePath}.`
   );
 }
 
-async function waitForPreviousDaemonAsync(pid: number | undefined, deadline: number): Promise<void> {
-  if (pid === undefined) return;
-  if (!Number.isSafeInteger(pid) || pid <= 0) {
-    throw new RangeError('previousDaemonPid must be a positive safe integer.');
+function readDaemonOwnership(lockfilePath: string): Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined {
+  let record: unknown;
+  try {
+    record = JSON.parse(fs.readFileSync(lockfilePath, 'utf8'));
+  } catch (error) {
+    if (hasErrorCode(error, 'ENOENT')) return undefined;
+    throw new DaemonClientError(
+      'startupFailed',
+      `Cannot safely read ${lockfilePath}; refusing automatic reclaim.`,
+      { cause: error }
+    );
   }
+  if (!isDaemonOwnership(record)) {
+    throw new DaemonClientError(
+      'startupFailed',
+      `Invalid daemon ownership record in ${lockfilePath}; refusing automatic reclaim.`
+    );
+  }
+  return { pid: record.pid, startedAt: record.startedAt };
+}
+
+function isDaemonOwnership(record: unknown): record is Pick<IDaemonLockfile, 'pid' | 'startedAt'> {
+  return (
+    typeof record === 'object' &&
+    record !== null &&
+    'pid' in record &&
+    typeof record.pid === 'number' &&
+    Number.isSafeInteger(record.pid) &&
+    record.pid > 0 &&
+    'startedAt' in record &&
+    typeof record.startedAt === 'string' &&
+    Number.isFinite(Date.parse(record.startedAt))
+  );
+}
+
+async function waitForPreviousDaemonAsync(
+  paths: IDaemonPaths,
+  previous: IConnectOrStartDaemonOptions['previousDaemon'],
+  deadline: number
+): Promise<void> {
+  if (previous === undefined) return;
+  if (!isDaemonOwnership(previous)) {
+    throw new RangeError(
+      'previousDaemon must contain a positive safe-integer pid and valid startedAt timestamp.'
+    );
+  }
+  const { pid, startedAt } = previous;
   let backoffMs: number = 50;
-  while (isProcessAlive(pid)) {
+  while (true) {
+    const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = readDaemonOwnership(
+      paths.lockfilePath
+    );
+    if (!owner || owner.pid !== pid || owner.startedAt !== startedAt || !isProcessAlive(owner.pid)) return;
     if (Date.now() >= deadline) {
       throw new DaemonClientError(
         'timeout',
-        `The previous daemon PID ${pid} still exists; cleanup completion cannot be established. No PID was killed and no ownership record was reclaimed.`
+        `The previous daemon still owns ${paths.lockfilePath} (PID ${pid}); cleanup is incomplete or failed. No PID was killed and no ownership record was reclaimed.`
       );
     }
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));

@@ -7,6 +7,7 @@
 import { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 import { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
@@ -67,7 +68,7 @@ export interface ICaptureDaemonRequestOptions extends Omit<IDaemonRequestEnvelop
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
     // (undocumented)
     readonly paths: IDaemonPaths;
-    readonly previousDaemonPid?: number;
+    readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
     readonly startCommand?: IDaemonStartCommand;
     readonly startupTimeoutMs?: number;
 }
