@@ -19,6 +19,8 @@ import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { PhasedRequestRouter } from './PhasedRequestRouter';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
+import { getDaemonGraphObserver } from './DaemonGraphObserver';
 
 /** A request resolved by the integration that owns Rush command parsing. @beta */
 export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaemonGlobalRequest;
@@ -103,6 +105,10 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
     envelope: IDaemonRequestEnvelope,
     client: IDaemonRequestDispatchClient
   ): Promise<void> {
+    if (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph')) {
+      await new DaemonGraphRequestRouter(this.#workspaceSession).executeAsync(envelope, client);
+      return;
+    }
     if (!this.#resolver) {
       throw new DaemonRequestDispatchError(
         'unsupported',
@@ -114,6 +120,9 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
       envelope,
       workspaceSession: this.#workspaceSession
     });
+    if (this.#workspaceSession.operationGraph) {
+      getDaemonGraphObserver(this.#workspaceSession.operationGraph);
+    }
     if (resolved.kind === 'phased') {
       validateResolvedPhasedRequest(envelope, resolved.request);
       await this.#phasedRouter.executeAsync(

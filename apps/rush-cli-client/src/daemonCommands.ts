@@ -14,6 +14,7 @@ import type { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
+import { executeDaemonGraphCommandAsync } from './daemonGraph';
 import { writeStreamAsync } from './writeStreamAsync';
 
 export interface IDaemonCommandOptions {
@@ -26,11 +27,8 @@ export interface IDaemonCommandOptions {
 export async function executeDaemonCommandAsync(options: IDaemonCommandOptions): Promise<void> {
   const command: string | undefined = options.argv[0];
   if (command === 'graph') {
-    throw new Error(
-      options.environment.RUSH_DAEMON_EXPERIMENTAL !== '1'
-        ? 'Experimental graph commands require RUSH_DAEMON_EXPERIMENTAL=1 and host graph protocol support.'
-        : 'The host graph protocol is not available in this build.'
-    );
+    await executeDaemonGraphCommandAsync(options);
+    return;
   }
   if (
     options.argv.length !== 1 ||

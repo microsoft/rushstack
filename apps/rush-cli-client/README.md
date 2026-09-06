@@ -135,7 +135,67 @@ policy is added.
 This is the **text launcher stdout/stderr log**, including startup errors—not
 WS5 structured observability or a subscription to request-scoped events.
 
-`daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume` require
-host graph protocol integration and currently fail explicitly. Setting
-`RUSH_DAEMON_EXPERIMENTAL=1` does not make absent graph contracts available.
-These are outstanding acceptance criteria, not simulated management commands.
+## Experimental graph reference client
+
+Set `RUSH_DAEMON_EXPERIMENTAL=1` and use an explicitly started daemon:
+
+```sh
+export RUSH_DAEMON_EXPERIMENTAL=1
+rush-client daemon start
+rush-client daemon graph show
+rush-client build --to my-project
+rush-client daemon graph scope-out --project my-project
+rush-client daemon graph scope-in --operation 'my-project (compile)'
+rush-client daemon graph invalidate --project my-project
+rush-client daemon graph pause
+rush-client daemon graph status
+rush-client daemon graph resume
+rush-client daemon graph watch
+```
+
+All graph commands connect only; they never auto-start, initialize the graph, or
+fall back to native Rush. Cold `show` and `status` report `initialized: false`
+without an `operations` field. Other verbs fail explicitly until a supported,
+explicit build request has initialized the graph. The gate is checked both by the
+CLI and against the server request's environment. Older or unsupported servers,
+invalid arguments, and unknown selectors fail, never invoke a shell.
+
+`show` and `status` both emit a complete point-in-time metadata snapshot, including
+operation IDs, exact project/phase names, native enabled states, observed statuses,
+dependency IDs, manual-mode/scheduled flags, and a path-free invalidation summary.
+An operation without an observed execution status reports `null`. Snapshots contain
+no environment, runner, log, or terminal objects.
+
+`scope-in`, `scope-out`, and `invalidate` require one or more repeated
+`--project NAME` or `--operation ID` pairs. Names and IDs match exactly; there are
+no globs or implicit all-project selections. Every selector is validated before
+any mutation. Scope-in enables transitive dependencies. Scope-out includes
+transitive consumers and uses native safe-disable, which also prunes dependencies
+no longer needed by enabled operations. Invalidation marks selected native results
+stale without scheduling work. Mutations use exclusive workspace admission and
+never change an active iteration. Scope changes/invalidation reject an already
+prepared iteration instead of modifying stale execution records.
+
+Pause/resume change native `pauseNextIteration`: manual mode gates automatically
+scheduled iterations, **not explicit build requests**. Resume does not create or
+schedule work. If an engine owner has already prepared an automatic iteration,
+resume may release it and retains exclusive admission until native idle, including
+if the resume client disconnects. The reference client's watch command is not a
+build scheduler; the default lazy engine still rebuilds only on explicit requests.
+Native build requests apply their own selections, so a graph scope is not a
+persistent override of later build arguments.
+
+Graph stdout is NDJSON only. Snapshots use the existing `extension` event envelope
+with `payload.name: "rushd.graph-snapshot"` and
+`payload.data: { requestId, snapshot }`. The existing `requestResult` is emitted as
+the terminal record; queue positions and request rejections also retain their
+control-message shapes. Local failures use `{ kind: "graphError", message }`.
+No human renderer, ANSI styling, or graph-specific transport is involved.
+
+`watch` emits an initial snapshot followed by relevant graph state, invalidation,
+and idle updates. It holds no scheduler lease, so other clients can build.
+Slow consumers receive coalesced latest snapshots rather than every intermediate
+transition or an unbounded event history. SIGINT/SIGTERM cancel the subscription
+and wait for the authoritative aborted result (exit 130). Disconnect removes
+subscriber resources without cancelling another client's build. Graph hooks are
+installed once per graph, not once per connection.
