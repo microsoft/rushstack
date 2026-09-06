@@ -13,13 +13,13 @@ export interface IDaemonConfigurationJson {
   readonly watch?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
-  /** Reserved for WS3 eviction; currently inactive. Defaults to 300 seconds. */
+  /** Idle resource expiration in an attached daemon warm set. Defaults to 300 seconds. */
   readonly warmIdleTimeoutSeconds?: number;
-  /** Reserved for WS3 eviction; currently inactive. Defaults to 512 MiB. */
+  /** Best-effort sampled RSS budget for an attached warm set, not a hard ceiling. Defaults to 512 MiB. */
   readonly warmMemoryBudgetMB?: number;
-  /** Reserved for WS3 warming; currently inactive. Defaults to 20 projects. */
+  /** Best-effort retained project limit; active/protected work is exempt. Defaults to 20 projects. */
   readonly warmSetMaxProjects?: number;
-  /** Reserved for telemetry-driven warming; currently inactive. Defaults to false. */
+  /** Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts scripts. Defaults to false. */
   readonly autoWarmByTelemetry?: boolean;
 }
 
@@ -51,7 +51,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
 
 /**
  * Validates and snapshots daemon configuration, using environment, then config, then defaults.
- * @remarks Watch/warm-set settings are a validated integration seam, not an implemented warm engine.
+ * @remarks Warm policies are consumed by generation-owned WorkspaceWarmSet attachments. They do not alter native CLI execution.
  * @beta
  */
 export function resolveDaemonConfiguration(

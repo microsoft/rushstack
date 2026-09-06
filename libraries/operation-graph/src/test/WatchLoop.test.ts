@@ -309,11 +309,13 @@ describe(WatchLoop.name, () => {
 
       const successMessage: IAfterExecuteEventMessage = {
         event: 'after-execute',
-        status: OperationStatus.Success
+        status: OperationStatus.Success,
+        residentMemoryBytes: expect.any(Number)
       };
 
       expect(sendMock).toHaveBeenCalledWith(syncMessage);
       expect(sendMock).toHaveBeenLastCalledWith(successMessage);
+      expect(sendMock.mock.calls[1][0].residentMemoryBytes).toBeGreaterThan(0);
     });
   });
 });

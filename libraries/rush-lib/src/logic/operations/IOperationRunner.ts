@@ -156,6 +156,13 @@ export interface IOperationRunner {
   readonly isActive?: boolean;
 
   /**
+   * Last measured RSS of this runner's retained child process, in bytes.
+   * Undefined if unmeasured or no longer resident. This is a sample, not a limit, allocation estimate,
+   * or measurement of descendants. Runners sharing a process must not each report its RSS.
+   */
+  readonly residentMemoryBytes?: number;
+
+  /**
    * Method to be executed for the operation.
    * @param context - The context object containing information about the execution environment.
    * @param lastState - The last execution result of this operation, if any.

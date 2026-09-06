@@ -705,6 +705,7 @@ export interface IOperationGraph {
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
     debugMode: boolean;
+    deleteResults?(operations: Iterable<Operation>): void;
     discardScheduledIteration(): boolean;
     executeScheduledIterationAsync(): Promise<boolean>;
     readonly hasScheduledIteration: boolean;
@@ -794,6 +795,7 @@ export interface IOperationRunner {
     readonly isNoOp?: boolean;
     readonly name: string;
     reportTiming: boolean;
+    readonly residentMemoryBytes?: number;
     silent: boolean;
     warningsAreAllowed: boolean;
 }
@@ -1292,6 +1294,7 @@ export class OperationGraphHooks {
     readonly afterExecuteOperationAsync: AsyncSeriesHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ]>;
+    readonly beforeDeleteResults: SyncHook<[ReadonlySet<Operation>]>;
     readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
     ReadonlyMap<Operation, IOperationExecutionResult>,
     IOperationGraphIterationOptions

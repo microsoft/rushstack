@@ -45,7 +45,7 @@ import {
  */
 export interface IOperationExecutionRecordContext {
   iterationId: number;
-  streamCollator: StreamCollator;
+  streamCollator: StreamCollator | undefined;
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
@@ -168,7 +168,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public logFilePaths: ILogFilePaths | undefined;
 
-  private readonly _context: IOperationExecutionRecordContext;
+  private _context: IOperationExecutionRecordContext;
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
   private _status: OperationStatus;
@@ -223,6 +223,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
     if (!this._collatedWriter) {
+      if (!this._context.streamCollator) {
+        throw new InternalError('Cannot reopen the output of a detached execution record.');
+      }
       this._collatedWriter = this._context.streamCollator.registerTask(this.name);
     }
     return this._collatedWriter;
@@ -329,6 +332,31 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    */
   public get isOperationCompleted(): boolean {
     return this._operationCompleted;
+  }
+
+  /**
+   * Releases iteration-wide references after the host has drained all output.
+   * Retained hashes, warnings, timing and results remain usable for incremental decisions.
+   */
+  public detachExecutionContext(): void {
+    if (!this._operationCompleted) {
+      throw new InternalError('Cannot detach an unfinished execution record.');
+    }
+    if (this._context.inputsSnapshot) {
+      this.getStateHash();
+    }
+    const { iterationId, maxParallelism, debugMode, quietMode } = this._context;
+    this._context = {
+      iterationId,
+      maxParallelism,
+      debugMode,
+      quietMode,
+      inputsSnapshot: undefined,
+      streamCollator: undefined
+    };
+    this._collatedWriter = undefined;
+    this.dependencies.clear();
+    this.consumers.clear();
   }
 
   /**

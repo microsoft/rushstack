@@ -271,13 +271,13 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
-  /** Reserved for warm-set idle eviction. */
+  /** Overrides idle eviction in an attached daemon warm set. */
   RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
-  /** Reserved for warm-set memory budgeting. */
+  /** Overrides the attached warm set's best-effort sampled RSS budget. */
   RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
-  /** Reserved for warm-set project limits. */
+  /** Overrides the attached warm set's retained project limit. */
   RUSH_DAEMON_WARM_SET_MAX_PROJECTS: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
-  /** Reserved for telemetry-weighted warming. */
+  /** Enables telemetry-weighted retention of requested work in an attached warm set. */
   RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
   /** Gates the experimental graph client; requires host graph integration. */
   RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'

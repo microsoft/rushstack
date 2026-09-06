@@ -89,3 +89,14 @@ export { PhasedRequestRouter } from './PhasedRequestRouter';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
 export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';
 export { RushXDaemonRequestResolver } from './RushXDaemonRequestResolver';
+export {
+  WorkspaceWarmSet,
+  type IWorkspaceWarmSetOptions,
+  type IWorkspaceWarmSetStatus,
+  type WorkspaceWarmSetConfiguration
+} from './WorkspaceWarmSet';
+export {
+  WorkspaceSessionFileWatcher,
+  type IWorkspaceSessionFileWatcherOptions,
+  type WorkspaceWatchFactory
+} from './WorkspaceSessionFileWatcher';

@@ -121,6 +121,15 @@ export interface IOperationGraph {
   closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
 
   /**
+   * Drops retained results after the host has awaited runner and watcher cleanup.
+   * Rejects executing/prepared iterations and runners that still report active resources.
+   * Detaches completed iteration contexts so surviving results do not retain evicted records.
+   * Does not change enabled states, disk caches, or operation definitions.
+   * Optional for compatibility with hosts that do not support idle eviction.
+   */
+  deleteResults?(operations: Iterable<Operation>): void;
+
+  /**
    * Executes a single iteration of the operations.
    * @param options - Options for this execution iteration.
    * @returns A promise that resolves to true if the iteration has work to be done, or false if the iteration was empty and therefore not scheduled.

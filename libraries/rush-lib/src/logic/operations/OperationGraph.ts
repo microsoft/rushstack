@@ -491,6 +491,31 @@ export class OperationGraph implements IOperationGraph {
     }
   }
 
+  public deleteResults(operations: Iterable<Operation>): void {
+    if (this._currentIteration || this._scheduledIteration) {
+      throw new Error('Cannot delete results of an executing or prepared graph.');
+    }
+    const selected: Set<Operation> = new Set(operations);
+    for (const operation of selected) {
+      if (!this.operations.has(operation)) {
+        throw new Error(`Cannot delete results for an operation outside this graph: ${operation.name}`);
+      }
+      if (operation.runner?.isActive) {
+        throw new Error(`Cannot delete results of an active runner: ${operation.name}`);
+      }
+    }
+    // Each completed record originally owns a context and edges referencing the whole iteration.
+    // Detach survivors too; deleting only the selected map keys would retain the cold records.
+    this.hooks.beforeDeleteResults.call(selected);
+    for (const record of this.resultByOperation.values()) {
+      record.detachExecutionContext();
+    }
+    for (const operation of selected) {
+      this.resultByOperation.delete(operation);
+    }
+    this._scheduleManagerStateChanged();
+  }
+
   /**
    * Shorthand for scheduling an iteration then executing it.
    * Call `abortCurrentIterationAsync()` to cancel the execution of any operations that have not yet begun execution.
@@ -694,9 +719,7 @@ export class OperationGraph implements IOperationGraph {
       maxParallelism: this._maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
-      invalidate: (operations: Iterable<Operation>, reason: string) => {
-        graph.invalidateOperations(operations, reason);
-      },
+      invalidate: graph.invalidateOperations.bind(graph),
       get debugMode(): boolean {
         return graph.debugMode;
       },
