@@ -362,10 +362,19 @@ class PhasedRequestBatchCoordinator {
       });
     this.#nextGraphLeasePromise = undefined;
     const graphLease: IRequestLease = await graphLeasePromise;
+    let executionLease: AsyncDisposable | undefined;
+    let releasePromise: Promise<void> | undefined;
+    const releaseExecutionLeaseAsync: () => Promise<void> = () => {
+      releasePromise ??= (async () => {
+        await executionLease?.[Symbol.asyncDispose]();
+      })();
+      return releasePromise;
+    };
     try {
       if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
         throw new Error('The warm workspace operation graph is not idle.');
       }
+      executionLease = await this.#workspaceSession.acquireExecutionLeaseAsync?.();
       await this.#workspaceSession.reconcileInvalidationsAsync();
 
       if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
@@ -376,8 +385,13 @@ class PhasedRequestBatchCoordinator {
         this.#isEntryLive(entry)
       );
       if (participants.length === 0) {
+        const beforeResultAsync: (() => Promise<void>) | undefined = executionLease
+          ? createBatchReleaseBarrier(batch, releaseExecutionLeaseAsync)
+          : undefined;
         await Promise.all(
-          batch.map((entry: IBatchEntry) => this.#finishEntryAsync(entry, false, undefined))
+          batch.map((entry: IBatchEntry) =>
+            this.#finishEntryAsync(entry, false, undefined, [], beforeResultAsync)
+          )
         );
         return;
       }
@@ -453,13 +467,20 @@ class PhasedRequestBatchCoordinator {
 
       await this.#abortTail;
       iterationCleanupErrors.push(...this.#abortErrors.splice(0));
+      const beforeResultAsync: (() => Promise<void>) | undefined = executionLease
+        ? createBatchReleaseBarrier(batch, releaseExecutionLeaseAsync)
+        : undefined;
       await Promise.all(
         batch.map((entry: IBatchEntry) =>
-          this.#finishEntryAsync(entry, scheduled, executionError, iterationCleanupErrors)
+          this.#finishEntryAsync(entry, scheduled, executionError, iterationCleanupErrors, beforeResultAsync)
         )
       );
     } finally {
-      graphLease.release();
+      try {
+        await releaseExecutionLeaseAsync();
+      } finally {
+        graphLease.release();
+      }
     }
   }
 
@@ -514,7 +535,8 @@ class PhasedRequestBatchCoordinator {
     entry: IBatchEntry,
     batchScheduled: boolean,
     executionError: unknown,
-    batchCleanupErrors: ReadonlyArray<unknown> = []
+    batchCleanupErrors: ReadonlyArray<unknown> = [],
+    beforeResultAsync?: () => Promise<void>
   ): Promise<void> {
     if (entry.completed) {
       return;
@@ -528,6 +550,11 @@ class PhasedRequestBatchCoordinator {
       }
     }
     await collectInteractiveCleanupErrorAsync(entry.interactiveSession, cleanupErrors);
+    try {
+      await beforeResultAsync?.();
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
     const aborted: boolean = entry.abortRequested || entry.client.abortSignal.aborted;
     const operationOutcomes: ReadonlyArray<IPhasedOperationOutcome> = entry.requestSink
       ? collectOperationOutcomes(
@@ -581,6 +608,23 @@ class PhasedRequestBatchCoordinator {
       entry.abortListener = undefined;
     }
   }
+}
+
+function createBatchReleaseBarrier(
+  batch: ReadonlyArray<IBatchEntry>,
+  releaseAsync: () => Promise<void>
+): () => Promise<void> {
+  let remaining: number = batch.filter((entry) => !entry.completed).length;
+  if (remaining === 0) return releaseAsync;
+  let arrive: () => void = () => undefined;
+  const allDrained: Promise<void> = new Promise<void>((resolve) => {
+    arrive = resolve;
+  });
+  const released: Promise<void> = allDrained.then(releaseAsync);
+  return async () => {
+    if (--remaining === 0) arrive();
+    await released;
+  };
 }
 
 function getDualEmitGraph(workspaceSession: IWorkspaceSession): IDualEmitOperationGraph {

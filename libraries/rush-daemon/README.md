@@ -61,18 +61,35 @@ and native operation hashes decide which inputs changed. Graph-defining changes 
 the baseline. Command/parameter/environment changes are rejected rather than reusing stale runner definitions or
 automatically retrying a possibly executed request.
 
-This first integration supports Git-backed workspaces with direct project configuration and ordinary native phases.
-External Rush plugins, inherited or rig-based project configuration, `.env` initialization, watch/install/variant
+This integration supports Git-backed workspaces with direct, inherited, or rig-based project configuration and ordinary native phases.
+Engine configuration snapshots use private native configuration-file loaders and non-caching rig resolution, including
+the normal native inheritance merge and schema validation. Git selectors likewise read request-owned ignore-glob
+configuration. The engine does not clear, read, or populate the process-wide project/rig configuration caches.
+Before each iteration, it reloads the effective project configuration under the native execution lease and compares
+the graph/cache settings with the construction snapshot. Changed inherited or rig-provided settings reject execution
+even when their files are outside the watcher roots or ignored by Git, including files under `node_modules`.
+The retained graph and its cache policy are never patched in place.
+
+External Rush plugins, `.env` initialization, watch/install/variant
 and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global/rushx
 commands are rejected, not silently bypassed. The complete request environment must match the daemon startup
 environment, including Rush/cache policy variables. These restrictions remain until the corresponding initialization,
 environment, and resource-lifetime contracts are request-scoped.
 
-The native Rush lock is held from graph construction until successful disposal. Stop the daemon before using
-native mutation commands or switching to `--no-daemon`; restarting is required for another command shape, parameters,
-environment, or graph configuration. Disposal aborts the graph lifetime, awaits the current iteration and runner
-cleanup, disposes the owned cobuild provider, and only then releases the native lock. A cleanup failure retains it.
-The existing operation-completion cleanup is unchanged.
+The native Rush lock is held only during graph preparation and each coalesced iteration, not while the warm daemon
+is idle. `acquireExecutionLeaseAsync` is an optional engine/session hook invoked once by the batch coordinator,
+before input reconciliation. Compatible clients share that lease rather than contending independently. It remains
+held through operation execution, runner cleanup, and every participant's output/input cleanup; the batch barrier
+releases it before any final command result is published. Thus ordinary native actions and permanent `--no-daemon`
+fallback can run immediately after a completed warm request without stopping the daemon.
+
+A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
+automatic retry. A later explicit request can retry after contention ends, including contention during the first
+engine initialization. A dirty native lock left by another command invalidates retained successes so the native
+incremental/cache pipeline can reconcile possibly changed ignored outputs. Installation validity is also checked on
+every snapshot refresh. Another command shape, parameters, environment, or changed graph configuration still requires
+engine recreation. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
+runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 
 **Client integration boundary:** the resolver currently requires `commandOrigin: "built-in"` for native
 `build`/`rebuild`. A `rushx build` envelope must never be mistaken for a workspace build. The WS4 client at this

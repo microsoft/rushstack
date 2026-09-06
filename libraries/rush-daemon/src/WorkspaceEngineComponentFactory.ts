@@ -64,6 +64,8 @@ export interface IWorkspaceEngineComponents extends AsyncDisposable {
    * currently expose one deterministic shutdown operation.
    */
   [Symbol.asyncDispose](): Promise<void>;
+  /** Optional native execution gate, acquired once for a coalesced iteration before reconciliation. */
+  readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
   readonly getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
   readonly inputsSnapshot: IInputsSnapshot;
   readonly operationGraph: IOperationGraph;
@@ -389,6 +391,9 @@ export class WorkspaceEngineComponentFactory {
     });
     return {
       [Symbol.asyncDispose]: () => lifecycle[Symbol.asyncDispose](),
+      acquireExecutionLeaseAsync: components.acquireExecutionLeaseAsync
+        ? () => components.acquireExecutionLeaseAsync!()
+        : undefined,
       engineShape: this.shape,
       get inputsSnapshot(): IInputsSnapshot {
         return lifecycle.inputsSnapshot;

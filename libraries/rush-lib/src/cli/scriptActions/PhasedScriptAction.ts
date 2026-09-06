@@ -33,6 +33,7 @@ import type {
   IOperationGraphIterationOptions
 } from '../../logic/operations/IOperationGraph';
 import type { IPhasedCommandEngine } from '../../api/PhasedCommandEngine';
+import { PhasedCommandEngineConfigurationChangedError } from '../../api/PhasedCommandEngineConfigurationChangedError';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
@@ -43,6 +44,7 @@ import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import type { IGitSelectorParserOptions } from '../../logic/selectors/GitChangedProjectSelectorParser';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import type { Operation, OperationEnabledState } from '../../logic/operations/Operation';
 import { associateParametersByPhase } from '../parsing/associateParametersByPhase';
@@ -162,6 +164,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
   private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
+  private readonly _gitSelectorOptions: IGitSelectorParserOptions = {
+    includeExternalDependencies: true,
+    enableFiltering: true
+  };
   private readonly _verboseParameter: CommandLineFlagParameter;
   private readonly _parallelismParameter: CommandLineStringParameter | undefined;
   private readonly _ignoreHooksParameter: CommandLineFlagParameter;
@@ -237,13 +243,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     });
 
     this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-      gitOptions: {
-        // Include lockfile processing since this expands the selection, and we need to select
-        // at least the same projects selected with the same query to "rush build"
-        includeExternalDependencies: true,
-        // Enable filtering to reduce evaluation cost
-        enableFiltering: true
-      },
+      gitOptions: this._gitSelectorOptions,
       includeSubspaceSelector: false,
       cwd: this.parser.cwd
     });
@@ -377,6 +377,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public async selectEngineOperationsAsync(
     graph: IOperationGraph
   ): Promise<ReadonlyMap<Operation, OperationEnabledState>> {
+    this._gitSelectorOptions.getIncrementalBuildIgnoredGlobsAsync = async (project) => {
+      const configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+        await RushProjectConfiguration._tryLoadForProjectsUncachedAsync([project], this._terminal);
+      return configurations.get(project)?.incrementalBuildIgnoredGlobs;
+    };
     const projects: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
       this._terminal
     );
@@ -420,11 +425,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     // Initialize the stopwatch's start time at 0 (process startup).
     const stopwatch: Stopwatch = Stopwatch.start(0);
 
-    const {
-      defaultSubspace,
-      subspacesFeatureEnabled,
-      pnpmOptions: { useWorkspaces }
-    } = this.rushConfiguration;
+    const { defaultSubspace } = this.rushConfiguration;
     if (this._alwaysInstall || this._installParameter?.value) {
       await measureAsyncFn(`${PERF_PREFIX}:install`, async () => {
         const { doBasicInstallAsync } = await import(
@@ -453,24 +454,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       });
     }
 
-    if (!this._runsBeforeInstall) {
-      await measureAsyncFn(`${PERF_PREFIX}:checkInstallFlag`, async () => {
-        // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
-        const lastLinkFlag: FlagFile = new FlagFile(
-          defaultSubspace.getSubspaceTempFolderPath(),
-          RushConstants.lastLinkFlagFilename,
-          {}
-        );
-        // Only check for a valid link flag when subspaces is not enabled
-        if (!(await lastLinkFlag.isValidAsync()) && !subspacesFeatureEnabled) {
-          if (useWorkspaces) {
-            throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
-          } else {
-            throw new Error('Link flag invalid.\nDid you run "rush link"?');
-          }
-        }
-      });
-    }
+    await this._validateInstallStateAsync();
 
     measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this._doBeforeTask());
 
@@ -670,8 +654,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         ._runsBeforeInstall
         ? new Map()
         : await measureAsyncFn(`${PERF_PREFIX}:loadProjectConfigurations`, () =>
-            RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
+            onEngine
+              ? RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal)
+              : RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
           );
+      const projectConfigurationIdentity: string | undefined = onEngine
+        ? getProjectConfigurationIdentity(projectConfigurations)
+        : undefined;
 
       const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
 
@@ -745,6 +734,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         };
       }
 
+      const getGraphInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
+        onEngine && getInputsSnapshotAsync
+          ? async () => {
+              await this._validateInstallStateAsync();
+              const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+                await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal);
+              if (getProjectConfigurationIdentity(currentConfigurations) !== projectConfigurationIdentity) {
+                throw new PhasedCommandEngineConfigurationChangedError();
+              }
+              return await getInputsSnapshotAsync();
+            }
+          : getInputsSnapshotAsync;
       const graphOptions: IOperationGraphOptions = {
         quietMode: isQuietMode,
         debugMode: this.parser.isDebug,
@@ -758,7 +759,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         allowOversubscription: this._allowOversubscription,
         isWatch,
         pauseNextIteration: !!onEngine,
-        getInputsSnapshotAsync,
+        getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
         abortController: this.sessionAbortController,
         closeRunnersOnAbort: !onEngine,
         telemetry: executionTelemetryHandler
@@ -787,7 +788,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
       if (onEngine) {
-        if (!getInputsSnapshotAsync || !initialSnapshot) {
+        if (!getGraphInputsSnapshotAsync || !initialSnapshot) {
           throw new Error('The daemon engine requires a Git-backed workspace inputs snapshot.');
         }
         let disposePromise: Promise<void> | undefined;
@@ -795,7 +796,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           operationGraph: graph,
           rushSession: this.rushSession,
           inputsSnapshot: initialSnapshot,
-          getInputsSnapshotAsync,
+          getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
           isIncremental: this._isIncrementalBuildAllowed,
           phaseNames: Array.from(new Set(Array.from(operations, (op) => op.associatedPhase.name))).sort(),
           pluginNames: Array.from(
@@ -933,6 +934,31 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
   }
 
+  private async _validateInstallStateAsync(): Promise<void> {
+    if (!this._runsBeforeInstall) {
+      await measureAsyncFn(`${PERF_PREFIX}:checkInstallFlag`, async () => {
+        const {
+          defaultSubspace,
+          subspacesFeatureEnabled,
+          pnpmOptions: { useWorkspaces }
+        } = this.rushConfiguration;
+        // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
+        const lastLinkFlag: FlagFile = new FlagFile(
+          defaultSubspace.getSubspaceTempFolderPath(),
+          RushConstants.lastLinkFlagFilename,
+          {}
+        );
+        if (!(await lastLinkFlag.isValidAsync()) && !subspacesFeatureEnabled) {
+          if (useWorkspaces) {
+            throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
+          } else {
+            throw new Error('Link flag invalid.\nDid you run "rush link"?');
+          }
+        }
+      });
+    }
+  }
+
   private _doBeforeTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
@@ -957,6 +983,21 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
     this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
+}
+
+function getProjectConfigurationIdentity(
+  configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>
+): string {
+  return JSON.stringify(
+    Array.from(configurations, ([project, configuration]) => ({
+      project: project.packageName,
+      incrementalBuildIgnoredGlobs: configuration.incrementalBuildIgnoredGlobs,
+      disableBuildCacheForProject: configuration.disableBuildCacheForProject,
+      operations: Array.from(configuration.operationSettingsByOperationName).sort(([left], [right]) =>
+        left.localeCompare(right)
+      )
+    })).sort((left, right) => left.project.localeCompare(right.project))
+  );
 }
 
 async function disposeEngineGraphAsync(

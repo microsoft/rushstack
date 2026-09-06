@@ -5,6 +5,8 @@ import * as path from 'node:path';
 
 import {
   PhasedCommandEngine,
+  PhasedCommandEngineBusyError,
+  PhasedCommandEngineConfigurationChangedError,
   type IPhasedCommandEngine,
   type IInputsSnapshot,
   type IOperationGraph,
@@ -98,7 +100,15 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     } else {
       this.#parameterIdentity = command.parameterIdentity;
       this.#workspaceSession = workspaceSession;
-      this.#binding = this.#bindAsync(command, terminal, workspaceSession);
+      const binding: Promise<void> = this.#bindAsync(command, terminal, workspaceSession);
+      this.#binding = binding;
+      void binding.catch((error: unknown) => {
+        if (error instanceof PhasedCommandEngineBusyError && this.#binding === binding) {
+          this.#binding = undefined;
+          this.#parameterIdentity = undefined;
+          this.#workspaceSession = undefined;
+        }
+      });
     }
     await this.#binding;
     const graph: IOperationGraph | undefined = workspaceSession.operationGraph;
@@ -141,6 +151,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       try {
         engine = await command.createEngineAsync();
       } catch (error) {
+        if (error instanceof PhasedCommandEngineBusyError) throw error;
         throw new Error(terminal.describeError(error), { cause: error });
       }
       try {
@@ -149,7 +160,15 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           createEngineComponentsAsync: async () => ({
             ...engine,
             getInputsSnapshotAsync: async () => {
-              const snapshot: IInputsSnapshot | undefined = await engine.getInputsSnapshotAsync();
+              let snapshot: IInputsSnapshot | undefined;
+              try {
+                snapshot = await engine.getInputsSnapshotAsync();
+              } catch (error) {
+                if (error instanceof PhasedCommandEngineConfigurationChangedError) {
+                  throw new WorkspaceEngineRecreationRequiredError();
+                }
+                throw error;
+              }
               if (snapshot) assertCompatibleInputs(engine.inputsSnapshot, snapshot);
               return snapshot;
             }

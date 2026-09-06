@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { RushConfiguration } from '@microsoft/rush-lib';
+import { PhasedCommandEngineBusyError, RushConfiguration } from '@microsoft/rush-lib';
 import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/rush-lib';
 
 import { WorkspaceInvalidationTracker } from './WorkspaceInvalidationTracker';
@@ -44,6 +44,8 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
  * @beta
  */
 export interface IWorkspaceSessionComponents extends AsyncDisposable {
+  /** Acquire once for graph reconciliation/execution, not separately for each merged client. */
+  readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
   readonly engineShape?: IWorkspaceEngineShape;
   readonly inputsSnapshot?: IInputsSnapshot;
   readonly operationGraph?: IOperationGraph;
@@ -97,6 +99,8 @@ export interface IWorkspaceSessionOptions {
  * @beta
  */
 export interface IWorkspaceSession extends AsyncDisposable {
+  /** Optional execution lease retained through the coalesced iteration's output and resource cleanup. */
+  acquireExecutionLeaseAsync?(): Promise<AsyncDisposable | undefined>;
   readonly engineShape: IWorkspaceEngineShape | undefined;
   readonly inputsSnapshot: IInputsSnapshot | undefined;
   readonly invalidations: WorkspaceInvalidationTracker;
@@ -175,9 +179,24 @@ export class WorkspaceSession implements IWorkspaceSession {
       if (this.#components !== EMPTY_WORKSPACE_SESSION_COMPONENTS) {
         throw new Error('Workspace components have already been supplied.');
       }
-      this.#engineInitialization = this.#initializeEngineAsync(factory);
+      const initialization: Promise<void> = this.#initializeEngineAsync(factory);
+      this.#engineInitialization = initialization;
+      void initialization.catch((error: unknown) => {
+        if (
+          error instanceof PhasedCommandEngineBusyError &&
+          this.#engineInitialization === initialization &&
+          !this.#isDisposing
+        ) {
+          this.#engineInitialization = undefined;
+        }
+      });
     }
     await this.#engineInitialization;
+  }
+
+  public async acquireExecutionLeaseAsync(): Promise<AsyncDisposable | undefined> {
+    if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
+    return await this.#components.acquireExecutionLeaseAsync?.();
   }
 
   async #initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {

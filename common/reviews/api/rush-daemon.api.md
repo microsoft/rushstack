@@ -434,6 +434,7 @@ export interface IWorkspaceEngineComponentFactoryOptions {
 // @beta
 export interface IWorkspaceEngineComponents extends AsyncDisposable {
     [Symbol.asyncDispose](): Promise<void>;
+    readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
     // (undocumented)
     readonly getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
     // (undocumented)
@@ -480,6 +481,7 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
 
 // @beta
 export interface IWorkspaceSession extends AsyncDisposable {
+    acquireExecutionLeaseAsync?(): Promise<AsyncDisposable | undefined>;
     // (undocumented)
     readonly engineShape: IWorkspaceEngineShape | undefined;
     initializeEngineAsync?(factory: CreateWorkspaceSessionComponentsAsync): Promise<void>;
@@ -501,6 +503,7 @@ export interface IWorkspaceSession extends AsyncDisposable {
 
 // @beta
 export interface IWorkspaceSessionComponents extends AsyncDisposable {
+    readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
     // (undocumented)
     readonly engineShape?: IWorkspaceEngineShape;
     // (undocumented)
@@ -634,6 +637,8 @@ export class WorkspaceInvalidationTracker {
 // @beta
 export class WorkspaceSession implements IWorkspaceSession {
     [Symbol.asyncDispose](): Promise<void>;
+    // (undocumented)
+    acquireExecutionLeaseAsync(): Promise<AsyncDisposable | undefined>;
     static createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession>;
     // (undocumented)
     get engineShape(): IWorkspaceEngineShape | undefined;

@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, LockFile, Path } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
 import type { CommandLineAction } from '@rushstack/ts-command-line';
 
@@ -12,9 +12,11 @@ import { PhasedScriptAction } from '../cli/scriptActions/PhasedScriptAction';
 import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
 import type { IOperationGraph } from '../logic/operations/IOperationGraph';
 import type { Operation, OperationEnabledState } from '../logic/operations/Operation';
+import { PhasedCommandEngineExecution } from '../logic/operations/PhasedCommandEngineExecution';
 import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushUserConfiguration } from './RushUserConfiguration';
+import { PhasedCommandEngineBusyError } from './PhasedCommandEngineBusyError';
 
 /**
  * A native phased command graph prepared without executing an iteration.
@@ -22,6 +24,8 @@ import { RushUserConfiguration } from './RushUserConfiguration';
  */
 export interface IPhasedCommandEngine extends AsyncDisposable {
   [Symbol.asyncDispose](): Promise<void>;
+  /** Acquire once per coalesced iteration, before input reconciliation; dispose after output and runner cleanup. */
+  readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
   readonly operationGraph: IOperationGraph;
   readonly rushSession: RushSession;
   readonly inputsSnapshot: IInputsSnapshot;
@@ -44,7 +48,7 @@ export interface IParsePhasedCommandOptions {
  *
  * @remarks
  * The initial engine surface deliberately rejects watch/install, event-hook scripts, .env files, and
- * externally supplied plugins or inherited/rig-based project configuration. Those require request-scoped initialization and asynchronous disposal
+ * externally supplied plugins. Those require request-scoped initialization and asynchronous disposal
  * contracts before they can safely run in a shared process. Native graph/cache plugins are not replaced.
  * @alpha
  */
@@ -79,18 +83,6 @@ export class PhasedCommandEngine {
         throw new Error('Daemon engine execution does not yet support .env initialization. Use --no-daemon.');
       }
     }
-    for (const project of rushConfiguration.projects) {
-      const configFolder: string = path.join(project.projectFolder, 'config');
-      const projectConfigFile: string = path.join(configFolder, 'rush-project.json');
-      const projectConfig: { extends?: unknown } | undefined = FileSystem.exists(projectConfigFile)
-        ? JsonFile.load(projectConfigFile)
-        : undefined;
-      if (FileSystem.exists(path.join(configFolder, 'rig.json')) || projectConfig?.extends !== undefined) {
-        throw new Error(
-          `Inherited or rig-based project configuration for "${project.packageName}" requires --no-daemon.`
-        );
-      }
-    }
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd,
       engine: { rushConfiguration, terminalProvider }
@@ -106,32 +98,56 @@ export class PhasedCommandEngine {
 
   /**
    * Creates the all-project graph through the native CLI preparation pipeline.
-   * Holds the native Rush lock until successful disposal; hosts must stop before native mutations.
+   * Releases the preparation lock before returning. Hosts must acquire an execution lease around each iteration.
    */
   public async createEngineAsync(): Promise<IPhasedCommandEngine> {
     if (this._created) {
       throw new Error('This parsed command has already created its engine.');
     }
-    this._created = true;
     const lock: LockFile | undefined = LockFile.tryAcquire(
       this._parser.rushConfiguration.commonTempFolder,
       'rush'
     );
-    if (!lock) throw new Error('Another Rush command is already running in this repository.');
+    if (!lock) throw new PhasedCommandEngineBusyError();
+    this._created = true;
+    let engine: IPhasedCommandEngine | undefined;
+    let releaseAttempted: boolean = false;
     try {
       await this._parser.pluginManager.tryInitializeUnassociatedPluginsAsync();
-      const engine: IPhasedCommandEngine = await this._action.createEngineAsync();
-      let disposePromise: Promise<void> | undefined;
-      const disposeAsync: () => Promise<void> = async () => {
-        await engine[Symbol.asyncDispose]();
-        lock.release();
-      };
+      engine = await this._action.createEngineAsync();
+      releaseAttempted = true;
+      lock.release();
+      const execution: PhasedCommandEngineExecution = new PhasedCommandEngineExecution(
+        engine,
+        this._parser.rushConfiguration.commonTempFolder
+      );
       return {
         ...engine,
-        [Symbol.asyncDispose]: () => (disposePromise ??= disposeAsync())
+        acquireExecutionLeaseAsync: () => execution.acquireExecutionLeaseAsync(),
+        [Symbol.asyncDispose]: () => execution[Symbol.asyncDispose]()
       };
     } catch (error) {
-      lock.release();
+      const cleanupErrors: unknown[] = [];
+      if (engine) {
+        try {
+          await engine[Symbol.asyncDispose]();
+        } catch (cleanupError) {
+          cleanupErrors.push(cleanupError);
+        }
+      }
+      if (!releaseAttempted) {
+        try {
+          lock.release();
+        } catch (cleanupError) {
+          cleanupErrors.push(cleanupError);
+        }
+      }
+      if (cleanupErrors.length > 0) {
+        throw new AggregateError(
+          [error, ...cleanupErrors],
+          'Failed to prepare and clean up the native engine.'
+        );
+      }
       throw error;
     }
   }

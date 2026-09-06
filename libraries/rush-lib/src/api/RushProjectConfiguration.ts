@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AlreadyReportedError, Async, Path } from '@rushstack/node-core-library';
+import * as path from 'node:path';
+
+import { AlreadyReportedError, Async, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { RigConfig } from '@rushstack/rig-package';
+import { RigConfig, type IRigConfigJson } from '@rushstack/rig-package';
 
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
@@ -187,88 +189,93 @@ interface IOldRushProjectJson {
   buildCacheOptions?: unknown;
 }
 
-const RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IRushProjectJson> =
-  new ProjectConfigurationFile<IRushProjectJson>({
-    projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-    jsonSchemaObject: schemaJson,
-    propertyInheritance: {
-      operationSettings: {
-        inheritanceType: InheritanceType.custom,
-        inheritanceFunction: (
-          child: IOperationSettings[] | undefined,
-          parent: IOperationSettings[] | undefined
-        ) => {
-          if (!child) {
-            return parent;
-          } else if (!parent) {
-            return child;
-          } else {
-            // Merge any properties that need to be merged
-            const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
-            for (const parentOperationSettings of parent) {
-              resultOperationSettingsByOperationName.set(
-                parentOperationSettings.operationName,
-                parentOperationSettings
-              );
-            }
-
-            const childEncounteredOperationNames: Set<string> = new Set();
-            for (const childOperationSettings of child) {
-              const operationName: string = childOperationSettings.operationName;
-              if (childEncounteredOperationNames.has(operationName)) {
-                // If the operation settings already exist, but didn't come from the parent, then
-                // it shows up multiple times in the child.
-                const childSourceFilePath: string =
-                  RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(child)!;
-                throw new Error(
-                  `The operation "${operationName}" occurs multiple times in the "operationSettings" array ` +
-                    `in "${childSourceFilePath}".`
+function createProjectConfigurationFile(): ProjectConfigurationFile<IRushProjectJson> {
+  const configurationFile: ProjectConfigurationFile<IRushProjectJson> =
+    new ProjectConfigurationFile<IRushProjectJson>({
+      projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
+      jsonSchemaObject: schemaJson,
+      propertyInheritance: {
+        operationSettings: {
+          inheritanceType: InheritanceType.custom,
+          inheritanceFunction: (
+            child: IOperationSettings[] | undefined,
+            parent: IOperationSettings[] | undefined
+          ) => {
+            if (!child) {
+              return parent;
+            } else if (!parent) {
+              return child;
+            } else {
+              // Merge any properties that need to be merged
+              const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
+              for (const parentOperationSettings of parent) {
+                resultOperationSettingsByOperationName.set(
+                  parentOperationSettings.operationName,
+                  parentOperationSettings
                 );
               }
 
-              childEncounteredOperationNames.add(operationName);
+              const childEncounteredOperationNames: Set<string> = new Set();
+              for (const childOperationSettings of child) {
+                const operationName: string = childOperationSettings.operationName;
+                if (childEncounteredOperationNames.has(operationName)) {
+                  // If the operation settings already exist, but didn't come from the parent, then
+                  // it shows up multiple times in the child.
+                  const childSourceFilePath: string = configurationFile.getObjectSourceFilePath(child)!;
+                  throw new Error(
+                    `The operation "${operationName}" occurs multiple times in the "operationSettings" array ` +
+                      `in "${childSourceFilePath}".`
+                  );
+                }
 
-              let mergedOperationSettings: IOperationSettings | undefined =
-                resultOperationSettingsByOperationName.get(operationName);
-              if (mergedOperationSettings) {
-                // The parent operation settings object already exists
-                const outputFolderNames: string[] | undefined =
-                  mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
-                    ? [
-                        ...mergedOperationSettings.outputFolderNames,
-                        ...childOperationSettings.outputFolderNames
-                      ]
-                    : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
+                childEncounteredOperationNames.add(operationName);
 
-                const dependsOnEnvVars: string[] | undefined =
-                  mergedOperationSettings.dependsOnEnvVars && childOperationSettings.dependsOnEnvVars
-                    ? [
-                        ...mergedOperationSettings.dependsOnEnvVars,
-                        ...childOperationSettings.dependsOnEnvVars
-                      ]
-                    : mergedOperationSettings.dependsOnEnvVars || childOperationSettings.dependsOnEnvVars;
+                let mergedOperationSettings: IOperationSettings | undefined =
+                  resultOperationSettingsByOperationName.get(operationName);
+                if (mergedOperationSettings) {
+                  // The parent operation settings object already exists
+                  const outputFolderNames: string[] | undefined =
+                    mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
+                      ? [
+                          ...mergedOperationSettings.outputFolderNames,
+                          ...childOperationSettings.outputFolderNames
+                        ]
+                      : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
 
-                mergedOperationSettings = {
-                  ...mergedOperationSettings,
-                  ...childOperationSettings,
-                  ...(outputFolderNames ? { outputFolderNames } : {}),
-                  ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
-                };
-                resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
-              } else {
-                resultOperationSettingsByOperationName.set(operationName, childOperationSettings);
+                  const dependsOnEnvVars: string[] | undefined =
+                    mergedOperationSettings.dependsOnEnvVars && childOperationSettings.dependsOnEnvVars
+                      ? [
+                          ...mergedOperationSettings.dependsOnEnvVars,
+                          ...childOperationSettings.dependsOnEnvVars
+                        ]
+                      : mergedOperationSettings.dependsOnEnvVars || childOperationSettings.dependsOnEnvVars;
+
+                  mergedOperationSettings = {
+                    ...mergedOperationSettings,
+                    ...childOperationSettings,
+                    ...(outputFolderNames ? { outputFolderNames } : {}),
+                    ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
+                  };
+                  resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
+                } else {
+                  resultOperationSettingsByOperationName.set(operationName, childOperationSettings);
+                }
               }
-            }
 
-            return Array.from(resultOperationSettingsByOperationName.values());
+              return Array.from(resultOperationSettingsByOperationName.values());
+            }
           }
+        },
+        incrementalBuildIgnoredGlobs: {
+          inheritanceType: InheritanceType.replace
         }
-      },
-      incrementalBuildIgnoredGlobs: {
-        inheritanceType: InheritanceType.replace
       }
-    }
-  });
+    });
+  return configurationFile;
+}
+
+const RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IRushProjectJson> =
+  createProjectConfigurationFile();
 
 const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProjectJson> =
   new ProjectConfigurationFile<IOldRushProjectJson>({
@@ -277,6 +284,11 @@ const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProj
   });
 
 const _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> = new Map();
+
+interface IIsolatedProjectConfigurationLoaders {
+  readonly configurationFile: ProjectConfigurationFile<IRushProjectJson>;
+  readonly oldConfigurationFile: ProjectConfigurationFile<IOldRushProjectJson>;
+}
 
 /**
  * Use this class to load the "config/rush-project.json" config file.
@@ -509,7 +521,6 @@ export class RushProjectConfiguration {
       project,
       terminal
     );
-
     if (rushProjectJson) {
       const operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings> =
         _getRushProjectConfiguration(project, rushProjectJson, terminal);
@@ -524,6 +535,47 @@ export class RushProjectConfiguration {
       _configCache.set(project, false);
       return undefined;
     }
+  }
+
+  /**
+   * Loads a fresh native configuration snapshot without reading or modifying process-wide
+   * project, inherited-file, or rig caches. The loaders are owned only by this invocation.
+   * @internal
+   */
+  public static async _tryLoadForProjectsUncachedAsync(
+    projects: Iterable<RushConfigurationProject>,
+    terminal: ITerminal
+  ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
+    const loaders: IIsolatedProjectConfigurationLoaders = {
+      configurationFile: createProjectConfigurationFile(),
+      oldConfigurationFile: new ProjectConfigurationFile<IOldRushProjectJson>({
+        projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
+        jsonSchemaObject: anythingSchemaJson
+      })
+    };
+    const result: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
+    await Async.forEachAsync(
+      projects,
+      async (project) => {
+        const rushProjectJson: IRushProjectJson | undefined = await _tryLoadJsonForProjectAsync(
+          project,
+          terminal,
+          loaders
+        );
+        if (rushProjectJson) {
+          result.set(
+            project,
+            new RushProjectConfiguration(
+              project,
+              rushProjectJson,
+              _getRushProjectConfiguration(project, rushProjectJson, terminal)
+            )
+          );
+        }
+      },
+      { concurrency: 50 }
+    );
+    return result;
   }
 
   /**
@@ -574,14 +626,19 @@ export class RushProjectConfiguration {
 
 async function _tryLoadJsonForProjectAsync(
   project: RushConfigurationProject,
-  terminal: ITerminal
+  terminal: ITerminal,
+  loaders?: IIsolatedProjectConfigurationLoaders
 ): Promise<IRushProjectJson | undefined> {
-  const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-    projectFolderPath: project.projectFolder
-  });
+  const configurationFile: ProjectConfigurationFile<IRushProjectJson> =
+    loaders?.configurationFile ?? RUSH_PROJECT_CONFIGURATION_FILE;
+  const oldConfigurationFile: ProjectConfigurationFile<IOldRushProjectJson> =
+    loaders?.oldConfigurationFile ?? OLD_RUSH_PROJECT_CONFIGURATION_FILE;
+  const rigConfig: RigConfig | undefined = loaders
+    ? await loadIsolatedRigConfigAsync(project.projectFolder)
+    : await RigConfig.loadForProjectFolderAsync({ projectFolderPath: project.projectFolder });
 
   try {
-    return await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    return await configurationFile.tryLoadConfigurationFileForProjectAsync(
       terminal,
       project.projectFolder,
       rigConfig
@@ -590,7 +647,7 @@ async function _tryLoadJsonForProjectAsync(
     // Detect if the project is using the old rush-project.json schema
     let oldRushProjectJson: IOldRushProjectJson | undefined;
     try {
-      oldRushProjectJson = await OLD_RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+      oldRushProjectJson = await oldConfigurationFile.tryLoadConfigurationFileForProjectAsync(
         terminal,
         project.projectFolder,
         rigConfig
@@ -613,6 +670,25 @@ async function _tryLoadJsonForProjectAsync(
       throw e1;
     }
   }
+}
+
+async function loadIsolatedRigConfigAsync(projectFolder: string): Promise<RigConfig | undefined> {
+  let rigJson: IRigConfigJson;
+  try {
+    rigJson = await JsonFile.loadAsync(path.join(projectFolder, 'config', 'rig.json'));
+  } catch (error) {
+    if (FileSystem.isNotExistError(error as Error)) return undefined;
+    throw error;
+  }
+  if (!rigJson || typeof rigJson !== 'object' || Array.isArray(rigJson)) {
+    throw new Error(`The rig configuration for "${projectFolder}" must be a JSON object.`);
+  }
+  // bypassCache still writes the shared rig cache. An explicit JSON override uses the
+  // native schema/resolution path without either reading or populating that cache.
+  return await RigConfig.loadForProjectFolderAsync({
+    projectFolderPath: projectFolder,
+    overrideRigJsonObject: rigJson
+  });
 }
 
 /**
