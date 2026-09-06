@@ -104,6 +104,30 @@ describe('detached daemon startup', () => {
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('not json');
   });
 
+  it('does not start while the acknowledged predecessor PID remains alive, even without a lockfile', async () => {
+    await expect(
+      connectOrStartDaemonAsync({
+        ...options,
+        previousDaemonPid: process.pid,
+        startupTimeoutMs: 40
+      })
+    ).rejects.toThrow('previous daemon PID');
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it('preserves a live predecessor lock when restart times out', async () => {
+    const record: string = JSON.stringify({ pid: process.pid });
+    fs.writeFileSync(paths.lockfilePath, record);
+    await expect(
+      connectOrStartDaemonAsync({
+        ...options,
+        previousDaemonPid: process.pid,
+        startupTimeoutMs: 40
+      })
+    ).rejects.toThrow('previous daemon PID');
+    expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
+  });
+
   it('reports spawn failures and releases the start lock for another invocation', async () => {
     const invalid = {
       ...options,

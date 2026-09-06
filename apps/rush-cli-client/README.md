@@ -65,16 +65,37 @@ startup and fails rather than guessing a launcher for another Rush version.
 `rush-client daemon status` only connects and checks hello/pong. It never starts
 a process, reclaims files, or treats a PID file as evidence of readiness. Both
 commands print one JSON object with `state: "ready"`, `socketPath`, and the actual
-pong fields (`uptimeMs` and available versions). Exit code 0 means protocol
+pong fields (`uptimeMs`, available versions, and optional `pid` and
+`residentMemoryBytes`). Exit code 0 means protocol
 readiness, not build support. An unreachable/incompatible endpoint, invalid
 arguments, or startup failure returns exit code 1 with a diagnostic.
 
-PID identity, warm projects, reload tier, and memory are not reported because
-the current pong does not attest them. Status can inspect a protocol-compatible
+Warm projects and reload tier are not reported because the current pong does not
+attest them. Status can inspect a protocol-compatible
 daemon with a different implementation version; start requires the bundled
 version to match.
 
-`daemon stop|restart|logs` and
+`rush-client daemon stop` requires protocol >= 0.6 and waits for `shutdownAck`
+followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this
+does not assert successful workspace disposal. An absent/unreachable daemon,
+unsupported protocol, missing acknowledgement, or timeout returns exit code 1.
+It does not auto-start anything.
+
+`rush-client daemon restart` first verifies that the selected Rush version has a
+launcher and that the daemon reports a positive PID, then performs acknowledged
+shutdown. It waits for that original PID to exit before calling the existing
+locked starter. This guards against the current host releasing sockets and
+lockfiles before workspace cleanup. A live/reused PID fails closed at the startup
+deadline; no PID is killed and no live ownership record is deleted. A newly
+started/reused successor must pass hello/ping before reporting `state: "ready"`.
+An absent daemon must be started explicitly with `daemon start`.
+
+Restart is explicit even when automatic startup or CI execution routing is
+disabled, but conflicts with `--no-daemon`. Embedded hosts that keep the process
+alive after closing their workspace require a future cleanup-completion contract;
+this conservative restart path will time out instead of racing their cleanup.
+
+`daemon logs` and
 `daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume` require
 host lifecycle/graph protocol integration and currently fail explicitly. Setting
 `RUSH_DAEMON_EXPERIMENTAL=1` does not make absent graph contracts available.

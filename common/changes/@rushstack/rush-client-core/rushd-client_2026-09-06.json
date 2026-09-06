@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-client-core",
-      "comment": "Introduce the opt-in daemon client with immutable requests, backpressured output, cancellation, raw input cleanup, and serialized detached startup.",
+      "comment": "Introduce the opt-in daemon client with immutable requests, backpressured output, cancellation, raw input cleanup, serialized detached startup, and protocol-gated shutdown with conservative predecessor-exit coordination.",
       "type": "minor"
     }
   ],

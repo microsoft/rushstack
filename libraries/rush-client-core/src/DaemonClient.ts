@@ -4,6 +4,7 @@
 import type { Readable } from 'node:stream';
 
 import {
+  DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
   DaemonFrameType,
@@ -89,9 +90,11 @@ export class DaemonClient {
   readonly #connection: DaemonFrameConnection;
   readonly #ready: IDeferred<IDaemonPongMessage['payload']> = deferred();
   readonly #connectOptions: IDaemonClientConnectOptions;
-  #helloReceived: boolean = false;
+  #peerProtocolVersion: IDaemonProtocolVersion | undefined;
   #used: boolean = false;
   #result: IDeferred<DaemonClientOutcome> | undefined;
+  #shutdown: IDeferred<void> | undefined;
+  #shutdownAcknowledged: boolean = false;
   #execution: IDaemonClientExecuteOptions | undefined;
   #finished: boolean = false;
   #inputStarted: boolean = false;
@@ -106,11 +109,17 @@ export class DaemonClient {
     this.#connectOptions = options;
     connection.onFrame((frame) => this.#onFrameAsync(frame));
     connection.onClosed((error) => {
+      if (this.#shutdown && this.#shutdownAcknowledged && !error) {
+        this.#shutdown.resolve(undefined);
+        return;
+      }
       this.#fail(
         error ??
           new DaemonClientError(
             'disconnected',
-            'Daemon disconnected before delivering a result; the command was not retried.'
+            this.#shutdown
+              ? 'Daemon disconnected before acknowledging shutdown.'
+              : 'Daemon disconnected before delivering a result; the command was not retried.'
           )
       );
     });
@@ -153,6 +162,41 @@ export class DaemonClient {
   /** The reply that proved this connection ready. */
   public get status(): Promise<IDaemonPongMessage['payload']> {
     return this.#ready.promise;
+  }
+
+  /** The common protocol version established by hello. */
+  public get protocolVersion(): IDaemonProtocolVersion {
+    return this.#peerProtocolVersion!;
+  }
+
+  /**
+   * Requests shutdown on a fresh connection and waits for acknowledgement followed by EOF.
+   * @remarks This confirms acceptance and connection closure, not successful workspace cleanup.
+   * Requires protocol 0.6. The timeout defaults to 15000 milliseconds.
+   */
+  public async shutdownAsync(timeoutMs: number = 15000): Promise<void> {
+    if (this.#used) throw new Error('Create a fresh DaemonClient for shutdown.');
+    this.#used = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      validateTimeout(timeoutMs);
+      if (this.protocolVersion.minor < DAEMON_LIFECYCLE_PROTOCOL_MINOR) {
+        throw new DaemonClientError('versionMismatch', 'Daemon shutdown requires protocol 0.6 or newer.');
+      }
+      this.#shutdown = deferred();
+      timer = setTimeout(() => {
+        this.#connection.abort(
+          new DaemonClientError(
+            'timeout',
+            'Timed out waiting for shutdown acknowledgement and EOF; no PID was signaled.'
+          )
+        );
+      }, timeoutMs);
+      await Promise.all([this.#shutdown.promise, this.#sendControlAsync({ kind: 'shutdown', payload: {} })]);
+    } finally {
+      clearTimeout(timer);
+      await this.closeAsync();
+    }
   }
 
   /** Executes once, relays the result after output drains, and restores terminal state on every exit. */
@@ -236,7 +280,7 @@ export class DaemonClient {
   async #onControlAsync(message: DaemonControlMessage): Promise<void> {
     if (message.kind === 'error')
       throw new DaemonProtocolError(message.payload.code, message.payload.message);
-    if (!this.#helloReceived) {
+    if (!this.#peerProtocolVersion) {
       if (message.kind !== 'helloAck') throw new Error('Expected daemon helloAck.');
       const version: IDaemonProtocolVersion = message.payload.protocolVersion;
       if (
@@ -248,7 +292,10 @@ export class DaemonClient {
           'Daemon does not support the required request lifecycle protocol; restart it with a matching version.'
         );
       }
-      this.#helloReceived = true;
+      this.#peerProtocolVersion = Object.freeze({
+        major: version.major,
+        minor: Math.min(version.minor, DAEMON_PROTOCOL_VERSION.minor)
+      });
       await this.#sendControlAsync({
         kind: 'subscribe',
         payload: {
@@ -271,6 +318,13 @@ export class DaemonClient {
         );
       }
       this.#ready.resolve(message.payload);
+      return;
+    }
+    if (message.kind === 'shutdownAck') {
+      if (!this.#shutdown || this.#shutdownAcknowledged) {
+        throw new DaemonProtocolError('malformedControlMessage', 'Unexpected shutdown acknowledgement.');
+      }
+      this.#shutdownAcknowledged = true;
       return;
     }
     const execution: IDaemonClientExecuteOptions = this.#requireExecution();
@@ -333,9 +387,10 @@ export class DaemonClient {
   #fail(error: Error): void {
     this.#ready.reject(error);
     this.#result?.reject(error);
+    this.#shutdown?.reject(error);
   }
 
-  #sendControlAsync(message: DaemonControlMessage): Promise<void> {
+  async #sendControlAsync(message: DaemonControlMessage): Promise<void> {
     return this.#sendFrameAsync({
       kind: DaemonFrameType.controlJson,
       payload: encodeDaemonControlMessage(message)
