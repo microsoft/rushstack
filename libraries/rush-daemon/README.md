@@ -128,6 +128,22 @@ administrative commands in a client. Client-originated graph-reference fencing a
 generation token. Server-resolved requests are fenced here; operation names alone cannot identify which snapshot
 a client previously observed. Graph controls do not migrate a prepared iteration across a generation replacement.
 
+Resolver composition uses the optional `IDaemonRequestResolver.workspaceLifecycle` capability, not an
+`instanceof` check. A composite delegates native inspection but must wrap every generation replacement too:
+
+```ts
+this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
+  phasedResolver,
+  (replacement) => new RushDaemonRequestResolver(replacement)
+);
+```
+
+The helper returns `undefined` for a delegate without lifecycle support. Explicit `invocationKind: "rushx"`
+requests retain a generation lease but go directly to the composite resolver, without native build/mutation/graph
+interception or phased environment matching. They use exclusive global admission. The host disposes each old
+resolver before replacing its session, and disposes the current resolver at shutdown; the composite must forward
+its normal disposer to its owned delegates.
+
 **Client integration boundary:** the resolver requires `commandOrigin: "built-in"` for native
 `build`/`rebuild`. The standalone client identifies these workspace commands while leaving
 `rushx build` and other script invocations custom. The resolver also validates the native parsed

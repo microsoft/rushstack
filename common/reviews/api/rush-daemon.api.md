@@ -166,6 +166,8 @@ export interface IDaemonRequestResolver {
     readonly [Symbol.asyncDispose]?: () => Promise<void>;
     // (undocumented)
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
+    // (undocumented)
+    readonly workspaceLifecycle?: IWorkspaceResolverLifecycle;
 }
 
 // @beta
@@ -448,6 +450,9 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
 }
 
 // @beta
+export function isRushxInvocation(envelope: IDaemonRequestEnvelope): boolean;
+
+// @beta
 export type IsWorkspaceEngineRecreationRequiredAsync = (options: IClassifyWorkspaceInvalidationsOptions) => Promise<boolean>;
 
 // @beta
@@ -530,6 +535,14 @@ export interface IWorkspaceProcessRestartResult {
     readonly pid: number;
     // (undocumented)
     readonly rushVersion: string;
+}
+
+// @beta
+export interface IWorkspaceResolverLifecycle {
+    // (undocumented)
+    createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): IDaemonRequestResolver;
+    // (undocumented)
+    getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
 }
 
 // @beta
@@ -628,6 +641,8 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
     // (undocumented)
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
+    // (undocumented)
+    get workspaceLifecycle(): IWorkspaceResolverLifecycle;
 }
 
 // @public
@@ -740,6 +755,9 @@ export class WorkspaceSession implements IWorkspaceSession {
 
 // @beta
 export type WorkspaceSessionFactory = (options: IWorkspaceSessionOptions) => Promise<IWorkspaceSession>;
+
+// @beta
+export function wrapWorkspaceResolverLifecycle(resolver: IDaemonRequestResolver, wrap: (resolver: IDaemonRequestResolver) => IDaemonRequestResolver): IWorkspaceResolverLifecycle | undefined;
 
 // (No @packageDocumentation comment for this package)
 

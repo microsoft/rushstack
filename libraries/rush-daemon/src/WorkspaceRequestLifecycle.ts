@@ -26,7 +26,7 @@ import {
 } from './DaemonRequestDispatcher';
 import { createNativeMutationResolver } from './NativeMutationRequest';
 import { parseDaemonGraphRequest, type IDaemonGraphRequest } from './DaemonGraphRequest';
-import type { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 import {
   RequestExclusivityClass,
   RequestScheduler,
@@ -56,7 +56,7 @@ interface IExecutionState {
 
 interface IPreparedGeneration {
   readonly session: IWorkspaceSession;
-  readonly resolver: ProductionDaemonRequestResolver;
+  readonly resolver: IDaemonRequestResolver;
   readonly generation: number;
   readonly lease: IRequestLease;
   readonly fingerprint: IWorkspaceInputFingerprint;
@@ -64,7 +64,7 @@ interface IPreparedGeneration {
 
 export interface IWorkspaceRequestLifecycleOptions {
   readonly provider: WorkspaceSessionProvider;
-  readonly resolver: ProductionDaemonRequestResolver;
+  readonly resolver: IDaemonRequestResolver;
   readonly rushVersion: string;
   readonly getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
   readonly onRestartRequested: (plan: IWorkspaceProcessRestartPlan) => void;
@@ -107,7 +107,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #fingerprint: IWorkspaceInputFingerprint;
   #projectFingerprint: string | undefined;
   #commandIdentity: string | undefined;
-  #resolver: ProductionDaemonRequestResolver;
+  #resolver: IDaemonRequestResolver;
+  readonly #ownedResolvers: Set<IDaemonRequestResolver> = new Set();
   #boundSession: IWorkspaceSession | undefined;
   #forceReload: boolean = false;
   #closing: boolean = false;
@@ -123,6 +124,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     this.#options = options;
     this.#startupFingerprint = this.#fingerprint = fingerprint;
     this.#resolver = options.resolver;
+    this.#ownedResolvers.add(options.resolver);
     this.#runtimeCache = runtimeCache;
   }
 
@@ -245,6 +247,15 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
       if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
       let session: IWorkspaceSession = await this.#options.provider.getSessionAsync();
+      if (isRushxInvocation(envelope)) {
+        return {
+          session,
+          resolver: this.#resolver,
+          generation: this.#options.provider.generation,
+          lease,
+          fingerprint: this.#fingerprint
+        };
+      }
       if (isGraphRequest(envelope)) {
         const graphRequest: IDaemonGraphRequest = parseDaemonGraphRequest(envelope);
         if (session.operationGraph && !['show', 'status', 'watch'].includes(graphRequest.verb)) {
@@ -314,7 +325,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       let commandIdentity: string | undefined;
       let projectFingerprint: string | undefined;
       if (tier !== WorkspaceInputChangeTier.Restart && !isMutation(envelope)) {
-        commandIdentity = await this.#resolver.getCommandParameterIdentityAsync({
+        commandIdentity = await getResolverLifecycle(this.#resolver).getCommandParameterIdentityAsync({
           envelope,
           workspaceSession: session,
           abortSignal: client.abortSignal
@@ -394,7 +405,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         };
       }
 
-      commandIdentity = await this.#resolver.getCommandParameterIdentityAsync({
+      commandIdentity = await getResolverLifecycle(this.#resolver).getCommandParameterIdentityAsync({
         envelope,
         workspaceSession: session,
         abortSignal: client.abortSignal
@@ -436,12 +447,14 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       }
       try {
         const before: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
-        session = await this.#options.provider.reloadAsync();
         let expectedFingerprint: IWorkspaceInputFingerprint = before;
-        const replacementSession: IWorkspaceSession = session;
-        const resolver: ProductionDaemonRequestResolver = this.#options.resolver.createForSession(
+        const validationContext: { session?: IWorkspaceSession } = {};
+        const previousResolver: IDaemonRequestResolver = this.#resolver;
+        const resolver: IDaemonRequestResolver = getResolverLifecycle(previousResolver).createForSession(
           nativeLock,
           async () => {
+            const replacementSession: IWorkspaceSession | undefined = validationContext.session;
+            if (!replacementSession) throw new Error('The replacement generation is not initialized.');
             const current: IWorkspaceInputFingerprint = await this.#captureAsync(
               replacementSession,
               envelope
@@ -453,6 +466,27 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             }
           }
         );
+        this.#ownedResolvers.add(resolver);
+        try {
+          if (resolver === previousResolver) {
+            throw new Error('A new workspace generation must receive a new resolver instance.');
+          }
+          getResolverLifecycle(resolver);
+        } catch (error) {
+          this.#cleanupFailure = error;
+          throw error;
+        }
+        this.#resolver = resolver;
+        try {
+          await previousResolver[Symbol.asyncDispose]?.();
+          this.#ownedResolvers.delete(previousResolver);
+        } catch (error) {
+          this.#cleanupFailure = error;
+          throw error;
+        }
+        const replacementSession: IWorkspaceSession = await this.#options.provider.reloadAsync();
+        validationContext.session = replacementSession;
+        session = replacementSession;
         await resolver.resolveRequestAsync({
           envelope,
           workspaceSession: session,
@@ -471,7 +505,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           session.rushConfiguration,
           this.#terminal
         );
-        this.#commandIdentity = await resolver.getCommandParameterIdentityAsync({
+        this.#commandIdentity = await getResolverLifecycle(resolver).getCommandParameterIdentityAsync({
           envelope,
           workspaceSession: session,
           abortSignal: client.abortSignal
@@ -647,19 +681,48 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       const lease: IRequestLease = await this.#gate.acquireAsync({
         exclusivityClass: RequestExclusivityClass.Exclusive
       });
-      lease.release();
-      if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
+      const failures: unknown[] = [];
+      try {
+        for (const resolver of this.#ownedResolvers) {
+          try {
+            await resolver[Symbol.asyncDispose]?.();
+          } catch (error) {
+            failures.push(error);
+          }
+        }
+        this.#ownedResolvers.clear();
+        if (this.#cleanupFailure !== undefined && !failures.includes(this.#cleanupFailure)) {
+          failures.push(this.#cleanupFailure);
+        }
+      } finally {
+        lease.release();
+      }
+      if (failures.length === 1) throw failures[0];
+      if (failures.length > 1) throw new AggregateError(failures, 'Failed to dispose workspace resolvers.');
     })();
     return this.#disposePromise;
   }
 }
 
 function isMutation(envelope: IDaemonRequestEnvelope): boolean {
-  return envelope.commandOrigin === 'built-in' && ['install', 'update'].includes(envelope.commandName);
+  return (
+    !isRushxInvocation(envelope) &&
+    envelope.commandOrigin === 'built-in' &&
+    ['install', 'update'].includes(envelope.commandName)
+  );
 }
 
 function isGraphRequest(envelope: IDaemonRequestEnvelope): boolean {
-  return envelope.commandOrigin === 'built-in' && envelope.commandName === 'daemon';
+  return (
+    !isRushxInvocation(envelope) && envelope.commandOrigin === 'built-in' && envelope.commandName === 'daemon'
+  );
+}
+
+function getResolverLifecycle(resolver: IDaemonRequestResolver): IWorkspaceResolverLifecycle {
+  if (!resolver.workspaceLifecycle) {
+    throw new Error('A generation replacement lost its workspace resolver lifecycle capability.');
+  }
+  return resolver.workspaceLifecycle;
 }
 
 function isGraphWatch(envelope: IDaemonRequestEnvelope): boolean {

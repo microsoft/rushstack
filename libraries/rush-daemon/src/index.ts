@@ -91,6 +91,11 @@ export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
 export {
+  wrapWorkspaceResolverLifecycle,
+  isRushxInvocation,
+  type IWorkspaceResolverLifecycle
+} from './WorkspaceResolverLifecycle';
+export {
   type GetWorkspaceSuccessorLaunchAsync,
   type IWorkspaceProcessRestartContext,
   type IWorkspaceProcessRestartResult,

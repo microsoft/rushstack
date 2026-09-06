@@ -21,6 +21,7 @@ import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
 import { getDaemonGraphObserver } from './DaemonGraphObserver';
+import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 
 /** A request resolved by the integration that owns Rush command parsing. @beta */
 export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaemonGlobalRequest;
@@ -49,6 +50,7 @@ export interface IResolveDaemonRequestOptions {
 
 /** Resolves a validated wire envelope without coupling rushd to CLI parser internals. @beta */
 export interface IDaemonRequestResolver {
+  readonly workspaceLifecycle?: IWorkspaceResolverLifecycle;
   readonly [Symbol.asyncDispose]?: () => Promise<void>;
   resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
 }
@@ -156,6 +158,7 @@ async function dispatchWorkspaceRequestAsync(
   const { envelope, client, workspaceSession, resolver, onExecutionStarting } = options;
   workspaceSession.assertActive?.();
   if (
+    !isRushxInvocation(envelope) &&
     envelope.commandOrigin === 'built-in' &&
     (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
   ) {
@@ -191,7 +194,7 @@ async function dispatchWorkspaceRequestAsync(
   const request: IResolvedGlobalCommandRequest = globalRouter.resolveRequest({
     admission: envelope.admission,
     commandName: envelope.commandName,
-    commandOrigin: envelope.commandOrigin,
+    commandOrigin: isRushxInvocation(envelope) ? 'custom' : envelope.commandOrigin,
     cwd: envelope.cwd,
     environment: envelope.environment,
     requestId: envelope.requestId,

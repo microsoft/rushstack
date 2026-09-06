@@ -20,7 +20,6 @@ import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
-import { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
 import { WorkspaceRequestLifecycle } from './WorkspaceRequestLifecycle';
 import type {
   GetWorkspaceSuccessorLaunchAsync,
@@ -136,7 +135,7 @@ export class RushDaemonHost {
     const workspaceSession: IWorkspaceSession = await workspaceSessionProvider.getSessionAsync();
     let requestLifecycle: WorkspaceRequestLifecycle | undefined;
     try {
-      if (options.requestResolver instanceof ProductionDaemonRequestResolver) {
+      if (options.requestResolver?.workspaceLifecycle) {
         requestLifecycle = await WorkspaceRequestLifecycle.createAsync({
           provider: workspaceSessionProvider,
           resolver: options.requestResolver,

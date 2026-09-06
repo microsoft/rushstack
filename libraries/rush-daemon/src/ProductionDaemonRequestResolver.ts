@@ -31,6 +31,7 @@ import {
 } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession, IWorkspaceSessionComponents } from './WorkspaceSession';
 import { EngineTerminalProvider } from './EngineTerminalProvider';
+import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 
 /**
  * Binds the standalone host to a real native build/rebuild graph on its first request.
@@ -56,6 +57,10 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   }) {
     this.#preparationLock = options?.preparationLock;
     this.#validateGraphInputsAsync = options?.validateGraphInputsAsync;
+  }
+
+  public get workspaceLifecycle(): IWorkspaceResolverLifecycle {
+    return this;
   }
 
   /** Creates an unbound resolver for a replacement session without carrying old runner definitions. */

@@ -38,6 +38,12 @@ import type {
   IWorkspaceProcessRestartResult
 } from '../WorkspaceProcessRestart';
 import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
+import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
+import {
+  isRushxInvocation,
+  wrapWorkspaceResolverLifecycle,
+  type IWorkspaceResolverLifecycle
+} from '../WorkspaceResolverLifecycle';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import { TestPhasedRequestClient } from './PhasedRequestRouterTestUtilities';
 import {
@@ -67,7 +73,42 @@ interface IFixture extends AsyncDisposable {
 interface IFixtureOptions {
   readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
   readonly onSessionCreated?: (session: WorkspaceSession) => void;
-  readonly resolver?: ProductionDaemonRequestResolver;
+  readonly resolver?: IDaemonRequestResolver;
+}
+
+class DecoratedTestResolver implements IDaemonRequestResolver {
+  public readonly workspaceLifecycle: IWorkspaceResolverLifecycle | undefined;
+  private readonly _inner: IDaemonRequestResolver;
+  private readonly _events: string[];
+  private readonly _id: number;
+  private _disposed: boolean = false;
+
+  public constructor(inner: IDaemonRequestResolver, events: string[]) {
+    this._inner = inner;
+    this._events = events;
+    this._id = events.filter((event) => event.startsWith('created')).length;
+    events.push(`created:${this._id}`);
+    this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
+      inner,
+      (replacement) => new DecoratedTestResolver(replacement, events)
+    );
+  }
+
+  public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
+    if (this._disposed) throw new Error('A disposed resolver was invoked.');
+    if (isRushxInvocation(options.envelope)) {
+      this._events.push(`isolated:${this._id}`);
+      throw new Error('Explicit isolated invocation reached the decorated resolver.');
+    }
+    return await this._inner.resolveRequestAsync(options);
+  }
+
+  public async [Symbol.asyncDispose](): Promise<void> {
+    if (this._disposed) throw new Error('A resolver was disposed twice.');
+    this._disposed = true;
+    this._events.push(`disposed:${this._id}`);
+    await this._inner[Symbol.asyncDispose]?.();
+  }
 }
 
 async function createFixtureAsync(
@@ -309,6 +350,55 @@ function requestEnvironment(): Record<string, string> {
 }
 
 describe('native production daemon engine', () => {
+  it('preserves resolver decoration and isolated invocation routing across native generation reloads', async () => {
+    const events: string[] = [];
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+      resolver: new DecoratedTestResolver(new ProductionDaemonRequestResolver(), events)
+    });
+    try {
+      expect((await runAsync(fixture, 'initial-decorated', ['build', '--only', 'a'])).terminal).toMatchObject(
+        {
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
+        }
+      );
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      const filename: string = path.join(fixture.repoRoot, 'projects/a/package.json');
+      const json: { scripts: Record<string, string> } = JSON.parse(fs.readFileSync(filename, 'utf8'));
+      json.scripts['_phase:compile'] = 'node build.cjs --decorated-reload';
+      fs.writeFileSync(filename, JSON.stringify(json));
+      expect(
+        (await runAsync(fixture, 'reloaded-decorated', ['build', '--only', 'a'])).terminal
+      ).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(fixture.session.operationGraph).not.toBe(graph);
+      const isolated: { invocationKind: 'rushx'; commandOrigin: 'built-in' } = {
+        invocationKind: 'rushx',
+        commandOrigin: 'built-in'
+      };
+      expect(
+        (await runAsync(fixture, 'isolated-decorated', ['daemon', 'graph', 'show'], isolated)).terminal
+      ).toMatchObject({
+        kind: 'requestRejected',
+        payload: { message: 'Explicit isolated invocation reached the decorated resolver.' }
+      });
+      expect(events).toEqual([
+        'created:0',
+        'created:1',
+        'disposed:0',
+        'created:2',
+        'disposed:1',
+        'isolated:2'
+      ]);
+      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--decorated-reload']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+    expect(events.at(-1)).toBe('disposed:2');
+  });
+
   it('keeps tier0 session and graph identity for unchanged content, including metadata touches', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
