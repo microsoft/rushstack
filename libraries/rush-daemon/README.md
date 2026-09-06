@@ -15,6 +15,13 @@ the existing unlimited lifetime; invalid, nonpositive, or overflowing timeouts a
 The host's `closed` promise signals completion of shutdown, including idle shutdown, and `closeAsync()`
 reports cleanup failures. `serveRushDaemonAsync()` returns after either idle shutdown or its shutdown signal.
 
+Protocol 0.6 management clients can stop the host through the workspace transport rather than signaling a PID
+read from disk. The host requires a lifecycle-capable hello, drains `shutdownAck` before beginning shutdown,
+then cancels outstanding requests and disposes the resolver, workspace, and endpoint through its normal close
+path. A connection closing is not by itself proof that endpoint cleanup has finished: restarting clients must
+wait for transport ownership to be released before starting a successor. Ping responses include the live PID
+and resident memory; they do not claim that the loaded projects have a warm operation graph.
+
 The host loads `RushConfiguration` once before signaling readiness and keeps a headless file watcher
 active for the daemon lifetime. Its invalidation tracker retains changes while no clients are
 connected so a later request can reconcile them. The tracker starts with a conservative unknown

@@ -29,7 +29,9 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'requestStart',
 'requestCancel',
 'requestRejected',
-'requestResult'
+'requestResult',
+'shutdown',
+'shutdownAck'
 ];
 
 // @beta
@@ -55,6 +57,9 @@ export const DAEMON_EVENT_TYPES: readonly [
 export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_LIFECYCLE_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
 
 // @beta
@@ -67,7 +72,7 @@ export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -393,6 +398,8 @@ export interface IDaemonPongMessage {
     readonly payload: {
         readonly daemonVersion?: string;
         readonly protocolVersion?: IDaemonProtocolVersion;
+        readonly pid?: number;
+        readonly residentMemoryBytes?: number;
         readonly uptimeMs: number;
     };
 }
@@ -504,6 +511,22 @@ export interface IDaemonSetRawModeMessage {
         readonly enabled: boolean;
         readonly requestId: string;
     };
+}
+
+// @beta
+export interface IDaemonShutdownAckMessage {
+    // (undocumented)
+    readonly kind: 'shutdownAck';
+    // (undocumented)
+    readonly payload: Record<string, never>;
+}
+
+// @beta
+export interface IDaemonShutdownMessage {
+    // (undocumented)
+    readonly kind: 'shutdown';
+    // (undocumented)
+    readonly payload: Record<string, never>;
 }
 
 // @beta
