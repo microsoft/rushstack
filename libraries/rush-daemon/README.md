@@ -8,6 +8,13 @@ The package provides an opt-in `rushd` executable. Run it from a Rush workspace 
 for the nearest `rush.json`; it does not change the default behavior of `rush`, `rushx`, or
 `rush-pnpm`.
 
+Embedded hosts can opt into automatic shutdown with `idleTimeoutSeconds`. The timeout starts after
+readiness and resets after the last pending request finishes, including resolution, queueing, execution,
+output drain, and cleanup. An idle connection does not keep the daemon alive. Omitting the option keeps
+the existing unlimited lifetime; invalid, nonpositive, or overflowing timeouts are rejected before startup.
+The host's `closed` promise signals completion of shutdown, including idle shutdown, and `closeAsync()`
+reports cleanup failures. `serveRushDaemonAsync()` returns after either idle shutdown or its shutdown signal.
+
 The host loads `RushConfiguration` once before signaling readiness and keeps a headless file watcher
 active for the daemon lifetime. Its invalidation tracker retains changes while no clients are
 connected so a later request can reconcile them. The tracker starts with a conservative unknown

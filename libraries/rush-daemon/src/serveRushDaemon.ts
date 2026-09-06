@@ -29,7 +29,7 @@ export async function serveRushDaemonAsync(options: IRushDaemonServeOptions): Pr
   try {
     host = await RushDaemonHost.startAsync(options);
     await options.onReady?.(host);
-    await waitForAbortAsync(signalRegistration.signal);
+    await waitForShutdownAsync(host, signalRegistration.signal);
   } finally {
     signalRegistration.dispose();
     await host?.closeAsync();
@@ -55,9 +55,16 @@ function createProcessShutdownSignal(): IShutdownSignalRegistration {
   };
 }
 
-function waitForAbortAsync(signal: AbortSignal): Promise<void> {
+function waitForShutdownAsync(host: RushDaemonHost, signal: AbortSignal): Promise<void> {
   if (signal.aborted) {
     return Promise.resolve();
   }
-  return new Promise<void>((resolve: () => void) => signal.addEventListener('abort', () => resolve(), { once: true }));
+  return new Promise<void>((resolve: () => void) => {
+    const onAbort: () => void = () => resolve();
+    signal.addEventListener('abort', onAbort, { once: true });
+    void host.closed.then(() => {
+      signal.removeEventListener('abort', onAbort);
+      resolve();
+    });
+  });
 }
