@@ -5,6 +5,7 @@ import type { Readable } from 'node:stream';
 
 import {
   DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_INVOCATION_KIND_PROTOCOL_MINOR,
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
@@ -104,6 +105,7 @@ export class DaemonClient {
   #finished: boolean = false;
   #inputStarted: boolean = false;
   #inputAdmitted: boolean = false;
+  #observedExecution: boolean = false;
   #inputEnded: boolean = false;
   #supportsInputLifecycle: boolean = false;
   #inputAcknowledgement: IDeferred<void> | undefined;
@@ -237,6 +239,16 @@ export class DaemonClient {
           message: 'The daemon does not support stdin admission and EOF; no request was sent.'
         };
       }
+      if (
+        options.request.invocationKind === 'rushx' &&
+        this.protocolVersion.minor < DAEMON_INVOCATION_KIND_PROTOCOL_MINOR
+      ) {
+        return {
+          kind: 'fallback',
+          reason: 'unsupported',
+          message: 'The daemon does not support explicit Rushx invocations; no request was sent.'
+        };
+      }
       this.#result = deferred();
       await Promise.all([
         this.#sendControlAsync({ kind: 'requestStart', payload: options.request }),
@@ -284,6 +296,7 @@ export class DaemonClient {
       return;
     }
     const execution: IDaemonClientExecuteOptions = this.#requireExecution();
+    this.#observedExecution = true;
     if (frame.kind === DaemonFrameType.event) {
       await execution.onEventAsync?.(decodeDaemonEventFrame(frame.payload));
     } else if (frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr) {
@@ -420,6 +433,12 @@ export class DaemonClient {
   }
 
   #complete(outcome: DaemonClientOutcome): void {
+    if (outcome.kind === 'fallback' && (this.#observedExecution || this.#inputAdmitted || this.#inputStarted)) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'Daemon requested fallback after output or stdin admission; the command was not retried.'
+      );
+    }
     this.#finished = true;
     this.#stopInput();
     this.#inputAcknowledgement?.resolve(undefined);

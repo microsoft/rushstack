@@ -183,6 +183,7 @@ export interface IGlobalCommandExecutionContext {
     readonly terminalProperties: IGlobalCommandTerminalProperties;
     // (undocumented)
     readonly workspaceSession: IWorkspaceSession;
+    writeOutput(stream: 'stdout' | 'stderr', chunk: Uint8Array): void;
 }
 
 // @beta
@@ -207,6 +208,8 @@ export type IGlobalCommandRequestResult = IDaemonCommandResult;
 
 // @beta
 export interface IGlobalCommandSpawnOptions {
+    readonly cwd?: string;
+    readonly environment?: Readonly<NodeJS.ProcessEnv>;
     // (undocumented)
     readonly environmentOverlay?: Readonly<NodeJS.ProcessEnv>;
     // (undocumented)
@@ -606,6 +609,21 @@ export class RushDaemonHost {
     // (undocumented)
     readonly paths: IDaemonPaths;
     static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
+}
+
+// @beta
+export class RushDaemonRequestResolver implements IDaemonRequestResolver {
+    // (undocumented)
+    [Symbol.asyncDispose](): Promise<void>;
+    constructor(rushResolver: IDaemonRequestResolver);
+    // (undocumented)
+    resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
+}
+
+// @beta
+export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
+    // (undocumented)
+    resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
 }
 
 // @beta

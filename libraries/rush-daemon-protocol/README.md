@@ -38,6 +38,12 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   its input destination, then grants another after each write drains. The client sends
   one bounded chunk per credit and EOF after all chunks. Empty data is never interpreted
   as EOF. Peers that did not negotiate the capability receive no new controls.
+- **Invocation kind (0.8)** - optional `invocationKind: "rush" | "rushx"` selects the
+  native parser independently of `commandOrigin`. Omission retains legacy Rush
+  routing; custom workspace commands are never inferred to be package scripts.
+  A Rushx client must negotiate at least `DAEMON_INVOCATION_KIND_PROTOCOL_MINOR`
+  before submitting its request. Older peers could ignore the discriminator,
+  so the client falls back before `requestStart` or input consumption.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

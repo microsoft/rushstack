@@ -34,4 +34,14 @@ describe('opt-in routing', () => {
       })
     ).toEqual({ argv: ['install', '--', '--no-daemon'], commandName: 'install', daemon: true });
   });
+
+  it('uses native Rushx option boundaries instead of treating script flags as Rush options', () => {
+    const argv: string[] = ['-q', '-d', '--ignore-hooks', 'build', '--help', '--reporter=json', '--', '-h'];
+    expect(selectClientRoute({ argv, enabled: true, environment: {}, rushx: true })).toMatchObject({
+      argv, commandName: 'build', daemon: true
+    });
+    expect(selectClientRoute({
+      argv: ['--unknown', 'build'], enabled: true, environment: {}, rushx: true
+    }).daemon).toBe(false);
+  });
 });

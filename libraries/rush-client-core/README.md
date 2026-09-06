@@ -2,6 +2,7 @@
 
 Opt-in clients for the Rush daemon wire protocol: request lifecycle requires 0.5;
 shutdown requires 0.6; stdin admission, write credits, and EOF require 0.7.
+Explicit Rushx invocation selection requires 0.8.
 Later additive minors do not raise the request minimum.
 This package has no
 `rush-lib` dependency, command parser, operation graph, or presentation layer.
@@ -13,6 +14,11 @@ negotiates hello, subscribes capabilities, and awaits a matching pong.
 authoritative result. Async stdout/stderr/event callbacks are awaited in wire order,
 so slow destinations backpressure the transport. Log callbacks receive raw bytes
 and the protocol's operation ID. The calling client owns terminal presentation.
+
+The optional `invocationKind` is captured unchanged. This core does not infer it from
+command names or custom origin. Rushx requests fall back on older peers before sending
+`requestStart`, even for TTY input. A peer cannot request fallback after emitting output
+or admitting stdin: that is a protocol error, not permission to replay the command.
 
 Abort signals send `requestCancel`, then wait for the result; cancellation has a
 bounded grace period. Disconnects, protocol errors and sink failures are errors,

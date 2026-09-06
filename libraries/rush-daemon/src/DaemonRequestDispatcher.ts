@@ -106,6 +106,7 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
     client: IDaemonRequestDispatchClient
   ): Promise<void> {
     if (
+      envelope.invocationKind !== 'rushx' &&
       envelope.commandOrigin === 'built-in' &&
       (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
     ) {

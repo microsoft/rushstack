@@ -80,7 +80,7 @@ describe('standalone client piped input', () => {
     const child = spawn(process.execPath, [entry, 'sample', ...admissionArgs], {
       cwd: project,
       env: {
-        ...process.env, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy',
+        ...process.env, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy', RUSH_QUIET_MODE: '1',
         CI: 'false', TF_BUILD: 'false', GITHUB_ACTIONS: 'false'
       },
       stdio: 'pipe'

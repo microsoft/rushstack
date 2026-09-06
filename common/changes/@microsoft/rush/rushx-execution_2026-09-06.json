@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow the standalone Rushx frontend to capture and replay native configuration-discovery lines without changing legacy startup output.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

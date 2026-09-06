@@ -1114,6 +1114,35 @@ export interface IRushSessionReporterOptions {
     readonly sessionId: string;
 }
 
+// @beta
+export interface IRushXCommandLineArguments {
+    commandArgs: string[];
+    commandName: string;
+    help: boolean;
+    ignoreHooks: boolean;
+    isDebug: boolean;
+    quiet: boolean;
+}
+
+// @beta
+export interface IRushXCommandOptions {
+    // (undocumented)
+    readonly abortSignal?: AbortSignal;
+    readonly arguments: IRushXCommandLineArguments;
+    readonly consoleTerminal: ITerminal;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly environment: Readonly<NodeJS.ProcessEnv>;
+    // (undocumented)
+    readonly launchOptions: ILaunchOptions;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration | undefined;
+    readonly spawn?: (command: string, args: ReadonlyArray<string>, options: child_process.SpawnOptions) => child_process.ChildProcess;
+    // (undocumented)
+    readonly terminal: ITerminal;
+}
+
 export { IScopedLogger }
 
 export { IScopedMessageOptions }
@@ -1892,6 +1921,18 @@ export class RushUserConfiguration {
     static getRushUserFolderPath(): string;
     // (undocumented)
     static initializeAsync(): Promise<RushUserConfiguration>;
+}
+
+// @beta
+export class RushXCommand {
+    // (undocumented)
+    static executeAsync(options: IRushXCommandOptions): Promise<number>;
+    static getInProcessReason(args: IRushXCommandLineArguments, environment: Readonly<NodeJS.ProcessEnv>, configuration: RushConfiguration): string | undefined;
+    // (undocumented)
+    static getPackageFolder(cwd: string): string;
+    // (undocumented)
+    static parseArguments(argv: ReadonlyArray<string>, environment: Readonly<NodeJS.ProcessEnv>): IRushXCommandLineArguments;
+    static prepareEnvironment(cwd: string, environment: Readonly<NodeJS.ProcessEnv>, rushJsonFilePath: string): NodeJS.ProcessEnv;
 }
 
 // @public

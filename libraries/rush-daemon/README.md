@@ -96,6 +96,38 @@ runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 `rushx build` and other script invocations custom. The resolver also validates the native parsed
 action; identical script names alone never authorize a workspace build.
 
+### Native Rushx integration
+
+`RushXDaemonRequestResolver` handles only `invocationKind: "rushx"` with custom origin.
+`RushDaemonRequestResolver(existingRushResolver)` composes it with an injected workspace
+resolver; omitted or `"rush"` kinds go to that existing resolver without reinterpreting
+custom workspace commands. The default executable bootstrap remains unchanged for the
+separate lifecycle integration to wire this composite.
+
+The resolver validates canonical request and governing package directories inside its
+workspace before execution. Subfolder invocations run from the nearest package folder,
+with native PATH, INIT_CWD, RUSH_INVOKED_FOLDER, npm environment filtering and shell escaping.
+Per-request dotenv copies load repository then user values without changing daemon cwd,
+environment, argv, console streams or cached user configuration. Ordinary script/environment
+changes are read for each invocation; there is no cached script process or fabricated warm engine.
+
+`RushXCommand` shares the native implementation with the unchanged in-process entrypoint.
+Its asynchronous lifecycle spawn seam uses `spawnChild()` for the actual script shell.
+The context owns descendants, backpressures raw stdout/stderr, forwards stdin credits/EOF,
+and awaits cleanup before the final result. Early child stdin closure preserves the script's
+exit status. Native console ANSI bytes are preserved separately from color-aware diagnostic
+output; pnpm synchronization keeps native quiet/debug behavior. Cancellation retains the
+existing typed global-request abort result rather than inventing a second exit policy.
+
+Active pre/post Rushx hooks still depend on process-global argv and synchronous inherited
+I/O and are rejected before execution/input. `--ignore-hooks` and recursive calls reuse
+native skipping behavior. Encrypted dotenv vaults, unsupported environment initialization,
+and changed Rush/experiments configuration also reject before execution; queued configuration
+changes fail closed on admission. No hook, dependency synchronization, warning or terminal
+requirement is silently omitted. Controlling-terminal requests use the existing in-process
+policy; no PTY is allocated. Protocol 0.8 prevents older peers from interpreting
+`rushx build` as a workspace build.
+
 `PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
 integration parses the command and supplies its built-in/custom origin, an explicit phase/plugin shape, and operation enabled-state selection;
 the router validates both, reconciles retained invalidations, applies the selection with `IOperationGraph.setEnabledStates`,

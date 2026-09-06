@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+import { RushXCommand, type IRushXCommandLineArguments } from '@microsoft/rush-lib';
 
 import { parseClientAdmissionControls, type IClientAdmissionControls } from './ClientAdmissionControls';
 
@@ -52,13 +53,15 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     ...prefix.filter((arg) => arg !== '--no-daemon'),
     ...(separator < 0 ? [] : controls.argv.slice(separator))
   ];
-  const commandName: string | undefined = argv[0];
+  const rushxArguments: IRushXCommandLineArguments | undefined =
+    options.rushx ? RushXCommand.parseArguments(argv, options.environment) : undefined;
+  const commandName: string | undefined = rushxArguments ? rushxArguments.commandName || undefined : argv[0];
   const reporterControls: boolean =
     options.environment.RUSH_LOG_LEVEL !== undefined ||
     (options.environment.RUSH_REPORTER !== undefined && options.environment.RUSH_REPORTER !== 'legacy') ||
-    prefix.some((arg) =>
+    (!options.rushx && prefix.some((arg) =>
       ['--reporter', '--output', '--log-level'].some((name) => arg === name || arg.startsWith(`${name}=`))
-    );
+    ));
   const ci: boolean = ['CI', 'TF_BUILD', 'GITHUB_ACTIONS', 'JENKINS_URL', 'TEAMCITY_VERSION'].some((key) => {
     const value: string | undefined = options.environment[key];
     return value !== undefined && value !== '' && value !== '0' && value !== 'false';
@@ -70,7 +73,7 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     !!commandName &&
     !commandName.startsWith('-') &&
     (options.rushx || !neverDaemonize.has(commandName)) &&
-    !(prefix.includes('--help') || prefix.includes('-h')) &&
+    !(rushxArguments ? rushxArguments.help : prefix.includes('--help') || prefix.includes('-h')) &&
     (!ci || options.environment.RUSH_DAEMON === '1');
   return { argv, commandName, daemon, admission: controls.admission };
 }

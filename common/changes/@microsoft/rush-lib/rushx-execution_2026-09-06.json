@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Expose native Rushx parsing and request-local lifecycle execution with owned asynchronous spawning, isolated dotenv preparation, native diagnostics and injected-dependency synchronization.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib"
+}

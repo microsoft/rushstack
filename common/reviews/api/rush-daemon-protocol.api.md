@@ -62,6 +62,9 @@ export const DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR: number;
 export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
@@ -121,6 +124,9 @@ export type DaemonHandshakeOutcome = {
     readonly accepted: false;
     readonly error: ProtocolVersionMismatchError;
 };
+
+// @beta
+export type DaemonInvocationKind = 'rush' | 'rushx';
 
 // @beta
 export type DaemonJsonNull = null;
@@ -506,6 +512,7 @@ export interface IDaemonRequestEnvelope {
     readonly commandOrigin: DaemonRushCommandOrigin;
     readonly cwd: string;
     readonly environment: Readonly<Record<string, string>>;
+    readonly invocationKind?: DaemonInvocationKind;
     readonly requestId: string;
     readonly terminal: IDaemonRequestTerminal;
 }
