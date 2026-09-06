@@ -8,12 +8,13 @@ import {
   RushSessionReporting,
   TelemetrySubscriber,
   isReporterEventRequired,
-  resolveExitStatus,
+  resolveExitStatus as resolveRushExitStatus,
   type IReporterEmitEventInput,
   type IReporterEventEnvelope,
   type IReporterEventScope,
   type IReporterEventSink,
   type IReporterEventSource,
+  type IResolveExitStatusFromEventsOptions,
   type IRushExitStatus,
   type ITelemetryAggregate,
   type IScopedLogger,
@@ -100,7 +101,7 @@ interface IRushSessionReportingState {
 interface IRushSessionShadowEventObserver {
   ingest<TPayload>(event: IReporterEmitEventInput<TPayload>, eventId: string): void;
   buildTelemetryAggregate(): ITelemetryAggregate;
-  resolveExitStatus(): IRushExitStatus;
+  resolveExitStatus(options?: IResolveExitStatusFromEventsOptions): IRushExitStatus;
   correlateError(error: unknown, diagnosticId: string): void;
   isErrorRepresented(error: unknown): boolean;
 }
@@ -182,7 +183,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
     const hasOperationFailure: boolean = [...operationStatuses.values()].some(
       (status) => status === 'failure' || status === 'aborted'
     );
-    derivedExitStatus = resolveExitStatus({
+    derivedExitStatus = resolveRushExitStatus({
       hasFailures: hasUnscopedFailure || hasOperationFailure
     });
   };
@@ -234,7 +235,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
               succeeded: boolean;
               exitCode: number;
             };
-            derivedExitStatus = resolveExitStatus({
+            derivedExitStatus = resolveRushExitStatus({
               hasFailures: !succeeded || exitCode !== 0
             });
             break;
@@ -242,7 +243,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
           case 'commandCompleted':
           case 'sessionCompleted': {
             const { exitCode } = envelope.payload as { exitCode: number };
-            derivedExitStatus = resolveExitStatus({ hasFailures: exitCode !== 0 });
+            derivedExitStatus = resolveRushExitStatus({ hasFailures: exitCode !== 0 });
             break;
           }
           default:
@@ -262,8 +263,8 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
       return telemetrySubscriber.buildAggregate();
     },
 
-    resolveExitStatus(): IRushExitStatus {
-      return derivedExitStatus;
+    resolveExitStatus(options: IResolveExitStatusFromEventsOptions = {}): IRushExitStatus {
+      return resolveRushExitStatus({ hasFailures: derivedExitStatus.exitCode !== 0, ...options });
     },
 
     correlateError(error: unknown, diagnosticId: string): void {
@@ -464,8 +465,11 @@ export function _getRushSessionTelemetryAggregate(rushSession: RushSession): ITe
  *
  * @internal
  */
-export function _getRushSessionDerivedExitStatus(rushSession: RushSession): IRushExitStatus | undefined {
-  return _getSessionState(rushSession).reporting?.observer.resolveExitStatus();
+export function _getRushSessionDerivedExitStatus(
+  rushSession: RushSession,
+  options?: IResolveExitStatusFromEventsOptions
+): IRushExitStatus | undefined {
+  return _getSessionState(rushSession).reporting?.observer.resolveExitStatus(options);
 }
 
 /**
