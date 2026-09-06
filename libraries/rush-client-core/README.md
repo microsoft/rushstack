@@ -35,7 +35,7 @@ before awaiting input. The current standalone host does not do so. Piped stdin
 must remain in-process until explicit input admission/EOF are integrated.
 
 The standalone host has no request resolver or warm operation graph. A successful
-handshake is readiness, not evidence that a build is supported. Management,
+handshake is readiness, not evidence that a build is supported. Stop/restart,
 graph verbs, version-skew restart, and transparent handoff require real host
 contracts; this package does not fabricate them. A client that dies during the
 pre-bind spawn interval may leave a detached child still starting; normal
