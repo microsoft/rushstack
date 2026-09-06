@@ -125,6 +125,7 @@ describe('native build through the standalone client', () => {
     expect(JSON.parse(status.stdout).pid).toBe(firstPid);
     const script: IResult = await invokeAsync(['build'], true);
     expect(script.code).toBe(0);
+    expect(script.stderr).not.toMatch(/using in-process/i);
     expect(script.stdout).toContain('rushx-only');
     expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(`${beforeChange}a:two\nb:one\n`);
   }, 30000);

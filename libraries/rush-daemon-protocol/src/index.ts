@@ -23,7 +23,7 @@ export { DaemonFrameDecoder, type IDaemonFrameDecoderOptions } from './FrameDeco
 export { DaemonProtocolError, ProtocolVersionMismatchError } from './DaemonProtocolError';
 export type { DaemonProtocolErrorCode, IDaemonProtocolErrorOptions } from './DaemonProtocolError';
 export {
-  DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR, DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR, DAEMON_LIFECYCLE_PROTOCOL_MINOR, DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
+  DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR, DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR, DAEMON_INVOCATION_KIND_PROTOCOL_MINOR, DAEMON_LIFECYCLE_PROTOCOL_MINOR, DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION, isDaemonProtocolCompatible
 } from './DaemonProtocolVersion';
@@ -61,6 +61,7 @@ export type {
   IDaemonRequestStartMessage
 } from './DaemonRequestControl';
 export type { IDaemonRequestEnvelope, IDaemonRequestTerminal } from './DaemonRequestEnvelope';
+export type { DaemonInvocationKind } from './DaemonInvocationKind';
 export type {
   DaemonRequestAdmissionErrorCode,
   IDaemonRequestAdmissionOptions,

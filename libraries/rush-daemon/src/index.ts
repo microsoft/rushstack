@@ -87,3 +87,5 @@ export {
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';
+export { RushXDaemonRequestResolver } from './RushXDaemonRequestResolver';

@@ -81,6 +81,7 @@ export {
 } from './api/EnvironmentConfiguration';
 
 export { RushConstants } from './logic/RushConstants';
+export { RushXCommand, type IRushXCommandLineArguments, type IRushXCommandOptions } from './cli/RushXCommandLine';
 
 export { type PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 

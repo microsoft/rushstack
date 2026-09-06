@@ -13,7 +13,7 @@ import {
   type IRushDaemonWorkspace
 } from '../RushDaemonCommandLine';
 import { serveRushDaemonAsync } from '../serveRushDaemon';
-import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
+import { RushDaemonRequestResolver } from '../RushDaemonRequestResolver';
 
 describe(resolveRushDaemonWorkspace.name, () => {
   let tempFolder: string;
@@ -64,7 +64,7 @@ describe(resolveRushDaemonWorkspace.name, () => {
       expect.objectContaining({
         repoRoot: tempFolder,
         idleTimeoutSeconds: 42,
-        requestResolver: expect.any(ProductionDaemonRequestResolver)
+        requestResolver: expect.any(RushDaemonRequestResolver)
       })
     );
   });

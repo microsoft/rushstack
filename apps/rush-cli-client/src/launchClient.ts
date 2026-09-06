@@ -20,6 +20,7 @@ import {
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
+import { MinimalRushConfiguration } from '@microsoft/rush/lib/MinimalRushConfiguration';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
@@ -81,6 +82,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     commandName: route.commandName,
     // The native resolver additionally validates the parsed action; rushx scripts never claim this origin.
     commandOrigin: !rushx && ['build', 'rebuild'].includes(route.commandName) ? 'built-in' : 'custom',
+    invocationKind: rushx ? 'rushx' : 'rush',
     cwd,
     environment,
     terminal: {
@@ -130,13 +132,26 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     )
   });
   let outcome: DaemonClientOutcome;
+  const discoveryLines: string[] = [];
+  const writeDiscoveryAsync = async (): Promise<void> => {
+    if (discoveryLines.length > 0) {
+      await writeStreamAsync(process.stdout, Buffer.from(discoveryLines.splice(0).join('\n') + '\n'));
+    }
+  };
   try {
+    if (rushx) MinimalRushConfiguration.loadFromDefaultLocation((line) => discoveryLines.push(line));
     await renderer.initializeAsync();
     outcome = await client.executeAsync({
       request,
       abortSignal: abort.signal,
-      onStdoutAsync: (bytes, operationId) => renderer.writeLogAsync(bytes, operationId, 'stdout'),
-      onStderrAsync: (bytes, operationId) => renderer.writeLogAsync(bytes, operationId, 'stderr'),
+      onStdoutAsync: async (bytes, operationId) => {
+        await writeDiscoveryAsync();
+        await renderer.writeLogAsync(bytes, operationId, 'stdout');
+      },
+      onStderrAsync: async (bytes, operationId) => {
+        await writeDiscoveryAsync();
+        await renderer.writeLogAsync(bytes, operationId, 'stderr');
+      },
       onEventAsync: (event) => renderer.writeEventAsync(event),
       onQueuePositionAsync: process.stderr.isTTY
         ? (position) => writeStreamAsync(

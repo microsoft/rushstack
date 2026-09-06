@@ -55,7 +55,9 @@ export class MinimalRushConfiguration {
     this._useRushReporter = experimentsConfiguration?.useRushReporter === true;
   }
 
-  public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
+  public static loadFromDefaultLocation(
+    writeLine: (message: string) => void = (message) => console.log(message)
+  ): MinimalRushConfiguration | undefined {
     const showVerbose: boolean = !RushCommandLineParser.shouldRestrictConsoleOutput();
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
       showVerbose: false
@@ -83,8 +85,8 @@ export class MinimalRushConfiguration {
               (explicitReporter === undefined || explicitReporter === 'legacy')))
         ) {
           // Preserve the legacy discovery message exactly when the reporter path is not taking ownership.
-          console.log('Found configuration in ' + rushJsonLocation);
-          console.log('');
+          writeLine('Found configuration in ' + rushJsonLocation);
+          writeLine('');
         }
         return configuration;
       }

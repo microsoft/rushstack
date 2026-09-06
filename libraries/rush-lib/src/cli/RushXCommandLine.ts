@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import type * as childProcess from 'node:child_process';
 
 import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
@@ -16,7 +17,7 @@ import {
   type ITerminal
 } from '@rushstack/terminal';
 
-import { Utilities } from '../utilities/Utilities';
+import { Utilities, type ILifecycleCommandOptions } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { type ILaunchOptions, Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -27,10 +28,11 @@ import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
-import { initializeDotEnv } from '../logic/dotenv';
+import { initializeDotEnv, loadDotEnvForEnvironment } from '../logic/dotenv';
 import { escapeArgumentIfNeeded } from '../utilities/executionUtilities';
 
-interface IRushXCommandLineArguments {
+/** Native Rushx arguments. Options after the command belong to the script. @beta */
+export interface IRushXCommandLineArguments {
   /**
    * Flag indicating whether to suppress any rushx startup information.
    */
@@ -62,6 +64,94 @@ interface IRushXCommandLineArguments {
   commandArgs: string[];
 }
 
+/** Explicit process state and an optional owned asynchronous spawn seam for native Rushx. @beta */
+export interface IRushXCommandOptions {
+  /** Parse before dotenv initialization, as the native frontend does. */
+  readonly arguments: IRushXCommandLineArguments;
+  readonly abortSignal?: AbortSignal;
+  readonly cwd: string;
+  readonly environment: Readonly<NodeJS.ProcessEnv>;
+  readonly rushConfiguration: RushConfiguration | undefined;
+  readonly terminal: ITerminal;
+  /** Console output preserves native ANSI and newline bytes independently of diagnostic terminal capabilities. */
+  readonly consoleTerminal: ITerminal;
+  readonly launchOptions: ILaunchOptions;
+  /** When omitted, preserves the native CLI's synchronous inherited-stdio execution. */
+  readonly spawn?: (
+    command: string,
+    args: ReadonlyArray<string>,
+    options: childProcess.SpawnOptions
+  ) => childProcess.ChildProcess;
+}
+
+/**
+ * Native Rushx parsing and script execution with explicit request-local process state.
+ *
+ * @remarks
+ * The caller owns dotenv initialization, cwd confinement and child lifetime. Active hooks require in-process execution.
+ * This helper never changes process cwd, environment or exitCode.
+ * @beta
+ */
+export class RushXCommand {
+  public static parseArguments(
+    argv: ReadonlyArray<string>,
+    environment: Readonly<NodeJS.ProcessEnv>
+  ): IRushXCommandLineArguments {
+    return _parseCommandLineArguments(argv, environment);
+  }
+
+  public static getPackageFolder(cwd: string): string {
+    return path.dirname(_getPackageJsonFilePath(new PackageJsonLookup(), cwd));
+  }
+
+  /** Loads repository then user dotenv files into a copy, without consulting cached user state. */
+  public static prepareEnvironment(
+    cwd: string,
+    environment: Readonly<NodeJS.ProcessEnv>,
+    rushJsonFilePath: string
+  ): NodeJS.ProcessEnv {
+    return loadDotEnvForEnvironment(cwd, environment, rushJsonFilePath);
+  }
+
+  /** Returns a pre-execution boundary, never a reason to replay an executed script. */
+  public static getInProcessReason(
+    args: IRushXCommandLineArguments,
+    environment: Readonly<NodeJS.ProcessEnv>,
+    configuration: RushConfiguration
+  ): string | undefined {
+    if (args.help) return 'Rushx help requires the native frontend.';
+    if (
+      !args.ignoreHooks &&
+      environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] !== '1' &&
+      [Event.preRushx, Event.postRushx].some((event) => configuration.eventHooks.get(event).length > 0)
+    ) {
+      return 'Rushx event hooks still require process-global argv and inherited synchronous I/O.';
+    }
+    return undefined;
+  }
+
+  public static async executeAsync(options: IRushXCommandOptions): Promise<number> {
+    const { terminal, consoleTerminal, environment, arguments: args, rushConfiguration, launchOptions } = options;
+    try {
+      const reason: string | undefined = rushConfiguration &&
+        RushXCommand.getInProcessReason(args, environment, rushConfiguration);
+      if (reason) throw new Error(reason);
+      options.abortSignal?.throwIfAborted();
+      const ignoredHooks: EventHooksManager | undefined =
+        rushConfiguration && args.ignoreHooks &&
+        environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] !== '1'
+          ? new EventHooksManager(rushConfiguration) : undefined;
+      ignoredHooks?.handle(Event.preRushx, args.isDebug, true, consoleTerminal);
+      await _launchRushXInternalAsync(terminal, args, rushConfiguration, launchOptions, options);
+      ignoredHooks?.handle(Event.postRushx, args.isDebug, true, consoleTerminal);
+      return 0;
+    } catch (error) {
+      consoleTerminal.writeErrorLine(Colorize.red('Error: ' + (error as Error).message));
+      return _getRushXExitCode(error);
+    }
+  }
+}
+
 class ProcessError extends Error {
   public readonly exitCode: number;
   public constructor(message: string, exitCode: number) {
@@ -80,7 +170,11 @@ class ProcessError extends Error {
 export class RushXCommandLine {
   public static async launchRushXAsync(launcherVersion: string, options: ILaunchOptions): Promise<void> {
     try {
-      const rushxArguments: IRushXCommandLineArguments = _parseCommandLineArguments();
+      const rushxArguments: IRushXCommandLineArguments = _parseCommandLineArguments(
+        process.argv.slice(2), process.env,
+        // eslint-disable-next-line no-console
+        (message) => console.log(message)
+      );
       const rushJsonFilePath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         showVerbose: false
       });
@@ -128,53 +222,51 @@ export class RushXCommandLine {
       // Getting here means that we are all done with no major errors
       process.exitCode = 0;
     } catch (error) {
-      if (error instanceof ProcessError) {
-        process.exitCode = error.exitCode;
-      } else {
-        process.exitCode = 1;
-      }
+      process.exitCode = _getRushXExitCode(error);
       // eslint-disable-next-line no-console
       console.error(Colorize.red('Error: ' + (error as Error).message));
     }
   }
 }
 
+function _getRushXExitCode(error: unknown): number {
+  return error instanceof ProcessError ? error.exitCode : 1;
+}
+
 async function _launchRushXInternalAsync(
   terminal: ITerminal,
   rushxArguments: IRushXCommandLineArguments,
   rushConfiguration: RushConfiguration | undefined,
-  options: ILaunchOptions
+  options: ILaunchOptions,
+  execution?: IRushXCommandOptions
 ): Promise<void> {
   const { quiet, help, commandName, commandArgs } = rushxArguments;
+  const writeLine: (message: string) => void = execution
+    ? (message) => execution.consoleTerminal.writeLine(message)
+    // eslint-disable-next-line no-console
+    : (message) => console.log(message);
 
   if (!quiet) {
-    RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
+    RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged, execution?.consoleTerminal);
   }
   // Are we in a Rush repo?
   NodeJsCompatibility.warnAboutCompatibilityIssues({
     isRushLib: true,
     alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
-    rushConfiguration
+    rushConfiguration,
+    terminal: execution?.consoleTerminal
   });
 
   // Find the governing package.json for this folder:
   const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-  const packageJsonFilePath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
-    process.cwd()
-  );
-  if (!packageJsonFilePath) {
-    throw Error(
-      'This command should be used inside a project folder. ' +
-        'Unable to find a package.json file in the current working directory or any of its parents.'
-    );
-  }
+  const cwd: string = execution?.cwd ?? process.cwd();
+  const packageJsonFilePath: string = _getPackageJsonFilePath(packageJsonLookup, cwd);
 
-  if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
+  if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(cwd)) {
     // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
     // did not install the project's dependencies, because the project was not registered.
-    // eslint-disable-next-line no-console
-    console.log(
+    writeLine(
       Colorize.yellow(
         'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in ' +
           `${RushConstants.rushJsonFilename}.`
@@ -187,7 +279,7 @@ async function _launchRushXInternalAsync(
   const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
 
   if (help) {
-    _showUsage(packageJson, projectCommandSet);
+    _showUsage(packageJson, projectCommandSet, writeLine);
     return;
   }
 
@@ -216,24 +308,28 @@ async function _launchRushXInternalAsync(
   }
 
   if (!quiet) {
-    // eslint-disable-next-line no-console
-    console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
+    writeLine(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
   }
 
   const packageFolder: string = path.dirname(packageJsonFilePath);
 
-  const exitCode: number = Utilities.executeLifecycleCommand(commandWithArgs, {
+  const lifecycleOptions: ILifecycleCommandOptions = {
     rushConfiguration,
     workingDirectory: packageFolder,
     // If there is a rush.json then use its .npmrc from the temp folder.
     // Otherwise look for npmrc in the project folder.
     initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
     handleOutput: false,
+    ...(execution ? { initialEnvironment: execution.environment } : {}),
     environmentPathOptions: {
       includeProjectBin: true
     }
-  });
+  };
+  const exitCode: number = execution?.spawn
+    ? await _executeOwnedLifecycleAsync(commandWithArgs, lifecycleOptions, execution.spawn)
+    : Utilities.executeLifecycleCommand(commandWithArgs, lifecycleOptions);
 
+  execution?.abortSignal?.throwIfAborted();
   if (rushConfiguration?.isPnpm && rushConfiguration?.experimentsConfiguration) {
     const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
@@ -261,10 +357,11 @@ async function _launchRushXInternalAsync(
   }
 }
 
-function _parseCommandLineArguments(): IRushXCommandLineArguments {
-  // 0 = node.exe
-  // 1 = rushx
-  const args: string[] = process.argv.slice(2);
+function _parseCommandLineArguments(
+  args: ReadonlyArray<string>,
+  environment: Readonly<NodeJS.ProcessEnv>,
+  reportUnknownArguments?: (message: string) => void
+): IRushXCommandLineArguments {
   const unknownArgs: string[] = [];
 
   let help: boolean = false;
@@ -296,7 +393,7 @@ function _parseCommandLineArguments(): IRushXCommandLineArguments {
     }
   }
 
-  const quietModeValue: string | undefined = process.env[EnvironmentVariableNames.RUSH_QUIET_MODE];
+  const quietModeValue: string | undefined = environment[EnvironmentVariableNames.RUSH_QUIET_MODE];
   if (quietModeValue === '1' || quietModeValue === 'true') {
     quiet = true;
   }
@@ -308,8 +405,9 @@ function _parseCommandLineArguments(): IRushXCommandLineArguments {
   if (unknownArgs.length > 0) {
     // Future TODO: Instead of just displaying usage info, we could display a
     // specific error about the unknown flag the user tried to pass to rushx.
-    // eslint-disable-next-line no-console
-    console.log(Colorize.red(`Unknown arguments: ${unknownArgs.map((x) => JSON.stringify(x)).join(', ')}`));
+    reportUnknownArguments?.(
+      Colorize.red(`Unknown arguments: ${unknownArgs.map((x) => JSON.stringify(x)).join(', ')}`)
+    );
     help = true;
   }
 
@@ -323,24 +421,21 @@ function _parseCommandLineArguments(): IRushXCommandLineArguments {
   };
 }
 
-function _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
-  // eslint-disable-next-line no-console
-  console.log('usage: rushx [-h]');
-  // eslint-disable-next-line no-console
-  console.log('       rushx [-q/--quiet] [-d/--debug] [--ignore-hooks] <command> ...\n');
+function _showUsage(
+  packageJson: IPackageJson,
+  projectCommandSet: ProjectCommandSet,
+  writeLine: (message: string) => void
+): void {
+  writeLine('usage: rushx [-h]');
+  writeLine('       rushx [-q/--quiet] [-d/--debug] [--ignore-hooks] <command> ...\n');
 
-  // eslint-disable-next-line no-console
-  console.log('Optional arguments:');
-  // eslint-disable-next-line no-console
-  console.log('  -h, --help            Show this help message and exit.');
-  // eslint-disable-next-line no-console
-  console.log('  -q, --quiet           Hide rushx startup information.');
-  // eslint-disable-next-line no-console
-  console.log('  -d, --debug           Run in debug mode.\n');
+  writeLine('Optional arguments:');
+  writeLine('  -h, --help            Show this help message and exit.');
+  writeLine('  -q, --quiet           Hide rushx startup information.');
+  writeLine('  -d, --debug           Run in debug mode.\n');
 
   if (projectCommandSet.commandNames.length > 0) {
-    // eslint-disable-next-line no-console
-    console.log(`Project commands for ${Colorize.cyan(packageJson.name)}:`);
+    writeLine(`Project commands for ${Colorize.cyan(packageJson.name)}:`);
 
     // Calculate the length of the longest script name, for formatting
     let maxLength: number = 0;
@@ -358,8 +453,7 @@ function _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommand
       const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
       const truncateLength: number = Math.max(0, consoleWidth - firstPartLength) - 1;
 
-      // eslint-disable-next-line no-console
-      console.log(
+      writeLine(
         // Example: "  command: "
         '  ' +
           Colorize.cyan(Text.padEnd(commandName + ':', maxLength + 2)) +
@@ -369,8 +463,7 @@ function _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommand
     }
 
     if (projectCommandSet.malformedScriptNames.length > 0) {
-      // eslint-disable-next-line no-console
-      console.log(
+      writeLine(
         '\n' +
           Colorize.yellow(
             'Warning: Some "scripts" entries in the package.json file' +
@@ -380,9 +473,35 @@ function _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommand
       );
     }
   } else {
-    // eslint-disable-next-line no-console
-    console.log(Colorize.yellow('Warning: No commands are defined yet for this project.'));
-    // eslint-disable-next-line no-console
-    console.log('You can define a command by adding a "scripts" table to the project\'s package.json file.');
+    writeLine(Colorize.yellow('Warning: No commands are defined yet for this project.'));
+    writeLine('You can define a command by adding a "scripts" table to the project\'s package.json file.');
   }
+}
+
+function _getPackageJsonFilePath(lookup: PackageJsonLookup, cwd: string): string {
+  const packageJsonFilePath: string | undefined = lookup.tryGetPackageJsonFilePathFor(cwd);
+  if (!packageJsonFilePath) {
+    throw Error(
+      'This command should be used inside a project folder. ' +
+        'Unable to find a package.json file in the current working directory or any of its parents.'
+    );
+  }
+  return packageJsonFilePath;
+}
+
+function _executeOwnedLifecycleAsync(
+  command: string,
+  options: ILifecycleCommandOptions,
+  spawn: NonNullable<IRushXCommandOptions['spawn']>
+): Promise<number> {
+  const child: childProcess.ChildProcess = Utilities.executeLifecycleCommandAsync(
+    command, { ...options, stdio: 'pipe' }, spawn
+  );
+  return new Promise((resolve, reject) => {
+    child.once('error', reject);
+    child.once('close', (code) => {
+      if (code === null) reject(new Error('An unknown error occurred.'));
+      else resolve(code);
+    });
+  });
 }

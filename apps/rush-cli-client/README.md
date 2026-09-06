@@ -40,6 +40,26 @@ The client renders operation headers, collated text, and activity events; global
 command byte streams remain byte-preserving. A `rushx build` script never claims
 to be a workspace build.
 
+Rushx requests carry `invocationKind: "rushx"` (protocol 0.8), independently of custom
+command origin. Native parsing recognizes `-q`, `-d`, and `--ignore-hooks` before the
+command; subsequent flags and `--` belong to the script, apart from this client's
+explicit admission/escape controls. Older peers fall back before receiving the request
+or consuming input.
+
+The default daemon installs `RushDaemonRequestResolver(existingRushResolver)` to enable real
+package-script execution alongside native workspace builds. It reuses native Rushx parsing, escaping,
+banner/diagnostics, lifecycle PATH and INIT_CWD preparation, dotenv precedence, and
+pnpm injected-dependency synchronization. Only the actual script shell is spawned;
+there is no Rush CLI child or synthetic warm graph. Native configuration discovery
+is captured by the client and emitted only with daemon output, avoiding duplicate
+discovery messages on fallback.
+
+The composite is exported for embedded hosts and wired into the standalone daemon.
+No default or cutover flag is flipped. Active Rushx hooks, encrypted dotenv
+vaults, changed process-global Rush configuration variables, stale workspace configuration,
+and native help require pre-execution fallback. Ignored/recursive hooks retain native
+behavior, including skipping post hooks after failure. PTY requirements remain in-process.
+
 The initial engine is pinned to its startup environment, first command, and
 non-selection parameters. Direct, inherited, and rig-based project configuration
 uses private native loaders and is rechecked before execution. External plugins,

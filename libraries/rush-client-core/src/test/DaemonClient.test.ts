@@ -94,6 +94,25 @@ describe('DaemonClient', () => {
     });
   }
 
+  it('captures the parser discriminator without coupling core to Rush parsing', () => {
+    const original = { ...request(), invocationKind: 'rushx' as const };
+    const captured = captureDaemonRequest(original);
+    expect(captured.invocationKind).toBe('rushx');
+    expect(Object.isFrozen(captured)).toBe(true);
+  });
+
+  it.each([5, 6, 7])('does not send or consume Rushx input on protocol 0.%s', async (minor) => {
+    peerVersion = { major: 0, minor };
+    const input = new PassThrough();
+    input.end('unconsumed');
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const envelope = { ...request(), invocationKind: 'rushx' as const };
+    const result = await client.executeAsync({ request: envelope, stdin: input });
+    expect(result).toMatchObject({ kind: 'fallback', reason: 'unsupported' });
+    expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+    expect(input.read().toString()).toBe('unconsumed');
+  });
+
   it('subscribes, proves readiness and drains output before returning the exit code', async () => {
     const seen: string[] = [];
     onRequest = async (message) => {
@@ -236,6 +255,30 @@ describe('DaemonClient', () => {
       client.executeAsync({ request: request(), setRawMode: (enabled) => rawModes.push(enabled) })
     ).rejects.toThrow('not retried');
     expect(rawModes).toEqual([true, false]);
+  });
+
+  it.each(['output', 'input'])('does not replay a late unsupported rejection after %s', async (kind) => {
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      if (kind === 'output') {
+        await connection!.sendFrameAsync({
+          kind: DaemonFrameType.logStdout,
+          payload: encodeDaemonLogChunk({ operationId: message.payload.requestId, chunk: Buffer.from('ran') })
+        });
+      } else {
+        await sendAsync({ kind: 'stdinReady', payload: { requestId: message.payload.requestId } });
+      }
+      await sendAsync({
+        kind: 'requestRejected',
+        payload: { requestId: message.payload.requestId, code: 'unsupported', message: 'Too late.' }
+      });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.executeAsync({
+      request: { ...request(), terminal: { ...request().terminal, acceptsStdin: true } },
+      stdin: new PassThrough(),
+      onStdoutAsync: async () => {}
+    })).rejects.toThrow('not retried');
   });
 
   it('returns only unsupported rejections as fallback', async () => {
