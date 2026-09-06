@@ -111,6 +111,11 @@ export interface IOperationGraph {
 
   /**
    * Cleans up any resources used by the operation runners, if applicable.
+   *
+   * Does not wait for executing operations to finish before closing their runners. Hosts performing
+   * idle eviction must coordinate this call with iteration scheduling. Operations, their last results,
+   * and host-owned watchers are not removed.
+   *
    * @param operations - The operations whose runners should be closed, or undefined to close all runners.
    */
   closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;

@@ -847,6 +847,7 @@ export class OperationGraph implements IOperationGraph {
       onStartAsync: onOperationStartAsync,
       onResultAsync: onOperationCompleteAsync
     };
+    const completedRunnerCleanups: Set<OperationExecutionRecord> = new Set();
 
     const { eventSink } = this;
     if (!this.quietMode) {
@@ -930,7 +931,7 @@ export class OperationGraph implements IOperationGraph {
 
     const recordsToClose: OperationExecutionRecord[] = [];
     for (const record of executionRecords.values()) {
-      if (!record.shouldRunnerPersist) {
+      if (!record.shouldRunnerPersist && !completedRunnerCleanups.has(record)) {
         recordsToClose.push(record);
       }
     }
@@ -1113,6 +1114,11 @@ export class OperationGraph implements IOperationGraph {
         executionQueue.assignOperations();
       } else {
         try {
+          if (!record.shouldRunnerPersist) {
+            // Also close retained runners whose execution was bypassed by a hook or disabled.
+            completedRunnerCleanups.add(record);
+            await record.runner.closeAsync?.();
+          }
           await hooks.afterExecuteOperationAsync.promise(record);
         } catch (e) {
           _reportOperationErrorIfAny(record);
@@ -1295,10 +1301,9 @@ function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatef
 function _handleOperationSuccess(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
-    record.eventSink?.onActivity?.(
-      `"${record.name}" completed successfully in ${stopwatch.toString()}.`,
-      { operationId: record.name }
-    );
+    record.eventSink?.onActivity?.(`"${record.name}" completed successfully in ${stopwatch.toString()}.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" completed successfully in ${stopwatch.toString()}.`)
     );
@@ -1315,10 +1320,10 @@ function _handleOperationSuccessWithWarning(
 ): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
-    record.eventSink?.onActivity?.(
-      `"${record.name}" completed with warnings in ${stopwatch.toString()}.`,
-      { operationId: record.name, stderr: true }
-    );
+    record.eventSink?.onActivity?.(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`, {
+      operationId: record.name,
+      stderr: true
+    });
     record.collatedWriter.terminal.writeStderrLine(
       Colorize.yellow(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`)
     );
