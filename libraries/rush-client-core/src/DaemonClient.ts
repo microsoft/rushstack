@@ -5,6 +5,7 @@ import type { Readable } from 'node:stream';
 
 import {
   DAEMON_PROTOCOL_VERSION,
+  DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
   decodeDaemonControlMessage,
@@ -238,7 +239,10 @@ export class DaemonClient {
     if (!this.#helloReceived) {
       if (message.kind !== 'helloAck') throw new Error('Expected daemon helloAck.');
       const version: IDaemonProtocolVersion = message.payload.protocolVersion;
-      if (version.major !== DAEMON_PROTOCOL_VERSION.major || version.minor < DAEMON_PROTOCOL_VERSION.minor) {
+      if (
+        version.major !== DAEMON_PROTOCOL_VERSION.major ||
+        version.minor < DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR
+      ) {
         throw new DaemonClientError(
           'versionMismatch',
           'Daemon does not support the required request lifecycle protocol; restart it with a matching version.'
