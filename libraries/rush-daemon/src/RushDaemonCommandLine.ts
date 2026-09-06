@@ -41,9 +41,7 @@ export async function launchRushDaemonAsync(startingFolder: string = process.cwd
   if (!packageJson) {
     throw new Error('Unable to determine the @rushstack/rush-daemon package version.');
   }
-  // The WS3 host consumes this launch option. Keeping the launch shape explicit also permits
-  // this client/config change to build independently of the host lifecycle workstream.
-  const serveOptions: IRushDaemonServeOptions & { readonly idleTimeoutSeconds: number } = {
+  const serveOptions: IRushDaemonServeOptions = {
     daemonVersion: packageJson.version,
     repoRoot: workspace.repoRoot,
     rushVersion: workspace.rushVersion,

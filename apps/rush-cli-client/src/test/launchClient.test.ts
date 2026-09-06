@@ -6,6 +6,7 @@ import { once } from 'node:events';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
 import { RushDaemonHost } from '@rushstack/rush-daemon';
@@ -150,6 +151,32 @@ describe('standalone rushx fallback', () => {
     const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
     expect(fs.existsSync(paths.lockfilePath)).toBe(false);
   });
+
+  it('starts an absent daemon that survives the client and then shuts down when idle', async () => {
+    const rushJsonPath: string = path.join(folder, 'rush.json');
+    const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+    fs.writeFileSync(
+      rushJsonPath,
+      JSON.stringify({
+        ...config,
+        daemon: { enabled: false, autoStart: false, idleTimeoutSeconds: 2 }
+      })
+    );
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    try {
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
+      expect(result.code).toBe(0);
+      expect(result.stderr).toBe('');
+      expect(JSON.parse(result.stdout)).toMatchObject({ state: 'ready', socketPath: paths.socketPath });
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    }
+    const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
+    expect(stopped.code).toBe(1);
+  }, 15000);
 
   it('rejects stop/restart until the host has negotiated lifecycle controls', async () => {
     for (const verb of ['stop', 'restart']) {

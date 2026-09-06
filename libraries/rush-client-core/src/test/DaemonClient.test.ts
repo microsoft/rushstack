@@ -12,6 +12,7 @@ import {
   encodeDaemonEventFrame,
   encodeDaemonLogChunk,
   type DaemonControlMessage,
+  type IDaemonProtocolVersion,
   type IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
 import { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
@@ -24,11 +25,13 @@ describe('DaemonClient', () => {
   let connection: DaemonFrameConnection | undefined;
   let address: string;
   let controls: DaemonControlMessage[];
+  let peerVersion: IDaemonProtocolVersion;
   let onRequest: (message: DaemonControlMessage) => Promise<void>;
   let onStdin: (bytes: Uint8Array) => Promise<void>;
 
   beforeEach(async () => {
     controls = [];
+    peerVersion = DAEMON_PROTOCOL_VERSION;
     address =
       process.platform === 'win32'
         ? `\\\\.\\pipe\\rush-client-test-${process.pid}-${Math.random()}`
@@ -46,7 +49,7 @@ describe('DaemonClient', () => {
         if (message.kind === 'hello') {
           await sendAsync({
             kind: 'helloAck',
-            payload: { protocolVersion: DAEMON_PROTOCOL_VERSION, sessionId: 'test' }
+            payload: { protocolVersion: peerVersion, sessionId: 'test' }
           });
         } else if (message.kind === 'ping') {
           await sendAsync({ kind: 'pong', payload: { uptimeMs: 1, daemonVersion: 'test' } });
@@ -249,6 +252,21 @@ describe('DaemonClient', () => {
       DaemonClient.connectAsync({ socketPath: address, expectedDaemonVersion: 'other' })
     ).rejects.toThrow('Expected daemon other');
     expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+  });
+
+  it('keeps protocol 0.5 request peers compatible with later additive minors', async () => {
+    peerVersion = { major: 0, minor: 5 };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.closeAsync();
+    expect(controls.some((message) => message.kind === 'ping')).toBe(true);
+  });
+
+  it('rejects peers without the request lifecycle capability', async () => {
+    peerVersion = { major: 0, minor: 4 };
+    await expect(DaemonClient.connectAsync({ socketPath: address })).rejects.toThrow(
+      'required request lifecycle protocol'
+    );
+    expect(controls.some((message) => message.kind === 'subscribe')).toBe(false);
   });
 
   it('does not send an already cancelled request or leak a rejected completion promise', async () => {
