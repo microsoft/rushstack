@@ -12,7 +12,8 @@ const rushVersion = JSON.parse(
 ).version;
 const outputFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-reporter-demo-'));
 const commonArgs = ['build', '--only', '@rushstack/rush-reporter'];
-const baseEnv = { ...process.env };
+// Exercise the built frontend and engine even when rush.json pins an older release.
+const baseEnv = { ...process.env, RUSH_PREVIEW_VERSION: rushVersion };
 delete baseEnv.RUSH_REPORTER;
 delete baseEnv.RUSH_LOG_LEVEL;
 delete baseEnv.RUSH_QUIET_MODE;

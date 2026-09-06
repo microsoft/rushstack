@@ -21,6 +21,7 @@ import {
   initializeRushReporterHostAsync,
   resolveRushReporterSelection,
   stripReporterValueControls,
+  type IInitializedRushReporterHost,
   type IRushReporterOutputStream,
   type IRushReporterSelection
 } from '../RushReporterHost';
@@ -748,7 +749,63 @@ describe(initializeRushReporterHostAsync.name, () => {
     }
   });
 
-  it('publishes artifact completeness as a frozen boolean snapshot', async () => {
+  it('observes terminal resizing after binding the default stdout writer', async () => {
+    const originalColumns: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+      process.stdout,
+      'columns'
+    );
+    const originalIsTTY: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+      process.stdout,
+      'isTTY'
+    );
+    let output: string = '';
+    const writeSpy = jest.spyOn(process.stdout, 'write').mockImplementation((chunk: string | Uint8Array) => {
+      output += chunk.toString();
+      return true;
+    });
+    let initialized: IInitializedRushReporterHost | undefined;
+    try {
+      Object.defineProperty(process.stdout, 'columns', { configurable: true, writable: true, value: 80 });
+      Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
+      initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=default'],
+        env: { NO_COLOR: '' },
+        includeDefaultFileReporter: false
+      });
+      const activity: string = 'a'.repeat(60);
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 0 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'activityChanged',
+        payload: { text: activity }
+      });
+      await initialized.host.manager.flushAsync();
+      expect(output).toContain(activity);
+
+      output = '';
+      process.stdout.columns = 20;
+      await initialized.host.manager.flushAsync();
+      expect(output).not.toContain(activity);
+      expect(output).toContain('a'.repeat(19));
+    } finally {
+      await initialized?.closeAsync();
+      writeSpy.mockRestore();
+      for (const [property, descriptor] of [
+        ['columns', originalColumns],
+        ['isTTY', originalIsTTY]
+      ] as const) {
+        if (descriptor) {
+          Object.defineProperty(process.stdout, property, descriptor);
+        } else {
+          Reflect.deleteProperty(process.stdout, property);
+        }
+      }
+    }
+  });
+
+  it('publishes a frozen complete artifact after archiving replayed bootstrap output', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-artifact-snapshot-'));
     const reported: IReporterEventEnvelope<unknown>[] = [];
     const manager: ReporterManager = new ReporterManager();
@@ -765,9 +822,23 @@ describe(initializeRushReporterHostAsync.name, () => {
     };
     manager.addReporter(captureReporter);
     try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'bootstrap output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
       const initialized = await initializeRushReporterHostAsync({
         argv: ['build', '--reporter=json'],
-        env: {},
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory,
         commonTempFolder: directory,
         actionName: 'build',
         stdout: { isTTY: false, write: () => undefined },
@@ -796,6 +867,11 @@ describe(initializeRushReporterHostAsync.name, () => {
       });
       await initialized.closeAsync();
 
+      expect(initialized.bootstrapReplay).toMatchObject({ replayed: true, eventCount: 1 });
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(await fs.promises.readFile(initialized.logArtifact!.path!, 'utf8')).toContain(
+        'bootstrap output\n'
+      );
       const finalArtifact: IReporterEventEnvelope<unknown> = reported
         .filter(({ type }) => type === 'artifactAvailable')
         .at(-1)!;

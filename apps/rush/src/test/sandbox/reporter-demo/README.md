@@ -18,7 +18,9 @@ It verifies payload-only machine stdout, one visible writer, ordered/lossless pl
 same-invocation JSON sidecar, final artifact completeness, owner-only log permissions, failure flushing,
 AI parser-error context, command-JSON ownership, exclusive sidecar destinations, and the
 `RUSH_REPORTER=legacy` rollback transcript. Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
-`RUSH_QUIET_MODE` values are removed from the self-check matrix. It also verifies CI plaintext output,
+`RUSH_QUIET_MODE` values are removed from the self-check matrix. The matrix sets `RUSH_PREVIEW_VERSION`
+to the locally built Rush package version so it exercises the integrated frontend and engine even when
+`rush.json` pins an older release; preview warnings remain on stderr. It also verifies CI plaintext output,
 cache-path output, a matching `RUSH_PREVIEW_VERSION`, normalized `RUSH_TEMP_FOLDER` log placement, and
 matching purge-path selection. Captured stdout/stderr files are written to a temporary folder.
 

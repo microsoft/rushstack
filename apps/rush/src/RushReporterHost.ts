@@ -889,7 +889,9 @@ export async function initializeRushReporterHostAsync(
   const env: Record<string, string | undefined> = options.env ?? process.env;
   const stdout: IRushReporterOutputStream = options.stdout ?? {
     isTTY: process.stdout.isTTY,
-    columns: process.stdout.columns,
+    get columns() {
+      return process.stdout.columns;
+    },
     write: process.stdout.write.bind(process.stdout)
   };
   const stderr: IRushReporterOutputStream = options.stderr ?? {
