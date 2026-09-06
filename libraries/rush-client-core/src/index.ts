@@ -14,6 +14,7 @@ export {
   type IDaemonClientExecuteOptions
 } from './DaemonClient';
 export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientError';
+export { getDaemonLogFilePath } from './DaemonLogFile';
 export {
   connectOrStartDaemonAsync,
   type IConnectOrStartDaemonOptions,

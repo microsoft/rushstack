@@ -16,6 +16,8 @@ async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
   const folder: string = path.dirname(paths.lockfilePath);
   fs.appendFileSync(path.join(folder, 'starts'), `${process.pid}\n`);
+  process.stdout.write('launcher stdout\n');
+  process.stderr.write('launcher stderr\n');
   await new Promise((resolve) => setTimeout(resolve, 250));
   const listener = await DaemonFrameListener.listenAsync(paths, {
     protocolVersion: DAEMON_PROTOCOL_VERSION,

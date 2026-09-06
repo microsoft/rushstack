@@ -9,7 +9,7 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
-import { DaemonClient, connectOrStartDaemonAsync } from '@rushstack/rush-client-core';
+import { DaemonClient, connectOrStartDaemonAsync, getDaemonLogFilePath } from '@rushstack/rush-client-core';
 import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
 import { readDaemonLockfile, removeDaemonArtifacts } from '@rushstack/rush-daemon-transport';
 
@@ -24,6 +24,7 @@ interface IInvocationResult {
 describe('standalone rushx fallback', () => {
   let folder: string;
   let project: string;
+  let logFilePath: string;
   let host: RushDaemonHost | undefined;
 
   beforeEach(() => {
@@ -41,6 +42,7 @@ describe('standalone rushx fallback', () => {
         projectFolderMinDepth: 1
       })
     );
+    logFilePath = getDaemonLogFilePath(getDaemonConnectionOptions(folder, Rush.version, {}, false).paths);
     fs.writeFileSync(
       path.join(project, 'package.json'),
       JSON.stringify({
@@ -58,6 +60,7 @@ describe('standalone rushx fallback', () => {
     const closingHost: RushDaemonHost | undefined = host;
     host = undefined;
     await closingHost?.closeAsync();
+    fs.rmSync(logFilePath, { force: true });
     fs.rmSync(folder, { recursive: true });
   });
 
@@ -179,7 +182,41 @@ describe('standalone rushx fallback', () => {
     }
     const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
     expect(stopped.code).toBe(1);
+    const log: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'logs']);
+    expect(log.code).toBe(0);
+    expect(log.stdout).toContain('rushd ready at');
   }, 15000);
+
+  it('reads a saved launcher log without connecting or auto-starting', async () => {
+    fs.mkdirSync(path.dirname(logFilePath), { recursive: true, mode: 0o700 });
+    const contents: string = `${'startup output\n'.repeat(20000)}startup error\n`;
+    fs.writeFileSync(logFilePath, contents, { mode: 0o600 });
+    const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'logs']);
+    expect(result).toEqual({ code: 0, stdout: contents, stderr: '' });
+    expect(
+      fs.existsSync(getDaemonConnectionOptions(folder, Rush.version, {}, false).paths.lockfilePath)
+    ).toBe(false);
+  });
+
+  it('returns an actionable missing-log error without creating a log or daemon', async () => {
+    const result: IInvocationResult = await invokeAsync(true, true, false, ['daemon', 'logs']);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toBe('');
+    expect(result.stderr).toContain('No launcher log exists');
+    expect(result.stderr).toContain(logFilePath);
+    expect(fs.existsSync(logFilePath)).toBe(false);
+  });
+
+  it('accepts an empty launcher log and rejects unsupported follow arguments', async () => {
+    fs.mkdirSync(path.dirname(logFilePath), { recursive: true, mode: 0o700 });
+    fs.writeFileSync(logFilePath, '', { mode: 0o600 });
+    expect(await invokeAsync(true, false, false, ['daemon', 'logs'])).toEqual({
+      code: 0,
+      stdout: '',
+      stderr: ''
+    });
+    expect((await invokeAsync(true, false, false, ['daemon', 'logs', '--follow'])).code).toBe(1);
+  });
 
   it('does not start an absent daemon when stop or restart cannot be acknowledged', async () => {
     for (const verb of ['stop', 'restart']) {

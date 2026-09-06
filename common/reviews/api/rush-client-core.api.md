@@ -57,6 +57,9 @@ export type DaemonClientOutcome = {
 };
 
 // @beta
+export function getDaemonLogFilePath(paths: IDaemonPaths): string;
+
+// @beta
 export interface ICaptureDaemonRequestOptions extends Omit<IDaemonRequestEnvelope, 'environment' | 'requestId'> {
     // (undocumented)
     readonly environment: Readonly<Record<string, string | undefined>>;

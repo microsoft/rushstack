@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-cli-client",
-      "comment": "Add separate opt-in rush-client and rushx-client bins with safe in-process fallback and protocol-based daemon start/status/stop/restart; document host integration blockers without replacing rush/rushx.",
+      "comment": "Add separate opt-in rush-client and rushx-client bins with safe in-process fallback, protocol-based daemon start/status/stop/restart, and local launcher-log reading; document host integration blockers without replacing rush/rushx.",
       "type": "minor"
     }
   ],

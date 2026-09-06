@@ -14,6 +14,7 @@ import { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol
 import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from './daemonConnectionOptions';
+import { printDaemonLogAsync } from './daemonLogs';
 import { writeStreamAsync } from './writeStreamAsync';
 
 export interface IDaemonCommandOptions {
@@ -32,12 +33,15 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
         : 'The host graph protocol is not available in this build.'
     );
   }
-  if (command === 'logs') throw new Error('daemon logs requires a host log-stream subscription contract.');
   if (
     options.argv.length !== 1 ||
-    (command !== 'start' && command !== 'status' && command !== 'stop' && command !== 'restart')
+    (command !== 'start' &&
+      command !== 'status' &&
+      command !== 'stop' &&
+      command !== 'restart' &&
+      command !== 'logs')
   ) {
-    throw new Error('Usage: rush-client daemon start|status|stop|restart');
+    throw new Error('Usage: rush-client daemon start|status|stop|restart|logs');
   }
   if (!options.rushJsonPath) throw new Error('Daemon management requires a repository containing rush.json.');
   const mayStart: boolean = command === 'start' || command === 'restart';
@@ -52,6 +56,10 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
     options.environment,
     mayStart
   );
+  if (command === 'logs') {
+    await printDaemonLogAsync(connectionOptions.paths);
+    return;
+  }
   // Status observes the selected endpoint, including a compatible daemon from a different client version.
   // It never starts a process or trusts a PID file as evidence of readiness.
   const client: DaemonClient =
