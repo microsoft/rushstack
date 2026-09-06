@@ -41,7 +41,11 @@ export interface IPhasedRequestClient {
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
 
   /** Writes one operation-scoped output chunk through the client's backpressured destination. */
-  writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
+  writeLogChunkAsync(
+    operationId: string,
+    stream: 'stdout' | 'stderr',
+    chunk: Uint8Array
+  ): Promise<void>;
 
   /** Signals that the client must execute this request in-process instead. */
   writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;

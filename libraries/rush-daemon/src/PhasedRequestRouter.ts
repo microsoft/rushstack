@@ -19,7 +19,10 @@ import type {
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
-import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+import {
+  DaemonRequiresInProcessError,
+  evaluateDaemonTerminalPolicy
+} from './DaemonTerminalPolicy';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import {
@@ -284,7 +287,8 @@ class PhasedRequestBatchCoordinator {
     this.#running = true;
     try {
       if (this.#pending.length === 0) {
-        const unusedGraphLeasePromise: Promise<IRequestLease> | undefined = this.#nextGraphLeasePromise;
+        const unusedGraphLeasePromise: Promise<IRequestLease> | undefined =
+          this.#nextGraphLeasePromise;
         this.#nextGraphLeasePromise = undefined;
         (await unusedGraphLeasePromise)?.release();
         return;
@@ -296,7 +300,8 @@ class PhasedRequestBatchCoordinator {
           this.#takeCompatiblePending(batch);
         }
         this.#currentBatch = batch;
-        this.#acceptingCurrentBatch = first.exclusivityClass === RequestExclusivityClass.SharedBuild;
+        this.#acceptingCurrentBatch =
+          first.exclusivityClass === RequestExclusivityClass.SharedBuild;
         for (const entry of batch) {
           entry.executionStarted = true;
         }
@@ -361,9 +366,13 @@ class PhasedRequestBatchCoordinator {
         this.#takeCompatiblePending(batch);
       }
       this.#acceptingCurrentBatch = false;
-      const participants: IBatchEntry[] = batch.filter((entry: IBatchEntry) => this.#isEntryLive(entry));
+      const participants: IBatchEntry[] = batch.filter((entry: IBatchEntry) =>
+        this.#isEntryLive(entry)
+      );
       if (participants.length === 0) {
-        await Promise.all(batch.map((entry: IBatchEntry) => this.#finishEntryAsync(entry, false, undefined)));
+        await Promise.all(
+          batch.map((entry: IBatchEntry) => this.#finishEntryAsync(entry, false, undefined))
+        );
         return;
       }
 
@@ -418,7 +427,8 @@ class PhasedRequestBatchCoordinator {
         executionError = error;
         if (this.#graph.hasScheduledIteration) {
           try {
-            const failedExecutionPromise: Promise<boolean> = this.#graph.executeScheduledIterationAsync();
+            const failedExecutionPromise: Promise<boolean> =
+              this.#graph.executeScheduledIterationAsync();
             await Promise.resolve();
             this.#requestIterationAbort();
             await this.#abortTail;
@@ -741,7 +751,10 @@ function collectSelectionClosure(
   enabledOperations: ReadonlyArray<Operation>,
   ignoreDependencyOperations: ReadonlyArray<Operation>
 ): ReadonlyArray<Operation> {
-  const activeOperations: Set<Operation> = new Set([...enabledOperations, ...ignoreDependencyOperations]);
+  const activeOperations: Set<Operation> = new Set([
+    ...enabledOperations,
+    ...ignoreDependencyOperations
+  ]);
   for (const operation of activeOperations) {
     for (const dependency of operation.dependencies) {
       activeOperations.add(dependency);
@@ -750,7 +763,10 @@ function collectSelectionClosure(
   return Array.from(activeOperations);
 }
 
-function applySelections(graph: IOperationGraph, selections: ReadonlyArray<IResolvedSelection>): void {
+function applySelections(
+  graph: IOperationGraph,
+  selections: ReadonlyArray<IResolvedSelection>
+): void {
   const enabledOperations: ReadonlyArray<Operation> = selections.flatMap(
     (selection: IResolvedSelection) => selection.enabledOperations
   );
@@ -758,7 +774,8 @@ function applySelections(graph: IOperationGraph, selections: ReadonlyArray<IReso
     (selection: IResolvedSelection) => selection.ignoreDependencyOperations
   );
   const enabledClosureBySelection: ReadonlyArray<ReadonlySet<Operation>> = selections.map(
-    (selection: IResolvedSelection) => new Set(collectSelectionClosure(selection.enabledOperations, []))
+    (selection: IResolvedSelection) =>
+      new Set(collectSelectionClosure(selection.enabledOperations, []))
   );
   const effectiveIgnoreDependencyOperations: Operation[] = [];
   selections.forEach((selection: IResolvedSelection, selectionIndex: number) => {
@@ -775,7 +792,11 @@ function applySelections(graph: IOperationGraph, selections: ReadonlyArray<IReso
   graph.setEnabledStates(graph.operations, false, 'unsafe');
   graph.setEnabledStates(ignoreDependencyOperations, 'ignore-dependency-changes', 'safe');
   graph.setEnabledStates(enabledOperations, true, 'safe');
-  graph.setEnabledStates(effectiveIgnoreDependencyOperations, 'ignore-dependency-changes', 'unsafe');
+  graph.setEnabledStates(
+    effectiveIgnoreDependencyOperations,
+    'ignore-dependency-changes',
+    'unsafe'
+  );
 }
 
 function collectOperationOutcomes(
@@ -834,7 +855,9 @@ function getClientGraphStatus(
     return OperationStatus.Aborted;
   }
   if (
-    operationOutcomes.some(({ result }: IPhasedOperationOutcome) => result.status === OperationStatus.Aborted)
+    operationOutcomes.some(
+      ({ result }: IPhasedOperationOutcome) => result.status === OperationStatus.Aborted
+    )
   ) {
     return OperationStatus.Aborted;
   }
@@ -941,7 +964,12 @@ async function finishAfterAdmissionErrorAsync(
   const admissionErrorCode: ReturnType<typeof getRequestAdmissionErrorCode> =
     getRequestAdmissionErrorCode(admissionError);
   if (admissionError.code === RequestSchedulerErrorCode.Aborted) {
-    return await writeAbortedResultAsync(request.requestId, client, interactiveSession, admissionErrorCode);
+    return await writeAbortedResultAsync(
+      request.requestId,
+      client,
+      interactiveSession,
+      admissionErrorCode
+    );
   }
   const cleanupErrors: unknown[] = [];
   await collectInteractiveCleanupErrorAsync(interactiveSession, cleanupErrors);

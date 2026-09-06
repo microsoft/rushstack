@@ -3,7 +3,11 @@
 
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { WIRE_TEXT_ENCODER } from './DaemonWireText';
-import { MAX_REQUEST_ID_BYTES, REQUEST_ID_LENGTH_BYTES, REQUEST_ID_LENGTH_OFFSET } from './FrameConstants';
+import {
+  MAX_REQUEST_ID_BYTES,
+  REQUEST_ID_LENGTH_BYTES,
+  REQUEST_ID_LENGTH_OFFSET
+} from './FrameConstants';
 
 const LITTLE_ENDIAN: boolean = true;
 const REQUEST_ID_TEXT_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder('utf-8', {
@@ -64,8 +68,10 @@ function decodeRequestId(idBytes: Uint8Array): string {
   try {
     return REQUEST_ID_TEXT_DECODER.decode(idBytes);
   } catch (error) {
-    throw new DaemonProtocolError('malformedPayload', 'Stdin frame request id is not valid UTF-8.', {
-      cause: error
-    });
+    throw new DaemonProtocolError(
+      'malformedPayload',
+      'Stdin frame request id is not valid UTF-8.',
+      { cause: error }
+    );
   }
 }

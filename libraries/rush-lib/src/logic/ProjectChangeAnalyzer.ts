@@ -752,10 +752,7 @@ export function isPackageJsonVersionOnlyChange(
   newPackageJsonContent: string
 ): boolean {
   try {
-    return isPackageJsonVersionBumpChange(
-      JSON.parse(oldPackageJsonContent),
-      JSON.parse(newPackageJsonContent)
-    );
+    return isPackageJsonVersionBumpChange(JSON.parse(oldPackageJsonContent), JSON.parse(newPackageJsonContent));
   } catch (error) {
     // If we can't parse the JSON, assume it's not a version-only change
     return false;

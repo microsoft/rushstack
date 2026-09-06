@@ -4,13 +4,20 @@
 import * as path from 'node:path';
 
 import { RushConfiguration } from '@microsoft/rush-lib';
-import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/rush-lib';
+import type {
+  IInputsSnapshot,
+  IOperationGraph,
+  RushSession
+} from '@microsoft/rush-lib';
 
 import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
 } from '../WorkspaceEngineComponentFactory';
-import type { IWorkspaceSession, IWorkspaceSessionMetadata } from '../WorkspaceSession';
+import type {
+  IWorkspaceSession,
+  IWorkspaceSessionMetadata
+} from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
 
 export const TEST_REPO_ROOT: string = path.resolve(__dirname, '../../../..');

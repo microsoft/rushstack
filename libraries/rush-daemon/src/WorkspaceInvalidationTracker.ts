@@ -39,7 +39,10 @@ export class WorkspaceInvalidationTracker {
       return;
     }
 
-    if (!this.#sequenceByPath.has(changedPath) && this.#sequenceByPath.size >= MAX_TRACKED_CHANGED_PATHS) {
+    if (
+      !this.#sequenceByPath.has(changedPath) &&
+      this.#sequenceByPath.size >= MAX_TRACKED_CHANGED_PATHS
+    ) {
       this.#sequenceByPath.clear();
       this.#unknownChangeSequence = sequence;
       return;

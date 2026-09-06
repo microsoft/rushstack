@@ -4,7 +4,11 @@
 import * as path from 'node:path';
 
 import { RushConfiguration } from '@microsoft/rush-lib';
-import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/rush-lib';
+import type {
+  IInputsSnapshot,
+  IOperationGraph,
+  RushSession
+} from '@microsoft/rush-lib';
 
 import { WorkspaceInvalidationTracker } from './WorkspaceInvalidationTracker';
 import { WorkspaceSessionFileWatcher } from './WorkspaceSessionFileWatcher';
@@ -182,7 +186,10 @@ export class WorkspaceSession implements IWorkspaceSession {
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
     let sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
     try {
-      const metadata: IWorkspaceSessionMetadata = createMetadata(rushConfiguration, options.rushVersion);
+      const metadata: IWorkspaceSessionMetadata = createMetadata(
+        rushConfiguration,
+        options.rushVersion
+      );
       if (!projectWatcher) {
         projectWatcher = new WorkspaceSessionFileWatcher({
           onError: (error: Error) => {
@@ -243,7 +250,8 @@ export class WorkspaceSession implements IWorkspaceSession {
     if (!this.#components.reconcileInvalidationsAsync) {
       return undefined;
     }
-    const result: IWorkspaceInvalidationReconciliation = await this.#components.reconcileInvalidationsAsync();
+    const result: IWorkspaceInvalidationReconciliation =
+      await this.#components.reconcileInvalidationsAsync();
     this.#inputsSnapshot = result.inputsSnapshot;
     return result;
   }

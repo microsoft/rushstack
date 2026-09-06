@@ -29,7 +29,10 @@ import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
 } from '../WorkspaceEngineComponentFactory';
-import type { IWorkspaceSession, IWorkspaceSessionMetadata } from '../WorkspaceSession';
+import type {
+  IWorkspaceSession,
+  IWorkspaceSessionMetadata
+} from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
 import { TEST_RUSH_CONFIGURATION, TEST_REPO_ROOT } from './TestWorkspaceSession';
 
@@ -196,7 +199,9 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
     this.operationGraph = operationGraph;
   }
 
-  public async reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined> {
+  public async reconcileInvalidationsAsync(): Promise<
+    IWorkspaceInvalidationReconciliation | undefined
+  > {
     await this.onReconcileAsync?.();
     return undefined;
   }

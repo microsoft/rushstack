@@ -5,7 +5,9 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { EnvironmentMap } from '@rushstack/node-core-library';
-import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+import {
+  validateDaemonRequestAdmissionOptions
+} from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonRushCommandOrigin,
   DaemonTerminalRequirement,
@@ -183,7 +185,10 @@ function validateEnvironmentValue(name: string, value: unknown): asserts value i
 function resolveTerminalProperties(
   terminal: IGlobalCommandTerminalProperties
 ): IGlobalCommandTerminalProperties {
-  if (terminal.columns !== undefined && (!Number.isSafeInteger(terminal.columns) || terminal.columns <= 0)) {
+  if (
+    terminal.columns !== undefined &&
+    (!Number.isSafeInteger(terminal.columns) || terminal.columns <= 0)
+  ) {
     throw new Error('Global command terminal columns must be a positive safe integer.');
   }
   if (typeof terminal.isTTY !== 'boolean' || typeof terminal.supportsColor !== 'boolean') {

@@ -13,14 +13,20 @@ import {
   encodeDaemonControlMessage,
   encodeDaemonStdinChunk
 } from '@rushstack/rush-daemon-protocol';
-import type { DaemonControlMessage, IDaemonFrame } from '@rushstack/rush-daemon-protocol';
+import type {
+  DaemonControlMessage,
+  IDaemonFrame
+} from '@rushstack/rush-daemon-protocol';
 import {
   computeDaemonWorkspaceKey,
   connectDaemonAsync,
   readDaemonLockfile,
   resolveDaemonPathsFromProcess
 } from '@rushstack/rush-daemon-transport';
-import type { DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type {
+  DaemonFrameConnection,
+  IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
 import { RushDaemonHost } from '../RushDaemonHost';
 import type { IRushDaemonHostOptions } from '../RushDaemonHost';
@@ -82,7 +88,9 @@ async function exchangeControlAsync(
 
 describe(RushDaemonHost.name, () => {
   it('binds the workspace transport and handles hello plus ping', async () => {
-    const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(createTestRepoRoot()));
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(
+      createHostOptions(createTestRepoRoot())
+    );
     const client: DaemonFrameConnection = await connectDaemonAsync(host.paths.socketPath);
     try {
       expect(readDaemonLockfile(host.paths.lockfilePath)).toMatchObject({
@@ -229,9 +237,9 @@ describe(RushDaemonHost.name, () => {
         })
       });
 
-      await expect(exchangeControlAsync(inputClient, { kind: 'ping', payload: {} })).resolves.toMatchObject({
-        kind: 'pong'
-      });
+      await expect(
+        exchangeControlAsync(inputClient, { kind: 'ping', payload: {} })
+      ).resolves.toMatchObject({ kind: 'pong' });
       let markInputDelivered: (() => void) | undefined;
       const inputDelivered: Promise<void> = new Promise((resolve) => {
         markInputDelivered = resolve;
@@ -292,9 +300,9 @@ describe(RushDaemonHost.name, () => {
       await exchangeControlAsync(inputClient, { kind: 'ping', payload: {} });
       requestAbortController.abort();
 
-      await expect(exchangeControlAsync(inputClient, { kind: 'ping', payload: {} })).resolves.toMatchObject({
-        kind: 'pong'
-      });
+      await expect(
+        exchangeControlAsync(inputClient, { kind: 'ping', payload: {} })
+      ).resolves.toMatchObject({ kind: 'pong' });
       expect(errors).toEqual([]);
     } finally {
       await inputClient.closeAsync();
@@ -373,9 +381,9 @@ describe(RushDaemonHost.name, () => {
       await survivorInput;
       await expect(failedRequest.finishAsync()).rejects.toThrow('request stdin failed');
       await survivingRequest.finishAsync();
-      await expect(exchangeControlAsync(failureClient, { kind: 'ping', payload: {} })).resolves.toMatchObject(
-        { kind: 'pong' }
-      );
+      await expect(
+        exchangeControlAsync(failureClient, { kind: 'ping', payload: {} })
+      ).resolves.toMatchObject({ kind: 'pong' });
     } finally {
       await failureClient.closeAsync();
       await failureHost.closeAsync();
@@ -409,7 +417,9 @@ describe(RushDaemonHost.name, () => {
     const host: RushDaemonHost = await RushDaemonHost.startAsync(
       createHostOptions(repoRoot, {
         createWorkspaceSessionAsync: () =>
-          Promise.resolve(new TestWorkspaceSession(repoRoot, () => disposalEvents.push('workspace-session')))
+          Promise.resolve(
+            new TestWorkspaceSession(repoRoot, () => disposalEvents.push('workspace-session'))
+          )
       })
     );
     const client: DaemonFrameConnection = await connectDaemonAsync(host.paths.socketPath);

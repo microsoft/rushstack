@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IWorkspaceInvalidationWatcher, IWorkspaceSessionComponents } from '../WorkspaceSession';
+import type {
+  IWorkspaceInvalidationWatcher,
+  IWorkspaceSessionComponents
+} from '../WorkspaceSession';
 import { WorkspaceSession } from '../WorkspaceSession';
 import type { IWorkspaceInvalidationSnapshot } from '../WorkspaceInvalidationTracker';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';

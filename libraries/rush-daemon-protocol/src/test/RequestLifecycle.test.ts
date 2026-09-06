@@ -33,65 +33,65 @@ function createRequestStart(): IDaemonRequestStartMessage {
 }
 
 it('round-trips a presentation-free request envelope', () => {
-  expect(decodeDaemonControlMessage(encodeDaemonControlMessage(createRequestStart()))).toEqual(
-    createRequestStart()
-  );
+    expect(decodeDaemonControlMessage(encodeDaemonControlMessage(createRequestStart()))).toEqual(
+      createRequestStart()
+    );
 });
 
 it('round-trips cancellation, rejection, and final result controls', () => {
-  const messages: ReadonlyArray<DaemonControlMessage> = [
-    { kind: 'requestCancel', payload: { requestId: REQUEST_ID } },
-    {
-      kind: 'requestRejected',
-      payload: { code: 'unsupported', message: 'No resolver.', requestId: REQUEST_ID }
-    },
-    {
-      kind: 'requestResult',
-      payload: {
-        aborted: false,
-        exitCode: 0,
-        outcome: 'success',
-        requestId: REQUEST_ID
+    const messages: ReadonlyArray<DaemonControlMessage> = [
+      { kind: 'requestCancel', payload: { requestId: REQUEST_ID } },
+      {
+        kind: 'requestRejected',
+        payload: { code: 'unsupported', message: 'No resolver.', requestId: REQUEST_ID }
+      },
+      {
+        kind: 'requestResult',
+        payload: {
+          aborted: false,
+          exitCode: 0,
+          outcome: 'success',
+          requestId: REQUEST_ID
+        }
       }
+    ];
+    for (const message of messages) {
+      expect(decodeDaemonControlMessage(encodeDaemonControlMessage(message))).toEqual(message);
     }
-  ];
-  for (const message of messages) {
-    expect(decodeDaemonControlMessage(encodeDaemonControlMessage(message))).toEqual(message);
-  }
 });
 
 it.each([
-  [
-    'duplicate-free request id',
-    { ...createRequestStart(), payload: { ...createRequestStart().payload, requestId: '' } }
-  ],
-  [
-    'string environment',
-    { ...createRequestStart(), payload: { ...createRequestStart().payload, environment: { CI: 1 } } }
-  ],
-  [
-    'positive columns',
-    {
-      ...createRequestStart(),
-      payload: {
-        ...createRequestStart().payload,
-        terminal: { columns: INVALID_TERMINAL_COLUMN, isTTY: true, supportsColor: true }
+    [
+      'duplicate-free request id',
+      { ...createRequestStart(), payload: { ...createRequestStart().payload, requestId: '' } }
+    ],
+    [
+      'string environment',
+      { ...createRequestStart(), payload: { ...createRequestStart().payload, environment: { CI: 1 } } }
+    ],
+    [
+      'positive columns',
+      {
+        ...createRequestStart(),
+        payload: {
+          ...createRequestStart().payload,
+          terminal: { columns: INVALID_TERMINAL_COLUMN, isTTY: true, supportsColor: true }
+        }
       }
-    }
-  ],
-  [
-    'typed request result fields',
-    {
-      kind: 'requestResult',
-      payload: {
-        aborted: false,
-        admissionErrorCode: 'later',
-        exitCode: 0,
-        outcome: 'success',
-        requestId: REQUEST_ID
+    ],
+    [
+      'typed request result fields',
+      {
+        kind: 'requestResult',
+        payload: {
+          aborted: false,
+          admissionErrorCode: 'later',
+          exitCode: 0,
+          outcome: 'success',
+          requestId: REQUEST_ID
+        }
       }
-    }
-  ]
+    ]
 ])('rejects an invalid %s', (testName: string, message: unknown) => {
   expect(testName).toBeDefined();
   expect(() =>

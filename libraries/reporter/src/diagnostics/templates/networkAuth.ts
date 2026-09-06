@@ -10,5 +10,6 @@
  */
 // eslint-disable-next-line @typescript-eslint/typedef -- literal keys are required for the Record<RushDiagnosticTemplateKey, string> aggregate check
 export const NETWORK_AUTH_DIAGNOSTIC_TEMPLATES = {
-  'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary': 'Authentication failed for the registry {registryUrl}.'
+  'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary':
+    'Authentication failed for the registry {registryUrl}.'
 } as const;

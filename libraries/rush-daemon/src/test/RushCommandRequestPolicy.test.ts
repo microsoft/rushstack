@@ -7,7 +7,10 @@ import * as path from 'node:path';
 
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 
-import { BUILT_IN_RUSH_COMMAND_CLASSIFICATION, classifyRushCommand } from '../RushCommandRequestPolicy';
+import {
+  BUILT_IN_RUSH_COMMAND_CLASSIFICATION,
+  classifyRushCommand
+} from '../RushCommandRequestPolicy';
 import { RequestExclusivityClass } from '../RequestScheduler';
 
 describe(classifyRushCommand.name, () => {

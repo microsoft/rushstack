@@ -9,7 +9,10 @@ import {
   DaemonFrameListener,
   resolveDaemonPathsFromProcess
 } from '@rushstack/rush-daemon-transport';
-import type { DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type {
+  DaemonFrameConnection,
+  IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
 import { DaemonControlSession } from './DaemonControlSession';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
@@ -167,10 +170,9 @@ export class RushDaemonHost {
   private async _closeOnceAsync(): Promise<void> {
     this._lifecycle.closing = true;
     const errors: unknown[] = [];
-    const listenerClosePromise: Promise<unknown | undefined> = this._listener.closeAsync().then(
-      () => undefined,
-      (error: unknown) => error
-    );
+    const listenerClosePromise: Promise<unknown | undefined> = this._listener
+      .closeAsync()
+      .then(() => undefined, (error: unknown) => error);
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync())
     );

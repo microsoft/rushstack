@@ -39,7 +39,11 @@ function isPositiveSafeInteger(value: unknown): boolean {
 
 function validateTerminalRequirement(value: unknown): void {
   if (value === undefined) return;
-  const requirements: ReadonlySet<unknown> = new Set(['none', 'interactiveInput', 'controllingTerminal']);
+  const requirements: ReadonlySet<unknown> = new Set([
+    'none',
+    'interactiveInput',
+    'controllingTerminal'
+  ]);
   if (!requirements.has(value)) fail('Request terminal requirement is not recognized.');
 }
 

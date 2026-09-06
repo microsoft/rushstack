@@ -175,7 +175,10 @@ describe('negotiateReporterHello', () => {
 
   it('rejects a malformed wire hello with a predictable validation error', () => {
     expect(() =>
-      negotiateReporterHello({ kind: 'hello' }, { supportedProtocolVersion: { major: 1, minor: 0 } })
+      negotiateReporterHello(
+        { kind: 'hello' },
+        { supportedProtocolVersion: { major: 1, minor: 0 } }
+      )
     ).toThrow(InvalidReporterHelloError);
     expect(() =>
       negotiateReporterHello(

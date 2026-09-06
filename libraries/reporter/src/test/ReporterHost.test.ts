@@ -267,7 +267,10 @@ describe('ReporterHost handoff replay', () => {
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
       await manager.flushAsync();
       expect(result).toMatchObject({ replayed: true, eventCount: 2, skippedEventCount: 1 });
-      expect(reporter.reported.map((event) => event.type)).toEqual(['sessionStarted', 'diagnosticEmitted']);
+      expect(reporter.reported.map((event) => event.type)).toEqual([
+        'sessionStarted',
+        'diagnosticEmitted'
+      ]);
     });
   });
 

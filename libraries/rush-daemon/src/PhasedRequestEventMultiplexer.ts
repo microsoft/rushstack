@@ -46,7 +46,10 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
+  public onOperationStatusChanged(
+    result: IOperationExecutionResult,
+    previousStatus: OperationStatus
+  ): void {
     this.#workspaceSink?.onOperationStatusChanged?.(result, previousStatus);
     for (const requestSink of this.#requestSinks) {
       requestSink.onOperationStatusChanged?.(result, previousStatus);

@@ -64,7 +64,11 @@ describe(InteractiveRequestInputRouter.name, () => {
       new TestControlClient(),
       false
     ).session;
-    const ineligiblePromise: Promise<void> = routeAsync(router, 'non-interactive', Uint8Array.of(1));
+    const ineligiblePromise: Promise<void> = routeAsync(
+      router,
+      'non-interactive',
+      Uint8Array.of(1)
+    );
     expect(ineligiblePromise).toBeInstanceOf(Promise);
     await expect(ineligiblePromise).rejects.toMatchObject({ code: 'nonInteractiveRequest' });
     await session.finishAsync();
@@ -154,12 +158,12 @@ describe(InteractiveRequestInputRouter.name, () => {
       await register(router, `request-${index}`, new TestControlClient()).session.finishAsync();
     }
 
-    expect(() => register(router, 'over-limit', new TestControlClient())).toThrow(
-      expect.objectContaining({ code: 'requestLimitExceeded' })
-    );
-    expect(() => register(router, 'request-0', new TestControlClient())).toThrow(
-      expect.objectContaining({ code: 'duplicateRequest' })
-    );
+    expect(() =>
+      register(router, 'over-limit', new TestControlClient())
+    ).toThrow(expect.objectContaining({ code: 'requestLimitExceeded' }));
+    expect(() =>
+      register(router, 'request-0', new TestControlClient())
+    ).toThrow(expect.objectContaining({ code: 'duplicateRequest' }));
   });
 
   it('serializes raw-mode transitions and restores cooked mode before finishing', async () => {

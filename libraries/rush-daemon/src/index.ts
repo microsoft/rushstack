@@ -18,7 +18,10 @@ export {
   type IDaemonInteractiveConnection,
   type IDaemonInteractiveRequestOptions
 } from './DaemonInteractiveConnection';
-export { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+export {
+  DaemonRequiresInProcessError,
+  evaluateDaemonTerminalPolicy
+} from './DaemonTerminalPolicy';
 export {
   type IInteractiveRequestControlClient,
   type IInteractiveRequestInputSink,

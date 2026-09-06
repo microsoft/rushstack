@@ -8,7 +8,9 @@ import type {
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
-import { InteractiveRequestInputRouter } from './InteractiveRequestInputRouter';
+import {
+  InteractiveRequestInputRouter
+} from './InteractiveRequestInputRouter';
 import type {
   IInteractiveRequestControlClient,
   IInteractiveRequestSession
@@ -137,7 +139,9 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
         return;
       }
       if (this.#rawModeOwnerRequestId !== undefined) {
-        throw new Error(`Raw mode is already owned by interactive request "${this.#rawModeOwnerRequestId}".`);
+        throw new Error(
+          `Raw mode is already owned by interactive request "${this.#rawModeOwnerRequestId}".`
+        );
       }
       this.#rawModeOwnerRequestId = requestId;
       await this.#sendRawModeControlAsync(message, requestAbortSignal);
@@ -147,7 +151,10 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     }
   }
 
-  async #sendRawModeControlAsync(message: IDaemonSetRawModeMessage, abortSignal: AbortSignal): Promise<void> {
+  async #sendRawModeControlAsync(
+    message: IDaemonSetRawModeMessage,
+    abortSignal: AbortSignal
+  ): Promise<void> {
     if (this.#pendingRawModeByRequestId.has(message.payload.requestId)) {
       throw new Error(`Request "${message.payload.requestId}" already has a pending raw-mode change.`);
     }
@@ -174,7 +181,12 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     try {
       await promise;
     } catch (error) {
-      if (message.payload.enabled && sendStarted && abortSignal.aborted && !this.abortSignal.aborted) {
+      if (
+        message.payload.enabled &&
+        sendStarted &&
+        abortSignal.aborted &&
+        !this.abortSignal.aborted
+      ) {
         this.#abandonedRawModeEnableRequestIds.add(message.payload.requestId);
       }
       throw error;
@@ -182,12 +194,14 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
   }
 
   #acknowledgeRawMode(message: IDaemonRawModeChangedMessage): void {
-    if (message.payload.enabled && this.#abandonedRawModeEnableRequestIds.delete(message.payload.requestId)) {
+    if (
+      message.payload.enabled &&
+      this.#abandonedRawModeEnableRequestIds.delete(message.payload.requestId)
+    ) {
       return;
     }
-    const acknowledgement: IRawModeAcknowledgement | undefined = this.#pendingRawModeByRequestId.get(
-      message.payload.requestId
-    );
+    const acknowledgement: IRawModeAcknowledgement | undefined =
+      this.#pendingRawModeByRequestId.get(message.payload.requestId);
     if (!acknowledgement || acknowledgement.enabled !== message.payload.enabled) {
       throw new Error(`Unexpected raw-mode acknowledgement for request "${message.payload.requestId}".`);
     }

@@ -83,7 +83,8 @@ it('rejects a subscribe with an unknown verbosity', () => {
 });
 
 it('rejects an invalid request-admission capability', () => {
-  const json: string = '{"kind":"subscribe","payload":{"isTTY":true,"supportsRequestAdmission":"yes"}}';
+  const json: string =
+    '{"kind":"subscribe","payload":{"isTTY":true,"supportsRequestAdmission":"yes"}}';
   const error: ReturnType<typeof captureProtocolError> = captureProtocolError(() =>
     decodeDaemonControlMessage(Buffer.from(json))
   );

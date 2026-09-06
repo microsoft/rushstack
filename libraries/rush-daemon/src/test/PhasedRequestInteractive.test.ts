@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonPhasedRequest, IDaemonSetRawModeMessage } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonPhasedRequest,
+  IDaemonSetRawModeMessage
+} from '@rushstack/rush-daemon-protocol';
 
 import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
 import { InteractiveRequestInputRouter } from '../InteractiveRequestInputRouter';

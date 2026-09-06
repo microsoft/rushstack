@@ -30,7 +30,9 @@ export function mergeWith<TTarget extends object, TSource extends object>(
   const targetRecord: Record<string, unknown> = target as unknown as Record<string, unknown>;
   const sourceRecord: Record<string, unknown> = source as unknown as Record<string, unknown>;
   for (const [key, srcValue] of Object.entries(sourceRecord)) {
-    const objValue: unknown = Object.hasOwnProperty.call(targetRecord, key) ? targetRecord[key] : undefined;
+    const objValue: unknown = Object.hasOwnProperty.call(targetRecord, key)
+      ? targetRecord[key]
+      : undefined;
     const customized: unknown = customizer?.(objValue, srcValue, key);
     if (customized !== undefined) {
       _setProperty(targetRecord, key, customized);

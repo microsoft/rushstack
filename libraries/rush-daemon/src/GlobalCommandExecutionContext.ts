@@ -149,7 +149,9 @@ interface ITrackedChild {
   readonly completion: Promise<void>;
 }
 
-export class GlobalCommandExecutionContext implements IGlobalCommandExecutionContext, AsyncDisposable {
+export class GlobalCommandExecutionContext
+  implements IGlobalCommandExecutionContext, AsyncDisposable
+{
   readonly #abortController: AbortController = new AbortController();
   readonly #client: IGlobalCommandRequestClient;
   readonly #disposables: AsyncDisposable[] = [];
@@ -230,9 +232,10 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
       windowsHide: options.windowsHide
     });
     SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
-    const completion: Promise<void> = this.#trackChildAsync(child).catch((error: unknown) => {
-      this.#childCompletionErrors.push(error);
-    });
+    const completion: Promise<void> = this.#trackChildAsync(child)
+      .catch((error: unknown) => {
+        this.#childCompletionErrors.push(error);
+      });
     const trackedChild: ITrackedChild = { completion };
     this.#trackedChildren.add(trackedChild);
     void completion.then(() => this.#trackedChildren.delete(trackedChild));

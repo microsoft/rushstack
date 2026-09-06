@@ -9,7 +9,8 @@ import * as path from 'node:path';
 import type { BootstrapEventBuffer } from './BootstrapEventBuffer';
 import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
 
-const BOOTSTRAP_HANDOFF_MAX_BYTES: number = REPORTER_PROTOCOL_LIMITS.bootstrapBufferBytes + 1024;
+const BOOTSTRAP_HANDOFF_MAX_BYTES: number =
+  REPORTER_PROTOCOL_LIMITS.bootstrapBufferBytes + 1024;
 
 async function readBoundedUtf8FileAsync(filePath: string, maxBytes: number): Promise<string> {
   const fileHandle: fs.promises.FileHandle = await fs.promises.open(filePath, 'r');
@@ -149,7 +150,9 @@ export async function writeBootstrapHandoffFileAsync(
  *
  * @beta
  */
-export async function readBootstrapHandoffFileAsync(filePath: string): Promise<{
+export async function readBootstrapHandoffFileAsync(
+  filePath: string
+): Promise<{
   header: IBootstrapHandoffHeader | undefined;
   events: unknown[];
   discardedRecordCount: number;

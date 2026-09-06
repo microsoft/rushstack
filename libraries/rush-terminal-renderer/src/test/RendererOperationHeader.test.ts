@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type { DaemonVerbosity, IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
-import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
+import {
+  RUSHD_OPERATION_HEADER,
+  RUSHD_OPERATION_STREAM_CLOSED
+} from '@rushstack/rush-daemon-protocol';
 
 import { DaemonRendererHost } from '../DaemonRendererHost';
 

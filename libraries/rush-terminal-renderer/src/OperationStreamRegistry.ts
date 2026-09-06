@@ -81,7 +81,9 @@ export class OperationStreamRegistry {
     if (writer === undefined) {
       return;
     }
-    const counters: IDaemonOperationHeaderPayload = this._headers.takeOperationHeader(writer.taskName);
+    const counters: IDaemonOperationHeaderPayload = this._headers.takeOperationHeader(
+      writer.taskName
+    );
     const header: string = formatDaemonOperationHeader(
       writer.taskName,
       counters.completedOperations,

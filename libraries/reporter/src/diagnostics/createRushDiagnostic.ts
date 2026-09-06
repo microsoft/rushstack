@@ -84,7 +84,13 @@ export function createRushDiagnostic(
     throw new Error(`Unknown Rush diagnostic code: ${code}`);
   }
 
-  const { code: registeredCode, category, defaultSeverity, summaryKey, detailKey } = definition;
+  const {
+    code: registeredCode,
+    category,
+    defaultSeverity,
+    summaryKey,
+    detailKey
+  } = definition;
   const {
     diagnosticId = randomUUID(),
     severity = defaultSeverity,

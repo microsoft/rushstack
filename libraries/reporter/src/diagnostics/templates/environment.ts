@@ -18,6 +18,5 @@ export const ENVIRONMENT_DIAGNOSTIC_TEMPLATES = {
     'The producer advertised protocol major {producerProtocolMajor}. Update your global Rush installation to a version that supports it.',
   'diagnostic.RUSH_PROTOCOL_INVALID_CHILD_STREAM.summary':
     'A child process sent an invalid reporter protocol stream.',
-  'diagnostic.RUSH_PROTOCOL_INVALID_CHILD_STREAM.detail':
-    'The child reporter stream was rejected because {reason}.'
+  'diagnostic.RUSH_PROTOCOL_INVALID_CHILD_STREAM.detail': 'The child reporter stream was rejected because {reason}.'
 } as const;

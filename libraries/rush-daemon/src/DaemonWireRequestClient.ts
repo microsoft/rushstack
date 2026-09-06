@@ -86,7 +86,9 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     return this.#sendControlAsync(message);
   }
 
-  public writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void> {
+  public writeResultAsync(
+    result: IDaemonCommandResult | IDaemonPhasedRequestResult
+  ): Promise<void> {
     this.#claimTerminalOutcome();
     return this.#sendControlAsync({ kind: 'requestResult', payload: result });
   }
@@ -96,7 +98,10 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     return this.#sendControlAsync({ kind: 'terminalPolicy', payload: result });
   }
 
-  public writeRejectionAsync(code: DaemonRequestRejectionCode, message: string): Promise<void> {
+  public writeRejectionAsync(
+    code: DaemonRequestRejectionCode,
+    message: string
+  ): Promise<void> {
     this.#claimTerminalOutcome();
     return this.#sendControlAsync({
       kind: 'requestRejected',
@@ -104,7 +109,11 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     });
   }
 
-  #writeLogAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void> {
+  #writeLogAsync(
+    operationId: string,
+    stream: 'stdout' | 'stderr',
+    chunk: Uint8Array
+  ): Promise<void> {
     return this.#sendFrameAsync({
       kind: stream === 'stdout' ? DaemonFrameType.logStdout : DaemonFrameType.logStderr,
       payload: encodeDaemonLogChunk({ chunk, operationId })

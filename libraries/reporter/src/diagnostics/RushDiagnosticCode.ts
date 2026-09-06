@@ -23,15 +23,16 @@ export type RushDiagnosticCodeSegment<TSegment extends string = string> = string
  *
  * @beta
  */
-export type OneOrMoreRushDiagnosticCodeSegments<TSegments extends string = string> = string extends TSegments
-  ? `_${Uppercase<string>}`
-  : TSegments extends `_${infer Segments}`
-    ? Segments extends ''
-      ? never
-      : TSegments extends Uppercase<TSegments>
-        ? TSegments
-        : never
-    : never;
+export type OneOrMoreRushDiagnosticCodeSegments<TSegments extends string = string> =
+  string extends TSegments
+    ? `_${Uppercase<string>}`
+    : TSegments extends `_${infer Segments}`
+      ? Segments extends ''
+        ? never
+        : TSegments extends Uppercase<TSegments>
+          ? TSegments
+          : never
+      : never;
 
 /**
  * The shape of a stable, never-reused Rush diagnostic code:

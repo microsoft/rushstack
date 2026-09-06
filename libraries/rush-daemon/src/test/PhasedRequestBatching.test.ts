@@ -353,7 +353,10 @@ describe('shared phased request batching', () => {
       new TestPhasedRequestClient('one')
     );
     await operationStarted.promise;
-    const late = router.executeAsync(createRequest('late', OPERATION_C), new TestPhasedRequestClient('two'));
+    const late = router.executeAsync(
+      createRequest('late', OPERATION_C),
+      new TestPhasedRequestClient('two')
+    );
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(0);
     releaseOperation.resolve();
 
@@ -437,7 +440,9 @@ describe('shared phased request batching', () => {
       router.executeAsync(
         {
           ...createRequest('ignore-dependency', OPERATION_A),
-          operationSelection: [{ enabledState: 'ignore-dependency-changes', operationId: OPERATION_A }]
+          operationSelection: [
+            { enabledState: 'ignore-dependency-changes', operationId: OPERATION_A }
+          ]
         },
         new TestPhasedRequestClient('one')
       ),
@@ -466,7 +471,10 @@ describe('shared phased request batching', () => {
     clients.forEach((client: TestPhasedRequestClient, index: number) => {
       client.onWriteAsync = async (): Promise<void> => {
         concurrentWrites[index]++;
-        maximumConcurrentWrites[index] = Math.max(maximumConcurrentWrites[index], concurrentWrites[index]);
+        maximumConcurrentWrites[index] = Math.max(
+          maximumConcurrentWrites[index],
+          concurrentWrites[index]
+        );
         await new Promise<void>((resolve) => setImmediate(resolve));
         concurrentWrites[index]--;
       };

@@ -38,6 +38,9 @@ it('forwards unscoped and active activity while filtering other operation activi
     { stream: 'stdout', text: 'request summary' },
     { stream: 'stdout', text: 'active detail' }
   ]);
-  expect(activities.map(({ scope }) => scope)).toEqual([undefined, { operationId: ACTIVE_OPERATION }]);
+  expect(activities.map(({ scope }) => scope)).toEqual([
+    undefined,
+    { operationId: ACTIVE_OPERATION }
+  ]);
   expect(activities.every(({ required }) => required)).toBe(true);
 });

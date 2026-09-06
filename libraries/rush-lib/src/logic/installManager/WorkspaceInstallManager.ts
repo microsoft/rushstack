@@ -496,9 +496,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       { ...this.options, npmrcFolder: subspace.getSubspaceTempFolderPath() }
     );
-    const keepEnvironment: boolean = InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(
-      this.rushConfiguration
-    );
+    const keepEnvironment: boolean =
+      InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.rushConfiguration);
     if (ConsoleTerminalProvider.supportsColor) {
       packageManagerEnv.FORCE_COLOR = '1';
     }

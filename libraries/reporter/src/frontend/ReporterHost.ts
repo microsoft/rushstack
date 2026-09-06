@@ -11,7 +11,10 @@ import type { ReporterEventType } from '../events/ReporterEventType';
 import type { IReporterEventSink } from '../producers/IReporterEventSink';
 import { REPORTER_EVENT_TYPES } from '../events/ReporterEventType';
 import { ReporterManager } from '../manager/ReporterManager';
-import { REPORTER_PROTOCOL_VERSION, isReporterProtocolCompatible } from '../protocol/ReporterProtocol';
+import {
+  REPORTER_PROTOCOL_VERSION,
+  isReporterProtocolCompatible
+} from '../protocol/ReporterProtocol';
 import {
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
@@ -98,12 +101,7 @@ export interface IBootstrapReplayResult {
    * The reason no events were replayed, when a handoff path was present.
    * `nonce-mismatch` means the file failed authentication and was rejected.
    */
-  readonly skipReason?:
-    | 'unreadable'
-    | 'invalid-path'
-    | 'nonce-mismatch'
-    | 'invalid-event'
-    | 'incompatible-protocol';
+  readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -249,7 +247,10 @@ export class ReporterHost {
     let skippedEventCount: number = discardedRecordCount;
     for (const event of events) {
       const protocolVersion: IReporterProtocolVersion | undefined = getProtocolVersion(event);
-      if (protocolVersion && !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)) {
+      if (
+        protocolVersion &&
+        !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)
+      ) {
         await deleteBootstrapHandoffFileAsync(handoffPath);
         return {
           direct: false,

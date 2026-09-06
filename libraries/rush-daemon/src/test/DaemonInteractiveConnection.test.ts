@@ -60,16 +60,17 @@ it('cancels an unacknowledged raw-mode entry but still acknowledges restoration'
   await expect(finishPromise).rejects.toThrow('request cancelled');
   expect(
     sentControls
-      .filter(
-        (message): message is Extract<DaemonControlMessage, { kind: 'setRawMode' }> =>
-          message.kind === 'setRawMode'
+      .filter((message): message is Extract<DaemonControlMessage, { kind: 'setRawMode' }> =>
+        message.kind === 'setRawMode'
       )
       .map(({ payload }) => payload.enabled)
   ).toEqual([true, false]);
 });
 
 it('rejects interactive traffic until the client negotiates support', async () => {
-  const connection: DaemonInteractiveConnection = new DaemonInteractiveConnection(() => Promise.resolve());
+  const connection: DaemonInteractiveConnection = new DaemonInteractiveConnection(() =>
+    Promise.resolve()
+  );
   expect(() =>
     connection.registerRequest({
       abortSignal: new AbortController().signal,
@@ -81,12 +82,10 @@ it('rejects interactive traffic until the client negotiates support', async () =
   const stdinPromise: Promise<void> = connection.routeStdinFrameAsync(Uint8Array.of(0));
   expect(stdinPromise).toBeInstanceOf(Promise);
   await expect(stdinPromise).rejects.toThrow('did not negotiate');
-  expect(() =>
-    connection.writeTerminalPolicyAsync({
-      decision: 'runInDaemon',
-      requestId: 'not-negotiated'
-    })
-  ).toThrow('did not negotiate');
+  expect(() => connection.writeTerminalPolicyAsync({
+    decision: 'runInDaemon',
+    requestId: 'not-negotiated'
+  })).toThrow('did not negotiate');
 });
 
 it('serializes concurrent raw-mode requests and preserves exclusive ownership', async () => {
@@ -137,11 +136,12 @@ it('serializes concurrent raw-mode requests and preserves exclusive ownership', 
   ]);
 });
 
-function rawModePayloads(messages: DaemonControlMessage[]): Array<{ enabled: boolean; requestId: string }> {
+function rawModePayloads(
+  messages: DaemonControlMessage[]
+): Array<{ enabled: boolean; requestId: string }> {
   return messages
-    .filter(
-      (message): message is Extract<DaemonControlMessage, { kind: 'setRawMode' }> =>
-        message.kind === 'setRawMode'
+    .filter((message): message is Extract<DaemonControlMessage, { kind: 'setRawMode' }> =>
+      message.kind === 'setRawMode'
     )
     .map(({ payload }) => payload);
 }

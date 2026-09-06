@@ -19,21 +19,9 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
   'requestRejected',
   'requestResult'
 ] = [
-  'hello',
-  'helloAck',
-  'subscribe',
-  'unsubscribe',
-  'ping',
-  'pong',
-  'error',
-  'setRawMode',
-  'rawModeChanged',
-  'terminalPolicy',
-  'queuePosition',
-  'requestStart',
-  'requestCancel',
-  'requestRejected',
-  'requestResult'
+  'hello', 'helloAck', 'subscribe', 'unsubscribe', 'ping', 'pong', 'error',
+  'setRawMode', 'rawModeChanged', 'terminalPolicy', 'queuePosition',
+  'requestStart', 'requestCancel', 'requestRejected', 'requestResult'
 ];
 
 /** The union of control message `kind` discriminants. @beta */

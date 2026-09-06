@@ -69,7 +69,8 @@ export class HostEventRouter {
       return;
     }
     if (payload.name === RUSHD_OPERATION_STREAM_CLOSED) {
-      const data: IDaemonOperationStreamClosedPayload = payload.data as IDaemonOperationStreamClosedPayload;
+      const data: IDaemonOperationStreamClosedPayload =
+        payload.data as IDaemonOperationStreamClosedPayload;
       this._streams.closeOperation(data.operationId);
     }
   }

@@ -10,16 +10,8 @@ import {
   validateRawModeControl,
   validateTerminalPolicyControl
 } from './InteractiveControlValidation';
-import {
-  validateRequestAdmissionCapability,
-  validateRequestQueuePositionControl
-} from './RequestAdmissionControlValidation';
-import {
-  validateRequestCancelControl,
-  validateRequestRejectedControl,
-  validateRequestResultControl,
-  validateRequestStartControl
-} from './RequestControlValidation';
+import { validateRequestAdmissionCapability, validateRequestQueuePositionControl } from './RequestAdmissionControlValidation';
+import { validateRequestCancelControl, validateRequestRejectedControl, validateRequestResultControl, validateRequestStartControl } from './RequestControlValidation';
 import { validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);

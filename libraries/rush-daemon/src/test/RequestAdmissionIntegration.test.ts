@@ -16,8 +16,13 @@ import { OperationStatus } from '@microsoft/rush-lib';
 import type { IGlobalCommandExecutionContext } from '../GlobalCommandExecutionContext';
 import type { IResolvedGlobalCommandRequest } from '../GlobalCommandRequest';
 import type { IGlobalCommandRequestClient } from '../GlobalCommandRequestClient';
-import { GlobalCommandRequestRouter } from '../GlobalCommandRequestRouter';
-import type { GlobalCommandExecutor, IGlobalCommandExecutionResult } from '../GlobalCommandRequestRouter';
+import {
+  GlobalCommandRequestRouter
+} from '../GlobalCommandRequestRouter';
+import type {
+  GlobalCommandExecutor,
+  IGlobalCommandExecutionResult
+} from '../GlobalCommandRequestRouter';
 import type { IInteractiveRequestSession } from '../InteractiveRequestInputRouter';
 import { InteractiveRequestInputRouter } from '../InteractiveRequestInputRouter';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
@@ -275,7 +280,11 @@ describe('request admission integration', () => {
       exitCode: 0
     }));
     await expect(
-      router.executeAsync(createRequest(router, 'disconnected', 'list'), executor, disconnectedClient)
+      router.executeAsync(
+        createRequest(router, 'disconnected', 'list'),
+        executor,
+        disconnectedClient
+      )
     ).rejects.toThrow('client disconnected');
     release.resolve();
     await active;
@@ -333,7 +342,9 @@ describe('request admission integration', () => {
 
     await new Promise<void>((resolve) => setImmediate(resolve));
     expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(0);
-    expect(legacyClient.writes.map(({ queuePosition }) => queuePosition?.payload.position)).toContain(1);
+    expect(legacyClient.writes.map(({ queuePosition }) => queuePosition?.payload.position)).toContain(
+      1
+    );
     release.resolve();
 
     await Promise.all([active, legacy]);
@@ -414,10 +425,15 @@ describe('request admission integration', () => {
     );
     await globalStarted.promise;
     const phasedClient: TestPhasedRequestClient = new TestPhasedRequestClient();
-    const phased = phasedRouter.executeAsync(createPhasedRequest('phased'), phasedClient);
+    const phased = phasedRouter.executeAsync(
+      createPhasedRequest('phased'),
+      phasedClient
+    );
 
     await new Promise<void>((resolve) => setImmediate(resolve));
-    expect(phasedClient.writes.map(({ queuePosition }) => queuePosition?.payload.position)).toContain(1);
+    expect(
+      phasedClient.writes.map(({ queuePosition }) => queuePosition?.payload.position)
+    ).toContain(1);
     expect(fixture.runners.get(TEST_OPERATION)?.runCount).toBe(0);
     release.resolve();
 

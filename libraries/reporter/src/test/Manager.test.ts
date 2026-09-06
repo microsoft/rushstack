@@ -152,10 +152,9 @@ describe('ReporterManager ordering and assignment', () => {
     manager.ingestForeignEnvelope(foreign);
     await manager.flushAsync();
 
-    const byIdentity: [string, string][] = reporter.reported.map((e: IReporterEventEnvelope<unknown>) => [
-      e.sessionId,
-      e.eventId
-    ]);
+    const byIdentity: [string, string][] = reporter.reported.map(
+      (e: IReporterEventEnvelope<unknown>) => [e.sessionId, e.eventId]
+    );
     expect(byIdentity).toEqual([
       ['sess', 'evt_1'],
       ['child', 'evt_1']

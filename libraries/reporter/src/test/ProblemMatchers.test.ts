@@ -139,7 +139,7 @@ describe('runProblemMatchers', () => {
 
     const splitAnsiEvents: IReporterEventEnvelope<unknown>[] = emitOutput([
       '\u001b[31',
-      'msrc/split.ts(4,5): error TS2001: split escape\u001b[0m\n'
+      "msrc/split.ts(4,5): error TS2001: split escape\u001b[0m\n"
     ]);
     const splitAnsiResult: IProblemMatcherResult = runProblemMatchers(splitAnsiEvents, [TSC_ERROR_MATCHER]);
     expect(splitAnsiResult.diagnostics).toHaveLength(1);

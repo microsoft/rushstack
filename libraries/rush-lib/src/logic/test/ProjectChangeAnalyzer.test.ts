@@ -390,7 +390,10 @@ describe(ProjectChangeAnalyzer.name, () => {
 
       mockGetRepoChanges.mockReturnValue(
         new Map<string, IFileDiffStatus>([
-          ['b/package.json', { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }]
+          [
+            'b/package.json',
+            { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }
+          ]
         ])
       );
       const packageJsonByHash: Record<string, object> = {

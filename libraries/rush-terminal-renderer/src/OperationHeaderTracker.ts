@@ -20,7 +20,8 @@ export class OperationHeaderTracker {
   }
 
   public takeOperationHeader(operationId: string): IDaemonOperationHeaderPayload {
-    const header: IDaemonOperationHeaderPayload | undefined = this._headerByOperation.get(operationId);
+    const header: IDaemonOperationHeaderPayload | undefined =
+      this._headerByOperation.get(operationId);
     if (header !== undefined) {
       this._headerByOperation.delete(operationId);
       this._completedOperations = header.completedOperations;

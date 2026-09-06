@@ -62,7 +62,10 @@ export function isDaemonEventEnvelope(value: unknown): value is IDaemonEventEnve
  */
 export function validateDaemonEventEnvelope(value: unknown): IDaemonEventEnvelope {
   if (!isDaemonEventEnvelope(value)) {
-    throw new DaemonProtocolError('malformedPayload', 'Event frame payload is not a valid event envelope.');
+    throw new DaemonProtocolError(
+      'malformedPayload',
+      'Event frame payload is not a valid event envelope.'
+    );
   }
   return value;
 }

@@ -115,9 +115,9 @@ describe('Rush command result parity', () => {
 
   it('uses platform environment-name semantics for the warnings override', () => {
     const lowercaseEnvironmentName: string = 'rush_allow_warnings_in_successful_build';
-    expect(parseWarningsAllowedByEnvironment({ [lowercaseEnvironmentName]: '1' })).toBe(
-      process.platform === 'win32'
-    );
+    expect(
+      parseWarningsAllowedByEnvironment({ [lowercaseEnvironmentName]: '1' })
+    ).toBe(process.platform === 'win32');
   });
 
   it('ignores a retained warning when the current incremental iteration succeeds', () => {

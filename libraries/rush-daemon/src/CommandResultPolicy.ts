@@ -12,7 +12,8 @@ import type {
 
 export const RUSH_SUCCESS_EXIT_CODE: number = 0;
 export const RUSH_FAILURE_EXIT_CODE: number = 1;
-export const RUSH_ALLOW_WARNINGS_ENVIRONMENT_VARIABLE: string = 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD';
+export const RUSH_ALLOW_WARNINGS_ENVIRONMENT_VARIABLE: string =
+  'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD';
 
 export interface IPhasedOperationOutcome {
   readonly observedInCurrentIteration: boolean;
@@ -37,7 +38,9 @@ const SUCCESS_STATUSES: ReadonlySet<string> = new Set([
   OperationStatus.NoOp
 ]);
 
-export function parseWarningsAllowedByEnvironment(environment: Readonly<Record<string, string>>): boolean {
+export function parseWarningsAllowedByEnvironment(
+  environment: Readonly<Record<string, string>>
+): boolean {
   const value: string | undefined = new EnvironmentMap(environment).get(
     RUSH_ALLOW_WARNINGS_ENVIRONMENT_VARIABLE
   );
@@ -73,7 +76,9 @@ export function createGlobalCommandResult(options: {
   );
 }
 
-export function createPhasedCommandResult(options: IPhasedCommandResultOptions): IDaemonPhasedRequestResult {
+export function createPhasedCommandResult(
+  options: IPhasedCommandResultOptions
+): IDaemonPhasedRequestResult {
   const operationResults: ReadonlyArray<IDaemonPhasedOperationResult> = options.operationOutcomes.map(
     ({ result }) => result
   );

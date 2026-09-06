@@ -35,7 +35,10 @@ import {
   createDeferred,
   createWireEnvelope
 } from './DaemonRequestWireTestUtilities';
-import type { IDeferred, ITerminalExchange } from './DaemonRequestWireTestUtilities';
+import type {
+  IDeferred,
+  ITerminalExchange
+} from './DaemonRequestWireTestUtilities';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
@@ -95,7 +98,9 @@ async function startHostAsync(
 }
 
 async function connectAsync(host: RushDaemonHost): Promise<DaemonRequestWireClient> {
-  const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
+  const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(
+    host.paths.socketPath
+  );
   await client.handshakeAsync();
   return client;
 }
@@ -147,20 +152,26 @@ describe('daemon phased request wire integration', () => {
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
     const client: DaemonRequestWireClient = await connectAsync(host);
     try {
-      const first: ITerminalExchange = await startAsync(client, {
-        ...phasedEnvelope(repoRoot, 'subtree', OPERATION_B),
-        environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
-      });
+      const first: ITerminalExchange = await startAsync(
+        client,
+        {
+          ...phasedEnvelope(repoRoot, 'subtree', OPERATION_B),
+          environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
+        }
+      );
       expect(first.terminal).toMatchObject({
         kind: 'requestResult',
         payload: { exitCode: 0, outcome: 'success-with-warning', scheduled: true }
       });
       expect(readOperationIds(first)).toEqual(new Set([OPERATION_A, OPERATION_B]));
       expect(readLogText(first)).toContain('warning-output');
-      const warm: ITerminalExchange = await startAsync(client, {
-        ...phasedEnvelope(repoRoot, 'warm', OPERATION_B),
-        environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
-      });
+      const warm: ITerminalExchange = await startAsync(
+        client,
+        {
+          ...phasedEnvelope(repoRoot, 'warm', OPERATION_B),
+          environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
+        }
+      );
       expect(warm.terminal).toMatchObject({
         kind: 'requestResult',
         payload: { scheduled: false }
@@ -222,7 +233,8 @@ describe('daemon phased request wire integration', () => {
     const fixture: ITestRoutingFixture = createRoutingFixture(
       new Map([[OPERATION_A, new TestOperationRunner(OPERATION_A)]])
     );
-    fixture.session.onReconcileAsync = () => Promise.reject(new WorkspaceEngineRecreationRequiredError());
+    fixture.session.onReconcileAsync = () =>
+      Promise.reject(new WorkspaceEngineRecreationRequiredError());
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
     const client: DaemonRequestWireClient = await connectAsync(host);
@@ -251,14 +263,17 @@ describe('daemon phased request wire integration', () => {
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
     const client: DaemonRequestWireClient = await connectAsync(host);
     try {
-      const exchange: ITerminalExchange = await startAsync(client, {
-        ...phasedEnvelope(repoRoot, 'fallback', OPERATION_A),
-        terminal: {
-          isTTY: true,
-          supportsColor: true,
-          terminalRequirement: 'controllingTerminal'
+      const exchange: ITerminalExchange = await startAsync(
+        client,
+        {
+          ...phasedEnvelope(repoRoot, 'fallback', OPERATION_A),
+          terminal: {
+            isTTY: true,
+            supportsColor: true,
+            terminalRequirement: 'controllingTerminal'
+          }
         }
-      });
+      );
       expect(exchange.terminal).toMatchObject({
         kind: 'terminalPolicy',
         payload: { decision: 'requiresInProcess', requestId: 'fallback' }
@@ -326,7 +341,10 @@ function readOperationIds(exchange: ITerminalExchange): ReadonlySet<string> {
 
 function readLogText(exchange: ITerminalExchange): string {
   return exchange.frames
-    .filter((frame) => frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr)
+    .filter(
+      (frame) =>
+        frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr
+    )
     .map((frame) => new TextDecoder().decode(decodeDaemonLogChunk(frame.payload).chunk))
     .join('');
 }

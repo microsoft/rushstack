@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { DaemonTerminalRequirement, IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protocol';
+import type {
+  DaemonTerminalRequirement,
+  IDaemonTerminalPolicyResult
+} from '@rushstack/rush-daemon-protocol';
 
 /**
  * A typed signal that a thin client must execute the command in-process.

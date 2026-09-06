@@ -7,7 +7,10 @@ import type {
   IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest
 } from '@rushstack/rush-daemon-protocol';
-import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
+import {
+  RUSHD_OPERATION_HEADER,
+  RUSHD_OPERATION_STREAM_CLOSED
+} from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
@@ -17,7 +20,10 @@ import {
   TestPhasedRequestClient,
   createRoutingFixture
 } from './PhasedRequestRouterTestUtilities';
-import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
+import type {
+  ITestClientWrite,
+  ITestRoutingFixture
+} from './PhasedRequestRouterTestUtilities';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
@@ -40,7 +46,10 @@ function select(operationId: string): IDaemonPhasedOperationSelection {
   return { enabledState: true, operationId };
 }
 
-function selectRuntimeValue(operationId: string, enabledState: unknown): IDaemonPhasedOperationSelection {
+function selectRuntimeValue(
+  operationId: string,
+  enabledState: unknown
+): IDaemonPhasedOperationSelection {
   return { enabledState, operationId } as unknown as IDaemonPhasedOperationSelection;
 }
 
@@ -95,15 +104,18 @@ describe(PhasedRequestRouter.name, () => {
     await expect(router.executeAsync(createRequest([]), client)).rejects.toThrow(
       'must select at least one operation'
     );
-    await expect(router.executeAsync(createRequest([select('unknown operation')]), client)).rejects.toThrow(
-      'Unknown phased request operation id'
-    );
+    await expect(
+      router.executeAsync(createRequest([select('unknown operation')]), client)
+    ).rejects.toThrow('Unknown phased request operation id');
     await expect(
       router.executeAsync(createRequest([select(OPERATION_A), select(OPERATION_A)]), client)
     ).rejects.toThrow('Duplicate phased request operation id');
     for (const enabledState of [false, 'invalid-state']) {
       await expect(
-        router.executeAsync(createRequest([selectRuntimeValue(OPERATION_A, enabledState)]), client)
+        router.executeAsync(
+          createRequest([selectRuntimeValue(OPERATION_A, enabledState)]),
+          client
+        )
       ).rejects.toThrow(`Invalid phased request enabled state: "${String(enabledState)}"`);
     }
     await expect(
@@ -134,7 +146,9 @@ describe(PhasedRequestRouter.name, () => {
     );
 
     expect(trueFixture.operations.get(OPERATION_A)?.enabled).toBe(true);
-    expect(ignoredDependencyFixture.operations.get(OPERATION_A)?.enabled).toBe('ignore-dependency-changes');
+    expect(ignoredDependencyFixture.operations.get(OPERATION_A)?.enabled).toBe(
+      'ignore-dependency-changes'
+    );
 
     const mixedFixture: ITestRoutingFixture = createThreeOperationFixture();
     await new PhasedRequestRouter(mixedFixture.session).executeAsync(
@@ -148,7 +162,9 @@ describe(PhasedRequestRouter.name, () => {
       new TestPhasedRequestClient()
     );
 
-    expect(mixedFixture.operations.get(OPERATION_A)?.enabled).toBe('ignore-dependency-changes');
+    expect(mixedFixture.operations.get(OPERATION_A)?.enabled).toBe(
+      'ignore-dependency-changes'
+    );
     expect(mixedFixture.operations.get(OPERATION_B)?.enabled).toBe(true);
   });
 
@@ -166,7 +182,10 @@ describe(PhasedRequestRouter.name, () => {
       order.push('schedule');
     });
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
-    const executeSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'executeScheduledIterationAsync');
+    const executeSpy: jest.SpyInstance = jest.spyOn(
+      fixture.graph,
+      'executeScheduledIterationAsync'
+    );
     const client: TestPhasedRequestClient = new TestPhasedRequestClient();
 
     const result = await new PhasedRequestRouter(fixture.session).executeAsync(
@@ -180,7 +199,10 @@ describe(PhasedRequestRouter.name, () => {
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
     expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(0);
-    expect(result.operationResults.map(({ operationId }) => operationId)).toEqual([OPERATION_A, OPERATION_B]);
+    expect(result.operationResults.map(({ operationId }) => operationId)).toEqual([
+      OPERATION_A,
+      OPERATION_B
+    ]);
     expect(result.scheduled).toBe(true);
     expect(result).toMatchObject({ exitCode: 0, outcome: 'success' });
     expect(clientResultWrites(client)).toEqual([{ result }]);
@@ -203,13 +225,19 @@ describe(PhasedRequestRouter.name, () => {
       concurrentWrites--;
     };
 
-    await new PhasedRequestRouter(fixture.session).executeAsync(createRequest([select(OPERATION_A)]), client);
+    await new PhasedRequestRouter(fixture.session).executeAsync(
+      createRequest([select(OPERATION_A)]),
+      client
+    );
 
     expect(maximumConcurrentWrites).toBe(1);
     const logWrites: ITestClientWrite[] = client.writes.filter(
       (write: ITestClientWrite) => write.text !== undefined
     );
-    expect(logWrites.map(({ operationId }) => operationId)).toEqual([OPERATION_A, OPERATION_A]);
+    expect(logWrites.map(({ operationId }) => operationId)).toEqual([
+      OPERATION_A,
+      OPERATION_A
+    ]);
     expect(logWrites.map(({ stream }) => stream)).toEqual(['stdout', 'stderr']);
     expect(logWrites[0]?.text).toContain('stdout-a');
     expect(logWrites[1]?.text).toContain('stderr-a');
@@ -228,7 +256,8 @@ describe(PhasedRequestRouter.name, () => {
       .map((write: ITestClientWrite) => write.event)
       .find(
         (event: IDaemonEventEnvelope | undefined) =>
-          (event?.payload as { name?: unknown } | undefined)?.name === RUSHD_OPERATION_STREAM_CLOSED
+          (event?.payload as { name?: unknown } | undefined)?.name ===
+          RUSHD_OPERATION_STREAM_CLOSED
       );
     expect(streamClosedEvent?.required).toBe(true);
   });
@@ -337,7 +366,10 @@ describe(PhasedRequestRouter.name, () => {
     fixture.graph.eventSink = previousSink;
     const client: TestPhasedRequestClient = new TestPhasedRequestClient();
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
-    const requestPromise = router.executeAsync(createRequest([select(OPERATION_B)]), client);
+    const requestPromise = router.executeAsync(
+      createRequest([select(OPERATION_B)]),
+      client
+    );
     await operationAStarted;
     client.abortController.abort();
     releaseOperationA?.();
@@ -346,9 +378,9 @@ describe(PhasedRequestRouter.name, () => {
 
     expect(result.aborted).toBe(true);
     expect(result).toMatchObject({ exitCode: 1, outcome: 'aborted' });
-    expect(result.operationResults.find(({ operationId }) => operationId === OPERATION_B)?.status).toBe(
-      OperationStatus.Aborted
-    );
+    expect(
+      result.operationResults.find(({ operationId }) => operationId === OPERATION_B)?.status
+    ).toBe(OperationStatus.Aborted);
     expect(fixture.graph.pauseNextIteration).toBe(false);
     expect(fixture.runners.get(OPERATION_A)?.closeCount).toBe(0);
     expect(fixture.runners.get(OPERATION_B)?.closeCount).toBe(0);
@@ -387,9 +419,9 @@ describe(PhasedRequestRouter.name, () => {
       createRequest([select(OPERATION_B)]),
       new TestPhasedRequestClient()
     );
-    expect(first.operationResults.find(({ operationId }) => operationId === OPERATION_A)?.errorMessage).toBe(
-      'first iteration failure'
-    );
+    expect(
+      first.operationResults.find(({ operationId }) => operationId === OPERATION_A)?.errorMessage
+    ).toBe('first iteration failure');
 
     const secondClient: TestPhasedRequestClient = new TestPhasedRequestClient();
     const secondPromise = router.executeAsync(
@@ -425,7 +457,10 @@ describe(PhasedRequestRouter.name, () => {
     };
 
     await expect(
-      new PhasedRequestRouter(fixture.session).executeAsync(createRequest([select(OPERATION_B)]), client)
+      new PhasedRequestRouter(fixture.session).executeAsync(
+        createRequest([select(OPERATION_B)]),
+        client
+      )
     ).resolves.toMatchObject({
       errorMessage: 'client disconnected',
       exitCode: 1,
@@ -444,7 +479,10 @@ describe(PhasedRequestRouter.name, () => {
     };
 
     await expect(
-      new PhasedRequestRouter(fixture.session).executeAsync(createRequest([select(OPERATION_B)]), client)
+      new PhasedRequestRouter(fixture.session).executeAsync(
+        createRequest([select(OPERATION_B)]),
+        client
+      )
     ).rejects.toThrow('client disconnected before execution');
     expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(0);
     expect(fixture.graph.hasScheduledIteration).toBe(false);
@@ -525,7 +563,10 @@ describe(PhasedRequestRouter.name, () => {
     const firstClient: TestPhasedRequestClient = new TestPhasedRequestClient(sequenceState);
     const secondClient: TestPhasedRequestClient = new TestPhasedRequestClient(sequenceState);
 
-    const first = await router.executeAsync(createRequest([select(OPERATION_A)]), firstClient);
+    const first = await router.executeAsync(
+      createRequest([select(OPERATION_A)]),
+      firstClient
+    );
     const second = await router.executeAsync(
       { ...createRequest([select(OPERATION_A)]), requestId: 'request-2' },
       secondClient
@@ -562,7 +603,10 @@ describe(PhasedRequestRouter.name, () => {
     await router.executeAsync(createRequest([select(OPERATION_B)]), new TestPhasedRequestClient());
     const client: TestPhasedRequestClient = new TestPhasedRequestClient();
 
-    await router.executeAsync({ ...createRequest([select(OPERATION_B)]), requestId: 'request-2' }, client);
+    await router.executeAsync(
+      { ...createRequest([select(OPERATION_B)]), requestId: 'request-2' },
+      client
+    );
 
     const headers: IDaemonEventEnvelope[] = client.writes
       .map(({ event }) => event)

@@ -249,4 +249,5 @@ export class LegacyReporter implements IReporter {
   private _seconds(durationMs: number): string {
     return (durationMs / 1000).toFixed(2);
   }
+
 }

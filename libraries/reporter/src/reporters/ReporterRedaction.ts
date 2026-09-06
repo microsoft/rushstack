@@ -8,7 +8,9 @@ interface IClassifiedValue {
   readonly privacy: string;
 }
 
-export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IReporterEventEnvelope<unknown> {
+export function redactReporterEvent(
+  event: IReporterEventEnvelope<unknown>
+): IReporterEventEnvelope<unknown> {
   let payload: unknown = event.payload;
   if (event.privacy === 'secret') {
     payload = '[secret]';

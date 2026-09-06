@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonCommandResult, IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonCommandResult,
+  IDaemonTerminalPolicyResult
+} from '@rushstack/rush-daemon-protocol';
 
 import { createGlobalCommandResult } from './CommandResultPolicy';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
@@ -14,14 +17,21 @@ import {
   validateResolvedGlobalCommandRequest
 } from './GlobalCommandRequest';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
-import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+import {
+  DaemonRequiresInProcessError,
+  evaluateDaemonTerminalPolicy
+} from './DaemonTerminalPolicy';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import {
   getWorkspaceRequestScheduler,
   getRequestAdmissionErrorCode,
   RequestAdmissionController
 } from './WorkspaceRequestAdmission';
-import { type IRequestLease, RequestSchedulerError, RequestSchedulerErrorCode } from './RequestScheduler';
+import {
+  type IRequestLease,
+  RequestSchedulerError,
+  RequestSchedulerErrorCode
+} from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 
 /**
@@ -116,13 +126,7 @@ export class GlobalCommandRequestRouter {
 
     try {
       try {
-        return await executeAdmittedAsync(
-          request,
-          executor,
-          client,
-          interactiveSession,
-          this.#workspaceSession
-        );
+        return await executeAdmittedAsync(request, executor, client, interactiveSession, this.#workspaceSession);
       } finally {
         lease.release();
       }
