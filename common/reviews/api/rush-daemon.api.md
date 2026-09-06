@@ -399,6 +399,7 @@ export interface IResolveGlobalCommandRequestOptions {
 export interface IRushDaemonHostOptions {
     readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
     readonly daemonVersion: string;
+    readonly idleTimeoutSeconds?: number;
     readonly onError?: (error: Error) => void;
     readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
     readonly repoRoot: string;
@@ -585,6 +586,7 @@ export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaem
 // @beta
 export class RushDaemonHost {
     closeAsync(): Promise<void>;
+    readonly closed: Promise<void>;
     getWorkspaceSessionAsync(): Promise<IWorkspaceSession>;
     // (undocumented)
     readonly paths: IDaemonPaths;

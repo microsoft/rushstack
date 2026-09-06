@@ -44,6 +44,7 @@ export interface IDaemonControlSessionOptions {
   readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   readonly onClosed: (session: DaemonControlSession, error: Error | undefined) => void;
   readonly onError: (error: Error) => void;
+  readonly onRequestStarted?: () => () => void;
 }
 
 interface IRequestState {
@@ -257,7 +258,14 @@ export class DaemonControlSession {
     });
     const state: IRequestState = { abortController, client, completion: Promise.resolve() };
     this.#requestById.set(requestId, state);
-    state.completion = Promise.resolve().then(() => this.#dispatchRequestAsync(envelope, state));
+    const releaseActivity: (() => void) | undefined = this.#options.onRequestStarted?.();
+    state.completion = Promise.resolve()
+      .then(() => this.#dispatchRequestAsync(envelope, state))
+      .finally(() => {
+        this.#completeRequest(requestId, state);
+        releaseActivity?.();
+      });
+    void state.completion.catch((error: unknown) => this.#handleSendFailureAsync(error));
   }
 
   #getNextEventSequence(): number {
@@ -300,7 +308,6 @@ export class DaemonControlSession {
       const rejection: IClassifiedRejection = classifyRejection(dispatchError);
       await state.client.writeRejectionAsync(rejection.code, rejection.message);
     }
-    this.#completeRequest(envelope.requestId, state);
   }
 
   #completeRequest(requestId: string, state: IRequestState): void {

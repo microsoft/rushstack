@@ -15,6 +15,7 @@ import type {
 } from '@rushstack/rush-daemon-transport';
 
 import { DaemonControlSession } from './DaemonControlSession';
+import { DaemonIdleTimer } from './DaemonIdleTimer';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
 import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
@@ -32,6 +33,8 @@ export interface IRushDaemonHostOptions {
   readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
   /** The daemon implementation version reported by `pong`. */
   readonly daemonVersion: string;
+  /** Shuts down after this many seconds without pending requests. Disabled when omitted. */
+  readonly idleTimeoutSeconds?: number;
   /** Reports connection-level failures. */
   readonly onError?: (error: Error) => void;
   /** Resolves validated wire envelopes into existing typed phased or global requests. */
@@ -53,12 +56,17 @@ export interface IRushDaemonHostOptions {
  */
 export class RushDaemonHost {
   private readonly _listener: DaemonFrameListener;
+  private readonly _idleTimer: DaemonIdleTimer;
   private readonly _sessions: Set<DaemonControlSession>;
   private readonly _workspaceSessionProvider: WorkspaceSessionProvider;
   private readonly _lifecycle: { closing: boolean };
   private readonly _requestDispatcher: DaemonRequestDispatcher;
   public readonly paths: IDaemonPaths;
   private _closePromise: Promise<void> | undefined;
+  private _notifyClosed: (() => void) | undefined;
+
+  /** Resolves after shutdown cleanup finishes. Use closeAsync() to observe cleanup failures. */
+  public readonly closed: Promise<void>;
 
   private constructor(
     listener: DaemonFrameListener,
@@ -66,18 +74,24 @@ export class RushDaemonHost {
     sessions: Set<DaemonControlSession>,
     lifecycle: { closing: boolean },
     requestDispatcher: DaemonRequestDispatcher,
-    workspaceSessionProvider: WorkspaceSessionProvider
+    workspaceSessionProvider: WorkspaceSessionProvider,
+    idleTimer: DaemonIdleTimer
   ) {
+    this.closed = new Promise<void>((resolve) => {
+      this._notifyClosed = resolve;
+    });
     this._listener = listener;
     this.paths = paths;
     this._sessions = sessions;
     this._lifecycle = lifecycle;
     this._requestDispatcher = requestDispatcher;
     this._workspaceSessionProvider = workspaceSessionProvider;
+    this._idleTimer = idleTimer;
   }
 
   /** Resolves only after the transport is bound and its lockfile has been written. */
   public static async startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost> {
+    const idleTimer: DaemonIdleTimer = new DaemonIdleTimer(options.idleTimeoutSeconds);
     const canonicalRepoRoot: string = await realpath(options.repoRoot);
     const workspaceKey: string = computeDaemonWorkspaceKey({
       canonicalRepoRoot,
@@ -118,7 +132,8 @@ export class RushDaemonHost {
                 options.onError?.(error);
               }
             },
-            onError: (error: Error) => options.onError?.(error)
+            onError: (error: Error) => options.onError?.(error),
+            onRequestStarted: () => idleTimer.acquire()
           });
           sessions.add(session);
           if (lifecycle.closing) {
@@ -146,14 +161,22 @@ export class RushDaemonHost {
       }
       throw error;
     }
-    return new RushDaemonHost(
+    const host: RushDaemonHost = new RushDaemonHost(
       listener,
       paths,
       sessions,
       lifecycle,
       requestDispatcher,
-      workspaceSessionProvider
+      workspaceSessionProvider,
+      idleTimer
     );
+    idleTimer.start(() => {
+      void host.closeAsync().catch((error: Error) => {
+        if (options.onError) options.onError(error);
+        else process.emitWarning(error);
+      });
+    });
+    return host;
   }
 
   /** Returns the single warm workspace session owned by this host. */
@@ -163,11 +186,12 @@ export class RushDaemonHost {
 
   /** Closes active connections, stops listening, and removes transport artifacts. */
   public closeAsync(): Promise<void> {
-    this._closePromise ??= this._closeOnceAsync();
+    this._closePromise ??= this._closeOnceAsync().finally(() => this._notifyClosed?.());
     return this._closePromise;
   }
 
   private async _closeOnceAsync(): Promise<void> {
+    this._idleTimer[Symbol.dispose]();
     this._lifecycle.closing = true;
     const errors: unknown[] = [];
     const listenerClosePromise: Promise<unknown | undefined> = this._listener
