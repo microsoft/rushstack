@@ -27,6 +27,7 @@ export interface ISassConfigurationJson {
   exportAsDefault?: boolean;
   fileExtensions?: string[];
   nonModuleFileExtensions?: string[];
+  ignoreDeprecationsInDependencies?: boolean;
   silenceDeprecations?: string[];
   excludeFiles?: string[];
   doNotTrimOriginalFileExtension?: boolean;
@@ -98,6 +99,7 @@ export default class SassPlugin implements IHeftPlugin {
           exportAsDefault = true,
           fileExtensions,
           nonModuleFileExtensions,
+          ignoreDeprecationsInDependencies,
           silenceDeprecations,
           excludeFiles,
           doNotTrimOriginalFileExtension,
@@ -129,6 +131,7 @@ export default class SassPlugin implements IHeftPlugin {
             };
           }),
           silenceDeprecations,
+          ignoreDeprecationsInDependencies,
           doNotTrimOriginalFileExtension,
           preserveIcssExports,
           sourceMap,

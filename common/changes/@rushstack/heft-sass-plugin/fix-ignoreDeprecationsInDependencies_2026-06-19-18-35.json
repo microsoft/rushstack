@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix `ignoreDeprecationsInDependencies` option being silently ignored; it is now correctly forwarded to the Sass compiler's `quietDeps` flag.",
+      "type": "patch",
+      "packageName": "@rushstack/heft-sass-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin",
+  "email": "copilot@users.noreply.github.com"
+}

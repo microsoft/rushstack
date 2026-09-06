@@ -1,0 +1,5 @@
+// This partial intentionally uses darken(), a deprecated Sass global color function.
+// It exists only to test the ignoreDeprecationsInDependencies option.
+.dep-style {
+  color: darken(#0078d4, 10%);
+}
