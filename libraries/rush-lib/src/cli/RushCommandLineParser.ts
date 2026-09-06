@@ -92,6 +92,11 @@ export interface IRushCommandLineParserOptions {
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
   reporter?: IRushSessionReporterOptions;
   reporterCloseAsync?: () => Promise<void>;
+  /** Parse native commands without executing CLI actions or initializing process-global state. */
+  engine?: {
+    rushConfiguration: RushConfiguration;
+    terminalProvider: ITerminalProvider;
+  };
 }
 
 class ReporterTerminalProvider implements ITerminalProvider {
@@ -178,7 +183,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _quietParameter: CommandLineFlagParameter;
   private readonly _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   private readonly _rushOptions: IRushCommandLineParserOptions;
-  private readonly _terminalProvider: ConsoleTerminalProvider | ReporterTerminalProvider;
+  private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
   private readonly _autocreateBuildCommand: boolean;
   private _initializationFailed: boolean = false;
@@ -228,33 +233,39 @@ export class RushCommandLineParser extends CommandLineParser {
     const reporterTerminalProvider: ReporterTerminalProvider | undefined = reporter?.operationStreamEnabled
       ? new ReporterTerminalProvider()
       : undefined;
-    const terminalProvider: ConsoleTerminalProvider | ReporterTerminalProvider =
-      reporterTerminalProvider ?? new ConsoleTerminalProvider();
+    const terminalProvider: ITerminalProvider =
+      this._rushOptions.engine?.terminalProvider ?? reporterTerminalProvider ?? new ConsoleTerminalProvider();
     this._terminalProvider = terminalProvider;
     const terminal: Terminal = new Terminal(terminalProvider);
     this._terminal = terminal;
 
     let rushJsonFilePath: string | undefined;
     try {
-      rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: cwd,
-        showVerbose: !this._restrictConsoleOutput && !reporter?.operationStreamEnabled
-      });
+      if (this._rushOptions.engine) {
+        this.rushConfiguration = this._rushOptions.engine.rushConfiguration;
+      } else {
+        rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
+          startingFolder: cwd,
+          showVerbose: !this._restrictConsoleOutput && !reporter?.operationStreamEnabled
+        });
 
-      initializeDotEnv(terminal, rushJsonFilePath);
+        initializeDotEnv(terminal, rushJsonFilePath);
 
-      if (rushJsonFilePath) {
-        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
+        if (rushJsonFilePath) {
+          this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
+        }
       }
     } catch (error) {
       this._reportInitializationErrorAndSetExitCode(error as Error);
     }
 
-    NodeJsCompatibility.warnAboutCompatibilityIssues({
-      isRushLib: true,
-      alreadyReportedNodeTooNewError,
-      rushConfiguration: this.rushConfiguration
-    });
+    if (!this._rushOptions.engine) {
+      NodeJsCompatibility.warnAboutCompatibilityIssues({
+        isRushLib: true,
+        alreadyReportedNodeTooNewError,
+        rushConfiguration: this.rushConfiguration
+      });
+    }
 
     this.rushGlobalFolder = new RushGlobalFolder();
 
@@ -397,6 +408,9 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
+    if (this._rushOptions.engine) {
+      return;
+    }
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
     // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
@@ -474,7 +488,8 @@ export class RushCommandLineParser extends CommandLineParser {
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
       reporter: options.reporter,
-      reporterCloseAsync: options.reporterCloseAsync
+      reporterCloseAsync: options.reporterCloseAsync,
+      engine: options.engine
     };
   }
 
@@ -764,6 +779,9 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _reportInitializationErrorAndSetExitCode(error: Error): void {
+    if (this._rushOptions.engine) {
+      throw error;
+    }
     this._initializationFailed = true;
     this._reportErrorAndSetExitCode(error);
   }

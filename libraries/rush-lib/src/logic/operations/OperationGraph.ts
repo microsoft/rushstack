@@ -52,6 +52,8 @@ export interface IOperationGraphOptions {
    * Consumers (e.g. ProjectWatcher) can subscribe to this to perform cleanup.
    */
   abortController: AbortController;
+  /** Hosts with awaited lifetime cleanup can disable the legacy fire-and-forget abort cleanup. */
+  closeRunnersOnAbort?: boolean;
 
   isWatch?: boolean;
   pauseNextIteration?: boolean;
@@ -245,7 +247,9 @@ export class OperationGraph implements IOperationGraph {
         if (this._idleTimeout) {
           clearTimeout(this._idleTimeout);
         }
-        void this.closeRunnersAsync();
+        if (options.closeRunnersOnAbort !== false) {
+          void this.closeRunnersAsync();
+        }
       },
       { once: true }
     );
