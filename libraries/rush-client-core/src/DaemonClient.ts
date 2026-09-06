@@ -433,10 +433,13 @@ export class DaemonClient {
   }
 
   #complete(outcome: DaemonClientOutcome): void {
-    if (outcome.kind === 'fallback' && (this.#observedExecution || this.#inputAdmitted || this.#inputStarted)) {
+    if (
+      outcome.kind === 'fallback' &&
+      (this.#observedExecution || this.#inputAdmitted || this.#inputStarted || this.#rawModeChanged)
+    ) {
       throw new DaemonProtocolError(
         'malformedControlMessage',
-        'Daemon requested fallback after output or stdin admission; the command was not retried.'
+        'Daemon requested fallback after output, terminal control, or stdin admission; the command was not retried.'
       );
     }
     this.#finished = true;

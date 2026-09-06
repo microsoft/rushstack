@@ -281,6 +281,29 @@ describe('DaemonClient', () => {
     })).rejects.toThrow('not retried');
   });
 
+  it('does not replay after terminal control even when no stdin source was supplied', async () => {
+    const rawModes: boolean[] = [];
+    const envelope = request();
+    onRequest = async (message) => {
+      if (message.kind === 'requestStart') {
+        await sendAsync({
+          kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: true }
+        });
+      } else if (message.kind === 'rawModeChanged') {
+        await sendAsync({
+          kind: 'requestRejected',
+          payload: { requestId: envelope.requestId, code: 'unsupported', message: 'Too late for fallback.' }
+        });
+      }
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.executeAsync({
+      request: envelope, setRawMode: (enabled) => rawModes.push(enabled)
+    })).rejects.toThrow('not retried');
+    expect(rawModes).toEqual([true, false]);
+    expect(controls.filter((message) => message.kind === 'requestStart')).toHaveLength(1);
+  });
+
   it('returns only unsupported rejections as fallback', async () => {
     onRequest = async (message) => {
       if (message.kind === 'requestStart')
