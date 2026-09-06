@@ -114,15 +114,19 @@ describe('native build through the standalone client', () => {
     await client.closeAsync();
     expect((await invokeAsync(argv)).code).toBe(0);
     expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+    const native: IResult = await invokeAsync(['--no-daemon', ...argv]);
+    expect(native.code).toBe(0);
+    expect(native.stderr).not.toContain('Another Rush command');
+    const beforeChange: string = fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8');
     fs.writeFileSync(path.join(folder, 'a/input.txt'), 'two');
     expect((await invokeAsync(argv)).code).toBe(0);
-    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\na:two\nb:one\n');
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(`${beforeChange}a:two\nb:one\n`);
     const status = await invokeAsync(['daemon', 'status']);
     expect(JSON.parse(status.stdout).pid).toBe(firstPid);
     const script: IResult = await invokeAsync(['build'], true);
     expect(script.code).toBe(0);
     expect(script.stdout).toContain('rushx-only');
-    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8').split('\n').filter(Boolean)).toHaveLength(4);
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(`${beforeChange}a:two\nb:one\n`);
   }, 30000);
 
   it('provides presentation-free graph commands through the real standalone native daemon', async () => {

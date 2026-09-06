@@ -4,6 +4,7 @@
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { OperationStatus, type IOperationGraph } from '@microsoft/rush-lib';
+import { LockFile } from '@rushstack/node-core-library';
 import type {
   IDaemonEventEnvelope, IDaemonInitializedGraphSnapshot, IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
@@ -246,19 +247,29 @@ describe('experimental native graph over daemon transport', () => {
     const graph: IOperationGraph = fixture.session.operationGraph!;
     const scheduler = getWorkspaceRequestScheduler(fixture.session);
     const lease = await scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive });
+    const preparingLease: AsyncDisposable | undefined = await fixture.session.acquireExecutionLeaseAsync?.();
     try {
       fixture.write('a/input.txt', 'two');
       await fixture.session.reconcileInvalidationsAsync();
       graph.invalidateOperations();
       expect(await graph.scheduleIterationAsync({ inputsSnapshot: fixture.session.inputsSnapshot })).toBe(true);
     } finally {
+      await preparingLease?.[Symbol.asyncDispose]();
       lease.release();
     }
     expect((await snapshotAsync('status')).hasScheduledIteration).toBe(true);
     expect(fixture.runs()).toEqual(['a', 'b']);
+    fixture.write('a/input.txt', 'three');
+    const started = createDeferred<void>();
+    const release = createDeferred<void>();
+    graph.hooks.beforeExecuteIterationAsync.tapPromise('hold-resume-lease', async () => {
+      started.resolve();
+      await release.promise;
+    });
     const { client, request } = await watchAsync();
     try {
       const resumed = fixture.graphAsync('resume');
+      await started.promise;
       for (;;) {
         const snapshot = graphSnapshot(await client.readFrameAsync());
         if (snapshot.initialized && snapshot.status === OperationStatus.Executing) break;
@@ -266,14 +277,25 @@ describe('experimental native graph over daemon transport', () => {
       await expect(scheduler.acquireAsync({
         exclusivityClass: RequestExclusivityClass.SharedBuild, noWait: true
       })).rejects.toMatchObject({ code: 'NO_WAIT' });
+      const nativeProbe: LockFile | undefined =
+        LockFile.tryAcquire(fixture.session.rushConfiguration.commonTempFolder, 'rush');
+      try {
+        expect(nativeProbe).toBeUndefined();
+      } finally {
+        nativeProbe?.release();
+      }
+      release.resolve();
       expect(responseSnapshot(await resumed)).toMatchObject({
         pauseNextIteration: false, hasScheduledIteration: false, status: 'SUCCESS'
       });
       expect(fixture.runs()).toEqual(['a', 'b', 'a', 'b']);
       expect(scheduler.activeRequestCount).toBe(0);
+      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      expect(fixture.runs()).toEqual(['a', 'b', 'a', 'b']);
       await client.sendControlAsync({ kind: 'requestCancel', payload: { requestId: request.requestId } });
       await client.readTerminalAsync(request.requestId);
     } finally {
+      release.resolve();
       await client.closeAsync();
     }
   });

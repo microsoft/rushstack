@@ -21,6 +21,7 @@ import {
   RequestAdmissionController
 } from './WorkspaceRequestAdmission';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { setPauseNextIteration } from './PhasedRequestRouter';
 
 const DAEMON_PACKAGE_VERSION: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -89,7 +90,7 @@ export class DaemonGraphRequestRouter {
         }
         const operations: ReadonlySet<Operation> = selectDaemonGraphOperations(request, graph);
         if (request.verb === 'pause') {
-          graph.pauseNextIteration = true;
+          setPauseNextIteration(graph, true);
         } else if (request.verb === 'resume') {
           await this._resumeAsync(graph);
         } else {
@@ -109,24 +110,39 @@ export class DaemonGraphRequestRouter {
   }
 
   private async _resumeAsync(graph: IOperationGraph): Promise<void> {
-    // The native setter may release an already scheduled automatic iteration. Retain admission until
-    // native idle, even if this client disconnects; never execute or cancel that iteration ourselves.
     if (!graph.hasScheduledIteration) {
-      graph.pauseNextIteration = false;
+      setPauseNextIteration(graph, false);
       return;
     }
-    const observer: DaemonGraphObserver = getDaemonGraphObserver(graph);
-    const idleSequence: number = observer.idleSequence;
-    const changes: DaemonGraphChanges = new DaemonGraphChanges(this._session, graph, graph.abortController.signal);
+    // Keep prepared work paused while obtaining exclusive native ownership and refreshing its inputs.
+    setPauseNextIteration(graph, true);
+    const nativeLease: AsyncDisposable | undefined = await this._session.acquireExecutionLeaseAsync?.();
     try {
-      graph.pauseNextIteration = false;
-      while (observer.idleSequence === idleSequence) {
-        if (!(await changes.nextAsync())) {
-          throw new DaemonRequestDispatchError('routingFailed', 'The graph closed before reaching idle.');
+      graph.discardScheduledIteration();
+      await this._session.reconcileInvalidationsAsync();
+      const scheduled: boolean = await graph.scheduleIterationAsync({
+        inputsSnapshot: this._session.inputsSnapshot
+      });
+      if (!scheduled) {
+        setPauseNextIteration(graph, false);
+        return;
+      }
+      const observer: DaemonGraphObserver = getDaemonGraphObserver(graph);
+      const idleSequence: number = observer.idleSequence;
+      const changes: DaemonGraphChanges =
+        new DaemonGraphChanges(this._session, graph, graph.abortController.signal);
+      try {
+        setPauseNextIteration(graph, false);
+        while (observer.idleSequence === idleSequence) {
+          if (!(await changes.nextAsync())) {
+            throw new DaemonRequestDispatchError('routingFailed', 'The graph closed before reaching idle.');
+          }
         }
+      } finally {
+        changes[Symbol.dispose]();
       }
     } finally {
-      changes[Symbol.dispose]();
+      await nativeLease?.[Symbol.asyncDispose]();
     }
   }
 

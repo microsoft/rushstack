@@ -128,6 +128,13 @@ export interface IOperationGraph {
   scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
 
   /**
+   * Discards prepared, unstarted work without executing scripts or closing retained runners.
+   * Throws while an iteration is executing. Completed results remain unchanged.
+   * @returns Whether a prepared iteration was discarded.
+   */
+  discardScheduledIteration(): boolean;
+
+  /**
    * Executes all operations in the currently scheduled iteration, if any.
    * @returns A promise which is resolved when all operations have been processed to a final state.
    */

@@ -76,10 +76,11 @@ Set `requiresStdinEnd` for pipes: peers without the capability return
 `stdinEndUnsupported` before sending `requestStart` or consuming any input.
 Legacy 0.5/0.6 interactive clients retain their raw-mode/terminal-policy input path.
 
-The standalone host has no request resolver or warm operation graph. A successful
-handshake is readiness, not evidence that a build is supported. Graph verbs,
-version-selected daemon installation, incompatible-protocol replacement, and
-request handoff remain unavailable; this package does not fabricate them.
+The standalone host supports native phased builds and the experimental structured
+graph reference client. A successful handshake is still transport readiness, not a
+guarantee that every command or configuration is supported. Version-selected daemon
+installation, incompatible-protocol replacement, and general request handoff remain
+separate integration work; this core package does not construct an engine.
 A client that dies during the
 pre-bind spawn interval may leave a detached child still starting; normal
 concurrent first-invocations are serialized, but crash-safe spawn handoff requires

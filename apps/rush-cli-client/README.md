@@ -29,10 +29,12 @@ command byte streams remain byte-preserving. A `rushx build` script never claims
 to be a workspace build.
 
 The initial engine is pinned to its startup environment, first command, and
-non-selection parameters. External plugins, inherited/rig configuration, `.env`,
-watch/install options, and unsupported event-hook scripts still use typed
-pre-execution fallback. The current engine retains the native Rush lock until
-disposal, so stop it before native administrative commands. Unknown rejections,
+non-selection parameters. Direct, inherited, and rig-based project configuration
+uses private native loaders and is rechecked before execution. External plugins,
+`.env`, watch/install options, and unsupported event-hook scripts still use typed
+pre-execution fallback. The native Rush lock is held for preparation and each
+coalesced iteration, not while idle; native commands and `--no-daemon` can run
+after a completed request without stopping the daemon. Unknown rejections,
 transport loss after sending a request, and output failures never replay work.
 
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
@@ -177,9 +179,11 @@ never change an active iteration. Scope changes/invalidation reject an already
 prepared iteration instead of modifying stale execution records.
 
 Pause/resume change native `pauseNextIteration`: manual mode gates automatically
-scheduled iterations, **not explicit build requests**. Resume does not create or
-schedule work. If an engine owner has already prepared an automatic iteration,
-resume may release it and retains exclusive admission until native idle, including
+scheduled iterations, **not explicit build requests**. Resume does not create new
+work. If an engine owner has already prepared an automatic iteration, resume
+acquires the native execution lease, discards the old unstarted plan, reconciles
+inputs, and prepares its replacement before releasing it. Admission and the native
+lease remain held until native idle, including
 if the resume client disconnects. The reference client's watch command is not a
 build scheduler; the default lazy engine still rebuilds only on explicit requests.
 Native build requests apply their own selections, so a graph scope is not a

@@ -173,6 +173,8 @@ export {
   type IPhasedCommandEngine,
   type IParsePhasedCommandOptions
 } from './api/PhasedCommandEngine';
+export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
+export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {

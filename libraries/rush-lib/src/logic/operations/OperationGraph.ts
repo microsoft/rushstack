@@ -524,9 +524,36 @@ export class OperationGraph implements IOperationGraph {
   }
 
   /**
-   * Executes all operations which have been registered, returning a promise which is resolved when all operations have been processed to a final state.
-   * Aborts the current iteration first, if any.
+   * Discards unstarted records without executing scripts, changing completed results, or closing retained runners.
    */
+  public discardScheduledIteration(): boolean {
+    if (this._currentIteration) {
+      throw new Error('Cannot discard prepared work while an iteration is executing.');
+    }
+    const iteration: IExecutionIterationContext | undefined = this._scheduledIteration;
+    if (!iteration) return false;
+    this._setScheduledIteration(undefined);
+    const errors: unknown[] = [];
+    for (const record of iteration.records.values()) {
+      record.status = OperationStatus.Aborted;
+      for (const close of [
+        () => record.finalizeOperation(),
+        () => record.stdioSummarizer.close(),
+        () => record.problemCollector.close()
+      ]) {
+        try {
+          close();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+    }
+    this.hooks.onExecutionStatesUpdated.call(new Set(iteration.records.values()));
+    if (errors.length) throw new AggregateError(errors, 'Failed to discard prepared operation records.');
+    return true;
+  }
+
+  /** Executes the prepared iteration, after awaiting cancellation of any current iteration. */
   public async executeScheduledIterationAsync(): Promise<boolean> {
     await this.abortCurrentIterationAsync();
 

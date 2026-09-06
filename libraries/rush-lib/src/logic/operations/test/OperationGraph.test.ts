@@ -1161,6 +1161,53 @@ describe('deferred invalidation during active iteration', () => {
   });
 });
 
+describe('discarding prepared iterations', () => {
+  function pausedGraph(runner: IOperationRunner): OperationGraph {
+    return createGraph({
+      quietMode: true, debugMode: false, parallelism: 1, allowOversubscription: false,
+      destinations: [mockWritable], abortController: new AbortController(),
+      pauseNextIteration: true, closeRunnersOnAbort: false
+    }, runner);
+  }
+
+  it('drops unstarted work without running or closing its runner', async () => {
+    const runAsync = jest.fn(async () => OperationStatus.Success);
+    const runner: ClosableRunner = new ClosableRunner('discarded', runAsync);
+    const graph: OperationGraph = pausedGraph(runner);
+    try {
+      expect(await graph.scheduleIterationAsync({})).toBe(true);
+      expect(graph.discardScheduledIteration()).toBe(true);
+      expect(graph.discardScheduledIteration()).toBe(false);
+      expect(graph.hasScheduledIteration).toBe(false);
+      expect(graph.resultByOperation.size).toBe(0);
+      expect(runAsync).not.toHaveBeenCalled();
+      expect(runner.closeAsync).not.toHaveBeenCalled();
+    } finally {
+      graph.abortController.abort();
+      await graph.closeRunnersAsync();
+    }
+  });
+
+  it('preserves completed results and the resident runner when replacing a prepared iteration', async () => {
+    const runner: ClosableRunner = new ClosableRunner('retained');
+    const graph: OperationGraph = pausedGraph(runner);
+    try {
+      await graph.executeAsync({});
+      const operation: Operation = [...graph.operations][0];
+      const result = graph.resultByOperation.get(operation);
+      await graph.scheduleIterationAsync({});
+      graph.discardScheduledIteration();
+      expect(graph.resultByOperation.get(operation)).toBe(result);
+      expect(result?.status).toBe(OperationStatus.Success);
+      expect(runner.isActive).toBe(true);
+      expect(runner.closeAsync).not.toHaveBeenCalled();
+    } finally {
+      graph.abortController.abort();
+      await graph.closeRunnersAsync();
+    }
+  });
+});
+
 describe('runner persistence policy', () => {
   const graphOptions: IOperationGraphOptions = {
     quietMode: false,

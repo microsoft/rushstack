@@ -569,6 +569,7 @@ export interface IGenerateCacheEntryIdOptions {
 export interface IGetChangedProjectsOptions {
     enableFiltering: boolean;
     excludeVersionOnlyChanges?: boolean;
+    getIncrementalBuildIgnoredGlobsAsync?: (project: RushConfigurationProject) => Promise<ReadonlyArray<string> | undefined>;
     includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
@@ -704,6 +705,7 @@ export interface IOperationGraph {
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
     debugMode: boolean;
+    discardScheduledIteration(): boolean;
     executeScheduledIterationAsync(): Promise<boolean>;
     readonly hasScheduledIteration: boolean;
     readonly hooks: OperationGraphHooks;
@@ -910,6 +912,7 @@ export interface IPhasedCommand extends IRushCommand {
 export interface IPhasedCommandEngine extends AsyncDisposable {
     // (undocumented)
     [Symbol.asyncDispose](): Promise<void>;
+    readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
     // (undocumented)
     readonly getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
     // (undocumented)
@@ -1434,6 +1437,16 @@ export class PhasedCommandEngine {
 }
 
 // @alpha
+export class PhasedCommandEngineBusyError extends Error {
+    constructor();
+}
+
+// @alpha
+export class PhasedCommandEngineConfigurationChangedError extends Error {
+    constructor();
+}
+
+// @alpha
 export class PhasedCommandHooks {
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
     Set<Operation>,
@@ -1502,7 +1515,7 @@ export type PnpmTrustPolicy = 'no-downgrade' | 'off';
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     // @internal (undocumented)
-    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
+    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal, getIgnoreGlobsAsync?: IGetChangedProjectsOptions['getIncrementalBuildIgnoredGlobsAsync']): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
@@ -1845,6 +1858,8 @@ export class RushProjectConfiguration {
     readonly project: RushConfigurationProject;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
     static tryLoadForProjectsAsync(projects: Iterable<RushConfigurationProject>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
+    // @internal
+    static _tryLoadForProjectsUncachedAsync(projects: Iterable<RushConfigurationProject>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
     validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }
