@@ -43,7 +43,7 @@ no paths to classify and therefore remains a full invalidation. The routing laye
 workspace session rather than run a stale graph.
 The default daemon executable installs `ProductionDaemonRequestResolver`. Its first supported request binds a real
 all-project graph lazily, without replacing the session watcher or discarding retained invalidations. Embedded hosts
-can install the same resolver explicitly; omitting a resolver from `RushDaemonHost` retains the unsupported behavior.
+can install the same resolver explicitly; omitting a resolver from `RushDaemonHost` retains the unsupported build behavior.
 
 ### Bounded native engine integration
 
@@ -129,10 +129,43 @@ scheduler and phased batch coordinator, so compatible selections can execute in 
 The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
 typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle
 when cancellation, disconnect, or host shutdown aborts it. An embedded host without that resolver continues to start,
-answer ping, and reject request execution with the typed `unsupported` outcome; it never constructs an empty graph
+answer ping, and reject ordinary command execution with the typed `unsupported` outcome; it never constructs an empty graph
 or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
 reported as `workspaceRecreationRequired` before scheduling. Replacing the warm session is intentionally deferred to
 WS3.
+
+### Experimental graph requests
+
+The dispatcher reserves built-in `daemon graph` argv before invoking the production
+command resolver. Requests require `environment.RUSH_DAEMON_EXPERIMENTAL === "1"`
+and noninteractive input; unknown verbs, malformed selector pairs, and non-built-in
+origins are rejected. There is no graph construction or command execution fallback.
+`show`/`status` can report an uninitialized session; other verbs require its real graph.
+
+The route emits JSON-safe `rushd.graph-snapshot` extension events followed by the
+existing request result. IDs, project/phase, enabled/status/dependencies, manual-mode
+and scheduled flags, and a path-free invalidation summary are the entire snapshot.
+It never sends environment variables, native runner objects, logs, or terminal output.
+Scope selectors are exact operation IDs or project names and are fully validated
+before applying native safe enablement or invalidation. Scope-out expands consumers
+before native safe-disable prunes unneeded dependencies.
+
+Mutations acquire exclusive admission from the same workspace request scheduler.
+Active iterations cannot be mutated; prepared iterations reject scope/invalidation
+changes. Pause/resume set native manual mode without scheduling anything. Explicit
+builds may still run while paused. Releasing an already scheduled automatic iteration
+via resume retains admission until native idle, even after request cancellation.
+The engine owner remains responsible for scheduling work; this route never calls
+graph execution or initialization APIs.
+
+Watch is a lease-free observation subscription: one hook set per graph fans out
+to live subscribers, each retaining a single dirty notification while its output
+is backpressured. Status, invalidation and idle hooks wake the same bounded loop.
+Workspace invalidation notifications also cover acknowledgements and watcher errors;
+failed notification callbacks are warned without interrupting change tracking.
+Cancellation, graph shutdown and disconnect unsubscribe promptly. A live watch
+counts as an active request for daemon idle shutdown. No automatic build loop or
+new wire version/capability handshake is introduced.
 
 The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global action helpers still consult or mutate
 process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the

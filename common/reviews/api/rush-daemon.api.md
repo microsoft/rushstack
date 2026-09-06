@@ -632,6 +632,7 @@ export class WorkspaceInvalidationTracker {
     // @internal (undocumented)
     invalidateForInitialization(): void;
     markWatcherUnhealthy(): void;
+    subscribe(notify: () => void): () => void;
 }
 
 // @beta

@@ -298,6 +298,41 @@ export interface IDaemonFrameDecoderOptions {
 }
 
 // @beta
+export interface IDaemonGraphInvalidations {
+    // (undocumented)
+    readonly changedPathCount: number;
+    // (undocumented)
+    readonly hasUnknownChanges: boolean;
+    // (undocumented)
+    readonly isWatcherHealthy: boolean;
+    // (undocumented)
+    readonly sequence: number;
+}
+
+// @beta
+export interface IDaemonGraphOperation {
+    // (undocumented)
+    readonly dependencyIds: ReadonlyArray<string>;
+    // (undocumented)
+    readonly enabled: false | DaemonPhasedOperationEnabledState;
+    // (undocumented)
+    readonly operationId: string;
+    // (undocumented)
+    readonly phaseName: string;
+    // (undocumented)
+    readonly projectName: string;
+    readonly status: string | null;
+}
+
+// @beta
+export interface IDaemonGraphSnapshotPayload {
+    // (undocumented)
+    readonly requestId: string;
+    // (undocumented)
+    readonly snapshot: IDaemonInitializedGraphSnapshot | IDaemonUninitializedGraphSnapshot;
+}
+
+// @beta
 export interface IDaemonHelloAckMessage {
     // (undocumented)
     readonly kind: 'helloAck';
@@ -316,6 +351,21 @@ export interface IDaemonHelloMessage {
     readonly payload: {
         readonly protocolVersion: IDaemonProtocolVersion;
     };
+}
+
+// @beta
+export interface IDaemonInitializedGraphSnapshot {
+    // (undocumented)
+    readonly hasScheduledIteration: boolean;
+    // (undocumented)
+    readonly initialized: true;
+    // (undocumented)
+    readonly invalidations: IDaemonGraphInvalidations;
+    // (undocumented)
+    readonly operations: ReadonlyArray<IDaemonGraphOperation>;
+    readonly pauseNextIteration: boolean;
+    // (undocumented)
+    readonly status: string;
 }
 
 // @beta
@@ -588,6 +638,14 @@ export interface IDaemonTerminalPolicyResult {
 }
 
 // @beta
+export interface IDaemonUninitializedGraphSnapshot {
+    // (undocumented)
+    readonly initialized: false;
+    // (undocumented)
+    readonly invalidations: IDaemonGraphInvalidations;
+}
+
+// @beta
 export interface IDaemonUnsubscribeMessage {
     // (undocumented)
     readonly kind: 'unsubscribe';
@@ -664,6 +722,9 @@ export const REQUEST_ID_LENGTH_OFFSET: number;
 
 // @beta
 export const RUSHD_EXTENSION_NAMESPACE: 'rushd';
+
+// @beta
+export const RUSHD_GRAPH_SNAPSHOT: 'rushd.graph-snapshot';
 
 // @beta
 export const RUSHD_OPERATION_HEADER: 'rushd.operation-header';

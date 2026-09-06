@@ -10,6 +10,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient } from '@rushstack/rush-client-core';
+import { RUSHD_GRAPH_SNAPSHOT, type IDaemonGraphSnapshotPayload } from '@rushstack/rush-daemon-protocol';
 import {
   computeDaemonWorkspaceKey,
   resolveDaemonPaths,
@@ -122,5 +123,81 @@ describe('native build through the standalone client', () => {
     expect(script.code).toBe(0);
     expect(script.stdout).toContain('rushx-only');
     expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8').split('\n').filter(Boolean)).toHaveLength(4);
+  }, 30000);
+
+  it('provides presentation-free graph commands through the real standalone native daemon', async () => {
+    environment.RUSH_DAEMON_EXPERIMENTAL = '0';
+    const disabled = await invokeAsync(['daemon', 'graph', 'show']);
+    expect(disabled.code).toBe(1);
+    expect(JSON.parse(disabled.stdout)).toMatchObject({ kind: 'graphError' });
+    expect(disabled.stderr).toBe('');
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    environment.RUSH_DAEMON_EXPERIMENTAL = '1';
+    expect((await invokeAsync(['daemon', 'start'])).code).toBe(0);
+
+    const snapshotAsync = async (...args: string[]): Promise<IDaemonGraphSnapshotPayload['snapshot']> => {
+      const result = await invokeAsync(['daemon', 'graph', ...args]);
+      expect(result.code).toBe(0);
+      expect(result.stderr).toBe('');
+      expect(result.stdout).not.toContain('\u001b');
+      const records = result.stdout.trim().split('\n').map((line) => JSON.parse(line));
+      expect(records).toHaveLength(2);
+      expect(records[0]).toMatchObject({ type: 'extension', payload: { name: RUSHD_GRAPH_SNAPSHOT } });
+      expect(records[1]).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      return records[0].payload.data.snapshot;
+    };
+    expect(await snapshotAsync('show')).toMatchObject({ initialized: false });
+    expect(fs.existsSync(path.join(folder, 'runs.txt'))).toBe(false);
+    expect((await invokeAsync(['daemon', 'graph', 'watch'])).code).toBe(1);
+    expect((await invokeAsync(['build', '--to', 'b', '--parallelism', '3'])).code).toBe(0);
+    expect(await snapshotAsync('scope-out', '--project', 'a')).toMatchObject({
+      operations: [{ enabled: false }, { enabled: false }]
+    });
+    expect(await snapshotAsync('scope-in', '--operation', 'b (compile)')).toMatchObject({
+      operations: [{ enabled: true }, { enabled: true, dependencyIds: ['a (compile)'] }]
+    });
+    expect(await snapshotAsync('pause')).toMatchObject({ pauseNextIteration: true });
+    expect(await snapshotAsync('invalidate', '--project', 'a')).toMatchObject({
+      hasScheduledIteration: false, operations: [{ status: 'READY' }, { status: 'SUCCESS' }]
+    });
+    expect(await snapshotAsync('resume')).toMatchObject({ pauseNextIteration: false });
+    expect(await snapshotAsync('status')).toMatchObject({ initialized: true });
+    for (const args of [['invalid'], ['scope-out', '--project', 'missing'], ['pause', 'invalid']]) {
+      const result = await invokeAsync(['daemon', 'graph', ...args]);
+      expect(result.code).toBe(1);
+      expect(result.stderr).toBe('');
+      expect(JSON.parse(result.stdout)).toMatchObject({ kind: 'requestRejected' });
+    }
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+
+    const entry: string = path.resolve(__dirname, '../../bin/rush-client');
+    const watch = spawn(process.execPath, [entry, 'daemon', 'graph', 'watch'], {
+      cwd: folder, env: environment, stdio: ['ignore', 'pipe', 'pipe']
+    });
+    const closed = once(watch, 'close');
+    let output: string = '';
+    let errors: string = '';
+    watch.stderr.on('data', (bytes: Buffer) => { errors += bytes.toString(); });
+    const ready = new Promise<void>((resolve) => {
+      watch.stdout.on('data', (bytes: Buffer) => {
+        output += bytes.toString();
+        if (output.includes('\n')) resolve();
+      });
+    });
+    try {
+      await ready;
+      expect(await snapshotAsync('scope-out', '--project', 'a')).toMatchObject({
+        operations: [{ enabled: false }, { enabled: false }]
+      });
+      watch.kill('SIGINT');
+      expect((await closed)[0]).toBe(130);
+      expect(errors).toBe('');
+      const records = output.trim().split('\n').map((line) => JSON.parse(line));
+      expect(records[0]).toMatchObject({ type: 'extension', payload: { name: RUSHD_GRAPH_SNAPSHOT } });
+      expect(records.at(-1)).toMatchObject({ kind: 'requestResult', payload: { outcome: 'aborted', exitCode: 130 } });
+    } finally {
+      if (watch.exitCode === null) watch.kill('SIGTERM');
+      await closed;
+    }
   }, 30000);
 });
