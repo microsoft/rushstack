@@ -9,8 +9,10 @@
 import * as childProcess from 'node:child_process';
 import type { DaemonRushCommandOrigin } from '@rushstack/rush-daemon-protocol';
 import type { DaemonTerminalRequirement } from '@rushstack/rush-daemon-protocol';
+import * as fs from 'node:fs';
 import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
 import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import { IDaemonConfigurationJson } from '@microsoft/rush-lib';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
@@ -21,9 +23,9 @@ import type { IDaemonRequestQueuePositionMessage } from '@rushstack/rush-daemon-
 import type { IDaemonSetRawModeMessage } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
-import type { IOperationGraph } from '@microsoft/rush-lib';
+import { IOperationGraph } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
-import type { Operation } from '@microsoft/rush-lib';
+import { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
 import type { RushSession } from '@microsoft/rush-lib';
@@ -524,6 +526,17 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
 }
 
 // @beta
+export interface IWorkspaceSessionFileWatcherOptions {
+    // (undocumented)
+    readonly onError?: (error: Error) => void;
+    readonly projectNames?: Iterable<string>;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+    // (undocumented)
+    readonly watchFactory?: WorkspaceWatchFactory;
+}
+
+// @beta
 export interface IWorkspaceSessionMetadata {
     // (undocumented)
     readonly projectCount: number;
@@ -547,6 +560,39 @@ export interface IWorkspaceSessionOptions {
     readonly repoRoot: string;
     // (undocumented)
     readonly rushVersion: string;
+}
+
+// @beta
+export interface IWorkspaceWarmSetOptions {
+    readonly acquireExecutionLeaseAsync: () => Promise<AsyncDisposable | undefined>;
+    // (undocumented)
+    readonly configuration: WorkspaceWarmSetConfiguration;
+    readonly getProtectedOperations?: () => ReadonlySet<Operation>;
+    readonly onDiagnostic?: (error: Error) => void;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph;
+    readonly scheduler: RequestScheduler;
+    readonly watcher: WorkspaceSessionFileWatcher;
+}
+
+// @beta
+export interface IWorkspaceWarmSetStatus {
+    // (undocumented)
+    readonly cleanupFailures: ReadonlyArray<string>;
+    // (undocumented)
+    readonly daemonResidentMemoryBytes: number;
+    // (undocumented)
+    readonly deferredReason: 'workspace-busy' | 'native-busy' | 'graph-busy' | 'disposed' | undefined;
+    // (undocumented)
+    readonly measuredRunnerMemoryBytes: number;
+    // (undocumented)
+    readonly overMemoryBudget: boolean;
+    // (undocumented)
+    readonly overProjectLimit: boolean;
+    // (undocumented)
+    readonly protectedProjectNames: ReadonlyArray<string>;
+    readonly retainedProjectNames: ReadonlyArray<string>;
+    readonly unmeasuredRunnerCount: number;
 }
 
 // @beta
@@ -682,6 +728,37 @@ export class WorkspaceSession implements IWorkspaceSession {
 
 // @beta
 export type WorkspaceSessionFactory = (options: IWorkspaceSessionOptions) => Promise<IWorkspaceSession>;
+
+// @beta
+export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatcher {
+    // (undocumented)
+    [Symbol.asyncDispose](): Promise<void>;
+    constructor(options: IWorkspaceSessionFileWatcherOptions);
+    // (undocumented)
+    startAsync(onInvalidation: (changedPath?: string) => void): Promise<void>;
+    unwatchProjectsAsync(projectNames: Iterable<string>): Promise<void>;
+    get watchedProjectNames(): ReadonlySet<string>;
+    watchProjects(projectNames: Iterable<string>): void;
+}
+
+// @beta
+export class WorkspaceWarmSet implements AsyncDisposable {
+    // (undocumented)
+    [Symbol.asyncDispose](): Promise<void>;
+    static attach(options: IWorkspaceWarmSetOptions): WorkspaceWarmSet;
+    getStatus(): IWorkspaceWarmSetStatus;
+    maintainAsync(): Promise<IWorkspaceWarmSetStatus>;
+    updateConfiguration(configuration: WorkspaceWarmSetConfiguration): void;
+}
+
+// @beta
+export type WorkspaceWarmSetConfiguration = Pick<IDaemonConfigurationJson, 'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'>;
+
+// @beta
+export type WorkspaceWatchFactory = (folderPath: string, options: {
+    encoding: 'utf8';
+    recursive: boolean;
+}, listener: fs.WatchListener<string>) => fs.FSWatcher;
 
 // (No @packageDocumentation comment for this package)
 

@@ -99,6 +99,75 @@ runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 `rushx build` and other script invocations custom. The resolver also validates the native parsed
 action; identical script names alone never authorize a workspace build.
 
+### Warm-set generation attachment (WS3)
+
+`WorkspaceWarmSet.attach(options)` implements the four warm policies against a **real, already-created**
+operation graph and an **already-started** `WorkspaceSessionFileWatcher`. The generation owner must attach it
+before the first request iteration, capture that generation's native execution lease callback, and use the
+same workspace scheduler that admits phased/global requests and graph mutations:
+
+```ts
+const acquireExecutionLeaseAsync = engine.acquireExecutionLeaseAsync;
+if (!acquireExecutionLeaseAsync) throw new Error('The native engine must provide execution ownership.');
+const warmSet = WorkspaceWarmSet.attach({
+  operationGraph: engine.operationGraph,
+  configuration: resolvedDaemonConfiguration,
+  scheduler: getWorkspaceRequestScheduler(session),
+  acquireExecutionLeaseAsync,
+  watcher: generationWatcher,
+  onDiagnostic: reportWarmDiagnostic
+});
+```
+
+`getWorkspaceRequestScheduler` is the existing package-internal helper in `WorkspaceRequestAdmission.ts`.
+The configuration is the existing resolved `rush.json`/environment configuration; `updateConfiguration()` also
+validates and applies policy changes at runtime. Dispose the controller **before** its generation's engine and
+watcher, outside outstanding request leases. Controller disposal stops its timer and awaits maintenance;
+it does not dispose resources owned by the generation. This attachment is intentionally not installed in the
+default bootstrap/resolver here: automatic reload/generation ownership supplies that final wiring separately.
+The real-native-graph tests attach this exact controller at component creation, not a substitute implementation.
+
+| Policy | Runtime behavior |
+| --- | --- |
+| `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
+| `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
+| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
+| `autoWarmByTelemetry` | Promotes already-requested high-value work instead of pure LRU. Never schedules or executes speculative scripts. |
+
+One deterministic best-first comparator is shared by retention and reverse-order eviction. With complete
+measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then ordinal project
+name. Measured entries precede the missing-data bucket; that bucket uses LRU and the same name tie-break.
+Without telemetry mode the entire order is LRU. Savings compare actual cold and reused execution stopwatches
+(or native non-cached duration versus cache-restoration duration); no startup cost or RSS is invented.
+`operation-graph`'s existing `WatchLoop` now reports its own measured RSS in an optional IPC completion field.
+The native IPC runner accepts that sample and exposes it only while resident. Old children and unsupported
+runners remain explicitly unmeasured. These are last-completion process samples, not live measurements of
+descendants. Shell-runner records/watchers live within daemon RSS and have no fabricated per-project allocation.
+
+Maintenance acquires **exclusive, no-wait workspace admission**, then native repository ownership. It defers on
+contention or an executing/prepared graph without cancelling, discarding or mutating that work. Optional
+`getProtectedOperations()` protects additional generation-owned resources; update that protection under the
+same scheduler. Maintenance awaits `closeRunnersAsync`, confirms that runners no longer report active resources,
+awaits project watcher closure, and only then calls guarded native `deleteResults()`. Its `beforeDeleteResults`
+hook releases native cache/skip plugin scratch state; deletion also detaches old iteration contexts/record edges
+while preserving survivors' hashes, timing, warnings and status. Graph
+definitions, enabled selections and disk caches are unchanged. The native per-iteration `shouldRunnerPersist`
+policy is deliberately left intact: optional footprint cleanup must not turn successful requested work into a
+failed build merely because an optimization could not release resources.
+
+The watcher keeps root and Rush/subspace configuration observation permanent. Unrequested project observation
+is removed at maintenance; requested projects are observed again during planning. A new watcher can start with
+`projectNames: []` instead of recursively observing every project. **Every native request must still refresh its
+input snapshot and revalidate effective direct/rig/inherited configuration**, including files outside watcher
+roots. Cold source changes therefore rebuild correctly; changed graph configuration fails closed until the
+generation owner supplies a freshly constructed engine. This attachment does not implement automatic reload.
+
+`getStatus()` reports actual retained/protected projects, daemon RSS, measured child RSS, unmeasured runners,
+remaining pressure, maintenance deferral and failed cleanup. Diagnostics go to `onDiagnostic` (or a process
+warning). Failed cleanup keeps records and truthful resource accounting, and cannot falsify a command result.
+Releasing records does not force V8/allocator RSS to shrink. If remaining daemon memory, active/protected work,
+or cleanup failures cannot fit the budget, pressure remains reported instead of claiming success.
+
 ### Native Rushx integration
 
 `RushXDaemonRequestResolver` handles only `invocationKind: "rushx"` with custom origin.

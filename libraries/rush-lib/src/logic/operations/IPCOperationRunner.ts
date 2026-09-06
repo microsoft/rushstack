@@ -32,15 +32,21 @@ export interface IIPCOperationRunnerOptions {
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
-  return typeof message === 'object' && (message as IAfterExecuteEventMessage).event === 'after-execute';
+  return (
+    !!message &&
+    typeof message === 'object' &&
+    (message as IAfterExecuteEventMessage).event === 'after-execute'
+  );
 }
 
 function isRequestRunEventMessage(message: unknown): message is IRequestRunEventMessage {
-  return typeof message === 'object' && (message as IRequestRunEventMessage).event === 'requestRun';
+  return (
+    !!message && typeof message === 'object' && (message as IRequestRunEventMessage).event === 'requestRun'
+  );
 }
 
 function isSyncEventMessage(message: unknown): message is ISyncEventMessage {
-  return typeof message === 'object' && (message as ISyncEventMessage).event === 'sync';
+  return !!message && typeof message === 'object' && (message as ISyncEventMessage).event === 'sync';
 }
 
 /**
@@ -61,6 +67,9 @@ export class IPCOperationRunner implements IOperationRunner {
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
+  private _processClosedPromise: Promise<void> | undefined;
+  private _residentMemoryBytes: number | undefined;
+  private _closing: boolean = false;
 
   public constructor(options: IIPCOperationRunnerOptions) {
     const {
@@ -84,20 +93,30 @@ export class IPCOperationRunner implements IOperationRunner {
   }
 
   public get isActive(): boolean {
-    return !!(this._ipcProcess && !this._ipcProcess.killed && typeof this._ipcProcess.exitCode !== 'number');
+    return !!(this._ipcProcess && this._ipcProcess.exitCode === null && this._ipcProcess.signalCode === null);
+  }
+
+  public get residentMemoryBytes(): number | undefined {
+    return this.isActive ? this._residentMemoryBytes : undefined;
   }
 
   public async executeAsync(
     context: IOperationRunnerContext,
     lastState?: IOperationLastState
   ): Promise<OperationStatus> {
+    if (this._closing) {
+      // A failed close may already have sent "exit". Never send new work to that retiring child.
+      await this.closeAsync();
+    }
     const commandToRun: string =
       lastState && this._incrementalCommand ? this._incrementalCommand : this._initialCommand;
     const invalidate: (reason: string) => void = context.getInvalidateCallback();
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
-        if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
+        if (!this._ipcProcess || !this.isActive) {
+          await this._processClosedPromise;
+          this._residentMemoryBytes = undefined;
           // Log any ignored parameters
           if (this._ignoredParameterValues.length > 0) {
             terminal.writeLine(
@@ -124,6 +143,7 @@ export class IPCOperationRunner implements IOperationRunner {
             connectSubprocessTerminator: true,
             initialEnvironment
           });
+          this._processClosedPromise = new Promise((resolve) => this._ipcProcess!.once('close', resolve));
 
           let resolveReadyPromise!: () => void;
 
@@ -162,8 +182,11 @@ export class IPCOperationRunner implements IOperationRunner {
         subProcess.stderr?.on('data', onStderr);
 
         const status: OperationStatus = await new Promise((resolve, reject) => {
-          function finishHandler(message: unknown): void {
+          const finishHandler = (message: unknown): void => {
             if (isAfterExecuteEventMessage(message)) {
+              const memory: number | undefined = message.residentMemoryBytes;
+              this._residentMemoryBytes =
+                typeof memory === 'number' && Number.isSafeInteger(memory) && memory > 0 ? memory : undefined;
               terminal.writeLine('Received finish notification');
               subProcess.stdout?.off('data', onStdout);
               subProcess.stderr?.off('data', onStderr);
@@ -174,11 +197,17 @@ export class IPCOperationRunner implements IOperationRunner {
               // These types are currently distinct but have the same underlying values
               resolve(message.status as unknown as OperationStatus);
             }
-          }
+          };
 
           function onExit(exitCode: number | null, signal: NodeJS.Signals | null): void {
             try {
-              if (signal) {
+              if (isConnected) {
+                context.error = new OperationError(
+                  'error',
+                  'IPC process exited before reporting its operation result.'
+                );
+                resolve(OperationStatus.Failure);
+              } else if (signal) {
                 context.error = new OperationError('error', `Terminated by signal: ${signal}`);
                 resolve(OperationStatus.Failure);
               } else if (exitCode !== 0) {
@@ -234,12 +263,24 @@ export class IPCOperationRunner implements IOperationRunner {
       return;
     }
 
-    if (subProcess.connected) {
+    this._closing = true;
+    if (this.isActive) {
+      if (!subProcess.connected) {
+        throw new Error(`Cannot close the live IPC runner "${this.name}": its IPC channel is disconnected.`);
+      }
+      const closed: Promise<unknown> = once(subProcess, 'close');
       const exitCommand: IExitCommandMessage = {
         command: 'exit'
       };
       subProcess.send(exitCommand);
-      await once(subProcess, 'close');
+      await closed;
     }
+    // Even after "exit", stdio/descendants can still be draining. Resource ownership ends at "close".
+    await this._processClosedPromise;
+    this._ipcProcess = undefined;
+    this._processReadyPromise = undefined;
+    this._processClosedPromise = undefined;
+    this._residentMemoryBytes = undefined;
+    this._closing = false;
   }
 }

@@ -123,6 +123,16 @@ export class OperationGraphHooks {
   );
 
   /**
+   * Releases plugin-held completed-iteration state before idle result deletion.
+   * The graph rejects active/prepared iterations before invoking this hook. A thrown cleanup error
+   * prevents result deletion. Only invoked by hosts explicitly using `deleteResults()`.
+   */
+  public readonly beforeDeleteResults: SyncHook<[ReadonlySet<Operation>]> = new SyncHook(
+    ['operations'],
+    'beforeDeleteResults'
+  );
+
+  /**
    * Hook invoked after an iteration has finished and the command is watching for changes.
    * May be used to display additional relevant data to the user.
    * Only relevant when running in watch mode.

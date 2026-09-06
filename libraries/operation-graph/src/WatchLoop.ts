@@ -209,7 +209,8 @@ export class WatchLoop implements IWatchLoopState {
             } finally {
               const afterExecuteMessage: IAfterExecuteEventMessage = {
                 event: 'after-execute',
-                status
+                status,
+                residentMemoryBytes: process.memoryUsage().rss
               };
               tryMessageHost(afterExecuteMessage);
             }
