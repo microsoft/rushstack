@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
 import { LockFile } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+import type { IScopedReporter } from '@rushstack/rush-reporter';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
@@ -44,6 +45,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
   protected readonly rushConfiguration: RushConfiguration | undefined;
   protected readonly terminal: ITerminal;
   protected readonly rushSession: RushSession;
+  protected readonly reporter: IScopedReporter | undefined;
   protected readonly rushGlobalFolder: RushGlobalFolder;
   protected readonly parser: RushCommandLineParser;
 
@@ -57,6 +59,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     this.rushConfiguration = rushConfiguration;
     this.terminal = terminal;
     this.rushSession = rushSession;
+    this.reporter = rushSession.getReporter({ commandName: this.actionName });
     this.rushGlobalFolder = rushGlobalFolder;
   }
 
@@ -115,7 +118,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return this._eventHooksManager;
   }
 
-  protected declare readonly rushConfiguration: RushConfiguration;
+  declare protected readonly rushConfiguration: RushConfiguration;
 
   protected override async onExecuteAsync(): Promise<void> {
     if (!this.rushConfiguration) {

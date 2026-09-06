@@ -7,6 +7,8 @@ import {
   FileSystem,
   InternalError,
   JsonFile,
+  PackageJsonLookup,
+  type IPackageJson,
   type JsonObject,
   JsonSchema
 } from '@rushstack/node-core-library';
@@ -51,6 +53,7 @@ export abstract class PluginLoaderBase<
   protected readonly _terminal: ITerminal;
 
   protected _manifestCache: Readonly<IRushPluginManifest> | undefined;
+  private _packageVersionCache: string | undefined;
 
   /**
    * The folder that should be used for resolving the plugin's NPM package.
@@ -82,6 +85,20 @@ export abstract class PluginLoaderBase<
 
   public get pluginManifest(): IRushPluginManifest {
     return this._getRushPluginManifest();
+  }
+
+  public get packageVersion(): string {
+    if (!this._packageVersionCache) {
+      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(this.packageFolder, 'package.json')
+      );
+      if (!packageJson.version) {
+        throw new InternalError(`Rush plugin package "${this.packageName}" does not specify a version.`);
+      }
+      this._packageVersionCache = packageJson.version;
+    }
+
+    return this._packageVersionCache;
   }
 
   public getCommandLineConfiguration(): CommandLineConfiguration | undefined {
