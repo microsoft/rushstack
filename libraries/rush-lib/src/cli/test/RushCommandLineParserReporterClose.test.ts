@@ -77,6 +77,8 @@ describe('RushCommandLineParser reporter close', () => {
     const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
     Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
     Object.defineProperty(parser, '_rushOptions', { value: { reporterCloseAsync: closeAsync } });
+    const emitReporterCompletion: jest.Mock<void, [number]> = jest.fn();
+    Object.defineProperty(parser, '_emitReporterCompletion', { value: emitReporterCompletion });
     const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
       .spyOn(process, 'exit')
       .mockImplementation(() => undefined as never);
@@ -91,6 +93,7 @@ describe('RushCommandLineParser reporter close', () => {
     reportErrorAndSetExitCode(new Error('parser failed'));
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
+    expect(emitReporterCompletion).toHaveBeenCalledWith(1);
     expect(exitSpy).not.toHaveBeenCalled();
     process.exitCode = 0;
 
@@ -146,5 +149,30 @@ describe('RushCommandLineParser reporter close', () => {
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith('[reporter] Unable to finalize reporters: close failed\n');
+  });
+
+  it('shares one reporter close operation across failure and finalization paths', async () => {
+    let resolveClose: (() => void) | undefined;
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      () =>
+        new Promise<void>((resolve: () => void) => {
+          resolveClose = resolve;
+        })
+    );
+    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
+    Object.defineProperty(parser, '_rushOptions', { value: { reporterCloseAsync: closeAsync } });
+
+    const closeReporterAsync: () => Promise<void> = (
+      parser as unknown as {
+        _closeReporterAsync(): Promise<void>;
+      }
+    )._closeReporterAsync.bind(parser);
+    const firstClose: Promise<void> = closeReporterAsync();
+    const secondClose: Promise<void> = closeReporterAsync();
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    resolveClose!();
+    await expect(Promise.all([firstClose, secondClose])).resolves.toEqual([undefined, undefined]);
+    expect(closeAsync).toHaveBeenCalledTimes(1);
   });
 });

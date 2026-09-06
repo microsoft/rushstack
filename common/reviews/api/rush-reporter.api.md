@@ -1506,6 +1506,12 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly [{
     readonly defaultSeverity: "error";
     readonly summaryKey: "diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary";
     readonly detailKey: undefined;
+}, {
+    readonly code: "RUSH_COMMAND_FAILED";
+    readonly category: "operation";
+    readonly defaultSeverity: "error";
+    readonly summaryKey: "diagnostic.RUSH_COMMAND_FAILED.summary";
+    readonly detailKey: undefined;
 }];
 
 // @beta
