@@ -244,6 +244,71 @@
       },
       "additionalProperties": false
     },
+    "daemon": {
+      "description": "Opt-in standalone daemon client configuration. Environment overrides config, then defaults. Watch and warm-set controls are reserved integration seams, not active behavior.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable the separate rush-client/rushx-client binaries. Existing rush/rushx remain unchanged. RUSH_DAEMON overrides."
+        },
+        "idleTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "maximum": 2147483.647,
+          "default": 900,
+          "description": "Idle shutdown timeout. RUSH_DAEMON_IDLE_TIMEOUT_SECONDS overrides."
+        },
+        "autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-start only for opted-in invocations. RUSH_DAEMON_AUTO_START overrides."
+        },
+        "watch": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reserved for workspace watcher integration; currently inactive. RUSH_DAEMON_WATCH overrides."
+        },
+        "queueTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2147483.647,
+          "default": 30,
+          "description": "Maximum admission queue wait. RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS overrides."
+        },
+        "warmIdleTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "maximum": 2147483.647,
+          "default": 300,
+          "description": "Reserved for WS3 eviction; currently inactive. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
+        },
+        "warmMemoryBudgetMB": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "maximum": 9007199254740991,
+          "default": 512,
+          "description": "Reserved for WS3 eviction; currently inactive. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
+        },
+        "warmSetMaxProjects": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "default": 20,
+          "description": "Reserved for WS3 warming; currently inactive. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
+        },
+        "autoWarmByTelemetry": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reserved for telemetry-weighted warming; currently inactive. RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY overrides."
+        }
+      }
+    },
     "telemetryEnabled": {
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
