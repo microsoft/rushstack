@@ -114,6 +114,36 @@ describe('RushCommandLineParser', () => {
         });
       });
 
+      describe("'custom-output' action", () => {
+        it('preserves custom parameters that overlap reporter controls', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'custom-output'
+          );
+          process.argv.push(
+            '--reporter',
+            'junit',
+            '--output',
+            'custom-artifact.zip',
+            '--log-level',
+            'custom-level',
+            '--verbose'
+          );
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-output-args.json`)).toEqual([
+            '--reporter',
+            'junit',
+            '--output',
+            'custom-artifact.zip',
+            '--log-level',
+            'custom-level',
+            '--verbose'
+          ]);
+        });
+      });
+
       describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
@@ -138,6 +168,20 @@ describe('RushCommandLineParser', () => {
           const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
           expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
+        });
+      });
+
+      describe("'custom-reporter-flag' action", () => {
+        it('preserves a value-less custom reporter flag', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunRebuildActionRepo',
+            'custom-reporter-flag'
+          );
+          process.argv.push('--reporter');
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-reporter-flag-args.json`)).toEqual(['--reporter']);
         });
       });
     });
