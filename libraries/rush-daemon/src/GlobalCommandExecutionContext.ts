@@ -3,6 +3,7 @@
 
 import * as childProcess from 'node:child_process';
 import { EOL } from 'node:os';
+import { finished } from 'node:stream/promises';
 
 import { SubprocessTerminator } from '@rushstack/node-core-library';
 import { Terminal, TerminalProviderSeverity } from '@rushstack/terminal';
@@ -254,12 +255,16 @@ export class GlobalCommandExecutionContext
       throw new Error('The global command did not register an interactive input session.');
     }
     const sink: IInteractiveRequestInputSink = {
-      writeInputAsync: (chunk: Uint8Array): Promise<void> => writeChildInputAsync(child, chunk)
+      writeInputAsync: (chunk: Uint8Array): Promise<void> => writeChildInputAsync(child, chunk),
+      endInputAsync: (): Promise<void> => endChildInputAsync(child)
     };
+    const onInputError = (error: Error): void => this.#abortRequest(error);
+    child.stdin.on('error', onInputError);
     const attachment: Disposable = this.interactiveInput.attachInputSink(sink);
     this.registerDisposable({
       [Symbol.asyncDispose]: (): Promise<void> => {
         attachment[Symbol.dispose]();
+        child.stdin.removeListener('error', onInputError);
         return Promise.resolve();
       }
     });
@@ -380,6 +385,12 @@ function throwCleanupErrors(cleanupErrors: unknown[]): void {
 
 function normalizeError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
+}
+
+function endChildInputAsync(child: childProcess.ChildProcessWithoutNullStreams): Promise<void> {
+  const completion: Promise<void> = finished(child.stdin, { cleanup: true });
+  child.stdin.end();
+  return completion;
 }
 
 function writeChildInputAsync(

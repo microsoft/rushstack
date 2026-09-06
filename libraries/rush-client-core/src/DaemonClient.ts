@@ -4,6 +4,7 @@
 import type { Readable } from 'node:stream';
 
 import {
+  DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
@@ -28,6 +29,8 @@ import { connectDaemonAsync, type DaemonFrameConnection } from '@rushstack/rush-
 
 import { DaemonClientError } from './DaemonClientError';
 
+const MAX_STDIN_CHUNK_BYTES: number = 64 * 1024;
+
 /** Options for a fresh connection; readiness includes both hello and ping. @beta */
 export interface IDaemonClientConnectOptions {
   readonly socketPath: string;
@@ -45,8 +48,10 @@ export interface IDaemonClientExecuteOptions {
   readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
   readonly onQueuePositionAsync?: (position: number) => Promise<void>;
   readonly abortSignal?: AbortSignal;
-  /** Input starts only after the host requests raw mode or explicitly allows daemon terminal input. */
+  /** Protocol 0.7 input waits for stdinReady credits; older peers use the legacy raw-mode/terminal policy. */
   readonly stdin?: Readable;
+  /** Requires negotiated stdin admission and EOF; older peers fall back before requestStart or input consumption. */
+  readonly requiresStdinEnd?: boolean;
   readonly setRawMode?: (enabled: boolean) => void;
   readonly initialRawMode?: boolean;
   /** Treat a raw Ctrl+C byte as request cancellation. Defaults to false, preserving arbitrary input bytes. */
@@ -60,7 +65,7 @@ export type DaemonClientOutcome =
   | { readonly kind: 'result'; readonly result: IDaemonCommandResult }
   | {
       readonly kind: 'fallback';
-      readonly reason: 'unsupported' | 'controllingTerminalRequired';
+      readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported';
       readonly message?: string;
     }
   | { readonly kind: 'rejected'; readonly rejection: IDaemonRequestRejectedMessage['payload'] };
@@ -98,6 +103,11 @@ export class DaemonClient {
   #execution: IDaemonClientExecuteOptions | undefined;
   #finished: boolean = false;
   #inputStarted: boolean = false;
+  #inputAdmitted: boolean = false;
+  #inputEnded: boolean = false;
+  #supportsInputLifecycle: boolean = false;
+  #inputAcknowledgement: IDeferred<void> | undefined;
+  #inputTail: Promise<void> = Promise.resolve();
   #rawModeChanged: boolean = false;
   #sendTail: Promise<void> = Promise.resolve();
   #cancelTimer: ReturnType<typeof setTimeout> | undefined;
@@ -211,10 +221,20 @@ export class DaemonClient {
       if (options.stdin?.readableEncoding) {
         throw new Error('Daemon stdin must supply raw bytes; do not use setEncoding().');
       }
+      if (options.requiresStdinEnd && (!options.stdin || !options.request.terminal.acceptsStdin)) {
+        throw new Error('requiresStdinEnd requires a stdin source and an input-capable request.');
+      }
       if (options.abortSignal?.aborted) {
         return {
           kind: 'result',
           result: { requestId: options.request.requestId, exitCode: 130, outcome: 'aborted', aborted: true }
+        };
+      }
+      if (options.requiresStdinEnd && !this.#supportsInputLifecycle) {
+        return {
+          kind: 'fallback',
+          reason: 'stdinEndUnsupported',
+          message: 'The daemon does not support stdin admission and EOF; no request was sent.'
         };
       }
       this.#result = deferred();
@@ -296,12 +316,16 @@ export class DaemonClient {
         major: version.major,
         minor: Math.min(version.minor, DAEMON_PROTOCOL_VERSION.minor)
       });
+      this.#supportsInputLifecycle =
+        this.#peerProtocolVersion.minor >= DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR &&
+        this.#connectOptions.capabilities?.supportsInputLifecycle !== false;
       await this.#sendControlAsync({
         kind: 'subscribe',
         payload: {
           ...this.#connectOptions.capabilities,
           isTTY: this.#connectOptions.capabilities?.isTTY ?? false,
           supportsInteractiveIO: true,
+          supportsInputLifecycle: this.#supportsInputLifecycle,
           supportsRequestAdmission: true,
           supportsRequestLifecycle: true
         }
@@ -349,7 +373,7 @@ export class DaemonClient {
         if (message.payload.decision === 'requiresInProcess') {
           this.#complete({ kind: 'fallback', reason: 'controllingTerminalRequired' });
         } else {
-          this.#startInput();
+          if (!this.#supportsInputLifecycle) this.#startInput();
         }
         return;
       case 'setRawMode':
@@ -358,8 +382,25 @@ export class DaemonClient {
         execution.setRawMode(message.payload.enabled);
         this.#rawModeChanged = true;
         await this.#sendControlAsync({ kind: 'rawModeChanged', payload: message.payload });
-        if (message.payload.enabled) this.#startInput();
-        else this.#stopInput();
+        if (!this.#supportsInputLifecycle) {
+          if (message.payload.enabled) this.#startInput();
+          else this.#stopInput();
+        }
+        return;
+      case 'stdinReady':
+        if (!this.#supportsInputLifecycle) {
+          throw new DaemonProtocolError('malformedControlMessage', 'Unexpected stdin admission.');
+        }
+        if (!this.#inputAdmitted) {
+          this.#inputAdmitted = true;
+          this.#startInput();
+        } else if (this.#inputAcknowledgement) {
+          const acknowledgement: IDeferred<void> = this.#inputAcknowledgement;
+          this.#inputAcknowledgement = undefined;
+          acknowledgement.resolve(undefined);
+        } else {
+          throw new DaemonProtocolError('malformedControlMessage', 'Unexpected stdin write acknowledgement.');
+        }
         return;
       case 'queuePosition':
         await execution.onQueuePositionAsync?.(message.payload.position);
@@ -381,10 +422,14 @@ export class DaemonClient {
   #complete(outcome: DaemonClientOutcome): void {
     this.#finished = true;
     this.#stopInput();
+    this.#inputAcknowledgement?.resolve(undefined);
+    this.#inputAcknowledgement = undefined;
     this.#result!.resolve(outcome);
   }
 
   #fail(error: Error): void {
+    this.#inputAcknowledgement?.reject(error);
+    this.#inputAcknowledgement = undefined;
     this.#ready.reject(error);
     this.#result?.reject(error);
     this.#shutdown?.reject(error);
@@ -409,25 +454,66 @@ export class DaemonClient {
       return;
     }
     execution.stdin!.pause();
-    void this.#sendFrameAsync({
-      kind: DaemonFrameType.stdin,
-      payload: encodeDaemonStdinChunk({ requestId: execution.request.requestId, chunk })
-    })
+    this.#inputTail = this.#sendInputAsync(chunk);
+    void this.#inputTail
       .then(() => {
         if (this.#inputStarted && !this.#finished) execution.stdin!.resume();
       })
       .catch((error: Error) => this.#connection.abort(error));
   };
 
+  async #sendInputAsync(chunk: Uint8Array): Promise<void> {
+    for (let offset: number = 0; offset < chunk.byteLength; offset += MAX_STDIN_CHUNK_BYTES) {
+      if (this.#finished || this.#cancelSent) return;
+      const acknowledgement: IDeferred<void> | undefined = this.#supportsInputLifecycle
+        ? deferred<void>()
+        : undefined;
+      this.#inputAcknowledgement = acknowledgement;
+      await Promise.all([
+        this.#sendFrameAsync({
+          kind: DaemonFrameType.stdin,
+          payload: encodeDaemonStdinChunk({
+            requestId: this.#execution!.request.requestId,
+            chunk: chunk.subarray(offset, offset + MAX_STDIN_CHUNK_BYTES)
+          })
+        }),
+        acknowledgement?.promise
+      ]);
+    }
+  }
+
   readonly #onInputError = (error: Error): void => this.#connection.abort(error);
+
+  readonly #onInputEnd = (): void => {
+    if (!this.#inputStarted || this.#inputEnded || this.#finished) return;
+    this.#inputEnded = true;
+    this.#stopInput();
+    void this.#inputTail.then(async () => {
+      if (this.#finished || this.#cancelSent) return;
+      await this.#sendControlAsync({
+        kind: 'stdinEnd',
+        payload: { requestId: this.#execution!.request.requestId }
+      });
+    }).catch((error: Error) => this.#connection.abort(error));
+  };
 
   #startInput(): void {
     const execution: IDaemonClientExecuteOptions = this.#requireExecution();
-    if (this.#inputStarted || !execution.stdin || !execution.request.terminal.acceptsStdin) return;
+    if (this.#inputStarted || this.#inputEnded || !execution.stdin || !execution.request.terminal.acceptsStdin) return;
+    if (execution.stdin.destroyed && !execution.stdin.readableEnded) {
+      throw new Error('Daemon stdin closed before admission without reaching EOF.');
+    }
     this.#wasInputPaused = execution.stdin.isPaused();
     this.#inputStarted = true;
     execution.stdin.on('data', this.#onInput);
     execution.stdin.on('error', this.#onInputError);
+    if (this.#supportsInputLifecycle) {
+      execution.stdin.once('end', this.#onInputEnd);
+      if (execution.stdin.readableEnded) {
+        this.#onInputEnd();
+        return;
+      }
+    }
     execution.stdin.resume();
   }
 
@@ -438,6 +524,7 @@ export class DaemonClient {
     stdin.pause();
     stdin.removeListener('data', this.#onInput);
     stdin.removeListener('error', this.#onInputError);
+    stdin.removeListener('end', this.#onInputEnd);
     if (!this.#wasInputPaused && stdin.listenerCount('data') > 0) stdin.resume();
   }
 }

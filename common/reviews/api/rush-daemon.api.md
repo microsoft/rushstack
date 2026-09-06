@@ -237,11 +237,13 @@ export interface IGlobalCommandTerminalProperties {
 export interface IInteractiveRequestControlClient {
     // (undocumented)
     readonly abortSignal: AbortSignal;
+    writeInputReadyAsync?(requestId: string): Promise<void>;
     writeRawModeControlAsync(message: IDaemonSetRawModeMessage): Promise<void>;
 }
 
 // @beta
 export interface IInteractiveRequestInputSink {
+    endInputAsync?(): Promise<void>;
     // (undocumented)
     writeInputAsync(chunk: Uint8Array): Promise<void>;
 }
@@ -290,7 +292,7 @@ export class InteractiveInputRoutingError extends Error {
 }
 
 // @beta
-export type InteractiveInputRoutingErrorCode = 'duplicateRequest' | 'unknownRequest' | 'completedRequest' | 'nonInteractiveRequest' | 'requestLimitExceeded';
+export type InteractiveInputRoutingErrorCode = 'duplicateRequest' | 'unknownRequest' | 'completedRequest' | 'nonInteractiveRequest' | 'inputEnded' | 'requestLimitExceeded';
 
 // @beta
 export class InteractiveRequestInputRouter {
@@ -298,6 +300,7 @@ export class InteractiveRequestInputRouter {
     markRequestCompleted(requestId: string): void;
     // (undocumented)
     register(options: IInteractiveRequestRegistrationOptions): IInteractiveRequestSession;
+    routeStdinEndAsync(requestId: string): Promise<void>;
     // (undocumented)
     routeStdinFrameAsync(payload: Uint8Array): Promise<void>;
 }

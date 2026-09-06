@@ -26,12 +26,14 @@ describe('DaemonClient', () => {
   let address: string;
   let controls: DaemonControlMessage[];
   let peerVersion: IDaemonProtocolVersion;
+  let acknowledgeInput: boolean;
   let onRequest: (message: DaemonControlMessage) => Promise<void>;
   let onStdin: (bytes: Uint8Array) => Promise<void>;
 
   beforeEach(async () => {
     controls = [];
     peerVersion = DAEMON_PROTOCOL_VERSION;
+    acknowledgeInput = true;
     address =
       process.platform === 'win32'
         ? `\\\\.\\pipe\\rush-client-test-${process.pid}-${Math.random()}`
@@ -40,7 +42,11 @@ describe('DaemonClient', () => {
       connection = new DaemonFrameConnection(socket);
       connection.onFrame(async (frame) => {
         if (frame.kind === DaemonFrameType.stdin) {
-          await onStdin(decodeDaemonStdinChunk(frame.payload).chunk);
+          const { chunk, requestId } = decodeDaemonStdinChunk(frame.payload);
+          if (peerVersion.minor >= 7 && acknowledgeInput) {
+            await sendAsync({ kind: 'stdinReady', payload: { requestId } });
+          }
+          await onStdin(chunk);
           return;
         }
         if (frame.kind !== DaemonFrameType.controlJson) return;
@@ -193,6 +199,7 @@ describe('DaemonClient', () => {
     onRequest = async (message) => {
       if (message.kind === 'requestStart') {
         await sendAsync({ kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: true } });
+        await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
       }
     };
     onStdin = async (bytes) => {
@@ -238,6 +245,7 @@ describe('DaemonClient', () => {
           kind: 'requestRejected',
           payload: { requestId: message.payload.requestId, code: 'unsupported', message: 'No resolver.' }
         });
+
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
     expect(await client.executeAsync({ request: request() })).toEqual({
@@ -245,6 +253,81 @@ describe('DaemonClient', () => {
       reason: 'unsupported',
       message: 'No resolver.'
     });
+  });
+
+  it.each([5, 6])('preserves piped input when peer 0.%s cannot admit EOF', async (minor) => {
+    peerVersion = { major: 0, minor };
+    const stdin = new PassThrough();
+    stdin.end('untouched');
+    const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const result = await client.executeAsync({ request: envelope, stdin, requiresStdinEnd: true });
+    expect(result).toMatchObject({ kind: 'fallback', reason: 'stdinEndUnsupported' });
+    expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+    expect(stdin.read().toString()).toBe('untouched');
+    expect(stdin.listenerCount('data')).toBe(0);
+  });
+
+  it.each([Buffer.from([0, 3, 255, 13]), Buffer.alloc(0), Buffer.alloc(2 * 1024 * 1024, 3)]
+    .map((input) => ({ input, length: input.length })))(
+    'waits for admission and delivers $length piped bytes followed by EOF',
+    async ({ input }) => {
+      const stdin = new PassThrough();
+      stdin.end(input);
+      const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+      const received: Buffer[] = [];
+      onStdin = async (bytes) => { received.push(Buffer.from(bytes)); };
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          expect(stdin.readableLength).toBe(input.length);
+          expect(received).toHaveLength(0);
+          await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+        } else if (message.kind === 'stdinEnd') {
+          expect(Buffer.concat(received).equals(input)).toBe(true);
+          await sendAsync({
+            kind: 'requestResult',
+            payload: { requestId: envelope.requestId, exitCode: 0, outcome: 'success', aborted: false }
+          });
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(client.executeAsync({
+        request: envelope, stdin, requiresStdinEnd: true
+      })).resolves.toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(controls.filter((message) => message.kind === 'stdinEnd')).toHaveLength(1);
+      expect(stdin.listenerCount('end')).toBe(0);
+    }
+  );
+
+  it('keeps control responsive while a large stdin chunk waits for its next write credit', async () => {
+    acknowledgeInput = false;
+    const stdin = new PassThrough();
+    const input: Buffer = Buffer.alloc(128 * 1024, 3);
+    stdin.end(input);
+    const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+    const received: Buffer[] = [];
+    onStdin = async (bytes) => {
+      received.push(Buffer.from(bytes));
+      await sendAsync(received.length === 1
+        ? { kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: false } }
+        : { kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+    };
+    onRequest = async (message) => {
+      if (message.kind === 'requestStart' || message.kind === 'rawModeChanged') {
+        if (message.kind === 'rawModeChanged') expect(received).toHaveLength(1);
+        await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+      } else if (message.kind === 'stdinEnd') {
+        expect(Buffer.concat(received).equals(input)).toBe(true);
+        await sendAsync({
+          kind: 'requestResult',
+          payload: { requestId: envelope.requestId, exitCode: 0, outcome: 'success', aborted: false }
+        });
+      }
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.executeAsync({
+      request: envelope, stdin, requiresStdinEnd: true, setRawMode: () => {}
+    })).resolves.toMatchObject({ kind: 'result', result: { exitCode: 0 } });
   });
 
   it('rejects a version mismatch without attempting a request', async () => {
@@ -338,6 +421,7 @@ describe('DaemonClient', () => {
     onRequest = async (message) => {
       if (message.kind === 'requestStart') {
         await sendAsync({ kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: true } });
+        await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
       } else if (message.kind === 'requestCancel') {
         await sendAsync({
           kind: 'requestResult',

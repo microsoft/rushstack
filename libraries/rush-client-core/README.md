@@ -1,7 +1,8 @@
 # @rushstack/rush-client-core
 
 Opt-in clients for the Rush daemon wire protocol: request lifecycle requires 0.5;
-shutdown requires 0.6. Later additive minors do not raise the request minimum.
+shutdown requires 0.6; stdin admission, write credits, and EOF require 0.7.
+Later additive minors do not raise the request minimum.
 This package has no
 `rush-lib` dependency, command parser, operation graph, or presentation layer.
 
@@ -11,12 +12,12 @@ negotiates hello, subscribes capabilities, and awaits a matching pong.
 `executeAsync()` uses one fresh connection per invocation and closes it after the
 authoritative result. Async stdout/stderr/event callbacks are awaited in wire order,
 so slow destinations backpressure the transport. Log callbacks receive raw bytes
-and the protocol's operation ID. The daemon owns terminal presentation.
+and the protocol's operation ID. The calling client owns terminal presentation.
 
 Abort signals send `requestCancel`, then wait for the result; cancellation has a
 bounded grace period. Disconnects, protocol errors and sink failures are errors,
-never reasons to replay possibly executed work. Only typed `unsupported` and
-`controllingTerminalRequired` outcomes permit fallback. Raw-mode changes are
+never reasons to replay possibly executed work. Only pre-execution `unsupported`,
+`controllingTerminalRequired`, and `stdinEndUnsupported` outcomes permit fallback. Raw-mode changes are
 acknowledged only after applying them. Input listeners and raw state are restored
 on success, cancellation, disconnect and failure. No resize messages are sent.
 
@@ -56,11 +57,15 @@ close calls cannot remove successor artifacts.
 
 ## Integration boundaries
 
-The current protocol has no stdin EOF or normal request-admitted message.
-Automatic stdin pumping therefore begins only on `setRawMode(enabled: true)` or
-`terminalPolicy(runInDaemon)`. A host accepting cooked input must send the latter
-before awaiting input. The current standalone host does not do so. Piped stdin
-must remain in-process until explicit input admission/EOF are integrated.
+Protocol 0.7 negotiates `supportsInputLifecycle`. Input remains untouched until the
+host attaches a destination and grants the first `stdinReady` credit. Each credit
+permits one chunk, bounded to 64 KiB; the next credit follows the destination's
+completed write. This bounds buffering without blocking cancellation or raw-mode
+control frames. `stdinEnd` follows all preceding chunks and credits, including for
+empty input. Raw Ctrl+C handling is opt-in and must not be enabled for binary pipes.
+Set `requiresStdinEnd` for pipes: peers without the capability return
+`stdinEndUnsupported` before sending `requestStart` or consuming any input.
+Legacy 0.5/0.6 interactive clients retain their raw-mode/terminal-policy input path.
 
 The standalone host has no request resolver or warm operation graph. A successful
 handshake is readiness, not evidence that a build is supported. Graph verbs,

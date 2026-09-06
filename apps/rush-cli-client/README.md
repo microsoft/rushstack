@@ -22,8 +22,12 @@ has no request resolver or warm graph. That rejection and a controlling-terminal
 requirement fall back in-process. Unknown rejections, transport loss after sending
 a request, and output failures do not replay the command.
 
-Piped input stays in-process: the protocol has neither stdin EOF nor normal input
-admission, and consuming input before fallback would corrupt the invocation.
+Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
+not read input until the command attaches an input destination, and sends bounded
+chunks only as the daemon grants write credits. EOF follows all preceding writes;
+binary Ctrl+C bytes in a pipe are data, not cancellation signals. Older peers fall
+back before `requestStart` or input consumption, and pre-execution command fallback
+preserves the complete pipe for the native entrypoint.
 The existing Rush entrypoints resolve project scripts from cwd. Fallback loads the
 existing `@microsoft/rush` version-selecting entrypoint in the client process,
 preserving its startup checks, output and reporter integration instead of

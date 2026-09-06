@@ -5,6 +5,8 @@ import type { IDaemonClientCaps } from './DaemonClientCaps';
 import type {
   IDaemonRawModeChangedMessage,
   IDaemonSetRawModeMessage,
+  IDaemonStdinEndMessage,
+  IDaemonStdinReadyMessage,
   IDaemonTerminalPolicyMessage
 } from './DaemonInteractiveControl';
 import type { IDaemonShutdownAckMessage, IDaemonShutdownMessage } from './DaemonLifecycleControl';
@@ -83,6 +85,8 @@ export type DaemonControlMessage =
   | IDaemonShutdownAckMessage
   | IDaemonErrorMessage
   | IDaemonSetRawModeMessage
+  | IDaemonStdinEndMessage
+  | IDaemonStdinReadyMessage
   | IDaemonRawModeChangedMessage
   | IDaemonTerminalPolicyMessage
   | IDaemonRequestQueuePositionMessage

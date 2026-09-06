@@ -111,6 +111,13 @@ child process. Both global and phased routes stop accepting input on abort/disco
 acknowledged cooked-mode restoration before publishing the exact-once command result. The daemon never reads or
 mutates its own stdin or raw-mode state.
 
+Protocol 0.7 clients may negotiate stdin admission and EOF. Attaching an input sink grants one
+`stdinReady` write credit; another follows each completed write. `stdinEnd` is queued behind preceding
+data, and later data or duplicate EOF is rejected. Cancellation remains serviceable while a sink is
+backpressured or not yet attached. Input sinks that accept EOF implement `endInputAsync()`; missing
+EOF support fails the request explicitly. `spawnChild(..., { forwardInput: true })` forwards both
+bytes and EOF to the owned child process. Older clients receive no new controls.
+
 Terminal width remains the immutable request-start value established by WS2.5. The thin client owns resize and
 rendering, so this layer does not forward `SIGWINCH`. Commands declaring a real controlling-terminal requirement
 receive a typed `requiresInProcess` policy result and are not executed by rushd; no pseudo-terminal is allocated or

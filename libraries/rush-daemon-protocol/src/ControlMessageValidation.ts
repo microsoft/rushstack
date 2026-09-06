@@ -13,7 +13,7 @@ import {
 } from './InteractiveControlValidation';
 import { validateRequestAdmissionCapability, validateRequestQueuePositionControl } from './RequestAdmissionControlValidation';
 import { validateRequestCancelControl, validateRequestRejectedControl, validateRequestResultControl, validateRequestStartControl } from './RequestControlValidation';
-import { validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
+import { validateInputLifecycleCapability, validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);
 }
@@ -48,6 +48,7 @@ function validateSubscribe(payload: Record<string, unknown>): void {
     fail('Subscribe message payload.isTTY must be a boolean.');
   }
   validateInteractiveCapability(payload);
+  validateInputLifecycleCapability(payload);
   validateRequestAdmissionCapability(payload);
   validateRequestLifecycleCapability(payload);
   requireSubscribeVerbosity(payload);
@@ -81,7 +82,9 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   requestRejected: validateRequestRejectedControl,
   requestResult: validateRequestResultControl,
   shutdown: noopValidator,
-  shutdownAck: noopValidator
+  shutdownAck: noopValidator,
+  stdinReady: validateRequestCancelControl,
+  stdinEnd: validateRequestCancelControl
 };
 
 /** Structurally validates a parsed control message. @beta */

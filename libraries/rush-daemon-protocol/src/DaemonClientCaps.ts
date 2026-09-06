@@ -18,6 +18,8 @@ export interface IDaemonClientCaps {
   readonly isTTY: boolean;
   /** Whether the client supports request-scoped stdin and acknowledged raw-mode control. */
   readonly supportsInteractiveIO?: boolean;
+  /** Whether the client waits for stdin admission and can send request-scoped EOF. */
+  readonly supportsInputLifecycle?: boolean;
   /** Whether the client supports request admission progress controls and typed failures. */
   readonly supportsRequestAdmission?: boolean;
   /** Whether the client supports the request start, cancellation, and terminal outcome controls. */

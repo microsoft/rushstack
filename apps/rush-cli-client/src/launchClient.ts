@@ -59,7 +59,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     });
     return;
   }
-  if (!route.daemon || !rushJsonPath || !process.stdin.isTTY) {
+  if (!route.daemon || !rushJsonPath) {
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
   }
@@ -119,11 +119,10 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       onStdoutAsync: async (bytes) => writeStreamAsync(process.stdout, bytes),
       onStderrAsync: async (bytes) => writeStreamAsync(process.stderr, bytes),
       stdin: process.stdin,
-      cancelOnCtrlC: true,
+      requiresStdinEnd: !process.stdin.isTTY,
+      cancelOnCtrlC: !!process.stdin.isTTY,
       initialRawMode: !!process.stdin.isRaw,
-      setRawMode: (enabled) => {
-        process.stdin.setRawMode(enabled);
-      }
+      setRawMode: process.stdin.isTTY ? (enabled) => { process.stdin.setRawMode(enabled); } : undefined
     });
   } finally {
     process.removeListener('SIGINT', onSignal);

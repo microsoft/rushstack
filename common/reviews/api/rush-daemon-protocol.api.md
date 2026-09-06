@@ -31,7 +31,9 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'requestRejected',
 'requestResult',
 'shutdown',
-'shutdownAck'
+'shutdownAck',
+'stdinReady',
+'stdinEnd'
 ];
 
 // @beta
@@ -54,6 +56,9 @@ export const DAEMON_EVENT_TYPES: readonly [
 ];
 
 // @beta
+export const DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
 
 // @beta
@@ -72,7 +77,7 @@ export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonStdinEndMessage | IDaemonStdinReadyMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -205,6 +210,7 @@ export interface IDaemonClientCaps {
     readonly colorLevel?: number;
     readonly columns?: number;
     readonly isTTY: boolean;
+    readonly supportsInputLifecycle?: boolean;
     readonly supportsInteractiveIO?: boolean;
     readonly supportsRequestAdmission?: boolean;
     readonly supportsRequestLifecycle?: boolean;
@@ -533,6 +539,26 @@ export interface IDaemonShutdownMessage {
 export interface IDaemonStdinChunk {
     readonly chunk: Uint8Array;
     readonly requestId: string;
+}
+
+// @beta
+export interface IDaemonStdinEndMessage {
+    // (undocumented)
+    readonly kind: 'stdinEnd';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonStdinReadyMessage {
+    // (undocumented)
+    readonly kind: 'stdinReady';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
 }
 
 // @beta

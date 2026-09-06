@@ -33,6 +33,11 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   `shutdown` and receive `shutdownAck` before connection closure. Clients must negotiate at least
   `DAEMON_LIFECYCLE_PROTOCOL_MINOR` before sending this control. `pong` can also report the daemon's
   PID and resident memory in bytes; older peers may omit these fields.
+- **Input lifecycle controls (0.7)** — `supportsInputLifecycle` negotiates `stdinReady`
+  and `stdinEnd`. The host grants the first write credit only after the request attaches
+  its input destination, then grants another after each write drains. The client sends
+  one bounded chunk per credit and EOF after all chunks. Empty data is never interpreted
+  as EOF. Peers that did not negotiate the capability receive no new controls.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).
