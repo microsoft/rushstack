@@ -6,15 +6,11 @@ import * as net from 'node:net';
 import type { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 
 import { DaemonFrameConnection } from './DaemonFrameConnection';
-import { ADDRESS_IN_USE, listenOrErrorAsync, toListenTransportError } from './DaemonListenerNet';
-import type { INetError } from './DaemonListenerNet';
-import { ensureDaemonRuntimeDir, removeDaemonArtifacts, writeDaemonLockfile } from './DaemonLockfile';
+import { listenWithReclaimAsync } from './DaemonListenerBinding';
+import { DaemonListenerLifetime } from './DaemonListenerLifetime';
+import { ensureDaemonRuntimeDir, writeDaemonLockfile } from './DaemonLockfile';
+import { assertDaemonOwnershipAvailable } from './DaemonOwnership';
 import type { IDaemonPaths } from './DaemonPaths';
-import { reclaimStaleDaemonAsync } from './DaemonReclaim';
-
-const FIRST_ATTEMPT: number = 0;
-const RECLAIM_ATTEMPT: number = 1;
-
 
 /** Options for {@link DaemonFrameListener.listenAsync}. @beta */
 export interface IDaemonListenerOptions {
@@ -33,17 +29,16 @@ export interface IDaemonListenerOptions {
  * `daemonAlreadyRunning` transport error is thrown.
  * @beta */
 export class DaemonFrameListener {
-  private readonly _server: net.Server;
-  private readonly _paths: IDaemonPaths;
+  private readonly _lifetime: DaemonListenerLifetime;
   private constructor(server: net.Server, paths: IDaemonPaths) {
-    this._server = server;
-    this._paths = paths;
+    this._lifetime = new DaemonListenerLifetime(server, paths);
   }
   /** Binds the socket/pipe path and writes the PID lockfile. */
   public static async listenAsync(
     paths: IDaemonPaths,
     options: IDaemonListenerOptions
   ): Promise<DaemonFrameListener> {
+    assertDaemonOwnershipAvailable(paths.lockfilePath);
     const server: net.Server = net.createServer((socket: net.Socket) => {
       options.onConnection(new DaemonFrameConnection(socket));
     });
@@ -61,40 +56,11 @@ export class DaemonFrameListener {
   }
 
   /** Stops accepting connections and releases the socket/pipe and lockfile. */
-  public async closeAsync(): Promise<void> {
-    await new Promise<void>((resolve: () => void) => this._server.close(() => resolve()));
-    removeDaemonArtifacts(this._paths.lockfilePath, this._paths.socketPath);
+  public closeAsync(): Promise<void> {
+    return this._lifetime.closeAsync();
   }
-}
-
-
-async function listenWithReclaimAsync(server: net.Server, paths: IDaemonPaths): Promise<void> {
-  for (let attempt: number = FIRST_ATTEMPT; attempt <= RECLAIM_ATTEMPT; attempt++) {
-    const bound: boolean = await tryListenOnceAsync(server, paths, attempt);
-    if (bound) {
-      return;
-    }
+  /** Stops accepting clients and awaits existing connections while retaining daemon ownership. */
+  public stopAcceptingAsync(): Promise<void> {
+    return this._lifetime.stopAcceptingAsync();
   }
-}
-
-async function tryListenOnceAsync(
-  server: net.Server,
-  paths: IDaemonPaths,
-  attempt: number
-): Promise<boolean> {
-  const error: INetError | undefined = await listenOrErrorAsync(server, paths.socketPath);
-  return error ? recoverFromListenErrorAsync(error, paths, attempt) : true;
-}
-
-async function recoverFromListenErrorAsync(
-  error: INetError,
-  paths: IDaemonPaths,
-  attempt: number
-): Promise<boolean> {
-  const canReclaim: boolean = error.code === ADDRESS_IN_USE && attempt === FIRST_ATTEMPT;
-  if (!canReclaim) {
-    throw toListenTransportError(error, paths.socketPath);
-  }
-  await reclaimStaleDaemonAsync(paths);
-  return false;
 }

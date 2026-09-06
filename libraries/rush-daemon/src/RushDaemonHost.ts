@@ -197,7 +197,7 @@ export class RushDaemonHost {
     this._lifecycle.closing = true;
     const errors: unknown[] = [];
     const listenerClosePromise: Promise<unknown | undefined> = this._listener
-      .closeAsync()
+      .stopAcceptingAsync()
       .then(() => undefined, (error: unknown) => error);
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync())
@@ -222,6 +222,13 @@ export class RushDaemonHost {
       errors.push(error);
     }
 
+    if (errors.length === 0) {
+      try {
+        await this._listener.closeAsync();
+      } catch (error) {
+        errors.push(error);
+      }
+    }
     if (errors.length === 1) {
       throw errors[0];
     } else if (errors.length > 1) {

@@ -19,7 +19,9 @@ Protocol 0.6 management clients can stop the host through the workspace transpor
 read from disk. The host requires a lifecycle-capable hello, drains `shutdownAck` before beginning shutdown,
 then cancels outstanding requests and disposes the resolver, workspace, and endpoint through its normal close
 path. A connection closing is not by itself proof that endpoint cleanup has finished: restarting clients must
-wait for transport ownership to be released before starting a successor. Ping responses include the live PID
+wait for transport ownership to be released before starting a successor. Ownership is retained until resolver
+and workspace disposal both succeed; cleanup failures retain the live owner's lock and are reported rather
+than allowing a successor to overlap still-resident engine state. Ping responses include the live PID
 and resident memory; they do not claim that the loaded projects have a warm operation graph.
 
 The host loads `RushConfiguration` once before signaling readiness and keeps a headless file watcher
