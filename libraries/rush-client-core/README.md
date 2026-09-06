@@ -29,6 +29,15 @@ reclaims only an absent/dead owner, spawns detached without a shell, and waits f
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed; a live (possibly reused) PID with an unreachable socket fails closed.
 
+If a wire-compatible daemon reports the wrong implementation version and an explicit
+replacement launcher is available, startup serializes replacement under that same mutex.
+It verifies the old endpoint's attested ownership, requests shutdown, waits for ownership
+release, and starts or reuses the expected version before returning a client. Concurrent
+callers share one replacement; no command is submitted to the old version or replayed.
+Passive clients never replace a daemon, and unverifiable ownership or unsupported lifecycle
+protocol fails closed. `requestDaemonShutdownAsync()` is the shared ownership-checked
+shutdown primitive used by both this path and explicit CLI restart.
+
 `getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
 and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across
 restarts, including startup failures; the parent always closes its descriptor
@@ -69,7 +78,7 @@ Legacy 0.5/0.6 interactive clients retain their raw-mode/terminal-policy input p
 
 The standalone host has no request resolver or warm operation graph. A successful
 handshake is readiness, not evidence that a build is supported. Graph verbs,
-version-selected daemon installation, transparent version-skew restart, and
+version-selected daemon installation, incompatible-protocol replacement, and
 request handoff remain unavailable; this package does not fabricate them.
 A client that dies during the
 pre-bind spawn interval may leave a detached child still starting; normal

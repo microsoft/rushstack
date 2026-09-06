@@ -8,11 +8,13 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { LockFile } from '@rushstack/node-core-library';
+import { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol';
 import {
   DaemonTransportError,
   DaemonTransportErrorCode,
   ensureDaemonRuntimeDir,
   reclaimStaleDaemonAsync,
+  readDaemonLockfile,
   type IDaemonLockfile,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
@@ -83,6 +85,8 @@ export async function connectOrStartDaemonAsync(
   try {
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
+    const replacement: DaemonClient | undefined = await replaceMismatchedDaemonAsync(options, deadline);
+    if (replacement) return replacement;
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
     assertNoLiveOwner(options.paths);
     await reclaimStaleDaemonAsync(options.paths);
@@ -104,6 +108,56 @@ export async function connectOrStartDaemonAsync(
   }
 }
 
+/**
+ * Captures attested ownership and requests shutdown without claiming that cleanup has finished.
+ * Pass the returned identity as previousDaemon to connectOrStartDaemonAsync before replacement.
+ * @beta
+ */
+export async function requestDaemonShutdownAsync(
+  client: DaemonClient,
+  paths: IDaemonPaths,
+  timeoutMs?: number
+): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>> {
+  if (client.protocolVersion.minor < DAEMON_LIFECYCLE_PROTOCOL_MINOR) {
+    throw new DaemonClientError('versionMismatch', 'Daemon restart requires protocol 0.6 or newer.');
+  }
+  const { pid } = await client.status;
+  const owner: IDaemonLockfile | undefined = readDaemonLockfile(paths.lockfilePath);
+  if (!isDaemonOwnership(owner) || owner.pid !== pid || owner.socketPath !== paths.socketPath) {
+    throw new DaemonClientError(
+      'startupFailed',
+      'The daemon ownership record is missing, unreadable, or changed; shutdown was not sent.'
+    );
+  }
+  const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> = {
+    pid: owner.pid,
+    startedAt: owner.startedAt
+  };
+  await client.shutdownAsync(timeoutMs);
+  return previousDaemon;
+}
+
+async function replaceMismatchedDaemonAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<DaemonClient | undefined> {
+  if (options.expectedDaemonVersion === undefined) return undefined;
+  const current: DaemonClient | undefined = await tryConnectAsync({
+    ...options, expectedDaemonVersion: undefined, startCommand: undefined
+  }, deadline);
+  if (!current) return undefined;
+  if ((await current.status).daemonVersion === options.expectedDaemonVersion) return current;
+  try {
+    const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> = await requestDaemonShutdownAsync(
+      current, options.paths, Math.max(1, deadline - Date.now())
+    );
+    await waitForPreviousDaemonAsync(options.paths, previousDaemon, deadline);
+  } finally {
+    await current.closeAsync();
+  }
+  return await tryConnectAsync(options, deadline);
+}
+
 async function tryConnectAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
@@ -123,6 +177,14 @@ async function tryConnectAsync(
       return undefined;
     }
     if (error instanceof DaemonClientError && (error.code === 'timeout' || error.code === 'disconnected')) {
+      return undefined;
+    }
+    if (
+      error instanceof DaemonClientError &&
+      error.code === 'versionMismatch' &&
+      options.startCommand &&
+      options.expectedDaemonVersion !== undefined
+    ) {
       return undefined;
     }
     throw error;

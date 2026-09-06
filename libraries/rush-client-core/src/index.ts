@@ -17,6 +17,7 @@ export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientErr
 export { getDaemonLogFilePath } from './DaemonLogFile';
 export {
   connectOrStartDaemonAsync,
+  requestDaemonShutdownAsync,
   type IConnectOrStartDaemonOptions,
   type IDaemonStartCommand
 } from './connectOrStartDaemon';

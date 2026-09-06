@@ -65,6 +65,9 @@ positive safe integer. No warm-set setting changes build correctness.
 `--no-daemon`. It is idempotent: an existing compatible daemon is reused, not
 reconfigured. Startup uses the same detached, locked launcher as automatic
 startup and fails rather than guessing a launcher for another Rush version.
+With an explicit matching launcher, a daemon implementation-version mismatch triggers
+ownership-checked replacement under the start mutex before executing any command.
+This does not install another Rush version or replace a peer lacking safe shutdown support.
 
 `rush-client daemon status` only connects and checks hello/pong. It never starts
 a process, reclaims files, or treats a PID file as evidence of readiness. Both

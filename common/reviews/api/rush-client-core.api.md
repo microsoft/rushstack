@@ -123,4 +123,7 @@ export interface IDaemonStartCommand {
     readonly environment: Readonly<Record<string, string>>;
 }
 
+// @beta
+export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
+
 ```
