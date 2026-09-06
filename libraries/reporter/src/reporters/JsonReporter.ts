@@ -50,17 +50,43 @@ export class JsonReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
+    const machineEvent: IReporterEventEnvelope<unknown> =
+      event.type === 'messageEmitted' && event.privacy === 'local-sensitive'
+        ? {
+            ...event,
+            payload: {
+              ...(event.payload as Record<string, unknown>),
+              text: '[local-sensitive]'
+            }
+          }
+        : event;
+    const redactedEvent: IReporterEventEnvelope<unknown> = redactReporterEvent(machineEvent);
     try {
-      this._write(
-        encodeNdjsonRecord(redactReporterEvent(event), { maxRecordBytes: this._maxRecordBytes })
-      );
+      this._write(encodeNdjsonRecord(redactedEvent, { maxRecordBytes: this._maxRecordBytes }));
     } catch (error) {
       if (error instanceof NdjsonRecordTooLargeError) {
+        const source: IReporterEventEnvelope<unknown>['source'] =
+          redactedEvent.privacy === 'public'
+            ? redactedEvent.source
+            : {
+                packageName: '[private-producer]',
+                packageVersion: '[private-version]'
+              };
         this._write(
           encodeNdjsonRecord(
             {
-              ...event,
-              privacy: 'public',
+              protocolVersion: redactedEvent.protocolVersion,
+              eventId: redactedEvent.eventId,
+              sessionId: redactedEvent.sessionId,
+              parentSessionId: redactedEvent.parentSessionId,
+              parentOperationId: redactedEvent.parentOperationId,
+              sequence: redactedEvent.sequence,
+              sourceSequence: redactedEvent.sourceSequence,
+              timestamp: redactedEvent.timestamp,
+              source,
+              scope: redactedEvent.privacy === 'public' ? redactedEvent.scope : undefined,
+              privacy: redactedEvent.privacy,
+              required: redactedEvent.required,
               type: 'extension',
               payload: {
                 name: 'rush.reporter.record-too-large',

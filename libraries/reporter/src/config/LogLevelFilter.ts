@@ -64,7 +64,14 @@ export function getEventMinimumLogLevel(event: IReporterEventEnvelope<unknown>):
     case 'artifactAvailable':
       return 'normal';
     case 'messageEmitted': {
-      const severity: string | undefined = (event.payload as { severity?: string }).severity;
+      const payload: { severity?: string; minimumLogLevel?: ReporterLogLevel } = event.payload as {
+        severity?: string;
+        minimumLogLevel?: ReporterLogLevel;
+      };
+      if (payload.minimumLogLevel !== undefined) {
+        return payload.minimumLogLevel;
+      }
+      const severity: string | undefined = payload.severity;
       if (severity === 'error' || severity === 'warning') {
         return 'quiet';
       }

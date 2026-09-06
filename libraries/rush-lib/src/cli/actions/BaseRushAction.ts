@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 
 import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
-import { LockFile } from '@rushstack/node-core-library';
+import { AlreadyReportedError, LockFile } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type { IScopedReporter } from '@rushstack/rush-reporter';
 
@@ -14,6 +14,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushSession } from '../../pluginFramework/RushSession';
+import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
 import { measureAsyncFn } from '../../utilities/performance';
 
@@ -69,15 +70,21 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          this.terminal.writeLine(
-            Colorize.red(`Another Rush command is already running in this repository.`)
-          );
+          const message: string = 'Another Rush command is already running in this repository.';
+          if (_isRushSessionOperationStreamEnabled(this.rushSession)) {
+            this.terminal.writeErrorLine(message);
+            throw new AlreadyReportedError();
+          }
+          this.terminal.writeLine(Colorize.red(message));
           process.exit(1);
         }
       }
     }
 
-    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+    if (
+      !RushCommandLineParser.shouldRestrictConsoleOutput() &&
+      !_isRushSessionOperationStreamEnabled(this.rushSession)
+    ) {
       this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
 

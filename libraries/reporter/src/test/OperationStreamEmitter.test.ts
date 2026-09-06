@@ -61,12 +61,12 @@ describe('OperationStreamEmitter', () => {
   it('emits registration, status, output, and result with operation scope', () => {
     const sink: CapturingSink = new CapturingSink();
     const emitter: OperationStreamEmitter = makeEmitter(sink);
-    emitter.registerOperation('op1', 'project-a', 'build', false);
-    emitter.changeStatus('op1', 'executing', 0, 'queued');
-    emitter.writeOutput('op1', 'stdout', 'hello\n');
-    emitter.changeStatus('op1', 'success', 100, 'executing');
-    emitter.closeOperationStream('op1');
-    emitter.completeOperation('op1', 'success', 100);
+    emitter.registerOperation('op1', 'project-a', 'build', false, 7);
+    emitter.changeStatus('op1', 'executing', 0, 'queued', 7);
+    emitter.writeOutput('op1', 'stdout', 'hello\n', 7);
+    emitter.changeStatus('op1', 'success', 100, 'executing', 7);
+    emitter.closeOperationStream('op1', 7);
+    emitter.completeOperation('op1', 'success', 100, 7);
     emitter.completeCommand('build', true, 0, { success: 1 });
 
     expect(sink.inputs.map((i) => i.type)).toEqual([
@@ -80,6 +80,10 @@ describe('OperationStreamEmitter', () => {
     ]);
     expect(sink.inputs[2].scope).toEqual({ commandName: 'build', operationId: 'op1' });
     expect(sink.inputs[2].privacy).toBe('local-sensitive');
+    for (const input of sink.inputs.slice(0, 6)) {
+      expect(input.payload).toMatchObject({ iterationId: 7 });
+      expect(input.scope?.operationId).toBe('op1');
+    }
     expect(sink.inputs[0].payload).toMatchObject({ operationId: 'op1', silent: false });
     expect(sink.inputs[3].payload).toMatchObject({
       operationId: 'op1',
@@ -178,6 +182,8 @@ describe('reporter parity with StreamCollator', () => {
     emitter.writeOutput('op2', 'stdout', 'B2\n');
     emitter.changeStatus('op1', 'success', 100);
     emitter.changeStatus('op2', 'success', 200);
+    emitter.completeOperation('op1', 'success', 100);
+    emitter.completeOperation('op2', 'success', 200);
     emitter.completeCommand('build', true, 0);
 
     let output: string = '';
@@ -204,6 +210,7 @@ describe('reporter parity with StreamCollator', () => {
     emitter.changeStatus('op1', 'executing');
     emitter.writeOutput('op1', 'stdout', 'RAW-PROJECT-OUTPUT\n');
     emitter.changeStatus('op1', 'success', 100);
+    emitter.completeOperation('op1', 'success', 100);
     emitter.completeCommand('build', true, 0);
 
     const terminal: FakeTerminal = new FakeTerminal();

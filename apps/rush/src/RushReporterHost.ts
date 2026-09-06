@@ -20,12 +20,15 @@ import {
   shouldRenderAtLogLevel,
   type IReporter,
   type IReporterContext,
+  type IReporterEmitEventInput,
   type IReporterEventEnvelope,
   type IReporterEventSink,
+  type IFileReporterArtifact,
   type IReporterOutputTarget,
   type ReporterEventType,
   type ReporterLogLevel,
-  type ReporterName
+  type ReporterName,
+  type ReporterManager
 } from '@rushstack/rush-reporter';
 
 export interface IRushReporterOutputStream {
@@ -39,11 +42,15 @@ export interface IRushReporterHostOptions {
   readonly env?: Record<string, string | undefined>;
   readonly cwd?: string;
   readonly stdout?: IRushReporterOutputStream;
+  readonly stderr?: IRushReporterOutputStream;
+  readonly commonTempFolder?: string;
+  readonly actionName?: string;
   readonly includeDefaultFileReporter?: boolean;
   readonly commandName?: 'rush' | 'rush-pnpm' | 'rushx';
   readonly repositoryOptIn?: boolean;
   readonly forceLegacy?: boolean;
   readonly selectedRushVersion?: string;
+  readonly manager?: ReporterManager;
 }
 
 export interface IRushReporterSelection {
@@ -65,13 +72,15 @@ export interface IInitializedRushReporterHost {
   readonly host: ReporterHost;
   readonly sink: IReporterEventSink;
   readonly selection: IRushReporterSelection;
+  readonly logArtifact: IFileReporterArtifact | undefined;
   closeAsync(timeoutMs?: number): Promise<void>;
 }
 
 const REPORTER_VALUE_FLAGS: ReadonlySet<string> = new Set(['--reporter', '--output', '--log-level']);
 const ALL_REPORTER_VALUE_FLAGS: readonly string[] = ['--reporter', '--output', '--log-level'];
 const REPORTER_SELECTION_FLAG: readonly string[] = ['--reporter'];
-const DEFERRED_OPERATION_EVENT_TYPES: ReadonlySet<ReporterEventType> = new Set([
+const REPORTER_OUTPUT_VALUE_FLAGS: readonly string[] = ['--output', '--log-level'];
+const GROUPED_OPERATION_EVENT_TYPES: ReadonlySet<ReporterEventType> = new Set([
   'operationRegistered',
   'operationStatusChanged',
   'operationStreamClosed',
@@ -93,10 +102,16 @@ class LogLevelReporter implements IReporter {
 
   private readonly _reporter: IReporter;
   private readonly _logLevel: ReporterLogLevel;
+  private readonly _preserveOperationStream: boolean;
 
-  public constructor(reporter: IReporter, logLevel: ReporterLogLevel) {
+  public constructor(
+    reporter: IReporter,
+    logLevel: ReporterLogLevel,
+    preserveOperationStream: boolean = false
+  ) {
     this._reporter = reporter;
     this._logLevel = logLevel;
+    this._preserveOperationStream = preserveOperationStream;
     this.name = reporter.name;
   }
 
@@ -105,39 +120,13 @@ class LogLevelReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    if (shouldRenderAtLogLevel(this._logLevel, event)) {
-      this._reporter.report(event);
-    }
-  }
-
-  public flushAsync(): Promise<void> {
-    return this._reporter.flushAsync();
-  }
-
-  public closeAsync(): Promise<void> {
-    return this._reporter.closeAsync();
-  }
-}
-
-/**
- * Keeps operation presentation on the legacy collator until R5B transfers terminal ownership.
- */
-class DeferredOperationPresentationReporter implements IReporter {
-  public readonly name: string;
-
-  private readonly _reporter: IReporter;
-
-  public constructor(reporter: IReporter) {
-    this._reporter = reporter;
-    this.name = reporter.name;
-  }
-
-  public initializeAsync(context: IReporterContext): Promise<void> {
-    return this._reporter.initializeAsync(context);
-  }
-
-  public report(event: IReporterEventEnvelope<unknown>): void {
-    if (!DEFERRED_OPERATION_EVENT_TYPES.has(event.type)) {
+    if (
+      shouldRenderAtLogLevel(this._logLevel, event) ||
+      event.type === 'artifactAvailable' ||
+      (this._preserveOperationStream &&
+        GROUPED_OPERATION_EVENT_TYPES.has(event.type) &&
+        !(this._logLevel === 'quiet' && event.type === 'externalOutput'))
+    ) {
       this._reporter.report(event);
     }
   }
@@ -199,6 +188,112 @@ class ExplicitOutputReporter implements IReporter {
         this._fileDescriptor = undefined;
       }
     }
+  }
+}
+
+class FilePathReporter implements IReporter {
+  public readonly name: string = 'file-path';
+
+  private readonly _write: (text: string) => unknown;
+  private _path: string | undefined;
+  private _written: boolean = false;
+
+  public constructor(write: (text: string) => unknown) {
+    this._write = write;
+  }
+
+  public async initializeAsync(): Promise<void> {
+    /* no-op */
+  }
+
+  public report(event: IReporterEventEnvelope<unknown>): void {
+    if (event.type === 'artifactAvailable') {
+      const payload: { role?: string; path?: string } = event.payload as {
+        role?: string;
+        path?: string;
+      };
+      if (payload.role === 'log') {
+        this._path = payload.path;
+      }
+    } else if ((event.type === 'commandResult' || event.type === 'sessionCompleted') && this._path) {
+      this._writePathOnce();
+    }
+  }
+
+  public async flushAsync(): Promise<void> {
+    /* no-op */
+  }
+
+  public async closeAsync(): Promise<void> {
+    this._writePathOnce();
+  }
+
+  private _writePathOnce(): void {
+    if (!this._written && this._path) {
+      this._written = true;
+      this._write(`Rush full log: ${this._path}\n`);
+    }
+  }
+}
+
+class ArtifactCompletionReporterSink implements IReporterEventSink {
+  private readonly _host: ReporterHost;
+  private readonly _fullDetailReporter: FileReporter;
+  private _lastComplete: boolean | undefined;
+  private _artifactContext: IReporterEmitEventInput<unknown> | undefined;
+
+  public constructor(host: ReporterHost, fullDetailReporter: FileReporter) {
+    this._host = host;
+    this._fullDetailReporter = fullDetailReporter;
+  }
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    if (event.type === 'artifactAvailable') {
+      const payload: { role?: string; path?: string; complete?: boolean } = event.payload as {
+        role?: string;
+        path?: string;
+        complete?: boolean;
+      };
+      if (payload.role === 'log' && typeof payload.complete === 'boolean') {
+        this._lastComplete = payload.complete;
+        this._artifactContext = event;
+      }
+    }
+    return this._host.manager.emit(event);
+  }
+
+  public publishIfChanged(
+    context: IReporterEmitEventInput<unknown> | undefined = this._artifactContext
+  ): void {
+    if (!context) {
+      return;
+    }
+    const artifact: IFileReporterArtifact = this._fullDetailReporter.getArtifact();
+    if (!artifact.path || artifact.complete === this._lastComplete) {
+      return;
+    }
+    const complete: boolean = artifact.complete;
+    const payload: Readonly<{
+      role: 'log';
+      path: string;
+      format: 'plaintext';
+      complete: boolean;
+    }> = Object.freeze({
+      role: 'log' as const,
+      path: artifact.path,
+      format: 'plaintext' as const,
+      complete
+    });
+    this._host.manager.emit({
+      protocolVersion: context.protocolVersion,
+      sessionId: context.sessionId,
+      source: context.source,
+      scope: context.scope,
+      privacy: 'local-sensitive',
+      type: 'artifactAvailable',
+      payload
+    });
+    this._lastComplete = complete;
   }
 }
 
@@ -347,6 +442,34 @@ function hasReporterOutputControl(argv: readonly string[]): boolean {
   return false;
 }
 
+function hasReporterLogLevelControl(argv: readonly string[]): boolean {
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    if (argument.startsWith('--log-level=') && argument.length > '--log-level='.length) {
+      return true;
+    }
+    if (argument === '--log-level' && argv[index + 1] !== undefined && !argv[index + 1].startsWith('-')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasHelpControl(argv: readonly string[]): boolean {
+  for (const argument of argv) {
+    if (argument === '--') {
+      return false;
+    }
+    if (argument === '--help' || argument === '-h') {
+      return true;
+    }
+  }
+  return false;
+}
+
 function resolveLogLevel(
   controls: IParsedReporterControls,
   env: Record<string, string | undefined>,
@@ -397,6 +520,19 @@ function resolveLogLevel(
   }
 
   const environmentLogLevel: string | undefined = includeEnvironment ? env.RUSH_LOG_LEVEL : undefined;
+  const environmentQuiet: boolean =
+    includeEnvironment && (env.RUSH_QUIET_MODE === '1' || env.RUSH_QUIET_MODE?.toLowerCase() === 'true');
+  if (environmentQuiet && environmentLogLevel) {
+    const normalizedLogLevel: string = environmentLogLevel.trim().toLowerCase();
+    if (normalizedLogLevel !== 'quiet') {
+      throw new Error(
+        'RUSH_QUIET_MODE contradicts RUSH_LOG_LEVEL. Remove one of these environment controls.'
+      );
+    }
+  }
+  if (environmentQuiet) {
+    return 'quiet';
+  }
   if (environmentLogLevel) {
     const normalizedLogLevel: string = environmentLogLevel.trim().toLowerCase();
     if (!isSupportedLogLevel(normalizedLogLevel)) {
@@ -500,7 +636,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       outputs: [],
       commandJson,
       enabled: false,
-      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
+      reporterControlsOwnedByFrontend: true,
       reporterValueFlagsToStrip,
       reason: 'RUSH_REPORTER=legacy'
     };
@@ -515,6 +651,19 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
           'with this frontend.'
       );
     }
+    return {
+      reporter: 'legacy',
+      logLevel: 'normal',
+      outputs: [],
+      commandJson,
+      enabled: false,
+      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
+      reporterValueFlagsToStrip: requestedReporter === undefined ? [] : REPORTER_SELECTION_FLAG,
+      reason: requestedReporter === undefined ? 'pre-major legacy default' : 'explicit --reporter'
+    };
+  }
+
+  if (hasHelpControl(argv)) {
     return {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -548,14 +697,53 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     }
     if (options.repositoryOptIn) {
       const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
+      const ownsOutputControls: boolean = hasReporterOutputControl(argv);
+      const ownsLogLevelControls: boolean = hasReporterLogLevelControl(argv);
+      const candidateValueControls: IParsedReporterControls =
+        ownsOutputControls || ownsLogLevelControls ? parseReporterControls(argv, true) : selectionControls;
+      const ownsLogLevelControl: boolean =
+        ownsLogLevelControls &&
+        !ownsOutputControls &&
+        candidateValueControls.logLevels.length > 0 &&
+        candidateValueControls.logLevels.every((logLevel: string) => isSupportedLogLevel(logLevel));
+      const ownsValueControls: boolean = ownsOutputControls || ownsLogLevelControl;
+      const ownsEnvironmentControls: boolean = env.RUSH_LOG_LEVEL !== undefined;
+      const parsedValueControls: IParsedReporterControls = ownsValueControls
+        ? candidateValueControls
+        : selectionControls;
+      const outputControlsAreUnambiguous: boolean =
+        !parsedValueControls.logLevels.some((logLevel: string) => !isSupportedLogLevel(logLevel)) &&
+        parsedValueControls.outputs.every((outputValue: string) => {
+          try {
+            const output: IReporterOutputTarget = parseOutputControl(outputValue);
+            return output.reporter === 'file' || output.reporter === 'json';
+          } catch {
+            return false;
+          }
+        });
+      const implicitControls: IParsedReporterControls =
+        ownsOutputControls && !outputControlsAreUnambiguous
+          ? {
+              ...parsedValueControls,
+              logLevels: [],
+              outputs: []
+            }
+          : parsedValueControls;
+      validateReporterControlMultiplicity(implicitControls, ownsValueControls);
       return {
-        reporter: isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
-        logLevel: resolveLogLevel(selectionControls, env, true, true),
-        outputs: [],
+        reporter: commandJson ? 'file' : isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
+        logLevel: resolveLogLevel(implicitControls, env, true, true),
+        outputs: resolveOutputs(implicitControls.outputs, cwd),
         commandJson,
         enabled: true,
-        reporterControlsOwnedByFrontend: false,
-        reporterValueFlagsToStrip: [],
+        reporterControlsOwnedByFrontend:
+          ownsLogLevelControl || ownsEnvironmentControls || implicitControls.outputs.length > 0,
+        reporterValueFlagsToStrip:
+          implicitControls.outputs.length > 0
+            ? REPORTER_OUTPUT_VALUE_FLAGS
+            : ownsLogLevelControl
+              ? ['--log-level']
+              : [],
         reason: 'repository experiment'
       };
     }
@@ -582,6 +770,13 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       reporterValueFlagsToStrip: REPORTER_SELECTION_FLAG,
       reason: 'explicit --reporter'
     };
+  }
+
+  if (commandJson && requestedReporter !== 'file') {
+    throw new Error(
+      `The command-specific --json output owns stdout and cannot be combined with --reporter=${requestedReporter}. ` +
+        'Use --reporter=file or omit --reporter.'
+    );
   }
 
   const controls: IParsedReporterControls = parseReporterControls(argv, true);
@@ -614,8 +809,12 @@ function createPrimaryReporter(
     case 'default':
       return new DefaultInteractiveReporter({
         terminal: {
-          columns: stdout.columns ?? 80,
-          isTTY: stdout.isTTY === true,
+          get columns() {
+            return stdout.columns && stdout.columns > 0 ? stdout.columns : 80;
+          },
+          get isTTY() {
+            return stdout.isTTY === true;
+          },
           write: (text: string) => {
             stdout.write(text);
           }
@@ -629,11 +828,12 @@ function createPrimaryReporter(
     case 'plaintext':
       return new PlaintextReporter({
         write: (text: string) => stdout.write(text),
-        variant: isCiDetected(env) ? 'detailed' : 'concise',
-        color: false
+        variant: selection.reason === 'explicit --reporter' || isCiDetected(env) ? 'detailed' : 'concise',
+        color: false,
+        logLevel: selection.logLevel
       });
     case 'file':
-      return new FileReporter();
+      return undefined;
     case 'legacy':
       return undefined;
   }
@@ -644,30 +844,37 @@ export async function initializeRushReporterHostAsync(
 ): Promise<IInitializedRushReporterHost> {
   const env: Record<string, string | undefined> = options.env ?? process.env;
   const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
+  const stderr: IRushReporterOutputStream = options.stderr ?? process.stderr;
   const selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
-  const host: ReporterHost = new ReporterHost({ env });
+  const host: ReporterHost = new ReporterHost({ env, manager: options.manager });
+  let fullDetailReporter: FileReporter | undefined;
 
   if (selection.enabled) {
     const primaryReporter: IReporter | undefined = createPrimaryReporter(selection, stdout, env);
-    if (primaryReporter) {
-      const presentationReporter: IReporter =
-        selection.reporter === 'file'
-          ? primaryReporter
-          : new DeferredOperationPresentationReporter(primaryReporter);
-      host.manager.addReporter(new LogLevelReporter(presentationReporter, selection.logLevel), {
-        destination: selection.reporter === 'file' ? 'file:auto' : 'stdout'
+
+    if (options.includeDefaultFileReporter !== false || selection.reporter === 'file') {
+      fullDetailReporter = new FileReporter({
+        commonTempFolder: options.commonTempFolder,
+        actionName: options.actionName
+      });
+      host.manager.addReporter(fullDetailReporter, {
+        destination: 'file:auto'
       });
     }
 
-    const hasExplicitFileOutput: boolean = selection.outputs.some(
-      (output: IReporterOutputTarget) => output.reporter === 'file'
-    );
-    if (
-      options.includeDefaultFileReporter !== false &&
-      selection.reporter !== 'file' &&
-      !hasExplicitFileOutput
-    ) {
-      host.manager.addReporter(new FileReporter(), { destination: 'file:auto' });
+    if (primaryReporter) {
+      host.manager.addReporter(
+        new LogLevelReporter(primaryReporter, selection.logLevel, selection.reporter === 'plaintext'),
+        {
+          destination: 'stdout'
+        }
+      );
+    }
+
+    if (selection.reporter === 'file') {
+      host.manager.addReporter(new FilePathReporter((text: string) => stderr.write(text)), {
+        destination: 'stderr'
+      });
     }
 
     for (const output of selection.outputs) {
@@ -684,13 +891,24 @@ export async function initializeRushReporterHostAsync(
   }
 
   await host.manager.initializeAsync();
+  const artifactCompletionSink: ArtifactCompletionReporterSink | undefined = fullDetailReporter
+    ? new ArtifactCompletionReporterSink(host, fullDetailReporter)
+    : undefined;
   let closePromise: Promise<void> | undefined;
   return {
     host,
-    sink: host.getSink(),
+    sink: artifactCompletionSink ?? host.getSink(),
     selection,
+    logArtifact: fullDetailReporter?.getArtifact(),
     closeAsync: (timeoutMs?: number) => {
-      closePromise ??= host.manager.closeAsync(timeoutMs);
+      closePromise ??= (async () => {
+        const fullyFlushed: boolean = await host.manager._flushAndConfirmAsync(timeoutMs);
+        if (fullyFlushed) {
+          await fullDetailReporter?.closeAsync();
+          artifactCompletionSink?.publishIfChanged();
+        }
+        await host.manager.closeAsync(timeoutMs);
+      })();
       return closePromise;
     }
   };
