@@ -1,0 +1,16 @@
+{
+  "npmVersion": "6.4.1",
+  "rushVersion": "5.5.2",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+  "gitPolicy": {
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
+    "sampleEmail": "example@users.noreply.github.com"
+  },
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    }
+  ]
+}
