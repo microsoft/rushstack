@@ -98,8 +98,24 @@ without exiting their process. Failed cleanup retains the live lock and causes a
 bounded restart failure, even if the socket has already disappeared. A changed
 owner is reconnected and validated, not overwritten.
 
-`daemon logs` and
+`rush-client daemon logs` prints a snapshot of the selected workspace's launcher
+log, whether the daemon is running or stopped. It never connects or auto-starts.
+The stable path comes from `getDaemonLogFilePath(paths)`: `<lockfilePath>.log`.
+Detached child stdout and stderr are appended to this file across restarts; the
+parent closes its descriptor after spawning. On POSIX the launcher enforces mode
+`0600` and rejects linked destinations; Windows uses the existing per-user
+transport directory permissions.
+
+Reading is bounded to the size observed when the log is opened, with chunked,
+backpressured output. Empty logs succeed without output; missing/unreadable logs
+or invalid destinations fail with a diagnostic and exit code 1. A launcher log
+may not exist for a daemon started outside this client. No `--follow` or rotation
+policy is added.
+
+This is the **text launcher stdout/stderr log**, including startup errors—not
+WS5 structured observability or a subscription to request-scoped events.
+
 `daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume` require
-host lifecycle/graph protocol integration and currently fail explicitly. Setting
+host graph protocol integration and currently fail explicitly. Setting
 `RUSH_DAEMON_EXPERIMENTAL=1` does not make absent graph contracts available.
 These are outstanding acceptance criteria, not simulated management commands.

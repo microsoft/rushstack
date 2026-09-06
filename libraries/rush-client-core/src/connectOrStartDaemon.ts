@@ -19,6 +19,7 @@ import {
 
 import { DaemonClient, type IDaemonClientConnectOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
+import { getDaemonLogFilePath } from './DaemonLogFile';
 
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
 export interface IDaemonStartCommand {
@@ -224,8 +225,28 @@ function isProcessAlive(pid: number): boolean {
 
 async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promise<ChildProcess> {
   const start: IDaemonStartCommand = options.startCommand!;
-  const logFd: number = fs.openSync(`${options.paths.lockfilePath}.log`, 'a', 0o600);
+  const logFilePath: string = getDaemonLogFilePath(options.paths);
+  // These distinct native flags have non-overlapping values.
+  const flags: number =
+    fs.constants.O_WRONLY +
+    fs.constants.O_APPEND +
+    fs.constants.O_CREAT +
+    (process.platform === 'win32' ? 0 : fs.constants.O_NOFOLLOW + fs.constants.O_NONBLOCK);
+  const logFd: number = fs.openSync(logFilePath, flags, 0o600);
   try {
+    const stats: fs.Stats = fs.fstatSync(logFd);
+    if (!stats.isFile() || stats.nlink !== 1) {
+      throw new DaemonClientError(
+        'startupFailed',
+        `Launcher log must be a regular, unshared file: ${logFilePath}`
+      );
+    }
+    if (process.platform !== 'win32') {
+      if (stats.uid !== process.getuid?.()) {
+        throw new DaemonClientError('startupFailed', `Launcher log is owned by another user: ${logFilePath}`);
+      }
+      fs.fchmodSync(logFd, 0o600);
+    }
     const child: ChildProcess = spawn(start.command, [...start.args], {
       cwd: start.cwd,
       env: start.environment,
@@ -238,7 +259,7 @@ async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promis
     } catch (error) {
       throw new DaemonClientError(
         'startupFailed',
-        `Unable to start ${start.command}; inspect ${options.paths.lockfilePath}.log.`,
+        `Unable to start ${start.command}; inspect ${logFilePath}.`,
         { cause: error }
       );
     }
@@ -252,7 +273,7 @@ async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promis
 function startupError(options: IConnectOrStartDaemonOptions, reason: string): DaemonClientError {
   return new DaemonClientError(
     'startupFailed',
-    `Daemon startup ${reason}. Inspect ${options.paths.lockfilePath}.log and retry, or use --no-daemon.`
+    `Daemon startup ${reason}. Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.`
   );
 }
 

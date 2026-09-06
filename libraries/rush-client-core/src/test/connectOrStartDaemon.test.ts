@@ -8,10 +8,12 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import { FileSystem } from '@rushstack/node-core-library';
 import type { IDaemonLockfile, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClient } from '../DaemonClient';
 import { captureDaemonRequest } from '../captureDaemonRequest';
+import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 
 describe('detached daemon startup', () => {
@@ -90,6 +92,53 @@ describe('detached daemon startup', () => {
     await expect(connectOrStartDaemonAsync({ paths })).rejects.toThrow('auto-start is disabled');
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
+
+  it('appends both child streams to the private workspace launcher log', async () => {
+    const logFilePath: string = getDaemonLogFilePath(paths);
+    fs.writeFileSync(logFilePath, 'previous startup\n', { mode: 0o644 });
+    if (process.platform !== 'win32') fs.chmodSync(logFilePath, 0o644);
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    const log: string = fs.readFileSync(logFilePath, 'utf8');
+    expect(log).toContain('previous startup\n');
+    expect(log).toContain('launcher stdout\n');
+    expect(log).toContain('launcher stderr\n');
+    if (process.platform !== 'win32') {
+      expect(FileSystem.formatPosixModeBits(FileSystem.getPosixModeBits(logFilePath))).toBe('-rw-------');
+    }
+  });
+
+  it('retains actionable child startup errors in the same log', async () => {
+    const logFilePath: string = getDaemonLogFilePath(paths);
+    await expect(
+      connectOrStartDaemonAsync({
+        ...options,
+        startCommand: {
+          ...options.startCommand!,
+          args: [path.join(folder, 'missing-entry.js')]
+        }
+      })
+    ).rejects.toThrow(logFilePath);
+    expect(fs.readFileSync(logFilePath, 'utf8')).toContain('Cannot find module');
+  });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'refuses linked log destinations without changing their target',
+    async () => {
+      const logFilePath: string = getDaemonLogFilePath(paths);
+      const target: string = path.join(folder, 'not-a-log.txt');
+      fs.writeFileSync(target, 'unchanged', { mode: 0o644 });
+      fs.chmodSync(target, 0o644);
+      fs.symlinkSync(target, logFilePath);
+      await expect(connectOrStartDaemonAsync(options)).rejects.toMatchObject({ code: 'ELOOP' });
+      fs.unlinkSync(logFilePath);
+      fs.linkSync(target, logFilePath);
+      await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('regular, unshared file');
+      expect(fs.readFileSync(target, 'utf8')).toBe('unchanged');
+      expect(FileSystem.formatPosixModeBits(FileSystem.getPosixModeBits(target))).toBe('-rw-r--r--');
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    }
+  );
 
   it('never reclaims a live or reused PID', async () => {
     const record: string = JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() });

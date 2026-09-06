@@ -28,6 +28,13 @@ reclaims only an absent/dead owner, spawns detached without a shell, and waits f
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed; a live (possibly reused) PID with an unreachable socket fails closed.
 
+`getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
+and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across
+restarts, including startup failures; the parent always closes its descriptor
+after spawn or failure. On POSIX the launcher enforces `0600` permissions on a
+regular, unshared, current-user-owned file and refuses symlink destinations.
+This is a text launcher log, not structured request observability.
+
 `shutdownAsync()` requires a fresh connection with negotiated minor >= 6. It sends
 the existing `shutdown` control and resolves only after `shutdownAck` and EOF,
 with a bounded timeout. This is acceptance plus connection closure, **not** proof
@@ -56,7 +63,7 @@ before awaiting input. The current standalone host does not do so. Piped stdin
 must remain in-process until explicit input admission/EOF are integrated.
 
 The standalone host has no request resolver or warm operation graph. A successful
-handshake is readiness, not evidence that a build is supported. Graph/log verbs,
+handshake is readiness, not evidence that a build is supported. Graph verbs,
 version-selected daemon installation, transparent version-skew restart, and
 request handoff remain unavailable; this package does not fabricate them.
 A client that dies during the
