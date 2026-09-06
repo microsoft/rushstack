@@ -84,7 +84,7 @@
     },
     {
       "name": "@microsoft/rush",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-lib",

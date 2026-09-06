@@ -208,6 +208,9 @@ export enum CustomTipType {
     rush = "rush"
 }
 
+// @beta
+export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurationJson, string>>;
+
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -281,6 +284,16 @@ export const EnvironmentVariableNames: {
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
     readonly RUSH_INVOKED_ARGS: "RUSH_INVOKED_ARGS";
     readonly RUSH_QUIET_MODE: "RUSH_QUIET_MODE";
+    readonly RUSH_DAEMON: "RUSH_DAEMON";
+    readonly RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_IDLE_TIMEOUT_SECONDS";
+    readonly RUSH_DAEMON_AUTO_START: "RUSH_DAEMON_AUTO_START";
+    readonly RUSH_DAEMON_WATCH: "RUSH_DAEMON_WATCH";
+    readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
+    readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
+    readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
+    readonly RUSH_DAEMON_WARM_SET_MAX_PROJECTS: "RUSH_DAEMON_WARM_SET_MAX_PROJECTS";
+    readonly RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: "RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY";
+    readonly RUSH_DAEMON_EXPERIMENTAL: "RUSH_DAEMON_EXPERIMENTAL";
 };
 
 // @beta
@@ -461,6 +474,19 @@ export interface ICustomTipItemJson {
 // @beta
 export interface ICustomTipsJson {
     customTips?: ICustomTipItemJson[];
+}
+
+// @beta
+export interface IDaemonConfigurationJson {
+    readonly autoStart?: boolean;
+    readonly autoWarmByTelemetry?: boolean;
+    readonly enabled?: boolean;
+    readonly idleTimeoutSeconds?: number;
+    readonly queueTimeoutSeconds?: number;
+    readonly warmIdleTimeoutSeconds?: number;
+    readonly warmMemoryBudgetMB?: number;
+    readonly warmSetMaxProjects?: number;
+    readonly watch?: boolean;
 }
 
 // @beta (undocumented)
@@ -1371,6 +1397,9 @@ export class RepoStateFile {
     refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): boolean;
 }
 
+// @beta
+export function resolveDaemonConfiguration(json?: IDaemonConfigurationJson, environment?: Readonly<Record<string, string | undefined>>): Readonly<Required<IDaemonConfigurationJson>>;
+
 // @public
 export class Rush {
     static launch(launcherVersion: string, options: ILaunchOptions): void;
@@ -1410,6 +1439,8 @@ export class RushConfiguration {
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // @beta
     readonly customTipsConfigurationFilePath: string;
+    // @beta
+    readonly daemon: Readonly<Required<IDaemonConfigurationJson>>;
     // @beta (undocumented)
     get defaultSubspace(): Subspace;
     // @deprecated

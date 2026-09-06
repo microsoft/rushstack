@@ -7,6 +7,7 @@ import { trueCasePathSync } from 'true-case-path';
 
 import type { IEnvironment } from '../utilities/Utilities';
 import { IS_WINDOWS } from '../utilities/executionUtilities';
+import { resolveDaemonConfiguration } from './DaemonConfiguration';
 
 /**
  * @beta
@@ -252,7 +253,28 @@ export const EnvironmentVariableNames = {
    * to `rush`, `rushx`, and `install-run-rush.ts`. It suppresses informational startup messages
    * while preserving error output.
    */
-  RUSH_QUIET_MODE: 'RUSH_QUIET_MODE'
+  RUSH_QUIET_MODE: 'RUSH_QUIET_MODE',
+
+  /** Enables the opt-in standalone daemon client. */
+  RUSH_DAEMON: 'RUSH_DAEMON',
+  /** Overrides the daemon idle shutdown timeout. */
+  RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_IDLE_TIMEOUT_SECONDS',
+  /** Allows the opted-in client to start an absent daemon. */
+  RUSH_DAEMON_AUTO_START: 'RUSH_DAEMON_AUTO_START',
+  /** Reserved for daemon workspace watcher integration. */
+  RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
+  /** Overrides the request admission queue timeout. */
+  RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
+  /** Reserved for warm-set idle eviction. */
+  RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
+  /** Reserved for warm-set memory budgeting. */
+  RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
+  /** Reserved for warm-set project limits. */
+  RUSH_DAEMON_WARM_SET_MAX_PROJECTS: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
+  /** Reserved for telemetry-weighted warming. */
+  RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
+  /** Gates the experimental graph client; requires host graph integration. */
+  RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'
 } as const;
 
 /**
@@ -499,6 +521,7 @@ export class EnvironmentConfiguration {
    */
   public static validate(options: IEnvironmentConfigurationInitializeOptions = {}): void {
     EnvironmentConfiguration.reset();
+    resolveDaemonConfiguration();
 
     const unknownEnvVariables: string[] = [];
     for (const envVarName in process.env) {
@@ -638,6 +661,19 @@ export class EnvironmentConfiguration {
             }
             break;
           }
+
+          case EnvironmentVariableNames.RUSH_DAEMON:
+          case EnvironmentVariableNames.RUSH_DAEMON_IDLE_TIMEOUT_SECONDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_AUTO_START:
+          case EnvironmentVariableNames.RUSH_DAEMON_WATCH:
+          case EnvironmentVariableNames.RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_MEMORY_BUDGET_MB:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_SET_MAX_PROJECTS:
+          case EnvironmentVariableNames.RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY:
+          case EnvironmentVariableNames.RUSH_DAEMON_EXPERIMENTAL:
+            // Validated together by resolveDaemonConfiguration().
+            break;
 
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:

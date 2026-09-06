@@ -21,6 +21,11 @@ export {
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+export {
+  resolveDaemonConfiguration,
+  daemonEnvironmentVariables,
+  type IDaemonConfigurationJson
+} from './api/DaemonConfiguration';
 
 export { Subspace } from './api/Subspace';
 export { SubspacesConfiguration } from './api/SubspacesConfiguration';
