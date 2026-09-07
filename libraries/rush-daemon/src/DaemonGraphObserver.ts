@@ -10,6 +10,7 @@ import type {
 
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceInvalidationSnapshot } from './WorkspaceInvalidationTracker';
+import { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 
 const OBSERVERS: WeakMap<IOperationGraph, DaemonGraphObserver> = new WeakMap();
 const TAP_NAME: string = 'RushDaemonGraphObserver';
@@ -81,6 +82,7 @@ export function getDaemonGraphObserver(graph: IOperationGraph): DaemonGraphObser
 }
 
 export function snapshotDaemonGraph(session: IWorkspaceSession): IDaemonGraphSnapshotPayload['snapshot'] {
+  const workspaceGeneration: string = getWorkspaceGenerationToken(session);
   const changes: IWorkspaceInvalidationSnapshot = session.invalidations.getSnapshot();
   const invalidations: IDaemonGraphInvalidations = {
     sequence: changes.sequence,
@@ -89,9 +91,10 @@ export function snapshotDaemonGraph(session: IWorkspaceSession): IDaemonGraphSna
     isWatcherHealthy: changes.isWatcherHealthy
   };
   const graph: IOperationGraph | undefined = session.operationGraph;
-  if (!graph) return { initialized: false, invalidations };
+  if (!graph) return { initialized: false, invalidations, workspaceGeneration };
   return {
     initialized: true,
+    workspaceGeneration,
     invalidations,
     operations: getDaemonGraphObserver(graph).getOperations(graph),
     status: graph.status,

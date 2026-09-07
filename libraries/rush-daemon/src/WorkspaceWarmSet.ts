@@ -79,7 +79,7 @@ const PLUGIN_NAME: string = 'WorkspaceWarmSet';
 const RETRY_DELAY_MS: number = 1000;
 const MAX_POLL_DELAY_MS: number = 30_000;
 const BYTES_PER_MB: number = 1024 * 1024;
-const ATTACHED_GRAPHS: WeakSet<IOperationGraph> = new WeakSet();
+const ATTACHED_GRAPHS: WeakMap<IOperationGraph, WorkspaceWarmSet> = new WeakMap();
 
 /**
  * Retains explicitly requested work; never schedules operations or changes their enabled/result policy.
@@ -160,8 +160,13 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       throw new Error('A warm set is already attached to this graph.');
     }
     const controller: WorkspaceWarmSet = new WorkspaceWarmSet(options);
-    ATTACHED_GRAPHS.add(options.operationGraph);
+    ATTACHED_GRAPHS.set(options.operationGraph, controller);
     return controller;
+  }
+
+  /** Lets a generation adopt an integration-supplied controller without installing duplicate hooks. */
+  public static getAttached(graph: IOperationGraph): WorkspaceWarmSet | undefined {
+    return ATTACHED_GRAPHS.get(graph);
   }
 
   /** Revalidates all four knobs and applies the new policy on the next idle maintenance turn. */

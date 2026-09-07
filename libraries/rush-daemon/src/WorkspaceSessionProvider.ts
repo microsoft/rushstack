@@ -15,6 +15,13 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
   #initializationPromise: Promise<IWorkspaceSession> | undefined;
   #session: IWorkspaceSession | undefined;
   #disposed: boolean = false;
+  #generation: number = 1;
+  #reloadPromise: Promise<IWorkspaceSession> | undefined;
+  #cleanupFailure: unknown;
+
+  public get generation(): number {
+    return this.#generation;
+  }
 
   public constructor(factory: WorkspaceSessionFactory, options: IWorkspaceSessionOptions) {
     this.#factory = factory;
@@ -25,6 +32,8 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
     if (this.#disposed) {
       return Promise.reject(new Error('The workspace session provider has been disposed.'));
     }
+    if (this.#cleanupFailure !== undefined) return Promise.reject(this.#cleanupFailure);
+    if (this.#reloadPromise) return this.#reloadPromise;
     if (this.#session) {
       return Promise.resolve(this.#session);
     }
@@ -47,9 +56,43 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
     return this.#disposePromise;
   }
 
+  /** The caller must hold lifecycle/workspace admission and the native preparation lock. */
+  public reloadAsync(): Promise<IWorkspaceSession> {
+    if (this.#disposed) return Promise.reject(new Error('The workspace session provider has been disposed.'));
+    if (this.#cleanupFailure !== undefined) return Promise.reject(this.#cleanupFailure);
+    if (!this.#reloadPromise) {
+      const reload: Promise<IWorkspaceSession> = this.#reloadOnceAsync();
+      this.#reloadPromise = reload;
+      void reload
+        .finally(() => {
+          if (this.#reloadPromise === reload) this.#reloadPromise = undefined;
+        })
+        .catch(() => undefined);
+    }
+    return this.#reloadPromise;
+  }
+
+  async #reloadOnceAsync(): Promise<IWorkspaceSession> {
+    const oldSession: IWorkspaceSession | undefined = this.#session ?? (await this.#initializationPromise);
+    if (oldSession) {
+      oldSession.operationGraph?.discardScheduledIteration();
+      try {
+        await oldSession[Symbol.asyncDispose]();
+      } catch (error) {
+        this.#cleanupFailure = error;
+        throw error;
+      }
+    }
+    this.#session = undefined;
+    this.#initializationPromise = undefined;
+    this.#generation++;
+    return await this.#initializeAsync();
+  }
+
   async #disposeOnceAsync(): Promise<void> {
     this.#disposed = true;
     try {
+      await this.#reloadPromise?.catch(() => undefined);
       const session: IWorkspaceSession | undefined =
         this.#session ??
         (await this.#initializationPromise?.then(
@@ -69,11 +112,12 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
   }
 
   async #initializeAsync(): Promise<IWorkspaceSession> {
-    const session: IWorkspaceSession = await this.#factory(this.#options);
+    const session: IWorkspaceSession = await this.#factory({
+      ...this.#options,
+      generation: this.#generation
+    });
     if (this.#disposed) {
-      this.#initializationDisposalPromise = Promise.resolve().then(() =>
-        session[Symbol.asyncDispose]()
-      );
+      this.#initializationDisposalPromise = Promise.resolve().then(() => session[Symbol.asyncDispose]());
       await this.#initializationDisposalPromise;
       throw new Error('The workspace session provider was disposed during initialization.');
     }

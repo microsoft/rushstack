@@ -16,6 +16,9 @@ export const DAEMON_LIFECYCLE_PROTOCOL_MINOR: number = 6;
 /** The first additive protocol minor supporting stdin admission and EOF. @beta */
 export const DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR: number = 7;
 
+/** The first additive protocol minor supporting graph generation fencing. @beta */
+export const DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR: number = 9;
+
 /** The first additive protocol minor supporting explicit Rush/Rushx invocation selection. @beta */
 export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number = 8;
 
@@ -52,7 +55,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_INVOCATION_KIND_PROTOCOL_MINOR
+  minor: DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR
 };
 
 /**

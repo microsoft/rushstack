@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Expose composable workspace lifecycle capabilities, preserve resolver decorators across generation reloads, dispose generation-owned resolvers, and pass explicit rushx invocations through without phased or graph interception.",
+      "type": "patch"
+    }
+  ]
+}

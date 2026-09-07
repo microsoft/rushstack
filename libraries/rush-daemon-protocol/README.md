@@ -44,6 +44,12 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   A Rushx client must negotiate at least `DAEMON_INVOCATION_KIND_PROTOCOL_MINOR`
   before submitting its request. Older peers could ignore the discriminator,
   so the client falls back before `requestStart` or input consumption.
+- **Graph generation fencing (0.9)** - graph snapshots carry an opaque
+  `workspaceGeneration` token. Mutation requests must echo it in
+  `expectedWorkspaceGeneration`; the server checks it under exclusive admission
+  before touching operations. Tokens change on session or process replacement.
+  Clients must negotiate `DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR` before mutation;
+  an older server could otherwise ignore the reference.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

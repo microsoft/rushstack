@@ -17,8 +17,10 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
+import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { WorkspaceSession } from '../WorkspaceSession';
+import { getWorkspaceGenerationToken } from '../WorkspaceGeneration';
 import {
   createWireEnvelope,
   DaemonRequestWireClient,
@@ -35,11 +37,14 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     )
   };
   private _nextId: number = 0;
+  private _lifecycle: boolean = true;
 
   public static async createAsync(
-    configure?: (fixture: DaemonGraphTestFixture) => void
+    configure?: (fixture: DaemonGraphTestFixture) => void,
+    lifecycle: boolean = true
   ): Promise<DaemonGraphTestFixture> {
     const fixture: DaemonGraphTestFixture = new DaemonGraphTestFixture();
+    fixture._lifecycle = lifecycle;
     try {
       fixture.write(
         'rush.json',
@@ -112,11 +117,15 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   private async _startAsync(): Promise<void> {
+    const resolver: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
     this.host = await RushDaemonHost.startAsync({
       repoRoot: this.folder,
       rushVersion: Rush.version,
       daemonVersion: 'graph-test',
-      requestResolver: new ProductionDaemonRequestResolver(),
+      requestResolver: this._lifecycle ? resolver : {
+        resolveRequestAsync: (options) => resolver.resolveRequestAsync(options),
+        [Symbol.asyncDispose]: async () => { await resolver[Symbol.asyncDispose]?.(); }
+      },
       createWorkspaceSessionAsync: async (options) => {
         this.session = await WorkspaceSession.createAsync(options);
         return this.session;
@@ -152,6 +161,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     return createWireEnvelope(`graph-${++this._nextId}`, argv[0], this.folder, {
       argv,
       commandOrigin: 'built-in',
+      expectedWorkspaceGeneration: argv[0] === 'daemon' ? getWorkspaceGenerationToken(this.session) : undefined,
       environment:
         argv[0] === 'daemon' ? { ...this.environment, RUSH_DAEMON_EXPERIMENTAL: '1' } : this.environment,
       terminal: { isTTY: false, supportsColor: false },

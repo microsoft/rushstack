@@ -27,12 +27,16 @@ export interface IDaemonGraphInvalidations {
 
 /** A cold workspace does not pretend to contain an empty, usable operation graph. @beta */
 export interface IDaemonUninitializedGraphSnapshot {
+  /** Opaque generation token, present on protocol 0.9 or newer. */
+  readonly workspaceGeneration?: string;
   readonly initialized: false;
   readonly invalidations: IDaemonGraphInvalidations;
 }
 
 /** Point-in-time metadata for an initialized native graph. @beta */
 export interface IDaemonInitializedGraphSnapshot {
+  /** Echo this token when mutating operations retained from this snapshot. */
+  readonly workspaceGeneration?: string;
   readonly initialized: true;
   readonly operations: ReadonlyArray<IDaemonGraphOperation>;
   readonly status: string;

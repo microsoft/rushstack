@@ -8,6 +8,8 @@ import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/r
 
 import { WorkspaceInvalidationTracker } from './WorkspaceInvalidationTracker';
 import { WorkspaceSessionFileWatcher } from './WorkspaceSessionFileWatcher';
+import { WorkspaceWarmSet, type IWorkspaceWarmSetStatus } from './WorkspaceWarmSet';
+import { getWorkspaceRequestScheduler } from './WorkspaceRequestAdmission';
 import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
@@ -19,6 +21,8 @@ import type {
  * @beta
  */
 export interface IWorkspaceSessionMetadata {
+  /** Host-local session generation. It changes only when a new session is installed. */
+  readonly generation?: number;
   readonly projectCount: number;
   readonly projectNames: ReadonlyArray<string>;
   readonly repoRoot: string;
@@ -87,6 +91,7 @@ export type CreateWorkspaceSessionComponentsAsync = (
  * @beta
  */
 export interface IWorkspaceSessionOptions {
+  readonly generation?: number;
   readonly createComponentsAsync?: CreateWorkspaceSessionComponentsAsync;
   readonly onError?: (error: Error) => void;
   readonly repoRoot: string;
@@ -99,6 +104,13 @@ export interface IWorkspaceSessionOptions {
  * @beta
  */
 export interface IWorkspaceSession extends AsyncDisposable {
+  /** Stops background footprint maintenance before acquiring reload or mutation locks. */
+  quiesceWarmSetAsync?(): Promise<void>;
+  readonly warmSetStatus?: IWorkspaceWarmSetStatus;
+  /** Rejects work retained beyond this session's lifetime. */
+  assertActive?(): void;
+  /** Stops admission without starting resource cleanup, allowing an already produced result to drain. */
+  retire?(): void;
   /** Optional execution lease retained through the coalesced iteration's output and resource cleanup. */
   acquireExecutionLeaseAsync?(): Promise<AsyncDisposable | undefined>;
   readonly engineShape: IWorkspaceEngineShape | undefined;
@@ -136,6 +148,8 @@ export class WorkspaceSession implements IWorkspaceSession {
   #inputsSnapshot: IInputsSnapshot | undefined;
   #isDisposing: boolean = false;
   #engineInitialization: Promise<void> | undefined;
+  #warmSet: WorkspaceWarmSet | undefined;
+  #warmSetQuiescence: Promise<void> | undefined;
 
   public readonly invalidations: WorkspaceInvalidationTracker;
   public readonly metadata: IWorkspaceSessionMetadata;
@@ -170,6 +184,24 @@ export class WorkspaceSession implements IWorkspaceSession {
 
   public get inputsSnapshot(): IInputsSnapshot | undefined {
     return this.#inputsSnapshot;
+  }
+
+  public get warmSetStatus(): IWorkspaceWarmSetStatus | undefined {
+    return this.#warmSet?.getStatus();
+  }
+
+  public quiesceWarmSetAsync(): Promise<void> {
+    this.#warmSetQuiescence ??= this.#warmSet?.[Symbol.asyncDispose]() ?? Promise.resolve();
+    return this.#warmSetQuiescence;
+  }
+
+  public assertActive(): void {
+    if (this.#isDisposing)
+      throw new Error('This workspace generation has been disposed; execution has not begun.');
+  }
+
+  public retire(): void {
+    this.#isDisposing = true;
   }
 
   /** Installs one all-project engine without replacing the watcher or losing retained invalidations. */
@@ -210,6 +242,15 @@ export class WorkspaceSession implements IWorkspaceSession {
     }
     this.#components = components;
     this.#inputsSnapshot = components.inputsSnapshot;
+    if (components.operationGraph && this.#sessionOwnedProjectWatcher instanceof WorkspaceSessionFileWatcher) {
+      this.#warmSet = WorkspaceWarmSet.getAttached(components.operationGraph) ?? WorkspaceWarmSet.attach({
+        operationGraph: components.operationGraph,
+        configuration: this.rushConfiguration.daemon,
+        scheduler: getWorkspaceRequestScheduler(this),
+        acquireExecutionLeaseAsync: () => this.acquireExecutionLeaseAsync(),
+        watcher: this.#sessionOwnedProjectWatcher
+      });
+    }
   }
 
   /** Loads workspace identity, creates reusable components, and starts headless invalidation tracking. */
@@ -232,7 +273,10 @@ export class WorkspaceSession implements IWorkspaceSession {
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
     let sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
     try {
-      const metadata: IWorkspaceSessionMetadata = createMetadata(rushConfiguration, options.rushVersion);
+      const metadata: IWorkspaceSessionMetadata = {
+        ...createMetadata(rushConfiguration, options.rushVersion),
+        generation: options.generation ?? 1
+      };
       if (!projectWatcher) {
         projectWatcher = new WorkspaceSessionFileWatcher({
           onError: (error: Error) => {
@@ -302,6 +346,7 @@ export class WorkspaceSession implements IWorkspaceSession {
     // Initialization failures belong to the request. Any successfully constructed components are
     // disposed by initialization itself if shutdown won the race.
     await this.#engineInitialization?.catch(() => undefined);
+    await this.quiesceWarmSetAsync();
     let watcherError: unknown;
     try {
       await this.#sessionOwnedProjectWatcher?.[Symbol.asyncDispose]();

@@ -62,6 +62,7 @@ interface IGraphRoutingState {
 }
 
 interface IPreparedPhasedRequest {
+  readonly onExecutionStarting: (() => void) | undefined;
   readonly client: IPhasedRequestClient;
   readonly exclusivityClass: RequestExclusivityClass;
   readonly interactiveSession: IInteractiveRequestSession | undefined;
@@ -111,7 +112,8 @@ export class PhasedRequestRouter {
   public async executeAsync(
     request: IDaemonPhasedRequest,
     client: IPhasedRequestClient,
-    exactSelection: boolean = false
+    exactSelection: boolean = false,
+    onExecutionStarting?: () => void
   ): Promise<IDaemonPhasedRequestResult> {
     validateRequestIdentity(request);
     const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
@@ -190,7 +192,8 @@ export class PhasedRequestRouter {
               interactiveSession,
               request,
               selection,
-              warningsAllowedByEnvironment
+              warningsAllowedByEnvironment,
+              onExecutionStarting
             },
             admissionController
           );
@@ -421,6 +424,7 @@ class PhasedRequestBatchCoordinator {
       let executionError: unknown;
       const iterationCleanupErrors: unknown[] = [];
       try {
+        for (const entry of participants) entry.onExecutionStarting?.();
         scheduled = await this.#graph.scheduleIterationAsync({
           inputsSnapshot: this.#workspaceSession.inputsSnapshot
         });

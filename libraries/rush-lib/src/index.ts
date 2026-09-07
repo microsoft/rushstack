@@ -176,6 +176,15 @@ export {
 } from './api/PhasedCommandEngine';
 export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
 export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
+export {
+  captureWorkspaceInputFingerprintAsync,
+  captureProjectConfigurationFingerprintAsync,
+  classifyWorkspaceInputChange,
+  WorkspaceInputChangeTier,
+  WorkspaceRuntimeFingerprintCache,
+  type IWorkspaceInputFingerprint,
+  type IWorkspaceInputFingerprintOptions
+} from './api/WorkspaceInputFingerprint';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {

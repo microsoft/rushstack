@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { isDaemonControlRecord } from './ControlRecord';
-import { validateDaemonInvocationKind } from './DaemonInvocationKind';
+import { validateDaemonInvocationKind, validateExpectedWorkspaceGeneration } from './DaemonInvocationKind';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { validateRequestAdmission, validateRequestTerminal } from './RequestEnvelopeValidation';
 import { validateRequestId } from './RequestIdentifierValidation';
@@ -27,6 +27,7 @@ const REJECTION_CODES: ReadonlySet<unknown> = new Set([
 export function validateRequestStartControl(payload: Record<string, unknown>): void {
   validateRequestId(payload.requestId);
   validateDaemonInvocationKind(payload.invocationKind);
+  validateExpectedWorkspaceGeneration(payload.expectedWorkspaceGeneration);
   requireString(payload.commandName, 'requestStart payload.commandName');
   if (!COMMAND_ORIGINS.has(payload.commandOrigin)) fail('Request command origin is not recognized.');
   requireString(payload.cwd, 'requestStart payload.cwd');

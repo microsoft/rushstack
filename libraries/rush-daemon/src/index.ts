@@ -9,6 +9,9 @@ export {
   DaemonRequestDispatcher,
   type IDaemonRequestDispatchClient,
   type IDaemonRequestResolver,
+  type IDaemonRequestLifecycle,
+  type IDispatchWorkspaceRequestOptions,
+  type DispatchWorkspaceRequestAsync,
   type IResolvedDaemonGlobalRequest,
   type IResolvedDaemonPhasedRequest,
   type IResolveDaemonRequestOptions,
@@ -87,6 +90,7 @@ export {
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+export { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';
 export { RushXDaemonRequestResolver } from './RushXDaemonRequestResolver';
 export {
@@ -100,3 +104,14 @@ export {
   type IWorkspaceSessionFileWatcherOptions,
   type WorkspaceWatchFactory
 } from './WorkspaceSessionFileWatcher';
+export {
+  wrapWorkspaceResolverLifecycle,
+  isRushxInvocation,
+  type IWorkspaceResolverLifecycle
+} from './WorkspaceResolverLifecycle';
+export {
+  type GetWorkspaceSuccessorLaunchAsync,
+  type IWorkspaceProcessRestartContext,
+  type IWorkspaceProcessRestartResult,
+  type IWorkspaceSuccessorLaunch
+} from './WorkspaceProcessRestart';

@@ -34,6 +34,8 @@ export interface IDaemonRequestTerminal {
  * @beta
  */
 export interface IDaemonRequestEnvelope {
+  /** Required by graph mutations to reject stale client-held operation references (protocol 0.9). */
+  readonly expectedWorkspaceGeneration?: string;
   /** Queue-and-wait behavior requested by the client integration. */
   readonly admission?: IDaemonRequestAdmissionOptions;
   /** The original command arguments, excluding the Rush executable. */

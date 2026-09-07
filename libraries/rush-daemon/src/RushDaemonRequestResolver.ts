@@ -7,14 +7,22 @@ import type {
   ResolvedDaemonRequest
 } from './DaemonRequestDispatcher';
 import { RushXDaemonRequestResolver } from './RushXDaemonRequestResolver';
+import {
+  wrapWorkspaceResolverLifecycle,
+  type IWorkspaceResolverLifecycle
+} from './WorkspaceResolverLifecycle';
 
 /** Composes native Rushx execution with an integration-owned workspace command resolver. @beta */
 export class RushDaemonRequestResolver implements IDaemonRequestResolver {
   readonly #rushResolver: IDaemonRequestResolver;
   readonly #rushxResolver: RushXDaemonRequestResolver = new RushXDaemonRequestResolver();
+  public readonly workspaceLifecycle: IWorkspaceResolverLifecycle | undefined;
 
   public constructor(rushResolver: IDaemonRequestResolver) {
     this.#rushResolver = rushResolver;
+    this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
+      rushResolver, (replacement) => new RushDaemonRequestResolver(replacement)
+    );
   }
 
   public resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {

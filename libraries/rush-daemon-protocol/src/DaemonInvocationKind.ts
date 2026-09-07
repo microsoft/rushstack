@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DaemonProtocolError } from './DaemonProtocolError';
+import { validateRequestId } from './RequestIdentifierValidation';
 
 /** The native parser to use, independently of a command's built-in/custom origin. @beta */
 export type DaemonInvocationKind = 'rush' | 'rushx';
@@ -12,4 +13,9 @@ export function validateDaemonInvocationKind(value: unknown): void {
   if (!kinds.has(value)) {
     throw new DaemonProtocolError('malformedControlMessage', 'Request invocation kind is not recognized.');
   }
+}
+
+/** Validates the optional opaque workspace-generation reference. @internal */
+export function validateExpectedWorkspaceGeneration(value: unknown): void {
+  if (value !== undefined) validateRequestId(value);
 }

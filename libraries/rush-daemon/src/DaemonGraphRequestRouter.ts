@@ -22,6 +22,7 @@ import {
 } from './WorkspaceRequestAdmission';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { setPauseNextIteration } from './PhasedRequestRouter';
+import { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 
 const DAEMON_PACKAGE_VERSION: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -84,6 +85,12 @@ export class DaemonGraphRequestRouter {
         getWorkspaceRequestScheduler(this._session), RequestExclusivityClass.Exclusive
       );
       try {
+        this._session.assertActive?.();
+        if (envelope.expectedWorkspaceGeneration !== getWorkspaceGenerationToken(this._session)) {
+          throw new DaemonRequestDispatchError(
+            'invalidRequest', 'The graph generation changed or was not supplied; read a fresh snapshot before mutating.'
+          );
+        }
         const graph: IOperationGraph = this._requireGraph();
         if (graph.status === OperationStatus.Executing) {
           throw new DaemonRequestDispatchError('routingFailed', 'Cannot mutate an active graph iteration.');

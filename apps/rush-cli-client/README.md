@@ -200,6 +200,15 @@ dependency IDs, manual-mode/scheduled flags, and a path-free invalidation summar
 An operation without an observed execution status reports `null`. Snapshots contain
 no environment, runner, log, or terminal objects.
 
+Protocol 0.9 snapshots include an opaque `workspaceGeneration` token. Every mutation
+echoes a token, checked under exclusive admission before touching the graph. The
+token changes on soft reload and process replacement, preventing stale operation
+references from affecting a new generation. Use `--generation TOKEN` with a token
+from an earlier snapshot to preserve that reference; the client never refreshes an
+explicit token. Without this option, the client privately reads current status
+before submitting the mutation. A reload between those requests fails closed.
+Mutations reject older peers before submission; read-only inspection remains compatible.
+
 `scope-in`, `scope-out`, and `invalidate` require one or more repeated
 `--project NAME` or `--operation ID` pairs. Names and IDs match exactly; there are
 no globs or implicit all-project selections. Every selector is validated before

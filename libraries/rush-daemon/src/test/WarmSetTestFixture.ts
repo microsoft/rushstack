@@ -107,7 +107,7 @@ export class WarmSetTestFixture implements AsyncDisposable {
           );
           fixture.write('a/config/rush-project.json', '{"extends":"../../common/temp/inherited.json"}');
         }
-      });
+      }, false);
     });
     result._attachOnInitialization();
     return result;

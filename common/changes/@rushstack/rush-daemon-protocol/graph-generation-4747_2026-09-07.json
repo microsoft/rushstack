@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add generation-fenced experimental graph mutations in protocol 0.9.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

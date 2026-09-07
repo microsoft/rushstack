@@ -56,6 +56,9 @@ export const DAEMON_EVENT_TYPES: readonly [
 ];
 
 // @beta
+export const DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
@@ -372,6 +375,7 @@ export interface IDaemonInitializedGraphSnapshot {
     readonly pauseNextIteration: boolean;
     // (undocumented)
     readonly status: string;
+    readonly workspaceGeneration?: string;
 }
 
 // @beta
@@ -512,6 +516,7 @@ export interface IDaemonRequestEnvelope {
     readonly commandOrigin: DaemonRushCommandOrigin;
     readonly cwd: string;
     readonly environment: Readonly<Record<string, string>>;
+    readonly expectedWorkspaceGeneration?: string;
     readonly invocationKind?: DaemonInvocationKind;
     readonly requestId: string;
     readonly terminal: IDaemonRequestTerminal;
@@ -650,6 +655,7 @@ export interface IDaemonUninitializedGraphSnapshot {
     readonly initialized: false;
     // (undocumented)
     readonly invalidations: IDaemonGraphInvalidations;
+    readonly workspaceGeneration?: string;
 }
 
 // @beta
