@@ -4,7 +4,6 @@
 import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { EnvironmentVariableNames } from '../EnvironmentConfiguration';
 import { LastInstallFlag } from '../LastInstallFlag';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
@@ -93,38 +92,42 @@ describe(LastInstallFlag.name, () => {
     }).rejects.toThrow(/PNPM store path/);
   });
 
-  it("throws an error if the PNPM global virtual store setting doesn't match the old one", async () => {
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/pnpm-store`
-    });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/pnpm-store`,
-      pnpmGlobalVirtualStore: true
-    });
+  describe.each([
+    { name: 'full install', oldSelectedProjectNames: undefined, selectedProjectNames: undefined },
+    {
+      name: 'filtered install after full install',
+      oldSelectedProjectNames: undefined,
+      selectedProjectNames: ['a']
+    },
+    {
+      name: 'filtered install after superset',
+      oldSelectedProjectNames: ['a', 'b'],
+      selectedProjectNames: ['a']
+    }
+  ])('$name', ({ oldSelectedProjectNames, selectedProjectNames }) => {
+    it.each([true, false])(
+      'invalidates the flag without throwing when global virtual store was %s and is toggled',
+      async (previouslyEnabled) => {
+        const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+          packageManager: 'pnpm',
+          storePath: `${TEMP_DIR_PATH}/pnpm-store`,
+          ...(previouslyEnabled ? { pnpmGlobalVirtualStore: true } : {}),
+          ...(oldSelectedProjectNames ? { selectedProjectNames: oldSelectedProjectNames } : {})
+        });
+        const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+          packageManager: 'pnpm',
+          storePath: `${TEMP_DIR_PATH}/pnpm-store`,
+          ...(!previouslyEnabled ? { pnpmGlobalVirtualStore: true } : {}),
+          ...(selectedProjectNames ? { selectedProjectNames } : {})
+        });
 
-    await flag1.createAsync();
-    await expect(async () => {
-      await flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' });
-    }).rejects.toThrow(EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE);
-  });
-
-  it("throws an error if the PNPM global virtual store setting was previously enabled but isn't now", async () => {
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/pnpm-store`,
-      pnpmGlobalVirtualStore: true
-    });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/pnpm-store`
-    });
-
-    await flag1.createAsync();
-    await expect(async () => {
-      await flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' });
-    }).rejects.toThrow(EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE);
+        await flag1.createAsync();
+        await expect(flag2.isValidAsync()).resolves.toEqual(false);
+        await expect(flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' })).resolves.toEqual(
+          false
+        );
+      }
+    );
   });
 
   it("doesn't throw an error if conditions for error aren't met", async () => {

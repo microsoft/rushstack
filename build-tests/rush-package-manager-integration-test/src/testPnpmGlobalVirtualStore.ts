@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as assert from 'node:assert';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
@@ -80,6 +81,33 @@ export async function testPnpmGlobalVirtualStoreAsync(terminal: ITerminal): Prom
   await helper.verifyPnpmGlobalVirtualStoreAsync(testRepoPath, sharedStorePath);
   await helper.verifyDependenciesAsync(testRepoPath, 'test-project-a', ['semver']);
   await helper.verifyDependenciesAsync(testRepoPath, 'test-project-b', ['test-project-a']);
+
+  const lockfilePath: string = path.join(testRepoPath, 'common/config/rush/pnpm-lock.yaml');
+  const originalLockfile: string = await FileSystem.readFileAsync(lockfilePath);
+
+  terminal.writeLine('Switching to a local virtual store without --purge...');
+  await helper.executeRushAsync(['install'], testRepoPath, {
+    ...rushEnvironment,
+    RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: '0'
+  });
+  const workspaceYaml: string = await FileSystem.readFileAsync(
+    path.join(testRepoPath, 'common/temp/pnpm-workspace.yaml')
+  );
+  assert.ok(!workspaceYaml.includes('enableGlobalVirtualStore: true'));
+  const localVirtualStoreItems: string[] = await FileSystem.readFolderItemNamesAsync(
+    path.join(testRepoPath, 'common/temp/node_modules/.pnpm')
+  );
+  assert.ok(localVirtualStoreItems.some((name) => name.startsWith('semver@')));
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-a', ['semver']);
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-b', ['test-project-a']);
+  assert.strictEqual(await FileSystem.readFileAsync(lockfilePath), originalLockfile);
+
+  terminal.writeLine('Switching back to the global virtual store without --purge...');
+  await helper.executeRushAsync(['install'], testRepoPath, rushEnvironment);
+  await helper.verifyPnpmGlobalVirtualStoreAsync(testRepoPath, sharedStorePath);
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-a', ['semver']);
+  await helper.verifyDependenciesAsync(testRepoPath, 'test-project-b', ['test-project-a']);
+  assert.strictEqual(await FileSystem.readFileAsync(lockfilePath), originalLockfile);
 
   terminal.writeLine('');
   terminal.writeLine("Running 'rush build'...");

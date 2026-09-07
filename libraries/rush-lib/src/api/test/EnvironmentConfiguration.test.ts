@@ -109,27 +109,27 @@ describe(EnvironmentConfiguration.name, () => {
     });
   });
 
-  describe('pnpmGlobalVirtualStore', () => {
+  describe('enablePnpmGlobalVirtualStore', () => {
     const ENV_VAR: string = 'RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE';
 
     it('returns false for unset environment variable', () => {
       EnvironmentConfiguration.validate();
 
-      expect(EnvironmentConfiguration.pnpmGlobalVirtualStore).toEqual(false);
+      expect(EnvironmentConfiguration.enablePnpmGlobalVirtualStore).toEqual(false);
     });
 
     it('returns true when environment variable is set to 1', () => {
       process.env[ENV_VAR] = '1';
       EnvironmentConfiguration.validate();
 
-      expect(EnvironmentConfiguration.pnpmGlobalVirtualStore).toEqual(true);
+      expect(EnvironmentConfiguration.enablePnpmGlobalVirtualStore).toEqual(true);
     });
 
     it('returns false when environment variable is set to 0', () => {
       process.env[ENV_VAR] = '0';
       EnvironmentConfiguration.validate();
 
-      expect(EnvironmentConfiguration.pnpmGlobalVirtualStore).toEqual(false);
+      expect(EnvironmentConfiguration.enablePnpmGlobalVirtualStore).toEqual(false);
     });
 
     it('rejects unsupported environment variable values', () => {

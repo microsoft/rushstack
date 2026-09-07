@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -103,73 +101,72 @@ describe(WorkspaceInstallManager.name, () => {
   });
 
   describe('prepareCommonTempAsync', () => {
-    const fixtureRepoPath: string = path.resolve(__dirname, 'repoWithSubspacesCatalogs');
+    const fixtureRepoPath: string = `${__dirname}/repoWithSubspacesCatalogs`;
     const tempFolderPath: string = `${__dirname}/temp/${WorkspaceInstallManager.name}`;
-    let originalPnpmStorePathEnvValue: string | undefined;
-    let originalPnpmGlobalVirtualStoreEnvValue: string | undefined;
 
-    beforeEach(() => {
-      originalPnpmStorePathEnvValue = process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
-      originalPnpmGlobalVirtualStoreEnvValue =
-        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+    beforeEach(async () => {
+      jest.replaceProperty(process, 'env', { ...process.env });
       delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
       delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
       EnvironmentConfiguration.reset();
       EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
-      FileSystem.ensureEmptyFolder(tempFolderPath);
+      await FileSystem.ensureEmptyFolderAsync(tempFolderPath);
     });
 
-    afterEach(() => {
-      if (originalPnpmStorePathEnvValue === undefined) {
-        delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
-      } else {
-        process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH] = originalPnpmStorePathEnvValue;
-      }
-      if (originalPnpmGlobalVirtualStoreEnvValue === undefined) {
-        delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
-      } else {
-        process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] =
-          originalPnpmGlobalVirtualStoreEnvValue;
-      }
+    afterEach(async () => {
+      jest.restoreAllMocks();
       EnvironmentConfiguration.reset();
-      FileSystem.deleteFolder(tempFolderPath);
+      await FileSystem.deleteFolderAsync(tempFolderPath);
     });
 
-    function prepareFixtureRepo(options: { pnpmStore?: PnpmStoreLocation }): RushConfiguration {
+    async function prepareFixtureRepoAsync(options: {
+      pnpmStore?: PnpmStoreLocation;
+    }): Promise<RushConfiguration> {
       const repoPath: string = `${tempFolderPath}/repo`;
-      FileSystem.copyFiles({
+      await FileSystem.copyFilesAsync({
         sourcePath: fixtureRepoPath,
         destinationPath: repoPath
       });
 
       const rushJsonPath: string = `${repoPath}/rush.json`;
-      const rushJson: Record<string, unknown> = JsonFile.load(rushJsonPath);
+      const rushJson: Record<string, unknown> = await JsonFile.loadAsync(rushJsonPath);
       rushJson.pnpmVersion = '10.12.1';
-      JsonFile.save(rushJson, rushJsonPath, { updateExistingFile: true });
+      await JsonFile.saveAsync(rushJson, rushJsonPath, { updateExistingFile: true });
 
       const commonPnpmConfigPath: string = `${repoPath}/common/config/rush/pnpm-config.json`;
-      const commonPnpmConfigJson: Record<string, unknown> = JsonFile.load(commonPnpmConfigPath);
+      const commonPnpmConfigJson: Record<string, unknown> = await JsonFile.loadAsync(commonPnpmConfigPath);
       if (options.pnpmStore) {
         commonPnpmConfigJson.pnpmStore = options.pnpmStore;
       } else {
         delete commonPnpmConfigJson.pnpmStore;
       }
-      JsonFile.save(commonPnpmConfigJson, commonPnpmConfigPath, { updateExistingFile: true });
+      await JsonFile.saveAsync(commonPnpmConfigJson, commonPnpmConfigPath, { updateExistingFile: true });
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
-      FileSystem.ensureFolder(rushConfiguration.defaultSubspace.getSubspaceTempFolderPath());
+      await FileSystem.ensureFolderAsync(rushConfiguration.defaultSubspace.getSubspaceTempFolderPath());
       return rushConfiguration;
     }
 
     function createInstallManager(rushConfiguration: RushConfiguration): TestWorkspaceInstallManager {
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
       const options: IInstallManagerOptions = {
+        debug: false,
         allowShrinkwrapUpdates: true,
+        checkOnly: false,
+        bypassPolicy: false,
+        noLink: false,
         fullUpgrade: false,
+        recheckShrinkwrap: false,
+        offline: false,
+        networkConcurrency: undefined,
+        collectLogFile: false,
         variant: undefined,
+        maxInstallAttempts: 1,
+        pnpmFilterArgumentValues: [],
+        selectedProjects: new Set(rushConfiguration.projects),
         subspace: rushConfiguration.defaultSubspace,
         terminal
-      } as unknown as IInstallManagerOptions;
+      };
       const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
 
       return new TestWorkspaceInstallManager(
@@ -183,12 +180,12 @@ describe(WorkspaceInstallManager.name, () => {
     it('writes enableGlobalVirtualStore through the workspace install prepare path', async () => {
       process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
       EnvironmentConfiguration.reset();
-      const rushConfiguration: RushConfiguration = prepareFixtureRepo({ pnpmStore: 'global' });
+      const rushConfiguration: RushConfiguration = await prepareFixtureRepoAsync({ pnpmStore: 'global' });
       const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
 
       await installManager.prepareCommonTempForTestAsync(rushConfiguration.defaultSubspace);
 
-      const workspaceYaml: string = FileSystem.readFile(
+      const workspaceYaml: string = await FileSystem.readFileAsync(
         `${rushConfiguration.defaultSubspace.getSubspaceTempFolderPath()}/pnpm-workspace.yaml`
       );
       expect(workspaceYaml).toContain('enableGlobalVirtualStore: true');
@@ -198,7 +195,7 @@ describe(WorkspaceInstallManager.name, () => {
     it('throws from the workspace install prepare path when using a worktree-local PNPM store', async () => {
       process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
       EnvironmentConfiguration.reset();
-      const rushConfiguration: RushConfiguration = prepareFixtureRepo({});
+      const rushConfiguration: RushConfiguration = await prepareFixtureRepoAsync({});
       const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
 
       expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
