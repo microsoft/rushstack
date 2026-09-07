@@ -54,6 +54,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
   const { paths, startCommand: start, token, timeoutMs } = options;
   assertReservation(paths, token);
   let child: ChildProcess;
+  let closed: Promise<void> | undefined;
   try {
     child = spawn(start.command, [...start.args], {
       cwd: start.cwd,
@@ -62,9 +63,11 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
       stdio: ['ignore', 1, 2],
       windowsHide: true
     });
+    closed = new Promise<void>((resolve) => child.once('close', () => resolve()));
     await once(child, 'spawn');
   } catch (error) {
     // No executable was started, so this helper can safely release its own reservation.
+    if (closed) await closed;
     releaseDaemonStartup(paths, token);
     throw error;
   }
@@ -100,6 +103,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
       return;
     }
     if (child.exitCode !== null || child.signalCode !== null) {
+      await closed;
       throw new DaemonClientError(
         'startupFailed',
         `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation retained.`

@@ -4,7 +4,7 @@
 import { runDaemonStartupAsync, type IDaemonStartupOptions } from './DaemonStartup';
 
 process.once('message', (options: IDaemonStartupOptions) => {
-  if (process.connected) process.disconnect();
+  process.channel?.unref();
   runDaemonStartupAsync(options).catch((error: Error) => {
     process.stderr.write(`${error.stack}\n`);
     process.exitCode = 1;

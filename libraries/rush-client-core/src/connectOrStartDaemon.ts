@@ -29,6 +29,11 @@ import {
   type IDaemonStartupOptions
 } from './DaemonStartup';
 
+interface IStartupHelper {
+  readonly child: ChildProcess;
+  readonly closed: Promise<void>;
+}
+
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
 export interface IDaemonStartCommand {
   readonly command: string;
@@ -124,13 +129,24 @@ export async function connectOrStartDaemonAsync(
     await reclaimStaleDaemonAsync(options.paths);
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();
-    const child: ChildProcess = await spawnDetachedAsync(options, deadline);
+    const helper: IStartupHelper = await spawnDetachedAsync(options, deadline);
+    const { child } = helper;
     backoffMs = 50;
     while (Date.now() < deadline) {
       options.abortSignal?.throwIfAborted();
       const client: DaemonClient | undefined = await tryConnectAsync(options, deadline);
-      if (client) return client;
+      if (client) {
+        try {
+          await waitForHelperExitAsync(helper, options, deadline);
+          options.abortSignal?.throwIfAborted();
+          return client;
+        } catch (error) {
+          await client.closeAsync();
+          throw error;
+        }
+      }
       if ((child.exitCode !== null && child.exitCode !== 0) || child.signalCode !== null) {
+        await waitForHelperExitAsync(helper, options, deadline);
         throw startupError(
           options,
           `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`
@@ -356,7 +372,7 @@ function isProcessAlive(pid: number): boolean {
 async function spawnDetachedAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
-): Promise<ChildProcess> {
+): Promise<IStartupHelper> {
   const start: IDaemonStartCommand = options.startCommand!;
   const logFilePath: string = getDaemonLogFilePath(options.paths);
   // These distinct native flags have non-overlapping values.
@@ -381,16 +397,21 @@ async function spawnDetachedAsync(
       fs.fchmodSync(logFd, 0o600);
     }
     const token: string = reserveDaemonStartup(options.paths);
-    let child: ChildProcess;
+    let helper: IStartupHelper | undefined;
     try {
-      child = spawn(process.execPath, [path.join(__dirname, 'runDaemonStartup.js')], {
-        cwd: start.cwd,
+      const child: ChildProcess = spawn(process.execPath, [path.join(__dirname, 'runDaemonStartup.js')], {
+        cwd: __dirname,
         detached: true,
         stdio: ['ignore', logFd, logFd, 'ipc'],
         windowsHide: true
       });
+      helper = {
+        child,
+        closed: new Promise<void>((resolve) => child.once('close', () => resolve()))
+      };
       await once(child, 'spawn');
     } catch (error) {
+      if (helper) await helper.closed;
       releaseDaemonStartup(options.paths, token);
       throw new DaemonClientError(
         'startupFailed',
@@ -398,6 +419,7 @@ async function spawnDetachedAsync(
         { cause: error }
       );
     }
+    const { child } = helper;
     child.unref();
     const startup: IDaemonStartupOptions = {
       paths: options.paths,
@@ -405,16 +427,44 @@ async function spawnDetachedAsync(
       token,
       timeoutMs: Math.max(1, deadline - Date.now())
     };
+    let delivered: boolean = false;
     try {
       await new Promise<void>((resolve, reject) => {
         child.send(startup, (error) => (error ? reject(error) : resolve()));
       });
+      delivered = true;
     } finally {
-      if (child.connected) child.disconnect();
+      if (!delivered && child.connected) child.disconnect();
+      // On successful handoff, let exit close IPC naturally so ChildProcess emits its close event.
+      child.channel?.unref();
     }
-    return child;
+    return helper;
   } finally {
     fs.closeSync(logFd);
+  }
+}
+
+async function waitForHelperExitAsync(
+  helper: IStartupHelper,
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<void> {
+  const timeout: AbortController = new AbortController();
+  const signal: AbortSignal = options.abortSignal
+    ? AbortSignal.any([options.abortSignal, timeout.signal])
+    : timeout.signal;
+  try {
+    await Promise.race([
+      helper.closed,
+      delayAsync(Math.max(1, deadline - Date.now()), undefined, { signal }).then(() => {
+        throw startupError(options, 'timed out awaiting startup helper exit');
+      })
+    ]);
+  } catch (error) {
+    options.abortSignal?.throwIfAborted();
+    throw error;
+  } finally {
+    timeout.abort();
   }
 }
 
