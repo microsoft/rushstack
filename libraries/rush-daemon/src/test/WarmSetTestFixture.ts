@@ -34,6 +34,7 @@ export interface IWarmFixtureOptions {
 }
 
 export const GENEROUS_WARM_CONFIGURATION: WorkspaceWarmSetConfiguration = {
+  watch: true,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 100_000,
   warmSetMaxProjects: 20,
@@ -174,19 +175,7 @@ export class WarmSetTestFixture implements AsyncDisposable {
         const components = await factory(options);
         const graph: IOperationGraph = components.operationGraph!;
         if (this._options.ipc) {
-          // Use the real native IPC runner with the fixture's explicitly requested script. The default
-          // non-watch production resolver intentionally still selects shell runners.
-          for (const operation of graph.operations) {
-            operation.runner = new IPCOperationRunner({
-              name: operation.name,
-              phase: operation.associatedPhase,
-              project: operation.associatedProject,
-              initialCommand: 'node build.cjs',
-              incrementalCommand: 'node build.cjs',
-              commandForHash: 'node build.cjs',
-              ignoredParameterValues: []
-            });
-          }
+          useNativeIpcRunners(graph);
         }
         this.warm = WorkspaceWarmSet.attach({
           operationGraph: graph,
@@ -203,7 +192,22 @@ export class WarmSetTestFixture implements AsyncDisposable {
   }
 }
 
-function createScript(name: string, ipc: boolean): string {
+/** Test engines may supply real IPC runners; the production non-watch resolver still selects shells. */
+export function useNativeIpcRunners(graph: IOperationGraph): void {
+  for (const operation of graph.operations) {
+    operation.runner = new IPCOperationRunner({
+      name: operation.name,
+      phase: operation.associatedPhase,
+      project: operation.associatedProject,
+      initialCommand: 'node build.cjs',
+      incrementalCommand: 'node build.cjs',
+      commandForHash: 'node build.cjs',
+      ignoredParameterValues: []
+    });
+  }
+}
+
+export function createScript(name: string, ipc: boolean): string {
   const operationGraphPath: string = require.resolve('@rushstack/operation-graph', {
     paths: [path.dirname(require.resolve('@microsoft/rush-lib/package.json'))]
   });

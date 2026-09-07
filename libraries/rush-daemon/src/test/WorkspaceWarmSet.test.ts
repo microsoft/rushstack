@@ -112,6 +112,24 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(fixture.runs()).not.toContain('c');
   });
 
+  it('reports a deferred project cap in status without warning before idle cleanup can run', async () => {
+    const { fixture, warm, diagnostics } = await startAsync();
+    const lease = await getWorkspaceRequestScheduler(fixture.session).acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    try {
+      test!.update({ warmSetMaxProjects: 1 });
+      expect(await warm.maintainAsync()).toMatchObject({
+        deferredReason: 'workspace-busy', overProjectLimit: true, overMemoryBudget: false
+      });
+      expect(diagnostics).toEqual([]);
+    } finally {
+      lease.release();
+    }
+    expect((await warm.maintainAsync()).retainedProjectNames).toHaveLength(1);
+    expect(diagnostics).toEqual([]);
+  });
+
   it('evicts under measured memory pressure and reports a budget below remaining daemon RSS honestly', async () => {
     const { warm, fixture, graph } = await startAsync({ ipc: true });
     const initial = warm.getStatus();

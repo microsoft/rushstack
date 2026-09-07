@@ -22,7 +22,8 @@ import type {
   IDaemonErrorMessage,
   IDaemonFrame,
   IDaemonPongMessage,
-  IDaemonRequestEnvelope
+  IDaemonRequestEnvelope,
+  IDaemonWorkspaceStatus
 } from '@rushstack/rush-daemon-protocol';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
@@ -48,6 +49,7 @@ export interface IDaemonControlSessionOptions {
   readonly onError: (error: Error) => void;
   readonly onRequestStarted?: () => () => void;
   readonly onShutdownRequested: () => void;
+  readonly getWorkspaceStatus?: () => IDaemonWorkspaceStatus;
 }
 
 interface IRequestState {
@@ -374,6 +376,7 @@ export class DaemonControlSession {
         protocolVersion: DAEMON_PROTOCOL_VERSION,
         pid: process.pid,
         residentMemoryBytes: process.memoryUsage().rss,
+        workspace: this.#options.getWorkspaceStatus?.(),
         uptimeMs: Date.now() - this.#options.startedAtMs
       }
     };
@@ -385,10 +388,7 @@ export class DaemonControlSession {
     );
   }
 
-  #enqueueControlAsync(
-    message: DaemonControlMessage,
-    closeAfterSend: boolean = false
-  ): Promise<void> {
+  #enqueueControlAsync(message: DaemonControlMessage, closeAfterSend: boolean = false): Promise<void> {
     return this.#enqueueFrameAsync(
       { kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message) },
       closeAfterSend
@@ -457,9 +457,7 @@ export class DaemonControlSession {
     }
     this.#markClosing(closeReason);
     const drainPromise: Promise<void> = Promise.all([
-      Promise.allSettled(
-        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
-      ),
+      Promise.allSettled(Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)),
       this.#sendQueue
     ]).then(() => undefined);
     if (!(await settlesWithinAsync(drainPromise, CLOSE_DRAIN_TIMEOUT_MS))) {
@@ -485,7 +483,6 @@ export class DaemonControlSession {
     this.#options.onClosed(this, finalError);
     this.#resolveClosed();
   }
-
 }
 
 function createDeferred(): { promise: Promise<void>; resolve: () => void } {
@@ -522,7 +519,10 @@ function classifyRejection(error: unknown): IClassifiedRejection {
   return { code: 'routingFailed', message: normalizeError(error).message };
 }
 
-function combineCloseErrors(error: Error | undefined, cleanupErrors: ReadonlyArray<Error>): Error | undefined {
+function combineCloseErrors(
+  error: Error | undefined,
+  cleanupErrors: ReadonlyArray<Error>
+): Error | undefined {
   if (cleanupErrors.length === 0) return error;
   return new AggregateError(
     error ? [error, ...cleanupErrors] : cleanupErrors,
@@ -536,7 +536,13 @@ async function settlesWithinAsync(promise: Promise<void>, timeoutMs: number): Pr
     timeout = setTimeout(() => resolve(false), timeoutMs);
     timeout.unref();
   });
-  const settled: boolean = await Promise.race([promise.then(() => true, () => true), timeoutPromise]);
+  const settled: boolean = await Promise.race([
+    promise.then(
+      () => true,
+      () => true
+    ),
+    timeoutPromise
+  ]);
   if (timeout) clearTimeout(timeout);
   return settled;
 }

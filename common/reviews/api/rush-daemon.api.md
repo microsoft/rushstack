@@ -23,6 +23,8 @@ import type { IDaemonRequestQueuePositionMessage } from '@rushstack/rush-daemon-
 import type { IDaemonSetRawModeMessage } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonStartCommand } from '@rushstack/rush-client-core';
 import type { IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import { IOperationGraph } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
@@ -658,24 +660,7 @@ export interface IWorkspaceWarmSetOptions {
 }
 
 // @beta
-export interface IWorkspaceWarmSetStatus {
-    // (undocumented)
-    readonly cleanupFailures: ReadonlyArray<string>;
-    // (undocumented)
-    readonly daemonResidentMemoryBytes: number;
-    // (undocumented)
-    readonly deferredReason: 'workspace-busy' | 'native-busy' | 'graph-busy' | 'disposed' | undefined;
-    // (undocumented)
-    readonly measuredRunnerMemoryBytes: number;
-    // (undocumented)
-    readonly overMemoryBudget: boolean;
-    // (undocumented)
-    readonly overProjectLimit: boolean;
-    // (undocumented)
-    readonly protectedProjectNames: ReadonlyArray<string>;
-    readonly retainedProjectNames: ReadonlyArray<string>;
-    readonly unmeasuredRunnerCount: number;
-}
+export type IWorkspaceWarmSetStatus = IDaemonWarmSetStatus;
 
 // @beta
 export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspaceInvalidationsOptions) => Promise<Iterable<Operation>>;
@@ -748,6 +733,7 @@ export class RushDaemonHost {
     readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
     static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
     get workspaceGeneration(): number;
+    get workspaceStatus(): IDaemonWorkspaceStatus;
 }
 
 // @beta
@@ -856,7 +842,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
 }
 
 // @beta
-export type WorkspaceWarmSetConfiguration = Pick<IDaemonConfigurationJson, 'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'>;
+export type WorkspaceWarmSetConfiguration = Pick<IDaemonConfigurationJson, 'watch' | 'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'>;
 
 // @beta
 export type WorkspaceWatchFactory = (folderPath: string, options: {

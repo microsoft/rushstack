@@ -9,7 +9,7 @@ export interface IDaemonConfigurationJson {
   readonly idleTimeoutSeconds?: number;
   /** Start an absent daemon. Defaults to true, but only for opted-in invocations. */
   readonly autoStart?: boolean;
-  /** Reserved for workspace watcher integration; currently inactive. Defaults to false. */
+  /** Retains host file observation for warm projects between requests; never schedules builds. Defaults to false. */
   readonly watch?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;

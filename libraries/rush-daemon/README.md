@@ -62,10 +62,13 @@ The host uses stable fingerprints to classify native requests:
 | --- | --- | --- |
 | 0 | Unchanged definitions/parameters, or ordinary project source changes | Retain session, graph, plugins, and completed records; reconcile operation inputs |
 | 1 | Rush/project configuration, effective rig/inherited settings, command shape, or unhealthy invalidation tracking | Drain the old generation, dispose it, and construct a new session and real graph in the same process |
-| 2 | Environment, installed dependency state, implementation content, or selected Rush version | Finish a pre-execution failure result, close the old host completely, and launch an available successor process |
+| 2 | Environment, installed dependency state, implementation content, or selected Rush version | Drain request results (typed retry only for unstarted work), release old ownership, and launch a genuinely available matching successor; an eligible client may retry once |
 
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
+Native dispatch first copies the envelope and normalizes only engine-owned `_RUSH_LIB_PATH` to this daemon's
+real engine, preventing false restarts or wrong SDK selection from a foreign client path. All other environment
+inputs remain unchanged and are checked normally.
 Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
 still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
 
@@ -73,8 +76,9 @@ A generation lease spans resolution through final output. Reload also takes excl
 the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before
 publishing the replacement. The initiating request atomically downgrades its admission so another reload cannot
 dispose the newly selected graph before it runs. Watch requests are cancelled and drained before their generation
-is replaced. A race detected before scheduling may be re-resolved; once scheduling starts, or a terminal result has
-been attempted, the request is never replayed.
+is replaced. Server-side re-resolution is limited to races detected before scheduling and before attempting a
+terminal result. Protocol 0.10's separate client retry requires an explicit pre-execution
+`retryAfterRestart: true` result and the safeguards described below; it never replays started work.
 
 This integration supports Git-backed workspaces with direct, inherited, or rig-based project configuration and ordinary native phases.
 Engine configuration snapshots use private native configuration-file loaders and non-caching rig resolution, including
@@ -121,20 +125,29 @@ The default entrypoint supports the `rush.json` version, not a separate preview-
 
 Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
 resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
-`restartCompleted` reports completion or failure. There is no automatic request replay. A hard-change retry hint
-explicitly says no operation was scheduled or executed; the caller must reconnect and submit a new request.
+`restartCompleted` reports completion or failure.
+
+Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
+Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted
+queued requests drain those typed results before disconnect rather than being reduced to ambiguous connection
+loss. The client's `executeWithDaemonRestartAsync` waits for old ownership release and a validated successor,
+then retries an eligible request **at most once**. Command input/output or cancellation prevents retry,
+even with the typed flag. Error text, a changed PID, or connection loss never authorizes replay.
+Ordinary shutdown and disconnect retain cancellation semantics.
 
 Positively identified built-in `install` and `update` requests execute in `NativeMutationWorker`, a single-shot
 native Rush parser process owned by `GlobalCommandExecutionContext`. This is not the phased warm engine.
 Native arguments, policies, hooks, stdin/EOF, output and numeric exit status are preserved. Even a failed mutation
 may have changed files: its exact result is drained before old generation cleanup and successor startup.
 Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
-launched, the host stops without silently starting an incorrect successor. No mutation is replayed.
+launched, the host stops without silently starting an incorrect successor. A mutation that started is never
+replayed, even after failure; an unstarted request can retry only through the typed pre-execution contract above.
 
-The CLI admission/allowlist is separate from this server API; this package does not enable forwarding additional
-administrative commands in a client. Client-originated graph-reference fencing also needs a protocol/client
-generation token. Server-resolved requests are fenced here; operation names alone cannot identify which snapshot
-a client previously observed. Graph controls do not migrate a prepared iteration across a generation replacement.
+The opt-in CLI forwards positively identified built-in `install` and `update` only to peers supporting protocol
+0.10. Other administrative commands remain native; Rushx script names are not reinterpreted as Rush built-ins.
+Client-originated graph-reference fencing uses the protocol's generation token; operation names alone cannot
+identify which snapshot a client previously observed. Graph controls do not migrate a prepared iteration across
+a generation replacement.
 
 Resolver composition uses the optional `IDaemonRequestResolver.workspaceLifecycle` capability, not an
 `instanceof` check. A composite delegates native inspection but must wrap every generation replacement too:
@@ -159,10 +172,15 @@ action; identical script names alone never authorize a workspace build.
 
 ### Warm-set generation attachment (WS3)
 
-`WorkspaceWarmSet.attach(options)` implements the four warm policies against a **real, already-created**
-operation graph and an **already-started** `WorkspaceSessionFileWatcher`. The generation owner must attach it
-before the first request iteration, capture that generation's native execution lease callback, and use the
-same workspace scheduler that admits phased/global requests and graph mutations:
+`WorkspaceSession` automatically owns the warm controller for each real graph and
+`WorkspaceSessionFileWatcher`, using the effective `rush.json`/environment settings. Both lazy native
+initialization and eagerly supplied components attach after watcher startup and before the first iteration.
+An integration-supplied controller is adopted, not duplicated. Custom watchers or graphs without native
+result-eviction support remain explicitly unaccounted rather than reporting a fictitious warm set.
+
+Embedded integrations can still use `WorkspaceWarmSet.attach(options)` directly with a **real, already-created**
+graph and an **already-started** watcher. Capture that generation's native execution lease callback and use
+the same workspace scheduler that admits phased/global requests and graph mutations:
 
 ```ts
 const acquireExecutionLeaseAsync = engine.acquireExecutionLeaseAsync;
@@ -181,12 +199,20 @@ const warmSet = WorkspaceWarmSet.attach({
 The configuration is the existing resolved `rush.json`/environment configuration; `updateConfiguration()` also
 validates and applies policy changes at runtime. Dispose the controller **before** its generation's engine and
 watcher, outside outstanding request leases. Controller disposal stops its timer and awaits maintenance;
-it does not dispose resources owned by the generation. This attachment is intentionally not installed in the
-default bootstrap/resolver here: automatic reload/generation ownership supplies that final wiring separately.
-The real-native-graph tests attach this exact controller at component creation, not a substitute implementation.
+it does not dispose resources owned by the generation. The default session performs this ownership sequence
+automatically, including for component-owned instances of the concrete file watcher.
+
+`quiesceWarmSetAsync()` is a one-way generation barrier: it stops the current controller, waits for pending
+initialization, and disposes any controller returned late before completing. Quiescing a cold session prevents
+later initialization from installing an active controller behind that barrier. Existing initialized graphs may
+still finish admitted work; generation reload owns their disposal. Reload quiesces **before** taking workspace
+and native preparation locks, so those locks cannot deadlock an in-flight maintenance lease. Late cleanup and
+native lease-release failures remain sticky and block replacement; an optional project eviction failure still
+preserves its records and diagnostics without failing an otherwise successful build.
 
 | Policy | Runtime behavior |
 | --- | --- |
+| `watch` | Retains host observation of requested warm projects between requests when true. False (the default) keeps root/config guards only. Never schedules builds. |
 | `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
 | `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
 | `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
@@ -213,18 +239,61 @@ definitions, enabled selections and disk caches are unchanged. The native per-it
 policy is deliberately left intact: optional footprint cleanup must not turn successful requested work into a
 failed build merely because an optimization could not release resources.
 
-The watcher keeps root and Rush/subspace configuration observation permanent. Unrequested project observation
-is removed at maintenance; requested projects are observed again during planning. A new watcher can start with
-`projectNames: []` instead of recursively observing every project. **Every native request must still refresh its
+The default session starts with permanent root and Rush/subspace configuration observation and
+`projectNames: []`, not recursive watchers for every cold project. With `watch: true`, requested projects are
+observed during planning and between requests; idle eviction removes their observation. With `watch: false`,
+host project observation is disabled, but retained runners and execution results are not discarded merely
+because observation is off. **Every native request must still refresh its
 input snapshot and revalidate effective direct/rig/inherited configuration**, including files outside watcher
 roots. Cold source changes therefore rebuild correctly; changed graph configuration fails closed until the
-generation owner supplies a freshly constructed engine. This attachment does not implement automatic reload.
+generation owner supplies a freshly constructed engine. A same-PID soft reload replaces the controller,
+watcher, graph and session together; controller history never migrates across generations.
+
+Changing observation policy uses the same idle maintenance leases. Enabling it restores observation of eligible
+retained projects without running scripts; disabling it awaits project watcher closure without closing runners
+or deleting results. Executing/prepared graphs and protected projects defer teardown, and failed/pending closes
+remain visible in status and diagnostics. This flag controls only the host's project file observation, not
+watchers inside retained runner processes, native Rush watch mode, or an autonomous build loop.
+Previously project observation ran regardless of the inactive flag. Honoring its existing default `false`
+intentionally lowers background observation; set `watch: true` to retain that observation between requests.
 
 `getStatus()` reports actual retained/protected projects, daemon RSS, measured child RSS, unmeasured runners,
 remaining pressure, maintenance deferral and failed cleanup. Diagnostics go to `onDiagnostic` (or a process
 warning). Failed cleanup keeps records and truthful resource accounting, and cannot falsify a command result.
+Deferred project-cap cleanup remains visible in status without warning before idle maintenance can run.
+Memory pressure and limits that remain after an idle cleanup attempt still produce diagnostics.
 Releasing records does not force V8/allocator RSS to shrink. If remaining daemon memory, active/protected work,
 or cleanup failures cannot fit the budget, pressure remains reported instead of claiming success.
+
+### Read-only generation and warm status
+
+Daemon `pong` replies (and the existing JSON `daemon status` output) include an optional `workspace` snapshot.
+`RushDaemonHost.workspaceStatus` exposes the same synchronous view. It reads the provider's installed session
+and opaque generation token without calling `getSessionAsync()`, preparing a graph, scheduling work, or waiting
+for lifecycle/workspace/native locks. During old-generation cleanup it reports that installed generation;
+while a replacement session is being constructed the token is absent. The token matches graph fencing tokens.
+The shared pong/host snapshot reads `WorkspaceRequestLifecycle.lastReloadTier` live: `0` initially or after
+reuse, `1` after a successful in-process reload, and `2` when a hard/mutation restart is requested. A host
+without that lifecycle reports `0`. Status reads never update the tier or infer it from generation/PID changes;
+the tier is not a command-success or successor-readiness signal. Older peers may omit the field.
+
+| Field | Meaning |
+| --- | --- |
+| `generation`, `generationToken` | Provider generation counter and current installed session identity; neither implies a graph or successful build. |
+| `lastReloadTier` | Lifecycle-owned tier: `0` initial/reuse, `1` successful reload, `2` requested restart. |
+| `graphInitialized` | Whether that session has a materialized operation graph. |
+| `warmSet` | Absent when no controller is attached, not a claim of zero memory. |
+| `warmSet.configuration` | The effective `watch` flag and four warm-resource knobs; older peers may omit `watch`. |
+| `maintenanceState`, `maintenanceFailure` | Running, quiescing, stopped, or failed maintenance; stopping maintenance alone does not free graph/watcher resources. |
+| `retainedProjectNames`, `protectedProjectNames`, `watchedProjectNames` | Actual retained projects, additional protection and still-resident project observation, including pending close. |
+| RSS, unmeasured count and pressure fields | Sampled daemon/child memory and outstanding limits, with unknown child memory explicitly distinguished from zero. |
+| `cleanupFailures`, `deferredReason` | Failed optional cleanup and why maintenance could not run. |
+
+All rows after `warmSet` describe fields inside that object. The extra pong field is additive and optional;
+old pong messages still decode. The protocol validates nested shapes, finite counts/budgets and generation
+identity. This optional status field is independent of protocol 0.10's typed restart-retry contract.
+Graph snapshots also stop reporting historical success after a retained result is evicted: idle cold operations
+report `READY` for request-time revalidation, without scheduling work or modifying the completed build outcome.
 
 ### Native Rushx integration
 
@@ -301,9 +370,10 @@ queue progress, raw-mode controls, binary output, structured events, and the ter
 wire queue. A connection runs at most one request at a time so binary operation output remains unambiguous; concurrent
 requests use separate connections. Each connection accepts at most 256 distinct request identifiers before the client
 must reconnect, allowing the lifecycle and stdin routers to retain every identifier for deterministic duplicate and
-late-frame handling without unbounded growth. Disconnect and host shutdown abort every connection-owned active or
-queued request before the resolver and warm workspace are disposed. Separate connections still share the workspace
-scheduler and phased batch coordinator, so compatible selections can execute in one iteration.
+late-frame handling without unbounded growth. Disconnect and ordinary host shutdown abort connection-owned
+requests before the resolver and warm workspace are disposed. Planned process restart instead lets accepted
+queued requests drain eligible typed restart results before their connections close. Separate connections still
+share the workspace scheduler and phased batch coordinator, so compatible selections can execute in one iteration.
 
 The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
 typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle

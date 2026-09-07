@@ -245,7 +245,7 @@
       "additionalProperties": false
     },
     "daemon": {
-      "description": "Opt-in standalone daemon client configuration. Environment overrides config, then defaults. Warm policies require the generation-owned WorkspaceWarmSet host attachment; watch-driven execution remains reserved.",
+      "description": "Opt-in standalone daemon client configuration. Environment overrides config, then defaults. Observation and warm policies use the generation-owned WorkspaceWarmSet host attachment; no automatic build scheduling.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -270,7 +270,7 @@
         "watch": {
           "type": "boolean",
           "default": false,
-          "description": "Reserved for workspace watcher integration; currently inactive. RUSH_DAEMON_WATCH overrides."
+          "description": "Retain host observation of warm project files between requests; never schedule builds. Root/config guards and request-time input reconciliation remain active when false. RUSH_DAEMON_WATCH overrides."
         },
         "queueTimeoutSeconds": {
           "type": "number",

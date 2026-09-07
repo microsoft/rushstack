@@ -26,9 +26,13 @@ Explicit reporter/output/log-level controls retain the native frontend reporter 
 The current daemon client renders the legacy operation stream; it does not silently
 reinterpret requests for JSON, AI, file, or other reporter formats.
 
-`install`, `update`, package mutation, publishing, setup, management, and other
-administrative commands are never forwarded as execution requests. Rushx script names
-are not interpreted as Rush built-ins. Arguments after `--` are preserved.
+Positively identified built-in `install` and `update` follow the same opt-in routing
+precedence as workspace builds and require protocol **0.10**
+(`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`). They are not submitted to older peers.
+Other package mutation, publishing, setup, management, and administrative commands
+remain native rather than being forwarded as execution requests. Daemon management
+subcommands use their separate control path. Rushx script names are not interpreted
+as Rush built-ins. Arguments after `--` are preserved.
 Request cwd, environment, argv, width and color are captured before connecting.
 The protocol currently expresses request color as a boolean; subscriptions carry
 the corresponding color level. There is no SIGWINCH forwarding.
@@ -60,14 +64,32 @@ vaults, changed process-global Rush configuration variables, stale workspace con
 and native help require pre-execution fallback. Ignored/recursive hooks retain native
 behavior, including skipping post hooks after failure. PTY requirements remain in-process.
 
-The initial engine is pinned to its startup environment, first command, and
-non-selection parameters. Direct, inherited, and rig-based project configuration
-uses private native loaders and is rechecked before execution. External plugins,
-`.env`, watch/install options, and unsupported event-hook scripts still use typed
-pre-execution fallback. The native Rush lock is held for preparation and each
+Compatible requests reuse the same native graph. Source changes refresh inputs;
+changed configuration or command shape replaces the session and graph in the same
+process. Environment, installed dependencies, implementation content, or selected
+Rush version changes require a process restart rather than patching the existing
+engine. Direct, inherited, and rig-based project configuration uses private native
+loaders and is rechecked before execution. External plugins, `.env`, phased
+watch/install options, and unsupported event-hook scripts still use typed
+pre-execution fallback; this does not exclude the built-in `install` and `update`
+commands described above. The native Rush lock is held for preparation and each
 coalesced iteration, not while idle; native commands and `--no-daemon` can run
-after a completed request without stopping the daemon. Unknown rejections,
-transport loss after sending a request, and output failures never replay work.
+after a completed request without stopping the daemon.
+
+Native workspace dispatch copies the request envelope and normalizes only the
+engine-owned `_RUSH_LIB_PATH` to this daemon's real engine. Foreign client SDK
+paths therefore neither select the wrong SDK nor cause a false restart. All other
+environment inputs remain unchanged and participate in normal lifecycle checks.
+
+Protocol 0.10 permits a bounded retry only when a pre-execution command result
+explicitly carries `retryAfterRestart: true`. `executeWithDaemonRestartAsync`
+waits for old ownership release and a validated successor, then resubmits an eligible
+request **at most once**. Command input/output or cancellation prevents retry,
+even with the typed flag. Unknown rejections and connection loss never authorize replay.
+A started `install` or `update` is never repeated, including after a nonzero exit;
+only an unstarted request can receive
+the typed retry authorization. Accepted queued requests drain their typed restart
+results before the old connection closes.
 
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
 not read input until the command attaches an input destination, and sends bounded
@@ -99,18 +121,26 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | --- | --- | --- | --- |
 | `enabled` | `RUSH_DAEMON` | false | Client routing |
 | `autoStart` | `RUSH_DAEMON_AUTO_START` | true | Only after opt-in |
-| `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Forwarded at startup for the WS3 host to enforce |
+| `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Host idle shutdown after request/output/cleanup drain |
 | `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Sent through existing admission contract |
-| `watch` | `RUSH_DAEMON_WATCH` | false | Validated, inactive integration seam |
-| `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Validated, inactive integration seam |
-| `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Validated, inactive integration seam |
-| `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Validated, inactive integration seam |
-| `autoWarmByTelemetry` | `RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY` | false | Validated, inactive integration seam |
+| `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
+| `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |
+| `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling |
+| `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort retained-project limit; never trims requested execution |
+| `autoWarmByTelemetry` | `RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY` | false | Measured retention ranking with conservative LRU fallback; no speculative scripts |
 
 Timeouts must be positive and at most 2147483.647 seconds; queue timeout additionally
 accepts zero and is rounded down to milliseconds. Memory budget must be positive
 and no larger than JavaScript's maximum safe integer. Project count must be a
-positive safe integer. No warm-set setting changes build correctness.
+positive safe integer. The session automatically owns these warm policies for its real
+graph and watchers. Executing/prepared work and protected resources are not evicted.
+Missing child-memory measurements stay explicitly unknown; unavoidable active/base
+memory pressure is reported rather than hidden. No warm-set setting changes build correctness.
+Project observation previously ran regardless of `watch`. Its existing default `false`
+now disables host project observation; set it to `true` to retain observation between
+requests. Every explicit native request still refreshes inputs and effective configuration.
+Changing this flag neither discards warm results/runners nor starts scripts; safe idle
+maintenance applies watcher changes and reports deferred or failed cleanup.
 
 ## Management
 
@@ -128,15 +158,31 @@ compatible installations, never installing while the old workspace is being clea
 `rush-client daemon status` only connects and checks hello/pong. It never starts
 a process, reclaims files, or treats a PID file as evidence of readiness. Both
 commands print one JSON object with `state: "ready"`, `socketPath`, and the actual
-pong fields (`uptimeMs`, available versions, and optional `pid` and
-`residentMemoryBytes`). Exit code 0 means protocol
+pong fields (`uptimeMs`, available versions, optional `pid` and
+`residentMemoryBytes`, and an optional `workspace` snapshot). Exit code 0 means protocol
 readiness, not build support. An unreachable/incompatible endpoint, invalid
 arguments, or startup failure returns exit code 1 with a diagnostic.
 
-Warm projects and reload tier are not reported because the current pong does not
-attest them. Status can inspect a protocol-compatible
-daemon with a different implementation version; start requires the bundled
-version to match.
+The optional workspace snapshot reports the provider generation/token, graph existence,
+and available warm accounting without initializing a graph. Missing fields are unknown,
+not proof of zero memory or successful reload. Status can inspect a protocol-compatible
+daemon with a different implementation version; start requires the bundled version to match.
+
+| `workspace` field | Meaning |
+| --- | --- |
+| `generation`, `generationToken` | Current provider generation and installed session identity |
+| `lastReloadTier` | Lifecycle-owned `0` initial/reuse, `1` successful in-process reload, or `2` requested restart; older peers may omit it |
+| `graphInitialized` | A graph exists; this does not attest build success |
+| `warmSet.configuration` | Effective `watch` and four warm-resource settings; older peers may omit `watch` |
+| `warmSet.maintenanceState`, `warmSet.maintenanceFailure` | Running, quiescing, stopped or failed maintenance; stopping it does not itself free resources |
+| `warmSet.retainedProjectNames`, `warmSet.protectedProjectNames`, `warmSet.watchedProjectNames` | Actual retained/protected projects and resident project observation |
+| `warmSet.daemonResidentMemoryBytes`, `warmSet.measuredRunnerMemoryBytes`, `warmSet.unmeasuredRunnerCount` | Daemon RSS, last-completion child RSS samples, and explicitly unmeasured resident runners; descendants are not included |
+| `warmSet.overMemoryBudget`, `warmSet.overProjectLimit`, `warmSet.cleanupFailures`, `warmSet.deferredReason` | Outstanding footprint pressure, cleanup failures and maintenance deferral |
+
+An absent `warmSet` means no controller is attached, not that the workspace consumes
+no memory. Status reads `lastReloadTier` from the lifecycle (zero for a host without one);
+it does not infer a tier from PID/generation changes or initiate a reload. Tier `2`
+attests a restart request, not completion of successor startup or success of a command.
 
 `rush-client daemon stop` requires protocol >= 0.6 and waits for `shutdownAck`
 followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this
@@ -206,8 +252,10 @@ invalid arguments, and unknown selectors fail, never invoke a shell.
 `show` and `status` both emit a complete point-in-time metadata snapshot, including
 operation IDs, exact project/phase names, native enabled states, observed statuses,
 dependency IDs, manual-mode/scheduled flags, and a path-free invalidation summary.
-An operation without an observed execution status reports `null`. Snapshots contain
-no environment, runner, log, or terminal objects.
+An operation without an observed execution status reports `null`. An idle operation
+whose actual completed result was evicted reports `READY` for request-time revalidation,
+not historical success; inspection does not schedule work. Snapshots contain no
+environment, runner, log, or terminal objects.
 
 Protocol 0.9 snapshots include an opaque `workspaceGeneration` token. Every mutation
 echoes a token, checked under exclusive admission before touching the graph. The

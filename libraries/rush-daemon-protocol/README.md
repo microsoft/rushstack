@@ -56,6 +56,13 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   with cancellation, admission errors or operation results. Clients may retry once
   after attested predecessor ownership release, never on transport loss or an error
   string. The ordinary mutation result has no retry flag and drains before restart.
+- **Read-only workspace status** - optional `pong.payload.workspace` reports the provider generation,
+  installed session token, graph existence and real warm accounting. An absent token means no session is
+  installed; an absent `warmSet` means no controller is attached, not zero memory. Warm status includes
+  effective configuration, maintenance state/failure, retained/protected/watched projects, measured RSS,
+  unmeasured runners, pressure and cleanup diagnostics. Child RSS is a last-completion sample, not a
+  process-tree ceiling. Nested records and numeric fields are validated. Older pong shapes remain valid;
+  this additive field does not change the 0.9 request, generation-fencing or retry contracts.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

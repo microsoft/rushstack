@@ -470,6 +470,7 @@ export interface IDaemonPongMessage {
         readonly protocolVersion?: IDaemonProtocolVersion;
         readonly pid?: number;
         readonly residentMemoryBytes?: number;
+        readonly workspace?: IDaemonWorkspaceStatus;
         readonly uptimeMs: number;
     };
 }
@@ -668,6 +669,54 @@ export interface IDaemonUnsubscribeMessage {
     readonly kind: 'unsubscribe';
     // (undocumented)
     readonly payload: DaemonEmptyPayload;
+}
+
+// @beta
+export interface IDaemonWarmSetConfiguration {
+    // (undocumented)
+    readonly autoWarmByTelemetry: boolean;
+    // (undocumented)
+    readonly warmIdleTimeoutSeconds: number;
+    // (undocumented)
+    readonly warmMemoryBudgetMB: number;
+    // (undocumented)
+    readonly warmSetMaxProjects: number;
+    readonly watch?: boolean;
+}
+
+// @beta
+export interface IDaemonWarmSetStatus {
+    // (undocumented)
+    readonly cleanupFailures: ReadonlyArray<string>;
+    // (undocumented)
+    readonly configuration: IDaemonWarmSetConfiguration;
+    // (undocumented)
+    readonly daemonResidentMemoryBytes: number;
+    // (undocumented)
+    readonly deferredReason: 'workspace-busy' | 'native-busy' | 'graph-busy' | 'disposed' | undefined;
+    // (undocumented)
+    readonly maintenanceFailure?: string;
+    readonly maintenanceState: 'running' | 'quiescing' | 'stopped' | 'failed';
+    readonly measuredRunnerMemoryBytes: number;
+    // (undocumented)
+    readonly overMemoryBudget: boolean;
+    // (undocumented)
+    readonly overProjectLimit: boolean;
+    // (undocumented)
+    readonly protectedProjectNames: ReadonlyArray<string>;
+    readonly retainedProjectNames: ReadonlyArray<string>;
+    readonly unmeasuredRunnerCount: number;
+    readonly watchedProjectNames: ReadonlyArray<string>;
+}
+
+// @beta
+export interface IDaemonWorkspaceStatus {
+    // (undocumented)
+    readonly generation: number;
+    readonly generationToken?: string;
+    readonly graphInitialized: boolean;
+    readonly lastReloadTier?: number;
+    readonly warmSet?: IDaemonWarmSetStatus;
 }
 
 // @beta

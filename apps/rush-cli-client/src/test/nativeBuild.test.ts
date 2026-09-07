@@ -206,6 +206,51 @@ describe('native build through the standalone client', () => {
     }
   }, 30000);
 
+  it('reports live warm policy and reload generations through ordinary CLI status without running work', async () => {
+    delete environment.RUSH_DAEMON_WATCH;
+    delete environment.RUSH_DAEMON_WARM_SET_MAX_PROJECTS;
+    const started: IResult = await invokeAsync(['daemon', 'start']);
+    expect(started.code).toBe(0);
+    const cold = JSON.parse(started.stdout);
+    expect(cold.workspace).toMatchObject({
+      graphInitialized: false, generationToken: expect.any(String), lastReloadTier: 0
+    });
+    expect(cold.workspace.warmSet).toBeUndefined();
+    expect(fs.existsSync(path.join(folder, 'runs.txt'))).toBe(false);
+    expect((await invokeAsync(['build', '--to', 'b'])).code).toBe(0);
+    const warmStatus: IResult = await invokeAsync(['daemon', 'status']);
+    expect(warmStatus.code).toBe(0);
+    const warm = JSON.parse(warmStatus.stdout);
+    expect(warm.workspace).toMatchObject({
+      graphInitialized: true,
+      warmSet: {
+        configuration: { watch: false },
+        maintenanceState: 'running',
+        watchedProjectNames: [],
+        retainedProjectNames: expect.any(Array),
+        daemonResidentMemoryBytes: expect.any(Number)
+      }
+    });
+    const rushJsonPath: string = path.join(folder, 'rush.json');
+    const config = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+    fs.writeFileSync(rushJsonPath, JSON.stringify({
+      ...config, daemon: { ...config.daemon, watch: true, warmSetMaxProjects: 1 }
+    }));
+    expect((await invokeAsync(['build', '--to', 'b'])).code).toBe(0);
+    const runsBefore: string = fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8');
+    const reloadedStatus: IResult = await invokeAsync(['daemon', 'status']);
+    expect(reloadedStatus.code).toBe(0);
+    const reloaded = JSON.parse(reloadedStatus.stdout);
+    expect(reloaded.pid).toBe(warm.pid);
+    expect(reloaded.workspace.generation).toBeGreaterThan(warm.workspace.generation);
+    expect(reloaded.workspace.generationToken).not.toBe(warm.workspace.generationToken);
+    expect(reloaded.workspace).toMatchObject({
+      lastReloadTier: 1, graphInitialized: true,
+      warmSet: { configuration: { watch: true, warmSetMaxProjects: 1 } }
+    });
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(runsBefore);
+  }, 30000);
+
   it('runs the genuine preview-selected engine without rewriting the configured Rush version', async () => {
     const rushJsonPath: string = path.join(folder, 'rush.json');
     const configured = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));

@@ -272,7 +272,7 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_IDLE_TIMEOUT_SECONDS',
   /** Allows the opted-in client to start an absent daemon. */
   RUSH_DAEMON_AUTO_START: 'RUSH_DAEMON_AUTO_START',
-  /** Reserved for daemon workspace watcher integration. */
+  /** Controls persistent daemon observation of warm project files, without scheduling builds. */
   RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',

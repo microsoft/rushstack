@@ -21,6 +21,7 @@ import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { getWorkspaceGenerationToken } from '../WorkspaceGeneration';
+import type { GetWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import {
   createWireEnvelope,
   DaemonRequestWireClient,
@@ -30,6 +31,7 @@ import {
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
+  public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
   public readonly folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'));
   public readonly environment: Record<string, string> = {
     ...Object.fromEntries(
@@ -51,6 +53,9 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
         JSON.stringify({
           rushVersion: Rush.version,
           npmVersion: '10.0.0',
+          // Graph-control assertions must not depend on the surrounding Jest worker's RSS.
+          // Warm-policy fixtures explicitly override this budget to exercise real pressure.
+          daemon: { warmMemoryBudgetMB: 100_000 },
           projectFolderMinDepth: 1,
           projects: ['a', 'b', 'c'].map((name) => ({ packageName: name, projectFolder: name }))
         })
@@ -122,10 +127,15 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       repoRoot: this.folder,
       rushVersion: Rush.version,
       daemonVersion: 'graph-test',
-      requestResolver: this._lifecycle ? resolver : {
-        resolveRequestAsync: (options) => resolver.resolveRequestAsync(options),
-        [Symbol.asyncDispose]: async () => { await resolver[Symbol.asyncDispose]?.(); }
-      },
+      getSuccessorLaunchAsync: this.getSuccessorLaunchAsync,
+      requestResolver: this._lifecycle
+        ? resolver
+        : {
+            resolveRequestAsync: (options) => resolver.resolveRequestAsync(options),
+            [Symbol.asyncDispose]: async () => {
+              await resolver[Symbol.asyncDispose]?.();
+            }
+          },
       createWorkspaceSessionAsync: async (options) => {
         this.session = await WorkspaceSession.createAsync(options);
         return this.session;
@@ -161,7 +171,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     return createWireEnvelope(`graph-${++this._nextId}`, argv[0], this.folder, {
       argv,
       commandOrigin: 'built-in',
-      expectedWorkspaceGeneration: argv[0] === 'daemon' ? getWorkspaceGenerationToken(this.session) : undefined,
+      expectedWorkspaceGeneration:
+        argv[0] === 'daemon' ? getWorkspaceGenerationToken(this.session) : undefined,
       environment:
         argv[0] === 'daemon' ? { ...this.environment, RUSH_DAEMON_EXPERIMENTAL: '1' } : this.environment,
       terminal: { isTTY: false, supportsColor: false },
