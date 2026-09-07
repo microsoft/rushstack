@@ -41,8 +41,217 @@ or integration-classified plugin graph inputs fail closed with `WorkspaceEngineR
 the input baseline advances or the invalidation is acknowledged. The startup watcher-registration boundary has
 no paths to classify and therefore remains a full invalidation. The routing layer must replace the complete
 workspace session rather than run a stale graph.
-The default daemon executable does not construct or route this graph while the command-independent plugin shape and per-iteration runner
-lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.
+The default daemon executable composes `ProductionDaemonRequestResolver` with native Rushx handling via
+`RushDaemonRequestResolver`. Its first supported workspace build binds a real all-project graph lazily,
+without replacing the session watcher or discarding retained invalidations. Rushx scripts do not construct
+a workspace graph. Embedded hosts can install the composite explicitly; omitting a resolver from
+`RushDaemonHost` retains the unsupported build behavior.
+
+### Bounded native engine integration
+
+`PhasedCommandEngine` in `rush-lib` parses native `build` and `rebuild` commands without invoking CLI execution,
+initializing `.env`, changing the process working directory, or mutating `process.env`. Graph preparation reuses
+`PhasedScriptAction`'s standard operation, sharding, shell-runner, validation, cache/legacy-skip, and situational
+plugin pipeline. It does not launch a Rush CLI subprocess. The graph includes every project, and native
+`SelectionParameterSet` results are applied at request time. In particular, `--only` and the impacted-project
+selectors do not accidentally enable omitted dependencies; `--include-phase-deps` explicitly expands them.
+
+The host uses stable fingerprints to classify native requests:
+
+| Tier | Inputs | Action |
+| --- | --- | --- |
+| 0 | Unchanged definitions/parameters, or ordinary project source changes | Retain session, graph, plugins, and completed records; reconcile operation inputs |
+| 1 | Rush/project configuration, effective rig/inherited settings, command shape, or unhealthy invalidation tracking | Drain the old generation, dispose it, and construct a new session and real graph in the same process |
+| 2 | Environment, installed dependency state, implementation content, or selected Rush version | Finish a pre-execution failure result, close the old host completely, and launch an available successor process |
+
+Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
+file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
+Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
+still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
+
+A generation lease spans resolution through final output. Reload also takes exclusive workspace admission and
+the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before
+publishing the replacement. The initiating request atomically downgrades its admission so another reload cannot
+dispose the newly selected graph before it runs. Watch requests are cancelled and drained before their generation
+is replaced. A race detected before scheduling may be re-resolved; once scheduling starts, or a terminal result has
+been attempted, the request is never replayed.
+
+This integration supports Git-backed workspaces with direct, inherited, or rig-based project configuration and ordinary native phases.
+Engine configuration snapshots use private native configuration-file loaders and non-caching rig resolution, including
+the normal native inheritance merge and schema validation. Git selectors likewise read request-owned ignore-glob
+configuration. The engine does not clear, read, or populate the process-wide project/rig configuration caches.
+Before each iteration, it reloads effective project configuration under the native execution lease and compares
+the graph/cache settings with the construction snapshot. Changed inherited or rig-provided settings trigger a
+generation reload before execution, even outside watcher roots or in ignored `node_modules` files.
+The retained graph and its cache policy are never patched in place.
+
+External Rush plugins, `.env` initialization, watch/install/variant
+and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global
+commands are rejected by the phased path, not silently bypassed. Native Rushx is handled separately below.
+For phased commands, a changed request environment requires a new process, including Rush/cache
+policy variables. These restrictions remain until the corresponding initialization,
+environment, and resource-lifetime contracts are request-scoped.
+
+The native Rush lock is held only during graph preparation and each coalesced iteration, not while the warm daemon
+is idle. `acquireExecutionLeaseAsync` is an optional engine/session hook invoked once by the batch coordinator,
+before input reconciliation. Compatible clients share that lease rather than contending independently. It remains
+held through operation execution, runner cleanup, and every participant's output/input cleanup; the batch barrier
+releases it before any final command result is published. Thus ordinary native actions and permanent `--no-daemon`
+fallback can run immediately after a completed warm request without stopping the daemon.
+
+A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
+automatic retry. A later explicit request can retry after contention ends, including contention during the first
+engine initialization. A dirty native lock left by another command invalidates retained successes so the native
+incremental/cache pipeline can reconcile possibly changed ignored outputs. Installation validity is also checked on
+every snapshot refresh. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
+runner/provider cleanup. The existing operation-completion cleanup is unchanged.
+
+### Process restart and isolated install/update
+
+`serveRushDaemonAsync` supplies a successor selector for the currently installed daemon/Rush version.
+Embedded `RushDaemonHost` users can provide `getSuccessorLaunchAsync`, returning the existing core
+`IDaemonStartCommand` plus the expected daemon implementation version. Selection is validated before shutdown;
+an unavailable selected Rush version fails explicitly and is never run by the current engine under a false version.
+The default entrypoint supports the `rush.json` version, not a separate preview-version namespace.
+
+Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
+resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
+`restartCompleted` reports completion or failure. There is no automatic request replay. A hard-change retry hint
+explicitly says no operation was scheduled or executed; the caller must reconnect and submit a new request.
+
+Positively identified built-in `install` and `update` requests execute in `NativeMutationWorker`, a single-shot
+native Rush parser process owned by `GlobalCommandExecutionContext`. This is not the phased warm engine.
+Native arguments, policies, hooks, stdin/EOF, output and numeric exit status are preserved. Even a failed mutation
+may have changed files: its exact result is drained before old generation cleanup and successor startup.
+Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
+launched, the host stops without silently starting an incorrect successor. No mutation is replayed.
+
+The CLI admission/allowlist is separate from this server API; this package does not enable forwarding additional
+administrative commands in a client. Client-originated graph-reference fencing also needs a protocol/client
+generation token. Server-resolved requests are fenced here; operation names alone cannot identify which snapshot
+a client previously observed. Graph controls do not migrate a prepared iteration across a generation replacement.
+
+Resolver composition uses the optional `IDaemonRequestResolver.workspaceLifecycle` capability, not an
+`instanceof` check. A composite delegates native inspection but must wrap every generation replacement too:
+
+```ts
+this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
+  phasedResolver,
+  (replacement) => new RushDaemonRequestResolver(replacement)
+);
+```
+
+The helper returns `undefined` for a delegate without lifecycle support. Explicit `invocationKind: "rushx"`
+requests retain a generation lease but go directly to the composite resolver, without native build/mutation/graph
+interception or phased environment matching. They use exclusive global admission. The host disposes each old
+resolver before replacing its session, and disposes the current resolver at shutdown; the composite must forward
+its normal disposer to its owned delegates.
+
+**Client integration boundary:** the resolver requires `commandOrigin: "built-in"` for native
+`build`/`rebuild`. The standalone client identifies these workspace commands while leaving
+`rushx build` and other script invocations custom. The resolver also validates the native parsed
+action; identical script names alone never authorize a workspace build.
+
+### Warm-set generation attachment (WS3)
+
+`WorkspaceWarmSet.attach(options)` implements the four warm policies against a **real, already-created**
+operation graph and an **already-started** `WorkspaceSessionFileWatcher`. The generation owner must attach it
+before the first request iteration, capture that generation's native execution lease callback, and use the
+same workspace scheduler that admits phased/global requests and graph mutations:
+
+```ts
+const acquireExecutionLeaseAsync = engine.acquireExecutionLeaseAsync;
+if (!acquireExecutionLeaseAsync) throw new Error('The native engine must provide execution ownership.');
+const warmSet = WorkspaceWarmSet.attach({
+  operationGraph: engine.operationGraph,
+  configuration: resolvedDaemonConfiguration,
+  scheduler: getWorkspaceRequestScheduler(session),
+  acquireExecutionLeaseAsync,
+  watcher: generationWatcher,
+  onDiagnostic: reportWarmDiagnostic
+});
+```
+
+`getWorkspaceRequestScheduler` is the existing package-internal helper in `WorkspaceRequestAdmission.ts`.
+The configuration is the existing resolved `rush.json`/environment configuration; `updateConfiguration()` also
+validates and applies policy changes at runtime. Dispose the controller **before** its generation's engine and
+watcher, outside outstanding request leases. Controller disposal stops its timer and awaits maintenance;
+it does not dispose resources owned by the generation. This attachment is intentionally not installed in the
+default bootstrap/resolver here: automatic reload/generation ownership supplies that final wiring separately.
+The real-native-graph tests attach this exact controller at component creation, not a substitute implementation.
+
+| Policy | Runtime behavior |
+| --- | --- |
+| `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
+| `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
+| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
+| `autoWarmByTelemetry` | Promotes already-requested high-value work instead of pure LRU. Never schedules or executes speculative scripts. |
+
+One deterministic best-first comparator is shared by retention and reverse-order eviction. With complete
+measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then ordinal project
+name. Measured entries precede the missing-data bucket; that bucket uses LRU and the same name tie-break.
+Without telemetry mode the entire order is LRU. Savings compare actual cold and reused execution stopwatches
+(or native non-cached duration versus cache-restoration duration); no startup cost or RSS is invented.
+`operation-graph`'s existing `WatchLoop` now reports its own measured RSS in an optional IPC completion field.
+The native IPC runner accepts that sample and exposes it only while resident. Old children and unsupported
+runners remain explicitly unmeasured. These are last-completion process samples, not live measurements of
+descendants. Shell-runner records/watchers live within daemon RSS and have no fabricated per-project allocation.
+
+Maintenance acquires **exclusive, no-wait workspace admission**, then native repository ownership. It defers on
+contention or an executing/prepared graph without cancelling, discarding or mutating that work. Optional
+`getProtectedOperations()` protects additional generation-owned resources; update that protection under the
+same scheduler. Maintenance awaits `closeRunnersAsync`, confirms that runners no longer report active resources,
+awaits project watcher closure, and only then calls guarded native `deleteResults()`. Its `beforeDeleteResults`
+hook releases native cache/skip plugin scratch state; deletion also detaches old iteration contexts/record edges
+while preserving survivors' hashes, timing, warnings and status. Graph
+definitions, enabled selections and disk caches are unchanged. The native per-iteration `shouldRunnerPersist`
+policy is deliberately left intact: optional footprint cleanup must not turn successful requested work into a
+failed build merely because an optimization could not release resources.
+
+The watcher keeps root and Rush/subspace configuration observation permanent. Unrequested project observation
+is removed at maintenance; requested projects are observed again during planning. A new watcher can start with
+`projectNames: []` instead of recursively observing every project. **Every native request must still refresh its
+input snapshot and revalidate effective direct/rig/inherited configuration**, including files outside watcher
+roots. Cold source changes therefore rebuild correctly; changed graph configuration fails closed until the
+generation owner supplies a freshly constructed engine. This attachment does not implement automatic reload.
+
+`getStatus()` reports actual retained/protected projects, daemon RSS, measured child RSS, unmeasured runners,
+remaining pressure, maintenance deferral and failed cleanup. Diagnostics go to `onDiagnostic` (or a process
+warning). Failed cleanup keeps records and truthful resource accounting, and cannot falsify a command result.
+Releasing records does not force V8/allocator RSS to shrink. If remaining daemon memory, active/protected work,
+or cleanup failures cannot fit the budget, pressure remains reported instead of claiming success.
+
+### Native Rushx integration
+
+`RushXDaemonRequestResolver` handles only `invocationKind: "rushx"` with custom origin.
+`RushDaemonRequestResolver(existingRushResolver)` composes it with an injected workspace
+resolver; omitted or `"rush"` kinds go to that existing resolver without reinterpreting
+custom workspace commands. The default executable installs this composite for both native
+workspace builds and package-script execution.
+
+The resolver validates canonical request and governing package directories inside its
+workspace before execution. Subfolder invocations run from the nearest package folder,
+with native PATH, INIT_CWD, RUSH_INVOKED_FOLDER, npm environment filtering and shell escaping.
+Per-request dotenv copies load repository then user values without changing daemon cwd,
+environment, argv, console streams or cached user configuration. Ordinary script/environment
+changes are read for each invocation; there is no cached script process or fabricated warm engine.
+
+`RushXCommand` shares the native implementation with the unchanged in-process entrypoint.
+Its asynchronous lifecycle spawn seam uses `spawnChild()` for the actual script shell.
+The context owns descendants, backpressures raw stdout/stderr, forwards stdin credits/EOF,
+and awaits cleanup before the final result. Early child stdin closure preserves the script's
+exit status. Native console ANSI bytes are preserved separately from color-aware diagnostic
+output; pnpm synchronization keeps native quiet/debug behavior. Cancellation retains the
+existing typed global-request abort result rather than inventing a second exit policy.
+
+Active pre/post Rushx hooks still depend on process-global argv and synchronous inherited
+I/O and are rejected before execution/input. `--ignore-hooks` and recursive calls reuse
+native skipping behavior. Encrypted dotenv vaults, unsupported environment initialization,
+and changed Rush/experiments configuration also reject before execution; queued configuration
+changes fail closed on admission. No hook, dependency synchronization, warning or terminal
+requirement is silently omitted. Controlling-terminal requests use the existing in-process
+policy; no PTY is allocated. Protocol 0.8 prevents older peers from interpreting
+`rushx build` as a workspace build.
 
 `PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
 integration parses the command and supplies its built-in/custom origin, an explicit phase/plugin shape, and operation enabled-state selection;
@@ -65,10 +274,9 @@ to its own closure and derives its final result only from that subset. Requests 
 a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
 clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
 
-This layer deliberately does not reconstruct `PhasedScriptAction` command/plugin initialization. The typed phased
-request contract begins after an integration has produced a validated selection for the exact warm engine shape;
-full command parsing remains blocked by
-[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895).
+The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
+validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure
+selection mode by default. Native empty project selections are successful no-op requests.
 
 `GlobalCommandRequestRouter` is the corresponding opt-in boundary for caller-resolved global command logic. It
 canonicalizes and confines the request working directory to the workspace, snapshots its environment, creates a
@@ -94,11 +302,45 @@ scheduler and phased batch coordinator, so compatible selections can execute in 
 
 The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
 typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle
-when cancellation, disconnect, or host shutdown aborts it. Without that resolver, the standalone executable continues
-to start, answer ping, and reject request execution with the typed `unsupported` outcome; it never constructs an empty
-graph or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
-reported as `workspaceRecreationRequired` before scheduling. Replacing the warm session is intentionally deferred to
-WS3.
+when cancellation, disconnect, or host shutdown aborts it. An embedded host without that resolver continues to start,
+answer ping, and reject ordinary command execution with the typed `unsupported` outcome; it never constructs an empty graph
+or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
+reported as `workspaceRecreationRequired` before scheduling for unmanaged integrations. The production lifecycle
+instead replaces the generation and re-resolves a phased request only while execution is proven not to have begun.
+
+### Experimental graph requests
+
+The dispatcher reserves built-in `daemon graph` argv before invoking the production
+command resolver. Requests require `environment.RUSH_DAEMON_EXPERIMENTAL === "1"`
+and noninteractive input; unknown verbs, malformed selector pairs, and non-built-in
+origins are rejected. There is no graph construction or command execution fallback.
+`show`/`status` can report an uninitialized session; other verbs require its real graph.
+
+The route emits JSON-safe `rushd.graph-snapshot` extension events followed by the
+existing request result. IDs, project/phase, enabled/status/dependencies, manual-mode
+and scheduled flags, and a path-free invalidation summary are the entire snapshot.
+It never sends environment variables, native runner objects, logs, or terminal output.
+Scope selectors are exact operation IDs or project names and are fully validated
+before applying native safe enablement or invalidation. Scope-out expands consumers
+before native safe-disable prunes unneeded dependencies.
+
+Mutations acquire exclusive admission from the same workspace request scheduler.
+Active iterations cannot be mutated; prepared iterations reject scope/invalidation
+changes. Pause/resume set native manual mode; explicit builds may still run while
+paused. Releasing prepared automatic work acquires the same native execution lease
+as normal batches, discards its unstarted records, reconciles current inputs, and
+reprepares the existing selection. It retains both leases until native idle, even
+after request cancellation. A cold or unscheduled graph is never initialized or
+given new work by resume.
+
+Watch is a lease-free observation subscription: one hook set per graph fans out
+to live subscribers, each retaining a single dirty notification while its output
+is backpressured. Status, invalidation and idle hooks wake the same bounded loop.
+Workspace invalidation notifications also cover acknowledgements and watcher errors;
+failed notification callbacks are warned without interrupting change tracking.
+Cancellation, graph shutdown and disconnect unsubscribe promptly. A live watch
+counts as an active request for daemon idle shutdown. No automatic build loop or
+new wire version/capability handshake is introduced.
 
 The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global action helpers still consult or mutate
 process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the
@@ -110,6 +352,13 @@ sink while separate requests remain isolated. Global command integrations can bi
 child process. Both global and phased routes stop accepting input on abort/disconnect and await input drain plus an
 acknowledged cooked-mode restoration before publishing the exact-once command result. The daemon never reads or
 mutates its own stdin or raw-mode state.
+
+Protocol 0.7 clients may negotiate stdin admission and EOF. Attaching an input sink grants one
+`stdinReady` write credit; another follows each completed write. `stdinEnd` is queued behind preceding
+data, and later data or duplicate EOF is rejected. Cancellation remains serviceable while a sink is
+backpressured or not yet attached. Input sinks that accept EOF implement `endInputAsync()`; missing
+EOF support fails the request explicitly. `spawnChild(..., { forwardInput: true })` forwards both
+bytes and EOF to the owned child process. Older clients receive no new controls.
 
 Terminal width remains the immutable request-start value established by WS2.5. The thin client owns resize and
 rendering, so this layer does not forward `SIGWINCH`. Commands declaring a real controlling-terminal requirement

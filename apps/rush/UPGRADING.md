@@ -45,6 +45,18 @@ approaches:
 Dynamic registry and proxy URLs must also move out of the project `.npmrc` and into trusted user,
 global, CLI, or environment configuration.
 
+### Experimental Rush reporter opt-in
+
+Rush 5 keeps the existing terminal output by default. Maintainers can evaluate the new reporter path for one
+invocation with `--reporter=<name>` or for a repository with `"useRushReporter": true` in
+`common/config/rush/experiments.json`.
+
+Use `RUSH_REPORTER=legacy` for an immediate reporter-only rollback. Environment-based automatic AI selection
+and the planned Rush 6 default change are not enabled yet.
+
+See the [experimental Rush reporter guide](../../docs/rush/reporter.md) for the control precedence, stdout and
+stderr contracts, full-log and privacy behavior, cross-version prerequisite, and reproducible demo.
+
 ### Rush 5.135.0
 
 This release of Rush deprecates the `rush-project.json`'s `operationSettings.sharding.shardOperationSettings`

@@ -53,6 +53,7 @@ interface IResolvedSelection {
   readonly activeOperations: ReadonlyArray<Operation>;
   readonly enabledOperations: ReadonlyArray<Operation>;
   readonly ignoreDependencyOperations: ReadonlyArray<Operation>;
+  readonly exact: boolean;
 }
 
 interface IGraphRoutingState {
@@ -61,6 +62,7 @@ interface IGraphRoutingState {
 }
 
 interface IPreparedPhasedRequest {
+  readonly onExecutionStarting: (() => void) | undefined;
   readonly client: IPhasedRequestClient;
   readonly exclusivityClass: RequestExclusivityClass;
   readonly interactiveSession: IInteractiveRequestSession | undefined;
@@ -109,7 +111,9 @@ export class PhasedRequestRouter {
   /** Validates and executes one resolved phased request against the warm graph. */
   public async executeAsync(
     request: IDaemonPhasedRequest,
-    client: IPhasedRequestClient
+    client: IPhasedRequestClient,
+    exactSelection: boolean = false,
+    onExecutionStarting?: () => void
   ): Promise<IDaemonPhasedRequestResult> {
     validateRequestIdentity(request);
     const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
@@ -155,7 +159,11 @@ export class PhasedRequestRouter {
         try {
           validateEngineShape(request.engineShape, this.#workspaceSession.engineShape);
           const operationById: ReadonlyMap<string, Operation> = indexOperations(graph.operations);
-          const selection: IResolvedSelection = resolveSelection(request.operationSelection, operationById);
+          const selection: IResolvedSelection = resolveSelection(
+            request.operationSelection,
+            operationById,
+            exactSelection
+          );
           let warningsAllowedByEnvironment: boolean;
           try {
             warningsAllowedByEnvironment = parseWarningsAllowedByEnvironment(request.environment);
@@ -184,7 +192,8 @@ export class PhasedRequestRouter {
               interactiveSession,
               request,
               selection,
-              warningsAllowedByEnvironment
+              warningsAllowedByEnvironment,
+              onExecutionStarting
             },
             admissionController
           );
@@ -356,10 +365,19 @@ class PhasedRequestBatchCoordinator {
       });
     this.#nextGraphLeasePromise = undefined;
     const graphLease: IRequestLease = await graphLeasePromise;
+    let executionLease: AsyncDisposable | undefined;
+    let releasePromise: Promise<void> | undefined;
+    const releaseExecutionLeaseAsync: () => Promise<void> = () => {
+      releasePromise ??= (async () => {
+        await executionLease?.[Symbol.asyncDispose]();
+      })();
+      return releasePromise;
+    };
     try {
       if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
         throw new Error('The warm workspace operation graph is not idle.');
       }
+      executionLease = await this.#workspaceSession.acquireExecutionLeaseAsync?.();
       await this.#workspaceSession.reconcileInvalidationsAsync();
 
       if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
@@ -370,8 +388,13 @@ class PhasedRequestBatchCoordinator {
         this.#isEntryLive(entry)
       );
       if (participants.length === 0) {
+        const beforeResultAsync: (() => Promise<void>) | undefined = executionLease
+          ? createBatchReleaseBarrier(batch, releaseExecutionLeaseAsync)
+          : undefined;
         await Promise.all(
-          batch.map((entry: IBatchEntry) => this.#finishEntryAsync(entry, false, undefined))
+          batch.map((entry: IBatchEntry) =>
+            this.#finishEntryAsync(entry, false, undefined, [], beforeResultAsync)
+          )
         );
         return;
       }
@@ -401,6 +424,7 @@ class PhasedRequestBatchCoordinator {
       let executionError: unknown;
       const iterationCleanupErrors: unknown[] = [];
       try {
+        for (const entry of participants) entry.onExecutionStarting?.();
         scheduled = await this.#graph.scheduleIterationAsync({
           inputsSnapshot: this.#workspaceSession.inputsSnapshot
         });
@@ -447,13 +471,20 @@ class PhasedRequestBatchCoordinator {
 
       await this.#abortTail;
       iterationCleanupErrors.push(...this.#abortErrors.splice(0));
+      const beforeResultAsync: (() => Promise<void>) | undefined = executionLease
+        ? createBatchReleaseBarrier(batch, releaseExecutionLeaseAsync)
+        : undefined;
       await Promise.all(
         batch.map((entry: IBatchEntry) =>
-          this.#finishEntryAsync(entry, scheduled, executionError, iterationCleanupErrors)
+          this.#finishEntryAsync(entry, scheduled, executionError, iterationCleanupErrors, beforeResultAsync)
         )
       );
     } finally {
-      graphLease.release();
+      try {
+        await releaseExecutionLeaseAsync();
+      } finally {
+        graphLease.release();
+      }
     }
   }
 
@@ -508,7 +539,8 @@ class PhasedRequestBatchCoordinator {
     entry: IBatchEntry,
     batchScheduled: boolean,
     executionError: unknown,
-    batchCleanupErrors: ReadonlyArray<unknown> = []
+    batchCleanupErrors: ReadonlyArray<unknown> = [],
+    beforeResultAsync?: () => Promise<void>
   ): Promise<void> {
     if (entry.completed) {
       return;
@@ -522,6 +554,11 @@ class PhasedRequestBatchCoordinator {
       }
     }
     await collectInteractiveCleanupErrorAsync(entry.interactiveSession, cleanupErrors);
+    try {
+      await beforeResultAsync?.();
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
     const aborted: boolean = entry.abortRequested || entry.client.abortSignal.aborted;
     const operationOutcomes: ReadonlyArray<IPhasedOperationOutcome> = entry.requestSink
       ? collectOperationOutcomes(
@@ -577,6 +614,23 @@ class PhasedRequestBatchCoordinator {
   }
 }
 
+function createBatchReleaseBarrier(
+  batch: ReadonlyArray<IBatchEntry>,
+  releaseAsync: () => Promise<void>
+): () => Promise<void> {
+  let remaining: number = batch.filter((entry) => !entry.completed).length;
+  if (remaining === 0) return releaseAsync;
+  let arrive: () => void = () => undefined;
+  const allDrained: Promise<void> = new Promise<void>((resolve) => {
+    arrive = resolve;
+  });
+  const released: Promise<void> = allDrained.then(releaseAsync);
+  return async () => {
+    if (--remaining === 0) arrive();
+    await released;
+  };
+}
+
 function getDualEmitGraph(workspaceSession: IWorkspaceSession): IDualEmitOperationGraph {
   const graph: IOperationGraph | undefined = workspaceSession.operationGraph;
   if (!graph) {
@@ -599,7 +653,8 @@ function setGraphEventSink(
   graph.eventSink = eventSink;
 }
 
-function setPauseNextIteration(graph: IOperationGraph, pauseNextIteration: boolean): void {
+/** Changes native manual mode while the caller owns graph admission. @internal */
+export function setPauseNextIteration(graph: IOperationGraph, pauseNextIteration: boolean): void {
   graph.pauseNextIteration = pauseNextIteration;
 }
 
@@ -705,9 +760,10 @@ function indexOperations(operations: ReadonlySet<Operation>): ReadonlyMap<string
 
 function resolveSelection(
   requestedSelection: ReadonlyArray<IDaemonPhasedOperationSelection>,
-  operationById: ReadonlyMap<string, Operation>
+  operationById: ReadonlyMap<string, Operation>,
+  exact: boolean
 ): IResolvedSelection {
-  if (requestedSelection.length === 0) {
+  if (!exact && requestedSelection.length === 0) {
     throw new Error('A phased request must select at least one operation.');
   }
   const selectedIds: Set<string> = new Set();
@@ -726,9 +782,12 @@ function resolveSelection(
     addSelectedOperation(selection.enabledState, operation, enabledOperations, ignoreDependencyOperations);
   }
   return {
-    activeOperations: collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
+    activeOperations: exact
+      ? [...enabledOperations, ...ignoreDependencyOperations]
+      : collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
     enabledOperations,
-    ignoreDependencyOperations
+    ignoreDependencyOperations,
+    exact
   };
 }
 
@@ -767,15 +826,13 @@ function applySelections(
   graph: IOperationGraph,
   selections: ReadonlyArray<IResolvedSelection>
 ): void {
-  const enabledOperations: ReadonlyArray<Operation> = selections.flatMap(
-    (selection: IResolvedSelection) => selection.enabledOperations
-  );
-  const ignoreDependencyOperations: ReadonlyArray<Operation> = selections.flatMap(
-    (selection: IResolvedSelection) => selection.ignoreDependencyOperations
-  );
   const enabledClosureBySelection: ReadonlyArray<ReadonlySet<Operation>> = selections.map(
     (selection: IResolvedSelection) =>
-      new Set(collectSelectionClosure(selection.enabledOperations, []))
+      new Set(
+        selection.exact
+          ? selection.enabledOperations
+          : collectSelectionClosure(selection.enabledOperations, [])
+      )
   );
   const effectiveIgnoreDependencyOperations: Operation[] = [];
   selections.forEach((selection: IResolvedSelection, selectionIndex: number) => {
@@ -790,8 +847,16 @@ function applySelections(
     }
   });
   graph.setEnabledStates(graph.operations, false, 'unsafe');
-  graph.setEnabledStates(ignoreDependencyOperations, 'ignore-dependency-changes', 'safe');
-  graph.setEnabledStates(enabledOperations, true, 'safe');
+  for (const selection of selections) {
+    graph.setEnabledStates(
+      selection.ignoreDependencyOperations,
+      'ignore-dependency-changes',
+      selection.exact ? 'unsafe' : 'safe'
+    );
+  }
+  for (const selection of selections) {
+    graph.setEnabledStates(selection.enabledOperations, true, selection.exact ? 'unsafe' : 'safe');
+  }
   graph.setEnabledStates(
     effectiveIgnoreDependencyOperations,
     'ignore-dependency-changes',

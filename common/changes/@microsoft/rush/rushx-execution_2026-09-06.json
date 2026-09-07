@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose native Rushx parsing and request-local lifecycle execution with owned asynchronous spawning, isolated dotenv preparation, native diagnostics and injected-dependency synchronization.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow the standalone Rushx frontend to capture and replay native configuration-discovery lines without changing legacy startup output.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -28,6 +28,7 @@
     "@rushstack/rush-daemon": "workspace:*",
     "@rushstack/rush-daemon-transport": "workspace:*",
     "@rushstack/rush-daemon-protocol": "workspace:*",
+    "@rushstack/rush-terminal-renderer": "workspace:*",
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {

@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 
 import {
   DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
@@ -76,6 +77,7 @@ export class DaemonControlSession {
   #isClosing: boolean = false;
   #nextEventSequence: number = 1;
   #peerSupportsInteractiveProtocol: boolean = false;
+  #peerSupportsInputLifecycle: boolean = false;
   #peerSupportsDaemonLifecycle: boolean = false;
   #peerSupportsRequestAdmission: boolean = false;
   #peerSupportsRequestLifecycle: boolean = false;
@@ -166,6 +168,11 @@ export class DaemonControlSession {
       case 'requestCancel':
         this.#cancelRequest(message.payload.requestId);
         return;
+      case 'stdinEnd':
+        void this.#completeInputAsync(
+          this.#interactiveConnection.routeStdinEndAsync(message.payload.requestId)
+        );
+        return;
       default:
         throw new DaemonProtocolError(
           'malformedControlMessage',
@@ -197,6 +204,7 @@ export class DaemonControlSession {
     this.#sessionId = outcome.ack.payload.sessionId;
     const peerMinor: number = message.payload.protocolVersion.minor;
     this.#peerSupportsInteractiveProtocol = peerMinor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
+    this.#peerSupportsInputLifecycle = peerMinor >= DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR;
     this.#peerSupportsDaemonLifecycle = peerMinor >= DAEMON_LIFECYCLE_PROTOCOL_MINOR;
     this.#peerSupportsRequestAdmission = peerMinor >= DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR;
     this.#peerSupportsRequestLifecycle = peerMinor >= DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR;
@@ -215,7 +223,23 @@ export class DaemonControlSession {
       this.#peerSupportsRequestAdmission && payload.supportsRequestAdmission === true;
     this.#peerSupportsRequestLifecycle =
       this.#peerSupportsRequestLifecycle && payload.supportsRequestLifecycle === true;
-    this.#interactiveConnection.setEnabled(this.#peerSupportsInteractiveProtocol);
+    this.#peerSupportsInputLifecycle =
+      this.#peerSupportsInputLifecycle && payload.supportsInputLifecycle === true;
+    this.#interactiveConnection.setEnabled(
+      this.#peerSupportsInteractiveProtocol,
+      this.#peerSupportsInputLifecycle
+    );
+  }
+
+  async #shutdownHostAsync(): Promise<void> {
+    if (!this.#peerSupportsDaemonLifecycle) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'Daemon shutdown requires a lifecycle-capable protocol version.'
+      );
+    }
+    await this.#enqueueControlAsync({ kind: 'shutdownAck', payload: {} });
+    this.#options.onShutdownRequested();
   }
 
   async #shutdownHostAsync(): Promise<void> {

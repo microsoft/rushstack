@@ -14,7 +14,7 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 
 import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
-import type { IGlobalCommandExecutionContext } from '../GlobalCommandExecutionContext';
+import type { IGlobalCommandExecutionContext, IGlobalCommandSpawnOptions } from '../GlobalCommandExecutionContext';
 import type {
   IResolvedGlobalCommandRequest,
   IResolveGlobalCommandRequestOptions
@@ -211,6 +211,49 @@ describe(GlobalCommandRequestRouter.name, () => {
     expect(secondClient.writeOrder[secondClient.writeOrder.length - 1]).toBe('result');
     expect(process.cwd()).toBe(processCwd);
     expect(process.env.RUSHD_CONTEXT_TEST).toBe(processEnvironmentValue);
+  });
+
+  it('uses validated full child environment/cwd overrides without inheriting omitted request variables', async () => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(new TestWorkspaceSession(TEST_REPO_ROOT));
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    const result = await router.executeAsync(
+      router.resolveRequest(createRequestOptions('overrides', FIRST_CWD, { OMITTED: 'secret' }, 80)),
+      async (context) => {
+        const child = context.spawnChild(process.execPath, [
+          '-e', 'console.log(JSON.stringify({cwd:process.cwd(),value:process.env.VALUE,omitted:process.env.OMITTED}))'
+        ], { cwd: SECOND_CWD, environment: { VALUE: 'child' } });
+        await new Promise<void>((resolve, reject) => {
+          child.once('error', reject);
+          child.once('close', () => resolve());
+        });
+        expect(context.cwd).toBe(getCanonicalPath(FIRST_CWD));
+        expect(context.environment.get('OMITTED')).toBe('secret');
+        return { exitCode: 0 };
+      },
+      client
+    );
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(client.chunks.map(({ text }) => text).join('')))
+      .toEqual({ cwd: getCanonicalPath(SECOND_CWD), value: 'child' });
+  });
+
+  it.each<IGlobalCommandSpawnOptions>([
+    { cwd: path.dirname(TEST_REPO_ROOT) },
+    { cwd: '.' },
+    { environment: { 'BAD=NAME': 'value' } },
+    { environment: { VALUE: 'bad\0value' } },
+    { environment: {}, environmentOverlay: {} }
+  ])('rejects invalid child overrides before spawning: %j', async (options) => {
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(new TestWorkspaceSession(TEST_REPO_ROOT));
+    const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+    await router.executeAsync(
+      router.resolveRequest(createRequestOptions('invalid-overrides', FIRST_CWD, {}, 80)),
+      async (context) => {
+        expect(() => context.spawnChild(process.execPath, ['-e', ''], options)).toThrow();
+        return { exitCode: 0 };
+      }, client
+    );
+    expect(client.results[0].exitCode).toBe(0);
   });
 
   it('preserves a global command exit code and delivers it exactly once', async () => {

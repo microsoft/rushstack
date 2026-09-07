@@ -3,6 +3,7 @@
 
 import * as childProcess from 'node:child_process';
 import { EOL } from 'node:os';
+import { finished } from 'node:stream/promises';
 
 import { SubprocessTerminator } from '@rushstack/node-core-library';
 import { Terminal, TerminalProviderSeverity } from '@rushstack/terminal';
@@ -10,6 +11,8 @@ import type { ITerminal, ITerminalProvider } from '@rushstack/terminal';
 
 import {
   createGlobalCommandEnvironment,
+  resolveGlobalCommandEnvironment,
+  resolveGlobalCommandWorkingDirectory,
   type IGlobalCommandEnvironment,
   type IGlobalCommandTerminalProperties,
   type IResolvedGlobalCommandRequest
@@ -29,6 +32,10 @@ const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
  * @beta
  */
 export interface IGlobalCommandSpawnOptions {
+  /** An absolute, canonicalized directory confined to this request's workspace. */
+  readonly cwd?: string;
+  /** A complete child environment; cannot be combined with environmentOverlay. */
+  readonly environment?: Readonly<NodeJS.ProcessEnv>;
   readonly environmentOverlay?: Readonly<NodeJS.ProcessEnv>;
   readonly forwardInput?: boolean;
   readonly forwardOutput?: boolean;
@@ -51,6 +58,8 @@ export interface IGlobalCommandExecutionContext {
   readonly workspaceSession: IWorkspaceSession;
 
   registerDisposable(disposable: AsyncDisposable): void;
+  /** Queues raw request-owned output without terminal color or newline transformations. */
+  writeOutput(stream: 'stdout' | 'stderr', chunk: Uint8Array): void;
   /**
    * Spawns a child process whose process tree is owned by this request.
    *
@@ -214,6 +223,11 @@ export class GlobalCommandExecutionContext
     this.#disposables.push(disposable);
   }
 
+  public writeOutput(stream: 'stdout' | 'stderr', chunk: Uint8Array): void {
+    this.#throwIfClosed();
+    this.#writer.write(stream, chunk);
+  }
+
   public spawnChild(
     command: string,
     args: ReadonlyArray<string>,
@@ -223,10 +237,18 @@ export class GlobalCommandExecutionContext
     if (this.abortSignal.aborted) {
       throw this.abortSignal.reason ?? new Error('The global command request was aborted.');
     }
+    if (options.environment !== undefined && options.environmentOverlay !== undefined) {
+      throw new Error('A child environment and environmentOverlay cannot be combined.');
+    }
+    if (options.forwardInput && !this.interactiveInput) {
+      throw new Error('The global command did not register an interactive input session.');
+    }
     const child: childProcess.ChildProcessWithoutNullStreams = childProcess.spawn(command, [...args], {
-      cwd: this.cwd,
+      cwd: resolveGlobalCommandWorkingDirectory(options.cwd ?? this.cwd, this.workspaceSession),
       detached: SubprocessTerminator.RECOMMENDED_OPTIONS.detached,
-      env: createGlobalCommandEnvironment(this.environment, options.environmentOverlay),
+      env: options.environment === undefined
+        ? createGlobalCommandEnvironment(this.environment, options.environmentOverlay)
+        : resolveGlobalCommandEnvironment(options.environment),
       shell: options.shell,
       stdio: 'pipe',
       windowsHide: options.windowsHide
@@ -254,12 +276,18 @@ export class GlobalCommandExecutionContext
       throw new Error('The global command did not register an interactive input session.');
     }
     const sink: IInteractiveRequestInputSink = {
-      writeInputAsync: (chunk: Uint8Array): Promise<void> => writeChildInputAsync(child, chunk)
+      writeInputAsync: (chunk: Uint8Array): Promise<void> => writeChildInputAsync(child, chunk),
+      endInputAsync: (): Promise<void> => endChildInputAsync(child)
     };
+    const onInputError = (error: Error): void => {
+      if (!isClosedChildInputError(error)) this.#abortRequest(error);
+    };
+    child.stdin.on('error', onInputError);
     const attachment: Disposable = this.interactiveInput.attachInputSink(sink);
     this.registerDisposable({
       [Symbol.asyncDispose]: (): Promise<void> => {
         attachment[Symbol.dispose]();
+        child.stdin.removeListener('error', onInputError);
         return Promise.resolve();
       }
     });
@@ -382,17 +410,35 @@ function normalizeError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
+async function endChildInputAsync(child: childProcess.ChildProcessWithoutNullStreams): Promise<void> {
+  if (child.stdin.destroyed) return;
+  const completion: Promise<void> = finished(child.stdin, { cleanup: true });
+  child.stdin.end();
+  try {
+    await completion;
+  } catch (error) {
+    if (!isClosedChildInputError(error)) throw error;
+  }
+}
+
 function writeChildInputAsync(
   child: childProcess.ChildProcessWithoutNullStreams,
   chunk: Uint8Array
 ): Promise<void> {
+  if (child.stdin.destroyed) return Promise.resolve();
   return new Promise<void>((resolve, reject) => {
     child.stdin.write(chunk, (error: Error | null | undefined) => {
-      if (error) {
+      if (error && !isClosedChildInputError(error)) {
         reject(error);
       } else {
         resolve();
       }
     });
   });
+}
+
+function isClosedChildInputError(error: unknown): boolean {
+  // A script may close its pipe without reading all input. Preserve its exit status, as inherited stdin does.
+  const code: string | undefined = (error as NodeJS.ErrnoException).code;
+  return code === 'EPIPE' || code === 'ERR_STREAM_DESTROYED' || code === 'ERR_STREAM_PREMATURE_CLOSE';
 }

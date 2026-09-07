@@ -52,6 +52,8 @@ export interface IOperationGraphOptions {
    * Consumers (e.g. ProjectWatcher) can subscribe to this to perform cleanup.
    */
   abortController: AbortController;
+  /** Hosts with awaited lifetime cleanup can disable the legacy fire-and-forget abort cleanup. */
+  closeRunnersOnAbort?: boolean;
 
   isWatch?: boolean;
   pauseNextIteration?: boolean;
@@ -205,6 +207,7 @@ export class OperationGraph implements IOperationGraph {
   /** Tracks if a graph state change notification has been scheduled for next tick. */
   private _graphStateChangeScheduled: boolean = false;
   private _status: OperationStatus = OperationStatus.Ready;
+  private _nextIterationId: number = 1;
 
   public constructor(operations: Set<Operation>, options: IOperationGraphOptions) {
     const {
@@ -244,7 +247,9 @@ export class OperationGraph implements IOperationGraph {
         if (this._idleTimeout) {
           clearTimeout(this._idleTimeout);
         }
-        void this.closeRunnersAsync();
+        if (options.closeRunnersOnAbort !== false) {
+          void this.closeRunnersAsync();
+        }
       },
       { once: true }
     );
@@ -486,6 +491,31 @@ export class OperationGraph implements IOperationGraph {
     }
   }
 
+  public deleteResults(operations: Iterable<Operation>): void {
+    if (this._currentIteration || this._scheduledIteration) {
+      throw new Error('Cannot delete results of an executing or prepared graph.');
+    }
+    const selected: Set<Operation> = new Set(operations);
+    for (const operation of selected) {
+      if (!this.operations.has(operation)) {
+        throw new Error(`Cannot delete results for an operation outside this graph: ${operation.name}`);
+      }
+      if (operation.runner?.isActive) {
+        throw new Error(`Cannot delete results of an active runner: ${operation.name}`);
+      }
+    }
+    // Each completed record originally owns a context and edges referencing the whole iteration.
+    // Detach survivors too; deleting only the selected map keys would retain the cold records.
+    this.hooks.beforeDeleteResults.call(selected);
+    for (const record of this.resultByOperation.values()) {
+      record.detachExecutionContext();
+    }
+    for (const operation of selected) {
+      this.resultByOperation.delete(operation);
+    }
+    this._scheduleManagerStateChanged();
+  }
+
   /**
    * Shorthand for scheduling an iteration then executing it.
    * Call `abortCurrentIterationAsync()` to cancel the execution of any operations that have not yet begun execution.
@@ -519,9 +549,36 @@ export class OperationGraph implements IOperationGraph {
   }
 
   /**
-   * Executes all operations which have been registered, returning a promise which is resolved when all operations have been processed to a final state.
-   * Aborts the current iteration first, if any.
+   * Discards unstarted records without executing scripts, changing completed results, or closing retained runners.
    */
+  public discardScheduledIteration(): boolean {
+    if (this._currentIteration) {
+      throw new Error('Cannot discard prepared work while an iteration is executing.');
+    }
+    const iteration: IExecutionIterationContext | undefined = this._scheduledIteration;
+    if (!iteration) return false;
+    this._setScheduledIteration(undefined);
+    const errors: unknown[] = [];
+    for (const record of iteration.records.values()) {
+      record.status = OperationStatus.Aborted;
+      for (const close of [
+        () => record.finalizeOperation(),
+        () => record.stdioSummarizer.close(),
+        () => record.problemCollector.close()
+      ]) {
+        try {
+          close();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+    }
+    this.hooks.onExecutionStatesUpdated.call(new Set(iteration.records.values()));
+    if (errors.length) throw new AggregateError(errors, 'Failed to discard prepared operation records.');
+    return true;
+  }
+
+  /** Executes the prepared iteration, after awaiting cancellation of any current iteration. */
   public async executeScheduledIterationAsync(): Promise<boolean> {
     await this.abortCurrentIterationAsync();
 
@@ -533,6 +590,14 @@ export class OperationGraph implements IOperationGraph {
 
     this._currentIteration = iteration;
     this._setScheduledIteration(undefined);
+    for (const executionRecord of iteration.records.values()) {
+      iteration.eventSink?.onOperationRegistered?.(
+        executionRecord.name,
+        executionRecord.silent,
+        executionRecord,
+        executionRecord.iterationId
+      );
+    }
 
     iteration.promise = this._executeInnerAsync(this._currentIteration).finally(() => {
       this._currentIteration = undefined;
@@ -645,6 +710,7 @@ export class OperationGraph implements IOperationGraph {
 
     // Convert the developer graph to the mutable execution graph
     const iterationContext: IExecutionIterationContext = {
+      iterationId: this._nextIterationId++,
       abortController,
       startTime,
       streamCollator,
@@ -653,9 +719,7 @@ export class OperationGraph implements IOperationGraph {
       maxParallelism: this._maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
-      invalidate: (operations: Iterable<Operation>, reason: string) => {
-        graph.invalidateOperations(operations, reason);
-      },
+      invalidate: graph.invalidateOperations.bind(graph),
       get debugMode(): boolean {
         return graph.debugMode;
       },
@@ -676,9 +740,7 @@ export class OperationGraph implements IOperationGraph {
         operation,
         iterationContext
       );
-
       executionRecords.set(operation, executionRecord);
-      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent);
     }
 
     for (const [operation, record] of executionRecords) {
@@ -714,6 +776,18 @@ export class OperationGraph implements IOperationGraph {
     }
 
     if (iterationContext.totalOperations === 0) {
+      for (const executionRecord of executionRecords.values()) {
+        eventSink?.onOperationRegistered?.(
+          executionRecord.name,
+          executionRecord.silent,
+          executionRecord,
+          executionRecord.iterationId
+        );
+        executionRecord.status = OperationStatus.NoOp;
+        executionRecord.finalizeOperation();
+        executionRecord.stdioSummarizer.close();
+        executionRecord.problemCollector.close();
+      }
       return;
     }
 
@@ -798,6 +872,7 @@ export class OperationGraph implements IOperationGraph {
     this._setStatus(OperationStatus.Executing);
 
     const { hooks } = this;
+    const graph: OperationGraph = this;
 
     const { abortController, records: executionRecords, terminal, totalOperations } = iterationContext;
 
@@ -875,12 +950,28 @@ export class OperationGraph implements IOperationGraph {
     terminal.writeStdoutLine(parallelismLine);
     eventSink?.onActivity?.(parallelismLine);
 
-    const bailStatus: OperationStatus | undefined | void = abortSignal.aborted
-      ? OperationStatus.Aborted
-      : await measureAsyncFn(
-          `${PERF_PREFIX}:beforeExecuteIterationAsync`,
-          async () => await hooks.beforeExecuteIterationAsync.promise(executionRecords, iterationOptions)
-        );
+    let bailStatus: OperationStatus | undefined | void;
+    try {
+      bailStatus = abortSignal.aborted
+        ? OperationStatus.Aborted
+        : await measureAsyncFn(
+            `${PERF_PREFIX}:beforeExecuteIterationAsync`,
+            async () => await hooks.beforeExecuteIterationAsync.promise(executionRecords, iterationOptions)
+          );
+    } catch (error) {
+      await closeRunnersAndReportFailuresAsync(
+        [...executionRecords.values()].filter((record) => !record.shouldRunnerPersist)
+      );
+      for (const record of executionRecords.values()) {
+        if (!record.isTerminal) {
+          record.status = OperationStatus.Aborted;
+        }
+        record.finalizeOperation();
+        record.stdioSummarizer.close();
+        record.problemCollector.close();
+      }
+      throw error;
+    }
 
     if (bailStatus) {
       // A tap short-circuited the iteration. If it bailed with a successful status (e.g. the
@@ -928,21 +1019,20 @@ export class OperationGraph implements IOperationGraph {
       });
     }
 
-    const recordsToClose: OperationExecutionRecord[] = [];
-    for (const record of executionRecords.values()) {
-      if (!record.shouldRunnerPersist) {
-        recordsToClose.push(record);
-      }
-    }
     function reportRunnerCleanupFailure(record: OperationExecutionRecord, error: Error): void {
       record.error = error;
       record.status = OperationStatus.Failure;
       _reportOperationErrorIfAny(record);
       state.hasAnyFailures = true;
     }
-    if (recordsToClose.length > 0) {
+    async function closeRunnersAndReportFailuresAsync(
+      recordsToClose: readonly OperationExecutionRecord[]
+    ): Promise<void> {
+      if (recordsToClose.length === 0) {
+        return;
+      }
       try {
-        await this.closeRunnersAsync(recordsToClose.map((record) => record.operation));
+        await graph.closeRunnersAsync(recordsToClose.map((record) => record.operation));
       } catch (e) {
         if (e instanceof AggregateError) {
           for (const error of e.errors) {
@@ -960,7 +1050,17 @@ export class OperationGraph implements IOperationGraph {
         }
       }
     }
+    const incompleteRecordsToClose: OperationExecutionRecord[] = [];
     for (const record of executionRecords.values()) {
+      if (!record.shouldRunnerPersist && !record.isOperationCompleted) {
+        incompleteRecordsToClose.push(record);
+      }
+    }
+    await closeRunnersAndReportFailuresAsync(incompleteRecordsToClose);
+    for (const record of executionRecords.values()) {
+      if (!record.isOperationCompleted) {
+        record.finalizeOperation();
+      }
       record.stdioSummarizer.close();
       record.problemCollector.close();
     }
@@ -1118,6 +1218,9 @@ export class OperationGraph implements IOperationGraph {
           _reportOperationErrorIfAny(record);
           record.error = e;
           record.status = OperationStatus.Failure;
+        }
+        if (!record.shouldRunnerPersist) {
+          await closeRunnersAndReportFailuresAsync([record]);
         }
         _onOperationComplete(record, state);
       }
@@ -1295,10 +1398,9 @@ function _handleOperationNoOp(record: OperationExecutionRecord, context: IStatef
 function _handleOperationSuccess(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
-    record.eventSink?.onActivity?.(
-      `"${record.name}" completed successfully in ${stopwatch.toString()}.`,
-      { operationId: record.name }
-    );
+    record.eventSink?.onActivity?.(`"${record.name}" completed successfully in ${stopwatch.toString()}.`, {
+      operationId: record.name
+    });
     record.collatedWriter.terminal.writeStdoutLine(
       Colorize.green(`"${record.name}" completed successfully in ${stopwatch.toString()}.`)
     );
@@ -1315,10 +1417,10 @@ function _handleOperationSuccessWithWarning(
 ): void {
   const stopwatch: IStopwatchResult = _getOperationStopwatch(record);
   if (!record.silent) {
-    record.eventSink?.onActivity?.(
-      `"${record.name}" completed with warnings in ${stopwatch.toString()}.`,
-      { operationId: record.name, stderr: true }
-    );
+    record.eventSink?.onActivity?.(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`, {
+      operationId: record.name,
+      stderr: true
+    });
     record.collatedWriter.terminal.writeStderrLine(
       Colorize.yellow(`"${record.name}" completed with warnings in ${stopwatch.toString()}.`)
     );

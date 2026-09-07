@@ -31,7 +31,9 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'requestRejected',
 'requestResult',
 'shutdown',
-'shutdownAck'
+'shutdownAck',
+'stdinReady',
+'stdinEnd'
 ];
 
 // @beta
@@ -54,7 +56,16 @@ export const DAEMON_EVENT_TYPES: readonly [
 ];
 
 // @beta
+export const DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR: number;
+
+// @beta
+export const DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
+
+// @beta
+export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number;
 
 // @beta
 export const DAEMON_LIFECYCLE_PROTOCOL_MINOR: number;
@@ -72,7 +83,7 @@ export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonStdinEndMessage | IDaemonStdinReadyMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -116,6 +127,9 @@ export type DaemonHandshakeOutcome = {
     readonly accepted: false;
     readonly error: ProtocolVersionMismatchError;
 };
+
+// @beta
+export type DaemonInvocationKind = 'rush' | 'rushx';
 
 // @beta
 export type DaemonJsonNull = null;
@@ -205,6 +219,7 @@ export interface IDaemonClientCaps {
     readonly colorLevel?: number;
     readonly columns?: number;
     readonly isTTY: boolean;
+    readonly supportsInputLifecycle?: boolean;
     readonly supportsInteractiveIO?: boolean;
     readonly supportsRequestAdmission?: boolean;
     readonly supportsRequestLifecycle?: boolean;
@@ -292,6 +307,41 @@ export interface IDaemonFrameDecoderOptions {
 }
 
 // @beta
+export interface IDaemonGraphInvalidations {
+    // (undocumented)
+    readonly changedPathCount: number;
+    // (undocumented)
+    readonly hasUnknownChanges: boolean;
+    // (undocumented)
+    readonly isWatcherHealthy: boolean;
+    // (undocumented)
+    readonly sequence: number;
+}
+
+// @beta
+export interface IDaemonGraphOperation {
+    // (undocumented)
+    readonly dependencyIds: ReadonlyArray<string>;
+    // (undocumented)
+    readonly enabled: false | DaemonPhasedOperationEnabledState;
+    // (undocumented)
+    readonly operationId: string;
+    // (undocumented)
+    readonly phaseName: string;
+    // (undocumented)
+    readonly projectName: string;
+    readonly status: string | null;
+}
+
+// @beta
+export interface IDaemonGraphSnapshotPayload {
+    // (undocumented)
+    readonly requestId: string;
+    // (undocumented)
+    readonly snapshot: IDaemonInitializedGraphSnapshot | IDaemonUninitializedGraphSnapshot;
+}
+
+// @beta
 export interface IDaemonHelloAckMessage {
     // (undocumented)
     readonly kind: 'helloAck';
@@ -310,6 +360,22 @@ export interface IDaemonHelloMessage {
     readonly payload: {
         readonly protocolVersion: IDaemonProtocolVersion;
     };
+}
+
+// @beta
+export interface IDaemonInitializedGraphSnapshot {
+    // (undocumented)
+    readonly hasScheduledIteration: boolean;
+    // (undocumented)
+    readonly initialized: true;
+    // (undocumented)
+    readonly invalidations: IDaemonGraphInvalidations;
+    // (undocumented)
+    readonly operations: ReadonlyArray<IDaemonGraphOperation>;
+    readonly pauseNextIteration: boolean;
+    // (undocumented)
+    readonly status: string;
+    readonly workspaceGeneration?: string;
 }
 
 // @beta
@@ -450,6 +516,8 @@ export interface IDaemonRequestEnvelope {
     readonly commandOrigin: DaemonRushCommandOrigin;
     readonly cwd: string;
     readonly environment: Readonly<Record<string, string>>;
+    readonly expectedWorkspaceGeneration?: string;
+    readonly invocationKind?: DaemonInvocationKind;
     readonly requestId: string;
     readonly terminal: IDaemonRequestTerminal;
 }
@@ -536,6 +604,26 @@ export interface IDaemonStdinChunk {
 }
 
 // @beta
+export interface IDaemonStdinEndMessage {
+    // (undocumented)
+    readonly kind: 'stdinEnd';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonStdinReadyMessage {
+    // (undocumented)
+    readonly kind: 'stdinReady';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
+}
+
+// @beta
 export interface IDaemonSubscribeMessage {
     // (undocumented)
     readonly kind: 'subscribe';
@@ -559,6 +647,15 @@ export interface IDaemonTerminalPolicyResult {
     readonly reason?: DaemonTerminalPolicyReason;
     // (undocumented)
     readonly requestId: string;
+}
+
+// @beta
+export interface IDaemonUninitializedGraphSnapshot {
+    // (undocumented)
+    readonly initialized: false;
+    // (undocumented)
+    readonly invalidations: IDaemonGraphInvalidations;
+    readonly workspaceGeneration?: string;
 }
 
 // @beta
@@ -638,6 +735,9 @@ export const REQUEST_ID_LENGTH_OFFSET: number;
 
 // @beta
 export const RUSHD_EXTENSION_NAMESPACE: 'rushd';
+
+// @beta
+export const RUSHD_GRAPH_SNAPSHOT: 'rushd.graph-snapshot';
 
 // @beta
 export const RUSHD_OPERATION_HEADER: 'rushd.operation-header';

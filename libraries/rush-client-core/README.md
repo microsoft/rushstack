@@ -1,7 +1,9 @@
 # @rushstack/rush-client-core
 
 Opt-in clients for the Rush daemon wire protocol: request lifecycle requires 0.5;
-shutdown requires 0.6. Later additive minors do not raise the request minimum.
+shutdown requires 0.6; stdin admission, write credits, and EOF require 0.7.
+Explicit Rushx invocation selection requires 0.8.
+Later additive minors do not raise the request minimum.
 This package has no
 `rush-lib` dependency, command parser, operation graph, or presentation layer.
 
@@ -11,12 +13,17 @@ negotiates hello, subscribes capabilities, and awaits a matching pong.
 `executeAsync()` uses one fresh connection per invocation and closes it after the
 authoritative result. Async stdout/stderr/event callbacks are awaited in wire order,
 so slow destinations backpressure the transport. Log callbacks receive raw bytes
-and the protocol's operation ID. The daemon owns terminal presentation.
+and the protocol's operation ID. The calling client owns terminal presentation.
+
+The optional `invocationKind` is captured unchanged. This core does not infer it from
+command names or custom origin. Rushx requests fall back on older peers before sending
+`requestStart`, even for TTY input. A peer cannot request fallback after emitting output
+or admitting stdin: that is a protocol error, not permission to replay the command.
 
 Abort signals send `requestCancel`, then wait for the result; cancellation has a
 bounded grace period. Disconnects, protocol errors and sink failures are errors,
-never reasons to replay possibly executed work. Only typed `unsupported` and
-`controllingTerminalRequired` outcomes permit fallback. Raw-mode changes are
+never reasons to replay possibly executed work. Only pre-execution `unsupported`,
+`controllingTerminalRequired`, and `stdinEndUnsupported` outcomes permit fallback. Raw-mode changes are
 acknowledged only after applying them. Input listeners and raw state are restored
 on success, cancellation, disconnect and failure. No resize messages are sent.
 
@@ -27,6 +34,15 @@ aware `LockFile` for the first-start mutex. The winning client rechecks readines
 reclaims only an absent/dead owner, spawns detached without a shell, and waits for
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed; a live (possibly reused) PID with an unreachable socket fails closed.
+
+If a wire-compatible daemon reports the wrong implementation version and an explicit
+replacement launcher is available, startup serializes replacement under that same mutex.
+It verifies the old endpoint's attested ownership, requests shutdown, waits for ownership
+release, and starts or reuses the expected version before returning a client. Concurrent
+callers share one replacement; no command is submitted to the old version or replayed.
+Passive clients never replace a daemon, and unverifiable ownership or unsupported lifecycle
+protocol fails closed. `requestDaemonShutdownAsync()` is the shared ownership-checked
+shutdown primitive used by both this path and explicit CLI restart.
 
 `getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
 and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across
@@ -56,16 +72,21 @@ close calls cannot remove successor artifacts.
 
 ## Integration boundaries
 
-The current protocol has no stdin EOF or normal request-admitted message.
-Automatic stdin pumping therefore begins only on `setRawMode(enabled: true)` or
-`terminalPolicy(runInDaemon)`. A host accepting cooked input must send the latter
-before awaiting input. The current standalone host does not do so. Piped stdin
-must remain in-process until explicit input admission/EOF are integrated.
+Protocol 0.7 negotiates `supportsInputLifecycle`. Input remains untouched until the
+host attaches a destination and grants the first `stdinReady` credit. Each credit
+permits one chunk, bounded to 64 KiB; the next credit follows the destination's
+completed write. This bounds buffering without blocking cancellation or raw-mode
+control frames. `stdinEnd` follows all preceding chunks and credits, including for
+empty input. Raw Ctrl+C handling is opt-in and must not be enabled for binary pipes.
+Set `requiresStdinEnd` for pipes: peers without the capability return
+`stdinEndUnsupported` before sending `requestStart` or consuming any input.
+Legacy 0.5/0.6 interactive clients retain their raw-mode/terminal-policy input path.
 
-The standalone host has no request resolver or warm operation graph. A successful
-handshake is readiness, not evidence that a build is supported. Graph verbs,
-version-selected daemon installation, transparent version-skew restart, and
-request handoff remain unavailable; this package does not fabricate them.
+The standalone host supports native phased builds and the experimental structured
+graph reference client. A successful handshake is still transport readiness, not a
+guarantee that every command or configuration is supported. Version-selected daemon
+installation, incompatible-protocol replacement, and general request handoff remain
+separate integration work; this core package does not construct an engine.
 A client that dies during the
 pre-bind spawn interval may leave a detached child still starting; normal
 concurrent first-invocations are serialized, but crash-safe spawn handoff requires

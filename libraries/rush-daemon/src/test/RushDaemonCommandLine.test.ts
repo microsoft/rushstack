@@ -13,6 +13,7 @@ import {
   type IRushDaemonWorkspace
 } from '../RushDaemonCommandLine';
 import { serveRushDaemonAsync } from '../serveRushDaemon';
+import { RushDaemonRequestResolver } from '../RushDaemonRequestResolver';
 
 describe(resolveRushDaemonWorkspace.name, () => {
   let tempFolder: string;
@@ -60,7 +61,11 @@ describe(resolveRushDaemonWorkspace.name, () => {
     );
     await launchRushDaemonAsync(tempFolder);
     expect(serveRushDaemonAsync).toHaveBeenCalledWith(
-      expect.objectContaining({ repoRoot: tempFolder, idleTimeoutSeconds: 42 })
+      expect.objectContaining({
+        repoRoot: tempFolder,
+        idleTimeoutSeconds: 42,
+        requestResolver: expect.any(RushDaemonRequestResolver)
+      })
     );
   });
 });

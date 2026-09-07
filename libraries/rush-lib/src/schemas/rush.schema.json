@@ -245,7 +245,7 @@
       "additionalProperties": false
     },
     "daemon": {
-      "description": "Opt-in standalone daemon client configuration. Environment overrides config, then defaults. Watch and warm-set controls are reserved integration seams, not active behavior.",
+      "description": "Opt-in standalone daemon client configuration. Environment overrides config, then defaults. Warm policies require the generation-owned WorkspaceWarmSet host attachment; watch-driven execution remains reserved.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -285,7 +285,7 @@
           "exclusiveMinimum": true,
           "maximum": 2147483.647,
           "default": 300,
-          "description": "Reserved for WS3 eviction; currently inactive. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
+          "description": "Idle resource expiration for an attached warm set. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
         },
         "warmMemoryBudgetMB": {
           "type": "number",
@@ -293,25 +293,41 @@
           "exclusiveMinimum": true,
           "maximum": 9007199254740991,
           "default": 512,
-          "description": "Reserved for WS3 eviction; currently inactive. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
+          "description": "Best-effort sampled RSS budget, not a hard process/tree memory ceiling. Active/protected work is exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
         },
         "warmSetMaxProjects": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
           "default": 20,
-          "description": "Reserved for WS3 warming; currently inactive. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
+          "description": "Best-effort retained project limit for an attached warm set. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
         },
         "autoWarmByTelemetry": {
           "type": "boolean",
           "default": false,
-          "description": "Reserved for telemetry-weighted warming; currently inactive. RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY overrides."
+          "description": "Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts unrequested scripts. RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY overrides."
         }
       }
     },
     "telemetryEnabled": {
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
+    },
+    "reporting": {
+      "description": "Configures repository settings used by the Rush reporter system.",
+      "type": "object",
+      "properties": {
+        "agentEnvironmentVariables": {
+          "description": "Additional environment variable names that identify an agent environment.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
     },
     "allowedProjectTags": {
       "description": "This is an optional, but recommended, list of allowed tags that can be applied to Rush projects using the \"tags\" setting in this file.  This list is useful for preventing mistakes such as misspelling, and it also provides a centralized place to document your tags.  If \"allowedProjectTags\" list is not specified, then any valid tag is allowed.  A tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and \"@\" characters.",

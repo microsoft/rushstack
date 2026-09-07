@@ -49,7 +49,7 @@ export type DaemonClientOutcome = {
     readonly result: IDaemonCommandResult;
 } | {
     readonly kind: 'fallback';
-    readonly reason: 'unsupported' | 'controllingTerminalRequired';
+    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported';
     readonly message?: string;
 } | {
     readonly kind: 'rejected';
@@ -105,6 +105,7 @@ export interface IDaemonClientExecuteOptions {
     readonly onStdoutAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)
     readonly request: IDaemonRequestEnvelope;
+    readonly requiresStdinEnd?: boolean;
     // (undocumented)
     readonly setRawMode?: (enabled: boolean) => void;
     readonly stdin?: Readable;
@@ -121,5 +122,8 @@ export interface IDaemonStartCommand {
     // (undocumented)
     readonly environment: Readonly<Record<string, string>>;
 }
+
+// @beta
+export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
 
 ```

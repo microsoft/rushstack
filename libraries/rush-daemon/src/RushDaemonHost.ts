@@ -3,16 +3,14 @@
 
 import { realpath } from 'node:fs/promises';
 
+import { connectOrStartDaemonAsync, type DaemonClient } from '@rushstack/rush-client-core';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import {
   computeDaemonWorkspaceKey,
   DaemonFrameListener,
   resolveDaemonPathsFromProcess
 } from '@rushstack/rush-daemon-transport';
-import type {
-  DaemonFrameConnection,
-  IDaemonPaths
-} from '@rushstack/rush-daemon-transport';
+import type { DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonControlSession } from './DaemonControlSession';
 import { DaemonIdleTimer } from './DaemonIdleTimer';
@@ -22,6 +20,12 @@ import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
+import { WorkspaceRequestLifecycle } from './WorkspaceRequestLifecycle';
+import type {
+  GetWorkspaceSuccessorLaunchAsync,
+  IWorkspaceProcessRestartPlan,
+  IWorkspaceProcessRestartResult
+} from './WorkspaceProcessRestart';
 
 /**
  * Options for starting one workspace daemon host.
@@ -29,6 +33,8 @@ import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
  * @beta
  */
 export interface IRushDaemonHostOptions {
+  /** Selects an available successor before a hard transition; startup still waits for complete old ownership release. */
+  readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
   /** Overrides workspace session construction for engine integration or testing. */
   readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
   /** The daemon implementation version reported by `pong`. */
@@ -64,6 +70,13 @@ export class RushDaemonHost {
   public readonly paths: IDaemonPaths;
   private _closePromise: Promise<void> | undefined;
   private _notifyClosed: (() => void) | undefined;
+  private readonly _options: IRushDaemonHostOptions;
+  private readonly _startedAt: string;
+  private _restartPromise: Promise<IWorkspaceProcessRestartResult> | undefined;
+  private _resolveRestart: ((result: IWorkspaceProcessRestartResult | undefined) => void) | undefined;
+  private _rejectRestart: ((error: Error) => void) | undefined;
+  /** Settles after an accepted restart reaches a new ready process, or normal shutdown finishes without restarting. */
+  public readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
 
   /** Resolves after shutdown cleanup finishes. Use closeAsync() to observe cleanup failures. */
   public readonly closed: Promise<void>;
@@ -75,7 +88,9 @@ export class RushDaemonHost {
     lifecycle: { closing: boolean },
     requestDispatcher: DaemonRequestDispatcher,
     workspaceSessionProvider: WorkspaceSessionProvider,
-    idleTimer: DaemonIdleTimer
+    idleTimer: DaemonIdleTimer,
+    options: IRushDaemonHostOptions,
+    startedAt: string
   ) {
     this.closed = new Promise<void>((resolve) => {
       this._notifyClosed = resolve;
@@ -87,6 +102,13 @@ export class RushDaemonHost {
     this._requestDispatcher = requestDispatcher;
     this._workspaceSessionProvider = workspaceSessionProvider;
     this._idleTimer = idleTimer;
+    this._options = options;
+    this._startedAt = startedAt;
+    this.restartCompleted = new Promise((resolve, reject) => {
+      this._resolveRestart = resolve;
+      this._rejectRestart = reject;
+    });
+    void this.restartCompleted.catch(() => undefined);
   }
 
   /** Resolves only after the transport is bound and its lockfile has been written. */
@@ -111,9 +133,25 @@ export class RushDaemonHost {
     );
     const startedAtMs: number = Date.now();
     const workspaceSession: IWorkspaceSession = await workspaceSessionProvider.getSessionAsync();
+    let requestLifecycle: WorkspaceRequestLifecycle | undefined;
+    try {
+      if (options.requestResolver?.workspaceLifecycle) {
+        requestLifecycle = await WorkspaceRequestLifecycle.createAsync({
+          provider: workspaceSessionProvider,
+          resolver: options.requestResolver,
+          rushVersion: options.rushVersion,
+          getSuccessorLaunchAsync: options.getSuccessorLaunchAsync,
+          onRestartRequested: requestRestart
+        });
+      }
+    } catch (error) {
+      await workspaceSessionProvider[Symbol.asyncDispose]();
+      throw error;
+    }
     const requestDispatcher: DaemonRequestDispatcher = new DaemonRequestDispatcher(
       workspaceSession,
-      options.requestResolver
+      options.requestResolver,
+      requestLifecycle
     );
     let listener: DaemonFrameListener;
     try {
@@ -169,8 +207,13 @@ export class RushDaemonHost {
       lifecycle,
       requestDispatcher,
       workspaceSessionProvider,
-      idleTimer
+      idleTimer,
+      options,
+      new Date(startedAtMs).toISOString()
     );
+    function requestRestart(plan: IWorkspaceProcessRestartPlan): void {
+      host._requestRestart(plan);
+    }
     function requestShutdown(): void {
       void host.closeAsync().catch((error: Error) => {
         if (options.onError) options.onError(error);
@@ -186,19 +229,70 @@ export class RushDaemonHost {
     return this._workspaceSessionProvider.getSessionAsync();
   }
 
+  /** Host-local generation, useful for rejecting retained server-side references. */
+  public get workspaceGeneration(): number {
+    return this._workspaceSessionProvider.generation;
+  }
+
   /** Closes active connections, stops listening, and removes transport artifacts. */
   public closeAsync(): Promise<void> {
-    this._closePromise ??= this._closeOnceAsync().finally(() => this._notifyClosed?.());
+    this._closePromise ??= this._closeOnceAsync().finally(() => {
+      this._notifyClosed?.();
+      if (!this._restartPromise) this._resolveRestart?.(undefined);
+    });
     return this._closePromise;
+  }
+
+  private _requestRestart(plan: IWorkspaceProcessRestartPlan): void {
+    if (this._restartPromise || this._closePromise) return;
+    this._restartPromise = this._restartOnceAsync(plan);
+    void this._restartPromise.then(
+      (result) => this._resolveRestart?.(result),
+      (error: unknown) => {
+        const failure: Error = error instanceof Error ? error : new Error(String(error));
+        this._rejectRestart?.(failure);
+        if (this._options.onError) this._options.onError(failure);
+        else process.emitWarning(failure);
+      }
+    );
+  }
+
+  private async _restartOnceAsync(
+    plan: IWorkspaceProcessRestartPlan
+  ): Promise<IWorkspaceProcessRestartResult> {
+    await this.closeAsync();
+    if (plan.failure) throw plan.failure;
+    if (!plan.launch) throw new Error('A successor was not selected.');
+    const paths: IDaemonPaths = resolveDaemonPathsFromProcess(
+      computeDaemonWorkspaceKey({
+        canonicalRepoRoot: plan.repoRoot,
+        rushVersion: plan.rushVersion,
+        startupOptions: this._options.startupOptions
+      })
+    );
+    const client: DaemonClient = await connectOrStartDaemonAsync({
+      paths,
+      expectedDaemonVersion: plan.launch.daemonVersion,
+      startCommand: plan.launch.startCommand,
+      previousDaemon: { pid: process.pid, startedAt: this._startedAt }
+    });
+    try {
+      const { pid } = await client.status;
+      if (!pid || pid === process.pid) throw new Error('A process restart must attest a new daemon PID.');
+      return { pid, rushVersion: plan.rushVersion };
+    } finally {
+      await client.closeAsync();
+    }
   }
 
   private async _closeOnceAsync(): Promise<void> {
     this._idleTimer[Symbol.dispose]();
     this._lifecycle.closing = true;
     const errors: unknown[] = [];
-    const listenerClosePromise: Promise<unknown | undefined> = this._listener
-      .stopAcceptingAsync()
-      .then(() => undefined, (error: unknown) => error);
+    const listenerClosePromise: Promise<unknown | undefined> = this._listener.stopAcceptingAsync().then(
+      () => undefined,
+      (error: unknown) => error
+    );
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync())
     );
@@ -210,6 +304,12 @@ export class RushDaemonHost {
     const listenerError: unknown | undefined = await listenerClosePromise;
     if (listenerError !== undefined) {
       errors.push(listenerError);
+    }
+    try {
+      const workspace: IWorkspaceSession = await this._workspaceSessionProvider.getSessionAsync();
+      await workspace.quiesceWarmSetAsync?.();
+    } catch (error) {
+      throw new AggregateError([...errors, error], 'Could not quiesce workspace maintenance for shutdown.');
     }
     try {
       await this._requestDispatcher[Symbol.asyncDispose]();

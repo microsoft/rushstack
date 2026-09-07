@@ -8,13 +8,22 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
+import {
+  createRushDiagnostic,
+  type IRushDiagnostic,
+  type IScopedReporter,
+  type LifecycleEmitter,
+  type ReporterMessageSeverity
+} from '@rushstack/rush-reporter';
 import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
   Terminal,
   PrintUtilities,
   Colorize,
-  type ITerminal
+  type ITerminal,
+  type ITerminalProvider,
+  TerminalProviderSeverity
 } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -57,13 +66,22 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
 import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
-import { RushSession } from '../pluginFramework/RushSession';
+import { type IRushSessionReporterOptions, RushSession } from '../pluginFramework/RushSession';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
 import { initializeDotEnv } from '../logic/dotenv';
 import { measureAsyncFn } from '../utilities/performance';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import {
+  _correlateRushSessionError,
+  _flushRushSessionReporterAsync,
+  _getRushSessionDerivedExitStatus,
+  _getRushSessionLifecycleEmitter,
+  _getRushSessionReporterSourceVersion,
+  _isRushSessionOperationStreamEnabled,
+  _isRushSessionErrorRepresented
+} from '../pluginFramework/RushSession';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -72,6 +90,86 @@ export interface IRushCommandLineParserOptions {
   cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
+  reporter?: IRushSessionReporterOptions;
+  reporterCloseAsync?: () => Promise<void>;
+  /** Parse native commands without executing CLI actions or initializing process-global state. */
+  engine?: {
+    rushConfiguration: RushConfiguration;
+    terminalProvider: ITerminalProvider;
+  };
+}
+
+class ReporterTerminalProvider implements ITerminalProvider {
+  public verboseEnabled: boolean = true;
+  public debugEnabled: boolean = true;
+  public readonly supportsColor: boolean = false;
+  public readonly eolCharacter: string = '\n';
+
+  private readonly _bufferedMessages: Array<{
+    severity: ReporterMessageSeverity;
+    text: string;
+    minimumLogLevel?: 'verbose' | 'debug';
+  }> = [];
+  private _reporter: IScopedReporter | undefined;
+
+  public setReporter(reporter: IScopedReporter | undefined): void {
+    this._reporter = reporter;
+    if (reporter) {
+      for (const message of this._bufferedMessages.splice(0)) {
+        reporter.emitMessage({ ...message, privacy: 'local-sensitive' });
+      }
+    }
+  }
+
+  public write(data: string, severity: TerminalProviderSeverity): void {
+    if (
+      (severity === TerminalProviderSeverity.verbose && !this.verboseEnabled) ||
+      (severity === TerminalProviderSeverity.debug && !this.debugEnabled)
+    ) {
+      return;
+    }
+
+    const message: {
+      severity: ReporterMessageSeverity;
+      text: string;
+      minimumLogLevel?: 'verbose' | 'debug';
+    } = {
+      severity: this._toReporterSeverity(severity),
+      text: data,
+      ...this._getMinimumLogLevel(severity)
+    };
+    if (this._reporter) {
+      this._reporter.emitMessage({ ...message, privacy: 'local-sensitive' });
+    } else {
+      this._bufferedMessages.push(message);
+    }
+  }
+
+  private _toReporterSeverity(severity: TerminalProviderSeverity): ReporterMessageSeverity {
+    switch (severity) {
+      case TerminalProviderSeverity.error:
+        return 'error';
+      case TerminalProviderSeverity.warning:
+        return 'warning';
+      case TerminalProviderSeverity.debug:
+        return 'debug';
+      case TerminalProviderSeverity.verbose:
+        return 'debug';
+      default:
+        return 'info';
+    }
+  }
+
+  private _getMinimumLogLevel(severity: TerminalProviderSeverity): { minimumLogLevel?: 'verbose' | 'debug' } {
+    switch (severity) {
+      case TerminalProviderSeverity.verbose:
+        return { minimumLogLevel: 'verbose' };
+      case TerminalProviderSeverity.debug:
+        return { minimumLogLevel: 'debug' };
+      default:
+        return {};
+    }
+  }
 }
 
 export class RushCommandLineParser extends CommandLineParser {
@@ -85,9 +183,16 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _quietParameter: CommandLineFlagParameter;
   private readonly _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   private readonly _rushOptions: IRushCommandLineParserOptions;
-  private readonly _terminalProvider: ConsoleTerminalProvider;
+  private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
   private readonly _autocreateBuildCommand: boolean;
+  private _initializationFailed: boolean = false;
+  private _sessionLifecycleEmitter: LifecycleEmitter | undefined;
+  private _commandLifecycleEmitter: LifecycleEmitter | undefined;
+  private _sessionStartTimeMs: number | undefined;
+  private _commandStartTimeMs: number | undefined;
+  private _reporterCompletionEmitted: boolean = false;
+  private _reporterClosePromise: Promise<void> | undefined;
 
   /**
    * The current working directory that was used to find the Rush configuration.
@@ -123,41 +228,53 @@ export class RushCommandLineParser extends CommandLineParser {
       description: 'Hide rush startup information'
     });
 
-    const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
-    this._terminalProvider = terminalProvider;
-    const terminal: Terminal = new Terminal(this._terminalProvider);
-    this._terminal = terminal;
     this._rushOptions = this._normalizeOptions(options || {});
-    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this._rushOptions;
+    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations, reporter } = this._rushOptions;
+    const reporterTerminalProvider: ReporterTerminalProvider | undefined = reporter?.operationStreamEnabled
+      ? new ReporterTerminalProvider()
+      : undefined;
+    const terminalProvider: ITerminalProvider =
+      this._rushOptions.engine?.terminalProvider ?? reporterTerminalProvider ?? new ConsoleTerminalProvider();
+    this._terminalProvider = terminalProvider;
+    const terminal: Terminal = new Terminal(terminalProvider);
+    this._terminal = terminal;
 
     let rushJsonFilePath: string | undefined;
     try {
-      rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: cwd,
-        showVerbose: !this._restrictConsoleOutput
-      });
+      if (this._rushOptions.engine) {
+        this.rushConfiguration = this._rushOptions.engine.rushConfiguration;
+      } else {
+        rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
+          startingFolder: cwd,
+          showVerbose: !this._restrictConsoleOutput && !reporter?.operationStreamEnabled
+        });
 
-      initializeDotEnv(terminal, rushJsonFilePath);
+        initializeDotEnv(terminal, rushJsonFilePath);
 
-      if (rushJsonFilePath) {
-        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
+        if (rushJsonFilePath) {
+          this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
+        }
       }
     } catch (error) {
-      this._reportErrorAndSetExitCode(error as Error);
+      this._reportInitializationErrorAndSetExitCode(error as Error);
     }
 
-    NodeJsCompatibility.warnAboutCompatibilityIssues({
-      isRushLib: true,
-      alreadyReportedNodeTooNewError,
-      rushConfiguration: this.rushConfiguration
-    });
+    if (!this._rushOptions.engine) {
+      NodeJsCompatibility.warnAboutCompatibilityIssues({
+        isRushLib: true,
+        alreadyReportedNodeTooNewError,
+        rushConfiguration: this.rushConfiguration
+      });
+    }
 
     this.rushGlobalFolder = new RushGlobalFolder();
 
     this.rushSession = new RushSession({
       getIsDebugMode: () => this.isDebug,
-      terminalProvider
+      terminalProvider,
+      reporter
     });
+    reporterTerminalProvider?.setReporter(this.rushSession.getReporter());
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
@@ -166,6 +283,10 @@ export class RushCommandLineParser extends CommandLineParser {
       restrictConsoleOutput: this._restrictConsoleOutput,
       rushGlobalFolder: this.rushGlobalFolder
     });
+    if (this._initializationFailed) {
+      this._autocreateBuildCommand = true;
+      return;
+    }
 
     const pluginCommandLineConfigurations: ICustomCommandLineConfigurationInfo[] =
       this.pluginManager.tryGetCustomCommandLineConfigurationInfos();
@@ -178,18 +299,22 @@ export class RushCommandLineParser extends CommandLineParser {
     this._autocreateBuildCommand = !hasBuildCommandInPlugin;
 
     this._populateActions();
+    if (this._initializationFailed) {
+      return;
+    }
 
     for (const { commandLineConfiguration, pluginLoader } of pluginCommandLineConfigurations) {
       try {
         this._addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
-        this._reportErrorAndSetExitCode(
+        this._reportInitializationErrorAndSetExitCode(
           new Error(
             `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
               e as Error
             ).toString()}`
           )
         );
+        return;
       }
     }
   }
@@ -216,6 +341,9 @@ export class RushCommandLineParser extends CommandLineParser {
 
     for (let i: number = 2; i < process.argv.length; i++) {
       const arg: string = process.argv[i];
+      if (arg === '--') {
+        break;
+      }
       if (arg === '-q' || arg === '--quiet' || arg === '--json') {
         return true;
       }
@@ -234,18 +362,55 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   public override async executeAsync(args?: string[]): Promise<boolean> {
+    if (this._initializationFailed) {
+      await this._closeReporterAsync();
+      return false;
+    }
+
     // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
-    this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
-      process.argv.indexOf('--debug') >= 0;
+    if (this._terminalProvider instanceof ConsoleTerminalProvider) {
+      const passThroughSeparatorIndex: number = process.argv.indexOf('--', 2);
+      const rushArgv: string[] =
+        passThroughSeparatorIndex < 0
+          ? process.argv.slice(2)
+          : process.argv.slice(2, passThroughSeparatorIndex);
+      this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
+        rushArgv.includes('--debug') || rushArgv.includes('-d');
+    }
 
-    await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
-      this.pluginManager.tryInitializeUnassociatedPluginsAsync()
-    );
+    this._sessionLifecycleEmitter = _getRushSessionLifecycleEmitter(this.rushSession);
+    if (this._sessionLifecycleEmitter) {
+      this._sessionStartTimeMs = performance.now();
+      this._sessionLifecycleEmitter.emitSessionStarted({
+        rushVersion: _getRushSessionReporterSourceVersion(this.rushSession)!
+      });
+    }
 
-    return await super.executeAsync(args);
+    try {
+      await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
+        this.pluginManager.tryInitializeUnassociatedPluginsAsync()
+      );
+
+      const succeeded: boolean = await super.executeAsync(args);
+      if (!this._reporterCompletionEmitted) {
+        this._emitReporterCompletion(succeeded ? 0 : _getNumericProcessExitCode(1));
+      }
+      return succeeded;
+    } catch (error) {
+      if (!process.exitCode) {
+        process.exitCode = 1;
+      }
+      this._reportErrorAndSetExitCode(error as Error);
+      return false;
+    } finally {
+      await this._closeReporterAsync();
+    }
   }
 
   protected override async onExecuteAsync(): Promise<void> {
+    if (this._rushOptions.engine) {
+      return;
+    }
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
     // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
@@ -255,6 +420,17 @@ export class RushCommandLineParser extends CommandLineParser {
 
     if (this._debugParameter.value) {
       InternalError.breakInDebugger = true;
+    }
+
+    const commandName: string | undefined = this.selectedAction?.actionName;
+    if (commandName) {
+      this._commandLifecycleEmitter = _getRushSessionLifecycleEmitter(this.rushSession, {
+        commandName
+      });
+      if (this._commandLifecycleEmitter) {
+        this._commandStartTimeMs = performance.now();
+        this._commandLifecycleEmitter.emitCommandStarted({ commandName });
+      }
     }
 
     try {
@@ -297,6 +473,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
+      this._emitReporterCompletion(0);
     } catch (error) {
       this._reportErrorAndSetExitCode(error as Error);
     }
@@ -309,7 +486,10 @@ export class RushCommandLineParser extends CommandLineParser {
     return {
       cwd: options.cwd || process.cwd(),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
-      builtInPluginConfigurations: options.builtInPluginConfigurations || []
+      builtInPluginConfigurations: options.builtInPluginConfigurations || [],
+      reporter: options.reporter,
+      reporterCloseAsync: options.reporterCloseAsync,
+      engine: options.engine
     };
   }
 
@@ -359,7 +539,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       this._populateScriptActions();
     } catch (error) {
-      this._reportErrorAndSetExitCode(error as Error);
+      this._reportInitializationErrorAndSetExitCode(error as Error);
     }
   }
 
@@ -512,6 +692,20 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _reportErrorAndSetExitCode(error: Error): void {
+    const rushSession: RushSession | undefined = this.rushSession;
+    if (rushSession && !_isRushSessionErrorRepresented(rushSession, error)) {
+      const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_COMMAND_FAILED', {
+        parameters: {
+          commandName: {
+            value: this.selectedAction?.actionName ?? 'unknown',
+            privacy: 'public'
+          }
+        }
+      });
+      this._commandLifecycleEmitter?.emitDiagnostic(diagnostic);
+      _correlateRushSessionError(rushSession, error, diagnostic.diagnosticId);
+    }
+
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
 
@@ -521,17 +715,39 @@ export class RushCommandLineParser extends CommandLineParser {
       const message: string = Text.splitByNewLines(PrintUtilities.wrapWords(prefix + error.message))
         .map((line) => Colorize.red(line))
         .join('\n');
-      // eslint-disable-next-line no-console
-      console.error(`\n${message}`);
+      if (
+        (rushSession && _isRushSessionOperationStreamEnabled(rushSession)) ||
+        this._rushOptions.reporter?.operationStreamEnabled
+      ) {
+        this._terminal.writeErrorLine(message);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error(`\n${message}`);
+      }
     }
 
     if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
-      // eslint-disable-next-line no-console
-      console.error(`\n${error.stack}`);
+      if (
+        (rushSession && _isRushSessionOperationStreamEnabled(rushSession)) ||
+        this._rushOptions.reporter?.operationStreamEnabled
+      ) {
+        this._terminal.writeErrorLine(error.stack ?? error.message);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error(`\n${error.stack}`);
+      }
     }
 
+    const configuredExitCode: string | number | undefined = process.exitCode;
+    const numericExitCode: number = Number(configuredExitCode);
+    const exitCode: number =
+      configuredExitCode !== undefined && Number.isInteger(numericExitCode) && numericExitCode !== 0
+        ? numericExitCode
+        : 1;
+    process.exitCode = exitCode;
+    this._emitReporterCompletion(exitCode);
     this.flushTelemetry();
 
     const handleExit = (): never => {
@@ -541,17 +757,96 @@ export class RushCommandLineParser extends CommandLineParser {
       // performs nontrivial work that can throw an exception.  Either the Rush class would need
       // to handle reporting for those exceptions, or else _populateActions() should be moved
       // to a RushCommandLineParser lifecycle stage that can handle it.
-      if (process.exitCode !== undefined) {
-        process.exit(process.exitCode);
-      } else {
-        process.exit(1);
-      }
+      process.exit(exitCode);
     };
 
-    if (this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()) {
-      this.telemetry.ensureFlushedAsync().then(handleExit).catch(handleExit);
-    } else {
-      handleExit();
+    const telemetryFlushAsync: Promise<void> | undefined =
+      this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()
+        ? this.telemetry.ensureFlushedAsync()
+        : undefined;
+
+    const pendingFlushes: Promise<unknown>[] = [
+      this._rushOptions.reporterCloseAsync
+        ? this._closeReporterAsync()
+        : rushSession
+          ? _flushRushSessionReporterAsync(rushSession)
+          : Promise.resolve()
+    ];
+    if (telemetryFlushAsync) {
+      pendingFlushes.push(telemetryFlushAsync);
+    }
+    void Promise.allSettled(pendingFlushes).then(handleExit);
+  }
+
+  private _reportInitializationErrorAndSetExitCode(error: Error): void {
+    if (this._rushOptions.engine) {
+      throw error;
+    }
+    this._initializationFailed = true;
+    this._reportErrorAndSetExitCode(error);
+  }
+
+  private _closeReporterAsync(): Promise<void> {
+    if (!this._reporterClosePromise) {
+      this._reporterClosePromise = (async (): Promise<void> => {
+        try {
+          await this._rushOptions.reporterCloseAsync?.();
+        } catch (error) {
+          process.exitCode = 1;
+          process.stderr.write(`[reporter] Unable to finalize reporters: ${(error as Error).message}\n`);
+        }
+      })();
+    }
+    return this._reporterClosePromise;
+  }
+
+  private _emitReporterCompletion(exitCode: number): void {
+    if (this._reporterCompletionEmitted) {
+      return;
+    }
+    this._reporterCompletionEmitted = true;
+
+    const commandName: string | undefined = this.selectedAction?.actionName;
+    if (commandName && this._commandLifecycleEmitter) {
+      const durationMs: number | undefined =
+        this._commandStartTimeMs === undefined ? undefined : performance.now() - this._commandStartTimeMs;
+      this._commandLifecycleEmitter.emitCommandResult({
+        commandName,
+        succeeded: exitCode === 0,
+        exitCode
+      });
+      this._commandLifecycleEmitter.emitCommandCompleted({
+        commandName,
+        exitCode,
+        ...(durationMs === undefined ? {} : { durationMs })
+      });
+    }
+
+    if (this._sessionLifecycleEmitter) {
+      const durationMs: number | undefined =
+        this._sessionStartTimeMs === undefined ? undefined : performance.now() - this._sessionStartTimeMs;
+      this._sessionLifecycleEmitter.emitSessionCompleted({
+        exitCode,
+        ...(durationMs === undefined ? {} : { durationMs })
+      });
+    }
+
+    // Shadow derivation is deliberately observational. process.exitCode remains authoritative.
+    const rushSession: RushSession | undefined = this.rushSession;
+    if (rushSession) {
+      _getRushSessionDerivedExitStatus(rushSession);
     }
   }
+}
+
+function _getNumericProcessExitCode(fallback: number): number {
+  const { exitCode } = process;
+  if (typeof exitCode === 'number') {
+    return exitCode;
+  }
+  if (typeof exitCode === 'string') {
+    const parsed: number = Number(exitCode);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  return fallback;
 }

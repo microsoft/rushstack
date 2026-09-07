@@ -56,8 +56,10 @@ describe('detached daemon startup', () => {
     if (fs.existsSync(path.join(folder, 'starts'))) {
       fs.writeFileSync(path.join(folder, 'stop'), '');
       const deadline: number = Date.now() + 5000;
-      while (!fs.existsSync(path.join(folder, 'stopped')) && Date.now() < deadline) await delayAsync(50);
-      expect(fs.existsSync(path.join(folder, 'stopped'))).toBe(true);
+      const pids: string[] = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n');
+      const allStopped = (): boolean => pids.every((pid) => fs.existsSync(path.join(folder, `stopped-${pid}`)));
+      while (!allStopped() && Date.now() < deadline) await delayAsync(50);
+      expect(allStopped()).toBe(true);
     }
     fs.rmSync(folder, { recursive: true });
   });
@@ -87,6 +89,67 @@ describe('detached daemon startup', () => {
     expect(await client.status).toMatchObject({ daemonVersion: 'fixture' });
     await client.closeAsync();
   }, 15000);
+
+  it('replaces a mismatched daemon exactly once for concurrent clients before requests start', async () => {
+    const old = await connectOrStartDaemonAsync(options);
+    const previous = await old.status;
+    await old.closeAsync();
+    const replacement: IConnectOrStartDaemonOptions = {
+      ...options,
+      expectedDaemonVersion: 'replacement',
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'replacement'] }
+    };
+    const clients: DaemonClient[] = await Promise.all(
+      Array.from({ length: 4 }, () => connectOrStartDaemonAsync(replacement))
+    );
+    try {
+      const statuses = await Promise.all(clients.map((client) => client.status));
+      expect(statuses.every((status) => status.daemonVersion === 'replacement')).toBe(true);
+      expect(new Set(statuses.map((status) => status.pid)).size).toBe(1);
+      expect(statuses[0].pid).not.toBe(previous.pid);
+      expect(fs.existsSync(path.join(folder, `stopped-${previous.pid}`))).toBe(true);
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+      const request = captureDaemonRequest({
+        argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
+        terminal: { isTTY: false, supportsColor: false }
+      });
+      await expect(clients[0].executeAsync({ request })).resolves.toMatchObject({
+        kind: 'result', result: { exitCode: 0 }
+      });
+      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8')).toBe('replacement\n');
+    } finally {
+      await Promise.all(clients.map((client) => client.closeAsync()));
+    }
+  }, 15000);
+
+  it('does not replace a mismatched daemon without an explicit launcher', async () => {
+    const running = await connectOrStartDaemonAsync(options);
+    await running.closeAsync();
+    await expect(connectOrStartDaemonAsync({
+      paths, expectedDaemonVersion: 'replacement'
+    })).rejects.toMatchObject({ code: 'versionMismatch' });
+    const original = await DaemonClient.connectAsync({
+      socketPath: paths.socketPath, expectedDaemonVersion: 'fixture'
+    });
+
+    await original.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  it('does not stop a mismatched daemon with unverifiable ownership', async () => {
+    const running = await connectOrStartDaemonAsync(options);
+    await running.closeAsync();
+    fs.writeFileSync(paths.lockfilePath, 'corrupt');
+    await expect(connectOrStartDaemonAsync({
+      ...options, expectedDaemonVersion: 'replacement'
+    })).rejects.toThrow('shutdown was not sent');
+    const original = await DaemonClient.connectAsync({
+      socketPath: paths.socketPath, expectedDaemonVersion: 'fixture'
+    });
+    await original.closeAsync();
+    expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('corrupt');
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
 
   it('does not start when auto-start is absent', async () => {
     await expect(connectOrStartDaemonAsync({ paths })).rejects.toThrow('auto-start is disabled');

@@ -99,6 +99,31 @@ describe('daemon global request wire integration', () => {
     }
   });
 
+  it('does not intercept custom commands named daemon when graph features are enabled', async () => {
+    const repoRoot: string = createRepoRoot();
+    const executorAsync: GlobalCommandExecutor = async (context) => {
+      context.terminal.write('custom daemon');
+      return { exitCode: 0 };
+    };
+    const resolver = new CallbackDaemonRequestResolver(async () => ({
+      kind: 'global', executor: executorAsync
+    }));
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot, resolver));
+    const client: DaemonRequestWireClient = await connectAsync(host);
+    try {
+      const exchange: ITerminalExchange = await startAsync(client, createWireEnvelope('custom-daemon', 'daemon', repoRoot, {
+        argv: ['daemon', 'graph'],
+        commandOrigin: 'custom',
+        environment: { RUSH_DAEMON_EXPERIMENTAL: '1' }
+      }));
+      expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(readLogText(exchange)).toBe('custom daemon');
+    } finally {
+      await client.closeAsync();
+      await host.closeAsync();
+    }
+  });
+
   it('isolates global cwd and environment while preserving raw ordered output and exit codes', async () => {
     const repoRoot: string = createRepoRoot();
     const firstCwd: string = fs.mkdtempSync(path.join(repoRoot, 'first-'));

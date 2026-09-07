@@ -96,6 +96,12 @@ class TestOperationGraph implements IOperationGraph {
     return Promise.resolve(false);
   }
 
+  public discardScheduledIteration(): boolean {
+    const hadScheduled: boolean = this.hasScheduledIteration;
+    this.hasScheduledIteration = false;
+    return hadScheduled;
+  }
+
   public invalidateOperations(): void {}
 
   public removeTerminalDestination(): boolean {

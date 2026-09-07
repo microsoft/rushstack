@@ -6,9 +6,12 @@ import { EOL } from 'node:os';
 import type { IDaemonActivityPayload, IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import type { IDaemonRenderer, IDaemonRendererContext } from './DaemonRenderer';
-import type { IDaemonRendererTerminal } from './DaemonRendererTerminal';
+import type { DaemonRenderStream, IDaemonRendererTerminal } from './DaemonRendererTerminal';
 
 const RENDERER_NAME: string = 'legacy-collated';
+const NEWLINE: string = '\n';
+const EMPTY: string = '';
+const NEWLINES: RegExp = /\r?\n/g;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -16,6 +19,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isActivityPayload(payload: unknown): payload is IDaemonActivityPayload {
   return isRecord(payload) && typeof payload.text === 'string';
+}
+
+function activityStream(stream: DaemonRenderStream | undefined): DaemonRenderStream {
+  return stream === 'stderr' ? 'stderr' : 'stdout';
 }
 
 /**
@@ -44,14 +51,16 @@ export class LegacyCollatedRenderer implements IDaemonRenderer {
     if (event.type !== 'activityChanged' || !isActivityPayload(event.payload)) {
       return;
     }
-    this._writeLine(event.payload.text);
+    this._writeLine(event.payload.text, activityStream(event.payload.stream));
   }
 
-  private _writeLine(text: string): void {
+  private _writeLine(text: string, stream: DaemonRenderStream): void {
     // Emit the client's OS newline, matching the newline normalization the
     // collated pipeline applies (TextRewriterTransform OsDefault) so global
     // status lines and collated blocks are consistent on every platform.
-    this._terminal?.write(`${text}${EOL}`, 'stdout');
+    this._terminal?.write(
+      `${text.replace(NEWLINES, EOL)}${text.endsWith(NEWLINE) ? EMPTY : EOL}`, stream
+    );
   }
 
   /** {@inheritDoc IDaemonRenderer.flushAsync} */

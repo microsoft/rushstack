@@ -214,6 +214,12 @@ export const EnvironmentVariableNames = {
    */
   RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
 
+  /** Reporter selection is interpreted by the frontend, not the execution engine. */
+  RUSH_REPORTER: 'RUSH_REPORTER',
+
+  /** Reporter verbosity is interpreted by the frontend, not the execution engine. */
+  RUSH_LOG_LEVEL: 'RUSH_LOG_LEVEL',
+
   /**
    * Internal variable used by `rushx` when recursively invoking another `rushx` process, to avoid
    * nesting event hooks.
@@ -265,13 +271,13 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
-  /** Reserved for warm-set idle eviction. */
+  /** Overrides idle eviction in an attached daemon warm set. */
   RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
-  /** Reserved for warm-set memory budgeting. */
+  /** Overrides the attached warm set's best-effort sampled RSS budget. */
   RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
-  /** Reserved for warm-set project limits. */
+  /** Overrides the attached warm set's retained project limit. */
   RUSH_DAEMON_WARM_SET_MAX_PROJECTS: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
-  /** Reserved for telemetry-weighted warming. */
+  /** Enables telemetry-weighted retention of requested work in an attached warm set. */
   RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
   /** Gates the experimental graph client; requires host graph integration. */
   RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'
@@ -517,6 +523,18 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * Reads and normalizes `RUSH_TEMP_FOLDER` without initializing the global environment state.
+   *
+   * @internal
+   */
+  public static _getRushTempFolderOverride(processEnv: IEnvironment): string | undefined {
+    const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_TEMP_FOLDER];
+    if (value) {
+      return _normalizeDeepestParentFolderPath(value) || value;
+    }
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
   public static validate(options: IEnvironmentConfigurationInitializeOptions = {}): void {
@@ -533,7 +551,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             _rushTempFolderOverride =
               value && !options.doNotNormalizePaths
-                ? _normalizeDeepestParentFolderPath(value) || value
+                ? EnvironmentConfiguration._getRushTempFolderOverride(process.env)
                 : value;
             break;
           }
@@ -679,6 +697,8 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
+          case EnvironmentVariableNames.RUSH_REPORTER:
+          case EnvironmentVariableNames.RUSH_LOG_LEVEL:
             // Handled by @microsoft/rush front end
             break;
 

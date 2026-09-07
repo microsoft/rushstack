@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose a bounded native phased-command engine factory that reuses Rush command parsing and the all-project operation graph pipeline without CLI process-state mutation, with explicit lifetime cleanup and native lock ownership.",
+      "type": "minor"
+    }
+  ]
+}

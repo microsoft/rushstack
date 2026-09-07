@@ -23,7 +23,7 @@ export { DaemonFrameDecoder, type IDaemonFrameDecoderOptions } from './FrameDeco
 export { DaemonProtocolError, ProtocolVersionMismatchError } from './DaemonProtocolError';
 export type { DaemonProtocolErrorCode, IDaemonProtocolErrorOptions } from './DaemonProtocolError';
 export {
-  DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR, DAEMON_LIFECYCLE_PROTOCOL_MINOR, DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
+  DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR, DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR, DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR, DAEMON_INVOCATION_KIND_PROTOCOL_MINOR, DAEMON_LIFECYCLE_PROTOCOL_MINOR, DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION, isDaemonProtocolCompatible
 } from './DaemonProtocolVersion';
@@ -36,7 +36,7 @@ export type { IDaemonErrorMessage, IDaemonHelloAckMessage, IDaemonHelloMessage }
 export type { IDaemonPingMessage, IDaemonSubscribeMessage, IDaemonUnsubscribeMessage } from './DaemonControlMessage';
 export type {
   IDaemonRawModeChangedMessage,
-  IDaemonSetRawModeMessage,
+  IDaemonSetRawModeMessage, IDaemonStdinEndMessage, IDaemonStdinReadyMessage,
   IDaemonTerminalPolicyMessage
 } from './DaemonInteractiveControl';
 export type { IDaemonPongMessage } from './DaemonPongMessage';
@@ -61,23 +61,22 @@ export type {
   IDaemonRequestStartMessage
 } from './DaemonRequestControl';
 export type { IDaemonRequestEnvelope, IDaemonRequestTerminal } from './DaemonRequestEnvelope';
+export type { DaemonInvocationKind } from './DaemonInvocationKind';
 export type {
   DaemonRequestAdmissionErrorCode,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from './DaemonRequestAdmission';
 export type { DaemonRushCommandOrigin } from './DaemonRushCommand';
+export { RUSHD_GRAPH_SNAPSHOT } from './DaemonGraphSnapshot';
+export type { IDaemonGraphInvalidations, IDaemonGraphOperation, IDaemonGraphSnapshotPayload, IDaemonInitializedGraphSnapshot, IDaemonUninitializedGraphSnapshot } from './DaemonGraphSnapshot';
 export type {
   DaemonTerminalPolicyDecision,
   DaemonTerminalPolicyReason,
   DaemonTerminalRequirement,
   IDaemonTerminalPolicyResult
 } from './DaemonTerminalPolicy';
-export {
-  decodeDaemonStdinChunk,
-  encodeDaemonStdinChunk,
-  type IDaemonStdinChunk
-} from './StdinFrameCodec';
+export { decodeDaemonStdinChunk, encodeDaemonStdinChunk, type IDaemonStdinChunk } from './StdinFrameCodec';
 export { DAEMON_EVENT_TYPES, isDaemonEventType, type DaemonEventType } from './DaemonEventType';
 export type { DaemonEventPrivacy, IDaemonEventEnvelope, IDaemonEventScope, IDaemonEventSource } from './DaemonEventEnvelope';
 export { isDaemonEventEnvelope, validateDaemonEventEnvelope } from './DaemonEventValidation';

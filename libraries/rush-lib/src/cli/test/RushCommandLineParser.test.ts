@@ -29,8 +29,9 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 import './mockRushCommandLineParser';
 
 import type { SpawnOptions } from 'node:child_process';
-import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import {
@@ -46,6 +47,15 @@ import { IS_WINDOWS } from '../../utilities/executionUtilities';
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
 // we only reference the one that is common.
 const SPAWN_ARG_OPTIONS: number = 2;
+
+class CapturingReporterSink implements IReporterEventSink {
+  public readonly inputs: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.inputs.push(event);
+    return `event-${this.inputs.length}`;
+  }
+}
 
 function spawnOptionEquals<TOption extends keyof SpawnOptions, TExepcted>(
   spawnCall: SpawnMockCall,
@@ -93,7 +103,11 @@ describe('RushCommandLineParser', () => {
       describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
-          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(repoName, 'build');
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(repoName, 'build', {
+            eventSink: reporterSink,
+            sessionId: 'parser-shadow'
+          });
 
           await expect(parser.executeAsync()).resolves.toEqual(true);
 
@@ -111,6 +125,120 @@ describe('RushCommandLineParser', () => {
           const secondSpawn: SpawnMockArgs = spawnMock.mock.calls[1];
           expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
+
+          const eventTypes: string[] = reporterSink.inputs.map(({ type }) => type);
+          expect(eventTypes[0]).toBe('sessionStarted');
+          expect(eventTypes[1]).toBe('commandStarted');
+          expect(eventTypes).toContain('operationRegistered');
+          expect(eventTypes).toContain('operationStatusChanged');
+          expect(eventTypes.slice(-3)).toEqual(['commandResult', 'commandCompleted', 'sessionCompleted']);
+          expect(reporterSink.inputs.at(-3)?.payload).toMatchObject({
+            commandName: 'build',
+            succeeded: true,
+            exitCode: 0
+          });
+          for (const event of reporterSink.inputs.filter(({ type }) => type === 'operationRegistered')) {
+            const scope = event.scope!;
+            expect(scope.operationId).toBe(`${scope.projectName}#${scope.phaseName}`);
+          }
+          expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+        });
+
+        it('makes the opted-in reporter stream the sole visible operation writer', async () => {
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const stdoutSpy: jest.SpiedFunction<typeof process.stdout.write> = jest
+            .spyOn(process.stdout, 'write')
+            .mockImplementation(() => true);
+          const stderrSpy: jest.SpiedFunction<typeof process.stderr.write> = jest
+            .spyOn(process.stderr, 'write')
+            .mockImplementation(() => true);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-visible-cutover',
+                operationStreamEnabled: true
+              }
+            );
+
+            await expect(parser.executeAsync()).resolves.toEqual(true);
+
+            expect(stdoutSpy).not.toHaveBeenCalled();
+            expect(stderrSpy).not.toHaveBeenCalled();
+            expect(reporterSink.inputs.some(({ type }) => type === 'operationCompleted')).toBe(true);
+          } finally {
+            stdoutSpy.mockRestore();
+            stderrSpy.mockRestore();
+          }
+        });
+
+        it('preserves the actionable lock contention reason in reporter mode', async () => {
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockReturnValue(undefined);
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-conflict',
+                operationStreamEnabled: true
+              }
+            );
+
+            await parser.executeAsync();
+            await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+            expect(reporterSink.inputs).toContainEqual(
+              expect.objectContaining({
+                type: 'messageEmitted',
+                payload: expect.objectContaining({
+                  severity: 'error',
+                  text: expect.stringContaining('Another Rush command is already running')
+                })
+              })
+            );
+          } finally {
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
+          }
+        });
+      });
+
+      describe("'custom-output' action", () => {
+        it('preserves custom parameters that overlap reporter controls', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'custom-output'
+          );
+          process.argv.push(
+            '--reporter',
+            'junit',
+            '--output',
+            'custom-artifact.zip',
+            '--log-level',
+            'custom-level',
+            '--verbose'
+          );
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-output-args.json`)).toEqual([
+            '--reporter',
+            'junit',
+            '--output',
+            'custom-artifact.zip',
+            '--log-level',
+            'custom-level',
+            '--verbose'
+          ]);
         });
       });
 
@@ -138,6 +266,20 @@ describe('RushCommandLineParser', () => {
           const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
           expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
+        });
+      });
+
+      describe("'custom-reporter-flag' action", () => {
+        it('preserves a value-less custom reporter flag', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunRebuildActionRepo',
+            'custom-reporter-flag'
+          );
+          process.argv.push('--reporter');
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-reporter-flag-args.json`)).toEqual(['--reporter']);
         });
       });
     });

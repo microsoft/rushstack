@@ -27,6 +27,14 @@ describe(EnvironmentConfiguration.name, () => {
       expect(EnvironmentConfiguration.validate).not.toThrow();
     });
 
+    it('accepts frontend-owned reporter controls without interpreting or deleting them', () => {
+      process.env.RUSH_REPORTER = 'legacy';
+      process.env.RUSH_LOG_LEVEL = 'debug';
+      expect(EnvironmentConfiguration.validate).not.toThrow();
+      expect(process.env.RUSH_REPORTER).toBe('legacy');
+      expect(process.env.RUSH_LOG_LEVEL).toBe('debug');
+    });
+
     it('does not allow unknown environment variables', () => {
       process.env['rush_foobar'] = 'asdf'; // eslint-disable-line dot-notation
       expect(EnvironmentConfiguration.validate).toThrow();

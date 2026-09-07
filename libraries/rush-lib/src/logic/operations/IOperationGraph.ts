@@ -111,9 +111,23 @@ export interface IOperationGraph {
 
   /**
    * Cleans up any resources used by the operation runners, if applicable.
+   *
+   * Does not wait for executing operations to finish before closing their runners. Hosts performing
+   * idle eviction must coordinate this call with iteration scheduling. Operations, their last results,
+   * and host-owned watchers are not removed.
+   *
    * @param operations - The operations whose runners should be closed, or undefined to close all runners.
    */
   closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
+
+  /**
+   * Drops retained results after the host has awaited runner and watcher cleanup.
+   * Rejects executing/prepared iterations and runners that still report active resources.
+   * Detaches completed iteration contexts so surviving results do not retain evicted records.
+   * Does not change enabled states, disk caches, or operation definitions.
+   * Optional for compatibility with hosts that do not support idle eviction.
+   */
+  deleteResults?(operations: Iterable<Operation>): void;
 
   /**
    * Executes a single iteration of the operations.
@@ -121,6 +135,13 @@ export interface IOperationGraph {
    * @returns A promise that resolves to true if the iteration has work to be done, or false if the iteration was empty and therefore not scheduled.
    */
   scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
+
+  /**
+   * Discards prepared, unstarted work without executing scripts or closing retained runners.
+   * Throws while an iteration is executing. Completed results remain unchanged.
+   * @returns Whether a prepared iteration was discarded.
+   */
+  discardScheduledIteration(): boolean;
 
   /**
    * Executes all operations in the currently scheduled iteration, if any.

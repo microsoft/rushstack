@@ -20,7 +20,11 @@ export {
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
-export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+export {
+  RushConfiguration,
+  type IRushReportingConfiguration,
+  type ITryFindRushJsonLocationOptions
+} from './api/RushConfiguration';
 export {
   resolveDaemonConfiguration,
   daemonEnvironmentVariables,
@@ -77,6 +81,7 @@ export {
 } from './api/EnvironmentConfiguration';
 
 export { RushConstants } from './logic/RushConstants';
+export { RushXCommand, type IRushXCommandLineArguments, type IRushXCommandOptions } from './cli/RushXCommandLine';
 
 export { type PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
@@ -164,14 +169,46 @@ export type {
 export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
 export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export {
+  PhasedCommandEngine,
+  type IPhasedCommandEngine,
+  type IParsePhasedCommandOptions
+} from './api/PhasedCommandEngine';
+export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
+export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
+export {
+  captureWorkspaceInputFingerprintAsync,
+  captureProjectConfigurationFingerprintAsync,
+  classifyWorkspaceInputChange,
+  WorkspaceInputChangeTier,
+  WorkspaceRuntimeFingerprintCache,
+  type IWorkspaceInputFingerprint,
+  type IWorkspaceInputFingerprintOptions
+} from './api/WorkspaceInputFingerprint';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {
   RushSession,
   type IRushSessionOptions,
+  type IRushSessionReporterOptions,
   type CloudBuildCacheProviderFactory,
   type CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
+
+export {
+  createRushDiagnostic,
+  parseReporterExtensionEventName,
+  type ICreateRushDiagnosticOptions,
+  type IReporterEventScope,
+  type IReporterEventSink,
+  type IRushDiagnostic,
+  type IScopedLogger,
+  type IScopedMessageOptions,
+  type IScopedReporter,
+  type ReporterExtensionEventName,
+  type ReporterJsonValue,
+  type ReporterPrivacyClassification
+} from '@rushstack/rush-reporter';
 
 export {
   type IRushCommand,
@@ -188,6 +225,7 @@ export {
 } from './pluginFramework/PhasedCommandHooks';
 export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
 export type {
+  IOperationChildProcessReporter as _IOperationChildProcessReporter,
   IOperationGraphEventSink as _IOperationGraphEventSink,
   IOperationActivityOptions as _IOperationActivityOptions
 } from './logic/operations/OperationEventSink';

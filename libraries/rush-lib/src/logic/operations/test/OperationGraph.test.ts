@@ -35,6 +35,8 @@ jest.mock('../ProjectLogWritable', () => {
   };
 });
 
+import { spawn, type ChildProcess } from 'node:child_process';
+
 import { type ITerminal, Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
@@ -47,6 +49,7 @@ import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
 import { _printTimeline } from '../ConsoleTimelinePlugin';
 import { OperationStatus } from '../OperationStatus';
 import { Operation } from '../Operation';
+import { IPCOperationRunner } from '../IPCOperationRunner';
 import { Utilities } from '../../../utilities/Utilities';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import { MockOperationRunner } from './MockOperationRunner';
@@ -116,11 +119,7 @@ class ClosableRunner extends MockOperationRunner {
 
   public override async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     this.isActive = true;
-    const status: OperationStatus = await super.executeAsync(context);
-    if (!context.shouldRunnerPersist) {
-      await this.closeAsync();
-    }
-    return status;
+    return await super.executeAsync(context);
   }
 }
 
@@ -1162,6 +1161,53 @@ describe('deferred invalidation during active iteration', () => {
   });
 });
 
+describe('discarding prepared iterations', () => {
+  function pausedGraph(runner: IOperationRunner): OperationGraph {
+    return createGraph({
+      quietMode: true, debugMode: false, parallelism: 1, allowOversubscription: false,
+      destinations: [mockWritable], abortController: new AbortController(),
+      pauseNextIteration: true, closeRunnersOnAbort: false
+    }, runner);
+  }
+
+  it('drops unstarted work without running or closing its runner', async () => {
+    const runAsync = jest.fn(async () => OperationStatus.Success);
+    const runner: ClosableRunner = new ClosableRunner('discarded', runAsync);
+    const graph: OperationGraph = pausedGraph(runner);
+    try {
+      expect(await graph.scheduleIterationAsync({})).toBe(true);
+      expect(graph.discardScheduledIteration()).toBe(true);
+      expect(graph.discardScheduledIteration()).toBe(false);
+      expect(graph.hasScheduledIteration).toBe(false);
+      expect(graph.resultByOperation.size).toBe(0);
+      expect(runAsync).not.toHaveBeenCalled();
+      expect(runner.closeAsync).not.toHaveBeenCalled();
+    } finally {
+      graph.abortController.abort();
+      await graph.closeRunnersAsync();
+    }
+  });
+
+  it('preserves completed results and the resident runner when replacing a prepared iteration', async () => {
+    const runner: ClosableRunner = new ClosableRunner('retained');
+    const graph: OperationGraph = pausedGraph(runner);
+    try {
+      await graph.executeAsync({});
+      const operation: Operation = [...graph.operations][0];
+      const result = graph.resultByOperation.get(operation);
+      await graph.scheduleIterationAsync({});
+      graph.discardScheduledIteration();
+      expect(graph.resultByOperation.get(operation)).toBe(result);
+      expect(result?.status).toBe(OperationStatus.Success);
+      expect(runner.isActive).toBe(true);
+      expect(runner.closeAsync).not.toHaveBeenCalled();
+    } finally {
+      graph.abortController.abort();
+      await graph.closeRunnersAsync();
+    }
+  });
+});
+
 describe('runner persistence policy', () => {
   const graphOptions: IOperationGraphOptions = {
     quietMode: false,
@@ -1220,14 +1266,21 @@ describe('runner persistence policy', () => {
 
     await graph.executeAsync({});
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
-    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(2);
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(changingRunner.closeAsync).not.toHaveBeenCalled();
 
     persistentOperations = new Set([persistentOperation]);
     await graph.executeAsync({});
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
-    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(4);
-    expect(changingRunner.closeAsync).toHaveBeenCalledTimes(2);
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(2);
+    expect(changingRunner.closeAsync).toHaveBeenCalledTimes(1);
+
+    persistentOperations = new Set([persistentOperation, changingOperation]);
+    await graph.executeAsync({});
+    expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+    expect(oneShotRunner.closeAsync).toHaveBeenCalledTimes(3);
+    expect(changingRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(changingRunner.isActive).toBe(true);
   });
 
   it('releases a non-persistent runner before its dependents execute', async () => {
@@ -1271,11 +1324,44 @@ describe('runner persistence policy', () => {
     configureRunnerPersistence(graph, (operation) => operation !== upstreamOperation);
     await graph.executeAsync({});
 
-    expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(2);
+    expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(downstreamRunner.closeAsync).not.toHaveBeenCalled();
     // The non-persistent upstream runner must be released immediately upon its own completion,
     // before the downstream operation begins executing — not deferred to the end of the iteration.
     expect(executionOrder).toEqual(['upstream:run', 'upstream:close', 'downstream:run']);
+  });
+
+  it('blocks dependents when a non-persistent runner fails to close', async () => {
+    const upstreamRunner: ClosableRunner = new ClosableRunner('upstream');
+    const closeError: Error = new Error('close failed');
+    upstreamRunner.closeAsync.mockRejectedValue(closeError);
+    const downstreamRun: jest.Mock = jest.fn(async () => OperationStatus.Success);
+    const upstreamOperation: Operation = new Operation({
+      runner: upstreamRunner,
+      logFilenameIdentifier: 'upstream',
+      phase: mockPhase,
+      project: getOrCreateProject('upstream')
+    });
+    const downstreamOperation: Operation = new Operation({
+      runner: new MockOperationRunner('downstream', downstreamRun),
+      logFilenameIdentifier: 'downstream',
+      phase: mockPhase,
+      project: getOrCreateProject('downstream')
+    });
+    downstreamOperation.addDependency(upstreamOperation);
+    const graph: OperationGraph = new OperationGraph(
+      new Set([upstreamOperation, downstreamOperation]),
+      graphOptions
+    );
+    configureRunnerPersistence(graph, (operation) => operation !== upstreamOperation);
+
+    const result: IExecutionResult = await graph.executeAsync({});
+
+    expect(result.status).toBe(OperationStatus.Failure);
+    expect(result.operationResults.get(upstreamOperation)?.error).toBe(closeError);
+    expect(result.operationResults.get(downstreamOperation)?.status).toBe(OperationStatus.Blocked);
+    expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(1);
+    expect(downstreamRun).not.toHaveBeenCalled();
   });
 
   it('closes an active cold runner when an iteration bypasses runner execution', async () => {
@@ -1392,6 +1478,177 @@ describe('runner persistence policy', () => {
     expect(successfulColdResult?.error).toBeUndefined();
     expect(successfulColdRunner.closeAsync).toHaveBeenCalledTimes(1);
     expect(persistentRunner.closeAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('IPC runner persistence', () => {
+  let children: ChildProcess[];
+  let childClosedPromises: Promise<void>[];
+  let events: string[];
+  let graphOptions: IOperationGraphOptions;
+
+  beforeEach(() => {
+    children = [];
+    childClosedPromises = [];
+    events = [];
+    graphOptions = {
+      quietMode: true,
+      debugMode: false,
+      parallelism: 2,
+      allowOversubscription: true,
+      destinations: [mockWritable],
+      abortController: new AbortController()
+    };
+    jest.mocked(Utilities.executeLifecycleCommandAsync).mockImplementation(() => {
+      const child: ChildProcess = spawn(
+        process.execPath,
+        [
+          '-e',
+          `
+            process.on('message', (message) => {
+              if (message.command === 'run') {
+                process.send({ event: 'after-execute', status: 'SUCCESS' });
+              } else if (message.command === 'exit') {
+                process.exit(0);
+              }
+            });
+            process.send({ event: 'sync' });
+          `
+        ],
+        { stdio: ['ignore', 'pipe', 'pipe', 'ipc'] }
+      );
+      children.push(child);
+      child.on('exit', () => events.push('child:exit'));
+      childClosedPromises.push(
+        new Promise<void>((resolve) => {
+          child.once('close', () => {
+            events.push('child:close');
+            resolve();
+          });
+        })
+      );
+      return child;
+    });
+  });
+
+  afterEach(async () => {
+    for (const child of children) {
+      if (child.exitCode === null && child.signalCode === null) {
+        child.kill();
+      }
+    }
+    await Promise.all(childClosedPromises);
+    jest.mocked(Utilities.executeLifecycleCommandAsync).mockReset();
+  });
+
+  function createIPCRunner(): IPCOperationRunner {
+    return new IPCOperationRunner({
+      name: 'ipc',
+      phase: mockPhase,
+      project: {
+        packageName: 'ipc',
+        projectFolder: __dirname,
+        rushConfiguration: { commonTempFolder: __dirname }
+      } as RushConfigurationProject,
+      initialCommand: 'initial',
+      incrementalCommand: 'incremental',
+      commandForHash: 'build',
+      ignoredParameterValues: []
+    });
+  }
+
+  it('reuses, closes and restarts a child as the iteration policy changes, restoring the default when omitted', async () => {
+    const runner: IPCOperationRunner = createIPCRunner();
+    const graph: OperationGraph = createGraph(graphOptions, runner);
+    let shouldRunnerPersist: boolean | undefined;
+    graph.hooks.configureIteration.tap('test', (records) => {
+      if (shouldRunnerPersist !== undefined) {
+        for (const record of records.values()) {
+          record.shouldRunnerPersist = shouldRunnerPersist;
+        }
+      }
+    });
+
+    for (const [policy, expectedChildren] of [
+      [undefined, 1],
+      [false, 1],
+      [true, 2],
+      [false, 2],
+      [undefined, 3]
+    ] as const) {
+      shouldRunnerPersist = policy;
+      const result: IExecutionResult = await graph.executeAsync({});
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(children).toHaveLength(expectedChildren);
+      expect(runner.isActive).toBe(policy ?? true);
+      expect([...result.operationResults.values()][0].shouldRunnerPersist).toBe(policy ?? true);
+    }
+    expect(
+      jest.mocked(Utilities.executeLifecycleCommandAsync).mock.calls.map(([command]) => command)
+    ).toEqual(['initial', 'incremental', 'incremental']);
+  });
+
+  it.each([undefined, OperationStatus.FromCache, OperationStatus.Skipped, 'disabled'] as const)(
+    'closes a retained child before dependents when the next execution returns %s',
+    async (bypassStatus) => {
+      const runner: IPCOperationRunner = createIPCRunner();
+      const upstream: Operation = new Operation({
+        runner,
+        phase: mockPhase,
+        project: getOrCreateProject('ipc'),
+        logFilenameIdentifier: 'ipc'
+      });
+      const downstream: Operation = new Operation({
+        runner: new MockOperationRunner('downstream', async () => {
+          events.push('downstream:run');
+          return OperationStatus.Success;
+        }),
+        phase: mockPhase,
+        project: getOrCreateProject('downstream'),
+        logFilenameIdentifier: 'downstream'
+      });
+      downstream.addDependency(upstream);
+      const graph: OperationGraph = new OperationGraph(new Set([upstream, downstream]), graphOptions);
+      await graph.executeAsync({});
+      expect(runner.isActive).toBe(true);
+      events.length = 0;
+
+      configureRunnerPersistence(graph, (operation) => operation !== upstream);
+      if (bypassStatus === 'disabled') {
+        graph.hooks.configureIteration.tap('disable-upstream', (records) => {
+          records.get(upstream)!.enabled = false;
+        });
+      } else {
+        graph.hooks.beforeExecuteOperationAsync.tapPromise('bypass-upstream', async (record) => {
+          return record.operation === upstream ? bypassStatus : undefined;
+        });
+      }
+      const result: IExecutionResult = await graph.executeAsync({});
+
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(runner.isActive).toBe(false);
+      expect(children).toHaveLength(1);
+      expect(events).toEqual(['child:exit', 'child:close', 'downstream:run']);
+    }
+  );
+
+  it('closes an idle child without dropping its operation or last result and restarts it on execution', async () => {
+    const runner: IPCOperationRunner = createIPCRunner();
+    const graph: OperationGraph = createGraph(graphOptions, runner);
+    await graph.executeAsync({});
+    const [operation]: Operation[] = [...graph.operations];
+    const lastResult: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
+
+    await graph.closeRunnersAsync([operation]);
+
+    expect(runner.isActive).toBe(false);
+    expect(events).toEqual(['child:exit', 'child:close']);
+    expect(graph.operations.has(operation)).toBe(true);
+    expect(graph.resultByOperation.get(operation)).toBe(lastResult);
+    expect(lastResult?.status).toBe(OperationStatus.Success);
+    expect((await graph.executeAsync({})).status).toBe(OperationStatus.Success);
+    expect(children).toHaveLength(2);
+    expect(runner.isActive).toBe(true);
   });
 });
 

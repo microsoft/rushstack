@@ -6,15 +6,16 @@ import * as path from 'node:path';
 import { Rush } from '@microsoft/rush-lib';
 import {
   DaemonClient,
-  DaemonClientError,
   connectOrStartDaemonAsync,
+  requestDaemonShutdownAsync,
   type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
-import { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol';
-import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import type { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
 import { getDaemonConnectionOptions } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
+import { executeDaemonGraphCommandAsync } from './daemonGraph';
 import { writeStreamAsync } from './writeStreamAsync';
 
 export interface IDaemonCommandOptions {
@@ -22,16 +23,17 @@ export interface IDaemonCommandOptions {
   readonly environment: Readonly<NodeJS.ProcessEnv>;
   readonly rushJsonPath?: string;
   readonly rushVersion: string;
+  readonly admission?: IDaemonRequestAdmissionOptions;
 }
 
 export async function executeDaemonCommandAsync(options: IDaemonCommandOptions): Promise<void> {
   const command: string | undefined = options.argv[0];
+  if (options.admission && command !== 'graph') {
+    throw new Error('Daemon admission controls apply to command execution or graph requests, not lifecycle commands.');
+  }
   if (command === 'graph') {
-    throw new Error(
-      options.environment.RUSH_DAEMON_EXPERIMENTAL !== '1'
-        ? 'Experimental graph commands require RUSH_DAEMON_EXPERIMENTAL=1 and host graph protocol support.'
-        : 'The host graph protocol is not available in this build.'
-    );
+    await executeDaemonGraphCommandAsync(options);
+    return;
   }
   if (
     options.argv.length !== 1 ||
@@ -95,34 +97,8 @@ async function restartDaemonAsync(
   client: DaemonClient,
   options: IConnectOrStartDaemonOptions
 ): Promise<DaemonClient> {
-  if (client.protocolVersion.minor < DAEMON_LIFECYCLE_PROTOCOL_MINOR) {
-    throw new DaemonClientError('versionMismatch', 'Daemon restart requires protocol 0.6 or newer.');
-  }
-  const { pid } = await client.status;
-  if (pid === undefined || !Number.isSafeInteger(pid) || pid <= 0) {
-    throw new DaemonClientError(
-      'startupFailed',
-      'The daemon must report a positive PID before safe restart is possible.'
-    );
-  }
-  const lockfile: IDaemonLockfile | undefined = readDaemonLockfile(options.paths.lockfilePath);
-  if (
-    !lockfile ||
-    lockfile.pid !== pid ||
-    lockfile.socketPath !== options.paths.socketPath ||
-    typeof lockfile.startedAt !== 'string' ||
-    !Number.isFinite(Date.parse(lockfile.startedAt))
-  ) {
-    throw new DaemonClientError(
-      'startupFailed',
-      'The daemon ownership record is missing, unreadable, or changed; shutdown was not sent.'
-    );
-  }
-  const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> = {
-    pid,
-    startedAt: lockfile.startedAt
-  };
-  await client.shutdownAsync();
+  const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> =
+    await requestDaemonShutdownAsync(client, options.paths);
   return await connectOrStartDaemonAsync({ ...options, previousDaemon });
 }
 

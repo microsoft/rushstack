@@ -11,6 +11,11 @@ describe('opt-in routing', () => {
     { argv: ['build'], enabled: true, environment: { CI: '1' }, daemon: false },
     { argv: ['build'], enabled: true, environment: { CI: '1', RUSH_DAEMON: '1' }, daemon: true },
     { argv: ['build'], enabled: true, environment: { CI: 'false' }, daemon: true },
+    { argv: ['build', '--reporter=json'], enabled: true, environment: {}, daemon: false },
+    { argv: ['build', '--output', 'build.log'], enabled: true, environment: {}, daemon: false },
+    { argv: ['build', '--log-level=debug'], enabled: true, environment: {}, daemon: false },
+    { argv: ['build'], enabled: true, environment: { RUSH_REPORTER: 'json' }, daemon: false },
+    { argv: ['build'], enabled: true, environment: { RUSH_REPORTER: 'legacy' }, daemon: true },
     { argv: ['install'], enabled: true, environment: { RUSH_DAEMON: '1' }, daemon: false },
     { argv: ['daemon', 'status'], enabled: true, environment: {}, daemon: false },
     { argv: ['--help'], enabled: true, environment: {}, daemon: false },
@@ -28,5 +33,15 @@ describe('opt-in routing', () => {
         rushx: true
       })
     ).toEqual({ argv: ['install', '--', '--no-daemon'], commandName: 'install', daemon: true });
+  });
+
+  it('uses native Rushx option boundaries instead of treating script flags as Rush options', () => {
+    const argv: string[] = ['-q', '-d', '--ignore-hooks', 'build', '--help', '--reporter=json', '--', '-h'];
+    expect(selectClientRoute({ argv, enabled: true, environment: {}, rushx: true })).toMatchObject({
+      argv, commandName: 'build', daemon: true
+    });
+    expect(selectClientRoute({
+      argv: ['--unknown', 'build'], enabled: true, environment: {}, rushx: true
+    }).daemon).toBe(false);
   });
 });

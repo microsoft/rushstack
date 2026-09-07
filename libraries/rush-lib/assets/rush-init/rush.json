@@ -317,11 +317,26 @@
   /*[LINE "HYPOTHETICAL"]*/ "telemetryEnabled": false,
 
   /**
+   * Configures repository settings used by the experimental Rush reporter system.
+   */
+  /*[BEGIN "HYPOTHETICAL"]*/
+  "reporting": {
+    /**
+     * Additional environment variable names that identify an agent environment.
+     * The built-in COPILOT_CLI variable does not need to be listed here.
+     */
+    "agentEnvironmentVariables": ["MY_AGENT_CLI", "ANOTHER_AGENT"]
+  },
+  /*[END "HYPOTHETICAL"]*/
+
+  /**
    * The separate rush-client/rushx-client binaries are opt-in. Existing rush/rushx are unchanged.
    * Precedence: RUSH_DAEMON* environment variables, then this block, then the defaults shown.
    * CI uses in-process execution unless RUSH_DAEMON=1 explicitly opts in.
    * Boolean environment overrides accept only 0 or 1; numeric overrides use decimal numbers.
-   * Watch and warm-set options are validated but inactive until WS3 host integration is available.
+   * Warm-set policies require the generation-owned WorkspaceWarmSet host attachment.
+   * They retain requested work without starting scripts and impose no hard process-RSS ceiling.
+   * The watch option remains reserved for automatic watcher-driven execution.
    */
   /*[LINE "HYPOTHETICAL"]*/ "daemon": {
     /*[LINE "HYPOTHETICAL"]*/ "enabled": false,

@@ -10,25 +10,42 @@ import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
+import type * as child_process from 'node:child_process';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
+import { createRushDiagnostic } from '@rushstack/rush-reporter';
 import { CredentialCache } from '@rushstack/credential-cache';
 import { HookMap } from 'tapable';
+import { ICreateRushDiagnosticOptions } from '@rushstack/rush-reporter';
 import { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { ICredentialCacheOptions } from '@rushstack/credential-cache';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IProblemCollector } from '@rushstack/terminal';
+import { IReporterChildContext } from '@rushstack/rush-reporter';
+import { IReporterEventEnvelope } from '@rushstack/rush-reporter';
+import { IReporterEventScope } from '@rushstack/rush-reporter';
+import { IReporterEventSink } from '@rushstack/rush-reporter';
+import { IRushDiagnostic } from '@rushstack/rush-reporter';
+import { IScopedLogger } from '@rushstack/rush-reporter';
+import { IScopedMessageOptions } from '@rushstack/rush-reporter';
+import { IScopedReporter } from '@rushstack/rush-reporter';
+import type { ITelemetryAggregate } from '@rushstack/rush-reporter';
 import { ITerminal } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { LockFile } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import { parseReporterExtensionEventName } from '@rushstack/rush-reporter';
 import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
+import { ReporterExtensionEventName } from '@rushstack/rush-reporter';
+import { ReporterJsonValue } from '@rushstack/rush-reporter';
+import { ReporterPrivacyClassification } from '@rushstack/rush-reporter';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -100,10 +117,19 @@ export enum BumpType {
     'prerelease' = 1
 }
 
+// @alpha
+export function captureProjectConfigurationFingerprintAsync(rushConfiguration: RushConfiguration, terminal: ITerminal): Promise<string>;
+
+// @alpha
+export function captureWorkspaceInputFingerprintAsync(options: IWorkspaceInputFingerprintOptions): Promise<IWorkspaceInputFingerprint>;
+
 // @public
 export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
+
+// @alpha
+export function classifyWorkspaceInputChange(current: IWorkspaceInputFingerprint, next: IWorkspaceInputFingerprint): WorkspaceInputChangeTier;
 
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
@@ -147,6 +173,8 @@ export class CommonVersionsConfiguration {
     save(): boolean;
     saveAsync(): Promise<boolean>;
 }
+
+export { createRushDiagnostic }
 
 export { CredentialCache }
 
@@ -242,6 +270,8 @@ export class EnvironmentConfiguration {
     //
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
+    // @internal
+    static _getRushTempFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
     static get hasBeenValidated(): boolean;
     // (undocumented)
@@ -279,6 +309,8 @@ export const EnvironmentVariableNames: {
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
+    readonly RUSH_REPORTER: "RUSH_REPORTER";
+    readonly RUSH_LOG_LEVEL: "RUSH_LOG_LEVEL";
     readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
     readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
@@ -452,6 +484,8 @@ export interface ICreateOperationsContext {
     readonly rushConfiguration: RushConfiguration;
 }
 
+export { ICreateRushDiagnosticOptions }
+
 export { ICredentialCacheEntry }
 
 export { ICredentialCacheOptions }
@@ -525,6 +559,7 @@ export interface IExperimentsJson {
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
     usePnpmSyncForInjectedDependencies?: boolean;
+    useRushReporter?: boolean;
 }
 
 // @beta
@@ -544,6 +579,7 @@ export interface IGenerateCacheEntryIdOptions {
 export interface IGetChangedProjectsOptions {
     enableFiltering: boolean;
     excludeVersionOnlyChanges?: boolean;
+    getIncrementalBuildIgnoredGlobsAsync?: (project: RushConfigurationProject) => Promise<ReadonlyArray<string> | undefined>;
     includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
@@ -582,6 +618,8 @@ export interface ILaunchOptions {
     // @internal
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
+    // @internal
+    reporter?: IRushSessionReporterOptions;
     terminalProvider?: ITerminalProvider;
 }
 
@@ -642,10 +680,23 @@ export interface _IOperationBuildCacheOptions {
     useDirectFileTransfersForBuildCache: boolean;
 }
 
+// @internal
+export interface _IOperationChildProcessReporter {
+    // (undocumented)
+    attachAsync(child: child_process.ChildProcess, structuredOutputTerminalProvider: ITerminalProvider): Promise<void>;
+    // (undocumented)
+    readonly environment: Readonly<Record<string, string>>;
+    // (undocumented)
+    readonly hasWarningOrError: boolean;
+    // (undocumented)
+    readonly stdio: child_process.StdioOptions;
+}
+
 // @alpha
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
     readonly error: Error | undefined;
+    readonly iterationId: number;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly problemCollector: IProblemCollector;
@@ -664,6 +715,8 @@ export interface IOperationGraph {
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
     debugMode: boolean;
+    deleteResults?(operations: Iterable<Operation>): void;
+    discardScheduledIteration(): boolean;
     executeScheduledIterationAsync(): Promise<boolean>;
     readonly hasScheduledIteration: boolean;
     readonly hooks: OperationGraphHooks;
@@ -688,12 +741,14 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 
 // @internal
 export interface _IOperationGraphEventSink {
+    createChildProcessReporter?(operationId: string, iterationId: number): _IOperationChildProcessReporter | undefined;
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
-    onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
+    onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
+    onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(operationId: string, silent: boolean): void;
+    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
-    onOperationStreamClosed?(operationId: string): void;
+    onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult, iterationId?: number): void;
 }
 
 // @alpha
@@ -750,6 +805,7 @@ export interface IOperationRunner {
     readonly isNoOp?: boolean;
     readonly name: string;
     reportTiming: boolean;
+    readonly residentMemoryBytes?: number;
     silent: boolean;
     warningsAreAllowed: boolean;
 }
@@ -757,6 +813,8 @@ export interface IOperationRunner {
 // @beta
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
+    // @internal
+    createChildProcessReporter(): _IOperationChildProcessReporter | undefined;
     debugMode: boolean;
     environment: IEnvironment | undefined;
     error?: Error;
@@ -764,7 +822,7 @@ export interface IOperationRunnerContext {
     // @internal
     _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
-    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider, structuredChildOutputTerminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
@@ -825,6 +883,18 @@ export interface IParallelismScalar {
 }
 
 // @alpha
+export interface IParsePhasedCommandOptions {
+    // (undocumented)
+    readonly argv: ReadonlyArray<string>;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+    // (undocumented)
+    readonly terminalProvider: ITerminalProvider;
+}
+
+// @alpha
 export interface IPhase {
     allowWarningsOnSuccess: boolean;
     associatedParameters: Set<CommandLineParameter>;
@@ -848,6 +918,27 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
     // @alpha
     readonly sessionAbortController: AbortController;
+}
+
+// @alpha
+export interface IPhasedCommandEngine extends AsyncDisposable {
+    // (undocumented)
+    [Symbol.asyncDispose](): Promise<void>;
+    readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
+    // (undocumented)
+    readonly getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
+    // (undocumented)
+    readonly inputsSnapshot: IInputsSnapshot;
+    // (undocumented)
+    readonly isIncremental: boolean;
+    // (undocumented)
+    readonly operationGraph: IOperationGraph;
+    // (undocumented)
+    readonly phaseNames: ReadonlyArray<string>;
+    // (undocumented)
+    readonly pluginNames: ReadonlyArray<string>;
+    // (undocumented)
+    readonly rushSession: RushSession;
 }
 
 // @alpha
@@ -936,6 +1027,10 @@ export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
     phaseName: string;
 };
 
+export { IReporterEventScope }
+
+export { IReporterEventSink }
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -968,6 +1063,8 @@ export interface IRushCommandLineSpec {
 // @beta (undocumented)
 export type IRushConfigurationProjectForSnapshot = Pick<RushConfigurationProject, 'projectFolder' | 'projectRelativeFolder'>;
 
+export { IRushDiagnostic }
+
 // @alpha (undocumented)
 export interface IRushPhaseSharding {
     count: number;
@@ -999,13 +1096,70 @@ export interface _IRushProjectJson {
     operationSettings?: IOperationSettings[];
 }
 
+// @beta
+export interface IRushReportingConfiguration {
+    readonly agentEnvironmentVariables: readonly string[];
+}
+
 // @beta (undocumented)
 export interface IRushSessionOptions {
     // (undocumented)
     getIsDebugMode: () => boolean;
+    reporter?: IRushSessionReporterOptions;
     // (undocumented)
     terminalProvider: ITerminalProvider;
 }
+
+// @beta
+export interface IRushSessionReporterOptions {
+    // @internal
+    readonly childProcessReporter?: {
+        readonly requestId: string;
+        readonly context: IReporterChildContext;
+        readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+    };
+    readonly eventSink: IReporterEventSink;
+    // @internal
+    readonly flushAsync?: () => Promise<void>;
+    // @internal
+    readonly operationStreamEnabled?: boolean;
+    readonly sessionId: string;
+}
+
+// @beta
+export interface IRushXCommandLineArguments {
+    commandArgs: string[];
+    commandName: string;
+    help: boolean;
+    ignoreHooks: boolean;
+    isDebug: boolean;
+    quiet: boolean;
+}
+
+// @beta
+export interface IRushXCommandOptions {
+    // (undocumented)
+    readonly abortSignal?: AbortSignal;
+    readonly arguments: IRushXCommandLineArguments;
+    readonly consoleTerminal: ITerminal;
+    // (undocumented)
+    readonly cwd: string;
+    // (undocumented)
+    readonly environment: Readonly<NodeJS.ProcessEnv>;
+    // (undocumented)
+    readonly launchOptions: ILaunchOptions;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration | undefined;
+    readonly spawn?: (command: string, args: ReadonlyArray<string>, options: child_process.SpawnOptions) => child_process.ChildProcess;
+    // (undocumented)
+    readonly terminal: ITerminal;
+}
+
+export { IScopedLogger }
+
+export { IScopedMessageOptions }
+
+export { IScopedReporter }
 
 // @beta
 export interface IStopwatchResult {
@@ -1027,6 +1181,7 @@ export interface ITelemetryData {
     readonly operationResults?: Record<string, ITelemetryOperationResult>;
     readonly performanceEntries?: readonly PerformanceEntry_2[];
     readonly platform?: string;
+    readonly reporterData?: ITelemetryAggregate;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;
     readonly timestampMs?: number;
@@ -1071,6 +1226,30 @@ export interface IVersionPolicyJson {
     includeEmailInChangeFile?: boolean;
     // (undocumented)
     policyName: string;
+}
+
+// @alpha
+export interface IWorkspaceInputFingerprint {
+    // (undocumented)
+    readonly configurationHash: string;
+    // (undocumented)
+    readonly environmentHash: string;
+    // (undocumented)
+    readonly installationHash: string;
+    // (undocumented)
+    readonly runtimeHash: string;
+    // (undocumented)
+    readonly selectedRushVersion: string;
+}
+
+// @alpha
+export interface IWorkspaceInputFingerprintOptions {
+    // (undocumented)
+    readonly environment: Readonly<Record<string, string | undefined>>;
+    readonly runtimeCache?: WorkspaceRuntimeFingerprintCache;
+    readonly runtimePaths?: ReadonlyArray<string>;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
 }
 
 // @internal
@@ -1149,6 +1328,7 @@ export class OperationGraphHooks {
     readonly afterExecuteOperationAsync: AsyncSeriesHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ]>;
+    readonly beforeDeleteResults: SyncHook<[ReadonlySet<Operation>]>;
     readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
     ReadonlyMap<Operation, IOperationExecutionResult>,
     IOperationGraphIterationOptions
@@ -1308,6 +1488,30 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 // @beta
 export type Parallelism = number | IParallelismScalar;
 
+export { parseReporterExtensionEventName }
+
+// @alpha
+export class PhasedCommandEngine {
+    // (undocumented)
+    readonly commandName: string;
+    createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
+    // (undocumented)
+    readonly parameterIdentity: string;
+    // (undocumented)
+    static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
+    selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
+}
+
+// @alpha
+export class PhasedCommandEngineBusyError extends Error {
+    constructor();
+}
+
+// @alpha
+export class PhasedCommandEngineConfigurationChangedError extends Error {
+    constructor();
+}
+
 // @alpha
 export class PhasedCommandHooks {
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
@@ -1377,13 +1581,19 @@ export type PnpmTrustPolicy = 'no-downgrade' | 'off';
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     // @internal (undocumented)
-    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
+    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal, getIgnoreGlobsAsync?: IGetChangedProjectsOptions['getIncrementalBuildIgnoredGlobsAsync']): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
+
+export { ReporterExtensionEventName }
+
+export { ReporterJsonValue }
+
+export { ReporterPrivacyClassification }
 
 // @public
 export class RepoStateFile {
@@ -1504,6 +1714,8 @@ export class RushConfiguration {
     get projectsByName(): ReadonlyMap<string, RushConfigurationProject>;
     // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
+    // @beta
+    readonly reportingConfiguration: IRushReportingConfiguration;
     readonly repositoryDefaultBranch: string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     readonly repositoryDefaultRemote: string;
@@ -1705,6 +1917,8 @@ export class RushProjectConfiguration {
         phaseName: string;
         isNoOp: boolean;
     }): string | undefined;
+    // @internal (undocumented)
+    _getJsonForFingerprint(): string;
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
@@ -1712,6 +1926,8 @@ export class RushProjectConfiguration {
     readonly project: RushConfigurationProject;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
     static tryLoadForProjectsAsync(projects: Iterable<RushConfigurationProject>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
+    // @internal
+    static _tryLoadForProjectsUncachedAsync(projects: Iterable<RushConfigurationProject>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
     validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }
@@ -1725,6 +1941,8 @@ export class RushSession {
     getCobuildLockProviderFactory(cobuildLockProviderName: string): CobuildLockProviderFactory | undefined;
     // (undocumented)
     getLogger(name: string): ILogger;
+    getReporter(scope?: IReporterEventScope): IScopedReporter | undefined;
+    getScopedLogger(scope?: IReporterEventScope): IScopedLogger | undefined;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)
@@ -1742,6 +1960,18 @@ export class RushUserConfiguration {
     static getRushUserFolderPath(): string;
     // (undocumented)
     static initializeAsync(): Promise<RushUserConfiguration>;
+}
+
+// @beta
+export class RushXCommand {
+    // (undocumented)
+    static executeAsync(options: IRushXCommandOptions): Promise<number>;
+    static getInProcessReason(args: IRushXCommandLineArguments, environment: Readonly<NodeJS.ProcessEnv>, configuration: RushConfiguration): string | undefined;
+    // (undocumented)
+    static getPackageFolder(cwd: string): string;
+    // (undocumented)
+    static parseArguments(argv: ReadonlyArray<string>, environment: Readonly<NodeJS.ProcessEnv>): IRushXCommandLineArguments;
+    static prepareEnvironment(cwd: string, environment: Readonly<NodeJS.ProcessEnv>, rushJsonFilePath: string): NodeJS.ProcessEnv;
 }
 
 // @public
@@ -1852,6 +2082,24 @@ export enum VersionPolicyDefinitionName {
     'individualVersion' = 1,
     // (undocumented)
     'lockStepVersion' = 0
+}
+
+// @alpha
+export enum WorkspaceInputChangeTier {
+    // (undocumented)
+    Reload = 1,
+    // (undocumented)
+    Restart = 2,
+    // (undocumented)
+    Reuse = 0
+}
+
+// @alpha
+export class WorkspaceRuntimeFingerprintCache {
+    // @internal (undocumented)
+    get changedPaths(): ReadonlyArray<string>;
+    // @internal (undocumented)
+    _hashPaths(paths: ReadonlyArray<string>): string;
 }
 
 // @public

@@ -72,7 +72,7 @@
     },
     {
       "name": "@rushstack/rush-terminal-renderer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-themed-ui",

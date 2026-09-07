@@ -3,15 +3,13 @@
 
 import * as path from 'node:path';
 
-import { RushConfiguration } from '@microsoft/rush-lib';
-import type {
-  IInputsSnapshot,
-  IOperationGraph,
-  RushSession
-} from '@microsoft/rush-lib';
+import { PhasedCommandEngineBusyError, RushConfiguration } from '@microsoft/rush-lib';
+import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/rush-lib';
 
 import { WorkspaceInvalidationTracker } from './WorkspaceInvalidationTracker';
 import { WorkspaceSessionFileWatcher } from './WorkspaceSessionFileWatcher';
+import { WorkspaceWarmSet, type IWorkspaceWarmSetStatus } from './WorkspaceWarmSet';
+import { getWorkspaceRequestScheduler } from './WorkspaceRequestAdmission';
 import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
@@ -23,6 +21,8 @@ import type {
  * @beta
  */
 export interface IWorkspaceSessionMetadata {
+  /** Host-local session generation. It changes only when a new session is installed. */
+  readonly generation?: number;
   readonly projectCount: number;
   readonly projectNames: ReadonlyArray<string>;
   readonly repoRoot: string;
@@ -43,12 +43,13 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
  * Optional engine state supplied when reusable graph construction is available.
  *
  * @remarks
- * The default session intentionally leaves the graph, plugin session, and inputs snapshot uninitialized.
- * Their existing construction is command-specific and remains blocked on the reusable runner lifetime work.
+ * A session can supply components at creation or bind its command-dependent engine on the first request.
  *
  * @beta
  */
 export interface IWorkspaceSessionComponents extends AsyncDisposable {
+  /** Acquire once for graph reconciliation/execution, not separately for each merged client. */
+  readonly acquireExecutionLeaseAsync?: () => Promise<AsyncDisposable>;
   readonly engineShape?: IWorkspaceEngineShape;
   readonly inputsSnapshot?: IInputsSnapshot;
   readonly operationGraph?: IOperationGraph;
@@ -90,6 +91,7 @@ export type CreateWorkspaceSessionComponentsAsync = (
  * @beta
  */
 export interface IWorkspaceSessionOptions {
+  readonly generation?: number;
   readonly createComponentsAsync?: CreateWorkspaceSessionComponentsAsync;
   readonly onError?: (error: Error) => void;
   readonly repoRoot: string;
@@ -102,6 +104,15 @@ export interface IWorkspaceSessionOptions {
  * @beta
  */
 export interface IWorkspaceSession extends AsyncDisposable {
+  /** Stops background footprint maintenance before acquiring reload or mutation locks. */
+  quiesceWarmSetAsync?(): Promise<void>;
+  readonly warmSetStatus?: IWorkspaceWarmSetStatus;
+  /** Rejects work retained beyond this session's lifetime. */
+  assertActive?(): void;
+  /** Stops admission without starting resource cleanup, allowing an already produced result to drain. */
+  retire?(): void;
+  /** Optional execution lease retained through the coalesced iteration's output and resource cleanup. */
+  acquireExecutionLeaseAsync?(): Promise<AsyncDisposable | undefined>;
   readonly engineShape: IWorkspaceEngineShape | undefined;
   readonly inputsSnapshot: IInputsSnapshot | undefined;
   readonly invalidations: WorkspaceInvalidationTracker;
@@ -109,6 +120,8 @@ export interface IWorkspaceSession extends AsyncDisposable {
   readonly operationGraph: IOperationGraph | undefined;
   readonly rushConfiguration: RushConfiguration;
   readonly rushSession: RushSession | undefined;
+  /** Binds the first command-dependent engine, if this session supports lazy engine initialization. */
+  initializeEngineAsync?(factory: CreateWorkspaceSessionComponentsAsync): Promise<void>;
   reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
 }
 
@@ -129,17 +142,18 @@ const EMPTY_WORKSPACE_SESSION_COMPONENTS: IWorkspaceSessionComponents = {
  * @beta
  */
 export class WorkspaceSession implements IWorkspaceSession {
-  readonly #components: IWorkspaceSessionComponents;
+  #components: IWorkspaceSessionComponents;
   readonly #sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
   #disposePromise: Promise<void> | undefined;
   #inputsSnapshot: IInputsSnapshot | undefined;
   #isDisposing: boolean = false;
+  #engineInitialization: Promise<void> | undefined;
+  #warmSet: WorkspaceWarmSet | undefined;
+  #warmSetQuiescence: Promise<void> | undefined;
 
   public readonly invalidations: WorkspaceInvalidationTracker;
   public readonly metadata: IWorkspaceSessionMetadata;
-  public readonly operationGraph: IOperationGraph | undefined;
   public readonly rushConfiguration: RushConfiguration;
-  public readonly rushSession: RushSession | undefined;
 
   private constructor(
     rushConfiguration: RushConfiguration,
@@ -154,8 +168,14 @@ export class WorkspaceSession implements IWorkspaceSession {
     this.#components = components;
     this.#sessionOwnedProjectWatcher = sessionOwnedProjectWatcher;
     this.#inputsSnapshot = components.inputsSnapshot;
-    this.operationGraph = components.operationGraph;
-    this.rushSession = components.rushSession;
+  }
+
+  public get operationGraph(): IOperationGraph | undefined {
+    return this.#components.operationGraph;
+  }
+
+  public get rushSession(): RushSession | undefined {
+    return this.#components.rushSession;
   }
 
   public get engineShape(): IWorkspaceEngineShape | undefined {
@@ -164,6 +184,73 @@ export class WorkspaceSession implements IWorkspaceSession {
 
   public get inputsSnapshot(): IInputsSnapshot | undefined {
     return this.#inputsSnapshot;
+  }
+
+  public get warmSetStatus(): IWorkspaceWarmSetStatus | undefined {
+    return this.#warmSet?.getStatus();
+  }
+
+  public quiesceWarmSetAsync(): Promise<void> {
+    this.#warmSetQuiescence ??= this.#warmSet?.[Symbol.asyncDispose]() ?? Promise.resolve();
+    return this.#warmSetQuiescence;
+  }
+
+  public assertActive(): void {
+    if (this.#isDisposing)
+      throw new Error('This workspace generation has been disposed; execution has not begun.');
+  }
+
+  public retire(): void {
+    this.#isDisposing = true;
+  }
+
+  /** Installs one all-project engine without replacing the watcher or losing retained invalidations. */
+  public async initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {
+    if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
+    if (!this.#engineInitialization) {
+      if (this.#components !== EMPTY_WORKSPACE_SESSION_COMPONENTS) {
+        throw new Error('Workspace components have already been supplied.');
+      }
+      const initialization: Promise<void> = this.#initializeEngineAsync(factory);
+      this.#engineInitialization = initialization;
+      void initialization.catch((error: unknown) => {
+        if (
+          error instanceof PhasedCommandEngineBusyError &&
+          this.#engineInitialization === initialization &&
+          !this.#isDisposing
+        ) {
+          this.#engineInitialization = undefined;
+        }
+      });
+    }
+    await this.#engineInitialization;
+  }
+
+  public async acquireExecutionLeaseAsync(): Promise<AsyncDisposable | undefined> {
+    if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
+    return await this.#components.acquireExecutionLeaseAsync?.();
+  }
+
+  async #initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {
+    const components: IWorkspaceSessionComponents = await factory({
+      invalidations: this.invalidations,
+      rushConfiguration: this.rushConfiguration
+    });
+    if (this.#isDisposing || components.projectWatcher) {
+      await components[Symbol.asyncDispose]();
+      throw new Error('Cannot install engine components after disposal or replace the session watcher.');
+    }
+    this.#components = components;
+    this.#inputsSnapshot = components.inputsSnapshot;
+    if (components.operationGraph && this.#sessionOwnedProjectWatcher instanceof WorkspaceSessionFileWatcher) {
+      this.#warmSet = WorkspaceWarmSet.getAttached(components.operationGraph) ?? WorkspaceWarmSet.attach({
+        operationGraph: components.operationGraph,
+        configuration: this.rushConfiguration.daemon,
+        scheduler: getWorkspaceRequestScheduler(this),
+        acquireExecutionLeaseAsync: () => this.acquireExecutionLeaseAsync(),
+        watcher: this.#sessionOwnedProjectWatcher
+      });
+    }
   }
 
   /** Loads workspace identity, creates reusable components, and starts headless invalidation tracking. */
@@ -186,10 +273,10 @@ export class WorkspaceSession implements IWorkspaceSession {
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
     let sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
     try {
-      const metadata: IWorkspaceSessionMetadata = createMetadata(
-        rushConfiguration,
-        options.rushVersion
-      );
+      const metadata: IWorkspaceSessionMetadata = {
+        ...createMetadata(rushConfiguration, options.rushVersion),
+        generation: options.generation ?? 1
+      };
       if (!projectWatcher) {
         projectWatcher = new WorkspaceSessionFileWatcher({
           onError: (error: Error) => {
@@ -250,13 +337,16 @@ export class WorkspaceSession implements IWorkspaceSession {
     if (!this.#components.reconcileInvalidationsAsync) {
       return undefined;
     }
-    const result: IWorkspaceInvalidationReconciliation =
-      await this.#components.reconcileInvalidationsAsync();
+    const result: IWorkspaceInvalidationReconciliation = await this.#components.reconcileInvalidationsAsync();
     this.#inputsSnapshot = result.inputsSnapshot;
     return result;
   }
 
   async #disposeOnceAsync(): Promise<void> {
+    // Initialization failures belong to the request. Any successfully constructed components are
+    // disposed by initialization itself if shutdown won the race.
+    await this.#engineInitialization?.catch(() => undefined);
+    await this.quiesceWarmSetAsync();
     let watcherError: unknown;
     try {
       await this.#sessionOwnedProjectWatcher?.[Symbol.asyncDispose]();

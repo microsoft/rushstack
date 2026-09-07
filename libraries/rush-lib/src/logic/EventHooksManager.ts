@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { EventHooks } from '../api/EventHooks';
 import { type IEnvironment, Utilities } from '../utilities/Utilities';
@@ -21,7 +21,7 @@ export class EventHooksManager {
     this._commonTempFolder = rushConfiguration.commonTempFolder;
   }
 
-  public handle(event: Event, isDebug: boolean, ignoreHooks: boolean): void {
+  public handle(event: Event, isDebug: boolean, ignoreHooks: boolean, terminal?: ITerminal): void {
     if (!this._eventHooks) {
       return;
     }
@@ -29,8 +29,10 @@ export class EventHooksManager {
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
       if (ignoreHooks) {
+        const message: string = `Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`;
+        if (terminal) terminal.writeLine(message);
         // eslint-disable-next-line no-console
-        console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
+        else console.log(message);
         return;
       }
 

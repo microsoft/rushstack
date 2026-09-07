@@ -9,6 +9,7 @@ import type { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonOperationHeaderPayload } from '@rushstack/rush-daemon-protocol';
 import { ITerminalChunk } from '@rushstack/terminal';
+import type { TerminalChunkKind } from '@rushstack/terminal';
 import { TerminalWritable } from '@rushstack/terminal';
 
 // @beta
@@ -84,6 +85,7 @@ export class OperationStreamRegistry {
     closeOperation(operationId: string): void;
     registerOperation(): void;
     setOperationHeader(header: IDaemonOperationHeaderPayload): void;
+    writeBytes(operationId: string, kind: TerminalChunkKind, bytes: Uint8Array): void;
     writeChunk(operationId: string, chunk: ITerminalChunk): void;
 }
 

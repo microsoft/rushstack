@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add an explicitly tagged native Rushx resolver and injectable composite resolver with request-owned lifecycle children, canonical cwd/environment overrides, raw output, stdin EOF, and early pipe-close handling.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

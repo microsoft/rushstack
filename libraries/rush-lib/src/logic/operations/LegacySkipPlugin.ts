@@ -64,6 +64,9 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
       this._options;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
+      graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations) => {
+        for (const operation of operations) stateMap.delete(operation);
+      });
       graph.hooks.beforeExecuteIterationAsync.tap(
         PLUGIN_NAME,
         (

@@ -91,6 +91,11 @@ interface IQueuedRequest {
   abortListener: (() => void) | undefined;
 }
 
+interface ILeaseState {
+  exclusivityClass: RequestExclusivityClass;
+  released: boolean;
+}
+
 /**
  * Provides fair, queue-and-wait admission for daemon requests.
  *
@@ -104,6 +109,24 @@ export class RequestScheduler {
   private readonly _queue: IQueuedRequest[] = [];
   private _activeClass: RequestExclusivityClass | undefined;
   private _activeRequestCount: number = 0;
+  private readonly _leaseStates: WeakMap<IRequestLease, ILeaseState> = new WeakMap();
+
+  /**
+   * Atomically reduces an exclusive owner's rights without opening a gap in admission.
+   * Used to publish a reloaded generation and retain it while the initiating request executes.
+   */
+  public downgradeExclusiveLease(
+    lease: IRequestLease,
+    target: RequestExclusivityClass.SharedBuild | RequestExclusivityClass.SharedRead
+  ): void {
+    const state: ILeaseState | undefined = this._leaseStates.get(lease);
+    if (!state || state.released || state.exclusivityClass !== RequestExclusivityClass.Exclusive) {
+      throw new Error('Only an active exclusive lease from this scheduler can be downgraded.');
+    }
+    state.exclusivityClass = target;
+    this._activeClass = target;
+    this._drainQueue();
+  }
 
   /**
    * The number of requests currently waiting for admission.
@@ -131,7 +154,10 @@ export class RequestScheduler {
 
     if (options.abortSignal?.aborted) {
       return Promise.reject(
-        new RequestSchedulerError(RequestSchedulerErrorCode.Aborted, 'The request was aborted before admission.')
+        new RequestSchedulerError(
+          RequestSchedulerErrorCode.Aborted,
+          'The request was aborted before admission.'
+        )
       );
     }
 
@@ -173,7 +199,10 @@ export class RequestScheduler {
         request.abortListener = () => {
           this._rejectQueuedRequest(
             request,
-            new RequestSchedulerError(RequestSchedulerErrorCode.Aborted, 'The request was aborted while waiting.')
+            new RequestSchedulerError(
+              RequestSchedulerErrorCode.Aborted,
+              'The request was aborted while waiting.'
+            )
           );
         };
         options.abortSignal.addEventListener('abort', request.abortListener, { once: true });
@@ -200,24 +229,24 @@ export class RequestScheduler {
       return true;
     }
 
-    return (
-      exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this._activeClass
-    );
+    return exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this._activeClass;
   }
 
   private _createLease(exclusivityClass: RequestExclusivityClass): IRequestLease {
     this._activeClass = exclusivityClass;
     this._activeRequestCount++;
 
-    let released: boolean = false;
-    return {
-      exclusivityClass,
+    const state: ILeaseState = { exclusivityClass, released: false };
+    const lease: IRequestLease = {
+      get exclusivityClass(): RequestExclusivityClass {
+        return state.exclusivityClass;
+      },
       release: (): void => {
-        if (released) {
+        if (state.released) {
           return;
         }
 
-        released = true;
+        state.released = true;
         this._activeRequestCount--;
         if (this._activeRequestCount === 0) {
           this._activeClass = undefined;
@@ -225,6 +254,8 @@ export class RequestScheduler {
         this._drainQueue();
       }
     };
+    this._leaseStates.set(lease, state);
+    return lease;
   }
 
   private _drainQueue(): void {
