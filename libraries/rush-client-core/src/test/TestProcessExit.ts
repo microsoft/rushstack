@@ -4,6 +4,27 @@
 import * as fs from 'node:fs';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+/** Call after resource joins. Windows sharing retries wait at most 1.5 seconds in total; other errors fail. */
+export async function removeTestFolderAsync(folder: string, force: boolean = false): Promise<void> {
+  for (let attempt: number = 0; ; attempt++) {
+    try {
+      await fs.promises.rm(folder, { recursive: true, force });
+      return;
+    } catch (error) {
+      if (
+        process.platform !== 'win32' ||
+        attempt >= 5 ||
+        typeof error !== 'object' ||
+        error === null ||
+        !('code' in error) ||
+        (error.code !== 'EPERM' && error.code !== 'EBUSY' && error.code !== 'ENOTEMPTY')
+      )
+        throw error;
+    }
+    await delayAsync((attempt + 1) * 100);
+  }
+}
+
 /** Only for PIDs captured from this test's own spawned fixtures, never for daemon ownership reclamation. */
 export async function waitForTestProcessExitAsync(pid: number): Promise<void> {
   if (!Number.isSafeInteger(pid) || pid <= 0 || pid === process.pid) {

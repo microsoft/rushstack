@@ -7,7 +7,6 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import { LockFile } from '@rushstack/node-core-library';
 import { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol';
 import {
   DaemonTransportError,
@@ -28,6 +27,7 @@ import {
   releaseDaemonStartup,
   type IDaemonStartupOptions
 } from './DaemonStartup';
+import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 interface IStartupHelper {
   readonly child: ChildProcess;
@@ -90,13 +90,11 @@ export async function connectOrStartDaemonAsync(
     );
   }
   ensureDaemonRuntimeDir(options.paths);
-  const folder: string = path.dirname(options.paths.lockfilePath);
-  const resource: string = `${path.basename(options.paths.lockfilePath)}-start`;
-  let lock: LockFile | undefined;
+  let lock: IStartupLock | undefined;
   let backoffMs: number = 50;
   while (Date.now() < deadline) {
     options.abortSignal?.throwIfAborted();
-    lock = LockFile.tryAcquire(folder, resource);
+    lock = await tryAcquireStartupLockAsync(options.paths);
     if (lock) break;
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
     backoffMs = Math.min(500, backoffMs * 2);
@@ -157,7 +155,7 @@ export async function connectOrStartDaemonAsync(
     }
     throw startupError(options, 'timed out awaiting hello/ping readiness');
   } finally {
-    lock.release();
+    await lock.releaseAsync();
   }
 }
 
@@ -328,6 +326,32 @@ function isDaemonOwnership(record: unknown): record is Pick<IDaemonLockfile, 'pi
   );
 }
 
+async function readHandoffOwnershipAsync(
+  lockfilePath: string,
+  deadline: number,
+  abortSignal?: AbortSignal
+): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined> {
+  let backoffMs: number = 20;
+  while (true) {
+    abortSignal?.throwIfAborted();
+    try {
+      return readDaemonOwnership(lockfilePath);
+    } catch (error) {
+      if (
+        process.platform !== 'win32' ||
+        !(error instanceof DaemonClientError) ||
+        !(hasErrorCode(error.cause, 'EPERM') || hasErrorCode(error.cause, 'EBUSY')) ||
+        Date.now() >= deadline
+      ) {
+        throw error;
+      }
+    }
+    // A sharing-denied record is unknown, not released. Retry only within the existing handoff deadline.
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: abortSignal });
+    backoffMs = Math.min(100, backoffMs * 2);
+  }
+}
+
 async function waitForPreviousDaemonAsync(
   paths: IDaemonPaths,
   previous: IConnectOrStartDaemonOptions['previousDaemon'],
@@ -344,8 +368,8 @@ async function waitForPreviousDaemonAsync(
   let backoffMs: number = 50;
   while (true) {
     abortSignal?.throwIfAborted();
-    const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = readDaemonOwnership(
-      paths.lockfilePath
+    const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = await readHandoffOwnershipAsync(
+      paths.lockfilePath, deadline, abortSignal
     );
     if (!owner || owner.pid !== pid || owner.startedAt !== startedAt || !isProcessAlive(owner.pid)) return;
     if (Date.now() >= deadline) {
