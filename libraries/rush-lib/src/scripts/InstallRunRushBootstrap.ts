@@ -80,8 +80,8 @@ export interface IInstallRunRushBootstrap {
   readonly prepareToRun: (() => void) | undefined;
 }
 
-function readSingleFlagValue(argv: readonly string[], flag: string): string | undefined {
-  let result: string | undefined;
+function readFlagValues(argv: readonly string[], flag: string, strict: boolean): string[] {
+  const result: string[] = [];
   const prefix: string = `${flag}=`;
   for (let index: number = 0; index < argv.length; index++) {
     const argument: string = argv[index];
@@ -94,19 +94,25 @@ function readSingleFlagValue(argv: readonly string[], flag: string): string | un
     } else if (argument === flag) {
       value = argv[index + 1];
       if (!value || value.startsWith('-')) {
-        throw new Error(`${flag} requires a value.`);
+        if (strict) {
+          throw new Error(`${flag} requires a value.`);
+        }
+        continue;
       }
       index++;
     }
 
     if (value !== undefined) {
       if (!value) {
-        throw new Error(`${flag} requires a value.`);
+        if (strict) {
+          throw new Error(`${flag} requires a value.`);
+        }
+        continue;
       }
-      if (result !== undefined) {
+      if (strict && result.length > 0) {
         throw new Error(`${flag} may be specified only once.`);
       }
-      result = value;
+      result.push(value);
     }
   }
   return result;
@@ -551,14 +557,32 @@ export function createInstallRunRushBootstrap(
     return createLegacyBootstrap(options);
   }
 
-  const explicitReporter: string | undefined = readSingleFlagValue(options.argv, '--reporter');
-  const explicitLogLevel: string | undefined = readSingleFlagValue(options.argv, '--log-level');
+  const repositoryOptIn: boolean = repositoryUsesRushReporter(options.rushJsonFolder);
+  const reporterControlsOwned: boolean =
+    repositoryOptIn ||
+    readFlagValues(options.argv, '--reporter', false).some((value: string) => SUPPORTED_REPORTERS.has(value));
+  if (!reporterControlsOwned) {
+    return createLegacyBootstrap(options);
+  }
+
+  const explicitReporter: string | undefined = readFlagValues(options.argv, '--reporter', true)[0];
   if (explicitReporter !== undefined && !SUPPORTED_REPORTERS.has(explicitReporter)) {
     throw new Error(
       `Unsupported reporter ${JSON.stringify(explicitReporter)}. ` +
         'Supported values are default, ai, json, plaintext, file, and legacy.'
     );
   }
+  if (explicitReporter === 'legacy') {
+    return createLegacyBootstrap(options);
+  }
+
+  const logLevelProbe: string[] = readFlagValues(options.argv, '--log-level', false);
+  const logLevelOwned: boolean =
+    explicitReporter !== undefined ||
+    (logLevelProbe.length > 0 && logLevelProbe.every((value: string) => SUPPORTED_LOG_LEVELS.has(value)));
+  const explicitLogLevel: string | undefined = logLevelOwned
+    ? readFlagValues(options.argv, '--log-level', true)[0]
+    : undefined;
   if (explicitLogLevel !== undefined && !SUPPORTED_LOG_LEVELS.has(explicitLogLevel)) {
     throw new Error(
       `Unsupported log level ${JSON.stringify(explicitLogLevel)}. ` +
@@ -566,15 +590,7 @@ export function createInstallRunRushBootstrap(
     );
   }
 
-  if (explicitReporter === 'legacy') {
-    return createLegacyBootstrap(options);
-  }
-
-  const repositoryOptIn: boolean = repositoryUsesRushReporter(options.rushJsonFolder);
   const explicitOptIn: boolean = explicitReporter !== undefined;
-  if (!explicitOptIn && !repositoryOptIn) {
-    return createLegacyBootstrap(options);
-  }
 
   if (!supportsBootstrapHandoff(options.rushVersion, options.bootstrapVersion)) {
     if (explicitOptIn) {
@@ -587,5 +603,13 @@ export function createInstallRunRushBootstrap(
     return createLegacyBootstrap(options);
   }
 
-  return new InstallRunRushBootstrap(options, explicitReporter !== 'json' && explicitReporter !== 'ai');
+  const separatorIndex: number = options.argv.indexOf('--');
+  const commandArgs: readonly string[] =
+    separatorIndex < 0 ? options.argv : options.argv.slice(0, separatorIndex);
+  const stdoutReserved: boolean =
+    explicitReporter === 'json' ||
+    explicitReporter === 'ai' ||
+    explicitReporter === 'file' ||
+    commandArgs.includes('--json');
+  return new InstallRunRushBootstrap(options, !stdoutReserved);
 }

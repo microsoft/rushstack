@@ -7,6 +7,7 @@ import {
   captureProjectConfigurationFingerprintAsync,
   captureWorkspaceInputFingerprintAsync,
   classifyWorkspaceInputChange,
+  EnvironmentVariableNames,
   PhasedCommandEngineBusyError,
   Rush,
   WorkspaceInputChangeTier,
@@ -156,10 +157,18 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   }
 
   public async dispatchAsync(
-    envelope: IDaemonRequestEnvelope,
+    request: IDaemonRequestEnvelope,
     destination: IDaemonRequestDispatchClient,
     dispatchAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
+    // Native Rush owns its SDK handoff; a foreign client's bundled engine must not override this one.
+    const envelope: IDaemonRequestEnvelope = {
+      ...request,
+      environment: {
+        ...request.environment,
+        [EnvironmentVariableNames._RUSH_LIB_PATH]: require.resolve('@microsoft/rush-lib')
+      }
+    };
     if (this.#restartPending) {
       await destination.interactiveSession.finishAsync();
       await destination.writeResultAsync({

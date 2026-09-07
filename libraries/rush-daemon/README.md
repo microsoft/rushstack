@@ -66,6 +66,9 @@ The host uses stable fingerprints to classify native requests:
 
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
+Native dispatch first copies the envelope and normalizes only engine-owned `_RUSH_LIB_PATH` to this daemon's
+real engine, preventing false restarts or wrong SDK selection from a foreign client path. All other environment
+inputs remain unchanged and are checked normally.
 Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
 still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
 
@@ -109,7 +112,12 @@ runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 
 ### Process restart and isolated install/update
 
-`serveRushDaemonAsync` supplies a successor selector for the currently installed daemon/Rush version.
+`serveRushDaemonAsync` supplies a successor selector for bundled or cached compatible
+daemon installations pinning the exact requested Rush engine. The client can prepare
+an installation using native Rush package-install APIs; the host does not install
+packages during restart. Selection probes foreign runtimes in isolation, and launch
+rechecks the actual engine version and protocol before binding. An unavailable or
+incompatible installation is never impersonated by the bundled engine.
 Embedded `RushDaemonHost` users can provide `getSuccessorLaunchAsync`, returning the existing core
 `IDaemonStartCommand` plus the expected daemon implementation version. Selection is validated before shutdown;
 an unavailable selected Rush version fails explicitly and is never run by the current engine under a false version.
@@ -117,8 +125,7 @@ The default entrypoint supports the `rush.json` version, not a separate preview-
 
 Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
 resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
-`restartCompleted` reports completion or failure. These warm/retry features do not establish availability of
-another selected Rush version; a matching launcher must actually be resolved, otherwise the transition fails closed.
+`restartCompleted` reports completion or failure.
 
 Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
 Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted

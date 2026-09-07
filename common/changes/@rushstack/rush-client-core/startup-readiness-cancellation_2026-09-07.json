@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Honor cancellation during daemon hello/pong readiness, close newly ready clients when cancellation wins, and preserve abort reasons instead of treating handshake failures as retryable.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

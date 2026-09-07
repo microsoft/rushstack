@@ -23,10 +23,11 @@ import {
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 import { MinimalRushConfiguration } from '@microsoft/rush/lib/MinimalRushConfiguration';
+import { DaemonLauncherUnavailableError } from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
-import { getDaemonConnectionOptions } from './daemonConnectionOptions';
+import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { writeStreamAsync } from './writeStreamAsync';
 
@@ -68,13 +69,6 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
   }
-  if (selectedVersion !== Rush.version) {
-    process.stderr.write(
-      `rush-client: selected Rush ${selectedVersion} has no version-selected daemon launcher; using the existing Rush version selector.\n`
-    );
-    launchInProcess(route.argv, rushx, selectedVersion);
-    return;
-  }
   const terminal: ConsoleTerminalProvider = new ConsoleTerminalProvider();
   const verbosity: DaemonVerbosity = route.argv.includes('--verbose') || route.argv.includes('-v')
     ? 'verbose'
@@ -95,20 +89,23 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     },
     admission: route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) }
   });
-  const connection: IConnectOrStartDaemonOptions = {
-    ...getDaemonConnectionOptions(path.dirname(rushJsonPath), selectedVersion, request.environment, config.autoStart),
-    capabilities: {
-      isTTY: request.terminal.isTTY,
-      columns: request.terminal.columns,
-      colorLevel: terminal.supportsColor ? 1 : 0,
-      verbosity
-    }
-  };
+  let connection: IConnectOrStartDaemonOptions;
   let client: DaemonClient;
   try {
+    connection = {
+      ...await getDaemonConnectionOptionsAsync(
+        path.dirname(rushJsonPath), selectedVersion, request.environment, config.autoStart
+      ),
+      capabilities: {
+        isTTY: request.terminal.isTTY,
+        columns: request.terminal.columns,
+        colorLevel: terminal.supportsColor ? 1 : 0,
+        verbosity
+      }
+    };
     client = await connectOrStartDaemonAsync(connection);
   } catch (error) {
-    if (!(error instanceof DaemonClientError)) throw error;
+    if (!(error instanceof DaemonClientError) && !(error instanceof DaemonLauncherUnavailableError)) throw error;
     process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
     return;

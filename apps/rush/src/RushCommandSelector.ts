@@ -57,7 +57,7 @@ export class RushCommandSelector {
       }
     );
     let effectiveOptions: IRushFrontendLaunchOptions = options;
-    let restoreOldEngineOutput: (() => void) | undefined;
+    let restoreEngineOutput: (() => void) | undefined;
     if (compatibility.mode !== 'structured' && engineProtocolMajor !== undefined && options.reporterEnabled) {
       if (options.reporterSelectionReason === 'explicit --reporter') {
         throw new Error(
@@ -75,8 +75,15 @@ export class RushCommandSelector {
         reporterEnabled: false,
         reporterSelectionReason: 'bootstrap compatibility fallback'
       };
-    } else if (compatibility.mode === 'new-frontend-old-engine' && options.reporterEnabled) {
-      restoreOldEngineOutput = _observeOldEngineOutput(options, Rush.version);
+    } else if (options.reporterEnabled) {
+      restoreEngineOutput = _observeEngineOutput(options, Rush.version);
+      effectiveOptions = {
+        ...options,
+        reporterCloseAsync: async () => {
+          restoreEngineOutput?.();
+          await options.reporterCloseAsync();
+        }
+      };
     }
 
     try {
@@ -103,13 +110,13 @@ export class RushCommandSelector {
         Rush.launch(launcherVersion, effectiveOptions);
       }
     } catch (error) {
-      restoreOldEngineOutput?.();
+      restoreEngineOutput?.();
       throw error;
     }
   }
 }
 
-function _observeOldEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): () => void {
+function _observeEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): () => void {
   const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
     sink: options.reporter.eventSink,
     sessionId: options.reporter.sessionId,
@@ -120,7 +127,7 @@ function _observeOldEngineOutput(options: IRushFrontendLaunchOptions, engineVers
     'stdout',
     adapter,
     process.stdout.write.bind(process.stdout),
-    options.reporterStdoutIsMachineReadable !== true
+    (options.reporterStdoutIsReserved ?? options.reporterStdoutIsMachineReadable) !== true
   );
   const restoreStderr: () => void = _observeStream(
     process.stderr,

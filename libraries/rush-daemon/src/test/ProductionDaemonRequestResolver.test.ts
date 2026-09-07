@@ -419,6 +419,25 @@ describe('native production daemon engine', () => {
     }
   });
 
+  it('keeps the selected native SDK handoff instead of restarting for a foreign client engine path', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial-sdk', ['build', '--only', 'a']);
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      const environment: Record<string, string> = {
+        ...requestEnvironment(),
+        _RUSH_LIB_PATH: path.join(fixture.repoRoot, 'foreign-client-engine.js')
+      };
+      expect((await runAsync(fixture, 'foreign-sdk', ['build', '--only', 'a'], { environment })).terminal)
+        .toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(environment._RUSH_LIB_PATH).toBe(path.join(fixture.repoRoot, 'foreign-client-engine.js'));
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('replaces configuration and command shape in-process without using a disposed generation', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {

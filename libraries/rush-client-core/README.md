@@ -42,9 +42,21 @@ host-started successor, but never lets the client spawn one.
 arguments, environment and cwd. It does not discover or install a Rush version.
 It reuses transport paths/reclaim checks and node-core-library's process-identity
 aware `LockFile` for the first-start mutex. The winning client rechecks readiness,
-reclaims only an absent/dead owner, spawns detached without a shell, and waits for
+reclaims only an absent/dead owner, and reserves `<lockfilePath>.starting` before
+handing the explicit command to a detached startup helper. The helper spawns without
+a shell and retains that reservation until the daemon completes hello/ping readiness,
+independently of whether the requesting client survives. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed; a live (possibly reused) PID with an unreachable socket fails closed.
+
+An unresolved startup reservation is never automatically reclaimed based on PID
+liveness or elapsed time. If the helper cannot establish readiness, subsequent starts
+fail closed instead of risking a second detached daemon. Only a known spawn failure
+(no executable started) releases the reservation immediately. An arbitrary launcher
+can spawn descendants, so its exit is not proof that another launch is safe.
+Recovery of an abandoned reservation requires operator confirmation that the original
+startup cannot still publish an endpoint; normal successful startup releases it
+automatically. Cancellation stops the client waiting, not the detached handoff.
 
 If a wire-compatible daemon reports the wrong implementation version and an explicit
 replacement launcher is available, startup serializes replacement under that same mutex.
@@ -98,7 +110,6 @@ graph reference client. A successful handshake is still transport readiness, not
 guarantee that every command or configuration is supported. Version-selected daemon
 installation and incompatible-protocol replacement remain
 separate integration work; this core package does not construct an engine.
-A client that dies during the
-pre-bind spawn interval may leave a detached child still starting; normal
-concurrent first-invocations are serialized, but crash-safe spawn handoff requires
-a host-owned startup record/readiness handoff beyond the existing contracts.
+The startup helper and durable pre-bind reservation protect concurrent first-invocations
+even if the original client dies. They do not add a new daemon protocol or authorize
+automatic recovery of ambiguous launcher failures.
