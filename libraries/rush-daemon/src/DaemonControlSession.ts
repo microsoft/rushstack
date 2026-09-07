@@ -242,17 +242,6 @@ export class DaemonControlSession {
     this.#options.onShutdownRequested();
   }
 
-  async #shutdownHostAsync(): Promise<void> {
-    if (!this.#peerSupportsDaemonLifecycle) {
-      throw new DaemonProtocolError(
-        'malformedControlMessage',
-        'Daemon shutdown requires a lifecycle-capable protocol version.'
-      );
-    }
-    await this.#enqueueControlAsync({ kind: 'shutdownAck', payload: {} });
-    this.#options.onShutdownRequested();
-  }
-
   #startRequest(envelope: IDaemonRequestEnvelope): void {
     this.#assertRequestLifecycleReady();
     const requestId: string = envelope.requestId;
