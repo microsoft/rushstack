@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Recognize inherited reporter pipes on Windows while continuing to reject regular-file descriptors.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
