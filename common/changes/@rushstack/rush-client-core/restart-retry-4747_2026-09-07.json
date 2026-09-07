@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Support one ownership-attested pre-execution restart retry, cancellation during handoff, and native mutation protocol admission.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

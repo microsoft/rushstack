@@ -518,6 +518,54 @@ describe('native production daemon engine', () => {
     }
   });
 
+  it('drains typed pre-execution results for accepted queued clients before hard restart closes them', async () => {
+    const selecting: IDeferred<void> = createDeferred();
+    const release: IDeferred<void> = createDeferred();
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+      getSuccessorLaunchAsync: async (context) => {
+        selecting.resolve();
+        await release.promise;
+        return await getInstalledWorkspaceSuccessorLaunchAsync(context);
+      }
+    });
+    let second: DaemonRequestWireClient | undefined;
+    let firstResult: Promise<ITerminalExchange> | undefined;
+    let secondResult: Promise<ITerminalExchange> | undefined;
+    try {
+      await runAsync(fixture, 'initialize-before-restart', ['build', '--only', 'a']);
+      const environment: Record<string, string> = { ...requestEnvironment(), RUSHD_TEST_INPUT: 'changed' };
+      second = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
+      await second.handshakeAsync();
+      firstResult = runAsync(fixture, 'restart-initiator', ['build', '--only', 'a'], { environment });
+      await selecting.promise;
+      await second.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('queued-for-restart', 'build', fixture.repoRoot, {
+          argv: ['build', '--only', 'a'], commandOrigin: 'built-in', environment
+        })
+      });
+      expect((await second.readControlAsync()).kind).toBe('queuePosition');
+      secondResult = second.readTerminalAsync('queued-for-restart');
+      release.resolve();
+      for (const result of await Promise.all([firstResult, secondResult])) {
+        expect(result.terminal).toMatchObject({
+          kind: 'requestResult', payload: { exitCode: 1, retryAfterRestart: true }
+        });
+        expect(result.frames.every((frame) => frame.kind === DaemonFrameType.controlJson)).toBe(true);
+      }
+      expect((await fixture.host.restartCompleted)?.pid).not.toBe(process.pid);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      release.resolve();
+      await firstResult;
+      await secondResult;
+      await second?.closeAsync();
+      await fixture.host.restartCompleted;
+      await stopSuccessorAsync(fixture.host.paths);
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('restarts a hard environment change in a new process without replaying the triggering request', async () => {
     const fixture: IFixture = await createFixtureAsync(false, 'direct', {
       getSuccessorLaunchAsync: getInstalledWorkspaceSuccessorLaunchAsync

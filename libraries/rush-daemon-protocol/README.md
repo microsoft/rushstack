@@ -50,6 +50,12 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   before touching operations. Tokens change on session or process replacement.
   Clients must negotiate `DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR` before mutation;
   an older server could otherwise ignore the reference.
+- **Workspace restart (0.10)** - native `install`/`update` routing is capability-gated.
+  A failure result may include `retryAfterRestart: true` only when no execution or
+  request IO occurred and an available successor was selected. It cannot coexist
+  with cancellation, admission errors or operation results. Clients may retry once
+  after attested predecessor ownership release, never on transport loss or an error
+  string. The ordinary mutation result has no retry flag and drains before restart.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

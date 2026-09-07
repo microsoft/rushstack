@@ -80,6 +80,9 @@ export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
 export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number;
+
+// @beta
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
@@ -234,6 +237,7 @@ export interface IDaemonCommandResult {
     readonly exitCode: number;
     readonly outcome: DaemonCommandOutcome;
     readonly requestId: string;
+    readonly retryAfterRestart?: true;
 }
 
 // @beta
