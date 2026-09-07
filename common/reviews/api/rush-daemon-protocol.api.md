@@ -681,6 +681,7 @@ export interface IDaemonWarmSetConfiguration {
     readonly warmMemoryBudgetMB: number;
     // (undocumented)
     readonly warmSetMaxProjects: number;
+    readonly watch?: boolean;
 }
 
 // @beta

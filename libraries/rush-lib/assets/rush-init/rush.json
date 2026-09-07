@@ -336,7 +336,7 @@
    * Boolean environment overrides accept only 0 or 1; numeric overrides use decimal numbers.
    * Warm-set policies require the generation-owned WorkspaceWarmSet host attachment.
    * They retain requested work without starting scripts and impose no hard process-RSS ceiling.
-   * The watch option remains reserved for automatic watcher-driven execution.
+   * The watch option retains host observation of warm project files between requests, without running builds.
    */
   /*[LINE "HYPOTHETICAL"]*/ "daemon": {
     /*[LINE "HYPOTHETICAL"]*/ "enabled": false,

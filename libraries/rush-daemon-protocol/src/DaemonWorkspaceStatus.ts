@@ -3,6 +3,8 @@
 
 /** Effective runtime policy, not a hard process/tree RSS limit. @beta */
 export interface IDaemonWarmSetConfiguration {
+  /** Persistent host project observation; omitted by older peers. Never schedules builds. */
+  readonly watch?: boolean;
   readonly warmIdleTimeoutSeconds: number;
   readonly warmMemoryBudgetMB: number;
   readonly warmSetMaxProjects: number;

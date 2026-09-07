@@ -34,6 +34,7 @@ export interface IWarmFixtureOptions {
 }
 
 export const GENEROUS_WARM_CONFIGURATION: WorkspaceWarmSetConfiguration = {
+  watch: true,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 100_000,
   warmSetMaxProjects: 20,

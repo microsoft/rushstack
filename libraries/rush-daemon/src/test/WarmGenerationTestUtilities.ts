@@ -15,6 +15,7 @@ import { WorkspaceSessionFileWatcher } from '../WorkspaceSessionFileWatcher';
 import type { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 
 export const GENERATION_POLICY: WorkspaceWarmSetConfiguration = {
+  watch: true,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 100_000,
   warmSetMaxProjects: 20,

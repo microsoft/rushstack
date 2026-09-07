@@ -26,7 +26,7 @@ import type { WorkspaceSessionFileWatcher } from './WorkspaceSessionFileWatcher'
 /** The runtime footprint/latency policy, independent of command correctness. @beta */
 export type WorkspaceWarmSetConfiguration = Pick<
   IDaemonConfigurationJson,
-  'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'
+  'watch' | 'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'
 >;
 
 /** Attachment contract for one generation's real graph and watcher. @beta */
@@ -88,6 +88,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   #deferredReason: IWorkspaceWarmSetStatus['deferredReason'];
   #pressureKey: string | undefined;
   #leaseReleaseFailure: Error | undefined;
+  #watcherPolicyFailure: Error | undefined;
 
   private constructor(options: IWorkspaceWarmSetOptions) {
     this.#options = options;
@@ -114,9 +115,9 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         requested.push(name);
       }
       try {
-        options.watcher.watchProjects(requested);
+        if (this.#configuration.watch) options.watcher.watchProjects(requested);
       } catch (error) {
-        this.#diagnose(new Error('Failed to restore warm project observation.', { cause: error }));
+        this.#reportWatcherPolicyFailure(error);
       }
       this.#schedule(0);
     });
@@ -159,7 +160,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     return ATTACHED_GRAPHS.get(graph);
   }
 
-  /** Revalidates all four knobs and applies the new policy on the next idle maintenance turn. */
+  /** Revalidates observation and warm-resource policy and applies it on the next idle maintenance turn. */
   public updateConfiguration(configuration: WorkspaceWarmSetConfiguration): void {
     if (this.#disposed) throw new Error('The workspace warm set is disposed.');
     this.#configuration = resolveWarmConfiguration(configuration);
@@ -195,7 +196,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         this.#configuration.warmMemoryBudgetMB * BYTES_PER_MB,
       overProjectLimit: projects.length > this.#configuration.warmSetMaxProjects,
       deferredReason: this.#deferredReason,
-      cleanupFailures: [...this.#cleanupFailures.values()]
+      cleanupFailures: [
+        ...this.#cleanupFailures.values(),
+        ...(this.#watcherPolicyFailure ? [this.#watcherPolicyFailure.message] : [])
+      ]
     };
   }
 
@@ -220,7 +224,9 @@ export class WorkspaceWarmSet implements AsyncDisposable {
               return remaining > 0 ? Math.max(1, remaining) : RETRY_DELAY_MS;
             })
           );
-          this.#schedule(this.#deferredReason ? Math.min(delay, RETRY_DELAY_MS) : delay);
+          this.#schedule(
+            this.#deferredReason || this.#watcherPolicyFailure ? Math.min(delay, RETRY_DELAY_MS) : delay
+          );
         }
       });
     }
@@ -268,7 +274,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
           nativeLease = await this.#options.acquireExecutionLeaseAsync();
           if (this.#disposed) this.#deferredReason = 'disposed';
           else if (isGraphBusy(graph)) this.#deferredReason = 'graph-busy';
-          else await this.#evictIdleAsync();
+          else {
+            await this.#evictIdleAsync();
+            if (!this.#disposed) await this.#reconcileWatcherPolicyAsync();
+          }
         }
       }
     } catch (error) {
@@ -298,6 +307,33 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     const status: IWorkspaceWarmSetStatus = this.getStatus();
     this.#reportPressure(status);
     return status;
+  }
+
+  async #reconcileWatcherPolicyAsync(): Promise<void> {
+    const { watcher } = this.#options;
+    try {
+      const projects: IWarmProject[] = this.#rankProjects();
+      if (this.#configuration.watch) {
+        watcher.watchProjects(
+          projects.filter((project) => !this.#cleanupFailures.has(project.key)).map((project) => project.key)
+        );
+      } else {
+        await watcher.unwatchProjectsAsync(
+          projects.filter((project) => !project.protected).map((project) => project.key)
+        );
+      }
+      this.#watcherPolicyFailure = undefined;
+    } catch (error) {
+      this.#reportWatcherPolicyFailure(error);
+    }
+  }
+
+  #reportWatcherPolicyFailure(error: unknown): void {
+    const detail: string = error instanceof Error ? error.message : String(error);
+    this.#watcherPolicyFailure = new Error(`Failed to apply daemon.watch project observation: ${detail}`, {
+      cause: error
+    });
+    this.#diagnose(this.#watcherPolicyFailure);
   }
 
   async #evictIdleAsync(): Promise<void> {
@@ -457,9 +493,10 @@ function isGraphBusy(graph: IOperationGraph): boolean {
 function resolveWarmConfiguration(
   configuration: WorkspaceWarmSetConfiguration
 ): Readonly<Required<WorkspaceWarmSetConfiguration>> {
-  const { warmIdleTimeoutSeconds, warmMemoryBudgetMB, warmSetMaxProjects, autoWarmByTelemetry } =
+  const { watch, warmIdleTimeoutSeconds, warmMemoryBudgetMB, warmSetMaxProjects, autoWarmByTelemetry } =
     resolveDaemonConfiguration(configuration, {});
   return Object.freeze({
+    watch,
     warmIdleTimeoutSeconds,
     warmMemoryBudgetMB,
     warmSetMaxProjects,

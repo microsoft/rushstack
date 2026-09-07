@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { decodeDaemonControlMessage } from '../ControlFrameCodec';
+import { decodeDaemonControlMessage, encodeDaemonControlMessage } from '../ControlFrameCodec';
 
 import { INVALID_NUMBER, WARM_STATUS, ZERO, statusFrame, workspaceStatus } from './WorkspaceStatusTestData';
 
@@ -25,12 +25,24 @@ it.each([
   expect(() => decodeDaemonControlMessage(statusFrame(workspaceStatus(warmSet)))).toThrow();
 });
 
-it.each(['warmIdleTimeoutSeconds', 'warmMemoryBudgetMB', 'warmSetMaxProjects', 'autoWarmByTelemetry'])(
-  'rejects invalid effective configuration field %s',
-  (field: string) => {
-    const configuration: Record<string, unknown> = { ...WARM_STATUS.configuration, [field]: ZERO };
-    const warmSet: unknown = { ...WARM_STATUS, configuration };
-    expect(() => decodeDaemonControlMessage(statusFrame(workspaceStatus(warmSet)))).toThrow();
+it.each([
+  'watch',
+  'warmIdleTimeoutSeconds',
+  'warmMemoryBudgetMB',
+  'warmSetMaxProjects',
+  'autoWarmByTelemetry'
+])('rejects invalid effective configuration field %s', (field: string) => {
+  const configuration: Record<string, unknown> = { ...WARM_STATUS.configuration, [field]: ZERO };
+  const warmSet: unknown = { ...WARM_STATUS, configuration };
+  expect(() => decodeDaemonControlMessage(statusFrame(workspaceStatus(warmSet)))).toThrow();
+});
+
+it.each([false, true, undefined])(
+  'accepts observation policy and legacy omission: %s',
+  (watch: boolean | undefined) => {
+    const warmSet: unknown = { ...WARM_STATUS, configuration: { ...WARM_STATUS.configuration, watch } };
+    const frame: Uint8Array = statusFrame(workspaceStatus(warmSet));
+    expect(encodeDaemonControlMessage(decodeDaemonControlMessage(frame))).toEqual(frame);
   }
 );
 

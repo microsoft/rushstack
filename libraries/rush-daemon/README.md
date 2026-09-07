@@ -205,6 +205,7 @@ preserves its records and diagnostics without failing an otherwise successful bu
 
 | Policy | Runtime behavior |
 | --- | --- |
+| `watch` | Retains host observation of requested warm projects between requests when true. False (the default) keeps root/config guards only. Never schedules builds. |
 | `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
 | `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
 | `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
@@ -232,12 +233,22 @@ policy is deliberately left intact: optional footprint cleanup must not turn suc
 failed build merely because an optimization could not release resources.
 
 The default session starts with permanent root and Rush/subspace configuration observation and
-`projectNames: []`, not recursive watchers for every cold project. Requested projects are observed during
-planning; idle eviction removes their observation. **Every native request must still refresh its
+`projectNames: []`, not recursive watchers for every cold project. With `watch: true`, requested projects are
+observed during planning and between requests; idle eviction removes their observation. With `watch: false`,
+host project observation is disabled, but retained runners and execution results are not discarded merely
+because observation is off. **Every native request must still refresh its
 input snapshot and revalidate effective direct/rig/inherited configuration**, including files outside watcher
 roots. Cold source changes therefore rebuild correctly; changed graph configuration fails closed until the
 generation owner supplies a freshly constructed engine. A same-PID soft reload replaces the controller,
 watcher, graph and session together; controller history never migrates across generations.
+
+Changing observation policy uses the same idle maintenance leases. Enabling it restores observation of eligible
+retained projects without running scripts; disabling it awaits project watcher closure without closing runners
+or deleting results. Executing/prepared graphs and protected projects defer teardown, and failed/pending closes
+remain visible in status and diagnostics. This flag controls only the host's project file observation, not
+watchers inside retained runner processes, native Rush watch mode, or an autonomous build loop.
+Previously project observation ran regardless of the inactive flag. Honoring its existing default `false`
+intentionally lowers background observation; set `watch: true` to retain that observation between requests.
 
 `getStatus()` reports actual retained/protected projects, daemon RSS, measured child RSS, unmeasured runners,
 remaining pressure, maintenance deferral and failed cleanup. Diagnostics go to `onDiagnostic` (or a process
@@ -258,7 +269,7 @@ while a replacement session is being constructed the token is absent. The token 
 | `generation`, `generationToken` | Provider generation counter and current installed session identity; neither implies a graph or successful build. |
 | `graphInitialized` | Whether that session has a materialized operation graph. |
 | `warmSet` | Absent when no controller is attached, not a claim of zero memory. |
-| `warmSet.configuration` | The four effective runtime warm knobs. |
+| `warmSet.configuration` | The effective `watch` flag and four warm-resource knobs; older peers may omit `watch`. |
 | `maintenanceState`, `maintenanceFailure` | Running, quiescing, stopped, or failed maintenance; stopping maintenance alone does not free graph/watcher resources. |
 | `retainedProjectNames`, `protectedProjectNames`, `watchedProjectNames` | Actual retained projects, additional protection and still-resident project observation, including pending close. |
 | RSS, unmeasured count and pressure fields | Sampled daemon/child memory and outstanding limits, with unknown child memory explicitly distinguished from zero. |

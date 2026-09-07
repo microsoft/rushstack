@@ -842,7 +842,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
 }
 
 // @beta
-export type WorkspaceWarmSetConfiguration = Pick<IDaemonConfigurationJson, 'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'>;
+export type WorkspaceWarmSetConfiguration = Pick<IDaemonConfigurationJson, 'watch' | 'warmIdleTimeoutSeconds' | 'warmMemoryBudgetMB' | 'warmSetMaxProjects' | 'autoWarmByTelemetry'>;
 
 // @beta
 export type WorkspaceWatchFactory = (folderPath: string, options: {

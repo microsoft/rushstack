@@ -39,6 +39,7 @@ function validateConfiguration(value: unknown): void {
   requireStatusPositive(config.warmSetMaxProjects, 'warmSetMaxProjects');
   requireStatusCount(config.warmSetMaxProjects, 'warmSetMaxProjects');
   requireStatusBoolean(config.autoWarmByTelemetry, 'autoWarmByTelemetry');
+  if (config.watch !== undefined) requireStatusBoolean(config.watch, 'watch');
 }
 
 function validateChoice(value: unknown, field: string, choices: ReadonlySet<string>): void {

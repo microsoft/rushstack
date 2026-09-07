@@ -112,7 +112,7 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `autoStart` | `RUSH_DAEMON_AUTO_START` | true | Only after opt-in |
 | `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Host idle shutdown after request/output/cleanup drain |
 | `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Sent through existing admission contract |
-| `watch` | `RUSH_DAEMON_WATCH` | false | Reserved; does not enable automatic builds |
+| `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |
 | `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling |
 | `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort retained-project limit; never trims requested execution |
@@ -125,6 +125,11 @@ positive safe integer. The session automatically owns these warm policies for it
 graph and watchers. Executing/prepared work and protected resources are not evicted.
 Missing child-memory measurements stay explicitly unknown; unavoidable active/base
 memory pressure is reported rather than hidden. No warm-set setting changes build correctness.
+Project observation previously ran regardless of `watch`. Its existing default `false`
+now disables host project observation; set it to `true` to retain observation between
+requests. Every explicit native request still refreshes inputs and effective configuration.
+Changing this flag neither discards warm results/runners nor starts scripts; safe idle
+maintenance applies watcher changes and reports deferred or failed cleanup.
 
 ## Management
 
@@ -154,7 +159,7 @@ daemon with a different implementation version; start requires the bundled versi
 | --- | --- |
 | `generation`, `generationToken` | Current provider generation and installed session identity |
 | `graphInitialized` | A graph exists; this does not attest build success |
-| `warmSet.configuration` | The four effective runtime warm settings |
+| `warmSet.configuration` | Effective `watch` and four warm-resource settings; older peers may omit `watch` |
 | `warmSet.maintenanceState`, `warmSet.maintenanceFailure` | Running, quiescing, stopped or failed maintenance; stopping it does not itself free resources |
 | `warmSet.retainedProjectNames`, `warmSet.protectedProjectNames`, `warmSet.watchedProjectNames` | Actual retained/protected projects and resident project observation |
 | `warmSet.daemonResidentMemoryBytes`, `warmSet.measuredRunnerMemoryBytes`, `warmSet.unmeasuredRunnerCount` | Daemon RSS, last-completion child RSS samples, and explicitly unmeasured resident runners; descendants are not included |
