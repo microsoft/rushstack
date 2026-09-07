@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
+import { computeDaemonWorkspaceKey, resolveDaemonPathsFromProcess } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions, getDaemonConnectionOptionsAsync } from '../daemonConnectionOptions';
 
@@ -12,12 +14,19 @@ describe('version-selected daemon connection options', () => {
   let repoRoot: string;
 
   beforeEach(() => {
-    const tempRoot: string = path.resolve(__dirname, '../../temp');
-    fs.mkdirSync(tempRoot, { recursive: true });
-    repoRoot = fs.mkdtempSync(path.join(tempRoot, 'daemon-connection-'));
+    repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'daemon-connection-'));
     fs.writeFileSync(path.join(repoRoot, 'rush.json'), JSON.stringify({ rushVersion: Rush.version }));
   });
   afterEach(() => fs.rmSync(repoRoot, { recursive: true }));
+
+  it('uses the same native filesystem identity as the daemon host', async () => {
+    const nativeRoot: string = await fs.promises.realpath(repoRoot);
+    const options = getDaemonConnectionOptions(repoRoot, Rush.version, process.env, true);
+    expect(options.paths).toEqual(resolveDaemonPathsFromProcess(computeDaemonWorkspaceKey({
+      canonicalRepoRoot: nativeRoot, rushVersion: Rush.version
+    })));
+    expect(options.startCommand?.cwd).toBe(nativeRoot);
+  });
 
   it('creates an attested async launcher without changing current synchronous callers', async () => {
     const synchronous = getDaemonConnectionOptions(repoRoot, Rush.version, process.env, true);

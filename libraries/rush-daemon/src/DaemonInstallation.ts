@@ -23,7 +23,7 @@ export interface IInstalledDaemonLauncher extends IDaemonInstallationMetadata {
 
 /** Resolves declared files without loading foreign engine code into the caller. */
 export function readDaemonInstallationMetadata(packageJsonPath: string): IDaemonInstallationMetadata {
-  const daemonPackageJsonPath: string = fs.realpathSync(packageJsonPath);
+  const daemonPackageJsonPath: string = fs.realpathSync.native(packageJsonPath);
   const root: string = path.dirname(daemonPackageJsonPath);
   const metadata: {
     name?: string;
@@ -39,7 +39,7 @@ export function readDaemonInstallationMetadata(packageJsonPath: string): IDaemon
   }
   const declaredPath: string = path.resolve(root, metadata.bin.rushd);
   assertPackageFile(root, declaredPath);
-  const launcherPath: string = fs.realpathSync(declaredPath);
+  const launcherPath: string = fs.realpathSync.native(declaredPath);
   assertPackageFile(root, launcherPath);
   if (!fs.statSync(launcherPath).isFile()) throw new Error(`Daemon launcher is not a file: ${launcherPath}`);
   const selectedRequire: NodeRequire = createRequire(launcherPath);

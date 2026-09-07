@@ -5,14 +5,45 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { IOperationGraph } from '@microsoft/rush-lib';
+import { Rush, type IOperationGraph } from '@microsoft/rush-lib';
 import { FileSystem } from '@rushstack/node-core-library';
 
+import { WorkspaceSession } from '../WorkspaceSession';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { createNativeEngineAsync } from './WarmGenerationTestUtilities';
 
 jest.setTimeout(30_000);
 
 describe('native daemon workspace paths', () => {
+  it('loads canonical session configuration for real Git snapshots through a workspace alias', async () => {
+    const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
+    const aliasFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-session-alias-'));
+    try {
+      const root: string = await fs.promises.realpath(fixture.folder);
+      const alias: string = path.join(aliasFolder, 'workspace');
+      await FileSystem.createSymbolicLinkJunctionAsync({ linkTargetPath: root, newLinkPath: alias });
+      const session: WorkspaceSession = await WorkspaceSession.createAsync({
+        repoRoot: alias, rushVersion: Rush.version
+      });
+      try {
+        expect(session.metadata.repoRoot).toBe(root);
+        expect(session.rushConfiguration.rushJsonFolder).toBe(root);
+        const engine = await createNativeEngineAsync(session.rushConfiguration);
+        try {
+          expect(engine.inputsSnapshot).toBeDefined();
+          expect(fixture.runs()).toEqual([]);
+        } finally {
+          await engine[Symbol.asyncDispose]();
+        }
+      } finally {
+        await session[Symbol.asyncDispose]();
+      }
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+      fs.rmSync(aliasFolder, { recursive: true, force: true });
+    }
+  });
+
   it.each(['workspace', 'project'])(
     'selects a project through a %s alias and reuses its real graph through the canonical path',
     async (kind) => {
