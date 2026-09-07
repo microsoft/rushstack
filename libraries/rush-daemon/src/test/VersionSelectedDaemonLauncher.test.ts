@@ -25,7 +25,7 @@ import {
   DaemonLauncherUnavailableError,
   type IDaemonLauncherContext
 } from '../VersionSelectedDaemonLauncher';
-import { waitForTestProcessExitAsync } from './TestProcessExit';
+import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('version-selected daemon launcher', () => {
   let repoRoot: string;
@@ -64,8 +64,8 @@ describe('version-selected daemon launcher', () => {
     };
   });
 
-  afterEach(() => {
-    if (!preserveFixture) fs.rmSync(repoRoot, { recursive: true });
+  afterEach(async () => {
+    if (!preserveFixture) await removeTestFolderAsync(repoRoot);
   });
 
   async function stopDaemonAsync(client: DaemonClient, paths: IDaemonPaths): Promise<void> {

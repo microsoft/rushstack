@@ -692,7 +692,7 @@ process.exit(23);
         );
         const rushJsonPath: string = path.join(fixture.repoRoot, 'rush.json');
         const json: { eventHooks?: object } = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
-        json.eventHooks = { preRushInstall: [`"${process.execPath}" "${scriptPath}"`] };
+        json.eventHooks = { preRushInstall: ['node common/temp/mutate.cjs'] };
         fs.writeFileSync(rushJsonPath, JSON.stringify(json));
         const result: ITerminalExchange = await runAsync(fixture, 'mutation', [
           commandName,
