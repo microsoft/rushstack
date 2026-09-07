@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { realpath } from 'node:fs/promises';
 
 import { PhasedCommandEngineBusyError, RushConfiguration } from '@microsoft/rush-lib';
 import type { IInputsSnapshot, IOperationGraph, RushSession } from '@microsoft/rush-lib';
@@ -309,10 +310,10 @@ export class WorkspaceSession implements IWorkspaceSession {
 
   /** Loads workspace identity, creates reusable components, and starts headless invalidation tracking. */
   public static async createAsync(options: IWorkspaceSessionOptions): Promise<WorkspaceSession> {
+    const canonicalRepoRoot: string = await realpath(options.repoRoot);
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.join(options.repoRoot, 'rush.json')
+      path.join(canonicalRepoRoot, 'rush.json')
     );
-    const canonicalRepoRoot: string = path.resolve(options.repoRoot);
     if (path.resolve(rushConfiguration.rushJsonFolder) !== canonicalRepoRoot) {
       throw new Error(`Rush configuration resolved outside the daemon workspace: ${options.repoRoot}`);
     }

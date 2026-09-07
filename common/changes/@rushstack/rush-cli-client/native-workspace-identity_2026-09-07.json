@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Use native filesystem canonicalization so Windows short-path aliases address the same daemon as the host.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

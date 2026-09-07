@@ -468,7 +468,7 @@ describe(RushDaemonHost.name, () => {
   it('removes transport artifacts when workspace initialization fails', async () => {
     const repoRoot: string = createTestRepoRoot();
     const workspaceKey: string = computeDaemonWorkspaceKey({
-      canonicalRepoRoot: fs.realpathSync(repoRoot),
+      canonicalRepoRoot: fs.realpathSync.native(repoRoot),
       rushVersion: RUSH_VERSION
     });
     const paths: IDaemonPaths = resolveDaemonPathsFromProcess(workspaceKey);
