@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Resolve native daemon command working directories physically before enforcing workspace confinement and native project selection, accepting Windows short paths and workspace aliases while rejecting symlink escapes.",
+      "type": "patch"
+    }
+  ]
+}
