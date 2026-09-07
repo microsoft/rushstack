@@ -20,6 +20,7 @@ async function mainAsync(): Promise<void> {
   const connections: Set<DaemonFrameConnection> = new Set();
   let closing: Promise<void> | undefined;
   fs.appendFileSync(path.join(folder, 'starts'), `${process.pid}\n`);
+  fs.appendFileSync(path.join(folder, 'parents'), `${process.ppid}\n`);
   process.stdout.write('launcher stdout\n');
   process.stderr.write('launcher stderr\n');
   if (fs.existsSync(path.join(folder, 'hold-prebind'))) {

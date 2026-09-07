@@ -218,7 +218,7 @@ export async function selectDaemonLauncherAsync(
         stdio: ['ignore', 2, 2]
       }
     );
-    const [exitCode, signal] = await once(child, 'exit');
+    const [exitCode, signal] = await once(child, 'close');
     if (exitCode !== 0 || signal) {
       throw new Error(`Installing ${DAEMON_PACKAGE}@${candidate} failed (${signal ?? exitCode}).`);
     }

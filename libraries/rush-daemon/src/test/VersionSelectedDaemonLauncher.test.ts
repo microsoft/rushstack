@@ -2,11 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { connectOrStartDaemonAsync, requestDaemonShutdownAsync } from '@rushstack/rush-client-core';
+import {
+  connectOrStartDaemonAsync,
+  requestDaemonShutdownAsync,
+  type DaemonClient
+} from '@rushstack/rush-client-core';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import {
   computeDaemonWorkspaceKey,
@@ -20,15 +25,16 @@ import {
   DaemonLauncherUnavailableError,
   type IDaemonLauncherContext
 } from '../VersionSelectedDaemonLauncher';
+import { waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('version-selected daemon launcher', () => {
   let repoRoot: string;
   let context: IDaemonLauncherContext;
+  let preserveFixture: boolean;
 
   beforeEach(() => {
-    const tempRoot: string = path.resolve(__dirname, '../../temp');
-    fs.mkdirSync(tempRoot, { recursive: true });
-    repoRoot = fs.mkdtempSync(path.join(tempRoot, 'daemon-selection-'));
+    preserveFixture = false;
+    repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'daemon-selection-'));
     fs.mkdirSync(path.join(repoRoot, 'runtime'));
     fs.writeFileSync(
       path.join(repoRoot, 'rush.json'),
@@ -58,7 +64,19 @@ describe('version-selected daemon launcher', () => {
     };
   });
 
-  afterEach(() => fs.rmSync(repoRoot, { recursive: true }));
+  afterEach(() => {
+    if (!preserveFixture) fs.rmSync(repoRoot, { recursive: true });
+  });
+
+  async function stopDaemonAsync(client: DaemonClient, paths: IDaemonPaths): Promise<void> {
+    try {
+      const owner = await requestDaemonShutdownAsync(client, paths).finally(() => client.closeAsync());
+      await waitForTestProcessExitAsync(owner.pid);
+    } catch (error) {
+      preserveFixture = true;
+      throw error;
+    }
+  }
 
   it('attests the actual bundled engine and protocol without changing the caller environment', async () => {
     const originalRushLibPath: string | undefined = process.env._RUSH_LIB_PATH;
@@ -142,13 +160,17 @@ describe('version-selected daemon launcher', () => {
         paths,
         expectedDaemonVersion: selected.daemonVersion,
         startCommand: selected.startCommand
+      }).catch((cause: unknown) => {
+        preserveFixture = true;
+        const logPath: string = `${paths.lockfilePath}.log`;
+        const log: string = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '(log not created)';
+        throw new Error(`Selected daemon startup failed. Launcher log (${logPath}):\n${log}`, { cause });
       });
       try {
         expect(await client.status).toMatchObject({ daemonVersion: selected.daemonVersion });
         expect(fs.readFileSync(`${paths.lockfilePath}.log`, 'utf8')).toContain(`Rush ${Rush.version}`);
       } finally {
-        await requestDaemonShutdownAsync(client, paths);
-        await client.closeAsync();
+        await stopDaemonAsync(client, paths);
       }
     },
     30000

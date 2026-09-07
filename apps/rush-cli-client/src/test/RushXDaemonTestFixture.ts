@@ -43,6 +43,7 @@ export class RushXDaemonTestFixture implements AsyncDisposable {
   public constructor(hooks: boolean = false, pnpmSync: boolean = false) {
     this.write('rush.json', JSON.stringify({
       rushVersion: Rush.version,
+      suppressNodeLtsWarning: true,
       pnpmVersion: '10.27.0',
       projectFolderMinDepth: 2,
       projectFolderMaxDepth: 2,

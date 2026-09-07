@@ -7,6 +7,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 async function mainAsync(): Promise<void> {
+  fs.appendFileSync(path.join(process.cwd(), 'parents'), `${process.ppid}\n`);
   fs.writeFileSync(
     path.join(process.cwd(), 'launcher-options'),
     JSON.stringify({ cwd: process.cwd(), argument: process.argv[2], environment: process.env.FIXTURE_VALUE })

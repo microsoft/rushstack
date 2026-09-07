@@ -48,6 +48,8 @@ a shell and retains that reservation until the daemon completes hello/ping readi
 independently of whether the requesting client survives. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed; a live (possibly reused) PID with an unreachable socket fails closed.
+The helper uses a stable tool cwd, and the starting client awaits its exit after
+readiness. The explicit launcher's cwd is unchanged.
 
 An unresolved startup reservation is never automatically reclaimed based on PID
 liveness or elapsed time. If the helper cannot establish readiness, subsequent starts

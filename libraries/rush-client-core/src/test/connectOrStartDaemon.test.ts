@@ -17,6 +17,7 @@ import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
 import { getDaemonStartupFilePath } from '../DaemonStartup';
+import { waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('detached daemon startup', () => {
   let folder: string;
@@ -66,11 +67,13 @@ describe('detached daemon startup', () => {
     }
     if (fs.existsSync(path.join(folder, 'starts'))) {
       fs.writeFileSync(path.join(folder, 'stop'), '');
-      const deadline: number = Date.now() + 5000;
       const pids: string[] = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n');
-      const allStopped = (): boolean => pids.every((pid) => fs.existsSync(path.join(folder, `stopped-${pid}`)));
-      while (!allStopped() && Date.now() < deadline) await delayAsync(50);
-      expect(allStopped()).toBe(true);
+      await Promise.all(pids.map((pid) => waitForTestProcessExitAsync(Number(pid))));
+      expect(pids.every((pid) => fs.existsSync(path.join(folder, `stopped-${pid}`)))).toBe(true);
+    }
+    if (fs.existsSync(path.join(folder, 'parents'))) {
+      const parents = new Set(fs.readFileSync(path.join(folder, 'parents'), 'utf8').trim().split('\n'));
+      await Promise.all([...parents].map((pid) => waitForTestProcessExitAsync(Number(pid))));
     }
     fs.rmSync(folder, { recursive: true });
   });
@@ -166,11 +169,12 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
 
-  it('preserves an arbitrary launcher, arguments, cwd and explicit environment', async () => {
+  it.each([false, true])('preserves an explicit launcher and environment (relative cwd: %s)', async (relative) => {
     const client = await connectOrStartDaemonAsync({
       ...options,
       startCommand: {
         ...options.startCommand!,
+        cwd: relative ? path.relative(process.cwd(), folder) : folder,
         args: [
           path.join(__dirname, 'fixtures/launcher.js'),
           'an argument with spaces',
@@ -188,6 +192,79 @@ describe('detached daemon startup', () => {
     await client.closeAsync();
   });
 
+  it('finishes startup helper resources before returning a ready client', async () => {
+    const childProcess = jest.requireActual<typeof import('node:child_process')>('node:child_process');
+    const originalSpawn: typeof spawn = childProcess.spawn;
+    const helpers: Set<ChildProcess> = new Set();
+    const closed: Set<ChildProcess> = new Set();
+    const observer = jest.spyOn(childProcess, 'spawn').mockImplementation((command, args, spawnOptions) => {
+      const child = originalSpawn(command, args, spawnOptions);
+      if (args?.includes(require.resolve('../runDaemonStartup'))) {
+        helpers.add(child);
+        child.once('close', () => closed.add(child));
+      }
+      return child;
+    });
+    try {
+      const client = await connectOrStartDaemonAsync(options);
+      await client.closeAsync();
+      expect(helpers.size).toBe(1);
+      expect(closed).toEqual(helpers);
+      for (const helper of helpers) expect(helper.exitCode).toBe(0);
+    } finally {
+      observer.mockRestore();
+    }
+  });
+
+  it('waits for fixture process exit rather than its work-finished marker', async () => {
+    const child = spawn(process.execPath, ['-e', "process.stdout.write('finished'); process.stdin.resume();"], {
+      cwd: folder,
+      stdio: 'pipe'
+    });
+    starterProcesses.push(child);
+    const closed: Promise<unknown[]> = once(child, 'close');
+    await once(child.stdout, 'data');
+    let exited: boolean = false;
+    const waiting: Promise<void> = waitForTestProcessExitAsync(child.pid!).then(() => {
+      exited = true;
+    });
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(exited).toBe(false);
+    child.stdin.end();
+    await Promise.all([closed, waiting]);
+    expect(exited).toBe(true);
+  });
+
+  it('releases a helper whose IPC handoff failed without reclaiming its reservation', async () => {
+    const childProcess = jest.requireActual<typeof import('node:child_process')>('node:child_process');
+    const originalSpawn: typeof spawn = childProcess.spawn;
+    const failure: Error = new Error('fixture IPC handoff failure');
+    let helper: ChildProcess | undefined;
+    let exited: boolean = false;
+    const observer = jest.spyOn(childProcess, 'spawn').mockImplementation((command, args, spawnOptions) => {
+      const child = originalSpawn(command, args, spawnOptions);
+      helper = child;
+      jest.spyOn(child, 'send').mockImplementation(() => {
+        throw failure;
+      });
+      return child;
+    });
+    try {
+      await expect(connectOrStartDaemonAsync(options)).rejects.toBe(failure);
+      expect(helper?.pid).toBeDefined();
+      await waitForTestProcessExitAsync(helper!.pid!);
+      exited = true;
+      expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(true);
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    } finally {
+      observer.mockRestore();
+      if (!exited && helper?.pid !== undefined) {
+        if (helper.exitCode === null && helper.signalCode === null) helper.kill('SIGKILL');
+        await waitForTestProcessExitAsync(helper.pid);
+      }
+    }
+  });
+
   it('starts exactly once across four processes and survives all starting clients', async () => {
     const starters: ChildProcess[] = Array.from({ length: 4 }, () =>
       spawn(process.execPath, [path.join(__dirname, 'fixtures/starter.js'), JSON.stringify(options)], {
@@ -200,7 +277,7 @@ describe('detached daemon startup', () => {
         starter.stderr!.on('data', (chunk: Buffer) => {
           stderr += chunk.toString();
         });
-        const [code] = await once(starter, 'exit');
+        const [code] = await once(starter, 'close');
         return { code, stderr };
       })
     );
