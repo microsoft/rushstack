@@ -22,6 +22,12 @@ import {
 import { DaemonClient, type IDaemonClientConnectOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
 import { getDaemonLogFilePath } from './DaemonLogFile';
+import {
+  getDaemonStartupFilePath,
+  reserveDaemonStartup,
+  releaseDaemonStartup,
+  type IDaemonStartupOptions
+} from './DaemonStartup';
 
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
 export interface IDaemonStartCommand {
@@ -43,7 +49,7 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
   readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
   /** Total startup/retry deadline. Defaults to 15000 milliseconds. */
   readonly startupTimeoutMs?: number;
-  /** Cancels waiting/startup, without stopping an already spawned daemon. */
+  /** Cancels waiting/startup, without stopping startup already handed off to the detached helper. */
   readonly abortSignal?: AbortSignal;
 }
 
@@ -94,6 +100,19 @@ export async function connectOrStartDaemonAsync(
   }
   if (!lock) throw startupError(options, 'timed out waiting for another starting client');
   try {
+    while (fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false })) {
+      const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
+      if (ready) return ready;
+      if (Date.now() >= deadline) {
+        throw startupError(
+          options,
+          `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)}; refusing another launch`
+        );
+      }
+      await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
+        signal: options.abortSignal
+      });
+    }
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
     const replacement: DaemonClient | undefined = await replaceMismatchedDaemonAsync(options, deadline);
@@ -105,14 +124,17 @@ export async function connectOrStartDaemonAsync(
     await reclaimStaleDaemonAsync(options.paths);
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();
-    const child: ChildProcess = await spawnDetachedAsync(options);
+    const child: ChildProcess = await spawnDetachedAsync(options, deadline);
     backoffMs = 50;
     while (Date.now() < deadline) {
       options.abortSignal?.throwIfAborted();
       const client: DaemonClient | undefined = await tryConnectAsync(options, deadline);
       if (client) return client;
-      if (child.exitCode !== null || child.signalCode !== null) {
-        throw startupError(options, `child exited (${child.exitCode ?? child.signalCode}) before readiness`);
+      if ((child.exitCode !== null && child.exitCode !== 0) || child.signalCode !== null) {
+        throw startupError(
+          options,
+          `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`
+        );
       }
       await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
       backoffMs = Math.min(500, backoffMs * 2);
@@ -179,12 +201,22 @@ async function tryConnectAsync(
 ): Promise<DaemonClient | undefined> {
   options.abortSignal?.throwIfAborted();
   try {
-    return await DaemonClient.connectAsync({
+    const client: DaemonClient = await DaemonClient.connectAsync({
       ...options,
       socketPath: options.paths.socketPath,
       timeoutMs: Math.min(options.timeoutMs ?? 1000, Math.max(1, deadline - Date.now()))
     });
+    // Do not expose a just-started daemon to shutdown/restart until the helper finishes the handoff.
+    let pendingStartup: boolean = true;
+    try {
+      options.abortSignal?.throwIfAborted();
+      pendingStartup = !!fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false });
+    } finally {
+      if (pendingStartup) await client.closeAsync();
+    }
+    return pendingStartup ? undefined : client;
   } catch (error) {
+    options.abortSignal?.throwIfAborted();
     if (
       error instanceof DaemonTransportError &&
       (error.code === DaemonTransportErrorCode.connectionRefused ||
@@ -321,7 +353,10 @@ function isProcessAlive(pid: number): boolean {
   }
 }
 
-async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promise<ChildProcess> {
+async function spawnDetachedAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<ChildProcess> {
   const start: IDaemonStartCommand = options.startCommand!;
   const logFilePath: string = getDaemonLogFilePath(options.paths);
   // These distinct native flags have non-overlapping values.
@@ -345,16 +380,18 @@ async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promis
       }
       fs.fchmodSync(logFd, 0o600);
     }
-    const child: ChildProcess = spawn(start.command, [...start.args], {
-      cwd: start.cwd,
-      env: start.environment,
-      detached: true,
-      stdio: ['ignore', logFd, logFd],
-      windowsHide: true
-    });
+    const token: string = reserveDaemonStartup(options.paths);
+    let child: ChildProcess;
     try {
+      child = spawn(process.execPath, [path.join(__dirname, 'runDaemonStartup.js')], {
+        cwd: start.cwd,
+        detached: true,
+        stdio: ['ignore', logFd, logFd, 'ipc'],
+        windowsHide: true
+      });
       await once(child, 'spawn');
     } catch (error) {
+      releaseDaemonStartup(options.paths, token);
       throw new DaemonClientError(
         'startupFailed',
         `Unable to start ${start.command}; inspect ${logFilePath}.`,
@@ -362,6 +399,19 @@ async function spawnDetachedAsync(options: IConnectOrStartDaemonOptions): Promis
       );
     }
     child.unref();
+    const startup: IDaemonStartupOptions = {
+      paths: options.paths,
+      startCommand: start,
+      token,
+      timeoutMs: Math.max(1, deadline - Date.now())
+    };
+    try {
+      await new Promise<void>((resolve, reject) => {
+        child.send(startup, (error) => (error ? reject(error) : resolve()));
+      });
+    } finally {
+      if (child.connected) child.disconnect();
+    }
     return child;
   } finally {
     fs.closeSync(logFd);

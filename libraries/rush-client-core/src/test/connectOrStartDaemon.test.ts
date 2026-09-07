@@ -16,13 +16,16 @@ import { captureDaemonRequest } from '../captureDaemonRequest';
 import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
+import { getDaemonStartupFilePath } from '../DaemonStartup';
 
 describe('detached daemon startup', () => {
   let folder: string;
   let paths: IDaemonPaths;
   let options: IConnectOrStartDaemonOptions;
+  let starterProcesses: ChildProcess[];
 
   beforeEach(() => {
+    starterProcesses = [];
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-'));
     paths = {
       runtimeDir: folder,
@@ -54,6 +57,13 @@ describe('detached daemon startup', () => {
   });
 
   afterEach(async () => {
+    for (const starter of starterProcesses) {
+      if (starter.exitCode === null && starter.signalCode === null) {
+        const closed: Promise<unknown[]> = once(starter, 'close');
+        starter.kill('SIGKILL');
+        await closed;
+      }
+    }
     if (fs.existsSync(path.join(folder, 'starts'))) {
       fs.writeFileSync(path.join(folder, 'stop'), '');
       const deadline: number = Date.now() + 5000;
@@ -63,6 +73,119 @@ describe('detached daemon startup', () => {
       expect(allStopped()).toBe(true);
     }
     fs.rmSync(folder, { recursive: true });
+  });
+
+  function startClient(startOptions: IConnectOrStartDaemonOptions = options): {
+    child: ChildProcess;
+    result: Promise<{ code: number | null; stderr: string }>;
+  } {
+    const child: ChildProcess = spawn(
+      process.execPath,
+      [path.join(__dirname, 'fixtures/starter.js'), JSON.stringify(startOptions)],
+      { stdio: ['ignore', 'ignore', 'pipe'] }
+    );
+    starterProcesses.push(child);
+    let stderr: string = '';
+    child.stderr!.on('data', (chunk: Buffer) => {
+      stderr += chunk.toString();
+    });
+    return {
+      child,
+      result: once(child, 'close').then(([code]) => ({ code, stderr }))
+    };
+  }
+
+  async function killStarterBeforeBindAsync(): Promise<number> {
+    fs.writeFileSync(path.join(folder, 'hold-prebind'), '');
+    const starter = startClient();
+    const barrier: string = path.join(folder, 'prebind');
+    const deadline: number = Date.now() + 5000;
+    while (!fs.existsSync(barrier) && Date.now() < deadline) await delayAsync(20);
+    expect(fs.existsSync(barrier)).toBe(true);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    const daemonPid: number = Number(fs.readFileSync(barrier, 'utf8'));
+    expect(starter.child.kill('SIGKILL')).toBe(true);
+    expect((await starter.result).code).not.toBe(0);
+    expect(starter.child.signalCode).toBe('SIGKILL');
+    return daemonPid;
+  }
+
+  it('fails closed for successor starters while the original detached daemon remains pre-bind', async () => {
+    const daemonPid: number = await killStarterBeforeBindAsync();
+    const results = await Promise.all(
+      Array.from({ length: 4 }, () => startClient({ ...options, startupTimeoutMs: 700 }).result)
+    );
+    expect(results.every(({ code }) => code !== 0)).toBe(true);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+
+    fs.unlinkSync(path.join(folder, 'hold-prebind'));
+    const client = await connectOrStartDaemonAsync(options);
+    expect((await client.status).pid).toBe(daemonPid);
+    await client.closeAsync();
+  }, 15000);
+
+  it('hands startup to the detached owner after the first client dies and reuses exactly one daemon', async () => {
+    const daemonPid: number = await killStarterBeforeBindAsync();
+    const successors = Array.from({ length: 4 }, () => startClient());
+    fs.unlinkSync(path.join(folder, 'hold-prebind'));
+    expect(await Promise.all(successors.map(({ result }) => result))).toEqual(
+      Array.from({ length: 4 }, () => ({ code: 0, stderr: '' }))
+    );
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    const client = await DaemonClient.connectAsync({
+      socketPath: paths.socketPath,
+      expectedDaemonVersion: 'fixture'
+    });
+    expect((await client.status).pid).toBe(daemonPid);
+    await client.closeAsync();
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+  }, 15000);
+
+  it('preserves an unresolved startup reservation rather than trusting or reclaiming its contents', async () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    const contents: string = JSON.stringify({ pid: process.pid, startedAt: 'not an ownership contract' });
+    fs.writeFileSync(startupPath, contents);
+    const { result } = startClient({ ...options, startupTimeoutMs: 200 });
+    expect(await result).toMatchObject({ code: 1, stderr: expect.stringContaining('unresolved startup handoff') });
+    expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it('does not infer safe retry from a launcher exiting before ownership publication', async () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    const failing: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: { ...options.startCommand!, args: [path.join(folder, 'missing-entry.js')] }
+    };
+    await expect(connectOrStartDaemonAsync(failing)).rejects.toThrow('Unable to start');
+    const contents: string = fs.readFileSync(startupPath, 'utf8');
+    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 100 }))
+      .rejects.toThrow('unresolved startup handoff');
+    expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it('preserves an arbitrary launcher, arguments, cwd and explicit environment', async () => {
+    const client = await connectOrStartDaemonAsync({
+      ...options,
+      startCommand: {
+        ...options.startCommand!,
+        args: [
+          path.join(__dirname, 'fixtures/launcher.js'),
+          'an argument with spaces',
+          JSON.stringify(paths)
+        ],
+        environment: { ...options.startCommand!.environment, FIXTURE_VALUE: 'explicit environment' }
+      }
+    });
+    expect(JSON.parse(fs.readFileSync(path.join(folder, 'launcher-options'), 'utf8'))).toEqual({
+      cwd: folder,
+      argument: 'an argument with spaces',
+      environment: 'explicit environment'
+    });
+    expect((await client.status).daemonVersion).toBe('fixture');
+    await client.closeAsync();
   });
 
   it('starts exactly once across four processes and survives all starting clients', async () => {
