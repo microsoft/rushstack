@@ -3,6 +3,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { spawn } from 'node:child_process';
 
 import {
   RushUserConfiguration,
@@ -202,7 +203,10 @@ export function useNativeIpcRunners(graph: IOperationGraph): void {
       initialCommand: 'node build.cjs',
       incrementalCommand: 'node build.cjs',
       commandForHash: 'node build.cjs',
-      ignoredParameterValues: []
+      ignoredParameterValues: [],
+      // Windows cmd.exe cannot forward Node's IPC descriptor to its grandchild (the first send fails EPIPE).
+      // Keep the real runner and native lifecycle options, but make the known fixture Node script the IPC child.
+      spawn: (command, args, options) => spawn(process.execPath, ['build.cjs'], { ...options, shell: false })
     });
   }
 }

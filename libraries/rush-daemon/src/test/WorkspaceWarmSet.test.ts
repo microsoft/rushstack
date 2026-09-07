@@ -4,6 +4,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
+import { inspect } from 'node:util';
 
 import { OperationStatus, type IOperationExecutionResult } from '@microsoft/rush-lib';
 
@@ -26,7 +27,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
 
   async function startAsync(options: IWarmFixtureOptions = {}): Promise<WarmSetTestFixture> {
     test = await WarmSetTestFixture.createAsync(options);
-    expect((await test.fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await test.fixture.buildSuccessfullyAsync();
     await test.warm.maintainAsync();
     return test;
   }
@@ -50,7 +51,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
 
     test!.update({ warmIdleTimeoutSeconds: 300 });
     fixture.write('a/input.txt', 'changed-while-cold');
-    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await fixture.buildSuccessfullyAsync();
     expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
     expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe('changed-while-cold');
     expect(test!.operation('a').runner?.isActive).toBe(true);
@@ -90,7 +91,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     const { fixture, warm, graph } = await startAsync({ ipc: true });
     fixture.write('a/input.txt', 'two');
     fixture.write('b/input.txt', 'two');
-    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await fixture.buildSuccessfullyAsync();
     await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
     test!.update({ autoWarmByTelemetry: true });
     expect(warm.getStatus().retainedProjectNames).toEqual(['a', 'b']);
@@ -120,7 +121,9 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     try {
       test!.update({ warmSetMaxProjects: 1 });
       expect(await warm.maintainAsync()).toMatchObject({
-        deferredReason: 'workspace-busy', overProjectLimit: true, overMemoryBudget: false
+        deferredReason: 'workspace-busy',
+        overProjectLimit: true,
+        overMemoryBudget: false
       });
       expect(diagnostics).toEqual([]);
     } finally {
@@ -161,7 +164,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     }
     try {
       fixture.write('a/input.txt', 'two');
-      await fixture.buildAsync();
+      await fixture.buildSuccessfullyAsync();
       await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
       test!.update({ autoWarmByTelemetry: true });
       expect(warm.getStatus().unmeasuredRunnerCount).toBe(2);
@@ -179,7 +182,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     const before: IOperationExecutionResult = graph.resultByOperation.get(test!.operation('a'))!;
     const gate = await createNativeScriptGateAsync(fixture.folder, 'a');
     fixture.write('a/input.txt', 'gated');
-    const build = fixture.buildAsync();
+    const build = fixture.buildSuccessfullyAsync();
     try {
       await gate.entered;
       test!.update({ warmMemoryBudgetMB: 0.01, warmIdleTimeoutSeconds: 0.01, warmSetMaxProjects: 1 });
@@ -189,12 +192,13 @@ describe('warm policies attached to native graphs and real filesystem watchers',
       expect(test!.operation('a').runner?.isActive).toBe(true);
       expect(graph.resultByOperation.get(test!.operation('a'))).toBe(before);
       expect(() => graph.deleteResults!([test!.operation('a')])).toThrow('executing or prepared');
+      // Register protection while the real build still holds admission, not in a race with its idle timer.
+      test!.protectedOperations.add(test!.operation('a'));
+      test!.protectedOperations.add(test!.operation('b'));
     } finally {
       await gate.releaseAsync();
     }
     expect((await build).terminal).toMatchObject({ payload: { exitCode: 0 } });
-    test!.protectedOperations.add(test!.operation('a'));
-    test!.protectedOperations.add(test!.operation('b'));
     const protectedStatus = await warm.maintainAsync();
     expect([...protectedStatus.protectedProjectNames].sort()).toEqual(['a', 'b']);
     expect(protectedStatus.overMemoryBudget).toBe(true);
@@ -210,11 +214,17 @@ describe('warm policies attached to native graphs and real filesystem watchers',
       await gate.entered;
       test!.update({ warmMemoryBudgetMB: 0.01 });
       const status = await warm.maintainAsync();
+      if (status.deferredReason !== 'native-busy') {
+        throw new Error(
+          `Native contention was not reported:\n${inspect({ status, diagnostics: test!.diagnostics }, { depth: null })}`
+        );
+      }
       expect(status.deferredReason).toBe('native-busy');
       expect(graph.resultByOperation.size).toBe(2);
       expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
     } finally {
       await gate.releaseAsync();
+      await native;
     }
     expect((await native).exitCode).toBe(0);
     await warm.maintainAsync();
@@ -309,7 +319,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
         expect(watcher.watchedProjectNames.has('a')).toBe(true);
         expect(operation.runner?.isActive).toBe(kind === 'runner');
         expect(test!.diagnostics.some((error) => error.message.includes('Could not evict'))).toBe(true);
-        expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+        await fixture.buildSuccessfullyAsync();
       } finally {
         close.mockRestore();
       }
@@ -343,7 +353,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     await warm.maintainAsync();
     fs.rmSync(path.join(fixture.folder, 'a/lib'), { recursive: true });
     test!.update({});
-    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await fixture.buildSuccessfullyAsync();
     expect(fixture.runs()).toEqual(['a', 'b']);
     expect(graph.resultByOperation.get(test!.operation('a'))?.status).toBe(OperationStatus.FromCache);
     expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe('one');
@@ -450,7 +460,7 @@ describe('warm policies attached to native graphs and real filesystem watchers',
       expect(fixture.runs()).toEqual(['a', 'b']);
       test!.update({});
       await test!.restartAsync();
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe(
         'new-configuration'
       );

@@ -27,12 +27,15 @@ import {
   DaemonRequestWireClient,
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
+import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
   public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
-  public readonly folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'));
+  public readonly folder: string = fs.realpathSync.native(
+    fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
+  );
   public readonly environment: Record<string, string> = {
     ...Object.fromEntries(
       Object.entries(process.env).filter((pair): pair is [string, string] => pair[1] !== undefined)
@@ -200,6 +203,12 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
 
   public buildAsync(): Promise<ITerminalExchange> {
     return this.runAsync(['build', '--to', 'b', '--parallelism', '3']);
+  }
+
+  public async buildSuccessfullyAsync(): Promise<ITerminalExchange> {
+    const exchange: ITerminalExchange = await this.buildAsync();
+    assertSuccessfulNativeBuild(exchange, this.session.operationGraph);
+    return exchange;
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
