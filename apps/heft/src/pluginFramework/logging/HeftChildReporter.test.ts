@@ -7,6 +7,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import type { Readable, Writable } from 'node:stream';
 
+import { PackageJsonLookup } from '@rushstack/node-core-library';
+
 import { HeftChildReporter } from './HeftChildReporter';
 
 describe(HeftChildReporter.name, () => {
@@ -33,6 +35,54 @@ describe(HeftChildReporter.name, () => {
       fs.closeSync(eventFd);
       fs.closeSync(acknowledgementFd);
       fs.rmSync(folderPath, { recursive: true });
+    }
+  });
+
+  it('recognizes pipe mode bits when platform predicates return false', () => {
+    const fsModule: typeof fs = jest.requireActual('node:fs');
+    const stats: fs.Stats = fs.statSync(__filename);
+    stats.mode = fs.constants.S_IFIFO;
+    stats.isFIFO = () => false;
+    stats.isSocket = () => false;
+    const acknowledgement: Buffer = Buffer.from(
+      `${JSON.stringify({
+        kind: 'helloAck',
+        protocolVersion: { major: 1, minor: 2 },
+        acceptedCapabilities: ['heft-child-events-v1'],
+        rejectedRequiredFeatures: []
+      })}\n`
+    );
+    const statSpy: jest.SpyInstance = jest.spyOn(fsModule, 'fstatSync').mockReturnValue(stats);
+    const packageSpy: jest.SpyInstance = jest
+      .spyOn(PackageJsonLookup.instance, 'tryLoadPackageJsonFor')
+      .mockReturnValue({ name: '@rushstack/heft', version: '1.0.0' });
+    const writeSpy: jest.SpyInstance = jest.spyOn(fsModule, 'writeSync').mockReturnValue(1);
+    const readSpy: jest.SpyInstance = jest.spyOn(fsModule, 'readSync').mockImplementation((fd, buffer) => {
+      expect(fd).toBe(4);
+      if (!Buffer.isBuffer(buffer)) {
+        throw new Error('Expected the acknowledgement read buffer.');
+      }
+      return acknowledgement.copy(buffer);
+    });
+    const closeSpy: jest.SpyInstance = jest.spyOn(fsModule, 'closeSync').mockImplementation(() => {});
+
+    try {
+      const reporter: HeftChildReporter | undefined = HeftChildReporter.tryInitialize({
+        _RUSH_REPORTER_CHILD_FD: '3',
+        _RUSH_REPORTER_CHILD_ACK_FD: '4'
+      });
+
+      expect(reporter).toBeDefined();
+      expect(reporter?.parentReporterName).toBe('plaintext');
+      expect(writeSpy).toHaveBeenCalledWith(3, expect.stringContaining('"kind":"hello"'));
+      expect(closeSpy).toHaveBeenCalledWith(4);
+      expect(closeSpy).not.toHaveBeenCalledWith(3);
+    } finally {
+      closeSpy.mockRestore();
+      readSpy.mockRestore();
+      writeSpy.mockRestore();
+      packageSpy.mockRestore();
+      statSpy.mockRestore();
     }
   });
 
@@ -218,6 +268,7 @@ describe(HeftChildReporter.name, () => {
       });
 
       expect(exitCode).toBe(0);
+      expect(acknowledgementSent).toBe(true);
       expect(stdout).toBe('context fallback');
     }
   );
