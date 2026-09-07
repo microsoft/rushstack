@@ -209,12 +209,14 @@ async function tryConnectAsync(
     // Do not expose a just-started daemon to shutdown/restart until the helper finishes the handoff.
     let pendingStartup: boolean = true;
     try {
+      options.abortSignal?.throwIfAborted();
       pendingStartup = !!fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false });
     } finally {
       if (pendingStartup) await client.closeAsync();
     }
     return pendingStartup ? undefined : client;
   } catch (error) {
+    options.abortSignal?.throwIfAborted();
     if (
       error instanceof DaemonTransportError &&
       (error.code === DaemonTransportErrorCode.connectionRefused ||
