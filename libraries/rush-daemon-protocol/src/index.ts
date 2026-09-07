@@ -29,6 +29,7 @@ export { DAEMON_INVOCATION_KIND_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR, DAEMON_PROTOCOL_VERSION } from './DaemonProtocolVersion';
+export { DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { isDaemonProtocolCompatible } from './DaemonProtocolVersion';
 export type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 export type { IDaemonClientCaps } from './DaemonClientCaps';

@@ -16,6 +16,7 @@ async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
   const folder: string = path.dirname(paths.lockfilePath);
   const daemonVersion: string = process.argv[3] ?? 'fixture';
+  const restartMode: string | undefined = process.argv[4];
   const connections: Set<DaemonFrameConnection> = new Set();
   let closing: Promise<void> | undefined;
   fs.appendFileSync(path.join(folder, 'starts'), `${process.pid}\n`);
@@ -47,18 +48,28 @@ async function mainAsync(): Promise<void> {
           });
         } else if (message.kind === 'requestStart') {
           fs.appendFileSync(path.join(folder, 'requests'), `${daemonVersion}\n`);
+          if (message.payload.admission?.waitTimeoutMs !== undefined) {
+            fs.appendFileSync(path.join(folder, 'waits'), `${message.payload.admission.waitTimeoutMs}\n`);
+          }
+          const restart: boolean = restartMode !== undefined &&
+            (restartMode !== 'restart-once' || !fs.existsSync(path.join(folder, 'restarted')));
           await connection.sendFrameAsync({
             kind: DaemonFrameType.controlJson,
             payload: encodeDaemonControlMessage({
               kind: 'requestResult',
               payload: {
                 requestId: message.payload.requestId,
-                exitCode: 0,
-                outcome: 'success',
-                aborted: false
+                exitCode: restart ? 1 : 0,
+                outcome: restart ? 'failure' : 'success',
+                aborted: false,
+                ...(restart ? { retryAfterRestart: true as const } : {})
               }
             })
           });
+          if (restart && restartMode !== 'restart-held') {
+            fs.writeFileSync(path.join(folder, 'restarted'), '');
+            await stopAsync();
+          }
         } else if (message.kind === 'shutdown') {
           await connection.sendFrameAsync({
             kind: DaemonFrameType.controlJson,
@@ -88,6 +99,7 @@ async function mainAsync(): Promise<void> {
     const stopped: Promise<void> = listener.stopAcceptingAsync();
     await Promise.all([...connections].map((connection) => connection.closeAsync()));
     await stopped;
+    if (restartMode) await new Promise((resolve) => setTimeout(resolve, 150));
     await listener.closeAsync();
     fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
   }

@@ -22,6 +22,9 @@ export const DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR: number = 9;
 /** The first additive protocol minor supporting explicit Rush/Rushx invocation selection. @beta */
 export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number = 8;
 
+/** The first minor supporting native mutations and guaranteed pre-execution restart outcomes. @beta */
+export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number = 10;
+
 /**
  * A rushd wire protocol version.
  *
@@ -55,7 +58,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR
+  minor: DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR
 };
 
 /**

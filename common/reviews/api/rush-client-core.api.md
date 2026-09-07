@@ -57,6 +57,9 @@ export type DaemonClientOutcome = {
 };
 
 // @beta
+export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, execution: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
+
+// @beta
 export function getDaemonLogFilePath(paths: IDaemonPaths): string;
 
 // @beta
@@ -69,6 +72,7 @@ export interface ICaptureDaemonRequestOptions extends Omit<IDaemonRequestEnvelop
 
 // @beta
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
+    readonly abortSignal?: AbortSignal;
     // (undocumented)
     readonly paths: IDaemonPaths;
     readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;

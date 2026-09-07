@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add protocol 0.10 native mutation and guaranteed pre-execution restart results.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

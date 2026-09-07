@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Retry guaranteed pre-execution hard-restart outcomes once and forward opt-in native install/update requests.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

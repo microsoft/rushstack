@@ -3,6 +3,7 @@
 Opt-in clients for the Rush daemon wire protocol: request lifecycle requires 0.5;
 shutdown requires 0.6; stdin admission, write credits, and EOF require 0.7.
 Explicit Rushx invocation selection requires 0.8.
+Native install/update and guaranteed pre-execution restart results require 0.10.
 Later additive minors do not raise the request minimum.
 This package has no
 `rush-lib` dependency, command parser, operation graph, or presentation layer.
@@ -26,6 +27,16 @@ never reasons to replay possibly executed work. Only pre-execution `unsupported`
 `controllingTerminalRequired`, and `stdinEndUnsupported` outcomes permit fallback. Raw-mode changes are
 acknowledged only after applying them. Input listeners and raw state are restored
 on success, cancellation, disconnect and failure. No resize messages are sent.
+
+`executeWithDaemonRestartAsync(readyClient, connectionOptions, executionOptions)`
+adds one bounded retry for an explicit `retryAfterRestart: true` result. It captures
+the endpoint's PID/start identity before sending, requires protocol 0.10, waits for
+that ownership to be released, and reconnects through the same startup mutex.
+The original immutable request and unread input are preserved. Output, events,
+terminal control, or stdin admission forbid retry, as do connection loss and plain
+error messages. A second restart result fails explicitly. Cancellation stops waiting
+without killing a daemon. Disabling auto-start still permits waiting for a
+host-started successor, but never lets the client spawn one.
 
 `connectOrStartDaemonAsync()` accepts an **explicit, version-selected** executable,
 arguments, environment and cwd. It does not discover or install a Rush version.
@@ -85,7 +96,7 @@ Legacy 0.5/0.6 interactive clients retain their raw-mode/terminal-policy input p
 The standalone host supports native phased builds and the experimental structured
 graph reference client. A successful handshake is still transport readiness, not a
 guarantee that every command or configuration is supported. Version-selected daemon
-installation, incompatible-protocol replacement, and general request handoff remain
+installation and incompatible-protocol replacement remain
 separate integration work; this core package does not construct an engine.
 A client that dies during the
 pre-bind spawn interval may leave a detached child still starting; normal

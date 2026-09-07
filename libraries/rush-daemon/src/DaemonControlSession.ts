@@ -103,8 +103,8 @@ export class DaemonControlSession {
     options.onInteractiveConnection?.(this.#interactiveConnection);
   }
 
-  public closeAsync(): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync();
+  public closeAsync(drainRequests: boolean = false): Promise<void> {
+    this.#closePromise ??= this.#closeOnceAsync(drainRequests);
     return this.#closePromise;
   }
 
@@ -443,8 +443,18 @@ export class DaemonControlSession {
     }
   }
 
-  async #closeOnceAsync(): Promise<void> {
+  async #closeOnceAsync(drainRequests: boolean = false): Promise<void> {
     const closeReason: Error = new Error('The daemon control session is closing.');
+    if (drainRequests) {
+      const pending: Promise<PromiseSettledResult<void>[]> = Promise.allSettled(
+        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
+      );
+      // Lifecycle admission has stopped execution; let accepted requests receive their typed restart result.
+      if (!(await settlesWithinAsync(pending.then(() => undefined), CLOSE_DRAIN_TIMEOUT_MS))) {
+        this.#connection.abort(closeReason);
+      }
+      await pending;
+    }
     this.#markClosing(closeReason);
     const drainPromise: Promise<void> = Promise.all([
       Promise.allSettled(Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)),
