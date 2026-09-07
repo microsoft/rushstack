@@ -76,7 +76,7 @@ describe('native build through the standalone client', () => {
     ], { cwd: folder });
     paths = resolveDaemonPaths(
       { platform: process.platform, env: environment, tmpdir: os.tmpdir(), uid: process.getuid?.() },
-      computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync(folder), rushVersion: Rush.version })
+      computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync.native(folder), rushVersion: Rush.version })
     );
   });
 

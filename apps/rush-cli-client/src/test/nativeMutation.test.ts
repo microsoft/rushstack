@@ -39,7 +39,7 @@ describe('native mutations through the standalone CLI and default daemon', () =>
     const fixture: SuccessfulMutationFixture = await SuccessfulMutationFixture.createAsync();
     fixture.paths = resolveDaemonPaths(
       { platform: process.platform, env: fixture.environment, tmpdir: os.tmpdir(), uid: process.getuid?.() },
-      computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync(fixture.repoRoot), rushVersion: Rush.version })
+      computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync.native(fixture.repoRoot), rushVersion: Rush.version })
     );
     try {
       expect(await fixture.runWorkerAsync('update')).toMatchObject({ exitCode: 0 });

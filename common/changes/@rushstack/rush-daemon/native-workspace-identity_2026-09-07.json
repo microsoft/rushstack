@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Load workspace sessions and selected installations using native canonical paths, including Windows short-name aliases.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

@@ -21,7 +21,7 @@ export function getDaemonConnectionOptions(
   environment: Readonly<NodeJS.ProcessEnv>,
   autoStart: boolean
 ): IConnectOrStartDaemonOptions {
-  const canonicalRepoRoot: string = fs.realpathSync(repoRoot);
+  const canonicalRepoRoot: string = fs.realpathSync.native(repoRoot);
   const daemonPackagePath: string = require.resolve('@rushstack/rush-daemon/package.json');
   const daemonPackage: { version: string; bin: { rushd: string } } = JsonFile.load(daemonPackagePath);
   if (autoStart && readDaemonInstallationMetadata(daemonPackagePath).rushVersion !== rushVersion) {
@@ -60,7 +60,7 @@ export async function getDaemonConnectionOptionsAsync(
   // The bundled runtime is already loaded here; its bootstrap re-attests before binding.
   if (rushVersion === Rush.version) return getDaemonConnectionOptions(repoRoot, rushVersion, environment, true);
   const launch: IVersionSelectedDaemonLaunch = await selectDaemonLauncherAsync({
-    repoRoot: fs.realpathSync(repoRoot),
+    repoRoot: fs.realpathSync.native(repoRoot),
     rushVersion,
     environment
   });

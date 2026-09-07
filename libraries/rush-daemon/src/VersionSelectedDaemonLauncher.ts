@@ -133,7 +133,7 @@ export async function selectDaemonLauncherAsync(
     input.environment
   );
   const context: IDaemonLauncherContext = {
-    repoRoot: path.resolve(input.repoRoot),
+    repoRoot: await fs.realpath(input.repoRoot),
     rushVersion: input.rushVersion,
     environment: Object.freeze({
       ...input.environment,

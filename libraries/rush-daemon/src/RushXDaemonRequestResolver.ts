@@ -68,7 +68,7 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
       const rushJsonPath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: cwd, showVerbose: false
       });
-      if (!rushJsonPath || fs.realpathSync(rushJsonPath) !== fs.realpathSync(configuration.rushJsonFile)) {
+      if (!rushJsonPath || fs.realpathSync.native(rushJsonPath) !== fs.realpathSync.native(configuration.rushJsonFile)) {
         throw new Error('The governing Rush configuration differs from this daemon workspace.');
       }
       assertCurrentConfiguration(configuration);

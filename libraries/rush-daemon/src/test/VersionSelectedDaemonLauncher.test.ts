@@ -83,8 +83,8 @@ describe('version-selected daemon launcher', () => {
     const selected = await selectDaemonLauncherAsync(context, { allowInstall: false });
     expect(selected.rushVersion).toBe(Rush.version);
     expect(selected.protocolVersion).toEqual(DAEMON_PROTOCOL_VERSION);
-    expect(fs.realpathSync(selected.rushLibEntryPoint)).toBe(
-      fs.realpathSync(require.resolve('@microsoft/rush-lib'))
+    expect(fs.realpathSync.native(selected.rushLibEntryPoint)).toBe(
+      fs.realpathSync.native(require.resolve('@microsoft/rush-lib'))
     );
     expect(selected.startCommand.command).toBe(process.execPath);
     expect(process.env._RUSH_LIB_PATH).toBe(originalRushLibPath);
@@ -154,7 +154,7 @@ describe('version-selected daemon launcher', () => {
           tmpdir: path.join(repoRoot, 'runtime'),
           uid: process.getuid?.()
         },
-        computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync(repoRoot), rushVersion: Rush.version })
+        computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync.native(repoRoot), rushVersion: Rush.version })
       );
       const client = await connectOrStartDaemonAsync({
         paths,
