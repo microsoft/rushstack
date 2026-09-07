@@ -111,6 +111,7 @@ describe('successful native install/update', () => {
           exitCode: 0,
           outcome: { kind: 'result', result: { exitCode: 0, outcome: 'success', aborted: false } }
         });
+        expect(result.outcome).not.toHaveProperty('result.retryAfterRestart');
         expect(result.stdout).toContain(`FINAL_POST_INSTALL:${commandName}`);
         expect(result.stdout).toContain(`Found pnpm version ${fixture.pnpmVersion}`);
         await disposal.entered;

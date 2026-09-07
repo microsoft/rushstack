@@ -10,7 +10,12 @@ import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import { Rush, RushConfiguration } from '@microsoft/rush-lib';
 import { LastInstallFlag } from '@microsoft/rush-lib/lib/api/LastInstallFlag';
 import { SubprocessTerminator } from '@rushstack/node-core-library';
-import { DaemonClient, captureDaemonRequest, type DaemonClientOutcome } from '@rushstack/rush-client-core';
+import {
+  DaemonClient,
+  captureDaemonRequest,
+  executeWithDaemonRestartAsync,
+  type DaemonClientOutcome
+} from '@rushstack/rush-client-core';
 import {
   readDaemonLockfile,
   type IDaemonLockfile,
@@ -323,28 +328,33 @@ if (fs.existsSync(controlFile)) {
   }
 
   public async requestAsync(args: ReadonlyArray<string>): Promise<IMutationRequestOutput> {
-    if (!this.paths) throw new Error('The standalone daemon has not started.');
-    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: this.paths.socketPath });
+    const paths: IDaemonPaths | undefined = this.paths;
+    if (!paths) throw new Error('The standalone daemon has not started.');
+    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];
-    const outcome: DaemonClientOutcome = await client.executeAsync({
-      request: captureDaemonRequest({
-        requestId: `successful-mutation-${++this.#requestSequence}`,
-        argv: args,
-        commandName: args[0],
-        commandOrigin: 'built-in',
-        invocationKind: 'rush',
-        cwd: this.repoRoot,
-        environment: this.environment,
-        terminal: { isTTY: false, supportsColor: false, acceptsStdin: false }
-      }),
-      onStdoutAsync: async (chunk) => {
-        stdout.push(Buffer.from(chunk));
-      },
-      onStderrAsync: async (chunk) => {
-        stderr.push(Buffer.from(chunk));
+    const outcome: DaemonClientOutcome = await executeWithDaemonRestartAsync(
+      client,
+      { paths },
+      {
+        request: captureDaemonRequest({
+          requestId: `successful-mutation-${++this.#requestSequence}`,
+          argv: args,
+          commandName: args[0],
+          commandOrigin: 'built-in',
+          invocationKind: 'rush',
+          cwd: this.repoRoot,
+          environment: this.environment,
+          terminal: { isTTY: false, supportsColor: false, acceptsStdin: false }
+        }),
+        onStdoutAsync: async (chunk) => {
+          stdout.push(Buffer.from(chunk));
+        },
+        onStderrAsync: async (chunk) => {
+          stderr.push(Buffer.from(chunk));
+        }
       }
-    });
+    );
     return {
       outcome,
       exitCode: outcome.kind === 'result' ? outcome.result.exitCode : undefined,
