@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-static-asset-typings-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-static-asset-typings-plugin",
+  "email": "rushbot@users.noreply.github.com"
+}

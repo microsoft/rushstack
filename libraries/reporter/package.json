@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-reporter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Canonical event protocol, reporter manager, and built-in reporters for Rush (public beta).",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
