@@ -29,12 +29,21 @@ resources:
       type: git
       name: 1ESPipelineTemplates/1ESPipelineTemplates
       ref: refs/tags/release
+    - repository: rushstackGitHubApp
+      type: github
+      name: microsoft/rushstack
+      endpoint: GitHubProjects
+      ref: refs/heads/main
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
   parameters:
     settings:
       networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3,DefaultDeny
+    sdl:
+      sourceRepositoriesToScan:
+        include:
+          - repository: rushstackGitHubApp
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
       os: windows
@@ -44,6 +53,7 @@ extends:
           VersionPolicyName: noRush
           StageName: BumpRushstackVersions
           StageDisplayName: 'Bump Rushstack Versions and Create PR'
+          CheckoutRepository: rushstackGitHubApp
           FeatureBranch: 'automated/bump-versions-rushstack'
           PrTitle: 'Bump Rushstack package versions'
           PrDescription: |
