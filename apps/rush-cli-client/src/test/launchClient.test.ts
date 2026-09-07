@@ -6,6 +6,7 @@ import { once } from 'node:events';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import * as http from 'node:http';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
@@ -68,7 +69,8 @@ describe('standalone rushx fallback', () => {
     client: boolean,
     optIn: boolean,
     fakeTty: boolean = false,
-    managementArgs?: ReadonlyArray<string>
+    managementArgs?: ReadonlyArray<string>,
+    environmentOverrides: NodeJS.ProcessEnv = {}
   ): Promise<IInvocationResult> {
     const entry: string = client
       ? path.resolve(__dirname, managementArgs ? '../../bin/rush-client' : '../../bin/rushx-client')
@@ -87,7 +89,8 @@ describe('standalone rushx fallback', () => {
         RUSH_DAEMON: optIn ? '1' : '0',
         CI: managementArgs ? 'true' : 'false',
         TF_BUILD: 'false',
-        GITHUB_ACTIONS: 'false'
+        GITHUB_ACTIONS: 'false',
+        ...environmentOverrides
       },
       stdio: ['ignore', 'pipe', 'pipe']
     });
@@ -327,9 +330,34 @@ describe('standalone rushx fallback', () => {
     const rushJsonPath: string = path.join(folder, 'rush.json');
     const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
     fs.writeFileSync(rushJsonPath, JSON.stringify({ ...config, rushVersion: '0.0.0' }));
-    const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
-    expect(result.code).toBe(1);
-    expect(result.stderr).toContain('no version-selected daemon launcher');
+    let registryRequests: number = 0;
+    const registry = http.createServer((request, response) => {
+      registryRequests++;
+      request.resume();
+      response.writeHead(404, { 'content-type': 'application/json', connection: 'close' });
+      response.end(JSON.stringify({ error: 'no supported release' }));
+    });
+    await new Promise<void>((resolve) => registry.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = registry.address();
+      if (!address || typeof address === 'string') throw new Error('Expected a local registry address.');
+      const registryUrl: string = `http://127.0.0.1:${address.port}`;
+      const npmrc: string = path.join(folder, 'empty.npmrc');
+      fs.writeFileSync(npmrc, '');
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start'], {
+        NPM_CONFIG_REGISTRY: registryUrl,
+        NPM_CONFIG_USERCONFIG: npmrc,
+        ...Object.fromEntries([['npm_config_registry', registryUrl], ['npm_config_userconfig', npmrc]]),
+        RUSH_GLOBAL_FOLDER: path.join(folder, 'global')
+      });
+      expect(result.code).toBe(1);
+      expect(result.stderr).toContain('Cannot launch selected Rush 0.0.0');
+      expect(result.stdout).toBe('');
+      expect(registryRequests).toBeGreaterThan(0);
+      expect(fs.existsSync(getDaemonConnectionOptions(folder, '0.0.0', {}, false).paths.lockfilePath)).toBe(false);
+    } finally {
+      await new Promise<void>((resolve, reject) => registry.close((error) => error ? reject(error) : resolve()));
+    }
   });
 
   it('rejects explicit startup combined with --no-daemon', async () => {

@@ -3,7 +3,6 @@
 
 import * as path from 'node:path';
 
-import { Rush } from '@microsoft/rush-lib';
 import {
   DaemonClient,
   connectOrStartDaemonAsync,
@@ -13,7 +12,7 @@ import {
 import type { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
-import { getDaemonConnectionOptions } from './daemonConnectionOptions';
+import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
 import { executeDaemonGraphCommandAsync } from './daemonGraph';
 import { writeStreamAsync } from './writeStreamAsync';
@@ -47,12 +46,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   }
   if (!options.rushJsonPath) throw new Error('Daemon management requires a repository containing rush.json.');
   const mayStart: boolean = command === 'start' || command === 'restart';
-  if (mayStart && options.rushVersion !== Rush.version) {
-    throw new Error(
-      `Selected Rush ${options.rushVersion} has no version-selected daemon launcher; this client bundles Rush ${Rush.version}.`
-    );
-  }
-  const connectionOptions: IConnectOrStartDaemonOptions = getDaemonConnectionOptions(
+  const connectionOptions: IConnectOrStartDaemonOptions = await getDaemonConnectionOptionsAsync(
     path.dirname(options.rushJsonPath),
     options.rushVersion,
     options.environment,

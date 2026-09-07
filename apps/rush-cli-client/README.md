@@ -78,8 +78,15 @@ preserves the complete pipe for the native entrypoint.
 The existing Rush entrypoints resolve project scripts from cwd. Fallback loads the
 existing `@microsoft/rush` version-selecting entrypoint in the client process,
 preserving its startup checks, output and reporter integration instead of
-inventing a cached module path. A different selected Rush version has no daemon launcher integration
-yet. Older Rush versions may also reject the new `daemon` config block; use
+inventing a cached module path. Before auto-start or explicit start/restart, the client
+selects an available daemon whose installed engine is exactly the requested Rush
+version, including a native `RUSH_PREVIEW_VERSION` override. It can install a published
+daemon release declaring that exact engine dependency into a node-specific Rush cache;
+it never overrides dependencies or relabels the bundled engine. Foreign installations
+are probed in isolation, and startup rechecks actual runtime version, protocol, and
+default request-launch APIs before binding. Incompatible or unavailable launchers use
+native fallback for ordinary invocations and fail explicitly for management commands.
+Connect-only calls never install packages. Older Rush versions may also reject the new `daemon` config block; use
 environment-only opt-in until a supporting Rush release is selected.
 
 ## Configuration
@@ -111,10 +118,12 @@ positive safe integer. No warm-set setting changes build correctness.
 `daemon.enabled`, `autoStart`, or CI execution routing. It conflicts with
 `--no-daemon`. It is idempotent: an existing compatible daemon is reused, not
 reconfigured. Startup uses the same detached, locked launcher as automatic
-startup and fails rather than guessing a launcher for another Rush version.
+startup and selects an attested launcher rather than guessing a path for another Rush version.
 With an explicit matching launcher, a daemon implementation-version mismatch triggers
 ownership-checked replacement under the start mutex before executing any command.
-This does not install another Rush version or replace a peer lacking safe shutdown support.
+It does not replace a peer lacking safe shutdown support. Foreign package installation
+is a client preparation step; host self-restart selects only bundled or already cached
+compatible installations, never installing while the old workspace is being cleaned up.
 
 `rush-client daemon status` only connects and checks hello/pong. It never starts
 a process, reclaims files, or treats a PID file as evidence of readiness. Both

@@ -108,7 +108,12 @@ runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 
 ### Process restart and isolated install/update
 
-`serveRushDaemonAsync` supplies a successor selector for the currently installed daemon/Rush version.
+`serveRushDaemonAsync` supplies a successor selector for bundled or cached compatible
+daemon installations pinning the exact requested Rush engine. The client can prepare
+an installation using native Rush package-install APIs; the host does not install
+packages during restart. Selection probes foreign runtimes in isolation, and launch
+rechecks the actual engine version and protocol before binding. An unavailable or
+incompatible installation is never impersonated by the bundled engine.
 Embedded `RushDaemonHost` users can provide `getSuccessorLaunchAsync`, returning the existing core
 `IDaemonStartCommand` plus the expected daemon implementation version. Selection is validated before shutdown;
 an unavailable selected Rush version fails explicitly and is never run by the current engine under a false version.

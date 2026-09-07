@@ -206,6 +206,25 @@ describe('native build through the standalone client', () => {
     }
   }, 30000);
 
+  it('runs the genuine preview-selected engine without rewriting the configured Rush version', async () => {
+    const rushJsonPath: string = path.join(folder, 'rush.json');
+    const configured = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+    const original: string = JSON.stringify({ ...configured, rushVersion: '5.178.1' });
+    fs.writeFileSync(rushJsonPath, original);
+    environment.RUSH_PREVIEW_VERSION = Rush.version;
+    const result: IResult = await invokeAsync(['build', '--to', 'b', '--verbose']);
+    expect(result.code).toBe(0);
+    expect(result.stderr).not.toMatch(/using in-process/i);
+    expect(result.stdout).toContain('built-a-one');
+    expect(result.stdout).toContain('built-b-one');
+    expect(fs.readFileSync(rushJsonPath, 'utf8')).toBe(original);
+    const status: IResult = await invokeAsync(['daemon', 'status']);
+    expect(status.code).toBe(0);
+    const initialPid: number = JSON.parse(status.stdout).pid;
+    expect((await invokeAsync(['daemon', 'restart'])).code).toBe(0);
+    expect(JSON.parse((await invokeAsync(['daemon', 'status'])).stdout).pid).not.toBe(initialPid);
+  }, 30000);
+
   it('transparently replaces a hard-input generation and executes the original request exactly once', async () => {
     const argv: string[] = ['build', '--to', 'b', '--verbose'];
     expect((await invokeAsync(argv)).code).toBe(0);
