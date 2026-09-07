@@ -32,7 +32,9 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
   public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
-  public readonly folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'));
+  public readonly folder: string = fs.realpathSync.native(
+    fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
+  );
   public readonly environment: Record<string, string> = {
     ...Object.fromEntries(
       Object.entries(process.env).filter((pair): pair is [string, string] => pair[1] !== undefined)
