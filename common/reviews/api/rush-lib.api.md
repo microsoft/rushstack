@@ -235,6 +235,7 @@ export class EnvironmentConfiguration {
     static get cobuildContextId(): string | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
     static get cobuildRunnerId(): string | undefined;
+    static get enablePnpmGlobalVirtualStore(): boolean;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -243,7 +244,6 @@ export class EnvironmentConfiguration {
     static get hasBeenValidated(): boolean;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
-    static get pnpmGlobalVirtualStore(): boolean;
     static get pnpmStorePathOverride(): string | undefined;
     static get pnpmVerifyStoreIntegrity(): boolean | undefined;
     static get quietMode(): boolean;

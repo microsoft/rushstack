@@ -280,7 +280,7 @@ let _allowWarningsInSuccessfulBuild: boolean = false;
 
 let _pnpmStorePathOverride: string | undefined;
 
-let _pnpmGlobalVirtualStore: boolean = false;
+let _enablePnpmGlobalVirtualStore: boolean = false;
 
 let _pnpmVerifyStoreIntegrity: boolean | undefined;
 
@@ -376,9 +376,9 @@ export class EnvironmentConfiguration {
    * If true, enables PNPM's global virtual store during workspace installs.
    * See {@link EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE}
    */
-  public static get pnpmGlobalVirtualStore(): boolean {
+  public static get enablePnpmGlobalVirtualStore(): boolean {
     _ensureValidated();
-    return _pnpmGlobalVirtualStore;
+    return _enablePnpmGlobalVirtualStore;
   }
 
   /**
@@ -575,7 +575,7 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: {
-            _pnpmGlobalVirtualStore =
+            _enablePnpmGlobalVirtualStore =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                 EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE,
                 value
@@ -718,7 +718,7 @@ export class EnvironmentConfiguration {
   public static reset(): void {
     _rushTempFolderOverride = undefined;
     _pnpmStorePathOverride = undefined;
-    _pnpmGlobalVirtualStore = false;
+    _enablePnpmGlobalVirtualStore = false;
     _quietMode = false;
     _gitBinaryPath = undefined;
     _tarBinaryPath = undefined;
