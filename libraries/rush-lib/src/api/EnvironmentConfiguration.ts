@@ -39,6 +39,17 @@ export const EnvironmentVariableNames = {
   RUSH_PREVIEW_VERSION: 'RUSH_PREVIEW_VERSION',
 
   /**
+   * Frontend-owned reporter selection, including the legacy emergency override.
+   * Engines recognize this variable without consuming its value.
+   */
+  RUSH_REPORTER: 'RUSH_REPORTER',
+
+  /**
+   * Frontend-owned reporter verbosity. Engines recognize this variable without consuming its value.
+   */
+  RUSH_LOG_LEVEL: 'RUSH_LOG_LEVEL',
+
+  /**
    * If this variable is set to "1", Rush will not fail the build when running a version
    * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
    * field from rush.json.
@@ -213,12 +224,6 @@ export const EnvironmentVariableNames = {
    * Explicitly specifies the path for the `tar` binary that is invoked by certain Rush operations.
    */
   RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
-
-  /** Reporter selection is interpreted by the frontend, not the execution engine. */
-  RUSH_REPORTER: 'RUSH_REPORTER',
-
-  /** Reporter verbosity is interpreted by the frontend, not the execution engine. */
-  RUSH_LOG_LEVEL: 'RUSH_LOG_LEVEL',
 
   /**
    * Internal variable used by `rushx` when recursively invoking another `rushx` process, to avoid
@@ -695,10 +700,10 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
-          case EnvironmentVariableNames.RUSH_VARIANT:
-          case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
           case EnvironmentVariableNames.RUSH_REPORTER:
           case EnvironmentVariableNames.RUSH_LOG_LEVEL:
+          case EnvironmentVariableNames.RUSH_VARIANT:
+          case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
 
