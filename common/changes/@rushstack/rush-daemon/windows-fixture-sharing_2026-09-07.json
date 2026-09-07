@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Join owned successor processes before fixture teardown and bound Windows sharing retries without deleting fixtures after failed resource disposal.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

@@ -127,19 +127,19 @@ describe('native IPC resource lifetime and measured RSS', () => {
     await graph.executeAsync({});
     const exited: Promise<unknown> = once(child, 'exit');
     let isClosed: boolean = false;
-    const observedClose: Promise<void> = closed.then(() => {
+    child.once('close', () => {
       isClosed = true;
     });
-    const closing: Promise<void> = graph.closeRunnersAsync();
-    await exited;
-    let secondClosed: boolean = false;
-    const secondClosing: Promise<void> = graph.closeRunnersAsync().then(() => {
-      secondClosed = true;
+    const closedAtResolution: boolean[] = [];
+    const closing: Promise<void> = graph.closeRunnersAsync().then(() => {
+      closedAtResolution.push(isClosed);
     });
-    await Promise.resolve();
-    expect(secondClosed).toBe(false);
-    expect(isClosed).toBe(false);
-    await Promise.all([closing, secondClosing, observedClose]);
+    await exited;
+    const secondClosing: Promise<void> = graph.closeRunnersAsync().then(() => {
+      closedAtResolution.push(isClosed);
+    });
+    await Promise.all([closing, secondClosing, closed]);
+    expect(closedAtResolution).toEqual([true, true]);
     expect(isClosed).toBe(true);
     expect(runner.isActive).toBe(false);
   });

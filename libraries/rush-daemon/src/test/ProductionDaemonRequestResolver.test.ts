@@ -31,6 +31,7 @@ import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResol
 import { RushDaemonHost } from '../RushDaemonHost';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
+import { removeTestFolderAsync } from './TestProcessExit';
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
@@ -290,22 +291,15 @@ if (input === 'failure') process.exitCode = 7;
       },
       client,
       [Symbol.asyncDispose]: async () => {
-        try {
-          await client.closeAsync();
-        } finally {
-          try {
-            await runningHost.closeAsync();
-          } finally {
-            if (cache) fs.rmSync(cacheFolder, { recursive: true, force: true });
-            fs.rmSync(repoRoot, { recursive: true, force: true });
-          }
-        }
+        await client.closeAsync().finally(() => runningHost.closeAsync());
+        if (cache) await removeTestFolderAsync(cacheFolder, true);
+        await removeTestFolderAsync(repoRoot, true);
       }
     };
   } catch (error) {
     await host?.closeAsync();
-    if (cache) fs.rmSync(cacheFolder, { recursive: true, force: true });
-    fs.rmSync(repoRoot, { recursive: true, force: true });
+    if (cache) await removeTestFolderAsync(cacheFolder, true);
+    await removeTestFolderAsync(repoRoot, true);
     throw error;
   }
 }

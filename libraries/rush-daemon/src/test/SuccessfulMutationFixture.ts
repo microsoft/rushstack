@@ -24,7 +24,7 @@ import {
 
 import { createDeferred, type IDeferred } from './DaemonRequestWireTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
-import { waitForTestProcessExitAsync } from './TestProcessExit';
+import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 export interface ISuccessfulMutationOutput {
   readonly exitCode: number | undefined;
@@ -432,9 +432,7 @@ if (fs.existsSync(controlFile)) {
     try {
       if (this.paths) {
         try {
-          const owner = readDaemonLockfile(this.paths.lockfilePath);
           await stopSuccessorAsync(this.paths);
-          if (owner) await waitForTestProcessExitAsync(owner.pid);
         } catch (error) {
           errors.push(error);
         }
@@ -451,7 +449,7 @@ if (fs.existsSync(controlFile)) {
         }
       }
     } finally {
-      if (errors.length === 0) fs.rmSync(this.folder, { recursive: true, force: true });
+      if (errors.length === 0) await removeTestFolderAsync(this.folder, true);
     }
     if (errors.length > 0) {
       throw new AggregateError(errors, `Failed to clean up native mutation fixtures; retained ${this.folder}.`);

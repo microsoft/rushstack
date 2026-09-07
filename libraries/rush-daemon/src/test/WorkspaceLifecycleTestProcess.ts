@@ -10,6 +10,7 @@ import {
   type IDaemonLockfile,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
+import { waitForTestProcessExitAsync } from './TestProcessExit';
 
 /** Waits on attested ownership removal, not an arbitrary sleep or mere connection close. */
 export async function stopSuccessorAsync(paths: IDaemonPaths): Promise<void> {
@@ -39,6 +40,7 @@ export async function stopSuccessorAsync(paths: IDaemonPaths): Promise<void> {
   try {
     await requestDaemonShutdownAsync(client, paths);
     await removed;
+    await waitForTestProcessExitAsync(ownerPid);
   } finally {
     await client.closeAsync();
   }

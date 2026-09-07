@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, EnvironmentMap } from '@rushstack/node-core-library';
 import {
   type ITerminal,
   Terminal,
@@ -772,10 +772,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         // instead supply that same prefix only to operation environments, before plugin transforms.
         graph.hooks.createEnvironmentForOperation.tap(
           { name: 'PhasedCommandEngine', stage: -Infinity },
-          (environment) => ({
-            ...environment,
-            PATH: `${path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin')}${path.delimiter}${environment.PATH ?? ''}`
-          })
+          (environment) => {
+            const result: EnvironmentMap = new EnvironmentMap(environment);
+            result.set(
+              'PATH',
+              `${path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin')}${path.delimiter}${result.get('PATH') ?? ''}`
+            );
+            return result.toObject();
+          }
         );
       }
 

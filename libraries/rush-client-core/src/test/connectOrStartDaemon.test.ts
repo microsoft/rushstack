@@ -17,7 +17,7 @@ import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
 import { getDaemonStartupFilePath } from '../DaemonStartup';
-import { waitForTestProcessExitAsync } from './TestProcessExit';
+import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('detached daemon startup', () => {
   let folder: string;
@@ -75,7 +75,7 @@ describe('detached daemon startup', () => {
       const parents = new Set(fs.readFileSync(path.join(folder, 'parents'), 'utf8').trim().split('\n'));
       await Promise.all([...parents].map((pid) => waitForTestProcessExitAsync(Number(pid))));
     }
-    fs.rmSync(folder, { recursive: true });
+    await removeTestFolderAsync(folder);
   });
 
   function startClient(startOptions: IConnectOrStartDaemonOptions = options): {
