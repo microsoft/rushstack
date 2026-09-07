@@ -21,31 +21,34 @@ export async function executeWithDaemonRestartAsync(
   execution: IDaemonClientExecuteOptions
 ): Promise<DaemonClientOutcome> {
   const startedAt: number = Date.now();
+  const abortSignal: AbortSignal | undefined = execution.abortSignal && connection.abortSignal
+    ? AbortSignal.any([execution.abortSignal, connection.abortSignal])
+    : execution.abortSignal ?? connection.abortSignal;
   const owner: IDaemonLockfile | undefined = readDaemonLockfile(connection.paths.lockfilePath);
   const { pid } = await client.status;
   const attested: boolean =
     client.protocolVersion.minor >= DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR &&
     owner !== undefined && owner.pid === pid && owner.socketPath === connection.paths.socketPath &&
     Number.isSafeInteger(owner.pid) && owner.pid > 0 && Number.isFinite(Date.parse(owner.startedAt));
-  const outcome: DaemonClientOutcome = await client.executeAsync(execution);
+  const outcome: DaemonClientOutcome = await client.executeAsync({ ...execution, abortSignal });
   if (outcome.kind !== 'result' || !outcome.result.retryAfterRestart) return outcome;
   if (!attested || !owner) {
     throw new DaemonClientError(
       'startupFailed', 'Cannot attest the restarting daemon ownership; the request was not retried.'
     );
   }
-  if (execution.abortSignal?.aborted) return abortedOutcome(execution);
+  if (abortSignal?.aborted) return abortedOutcome(execution);
   let successor: DaemonClient;
   try {
     successor = await connectOrStartDaemonAsync({
       ...connection,
       previousDaemon: { pid: owner.pid, startedAt: owner.startedAt },
-      abortSignal: execution.abortSignal
+      abortSignal
     });
   } catch (error) {
     if (
-      execution.abortSignal?.aborted &&
-      (error === execution.abortSignal.reason ||
+      abortSignal?.aborted &&
+      (error === abortSignal.reason ||
         (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ABORT_ERR'))
     ) {
       return abortedOutcome(execution);
@@ -55,6 +58,7 @@ export async function executeWithDaemonRestartAsync(
   const waitTimeoutMs: number | undefined = execution.request.admission?.waitTimeoutMs;
   const result: DaemonClientOutcome = await successor.executeAsync({
     ...execution,
+    abortSignal,
     request: waitTimeoutMs === undefined ? execution.request : captureDaemonRequest({
       ...execution.request,
       admission: {

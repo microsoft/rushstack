@@ -263,10 +263,15 @@ Daemon `pong` replies (and the existing JSON `daemon status` output) include an 
 and opaque generation token without calling `getSessionAsync()`, preparing a graph, scheduling work, or waiting
 for lifecycle/workspace/native locks. During old-generation cleanup it reports that installed generation;
 while a replacement session is being constructed the token is absent. The token matches graph fencing tokens.
+The shared pong/host snapshot reads `WorkspaceRequestLifecycle.lastReloadTier` live: `0` initially or after
+reuse, `1` after a successful in-process reload, and `2` when a hard/mutation restart is requested. A host
+without that lifecycle reports `0`. Status reads never update the tier or infer it from generation/PID changes;
+the tier is not a command-success or successor-readiness signal. Older peers may omit the field.
 
 | Field | Meaning |
 | --- | --- |
 | `generation`, `generationToken` | Provider generation counter and current installed session identity; neither implies a graph or successful build. |
+| `lastReloadTier` | Lifecycle-owned tier: `0` initial/reuse, `1` successful reload, `2` requested restart. |
 | `graphInitialized` | Whether that session has a materialized operation graph. |
 | `warmSet` | Absent when no controller is attached, not a claim of zero memory. |
 | `warmSet.configuration` | The effective `watch` flag and four warm-resource knobs; older peers may omit `watch`. |

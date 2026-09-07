@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add optional validated lastReloadTier workspace status metadata for initial/reuse, successful reload, and requested restart; accept omission by older peers.",
+      "type": "patch"
+    }
+  ]
+}

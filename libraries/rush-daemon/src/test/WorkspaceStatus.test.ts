@@ -1,10 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+
 import { WorkspaceSessionProvider } from '../WorkspaceSessionProvider';
 import { getWorkspaceStatus } from '../WorkspaceStatus';
 import { createDeferred } from './DaemonRequestWireTestUtilities';
 import { TestWorkspaceSession } from './TestWorkspaceSession';
+
+it.each([WorkspaceInputChangeTier.Reuse, WorkspaceInputChangeTier.Reload, WorkspaceInputChangeTier.Restart])(
+  'projects the supplied lifecycle tier %s without constructing a session',
+  async (tier) => {
+    const factory = jest.fn(async () => new TestWorkspaceSession('repo'));
+    const provider = new WorkspaceSessionProvider(factory, { repoRoot: 'repo', rushVersion: '5.178.0' });
+    expect(getWorkspaceStatus(provider, tier)).toMatchObject({
+      lastReloadTier: tier,
+      graphInitialized: false
+    });
+    expect(factory).not.toHaveBeenCalled();
+    await provider[Symbol.asyncDispose]();
+  }
+);
 
 it('reads provider generation/token without starting or awaiting cold initialization', async () => {
   const ready = createDeferred<TestWorkspaceSession>();
@@ -12,6 +28,7 @@ it('reads provider generation/token without starting or awaiting cold initializa
   const provider = new WorkspaceSessionProvider(factory, { repoRoot: 'repo', rushVersion: '5.178.0' });
   expect(getWorkspaceStatus(provider)).toEqual({
     generation: 1,
+    lastReloadTier: undefined,
     generationToken: undefined,
     graphInitialized: false,
     warmSet: undefined

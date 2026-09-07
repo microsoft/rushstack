@@ -715,6 +715,7 @@ export interface IDaemonWorkspaceStatus {
     readonly generation: number;
     readonly generationToken?: string;
     readonly graphInitialized: boolean;
+    readonly lastReloadTier?: number;
     readonly warmSet?: IDaemonWarmSetStatus;
 }
 

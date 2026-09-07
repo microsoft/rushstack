@@ -67,6 +67,7 @@ export class RushDaemonHost {
   private readonly _idleTimer: DaemonIdleTimer;
   private readonly _sessions: Set<DaemonControlSession>;
   private readonly _workspaceSessionProvider: WorkspaceSessionProvider;
+  private readonly _readWorkspaceStatus: () => IDaemonWorkspaceStatus;
   private readonly _lifecycle: { closing: boolean };
   private readonly _requestDispatcher: DaemonRequestDispatcher;
   public readonly paths: IDaemonPaths;
@@ -92,7 +93,8 @@ export class RushDaemonHost {
     workspaceSessionProvider: WorkspaceSessionProvider,
     idleTimer: DaemonIdleTimer,
     options: IRushDaemonHostOptions,
-    startedAt: string
+    startedAt: string,
+    readWorkspaceStatus: () => IDaemonWorkspaceStatus
   ) {
     this.closed = new Promise<void>((resolve) => {
       this._notifyClosed = resolve;
@@ -103,6 +105,7 @@ export class RushDaemonHost {
     this._lifecycle = lifecycle;
     this._requestDispatcher = requestDispatcher;
     this._workspaceSessionProvider = workspaceSessionProvider;
+    this._readWorkspaceStatus = readWorkspaceStatus;
     this._idleTimer = idleTimer;
     this._options = options;
     this._startedAt = startedAt;
@@ -150,6 +153,8 @@ export class RushDaemonHost {
       await workspaceSessionProvider[Symbol.asyncDispose]();
       throw error;
     }
+    const readWorkspaceStatus = (): IDaemonWorkspaceStatus =>
+      getWorkspaceStatus(workspaceSessionProvider, requestLifecycle?.lastReloadTier ?? 0);
     const requestDispatcher: DaemonRequestDispatcher = new DaemonRequestDispatcher(
       workspaceSession,
       options.requestResolver,
@@ -165,7 +170,7 @@ export class RushDaemonHost {
             daemonVersion: options.daemonVersion,
             dispatcher: requestDispatcher,
             startedAtMs,
-            getWorkspaceStatus: () => getWorkspaceStatus(workspaceSessionProvider),
+            getWorkspaceStatus: readWorkspaceStatus,
             onInteractiveConnection: options.onInteractiveConnection,
             onClosed: (closedSession: DaemonControlSession, error: Error | undefined) => {
               sessions.delete(closedSession);
@@ -212,7 +217,8 @@ export class RushDaemonHost {
       workspaceSessionProvider,
       idleTimer,
       options,
-      new Date(startedAtMs).toISOString()
+      new Date(startedAtMs).toISOString(),
+      readWorkspaceStatus
     );
     function requestRestart(plan: IWorkspaceProcessRestartPlan): void {
       host._requestRestart(plan);
@@ -239,7 +245,7 @@ export class RushDaemonHost {
 
   /** Samples the installed generation without constructing a session or graph or taking request leases. */
   public get workspaceStatus(): IDaemonWorkspaceStatus {
-    return getWorkspaceStatus(this._workspaceSessionProvider);
+    return this._readWorkspaceStatus();
   }
 
   /** Closes active connections, stops listening, and removes transport artifacts. */

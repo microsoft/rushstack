@@ -158,6 +158,7 @@ daemon with a different implementation version; start requires the bundled versi
 | `workspace` field | Meaning |
 | --- | --- |
 | `generation`, `generationToken` | Current provider generation and installed session identity |
+| `lastReloadTier` | Lifecycle-owned `0` initial/reuse, `1` successful in-process reload, or `2` requested restart; older peers may omit it |
 | `graphInitialized` | A graph exists; this does not attest build success |
 | `warmSet.configuration` | Effective `watch` and four warm-resource settings; older peers may omit `watch` |
 | `warmSet.maintenanceState`, `warmSet.maintenanceFailure` | Running, quiescing, stopped or failed maintenance; stopping it does not itself free resources |
@@ -166,7 +167,9 @@ daemon with a different implementation version; start requires the bundled versi
 | `warmSet.overMemoryBudget`, `warmSet.overProjectLimit`, `warmSet.cleanupFailures`, `warmSet.deferredReason` | Outstanding footprint pressure, cleanup failures and maintenance deferral |
 
 An absent `warmSet` means no controller is attached, not that the workspace consumes
-no memory. Status does not infer a reload tier from the PID or generation counter.
+no memory. Status reads `lastReloadTier` from the lifecycle (zero for a host without one);
+it does not infer a tier from PID/generation changes or initiate a reload. Tier `2`
+attests a restart request, not completion of successor startup or success of a command.
 
 `rush-client daemon stop` requires protocol >= 0.6 and waits for `shutdownAck`
 followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this

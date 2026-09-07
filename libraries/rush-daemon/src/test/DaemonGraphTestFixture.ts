@@ -21,6 +21,7 @@ import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { getWorkspaceGenerationToken } from '../WorkspaceGeneration';
+import type { GetWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import {
   createWireEnvelope,
   DaemonRequestWireClient,
@@ -30,6 +31,7 @@ import {
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
+  public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
   public readonly folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'));
   public readonly environment: Record<string, string> = {
     ...Object.fromEntries(
@@ -125,6 +127,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       repoRoot: this.folder,
       rushVersion: Rush.version,
       daemonVersion: 'graph-test',
+      getSuccessorLaunchAsync: this.getSuccessorLaunchAsync,
       requestResolver: this._lifecycle
         ? resolver
         : {

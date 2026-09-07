@@ -11,15 +11,24 @@ import {
 } from './StatusValidation';
 import { validateWarmSetStatus } from './WarmSetStatusValidation';
 
+const MAX_RELOAD_TIER: number = 2;
+
 export function validateWorkspaceStatus(value: unknown): void {
   if (value === undefined) return;
   const status: Record<string, unknown> = requireStatusRecord(value, 'workspace');
   requireStatusCount(status.generation, 'generation');
   requireStatusPositive(status.generation, 'generation');
+  validateReloadTier(status.lastReloadTier);
   requireStatusBoolean(status.graphInitialized, 'graphInitialized');
   validateGenerationToken(status);
   validateWarmGraph(status);
   validateWarmSetStatus(status.warmSet);
+}
+
+function validateReloadTier(value: unknown): void {
+  if (value === undefined) return;
+  requireStatusCount(value, 'lastReloadTier');
+  if (value > MAX_RELOAD_TIER) failStatus('lastReloadTier');
 }
 
 function validateGenerationToken(status: Record<string, unknown>): void {

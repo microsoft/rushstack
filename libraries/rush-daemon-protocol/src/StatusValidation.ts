@@ -37,7 +37,7 @@ export function requireStatusPositive(value: unknown, field: string): void {
   if (requireFiniteNumber(value, field) <= ZERO) failStatus(field);
 }
 
-export function requireStatusCount(value: unknown, field: string): void {
+export function requireStatusCount(value: unknown, field: string): asserts value is number {
   const number: number = requireFiniteNumber(value, field);
   if (!Number.isSafeInteger(number) || number < ZERO) failStatus(field);
 }

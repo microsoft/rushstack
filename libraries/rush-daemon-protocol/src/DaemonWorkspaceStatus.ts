@@ -36,6 +36,8 @@ export interface IDaemonWarmSetStatus {
 /** A non-initializing snapshot of the provider's current generation. @beta */
 export interface IDaemonWorkspaceStatus {
   readonly generation: number;
+  /** Last lifecycle tier: 0 reuse/initial, 1 successful reload, 2 requested restart. Older peers may omit it. */
+  readonly lastReloadTier?: number;
   /** Current installed session token; absent while no session is installed. */
   readonly generationToken?: string;
   /** Graph existence, not a claim of successful execution or resident children. */
