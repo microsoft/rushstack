@@ -7,7 +7,7 @@ import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { ExperimentsConfiguration } from '../ExperimentsConfiguration';
 
-const TEMP_FOLDER: string = path.join(__dirname, 'temp', ExperimentsConfiguration.name);
+const TEMP_FOLDER: string = path.join(__dirname, `temp-${ExperimentsConfiguration.name}`);
 const EXPERIMENTS_JSON_PATH: string = path.join(TEMP_FOLDER, 'experiments.json');
 
 describe(ExperimentsConfiguration.name, () => {
