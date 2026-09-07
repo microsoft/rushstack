@@ -91,6 +91,12 @@ class RestartBeforeExecution extends Error {
   }
 }
 
+class RestartPendingBeforeExecution extends Error {
+  public constructor() {
+    super('The workspace is restarting. No operation was scheduled or executed.');
+  }
+}
+
 /**
  * Generation admission composes the existing request schedulers, native locks and session provider.
  * It never releases a resolved request onto a different session, and never replays scheduled work.
@@ -112,6 +118,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #boundSession: IWorkspaceSession | undefined;
   #forceReload: boolean = false;
   #closing: boolean = false;
+  #restartPending: boolean = false;
   #transitioning: boolean = false;
   #cleanupFailure: unknown;
   #disposePromise: Promise<void> | undefined;
@@ -147,6 +154,14 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     destination: IDaemonRequestDispatchClient,
     dispatchAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
+    if (this.#restartPending) {
+      await destination.interactiveSession.finishAsync();
+      await destination.writeResultAsync({
+        ...preExecutionFailure(envelope.requestId, new RestartPendingBeforeExecution()),
+        retryAfterRestart: true
+      });
+      return;
+    }
     if (this.#closing)
       throw new Error('The workspace lifecycle is closing. No operation was scheduled or executed.');
     if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
@@ -202,14 +217,26 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           if (error instanceof RestartBeforeExecution && !state.began && !state.terminalAttempted) {
             try {
               await client.interactiveSession.finishAsync();
-              await client.writeResultAsync(preExecutionFailure(envelope.requestId, error));
+              await client.writeResultAsync({
+                ...preExecutionFailure(envelope.requestId, error),
+                retryAfterRestart: true
+              });
               error.session.retire?.();
+              this.#restartPending = true;
               this.#closing = true;
               this.#options.onRestartRequested(error.plan);
             } finally {
               error.workspaceLease.release();
               error.lease.release();
             }
+            return;
+          }
+          if (error instanceof RestartPendingBeforeExecution && !state.began && !state.terminalAttempted) {
+            await client.interactiveSession.finishAsync();
+            await client.writeResultAsync({
+              ...preExecutionFailure(envelope.requestId, error),
+              retryAfterRestart: true
+            });
             return;
           }
           if (error instanceof RequestSchedulerError && !state.began && !state.terminalAttempted) {
@@ -243,6 +270,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       admittedLease ?? (await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild));
     let ownsTransition: boolean = false;
     try {
+      if (this.#restartPending) throw new RestartPendingBeforeExecution();
       if (this.#closing)
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
       if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
@@ -371,6 +399,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       this.#transitioning = ownsTransition = true;
       this.#cancelObservers();
       lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
+      if (this.#restartPending) throw new RestartPendingBeforeExecution();
       if (this.#closing)
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
       session = await this.#options.provider.getSessionAsync();
@@ -671,6 +700,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           };
         }
         this.#closing = true;
+        this.#restartPending = restart!.launch !== undefined && restart!.failure === undefined;
         generation.session.retire?.();
         this.#options.onRestartRequested(restart!);
       }
@@ -761,10 +791,19 @@ function createLifecycleClient(
     sessionId: client.sessionId,
     supportsRequestAdmission: client.supportsRequestAdmission,
     getNextEventSequence: () => client.getNextEventSequence(),
-    writeEventAsync: (event) => client.writeEventAsync(event),
-    writeLogChunkAsync: (operationId, stream, chunk) => client.writeLogChunkAsync(operationId, stream, chunk),
+    writeEventAsync: (event) => {
+      state.began = true;
+      return client.writeEventAsync(event);
+    },
+    writeLogChunkAsync: (operationId, stream, chunk) => {
+      state.began = true;
+      return client.writeLogChunkAsync(operationId, stream, chunk);
+    },
     writeQueuePositionAsync: (message) => client.writeQueuePositionAsync(message),
-    writeTerminalChunkAsync: (stream, chunk) => client.writeTerminalChunkAsync(stream, chunk),
+    writeTerminalChunkAsync: (stream, chunk) => {
+      state.began = true;
+      return client.writeTerminalChunkAsync(stream, chunk);
+    },
     writeTerminalPolicyAsync: (result) => {
       state.terminalAttempted = true;
       return client.writeTerminalPolicyAsync(result);

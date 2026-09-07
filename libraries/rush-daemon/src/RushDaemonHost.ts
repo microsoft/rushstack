@@ -245,7 +245,7 @@ export class RushDaemonHost {
 
   private _requestRestart(plan: IWorkspaceProcessRestartPlan): void {
     if (this._restartPromise || this._closePromise) return;
-    this._restartPromise = this._restartOnceAsync(plan);
+    this._restartPromise = Promise.resolve().then(() => this._restartOnceAsync(plan));
     void this._restartPromise.then(
       (result) => this._resolveRestart?.(result),
       (error: unknown) => {
@@ -294,7 +294,7 @@ export class RushDaemonHost {
       (error: unknown) => error
     );
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
-      Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync())
+      Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync(!!this._restartPromise))
     );
     for (const settlement of sessionSettlements) {
       if (settlement.status === 'rejected') {

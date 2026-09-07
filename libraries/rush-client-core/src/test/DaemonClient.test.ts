@@ -170,6 +170,59 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it.each([['install', 9], ['update', 9]])('does not send native %s to protocol 0.%s', async (command, minor) => {
+    peerVersion = { major: 0, minor: Number(minor) };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const stdin = new PassThrough();
+    stdin.end('untouched');
+    const envelope = { ...request(), commandName: String(command), commandOrigin: 'built-in' as const };
+    expect(await client.executeAsync({ request: envelope, stdin }))
+      .toMatchObject({ kind: 'fallback', reason: 'unsupported' });
+    expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+    expect(stdin.read().toString()).toBe('untouched');
+  });
+
+  it.each(['output', 'event', 'stdin', 'raw-mode', 'old-peer'])(
+    'does not authorize restart replay after %s',
+    async (mode) => {
+      if (mode === 'old-peer') peerVersion = { major: 0, minor: 9 };
+      const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+      const stdin = new PassThrough();
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        if (mode === 'output') {
+          await connection!.sendFrameAsync({
+            kind: DaemonFrameType.logStdout,
+            payload: encodeDaemonLogChunk({ operationId: envelope.requestId, chunk: Buffer.from('executed') })
+          });
+        } else if (mode === 'event') {
+          await connection!.sendFrameAsync({
+            kind: DaemonFrameType.event,
+            payload: encodeDaemonEventFrame({
+              protocolVersion: DAEMON_PROTOCOL_VERSION, eventId: 'event', sessionId: 'test', sequence: 1,
+              timestamp: new Date().toISOString(), type: 'commandStarted', privacy: 'public', required: true,
+              source: { packageName: 'test', packageVersion: '1.0.0' }, payload: {}
+            })
+          });
+        } else if (mode === 'stdin') {
+          await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+        } else if (mode === 'raw-mode') {
+          await sendAsync({ kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: true } });
+        }
+        await sendAsync({
+          kind: 'requestResult',
+          payload: { requestId: envelope.requestId, exitCode: 1, outcome: 'failure', aborted: false, retryAfterRestart: true }
+        });
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(client.executeAsync({
+        request: envelope, stdin, setRawMode: () => {}, onStdoutAsync: async () => {}, onEventAsync: async () => {}
+      })).rejects.toThrow(mode === 'old-peer' ? 'Unexpected pre-execution restart' : 'not retried');
+      stdin.destroy();
+      expect(controls.filter((message) => message.kind === 'requestStart')).toHaveLength(1);
+    }
+  );
+
   it('does not consume stdin when a controlling terminal requires fallback', async () => {
     const stdin = new PassThrough();
     stdin.write('still here');

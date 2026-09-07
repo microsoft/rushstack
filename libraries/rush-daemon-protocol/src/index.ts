@@ -24,7 +24,7 @@ export { DaemonProtocolError, ProtocolVersionMismatchError } from './DaemonProto
 export type { DaemonProtocolErrorCode, IDaemonProtocolErrorOptions } from './DaemonProtocolError';
 export {
   DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR, DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR, DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR, DAEMON_INVOCATION_KIND_PROTOCOL_MINOR, DAEMON_LIFECYCLE_PROTOCOL_MINOR, DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
-  DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR, DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION, isDaemonProtocolCompatible
 } from './DaemonProtocolVersion';
 export type { IDaemonProtocolVersion } from './DaemonProtocolVersion';

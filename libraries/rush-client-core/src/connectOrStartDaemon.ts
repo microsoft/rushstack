@@ -43,6 +43,8 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
   readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
   /** Total startup/retry deadline. Defaults to 15000 milliseconds. */
   readonly startupTimeoutMs?: number;
+  /** Cancels waiting/startup, without stopping an already spawned daemon. */
+  readonly abortSignal?: AbortSignal;
 }
 
 /**
@@ -59,10 +61,18 @@ export async function connectOrStartDaemonAsync(
     throw new RangeError('startupTimeoutMs must be an integer between 1 and 2147483647.');
   }
   const deadline: number = Date.now() + timeoutMs;
-  await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline);
+  options.abortSignal?.throwIfAborted();
+  await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline, options.abortSignal);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
   if (!options.startCommand) {
+    if (options.previousDaemon) {
+      while (Date.now() < deadline) {
+        await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
+        const successor: DaemonClient | undefined = await tryConnectAsync(options, deadline);
+        if (successor) return successor;
+      }
+    }
     throw new DaemonClientError(
       'startupFailed',
       `No ready daemon at ${options.paths.socketPath}; auto-start is disabled.`
@@ -74,9 +84,10 @@ export async function connectOrStartDaemonAsync(
   let lock: LockFile | undefined;
   let backoffMs: number = 50;
   while (Date.now() < deadline) {
+    options.abortSignal?.throwIfAborted();
     lock = LockFile.tryAcquire(folder, resource);
     if (lock) break;
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
     backoffMs = Math.min(500, backoffMs * 2);
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
@@ -87,19 +98,23 @@ export async function connectOrStartDaemonAsync(
     if (ready) return ready;
     const replacement: DaemonClient | undefined = await replaceMismatchedDaemonAsync(options, deadline);
     if (replacement) return replacement;
+    const handoff: DaemonClient | undefined = await waitForHandoffAsync(options, deadline);
+    if (handoff) return handoff;
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
     assertNoLiveOwner(options.paths);
     await reclaimStaleDaemonAsync(options.paths);
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
+    options.abortSignal?.throwIfAborted();
     const child: ChildProcess = await spawnDetachedAsync(options);
     backoffMs = 50;
     while (Date.now() < deadline) {
+      options.abortSignal?.throwIfAborted();
       const client: DaemonClient | undefined = await tryConnectAsync(options, deadline);
       if (client) return client;
       if (child.exitCode !== null || child.signalCode !== null) {
         throw startupError(options, `child exited (${child.exitCode ?? child.signalCode}) before readiness`);
       }
-      await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
+      await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
       backoffMs = Math.min(500, backoffMs * 2);
     }
     throw startupError(options, 'timed out awaiting hello/ping readiness');
@@ -151,7 +166,7 @@ async function replaceMismatchedDaemonAsync(
     const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> = await requestDaemonShutdownAsync(
       current, options.paths, Math.max(1, deadline - Date.now())
     );
-    await waitForPreviousDaemonAsync(options.paths, previousDaemon, deadline);
+    await waitForPreviousDaemonAsync(options.paths, previousDaemon, deadline, options.abortSignal);
   } finally {
     await current.closeAsync();
   }
@@ -162,6 +177,7 @@ async function tryConnectAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
 ): Promise<DaemonClient | undefined> {
+  options.abortSignal?.throwIfAborted();
   try {
     return await DaemonClient.connectAsync({
       ...options,
@@ -189,6 +205,24 @@ async function tryConnectAsync(
     }
     throw error;
   }
+}
+
+async function waitForHandoffAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<DaemonClient | undefined> {
+  let backoffMs: number = 50;
+  while (Date.now() < deadline) {
+    const owner: IDaemonLockfile | undefined = readDaemonLockfile(options.paths.lockfilePath);
+    // Only wait on a fully published endpoint; malformed or ambiguous ownership still fails closed.
+    if (!owner || owner.socketPath !== options.paths.socketPath || !isProcessAlive(owner.pid)) return undefined;
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
+    const client: DaemonClient | undefined = await tryConnectAsync(options, deadline);
+    if (client) return client;
+    backoffMs = Math.min(500, backoffMs * 2);
+  }
+  assertNoLiveOwner(options.paths);
+  return undefined;
 }
 
 function assertNoLiveOwner(paths: IDaemonPaths): void {
@@ -249,7 +283,8 @@ function isDaemonOwnership(record: unknown): record is Pick<IDaemonLockfile, 'pi
 async function waitForPreviousDaemonAsync(
   paths: IDaemonPaths,
   previous: IConnectOrStartDaemonOptions['previousDaemon'],
-  deadline: number
+  deadline: number,
+  abortSignal?: AbortSignal
 ): Promise<void> {
   if (previous === undefined) return;
   if (!isDaemonOwnership(previous)) {
@@ -260,6 +295,7 @@ async function waitForPreviousDaemonAsync(
   const { pid, startedAt } = previous;
   let backoffMs: number = 50;
   while (true) {
+    abortSignal?.throwIfAborted();
     const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = readDaemonOwnership(
       paths.lockfilePath
     );
@@ -270,7 +306,7 @@ async function waitForPreviousDaemonAsync(
         `The previous daemon still owns ${paths.lockfilePath} (PID ${pid}); cleanup is incomplete or failed. No PID was killed and no ownership record was reclaimed.`
       );
     }
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: abortSignal });
     backoffMs = Math.min(500, backoffMs * 2);
   }
 }

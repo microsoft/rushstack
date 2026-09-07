@@ -15,6 +15,7 @@ import { DaemonClient } from '../DaemonClient';
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
+import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
 
 describe('detached daemon startup', () => {
   let folder: string;
@@ -131,9 +132,118 @@ describe('detached daemon startup', () => {
     const original = await DaemonClient.connectAsync({
       socketPath: paths.socketPath, expectedDaemonVersion: 'fixture'
     });
-
     await original.closeAsync();
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  it.each(['restart-once', 'restart-always', 'restart-held'])(
+    'retries only the typed pre-execution result for %s after ownership release',
+    async (mode) => {
+      const connection: IConnectOrStartDaemonOptions = {
+        ...options,
+        startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
+      };
+      const client = await connectOrStartDaemonAsync(connection);
+      const request = captureDaemonRequest({
+        argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
+        terminal: { isTTY: false, supportsColor: false }, admission: { waitTimeoutMs: 1000 }
+      });
+      const pending = executeWithDaemonRestartAsync(client, {
+        ...connection, startupTimeoutMs: mode === 'restart-held' ? 100 : 7000
+      }, { request });
+      if (mode === 'restart-once') {
+        expect(await pending).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+        const waits = fs.readFileSync(path.join(folder, 'waits'), 'utf8').trim().split('\n').map(Number);
+        expect(waits[0]).toBe(1000);
+        expect(waits[1]).toBeLessThan(1000);
+        expect(waits[1]).toBeGreaterThanOrEqual(0);
+        expect(request.admission?.waitTimeoutMs).toBe(1000);
+      } else {
+        await expect(pending).rejects.toThrow(
+          mode === 'restart-held' ? 'previous daemon still owns' : 'single safe retry was exhausted'
+        );
+      }
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n'))
+        .toHaveLength(mode === 'restart-held' ? 1 : 2);
+      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n'))
+        .toHaveLength(mode === 'restart-held' ? 1 : 2);
+    },
+    15000
+  );
+
+  it('cancels successor waiting without spawning or replaying a request', async () => {
+    const connection: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-held'] }
+    };
+    const client = await connectOrStartDaemonAsync(connection);
+    const abort = new AbortController();
+    const request = captureDaemonRequest({
+      argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
+      terminal: { isTTY: false, supportsColor: false }
+    });
+    const timer = setTimeout(() => abort.abort(), 200);
+    try {
+      expect(await executeWithDaemonRestartAsync(client, connection, { request, abortSignal: abort.signal }))
+        .toMatchObject({ kind: 'result', result: { exitCode: 130, aborted: true } });
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    } finally {
+      clearTimeout(timer);
+    }
+  });
+
+  it('refuses restart retry if ownership was not attested before submitting', async () => {
+    const connection: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-held'] }
+    };
+    const client = await connectOrStartDaemonAsync(connection);
+    const owner = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
+    fs.writeFileSync(paths.lockfilePath, JSON.stringify({ ...owner, pid: process.pid }));
+    const request = captureDaemonRequest({
+      argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
+      terminal: { isTTY: false, supportsColor: false }
+    });
+    try {
+      await expect(executeWithDaemonRestartAsync(client, connection, { request })).rejects.toThrow('Cannot attest');
+    } finally {
+      fs.writeFileSync(paths.lockfilePath, JSON.stringify(owner));
+    }
+  });
+
+  it('waits through published ownership handoff even without a captured predecessor', async () => {
+    const running = await connectOrStartDaemonAsync({
+      ...options,
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-once'] }
+    });
+    const previous = await running.status;
+    await running.shutdownAsync();
+    const replacement = await connectOrStartDaemonAsync(options);
+    try {
+      expect((await replacement.status).pid).not.toBe(previous.pid);
+      expect(fs.existsSync(path.join(folder, `stopped-${previous.pid}`))).toBe(true);
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+    } finally {
+      await replacement.closeAsync();
+    }
+  });
+
+  it('waits for an externally started successor without enabling auto-start', async () => {
+    const running = await connectOrStartDaemonAsync(options);
+    const previous = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8')) as IDaemonLockfile;
+    await running.shutdownAsync();
+    const waiting = connectOrStartDaemonAsync({
+      paths, previousDaemon: previous, expectedDaemonVersion: 'fixture', startupTimeoutMs: 7000
+    });
+    const starter = await connectOrStartDaemonAsync(options);
+    try {
+      const passive = await waiting;
+      expect((await passive.status).pid).toBe((await starter.status).pid);
+      await passive.closeAsync();
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+    } finally {
+      await starter.closeAsync();
+    }
   });
 
   it('does not stop a mismatched daemon with unverifiable ownership', async () => {

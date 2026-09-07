@@ -205,4 +205,22 @@ describe('native build through the standalone client', () => {
       await closed;
     }
   }, 30000);
+
+  it('transparently replaces a hard-input generation and executes the original request exactly once', async () => {
+    const argv: string[] = ['build', '--to', 'b', '--verbose'];
+    expect((await invokeAsync(argv)).code).toBe(0);
+    const before = JSON.parse((await invokeAsync(['daemon', 'status'])).stdout);
+    environment.RUSHD_TEST_RESTART_VALUE = 'new-process-environment';
+    fs.writeFileSync(path.join(folder, 'a/input.txt'), 'two');
+    const changed: IResult = await invokeAsync(argv);
+    expect(changed.code).toBe(0);
+    expect(changed.stderr).not.toMatch(/using in-process|restart/i);
+    expect(changed.stdout).toContain('built-a-two');
+    const after = JSON.parse((await invokeAsync(['daemon', 'status'])).stdout);
+    expect(after.pid).not.toBe(before.pid);
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\na:two\nb:one\n');
+    expect((await invokeAsync(argv)).code).toBe(0);
+    expect(JSON.parse((await invokeAsync(['daemon', 'status'])).stdout).pid).toBe(after.pid);
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\na:two\nb:one\n');
+  }, 30000);
 });
