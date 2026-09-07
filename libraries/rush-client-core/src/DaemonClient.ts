@@ -9,6 +9,7 @@ import {
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
   decodeDaemonControlMessage,
@@ -249,6 +250,18 @@ export class DaemonClient {
           message: 'The daemon does not support explicit Rushx invocations; no request was sent.'
         };
       }
+      if (
+        options.request.invocationKind !== 'rushx' &&
+        options.request.commandOrigin === 'built-in' &&
+        ['install', 'update'].includes(options.request.commandName) &&
+        this.protocolVersion.minor < DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR
+      ) {
+        return {
+          kind: 'fallback',
+          reason: 'unsupported',
+          message: 'The daemon does not support native mutation handoff; no request was sent.'
+        };
+      }
       this.#result = deferred();
       await Promise.all([
         this.#sendControlAsync({ kind: 'requestStart', payload: options.request }),
@@ -433,14 +446,24 @@ export class DaemonClient {
   }
 
   #complete(outcome: DaemonClientOutcome): void {
+    const restart: boolean = outcome.kind === 'result' && outcome.result.retryAfterRestart === true;
+    if (restart && this.protocolVersion.minor < DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR) {
+      throw new DaemonProtocolError('malformedControlMessage', 'Unexpected pre-execution restart outcome.');
+    }
     if (
-      outcome.kind === 'fallback' &&
+      (outcome.kind === 'fallback' || restart) &&
       (this.#observedExecution || this.#inputAdmitted || this.#inputStarted || this.#rawModeChanged)
     ) {
       throw new DaemonProtocolError(
         'malformedControlMessage',
-        'Daemon requested fallback after output, terminal control, or stdin admission; the command was not retried.'
+        'Daemon requested fallback or restart after output, terminal control, or stdin admission; the command was not retried.'
       );
+    }
+    if (restart && this.#cancelSent) {
+      outcome = {
+        kind: 'result',
+        result: { requestId: this.#execution!.request.requestId, outcome: 'aborted', exitCode: 130, aborted: true }
+      };
     }
     this.#finished = true;
     this.#stopInput();

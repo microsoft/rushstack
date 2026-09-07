@@ -15,8 +15,10 @@ import {
   DaemonClientError,
   captureDaemonRequest,
   connectOrStartDaemonAsync,
+  executeWithDaemonRestartAsync,
   type DaemonClient,
-  type DaemonClientOutcome
+  type DaemonClientOutcome,
+  type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
@@ -81,7 +83,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     argv: route.argv,
     commandName: route.commandName,
     // The native resolver additionally validates the parsed action; rushx scripts never claim this origin.
-    commandOrigin: !rushx && ['build', 'rebuild'].includes(route.commandName) ? 'built-in' : 'custom',
+    commandOrigin: !rushx && ['build', 'rebuild', 'install', 'update'].includes(route.commandName) ? 'built-in' : 'custom',
     invocationKind: rushx ? 'rushx' : 'rush',
     cwd,
     environment,
@@ -93,22 +95,18 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     },
     admission: route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) }
   });
+  const connection: IConnectOrStartDaemonOptions = {
+    ...getDaemonConnectionOptions(path.dirname(rushJsonPath), selectedVersion, request.environment, config.autoStart),
+    capabilities: {
+      isTTY: request.terminal.isTTY,
+      columns: request.terminal.columns,
+      colorLevel: terminal.supportsColor ? 1 : 0,
+      verbosity
+    }
+  };
   let client: DaemonClient;
   try {
-    client = await connectOrStartDaemonAsync({
-      ...getDaemonConnectionOptions(
-        path.dirname(rushJsonPath),
-        selectedVersion,
-        request.environment,
-        config.autoStart
-      ),
-      capabilities: {
-        isTTY: request.terminal.isTTY,
-        columns: request.terminal.columns,
-        colorLevel: terminal.supportsColor ? 1 : 0,
-        verbosity
-      }
-    });
+    client = await connectOrStartDaemonAsync(connection);
   } catch (error) {
     if (!(error instanceof DaemonClientError)) throw error;
     process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
@@ -141,7 +139,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   try {
     if (rushx) MinimalRushConfiguration.loadFromDefaultLocation((line) => discoveryLines.push(line));
     await renderer.initializeAsync();
-    outcome = await client.executeAsync({
+    outcome = await executeWithDaemonRestartAsync(client, connection, {
       request,
       abortSignal: abort.signal,
       onStdoutAsync: async (bytes, operationId) => {

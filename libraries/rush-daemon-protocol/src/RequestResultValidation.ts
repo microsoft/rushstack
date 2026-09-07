@@ -3,6 +3,7 @@
 
 import { isDaemonControlRecord } from './ControlRecord';
 import { DaemonProtocolError } from './DaemonProtocolError';
+import { validateRestartResult } from './RestartResultValidation';
 
 const ADMISSION_ERROR_CODES: ReadonlySet<unknown> = new Set(['aborted', 'no-wait', 'wait-timeout']);
 const EMPTY_STRING_LENGTH: number = 0;
@@ -12,6 +13,7 @@ export function validateRequestResultFields(payload: Record<string, unknown>): v
   validateOptionalString(payload.errorMessage, 'errorMessage');
   validateAdmissionErrorCode(payload.admissionErrorCode);
   validatePhasedResultShape(payload);
+  validateRestartResult(payload);
 }
 
 function validateAdmissionErrorCode(value: unknown): void {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Drain explicit pre-execution restart results for accepted requests before closing a retiring host.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}
