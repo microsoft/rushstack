@@ -114,7 +114,7 @@ stages:
         displayName: 'Publish ${{ parameters.DisplayNameSuffix }} NPM Packages'
         dependsOn:
           - Prepare${{ parameters.StageNameSuffix }}
-        condition: and(succeeded('Prepare${{ parameters.StageNameSuffix }}'), eq(dependencies.Prepare${{ parameters.StageNameSuffix }}.outputs['PrepareNpmPublish.FindBumpRun.IsVersionBumpMerge'], 'true'))
+        condition: and(succeeded('Prepare${{ parameters.StageNameSuffix }}'), eq(stageDependencies.Prepare${{ parameters.StageNameSuffix }}.PrepareNpmPublish.outputs['FindBumpRun.IsVersionBumpMerge'], 'true'))
         jobs:
           - job: PublishNpmPackages
             displayName: 'Publish ${{ parameters.DisplayNameSuffix }} NPM Packages'
