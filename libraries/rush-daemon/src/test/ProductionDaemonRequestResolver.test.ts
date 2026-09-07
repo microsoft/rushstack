@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 
 import {
   PhasedCommandEngine,
+  Rush,
   RushProjectConfiguration,
   RushUserConfiguration,
   type IOperationGraph,
@@ -60,7 +61,7 @@ import {
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
 
-const RUSH_VERSION: string = '5.179.0';
+const RUSH_VERSION: string = Rush.version;
 jest.setTimeout(30_000);
 
 interface IFixture extends AsyncDisposable {

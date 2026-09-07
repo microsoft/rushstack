@@ -7,6 +7,8 @@ import * as path from 'node:path';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 
+import { Rush } from '@microsoft/rush-lib';
+
 import {
   launchRushDaemonAsync,
   resolveRushDaemonWorkspace,
@@ -57,7 +59,7 @@ describe(resolveRushDaemonWorkspace.name, () => {
   it('forwards validated idle configuration to the WS3 host option', async () => {
     await writeFile(
       path.join(tempFolder, 'rush.json'),
-      '{ "rushVersion": "5.179.0", "daemon": { "idleTimeoutSeconds": 42 } }\n'
+      JSON.stringify({ rushVersion: Rush.version, daemon: { idleTimeoutSeconds: 42 } })
     );
     await launchRushDaemonAsync(tempFolder);
     expect(serveRushDaemonAsync).toHaveBeenCalledWith(
