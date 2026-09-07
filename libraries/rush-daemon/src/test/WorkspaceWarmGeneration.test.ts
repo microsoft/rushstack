@@ -42,7 +42,7 @@ describe('automatic warm generation ownership and pong accounting', () => {
     expect(fixture.session.operationGraph).toBeUndefined();
     expect(fixture.runs()).toEqual([]);
     setDaemonPolicy(fixture, { warmSetMaxProjects: 1, autoWarmByTelemetry: true });
-    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await fixture.buildSuccessfullyAsync();
     const warm = getWarmSet(fixture);
     await eventuallyAsync(() => expect(warm.getStatus().retainedProjectNames).toHaveLength(1));
     const status = await pongAsync(fixture);
@@ -64,7 +64,7 @@ describe('automatic warm generation ownership and pong accounting', () => {
 
   it('applies idle and memory knobs in the default host while reporting irreducible pressure honestly', async () => {
     setDaemonPolicy(fixture, { warmIdleTimeoutSeconds: 0.05 });
-    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await fixture.buildSuccessfullyAsync();
     const generation: number = fixture.host.workspaceGeneration;
     await eventuallyAsync(() => expect(fixture.session.warmSetStatus?.retainedProjectNames).toEqual([]));
     expect((await pongAsync(fixture)).workspace?.warmSet?.configuration.warmIdleTimeoutSeconds).toBe(0.05);
@@ -76,14 +76,14 @@ describe('automatic warm generation ownership and pong accounting', () => {
       }
     );
     fixture.write('a/input.txt', 'cold-source-change');
-    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    await fixture.buildSuccessfullyAsync();
     expect(fixture.host.workspaceGeneration).toBe(generation);
     expect(observed).toContainEqual(['a', 'b']);
     expect(fixture.runs()).toEqual(['a', 'b', 'a', 'b']);
     const warning = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
     try {
       setDaemonPolicy(fixture, { warmMemoryBudgetMB: 0.01 });
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       await eventuallyAsync(() => expect(fixture.session.warmSetStatus?.retainedProjectNames).toEqual([]));
       const status = await pongAsync(fixture);
       expect(status.workspace?.warmSet).toMatchObject({
@@ -101,7 +101,7 @@ describe('automatic warm generation ownership and pong accounting', () => {
   });
 
   it('does not certify evicted graph results from historical observer state', async () => {
-    await fixture.buildAsync();
+    await fixture.buildSuccessfullyAsync();
     responseSnapshot(await fixture.graphAsync('status'));
     const warning = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
     try {
@@ -139,10 +139,10 @@ describe('automatic warm generation ownership and pong accounting', () => {
           return engine;
         });
       try {
-        expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+        await fixture.buildSuccessfullyAsync();
         fixture.write('a/input.txt', 'two');
         fixture.write('b/input.txt', 'two');
-        expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+        await fixture.buildSuccessfullyAsync();
         await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
         expect(
           (await fixture.runAsync(['build', '--only', 'c', '--parallelism', '3'])).terminal
@@ -167,7 +167,7 @@ describe('automatic warm generation ownership and pong accounting', () => {
   );
 
   it('quiesces the old controller before workspace/native locks and replaces it on a same-PID soft reload', async () => {
-    await fixture.buildAsync();
+    await fixture.buildSuccessfullyAsync();
     const oldSession = fixture.session;
     const oldGraph = oldSession.operationGraph!;
     const oldWarm = getWarmSet(fixture);
@@ -197,7 +197,7 @@ describe('automatic warm generation ownership and pong accounting', () => {
     const manifest: { scripts: Record<string, string> } = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     manifest.scripts['_phase:compile'] = 'node build.cjs --soft-reload';
     fixture.write('a/package.json', JSON.stringify(manifest));
-    const build = fixture.buildAsync();
+    const build = fixture.buildSuccessfullyAsync();
     try {
       await quiescing.promise;
       expect(admission).not.toHaveBeenCalled();
