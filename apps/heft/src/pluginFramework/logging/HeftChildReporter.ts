@@ -46,7 +46,9 @@ function readDescriptorFd(env: Record<string, string | undefined>, name: string)
 function isReporterPipe(fd: number): boolean {
   try {
     const stats: fs.Stats = fs.fstatSync(fd);
-    return stats.isFIFO() || stats.isSocket();
+    // Node disables isFIFO() on Windows even when fstat reports a named pipe.
+    // eslint-disable-next-line no-bitwise -- Compare the file type without permission bits.
+    return (stats.mode & fs.constants.S_IFMT) === fs.constants.S_IFIFO || stats.isSocket();
   } catch {
     return false;
   }
