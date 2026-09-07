@@ -171,7 +171,7 @@ describe('detached daemon startup', () => {
     15000
   );
 
-  it('cancels successor waiting without spawning or replaying a request', async () => {
+  it.each(['execution', 'connection'])('cancels successor waiting using the %s signal without replay', async (source) => {
     const connection: IConnectOrStartDaemonOptions = {
       ...options,
       startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-held'] }
@@ -184,7 +184,11 @@ describe('detached daemon startup', () => {
     });
     const timer = setTimeout(() => abort.abort(), 200);
     try {
-      expect(await executeWithDaemonRestartAsync(client, connection, { request, abortSignal: abort.signal }))
+      expect(await executeWithDaemonRestartAsync(
+        client,
+        { ...connection, abortSignal: source === 'connection' ? abort.signal : undefined },
+        { request, abortSignal: source === 'execution' ? abort.signal : undefined }
+      ))
         .toMatchObject({ kind: 'result', result: { exitCode: 130, aborted: true } });
       expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
     } finally {
