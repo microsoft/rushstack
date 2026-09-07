@@ -62,7 +62,7 @@ The host uses stable fingerprints to classify native requests:
 | --- | --- | --- |
 | 0 | Unchanged definitions/parameters, or ordinary project source changes | Retain session, graph, plugins, and completed records; reconcile operation inputs |
 | 1 | Rush/project configuration, effective rig/inherited settings, command shape, or unhealthy invalidation tracking | Drain the old generation, dispose it, and construct a new session and real graph in the same process |
-| 2 | Environment, installed dependency state, implementation content, or selected Rush version | Finish a pre-execution failure result, close the old host completely, and launch an available successor process |
+| 2 | Environment, installed dependency state, implementation content, or selected Rush version | Drain request results (typed retry only for unstarted work), release old ownership, and launch a genuinely available matching successor; an eligible client may retry once |
 
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
@@ -73,8 +73,9 @@ A generation lease spans resolution through final output. Reload also takes excl
 the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before
 publishing the replacement. The initiating request atomically downgrades its admission so another reload cannot
 dispose the newly selected graph before it runs. Watch requests are cancelled and drained before their generation
-is replaced. A race detected before scheduling may be re-resolved; once scheduling starts, or a terminal result has
-been attempted, the request is never replayed.
+is replaced. Server-side re-resolution is limited to races detected before scheduling and before attempting a
+terminal result. Protocol 0.10's separate client retry requires an explicit pre-execution
+`retryAfterRestart: true` result and the safeguards described below; it never replays started work.
 
 This integration supports Git-backed workspaces with direct, inherited, or rig-based project configuration and ordinary native phases.
 Engine configuration snapshots use private native configuration-file loaders and non-caching rig resolution, including
@@ -116,20 +117,30 @@ The default entrypoint supports the `rush.json` version, not a separate preview-
 
 Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
 resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
-`restartCompleted` reports completion or failure. There is no automatic request replay. A hard-change retry hint
-explicitly says no operation was scheduled or executed; the caller must reconnect and submit a new request.
+`restartCompleted` reports completion or failure. These warm/retry features do not establish availability of
+another selected Rush version; a matching launcher must actually be resolved, otherwise the transition fails closed.
+
+Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
+Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted
+queued requests drain those typed results before disconnect rather than being reduced to ambiguous connection
+loss. The client's `executeWithDaemonRestartAsync` waits for old ownership release and a validated successor,
+then retries an eligible request **at most once**. Command input/output or cancellation prevents retry,
+even with the typed flag. Error text, a changed PID, or connection loss never authorizes replay.
+Ordinary shutdown and disconnect retain cancellation semantics.
 
 Positively identified built-in `install` and `update` requests execute in `NativeMutationWorker`, a single-shot
 native Rush parser process owned by `GlobalCommandExecutionContext`. This is not the phased warm engine.
 Native arguments, policies, hooks, stdin/EOF, output and numeric exit status are preserved. Even a failed mutation
 may have changed files: its exact result is drained before old generation cleanup and successor startup.
 Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
-launched, the host stops without silently starting an incorrect successor. No mutation is replayed.
+launched, the host stops without silently starting an incorrect successor. A mutation that started is never
+replayed, even after failure; an unstarted request can retry only through the typed pre-execution contract above.
 
-The CLI admission/allowlist is separate from this server API; this package does not enable forwarding additional
-administrative commands in a client. Client-originated graph-reference fencing also needs a protocol/client
-generation token. Server-resolved requests are fenced here; operation names alone cannot identify which snapshot
-a client previously observed. Graph controls do not migrate a prepared iteration across a generation replacement.
+The opt-in CLI forwards positively identified built-in `install` and `update` only to peers supporting protocol
+0.10. Other administrative commands remain native; Rushx script names are not reinterpreted as Rush built-ins.
+Client-originated graph-reference fencing uses the protocol's generation token; operation names alone cannot
+identify which snapshot a client previously observed. Graph controls do not migrate a prepared iteration across
+a generation replacement.
 
 Resolver composition uses the optional `IDaemonRequestResolver.workspaceLifecycle` capability, not an
 `instanceof` check. A composite delegates native inspection but must wrap every generation replacement too:
@@ -255,7 +266,7 @@ while a replacement session is being constructed the token is absent. The token 
 
 All rows after `warmSet` describe fields inside that object. The extra pong field is additive and optional;
 old pong messages still decode. The protocol validates nested shapes, finite counts/budgets and generation
-identity. No protocol result/rejection, request retry or CLI routing contract changes are needed.
+identity. This optional status field is independent of protocol 0.10's typed restart-retry contract.
 Graph snapshots also stop reporting historical success after a retained result is evicted: idle cold operations
 report `READY` for request-time revalidation, without scheduling work or modifying the completed build outcome.
 
@@ -334,9 +345,10 @@ queue progress, raw-mode controls, binary output, structured events, and the ter
 wire queue. A connection runs at most one request at a time so binary operation output remains unambiguous; concurrent
 requests use separate connections. Each connection accepts at most 256 distinct request identifiers before the client
 must reconnect, allowing the lifecycle and stdin routers to retain every identifier for deterministic duplicate and
-late-frame handling without unbounded growth. Disconnect and host shutdown abort every connection-owned active or
-queued request before the resolver and warm workspace are disposed. Separate connections still share the workspace
-scheduler and phased batch coordinator, so compatible selections can execute in one iteration.
+late-frame handling without unbounded growth. Disconnect and ordinary host shutdown abort connection-owned
+requests before the resolver and warm workspace are disposed. Planned process restart instead lets accepted
+queued requests drain eligible typed restart results before their connections close. Separate connections still
+share the workspace scheduler and phased batch coordinator, so compatible selections can execute in one iteration.
 
 The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
 typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle
