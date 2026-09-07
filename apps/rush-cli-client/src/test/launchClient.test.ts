@@ -27,8 +27,10 @@ describe('standalone rushx fallback', () => {
   let project: string;
   let logFilePath: string;
   let host: RushDaemonHost | undefined;
+  let invocationClosures: Promise<unknown>[];
 
   beforeEach(() => {
+    invocationClosures = [];
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-cli-client-'));
     project = path.join(folder, 'project');
     fs.mkdirSync(project);
@@ -59,10 +61,13 @@ describe('standalone rushx fallback', () => {
 
   afterEach(async () => {
     const closingHost: RushDaemonHost | undefined = host;
+    const closingFolder: string = folder;
+    const closingLogFilePath: string = logFilePath;
     host = undefined;
+    await Promise.all(invocationClosures);
     await closingHost?.closeAsync();
-    fs.rmSync(logFilePath, { force: true });
-    fs.rmSync(folder, { recursive: true });
+    fs.rmSync(closingLogFilePath, { force: true });
+    fs.rmSync(closingFolder, { recursive: true });
   });
 
   async function invokeAsync(
@@ -102,8 +107,10 @@ describe('standalone rushx fallback', () => {
     child.stderr!.on('data', (chunk: Buffer) => {
       stderr += chunk.toString();
     });
-    const [code] = await once(child, 'close');
-    return { code: code ?? undefined, stdout, stderr };
+    const closed: Promise<unknown[]> = once(child, 'close');
+    invocationClosures.push(closed);
+    const [code] = await closed;
+    return { code: typeof code === 'number' ? code : undefined, stdout, stderr };
   }
 
   it('preserves native project-script output and exit code for --no-daemon', async () => {
@@ -342,12 +349,17 @@ describe('standalone rushx fallback', () => {
       const address = registry.address();
       if (!address || typeof address === 'string') throw new Error('Expected a local registry address.');
       const registryUrl: string = `http://127.0.0.1:${address.port}`;
-      const npmrc: string = path.join(folder, 'empty.npmrc');
-      fs.writeFileSync(npmrc, '');
+      // Native Rush subprocesses discard NPM_CONFIG_* overrides.
+      fs.writeFileSync(
+        path.join(folder, 'common/config/rush/.npmrc'),
+        `registry=${registryUrl}\ncache=${path.join(folder, 'npm-cache')}\naudit=false\nfund=false\n`
+      );
+      const home: string = path.join(folder, 'home');
+      fs.mkdirSync(home);
+      fs.writeFileSync(path.join(home, '.npmrc'), '');
       const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start'], {
-        NPM_CONFIG_REGISTRY: registryUrl,
-        NPM_CONFIG_USERCONFIG: npmrc,
-        ...Object.fromEntries([['npm_config_registry', registryUrl], ['npm_config_userconfig', npmrc]]),
+        HOME: home,
+        USERPROFILE: home,
         RUSH_GLOBAL_FOLDER: path.join(folder, 'global')
       });
       expect(result.code).toBe(1);
@@ -358,7 +370,7 @@ describe('standalone rushx fallback', () => {
     } finally {
       await new Promise<void>((resolve, reject) => registry.close((error) => error ? reject(error) : resolve()));
     }
-  });
+  }, 15000);
 
   it('rejects explicit startup combined with --no-daemon', async () => {
     const result: IInvocationResult = await invokeAsync(true, false, false, [

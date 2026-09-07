@@ -23,7 +23,10 @@ export async function stopSuccessorAsync(paths: IDaemonPaths): Promise<void> {
       () => finish(new Error('Successor did not release ownership.')),
       15_000
     );
-    const watcher: fs.FSWatcher = fs.watch(path.dirname(paths.lockfilePath), () => inspect());
+    const watcher: fs.FSWatcher = fs.watch(
+      fs.realpathSync.native(path.dirname(paths.lockfilePath)),
+      () => inspect()
+    );
     function finish(error?: Error): void {
       clearTimeout(timeout);
       watcher.close();

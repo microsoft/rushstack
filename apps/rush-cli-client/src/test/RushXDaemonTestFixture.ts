@@ -186,7 +186,7 @@ setInterval(() => {}, 1000);
     child.stdout!.on('data', (bytes: Buffer) => stdout.push(bytes));
     child.stderr!.on('data', (bytes: Buffer) => stderr.push(bytes));
     child.stdin!.on('error', (error: NodeJS.ErrnoException) => {
-      if (error.code !== 'EPIPE') throw error;
+      if (error.code !== 'EPIPE' && !(process.platform === 'win32' && error.code === 'EOF')) throw error;
     });
     child.stdin!.end(input);
     return new Promise((resolve, reject) => {

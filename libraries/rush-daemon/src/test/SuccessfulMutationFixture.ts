@@ -463,7 +463,7 @@ function waitForFileAsync(filename: string): Promise<void> {
       () => finish(new Error(`Timed out waiting for ${filename}`)),
       20_000
     );
-    const watcher: fs.FSWatcher = fs.watch(path.dirname(filename), inspect);
+    const watcher: fs.FSWatcher = fs.watch(fs.realpathSync.native(path.dirname(filename)), inspect);
     function finish(error?: Error): void {
       clearTimeout(timeout);
       watcher.close();
@@ -484,7 +484,10 @@ function waitForOwnershipAsync(paths: IDaemonPaths, oldPid: number): Promise<IDa
       () => finish(undefined, new Error('No successor acquired ownership.')),
       20_000
     );
-    const watcher: fs.FSWatcher = fs.watch(path.dirname(paths.lockfilePath), inspect);
+    const watcher: fs.FSWatcher = fs.watch(
+      fs.realpathSync.native(path.dirname(paths.lockfilePath)),
+      inspect
+    );
     function finish(owner?: IDaemonLockfile, error?: Error): void {
       clearTimeout(timeout);
       watcher.close();
