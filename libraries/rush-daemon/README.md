@@ -154,10 +154,15 @@ action; identical script names alone never authorize a workspace build.
 
 ### Warm-set generation attachment (WS3)
 
-`WorkspaceWarmSet.attach(options)` implements the four warm policies against a **real, already-created**
-operation graph and an **already-started** `WorkspaceSessionFileWatcher`. The generation owner must attach it
-before the first request iteration, capture that generation's native execution lease callback, and use the
-same workspace scheduler that admits phased/global requests and graph mutations:
+`WorkspaceSession` automatically owns the warm controller for each real graph and
+`WorkspaceSessionFileWatcher`, using the effective `rush.json`/environment settings. Both lazy native
+initialization and eagerly supplied components attach after watcher startup and before the first iteration.
+An integration-supplied controller is adopted, not duplicated. Custom watchers or graphs without native
+result-eviction support remain explicitly unaccounted rather than reporting a fictitious warm set.
+
+Embedded integrations can still use `WorkspaceWarmSet.attach(options)` directly with a **real, already-created**
+graph and an **already-started** watcher. Capture that generation's native execution lease callback and use
+the same workspace scheduler that admits phased/global requests and graph mutations:
 
 ```ts
 const acquireExecutionLeaseAsync = engine.acquireExecutionLeaseAsync;
@@ -176,9 +181,16 @@ const warmSet = WorkspaceWarmSet.attach({
 The configuration is the existing resolved `rush.json`/environment configuration; `updateConfiguration()` also
 validates and applies policy changes at runtime. Dispose the controller **before** its generation's engine and
 watcher, outside outstanding request leases. Controller disposal stops its timer and awaits maintenance;
-it does not dispose resources owned by the generation. This attachment is intentionally not installed in the
-default bootstrap/resolver here: automatic reload/generation ownership supplies that final wiring separately.
-The real-native-graph tests attach this exact controller at component creation, not a substitute implementation.
+it does not dispose resources owned by the generation. The default session performs this ownership sequence
+automatically, including for component-owned instances of the concrete file watcher.
+
+`quiesceWarmSetAsync()` is a one-way generation barrier: it stops the current controller, waits for pending
+initialization, and disposes any controller returned late before completing. Quiescing a cold session prevents
+later initialization from installing an active controller behind that barrier. Existing initialized graphs may
+still finish admitted work; generation reload owns their disposal. Reload quiesces **before** taking workspace
+and native preparation locks, so those locks cannot deadlock an in-flight maintenance lease. Late cleanup and
+native lease-release failures remain sticky and block replacement; an optional project eviction failure still
+preserves its records and diagnostics without failing an otherwise successful build.
 
 | Policy | Runtime behavior |
 | --- | --- |
@@ -208,18 +220,44 @@ definitions, enabled selections and disk caches are unchanged. The native per-it
 policy is deliberately left intact: optional footprint cleanup must not turn successful requested work into a
 failed build merely because an optimization could not release resources.
 
-The watcher keeps root and Rush/subspace configuration observation permanent. Unrequested project observation
-is removed at maintenance; requested projects are observed again during planning. A new watcher can start with
-`projectNames: []` instead of recursively observing every project. **Every native request must still refresh its
+The default session starts with permanent root and Rush/subspace configuration observation and
+`projectNames: []`, not recursive watchers for every cold project. Requested projects are observed during
+planning; idle eviction removes their observation. **Every native request must still refresh its
 input snapshot and revalidate effective direct/rig/inherited configuration**, including files outside watcher
 roots. Cold source changes therefore rebuild correctly; changed graph configuration fails closed until the
-generation owner supplies a freshly constructed engine. This attachment does not implement automatic reload.
+generation owner supplies a freshly constructed engine. A same-PID soft reload replaces the controller,
+watcher, graph and session together; controller history never migrates across generations.
 
 `getStatus()` reports actual retained/protected projects, daemon RSS, measured child RSS, unmeasured runners,
 remaining pressure, maintenance deferral and failed cleanup. Diagnostics go to `onDiagnostic` (or a process
 warning). Failed cleanup keeps records and truthful resource accounting, and cannot falsify a command result.
 Releasing records does not force V8/allocator RSS to shrink. If remaining daemon memory, active/protected work,
 or cleanup failures cannot fit the budget, pressure remains reported instead of claiming success.
+
+### Read-only generation and warm status
+
+Daemon `pong` replies (and the existing JSON `daemon status` output) include an optional `workspace` snapshot.
+`RushDaemonHost.workspaceStatus` exposes the same synchronous view. It reads the provider's installed session
+and opaque generation token without calling `getSessionAsync()`, preparing a graph, scheduling work, or waiting
+for lifecycle/workspace/native locks. During old-generation cleanup it reports that installed generation;
+while a replacement session is being constructed the token is absent. The token matches graph fencing tokens.
+
+| Field | Meaning |
+| --- | --- |
+| `generation`, `generationToken` | Provider generation counter and current installed session identity; neither implies a graph or successful build. |
+| `graphInitialized` | Whether that session has a materialized operation graph. |
+| `warmSet` | Absent when no controller is attached, not a claim of zero memory. |
+| `warmSet.configuration` | The four effective runtime warm knobs. |
+| `maintenanceState`, `maintenanceFailure` | Running, quiescing, stopped, or failed maintenance; stopping maintenance alone does not free graph/watcher resources. |
+| `retainedProjectNames`, `protectedProjectNames`, `watchedProjectNames` | Actual retained projects, additional protection and still-resident project observation, including pending close. |
+| RSS, unmeasured count and pressure fields | Sampled daemon/child memory and outstanding limits, with unknown child memory explicitly distinguished from zero. |
+| `cleanupFailures`, `deferredReason` | Failed optional cleanup and why maintenance could not run. |
+
+All rows after `warmSet` describe fields inside that object. The extra pong field is additive and optional;
+old pong messages still decode. The protocol validates nested shapes, finite counts/budgets and generation
+identity. No protocol result/rejection, request retry or CLI routing contract changes are needed.
+Graph snapshots also stop reporting historical success after a retained result is evicted: idle cold operations
+report `READY` for request-time revalidation, without scheduling work or modifying the completed build outcome.
 
 ### Native Rushx integration
 

@@ -5,6 +5,7 @@ import { realpath } from 'node:fs/promises';
 
 import { connectOrStartDaemonAsync, type DaemonClient } from '@rushstack/rush-client-core';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import {
   computeDaemonWorkspaceKey,
   DaemonFrameListener,
@@ -20,6 +21,7 @@ import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
+import { getWorkspaceStatus } from './WorkspaceStatus';
 import { WorkspaceRequestLifecycle } from './WorkspaceRequestLifecycle';
 import type {
   GetWorkspaceSuccessorLaunchAsync,
@@ -163,6 +165,7 @@ export class RushDaemonHost {
             daemonVersion: options.daemonVersion,
             dispatcher: requestDispatcher,
             startedAtMs,
+            getWorkspaceStatus: () => getWorkspaceStatus(workspaceSessionProvider),
             onInteractiveConnection: options.onInteractiveConnection,
             onClosed: (closedSession: DaemonControlSession, error: Error | undefined) => {
               sessions.delete(closedSession);
@@ -232,6 +235,11 @@ export class RushDaemonHost {
   /** Host-local generation, useful for rejecting retained server-side references. */
   public get workspaceGeneration(): number {
     return this._workspaceSessionProvider.generation;
+  }
+
+  /** Samples the installed generation without constructing a session or graph or taking request leases. */
+  public get workspaceStatus(): IDaemonWorkspaceStatus {
+    return getWorkspaceStatus(this._workspaceSessionProvider);
   }
 
   /** Closes active connections, stops listening, and removes transport artifacts. */

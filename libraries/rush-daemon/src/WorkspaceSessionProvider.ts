@@ -6,6 +6,7 @@ import type {
   IWorkspaceSessionOptions,
   WorkspaceSessionFactory
 } from './WorkspaceSession';
+import { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 
 export class WorkspaceSessionProvider implements AsyncDisposable {
   readonly #factory: WorkspaceSessionFactory;
@@ -21,6 +22,16 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
 
   public get generation(): number {
     return this.#generation;
+  }
+
+  /** Reads installed state without initializing, awaiting or replacing a session or graph. */
+  public get currentSession(): IWorkspaceSession | undefined {
+    return this.#session;
+  }
+
+  /** The installed session token, absent while no session is installed. */
+  public get currentGenerationToken(): string | undefined {
+    return this.#session && getWorkspaceGenerationToken(this.#session);
   }
 
   public constructor(factory: WorkspaceSessionFactory, options: IWorkspaceSessionOptions) {

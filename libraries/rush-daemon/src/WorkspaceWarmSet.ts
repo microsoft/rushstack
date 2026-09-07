@@ -11,6 +11,7 @@ import {
   type IOperationRunner,
   type Operation
 } from '@microsoft/rush-lib';
+import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 
 import {
   RequestExclusivityClass,
@@ -45,19 +46,7 @@ export interface IWorkspaceWarmSetOptions {
 }
 
 /** A sampled footprint, not a hard process/tree RSS guarantee. @beta */
-export interface IWorkspaceWarmSetStatus {
-  /** Actual retained resources, highest retention priority first. */
-  readonly retainedProjectNames: ReadonlyArray<string>;
-  readonly protectedProjectNames: ReadonlyArray<string>;
-  readonly daemonResidentMemoryBytes: number;
-  readonly measuredRunnerMemoryBytes: number;
-  /** Resident runners without a producer measurement; never counted as zero-sized runners. */
-  readonly unmeasuredRunnerCount: number;
-  readonly overMemoryBudget: boolean;
-  readonly overProjectLimit: boolean;
-  readonly deferredReason: 'workspace-busy' | 'native-busy' | 'graph-busy' | 'disposed' | undefined;
-  readonly cleanupFailures: ReadonlyArray<string>;
-}
+export type IWorkspaceWarmSetStatus = IDaemonWarmSetStatus;
 
 interface IProjectHistory {
   readonly operations: Operation[];
@@ -98,10 +87,11 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   #disposed: boolean = false;
   #deferredReason: IWorkspaceWarmSetStatus['deferredReason'];
   #pressureKey: string | undefined;
+  #leaseReleaseFailure: Error | undefined;
 
   private constructor(options: IWorkspaceWarmSetOptions) {
     this.#options = options;
-    this.#configuration = resolveDaemonConfiguration(options.configuration, {});
+    this.#configuration = resolveWarmConfiguration(options.configuration);
     const now: number = performance.now();
     for (const operation of options.operationGraph.operations) {
       const name: string = operation.associatedProject.packageName;
@@ -172,7 +162,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   /** Revalidates all four knobs and applies the new policy on the next idle maintenance turn. */
   public updateConfiguration(configuration: WorkspaceWarmSetConfiguration): void {
     if (this.#disposed) throw new Error('The workspace warm set is disposed.');
-    this.#configuration = resolveDaemonConfiguration(configuration, {});
+    this.#configuration = resolveWarmConfiguration(configuration);
     this.#schedule(0);
   }
 
@@ -191,8 +181,12 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     }
     const daemonResidentMemoryBytes: number = process.memoryUsage().rss;
     return {
+      configuration: this.#configuration,
+      maintenanceState: this.#getMaintenanceState(),
+      maintenanceFailure: this.#leaseReleaseFailure?.message,
       retainedProjectNames: projects.map((project) => project.key),
       protectedProjectNames: projects.filter((project) => project.protected).map((project) => project.key),
+      watchedProjectNames: [...this.#options.watcher.watchedProjectNames].sort(),
       daemonResidentMemoryBytes,
       measuredRunnerMemoryBytes,
       unmeasuredRunnerCount,
@@ -205,12 +199,18 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     };
   }
 
+  #getMaintenanceState(): IWorkspaceWarmSetStatus['maintenanceState'] {
+    if (this.#leaseReleaseFailure) return 'failed';
+    if (!this.#disposed) return 'running';
+    return this.#maintenance ? 'quiescing' : 'stopped';
+  }
+
   /** Runs an idle pass, or reports why it was deferred. Optional cleanup never changes build results. */
   public maintainAsync(): Promise<IWorkspaceWarmSetStatus> {
     if (!this.#maintenance) {
       this.#maintenance = this.#maintainOnceAsync().finally(() => {
         this.#maintenance = undefined;
-        if (!this.#disposed) {
+        if (!this.#disposed && !this.#leaseReleaseFailure) {
           const now: number = performance.now();
           const delay: number = Math.min(
             MAX_POLL_DELAY_MS,
@@ -220,7 +220,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
               return remaining > 0 ? Math.max(1, remaining) : RETRY_DELAY_MS;
             })
           );
-          this.#schedule(delay);
+          this.#schedule(this.#deferredReason ? Math.min(delay, RETRY_DELAY_MS) : delay);
         }
       });
     }
@@ -233,10 +233,11 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     if (this.#timer) clearTimeout(this.#timer);
     this.#timer = undefined;
     await this.#maintenance;
+    if (this.#leaseReleaseFailure) throw this.#leaseReleaseFailure;
   }
 
   #schedule(delay: number): void {
-    if (this.#disposed) return;
+    if (this.#disposed || this.#leaseReleaseFailure) return;
     if (this.#timer) clearTimeout(this.#timer);
     this.#timer = setTimeout(() => {
       this.#timer = undefined;
@@ -251,7 +252,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     let nativeLease: AsyncDisposable | undefined;
     this.#deferredReason = undefined;
     try {
-      if (this.#disposed) {
+      if (this.#disposed || this.#leaseReleaseFailure) {
         this.#deferredReason = 'disposed';
       } else {
         admission = await this.#options.scheduler.acquireAsync({
@@ -259,7 +260,9 @@ export class WorkspaceWarmSet implements AsyncDisposable {
           noWait: true
         });
         const graph: IOperationGraph = this.#options.operationGraph;
-        if (isGraphBusy(graph)) {
+        if (this.#disposed) {
+          this.#deferredReason = 'disposed';
+        } else if (isGraphBusy(graph)) {
           this.#deferredReason = 'graph-busy';
         } else {
           nativeLease = await this.#options.acquireExecutionLeaseAsync();
@@ -284,7 +287,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       try {
         await nativeLease?.[Symbol.asyncDispose]();
       } catch (error) {
-        this.#diagnose(new Error('Failed to release the warm-set native execution lease.', { cause: error }));
+        this.#leaseReleaseFailure = new Error('Failed to release the warm-set native execution lease.', {
+          cause: error
+        });
+        this.#diagnose(this.#leaseReleaseFailure);
       } finally {
         admission?.release();
       }
@@ -298,6 +304,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     const { operationGraph: graph, watcher } = this.#options;
     // Retention and eviction use exactly the same ordering, reversed only to release the lowest value first.
     for (const project of this.#rankProjects().reverse()) {
+      if (this.#disposed) break;
       if (project.protected) continue;
       const status: IWorkspaceWarmSetStatus = this.getStatus();
       const expired: boolean =
@@ -424,10 +431,12 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     const diagnostic: Error = error instanceof Error ? error : new Error(String(error));
     try {
       if (this.#options.onDiagnostic) this.#options.onDiagnostic(diagnostic);
-      else process.emitWarning(diagnostic, { code: 'RUSH_DAEMON_WARM_SET' });
+      else
+        process.emitWarning(diagnostic.message, { code: 'RUSH_DAEMON_WARM_SET', detail: diagnostic.stack });
     } catch (callbackError) {
       process.emitWarning(
-        new AggregateError([diagnostic, callbackError], 'Warm-set diagnostic callback failed.')
+        `Warm-set diagnostic callback failed: ${String(callbackError)}. ${diagnostic.message}`,
+        { code: 'RUSH_DAEMON_WARM_SET' }
       );
     }
   }
@@ -443,4 +452,17 @@ function isGraphBusy(graph: IOperationGraph): boolean {
     graph.status === OperationStatus.Executing ||
     graph.abortController.signal.aborted
   );
+}
+
+function resolveWarmConfiguration(
+  configuration: WorkspaceWarmSetConfiguration
+): Readonly<Required<WorkspaceWarmSetConfiguration>> {
+  const { warmIdleTimeoutSeconds, warmMemoryBudgetMB, warmSetMaxProjects, autoWarmByTelemetry } =
+    resolveDaemonConfiguration(configuration, {});
+  return Object.freeze({
+    warmIdleTimeoutSeconds,
+    warmMemoryBudgetMB,
+    warmSetMaxProjects,
+    autoWarmByTelemetry
+  });
 }

@@ -150,6 +150,8 @@ export class WorkspaceSession implements IWorkspaceSession {
   #engineInitialization: Promise<void> | undefined;
   #warmSet: WorkspaceWarmSet | undefined;
   #warmSetQuiescence: Promise<void> | undefined;
+  #initializationCleanupFailure: unknown;
+  #onError: ((error: Error) => void) | undefined;
 
   public readonly invalidations: WorkspaceInvalidationTracker;
   public readonly metadata: IWorkspaceSessionMetadata;
@@ -191,8 +193,28 @@ export class WorkspaceSession implements IWorkspaceSession {
   }
 
   public quiesceWarmSetAsync(): Promise<void> {
-    this.#warmSetQuiescence ??= this.#warmSet?.[Symbol.asyncDispose]() ?? Promise.resolve();
+    this.#warmSetQuiescence ??= this.#quiesceWarmSetOnceAsync();
     return this.#warmSetQuiescence;
+  }
+
+  async #quiesceWarmSetOnceAsync(): Promise<void> {
+    const warmSet: WorkspaceWarmSet | undefined = this.#warmSet;
+    const results: PromiseSettledResult<void | undefined>[] = await Promise.allSettled([
+      warmSet?.[Symbol.asyncDispose](),
+      this.#engineInitialization?.catch(() => undefined)
+    ]);
+    const errors: unknown[] = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (this.#warmSet !== warmSet) {
+      try {
+        await this.#warmSet?.[Symbol.asyncDispose]();
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    if (this.#initializationCleanupFailure !== undefined) errors.push(this.#initializationCleanupFailure);
+    if (errors.length) throw new AggregateError(errors, 'Failed to quiesce workspace warm resources.');
   }
 
   public assertActive(): void {
@@ -207,11 +229,16 @@ export class WorkspaceSession implements IWorkspaceSession {
   /** Installs one all-project engine without replacing the watcher or losing retained invalidations. */
   public async initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {
     if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
+    if (this.#warmSetQuiescence)
+      throw new Error('The workspace session is quiescing; no new engine may attach.');
     if (!this.#engineInitialization) {
       if (this.#components !== EMPTY_WORKSPACE_SESSION_COMPONENTS) {
         throw new Error('Workspace components have already been supplied.');
       }
-      const initialization: Promise<void> = this.#initializeEngineAsync(factory);
+      // Publish ownership before invoking user-supplied construction, which can reenter quiescence.
+      const initialization: Promise<void> = Promise.resolve().then(() =>
+        this.#initializeEngineAsync(factory)
+      );
       this.#engineInitialization = initialization;
       void initialization.catch((error: unknown) => {
         if (
@@ -234,22 +261,49 @@ export class WorkspaceSession implements IWorkspaceSession {
   async #initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {
     const components: IWorkspaceSessionComponents = await factory({
       invalidations: this.invalidations,
-      rushConfiguration: this.rushConfiguration
+      rushConfiguration: this.rushConfiguration,
+      onError: this.#onError
     });
-    if (this.#isDisposing || components.projectWatcher) {
-      await components[Symbol.asyncDispose]();
-      throw new Error('Cannot install engine components after disposal or replace the session watcher.');
+    if (this.#isDisposing || this.#warmSetQuiescence || components.projectWatcher) {
+      await this.#disposeRejectedComponentsAsync(components);
+      throw new Error(
+        'Cannot install engine components after quiescence/disposal or replace the session watcher.'
+      );
     }
     this.#components = components;
     this.#inputsSnapshot = components.inputsSnapshot;
-    if (components.operationGraph && this.#sessionOwnedProjectWatcher instanceof WorkspaceSessionFileWatcher) {
-      this.#warmSet = WorkspaceWarmSet.getAttached(components.operationGraph) ?? WorkspaceWarmSet.attach({
-        operationGraph: components.operationGraph,
-        configuration: this.rushConfiguration.daemon,
-        scheduler: getWorkspaceRequestScheduler(this),
-        acquireExecutionLeaseAsync: () => this.acquireExecutionLeaseAsync(),
-        watcher: this.#sessionOwnedProjectWatcher
-      });
+    this.#attachWarmSet();
+  }
+
+  async #disposeRejectedComponentsAsync(components: IWorkspaceSessionComponents): Promise<void> {
+    this.#components = components;
+    this.#warmSet = components.operationGraph && WorkspaceWarmSet.getAttached(components.operationGraph);
+    try {
+      await this.#warmSet?.[Symbol.asyncDispose]();
+      await components[Symbol.asyncDispose]();
+      this.#components = EMPTY_WORKSPACE_SESSION_COMPONENTS;
+    } catch (error) {
+      // Keep ownership and fail the generation barrier even if the initialization request already failed.
+      this.#initializationCleanupFailure = error;
+      throw error;
+    }
+  }
+
+  #attachWarmSet(): void {
+    const { operationGraph, acquireExecutionLeaseAsync, projectWatcher } = this.#components;
+    const watcher: IWorkspaceInvalidationWatcher | undefined =
+      projectWatcher ?? this.#sessionOwnedProjectWatcher;
+    if (operationGraph?.deleteResults && watcher instanceof WorkspaceSessionFileWatcher) {
+      this.#warmSet =
+        WorkspaceWarmSet.getAttached(operationGraph) ??
+        WorkspaceWarmSet.attach({
+          operationGraph,
+          configuration: this.rushConfiguration.daemon,
+          scheduler: getWorkspaceRequestScheduler(this),
+          acquireExecutionLeaseAsync: async () => await acquireExecutionLeaseAsync?.(),
+          watcher,
+          onDiagnostic: this.#onError
+        });
     }
   }
 
@@ -272,6 +326,7 @@ export class WorkspaceSession implements IWorkspaceSession {
       })) ?? EMPTY_WORKSPACE_SESSION_COMPONENTS;
     let projectWatcher: IWorkspaceInvalidationWatcher | undefined = components.projectWatcher;
     let sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
+    let session: WorkspaceSession | undefined;
     try {
       const metadata: IWorkspaceSessionMetadata = {
         ...createMetadata(rushConfiguration, options.rushVersion),
@@ -283,25 +338,33 @@ export class WorkspaceSession implements IWorkspaceSession {
             invalidations.markWatcherUnhealthy();
             options.onError?.(error);
           },
-          rushConfiguration
+          rushConfiguration,
+          projectNames: []
         });
         sessionOwnedProjectWatcher = projectWatcher;
       }
-      const session: WorkspaceSession = new WorkspaceSession(
+      session = new WorkspaceSession(
         rushConfiguration,
         metadata,
         invalidations,
         components,
         sessionOwnedProjectWatcher
       );
+      session.#onError = options.onError;
       await projectWatcher.startAsync((changedPath: string | undefined) =>
         invalidations.invalidate(changedPath)
       );
+      session.#attachWarmSet();
       // Changes before the watcher registered its callbacks cannot be observed path-by-path.
       invalidations.invalidateForInitialization();
       return session;
     } catch (error) {
       const cleanupErrors: unknown[] = [];
+      try {
+        await session?.quiesceWarmSetAsync();
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
       try {
         await sessionOwnedProjectWatcher?.[Symbol.asyncDispose]();
       } catch (cleanupError) {
@@ -343,9 +406,6 @@ export class WorkspaceSession implements IWorkspaceSession {
   }
 
   async #disposeOnceAsync(): Promise<void> {
-    // Initialization failures belong to the request. Any successfully constructed components are
-    // disposed by initialization itself if shutdown won the race.
-    await this.#engineInitialization?.catch(() => undefined);
     await this.quiesceWarmSetAsync();
     let watcherError: unknown;
     try {

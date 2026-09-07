@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Complete automatic warm-controller generation ownership, fencing cold/late attachment and awaiting pending initialization and maintenance before reload locks. Preserve ownership failures, start cold sessions with scoped watchers, expose non-initializing generation and truthful warm accounting in pong/status, and stop certifying evicted graph results from historical observer state.",
+      "type": "patch"
+    }
+  ]
+}

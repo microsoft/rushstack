@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { OperationStatus, type IOperationGraph, type Operation } from '@microsoft/rush-lib';
+import {
+  OperationStatus,
+  type IOperationExecutionResult,
+  type IOperationGraph,
+  type Operation
+} from '@microsoft/rush-lib';
 import type {
   IDaemonGraphInvalidations,
   IDaemonGraphOperation,
@@ -14,6 +19,13 @@ import { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 
 const OBSERVERS: WeakMap<IOperationGraph, DaemonGraphObserver> = new WeakMap();
 const TAP_NAME: string = 'RushDaemonGraphObserver';
+const RETAINED_RESULT_STATUSES: ReadonlySet<OperationStatus> = new Set([
+  OperationStatus.Success,
+  OperationStatus.SuccessWithWarning,
+  OperationStatus.Failure,
+  OperationStatus.FromCache,
+  OperationStatus.NoOp
+]);
 
 /** One hook set per graph, retaining only status metadata and live subscriber callbacks. */
 export class DaemonGraphObserver {
@@ -52,7 +64,9 @@ export class DaemonGraphObserver {
 
   public subscribe(notify: () => void): () => void {
     this.#subscribers.add(notify);
-    return () => { this.#subscribers.delete(notify); };
+    return () => {
+      this.#subscribers.delete(notify);
+    };
   }
 
   public getOperations(graph: IOperationGraph): IDaemonGraphOperation[] {
@@ -61,9 +75,25 @@ export class DaemonGraphObserver {
       projectName: operation.associatedProject.packageName,
       phaseName: operation.associatedPhase.name,
       enabled: operation.enabled,
-      status: this.#statuses.get(operation) ?? graph.resultByOperation.get(operation)?.status ?? null,
+      status: this.#getOperationStatus(graph, operation),
       dependencyIds: Array.from(operation.dependencies, (dependency) => dependency.name).sort()
     })).sort((a, b) => a.operationId.localeCompare(b.operationId));
+  }
+
+  #getOperationStatus(graph: IOperationGraph, operation: Operation): OperationStatus | null {
+    const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
+    const status: OperationStatus | undefined = this.#statuses.get(operation) ?? retained?.status;
+    if (
+      status !== undefined &&
+      RETAINED_RESULT_STATUSES.has(status) &&
+      !retained &&
+      graph.status !== OperationStatus.Executing &&
+      !graph.hasScheduledIteration
+    ) {
+      // Idle eviction removed the actual result. Historical observer state must not certify it as current.
+      return OperationStatus.Ready;
+    }
+    return status ?? null;
   }
 
   #notify(): void {
@@ -125,7 +155,9 @@ export class DaemonGraphChanges implements Disposable {
 
   public async nextAsync(): Promise<boolean> {
     if (!this.#dirty && !this.#disposed) {
-      await new Promise<void>((resolve) => { this.#wake = resolve; });
+      await new Promise<void>((resolve) => {
+        this.#wake = resolve;
+      });
     }
     this.#dirty = false;
     return !this.#disposed;

@@ -3,6 +3,7 @@
 
 import { isDaemonControlRecord } from './ControlRecord';
 import { DaemonProtocolError } from './DaemonProtocolError';
+import { validateWorkspaceStatus } from './WorkspaceStatusValidation';
 
 const ZERO: number = 0;
 
@@ -16,6 +17,7 @@ export function validateDaemonPong(payload: Record<string, unknown>): void {
   if (typeof payload.uptimeMs !== 'number') fail('uptimeMs');
   validatePid(payload.pid);
   validateResidentMemory(payload.residentMemoryBytes);
+  validateWorkspaceStatus(payload.workspace);
 }
 
 function validateDaemonVersion(value: unknown): void {
