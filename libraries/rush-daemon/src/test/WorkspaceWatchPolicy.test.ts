@@ -34,7 +34,7 @@ describe('daemon.watch observation-only policy', () => {
   it('defaults to root/config guards only and still rebuilds unwatched source/config changes correctly', async () => {
     const fixture = await createFixtureAsync();
     try {
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       const graph = fixture.session.operationGraph!;
       const generation: number = fixture.host.workspaceGeneration;
       expect((await pongAsync(fixture)).workspace?.warmSet).toMatchObject({
@@ -43,7 +43,7 @@ describe('daemon.watch observation-only policy', () => {
         retainedProjectNames: ['a', 'b']
       });
       fixture.write('a/input.txt', 'changed-unwatched');
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       expect(fixture.session.operationGraph).toBe(graph);
       expect(fixture.host.workspaceGeneration).toBe(generation);
       expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe(
@@ -57,7 +57,7 @@ describe('daemon.watch observation-only policy', () => {
         })
       );
       fixture.write('a/input.txt', 'changed-config');
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       expect(fixture.host.workspaceGeneration).toBeGreaterThan(generation);
       expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe('changed-config');
       expect(fixture.session.warmSetStatus?.watchedProjectNames).toEqual([]);
@@ -83,7 +83,7 @@ describe('daemon.watch observation-only policy', () => {
   it('observes requested warm projects between requests when enabled, without scheduling scripts', async () => {
     const fixture = await createFixtureAsync(true);
     try {
-      await fixture.buildAsync();
+      await fixture.buildSuccessfullyAsync();
       const graph = fixture.session.operationGraph!;
       expect(fixture.session.warmSetStatus?.watchedProjectNames).toEqual(['a', 'b']);
       fixture.write('a/input.txt', 'observed-idle-change');
@@ -95,7 +95,7 @@ describe('daemon.watch observation-only policy', () => {
       expect(graph.hasScheduledIteration).toBe(false);
       expect(fixture.runs()).toEqual(['a', 'b']);
       expect((await pongAsync(fixture)).workspace?.warmSet?.configuration.watch).toBe(true);
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe(
         'observed-idle-change'
       );
@@ -111,7 +111,7 @@ describe('daemon.watch observation-only policy', () => {
     process.env.RUSH_DAEMON_WATCH = environment;
     const fixture = await createFixtureAsync(json);
     try {
-      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+      await fixture.buildSuccessfullyAsync();
       expect(fixture.session.warmSetStatus?.watchedProjectNames).toEqual(expected);
       expect(fixture.session.warmSetStatus?.configuration.watch).toBe(environment === '1');
     } finally {
@@ -122,7 +122,7 @@ describe('daemon.watch observation-only policy', () => {
   it('closes and restores project observation without dropping native results or warm IPC runners', async () => {
     const resources = await WarmSetTestFixture.createAsync({ ipc: true });
     try {
-      await resources.fixture.buildAsync();
+      await resources.fixture.buildSuccessfullyAsync();
       const records = new Map(resources.graph.resultByOperation);
       const closeRunners = jest.spyOn(resources.graph, 'closeRunnersAsync');
       resources.update({ watch: false });
@@ -145,7 +145,7 @@ describe('daemon.watch observation-only policy', () => {
   it('defers teardown behind active/protected work and diagnoses failed closes without false accounting', async () => {
     const resources = await WarmSetTestFixture.createAsync({ ipc: true });
     try {
-      await resources.fixture.buildAsync();
+      await resources.fixture.buildSuccessfullyAsync();
       const scheduler = getWorkspaceRequestScheduler(resources.fixture.session);
       const active = await scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedBuild });
       resources.update({ watch: false });
@@ -176,7 +176,7 @@ describe('daemon.watch observation-only policy', () => {
         const recovered = await resources.warm.maintainAsync();
         expect(recovered.watchedProjectNames).toEqual([]);
         expect(recovered.cleanupFailures).toEqual([]);
-        expect((await resources.fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+        await resources.fixture.buildSuccessfullyAsync();
       } finally {
         close.mockRestore();
       }
@@ -188,7 +188,7 @@ describe('daemon.watch observation-only policy', () => {
   it('does not alter observation while an unstarted native iteration is prepared', async () => {
     const resources = await WarmSetTestFixture.createAsync({ ipc: true });
     try {
-      await resources.fixture.buildAsync();
+      await resources.fixture.buildSuccessfullyAsync();
       const session = resources.fixture.session;
       const scheduler = getWorkspaceRequestScheduler(session);
       const admission = await scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive });

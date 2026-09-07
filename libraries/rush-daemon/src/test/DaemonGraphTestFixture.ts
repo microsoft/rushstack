@@ -27,6 +27,7 @@ import {
   DaemonRequestWireClient,
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
+import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
@@ -202,6 +203,12 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
 
   public buildAsync(): Promise<ITerminalExchange> {
     return this.runAsync(['build', '--to', 'b', '--parallelism', '3']);
+  }
+
+  public async buildSuccessfullyAsync(): Promise<ITerminalExchange> {
+    const exchange: ITerminalExchange = await this.buildAsync();
+    assertSuccessfulNativeBuild(exchange, this.session.operationGraph);
+    return exchange;
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {

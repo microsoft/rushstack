@@ -41,9 +41,8 @@ host-started successor, but never lets the client spawn one.
 `connectOrStartDaemonAsync()` accepts an **explicit, version-selected** executable,
 arguments, environment and cwd. It does not discover or install a Rush version.
 It reuses transport paths/reclaim checks and node-core-library's process-identity
-aware `LockFile` for the first-start mutex on POSIX. On Windows an exclusively bound
-private named pipe supplies that mutex; a `wx` file can be unlinked while its writer
-is still alive. The winning client rechecks readiness,
+aware `LockFile` for the first-start mutex, including kernel-enforced exclusive
+file sharing on Windows. The winning client rechecks readiness,
 reclaims only an absent/dead owner, and reserves `<lockfilePath>.starting` before
 handing the explicit command to a detached startup helper. The helper spawns without
 a shell and retains that reservation until the daemon completes hello/ping readiness,

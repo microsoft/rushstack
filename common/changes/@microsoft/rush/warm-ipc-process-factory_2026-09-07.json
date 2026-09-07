@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow an explicit IPC process factory to reuse native lifecycle environment, stdio and process-tree ownership without passing Node's IPC channel through an intermediate shell. Existing default runner behavior is unchanged.",
+      "type": "patch"
+    }
+  ]
+}

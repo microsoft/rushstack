@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ChildProcess } from 'node:child_process';
+import type { ChildProcess, SpawnOptions } from 'node:child_process';
 import { once } from 'node:events';
 
 import type {
@@ -29,6 +29,11 @@ export interface IIPCOperationRunnerOptions {
   incrementalCommand: string | undefined;
   commandForHash: string;
   ignoredParameterValues: ReadonlyArray<string>;
+  /**
+   * Optional process factory for an explicit IPC executable. Receives the native lifecycle
+   * environment, stdio and process-group options; the default preserves shell command execution.
+   */
+  spawn?: (command: string, args: ReadonlyArray<string>, options: SpawnOptions) => ChildProcess;
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
@@ -64,6 +69,7 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _incrementalCommand: string | undefined;
   private readonly _commandForHash: string;
   private readonly _ignoredParameterValues: ReadonlyArray<string>;
+  private readonly _spawn: IIPCOperationRunnerOptions['spawn'];
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -90,6 +96,7 @@ export class IPCOperationRunner implements IOperationRunner {
     this._commandForHash = commandForHash;
 
     this._ignoredParameterValues = ignoredParameterValues;
+    this._spawn = options.spawn;
   }
 
   public get isActive(): boolean {
@@ -131,18 +138,22 @@ export class IPCOperationRunner implements IOperationRunner {
 
           const { environment: initialEnvironment } = context;
 
-          this._ipcProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
-            rushConfiguration,
-            workingDirectory: projectFolder,
-            initCwd: rushConfiguration.commonTempFolder,
-            handleOutput: true,
-            environmentPathOptions: {
-              includeProjectBin: true
+          this._ipcProcess = Utilities.executeLifecycleCommandAsync(
+            commandToRun,
+            {
+              rushConfiguration,
+              workingDirectory: projectFolder,
+              initCwd: rushConfiguration.commonTempFolder,
+              handleOutput: true,
+              environmentPathOptions: {
+                includeProjectBin: true
+              },
+              ipc: true,
+              connectSubprocessTerminator: true,
+              initialEnvironment
             },
-            ipc: true,
-            connectSubprocessTerminator: true,
-            initialEnvironment
-          });
+            this._spawn
+          );
           this._processClosedPromise = new Promise((resolve) => this._ipcProcess!.once('close', resolve));
 
           let resolveReadyPromise!: () => void;
