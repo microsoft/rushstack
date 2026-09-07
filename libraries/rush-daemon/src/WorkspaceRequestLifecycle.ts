@@ -119,6 +119,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #forceReload: boolean = false;
   #closing: boolean = false;
   #restartPending: boolean = false;
+  #lastReloadTier: WorkspaceInputChangeTier = WorkspaceInputChangeTier.Reuse;
   #transitioning: boolean = false;
   #cleanupFailure: unknown;
   #disposePromise: Promise<void> | undefined;
@@ -147,6 +148,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       runtimeCache
     });
     return new WorkspaceRequestLifecycle(options, fingerprint, runtimeCache);
+  }
+
+  /** The last applied input decision; reading status never changes or reloads the workspace. */
+  public get lastReloadTier(): WorkspaceInputChangeTier {
+    return this.#lastReloadTier;
   }
 
   public async dispatchAsync(
@@ -222,6 +228,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
                 retryAfterRestart: true
               });
               error.session.retire?.();
+              this.#lastReloadTier = WorkspaceInputChangeTier.Restart;
               this.#restartPending = true;
               this.#closing = true;
               this.#options.onRestartRequested(error.plan);
@@ -379,6 +386,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         }
       }
       if (tier === WorkspaceInputChangeTier.Reuse && !isMutation(envelope)) {
+        this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
         return {
           session,
           resolver: this.#resolver,
@@ -458,6 +466,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           this.#terminal
         );
         if (projectFingerprint === this.#projectFingerprint) {
+          this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
           this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
           return {
             session,
@@ -546,6 +555,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           workspaceSession: session,
           abortSignal: client.abortSignal
         });
+        this.#lastReloadTier = WorkspaceInputChangeTier.Reload;
         this.#forceReload = false;
         fingerprint = after;
       } catch (error) {
@@ -699,6 +709,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             )
           };
         }
+        this.#lastReloadTier = WorkspaceInputChangeTier.Restart;
         this.#closing = true;
         this.#restartPending = restart!.launch !== undefined && restart!.failure === undefined;
         generation.session.retire?.();
