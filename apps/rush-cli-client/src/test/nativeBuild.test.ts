@@ -10,6 +10,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient } from '@rushstack/rush-client-core';
+import { removeTestFolderAsync } from '@rushstack/rush-daemon/lib/test/TestProcessExit';
 import { RUSHD_GRAPH_SNAPSHOT, type IDaemonGraphSnapshotPayload } from '@rushstack/rush-daemon-protocol';
 import {
   computeDaemonWorkspaceKey,
@@ -27,8 +28,12 @@ describe('native build through the standalone client', () => {
   let folder: string;
   let environment: NodeJS.ProcessEnv;
   let paths: IDaemonPaths;
+  let invocationClosures: Promise<unknown[]>[];
+  let acceptingInvocations: boolean;
 
   beforeEach(() => {
+    invocationClosures = [];
+    acceptingInvocations = true;
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-native-'));
     environment = {
       ...process.env, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy', CI: 'false', TF_BUILD: 'false',
@@ -81,14 +86,21 @@ describe('native build through the standalone client', () => {
   });
 
   afterEach(async () => {
-    if (fs.existsSync(paths.lockfilePath)) await invokeAsync(['daemon', 'stop']);
+    acceptingInvocations = false;
+    await Promise.all(invocationClosures);
+    if (fs.existsSync(paths.lockfilePath)) await spawnClientAsync(['daemon', 'stop']);
     const deadline: number = Date.now() + 5000;
     while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(20);
     expect(fs.existsSync(paths.lockfilePath)).toBe(false);
-    fs.rmSync(folder, { recursive: true });
+    await removeTestFolderAsync(folder);
   });
 
-  async function invokeAsync(argv: ReadonlyArray<string>, rushx: boolean = false): Promise<IResult> {
+  function invokeAsync(argv: ReadonlyArray<string>, rushx: boolean = false): Promise<IResult> {
+    if (!acceptingInvocations) throw new Error('The native build fixture is already closing.');
+    return spawnClientAsync(argv, rushx);
+  }
+
+  async function spawnClientAsync(argv: ReadonlyArray<string>, rushx: boolean = false): Promise<IResult> {
     const entry: string = path.resolve(__dirname, rushx ? '../../bin/rushx-client' : '../../bin/rush-client');
     const child = spawn(process.execPath, [entry, ...argv], {
       cwd: rushx ? path.join(folder, 'b') : folder, env: environment, stdio: ['ignore', 'pipe', 'pipe']
@@ -97,8 +109,22 @@ describe('native build through the standalone client', () => {
     let stderr: string = '';
     child.stdout.on('data', (bytes: Buffer) => { stdout += bytes.toString(); });
     child.stderr.on('data', (bytes: Buffer) => { stderr += bytes.toString(); });
-    const [code] = await once(child, 'close');
+    const closed: Promise<unknown[]> = once(child, 'close');
+    invocationClosures.push(closed);
+    const [code] = await closed;
     return { code: typeof code === 'number' ? code : undefined, stdout, stderr };
+  }
+
+  async function snapshotAsync(...args: string[]): Promise<IDaemonGraphSnapshotPayload['snapshot']> {
+    const result = await invokeAsync(['daemon', 'graph', ...args]);
+    expect(result.code).toBe(0);
+    expect(result.stderr).toBe('');
+    expect(result.stdout).not.toContain('\u001b');
+    const records = result.stdout.trim().split('\n').map((line) => JSON.parse(line));
+    expect(records).toHaveLength(2);
+    expect(records[0]).toMatchObject({ type: 'extension', payload: { name: RUSHD_GRAPH_SNAPSHOT } });
+    expect(records[1]).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+    return records[0].payload.data.snapshot;
   }
 
   it('executes selected scripts, reuses warm state, and never confuses rushx build with rush build', async () => {
@@ -130,7 +156,7 @@ describe('native build through the standalone client', () => {
     expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(`${beforeChange}a:two\nb:one\n`);
   }, 30000);
 
-  it('provides presentation-free graph commands through the real standalone native daemon', async () => {
+  it('gates graph commands and inspects an uninitialized daemon without running work', async () => {
     environment.RUSH_DAEMON_EXPERIMENTAL = '0';
     const disabled = await invokeAsync(['daemon', 'graph', 'show']);
     expect(disabled.code).toBe(1);
@@ -140,20 +166,14 @@ describe('native build through the standalone client', () => {
     environment.RUSH_DAEMON_EXPERIMENTAL = '1';
     expect((await invokeAsync(['daemon', 'start'])).code).toBe(0);
 
-    const snapshotAsync = async (...args: string[]): Promise<IDaemonGraphSnapshotPayload['snapshot']> => {
-      const result = await invokeAsync(['daemon', 'graph', ...args]);
-      expect(result.code).toBe(0);
-      expect(result.stderr).toBe('');
-      expect(result.stdout).not.toContain('\u001b');
-      const records = result.stdout.trim().split('\n').map((line) => JSON.parse(line));
-      expect(records).toHaveLength(2);
-      expect(records[0]).toMatchObject({ type: 'extension', payload: { name: RUSHD_GRAPH_SNAPSHOT } });
-      expect(records[1]).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
-      return records[0].payload.data.snapshot;
-    };
     expect(await snapshotAsync('show')).toMatchObject({ initialized: false });
     expect(fs.existsSync(path.join(folder, 'runs.txt'))).toBe(false);
     expect((await invokeAsync(['daemon', 'graph', 'watch'])).code).toBe(1);
+    expect(fs.existsSync(path.join(folder, 'runs.txt'))).toBe(false);
+  }, 30000);
+
+  it('provides presentation-free graph controls without implicitly executing scheduled work', async () => {
+    environment.RUSH_DAEMON_EXPERIMENTAL = '1';
     expect((await invokeAsync(['build', '--to', 'b', '--parallelism', '3'])).code).toBe(0);
     expect(await snapshotAsync('scope-out', '--project', 'a')).toMatchObject({
       operations: [{ enabled: false }, { enabled: false }]
@@ -167,6 +187,12 @@ describe('native build through the standalone client', () => {
     });
     expect(await snapshotAsync('resume')).toMatchObject({ pauseNextIteration: false });
     expect(await snapshotAsync('status')).toMatchObject({ initialized: true });
+    expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+  }, 30000);
+
+  it('rejects invalid graph commands without native fallback or executing work', async () => {
+    environment.RUSH_DAEMON_EXPERIMENTAL = '1';
+    expect((await invokeAsync(['build', '--to', 'b'])).code).toBe(0);
     for (const args of [['invalid'], ['scope-out', '--project', 'missing'], ['pause', 'invalid']]) {
       const result = await invokeAsync(['daemon', 'graph', ...args]);
       expect(result.code).toBe(1);
@@ -174,34 +200,47 @@ describe('native build through the standalone client', () => {
       expect(JSON.parse(result.stdout)).toMatchObject({ kind: 'requestRejected' });
     }
     expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+  }, 30000);
 
-    const entry: string = path.resolve(__dirname, '../../bin/rush-client');
+  it('streams graph changes and gracefully cancels through the CLI signal handler', async () => {
+    environment.RUSH_DAEMON_EXPERIMENTAL = '1';
+    expect((await invokeAsync(['build', '--to', 'b'])).code).toBe(0);
+    const entry: string = path.resolve(
+      __dirname, process.platform === 'win32' ? 'CliSignalTestProcess.js' : '../../bin/rush-client'
+    );
     const watch = spawn(process.execPath, [entry, 'daemon', 'graph', 'watch'], {
-      cwd: folder, env: environment, stdio: ['ignore', 'pipe', 'pipe']
+      cwd: folder, env: environment,
+      stdio: process.platform === 'win32' ? ['ignore', 'pipe', 'pipe', 'ipc'] : ['ignore', 'pipe', 'pipe']
     });
     const closed = once(watch, 'close');
+    invocationClosures.push(closed);
     let output: string = '';
     let errors: string = '';
-    watch.stderr.on('data', (bytes: Buffer) => { errors += bytes.toString(); });
+    watch.stderr!.on('data', (bytes: Buffer) => { errors += bytes.toString(); });
     const ready = new Promise<void>((resolve) => {
-      watch.stdout.on('data', (bytes: Buffer) => {
+      watch.stdout!.on('data', (bytes: Buffer) => {
         output += bytes.toString();
         if (output.includes('\n')) resolve();
       });
     });
     try {
-      await ready;
+      await Promise.race([
+        ready,
+        closed.then(() => { throw new Error(`Graph watch exited before its first snapshot: ${errors}`); })
+      ]);
       expect(await snapshotAsync('scope-out', '--project', 'a')).toMatchObject({
         operations: [{ enabled: false }, { enabled: false }]
       });
-      watch.kill('SIGINT');
-      expect((await closed)[0]).toBe(130);
+      if (process.platform === 'win32') watch.send('SIGINT');
+      else watch.kill('SIGINT');
+      expect(await closed).toEqual([130, null]);
       expect(errors).toBe('');
       const records = output.trim().split('\n').map((line) => JSON.parse(line));
       expect(records[0]).toMatchObject({ type: 'extension', payload: { name: RUSHD_GRAPH_SNAPSHOT } });
       expect(records.at(-1)).toMatchObject({ kind: 'requestResult', payload: { outcome: 'aborted', exitCode: 130 } });
+      expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
     } finally {
-      if (watch.exitCode === null) watch.kill('SIGTERM');
+      if (watch.exitCode === null && watch.signalCode === null) watch.kill('SIGTERM');
       await closed;
     }
   }, 30000);
@@ -286,5 +325,5 @@ describe('native build through the standalone client', () => {
     expect((await invokeAsync(argv)).code).toBe(0);
     expect(JSON.parse((await invokeAsync(['daemon', 'status'])).stdout).pid).toBe(after.pid);
     expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\na:two\nb:one\n');
-  }, 30000);
+  }, 45000);
 });
