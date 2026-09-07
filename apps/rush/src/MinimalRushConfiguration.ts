@@ -75,7 +75,7 @@ export class MinimalRushConfiguration {
           explicitReporter === 'legacy' ||
           process.env.RUSH_REPORTER?.trim().toLowerCase() === 'legacy' ||
           _hasHelpControl(process.argv.slice(2)) ||
-          effectiveRushVersion !== currentPackageVersion;
+          (effectiveRushVersion !== currentPackageVersion && explicitReporter === undefined);
         if (
           showVerbose &&
           (legacyFallbackRequested ||

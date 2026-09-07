@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve custom bootstrap controls and legacy environment overrides, keep direct command output within reporter-owned destinations, and suppress duplicate watch presentation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

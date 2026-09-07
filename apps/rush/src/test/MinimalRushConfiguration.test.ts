@@ -12,6 +12,7 @@ describe(MinimalRushConfiguration.name, () => {
   const originalArgv: string[] = process.argv;
   const originalRushTempFolder: string | undefined = process.env.RUSH_TEMP_FOLDER;
   const originalRushPreviewVersion: string | undefined = process.env.RUSH_PREVIEW_VERSION;
+  const originalRushReporter: string | undefined = process.env.RUSH_REPORTER;
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -25,6 +26,11 @@ describe(MinimalRushConfiguration.name, () => {
       delete process.env.RUSH_PREVIEW_VERSION;
     } else {
       process.env.RUSH_PREVIEW_VERSION = originalRushPreviewVersion;
+    }
+    if (originalRushReporter === undefined) {
+      delete process.env.RUSH_REPORTER;
+    } else {
+      process.env.RUSH_REPORTER = originalRushReporter;
     }
     EnvironmentConfiguration.reset();
   });
@@ -143,11 +149,30 @@ describe(MinimalRushConfiguration.name, () => {
     ]);
   });
 
+  it.each(['json', 'ai', 'file'])(
+    'keeps discovery off stdout when an incompatible engine rejects %s',
+    (reporter) => {
+      const legacyRepo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+      jest.spyOn(PackageJsonLookup, 'loadOwnPackageJson').mockReturnValue({
+        name: '@microsoft/rush',
+        version: '5.178.1'
+      });
+      jest.spyOn(process, 'cwd').mockReturnValue(path.join(legacyRepo, 'project'));
+      delete process.env.RUSH_REPORTER;
+      process.argv = ['node', 'rush', 'build', `--reporter=${reporter}`];
+
+      MinimalRushConfiguration.loadFromDefaultLocation();
+
+      expect(consoleLog).not.toHaveBeenCalled();
+    }
+  );
+
   it.each([
     ['environment fallback', ['build', '--reporter=json'], 'legacy'],
     ['explicit legacy reporter', ['build', '--reporter=legacy'], undefined],
     ['help fallback', ['build', '--reporter=json', '--help'], undefined],
-    ['cross-version fallback', ['build', '--reporter=json'], undefined]
+    ['cross-version fallback', ['build'], undefined]
   ])('restores legacy discovery output in an opted-in repository for %s', (testName, args, envValue) => {
     void testName;
     const repo: string = path.join(__dirname, 'sandbox', 'repo');

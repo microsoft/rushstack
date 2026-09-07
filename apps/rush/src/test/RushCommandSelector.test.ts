@@ -72,13 +72,13 @@ describe(RushCommandSelector.name, () => {
     );
   });
 
-  it('does not observe output from a matching structured engine', () => {
+  it('does not observe output from a matching structured engine when reporters are disabled', () => {
     const manager: ReporterManager = new ReporterManager();
     const options: IRushFrontendLaunchOptions = {
       isManaged: true,
       reporter: { eventSink: manager, sessionId: 'test-session' },
       reporterCloseAsync: async () => {},
-      reporterEnabled: true,
+      reporterEnabled: false,
       reporterSelectionReason: 'explicit --reporter'
     };
     const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
@@ -275,62 +275,72 @@ describe(RushCommandSelector.name, () => {
     ]);
   });
 
-  it('keeps old-engine stdout structured for machine reporters', async () => {
-    const manager: ReporterManager = new ReporterManager();
-    const reporter: RecordingReporter = new RecordingReporter();
-    manager.addReporter(reporter);
-    await manager.initializeAsync();
+  it.each([undefined, REPORTER_PROTOCOL_VERSION.major])(
+    'keeps engine stdout structured for machine reporters (protocol %s)',
+    async (protocolMajor) => {
+      const manager: ReporterManager = new ReporterManager();
+      const reporter: RecordingReporter = new RecordingReporter();
+      manager.addReporter(reporter);
+      await manager.initializeAsync();
 
-    const originalArgv: string[] = process.argv;
-    const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
-    const originalStderrWrite: typeof process.stderr.write = process.stderr.write;
-    let stdoutText: string = '';
-    const stdoutWrite: typeof process.stdout.write = ((text: string): boolean => {
-      stdoutText += text;
-      return true;
-    }) as typeof process.stdout.write;
-    process.argv = ['node', 'rush', 'build'];
-    process.stdout.write = stdoutWrite;
-    process.stderr.write = (() => true) as typeof process.stderr.write;
-    const previousBeforeExitListeners: readonly BeforeExitListener[] = process.listeners(
-      'beforeExit'
-    ) as BeforeExitListener[];
+      const originalArgv: string[] = process.argv;
+      const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
+      const originalStderrWrite: typeof process.stderr.write = process.stderr.write;
+      let stdoutText: string = '';
+      const stdoutWrite: typeof process.stdout.write = ((text: string): boolean => {
+        stdoutText += text;
+        return true;
+      }) as typeof process.stdout.write;
+      process.argv = ['node', 'rush', 'build'];
+      process.stdout.write = stdoutWrite;
+      process.stderr.write = (() => true) as typeof process.stderr.write;
+      const previousBeforeExitListeners: readonly BeforeExitListener[] = process.listeners(
+        'beforeExit'
+      ) as BeforeExitListener[];
+      let closeFromEngine: (() => Promise<void>) | undefined;
 
-    try {
-      RushCommandSelector.execute(
-        '5.178.1',
-        {
-          Rush: {
-            version: '5.177.0',
-            launch: () => {
-              process.stdout.write('legacy stdout\n');
+      try {
+        RushCommandSelector.execute(
+          '5.178.1',
+          {
+            Rush: {
+              version: '5.177.0',
+              _reporterProtocolMajor: protocolMajor,
+              launch: (version: string, options: IRushFrontendLaunchOptions) => {
+                void version;
+                closeFromEngine = options.reporterCloseAsync;
+                process.stdout.write('legacy stdout\n');
+              }
             }
+          } as unknown as typeof import('@microsoft/rush-lib'),
+          {
+            isManaged: true,
+            reporter: { eventSink: manager, sessionId: 'test-session' },
+            reporterCloseAsync: async () => {
+              expect(process.stdout.write).toBe(stdoutWrite);
+              await manager.closeAsync();
+            },
+            reporterEnabled: true,
+            reporterStdoutIsMachineReadable: true,
+            reporterSelectionReason: 'explicit --reporter'
           }
-        } as unknown as typeof import('@microsoft/rush-lib'),
-        {
-          isManaged: true,
-          reporter: { eventSink: manager, sessionId: 'test-session' },
-          reporterCloseAsync: async () => {},
-          reporterEnabled: true,
-          reporterStdoutIsMachineReadable: true,
-          reporterSelectionReason: 'explicit --reporter'
-        }
-      );
-      restoreObservedOutput(previousBeforeExitListeners);
-      await manager.flushAsync();
-    } finally {
-      restoreObservedOutput(previousBeforeExitListeners, false);
-      process.stdout.write = originalStdoutWrite;
-      process.stderr.write = originalStderrWrite;
-      process.argv = originalArgv;
-    }
+        );
+        expect(closeFromEngine).toBeDefined();
+        await closeFromEngine!();
+      } finally {
+        restoreObservedOutput(previousBeforeExitListeners, false);
+        process.stdout.write = originalStdoutWrite;
+        process.stderr.write = originalStderrWrite;
+        process.argv = originalArgv;
+      }
 
-    expect(stdoutText).toBe('');
-    expect(reporter.events[0].payload).toEqual({
-      stream: 'stdout',
-      text: 'legacy stdout\n'
-    });
-  });
+      expect(stdoutText).toBe('');
+      expect(reporter.events[0].payload).toEqual({
+        stream: 'stdout',
+        text: 'legacy stdout\n'
+      });
+    }
+  );
 
   it('preserves a UTF-8 code point split across old-engine buffer writes', async () => {
     const manager: ReporterManager = new ReporterManager();

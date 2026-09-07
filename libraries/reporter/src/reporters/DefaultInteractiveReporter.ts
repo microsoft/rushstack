@@ -127,6 +127,7 @@ export class DefaultInteractiveReporter implements IReporter {
   private _paintedRowCount: number;
   private _cursorHidden: boolean;
   private _finalized: boolean;
+  private _refreshTimer: ReturnType<typeof setInterval> | undefined;
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
     this._terminal = options.terminal;
@@ -153,7 +154,22 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   public async initializeAsync(): Promise<void> {
-    /* The cursor is hidden lazily on the first paint. */
+    if (!this._refreshTimer && this._terminal.isTTY && !this._finalized) {
+      this._refreshTimer = setInterval(
+        () => {
+          if (
+            this._terminal.isTTY &&
+            this._cursorHidden &&
+            !this._finalized &&
+            shouldRefresh(this._lastPaintMs, this._nowMs(), this._minRefreshIntervalMs)
+          ) {
+            this._paint();
+          }
+        },
+        Math.max(MIN_REFRESH_INTERVAL_MS, this._minRefreshIntervalMs)
+      );
+      this._refreshTimer.unref();
+    }
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
@@ -174,6 +190,10 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
+    if (this._refreshTimer) {
+      clearInterval(this._refreshTimer);
+      this._refreshTimer = undefined;
+    }
     this._finalize();
   }
 

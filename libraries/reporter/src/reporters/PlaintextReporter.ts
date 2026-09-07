@@ -117,6 +117,7 @@ export class PlaintextReporter implements IReporter {
   private _nextSpoolId: number;
   private _legacyIterationId: number;
   private _latestIterationId: number;
+  private _heartbeatTimer: ReturnType<typeof setInterval> | undefined;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -138,7 +139,17 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async initializeAsync(): Promise<void> {
-    /* no-op */
+    if (!this._heartbeatTimer && this._logLevel !== 'quiet') {
+      this._heartbeatTimer = setInterval(
+        () => {
+          if (this._commandName !== undefined) {
+            this.emitHeartbeatIfDue();
+          }
+        },
+        Math.max(1, this._heartbeatIntervalMs)
+      );
+      this._heartbeatTimer.unref();
+    }
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
@@ -245,6 +256,7 @@ export class PlaintextReporter implements IReporter {
         break;
       }
       case 'commandResult': {
+        this._stopHeartbeat();
         this._onResult(event.payload as { commandName: string; succeeded: boolean; exitCode: number });
         break;
       }
@@ -258,6 +270,7 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
+    this._stopHeartbeat();
     for (const cycle of this._watchCycles.values()) {
       for (const [operationId, record] of cycle.operations) {
         if (!record.silent && this._variant === 'detailed') {
@@ -289,6 +302,13 @@ export class PlaintextReporter implements IReporter {
       return true;
     }
     return false;
+  }
+
+  private _stopHeartbeat(): void {
+    if (this._heartbeatTimer) {
+      clearInterval(this._heartbeatTimer);
+      this._heartbeatTimer = undefined;
+    }
   }
 
   private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
