@@ -8,7 +8,7 @@ import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { Rush } from '../Rush';
 import { RushConfiguration } from '../RushConfiguration';
 
-const TEMP_FOLDER: string = path.join(__dirname, 'temp', 'RushConfigurationReporting');
+const TEMP_FOLDER: string = path.join(__dirname, 'temp-RushConfigurationReporting');
 const RUSH_JSON_PATH: string = path.join(TEMP_FOLDER, 'rush.json');
 
 function writeRushJson(reporting?: unknown): void {
