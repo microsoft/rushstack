@@ -22,6 +22,16 @@ async function mainAsync(): Promise<void> {
   fs.appendFileSync(path.join(folder, 'starts'), `${process.pid}\n`);
   process.stdout.write('launcher stdout\n');
   process.stderr.write('launcher stderr\n');
+  if (fs.existsSync(path.join(folder, 'hold-prebind'))) {
+    fs.writeFileSync(path.join(folder, 'prebind'), String(process.pid));
+    while (fs.existsSync(path.join(folder, 'hold-prebind'))) {
+      if (fs.existsSync(path.join(folder, 'stop'))) {
+        fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+  }
   await new Promise((resolve) => setTimeout(resolve, 250));
   const listener = await DaemonFrameListener.listenAsync(paths, {
     protocolVersion: DAEMON_PROTOCOL_VERSION,
