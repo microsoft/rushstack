@@ -78,8 +78,8 @@ jest.setTimeout(1000000);
 
 function expectSpawnToMatchRegexp(spawnCall: SpawnMockCall, expectedRegexp: RegExp): void {
   if (IS_WINDOWS) {
-    // On Windows, the command is passed as a single string with the `shell: true` option
-    spawnOptionEquals(spawnCall, 'shell', true);
+    // Phased runners supply an explicit environment, so Windows uses that environment's shell.
+    spawnOptionEquals(spawnCall, 'shell', process.env.COMSPEC || process.env.comspec || 'cmd.exe');
     expect(spawnCall[0]).toMatch(expectedRegexp);
   } else {
     expect(spawnCall[1]).toEqual(expect.arrayContaining([expect.stringMatching(expectedRegexp)]));
@@ -101,6 +101,36 @@ describe('RushCommandLineParser', () => {
 
     describe('in basic repo', () => {
       describe("'build' action", () => {
+        if (IS_WINDOWS) {
+          it.each([
+            { comspec: 'C:\\Native shell\\cmd.exe', expectedShell: 'C:\\Native shell\\cmd.exe' },
+            { comspec: undefined, expectedShell: 'cmd.exe' }
+          ])(
+            'uses exactly $expectedShell for an explicit Windows runner environment',
+            async ({ comspec, expectedShell }) => {
+              const { parser, spawnMock } = await getCommandLineParserInstanceAsync(
+                'basicAndRunBuildActionRepo',
+                'build'
+              );
+              const originalComspec: string | undefined = process.env.COMSPEC;
+              try {
+                if (comspec === undefined) delete process.env.COMSPEC;
+                else process.env.COMSPEC = comspec;
+
+                await expect(parser.executeAsync()).resolves.toEqual(true);
+
+                expect(spawnMock.mock.calls).toHaveLength(2);
+                for (const spawnCall of spawnMock.mock.calls) {
+                  spawnOptionEquals(spawnCall, 'shell', expectedShell);
+                }
+              } finally {
+                if (originalComspec === undefined) delete process.env.COMSPEC;
+                else process.env.COMSPEC = originalComspec;
+              }
+            }
+          );
+        }
+
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
           const reporterSink: CapturingReporterSink = new CapturingReporterSink();

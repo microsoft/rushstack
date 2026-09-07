@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { FileSystem, LockFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, LockFile } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
 import type { CommandLineAction } from '@rushstack/ts-command-line';
 
@@ -17,6 +17,7 @@ import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { PhasedCommandEngineBusyError } from './PhasedCommandEngineBusyError';
+import { resolvePhasedCommandCwdAsync } from '../utilities/resolvePhasedCommandCwd';
 
 /**
  * A native phased command graph prepared without executing an iteration.
@@ -69,9 +70,7 @@ export class PhasedCommandEngine {
 
   public static async parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine> {
     const { rushConfiguration, terminalProvider, cwd, argv } = options;
-    if (!Path.isUnderOrEqual(cwd, rushConfiguration.rushJsonFolder)) {
-      throw new Error('The command working directory must be inside the daemon workspace.');
-    }
+    const resolvedCwd: string = await resolvePhasedCommandCwdAsync(cwd, rushConfiguration.rushJsonFolder);
     if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
       throw new Error('Command help must be handled by the native CLI, not by an engine request.');
     }
@@ -84,7 +83,7 @@ export class PhasedCommandEngine {
       }
     }
     const parser: RushCommandLineParser = new RushCommandLineParser({
-      cwd,
+      cwd: resolvedCwd,
       engine: { rushConfiguration, terminalProvider }
     });
     await parser.executeWithoutErrorHandlingAsync([...argv]);
