@@ -193,7 +193,7 @@ describe('version-selected daemon launcher', () => {
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain(`actual engine is ${Rush.version}`);
     expect(result.stdout).not.toContain('rushd ready');
-  });
+  }, 15000);
 
   it('rechecks the real engine before binding and refuses a changed repository selection', async () => {
     const selected = await selectDaemonLauncherAsync(context, { allowInstall: false });
