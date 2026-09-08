@@ -267,7 +267,7 @@ async function _launchRushXInternalAsync(
   const lifecycleConfiguration: ILifecycleCommandOptions['rushConfiguration'] =
     _getLifecycleConfiguration(rushConfiguration, execution);
   // Match native registration lookup in the discovered configuration's namespace, not by physical project identity.
-  const projectLookupCwd: string = rushConfiguration && lifecycleConfiguration
+  const projectLookupCwd: string = execution?.rushJsonFilePath && rushConfiguration && lifecycleConfiguration
     ? path.resolve(rushConfiguration.rushJsonFolder, path.relative(lifecycleConfiguration.rushJsonFolder, cwd))
     : cwd;
 

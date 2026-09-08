@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve the original native Rushx registration path unless an explicit invocation namespace is supplied, and release fixture-owned native parser locks after frontend tests.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

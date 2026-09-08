@@ -9,6 +9,7 @@ import * as rushLib from '@microsoft/rush-lib';
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
+import { LockFile } from '@rushstack/node-core-library';
 import {
   ReporterHost,
   ReporterManager,
@@ -184,6 +185,17 @@ function emitCommandStarted(sink: IReporterEventSink): void {
     type: 'commandStarted',
     payload: { commandName: 'build' }
   });
+}
+
+function releaseParserTestLocks(spy: jest.SpiedFunction<typeof LockFile.tryAcquire>): void {
+  try {
+    // Native parser locks live until process exit; these fixtures run the parser inside Jest instead.
+    for (const result of spy.mock.results) {
+      if (result.type === 'return' && result.value && !result.value.isReleased) result.value.release();
+    }
+  } finally {
+    spy.mockRestore();
+  }
 }
 
 describe(launchRushFrontendAsync.name, () => {
@@ -561,6 +573,7 @@ describe(launchRushFrontendAsync.name, () => {
     }
     process.argv.push('--verbose');
     let selection: IRushReporterSelection | undefined;
+    const lockSpy = jest.spyOn(LockFile, 'tryAcquire');
 
     try {
       EnvironmentConfiguration.reset();
@@ -598,10 +611,16 @@ describe(launchRushFrontendAsync.name, () => {
       expect(
         JSON.parse(await fs.promises.readFile(path.join(repoPath, 'custom-output-args.json'), 'utf8'))
       ).toEqual(testCase.expectedArguments);
+      expect(
+        lockSpy.mock.results.some(
+          (result) => result.type === 'return' && result.value && !result.value.isReleased
+        )
+      ).toBe(true);
     } finally {
       EnvironmentConfiguration.reset();
       process.argv = originalArgv;
       process.exitCode = originalExitCode;
+      releaseParserTestLocks(lockSpy);
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
@@ -647,6 +666,7 @@ describe(launchRushFrontendAsync.name, () => {
     process.argv = ['node', 'rush', 'custom-reporter-flag', '--reporter'];
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
     let selection: IRushReporterSelection | undefined;
+    const lockSpy = jest.spyOn(LockFile, 'tryAcquire');
 
     try {
       EnvironmentConfiguration.reset();
@@ -690,10 +710,16 @@ describe(launchRushFrontendAsync.name, () => {
       ).toEqual(['--reporter']);
       expect(processLifecycle.beforeExitListener).toBeUndefined();
       expect(processLifecycle.signalListeners.size).toBe(0);
+      expect(
+        lockSpy.mock.results.some(
+          (result) => result.type === 'return' && result.value && !result.value.isReleased
+        )
+      ).toBe(true);
     } finally {
       EnvironmentConfiguration.reset();
       process.argv = originalArgv;
       process.exitCode = originalExitCode;
+      releaseParserTestLocks(lockSpy);
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
