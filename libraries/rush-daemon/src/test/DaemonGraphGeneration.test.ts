@@ -76,13 +76,14 @@ describe('graph-generation fencing over the native daemon wire', () => {
     let stale: IDaemonRequestEnvelope;
     beforeEach(() =>
       runWithFixtureAsync(async (fixture) => {
-        // Measured Windows phases: initial build ~3.5s, rebuild ~2.6s. Preparation has its own hook budget.
+        // Real Git/build subprocess preparation can exceed the unit-test budget on shared Windows runners.
         await fixture.buildSuccessfullyAsync();
         previousGeneration = responseSnapshot(await fixture.graphAsync('show')).workspaceGeneration;
         previousGraph = fixture.session.operationGraph;
         previousPid = process.pid;
         stale = fixture.envelope(['daemon', 'graph', 'scope-out', '--project', 'a']);
-      })
+      }),
+      15_000
     );
 
     it('rejects an old reference after same-process soft reload without applying it to the replacement graph', () =>
