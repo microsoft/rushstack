@@ -75,9 +75,9 @@ export interface IInstallPackageInDirectoryOptions {
 
 export interface ILifecycleCommandOptions {
   /**
-   * The rush configuration, if the command is running in a rush repo.
+   * Rush configuration paths used to prepare the lifecycle environment, if running in a Rush repo.
    */
-  rushConfiguration: RushConfiguration | undefined;
+  rushConfiguration: Pick<RushConfiguration, 'rushJsonFolder' | 'commonTempFolder'> | undefined;
 
   /**
    * Working directory for running the command

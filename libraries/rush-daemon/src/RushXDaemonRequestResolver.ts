@@ -14,7 +14,7 @@ import {
   RushXCommand,
   type IRushXCommandLineArguments
 } from '@microsoft/rush-lib';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { EnvironmentMap, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { Terminal, TerminalProviderSeverity, type ITerminal } from '@rushstack/terminal';
 
 import {
@@ -50,10 +50,12 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
       throw new DaemonRequestDispatchError('invalidRequest', 'A Rushx script cannot claim built-in Rush origin.');
     }
     let cwd: string;
+    let canonicalCwd: string;
     try {
-      cwd = resolveGlobalCommandRequest({
+      canonicalCwd = resolveGlobalCommandRequest({
         ...envelope, terminal: { ...envelope.terminal, columns: envelope.terminal.columns }
       }, workspaceSession).cwd;
+      cwd = process.platform === 'win32' ? path.resolve(envelope.cwd) : canonicalCwd;
       resolveGlobalCommandWorkingDirectory(RushXCommand.getPackageFolder(cwd), workspaceSession);
     } catch (error) {
       throw new DaemonRequestDispatchError('invalidRequest', (error as Error).message, { cause: error });
@@ -64,6 +66,7 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
     }
     const configuration: RushConfiguration = workspaceSession.rushConfiguration;
     let environment: NodeJS.ProcessEnv;
+    let rushJsonFilePath: string;
     try {
       const rushJsonPath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: cwd, showVerbose: false
@@ -71,6 +74,7 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
       if (!rushJsonPath || fs.realpathSync.native(rushJsonPath) !== fs.realpathSync.native(configuration.rushJsonFile)) {
         throw new Error('The governing Rush configuration differs from this daemon workspace.');
       }
+      rushJsonFilePath = rushJsonPath;
       assertCurrentConfiguration(configuration);
       environment = RushXCommand.prepareEnvironment(cwd, envelope.environment, rushJsonPath);
       this.#validateConfigurationEnvironment(environment);
@@ -82,6 +86,9 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
     abortSignal.throwIfAborted();
     const executeAsync: GlobalCommandExecutor = async (context) => {
       try {
+        if (resolveGlobalCommandWorkingDirectory(cwd, workspaceSession) !== canonicalCwd) {
+          throw new Error('The Rushx invocation directory changed while waiting for admission.');
+        }
         assertCurrentConfiguration(configuration);
       } catch (error) {
         context.terminal.writeErrorLine((error as Error).message);
@@ -93,6 +100,7 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
           cwd,
           environment,
           rushConfiguration: configuration,
+          rushJsonFilePath,
           terminal: createRushXTerminal(context, args.isDebug),
           consoleTerminal: new Terminal({
             supportsColor: true,
@@ -125,6 +133,10 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
   }
 
   #validateConfigurationEnvironment(environment: NodeJS.ProcessEnv): void {
+    const tempOverride: string | undefined = new EnvironmentMap(environment).get('RUSH_TEMP_FOLDER');
+    if (tempOverride && !path.isAbsolute(tempOverride)) {
+      throw new Error('Relative RUSH_TEMP_FOLDER requires in-process Rushx environment initialization.');
+    }
     const quiet: string | undefined = environment.RUSH_QUIET_MODE;
     if (quiet !== 'true' && quiet !== 'false') {
       EnvironmentConfiguration.parseBooleanEnvironmentVariable('RUSH_QUIET_MODE', quiet);

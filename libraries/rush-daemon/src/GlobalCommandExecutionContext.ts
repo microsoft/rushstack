@@ -32,7 +32,7 @@ const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
  * @beta
  */
 export interface IGlobalCommandSpawnOptions {
-  /** An absolute, canonicalized directory confined to this request's workspace. */
+  /** An absolute directory, physically confined to the workspace. Explicit Windows path spelling is preserved. */
   readonly cwd?: string;
   /** A complete child environment; cannot be combined with environmentOverlay. */
   readonly environment?: Readonly<NodeJS.ProcessEnv>;
@@ -243,8 +243,11 @@ export class GlobalCommandExecutionContext
     if (options.forwardInput && !this.interactiveInput) {
       throw new Error('The global command did not register an interactive input session.');
     }
+    const canonicalCwd: string = resolveGlobalCommandWorkingDirectory(
+      options.cwd ?? this.cwd, this.workspaceSession
+    );
     const child: childProcess.ChildProcessWithoutNullStreams = childProcess.spawn(command, [...args], {
-      cwd: resolveGlobalCommandWorkingDirectory(options.cwd ?? this.cwd, this.workspaceSession),
+      cwd: process.platform === 'win32' ? options.cwd ?? canonicalCwd : canonicalCwd,
       detached: SubprocessTerminator.RECOMMENDED_OPTIONS.detached,
       env: options.environment === undefined
         ? createGlobalCommandEnvironment(this.environment, options.environmentOverlay)

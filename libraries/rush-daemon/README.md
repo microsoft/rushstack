@@ -310,6 +310,15 @@ Per-request dotenv copies load repository then user values without changing daem
 environment, argv, console streams or cached user configuration. Ordinary script/environment
 changes are read for each invocation; there is no cached script process or fabricated warm engine.
 
+Workspace identity and confinement use native physical paths. Windows Rushx execution separately
+retains the client's invocation spelling (including 8.3 names and junctions) for cwd, package lookup,
+the governing configuration namespace, lifecycle environment, and pnpm-sync diagnostics. Native
+registration warnings use that configuration namespace rather than silently replacing an aliased
+project with its physical registered identity. Queued aliases are rechecked against their original
+physical directory, and explicit child cwd overrides are confined again immediately before spawning.
+No output is rewritten to manufacture parity. Relative `RUSH_TEMP_FOLDER` initialization still
+requires pre-execution in-process fallback instead of resolving against the daemon's cwd.
+
 `RushXCommand` shares the native implementation with the unchanged in-process entrypoint.
 Its asynchronous lifecycle spawn seam uses `spawnChild()` for the actual script shell.
 The context owns descendants, backpressures raw stdout/stderr, forwards stdin credits/EOF,

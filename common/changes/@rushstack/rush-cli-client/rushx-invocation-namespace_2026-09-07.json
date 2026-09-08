@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Add exact native Rushx alias parity regressions for lifecycle paths, project registration, pnpm-sync diagnostics and safe pre-execution rejection.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

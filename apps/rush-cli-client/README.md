@@ -58,6 +58,12 @@ there is no Rush CLI child or synthetic warm graph. Native configuration discove
 is captured by the client and emitted only with daemon output, avoiding duplicate
 discovery messages on fallback.
 
+On Windows, Rushx retains native invocation-path spelling in script cwd, lifecycle variables and
+pnpm-sync output, including 8.3 aliases and junctions. Daemon identity and confinement remain physical;
+an alias does not create another workspace identity or permit execution outside the workspace.
+Alias retargeting while queued fails before execution. Relative `RUSH_TEMP_FOLDER` initialization
+uses safe in-process fallback.
+
 The composite is exported for embedded hosts and wired into the standalone daemon.
 No default or cutover flag is flipped. Active Rushx hooks, encrypted dotenv
 vaults, changed process-global Rush configuration variables, stale workspace configuration,
