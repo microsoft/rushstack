@@ -107,6 +107,8 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(barrier)).toBe(true);
     expect(fs.existsSync(paths.lockfilePath)).toBe(false);
     const daemonPid: number = Number(fs.readFileSync(barrier, 'utf8'));
+    expect(Number.isSafeInteger(daemonPid)).toBe(true);
+    expect(daemonPid).toBeGreaterThan(0);
     expect(starter.child.kill('SIGKILL')).toBe(true);
     expect((await starter.result).code).not.toBe(0);
     expect(starter.child.signalCode).toBe('SIGKILL');

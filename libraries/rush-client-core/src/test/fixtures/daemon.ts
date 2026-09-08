@@ -24,7 +24,9 @@ async function mainAsync(): Promise<void> {
   process.stdout.write('launcher stdout\n');
   process.stderr.write('launcher stderr\n');
   if (fs.existsSync(path.join(folder, 'hold-prebind'))) {
-    fs.writeFileSync(path.join(folder, 'prebind'), String(process.pid));
+    const marker: string = path.join(folder, `prebind-${process.pid}.tmp`);
+    fs.writeFileSync(marker, String(process.pid));
+    fs.renameSync(marker, path.join(folder, 'prebind'));
     while (fs.existsSync(path.join(folder, 'hold-prebind'))) {
       if (fs.existsSync(path.join(folder, 'stop'))) {
         fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
