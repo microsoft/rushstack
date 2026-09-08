@@ -6,7 +6,7 @@ import type * as childProcess from 'node:child_process';
 
 import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
-import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async } from '@rushstack/node-core-library';
+import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async, EnvironmentMap } from '@rushstack/node-core-library';
 import {
   Colorize,
   ConsoleTerminalProvider,
@@ -25,7 +25,7 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
-import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 import { initializeDotEnv, loadDotEnvForEnvironment } from '../logic/dotenv';
@@ -72,6 +72,8 @@ export interface IRushXCommandOptions {
   readonly cwd: string;
   readonly environment: Readonly<NodeJS.ProcessEnv>;
   readonly rushConfiguration: RushConfiguration | undefined;
+  /** The caller-validated governing configuration path in the invocation's namespace, including Windows aliases. */
+  readonly rushJsonFilePath?: string;
   readonly terminal: ITerminal;
   /** Console output preserves native ANSI and newline bytes independently of diagnostic terminal capabilities. */
   readonly consoleTerminal: ITerminal;
@@ -262,8 +264,14 @@ async function _launchRushXInternalAsync(
 
   const cwd: string = execution?.cwd ?? process.cwd();
   const packageJsonFilePath: string = _getPackageJsonFilePath(packageJsonLookup, cwd);
+  const lifecycleConfiguration: ILifecycleCommandOptions['rushConfiguration'] =
+    _getLifecycleConfiguration(rushConfiguration, execution);
+  // Match native registration lookup in the discovered configuration's namespace, not by physical project identity.
+  const projectLookupCwd: string = rushConfiguration && lifecycleConfiguration
+    ? path.resolve(rushConfiguration.rushJsonFolder, path.relative(lifecycleConfiguration.rushJsonFolder, cwd))
+    : cwd;
 
-  if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(cwd)) {
+  if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(projectLookupCwd)) {
     // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
     // did not install the project's dependencies, because the project was not registered.
     writeLine(
@@ -314,11 +322,11 @@ async function _launchRushXInternalAsync(
   const packageFolder: string = path.dirname(packageJsonFilePath);
 
   const lifecycleOptions: ILifecycleCommandOptions = {
-    rushConfiguration,
+    rushConfiguration: lifecycleConfiguration,
     workingDirectory: packageFolder,
     // If there is a rush.json then use its .npmrc from the temp folder.
     // Otherwise look for npmrc in the project folder.
-    initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
+    initCwd: lifecycleConfiguration ? lifecycleConfiguration.commonTempFolder : packageFolder,
     handleOutput: false,
     ...(execution ? { initialEnvironment: execution.environment } : {}),
     environmentPathOptions: {
@@ -355,6 +363,22 @@ async function _launchRushXInternalAsync(
   if (exitCode > 0) {
     throw new ProcessError(`Failed calling ${commandWithArgs}.  Exit code: ${exitCode}`, exitCode);
   }
+}
+
+function _getLifecycleConfiguration(
+  configuration: RushConfiguration | undefined,
+  execution: IRushXCommandOptions | undefined
+): ILifecycleCommandOptions['rushConfiguration'] {
+  if (!configuration || !execution?.rushJsonFilePath) return configuration;
+  const rushJsonFolder: string = path.dirname(execution.rushJsonFilePath);
+  const tempOverride: string | undefined =
+    new EnvironmentMap(execution.environment).get(EnvironmentVariableNames.RUSH_TEMP_FOLDER);
+  return {
+    rushJsonFolder,
+    commonTempFolder: EnvironmentConfiguration._getRushTempFolderOverride({
+      [EnvironmentVariableNames.RUSH_TEMP_FOLDER]: tempOverride
+    }) || path.join(rushJsonFolder, RushConstants.commonFolderName, RushConstants.rushTempFolderName)
+  };
 }
 
 function _parseCommandLineArguments(

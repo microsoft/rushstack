@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve native Rushx invocation/configuration path namespaces for isolated lifecycle execution, including Windows aliases and registration diagnostics.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

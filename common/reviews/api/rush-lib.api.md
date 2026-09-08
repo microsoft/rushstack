@@ -1150,6 +1150,7 @@ export interface IRushXCommandOptions {
     readonly launchOptions: ILaunchOptions;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration | undefined;
+    readonly rushJsonFilePath?: string;
     readonly spawn?: (command: string, args: ReadonlyArray<string>, options: child_process.SpawnOptions) => child_process.ChildProcess;
     // (undocumented)
     readonly terminal: ITerminal;
