@@ -88,8 +88,10 @@ describe(HeftChildReporter.name, () => {
 
   it('negotiates context and emits ordered structured output and diagnostics', async () => {
     const modulePath: string = require.resolve('./HeftChildReporter');
+    const loggingManagerPath: string = require.resolve('./LoggingManager');
     const childScript: string = `
       const { HeftChildReporter } = require(process.argv[1]);
+      const { LoggingManager } = require(process.argv[2]);
       const reporter = HeftChildReporter.tryInitialize(process.env);
       if (!reporter) {
         process.stdout.write('fallback');
@@ -99,11 +101,16 @@ describe(HeftChildReporter.name, () => {
       reporter.setCommandName('build');
       reporter.write('visible output\\n', 0);
       reporter.write('hidden verbose output\\n', 3);
-      reporter.emitDiagnostic('typescript', new Error('structured failure'), 'error');
+      const logging = new LoggingManager({ terminalProvider: reporter, childReporter: reporter });
+      const logger = logging.requestScopedLogger('typescript');
+      logger.emitError(new Error('structured failure'));
+      if (!logging.errorsHaveBeenEmitted || !logger.hasErrors) process.exit(4);
+      logging.resetScopedLoggerErrorsAndWarnings();
+      if (logging.errorsHaveBeenEmitted || logger.hasErrors) process.exit(5);
     `;
     const child: childProcess.ChildProcess = childProcess.spawn(
       process.execPath,
-      ['-e', childScript, modulePath],
+      ['-e', childScript, modulePath, loggingManagerPath],
       {
         env: {
           ...process.env,

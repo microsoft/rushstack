@@ -58,21 +58,21 @@ export interface IScopedLoggerOptions {
 }
 
 export class ScopedLogger implements IScopedLogger {
-  private readonly _options: IScopedLoggerOptions;
-  private _errors: Error[] = [];
-  private _warnings: Error[] = [];
+  readonly #options: IScopedLoggerOptions;
+  #errors: Error[] = [];
+  #warnings: Error[] = [];
 
-  private get _shouldPrintStacks(): boolean {
+  get #shouldPrintStacks(): boolean {
     // TODO: Consider dumping stacks and more verbose logging to a file
-    return this._options.getShouldPrintStacks();
+    return this.#options.getShouldPrintStacks();
   }
 
   public get errors(): ReadonlyArray<Error> {
-    return [...this._errors];
+    return [...this.#errors];
   }
 
   public get warnings(): ReadonlyArray<Error> {
-    return [...this._warnings];
+    return [...this.#warnings];
   }
 
   public readonly loggerName: string;
@@ -85,7 +85,7 @@ export class ScopedLogger implements IScopedLogger {
    * @internal
    */
   public constructor(options: IScopedLoggerOptions) {
-    this._options = options;
+    this.#options = options;
     this.loggerName = options.loggerName;
 
     this.terminalProvider = new PrefixProxyTerminalProvider({
@@ -99,21 +99,21 @@ export class ScopedLogger implements IScopedLogger {
    * {@inheritdoc IScopedLogger.hasErrors}
    */
   public get hasErrors(): boolean {
-    return this._errors.length > 0;
+    return this.#errors.length > 0;
   }
 
   /**
    * {@inheritdoc IScopedLogger.emitError}
    */
   public emitError(error: Error): void {
-    this._options.errorHasBeenEmittedCallback();
-    this._errors.push(error);
-    if (this._options.structuredDiagnosticCallback) {
-      this._options.structuredDiagnosticCallback(error, 'error');
+    this.#options.errorHasBeenEmittedCallback();
+    this.#errors.push(error);
+    if (this.#options.structuredDiagnosticCallback) {
+      this.#options.structuredDiagnosticCallback(error, 'error');
     } else {
       this.terminal.writeErrorLine(`Error: ${LoggingManager.getErrorMessage(error)}`);
     }
-    if (this._shouldPrintStacks && error.stack) {
+    if (this.#shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
   }
@@ -122,14 +122,14 @@ export class ScopedLogger implements IScopedLogger {
    * {@inheritdoc IScopedLogger.emitWarning}
    */
   public emitWarning(warning: Error): void {
-    this._options.warningHasBeenEmittedCallback();
-    this._warnings.push(warning);
-    if (this._options.structuredDiagnosticCallback) {
-      this._options.structuredDiagnosticCallback(warning, 'warning');
+    this.#options.warningHasBeenEmittedCallback();
+    this.#warnings.push(warning);
+    if (this.#options.structuredDiagnosticCallback) {
+      this.#options.structuredDiagnosticCallback(warning, 'warning');
     } else {
       this.terminal.writeWarningLine(`Warning: ${LoggingManager.getErrorMessage(warning)}`);
     }
-    if (this._shouldPrintStacks && warning.stack) {
+    if (this.#shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
   }
@@ -138,7 +138,7 @@ export class ScopedLogger implements IScopedLogger {
    * {@inheritdoc IScopedLogger.resetErrorsAndWarnings}
    */
   public resetErrorsAndWarnings(): void {
-    this._errors = [];
-    this._warnings = [];
+    this.#errors = [];
+    this.#warnings = [];
   }
 }
