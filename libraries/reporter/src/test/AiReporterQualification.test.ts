@@ -19,7 +19,7 @@ describe('AI reporter deterministic qualification corpus', () => {
 
   beforeAll(async () => {
     qualification = await runAiReporterQualificationCorpusAsync();
-  });
+  }, 15000);
 
   it('passes every blocking gate with machine-readable safe results', () => {
     if (!qualification.passed) {

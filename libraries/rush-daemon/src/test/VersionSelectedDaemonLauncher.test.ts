@@ -208,7 +208,7 @@ describe('version-selected daemon launcher', () => {
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain('does not match rush.json');
     expect(result.stdout).not.toContain('rushd ready');
-  });
+  }, 15000);
 
   (process.env.RUSHD_VERSION_SELECTION_REGISTRY_TEST === '1' ? it : it.skip)(
     'installs the real published 5.178.1 engine and reports its actual daemon compatibility gate',

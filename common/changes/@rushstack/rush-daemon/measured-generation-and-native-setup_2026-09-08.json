@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Share measured telemetry expectations across explicit and automatic warm-set fixtures, and give the real selection-revalidation subprocess test its scoped integration budget.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

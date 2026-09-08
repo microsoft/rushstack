@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Give the full qualification-corpus setup a bounded 15-second integration budget without changing any qualification or performance threshold.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

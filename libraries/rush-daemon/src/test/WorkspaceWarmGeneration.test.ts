@@ -18,7 +18,9 @@ import {
   pongAsync,
   setDaemonPolicy
 } from './WarmGenerationTestUtilities';
-import { createScript, useNativeIpcRunners } from './WarmSetTestFixture';
+import {
+  captureWarmRankingDurations, createScript, getMeasuredFixtureRetentionOrder, useNativeIpcRunners
+} from './WarmSetTestFixture';
 
 jest.setTimeout(30_000);
 
@@ -140,14 +142,18 @@ describe('automatic warm generation ownership and pong accounting', () => {
         });
       try {
         await fixture.buildSuccessfullyAsync();
+        const graph = fixture.session.operationGraph!;
+        const coldDurations = captureWarmRankingDurations(graph);
         fixture.write('a/input.txt', 'two');
         fixture.write('b/input.txt', 'two');
         await fixture.buildSuccessfullyAsync();
         await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
+        const expected: string[] = telemetry
+          ? getMeasuredFixtureRetentionOrder(graph, coldDurations, ['a', 'b', 'a', 'b', 'b'])
+          : ['c', 'b'];
         expect(
           (await fixture.runAsync(['build', '--only', 'c', '--parallelism', '3'])).terminal
         ).toMatchObject({ payload: { exitCode: 0 } });
-        const expected: string[] = telemetry ? ['a', 'b'] : ['c', 'b'];
         await eventuallyAsync(() =>
           expect(fixture.session.warmSetStatus?.retainedProjectNames).toEqual(expected)
         );

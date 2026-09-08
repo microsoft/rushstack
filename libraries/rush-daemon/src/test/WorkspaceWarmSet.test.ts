@@ -13,7 +13,10 @@ import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
 import { WorkspaceWarmSet } from '../WorkspaceWarmSet';
 import { createDeferred } from './DaemonRequestWireTestUtilities';
 import { createNativeScriptGateAsync, runNativeCommandAsync } from './NativeEngineTestCommands';
-import { WarmSetTestFixture, type IWarmFixtureOptions } from './WarmSetTestFixture';
+import {
+  captureWarmRankingDurations, getMeasuredFixtureRetentionOrder,
+  WarmSetTestFixture, type IWarmFixtureOptions
+} from './WarmSetTestFixture';
 
 jest.setTimeout(30_000);
 
@@ -89,28 +92,15 @@ describe('warm policies attached to native graphs and real filesystem watchers',
 
   it('lets autoWarmByTelemetry change actual retention using real cold/reused durations and IPC RSS', async () => {
     const { fixture, warm, graph } = await startAsync({ ipc: true });
-    const names = ['a', 'b'] as const;
-    const coldDurations = new Map(names.map((name) => [
-      name, graph.resultByOperation.get(test!.operation(name))!.stopwatch.duration
-    ]));
+    const coldDurations = captureWarmRankingDurations(graph);
     fixture.write('a/input.txt', 'two');
     fixture.write('b/input.txt', 'two');
     await fixture.buildSuccessfullyAsync();
     await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
-    const measuredRanks = names.map((name) => {
-      const operation = test!.operation(name);
-      const memory: number | undefined = operation.runner?.residentMemoryBytes;
-      if (memory === undefined || !Number.isFinite(memory) || memory <= 0) {
-        throw new Error('Expected measured IPC runner RSS.');
-      }
-      const reusedDuration: number = graph.resultByOperation.get(operation)!.stopwatch.duration;
-      const timeSavedMs: number = Math.max(0, (coldDurations.get(name)! - reusedDuration) * 1000);
-      return { name, score: timeSavedMs * (name === 'b' ? 3 : 2) / memory };
-    });
     // Actual startup timing/RSS can reverse the projects' value on shared runners. Ties use b's recency.
-    measuredRanks.sort((a, b) => b.score - a.score || names.indexOf(b.name) - names.indexOf(a.name));
-    const retained = measuredRanks[0].name;
-    const evicted = measuredRanks[1].name;
+    const [retained, evicted] = getMeasuredFixtureRetentionOrder(
+      graph, coldDurations, ['a', 'b', 'a', 'b', 'b']
+    );
     test!.update({ autoWarmByTelemetry: true });
     expect(warm.getStatus().retainedProjectNames).toEqual([retained, evicted]);
     test!.update({ autoWarmByTelemetry: false });

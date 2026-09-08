@@ -42,6 +42,34 @@ export const GENEROUS_WARM_CONFIGURATION: WorkspaceWarmSetConfiguration = {
   autoWarmByTelemetry: false
 };
 
+export function captureWarmRankingDurations(graph: IOperationGraph): ReadonlyMap<Operation, number> {
+  return new Map([...graph.resultByOperation].map(([operation, result]) => [
+    operation, result.stopwatch.duration
+  ]));
+}
+
+/** Independent expected scores for the one-operation-per-project native fixtures. */
+export function getMeasuredFixtureRetentionOrder(
+  graph: IOperationGraph,
+  coldDurations: ReadonlyMap<Operation, number>,
+  requestedProjects: ReadonlyArray<string>
+): string[] {
+  const measuredRanks = [...coldDurations].map(([operation, coldDuration]) => {
+    const name: string = operation.associatedProject.packageName;
+    const memory: number | undefined = operation.runner?.residentMemoryBytes;
+    const result = graph.resultByOperation.get(operation);
+    const frequency: number = requestedProjects.filter((project) => project === name).length;
+    if (!result || memory === undefined || !Number.isFinite(memory) || memory <= 0 || frequency === 0) {
+      throw new Error(`Expected native timing, request history, and IPC RSS for ${name}.`);
+    }
+    const savedMs: number = Math.max(0, (coldDuration - result.stopwatch.duration) * 1000);
+    return { name, score: savedMs * frequency / memory, lastUsed: requestedProjects.lastIndexOf(name) };
+  });
+  measuredRanks.sort((a, b) => b.score - a.score || b.lastUsed - a.lastUsed ||
+    (a.name === b.name ? 0 : a.name < b.name ? -1 : 1));
+  return measuredRanks.map(({ name }) => name);
+}
+
 /** Attaches the production controller at the same generation-owned component boundary used by the host. */
 export class WarmSetTestFixture implements AsyncDisposable {
   public fixture!: DaemonGraphTestFixture;
