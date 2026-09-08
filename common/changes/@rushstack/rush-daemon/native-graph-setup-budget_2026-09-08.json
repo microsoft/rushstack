@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-daemon",
-      "comment": "Give only the real native graph preparation hook a 15-second integration budget after a hosted Windows setup timeout; retain test-body and cleanup limits and every generation assertion.",
+      "comment": "Use an explicit 15-second integration budget for real native graph hosts and Git/build subprocesses after repeated Windows setup timeouts; retain every generation assertion, cleanup limit and production deadline.",
       "type": "none"
     }
   ],

@@ -7,6 +7,9 @@ import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { DaemonGraphTestFixture, responseSnapshot } from './DaemonGraphTestFixture';
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 
+// These cases start real hosts and run Git/build subprocesses rather than mocked unit work.
+jest.setTimeout(15_000);
+
 // Allow the host's 5s close/drain limit plus joins and fixture removal, without extending test budgets.
 const GRAPH_FIXTURE_CLEANUP_TIMEOUT_MS: number = 10_000;
 
@@ -82,8 +85,7 @@ describe('graph-generation fencing over the native daemon wire', () => {
         previousGraph = fixture.session.operationGraph;
         previousPid = process.pid;
         stale = fixture.envelope(['daemon', 'graph', 'scope-out', '--project', 'a']);
-      }),
-      15_000
+      })
     );
 
     it('rejects an old reference after same-process soft reload without applying it to the replacement graph', () =>
