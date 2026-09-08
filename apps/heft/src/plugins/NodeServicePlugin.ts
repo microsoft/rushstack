@@ -402,7 +402,10 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     }
   }
 
-  #formatCodeOrSignal(code: number | null | undefined, signal: string | null | undefined): string {
+  #formatCodeOrSignal(
+    code: child_process.ChildProcess['exitCode'],
+    signal: string | child_process.ChildProcess['signalCode']
+  ): string {
     if (signal) {
       return ` (signal=${code})`;
     }
