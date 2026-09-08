@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Separate real initial graph preparation from soft-reload reference assertions and join timed-out fixture work before cleanup/replacement. Preserve default assertion budgets and all generation-fencing behavior.",
+      "type": "patch"
+    }
+  ]
+}
