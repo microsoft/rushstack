@@ -89,27 +89,47 @@ describe('warm policies attached to native graphs and real filesystem watchers',
 
   it('lets autoWarmByTelemetry change actual retention using real cold/reused durations and IPC RSS', async () => {
     const { fixture, warm, graph } = await startAsync({ ipc: true });
+    const names = ['a', 'b'] as const;
+    const coldDurations = new Map(names.map((name) => [
+      name, graph.resultByOperation.get(test!.operation(name))!.stopwatch.duration
+    ]));
     fixture.write('a/input.txt', 'two');
     fixture.write('b/input.txt', 'two');
     await fixture.buildSuccessfullyAsync();
     await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
+    const measuredRanks = names.map((name) => {
+      const operation = test!.operation(name);
+      const memory: number | undefined = operation.runner?.residentMemoryBytes;
+      if (memory === undefined || !Number.isFinite(memory) || memory <= 0) {
+        throw new Error('Expected measured IPC runner RSS.');
+      }
+      const reusedDuration: number = graph.resultByOperation.get(operation)!.stopwatch.duration;
+      const timeSavedMs: number = Math.max(0, (coldDurations.get(name)! - reusedDuration) * 1000);
+      return { name, score: timeSavedMs * (name === 'b' ? 3 : 2) / memory };
+    });
+    // Actual startup timing/RSS can reverse the projects' value on shared runners. Ties use b's recency.
+    measuredRanks.sort((a, b) => b.score - a.score || names.indexOf(b.name) - names.indexOf(a.name));
+    const retained = measuredRanks[0].name;
+    const evicted = measuredRanks[1].name;
     test!.update({ autoWarmByTelemetry: true });
-    expect(warm.getStatus().retainedProjectNames).toEqual(['a', 'b']);
+    expect(warm.getStatus().retainedProjectNames).toEqual([retained, evicted]);
     test!.update({ autoWarmByTelemetry: false });
     expect(warm.getStatus().retainedProjectNames).toEqual(['b', 'a']);
     test!.update({ autoWarmByTelemetry: true, warmSetMaxProjects: 1 });
     await warm.maintainAsync();
-    expect(warm.getStatus().retainedProjectNames).toEqual(['a']);
-    expect(graph.resultByOperation.has(test!.operation('b'))).toBe(false);
-    expect(test!.operation('b').runner?.isActive).toBe(false);
+    expect(warm.getStatus().retainedProjectNames).toEqual([retained]);
+    expect(graph.resultByOperation.has(test!.operation(evicted))).toBe(false);
+    expect(test!.operation(evicted).runner?.isActive).toBe(false);
 
     // Requested rewarming, not a speculative script launch, then pure LRU keeps the most recent request.
     test!.update({ autoWarmByTelemetry: false, warmSetMaxProjects: 2 });
-    await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
+    await fixture.runAsync(['build', '--only', evicted, '--parallelism', '3']);
+    test!.update({ autoWarmByTelemetry: true });
+    expect(warm.getStatus().retainedProjectNames).toEqual([retained, evicted]);
     test!.update({ autoWarmByTelemetry: false, warmSetMaxProjects: 1 });
     await warm.maintainAsync();
-    expect(warm.getStatus().retainedProjectNames).toEqual(['b']);
-    expect(test!.operation('a').runner?.isActive).toBe(false);
+    expect(warm.getStatus().retainedProjectNames).toEqual([evicted]);
+    expect(test!.operation(retained).runner?.isActive).toBe(false);
     expect(fixture.runs()).not.toContain('c');
   });
 
