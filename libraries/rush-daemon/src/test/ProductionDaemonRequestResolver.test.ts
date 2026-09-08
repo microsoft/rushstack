@@ -250,6 +250,7 @@ if (input === 'failure') process.exitCode = 7;
     );
   }
   execFileSync('git', ['init', '--quiet'], { cwd: repoRoot });
+  execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: repoRoot });
   execFileSync('git', ['add', '.'], { cwd: repoRoot });
   execFileSync(
     'git',

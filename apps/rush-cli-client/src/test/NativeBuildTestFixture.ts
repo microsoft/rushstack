@@ -101,6 +101,7 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     );
   }
   execFileSync('git', ['init', '--quiet'], { cwd: folder });
+  execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: folder });
   execFileSync('git', ['add', '.'], { cwd: folder });
   execFileSync(
     'git',

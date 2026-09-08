@@ -101,6 +101,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       }
       configure?.(fixture);
       execFileSync('git', ['init', '--quiet'], { cwd: fixture.folder });
+      execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: fixture.folder });
       execFileSync('git', ['add', '.'], { cwd: fixture.folder });
       execFileSync(
         'git',

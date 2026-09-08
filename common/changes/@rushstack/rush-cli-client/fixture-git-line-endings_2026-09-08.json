@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Configure generated Git fixtures locally to preserve LF files without Windows autocrlf warnings; leave user settings and CI warning policy unchanged.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

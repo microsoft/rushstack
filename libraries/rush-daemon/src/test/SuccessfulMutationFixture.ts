@@ -283,6 +283,7 @@ if (fs.existsSync(controlFile)) {
 `
     );
     execFileSync('git', ['init', '--quiet'], { cwd: this.repoRoot });
+    execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: this.repoRoot });
     execFileSync('git', ['add', '.'], { cwd: this.repoRoot });
     execFileSync(
       'git',
