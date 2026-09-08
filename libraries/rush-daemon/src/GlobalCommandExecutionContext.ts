@@ -23,6 +23,7 @@ import type {
   IInteractiveRequestSession
 } from './InteractiveRequestInputRouter';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { waitForLinuxProcessGroupExitAsync } from './LinuxProcessGroupExit';
 
 const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
 
@@ -64,7 +65,7 @@ export interface IGlobalCommandExecutionContext {
    * Spawns a child process whose process tree is owned by this request.
    *
    * @remarks
-   * Descendants must not detach from the spawned child's process tree. On Windows, the spawned child must remain active
+   * Descendants must remain in the spawned child's POSIX process group. On Windows, the spawned child must remain active
    * until all of its descendants exit because a descendant cannot be recovered after its parent exits.
    */
   spawnChild(
@@ -342,17 +343,14 @@ export class GlobalCommandExecutionContext
     try {
       await new Promise<void>((resolve, reject) => {
         child.once('error', reject);
-        child.once('close', () => {
-          try {
-            terminateExitedChildProcessGroup(child);
-            resolve();
-          } catch (error) {
-            reject(error);
-          }
-        });
+        child.once('close', () => resolve());
       });
     } finally {
       this.abortSignal.removeEventListener('abort', terminateChild);
+    }
+    terminateExitedChildProcessGroup(child);
+    if (process.platform === 'linux' && child.pid !== undefined) {
+      await waitForLinuxProcessGroupExitAsync(child.pid);
     }
   }
 

@@ -12,6 +12,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient, connectOrStartDaemonAsync, getDaemonLogFilePath } from '@rushstack/rush-client-core';
 import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
+import { removeTestFolderAsync, waitForTestProcessExitAsync } from '@rushstack/rush-daemon/lib/test/TestProcessExit';
 import { readDaemonLockfile, removeDaemonArtifacts } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
@@ -28,9 +29,11 @@ describe('standalone rushx fallback', () => {
   let logFilePath: string;
   let host: RushDaemonHost | undefined;
   let invocationClosures: Promise<unknown>[];
+  let daemonPids: Set<number>;
 
   beforeEach(() => {
     invocationClosures = [];
+    daemonPids = new Set();
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-cli-client-'));
     project = path.join(folder, 'project');
     fs.mkdirSync(project);
@@ -63,11 +66,13 @@ describe('standalone rushx fallback', () => {
     const closingHost: RushDaemonHost | undefined = host;
     const closingFolder: string = folder;
     const closingLogFilePath: string = logFilePath;
+    const closingDaemonPids: Set<number> = daemonPids;
     host = undefined;
     await Promise.all(invocationClosures);
     await closingHost?.closeAsync();
-    fs.rmSync(closingLogFilePath, { force: true });
-    fs.rmSync(closingFolder, { recursive: true });
+    await Promise.all(Array.from(closingDaemonPids, (pid) => waitForTestProcessExitAsync(pid)));
+    await removeTestFolderAsync(closingLogFilePath, true);
+    await removeTestFolderAsync(closingFolder);
   });
 
   async function invokeAsync(
@@ -77,6 +82,7 @@ describe('standalone rushx fallback', () => {
     managementArgs?: ReadonlyArray<string>,
     environmentOverrides: NodeJS.ProcessEnv = {}
   ): Promise<IInvocationResult> {
+    const invocationDaemonPids: Set<number> = daemonPids;
     const entry: string = client
       ? path.resolve(__dirname, managementArgs ? '../../bin/rush-client' : '../../bin/rushx-client')
       : path.resolve(path.dirname(require.resolve('@microsoft/rush/package.json')), 'bin/rushx');
@@ -110,6 +116,14 @@ describe('standalone rushx fallback', () => {
     const closed: Promise<unknown[]> = once(child, 'close');
     invocationClosures.push(closed);
     const [code] = await closed;
+    if (code === 0 && managementArgs?.[0] === 'daemon' &&
+        (managementArgs[1] === 'start' || managementArgs[1] === 'restart')) {
+      const { pid }: { pid: unknown } = JSON.parse(stdout);
+      if (typeof pid !== 'number' || !Number.isSafeInteger(pid) || pid <= 0) {
+        throw new Error('The started fixture daemon did not report a valid PID.');
+      }
+      if (pid !== process.pid) invocationDaemonPids.add(pid);
+    }
     return { code: typeof code === 'number' ? code : undefined, stdout, stderr };
   }
 

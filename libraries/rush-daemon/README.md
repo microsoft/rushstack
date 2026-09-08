@@ -327,6 +327,11 @@ exit status. Native console ANSI bytes are preserved separately from color-aware
 output; pnpm synchronization keeps native quiet/debug behavior. Cancellation retains the
 existing typed global-request abort result rather than inventing a second exit policy.
 
+On Linux, completion also waits for the captured detached process group/session to disappear
+or contain only nonexecuting zombies. This uses a procps-compatible `ps --sid` with a bounded
+cleanup wait; signal delivery and the leader's stream closure alone do not authorize completion.
+Inspection failures or a group that remains live fail cleanup rather than reporting success.
+
 Active pre/post Rushx hooks still depend on process-global argv and synchronous inherited
 I/O and are rejected before execution/input. `--ignore-hooks` and recursive calls reuse
 native skipping behavior. Encrypted dotenv vaults, unsupported environment initialization,

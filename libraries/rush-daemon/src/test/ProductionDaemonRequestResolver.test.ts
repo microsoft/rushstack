@@ -135,6 +135,8 @@ async function createFixtureAsync(
     JSON.stringify({
       rushVersion: RUSH_VERSION,
       npmVersion: '10.0.0',
+      // Retention assertions must not depend on the surrounding Jest worker's accumulated RSS.
+      daemon: { warmMemoryBudgetMB: 100_000 },
       projectFolderMinDepth: 2,
       projectFolderMaxDepth: 2,
       projects: ['a', 'b', 'c'].map((name) => ({

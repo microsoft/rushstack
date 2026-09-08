@@ -28,6 +28,7 @@ import {
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
+import { removeTestFolderAsync } from './TestProcessExit';
 
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
@@ -213,11 +214,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
-    try {
-      await this.host?.closeAsync();
-    } finally {
-      fs.rmSync(this.folder, { recursive: true, force: true });
-    }
+    await this.host?.closeAsync();
+    await removeTestFolderAsync(this.folder, true);
   }
 }
 

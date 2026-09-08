@@ -30,6 +30,7 @@ import {
   type IInteractiveRequestSession
 } from '../InteractiveRequestInputRouter';
 import { TestWorkspaceSession, TEST_REPO_ROOT } from './TestWorkspaceSession';
+import * as linuxProcessGroupExit from '../LinuxProcessGroupExit';
 
 const TEXT_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder();
 const FIRST_CWD: string = path.join(TEST_REPO_ROOT, 'libraries', 'rush-daemon');
@@ -367,7 +368,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       const processKillSpy: jest.SpyInstance = jest
         .spyOn(process, 'kill')
         .mockImplementation((pid: number, signal?: string | number): true => {
-          return pid < 0 ? true : originalProcessKill(pid, signal);
+          return pid < 0 && signal === 'SIGKILL' ? true : originalProcessKill(pid, signal);
         });
       let childPid: number | undefined;
       try {
@@ -390,6 +391,49 @@ describe(GlobalCommandRequestRouter.name, () => {
         expect(processKillSpy).toHaveBeenCalledWith(-childPid, 'SIGKILL');
       } finally {
         processKillSpy.mockRestore();
+      }
+    }
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'does not complete a global request before its exited leader group is quiescent',
+    async () => {
+      const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+      let release!: () => void;
+      let entered!: () => void;
+      const draining = new Promise<void>((resolve) => { release = resolve; });
+      const inspecting = new Promise<void>((resolve) => { entered = resolve; });
+      const waitSpy = jest.spyOn(linuxProcessGroupExit, 'waitForLinuxProcessGroupExitAsync')
+        .mockImplementation(async () => { entered(); await draining; });
+      let childPid: number | undefined;
+      let completed: boolean = false;
+      const execution = router.executeAsync(
+        router.resolveRequest(createRequestOptions('group-quiescence', FIRST_CWD, {}, 80)),
+        async (context) => {
+          const child = context.spawnChild(process.execPath, ['-e', '']);
+          childPid = child.pid;
+          await new Promise<void>((resolve) => child.once('close', () => resolve()));
+          return { exitCode: 0 };
+        },
+        new TestGlobalCommandClient()
+      ).then((result) => { completed = true; return result; });
+      try {
+        await Promise.race([
+          inspecting,
+          execution.then(() => { throw new Error('The request completed before group inspection.'); })
+        ]);
+        expect(waitSpy).toHaveBeenCalledWith(childPid);
+        expect(completed).toBe(false);
+        release();
+        expect(await execution).toMatchObject({ exitCode: 0 });
+      } finally {
+        release();
+        try {
+          await execution;
+        } finally {
+          waitSpy.mockRestore();
+        }
       }
     }
   );
