@@ -17,6 +17,9 @@ interface ISourceMap {
   mappingItems: MappingItem[];
 }
 
+const NO_SOURCE_MAP: unique symbol = Symbol('NO_SOURCE_MAP');
+type SourceMapCacheEntry = ISourceMap | typeof NO_SOURCE_MAP;
+
 interface IOriginalFileInfo {
   // Whether the .ts file exists
   fileExists: boolean;
@@ -66,8 +69,8 @@ export interface IGetSourceLocationOptions {
 }
 
 export class SourceMapper {
-  // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
-  #sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
+  // Map from .d.ts file path --> ISourceMap if a source map was found, or NO_SOURCE_MAP if not found
+  #sourceMapByFilePath: Map<string, SourceMapCacheEntry> = new Map();
 
   // Cache the FileSystem.exists() result for mapped .ts files
   #originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
@@ -102,7 +105,7 @@ export class SourceMapper {
       throw new InternalError('The referenced path was not found: ' + sourceFilePath);
     }
 
-    const sourceMap: ISourceMap | null = this.#getSourceMap(sourceFilePath);
+    const sourceMap: ISourceMap | undefined = this.#getSourceMap(sourceFilePath);
     if (!sourceMap) return;
 
     const nearestMappingItem: MappingItem | undefined = _findNearestMappingItem(sourceMap.mappingItems, {
@@ -167,8 +170,8 @@ export class SourceMapper {
     }
   }
 
-  #getSourceMap(sourceFilePath: string): ISourceMap | null {
-    let sourceMap: ISourceMap | null | undefined = this.#sourceMapByFilePath.get(sourceFilePath);
+  #getSourceMap(sourceFilePath: string): ISourceMap | undefined {
+    let sourceMap: SourceMapCacheEntry | undefined = this.#sourceMapByFilePath.get(sourceFilePath);
 
     if (sourceMap === undefined) {
       // Normalize the path and redo the lookup
@@ -206,7 +209,7 @@ export class SourceMapper {
           sourceMap = { sourceMapConsumer, mappingItems };
         } else {
           // No source map for this filename
-          sourceMap = null;
+          sourceMap = NO_SOURCE_MAP;
         }
 
         this.#sourceMapByFilePath.set(normalizedPath, sourceMap);
@@ -217,7 +220,7 @@ export class SourceMapper {
       }
     }
 
-    return sourceMap;
+    return sourceMap === NO_SOURCE_MAP ? undefined : sourceMap;
   }
 }
 
