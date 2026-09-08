@@ -33,39 +33,56 @@ describe('native build through the standalone client', () => {
     return fixture.runAsync(work);
   }
 
-  it(
-    'executes selected scripts, reuses warm state, and never confuses rushx build with rush build',
-    () =>
-      runWithFixtureAsync(async ({ folder, paths, invokeAsync }) => {
-        const argv: string[] = ['build', '--to', 'b', '--verbose'];
-        const first: IResult = await invokeAsync(argv);
-        expect(first.code).toBe(0);
-        expect(first.stderr).not.toMatch(/using in-process/i);
-        expect(first.stdout).toContain('built-a-one');
-        expect(first.stdout).toContain('built-b-one');
-        expect(first.stdout).toContain('==[');
-        const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
-        const firstPid: number | undefined = (await client.status).pid;
-        await client.closeAsync();
-        expect((await invokeAsync(argv)).code).toBe(0);
-        expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
-        const native: IResult = await invokeAsync(['--no-daemon', ...argv]);
-        expect(native.code).toBe(0);
-        expect(native.stderr).not.toContain('Another Rush command');
-        const beforeChange: string = fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8');
-        fs.writeFileSync(path.join(folder, 'a/input.txt'), 'two');
-        expect((await invokeAsync(argv)).code).toBe(0);
-        expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(`${beforeChange}a:two\nb:one\n`);
-        const status = await invokeAsync(['daemon', 'status']);
-        expect(JSON.parse(status.stdout).pid).toBe(firstPid);
-        const script: IResult = await invokeAsync(['build'], true);
-        expect(script.code).toBe(0);
-        expect(script.stderr).not.toMatch(/using in-process/i);
-        expect(script.stdout).toContain('rushx-only');
-        expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(`${beforeChange}a:two\nb:one\n`);
-      }),
-    30000
-  );
+  describe('after a successful initial native build', () => {
+    const argv: string[] = ['build', '--to', 'b', '--verbose'];
+    let firstPid: number | undefined;
+    beforeEach(
+      () =>
+        runWithFixtureAsync(async ({ paths, invokeAsync }) => {
+          const first: IResult = await invokeAsync(argv);
+          expect(first.code).toBe(0);
+          expect(first.stderr).not.toMatch(/using in-process/i);
+          expect(first.stdout).toContain('built-a-one');
+          expect(first.stdout).toContain('built-b-one');
+          expect(first.stdout).toContain('==[');
+          const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
+          try {
+            firstPid = (await client.status).pid;
+          } finally {
+            await client.closeAsync();
+          }
+        }),
+      30000
+    );
+
+    it(
+      'executes selected scripts, reuses warm state, and never confuses rushx build with rush build',
+      () =>
+        runWithFixtureAsync(async ({ folder, invokeAsync }) => {
+          expect((await invokeAsync(argv)).code).toBe(0);
+          expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+          const native: IResult = await invokeAsync(['--no-daemon', ...argv]);
+          expect(native.code).toBe(0);
+          expect(native.stderr).not.toContain('Another Rush command');
+          const beforeChange: string = fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8');
+          fs.writeFileSync(path.join(folder, 'a/input.txt'), 'two');
+          expect((await invokeAsync(argv)).code).toBe(0);
+          expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(
+            `${beforeChange}a:two\nb:one\n`
+          );
+          const status = await invokeAsync(['daemon', 'status']);
+          expect(JSON.parse(status.stdout).pid).toBe(firstPid);
+          const script: IResult = await invokeAsync(['build'], true);
+          expect(script.code).toBe(0);
+          expect(script.stderr).not.toMatch(/using in-process/i);
+          expect(script.stdout).toContain('rushx-only');
+          expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe(
+            `${beforeChange}a:two\nb:one\n`
+          );
+        }),
+      30000
+    );
+  });
 
   it(
     'gates graph commands and inspects an uninitialized daemon without running work',
