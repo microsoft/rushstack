@@ -28,63 +28,63 @@ const LEGACY_MIN_MIDDLE: number = 0;
 
 /** Replicates the legacy in-process collated output pipeline. */
 export class LegacyPipelineReplica {
-  private readonly _collator: StreamCollator;
-  private readonly _terminal: CollatedTerminal;
-  private readonly _writers: Map<string, CollatedWriter>;
-  private readonly _quiet: boolean;
-  private readonly _total: number;
-  private _completed: number;
+  readonly #collator: StreamCollator;
+  readonly #terminal: CollatedTerminal;
+  readonly #writers: Map<string, CollatedWriter>;
+  readonly #quiet: boolean;
+  readonly #total: number;
+  #completed: number;
 
   public constructor(destination: TerminalWritable, totalOperations: number, quiet: boolean) {
-    this._writers = new Map();
-    this._quiet = quiet;
-    this._total = totalOperations;
-    this._completed = INITIAL_COUNT;
+    this.#writers = new Map();
+    this.#quiet = quiet;
+    this.#total = totalOperations;
+    this.#completed = INITIAL_COUNT;
     const transform: TextRewriterTransform = new TextRewriterTransform({
       destination,
       normalizeNewlines: NewlineKind.OsDefault,
       removeColors: true
     });
-    this._terminal = new CollatedTerminal(transform);
-    this._collator = new StreamCollator({
+    this.#terminal = new CollatedTerminal(transform);
+    this.#collator = new StreamCollator({
       destination: transform,
-      onWriterActive: (writer: CollatedWriter | undefined) => this._legacyOnWriterActive(writer)
+      onWriterActive: (writer: CollatedWriter | undefined) => this.#legacyOnWriterActive(writer)
     });
   }
 
   public writeChunk(operationId: string, chunk: ITerminalChunk): void {
     // Legacy quiet mode installs a DiscardStdoutTransform upstream of the collator.
-    if (this._isDiscarded(chunk)) {
+    if (this.#isDiscarded(chunk)) {
       return;
     }
-    let writer: CollatedWriter | undefined = this._writers.get(operationId);
+    let writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer === undefined) {
-      writer = this._collator.registerTask(operationId);
-      this._writers.set(operationId, writer);
+      writer = this.#collator.registerTask(operationId);
+      this.#writers.set(operationId, writer);
     }
     writer.writeChunk(chunk);
   }
 
-  private _isDiscarded(chunk: ITerminalChunk): boolean {
-    return this._quiet && chunk.kind === TerminalChunkKind.Stdout;
+  #isDiscarded(chunk: ITerminalChunk): boolean {
+    return this.#quiet && chunk.kind === TerminalChunkKind.Stdout;
   }
 
   public closeOperation(operationId: string): void {
-    const writer: CollatedWriter | undefined = this._writers.get(operationId);
+    const writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer !== undefined && writer.isOpen) {
       writer.close();
     }
   }
 
-  private _legacyOnWriterActive(writer: CollatedWriter | undefined): void {
+  #legacyOnWriterActive(writer: CollatedWriter | undefined): void {
     if (!writer) {
       return;
     }
-    this._completed += 1;
+    this.#completed += 1;
     const leftPart: string = Colorize.gray('==[') + ' ' + Colorize.cyan(writer.taskName) + ' ';
     const leftPartLength: number =
       LEGACY_LEFT_BRACKET_CHARS + writer.taskName.length + LEGACY_NAME_PADDING;
-    const completedOfTotal: string = `${this._completed} of ${this._total}`;
+    const completedOfTotal: string = `${this.#completed} of ${this.#total}`;
     const rightPart: string = ' ' + Colorize.white(completedOfTotal) + ' ' + Colorize.gray(']==');
     const rightPartLength: number = LEGACY_COUNT_PADDING + completedOfTotal.length + LEGACY_RIGHT_BRACKET_CHARS;
     const middleLength: number = Math.max(
@@ -92,9 +92,9 @@ export class LegacyPipelineReplica {
       LEGACY_MIN_MIDDLE
     );
     const middlePart: string = Colorize.gray(']' + '='.repeat(middleLength) + '[');
-    this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
-    if (!this._quiet) {
-      this._terminal.writeStdoutLine('');
+    this.#terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
+    if (!this.#quiet) {
+      this.#terminal.writeStdoutLine('');
     }
   }
 }

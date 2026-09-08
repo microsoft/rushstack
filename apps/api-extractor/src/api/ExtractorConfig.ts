@@ -314,7 +314,7 @@ export class ExtractorConfig {
    * @deprecated Use {@link ExtractorConfig.reportConfigs} to access all report configurations.
    */
   public get reportFilePath(): string {
-    const completeConfig: IExtractorConfigApiReport | undefined = this._getCompleteReportConfig();
+    const completeConfig: IExtractorConfigApiReport | undefined = this.#getCompleteReportConfig();
     return completeConfig === undefined ? '' : path.join(this.reportFolder, completeConfig.fileName);
   }
 
@@ -324,7 +324,7 @@ export class ExtractorConfig {
    * @deprecated Use {@link ExtractorConfig.reportConfigs} to access all report configurations.
    */
   public get reportTempFilePath(): string {
-    const completeConfig: IExtractorConfigApiReport | undefined = this._getCompleteReportConfig();
+    const completeConfig: IExtractorConfigApiReport | undefined = this.#getCompleteReportConfig();
     return completeConfig === undefined ? '' : path.join(this.reportTempFolder, completeConfig.fileName);
   }
 
@@ -1166,7 +1166,7 @@ export class ExtractorConfig {
   /**
    * Gets the report configuration for the "complete" (default) report configuration, if one was specified.
    */
-  private _getCompleteReportConfig(): IExtractorConfigApiReport | undefined {
+  #getCompleteReportConfig(): IExtractorConfigApiReport | undefined {
     return this.reportConfigs.find((x) => x.variant === 'complete');
   }
 

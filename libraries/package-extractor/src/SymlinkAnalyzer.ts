@@ -72,16 +72,16 @@ export interface IAnalyzePathOptions {
 }
 
 export class SymlinkAnalyzer {
-  private readonly _requiredSourceParentPath: string | undefined;
+  readonly #requiredSourceParentPath: string | undefined;
 
   // The directory tree discovered so far
-  private readonly _nodesByPath: Map<string, PathNode> = new Map<string, PathNode>();
+  readonly #nodesByPath: Map<string, PathNode> = new Map<string, PathNode>();
 
   // The symlinks that we encountered while building the directory tree
-  private readonly _linkInfosByPath: Map<string, ILinkInfo> = new Map<string, ILinkInfo>();
+  readonly #linkInfosByPath: Map<string, ILinkInfo> = new Map<string, ILinkInfo>();
 
   public constructor(options: ISymlinkAnalyzerOptions = {}) {
-    this._requiredSourceParentPath = options.requiredSourceParentPath;
+    this.#requiredSourceParentPath = options.requiredSourceParentPath;
   }
 
   public async analyzePathAsync(
@@ -95,7 +95,7 @@ export class SymlinkAnalyzer {
 
     // First, try to short-circuit the analysis if we've already analyzed this path
     const resolvedPath: string = path.resolve(inputPath);
-    const existingNode: PathNode | undefined = this._nodesByPath.get(resolvedPath);
+    const existingNode: PathNode | undefined = this.#nodesByPath.get(resolvedPath);
     if (existingNode) {
       return existingNode;
     }
@@ -113,7 +113,7 @@ export class SymlinkAnalyzer {
       }
 
       const currentPath: string = targetPath.slice(0, targetPathIndex);
-      currentNode = this._nodesByPath.get(currentPath);
+      currentNode = this.#nodesByPath.get(currentPath);
       if (currentNode === undefined) {
         const linkStats: FileSystemStats = await FileSystem.getLinkStatisticsAsync(currentPath);
         if (linkStats.isSymbolicLink()) {
@@ -122,9 +122,9 @@ export class SymlinkAnalyzer {
           const resolvedLinkTargetPath: string = path.resolve(path.dirname(currentPath), linkTargetPath);
 
           // Do a check to make sure that the link target path is not outside the source folder
-          if (this._requiredSourceParentPath) {
+          if (this.#requiredSourceParentPath) {
             const relativeLinkTargetPath: string = path.relative(
-              this._requiredSourceParentPath,
+              this.#requiredSourceParentPath,
               resolvedLinkTargetPath
             );
             if (relativeLinkTargetPath.startsWith('..')) {
@@ -134,7 +134,7 @@ export class SymlinkAnalyzer {
                 return undefined;
               }
               throw new Error(
-                `Symlink targets not under folder "${this._requiredSourceParentPath}": ` +
+                `Symlink targets not under folder "${this.#requiredSourceParentPath}": ` +
                   `${currentPath} -> ${resolvedLinkTargetPath}`
               );
             }
@@ -161,7 +161,7 @@ export class SymlinkAnalyzer {
         } else {
           throw new Error('Unknown object type: ' + currentPath);
         }
-        this._nodesByPath.set(currentPath, currentNode);
+        this.#nodesByPath.set(currentPath, currentNode);
       }
 
       if (!preserveLinks) {
@@ -172,7 +172,7 @@ export class SymlinkAnalyzer {
           });
 
           // Have we created an ILinkInfo for this link yet?
-          if (!this._linkInfosByPath.has(currentNode.nodePath)) {
+          if (!this.#linkInfosByPath.has(currentNode.nodePath)) {
             // Follow any symbolic links to determine whether the final target is a directory
             const targetStats: FileSystemStats = await FileSystem.getStatisticsAsync(targetNode.nodePath);
             const targetIsDirectory: boolean = targetStats.isDirectory();
@@ -181,7 +181,7 @@ export class SymlinkAnalyzer {
               linkPath: currentNode.nodePath,
               targetPath: targetNode.nodePath
             };
-            this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
+            this.#linkInfosByPath.set(currentNode.nodePath, linkInfo);
           }
 
           const nodeTargetPath: string = targetNode.nodePath;
@@ -209,7 +209,7 @@ export class SymlinkAnalyzer {
    * Returns a summary of all the symbolic links encountered by {@link SymlinkAnalyzer.analyzePathAsync}.
    */
   public reportSymlinks(): ILinkInfo[] {
-    const list: ILinkInfo[] = [...this._linkInfosByPath.values()];
+    const list: ILinkInfo[] = [...this.#linkInfosByPath.values()];
     Sort.sortBy(list, (x) => x.linkPath);
     return list;
   }

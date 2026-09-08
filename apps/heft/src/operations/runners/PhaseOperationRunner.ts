@@ -20,19 +20,19 @@ export interface IPhaseOperationRunnerOptions {
 export class PhaseOperationRunner implements IOperationRunner {
   public readonly silent: boolean = true;
 
-  private readonly _options: IPhaseOperationRunnerOptions;
-  private _isClean: boolean = false;
+  readonly #options: IPhaseOperationRunnerOptions;
+  #isClean: boolean = false;
 
   public get name(): string {
-    return `Phase ${JSON.stringify(this._options.phase.phaseName)}`;
+    return `Phase ${JSON.stringify(this.#options.phase.phaseName)}`;
   }
 
   public constructor(options: IPhaseOperationRunnerOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    const { internalHeftSession, phase } = this._options;
+    const { internalHeftSession, phase } = this.#options;
     const { clean } = internalHeftSession.parameterManager.defaultParameters;
 
     // Load and apply the plugins for this phase only
@@ -40,7 +40,7 @@ export class PhaseOperationRunner implements IOperationRunner {
     const { phaseLogger, cleanLogger } = phaseSession;
     await phaseSession.applyPluginsAsync(phaseLogger.terminal);
 
-    if (this._isClean || !clean) {
+    if (this.#isClean || !clean) {
       return OperationStatus.NoOp;
     }
 
@@ -68,7 +68,7 @@ export class PhaseOperationRunner implements IOperationRunner {
     }
 
     // Ensure we only run the clean operation once
-    this._isClean = true;
+    this.#isClean = true;
 
     cleanLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);
 

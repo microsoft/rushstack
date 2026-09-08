@@ -13,42 +13,42 @@ export interface IPeriodicCallbackOptions {
  * @beta
  */
 export class PeriodicCallback {
-  private _callbacks: ICallbackFn[];
-  private _interval: number;
-  private _intervalId: NodeJS.Timeout | undefined;
-  private _isRunning: boolean;
+  #callbacks: ICallbackFn[];
+  #interval: number;
+  #intervalId: NodeJS.Timeout | undefined;
+  #isRunning: boolean;
 
   public constructor(options: IPeriodicCallbackOptions) {
-    this._callbacks = [];
-    this._interval = options.interval;
-    this._isRunning = false;
+    this.#callbacks = [];
+    this.#interval = options.interval;
+    this.#isRunning = false;
   }
 
   public addCallback(callback: ICallbackFn): void {
-    if (this._isRunning) {
+    if (this.#isRunning) {
       throw new Error('Can not add callback while watcher is running');
     }
-    this._callbacks.push(callback);
+    this.#callbacks.push(callback);
   }
 
   public start(): void {
-    if (this._intervalId) {
+    if (this.#intervalId) {
       throw new Error('Watcher already started');
     }
-    if (this._callbacks.length === 0) {
+    if (this.#callbacks.length === 0) {
       return;
     }
-    this._isRunning = true;
-    this._intervalId = setInterval(() => {
-      this._callbacks.forEach((callback) => callback());
-    }, this._interval);
+    this.#isRunning = true;
+    this.#intervalId = setInterval(() => {
+      this.#callbacks.forEach((callback) => callback());
+    }, this.#interval);
   }
 
   public stop(): void {
-    if (this._intervalId) {
-      clearInterval(this._intervalId);
-      this._intervalId = undefined;
-      this._isRunning = false;
+    if (this.#intervalId) {
+      clearInterval(this.#intervalId);
+      this.#intervalId = undefined;
+      this.#isRunning = false;
     }
   }
 }

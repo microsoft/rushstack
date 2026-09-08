@@ -18,13 +18,13 @@ interface IMinimalRushConfigurationJson {
  * decide which version of Rush should be installed/used.
  */
 export class MinimalRushConfiguration {
-  private _rushVersion: string;
-  private _commonRushConfigFolder: string;
+  #rushVersion: string;
+  #commonRushConfigFolder: string;
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
-    this._rushVersion =
+    this.#rushVersion =
       minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
-    this._commonRushConfigFolder = path.join(
+    this.#commonRushConfigFolder = path.join(
       path.dirname(rushJsonFilename),
       RushConstants.commonFolderName,
       'config',
@@ -54,7 +54,7 @@ export class MinimalRushConfiguration {
    *  a semver style version number like "4.0.0"
    */
   public get rushVersion(): string {
-    return this._rushVersion;
+    return this.#rushVersion;
   }
 
   /**
@@ -66,7 +66,7 @@ export class MinimalRushConfiguration {
    * Example: "C:\MyRepo\common\config\rush"
    */
   public get commonRushConfigFolder(): string {
-    return this._commonRushConfigFolder;
+    return this.#commonRushConfigFolder;
   }
 }
 

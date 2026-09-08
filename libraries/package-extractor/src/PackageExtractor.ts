@@ -413,25 +413,25 @@ export class PackageExtractor {
       existingDependencyConfigurations.push(dependencyConfiguration);
     }
 
-    await this._performExtractionAsync(options, state);
+    await this.#performExtractionAsync(options, state);
     await state.assetHandler.finalizeAsync({
       onAfterExtractSymlinksAsync: async () => {
         // We need the symlinks to be created before attempting to create the bin links, since it requires
         // the node_modules folder to be realized. While we're here, we may as well perform some specific
         // link creation tasks and write the extractor-metadata.json file before the asset handler finalizes.
         if (linkCreation === 'default') {
-          await this._makeBinLinksAsync(options, state);
+          await this.#makeBinLinksAsync(options, state);
         } else if (linkCreation === 'script') {
-          await this._writeCreateLinksScriptAsync(options, state);
+          await this.#writeCreateLinksScriptAsync(options, state);
         }
 
         terminal.writeLine('Creating extractor-metadata.json');
-        await this._writeExtractorMetadataAsync(options, state);
+        await this.#writeExtractorMetadataAsync(options, state);
       }
     });
   }
 
-  private async _performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
+  async #performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const {
       terminal,
       mainProjectName,
@@ -470,7 +470,7 @@ export class PackageExtractor {
       terminal.writeLine(Colorize.cyan(`Analyzing project: ${projectName}`));
       startingFolders.push(projectFolder);
     }
-    await this._collectFoldersAsync(startingFolders, options, state);
+    await this.#collectFoldersAsync(startingFolders, options, state);
 
     if (!createArchiveOnly) {
       terminal.writeLine(`Copying folders to target folder "${targetRootFolder}"`);
@@ -478,7 +478,7 @@ export class PackageExtractor {
     await Async.forEachAsync(
       foldersToCopy,
       async (folderToCopy: string) => {
-        await this._extractFolderAsync(folderToCopy, options, state);
+        await this.#extractFolderAsync(folderToCopy, options, state);
       },
       {
         concurrency: MAX_CONCURRENCY
@@ -494,14 +494,14 @@ export class PackageExtractor {
         sourceRootFolder: additionalFolderPath,
         targetRootFolder
       };
-      await this._extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
+      await this.#extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
     }
   }
 
   /**
    * Recursively crawl the node_modules dependencies and collect the result in IExtractorState.foldersToCopy.
    */
-  private async _collectFoldersAsync(
+  async #collectFoldersAsync(
     packageJsonFolders: string[],
     options: IExtractorOptions,
     state: IExtractorState
@@ -566,7 +566,7 @@ export class PackageExtractor {
             }
           }
 
-          this._applyDependencyFilters(
+          this.#applyDependencyFilters(
             terminal,
             dependencyNamesToProcess,
             projectConfiguration.additionalDependenciesToInclude,
@@ -653,7 +653,7 @@ export class PackageExtractor {
     );
   }
 
-  private _applyDependencyFilters(
+  #applyDependencyFilters(
     terminal: ITerminal,
     allDependencyNames: Set<string>,
     additionalDependenciesToInclude: string[] = [],
@@ -696,7 +696,7 @@ export class PackageExtractor {
   /**
    * Copy one package folder to the extractor target folder.
    */
-  private async _extractFolderAsync(
+  async #extractFolderAsync(
     sourceFolderPath: string,
     options: IExtractorOptions,
     state: IExtractorState
@@ -884,7 +884,7 @@ export class PackageExtractor {
   /**
    * Write the common/deploy/deploy-metadata.json file.
    */
-  private async _writeExtractorMetadataAsync(
+  async #writeExtractorMetadataAsync(
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
@@ -936,7 +936,7 @@ export class PackageExtractor {
     });
   }
 
-  private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
+  async #makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const { terminal } = options;
 
     const extractedProjectFolderPaths: string[] = [];
@@ -958,7 +958,7 @@ export class PackageExtractor {
     );
   }
 
-  private async _writeCreateLinksScriptAsync(
+  async #writeCreateLinksScriptAsync(
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {

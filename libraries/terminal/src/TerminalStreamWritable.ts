@@ -32,7 +32,7 @@ export interface ITerminalStreamWritableOptions {
  * @beta
  */
 export class TerminalStreamWritable extends Writable {
-  private _writeMethod: (data: string) => void;
+  #writeMethod: (data: string) => void;
 
   public constructor(options: ITerminalStreamWritableOptions) {
     const { terminal, severity, writableOptions } = options;
@@ -41,19 +41,19 @@ export class TerminalStreamWritable extends Writable {
     this._writev = undefined;
     switch (severity) {
       case TerminalProviderSeverity.log:
-        this._writeMethod = terminal.write.bind(terminal);
+        this.#writeMethod = terminal.write.bind(terminal);
         break;
       case TerminalProviderSeverity.verbose:
-        this._writeMethod = terminal.writeVerbose.bind(terminal);
+        this.#writeMethod = terminal.writeVerbose.bind(terminal);
         break;
       case TerminalProviderSeverity.debug:
-        this._writeMethod = terminal.writeDebug.bind(terminal);
+        this.#writeMethod = terminal.writeDebug.bind(terminal);
         break;
       case TerminalProviderSeverity.warning:
-        this._writeMethod = terminal.writeWarning.bind(terminal);
+        this.#writeMethod = terminal.writeWarning.bind(terminal);
         break;
       case TerminalProviderSeverity.error:
-        this._writeMethod = terminal.writeError.bind(terminal);
+        this.#writeMethod = terminal.writeError.bind(terminal);
         break;
       default:
         throw new Error(`Unknown severity: ${severity}`);
@@ -68,7 +68,7 @@ export class TerminalStreamWritable extends Writable {
   ): void {
     try {
       const chunkData: string | Buffer = typeof chunk === 'string' ? chunk : Buffer.from(chunk);
-      this._writeMethod(chunkData.toString());
+      this.#writeMethod(chunkData.toString());
     } catch (e: unknown) {
       callback(e as Error);
       return;

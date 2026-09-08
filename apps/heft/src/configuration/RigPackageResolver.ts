@@ -37,16 +37,16 @@ export interface IRigPackageResolverOptions {
  * Rig resolves requested tools from the project's Heft rig.
  */
 export class RigPackageResolver implements IRigPackageResolver {
-  private readonly _buildFolder: string;
-  private readonly _projectPackageJson: IPackageJson;
-  private readonly _rigConfig: IRigConfig;
-  private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-  private readonly _resolverCache: Map<string, Promise<string>> = new Map();
+  readonly #buildFolder: string;
+  readonly #projectPackageJson: IPackageJson;
+  readonly #rigConfig: IRigConfig;
+  readonly #packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+  readonly #resolverCache: Map<string, Promise<string>> = new Map();
 
   public constructor(options: IRigPackageResolverOptions) {
-    this._buildFolder = options.buildFolder;
-    this._projectPackageJson = options.projectPackageJson;
-    this._rigConfig = options.rigConfig;
+    this.#buildFolder = options.buildFolder;
+    this.#projectPackageJson = options.projectPackageJson;
+    this.#rigConfig = options.rigConfig;
   }
 
   /**
@@ -61,32 +61,32 @@ export class RigPackageResolver implements IRigPackageResolver {
    * - OTHERWISE try to resolve it from the current project.
    */
   public async resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string> {
-    const buildFolder: string = this._buildFolder;
-    const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(buildFolder);
+    const buildFolder: string = this.#buildFolder;
+    const projectFolder: string | undefined = this.#packageJsonLookup.tryGetPackageFolderFor(buildFolder);
     if (!projectFolder) {
       throw new Error(`Unable to find a package.json file for "${buildFolder}".`);
     }
 
     const cacheKey: string = `${projectFolder};${packageName}`;
-    let resolutionPromise: Promise<string> | undefined = this._resolverCache.get(cacheKey);
+    let resolutionPromise: Promise<string> | undefined = this.#resolverCache.get(cacheKey);
     if (!resolutionPromise) {
-      resolutionPromise = this._resolvePackageInnerAsync(packageName, terminal);
-      this._resolverCache.set(cacheKey, resolutionPromise);
+      resolutionPromise = this.#resolvePackageInnerAsync(packageName, terminal);
+      this.#resolverCache.set(cacheKey, resolutionPromise);
     }
 
     return await resolutionPromise;
   }
 
-  private async _resolvePackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
+  async #resolvePackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
     // See if the project has a devDependency on the package
     if (
-      this._projectPackageJson.devDependencies &&
-      this._projectPackageJson.devDependencies[toolPackageName]
+      this.#projectPackageJson.devDependencies &&
+      this.#projectPackageJson.devDependencies[toolPackageName]
     ) {
       try {
         const resolvedPackageFolder: string = Import.resolvePackage({
           packageName: toolPackageName,
-          baseFolderPath: this._buildFolder
+          baseFolderPath: this.#buildFolder
         });
         terminal.writeVerboseLine(
           `Resolved ${JSON.stringify(toolPackageName)} as a direct devDependency of the project.`
@@ -101,11 +101,11 @@ export class RigPackageResolver implements IRigPackageResolver {
     }
 
     // See if the project rig has a regular dependency on the package
-    const rigConfiguration: IRigConfig = this._rigConfig;
+    const rigConfiguration: IRigConfig = this.#rigConfig;
     if (rigConfiguration.rigFound) {
       const rigFolder: string = rigConfiguration.getResolvedProfileFolder();
       const rigPackageJsonPath: string | undefined =
-        this._packageJsonLookup.tryGetPackageJsonFilePathFor(rigFolder);
+        this.#packageJsonLookup.tryGetPackageJsonFilePathFor(rigFolder);
       if (!rigPackageJsonPath) {
         throw new Error(
           'Unable to resolve the package.json file for the ' +
@@ -113,7 +113,7 @@ export class RigPackageResolver implements IRigPackageResolver {
         );
       }
       const rigPackageJson: INodePackageJson =
-        this._packageJsonLookup.loadNodePackageJson(rigPackageJsonPath);
+        this.#packageJsonLookup.loadNodePackageJson(rigPackageJsonPath);
       if (rigPackageJson.dependencies && rigPackageJson.dependencies[toolPackageName]) {
         try {
           const resolvedPackageFolder: string = Import.resolvePackage({
@@ -139,7 +139,7 @@ export class RigPackageResolver implements IRigPackageResolver {
     try {
       const resolvedPackageFolder: string = Import.resolvePackage({
         packageName: toolPackageName,
-        baseFolderPath: this._buildFolder
+        baseFolderPath: this.#buildFolder
       });
       terminal.writeVerboseLine(
         `Resolved ${JSON.stringify(toolPackageName)} from "${resolvedPackageFolder}".`

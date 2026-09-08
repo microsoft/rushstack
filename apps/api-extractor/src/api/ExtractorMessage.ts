@@ -88,8 +88,8 @@ export interface IExtractorMessageOptions {
  * @public
  */
 export class ExtractorMessage {
-  private _handled: boolean;
-  private _logLevel: ExtractorLogLevel;
+  #handled: boolean;
+  #logLevel: ExtractorLogLevel;
 
   /**
    * The category of issue.
@@ -150,8 +150,8 @@ export class ExtractorMessage {
     this.sourceFileColumn = sourceFileColumn;
     this.properties = properties;
 
-    this._handled = false;
-    this._logLevel = logLevel;
+    this.#handled = false;
+    this.#logLevel = logLevel;
   }
 
   /**
@@ -167,16 +167,16 @@ export class ExtractorMessage {
    * to discard a message entirely, instead assign `logLevel = none`.
    */
   public get handled(): boolean {
-    return this._handled;
+    return this.#handled;
   }
 
   public set handled(value: boolean) {
-    if (this._handled && !value) {
+    if (this.#handled && !value) {
       throw new Error(
         'One a message has been marked as handled, the "handled" property cannot be set to false'
       );
     }
-    this._handled = value;
+    this.#handled = value;
   }
 
   /**
@@ -193,7 +193,7 @@ export class ExtractorMessage {
    * To discard a message entirely, assign `logLevel = none`.
    */
   public get logLevel(): ExtractorLogLevel {
-    return this._logLevel;
+    return this.#logLevel;
   }
 
   public set logLevel(value: ExtractorLogLevel) {
@@ -207,7 +207,7 @@ export class ExtractorMessage {
       default:
         throw new Error('Invalid log level');
     }
-    this._logLevel = value;
+    this.#logLevel = value;
   }
 
   /**
