@@ -627,11 +627,10 @@ describe(initializeRushReporterHostAsync.name, () => {
 
   it('preserves the initialization error after cleanup and emergency reporting fail', async () => {
     const originalError: Error = new Error('original initialization failure');
-    const manager: ReporterManager = new ReporterManager();
     const close: jest.Mock = jest.fn(async () => {
       throw new Error('cleanup failure');
     });
-    manager.addReporter({
+    const reporter: IReporter = {
       name: 'partially-initialized',
       initializeAsync: async () => {
         throw originalError;
@@ -639,22 +638,32 @@ describe(initializeRushReporterHostAsync.name, () => {
       report: () => undefined,
       flushAsync: async () => undefined,
       closeAsync: close
-    });
-
-    await expect(
-      initializeRushReporterHostAsync({
-        argv: [],
-        env: {},
-        manager,
-        includeDefaultFileReporter: false,
-        stderr: {
-          write: () => {
-            throw new Error('emergency output failed');
+    };
+    const initialize: typeof ReporterManager.prototype.initializeAsync =
+      ReporterManager.prototype.initializeAsync;
+    const initializeSpy: jest.SpiedFunction<typeof initialize> = jest
+      .spyOn(ReporterManager.prototype, 'initializeAsync')
+      .mockImplementation(async function (this: ReporterManager): Promise<void> {
+        this.addReporter(reporter);
+        await initialize.call(this);
+      });
+    try {
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: [],
+          env: {},
+          includeDefaultFileReporter: false,
+          stderr: {
+            write: () => {
+              throw new Error('emergency output failed');
+            }
           }
-        }
-      })
-    ).rejects.toBe(originalError);
-    expect(close).toHaveBeenCalledTimes(1);
+        })
+      ).rejects.toBe(originalError);
+      expect(close).toHaveBeenCalledTimes(1);
+    } finally {
+      initializeSpy.mockRestore();
+    }
   });
 
   it('hands callers a typed sink while leaving no-opt-in output unchanged', async () => {
