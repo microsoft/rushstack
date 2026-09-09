@@ -13,6 +13,7 @@ import {
   type ReporterEventType,
   type ReporterJsonValue
 } from '../index';
+import { startReporterTimer } from '../utilities/startReporterTimer';
 
 class RecordingReporter implements IReporter {
   public readonly name: string;
@@ -71,6 +72,158 @@ function makeInput(
 }
 
 describe('ReporterManager ordering and assignment', () => {
+  it('aborts all attempted initializations before blocked close and preserves once-only concurrent cleanup', async () => {
+    jest.useFakeTimers();
+    const failure: Error = new Error('startup failed');
+    const manager: ReporterManager = new ReporterManager({ emergencyDiagnosticWriter: () => undefined });
+    const started: RecordingReporter = new RecordingReporter('started');
+    const partial: RecordingReporter = new RecordingReporter('partial');
+    const unstarted: RecordingReporter = new RecordingReporter('unstarted');
+    let backgroundCalls: number = 0;
+    const stopTimers: Array<() => void> = [];
+    let finishClose!: () => void;
+    let notifyCloseStarted!: () => void;
+    const closeFinished: Promise<void> = new Promise((resolve) => (finishClose = resolve));
+    const closeStarted: Promise<void> = new Promise((resolve) => (notifyCloseStarted = resolve));
+    for (const reporter of [started, partial]) {
+      jest.spyOn(reporter, 'initializeAsync').mockImplementation(async (context) => {
+        reporter.context = context;
+        reporter.initCount++;
+        stopTimers.push(startReporterTimer(context, () => backgroundCalls++, 10));
+        if (reporter === partial) {
+          throw failure;
+        }
+      });
+      manager.addReporter(reporter);
+    }
+    manager.addReporter(unstarted);
+    jest.spyOn(started, 'closeAsync').mockImplementation(async () => {
+      started.closeCount++;
+      notifyCloseStarted();
+      await closeFinished;
+    });
+    partial.throwOnClose = true;
+    let disposalAssertion: Promise<void> | undefined;
+    let closing: Promise<void> | undefined;
+    try {
+      await expect(manager.initializeAsync()).rejects.toBe(failure);
+      expect(jest.getTimerCount()).toBe(2);
+      const disposal: Promise<void> = manager._disposeInitializedReportersAsync(failure);
+      disposalAssertion = expect(disposal).rejects.toThrow('close failed partial');
+
+      expect(jest.getTimerCount()).toBe(0);
+      for (const reporter of [started, partial]) {
+        expect(reporter.context?.abortSignal?.aborted).toBe(true);
+        expect(reporter.context?.abortSignal?.reason).toBe(failure);
+        reporter.context?.runWithErrorHandling?.(() => backgroundCalls++);
+      }
+      expect(backgroundCalls).toBe(0);
+      expect(started.closeCount).toBe(0);
+      closing = manager.closeAsync();
+      await closeStarted;
+      expect(started.closeCount).toBe(1);
+      finishClose();
+      await Promise.all([disposalAssertion, closing]);
+      expect([started.closeCount, partial.closeCount, unstarted.closeCount]).toEqual([1, 1, 0]);
+      expect([started.flushCount, partial.flushCount, unstarted.flushCount]).toEqual([0, 0, 0]);
+      expect(unstarted.initCount).toBe(0);
+    } finally {
+      finishClose();
+      await Promise.all([disposalAssertion, closing]);
+      for (const stop of stopTimers) stop();
+      jest.useRealTimers();
+    }
+  });
+
+  it('cancels reporter work synchronously while disposal waits behind a blocked lifecycle action', async () => {
+    jest.useFakeTimers();
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('blocked-lifecycle');
+    const failure: Error = new Error('replay failed');
+    let finishFlush!: () => void;
+    let notifyFlushStarted!: () => void;
+    const flushFinished: Promise<void> = new Promise((resolve) => (finishFlush = resolve));
+    const flushStarted: Promise<void> = new Promise((resolve) => (notifyFlushStarted = resolve));
+    jest.spyOn(reporter, 'flushAsync').mockImplementation(async () => {
+      reporter.flushCount++;
+      if (reporter.flushCount === 1) {
+        notifyFlushStarted();
+        await flushFinished;
+      }
+    });
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+    let backgroundCalls: number = 0;
+    const stopTimer: () => void = startReporterTimer(reporter.context, () => backgroundCalls++, 10);
+    const flushing: Promise<void> = manager.flushAsync();
+    let disposing: Promise<void> | undefined;
+    let closing: Promise<void> | undefined;
+    try {
+      await flushStarted;
+      const timersBefore: number = jest.getTimerCount();
+      disposing = manager._disposeInitializedReportersAsync(failure);
+      expect(reporter.context?.abortSignal?.aborted).toBe(true);
+      expect(reporter.context?.abortSignal?.reason).toBe(failure);
+      expect(jest.getTimerCount()).toBe(timersBefore - 1);
+      expect(reporter.closeCount).toBe(0);
+      jest.advanceTimersByTime(100);
+      expect(backgroundCalls).toBe(0);
+      closing = manager.closeAsync();
+      finishFlush();
+      await Promise.all([flushing, disposing, closing]);
+      expect(reporter.closeCount).toBe(1);
+    } finally {
+      finishFlush();
+      await Promise.all([flushing, disposing, closing]);
+      stopTimer();
+      jest.useRealTimers();
+    }
+  });
+
+  it('publishes the disposal promise before abort listeners can reenter cleanup', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('reentrant-abort');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+    const failure: Error = new Error('startup failed');
+    let reentrant: Promise<void> | undefined;
+    reporter.context?.abortSignal?.addEventListener(
+      'abort',
+      () => {
+        reentrant = manager._disposeInitializedReportersAsync(failure);
+      },
+      { once: true }
+    );
+
+    const disposal: Promise<void> = manager._disposeInitializedReportersAsync(failure);
+    expect(reentrant).toBe(disposal);
+    await disposal;
+    expect(reporter.closeCount).toBe(1);
+  });
+
+  it('uses an Error cancellation reason while retaining a non-Error initialization failure as its cause', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const failure: { message: string } = { message: 'foreign initialization failure' };
+    let context: IReporterContext | undefined;
+    manager.addReporter({
+      name: 'foreign-rejection',
+      initializeAsync: async (value: IReporterContext) => {
+        context = value;
+        return Promise.reject(failure);
+      },
+      report: () => undefined,
+      flushAsync: async () => undefined,
+      closeAsync: async () => undefined
+    });
+    await expect(manager.initializeAsync()).rejects.toBe(failure);
+
+    const disposal: Promise<void> = manager._disposeInitializedReportersAsync(failure);
+    expect(context?.abortSignal?.aborted).toBe(true);
+    expect(context?.abortSignal?.reason).toBeInstanceOf(Error);
+    expect(context?.abortSignal?.reason.cause).toBe(failure);
+    await disposal;
+  });
+
   it('reserves the disposal lifecycle lane before concurrent shutdown can flush or close', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter('blocked-disposal-flush');
@@ -402,73 +555,79 @@ describe('ReporterManager failure handling', () => {
       : new PlaintextReporter({ write, heartbeatIntervalMs: 100 });
   }
 
-  it.each(['default', 'plaintext'] as const)('contains %s timer failures and stops the disabled timer', async (kind) => {
-    jest.useFakeTimers();
-    const emergency: string[] = [];
-    const manager: ReporterManager = new ReporterManager({
-      emergencyDiagnosticWriter: (message: string) => emergency.push(message)
-    });
-    const good: RecordingReporter = new RecordingReporter('good');
-    let failWrites: boolean = false;
-    let writeCount: number = 0;
-    manager.addReporter(
-      makeTimedReporter(kind, () => {
-        writeCount++;
-        if (failWrites) {
-          throw new Error('timer output failed');
-        }
-      })
-    );
-    manager.addReporter(good);
-    try {
-      await manager.initializeAsync();
-      manager.emit(makeInput('commandStarted', { commandName: 'build' }));
-      failWrites = true;
-      expect(() => jest.advanceTimersByTime(100)).not.toThrow();
-      expect(emergency).toHaveLength(1);
-      expect(jest.getTimerCount()).toBe(0);
-      const countAfterFailure: number = writeCount;
-      jest.advanceTimersByTime(1000);
-      expect(writeCount).toBe(countAfterFailure);
-      manager.emit(makeInput('commandResult', { succeeded: true, exitCode: 0 }));
-      expect(good.reported.at(-1)?.payload).toEqual({ succeeded: true, exitCode: 0 });
-      await expect(manager.closeAsync()).resolves.toBeUndefined();
-      expect(emergency).toHaveLength(1);
-      expect(jest.getTimerCount()).toBe(0);
-    } finally {
-      failWrites = false;
-      await manager.closeAsync();
-      jest.useRealTimers();
+  it.each(['default', 'plaintext'] as const)(
+    'contains %s timer failures and stops the disabled timer',
+    async (kind) => {
+      jest.useFakeTimers();
+      const emergency: string[] = [];
+      const manager: ReporterManager = new ReporterManager({
+        emergencyDiagnosticWriter: (message: string) => emergency.push(message)
+      });
+      const good: RecordingReporter = new RecordingReporter('good');
+      let failWrites: boolean = false;
+      let writeCount: number = 0;
+      manager.addReporter(
+        makeTimedReporter(kind, () => {
+          writeCount++;
+          if (failWrites) {
+            throw new Error('timer output failed');
+          }
+        })
+      );
+      manager.addReporter(good);
+      try {
+        await manager.initializeAsync();
+        manager.emit(makeInput('commandStarted', { commandName: 'build' }));
+        failWrites = true;
+        expect(() => jest.advanceTimersByTime(100)).not.toThrow();
+        expect(emergency).toHaveLength(1);
+        expect(jest.getTimerCount()).toBe(0);
+        const countAfterFailure: number = writeCount;
+        jest.advanceTimersByTime(1000);
+        expect(writeCount).toBe(countAfterFailure);
+        manager.emit(makeInput('commandResult', { succeeded: true, exitCode: 0 }));
+        expect(good.reported.at(-1)?.payload).toEqual({ succeeded: true, exitCode: 0 });
+        await expect(manager.closeAsync()).resolves.toBeUndefined();
+        expect(emergency).toHaveLength(1);
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        failWrites = false;
+        await manager.closeAsync();
+        jest.useRealTimers();
+      }
     }
-  });
+  );
 
-  it.each(['default', 'plaintext'] as const)('cancels the %s timer when event delivery disables the reporter', async (kind) => {
-    jest.useFakeTimers();
-    const emergency: string[] = [];
-    const manager: ReporterManager = new ReporterManager({
-      emergencyDiagnosticWriter: (message: string) => emergency.push(message)
-    });
-    let writeCount: number = 0;
-    manager.addReporter(
-      makeTimedReporter(kind, () => {
-        if (++writeCount >= (kind === 'default' ? 2 : 1)) {
-          throw new Error('event output failed');
-        }
-      })
-    );
-    try {
-      await manager.initializeAsync();
-      expect(() => manager.emit(makeInput('commandStarted', { commandName: 'build' }))).not.toThrow();
-      expect(emergency).toHaveLength(1);
-      expect(jest.getTimerCount()).toBe(0);
-      const countAfterFailure: number = writeCount;
-      expect(() => jest.advanceTimersByTime(1000)).not.toThrow();
-      expect(writeCount).toBe(countAfterFailure);
-    } finally {
-      await manager.closeAsync();
-      jest.useRealTimers();
+  it.each(['default', 'plaintext'] as const)(
+    'cancels the %s timer when event delivery disables the reporter',
+    async (kind) => {
+      jest.useFakeTimers();
+      const emergency: string[] = [];
+      const manager: ReporterManager = new ReporterManager({
+        emergencyDiagnosticWriter: (message: string) => emergency.push(message)
+      });
+      let writeCount: number = 0;
+      manager.addReporter(
+        makeTimedReporter(kind, () => {
+          if (++writeCount >= (kind === 'default' ? 2 : 1)) {
+            throw new Error('event output failed');
+          }
+        })
+      );
+      try {
+        await manager.initializeAsync();
+        expect(() => manager.emit(makeInput('commandStarted', { commandName: 'build' }))).not.toThrow();
+        expect(emergency).toHaveLength(1);
+        expect(jest.getTimerCount()).toBe(0);
+        const countAfterFailure: number = writeCount;
+        expect(() => jest.advanceTimersByTime(1000)).not.toThrow();
+        expect(writeCount).toBe(countAfterFailure);
+      } finally {
+        await manager.closeAsync();
+        jest.useRealTimers();
+      }
     }
-  });
+  );
 
   it('treats initialization failure as fatal', async () => {
     const reporter: RecordingReporter = new RecordingReporter('a');

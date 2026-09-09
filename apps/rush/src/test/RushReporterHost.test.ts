@@ -734,12 +734,16 @@ describe(initializeRushReporterHostAsync.name, () => {
 
   it('preserves the initialization error after cleanup and emergency reporting fail', async () => {
     const originalError: Error = new Error('original initialization failure');
+    let context: IReporterContext | undefined;
+    let abortedWhenClosing: boolean | undefined;
     const close: jest.Mock = jest.fn(async () => {
+      abortedWhenClosing = context?.abortSignal?.aborted;
       throw new Error('cleanup failure');
     });
     const reporter: IReporter = {
       name: 'partially-initialized',
-      initializeAsync: async () => {
+      initializeAsync: async (reporterContext: IReporterContext) => {
+        context = reporterContext;
         throw originalError;
       },
       report: () => undefined,
@@ -768,6 +772,8 @@ describe(initializeRushReporterHostAsync.name, () => {
         })
       ).rejects.toBe(originalError);
       expect(close).toHaveBeenCalledTimes(1);
+      expect(abortedWhenClosing).toBe(true);
+      expect(context?.abortSignal?.reason).toBe(originalError);
     } finally {
       initializeSpy.mockRestore();
     }

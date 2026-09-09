@@ -220,40 +220,65 @@ export class ReporterManager implements IReporterEventSink {
    *
    * @internal
    */
-  public _disposeInitializedReportersAsync(): Promise<void> {
-    this._disposalPromise ??= (async () => {
-      const results: PromiseSettledResult<void>[] = await Promise.allSettled(
-        this._entries
-          .filter((entry: IReporterEntry) => entry.initializationStarted)
-          .map((entry: IReporterEntry): Promise<void> => {
-            const previousLifecycle: Promise<void> = entry.lifecyclePromise;
-            const disposal: Promise<void> = (async () => {
-              try {
-                await previousLifecycle;
-                await entry.drainPromise;
-                if (this._canFlushEntry(entry)) {
-                  await entry.reporter.flushAsync();
-                }
-              } finally {
-                await this._closeEntryAsync(entry);
-              }
-            })();
-            // Reserve the lifecycle lane without swallowing failures needed by the aggregate.
-            entry.lifecyclePromise = disposal;
-            return disposal;
-          })
-      );
-      const errors: unknown[] = results
-        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
-        .map((result: PromiseRejectedResult) => result.reason);
-      if (errors.length > 0) {
-        throw new AggregateError(
-          errors,
-          `Reporter initialization cleanup failed: ${errors.map((error: unknown) => String(error)).join('; ')}`
-        );
+  public _disposeInitializedReportersAsync(failure?: unknown): Promise<void> {
+    if (this._disposalPromise) {
+      return this._disposalPromise;
+    }
+    const attempted: IReporterEntry[] = this._entries.filter(
+      (entry: IReporterEntry) => entry.initializationStarted
+    );
+    const reason: Error =
+      failure instanceof Error ? failure : new Error('Reporter initialization failed.', { cause: failure });
+    let resolveDisposal!: () => void;
+    let rejectDisposal!: (error: unknown) => void;
+    // Publish the promise before abort listeners can reenter disposal.
+    this._disposalPromise = new Promise<void>((resolve, reject) => {
+      resolveDisposal = resolve;
+      rejectDisposal = reject;
+    });
+    const errors: unknown[] = [];
+    for (const entry of attempted) {
+      try {
+        entry.abortController.abort(reason);
+      } catch (error) {
+        errors.push(error);
       }
-    })();
+    }
+    void this._disposeEntriesAsync(attempted, errors).then(resolveDisposal, rejectDisposal);
     return this._disposalPromise;
+  }
+
+  private async _disposeEntriesAsync(entries: readonly IReporterEntry[], errors: unknown[]): Promise<void> {
+    const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+      entries.map((entry: IReporterEntry): Promise<void> => {
+        const previousLifecycle: Promise<void> = entry.lifecyclePromise;
+        const disposal: Promise<void> = (async () => {
+          try {
+            await previousLifecycle;
+            await entry.drainPromise;
+            if (this._canFlushEntry(entry)) {
+              await entry.reporter.flushAsync();
+            }
+          } finally {
+            await this._closeEntryAsync(entry);
+          }
+        })();
+        // Reserve the lifecycle lane without swallowing failures needed by the aggregate.
+        entry.lifecyclePromise = disposal;
+        return disposal;
+      })
+    );
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        errors.push(result.reason);
+      }
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(
+        errors,
+        `Reporter initialization cleanup failed: ${errors.map((error: unknown) => String(error)).join('; ')}`
+      );
+    }
   }
 
   /**

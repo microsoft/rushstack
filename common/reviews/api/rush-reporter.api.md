@@ -1603,7 +1603,7 @@ export class ReporterManager implements IReporterEventSink {
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
     // @internal
-    _disposeInitializedReportersAsync(): Promise<void>;
+    _disposeInitializedReportersAsync(failure?: unknown): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     // @internal
     _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;

@@ -16,6 +16,9 @@ removed; timestamp ties are resolved by filename.
 Each registration shares a cached manager-owned close operation across normal shutdown and initialization
 disposal, including rejected closes. The frontend's eager full-log close for artifact publication remains
 unchanged.
+Failed initialization aborts every attempted reporter synchronously before waiting for its lifecycle lane.
+Abort signals retain the startup failure as their reason; non-Error failures are retained as the cause of an
+Error used for cancellation, while the frontend rethrows the original failure unchanged.
 
 ## AI reporter qualification
 

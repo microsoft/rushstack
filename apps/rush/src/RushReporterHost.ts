@@ -1047,7 +1047,7 @@ export async function initializeRushReporterHostAsync(
     };
   } catch (error) {
     const [disposal]: PromiseSettledResult<void>[] = await Promise.allSettled([
-      host.manager._disposeInitializedReportersAsync()
+      host.manager._disposeInitializedReportersAsync(error)
     ]);
     if (disposal.status === 'rejected') {
       // Even a failed emergency write must not replace the original startup failure.
