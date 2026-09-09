@@ -249,7 +249,6 @@ export interface IAiDiagnostic {
     readonly severity: string;
     // (undocumented)
     readonly summary?: string;
-    // (undocumented)
     readonly summaryKey?: string;
 }
 
