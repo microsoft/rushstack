@@ -107,17 +107,17 @@ const _packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
 export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly isWorkspaceCompatible: boolean;
 
-  private _shrinkwrapJson: IYarnShrinkwrapJson;
-  private _tempProjectNames: string[];
+  #shrinkwrapJson: IYarnShrinkwrapJson;
+  #tempProjectNames: string[];
 
   private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {
     super();
-    this._shrinkwrapJson = shrinkwrapJson;
-    this._tempProjectNames = [];
+    this.#shrinkwrapJson = shrinkwrapJson;
+    this.#tempProjectNames = [];
 
     const seenEntries: Set<string> = new Set();
 
-    for (const key of Object.keys(this._shrinkwrapJson)) {
+    for (const key of Object.keys(this.#shrinkwrapJson)) {
       // Example key:
       const packageNameAndSemVer: IPackageNameAndSemVer = _decodePackageNameAndSemVer(key);
 
@@ -143,9 +143,9 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
           );
         }
 
-        this._tempProjectNames.push(packageNameAndSemVer.packageName);
+        this.#tempProjectNames.push(packageNameAndSemVer.packageName);
 
-        const entry: IYarnShrinkwrapEntry = this._shrinkwrapJson[key];
+        const entry: IYarnShrinkwrapEntry = this.#shrinkwrapJson[key];
 
         // Yarn fails installation if the integrity hash does not match a "file://" reference to a tarball.
         // This is incorrect:  Normally a mismatched integrity hash does indicate a corrupted download,
@@ -165,7 +165,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       }
     }
 
-    this._tempProjectNames.sort(); // make the result deterministic
+    this.#tempProjectNames.sort(); // make the result deterministic
 
     // We don't support Yarn workspaces yet
     this.isWorkspaceCompatible = false;
@@ -189,7 +189,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public override getTempProjectNames(): ReadonlyArray<string> {
-    return this._tempProjectNames;
+    return this.#tempProjectNames;
   }
 
   public override hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
@@ -201,7 +201,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     });
 
     // Check whether this exact key appears in the shrinkwrap file
-    return Object.hasOwnProperty.call(this._shrinkwrapJson, key);
+    return Object.hasOwnProperty.call(this.#shrinkwrapJson, key);
   }
 
   public override tryEnsureCompatibleDependency(
@@ -212,7 +212,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected override serialize(): string {
-    return lockfileModule.stringify(this._shrinkwrapJson);
+    return lockfileModule.stringify(this.#shrinkwrapJson);
   }
 
   protected override getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {

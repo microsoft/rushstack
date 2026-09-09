@@ -41,13 +41,13 @@ export class ShellOperationRunner implements IOperationRunner {
    */
   public readonly isNoOp: boolean = false;
 
-  private readonly _commandForHash: string;
-  private readonly _initialCommand: string;
-  private readonly _incrementalCommand: string | undefined;
+  readonly #commandForHash: string;
+  readonly #initialCommand: string;
+  readonly #incrementalCommand: string | undefined;
 
-  private readonly _rushProject: RushConfigurationProject;
+  readonly #rushProject: RushConfigurationProject;
 
-  private readonly _ignoredParameterValues: ReadonlyArray<string>;
+  readonly #ignoredParameterValues: ReadonlyArray<string>;
 
   public constructor(options: IShellOperationRunnerOptions) {
     const {
@@ -63,11 +63,11 @@ export class ShellOperationRunner implements IOperationRunner {
     this.name = displayName;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
-    this._rushProject = rushProject;
-    this._initialCommand = initialCommand;
-    this._incrementalCommand = incrementalCommand;
-    this._commandForHash = commandForHash;
-    this._ignoredParameterValues = ignoredParameterValues;
+    this.#rushProject = rushProject;
+    this.#initialCommand = initialCommand;
+    this.#incrementalCommand = incrementalCommand;
+    this.#commandForHash = commandForHash;
+    this.#ignoredParameterValues = ignoredParameterValues;
   }
 
   public async executeAsync(
@@ -79,21 +79,21 @@ export class ShellOperationRunner implements IOperationRunner {
         let hasWarningOrError: boolean = false;
 
         // Log any ignored parameters
-        if (this._ignoredParameterValues.length > 0) {
+        if (this.#ignoredParameterValues.length > 0) {
           terminal.writeLine(
-            `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
+            `These parameters were ignored for this operation by project-level configuration: ${this.#ignoredParameterValues.join(' ')}`
           );
         }
         const incrementalCommand: string | undefined =
-          lastState && this._incrementalCommand ? this._incrementalCommand : undefined;
-        const commandToRun: string = incrementalCommand ?? this._initialCommand;
+          lastState && this.#incrementalCommand ? this.#incrementalCommand : undefined;
+        const commandToRun: string = incrementalCommand ?? this.#initialCommand;
 
         // Run the operation
         terminal.writeLine(
           `Invoking (${incrementalCommand !== undefined ? 'incremental' : 'initial'}): ${commandToRun}`
         );
 
-        const { rushConfiguration, projectFolder } = this._rushProject;
+        const { rushConfiguration, projectFolder } = this.#rushProject;
 
         const { environment: initialEnvironment } = context;
 
@@ -152,7 +152,7 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   public getConfigHash(): string {
-    return this._commandForHash;
+    return this.#commandForHash;
   }
 }
 
