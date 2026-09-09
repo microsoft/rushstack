@@ -29,15 +29,18 @@ matching purge-path selection. Captured stdout/stderr files are written to a tem
 The final matrix case invokes `rush purge` with an isolated `RUSH_TEMP_FOLDER`. This also unlinks project
 dependencies, so run the install command again before continuing development in the checkout.
 
-For an individual invocation:
+For individual invocations, first select the locally built engine in the same shell. The local
+`apps/rush/bin/rush` still honors the version in `rush.json`; without this override, an older pinned
+engine can reject the explicit reporter request. The override selects the engine, not the reporter:
 
 ```sh
+export RUSH_PREVIEW_VERSION="$(node -p "require('./apps/rush/package.json').version")"
+
 # Interactive TTY only
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=default
 
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plaintext
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json --log-level=debug
-RUSH_PREVIEW_VERSION=$(node -p "require('./apps/rush/package.json').version") node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=ai
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=file
 RUSH_TEMP_FOLDER=./common/temp/reporter-demo-override node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=file
@@ -45,6 +48,9 @@ node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plainte
 RUSH_REPORTER=legacy node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
 node apps/rush/bin/rush list --json --reporter=file
 ```
+
+After the individual demo commands, run `unset RUSH_PREVIEW_VERSION` to restore the repository's normal
+version selection. The self-checking driver sets its own override and needs no shell export.
 
 Repositories can opt in without a command-line flag by setting `"useRushReporter": true` in
 `common/config/rush/experiments.json`. Remove that setting or use `RUSH_REPORTER=legacy` for immediate
