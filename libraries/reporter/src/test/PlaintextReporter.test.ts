@@ -98,6 +98,56 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('TOP_SECRET_VALUE');
   });
 
+  it('renders negotiated compiler details without a duplicate raw diagnostic', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('diagnosticEmitted', {
+        code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+        severity: 'error',
+        summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+        parameters: {
+          tool: { value: 'typescript', privacy: 'public' },
+          code: { value: 'TS1005', privacy: 'public' },
+          message: { value: 'semicolon expected', privacy: 'local-sensitive' }
+        },
+        source: { kind: 'file', file: 'src/index.ts', line: 4, column: 2, toolName: 'typescript' }
+      })
+    );
+
+    expect(capture.getOutput()).toContain('typescript');
+    expect(capture.getOutput()).toContain('TS1005');
+    expect(capture.getOutput()).toContain('src/index.ts:4:2');
+    expect(capture.getOutput().match(/semicolon expected/g)).toHaveLength(1);
+  });
+
+  it('redacts secret diagnostic values and the whole secret envelope', () => {
+    const capture: ICapture = makeDetailed();
+    const payload = {
+      code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+      severity: 'warning',
+      summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+      parameters: {
+        tool: { value: 'typescript', privacy: 'public' },
+        code: { value: 'TS1005', privacy: 'public' },
+        message: { value: 'TOP_SECRET_MESSAGE', privacy: 'secret' }
+      },
+      source: { kind: 'file', file: 'src/index.ts', line: 4, column: 2 }
+    };
+    capture.reporter.report(ev('diagnosticEmitted', payload, undefined, 'local-sensitive'));
+    capture.reporter.report(
+      ev(
+        'diagnosticEmitted',
+        { ...payload, source: { kind: 'file', file: 'TOP_SECRET_FILE' } },
+        undefined,
+        'secret'
+      )
+    );
+
+    expect(capture.getOutput()).toContain('[secret]');
+    expect(capture.getOutput()).toContain('src/index.ts:4:2');
+    expect(capture.getOutput()).not.toContain('TOP_SECRET');
+  });
+
   it('does not replay old-engine output that was already rendered', () => {
     const capture: ICapture = makeDetailed();
     capture.reporter.report(

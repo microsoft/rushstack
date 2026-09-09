@@ -9,6 +9,7 @@ import { StringDecoder } from 'node:string_decoder';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import { getHumanReadableMessageText } from './ReporterRedaction';
+import { formatHumanReadableDiagnostic } from './HumanReadableDiagnostic';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
 import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
@@ -206,7 +207,7 @@ export class PlaintextReporter implements IReporter {
           severity?: string;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._writeLine(this._formatDiagnostic(payload.severity, payload.code ?? 'unknown'));
+          this._writeLine(this._formatDiagnostic(payload.severity, formatHumanReadableDiagnostic(event)));
         }
         break;
       }
@@ -557,8 +558,7 @@ export class PlaintextReporter implements IReporter {
     return line;
   }
 
-  private _formatDiagnostic(severity: string, code: string): string {
-    const line: string = `[${severity}] ${code}`;
+  private _formatDiagnostic(severity: string, line: string): string {
     if (severity === 'error') {
       return this._color.red(line);
     }
