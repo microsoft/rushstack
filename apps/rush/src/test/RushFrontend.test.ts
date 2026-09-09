@@ -875,25 +875,24 @@ describe(launchRushFrontendAsync.name, () => {
           void version;
           void selectedRushLib;
           emitCommandStarted(launchOptions.reporter.eventSink);
-          const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-          Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
-          Object.defineProperty(parser, '_rushOptions', {
-            value: { reporterCloseAsync: launchOptions.reporterCloseAsync }
+          const parser: RushCommandLineParser = new RushCommandLineParser({
+            cwd: directory,
+            reporterCloseAsync: launchOptions.reporterCloseAsync
           });
+          jest.spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+            .mockRejectedValue(new Error('parser failed'));
           process.exitCode = 1;
 
-          return new Promise<void>((resolve: () => void) => {
+          const exited: Promise<void> = new Promise((resolve: () => void) => {
             jest.spyOn(process, 'exit').mockImplementation(() => {
               outputAtExit = fs.readFileSync(outputPath, 'utf8');
               resolve();
               return undefined as never;
             });
             jest.spyOn(console, 'error').mockImplementation(() => undefined);
-            (
-              parser as unknown as {
-                _reportErrorAndSetExitCode(error: Error): void;
-              }
-            )._reportErrorAndSetExitCode(new Error('parser failed'));
+          });
+          return Promise.all([exited, parser.executeAsync(['build'])]).then(([, succeeded]) => {
+            expect(succeeded).toBe(false);
           });
         },
         processLifecycle: createTestProcessLifecycle()

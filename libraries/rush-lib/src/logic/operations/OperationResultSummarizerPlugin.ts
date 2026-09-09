@@ -25,10 +25,10 @@ type IOperationsByStatus = Map<OperationStatus, IOperationAndResult[]>;
  * Phased command plugin that emits a summary of build results to the console.
  */
 export class OperationResultSummarizerPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -40,7 +40,7 @@ export class OperationResultSummarizerPlugin implements IPhasedCommandPlugin {
           status: OperationStatus,
           results: ReadonlyMap<Operation, IOperationExecutionResult>
         ): OperationStatus => {
-          _printOperationStatus(this._terminal, { status, operationResults: results });
+          _printOperationStatus(this.#terminal, { status, operationResults: results });
           return status;
         }
       );

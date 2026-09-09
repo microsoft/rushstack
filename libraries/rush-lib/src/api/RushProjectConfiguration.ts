@@ -331,8 +331,8 @@ export class RushProjectConfiguration {
 
   public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
-  private readonly _validationCache: WeakSet<object> = new WeakSet();
-  private readonly _jsonForFingerprint: string;
+  readonly #validationCache: WeakSet<object> = new WeakSet();
+  readonly #jsonForFingerprint: string;
 
   private constructor(
     project: RushConfigurationProject,
@@ -340,7 +340,7 @@ export class RushProjectConfiguration {
     operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings>
   ) {
     this.project = project;
-    this._jsonForFingerprint = JSON.stringify(rushProjectJson);
+    this.#jsonForFingerprint = JSON.stringify(rushProjectJson);
     this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs || [];
     this.disableBuildCacheForProject = rushProjectJson.disableBuildCacheForProject || false;
     this.operationSettingsByOperationName = operationSettingsByOperationName;
@@ -348,7 +348,7 @@ export class RushProjectConfiguration {
 
   /** @internal */
   public _getJsonForFingerprint(): string {
-    return this._jsonForFingerprint;
+    return this.#jsonForFingerprint;
   }
 
   /**
@@ -360,7 +360,7 @@ export class RushProjectConfiguration {
    */
   public validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void {
     // Don't repeatedly validate the same set of phases for the same project.
-    if (this._validationCache.has(phases)) {
+    if (this.#validationCache.has(phases)) {
       return;
     }
 
@@ -436,7 +436,7 @@ export class RushProjectConfiguration {
       }
     }
 
-    this._validationCache.add(phases);
+    this.#validationCache.add(phases);
 
     if (hasErrors) {
       throw new AlreadyReportedError();

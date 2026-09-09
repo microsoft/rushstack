@@ -7,6 +7,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { inspect } from 'node:util';
 
 import { OperationStatus, type IOperationExecutionResult } from '@microsoft/rush-lib';
+import { OperationExecutionRecord } from '@microsoft/rush-lib/lib/logic/operations/OperationExecutionRecord';
 
 import { RequestExclusivityClass } from '../RequestScheduler';
 import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
@@ -408,11 +409,14 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 1 } });
     const operation = test!.operation('b');
     const record: IOperationExecutionResult = graph.resultByOperation.get(operation)!;
+    const nativeRecord: unknown = record;
+    if (!(nativeRecord instanceof OperationExecutionRecord)) throw new Error('Expected a native execution record.');
     const hash: string = record.getStateHash();
     const warnings: string = record.stdioSummarizer.getReport();
     const duration: number = record.stopwatch.duration;
     expect(record.getStateHashComponents().dependencies).toHaveLength(1);
-    expect(Reflect.get(record, '_context')).toHaveProperty('records');
+    expect(nativeRecord.eventSink).toBeDefined();
+    expect(nativeRecord.environment).toBeDefined();
     expect(
       graph.hooks.beforeDeleteResults.taps.some((tap) => tap.name === 'CacheablePhasedOperationPlugin')
     ).toBe(true);
@@ -421,9 +425,12 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     await warm.maintainAsync();
     expect(graph.resultByOperation.get(operation)).toBe(record);
     expect(graph.resultByOperation.has(test!.operation('a'))).toBe(false);
-    expect(Reflect.get(record, 'dependencies')).toEqual(new Set());
-    expect(Reflect.get(record, '_context')).not.toHaveProperty('records');
-    expect(Reflect.get(record, '_context').inputsSnapshot).toBeUndefined();
+    expect(nativeRecord.dependencies).toEqual(new Set());
+    expect(nativeRecord.consumers).toEqual(new Set());
+    expect(nativeRecord.eventSink).toBeUndefined();
+    expect(nativeRecord.environment).toBeUndefined();
+    expect(nativeRecord.createChildProcessReporter()).toBeUndefined();
+    expect(() => nativeRecord.collatedWriter).toThrow('Cannot reopen the output of a detached execution record.');
     expect(record.getStateHash()).toBe(hash);
     expect(record.stopwatch.duration).toBe(duration);
     expect(record.stdioSummarizer.getReport()).toBe(warnings);

@@ -67,19 +67,19 @@ export class IPCOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
-  private readonly _rushProject: RushConfigurationProject;
-  private readonly _initialCommand: string;
-  private readonly _incrementalCommand: string | undefined;
-  private readonly _commandForHash: string;
-  private readonly _ignoredParameterValues: ReadonlyArray<string>;
-  private readonly _spawn: IIPCOperationRunnerOptions['spawn'];
-  private readonly _requireIpc: boolean;
+  readonly #rushProject: RushConfigurationProject;
+  readonly #initialCommand: string;
+  readonly #incrementalCommand: string | undefined;
+  readonly #commandForHash: string;
+  readonly #ignoredParameterValues: ReadonlyArray<string>;
+  readonly #spawn: IIPCOperationRunnerOptions['spawn'];
+  readonly #requireIpc: boolean;
 
-  private _ipcProcess: ChildProcess | undefined;
-  private _processReadyPromise: Promise<void> | undefined;
-  private _processClosedPromise: Promise<void> | undefined;
-  private _residentMemoryBytes: number | undefined;
-  private _closing: boolean = false;
+  #ipcProcess: ChildProcess | undefined;
+  #processReadyPromise: Promise<void> | undefined;
+  #processClosedPromise: Promise<void> | undefined;
+  #residentMemoryBytes: number | undefined;
+  #closing: boolean = false;
 
   public constructor(options: IIPCOperationRunnerOptions) {
     const {
@@ -94,56 +94,56 @@ export class IPCOperationRunner implements IOperationRunner {
     this.name = name;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || allowWarningsOnSuccess;
-    this._rushProject = project;
-    this._initialCommand = initialCommand;
-    this._incrementalCommand = incrementalCommand;
-    this._commandForHash = commandForHash;
+    this.#rushProject = project;
+    this.#initialCommand = initialCommand;
+    this.#incrementalCommand = incrementalCommand;
+    this.#commandForHash = commandForHash;
 
-    this._ignoredParameterValues = ignoredParameterValues;
-    this._spawn = options.spawn;
-    this._requireIpc = options.requireIpc ?? false;
+    this.#ignoredParameterValues = ignoredParameterValues;
+    this.#spawn = options.spawn;
+    this.#requireIpc = options.requireIpc ?? false;
   }
 
   public get isActive(): boolean {
-    return !!(this._ipcProcess && this._ipcProcess.exitCode === null && this._ipcProcess.signalCode === null);
+    return !!(this.#ipcProcess && this.#ipcProcess.exitCode === null && this.#ipcProcess.signalCode === null);
   }
 
   public get residentMemoryBytes(): number | undefined {
-    return this.isActive ? this._residentMemoryBytes : undefined;
+    return this.isActive ? this.#residentMemoryBytes : undefined;
   }
 
   public async executeAsync(
     context: IOperationRunnerContext,
     lastState?: IOperationLastState
   ): Promise<OperationStatus> {
-    if (this._closing) {
+    if (this.#closing) {
       // A failed close may already have sent "exit". Never send new work to that retiring child.
       await this.closeAsync();
     }
     const commandToRun: string =
-      lastState && this._incrementalCommand ? this._incrementalCommand : this._initialCommand;
+      lastState && this.#incrementalCommand ? this.#incrementalCommand : this.#initialCommand;
     const invalidate: (reason: string) => void = context.getInvalidateCallback();
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
-        if (!this._ipcProcess || !this.isActive) {
-          await this._processClosedPromise;
-          this._residentMemoryBytes = undefined;
+        if (!this.#ipcProcess || !this.isActive) {
+          await this.#processClosedPromise;
+          this.#residentMemoryBytes = undefined;
           // Log any ignored parameters
-          if (this._ignoredParameterValues.length > 0) {
+          if (this.#ignoredParameterValues.length > 0) {
             terminal.writeLine(
-              `These parameters were ignored for this operation by project-level configuration: ${this._ignoredParameterValues.join(' ')}`
+              `These parameters were ignored for this operation by project-level configuration: ${this.#ignoredParameterValues.join(' ')}`
             );
           }
 
           // Run the operation
           terminal.writeLine('Invoking: ' + commandToRun);
 
-          const { rushConfiguration, projectFolder } = this._rushProject;
+          const { rushConfiguration, projectFolder } = this.#rushProject;
 
           const { environment: initialEnvironment } = context;
 
-          this._ipcProcess = Utilities.executeLifecycleCommandAsync(
+          this.#ipcProcess = Utilities.executeLifecycleCommandAsync(
             commandToRun,
             {
               rushConfiguration,
@@ -157,17 +157,17 @@ export class IPCOperationRunner implements IOperationRunner {
               connectSubprocessTerminator: true,
               initialEnvironment
             },
-            this._spawn
+            this.#spawn
           );
-          this._processClosedPromise = new Promise((resolve) => this._ipcProcess!.once('close', resolve));
+          this.#processClosedPromise = new Promise((resolve) => this.#ipcProcess!.once('close', resolve));
 
           let resolveReadyPromise!: () => void;
 
-          this._processReadyPromise = new Promise<void>((resolve) => {
+          this.#processReadyPromise = new Promise<void>((resolve) => {
             resolveReadyPromise = resolve;
           });
 
-          this._ipcProcess.on('message', (message: unknown) => {
+          this.#ipcProcess.on('message', (message: unknown) => {
             if (isRequestRunEventMessage(message)) {
               const reason: string = message.detail
                 ? `${message.requestor}: ${message.detail}`
@@ -180,8 +180,8 @@ export class IPCOperationRunner implements IOperationRunner {
         } else {
           terminal.writeLine(`Connecting to existing IPC process...`);
         }
-        const subProcess: ChildProcess = this._ipcProcess;
-        const requireIpc: boolean = this._requireIpc;
+        const subProcess: ChildProcess = this.#ipcProcess;
+        const requireIpc: boolean = this.#requireIpc;
         let hasWarningOrError: boolean = false;
         const stdoutDecoder: StringDecoder = new StringDecoder('utf8');
         const stderrDecoder: StringDecoder = new StringDecoder('utf8');
@@ -204,7 +204,7 @@ export class IPCOperationRunner implements IOperationRunner {
           const finishHandler = (message: unknown): void => {
             if (isAfterExecuteEventMessage(message)) {
               const memory: number | undefined = message.residentMemoryBytes;
-              this._residentMemoryBytes =
+              this.#residentMemoryBytes =
                 typeof memory === 'number' && Number.isSafeInteger(memory) && memory > 0 ? memory : undefined;
               terminal.writeLine('Received finish notification');
               subProcess.stdout?.off('data', onStdout);
@@ -259,7 +259,7 @@ export class IPCOperationRunner implements IOperationRunner {
           subProcess.on('message', finishHandler);
           subProcess.on('error', reject);
           subProcess.on('close', onExit);
-          this._processReadyPromise!.then(() => {
+          this.#processReadyPromise!.then(() => {
             isConnected = true;
             terminal.writeLine('Child supports IPC protocol. Sending "run" command...');
             const runCommand: IRunCommandMessage = {
@@ -286,16 +286,16 @@ export class IPCOperationRunner implements IOperationRunner {
   }
 
   public getConfigHash(): string {
-    return this._commandForHash;
+    return this.#commandForHash;
   }
 
   public async closeAsync(): Promise<void> {
-    const { _ipcProcess: subProcess } = this;
+    const subProcess: ChildProcess | undefined = this.#ipcProcess;
     if (!subProcess) {
       return;
     }
 
-    this._closing = true;
+    this.#closing = true;
     if (this.isActive) {
       if (!subProcess.connected) {
         throw new Error(`Cannot close the live IPC runner "${this.name}": its IPC channel is disconnected.`);
@@ -308,11 +308,11 @@ export class IPCOperationRunner implements IOperationRunner {
       await closed;
     }
     // Even after "exit", stdio/descendants can still be draining. Resource ownership ends at "close".
-    await this._processClosedPromise;
-    this._ipcProcess = undefined;
-    this._processReadyPromise = undefined;
-    this._processClosedPromise = undefined;
-    this._residentMemoryBytes = undefined;
-    this._closing = false;
+    await this.#processClosedPromise;
+    this.#ipcProcess = undefined;
+    this.#processReadyPromise = undefined;
+    this.#processClosedPromise = undefined;
+    this.#residentMemoryBytes = undefined;
+    this.#closing = false;
   }
 }

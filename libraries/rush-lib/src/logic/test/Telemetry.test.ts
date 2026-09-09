@@ -19,8 +19,14 @@ class CapturingSink implements IReporterEventSink {
   }
 }
 
-interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
-  _flushAsyncTasks: Map<symbol, Promise<void>>;
+function createFlushGate(): { promise: Promise<void>; release: () => void; reject: (error: Error) => void } {
+  let release!: () => void;
+  let rejectGate!: (error: Error) => void;
+  const promise: Promise<void> = new Promise((resolve, reject) => {
+    release = resolve;
+    rejectGate = reject;
+  });
+  return { promise, release, reject: rejectGate };
 }
 
 describe(Telemetry.name, () => {
@@ -185,12 +191,10 @@ describe(Telemetry.name, () => {
       terminalProvider: new ConsoleTerminalProvider(),
       getIsDebugMode: () => false
     });
-    const customFlushTelemetry: jest.Mock = jest.fn();
-    rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
-    const telemetry: ITelemetryPrivateMembers = new Telemetry(
-      rushConfig,
-      rushSession
-    ) as unknown as ITelemetryPrivateMembers;
+    const gate = createFlushGate();
+    const customFlushTelemetry: jest.Mock = jest.fn(() => gate.promise);
+    rushSession.hooks.flushTelemetry.tapPromise('test', customFlushTelemetry);
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -202,10 +206,16 @@ describe(Telemetry.name, () => {
     expect(customFlushTelemetry).toHaveBeenCalledTimes(1);
     expect(customFlushTelemetry.mock.calls[0][0][0]).toEqual(expect.objectContaining(logData));
 
+    let flushed: boolean = false;
+    const completion: Promise<void> = telemetry.ensureFlushedAsync().then(() => { flushed = true; });
+    await Promise.resolve();
+    expect(flushed).toBe(false);
+    gate.release();
+    await completion;
+    expect(flushed).toBe(true);
     await telemetry.ensureFlushedAsync();
-
-    // Ensure the tasks get cleaned up
-    expect(telemetry._flushAsyncTasks.size).toEqual(0);
+    expect(customFlushTelemetry).toHaveBeenCalledTimes(1);
+    expect(telemetry.store).toEqual([]);
   });
 
   it('calls custom flush telemetry twice', async () => {
@@ -215,12 +225,13 @@ describe(Telemetry.name, () => {
       terminalProvider: new ConsoleTerminalProvider(),
       getIsDebugMode: () => false
     });
-    const customFlushTelemetry: jest.Mock = jest.fn();
-    rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
-    const telemetry: ITelemetryPrivateMembers = new Telemetry(
-      rushConfig,
-      rushSession
-    ) as unknown as ITelemetryPrivateMembers;
+    const firstGate = createFlushGate();
+    const secondGate = createFlushGate();
+    const customFlushTelemetry: jest.Mock = jest.fn()
+      .mockImplementationOnce(() => firstGate.promise)
+      .mockImplementationOnce(() => secondGate.promise);
+    rushSession.hooks.flushTelemetry.tapPromise('test', customFlushTelemetry);
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -243,9 +254,37 @@ describe(Telemetry.name, () => {
     expect(customFlushTelemetry).toHaveBeenCalledTimes(2);
     expect(customFlushTelemetry.mock.calls[1][0][0]).toEqual(expect.objectContaining(logData2));
 
+    let flushed: boolean = false;
+    const completion: Promise<void> = telemetry.ensureFlushedAsync().then(() => { flushed = true; });
+    firstGate.release();
+    await Promise.resolve();
+    expect(flushed).toBe(false);
+    secondGate.release();
+    await completion;
+    expect(flushed).toBe(true);
     await telemetry.ensureFlushedAsync();
+    expect(customFlushTelemetry).toHaveBeenCalledTimes(2);
+    expect(telemetry.store).toEqual([]);
+  });
 
-    // Ensure the tasks get cleaned up
-    expect(telemetry._flushAsyncTasks.size).toEqual(0);
+  it('reports a pending flush rejection once and releases it before a later public join', async () => {
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      `${__dirname}/telemetry/telemetryEnabled.json`
+    );
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new ConsoleTerminalProvider(),
+      getIsDebugMode: () => false
+    });
+    const gate = createFlushGate();
+    rushSession.hooks.flushTelemetry.tapPromise('rejecting-flush', () => gate.promise);
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    telemetry.log({ name: 'failed-flush', durationInSeconds: 1, result: 'Succeeded' });
+    telemetry.flush();
+    const failure: Error = new Error('telemetry upload failed');
+    const rejected: Promise<void> = expect(telemetry.ensureFlushedAsync()).rejects.toBe(failure);
+    gate.reject(failure);
+    await rejected;
+    await expect(telemetry.ensureFlushedAsync()).resolves.toBeUndefined();
+    expect(telemetry.store).toEqual([]);
   });
 });

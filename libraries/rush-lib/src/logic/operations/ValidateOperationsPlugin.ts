@@ -14,10 +14,10 @@ const PLUGIN_NAME: 'ValidateOperationsPlugin' = 'ValidateOperationsPlugin';
  * Core phased command plugin that verifies correctness of the entries in rush-project.json
  */
 export class ValidateOperationsPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -41,7 +41,7 @@ export class ValidateOperationsPlugin implements IPhasedCommandPlugin {
         const projectConfiguration: RushProjectConfiguration | undefined =
           context.projectConfigurations.get(project);
         if (projectConfiguration) {
-          projectConfiguration.validatePhaseConfiguration(phases, this._terminal);
+          projectConfiguration.validatePhaseConfiguration(phases, this.#terminal);
         }
       }
     });

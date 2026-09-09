@@ -42,6 +42,7 @@ import {
   type IEnvironmentConfigIsolation
 } from './TestUtils';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import { AnsiEscape } from '@rushstack/terminal';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
@@ -83,6 +84,29 @@ function expectSpawnToMatchRegexp(spawnCall: SpawnMockCall, expectedRegexp: RegE
     expect(spawnCall[0]).toMatch(expectedRegexp);
   } else {
     expect(spawnCall[1]).toEqual(expect.arrayContaining([expect.stringMatching(expectedRegexp)]));
+  }
+}
+
+async function expectInitializationFailureAsync(repoName: string, expectedMessage: string): Promise<void> {
+  const originalExitCode: string | number | undefined = process.exitCode;
+  const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+  const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  try {
+    const { parser, spawnMock } = await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+    await expect(parser.executeAsync()).resolves.toBe(false);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(exitSpy).toHaveBeenCalledTimes(1);
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
+    expect(spawnMock).not.toHaveBeenCalled();
+    const errors: string = AnsiEscape.removeCodes(
+      errorSpy.mock.calls.map((args) => args.join(' ')).join('\n')
+    ).replace(/\s+/g, ' ');
+    expect(errors).toContain(expectedMessage);
+  } finally {
+    exitSpy.mockRestore();
+    errorSpy.mockRestore();
+    process.exitCode = originalExitCode;
   }
 }
 
@@ -420,49 +444,37 @@ describe('RushCommandLineParser', () => {
     });
 
     describe("in repo with 'build' command overridden as a global command", () => {
-      it(`throws an error when starting Rush`, async () => {
-        const repoName: string = 'overrideBuildAsGlobalCommandRepo';
-
-        await expect(async () => {
-          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
-        }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"command-line.json defines a command \\"build\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
+      it('reports an error and refuses execution when starting Rush', async () => {
+        await expectInitializationFailureAsync(
+          'overrideBuildAsGlobalCommandRepo',
+          'command-line.json defines a command "build" using the command kind "global". This command can only be designated as a command kind "bulk" or "phased".'
         );
       });
     });
 
     describe("in repo with 'rebuild' command overridden as a global command", () => {
-      it(`throws an error when starting Rush`, async () => {
-        const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
-
-        await expect(async () => {
-          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
-        }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"command-line.json defines a command \\"rebuild\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
+      it('reports an error and refuses execution when starting Rush', async () => {
+        await expectInitializationFailureAsync(
+          'overrideRebuildAsGlobalCommandRepo',
+          'command-line.json defines a command "rebuild" using the command kind "global". This command can only be designated as a command kind "bulk" or "phased".'
         );
       });
     });
 
     describe("in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'", () => {
-      it(`throws an error when starting Rush`, async () => {
-        const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
-
-        await expect(async () => {
-          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
-        }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"command-line.json defines a command \\"build\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"build\\"."`
+      it('reports an error and refuses execution when starting Rush', async () => {
+        await expectInitializationFailureAsync(
+          'overrideBuildWithSimultaneousProcessesRepo',
+          'command-line.json defines a command "build" using "safeForSimultaneousRushProcesses=true". This configuration is not supported for "build".'
         );
       });
     });
 
     describe("in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'", () => {
-      it(`throws an error when starting Rush`, async () => {
-        const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
-
-        await expect(async () => {
-          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
-        }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
+      it('reports an error and refuses execution when starting Rush', async () => {
+        await expectInitializationFailureAsync(
+          'overrideRebuildWithSimultaneousProcessesRepo',
+          'command-line.json defines a command "rebuild" using "safeForSimultaneousRushProcesses=true". This configuration is not supported for "rebuild".'
         );
       });
     });
@@ -622,25 +634,19 @@ describe('RushCommandLineParser', () => {
     });
 
     describe('in repo plugin with conflict build command', () => {
-      it(`throws an error when starting Rush`, async () => {
-        const repoName: string = 'pluginWithConflictBuildCommandRepo';
-
-        await expect(async () => {
-          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
-        }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Error from plugin rush-build-command-plugin by rush-build-command-plugin: Error: command-line.json defines a command \\"build\\" using a name that already exists"`
+      it('reports an error and refuses execution when starting Rush', async () => {
+        await expectInitializationFailureAsync(
+          'pluginWithConflictBuildCommandRepo',
+          'Error from plugin rush-build-command-plugin by rush-build-command-plugin: Error: command-line.json defines a command "build" using a name that already exists'
         );
       });
     });
 
     describe("in repo plugin with conflict rebuild command'", () => {
-      it(`throws an error when starting Rush`, async () => {
-        const repoName: string = 'pluginWithConflictRebuildCommandRepo';
-
-        await expect(async () => {
-          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
-        }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"command-line.json defines a parameter \\"--no-color\\" that is associated with a command \\"build\\" that is not defined in this file."`
+      it('reports an error and refuses execution when starting Rush', async () => {
+        await expectInitializationFailureAsync(
+          'pluginWithConflictRebuildCommandRepo',
+          'command-line.json defines a parameter "--no-color" that is associated with a command "build" that is not defined in this file.'
         );
       });
     });

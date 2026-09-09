@@ -150,37 +150,37 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public readonly hooks: PhasedCommandHooks;
   public readonly sessionAbortController: AbortController;
 
-  private readonly _enableParallelism: boolean;
-  private readonly _allowOversubscription: boolean;
-  private readonly _isIncrementalBuildAllowed: boolean;
-  private readonly _disableBuildCache: boolean;
-  private readonly _originalPhases: ReadonlySet<IPhase>;
-  private readonly _initialPhases: ReadonlySet<IPhase>;
-  private readonly _watchPhases: ReadonlySet<IPhase>;
-  private readonly _watchDebounceMs: number;
-  private readonly _alwaysWatch: boolean;
-  private readonly _alwaysInstall: boolean | undefined;
-  private readonly _includeAllProjectsInWatchGraph: boolean;
-  private readonly _terminal: ITerminal;
+  readonly #enableParallelism: boolean;
+  readonly #allowOversubscription: boolean;
+  readonly #isIncrementalBuildAllowed: boolean;
+  readonly #disableBuildCache: boolean;
+  readonly #originalPhases: ReadonlySet<IPhase>;
+  readonly #initialPhases: ReadonlySet<IPhase>;
+  readonly #watchPhases: ReadonlySet<IPhase>;
+  readonly #watchDebounceMs: number;
+  readonly #alwaysWatch: boolean;
+  readonly #alwaysInstall: boolean | undefined;
+  readonly #includeAllProjectsInWatchGraph: boolean;
+  readonly #terminal: ITerminal;
 
-  private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
-  private readonly _selectionParameters: SelectionParameterSet;
-  private readonly _gitSelectorOptions: IGitSelectorParserOptions = {
+  readonly #changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
+  readonly #selectionParameters: SelectionParameterSet;
+  readonly #gitSelectorOptions: IGitSelectorParserOptions = {
     includeExternalDependencies: true,
     enableFiltering: true
   };
-  private readonly _verboseParameter: CommandLineFlagParameter;
-  private readonly _parallelismParameter: CommandLineStringParameter | undefined;
-  private readonly _ignoreHooksParameter: CommandLineFlagParameter;
-  private readonly _watchParameter: CommandLineFlagParameter | undefined;
-  private readonly _timelineParameter: CommandLineFlagParameter | undefined;
-  private readonly _cobuildPlanParameter: CommandLineFlagParameter | undefined;
-  private readonly _installParameter: CommandLineFlagParameter | undefined;
-  private readonly _variantParameter: CommandLineStringParameter | undefined;
-  private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
-  private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
-  private readonly _debugBuildCacheIdsParameter: CommandLineFlagParameter;
-  private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
+  readonly #verboseParameter: CommandLineFlagParameter;
+  readonly #parallelismParameter: CommandLineStringParameter | undefined;
+  readonly #ignoreHooksParameter: CommandLineFlagParameter;
+  readonly #watchParameter: CommandLineFlagParameter | undefined;
+  readonly #timelineParameter: CommandLineFlagParameter | undefined;
+  readonly #cobuildPlanParameter: CommandLineFlagParameter | undefined;
+  readonly #installParameter: CommandLineFlagParameter | undefined;
+  readonly #variantParameter: CommandLineStringParameter | undefined;
+  readonly #noIPCParameter: CommandLineFlagParameter | undefined;
+  readonly #nodeDiagnosticDirParameter: CommandLineStringParameter;
+  readonly #debugBuildCacheIdsParameter: CommandLineFlagParameter;
+  readonly #includePhaseDeps: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -198,25 +198,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       includeAllProjectsInWatchGraph,
       phases
     } = options;
-    this._enableParallelism = enableParallelism;
-    this._allowOversubscription = allowOversubscription;
-    this._isIncrementalBuildAllowed = incremental;
-    this._disableBuildCache = disableBuildCache;
-    this._originalPhases = originalPhases;
-    this._initialPhases = initialPhases;
-    this._watchPhases = watchPhases;
-    this._watchDebounceMs = watchDebounceMs;
-    this._alwaysWatch = alwaysWatch;
-    this._alwaysInstall = alwaysInstall;
-    this._includeAllProjectsInWatchGraph = includeAllProjectsInWatchGraph;
+    this.#enableParallelism = enableParallelism;
+    this.#allowOversubscription = allowOversubscription;
+    this.#isIncrementalBuildAllowed = incremental;
+    this.#disableBuildCache = disableBuildCache;
+    this.#originalPhases = originalPhases;
+    this.#initialPhases = initialPhases;
+    this.#watchPhases = watchPhases;
+    this.#watchDebounceMs = watchDebounceMs;
+    this.#alwaysWatch = alwaysWatch;
+    this.#alwaysInstall = alwaysInstall;
+    this.#includeAllProjectsInWatchGraph = includeAllProjectsInWatchGraph;
     this._runsBeforeInstall = false;
     this.sessionAbortController = new AbortController();
 
     this.hooks = new PhasedCommandHooks();
 
-    this._terminal = new Terminal(this.rushSession.terminalProvider);
+    this.#terminal = new Terminal(this.rushSession.terminalProvider);
 
-    this._parallelismParameter = this._enableParallelism
+    this.#parallelismParameter = this.#enableParallelism
       ? this.defineStringParameter({
           parameterLongName: '--parallelism',
           parameterShortName: '-p',
@@ -230,32 +230,32 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         })
       : undefined;
 
-    this._timelineParameter = this.defineFlagParameter({
+    this.#timelineParameter = this.defineFlagParameter({
       parameterLongName: '--timeline',
       description:
         'After the build is complete, print additional statistics and CPU usage information,' +
         ' including an ASCII chart of the start and stop times for each operation.'
     });
-    this._cobuildPlanParameter = this.defineFlagParameter({
+    this.#cobuildPlanParameter = this.defineFlagParameter({
       parameterLongName: '--log-cobuild-plan',
       description:
         '(EXPERIMENTAL) Before the build starts, log information about the cobuild state. This will include information about ' +
         'clusters and the projects that are part of each cluster.'
     });
 
-    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-      gitOptions: this._gitSelectorOptions,
+    this.#selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+      gitOptions: this.#gitSelectorOptions,
       includeSubspaceSelector: false,
       cwd: this.parser.cwd
     });
 
-    this._verboseParameter = this.defineFlagParameter({
+    this.#verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
 
-    this._includePhaseDeps = this.defineFlagParameter({
+    this.#includePhaseDeps = this.defineFlagParameter({
       parameterLongName: '--include-phase-deps',
       description:
         'If the selected projects are "unsafe" (missing some dependencies), add the minimal set of phase dependencies. For example, ' +
@@ -263,7 +263,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         `Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
     });
 
-    this._changedProjectsOnlyParameter = this._isIncrementalBuildAllowed
+    this.#changedProjectsOnlyParameter = this.#isIncrementalBuildAllowed
       ? this.defineFlagParameter({
           parameterLongName: '--changed-projects-only',
           parameterShortName: '-c',
@@ -276,7 +276,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         })
       : undefined;
 
-    this._ignoreHooksParameter = this.defineFlagParameter({
+    this.#ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description:
         `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
@@ -284,12 +284,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     });
 
     // Only define the parameter if it has an effect.
-    this._watchParameter =
-      this._watchPhases.size > 0 && !this._alwaysWatch
+    this.#watchParameter =
+      this.#watchPhases.size > 0 && !this.#alwaysWatch
         ? this.defineFlagParameter({
             parameterLongName: '--watch',
             description: `Starts a file watcher after initial execution finishes. Will run the following phases on affected projects: ${Array.from(
-              this._watchPhases,
+              this.#watchPhases,
               (phase: IPhase) => phase.name
             ).join(', ')}`
           })
@@ -297,8 +297,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     // If `this._alwaysInstall === undefined`, Rush does not define the parameter
     // but a repository may still define a custom parameter with the same name.
-    this._installParameter =
-      this._alwaysInstall === false
+    this.#installParameter =
+      this.#alwaysInstall === false
         ? this.defineFlagParameter({
             parameterLongName: '--install',
             description:
@@ -307,13 +307,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           })
         : undefined;
 
-    this._variantParameter =
-      this._alwaysInstall !== undefined ? this.defineStringParameter(VARIANT_PARAMETER) : undefined;
+    this.#variantParameter =
+      this.#alwaysInstall !== undefined ? this.defineStringParameter(VARIANT_PARAMETER) : undefined;
 
     const isIpcSupported: boolean =
-      this._watchPhases.size > 0 &&
+      this.#watchPhases.size > 0 &&
       !!this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode;
-    this._noIPCParameter = isIpcSupported
+    this.#noIPCParameter = isIpcSupported
       ? this.defineFlagParameter({
           parameterLongName: '--no-ipc',
           description:
@@ -322,7 +322,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         })
       : undefined;
 
-    this._nodeDiagnosticDirParameter = this.defineStringParameter({
+    this.#nodeDiagnosticDirParameter = this.defineStringParameter({
       parameterLongName: '--node-diagnostic-dir',
       argumentName: 'DIRECTORY',
       description:
@@ -330,7 +330,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         'This directory will contain a subdirectory for each project and phase.'
     });
 
-    this._debugBuildCacheIdsParameter = this.defineFlagParameter({
+    this.#debugBuildCacheIdsParameter = this.defineFlagParameter({
       parameterLongName: '--debug-build-cache-ids',
       description:
         'Logs information about the components of the build cache ids for individual operations. This is useful for debugging the incremental build logic.'
@@ -343,22 +343,22 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   public async runAsync(): Promise<void> {
-    await this._runAsync();
+    await this.#runAsync();
   }
 
   public validateEngineCommand(): void {
     if (
-      this._alwaysWatch ||
-      this._watchParameter?.value ||
-      this._alwaysInstall ||
-      this._installParameter?.value ||
-      this._nodeDiagnosticDirParameter.value ||
-      this._variantParameter?.value
+      this.#alwaysWatch ||
+      this.#watchParameter?.value ||
+      this.#alwaysInstall ||
+      this.#installParameter?.value ||
+      this.#nodeDiagnosticDirParameter.value ||
+      this.#variantParameter?.value
     ) {
       throw new Error('Watch, install, variant and diagnostic-directory options require --no-daemon.');
     }
     if (
-      !this._ignoreHooksParameter.value &&
+      !this.#ignoreHooksParameter.value &&
       (this.rushConfiguration.eventHooks.get(Event.preRushBuild).length ||
         this.rushConfiguration.eventHooks.get(Event.postRushBuild).length)
     ) {
@@ -367,7 +367,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   public getEngineParameterIdentity(): string {
-    const selectionNames: ReadonlySet<string> = this._selectionParameters.parameterNames;
+    const selectionNames: ReadonlySet<string> = this.#selectionParameters.parameterNames;
     return JSON.stringify([
       this.actionName,
       this.parser.getParameterStringMap(),
@@ -378,17 +378,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public async selectEngineOperationsAsync(
     graph: IOperationGraph
   ): Promise<ReadonlyMap<Operation, OperationEnabledState>> {
-    this._gitSelectorOptions.getIncrementalBuildIgnoredGlobsAsync = async (project) => {
+    this.#gitSelectorOptions.getIncrementalBuildIgnoredGlobsAsync = async (project) => {
       const configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
-        await RushProjectConfiguration._tryLoadForProjectsUncachedAsync([project], this._terminal);
+        await RushProjectConfiguration._tryLoadForProjectsUncachedAsync([project], this.#terminal);
       return configurations.get(project)?.incrementalBuildIgnoredGlobs;
     };
-    const projects: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      this._terminal
+    const projects: Set<RushConfigurationProject> = await this.#selectionParameters.getSelectedProjectsAsync(
+      this.#terminal
     );
-    const includePhaseDeps: boolean = !!this._includePhaseDeps?.value;
+    const includePhaseDeps: boolean = !!this.#includePhaseDeps?.value;
     const phases: Set<string> = new Set(
-      Array.from(includePhaseDeps ? this._originalPhases : this._initialPhases, (phase) => phase.name)
+      Array.from(includePhaseDeps ? this.#originalPhases : this.#initialPhases, (phase) => phase.name)
     );
     const selected: Map<Operation, OperationEnabledState> = new Map();
     for (const operation of graph.operations) {
@@ -401,7 +401,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         for (const dependency of operation.dependencies) selected.set(dependency, true);
       }
     }
-    if (this._changedProjectsOnlyParameter?.value) {
+    if (this.#changedProjectsOnlyParameter?.value) {
       for (const operation of selected.keys()) {
         if (!operation.settings?.ignoreChangedProjectsOnlyFlag) {
           selected.set(operation, 'ignore-dependency-changes');
@@ -415,19 +415,19 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     this.validateEngineCommand();
     await this.initializePluginsAsync();
     let engine: IPhasedCommandEngine | undefined;
-    await this._runAsync((result) => {
+    await this.#runAsync((result) => {
       engine = result;
     });
     if (!engine) throw new Error('Native command preparation did not produce an operation graph.');
     return engine;
   }
 
-  private async _runAsync(onEngine?: (engine: IPhasedCommandEngine) => void): Promise<void> {
+  async #runAsync(onEngine?: (engine: IPhasedCommandEngine) => void): Promise<void> {
     // Initialize the stopwatch's start time at 0 (process startup).
     const stopwatch: Stopwatch = Stopwatch.start(0);
 
     const { defaultSubspace } = this.rushConfiguration;
-    if (this._alwaysInstall || this._installParameter?.value) {
+    if (this.#alwaysInstall || this.#installParameter?.value) {
       await measureAsyncFn(`${PERF_PREFIX}:install`, async () => {
         const { doBasicInstallAsync } = await import(
           /* webpackChunkName: 'doBasicInstallAsync' */
@@ -435,12 +435,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         );
 
         const variant: string | undefined = await getVariantAsync(
-          this._variantParameter,
+          this.#variantParameter,
           this.rushConfiguration,
           true
         );
         await doBasicInstallAsync({
-          terminal: this._terminal,
+          terminal: this.#terminal,
           rushConfiguration: this.rushConfiguration,
           rushGlobalFolder: this.rushGlobalFolder,
           isDebug: this.parser.isDebug,
@@ -455,12 +455,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       });
     }
 
-    await this._validateInstallStateAsync();
+    await this.#validateInstallStateAsync();
 
-    measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this._doBeforeTask());
+    measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this.#doBeforeTask());
 
     const hooks: PhasedCommandHooks = this.hooks;
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
     const presentationTerminal: ITerminal =
       onEngine || _isRushSessionOperationStreamEnabled(this.rushSession)
         ? new Terminal(new NoOpTerminalProvider())
@@ -469,8 +469,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
     const maxParallelism: number = getNumberOfCores();
-    const parallelism: Parallelism = this._enableParallelism
-      ? parseParallelism(this._parallelismParameter?.value)
+    const parallelism: Parallelism = this.#enableParallelism
+      ? parseParallelism(this.#parallelismParameter?.value)
       : 1;
 
     await measureAsyncFn(`${PERF_PREFIX}:applyStandardPlugins`, async () => {
@@ -494,7 +494,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       // Forward ignored parameters to child processes as an environment variable
       new IgnoredParametersPlugin().apply(hooks);
 
-      const showTimeline: boolean = this._timelineParameter?.value ?? false;
+      const showTimeline: boolean = this.#timelineParameter?.value ?? false;
       if (showTimeline) {
         const { ConsoleTimelinePlugin } = await import(
           /* webpackChunkName: 'ConsoleTimelinePlugin' */
@@ -503,7 +503,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         new ConsoleTimelinePlugin(presentationTerminal).apply(this.hooks);
       }
 
-      const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
+      const diagnosticDir: string | undefined = this.#nodeDiagnosticDirParameter.value;
       if (diagnosticDir) {
         new NodeDiagnosticDirPlugin({
           diagnosticDir
@@ -533,13 +533,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       });
     }
 
-    const isQuietMode: boolean = !this._verboseParameter.value;
+    const isQuietMode: boolean = !this.#verboseParameter.value;
 
-    const changedProjectsOnly: boolean = !!this._changedProjectsOnlyParameter?.value;
+    const changedProjectsOnly: boolean = !!this.#changedProjectsOnlyParameter?.value;
 
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     let cobuildConfiguration: CobuildConfiguration | undefined;
-    if (!this._disableBuildCache) {
+    if (!this.#disableBuildCache) {
       await measureAsyncFn(`${PERF_PREFIX}:configureBuildCache`, async () => {
         [buildCacheConfiguration, cobuildConfiguration] = await Promise.all([
           BuildCacheConfiguration.tryLoadAsync(terminal, this.rushConfiguration, this.rushSession),
@@ -555,8 +555,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       });
     }
 
-    const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
-    const generateFullGraph: boolean = !!onEngine || (isWatch && this._includeAllProjectsInWatchGraph);
+    const isWatch: boolean = this.#watchParameter?.value || this.#alwaysWatch;
+    const generateFullGraph: boolean = !!onEngine || (isWatch && this.#includeAllProjectsInWatchGraph);
     let transferredEngine: boolean = false;
     let ownedGraph: OperationGraph | undefined;
 
@@ -566,7 +566,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         () =>
           onEngine
             ? Promise.resolve(new Set(this.rushConfiguration.projects))
-            : this._selectionParameters.getSelectedProjectsAsync(terminal, generateFullGraph)
+            : this.#selectionParameters.getSelectedProjectsAsync(terminal, generateFullGraph)
       );
 
       const customParametersByName: Map<string, CommandLineParameter> = new Map();
@@ -582,13 +582,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       }
 
       await measureAsyncFn(`${PERF_PREFIX}:applySituationalPlugins`, async () => {
-        if (onEngine && this.rushConfiguration.daemon.usePersistentIpcRunners && !this._noIPCParameter?.value) {
+        if (onEngine && this.rushConfiguration.daemon.usePersistentIpcRunners && !this.#noIPCParameter?.value) {
           const { DaemonIpcOperationRunnerPlugin } = await import(
             /* webpackChunkName: 'DaemonIpcOperationRunnerPlugin' */ '../../logic/operations/DaemonIpcOperationRunnerPlugin'
           );
           new DaemonIpcOperationRunnerPlugin().apply(this.hooks);
         }
-        if (isWatch && this._noIPCParameter?.value === false) {
+        if (isWatch && this.#noIPCParameter?.value === false) {
           new (
             await import(
               /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
@@ -619,23 +619,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             useDirectFileTransfersForBuildCache
           }).apply(this.hooks);
 
-          if (this._debugBuildCacheIdsParameter.value) {
+          if (this.#debugBuildCacheIdsParameter.value) {
             new DebugHashesPlugin(terminal).apply(this.hooks);
           }
-        } else if (!this._disableBuildCache) {
+        } else if (!this.#disableBuildCache) {
           terminal.writeVerboseLine(`Incremental strategy: output preservation`);
           // Explicitly disabling the build cache also disables legacy skip detection.
           new LegacySkipPlugin({
             allowWarningsInSuccessfulBuild: buildSkipWithAllowWarningsInSuccessfulBuild,
             terminal,
             changedProjectsOnly,
-            isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
+            isIncrementalBuildAllowed: this.#isIncrementalBuildAllowed
           }).apply(this.hooks);
         } else {
           terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
         }
 
-        const showBuildPlan: boolean = this._cobuildPlanParameter?.value ?? false;
+        const showBuildPlan: boolean = this.#cobuildPlanParameter?.value ?? false;
 
         if (showBuildPlan) {
           if (!buildCacheConfiguration?.buildCacheEnabled) {
@@ -669,7 +669,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         ? await getProjectConfigurationIdentityAsync(projectConfigurations, this.rushConfiguration.daemon.usePersistentIpcRunners)
         : undefined;
 
-      const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
+      const includePhaseDeps: boolean = this.#includePhaseDeps?.value ?? false;
 
       const createOperationsContext: ICreateOperationsContext = {
         buildCacheConfiguration,
@@ -677,15 +677,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         customParameters: customParametersByName,
         changedProjectsOnly,
         includePhaseDeps,
-        isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
+        isIncrementalBuildAllowed: this.#isIncrementalBuildAllowed,
         isWatch,
         rushConfiguration: this.rushConfiguration,
         parallelism,
         phaseSelection: isWatch
-          ? this._watchPhases
+          ? this.#watchPhases
           : includePhaseDeps
-            ? this._originalPhases
-            : this._initialPhases,
+            ? this.#originalPhases
+            : this.#initialPhases,
         projectSelection,
         generateFullGraph,
         projectConfigurations
@@ -724,13 +724,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       let executionTelemetryHandler: IOperationGraphTelemetry | undefined;
       const { telemetry: parserTelemetry } = this.parser;
       if (parserTelemetry) {
-        const { _changedProjectsOnlyParameter: changedProjectsOnlyParameter } = this;
+        const changedProjectsOnlyParameter: CommandLineFlagParameter | undefined =
+          this.#changedProjectsOnlyParameter;
         executionTelemetryHandler = {
           changedProjectsOnlyKey:
             changedProjectsOnlyParameter?.scopedLongName ?? changedProjectsOnlyParameter?.longName,
           initialExtraData: {
             // Fields preserved across the command invocation
-            ...this._selectionParameters.getTelemetry(),
+            ...this.#selectionParameters.getTelemetry(),
             ...this.getParameterStringMap()
           },
           nameForLog: this.actionName,
@@ -744,7 +745,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       const getGraphInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
         onEngine && getInputsSnapshotAsync
           ? async () => {
-              await this._validateInstallStateAsync();
+              await this.#validateInstallStateAsync();
               const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
                 await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal);
               if (
@@ -766,7 +767,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         ],
         parallelism,
         maxParallelism,
-        allowOversubscription: this._allowOversubscription,
+        allowOversubscription: this.#allowOversubscription,
         isWatch,
         pauseNextIteration: !!onEngine,
         getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
@@ -811,7 +812,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           rushSession: this.rushSession,
           inputsSnapshot: initialSnapshot,
           getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
-          isIncremental: this._isIncrementalBuildAllowed,
+          isIncremental: this.#isIncrementalBuildAllowed,
           phaseNames: Array.from(new Set(Array.from(operations, (op) => op.associatedPhase.name))).sort(),
           pluginNames: Array.from(
             new Set([
@@ -835,7 +836,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
       const executeOptions: IExecuteOperationsOptions = {
         graph,
-        ignoreHooks: !!this._ignoreHooksParameter.value,
+        ignoreHooks: !!this.#ignoreHooksParameter.value,
         isWatch,
         stopwatch,
         terminal: presentationTerminal
@@ -864,7 +865,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           graph,
           initialSnapshot,
           terminal: presentationTerminal,
-          debounceMs: this._watchDebounceMs,
+          debounceMs: this.#watchDebounceMs,
           renderStatusInPlace: !_isRushSessionOperationStreamEnabled(this.rushSession)
         });
         watcher.clearStatus();
@@ -879,7 +880,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       } else {
         await measureAsyncFn(`${PERF_PREFIX}:runInitialPhases`, () =>
           measureAsyncFn(`${PERF_PREFIX}:executeOperations`, () =>
-            this._executeOperationsAsync(executeOptions, initialIterationOptions)
+            this.#executeOperationsAsync(executeOptions, initialIterationOptions)
           )
         );
       }
@@ -895,7 +896,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   /**
    * Runs a set of operations and reports the results.
    */
-  private async _executeOperationsAsync(
+  async #executeOperationsAsync(
     options: IExecuteOperationsOptions,
     iterationOptions: IOperationGraphIterationOptions
   ): Promise<void> {
@@ -940,7 +941,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
 
     if (!ignoreHooks) {
-      measureFn(`${PERF_PREFIX}:doAfterTask`, () => this._doAfterTask());
+      measureFn(`${PERF_PREFIX}:doAfterTask`, () => this.#doAfterTask());
     }
 
     if (!success) {
@@ -948,7 +949,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
   }
 
-  private async _validateInstallStateAsync(): Promise<void> {
+  async #validateInstallStateAsync(): Promise<void> {
     if (!this._runsBeforeInstall) {
       await measureAsyncFn(`${PERF_PREFIX}:checkInstallFlag`, async () => {
         const {
@@ -973,7 +974,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
   }
 
-  private _doBeforeTask(): void {
+  #doBeforeTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
@@ -984,10 +985,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     SetupChecks.validate(this.rushConfiguration);
 
-    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
+    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this.#ignoreHooksParameter.value);
   }
 
-  private _doAfterTask(): void {
+  #doAfterTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
@@ -995,7 +996,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
-    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
+    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this.#ignoreHooksParameter.value);
   }
 }
 

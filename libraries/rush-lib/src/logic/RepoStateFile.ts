@@ -47,12 +47,12 @@ const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
  * @public
  */
 export class RepoStateFile {
-  private _pnpmShrinkwrapHash: string | undefined;
-  private _preferredVersionsHash: string | undefined;
-  private _packageJsonInjectedDependenciesHash: string | undefined;
-  private _pnpmCatalogsHash: string | undefined;
-  private _isValid: boolean;
-  private _modified: boolean = false;
+  #pnpmShrinkwrapHash: string | undefined;
+  #preferredVersionsHash: string | undefined;
+  #packageJsonInjectedDependenciesHash: string | undefined;
+  #pnpmCatalogsHash: string | undefined;
+  #isValid: boolean;
+  #modified: boolean = false;
 
   /**
    * Get the absolute file path of the repo-state.json file.
@@ -61,13 +61,13 @@ export class RepoStateFile {
 
   private constructor(repoStateJson: IRepoStateJson | undefined, isValid: boolean, filePath: string) {
     this.filePath = filePath;
-    this._isValid = isValid;
+    this.#isValid = isValid;
 
     if (repoStateJson) {
-      this._pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
-      this._preferredVersionsHash = repoStateJson.preferredVersionsHash;
-      this._packageJsonInjectedDependenciesHash = repoStateJson.packageJsonInjectedDependenciesHash;
-      this._pnpmCatalogsHash = repoStateJson.pnpmCatalogsHash;
+      this.#pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
+      this.#preferredVersionsHash = repoStateJson.preferredVersionsHash;
+      this.#packageJsonInjectedDependenciesHash = repoStateJson.packageJsonInjectedDependenciesHash;
+      this.#pnpmCatalogsHash = repoStateJson.pnpmCatalogsHash;
     }
   }
 
@@ -75,35 +75,35 @@ export class RepoStateFile {
    * The hash of the pnpm shrinkwrap file at the end of the last update.
    */
   public get pnpmShrinkwrapHash(): string | undefined {
-    return this._pnpmShrinkwrapHash;
+    return this.#pnpmShrinkwrapHash;
   }
 
   /**
    * The hash of all preferred versions at the end of the last update.
    */
   public get preferredVersionsHash(): string | undefined {
-    return this._preferredVersionsHash;
+    return this.#preferredVersionsHash;
   }
 
   /**
    * The hash of all preferred versions at the end of the last update.
    */
   public get packageJsonInjectedDependenciesHash(): string | undefined {
-    return this._packageJsonInjectedDependenciesHash;
+    return this.#packageJsonInjectedDependenciesHash;
   }
 
   /**
    * The hash of the PNPM catalog definitions at the end of the last update.
    */
   public get pnpmCatalogsHash(): string | undefined {
-    return this._pnpmCatalogsHash;
+    return this.#pnpmCatalogsHash;
   }
 
   /**
    * If false, the repo-state.json file is not valid and its values cannot be relied upon
    */
   public get isValid(): boolean {
-    return this._isValid;
+    return this.#isValid;
   }
 
   /**
@@ -190,14 +190,14 @@ export class RepoStateFile {
           rushConfiguration.experimentsConfiguration.configuration
         );
 
-        if (this._pnpmShrinkwrapHash !== shrinkwrapFileHash) {
-          this._pnpmShrinkwrapHash = shrinkwrapFileHash;
-          this._modified = true;
+        if (this.#pnpmShrinkwrapHash !== shrinkwrapFileHash) {
+          this.#pnpmShrinkwrapHash = shrinkwrapFileHash;
+          this.#modified = true;
         }
       }
-    } else if (this._pnpmShrinkwrapHash !== undefined) {
-      this._pnpmShrinkwrapHash = undefined;
-      this._modified = true;
+    } else if (this.#pnpmShrinkwrapHash !== undefined) {
+      this.#pnpmShrinkwrapHash = undefined;
+      this.#modified = true;
     }
 
     // Currently, only support saving the preferred versions hash if using workspaces
@@ -206,13 +206,13 @@ export class RepoStateFile {
     if (useWorkspaces) {
       const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
       const preferredVersionsHash: string = commonVersions.getPreferredVersionsHash();
-      if (this._preferredVersionsHash !== preferredVersionsHash) {
-        this._preferredVersionsHash = preferredVersionsHash;
-        this._modified = true;
+      if (this.#preferredVersionsHash !== preferredVersionsHash) {
+        this.#preferredVersionsHash = preferredVersionsHash;
+        this.#modified = true;
       }
-    } else if (this._preferredVersionsHash !== undefined) {
-      this._preferredVersionsHash = undefined;
-      this._modified = true;
+    } else if (this.#preferredVersionsHash !== undefined) {
+      this.#preferredVersionsHash = undefined;
+      this.#modified = true;
     }
 
     if (rushConfiguration.isPnpm) {
@@ -223,65 +223,65 @@ export class RepoStateFile {
       // so we don't need to track the hash value for that subspace
       if (
         packageJsonInjectedDependenciesHash &&
-        packageJsonInjectedDependenciesHash !== this._packageJsonInjectedDependenciesHash
+        packageJsonInjectedDependenciesHash !== this.#packageJsonInjectedDependenciesHash
       ) {
-        this._packageJsonInjectedDependenciesHash = packageJsonInjectedDependenciesHash;
-        this._modified = true;
-      } else if (!packageJsonInjectedDependenciesHash && this._packageJsonInjectedDependenciesHash) {
+        this.#packageJsonInjectedDependenciesHash = packageJsonInjectedDependenciesHash;
+        this.#modified = true;
+      } else if (!packageJsonInjectedDependenciesHash && this.#packageJsonInjectedDependenciesHash) {
         // if packageJsonInjectedDependenciesHash is undefined, but this._packageJsonInjectedDependenciesHash is not
         // means users may turn off the injected installation
         // so we will need to remove unused fields in repo-state.json as well
-        this._packageJsonInjectedDependenciesHash = undefined;
-        this._modified = true;
+        this.#packageJsonInjectedDependenciesHash = undefined;
+        this.#modified = true;
       }
 
       // Track catalog hash to detect when catalog definitions change
       const pnpmCatalogsHash: string | undefined = subspace.getPnpmCatalogsHash();
-      if (pnpmCatalogsHash && pnpmCatalogsHash !== this._pnpmCatalogsHash) {
-        this._pnpmCatalogsHash = pnpmCatalogsHash;
-        this._modified = true;
-      } else if (!pnpmCatalogsHash && this._pnpmCatalogsHash) {
-        this._pnpmCatalogsHash = undefined;
-        this._modified = true;
+      if (pnpmCatalogsHash && pnpmCatalogsHash !== this.#pnpmCatalogsHash) {
+        this.#pnpmCatalogsHash = pnpmCatalogsHash;
+        this.#modified = true;
+      } else if (!pnpmCatalogsHash && this.#pnpmCatalogsHash) {
+        this.#pnpmCatalogsHash = undefined;
+        this.#modified = true;
       }
     }
 
     // Now that the file has been refreshed, we know its contents are valid
-    this._isValid = true;
+    this.#isValid = true;
 
-    return this._saveIfModified();
+    return this.#saveIfModified();
   }
 
   /**
    * Writes the "repo-state.json" file to disk, using the filename that was passed to loadFromFile().
    */
-  private _saveIfModified(): boolean {
-    if (this._modified) {
+  #saveIfModified(): boolean {
+    if (this.#modified) {
       const content: string =
         '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
-        `${NewlineKind.Lf}${this._serialize()}`;
+        `${NewlineKind.Lf}${this.#serialize()}`;
       FileSystem.writeFile(this.filePath, content);
-      this._modified = false;
+      this.#modified = false;
       return true;
     }
 
     return false;
   }
 
-  private _serialize(): string {
+  #serialize(): string {
     // We need to set these one-by-one, since JsonFile.stringify does not like undefined values
     const repoStateJson: IRepoStateJson = {};
-    if (this._pnpmShrinkwrapHash) {
-      repoStateJson.pnpmShrinkwrapHash = this._pnpmShrinkwrapHash;
+    if (this.#pnpmShrinkwrapHash) {
+      repoStateJson.pnpmShrinkwrapHash = this.#pnpmShrinkwrapHash;
     }
-    if (this._preferredVersionsHash) {
-      repoStateJson.preferredVersionsHash = this._preferredVersionsHash;
+    if (this.#preferredVersionsHash) {
+      repoStateJson.preferredVersionsHash = this.#preferredVersionsHash;
     }
-    if (this._packageJsonInjectedDependenciesHash) {
-      repoStateJson.packageJsonInjectedDependenciesHash = this._packageJsonInjectedDependenciesHash;
+    if (this.#packageJsonInjectedDependenciesHash) {
+      repoStateJson.packageJsonInjectedDependenciesHash = this.#packageJsonInjectedDependenciesHash;
     }
-    if (this._pnpmCatalogsHash) {
-      repoStateJson.pnpmCatalogsHash = this._pnpmCatalogsHash;
+    if (this.#pnpmCatalogsHash) {
+      repoStateJson.pnpmCatalogsHash = this.#pnpmCatalogsHash;
     }
 
     return JsonFile.stringify(repoStateJson, { newlineConversion: NewlineKind.Lf });
