@@ -1033,19 +1033,20 @@ export class OperationGraph implements IOperationGraph {
       }
       try {
         await graph.closeRunnersAsync(recordsToClose.map((record) => record.operation));
-      } catch (e) {
-        if (e instanceof AggregateError) {
-          for (const error of e.errors) {
-            if (error instanceof OperationRunnerCloseError) {
-              const record: OperationExecutionRecord | undefined = executionRecords.get(error.operation);
-              if (record) {
-                reportRunnerCleanupFailure(record, error.cause);
-              }
+      } catch (error) {
+        const failures: readonly unknown[] =
+          error instanceof AggregateError && error.errors.length > 0 ? error.errors : [error];
+        for (const failure of failures) {
+          if (failure instanceof OperationRunnerCloseError) {
+            const record: OperationExecutionRecord | undefined = executionRecords.get(failure.operation);
+            if (record) {
+              reportRunnerCleanupFailure(record, failure.cause);
+              continue;
             }
           }
-        } else {
+          const cleanupError: Error = failure instanceof Error ? failure : new Error(String(failure));
           for (const record of recordsToClose) {
-            reportRunnerCleanupFailure(record, e);
+            reportRunnerCleanupFailure(record, cleanupError);
           }
         }
       }

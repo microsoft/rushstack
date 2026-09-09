@@ -1364,6 +1364,43 @@ describe('runner persistence policy', () => {
     expect(downstreamRun).not.toHaveBeenCalled();
   });
 
+  it.each([false, true])(
+    'blocks dependents after an aggregate cleanup notification failure (empty: %s)',
+    async (empty) => {
+      const upstreamRunner: ClosableRunner = new ClosableRunner('upstream');
+      const downstreamRun: jest.Mock = jest.fn(async () => OperationStatus.Success);
+      const upstream: Operation = new Operation({
+        runner: upstreamRunner, logFilenameIdentifier: 'upstream',
+        phase: mockPhase, project: getOrCreateProject('upstream')
+      });
+      const downstream: Operation = new Operation({
+        runner: new MockOperationRunner('downstream', downstreamRun),
+        logFilenameIdentifier: 'downstream', phase: mockPhase, project: getOrCreateProject('downstream')
+      });
+      downstream.addDependency(upstream);
+      const graph: OperationGraph = new OperationGraph(new Set([upstream, downstream]), graphOptions);
+      configureRunnerPersistence(graph, (operation) => operation !== upstream);
+      const cause: Error = new Error('cleanup notification failed');
+      const failure: AggregateError = new AggregateError(empty ? [] : [cause], 'aggregate cleanup failed');
+      let threw: boolean = false;
+      graph.hooks.onExecutionStatesUpdated.tap('cleanup-notification', () => {
+        if (upstreamRunner.closeAsync.mock.calls.length > 0 && !threw) {
+          threw = true;
+          throw failure;
+        }
+      });
+
+      const result: IExecutionResult = await graph.executeAsync({});
+
+      expect(threw).toBe(true);
+      expect(result.status).toBe(OperationStatus.Failure);
+      expect(result.operationResults.get(upstream)?.error).toBe(empty ? failure : cause);
+      expect(result.operationResults.get(downstream)?.status).toBe(OperationStatus.Blocked);
+      expect(upstreamRunner.closeAsync).toHaveBeenCalledTimes(1);
+      expect(downstreamRun).not.toHaveBeenCalled();
+    }
+  );
+
   it('closes an active cold runner when an iteration bypasses runner execution', async () => {
     const persistentRunner: ClosableRunner = new ClosableRunner('persistent');
     const coldRunner: ClosableRunner = new ClosableRunner('cold');
