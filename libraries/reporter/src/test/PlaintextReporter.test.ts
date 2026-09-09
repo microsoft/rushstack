@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as fs from 'node:fs';
+
 import { PlaintextReporter, type IReporterEventEnvelope } from '../index';
 
 function ev(
@@ -98,6 +100,56 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('TOP_SECRET_VALUE');
   });
 
+  it('renders negotiated compiler details without a duplicate raw diagnostic', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('diagnosticEmitted', {
+        code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+        severity: 'error',
+        summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+        parameters: {
+          tool: { value: 'typescript', privacy: 'public' },
+          code: { value: 'TS1005', privacy: 'public' },
+          message: { value: 'semicolon expected', privacy: 'local-sensitive' }
+        },
+        source: { kind: 'file', file: 'src/index.ts', line: 4, column: 2, toolName: 'typescript' }
+      })
+    );
+
+    expect(capture.getOutput()).toContain('typescript');
+    expect(capture.getOutput()).toContain('TS1005');
+    expect(capture.getOutput()).toContain('src/index.ts:4:2');
+    expect(capture.getOutput().match(/semicolon expected/g)).toHaveLength(1);
+  });
+
+  it('redacts secret diagnostic values and the whole secret envelope', () => {
+    const capture: ICapture = makeDetailed();
+    const payload = {
+      code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+      severity: 'warning',
+      summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+      parameters: {
+        tool: { value: 'typescript', privacy: 'public' },
+        code: { value: 'TS1005', privacy: 'public' },
+        message: { value: 'TOP_SECRET_MESSAGE', privacy: 'secret' }
+      },
+      source: { kind: 'file', file: 'src/index.ts', line: 4, column: 2 }
+    };
+    capture.reporter.report(ev('diagnosticEmitted', payload, undefined, 'local-sensitive'));
+    capture.reporter.report(
+      ev(
+        'diagnosticEmitted',
+        { ...payload, source: { kind: 'file', file: 'TOP_SECRET_FILE' } },
+        undefined,
+        'secret'
+      )
+    );
+
+    expect(capture.getOutput()).toContain('[secret]');
+    expect(capture.getOutput()).toContain('src/index.ts:4:2');
+    expect(capture.getOutput()).not.toContain('TOP_SECRET');
+  });
+
   it('does not replay old-engine output that was already rendered', () => {
     const capture: ICapture = makeDetailed();
     capture.reporter.report(
@@ -119,6 +171,66 @@ describe('PlaintextReporter', () => {
 
     expect(capture.getOutput()).toContain('Building project-a\nproject-a: success');
     expect(capture.getOutput()).not.toContain('Building \nproject-a');
+  });
+
+  it.each([3, 0])('preserves grouped UTF-8 when the first spool write returns %s bytes', async (count) => {
+    const fsModule: typeof fs = jest.requireActual('node:fs');
+    const originalWrite: typeof fs.writeSync = fsModule.writeSync;
+    const capture: ICapture = makeDetailed();
+    const text: string = 'A\u{1f680}B\n';
+    capture.reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+    const writeSpy = jest
+      .spyOn(fsModule, 'writeSync')
+      .mockImplementationOnce((fd, data: string | NodeJS.ArrayBufferView) => {
+        const buffer: Buffer =
+          typeof data === 'string'
+            ? Buffer.from(data, 'utf8')
+            : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+        return count === 0 ? 0 : originalWrite(fd, buffer, 0, count);
+      });
+    try {
+      capture.reporter.report(ev('externalOutput', { text }, { operationId: 'op' }));
+      capture.reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+      await capture.reporter.closeAsync();
+    } finally {
+      writeSpy.mockRestore();
+      await capture.reporter.closeAsync();
+    }
+
+    expect(capture.getOutput().split(text)).toHaveLength(2);
+    expect(capture.getOutput().includes('Unable to spool')).toBe(count === 0);
+    expect(capture.getOutput()).not.toContain('\ufffd');
+  });
+
+  it('does not repeat a partially persisted UTF-8 prefix when the spool then fails', async () => {
+    const fsModule: typeof fs = jest.requireActual('node:fs');
+    const originalWrite: typeof fs.writeSync = fsModule.writeSync;
+    const capture: ICapture = makeDetailed();
+    const text: string = 'A\u{1f680}B\n';
+    capture.reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+    const writeSpy = jest
+      .spyOn(fsModule, 'writeSync')
+      .mockImplementationOnce((fd, data: string | NodeJS.ArrayBufferView) => {
+        const buffer: Buffer =
+          typeof data === 'string'
+            ? Buffer.from(data, 'utf8')
+            : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+        return originalWrite(fd, buffer, 0, 3);
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('spool full');
+      });
+    try {
+      capture.reporter.report(ev('externalOutput', { text }, { operationId: 'op' }));
+      capture.reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+      await capture.reporter.closeAsync();
+    } finally {
+      writeSpy.mockRestore();
+      await capture.reporter.closeAsync();
+    }
+    expect(capture.getOutput().split(text)).toHaveLength(2);
+    expect(capture.getOutput()).toContain('Unable to spool');
+    expect(capture.getOutput()).not.toContain('\ufffd');
   });
 
   it('treats duplicate active registration as idempotent', () => {

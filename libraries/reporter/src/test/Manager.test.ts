@@ -4,7 +4,10 @@
 import {
   ReporterManager,
   ReporterMultiplexer,
+  DefaultInteractiveReporter,
+  PlaintextReporter,
   type IReporter,
+  type IReporterContext,
   type IReporterEmitEventInput,
   type IReporterEventEnvelope,
   type ReporterEventType,
@@ -20,12 +23,14 @@ class RecordingReporter implements IReporter {
   public throwOnInit: boolean = false;
   public throwOnReportType: ReporterEventType | undefined = undefined;
   public throwOnClose: boolean = false;
+  public context: IReporterContext | undefined;
 
   public constructor(name: string) {
     this.name = name;
   }
 
-  public async initializeAsync(): Promise<void> {
+  public async initializeAsync(context?: IReporterContext): Promise<void> {
+    this.context = context;
     this.initCount++;
     if (this.throwOnInit) {
       throw new Error(`init failed ${this.name}`);
@@ -391,6 +396,80 @@ describe('ReporterManager destinations', () => {
 });
 
 describe('ReporterManager failure handling', () => {
+  function makeTimedReporter(kind: 'default' | 'plaintext', write: (text: string) => void): IReporter {
+    return kind === 'default'
+      ? new DefaultInteractiveReporter({ terminal: { isTTY: true, columns: 80, write }, color: false })
+      : new PlaintextReporter({ write, heartbeatIntervalMs: 100 });
+  }
+
+  it.each(['default', 'plaintext'] as const)('contains %s timer failures and stops the disabled timer', async (kind) => {
+    jest.useFakeTimers();
+    const emergency: string[] = [];
+    const manager: ReporterManager = new ReporterManager({
+      emergencyDiagnosticWriter: (message: string) => emergency.push(message)
+    });
+    const good: RecordingReporter = new RecordingReporter('good');
+    let failWrites: boolean = false;
+    let writeCount: number = 0;
+    manager.addReporter(
+      makeTimedReporter(kind, () => {
+        writeCount++;
+        if (failWrites) {
+          throw new Error('timer output failed');
+        }
+      })
+    );
+    manager.addReporter(good);
+    try {
+      await manager.initializeAsync();
+      manager.emit(makeInput('commandStarted', { commandName: 'build' }));
+      failWrites = true;
+      expect(() => jest.advanceTimersByTime(100)).not.toThrow();
+      expect(emergency).toHaveLength(1);
+      expect(jest.getTimerCount()).toBe(0);
+      const countAfterFailure: number = writeCount;
+      jest.advanceTimersByTime(1000);
+      expect(writeCount).toBe(countAfterFailure);
+      manager.emit(makeInput('commandResult', { succeeded: true, exitCode: 0 }));
+      expect(good.reported.at(-1)?.payload).toEqual({ succeeded: true, exitCode: 0 });
+      await expect(manager.closeAsync()).resolves.toBeUndefined();
+      expect(emergency).toHaveLength(1);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      failWrites = false;
+      await manager.closeAsync();
+      jest.useRealTimers();
+    }
+  });
+
+  it.each(['default', 'plaintext'] as const)('cancels the %s timer when event delivery disables the reporter', async (kind) => {
+    jest.useFakeTimers();
+    const emergency: string[] = [];
+    const manager: ReporterManager = new ReporterManager({
+      emergencyDiagnosticWriter: (message: string) => emergency.push(message)
+    });
+    let writeCount: number = 0;
+    manager.addReporter(
+      makeTimedReporter(kind, () => {
+        if (++writeCount >= (kind === 'default' ? 2 : 1)) {
+          throw new Error('event output failed');
+        }
+      })
+    );
+    try {
+      await manager.initializeAsync();
+      expect(() => manager.emit(makeInput('commandStarted', { commandName: 'build' }))).not.toThrow();
+      expect(emergency).toHaveLength(1);
+      expect(jest.getTimerCount()).toBe(0);
+      const countAfterFailure: number = writeCount;
+      expect(() => jest.advanceTimersByTime(1000)).not.toThrow();
+      expect(writeCount).toBe(countAfterFailure);
+    } finally {
+      await manager.closeAsync();
+      jest.useRealTimers();
+    }
+  });
+
   it('treats initialization failure as fatal', async () => {
     const reporter: RecordingReporter = new RecordingReporter('a');
     reporter.throwOnInit = true;
@@ -450,6 +529,35 @@ describe('ReporterManager failure handling', () => {
     expect(emergency).toHaveLength(1);
     expect(emergency[0]).toContain('Required reporter "bad" failed');
   });
+
+  it('preserves fatal required-reporter semantics for timer failures', async () => {
+    jest.useFakeTimers();
+    const emergency: string[] = [];
+    const manager: ReporterManager = new ReporterManager({
+      emergencyDiagnosticWriter: (message: string) => emergency.push(message)
+    });
+    let failWrites: boolean = false;
+    const reporter: IReporter = makeTimedReporter('plaintext', () => {
+      if (failWrites) {
+        throw new Error('required timer failed');
+      }
+    });
+    manager.addReporter(reporter, { required: true });
+    try {
+      await manager.initializeAsync();
+      manager.emit(makeInput('commandStarted', { commandName: 'build' }));
+      failWrites = true;
+      expect(() => jest.advanceTimersByTime(100)).not.toThrow();
+      expect(jest.getTimerCount()).toBe(0);
+      await expect(manager.flushAsync()).rejects.toThrow('required timer failed');
+      await expect(manager.closeAsync()).rejects.toThrow('required timer failed');
+      expect(emergency).toHaveLength(1);
+    } finally {
+      failWrites = false;
+      await reporter.closeAsync();
+      jest.useRealTimers();
+    }
+  });
 });
 
 describe('ReporterManager coalescing', () => {
@@ -480,6 +588,24 @@ describe('ReporterManager coalescing', () => {
 });
 
 describe('ReporterManager flush and close', () => {
+  it('cancels background work before close and rejects subsequent timer dispatch', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('background');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+    const context: IReporterContext | undefined = reporter.context;
+    expect(context?.abortSignal?.aborted).toBe(false);
+    let workCount: number = 0;
+    context?.runWithErrorHandling?.(() => workCount++);
+    expect(workCount).toBe(1);
+    const closePromise: Promise<void> = manager.closeAsync();
+    expect(context?.abortSignal?.aborted).toBe(true);
+    expect(context?.abortSignal?.reason).toBeNull();
+    context?.runWithErrorHandling?.(() => workCount++);
+    await closePromise;
+    expect(workCount).toBe(1);
+  });
+
   it('flushes and closes every reporter', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter('a');

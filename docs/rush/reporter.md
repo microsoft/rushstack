@@ -285,13 +285,21 @@ log path. It exercises the legacy baseline, detailed plaintext, JSON, AI, file,
 quiet, rollback, parser failure, help, explicit sidecar output, and
 command-specific JSON ownership. It removes inherited `RUSH_REPORTER`,
 `RUSH_LOG_LEVEL`, and `RUSH_QUIET_MODE` values so those controls do not change
-the matrix. It also runs `rush purge` against an isolated `RUSH_TEMP_FOLDER` to
-verify cleanup. Because `rush purge` unlinks project dependencies, run the
-install command again before continuing development in this checkout.
+the matrix, and sets `RUSH_PREVIEW_VERSION` to the locally built package version
+so it exercises that frontend and engine rather than an older `rush.json` pin.
+It also runs `rush purge` against an isolated `RUSH_TEMP_FOLDER` to verify
+cleanup. Because `rush purge` unlinks project dependencies, run the install
+command again before continuing development in this checkout.
 
-The following individual commands are useful when reviewing each shape:
+For the individual commands below, first select the locally built engine in the
+same shell. Invoking `apps/rush/bin/rush` still honors the version in `rush.json`;
+without this override, it can select an older engine and reject the explicit
+reporter request. This override only selects the engine: reporter activation
+still requires `--reporter` or the repository experiment.
 
 ```sh
+export RUSH_PREVIEW_VERSION="$(node -p "require('./apps/rush/package.json').version")"
+
 # Legacy baseline: unchanged when no opt-in is present
 node apps/rush/bin/rush build --only @rushstack/rush-reporter
 
@@ -303,9 +311,6 @@ node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=plainte
 
 # Payload-only NDJSON on stdout
 node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json --log-level=debug
-
-# Preview the bundled frontend version without contaminating JSON stdout
-RUSH_PREVIEW_VERSION=$(node -p "require('./apps/rush/package.json').version") node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
 
 # Bounded AI failure record; this command intentionally exits with code 1
 node apps/rush/bin/rush build --only @rushstack/does-not-exist --reporter=ai
@@ -322,6 +327,10 @@ node apps/rush/bin/rush --quiet build --only @rushstack/rush-reporter --reporter
 # Emergency rollback, even though a different reporter was requested
 RUSH_REPORTER=legacy node apps/rush/bin/rush build --only @rushstack/rush-reporter --reporter=json
 ```
+
+After the individual demo commands, run `unset RUSH_PREVIEW_VERSION` to return to
+the repository's normal version selection. The self-checking driver sets its
+own override and does not require the shell export.
 
 Expected shapes, rather than exact transcripts:
 

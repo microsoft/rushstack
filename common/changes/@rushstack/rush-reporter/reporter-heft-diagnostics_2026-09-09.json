@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Preserve readable tool, compiler code, source location, and message details in human diagnostic output while redacting secret values.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

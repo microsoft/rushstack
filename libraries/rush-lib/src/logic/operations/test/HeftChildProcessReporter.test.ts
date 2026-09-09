@@ -4,7 +4,7 @@
 import * as childProcess from 'node:child_process';
 import { PassThrough, Writable } from 'node:stream';
 
-import type { IReporterEventEnvelope, IRushDiagnostic } from '@rushstack/rush-reporter';
+import { PlaintextReporter, type IReporterEventEnvelope, type IRushDiagnostic } from '@rushstack/rush-reporter';
 import { StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { HeftChildProcessReporter, HeftChildReporterNonFatalError } from '../HeftChildProcessReporter';
@@ -27,6 +27,13 @@ function waitForCloseAsync(child: childProcess.ChildProcess): Promise<number | n
 describe(HeftChildProcessReporter.name, () => {
   it('negotiates structured child events and parent context', async () => {
     const envelopes: IReporterEventEnvelope<unknown>[] = [];
+    let plaintext: string = '';
+    const plaintextReporter: PlaintextReporter = new PlaintextReporter({
+      variant: 'detailed',
+      write: (text: string) => {
+        plaintext += text;
+      }
+    });
     let structuredNegotiated: boolean = false;
     const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
       parentSessionId: 'parent-session',
@@ -36,6 +43,7 @@ describe(HeftChildProcessReporter.name, () => {
       context: CONTEXT,
       ingestForeignEnvelope: (envelope) => {
         envelopes.push(envelope);
+        plaintextReporter.report(envelope);
         return envelope.eventId;
       },
       onDiagnostic: () => {
@@ -177,6 +185,12 @@ describe(HeftChildProcessReporter.name, () => {
     expect(structuredOutputTerminalProvider.getErrorOutput({ normalizeSpecialCharacters: false })).toBe(
       '2[typescript] error (TS1005): src/index.ts:4:2 - semicolon expected\n'
     );
+    await plaintextReporter.closeAsync();
+    expect(plaintext).toContain('typescript');
+    expect(plaintext).toContain('TS1005');
+    expect(plaintext).toContain('src/index.ts:4:2');
+    expect(plaintext.match(/semicolon expected/g)).toHaveLength(1);
+    expect(plaintext).not.toContain('TOP_SECRET_CHILD_OUTPUT');
     expect(eventStream?.listenerCount('data')).toBe(initialListenerCounts.eventData);
     expect(eventStream?.listenerCount('error')).toBe(initialListenerCounts.eventError);
     expect(eventStream?.listenerCount('end')).toBe(initialListenerCounts.eventEnd);
@@ -680,7 +694,135 @@ describe(HeftChildProcessReporter.name, () => {
     expect(await closePromise).toBe(0);
   });
 
-  it('reports a truncated accepted descriptor stream without hanging after child crash', async () => {
+  it('drains three MiB of accepted output in order without losing chunks', async () => {
+    const sequences: number[] = [];
+    let outputBytes: number = 0;
+    const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+      parentSessionId: 'parent-session',
+      parentRequestId: 'parent-request',
+      parentOperationId: 'project#build',
+      iterationId: 7,
+      context: CONTEXT,
+      ingestForeignEnvelope: (envelope) => {
+        const payload: { text: string } = envelope.payload as { text: string };
+        expect(Buffer.byteLength(payload.text)).toBe(64 * 1024);
+        sequences.push(envelope.sequence);
+        outputBytes += Buffer.byteLength(payload.text);
+        return envelope.eventId;
+      },
+      onDiagnostic: (diagnostic) => {
+        throw new Error(`Unexpected diagnostic: ${diagnostic.code}`);
+      },
+      onStructuredNegotiated: () => undefined
+    });
+    const script: string = `
+      const fs = require('node:fs');
+      const fd = Number(process.env._RUSH_REPORTER_CHILD_FD);
+      fs.writeSync(fd, JSON.stringify({
+        kind: 'hello', protocolVersion: { major: 1, minor: 2 },
+        producerVersion: '@rushstack/heft 1.2.25',
+        capabilities: ['heft-child-events-v1'], requiredFeatures: []
+      }) + '\\n');
+      fs.readFileSync(Number(process.env._RUSH_REPORTER_CHILD_ACK_FD), 'utf8');
+      for (let sequence = 1; sequence <= 48; sequence++) {
+        fs.writeSync(fd, JSON.stringify({
+          protocolVersion: { major: 1, minor: 2 }, eventId: 'child_' + sequence,
+          sessionId: 'child', sequence, timestamp: '2026-09-09T00:00:00Z',
+          source: { packageName: '@rushstack/heft', packageVersion: '1.2.25' },
+          privacy: 'local-sensitive', required: true, type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'x'.repeat(64 * 1024) }
+        }) + '\\n');
+      }
+    `;
+    const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
+      env: { ...process.env, ...reporter.environment },
+      stdio: reporter.stdio
+    });
+    const [exitCode]: [number | null, void] = await Promise.all([
+      waitForCloseAsync(child),
+      reporter.attachAsync(child, { supportsColor: false, eolCharacter: '\n', write: () => undefined })
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(outputBytes).toBe(3 * 1024 * 1024);
+    expect(sequences).toHaveLength(48);
+    for (let index: number = 0; index < sequences.length; index++) {
+      expect(sequences[index]).toBe(index + 1);
+    }
+  });
+
+  it.each(['malformed', 'oversized', 'truncated'] as const)(
+    'rejects an accepted %s stream even when the child exits successfully',
+    async (corruption) => {
+      const diagnostics: IRushDiagnostic[] = [];
+      const envelopes: IReporterEventEnvelope<unknown>[] = [];
+      const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+        parentSessionId: 'parent-session',
+        parentRequestId: 'parent-request',
+        parentOperationId: 'project#build',
+        iterationId: 7,
+        context: CONTEXT,
+        ingestForeignEnvelope: (envelope) => {
+          envelopes.push(envelope);
+          return envelope.eventId;
+        },
+        onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+        onStructuredNegotiated: () => undefined
+      });
+      const script: string = `
+        const fs = require('node:fs');
+        const eventFd = Number(process.env._RUSH_REPORTER_CHILD_FD);
+        const ackFd = Number(process.env._RUSH_REPORTER_CHILD_ACK_FD);
+        fs.writeSync(eventFd, JSON.stringify({
+          kind: 'hello',
+          protocolVersion: { major: 1, minor: 2 },
+          producerVersion: '@rushstack/heft 1.2.25',
+          capabilities: ['heft-child-events-v1'],
+          requiredFeatures: []
+        }) + '\\n');
+        fs.readFileSync(ackFd, 'utf8');
+        const event = {
+          protocolVersion: { major: 1, minor: 2 },
+          eventId: 'child_1',
+          sessionId: 'child-session',
+          sequence: 1,
+          timestamp: '2026-01-01T00:00:00.000Z',
+          source: { packageName: '@rushstack/heft', packageVersion: '1.2.25' },
+          privacy: 'local-sensitive',
+          required: true,
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'preserved before corruption\\n' }
+        };
+        fs.writeSync(eventFd, JSON.stringify(event) + '\\n');
+        const corruption = ${JSON.stringify(corruption)};
+        fs.writeSync(eventFd, corruption === 'oversized'
+          ? 'x'.repeat(1024 * 1024 + 1) + '\\n'
+          : corruption === 'malformed' ? '{invalid}\\n' : '{"eventId":');
+        if (corruption !== 'truncated') {
+          fs.writeSync(eventFd, JSON.stringify({
+            ...event, eventId: 'child_2', sequence: 2,
+            payload: { stream: 'stdout', text: 'cannot recover after corruption\\n' }
+          }) + '\\n');
+        }
+      `;
+      const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
+        env: { ...process.env, ...reporter.environment },
+        stdio: reporter.stdio
+      });
+      const closePromise: Promise<number | null> = waitForCloseAsync(child);
+
+      await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
+        'The negotiated Heft reporter stream was corrupt or incomplete.'
+      );
+      expect(await closePromise).toBe(0);
+      expect(envelopes.map((envelope) => envelope.payload)).toEqual([
+        { stream: 'stdout', text: 'preserved before corruption\n', iterationId: 7 }
+      ]);
+      expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['RUSH_PROTOCOL_INVALID_CHILD_STREAM']);
+    }
+  );
+
+  it('rejects a truncated accepted descriptor stream without hiding the child crash', async () => {
     const diagnostics: IRushDiagnostic[] = [];
     const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
       parentSessionId: 'parent-session',
@@ -712,12 +854,12 @@ describe(HeftChildProcessReporter.name, () => {
       stdio: reporter.stdio
     });
 
-    const [exitCode]: [number | null, void] = await Promise.all([
-      waitForCloseAsync(child),
-      reporter.attachAsync(child, new StringBufferTerminalProvider())
-    ]);
+    const closePromise: Promise<number | null> = waitForCloseAsync(child);
 
-    expect(exitCode).toBe(7);
+    await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
+      'The negotiated Heft reporter stream was corrupt or incomplete.'
+    );
+    expect(await closePromise).toBe(7);
     expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['RUSH_PROTOCOL_INVALID_CHILD_STREAM']);
   });
 });

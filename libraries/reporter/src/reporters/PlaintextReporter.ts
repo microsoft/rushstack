@@ -7,11 +7,14 @@ import * as path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
-import type { IReporter } from '../manager/IReporter';
+import type { IReporter, IReporterContext } from '../manager/IReporter';
 import { getHumanReadableMessageText } from './ReporterRedaction';
+import { formatHumanReadableDiagnostic } from './HumanReadableDiagnostic';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
 import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
+import { writeAllSync, WriteAllSyncError } from '../utilities/writeAllSync';
+import { startReporterTimer } from '../utilities/startReporterTimer';
 
 const HEARTBEAT_INTERVAL_MS: number = 30000;
 const OWNER_ONLY_MODE: number = 0o600;
@@ -117,7 +120,8 @@ export class PlaintextReporter implements IReporter {
   private _nextSpoolId: number;
   private _legacyIterationId: number;
   private _latestIterationId: number;
-  private _heartbeatTimer: ReturnType<typeof setInterval> | undefined;
+  private _disposeHeartbeat: (() => void) | undefined;
+  private _abortSignal: AbortSignal | undefined;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -138,9 +142,11 @@ export class PlaintextReporter implements IReporter {
     this._latestIterationId = 0;
   }
 
-  public async initializeAsync(): Promise<void> {
-    if (!this._heartbeatTimer && this._logLevel !== 'quiet') {
-      this._heartbeatTimer = setInterval(
+  public async initializeAsync(context?: IReporterContext): Promise<void> {
+    this._abortSignal = context?.abortSignal;
+    if (!this._disposeHeartbeat && this._logLevel !== 'quiet') {
+      this._disposeHeartbeat = startReporterTimer(
+        context,
         () => {
           if (this._commandName !== undefined) {
             this.emitHeartbeatIfDue();
@@ -148,7 +154,6 @@ export class PlaintextReporter implements IReporter {
         },
         Math.max(1, this._heartbeatIntervalMs)
       );
-      this._heartbeatTimer.unref();
     }
   }
 
@@ -206,7 +211,7 @@ export class PlaintextReporter implements IReporter {
           severity?: string;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._writeLine(this._formatDiagnostic(payload.severity, payload.code ?? 'unknown'));
+          this._writeLine(this._formatDiagnostic(payload.severity, formatHumanReadableDiagnostic(event)));
         }
         break;
       }
@@ -271,9 +276,10 @@ export class PlaintextReporter implements IReporter {
 
   public async closeAsync(): Promise<void> {
     this._stopHeartbeat();
+    const failed: boolean = this._abortSignal?.aborted === true && this._abortSignal.reason instanceof Error;
     for (const cycle of this._watchCycles.values()) {
       for (const [operationId, record] of cycle.operations) {
-        if (!record.silent && this._variant === 'detailed') {
+        if (!failed && !record.silent && this._variant === 'detailed') {
           const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
           this._writeLine('');
           this._writeLine(`==[ ${record.projectName}${phase} ]==`);
@@ -305,10 +311,8 @@ export class PlaintextReporter implements IReporter {
   }
 
   private _stopHeartbeat(): void {
-    if (this._heartbeatTimer) {
-      clearInterval(this._heartbeatTimer);
-      this._heartbeatTimer = undefined;
-    }
+    this._disposeHeartbeat?.();
+    this._disposeHeartbeat = undefined;
   }
 
   private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
@@ -397,18 +401,23 @@ export class PlaintextReporter implements IReporter {
       if (record.spoolFileDescriptor === undefined) {
         throw new Error('The grouped plaintext spool descriptor is not available.');
       }
-      fs.writeSync(record.spoolFileDescriptor, text, null, 'utf8');
+      writeAllSync(record.spoolFileDescriptor, text);
     } catch (error) {
       this._closeSpool(record, false);
-      this._writeSpooledOutput(record);
+      this._writeSpooledOutput(
+        record,
+        Buffer.from(text, 'utf8').subarray(error instanceof WriteAllSyncError ? error.bytesWritten : 0)
+      );
       record.spoolFailed = true;
       this._writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
-      this._writeRaw(text);
     }
   }
 
-  private _writeSpooledOutput(record: IOperationRecord): void {
+  private _writeSpooledOutput(record: IOperationRecord, remainingOutput?: Uint8Array): void {
     if (!record.spoolPath) {
+      if (remainingOutput) {
+        this._writeRaw(Buffer.from(remainingOutput).toString('utf8'));
+      }
       return;
     }
     const spoolCloseError: Error | undefined = this._closeSpool(record, true);
@@ -416,20 +425,18 @@ export class PlaintextReporter implements IReporter {
       this._writeLine(`[reporter] Unable to close grouped plaintext output: ${spoolCloseError.message}`);
     }
     let fileDescriptor: number | undefined;
+    let readError: Error | undefined;
     let readCloseError: Error | undefined;
+    const decoder: StringDecoder = new StringDecoder('utf8');
     try {
       fileDescriptor = fs.openSync(record.spoolPath, 'r');
-      const decoder: StringDecoder = new StringDecoder('utf8');
       const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
       let bytesRead: number;
       while ((bytesRead = fs.readSync(fileDescriptor, buffer, 0, buffer.length, null)) > 0) {
         this._writeRaw(decoder.write(buffer.subarray(0, bytesRead)));
       }
-      this._writeRaw(decoder.end());
     } catch (error) {
-      this._writeLine(
-        `[reporter] Unable to read grouped plaintext output; see the full log: ${(error as Error).message}`
-      );
+      readError = error as Error;
     } finally {
       if (fileDescriptor !== undefined) {
         try {
@@ -439,9 +446,18 @@ export class PlaintextReporter implements IReporter {
         }
       }
       this._deleteSpool(record);
-      if (readCloseError) {
-        this._writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
-      }
+    }
+    if (remainingOutput) {
+      this._writeRaw(decoder.write(remainingOutput));
+    }
+    this._writeRaw(decoder.end());
+    if (readError) {
+      this._writeLine(
+        `[reporter] Unable to read grouped plaintext output; see the full log: ${readError.message}`
+      );
+    }
+    if (readCloseError) {
+      this._writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
     }
   }
 
@@ -557,8 +573,7 @@ export class PlaintextReporter implements IReporter {
     return line;
   }
 
-  private _formatDiagnostic(severity: string, code: string): string {
-    const line: string = `[${severity}] ${code}`;
+  private _formatDiagnostic(severity: string, line: string): string {
     if (severity === 'error') {
       return this._color.red(line);
     }
