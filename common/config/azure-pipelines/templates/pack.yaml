@@ -1,5 +1,4 @@
 parameters:
-  # Only the packages belonging to this version policy are packed.
   - name: VersionPolicyName
     type: string
 
@@ -9,13 +8,31 @@ steps:
       Arguments: '--help'
       DisplayName: 'Install Rush'
 
-  - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
-    parameters:
-      Arguments: >
-        publish
-        --publish
-        --pack
-        --include-all
-        --version-policy ${{ parameters.VersionPolicyName }}
-        --release-folder $(Build.ArtifactStagingDirectory)/packages
-      DisplayName: 'Rush Pack (Policy: ${{ parameters.VersionPolicyName }})'
+  - ${{ if eq(parameters.VersionPolicyName, 'noRush') }}:
+      - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+        parameters:
+          Arguments: >
+            publish
+            --publish
+            --pack
+            --include-all
+            --release-folder $(Build.ArtifactStagingDirectory)/packages
+          DisplayName: 'Rush Pack (Policy: ${{ parameters.VersionPolicyName }})'
+
+  - ${{ else }}:
+      - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
+        parameters:
+          Arguments: >
+            publish
+            --publish
+            --pack
+            --include-all
+            --version-policy ${{ parameters.VersionPolicyName }}
+            --release-folder $(Build.ArtifactStagingDirectory)/packages
+          DisplayName: 'Rush Pack (Policy: ${{ parameters.VersionPolicyName }})'
+
+  - script: >
+      node common/scripts/publish-cohort.js filter-packages
+      --cohort ${{ parameters.VersionPolicyName }}
+      --packages-path $(Build.ArtifactStagingDirectory)/packages
+    displayName: 'Filter unpublished ${{ parameters.VersionPolicyName }} packages'

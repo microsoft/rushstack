@@ -71,9 +71,24 @@ stages:
 
           - template: /common/config/azure-pipelines/templates/build.yaml@self
 
+          # "noRush" is a pipeline cohort, not a Rush version policy. The old publishing flow
+          # achieved the separation by processing non-Rush changes before the Rush lockstep bump.
+          # Preserve that behavior while the two cohorts run in independent pipelines.
+          - script: >
+              node common/scripts/publish-cohort.js partition-changes
+              --cohort ${{ parameters.VersionPolicyName }}
+              --backup-path $(Agent.TempDirectory)/excluded-publish-changes
+            displayName: 'Select ${{ parameters.VersionPolicyName }} change files'
+
           - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
             parameters:
               VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+          - script: >
+              node common/scripts/publish-cohort.js restore-changes
+              --backup-path $(Agent.TempDirectory)/excluded-publish-changes
+            displayName: 'Restore other publishing cohort change files'
+            condition: succeededOrFailed()
 
           - bash: |
               git add -u -- common/changes
@@ -116,6 +131,13 @@ stages:
           - template: /common/config/azure-pipelines/templates/pack.yaml@self
             parameters:
               VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+          - bash: |
+              if [ "$(HasChanges)" = "true" ] && [ "$(HasPackages)" != "true" ]; then
+                echo "##[error]Version bump produced no unpublished package tarballs."
+                exit 1
+              fi
+            displayName: 'Verify package artifact'
 
           - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
 
