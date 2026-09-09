@@ -3,19 +3,38 @@
 
 import { setTimeout as delayAsync } from 'node:timers/promises';
 import * as fs from 'node:fs';
+import * as path from 'node:path';
 
-import type { IDaemonWarmProjectRank } from '@rushstack/rush-daemon-protocol';
+import { DaemonClient } from '@rushstack/rush-client-core';
+import type { IDaemonWarmProjectRank, IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 
 import { createPersistentIpcTestFixture, type IPersistentIpcTestFixture } from './PersistentIpcTestFixture';
 
 const BUDGET_MB: number = 512;
 const BYTES_PER_MB: number = 1024 * 1024;
+const PRESSURE_WORK_MARGIN_MS: number = 100;
+const PROJECTS = ['a', 'b'] as const;
+type ProjectName = typeof PROJECTS[number];
+const MEMORY_BYTES: Readonly<Record<ProjectName, number>> = {
+  a: 64 * BYTES_PER_MB,
+  b: 16 * BYTES_PER_MB
+};
 jest.setTimeout(60_000);
 
-function score(rank: IDaemonWarmProjectRank): number {
-  if (rank.timeSavedMs === undefined || rank.measuredRunnerMemoryBytes === undefined) {
-    throw new Error(`Missing real timing/RSS measurements for ${rank.projectName}.`);
+interface IMeasuredRank extends IDaemonWarmProjectRank {
+  readonly timeSavedMs: number;
+  readonly measuredRunnerMemoryBytes: number;
+}
+
+function measuredRank(warm: IDaemonWarmSetStatus, name: ProjectName): IMeasuredRank {
+  const rank = warm.projectRanks?.find((project) => project.projectName === name);
+  if (!rank || rank.timeSavedMs === undefined || !rank.measuredRunnerMemoryBytes) {
+    throw new Error(`Missing real timing/RSS measurements for ${name}: ${JSON.stringify(warm)}`);
   }
+  return { ...rank, timeSavedMs: rank.timeSavedMs, measuredRunnerMemoryBytes: rank.measuredRunnerMemoryBytes };
+}
+
+function score(rank: IMeasuredRank): number {
   return rank.timeSavedMs * rank.frequency / rank.measuredRunnerMemoryBytes;
 }
 
@@ -27,46 +46,139 @@ describe('measured production IPC retention through the public client', () => {
     await closing?.closeAsync();
   }, 35_000);
 
-  it.each([false, true])('uses actual score versus opposite recency under real memory pressure (telemetry: %s)', (telemetry) => {
+  it.each([
+    [false, 'a'], [true, 'a'], [false, 'b'], [true, 'b']
+  ] as const)('uses actual score versus opposite recency under real memory pressure (telemetry: %s, cold work: %s)', (telemetry, coldWork) => {
     const fixture = createPersistentIpcTestFixture({ telemetry, budgetMB: BUDGET_MB });
     activeFixture = fixture;
     return fixture.runAsync(async () => {
-      fixture.input('a', { value: 'cold', memoryBytes: 64 * BYTES_PER_MB });
-      fixture.input('b', { value: 'cold', memoryBytes: 16 * BYTES_PER_MB });
-      await fixture.buildAsync('--only', 'a');
-      await fixture.buildAsync('--only', 'b');
-      fixture.input('a', { value: 'warm', memoryBytes: 64 * BYTES_PER_MB });
-      fixture.input('b', { value: 'warm', memoryBytes: 16 * BYTES_PER_MB });
-      await fixture.buildAsync('--only', 'a');
-      await fixture.buildAsync('--only', 'b');
+      const started = await fixture.invokeAsync(['daemon', 'start']);
+      expect(started.code).toBe(0);
+      expect(JSON.parse(started.stdout).workspace.graphInitialized).toBe(false);
+      expect(fixture.events()).toEqual([]);
+      const coldInvocationMs: Record<ProjectName, number> = { a: 0, b: 0 };
+      for (const name of PROJECTS) {
+        fixture.input(name, {
+          value: 'cold',
+          memoryBytes: MEMORY_BYTES[name],
+          retainMemory: true,
+          coldDelayMs: name === coldWork ? 800 : 50
+        });
+        const startedAt = performance.now();
+        await fixture.buildAsync('--only', name);
+        coldInvocationMs[name] = performance.now() - startedAt;
+      }
+      for (const name of PROJECTS) {
+        fixture.input(name, { value: 'warm', memoryBytes: MEMORY_BYTES[name], retainMemory: true });
+        await fixture.buildAsync('--only', name);
+      }
+      const initial = await fixture.statusAsync();
+      if (!initial.workspace?.warmSet) throw new Error(`Missing warm status: ${JSON.stringify(initial)}`);
+      if (fixture.events().filter((event) => event.kind === 'complete').length !== 4) {
+        throw new Error(`Expected four real setup executions: ${JSON.stringify({ initial, events: fixture.events() })}`);
+      }
+      const initialA = measuredRank(initial.workspace.warmSet, 'a');
+      const initialB = measuredRank(initial.workspace.warmSet, 'b');
+      expect(initialA.frequency).toBe(2);
+      expect(initialB.frequency).toBe(2);
+      const higherValue: ProjectName = score(initialA) >= score(initialB) ? 'a' : 'b';
+      const newer: ProjectName = higherValue === 'a' ? 'b' : 'a';
+      const initialHigh = higherValue === 'a' ? initialA : initialB;
+      const initialLow = newer === 'a' ? initialA : initialB;
+      expect(score(initialHigh)).toBeGreaterThan(0);
+
+      // Compute the entire bounded request plan from the real measurements, never retry until an assertion passes.
+      const cacheHitRequests: ProjectName[] = [];
+      if (initialHigh.lastUsed >= initialLow.lastUsed || score(initialHigh) === score(initialLow)) {
+        const lowScoreAfterHit = initialLow.timeSavedMs * (initialLow.frequency + 1) /
+          initialLow.measuredRunnerMemoryBytes;
+        const highScorePerHit = initialHigh.timeSavedMs / initialHigh.measuredRunnerMemoryBytes;
+        const requiredHighFrequency = Math.floor(lowScoreAfterHit / highScorePerHit) + 1;
+        const highHits = Math.max(0, requiredHighFrequency - initialHigh.frequency);
+        expect(highHits).toBeLessThanOrEqual(2);
+        cacheHitRequests.push(...Array<ProjectName>(highHits).fill(higherValue), newer);
+      }
+      expect(cacheHitRequests.length).toBeLessThanOrEqual(3);
+      for (const name of cacheHitRequests) await fixture.buildAsync('--only', name);
       const before = await fixture.statusAsync();
       const warm = before.workspace?.warmSet;
-      const a = warm?.projectRanks?.find((rank) => rank.projectName === 'a');
-      const b = warm?.projectRanks?.find((rank) => rank.projectName === 'b');
-      if (!warm || !a || !b || !a.measuredRunnerMemoryBytes || !b.measuredRunnerMemoryBytes) {
-        throw new Error(`Expected both genuine resident Node tools: ${JSON.stringify(before)}`);
+      if (!warm) throw new Error(`Missing warm status: ${JSON.stringify(before)}`);
+      const a = measuredRank(warm, 'a');
+      const b = measuredRank(warm, 'b');
+      const high = higherValue === 'a' ? a : b;
+      const low = newer === 'a' ? a : b;
+      expect(high.frequency).toBe(initialHigh.frequency + cacheHitRequests.filter((name) => name === higherValue).length);
+      expect(low.frequency).toBe(initialLow.frequency + cacheHitRequests.filter((name) => name === newer).length);
+      expect(high.timeSavedMs).toBeGreaterThan(0);
+      expect(low.timeSavedMs).toBeGreaterThanOrEqual(0);
+      expect(score(high)).toBeGreaterThan(score(low));
+      expect(low.lastUsed).toBeGreaterThan(high.lastUsed);
+      expect(warm.retainedProjectNames).toEqual(telemetry ? [higherValue, newer] : [newer, higherValue]);
+      expect(before.workspace?.generationToken).toBe(initial.workspace.generationToken);
+      expect(fixture.events().filter((event) => event.kind === 'ready')).toHaveLength(2);
+      expect(fixture.events().filter((event) => event.kind === 'complete')).toHaveLength(4);
+      for (const [original, current] of [[initialA, a], [initialB, b]]) {
+        expect(current.timeSavedMs).toBe(original.timeSavedMs);
+        expect(current.measuredRunnerMemoryBytes).toBe(original.measuredRunnerMemoryBytes);
       }
-      expect(a.frequency).toBe(2);
-      expect(b.frequency).toBe(2);
-      expect(a.timeSavedMs).toBeGreaterThan(0);
-      expect(b.timeSavedMs).toBeGreaterThanOrEqual(0);
-      expect(score(a)).toBeGreaterThan(score(b));
-      expect(b.lastUsed).toBeGreaterThan(a.lastUsed);
-      expect(warm.retainedProjectNames).toEqual(telemetry ? ['a', 'b'] : ['b', 'a']);
       expect(warm.overMemoryBudget).toBe(false);
       for (const rank of [a, b]) {
         const sample = fixture.events().filter((event) => event.project === rank.projectName && event.kind === 'complete').at(-1);
         expect(rank.measuredRunnerMemoryBytes).toBe(sample?.residentMemoryBytes);
       }
 
-      // The actual requested tool allocates memory; no RSS getter, runner, clock, or launcher is substituted.
-      const allocation = Math.floor(BUDGET_MB * BYTES_PER_MB - warm.daemonResidentMemoryBytes -
-        b.measuredRunnerMemoryBytes - a.measuredRunnerMemoryBytes / 2);
-      expect(allocation).toBeGreaterThan(16 * BYTES_PER_MB);
-      fixture.input('b', { value: 'pressure', memoryBytes: allocation });
-      await fixture.buildAsync('--only', 'b');
-      const keep = telemetry ? 'a' : 'b';
-      const evict = telemetry ? 'b' : 'a';
+      // A cold public invocation contains the complete native cold operation. Real pressure work lasting
+      // longer than that upper bound must have zero savings under the unchanged production formula.
+      const pressureDelayMs = Math.ceil(coldInvocationMs[newer]) + PRESSURE_WORK_MARGIN_MS;
+      const pressureGate = path.join(fixture.folder, 'common/temp/pressure-gate.json');
+      fixture.input(newer, {
+        value: 'pressure',
+        memoryBytes: MEMORY_BYTES[newer],
+        retainMemory: true,
+        pressureGate,
+        delayMs: pressureDelayMs
+      });
+      let allocation: number;
+      let pressureAccounting: IDaemonWarmSetStatus | undefined;
+      let requestEnded = false;
+      const request = fixture.buildAsync('--only', newer);
+      void request.finally(() => { requestEnded = true; }).catch(() => undefined);
+      try {
+        const readyDeadline = Date.now() + pressureDelayMs + 15_000;
+        while (!fixture.events().some((event) => event.project === newer && event.kind === 'pressure-ready')) {
+          if (requestEnded) {
+            await request;
+            throw new Error('The real pressure operation completed without reaching its allocation barrier.');
+          }
+          if (Date.now() >= readyDeadline) throw new Error('The real pressure operation did not reach its allocation barrier.');
+          await delayAsync(10);
+        }
+        // Query the public control protocol while this CLI request owns admission. Sampling immediately
+        // before allocation avoids using an RSS snapshot from before the deliberately slow work.
+        const client = await DaemonClient.connectAsync({ socketPath: fixture.paths.socketPath });
+        try {
+          pressureAccounting = (await client.status).workspace?.warmSet;
+        } finally {
+          await client.closeAsync();
+        }
+        if (!pressureAccounting) throw new Error('Missing live pre-allocation accounting.');
+        expect([...pressureAccounting.retainedProjectNames].sort()).toEqual(['a', 'b']);
+        const ready = fixture.events().find((event) => event.project === newer && event.kind === 'pressure-ready');
+        if (!ready?.residentMemoryBytes) throw new Error('Missing real pre-allocation child RSS.');
+        allocation = Math.floor(BUDGET_MB * BYTES_PER_MB - pressureAccounting.daemonResidentMemoryBytes -
+          ready.residentMemoryBytes - high.measuredRunnerMemoryBytes / 2);
+        expect(allocation).toBeGreaterThan(16 * BYTES_PER_MB);
+        fs.writeFileSync(pressureGate, JSON.stringify({ additionalMemoryBytes: allocation }));
+        await request;
+      } finally {
+        if (!fs.existsSync(pressureGate)) fs.writeFileSync(pressureGate, '{"cancelled":true}');
+        await Promise.allSettled([request]);
+      }
+      const pressure = fixture.events().filter((event) => event.project === newer && event.kind === 'complete').at(-1);
+      expect(pressure?.durationMs).toBeGreaterThanOrEqual(coldInvocationMs[newer]);
+      expect(pressure?.residentMemoryBytes).toBeGreaterThan(low.measuredRunnerMemoryBytes);
+      const keep = telemetry ? higherValue : newer;
+      const evict = telemetry ? newer : higherValue;
       const deadline = Date.now() + 10_000;
       let after = await fixture.statusAsync();
       while (after.workspace?.warmSet?.retainedProjectNames.length !== 1 && Date.now() < deadline) {
@@ -77,6 +189,10 @@ describe('measured production IPC retention through the public client', () => {
       expect(after.workspace?.warmSet?.watchedProjectNames).toEqual([keep]);
       expect(after.workspace?.warmSet?.overMemoryBudget).toBe(false);
       expect(after.workspace?.generationToken).toBe(before.workspace?.generationToken);
+      if (!after.workspace?.warmSet) throw new Error(`Missing final warm status: ${JSON.stringify(after)}`);
+      const retainedRank = measuredRank(after.workspace.warmSet, keep);
+      expect(retainedRank.timeSavedMs).toBe(telemetry ? high.timeSavedMs : 0);
+      expect(retainedRank.frequency).toBe(telemetry ? high.frequency : low.frequency + 1);
       const evictedPid = fixture.events().find((event) => event.project === evict && event.kind === 'ready')!.pid;
       expect(fixture.events().some((event) => event.kind === 'closed' && event.pid === evictedPid)).toBe(true);
       expect(fixture.events().filter((event) => event.kind === 'ready')).toHaveLength(2);
@@ -87,10 +203,19 @@ describe('measured production IPC retention through the public client', () => {
           platform: process.platform,
           nodeVersion: process.version,
           telemetry,
+          coldWork,
           daemonPid: before.pid,
+          initialRankingInputs: [initialA, initialB],
           rankingInputs: [a, b],
           independentlyCalculatedScores: { a: score(a), b: score(b) },
+          higherValue,
+          newer,
+          cacheHitRequests,
+          coldInvocationMs,
+          pressureDelayMs,
+          pressure,
           allocation,
+          pressureAccounting,
           retained: after.workspace?.warmSet?.retainedProjectNames,
           watched: after.workspace?.warmSet?.watchedProjectNames,
           events: fixture.events()

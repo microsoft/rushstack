@@ -10,11 +10,12 @@ import type { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 import { createNativeBuildTestFixture, type INativeBuildTestFixture, type INativeBuildResult } from './NativeBuildTestFixture';
 
 export interface IIpcEvent {
-  readonly kind: 'ready' | 'started' | 'complete' | 'closed';
+  readonly kind: 'ready' | 'started' | 'pressure-ready' | 'complete' | 'closed';
   readonly project: string;
   readonly pid: number;
   readonly iteration?: number;
   readonly residentMemoryBytes?: number;
+  readonly durationMs?: number;
   readonly implementation?: string;
   readonly args?: string[];
 }
@@ -130,16 +131,19 @@ const events = path.resolve('../common/temp/ipc-events.jsonl');
 const record = (value) => fs.appendFileSync(events, JSON.stringify({ project, pid: process.pid, ...value }) + '\\n');
 let iteration = 0;
 let memory;
+let additionalMemory;
 let pending = Promise.resolve();
 let closing = false;
 record({ kind: 'ready', args: process.argv.slice(2), implementation: implementation.version });
 process.on('message', (message) => {
   if (message.command === 'run' && !closing) {
     pending = pending.then(async () => {
+      const startedAt = performance.now();
       const input = JSON.parse(fs.readFileSync('run-input.json', 'utf8'));
       record({ kind: 'started', iteration: iteration + 1 });
-      memory = Buffer.alloc(input.memoryBytes || 16 * 1024 * 1024, 1);
-      if (iteration === 0) await new Promise(resolve => setTimeout(resolve, project === 'a' ? 800 : 50));
+      const memoryBytes = input.memoryBytes || 16 * 1024 * 1024;
+      if (!input.retainMemory || !memory || memory.length !== memoryBytes) memory = Buffer.alloc(memoryBytes, 1);
+      if (iteration === 0) await new Promise(resolve => setTimeout(resolve, input.coldDelayMs ?? (project === 'a' ? 800 : 50)));
       if (input.delayMs) await new Promise(resolve => setTimeout(resolve, input.delayMs));
       iteration++;
       fs.mkdirSync('lib', { recursive: true });
@@ -149,8 +153,22 @@ process.on('message', (message) => {
       if (input.outputBytes) await new Promise(resolve => process.stdout.write(
         'PAYLOAD_BEGIN:' + String.fromCodePoint(0x1f642).repeat(input.outputBytes) + ':PAYLOAD_END\\n', resolve));
       if (input.warning) await new Promise(resolve => process.stderr.write('ipc-warning\\n', resolve));
+      if (input.pressureGate) {
+        memory.fill(1);
+        record({ kind: 'pressure-ready', iteration, residentMemoryBytes: process.memoryUsage().rss });
+        const deadline = performance.now() + 10000;
+        while (!fs.existsSync(input.pressureGate)) {
+          if (performance.now() >= deadline) throw new Error('Pressure fixture gate was not released.');
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        const gate = JSON.parse(fs.readFileSync(input.pressureGate, 'utf8'));
+        if (gate.cancelled) throw new Error('Pressure fixture setup was cancelled.');
+        additionalMemory = Buffer.alloc(gate.additionalMemoryBytes, 1);
+        memory.fill(1);
+        additionalMemory.fill(1);
+      }
       const residentMemoryBytes = process.memoryUsage().rss;
-      record({ kind: 'complete', iteration, residentMemoryBytes, implementation: implementation.version });
+      record({ kind: 'complete', iteration, residentMemoryBytes, durationMs: performance.now() - startedAt, implementation: implementation.version });
       process.send({ event: 'after-execute', status: input.failure ? 'FAILURE' : 'SUCCESS', residentMemoryBytes });
     }).catch(error => { console.error(error); process.exitCode = 1; process.disconnect(); });
   } else if (message.command === 'exit') {
