@@ -1,0 +1,44 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/webpack4-localization-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/webpack4-module-minifier-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    }
+  ]
+}
