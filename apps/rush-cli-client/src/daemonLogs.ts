@@ -10,8 +10,9 @@ import { getDaemonLogFilePath } from '@rushstack/rush-client-core';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { writeStreamAsync } from './writeStreamAsync';
+import { DaemonLogOutput } from './DaemonLogOutput';
+import { MAX_LOG_OUTPUT_BYTES } from './DaemonLogOutputProtocol';
 
-const READ_BUFFER_BYTES: number = 64 * 1024;
 const FOLLOW_POLL_INTERVAL_MS: number = 100;
 
 export interface IDaemonLogOptions {
@@ -28,6 +29,7 @@ export async function printDaemonLogAsync(
   if (options.abortSignal?.aborted) return;
   const logFilePath: string = getDaemonLogFilePath(paths);
   let file: FileHandle;
+  let ownedOutput: DaemonLogOutput | undefined;
   try {
     // These distinct native flags have non-overlapping values.
     file = await open(
@@ -51,14 +53,20 @@ export async function printDaemonLogAsync(
     if (!Number.isSafeInteger(stats.size) || stats.size < 0) {
       throw new Error(`Launcher log size cannot be represented safely: ${logFilePath}`);
     }
-    const buffer: Buffer = Buffer.alloc(READ_BUFFER_BYTES);
+    if (options.follow && !options.output && process.platform === 'win32' && !process.stdout.isTTY) {
+      ownedOutput = new DaemonLogOutput(options.abortSignal);
+    }
+    const signal: AbortSignal | undefined = ownedOutput
+      ? AbortSignal.any([ownedOutput.failureSignal, ...(options.abortSignal ? [options.abortSignal] : [])])
+      : options.abortSignal;
+    const buffer: Buffer = Buffer.alloc(MAX_LOG_OUTPUT_BYTES);
     let position: number = 0;
     let size: number = stats.size;
-    while (!options.abortSignal?.aborted) {
+    while (!signal?.aborted) {
       if (position === size) {
         if (!options.follow) break;
-        await waitForAppendAsync(options.abortSignal);
-        if (options.abortSignal?.aborted) break;
+        await waitForAppendAsync(signal);
+        if (signal?.aborted) break;
         const current: Stats = await file.stat();
         const named: Stats = await lstat(logFilePath);
         if (current.nlink !== 1 || !named.isFile() || named.dev !== stats.dev || named.ino !== stats.ino) {
@@ -77,13 +85,19 @@ export async function printDaemonLogAsync(
       const { bytesRead } = await file.read(buffer, 0, Math.min(buffer.length, size - position), position);
       if (bytesRead === 0)
         throw new Error(`Launcher log was truncated while reading ${logFilePath}; retry the command.`);
-      await writeLogChunkAsync(options, buffer.subarray(0, bytesRead));
+      if (ownedOutput) await ownedOutput.writeAsync(buffer.subarray(0, bytesRead));
+      else await writeLogChunkAsync(options, buffer.subarray(0, bytesRead));
       position += bytesRead;
     }
+    ownedOutput?.failureSignal.throwIfAborted();
   } catch (error) {
     if (!options.abortSignal?.aborted || error !== options.abortSignal.reason) throw error;
   } finally {
-    await file.close();
+    try {
+      await file.close();
+    } finally {
+      await ownedOutput?.closeAsync();
+    }
   }
 }
 

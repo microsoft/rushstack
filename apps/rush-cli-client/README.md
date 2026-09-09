@@ -261,6 +261,16 @@ indefinitely behind a stalled output pipe. Read/write failures remain explicit e
 replacement, or removal fails explicitly instead of silently following the wrong
 file; reopen the command after rotating a log. No automatic rotation policy is added.
 
+On Windows, following redirected stdout uses an invocation-owned, output-only Node
+process. Windows pipe writes can block the CLI event loop, and moving a blocked
+write to its filesystem thread pool alone can still prevent shutdown. The CLI
+instead sends one acknowledged chunk of at most 64 KiB to the isolated writer.
+Cancellation stops and joins that writer before the CLI exits; a lost parent
+also terminates the writer, so blocked display output is not orphaned. The worker
+does not run user `NODE_OPTIONS` preload hooks or any Rush command. This is not
+daemon startup. Default snapshots, TTY output, and the non-Windows output path
+retain their existing stdio behavior.
+
 This is the **text launcher stdout/stderr log**, including startup errors—not
 WS5 structured observability or a subscription to request-scoped events.
 

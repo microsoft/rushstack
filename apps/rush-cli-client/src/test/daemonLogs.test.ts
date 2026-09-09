@@ -151,7 +151,7 @@ describe('daemon launcher log following', () => {
         process.execPath,
         [
           windowsSignal
-            ? path.join(__dirname, 'CliSignalTestProcess.js')
+            ? path.join(__dirname, 'DaemonLogSignalTestProcess.js')
             : path.resolve(__dirname, '../../bin/rush-client'),
           'daemon',
           'logs',
@@ -165,6 +165,7 @@ describe('daemon launcher log following', () => {
       );
       const closed: Promise<unknown[]> = once(child, 'close');
       let timeout: ReturnType<typeof setTimeout> | undefined;
+      let forced: boolean = false;
       let stdout: string = '';
       let stderr: string = '';
       child.stderr!.on('data', (bytes: Buffer) => {
@@ -182,10 +183,19 @@ describe('daemon launcher log following', () => {
           fs.appendFileSync(filename, 'appended\n');
           await waitUntilAsync(() => stdout === 'initial\nappended\n');
         }
-        timeout = setTimeout(() => child.kill('SIGKILL'), 3000);
+        timeout = setTimeout(() => {
+          forced = true;
+          child.kill('SIGKILL');
+        }, 3000);
         if (windowsSignal) child.send!('SIGINT');
         else child.kill('SIGINT');
         expect((await closed)[0]).toBe(130);
+        expect(forced).toBe(false);
+        if (windowsSignal) {
+          expect(JSON.parse(fs.readFileSync(path.join(folder, 'log-follow-signal.json'), 'utf8'))).toEqual({
+            handlerDelivered: true
+          });
+        }
         expect(stderr).toBe('');
         expect(fs.existsSync(paths.lockfilePath)).toBe(false);
         expect(fs.existsSync(paths.socketPath)).toBe(false);
@@ -193,6 +203,104 @@ describe('daemon launcher log following', () => {
         clearTimeout(timeout);
         if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
         await closed;
+      }
+    },
+    15000
+  );
+
+  it('reports a real closed output pipe as an I/O failure rather than cancellation', async () => {
+    fs.writeFileSync(filename, Buffer.alloc(10 * 1024 * 1024));
+    const child = spawn(
+      process.execPath,
+      [path.resolve(__dirname, '../../bin/rush-client'), 'daemon', 'logs', '--follow'],
+      { cwd: folder, env: { ...process.env, RUSH_DAEMON: '1' }, stdio: ['ignore', 'pipe', 'pipe'] }
+    );
+    const closed = once(child, 'close');
+    const readable = once(child.stdout, 'readable');
+    let stderr: string = '';
+    let forced: boolean = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    child.stderr.on('data', (bytes: Buffer) => {
+      stderr += bytes.toString();
+    });
+    try {
+      await Promise.race([
+        readable,
+        closed.then(() => {
+          throw new Error('Log client exited before filling its output pipe.');
+        })
+      ]);
+      timeout = setTimeout(() => {
+        forced = true;
+        child.kill('SIGKILL');
+      }, 3000);
+      child.stdout.destroy();
+      expect((await closed)[0]).toBe(1);
+      expect(forced).toBe(false);
+      expect(stderr).toMatch(/EPIPE|broken pipe|output failed/i);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    } finally {
+      clearTimeout(timeout);
+      if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+      child.stdout.destroy();
+      await closed;
+    }
+  }, 15000);
+
+  it.each([false, true])(
+    'preserves real file redirection (follow: %s)',
+    async (follow) => {
+      const bytes: Buffer = Buffer.alloc(128 * 1024 + 17);
+      for (let index: number = 0; index < bytes.length; index++) bytes[index] = index % 256;
+      fs.writeFileSync(filename, bytes);
+      const captured: string = path.join(folder, 'captured.log');
+      const outputFd: number = fs.openSync(captured, 'w');
+      const windowsSignal: boolean = follow && process.platform === 'win32';
+      const child = spawn(
+        process.execPath,
+        [
+          windowsSignal
+            ? path.join(__dirname, 'DaemonLogSignalTestProcess.js')
+            : path.resolve(__dirname, '../../bin/rush-client'),
+          'daemon',
+          'logs',
+          ...(follow ? ['--follow'] : [])
+        ],
+        {
+          cwd: folder,
+          env: { ...process.env, RUSH_DAEMON: '1' },
+          stdio: windowsSignal ? ['ignore', outputFd, 'pipe', 'ipc'] : ['ignore', outputFd, 'pipe']
+        }
+      );
+      const closed = once(child, 'close');
+      let stderr: string = '';
+      let forced: boolean = false;
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      child.stderr!.on('data', (chunk: Buffer) => {
+        stderr += chunk.toString();
+      });
+      try {
+        if (follow) {
+          await waitUntilAsync(() => fs.statSync(captured).size === bytes.length);
+          timeout = setTimeout(() => {
+            forced = true;
+            child.kill('SIGKILL');
+          }, 3000);
+          if (windowsSignal) child.send!('SIGINT');
+          else child.kill('SIGINT');
+        }
+        expect((await closed)[0]).toBe(follow ? 130 : 0);
+        expect(forced).toBe(false);
+        expect(stderr).toBe('');
+        expect(fs.readFileSync(captured)).toEqual(bytes);
+        fs.writeSync(outputFd, 'still-open');
+        expect(fs.readFileSync(captured)).toEqual(Buffer.concat([bytes, Buffer.from('still-open')]));
+        expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+      } finally {
+        clearTimeout(timeout);
+        if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+        await closed;
+        fs.closeSync(outputFd);
       }
     },
     15000
