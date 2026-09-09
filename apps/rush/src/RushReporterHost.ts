@@ -38,6 +38,7 @@ export interface IRushReporterHostOptions {
   readonly env?: Record<string, string | undefined>;
   readonly cwd?: string;
   readonly stdout?: IRushReporterOutputStream;
+  readonly stderr?: IRushReporterOutputStream;
   readonly includeDefaultFileReporter?: boolean;
   readonly commandName?: 'rush' | 'rush-pnpm' | 'rushx';
   readonly repositoryOptIn?: boolean;
@@ -117,13 +118,24 @@ class ExplicitOutputReporter implements IReporter {
   private readonly _reporter: JsonReporter;
   private readonly _filteredReporter: LogLevelReporter;
   private readonly _outputPath: string;
+  private readonly _outputStream: IRushReporterOutputStream | undefined;
   private _fileDescriptor: number | undefined;
 
-  public constructor(reporterName: string, outputPath: string, logLevel: ReporterLogLevel) {
+  public constructor(
+    reporterName: string,
+    outputPath: string,
+    logLevel: ReporterLogLevel,
+    outputStream?: IRushReporterOutputStream
+  ) {
     this.name = `${reporterName}-output`;
     this._outputPath = outputPath;
+    this._outputStream = outputStream;
     this._reporter = new JsonReporter({
       write: (text: string) => {
+        if (this._outputStream) {
+          this._outputStream.write(text);
+          return;
+        }
         if (this._fileDescriptor === undefined) {
           throw new Error(`Reporter output ${JSON.stringify(this._outputPath)} is not initialized.`);
         }
@@ -134,8 +146,10 @@ class ExplicitOutputReporter implements IReporter {
   }
 
   public async initializeAsync(context: IReporterContext): Promise<void> {
-    await fs.promises.mkdir(path.dirname(this._outputPath), { recursive: true });
-    this._fileDescriptor = fs.openSync(this._outputPath, 'w', 0o600);
+    if (!this._outputStream) {
+      await fs.promises.mkdir(path.dirname(this._outputPath), { recursive: true });
+      this._fileDescriptor = fs.openSync(this._outputPath, 'w', 0o600);
+    }
     await this._filteredReporter.initializeAsync(context);
   }
 
@@ -371,6 +385,10 @@ function resolveLogLevel(
   return 'normal';
 }
 
+function isReporterStreamTarget(target: string): target is 'stdout' | 'stderr' {
+  return target === 'stdout' || target === 'stderr';
+}
+
 function resolveOutputs(outputValues: readonly string[], cwd: string): readonly IReporterOutputTarget[] {
   return outputValues.map((value: string) => {
     const output: IReporterOutputTarget = parseOutputControl(value);
@@ -400,7 +418,7 @@ function resolveOutputs(outputValues: readonly string[], cwd: string): readonly 
     }
     return {
       ...output,
-      target: path.resolve(cwd, output.target)
+      target: isReporterStreamTarget(output.target) ? output.target : path.resolve(cwd, output.target)
     };
   });
 }
@@ -426,6 +444,26 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
   const commandJson: boolean = separateJsonControls(argv).commandJson;
 
   const reporterProbe: IParsedReporterControls = parseReporterControls(argv, false, true);
+  if (isLegacyEmergencyFallbackRequested(env)) {
+    const reporterValueFlagsToStrip: readonly string[] = reporterProbe.reporters.some(
+      (reporter) => isSupportedReporterName(reporter) && reporter !== 'legacy'
+    )
+      ? ALL_REPORTER_VALUE_FLAGS
+      : reporterProbe.reporters.includes('legacy')
+        ? REPORTER_SELECTION_FLAG
+        : [];
+    return {
+      reporter: 'legacy',
+      logLevel: 'normal',
+      outputs: [],
+      commandJson,
+      enabled: false,
+      reporterControlsOwnedByFrontend: reporterValueFlagsToStrip.length > 0,
+      reporterValueFlagsToStrip,
+      reason: 'RUSH_REPORTER=legacy'
+    };
+  }
+
   const reporterOwnershipEstablished: boolean =
     options.repositoryOptIn === true ||
     hasReporterOutputControl(argv) ||
@@ -446,25 +484,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     );
   }
   const requestedReporter: ReporterName | undefined = reporterValue;
-
-  if (isLegacyEmergencyFallbackRequested(env)) {
-    const reporterValueFlagsToStrip: readonly string[] =
-      requestedReporter === 'legacy'
-        ? REPORTER_SELECTION_FLAG
-        : requestedReporter === undefined
-          ? []
-          : ALL_REPORTER_VALUE_FLAGS;
-    return {
-      reporter: 'legacy',
-      logLevel: 'normal',
-      outputs: [],
-      commandJson,
-      enabled: false,
-      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
-      reporterValueFlagsToStrip,
-      reason: 'RUSH_REPORTER=legacy'
-    };
-  }
 
   if (options.forceLegacy) {
     if (requestedReporter !== undefined && requestedReporter !== 'legacy') {
@@ -604,6 +623,7 @@ export async function initializeRushReporterHostAsync(
 ): Promise<IInitializedRushReporterHost> {
   const env: Record<string, string | undefined> = options.env ?? process.env;
   const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
+  const stderr: IRushReporterOutputStream = options.stderr ?? process.stderr;
   const selection: IRushReporterSelection = resolveRushReporterSelection({ ...options, env, stdout });
   const host: ReporterHost = new ReporterHost({ env });
 
@@ -633,9 +653,15 @@ export async function initializeRushReporterHostAsync(
           : output.reporter === 'file'
             ? 'debug'
             : selection.logLevel;
-      host.manager.addReporter(new ExplicitOutputReporter(output.reporter, output.target, outputLogLevel), {
-        destination: output.target
-      });
+      const outputStream: IRushReporterOutputStream | undefined = isReporterStreamTarget(output.target)
+        ? output.target === 'stdout'
+          ? stdout
+          : stderr
+        : undefined;
+      host.manager.addReporter(
+        new ExplicitOutputReporter(output.reporter, output.target, outputLogLevel, outputStream),
+        { destination: output.target }
+      );
     }
   }
 
