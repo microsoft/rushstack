@@ -5,9 +5,10 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { IReporterEventSink } from '@rushstack/rush-reporter';
+import type { IReporter, IReporterEventSink } from '@rushstack/rush-reporter';
 import {
   BootstrapEventBuffer,
+  ReporterManager,
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
   writeBootstrapHandoffFileAsync
