@@ -5,7 +5,7 @@ Separate `rush-client` and `rushx-client` binaries, opt-in until cutover. Existi
 
 Routing precedence:
 
-1. `--no-daemon` before `--`, help, and never-daemonize commands stay in-process.
+1. `--no-daemon` before `--`, help, never-daemonize commands, and Rushx with any TTY stdio stay in-process.
 2. CI stays in-process unless `RUSH_DAEMON=1` explicitly opts in, even if config enables the daemon.
 3. `RUSH_DAEMON` overrides `rush.json`'s `daemon.enabled`; the default is false.
 4. Auto-start is considered only after selecting daemon execution.
@@ -50,6 +50,14 @@ command; subsequent flags and `--` belong to the script, apart from this client'
 explicit admission/escape controls. Older peers fall back before receiving the request
 or consuming input.
 
+The standalone Rushx client conservatively keeps every script with TTY stdin, stdout, or stderr on
+the native path, before connecting, auto-starting, or consuming input. Arbitrary
+scripts may require raw mode or a controlling terminal, and a pipe is not a PTY.
+There is no attempt to discover this requirement by running and retrying a script.
+Fully non-TTY invocations retain daemon forwarding, binary byte parity, and EOF handling.
+An embedded client that knows its script is pipe-safe can still submit a Rushx
+envelope directly; it must declare any controlling-terminal requirement.
+
 The default daemon installs `RushDaemonRequestResolver(existingRushResolver)` to enable real
 package-script execution alongside native workspace builds. It reuses native Rushx parsing, escaping,
 banner/diagnostics, lifecycle PATH and INIT_CWD preparation, dotenv precedence, and
@@ -69,6 +77,10 @@ No default or cutover flag is flipped. Active Rushx hooks, encrypted dotenv
 vaults, changed process-global Rush configuration variables, stale workspace configuration,
 and native help require pre-execution fallback. Ignored/recursive hooks retain native
 behavior, including skipping post hooks after failure. PTY requirements remain in-process.
+For forwarded Rushx, TTY output color/width overrides are applied after native
+lifecycle environment preparation using the existing terminal policy helper.
+Non-TTY requests retain their explicit environment values, including intentional
+`FORCE_COLOR`/`COLUMNS` settings; no ambient daemon environment is merged in.
 
 Compatible requests reuse the same native graph. Source changes refresh inputs;
 changed configuration or command shape replaces the session and graph in the same
@@ -221,11 +233,19 @@ parent closes its descriptor after spawning. On POSIX the launcher enforces mode
 `0600` and rejects linked destinations; Windows uses the existing per-user
 transport directory permissions.
 
-Reading is bounded to the size observed when the log is opened, with chunked,
-backpressured output. Empty logs succeed without output; missing/unreadable logs
+Default reading is bounded to the size observed when the log is opened, with chunked,
+backpressured output. Empty snapshots succeed without output; missing/unreadable logs
 or invalid destinations fail with a diagnostic and exit code 1. A launcher log
-may not exist for a daemon started outside this client. No `--follow` or rotation
-policy is added.
+may not exist for a daemon started outside this client.
+
+`rush-client daemon logs --follow` also streams bytes appended after EOF, using
+at most 64 KiB per read and waiting for output backpressure before reading more.
+It never connects or starts a daemon, including when following an empty log.
+SIGINT/SIGTERM cancel following with exit code 130 after closing the log descriptor;
+pending display bytes may be discarded rather than keeping the client alive
+indefinitely behind a stalled output pipe. Read/write failures remain explicit errors. Truncation,
+replacement, or removal fails explicitly instead of silently following the wrong
+file; reopen the command after rotating a log. No automatic rotation policy is added.
 
 This is the **text launcher stdout/stderr log**, including startup errors—not
 WS5 structured observability or a subscription to request-scoped events.
@@ -272,6 +292,15 @@ explicit token. Without this option, the client privately reads current status
 before submitting the mutation. A reload between those requests fails closed.
 Mutations reject older peers before submission; read-only inspection remains compatible.
 
+Graph requests use the same resolved queue options as ordinary execution:
+`--no-wait`/`--wait-timeout` override environment, config, and the 30-second default.
+An implicit generation lookup and its mutation share one positive admission
+deadline; time spent connecting and reading the token is not reset before the
+mutation. If the budget expires, no later query is sent. Zero requests immediate
+server admission, as does `--no-wait`, without imposing a zero-length connection
+timeout. Cancellation covers generation preflight too. Once a mutation is admitted,
+its execution is not timed out by the admission budget.
+
 `scope-in`, `scope-out`, and `invalidate` require one or more repeated
 `--project NAME` or `--operation ID` pairs. Names and IDs match exactly; there are
 no globs or implicit all-project selections. Every selector is validated before
@@ -307,3 +336,14 @@ transition or an unbounded event history. SIGINT/SIGTERM cancel the subscription
 and wait for the authoritative aborted result (exit 130). Disconnect removes
 subscriber resources without cancelling another client's build. Graph hooks are
 installed once per graph, not once per connection.
+
+## Remaining epic constraints
+
+Origin issues #5894 and #5896 still require reconciliation with the canonical
+reporter contract and built-in reporters. The current wire consumers use
+`IDaemonEventEnvelope`/`DaemonEventType`; `ClientOperationRenderer` feeds
+`DaemonRendererHost`, whose default is `LegacyCollatedRenderer`. These inherited
+contracts are not replaced by the WS4 terminal, graph-admission, or log-follow
+fixes. Explicit reporter controls continue to select the native reporter path.
+Reporter reconciliation remains a separate epic decision, not an assertion that
+the WS5 default flip or the full daemon transparency matrix has passed.

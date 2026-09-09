@@ -42,10 +42,48 @@ describe('opt-in routing', () => {
   it('uses native Rushx option boundaries instead of treating script flags as Rush options', () => {
     const argv: string[] = ['-q', '-d', '--ignore-hooks', 'build', '--help', '--reporter=json', '--', '-h'];
     expect(selectClientRoute({ argv, enabled: true, environment: {}, rushx: true })).toMatchObject({
-      argv, commandName: 'build', daemon: true
+      argv,
+      commandName: 'build',
+      daemon: true
     });
-    expect(selectClientRoute({
-      argv: ['--unknown', 'build'], enabled: true, environment: {}, rushx: true
-    }).daemon).toBe(false);
+
+    expect(
+      selectClientRoute({
+        argv: ['--unknown', 'build'],
+        enabled: true,
+        environment: {},
+        rushx: true
+      }).daemon
+    ).toBe(false);
+  });
+
+  it('keeps unknown interactive Rushx scripts native before daemon connection or input admission', () => {
+    expect(
+      selectClientRoute({
+        argv: ['script'],
+        enabled: true,
+        environment: { RUSH_DAEMON: '1' },
+        rushx: true,
+        hasTerminal: true
+      }).daemon
+    ).toBe(false);
+    expect(
+      selectClientRoute({
+        argv: ['script'],
+        enabled: true,
+        environment: { RUSH_DAEMON: '1' },
+        rushx: true,
+        hasTerminal: false
+      }).daemon
+    ).toBe(true);
+    expect(
+      selectClientRoute({
+        argv: ['build'],
+        enabled: true,
+        environment: { RUSH_DAEMON: '1' },
+        rushx: false,
+        hasTerminal: true
+      }).daemon
+    ).toBe(true);
   });
 });

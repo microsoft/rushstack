@@ -50,6 +50,7 @@
     "@rushstack/rush-client-core": "workspace:*",
     "@rushstack/rush-daemon-protocol": "workspace:*",
     "@rushstack/rush-daemon-transport": "workspace:*",
+    "@rushstack/rush-terminal-renderer": "workspace:*",
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {

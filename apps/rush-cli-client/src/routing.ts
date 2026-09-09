@@ -32,6 +32,7 @@ export interface IClientRouteOptions {
   readonly environment: Readonly<Record<string, string | undefined>>;
   readonly enabled: boolean;
   readonly rushx: boolean;
+  readonly hasTerminal?: boolean;
 }
 
 export interface IClientRoute {
@@ -51,15 +52,17 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     ...prefix.filter((arg) => arg !== '--no-daemon'),
     ...(separator < 0 ? [] : controls.argv.slice(separator))
   ];
-  const rushxArguments: IRushXCommandLineArguments | undefined =
-    options.rushx ? RushXCommand.parseArguments(argv, options.environment) : undefined;
+  const rushxArguments: IRushXCommandLineArguments | undefined = options.rushx
+    ? RushXCommand.parseArguments(argv, options.environment)
+    : undefined;
   const commandName: string | undefined = rushxArguments ? rushxArguments.commandName || undefined : argv[0];
   const reporterControls: boolean =
     options.environment.RUSH_LOG_LEVEL !== undefined ||
     (options.environment.RUSH_REPORTER !== undefined && options.environment.RUSH_REPORTER !== 'legacy') ||
-    (!options.rushx && prefix.some((arg) =>
-      ['--reporter', '--output', '--log-level'].some((name) => arg === name || arg.startsWith(`${name}=`))
-    ));
+    (!options.rushx &&
+      prefix.some((arg) =>
+        ['--reporter', '--output', '--log-level'].some((name) => arg === name || arg.startsWith(`${name}=`))
+      ));
   const ci: boolean = ['CI', 'TF_BUILD', 'GITHUB_ACTIONS', 'JENKINS_URL', 'TEAMCITY_VERSION'].some((key) => {
     const value: string | undefined = options.environment[key];
     return value !== undefined && value !== '' && value !== '0' && value !== 'false';
@@ -68,6 +71,7 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     options.enabled &&
     !reporterControls &&
     !noDaemon &&
+    !(options.rushx && options.hasTerminal) &&
     !!commandName &&
     !commandName.startsWith('-') &&
     (options.rushx || !neverDaemonize.has(commandName)) &&

@@ -49,7 +49,8 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     argv: process.argv.slice(2),
     environment,
     enabled: config.enabled,
-    rushx
+    rushx,
+    hasTerminal: !!(process.stdin.isTTY || process.stdout.isTTY || process.stderr.isTTY)
   });
   const selectedVersion: string = environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? Rush.version;
   if (!rushx && route.commandName === 'daemon') {
@@ -61,7 +62,10 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       environment,
       rushJsonPath,
       rushVersion: selectedVersion,
-      admission: route.admission
+      admission:
+        route.argv[1] === 'graph'
+          ? (route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) })
+          : route.admission
     });
     return;
   }
@@ -70,14 +74,14 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     return;
   }
   const terminal: ConsoleTerminalProvider = new ConsoleTerminalProvider();
-  const verbosity: DaemonVerbosity = route.argv.includes('--verbose') || route.argv.includes('-v')
-    ? 'verbose'
-    : 'quiet';
+  const verbosity: DaemonVerbosity =
+    route.argv.includes('--verbose') || route.argv.includes('-v') ? 'verbose' : 'quiet';
   const request: IDaemonRequestEnvelope = captureDaemonRequest({
     argv: route.argv,
     commandName: route.commandName,
     // The native resolver additionally validates the parsed action; rushx scripts never claim this origin.
-    commandOrigin: !rushx && ['build', 'rebuild', 'install', 'update'].includes(route.commandName) ? 'built-in' : 'custom',
+    commandOrigin:
+      !rushx && ['build', 'rebuild', 'install', 'update'].includes(route.commandName) ? 'built-in' : 'custom',
     invocationKind: rushx ? 'rushx' : 'rush',
     cwd,
     environment,
@@ -93,9 +97,12 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   let client: DaemonClient;
   try {
     connection = {
-      ...await getDaemonConnectionOptionsAsync(
-        path.dirname(rushJsonPath), selectedVersion, request.environment, config.autoStart
-      ),
+      ...(await getDaemonConnectionOptionsAsync(
+        path.dirname(rushJsonPath),
+        selectedVersion,
+        request.environment,
+        config.autoStart
+      )),
       capabilities: {
         isTTY: request.terminal.isTTY,
         columns: request.terminal.columns,
@@ -105,7 +112,8 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     };
     client = await connectOrStartDaemonAsync(connection);
   } catch (error) {
-    if (!(error instanceof DaemonClientError) && !(error instanceof DaemonLauncherUnavailableError)) throw error;
+    if (!(error instanceof DaemonClientError) && !(error instanceof DaemonLauncherUnavailableError))
+      throw error;
     process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
@@ -119,12 +127,15 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     colorLevel: terminal.supportsColor ? 1 : 0,
     verbosity,
     terminal: {
-      get columns() { return process.stdout.columns ?? 80; },
-      get isTTY() { return !!process.stdout.isTTY; }
+      get columns() {
+        return process.stdout.columns ?? 80;
+      },
+      get isTTY() {
+        return !!process.stdout.isTTY;
+      }
     },
-    writeAsync: (bytes, stream) => writeStreamAsync(
-      stream === 'stderr' ? process.stderr : process.stdout, bytes
-    )
+    writeAsync: (bytes, stream) =>
+      writeStreamAsync(stream === 'stderr' ? process.stderr : process.stdout, bytes)
   });
   let outcome: DaemonClientOutcome;
   const discoveryLines: string[] = [];
@@ -149,15 +160,21 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       },
       onEventAsync: (event) => renderer.writeEventAsync(event),
       onQueuePositionAsync: process.stderr.isTTY
-        ? (position) => writeStreamAsync(
-          process.stderr, Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
-        )
+        ? (position) =>
+            writeStreamAsync(
+              process.stderr,
+              Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
+            )
         : undefined,
       stdin: process.stdin,
       requiresStdinEnd: !process.stdin.isTTY,
       cancelOnCtrlC: !!process.stdin.isTTY,
       initialRawMode: !!process.stdin.isRaw,
-      setRawMode: process.stdin.isTTY ? (enabled) => { process.stdin.setRawMode(enabled); } : undefined
+      setRawMode: process.stdin.isTTY
+        ? (enabled) => {
+            process.stdin.setRawMode(enabled);
+          }
+        : undefined
     });
   } finally {
     process.removeListener('SIGINT', onSignal);

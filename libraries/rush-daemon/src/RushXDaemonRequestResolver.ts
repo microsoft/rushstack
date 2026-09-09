@@ -15,6 +15,7 @@ import {
   type IRushXCommandLineArguments
 } from '@microsoft/rush-lib';
 import { EnvironmentMap, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { getDaemonChildEnvironmentOverrides } from '@rushstack/rush-terminal-renderer/lib/ChildEnvironment';
 import { Terminal, TerminalProviderSeverity, type ITerminal } from '@rushstack/terminal';
 
 import {
@@ -38,23 +39,36 @@ import type { IGlobalCommandExecutionContext } from './GlobalCommandExecutionCon
 export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
   readonly #startupEnvironment: NodeJS.ProcessEnv = { ...process.env };
   readonly #requestLocalRushVariables: ReadonlySet<string> = new Set([
-    ...Object.values(daemonEnvironmentVariables), 'RUSH_DAEMON_EXPERIMENTAL', 'RUSH_INVOKED_FOLDER', 'RUSH_QUIET_MODE'
+    ...Object.values(daemonEnvironmentVariables),
+    'RUSH_DAEMON_EXPERIMENTAL',
+    'RUSH_INVOKED_FOLDER',
+    'RUSH_QUIET_MODE'
   ]);
 
   public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
     const { envelope, workspaceSession, abortSignal } = options;
     if (envelope.invocationKind !== 'rushx') {
-      throw new DaemonRequestDispatchError('unsupported', 'This resolver requires an explicit Rushx invocation.');
+      throw new DaemonRequestDispatchError(
+        'unsupported',
+        'This resolver requires an explicit Rushx invocation.'
+      );
     }
     if (envelope.commandOrigin !== 'custom') {
-      throw new DaemonRequestDispatchError('invalidRequest', 'A Rushx script cannot claim built-in Rush origin.');
+      throw new DaemonRequestDispatchError(
+        'invalidRequest',
+        'A Rushx script cannot claim built-in Rush origin.'
+      );
     }
     let cwd: string;
     let canonicalCwd: string;
     try {
-      canonicalCwd = resolveGlobalCommandRequest({
-        ...envelope, terminal: { ...envelope.terminal, columns: envelope.terminal.columns }
-      }, workspaceSession).cwd;
+      canonicalCwd = resolveGlobalCommandRequest(
+        {
+          ...envelope,
+          terminal: { ...envelope.terminal, columns: envelope.terminal.columns }
+        },
+        workspaceSession
+      ).cwd;
       cwd = process.platform === 'win32' ? path.resolve(envelope.cwd) : canonicalCwd;
       resolveGlobalCommandWorkingDirectory(RushXCommand.getPackageFolder(cwd), workspaceSession);
     } catch (error) {
@@ -62,16 +76,23 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
     }
     const args: IRushXCommandLineArguments = RushXCommand.parseArguments(envelope.argv, envelope.environment);
     if (args.commandName !== envelope.commandName) {
-      throw new DaemonRequestDispatchError('invalidRequest', 'The command name does not match native Rushx argv.');
+      throw new DaemonRequestDispatchError(
+        'invalidRequest',
+        'The command name does not match native Rushx argv.'
+      );
     }
     const configuration: RushConfiguration = workspaceSession.rushConfiguration;
     let environment: NodeJS.ProcessEnv;
     let rushJsonFilePath: string;
     try {
       const rushJsonPath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: cwd, showVerbose: false
+        startingFolder: cwd,
+        showVerbose: false
       });
-      if (!rushJsonPath || fs.realpathSync.native(rushJsonPath) !== fs.realpathSync.native(configuration.rushJsonFile)) {
+      if (
+        !rushJsonPath ||
+        fs.realpathSync.native(rushJsonPath) !== fs.realpathSync.native(configuration.rushJsonFile)
+      ) {
         throw new Error('The governing Rush configuration differs from this daemon workspace.');
       }
       rushJsonFilePath = rushJsonPath;
@@ -105,11 +126,13 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
           consoleTerminal: new Terminal({
             supportsColor: true,
             eolCharacter: '\n',
-            write: (data, severity) => context.writeOutput(
-              severity === TerminalProviderSeverity.error || severity === TerminalProviderSeverity.warning
-                ? 'stderr' : 'stdout',
-              Buffer.from(data)
-            )
+            write: (data, severity) =>
+              context.writeOutput(
+                severity === TerminalProviderSeverity.error || severity === TerminalProviderSeverity.warning
+                  ? 'stderr'
+                  : 'stdout',
+                Buffer.from(data)
+              )
           }),
           launchOptions: { isManaged: true },
           abortSignal: context.abortSignal,
@@ -119,7 +142,14 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
             }
             const child: ChildProcessWithoutNullStreams = context.spawnChild(command, childArgs, {
               cwd: spawnOptions.cwd,
-              environment: spawnOptions.env,
+              environment: {
+                ...spawnOptions.env,
+                ...getDaemonChildEnvironmentOverrides({
+                  isTTY: envelope.terminal.isTTY,
+                  colorLevel: envelope.terminal.supportsColor ? 1 : 0,
+                  columns: envelope.terminal.columns
+                })
+              },
               shell: spawnOptions.shell,
               forwardInput: envelope.terminal.acceptsStdin === true
             });
@@ -141,17 +171,21 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
     if (quiet !== 'true' && quiet !== 'false') {
       EnvironmentConfiguration.parseBooleanEnvironmentVariable('RUSH_QUIET_MODE', quiet);
     }
-    const names: Set<string> = new Set([...Object.keys(this.#startupEnvironment), ...Object.keys(environment)]);
+    const names: Set<string> = new Set([
+      ...Object.keys(this.#startupEnvironment),
+      ...Object.keys(environment)
+    ]);
     for (const name of names) {
       if (
         name.startsWith('RUSH_') &&
         !this.#requestLocalRushVariables.has(name) &&
         environment[name] !== this.#startupEnvironment[name]
       ) {
-        throw new Error(`Changed ${name} requires native Rush environment initialization before Rushx execution.`);
+        throw new Error(
+          `Changed ${name} requires native Rush environment initialization before Rushx execution.`
+        );
       }
     }
-
   }
 }
 
@@ -165,7 +199,10 @@ function assertCurrentConfiguration(configuration: RushConfiguration): void {
     experiments = {};
   }
   if (
-    !isDeepStrictEqual({ ...current, repository: current.repository || {} }, configuration.rushConfigurationJson) ||
+    !isDeepStrictEqual(
+      { ...current, repository: current.repository || {} },
+      configuration.rushConfigurationJson
+    ) ||
     !isDeepStrictEqual(experiments, configuration.experimentsConfiguration.configuration)
   ) {
     throw new Error('Rush configuration changed; a refreshed workspace is required before Rushx execution.');
