@@ -45,6 +45,119 @@ async function withTempDir(action: (directory: string) => Promise<void>): Promis
 }
 
 describe('FileReporter', () => {
+  it('preserves UTF-8 through short spool, copy, and invocation-log writes', async () => {
+    await withTempDir(async (base: string) => {
+      const fsModule: typeof fs = jest.requireActual('node:fs');
+      const originalWrite: typeof fs.writeSync = fsModule.writeSync;
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      await reporter.initializeAsync();
+      const writeSpy = jest.spyOn(fsModule, 'writeSync').mockImplementation(
+        (
+          fd: number,
+          data: string | NodeJS.ArrayBufferView,
+          offset?: number | null,
+          length?: number | BufferEncoding | null
+        ): number => {
+          const buffer: Buffer =
+            typeof data === 'string'
+              ? Buffer.from(data, 'utf8')
+              : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+          const start: number = typeof data === 'string' ? 0 : (offset ?? 0);
+          const count: number = typeof length === 'number' ? length : buffer.length - start;
+          return originalWrite(fd, buffer, start, Math.min(3, count));
+        }
+      );
+      const text: string = 'OUTPUT-BEGIN \u{1f680} \u4e2d OUTPUT-END\n';
+      try {
+        reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+        reporter.report({ ...ev('externalOutput', { text }), scope: { operationId: 'op' } });
+        reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+        await reporter.closeAsync();
+      } finally {
+        writeSpy.mockRestore();
+        await reporter.closeAsync();
+      }
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('"type":"operationRegistered"');
+      expect(content).toContain(text);
+      expect(content.match(/OUTPUT-BEGIN/g)).toHaveLength(1);
+      expect(reporter.getArtifact().complete).toBe(true);
+    });
+  });
+
+  it('reports a zero-progress spool failure and does not claim a complete artifact', async () => {
+    await withTempDir(async (base: string) => {
+      const fsModule: typeof fs = jest.requireActual('node:fs');
+      const warnings: string[] = [];
+      const reporter: FileReporter = new FileReporter({
+        commonTempFolder: base,
+        nowMs: () => FIXED_NOW,
+        emergencyWarn: (warning) => warnings.push(warning)
+      });
+      await reporter.initializeAsync();
+      reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+      const writeSpy = jest.spyOn(fsModule, 'writeSync').mockReturnValueOnce(0);
+      try {
+        reporter.report({
+          ...ev('externalOutput', { text: 'RECOVERED-OUTPUT\n' }),
+          scope: { operationId: 'op' }
+        });
+        reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+        await reporter.closeAsync();
+      } finally {
+        writeSpy.mockRestore();
+        await reporter.closeAsync();
+      }
+
+      expect(warnings.some((warning) => warning.includes('Unable to spool'))).toBe(true);
+      expect(reporter.getArtifact().complete).toBe(false);
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content.match(/RECOVERED-OUTPUT/g)).toHaveLength(1);
+    });
+  });
+
+  it('recovers a failed spool suffix without repeating a partial UTF-8 prefix', async () => {
+    await withTempDir(async (base: string) => {
+      const fsModule: typeof fs = jest.requireActual('node:fs');
+      const originalWrite: typeof fs.writeSync = fsModule.writeSync;
+      const warnings: string[] = [];
+      const reporter: FileReporter = new FileReporter({
+        commonTempFolder: base,
+        nowMs: () => FIXED_NOW,
+        emergencyWarn: (warning) => warnings.push(warning)
+      });
+      await reporter.initializeAsync();
+      reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+      const writeSpy = jest
+        .spyOn(fsModule, 'writeSync')
+        .mockImplementationOnce((fd, data: string | NodeJS.ArrayBufferView) => {
+          const buffer: Buffer =
+            typeof data === 'string'
+              ? Buffer.from(data, 'utf8')
+              : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+          return originalWrite(fd, buffer, 0, 3);
+        })
+        .mockImplementationOnce(() => {
+          throw new Error('spool full');
+        });
+      const text: string = 'A\u{1f680}B\n';
+      try {
+        reporter.report({ ...ev('externalOutput', { text }), scope: { operationId: 'op' } });
+        reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+        await reporter.closeAsync();
+      } finally {
+        writeSpy.mockRestore();
+        await reporter.closeAsync();
+      }
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content.split(text)).toHaveLength(2);
+      expect(content).not.toContain('\ufffd');
+      expect(warnings.some((warning) => warning.includes('spool full'))).toBe(true);
+      expect(reporter.getArtifact().complete).toBe(false);
+    });
+  });
+
   it('streams events after initialization instead of retaining the full log', async () => {
     await withTempDir(async (base: string) => {
       const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
