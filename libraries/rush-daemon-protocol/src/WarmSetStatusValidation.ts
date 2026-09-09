@@ -10,6 +10,7 @@ import {
   requireStatusStrings,
   requireStatusText
 } from './StatusValidation';
+import { validateWarmProjectRanks } from './WarmProjectRankValidation';
 
 const STATES: ReadonlySet<string> = new Set(['running', 'quiescing', 'stopped', 'failed']);
 const DEFERRED: ReadonlySet<string> = new Set(['workspace-busy', 'native-busy', 'graph-busy', 'disposed']);
@@ -19,6 +20,7 @@ export function validateWarmSetStatus(value: unknown): void {
   const status: Record<string, unknown> = requireStatusRecord(value, 'warmSet');
   validateConfiguration(status.configuration);
   requireStatusStrings(status.retainedProjectNames, 'retainedProjectNames');
+  validateWarmProjectRanks(status.projectRanks);
   requireStatusStrings(status.protectedProjectNames, 'protectedProjectNames');
   requireStatusStrings(status.watchedProjectNames, 'watchedProjectNames');
   requireStatusStrings(status.cleanupFailures, 'cleanupFailures');

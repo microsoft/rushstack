@@ -12,6 +12,7 @@ import {
   type Operation
 } from '@microsoft/rush-lib';
 import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
+import { isResourceFreeNullOperationRunner } from '@microsoft/rush-lib/lib/logic/operations/NullOperationRunner';
 
 import {
   RequestExclusivityClass,
@@ -186,6 +187,13 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       maintenanceState: this.#getMaintenanceState(),
       maintenanceFailure: this.#leaseReleaseFailure?.message,
       retainedProjectNames: projects.map((project) => project.key),
+      projectRanks: projects.map((project) => ({
+        projectName: project.key,
+        frequency: project.frequency,
+        lastUsed: project.lastUsed,
+        timeSavedMs: project.timeSavedMs,
+        measuredRunnerMemoryBytes: project.residentMemoryBytes || undefined
+      })),
       protectedProjectNames: projects.filter((project) => project.protected).map((project) => project.key),
       watchedProjectNames: [...this.#options.watcher.watchedProjectNames].sort(),
       daemonResidentMemoryBytes,
@@ -380,7 +388,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       if (!resident.length && !watched.has(key)) continue;
       let residentMemoryBytes: number | undefined = 0;
       let timeSavedMs: number | undefined = 0;
+      let resourceOperationCount: number = 0;
       for (const operation of resident) {
+        if (isResourceFreeNullOperationRunner(operation.runner)) continue;
+        resourceOperationCount++;
         const memory: number | undefined = operation.runner?.residentMemoryBytes;
         const saved: number | undefined = this.#timings.get(operation)?.timeSavedMs;
         residentMemoryBytes =
@@ -388,6 +399,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
             ? residentMemoryBytes + memory
             : undefined;
         timeSavedMs = timeSavedMs !== undefined && saved !== undefined ? timeSavedMs + saved : undefined;
+      }
+      if (resourceOperationCount === 0) {
+        residentMemoryBytes = undefined;
+        timeSavedMs = undefined;
       }
       projects.push({
         key,

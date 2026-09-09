@@ -10,6 +10,7 @@ describe('daemon configuration', () => {
     expect(resolveDaemonConfiguration({}, {})).toMatchObject({
       enabled: false,
       autoStart: true,
+      usePersistentIpcRunners: false,
       idleTimeoutSeconds: 900
     });
     expect(
@@ -33,7 +34,8 @@ describe('daemon configuration', () => {
     { RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: 'Infinity' },
     { RUSH_DAEMON_WARM_SET_MAX_PROJECTS: '1.5' },
     { RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: '' },
-    { RUSH_DAEMON_EXPERIMENTAL: 'yes' }
+    { RUSH_DAEMON_EXPERIMENTAL: 'yes' },
+    { RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'yes' }
   ])('rejects invalid overrides %j', (environment) => {
     expect(() => resolveDaemonConfiguration({}, environment)).toThrow();
   });
@@ -49,7 +51,8 @@ describe('daemon configuration', () => {
     { warmIdleTimeoutSeconds: -1 },
     { warmMemoryBudgetMB: 0 },
     { warmSetMaxProjects: 0.5 },
-    { autoWarmByTelemetry: 1 }
+    { autoWarmByTelemetry: 1 },
+    { usePersistentIpcRunners: 'true' }
   ])('publishes schema rejection for %j', (daemon) => {
     const schema = JsonSchema.fromLoadedObject(schemaJson);
     expect(() =>

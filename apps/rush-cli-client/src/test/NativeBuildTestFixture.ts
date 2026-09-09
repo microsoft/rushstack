@@ -142,11 +142,13 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     });
     let stdout: string = '';
     let stderr: string = '';
-    child.stdout.on('data', (bytes: Buffer) => {
-      stdout += bytes.toString();
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (text: string) => {
+      stdout += text;
     });
-    child.stderr.on('data', (bytes: Buffer) => {
-      stderr += bytes.toString();
+    child.stderr.on('data', (text: string) => {
+      stderr += text;
     });
     const closed: Promise<unknown[]> = once(child, 'close');
     invocationClosures.push(closed);

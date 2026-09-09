@@ -3,6 +3,7 @@
 
 import type { ChildProcess, SpawnOptions } from 'node:child_process';
 import { once } from 'node:events';
+import { StringDecoder } from 'node:string_decoder';
 
 import type {
   IAfterExecuteEventMessage,
@@ -29,6 +30,8 @@ export interface IIPCOperationRunnerOptions {
   incrementalCommand: string | undefined;
   commandForHash: string;
   ignoredParameterValues: ReadonlyArray<string>;
+  /** Explicit daemon Node descriptors must negotiate IPC instead of succeeding as one-shot shell commands. */
+  requireIpc?: boolean;
   /**
    * Optional process factory for an explicit IPC executable. Receives the native lifecycle
    * environment, stdio and process-group options; the default preserves shell command execution.
@@ -70,6 +73,7 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _commandForHash: string;
   private readonly _ignoredParameterValues: ReadonlyArray<string>;
   private readonly _spawn: IIPCOperationRunnerOptions['spawn'];
+  private readonly _requireIpc: boolean;
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -97,6 +101,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
     this._ignoredParameterValues = ignoredParameterValues;
     this._spawn = options.spawn;
+    this._requireIpc = options.requireIpc ?? false;
   }
 
   public get isActive(): boolean {
@@ -176,14 +181,17 @@ export class IPCOperationRunner implements IOperationRunner {
           terminal.writeLine(`Connecting to existing IPC process...`);
         }
         const subProcess: ChildProcess = this._ipcProcess;
+        const requireIpc: boolean = this._requireIpc;
         let hasWarningOrError: boolean = false;
+        const stdoutDecoder: StringDecoder = new StringDecoder('utf8');
+        const stderrDecoder: StringDecoder = new StringDecoder('utf8');
 
         function onStdout(data: Buffer): void {
-          const text: string = data.toString();
+          const text: string = stdoutDecoder.write(data);
           terminalProvider.write(text, TerminalProviderSeverity.log);
         }
         function onStderr(data: Buffer): void {
-          const text: string = data.toString();
+          const text: string = stderrDecoder.write(data);
           terminalProvider.write(text, TerminalProviderSeverity.error);
           hasWarningOrError = true;
         }
@@ -201,9 +209,11 @@ export class IPCOperationRunner implements IOperationRunner {
               terminal.writeLine('Received finish notification');
               subProcess.stdout?.off('data', onStdout);
               subProcess.stderr?.off('data', onStderr);
+              terminalProvider.write(stdoutDecoder.end(), TerminalProviderSeverity.log);
+              terminalProvider.write(stderrDecoder.end(), TerminalProviderSeverity.error);
               subProcess.off('message', finishHandler);
               subProcess.off('error', reject);
-              subProcess.off('exit', onExit);
+              subProcess.off('close', onExit);
               terminal.writeLine('Disconnected from IPC process');
               // These types are currently distinct but have the same underlying values
               resolve(message.status as unknown as OperationStatus);
@@ -212,11 +222,21 @@ export class IPCOperationRunner implements IOperationRunner {
 
           function onExit(exitCode: number | null, signal: NodeJS.Signals | null): void {
             try {
+              subProcess.stdout?.off('data', onStdout);
+              subProcess.stderr?.off('data', onStderr);
+              terminalProvider.write(stdoutDecoder.end(), TerminalProviderSeverity.log);
+              terminalProvider.write(stderrDecoder.end(), TerminalProviderSeverity.error);
+              subProcess.off('message', finishHandler);
+              subProcess.off('error', reject);
+              subProcess.off('close', onExit);
               if (isConnected) {
                 context.error = new OperationError(
                   'error',
                   'IPC process exited before reporting its operation result.'
                 );
+                resolve(OperationStatus.Failure);
+              } else if (requireIpc) {
+                context.error = new OperationError('error', 'The explicit daemon Node tool exited without completing IPC readiness.');
                 resolve(OperationStatus.Failure);
               } else if (signal) {
                 context.error = new OperationError('error', `Terminated by signal: ${signal}`);
@@ -230,6 +250,7 @@ export class IPCOperationRunner implements IOperationRunner {
               } else {
                 resolve(OperationStatus.Success);
               }
+              if (requireIpc && context.error) terminal.writeErrorLine(context.error.message);
             } catch (error) {
               reject(error as OperationError);
             }
@@ -237,7 +258,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
           subProcess.on('message', finishHandler);
           subProcess.on('error', reject);
-          subProcess.on('exit', onExit);
+          subProcess.on('close', onExit);
           this._processReadyPromise!.then(() => {
             isConnected = true;
             terminal.writeLine('Child supports IPC protocol. Sending "run" command...');

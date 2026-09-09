@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Document the explicit Node-only persistent daemon path and cover production launch, measured retention, raw Unicode output, cancellation, NoOp/shards, and descriptor/implementation reload through the public client.",
+      "type": "minor"
+    }
+  ]
+}

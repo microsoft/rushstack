@@ -12,6 +12,7 @@ import type { ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushProjectConfiguration } from './RushProjectConfiguration';
+import { getDaemonIpcImplementationIdentityAsync } from '../logic/operations/DaemonIpcConfiguration';
 
 /** Stable inputs which distinguish reusable, reloadable, and process-bound workspace state. @alpha */
 export interface IWorkspaceInputFingerprint {
@@ -191,10 +192,11 @@ export async function captureProjectConfigurationFingerprintAsync(
     await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(rushConfiguration.projects, terminal);
   return hashText(
     JSON.stringify(
+      [await getDaemonIpcImplementationIdentityAsync(configurations, rushConfiguration.daemon.usePersistentIpcRunners),
       Array.from(configurations, ([project, configuration]) => [
         project.packageName,
         configuration._getJsonForFingerprint()
-      ]).sort(([left], [right]) => left.localeCompare(right))
+      ]).sort(([left], [right]) => left.localeCompare(right))]
     )
   );
 }

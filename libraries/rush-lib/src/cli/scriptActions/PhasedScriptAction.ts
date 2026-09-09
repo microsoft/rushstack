@@ -34,6 +34,7 @@ import type {
 } from '../../logic/operations/IOperationGraph';
 import type { IPhasedCommandEngine } from '../../api/PhasedCommandEngine';
 import { PhasedCommandEngineConfigurationChangedError } from '../../api/PhasedCommandEngineConfigurationChangedError';
+import { getDaemonIpcImplementationIdentityAsync } from '../../logic/operations/DaemonIpcConfiguration';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
@@ -581,6 +582,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       }
 
       await measureAsyncFn(`${PERF_PREFIX}:applySituationalPlugins`, async () => {
+        if (onEngine && this.rushConfiguration.daemon.usePersistentIpcRunners && !this._noIPCParameter?.value) {
+          const { DaemonIpcOperationRunnerPlugin } = await import(
+            /* webpackChunkName: 'DaemonIpcOperationRunnerPlugin' */ '../../logic/operations/DaemonIpcOperationRunnerPlugin'
+          );
+          new DaemonIpcOperationRunnerPlugin().apply(this.hooks);
+        }
         if (isWatch && this._noIPCParameter?.value === false) {
           new (
             await import(
@@ -659,7 +666,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               : RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
           );
       const projectConfigurationIdentity: string | undefined = onEngine
-        ? getProjectConfigurationIdentity(projectConfigurations)
+        ? await getProjectConfigurationIdentityAsync(projectConfigurations, this.rushConfiguration.daemon.usePersistentIpcRunners)
         : undefined;
 
       const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
@@ -740,7 +747,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               await this._validateInstallStateAsync();
               const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
                 await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal);
-              if (getProjectConfigurationIdentity(currentConfigurations) !== projectConfigurationIdentity) {
+              if (
+                await getProjectConfigurationIdentityAsync(currentConfigurations, this.rushConfiguration.daemon.usePersistentIpcRunners) !==
+                projectConfigurationIdentity
+              ) {
                 throw new PhasedCommandEngineConfigurationChangedError();
               }
               return await getInputsSnapshotAsync();
@@ -989,10 +999,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 }
 
-function getProjectConfigurationIdentity(
-  configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>
-): string {
+async function getProjectConfigurationIdentityAsync(
+  configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>,
+  persistentIpc: boolean
+): Promise<string> {
   return JSON.stringify(
+    [await getDaemonIpcImplementationIdentityAsync(configurations, persistentIpc),
     Array.from(configurations, ([project, configuration]) => ({
       project: project.packageName,
       incrementalBuildIgnoredGlobs: configuration.incrementalBuildIgnoredGlobs,
@@ -1000,7 +1012,7 @@ function getProjectConfigurationIdentity(
       operations: Array.from(configuration.operationSettingsByOperationName).sort(([left], [right]) =>
         left.localeCompare(right)
       )
-    })).sort((left, right) => left.project.localeCompare(right.project))
+    })).sort((left, right) => left.project.localeCompare(right.project))]
   );
 }
 

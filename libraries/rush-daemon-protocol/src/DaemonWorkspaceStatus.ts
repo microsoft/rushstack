@@ -19,6 +19,8 @@ export interface IDaemonWarmSetStatus {
   readonly maintenanceFailure?: string;
   /** Highest retention priority first. */
   readonly retainedProjectNames: ReadonlyArray<string>;
+  /** Raw ranking inputs for retained projects; absent on older peers. Missing measurements remain unknown. */
+  readonly projectRanks?: ReadonlyArray<IDaemonWarmProjectRank>;
   readonly protectedProjectNames: ReadonlyArray<string>;
   /** Actual recursive project watchers, including pending closes. */
   readonly watchedProjectNames: ReadonlyArray<string>;
@@ -31,6 +33,17 @@ export interface IDaemonWarmSetStatus {
   readonly overProjectLimit: boolean;
   readonly deferredReason: 'workspace-busy' | 'native-busy' | 'graph-busy' | 'disposed' | undefined;
   readonly cleanupFailures: ReadonlyArray<string>;
+}
+
+/** Measured inputs to retention policy, not estimates of a project's total memory allocation. @beta */
+export interface IDaemonWarmProjectRank {
+  readonly projectName: string;
+  readonly frequency: number;
+  /** Monotonic daemon-local milliseconds. */
+  readonly lastUsed: number;
+  readonly timeSavedMs?: number;
+  /** Present only when all resource-owning retained operations supply a measurement. */
+  readonly measuredRunnerMemoryBytes?: number;
 }
 
 /** A non-initializing snapshot of the provider's current generation. @beta */

@@ -187,6 +187,29 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     }
   });
 
+  it('does not mistake a resource-owning custom NoOp runner for a native resource-free node', async () => {
+    const { warm } = await startAsync();
+    const operation = test!.operation('a');
+    let active: boolean = true;
+    operation.runner = {
+      name: 'custom-noop-with-resource',
+      isNoOp: true,
+      cacheable: false,
+      reportTiming: false,
+      silent: false,
+      warningsAreAllowed: false,
+      get isActive() { return active; },
+      residentMemoryBytes: 1024,
+      getConfigHash: () => '',
+      executeAsync: async () => OperationStatus.NoOp,
+      closeAsync: async () => { active = false; }
+    };
+    const rank = warm.getStatus().projectRanks?.find((project) => project.projectName === 'a');
+    expect(rank?.measuredRunnerMemoryBytes).toBe(1024);
+    expect(rank?.timeSavedMs).toBeUndefined();
+    expect(warm.getStatus().measuredRunnerMemoryBytes).toBe(1024);
+  });
+
   it('defers maintenance during a real native build and keeps protected resources despite impossible limits', async () => {
     const { fixture, warm, graph } = await startAsync({ ipc: true });
     const before: IOperationExecutionResult = graph.resultByOperation.get(test!.operation('a'))!;
