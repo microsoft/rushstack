@@ -4,8 +4,6 @@ const childProcess = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const PUBLISH_REGISTRY_URL = 'https://packagefeedproxy.microsoft.io/npm/';
-
 function parseArguments() {
   const [command, ...args] = process.argv.slice(2);
   const options = new Map();
@@ -190,11 +188,6 @@ function filterPackages(repoPath, packagesPath, cohort) {
     throw new Error('Unable to determine the publish registry from .npmrc-publish.');
   }
   const registryUrl = registryMatch[1].trim();
-  if (registryUrl !== PUBLISH_REGISTRY_URL) {
-    throw new Error(
-      `Publishing must use the feed proxy registry ${PUBLISH_REGISTRY_URL}; found ${registryUrl}.`
-    );
-  }
   let retainedPackageCount = 0;
 
   for (const tarballPath of getFilesRecursively(packagesPath, '.tgz')) {
