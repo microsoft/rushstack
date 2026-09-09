@@ -30,9 +30,17 @@ export function formatHumanReadableDiagnostic(event: IReporterEventEnvelope<unkn
       : undefined;
 
   const source: IRushDiagnostic['source'] = diagnostic.source;
+  const secretValues: Set<string> = new Set();
+  for (const parameter of Object.values(diagnostic.parameters ?? {})) {
+    if (parameter.privacy === 'secret' && typeof parameter.value === 'string') {
+      secretValues.add(parameter.value);
+    }
+  }
+  // Source metadata can alias a classified parameter; it must not reveal that secret again.
+  const sourceText = (value: string): string => (secretValues.has(value) ? '[secret]' : value);
   let location: string = '';
   if (source?.kind === 'file') {
-    location = source.file;
+    location = sourceText(source.file);
     if (source.line !== undefined) {
       location += `:${source.line}`;
       if (source.column !== undefined) {
@@ -41,7 +49,8 @@ export function formatHumanReadableDiagnostic(event: IReporterEventEnvelope<unkn
     }
   }
   if (source?.toolName && diagnostic.parameters?.tool === undefined) {
-    location = location ? `[${source.toolName}] ${location}` : source.toolName;
+    const toolName: string = sourceText(source.toolName);
+    location = location ? `[${toolName}] ${location}` : toolName;
   }
 
   const detail: string = [location, summary].filter(Boolean).join(' - ');

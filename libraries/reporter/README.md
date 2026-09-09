@@ -63,6 +63,8 @@ classification and omit non-public source and scope metadata.
 Secret envelopes retain only protocol, event identity, ordering, timing, type, privacy, and fully redacted
 source and payload fields. Contextual parent, command, operation, project, phase, and scope metadata is
 removed.
+Human diagnostic source labels that duplicate an explicitly secret parameter are also redacted. Unrelated
+local-sensitive tool names and locations remain available in local human output.
 
 ## Links
 
