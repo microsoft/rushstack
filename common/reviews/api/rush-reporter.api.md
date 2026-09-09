@@ -1395,6 +1395,8 @@ export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
+    // @internal
+    _disposeInitializedReportersAsync(): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     flushAsync(timeoutMs?: number): Promise<void>;
     getPendingEventCount(): number;

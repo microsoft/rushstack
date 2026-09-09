@@ -89,6 +89,7 @@ interface IReporterEntry {
   readonly reporter: IReporter;
   readonly destination: string | undefined;
   readonly required: boolean;
+  initializationStarted: boolean;
   disabled: boolean;
   failureNotified: boolean;
   readonly queue: IReporterEventEnvelope<unknown>[];
@@ -121,6 +122,7 @@ export class ReporterManager implements IReporterEventSink {
   private _nextEventId: number;
   private _initialized: boolean;
   private _fatalError: Error | undefined;
+  private _disposalPromise: Promise<void> | undefined;
 
   public constructor(options: IReporterManagerOptions = {}) {
     const {
@@ -169,6 +171,7 @@ export class ReporterManager implements IReporterEventSink {
       reporter,
       destination,
       required: options.required ?? false,
+      initializationStarted: false,
       disabled: false,
       failureNotified: false,
       queue: [],
@@ -191,9 +194,45 @@ export class ReporterManager implements IReporterEventSink {
         protocolVersion: this._protocolVersion,
         destination: entry.destination
       };
+      entry.initializationStarted = true;
       await entry.reporter.initializeAsync(context);
     }
     this._initialized = true;
+  }
+
+  /**
+   * Joins cleanup of every attempted initialization, including a partially initialized reporter.
+   *
+   * @internal
+   */
+  public _disposeInitializedReportersAsync(): Promise<void> {
+    this._disposalPromise ??= (async () => {
+      const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+        this._entries
+          .filter((entry: IReporterEntry) => entry.initializationStarted)
+          .map(async (entry: IReporterEntry): Promise<void> => {
+            await entry.lifecyclePromise;
+            await entry.drainPromise;
+            try {
+              if (this._initialized && !entry.disabled) {
+                await entry.reporter.flushAsync();
+              }
+            } finally {
+              await entry.reporter.closeAsync();
+            }
+          })
+      );
+      const errors: unknown[] = results
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+        .map((result: PromiseRejectedResult) => result.reason);
+      if (errors.length > 0) {
+        throw new AggregateError(
+          errors,
+          `Reporter initialization cleanup failed: ${errors.map((error: unknown) => String(error)).join('; ')}`
+        );
+      }
+    })();
+    return this._disposalPromise;
   }
 
   /**

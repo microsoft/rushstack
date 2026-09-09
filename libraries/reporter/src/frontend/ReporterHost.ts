@@ -30,6 +30,17 @@ import {
  */
 export const DEFAULT_HANDOFF_RETENTION_MS: number = 14 * 24 * 60 * 60 * 1000;
 
+const MAX_ABANDONED_HANDOFF_SESSIONS: number = 20;
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code !== 'ESRCH';
+  }
+}
+
 /**
  * Options for constructing a {@link ReporterHost}.
  *
@@ -381,7 +392,8 @@ export class ReporterHost {
   }
 
   /**
-   * Deletes abandoned handoff files older than the retention window.
+   * Deletes expired abandoned handoffs and retains at most 20 recent abandoned sessions per user.
+   * Live processes, the current handoff, and files without verifiable ownership are protected.
    *
    * @returns the paths of the deleted files
    */
@@ -394,20 +406,65 @@ export class ReporterHost {
       return deleted;
     }
 
+    const uid: number = process.getuid?.() ?? os.userInfo().uid;
+    if (uid < 0) {
+      return deleted;
+    }
+    const currentHandoff: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
     const cutoff: number = this._nowMs() - this._retentionMs;
+    const abandoned: Array<{ path: string; pid: number; stats: fs.Stats }> = [];
     for (const fileName of fileNames) {
-      if (!isBootstrapHandoffFileName(fileName)) {
+      const match: RegExpExecArray | null = /^rush-reporter-bootstrap-([1-9]\d*)-.+\.ndjson$/.exec(fileName);
+      if (!match) {
         continue;
       }
+      const pid: number = Number(match[1]);
       const filePath: string = path.join(this._handoffDirectory, fileName);
+      if (
+        !Number.isSafeInteger(pid) ||
+        pid > 0x7fffffff ||
+        pid === process.pid ||
+        (currentHandoff !== undefined && path.resolve(filePath) === path.resolve(currentHandoff))
+      ) {
+        continue;
+      }
       try {
-        const stats: fs.Stats = await fs.promises.stat(filePath);
-        if (stats.mtimeMs < cutoff) {
-          await fs.promises.rm(filePath, { force: true });
-          deleted.push(filePath);
+        const stats: fs.Stats = await fs.promises.lstat(filePath);
+        if (stats.isFile() && stats.uid === uid && !isProcessAlive(pid)) {
+          abandoned.push({ path: filePath, pid, stats });
         }
       } catch {
         // Ignore files that vanish or cannot be inspected.
+      }
+    }
+    abandoned.sort(
+      (left, right) =>
+        right.stats.mtimeMs - left.stats.mtimeMs ||
+        (left.path < right.path ? -1 : left.path > right.path ? 1 : 0)
+    );
+    for (const [index, candidate] of abandoned.entries()) {
+      if (index < MAX_ABANDONED_HANDOFF_SESSIONS && candidate.stats.mtimeMs >= cutoff) {
+        continue;
+      }
+      try {
+        const stats: fs.Stats = await fs.promises.lstat(candidate.path);
+        if (
+          stats.isFile() &&
+          stats.uid === uid &&
+          stats.dev === candidate.stats.dev &&
+          stats.ino === candidate.stats.ino &&
+          stats.mtimeMs === candidate.stats.mtimeMs &&
+          !isProcessAlive(candidate.pid)
+        ) {
+          await fs.promises.unlink(candidate.path);
+          deleted.push(candidate.path);
+        }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+          process.stderr.write(
+            `[reporter] Unable to remove an abandoned bootstrap handoff: ${String(error)}\n`
+          );
+        }
       }
     }
     return deleted;
