@@ -302,6 +302,19 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           const result: IHeftChildResult = processor.flush();
           emitDiagnostic(result.diagnostic);
           eventEnded = true;
+          if (
+            !result.accepted &&
+            negotiationResult?.accepted &&
+            negotiationResult.ack.acceptedCapabilities.includes('heft-child-events-v1')
+          ) {
+            fail(
+              new Error(
+                'The negotiated Heft reporter stream was corrupt or incomplete. ' +
+                  'See the RUSH_PROTOCOL_INVALID_CHILD_STREAM diagnostic for details.'
+              )
+            );
+            return;
+          }
           if (!acknowledgementStarted && !reporterAckStream.destroyed) {
             reporterAckStream.destroy();
           }

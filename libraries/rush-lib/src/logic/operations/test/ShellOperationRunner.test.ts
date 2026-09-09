@@ -117,7 +117,10 @@ describe(convertSlashesForWindows.name, () => {
       }
     });
 
-    it('does not fail a successful Heft operation for a nonfatal acknowledgement error', async () => {
+    it.each<[Error, OperationStatus]>([
+      [new HeftChildReporterNonFatalError('acknowledgement failed'), OperationStatus.Success],
+      [new Error('The negotiated Heft reporter stream was corrupt or incomplete.'), OperationStatus.Failure]
+    ])('handles reporter failure %s with operation status %s', async (reporterError, expectedStatus) => {
       if (process.platform === 'win32') {
         return;
       }
@@ -141,7 +144,7 @@ describe(convertSlashesForWindows.name, () => {
         hasWarningOrError: false,
         stdio: ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'],
         attachAsync: async () => {
-          throw new HeftChildReporterNonFatalError('acknowledgement failed');
+          throw reporterError;
         }
       };
       const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
@@ -173,8 +176,12 @@ describe(convertSlashesForWindows.name, () => {
       });
 
       try {
-        await expect(runner.executeAsync(context)).resolves.toBe(OperationStatus.Success);
-        expect(context.error).toBeUndefined();
+        await expect(runner.executeAsync(context)).resolves.toBe(expectedStatus);
+        if (expectedStatus === OperationStatus.Failure) {
+          expect(context.error?.message).toContain(reporterError.message);
+        } else {
+          expect(context.error).toBeUndefined();
+        }
       } finally {
         executeSpy.mockRestore();
       }

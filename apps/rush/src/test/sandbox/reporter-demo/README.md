@@ -15,6 +15,12 @@ AI parser-error context, command-JSON ownership, CI plaintext output, cache-path
 `RUSH_TEMP_FOLDER` log placement, matching purge-path selection, and the `RUSH_REPORTER=legacy` rollback
 transcript. Captured stdout/stderr files are written to a temporary folder.
 
+The driver selects the locally built Rush package version through `RUSH_PREVIEW_VERSION`, even when
+`rush.json` pins an older release. It clears inherited reporter/log-level/quiet controls for a deterministic
+matrix. The direct Unix Heft path must negotiate structured output; the Windows shell path must retain
+readable raw fallback. Its final isolated-temp `rush purge` also unlinks project dependencies, so run
+`node common/scripts/install-run-rush.js install` again before continuing development.
+
 For an individual invocation:
 
 ```sh
