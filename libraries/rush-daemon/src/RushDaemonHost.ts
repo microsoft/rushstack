@@ -63,21 +63,21 @@ export interface IRushDaemonHostOptions {
  * @beta
  */
 export class RushDaemonHost {
-  private readonly _listener: DaemonFrameListener;
-  private readonly _idleTimer: DaemonIdleTimer;
-  private readonly _sessions: Set<DaemonControlSession>;
-  private readonly _workspaceSessionProvider: WorkspaceSessionProvider;
-  private readonly _readWorkspaceStatus: () => IDaemonWorkspaceStatus;
-  private readonly _lifecycle: { closing: boolean };
-  private readonly _requestDispatcher: DaemonRequestDispatcher;
+  readonly #listener: DaemonFrameListener;
+  readonly #idleTimer: DaemonIdleTimer;
+  readonly #sessions: Set<DaemonControlSession>;
+  readonly #workspaceSessionProvider: WorkspaceSessionProvider;
+  readonly #readWorkspaceStatus: () => IDaemonWorkspaceStatus;
+  readonly #lifecycle: { closing: boolean };
+  readonly #requestDispatcher: DaemonRequestDispatcher;
   public readonly paths: IDaemonPaths;
-  private _closePromise: Promise<void> | undefined;
-  private _notifyClosed: (() => void) | undefined;
-  private readonly _options: IRushDaemonHostOptions;
-  private readonly _startedAt: string;
-  private _restartPromise: Promise<IWorkspaceProcessRestartResult> | undefined;
-  private _resolveRestart: ((result: IWorkspaceProcessRestartResult | undefined) => void) | undefined;
-  private _rejectRestart: ((error: Error) => void) | undefined;
+  #closePromise: Promise<void> | undefined;
+  #notifyClosed: (() => void) | undefined;
+  readonly #options: IRushDaemonHostOptions;
+  readonly #startedAt: string;
+  #restartPromise: Promise<IWorkspaceProcessRestartResult> | undefined;
+  #resolveRestart: ((result: IWorkspaceProcessRestartResult | undefined) => void) | undefined;
+  #rejectRestart: ((error: Error) => void) | undefined;
   /** Settles after an accepted restart reaches a new ready process, or normal shutdown finishes without restarting. */
   public readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
 
@@ -97,21 +97,21 @@ export class RushDaemonHost {
     readWorkspaceStatus: () => IDaemonWorkspaceStatus
   ) {
     this.closed = new Promise<void>((resolve) => {
-      this._notifyClosed = resolve;
+      this.#notifyClosed = resolve;
     });
-    this._listener = listener;
+    this.#listener = listener;
     this.paths = paths;
-    this._sessions = sessions;
-    this._lifecycle = lifecycle;
-    this._requestDispatcher = requestDispatcher;
-    this._workspaceSessionProvider = workspaceSessionProvider;
-    this._readWorkspaceStatus = readWorkspaceStatus;
-    this._idleTimer = idleTimer;
-    this._options = options;
-    this._startedAt = startedAt;
+    this.#sessions = sessions;
+    this.#lifecycle = lifecycle;
+    this.#requestDispatcher = requestDispatcher;
+    this.#workspaceSessionProvider = workspaceSessionProvider;
+    this.#readWorkspaceStatus = readWorkspaceStatus;
+    this.#idleTimer = idleTimer;
+    this.#options = options;
+    this.#startedAt = startedAt;
     this.restartCompleted = new Promise((resolve, reject) => {
-      this._resolveRestart = resolve;
-      this._rejectRestart = reject;
+      this.#resolveRestart = resolve;
+      this.#rejectRestart = reject;
     });
     void this.restartCompleted.catch(() => undefined);
   }
@@ -221,7 +221,7 @@ export class RushDaemonHost {
       readWorkspaceStatus
     );
     function requestRestart(plan: IWorkspaceProcessRestartPlan): void {
-      host._requestRestart(plan);
+      host.#requestRestart(plan);
     }
     function requestShutdown(): void {
       void host.closeAsync().catch((error: Error) => {
@@ -235,45 +235,43 @@ export class RushDaemonHost {
 
   /** Returns the single warm workspace session owned by this host. */
   public getWorkspaceSessionAsync(): Promise<IWorkspaceSession> {
-    return this._workspaceSessionProvider.getSessionAsync();
+    return this.#workspaceSessionProvider.getSessionAsync();
   }
 
   /** Host-local generation, useful for rejecting retained server-side references. */
   public get workspaceGeneration(): number {
-    return this._workspaceSessionProvider.generation;
+    return this.#workspaceSessionProvider.generation;
   }
 
   /** Samples the installed generation without constructing a session or graph or taking request leases. */
   public get workspaceStatus(): IDaemonWorkspaceStatus {
-    return this._readWorkspaceStatus();
+    return this.#readWorkspaceStatus();
   }
 
   /** Closes active connections, stops listening, and removes transport artifacts. */
   public closeAsync(): Promise<void> {
-    this._closePromise ??= this._closeOnceAsync().finally(() => {
-      this._notifyClosed?.();
-      if (!this._restartPromise) this._resolveRestart?.(undefined);
+    this.#closePromise ??= this.#closeOnceAsync().finally(() => {
+      this.#notifyClosed?.();
+      if (!this.#restartPromise) this.#resolveRestart?.(undefined);
     });
-    return this._closePromise;
+    return this.#closePromise;
   }
 
-  private _requestRestart(plan: IWorkspaceProcessRestartPlan): void {
-    if (this._restartPromise || this._closePromise) return;
-    this._restartPromise = Promise.resolve().then(() => this._restartOnceAsync(plan));
-    void this._restartPromise.then(
-      (result) => this._resolveRestart?.(result),
+  #requestRestart(plan: IWorkspaceProcessRestartPlan): void {
+    if (this.#restartPromise || this.#closePromise) return;
+    this.#restartPromise = Promise.resolve().then(() => this.#restartOnceAsync(plan));
+    void this.#restartPromise.then(
+      (result) => this.#resolveRestart?.(result),
       (error: unknown) => {
         const failure: Error = error instanceof Error ? error : new Error(String(error));
-        this._rejectRestart?.(failure);
-        if (this._options.onError) this._options.onError(failure);
+        this.#rejectRestart?.(failure);
+        if (this.#options.onError) this.#options.onError(failure);
         else process.emitWarning(failure);
       }
     );
   }
 
-  private async _restartOnceAsync(
-    plan: IWorkspaceProcessRestartPlan
-  ): Promise<IWorkspaceProcessRestartResult> {
+  async #restartOnceAsync(plan: IWorkspaceProcessRestartPlan): Promise<IWorkspaceProcessRestartResult> {
     await this.closeAsync();
     if (plan.failure) throw plan.failure;
     if (!plan.launch) throw new Error('A successor was not selected.');
@@ -281,14 +279,14 @@ export class RushDaemonHost {
       computeDaemonWorkspaceKey({
         canonicalRepoRoot: plan.repoRoot,
         rushVersion: plan.rushVersion,
-        startupOptions: this._options.startupOptions
+        startupOptions: this.#options.startupOptions
       })
     );
     const client: DaemonClient = await connectOrStartDaemonAsync({
       paths,
       expectedDaemonVersion: plan.launch.daemonVersion,
       startCommand: plan.launch.startCommand,
-      previousDaemon: { pid: process.pid, startedAt: this._startedAt }
+      previousDaemon: { pid: process.pid, startedAt: this.#startedAt }
     });
     try {
       const { pid } = await client.status;
@@ -299,14 +297,16 @@ export class RushDaemonHost {
     }
   }
 
-  private async _closeOnceAsync(): Promise<void> {
-    this._idleTimer[Symbol.dispose]();
-    this._lifecycle.closing = true;
+  async #closeOnceAsync(): Promise<void> {
+    this.#idleTimer[Symbol.dispose]();
+    this.#lifecycle.closing = true;
     const errors: unknown[] = [];
     // Refuse new sessions but keep the listener's live ownership until every resource join succeeds.
     // A failed standalone host must not exit naturally and become reclaimable over unjoined children.
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
-      Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync(!!this._restartPromise))
+      Array.from(this.#sessions, (session: DaemonControlSession) =>
+        session.closeAsync(!!this.#restartPromise)
+      )
     );
     for (const settlement of sessionSettlements) {
       if (settlement.status === 'rejected') {
@@ -314,25 +314,25 @@ export class RushDaemonHost {
       }
     }
     try {
-      const workspace: IWorkspaceSession = await this._workspaceSessionProvider.getSessionAsync();
+      const workspace: IWorkspaceSession = await this.#workspaceSessionProvider.getSessionAsync();
       await workspace.quiesceWarmSetAsync?.();
     } catch (error) {
       throw new AggregateError([...errors, error], 'Could not quiesce workspace maintenance for shutdown.');
     }
     try {
-      await this._requestDispatcher[Symbol.asyncDispose]();
+      await this.#requestDispatcher[Symbol.asyncDispose]();
     } catch (error) {
       errors.push(error);
     }
     try {
-      await this._workspaceSessionProvider[Symbol.asyncDispose]();
+      await this.#workspaceSessionProvider[Symbol.asyncDispose]();
     } catch (error) {
       errors.push(error);
     }
 
     if (errors.length === 0) {
       try {
-        await this._listener.closeAsync();
+        await this.#listener.closeAsync();
       } catch (error) {
         errors.push(error);
       }

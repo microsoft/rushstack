@@ -30,14 +30,14 @@ export interface IBridgeCachePluginOptions {
 
 export class BridgeCachePlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
-  private readonly _actionParameterName: string;
-  private readonly _requireOutputFoldersParameterName: string | undefined;
+  readonly #actionParameterName: string;
+  readonly #requireOutputFoldersParameterName: string | undefined;
 
   public constructor(options: IBridgeCachePluginOptions) {
-    this._actionParameterName = options.actionParameterName;
-    this._requireOutputFoldersParameterName = options.requireOutputFoldersParameterName;
+    this.#actionParameterName = options.actionParameterName;
+    this.#requireOutputFoldersParameterName = options.requireOutputFoldersParameterName;
 
-    if (!this._actionParameterName) {
+    if (!this.#actionParameterName) {
       throw new Error(
         'The "actionParameterName" option must be provided for the BridgeCachePlugin. Please see the plugin README for details.'
       );
@@ -48,12 +48,12 @@ export class BridgeCachePlugin implements IRushPlugin {
     session.hooks.runAnyPhasedCommand.tapPromise(PLUGIN_NAME, async (command: IPhasedCommand) => {
       command.hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, async (graph, context) => {
         const { customParameters, buildCacheConfiguration } = context;
-        const cacheAction: CacheAction | undefined = this._getCacheAction(customParameters);
+        const cacheAction: CacheAction | undefined = this.#getCacheAction(customParameters);
 
         if (cacheAction !== undefined) {
           if (!buildCacheConfiguration?.buildCacheEnabled) {
             throw new Error(
-              `The build cache must be enabled to use the "${this._actionParameterName}" parameter.`
+              `The build cache must be enabled to use the "${this.#actionParameterName}" parameter.`
             );
           }
 
@@ -70,7 +70,7 @@ export class BridgeCachePlugin implements IRushPlugin {
 
           const logger: ILogger = session.getLogger(PLUGIN_NAME);
           const { terminal } = logger;
-          const requireOutputFolders: boolean = this._isRequireOutputFoldersFlagSet(customParameters);
+          const requireOutputFolders: boolean = this.#isRequireOutputFoldersFlagSet(customParameters);
 
           graph.hooks.beforeExecuteIterationAsync.tapPromise(
             PLUGIN_NAME,
@@ -171,17 +171,17 @@ export class BridgeCachePlugin implements IRushPlugin {
     });
   }
 
-  private _getCacheAction(
+  #getCacheAction(
     customParameters: ReadonlyMap<string, CommandLineParameter>
   ): CacheAction | undefined {
     const cacheActionParameter: CommandLineParameter | undefined = customParameters.get(
-      this._actionParameterName
+      this.#actionParameterName
     );
 
     if (cacheActionParameter) {
       if (cacheActionParameter.kind !== CommandLineParameterKind.Choice) {
         throw new Error(
-          `The parameter "${this._actionParameterName}" must be a choice. Please check the plugin configuration.`
+          `The parameter "${this.#actionParameterName}" must be a choice. Please check the plugin configuration.`
         );
       }
 
@@ -191,7 +191,7 @@ export class BridgeCachePlugin implements IRushPlugin {
         !cacheActionParameter.alternatives.has(CACHE_ACTION_WRITE)
       ) {
         throw new Error(
-          `The parameter "${this._actionParameterName}" must have exactly two choices: "${CACHE_ACTION_READ}" and "${CACHE_ACTION_WRITE}". Please check the plugin configuration.`
+          `The parameter "${this.#actionParameterName}" must have exactly two choices: "${CACHE_ACTION_READ}" and "${CACHE_ACTION_WRITE}". Please check the plugin configuration.`
         );
       }
 
@@ -204,7 +204,7 @@ export class BridgeCachePlugin implements IRushPlugin {
           return undefined;
         default:
           throw new Error(
-            `The parameter "${this._actionParameterName}" must be one of: "${CACHE_ACTION_READ}" or "${CACHE_ACTION_WRITE}". Received: "${value}". Please check the plugin configuration.`
+            `The parameter "${this.#actionParameterName}" must be one of: "${CACHE_ACTION_READ}" or "${CACHE_ACTION_WRITE}". Received: "${value}". Please check the plugin configuration.`
           );
       }
     }
@@ -212,15 +212,15 @@ export class BridgeCachePlugin implements IRushPlugin {
     return undefined;
   }
 
-  private _isRequireOutputFoldersFlagSet(
+  #isRequireOutputFoldersFlagSet(
     customParameters: ReadonlyMap<string, CommandLineParameter>
   ): boolean {
-    if (!this._requireOutputFoldersParameterName) {
+    if (!this.#requireOutputFoldersParameterName) {
       return false;
     }
 
     const requireOutputFoldersParam: CommandLineParameter | undefined = customParameters.get(
-      this._requireOutputFoldersParameterName
+      this.#requireOutputFoldersParameterName
     );
 
     if (!requireOutputFoldersParam) {
@@ -228,7 +228,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     }
 
     if (requireOutputFoldersParam.kind !== CommandLineParameterKind.Flag) {
-      throw new Error(`The parameter "${this._requireOutputFoldersParameterName}" must be a flag.`);
+      throw new Error(`The parameter "${this.#requireOutputFoldersParameterName}" must be a flag.`);
     }
 
     return requireOutputFoldersParam.value;

@@ -15,15 +15,15 @@ import type { IZipSyncMode, ZipSyncOptionCompression } from '../zipSyncUtils';
 import { pack, unpack } from '../index';
 
 export class ZipSyncCommandLineParser extends CommandLineParser {
-  private readonly _debugParameter: CommandLineFlagParameter;
-  private readonly _verboseParameter: CommandLineFlagParameter;
-  private readonly _modeParameter: IRequiredCommandLineChoiceParameter<IZipSyncMode>;
-  private readonly _archivePathParameter: IRequiredCommandLineStringParameter;
-  private readonly _baseDirParameter: IRequiredCommandLineStringParameter;
-  private readonly _targetDirectoriesParameter: CommandLineStringListParameter;
-  private readonly _compressionParameter: IRequiredCommandLineChoiceParameter<ZipSyncOptionCompression>;
-  private readonly _terminal: ITerminal;
-  private readonly _terminalProvider: ConsoleTerminalProvider;
+  readonly #debugParameter: CommandLineFlagParameter;
+  readonly #verboseParameter: CommandLineFlagParameter;
+  readonly #modeParameter: IRequiredCommandLineChoiceParameter<IZipSyncMode>;
+  readonly #archivePathParameter: IRequiredCommandLineStringParameter;
+  readonly #baseDirParameter: IRequiredCommandLineStringParameter;
+  readonly #targetDirectoriesParameter: CommandLineStringListParameter;
+  readonly #compressionParameter: IRequiredCommandLineChoiceParameter<ZipSyncOptionCompression>;
+  readonly #terminal: ITerminal;
+  readonly #terminalProvider: ConsoleTerminalProvider;
 
   public constructor(terminalProvider: ConsoleTerminalProvider, terminal: ITerminal) {
     super({
@@ -31,22 +31,22 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       toolDescription: ''
     });
 
-    this._terminal = terminal;
-    this._terminalProvider = terminalProvider;
+    this.#terminal = terminal;
+    this.#terminalProvider = terminalProvider;
 
-    this._debugParameter = this.defineFlagParameter({
+    this.#debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
     });
 
-    this._verboseParameter = this.defineFlagParameter({
+    this.#verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Show verbose output'
     });
 
-    this._modeParameter = this.defineChoiceParameter<IZipSyncMode>({
+    this.#modeParameter = this.defineChoiceParameter<IZipSyncMode>({
       parameterLongName: '--mode',
       parameterShortName: '-m',
       description:
@@ -55,7 +55,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._archivePathParameter = this.defineStringParameter({
+    this.#archivePathParameter = this.defineStringParameter({
       parameterLongName: '--archive-path',
       parameterShortName: '-a',
       description: 'Zip file path',
@@ -63,7 +63,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._targetDirectoriesParameter = this.defineStringListParameter({
+    this.#targetDirectoriesParameter = this.defineStringListParameter({
       parameterLongName: '--target-directory',
       parameterShortName: '-t',
       description: 'Target directories to pack or unpack',
@@ -71,7 +71,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._baseDirParameter = this.defineStringParameter({
+    this.#baseDirParameter = this.defineStringParameter({
       parameterLongName: '--base-dir',
       parameterShortName: '-b',
       description: 'Base directory for relative paths within the archive',
@@ -79,7 +79,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._compressionParameter = this.defineChoiceParameter<ZipSyncOptionCompression>({
+    this.#compressionParameter = this.defineChoiceParameter<ZipSyncOptionCompression>({
       parameterLongName: '--compression',
       parameterShortName: '-z',
       description:
@@ -90,34 +90,34 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    if (this._debugParameter.value) {
+    if (this.#debugParameter.value) {
       // eslint-disable-next-line no-debugger
       debugger;
-      this._terminalProvider.debugEnabled = true;
-      this._terminalProvider.verboseEnabled = true;
+      this.#terminalProvider.debugEnabled = true;
+      this.#terminalProvider.verboseEnabled = true;
     }
-    if (this._verboseParameter.value) {
-      this._terminalProvider.verboseEnabled = true;
+    if (this.#verboseParameter.value) {
+      this.#terminalProvider.verboseEnabled = true;
     }
     try {
-      if (this._modeParameter.value === 'pack') {
+      if (this.#modeParameter.value === 'pack') {
         pack({
-          terminal: this._terminal,
-          archivePath: this._archivePathParameter.value,
-          targetDirectories: this._targetDirectoriesParameter.values,
-          baseDir: this._baseDirParameter.value,
-          compression: this._compressionParameter.value
+          terminal: this.#terminal,
+          archivePath: this.#archivePathParameter.value,
+          targetDirectories: this.#targetDirectoriesParameter.values,
+          baseDir: this.#baseDirParameter.value,
+          compression: this.#compressionParameter.value
         });
-      } else if (this._modeParameter.value === 'unpack') {
+      } else if (this.#modeParameter.value === 'unpack') {
         unpack({
-          terminal: this._terminal,
-          archivePath: this._archivePathParameter.value,
-          targetDirectories: this._targetDirectoriesParameter.values,
-          baseDir: this._baseDirParameter.value
+          terminal: this.#terminal,
+          archivePath: this.#archivePathParameter.value,
+          targetDirectories: this.#targetDirectoriesParameter.values,
+          baseDir: this.#baseDirParameter.value
         });
       }
     } catch (error) {
-      this._terminal.writeErrorLine('\n' + error.stack);
+      this.#terminal.writeErrorLine('\n' + error.stack);
     }
   }
 }

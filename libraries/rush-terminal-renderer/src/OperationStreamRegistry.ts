@@ -30,11 +30,11 @@ export interface IOperationStreamRegistryOptions {
  * @beta
  */
 export class OperationStreamRegistry {
-  private readonly _collator: StreamCollator;
-  private readonly _collatedTerminal: CollatedTerminal;
-  private readonly _headers: OperationHeaderTracker = new OperationHeaderTracker();
-  private readonly _writers: Map<string, CollatedWriter> = new Map();
-  private readonly _decoder: OperationTextDecoder = new OperationTextDecoder();
+  readonly #collator: StreamCollator;
+  readonly #collatedTerminal: CollatedTerminal;
+  readonly #headers: OperationHeaderTracker = new OperationHeaderTracker();
+  readonly #writers: Map<string, CollatedWriter> = new Map();
+  readonly #decoder: OperationTextDecoder = new OperationTextDecoder();
 
   public constructor(options: IOperationStreamRegistryOptions) {
     const transform: TextRewriterTransform = new TextRewriterTransform({
@@ -42,46 +42,45 @@ export class OperationStreamRegistry {
       normalizeNewlines: NewlineKind.OsDefault,
       removeColors: options.removeColors
     });
-    this._collatedTerminal = new CollatedTerminal(transform);
-    this._collator = new StreamCollator({
+    this.#collatedTerminal = new CollatedTerminal(transform);
+    this.#collator = new StreamCollator({
       destination: transform,
       onWriterActive: (writer: CollatedWriter | undefined) =>
-        writeOperationStreamHeader(writer, this._headers, this._collatedTerminal, options.quiet)
+        writeOperationStreamHeader(writer, this.#headers, this.#collatedTerminal, options.quiet)
     });
   }
 
   /** Increments the total-operation count shown in headers. */
   public registerOperation(): void {
-    this._headers.registerOperation();
+    this.#headers.registerOperation();
   }
 
   /** Records engine-authoritative counters before an operation's stream activates. */
   public setOperationHeader(header: IDaemonOperationHeaderPayload): void {
-    this._headers.setOperationHeader(header);
+    this.#headers.setOperationHeader(header);
   }
 
   /** Decodes an operation's byte stream without corrupting split UTF-8 characters. */
   public writeBytes(operationId: string, kind: TerminalChunkKind, bytes: Uint8Array): void {
-    this.writeChunk(operationId, this._decoder.decode(operationId, kind, bytes));
+    this.writeChunk(operationId, this.#decoder.decode(operationId, kind, bytes));
   }
 
   /** Writes one raw chunk to the operation's collated stream. */
   public writeChunk(operationId: string, chunk: ITerminalChunk): void {
-    let writer: CollatedWriter | undefined = this._writers.get(operationId);
+    let writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer === undefined) {
-      writer = this._collator.registerTask(operationId);
-      this._writers.set(operationId, writer);
+      writer = this.#collator.registerTask(operationId);
+      this.#writers.set(operationId, writer);
     }
     writer.writeChunk(chunk);
   }
 
   /** Closes the operation's stream, flushing its collated output. */
   public closeOperation(operationId: string): void {
-    this._decoder.flush(operationId, (chunk) => this.writeChunk(operationId, chunk));
-    const writer: CollatedWriter | undefined = this._writers.get(operationId);
+    this.#decoder.flush(operationId, (chunk) => this.writeChunk(operationId, chunk));
+    const writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer !== undefined && writer.isOpen) {
       writer.close();
     }
   }
-
 }

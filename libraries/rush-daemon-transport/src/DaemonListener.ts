@@ -29,9 +29,9 @@ export interface IDaemonListenerOptions {
  * `daemonAlreadyRunning` transport error is thrown.
  * @beta */
 export class DaemonFrameListener {
-  private readonly _lifetime: DaemonListenerLifetime;
+  readonly #lifetime: DaemonListenerLifetime;
   private constructor(server: net.Server, paths: IDaemonPaths) {
-    this._lifetime = new DaemonListenerLifetime(server, paths);
+    this.#lifetime = new DaemonListenerLifetime(server, paths);
   }
   /** Binds the socket/pipe path and writes the PID lockfile. */
   public static async listenAsync(
@@ -57,11 +57,11 @@ export class DaemonFrameListener {
 
   /** Stops accepting connections and releases the socket/pipe and lockfile. */
   public closeAsync(): Promise<void> {
-    return this._lifetime.closeAsync();
+    return this.#lifetime.closeAsync();
   }
   /** Stops accepting clients and awaits existing connections while retaining daemon ownership. */
   public stopAcceptingAsync(): Promise<void> {
-    return this._lifetime.stopAcceptingAsync();
+    return this.#lifetime.stopAcceptingAsync();
   }
 }
 
