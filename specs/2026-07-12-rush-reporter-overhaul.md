@@ -335,6 +335,12 @@ required parent/wire reporter is fatal. Failure to create the full-detail file
 at both repository and OS-temp paths is nonfatal but emits an emergency warning
 and marks the artifact unavailable.
 
+The engine's root reporting context is available before fallible repository
+initialization. Failures before command selection emit a session-scoped
+diagnostic and failure completion before reporter close. Successful command
+completion is published only after command finalization, including the public
+telemetry flush hooks, so reporter results retain the native exit outcome.
+
 ### 5.5 Bootstrap and Wire Protocol
 
 `install-run-rush` performs a minimal prelude:

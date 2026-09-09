@@ -147,6 +147,13 @@ export class RushCommandLineParser extends CommandLineParser {
     this._rushOptions = this._normalizeOptions(options || {});
     const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations, reporter } = this._rushOptions;
 
+    this.rushSession = new RushSession({
+      getIsDebugMode: () => this.isDebug,
+      terminalProvider,
+      reporter
+    });
+    this._sessionLifecycleEmitter = _getRushSessionLifecycleEmitter(this.rushSession);
+
     let rushJsonFilePath: string | undefined;
     try {
       rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
@@ -171,11 +178,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.rushGlobalFolder = new RushGlobalFolder();
 
-    this.rushSession = new RushSession({
-      getIsDebugMode: () => this.isDebug,
-      terminalProvider,
-      reporter
-    });
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
@@ -277,13 +279,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       rushArgv.includes('--debug') || rushArgv.includes('-d');
 
-    this._sessionLifecycleEmitter = _getRushSessionLifecycleEmitter(this.rushSession);
-    if (this._sessionLifecycleEmitter) {
-      this._sessionStartTimeMs = performance.now();
-      this._sessionLifecycleEmitter.emitSessionStarted({
-        rushVersion: _getRushSessionReporterSourceVersion(this.rushSession)!
-      });
-    }
+    this._startReporterSession();
 
     try {
       await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
@@ -369,13 +365,17 @@ export class RushCommandLineParser extends CommandLineParser {
 
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
-      this._emitReporterCompletion(0);
     } catch (error) {
       this._reportErrorAndSetExitCode(error as Error);
     }
 
     // This only gets hit if the wrapped execution completes successfully
-    await this.telemetry?.ensureFlushedAsync();
+    try {
+      await this.telemetry?.ensureFlushedAsync();
+    } catch (error) {
+      this._emitReporterFailureDiagnostic(error as Error);
+      throw error;
+    }
   }
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
@@ -586,9 +586,21 @@ export class RushCommandLineParser extends CommandLineParser {
     );
   }
 
-  private _reportErrorAndSetExitCode(error: Error): void {
+  private _startReporterSession(): void {
+    if (this._sessionLifecycleEmitter && this._sessionStartTimeMs === undefined) {
+      this._sessionStartTimeMs = performance.now();
+      this._sessionLifecycleEmitter.emitSessionStarted({
+        rushVersion: _getRushSessionReporterSourceVersion(this.rushSession)!
+      });
+    }
+  }
+
+  private _emitReporterFailureDiagnostic(error: Error): void {
+    this._startReporterSession();
+    const emitter: LifecycleEmitter | undefined =
+      this._commandLifecycleEmitter ?? this._sessionLifecycleEmitter;
     const rushSession: RushSession | undefined = this.rushSession;
-    if (rushSession && !_isRushSessionErrorRepresented(rushSession, error)) {
+    if (emitter && rushSession && !_isRushSessionErrorRepresented(rushSession, error)) {
       const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_COMMAND_FAILED', {
         parameters: {
           commandName: {
@@ -597,9 +609,13 @@ export class RushCommandLineParser extends CommandLineParser {
           }
         }
       });
-      this._commandLifecycleEmitter?.emitDiagnostic(diagnostic);
+      emitter.emitDiagnostic(diagnostic);
       _correlateRushSessionError(rushSession, error, diagnostic.diagnosticId);
     }
+  }
+
+  private _reportErrorAndSetExitCode(error: Error): void {
+    this._emitReporterFailureDiagnostic(error);
 
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
@@ -680,7 +696,7 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _emitReporterCompletion(exitCode: number): void {
-    if (this._reporterCompletionEmitted) {
+    if (!this._sessionLifecycleEmitter || this._reporterCompletionEmitted) {
       return;
     }
     this._reporterCompletionEmitted = true;
