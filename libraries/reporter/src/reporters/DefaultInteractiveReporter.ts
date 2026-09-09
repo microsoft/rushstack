@@ -4,6 +4,7 @@
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import { getHumanReadableMessageText } from './ReporterRedaction';
+import { formatHumanReadableDiagnostic } from './HumanReadableDiagnostic';
 import {
   SPINNER_FRAMES,
   MIN_REFRESH_INTERVAL_MS,
@@ -295,7 +296,7 @@ export class DefaultInteractiveReporter implements IReporter {
           severity?: string;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._diagnostics.push(`[${payload.severity}] ${payload.code ?? 'unknown'}`);
+          this._diagnostics.push(formatHumanReadableDiagnostic(event));
         }
         break;
       }
