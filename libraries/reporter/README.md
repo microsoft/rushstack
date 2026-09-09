@@ -8,6 +8,12 @@ Rush 5 keeps legacy terminal output by default. See the
 [experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
 privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
 
+Bootstrap initialization failures close every destination whose initialization was attempted, including
+partially initialized reporters, before propagating the original failure. Abandoned handoff cleanup applies
+the 14-day retention window and a 20-session cap to files verifiably owned by the current user whose producer
+process has exited. Live/current handoffs, foreign files, and entries without verifiable ownership are not
+removed; timestamp ties are resolved by filename.
+
 ## AI reporter qualification
 
 The network-free qualification corpus runs representative bootstrap/version, configuration, input,
