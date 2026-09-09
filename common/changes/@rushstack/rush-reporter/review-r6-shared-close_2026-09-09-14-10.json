@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-reporter",
-      "comment": "Share once-only reporter close operations across manager shutdown and initialization disposal, including failed closes and lifecycle errors.",
+      "comment": "Share once-only reporter close operations and serialized lifecycle ordering across manager shutdown and initialization disposal, including failed closes and lifecycle errors.",
       "type": "patch"
     }
   ],
