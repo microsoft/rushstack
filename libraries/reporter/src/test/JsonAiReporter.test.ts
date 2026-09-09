@@ -522,7 +522,7 @@ describe('AiReporter', () => {
     expect(final.truncated).toBe(true);
   });
 
-  it('emits a status record and a bounded final record with scope, codes, and log', () => {
+  it('coalesces an unrendered start into a complete final record without losing scope, codes, or log', () => {
     const { records, final } = run([
       ev('commandStarted', { commandName: 'build' }),
       ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }),
@@ -538,7 +538,7 @@ describe('AiReporter', () => {
       ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
     ]);
 
-    expect(records[0].kind).toBe('ai.status');
+    expect(records.map(({ kind }) => kind)).toEqual(['ai.final']);
     expect(final.kind).toBe('ai.final');
     expect(final.result).toBe('failed');
     expect(final.exitCode).toBe(1);
@@ -548,6 +548,113 @@ describe('AiReporter', () => {
     expect(final.diagnostics[0].remediation?.[0].command).toBe('rush rebuild');
     expect(final.operationCounts).toEqual({ failure: 1 });
     expect(final.log).toEqual({ path: '/abs/rush.log', format: 'plaintext', complete: true });
+  });
+
+  it.each(['event', 'flush'])(
+    'preserves active-command status at the next %s boundary',
+    async (boundary: string) => {
+      let output: string = '';
+      const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
+      reporter.report(ev('commandStarted', { commandName: 'build' }));
+      reporter.report(
+        ev('artifactAvailable', { role: 'log', path: '/abs/rush.log', format: 'plaintext', complete: false })
+      );
+      expect(output).toBe('');
+      if (boundary === 'event') {
+        reporter.report(ev('activityChanged', { text: 'building' }));
+      } else {
+        await reporter.flushAsync();
+      }
+      expect(parseLines(output).map(({ kind }) => kind)).toEqual(['ai.status']);
+      reporter.report(ev('commandResult', { succeeded: true, exitCode: 0 }));
+      reporter.report(ev('artifactAvailable', { role: 'log', path: '/abs/rush.log', complete: true }));
+      await reporter.closeAsync();
+      const final: IAiFinalRecord = parseLines(output).at(-1) as unknown as IAiFinalRecord;
+      expect(final).toMatchObject({
+        result: 'succeeded',
+        exitCode: 0,
+        scope: { commandName: 'build' },
+        log: { path: '/abs/rush.log', complete: true },
+        truncated: false
+      });
+    }
+  );
+
+  it('preserves the complete final record when buffered start status is coalesced', async () => {
+    const output: string[] = ['', ''];
+    const reporters: AiReporter[] = output.map(
+      (value: string, index: number) => new AiReporter({ write: (text: string) => (output[index] += text) })
+    );
+    const events: IReporterEventEnvelope<unknown>[] = [
+      ev('commandStarted', { commandName: 'build' }),
+      ev('operationRegistered', { operationId: 'op', projectName: 'project' }),
+      ev('operationCompleted', { operationId: 'op', status: 'failure' }),
+      ev('diagnosticEmitted', {
+        diagnosticId: 'root',
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error',
+        parameters: {
+          project: { value: 'project', privacy: 'public' },
+          token: { value: 'not-for-output', privacy: 'secret' }
+        },
+        remediation: [{ descriptionKey: 'retry', command: 'rush rebuild', automatedExecutionSafety: 'safe' }]
+      }),
+      ev('diagnosticEmitted', {
+        code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+        category: 'operation',
+        severity: 'warning'
+      }),
+      ev('artifactAvailable', {
+        role: 'log',
+        path: '/absolute/full.log',
+        format: 'plaintext',
+        complete: true
+      })
+    ];
+    for (const reporter of reporters) {
+      for (const event of events) reporter.report(event);
+    }
+    await reporters[0].flushAsync();
+    for (const reporter of reporters) {
+      reporter.report(ev('commandResult', { succeeded: false, exitCode: 1 }));
+      await reporter.closeAsync();
+    }
+    const activeRecords: Record<string, unknown>[] = parseLines(output[0]);
+    const completedRecords: Record<string, unknown>[] = parseLines(output[1]);
+    expect(activeRecords.map(({ kind }) => kind)).toEqual(['ai.status', 'ai.final']);
+    expect(completedRecords.map(({ kind }) => kind)).toEqual(['ai.final']);
+    expect(completedRecords[0]).toEqual(activeRecords[1]);
+    expect(output[1]).not.toContain('not-for-output');
+    expect(Buffer.byteLength(output[0]) - Buffer.byteLength(output[1])).toBe(
+      Buffer.byteLength(`${JSON.stringify(activeRecords[0])}\n`)
+    );
+  });
+
+  it('preserves ordered watch history when a terminal result supersedes buffered start status', () => {
+    const { records, final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      ev('watchCycleCompleted', { succeeded: false, iterationId: 1 }),
+      ev('watchCycleCompleted', { succeeded: true, iterationId: 2 }),
+      ev('artifactAvailable', { role: 'log', path: '/abs/rush.log', complete: true }),
+      ev('commandResult', { succeeded: true, exitCode: 0 })
+    ]);
+    expect(records.map(({ kind }) => kind)).toEqual(['ai.watchCycle', 'ai.watchCycle', 'ai.final']);
+    expect(records.slice(0, -1).map(({ succeeded }) => succeeded)).toEqual([false, true]);
+    expect(final.result).toBe('succeeded');
+    expect(final.log?.path).toBe('/abs/rush.log');
+  });
+
+  it('keeps buffered progress write failures in the synchronous reporter failure boundary', () => {
+    const failure: Error = new Error('output failed');
+    const reporter: AiReporter = new AiReporter({
+      write: () => {
+        throw failure;
+      }
+    });
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(ev('artifactAvailable', { role: 'log', path: '/abs/rush.log' }));
+    expect(() => reporter.report(ev('activityChanged', {}))).toThrow(failure);
   });
 
   it('excludes silent operations from AI result counts', () => {

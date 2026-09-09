@@ -22,6 +22,7 @@ import {
 describe('AI reporter deterministic qualification corpus', () => {
   let qualification: IAiReporterQualificationResult;
 
+  // Three file-backed corpus passes can exceed Jest's default setup allowance on Windows CI.
   beforeAll(async () => {
     qualification = await runAiReporterQualificationCorpusAsync();
   }, 15000);
@@ -77,15 +78,27 @@ describe('AI reporter deterministic qualification corpus', () => {
     const byteLengthSpy: jest.SpiedFunction<typeof Buffer.byteLength> = jest.spyOn(Buffer, 'byteLength');
     try {
       const result: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
-      const capturedOutput: string[] = byteLengthSpy.mock.calls
-        .map(([value]) => value)
-        .filter(
-          (value): value is string =>
-            typeof value === 'string' &&
-            value.startsWith('{"kind":"ai.status"') &&
-            value.includes('"kind":"ai.final"')
-        )
-        .slice(0, result.cases.length);
+      const outputByLogPath: Map<string, string> = new Map();
+      for (const [value] of byteLengthSpy.mock.calls) {
+        if (
+          typeof value !== 'string' ||
+          !value.startsWith('{"kind":"ai.') ||
+          !value.includes('"kind":"ai.final"') ||
+          !value.endsWith('\n')
+        ) {
+          continue;
+        }
+        const final: { kind?: string; log?: { path?: string } } = JSON.parse(
+          value.trimEnd().split('\n').at(-1)!
+        );
+        if (final.kind === 'ai.final' && final.log?.path !== undefined) {
+          const previous: string | undefined = outputByLogPath.get(final.log.path);
+          if (previous === undefined || byteLength(value, 'utf8') > byteLength(previous, 'utf8')) {
+            outputByLogPath.set(final.log.path, value);
+          }
+        }
+      }
+      const capturedOutput: string[] = [...outputByLogPath.values()].slice(0, result.cases.length);
       expect(capturedOutput).toHaveLength(result.cases.length);
       expect(capturedOutput.every((output) => output.endsWith('\n'))).toBe(true);
       expect(capturedOutput.every((output) => !output.includes('<ABSOLUTE_LOG_PATH>'))).toBe(true);
