@@ -55,6 +55,9 @@ function loadProjects(repoPath) {
 }
 
 function isProjectInCohort(project, cohort) {
+  if (cohort === 'all') {
+    return true;
+  }
   if (cohort === 'rush') {
     return project.versionPolicyName === 'rush';
   }

@@ -1,6 +1,8 @@
 parameters:
   - name: VersionPolicyName
     type: string
+  - name: PackageCohort
+    type: string
 
 steps:
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
@@ -8,7 +10,7 @@ steps:
       Arguments: '--help'
       DisplayName: 'Install Rush'
 
-  - ${{ if eq(parameters.VersionPolicyName, 'noRush') }}:
+  - ${{ if ne(parameters.PackageCohort, 'rush') }}:
       - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
         parameters:
           Arguments: >
@@ -33,6 +35,6 @@ steps:
 
   - script: >
       node common/scripts/publish-cohort.js filter-packages
-      --cohort ${{ parameters.VersionPolicyName }}
+      --cohort ${{ parameters.PackageCohort }}
       --packages-path $(Build.ArtifactStagingDirectory)/packages
-    displayName: 'Filter unpublished ${{ parameters.VersionPolicyName }} packages'
+    displayName: 'Filter unpublished ${{ parameters.PackageCohort }} packages'
