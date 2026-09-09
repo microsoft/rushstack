@@ -11,6 +11,8 @@ export interface IDaemonConfigurationJson {
   readonly autoStart?: boolean;
   /** Retains host file observation for warm projects between requests; never schedules builds. Defaults to false. */
   readonly watch?: boolean;
+  /** Enables explicit operationSettings[].daemonIpc Node runners for daemon builds. Defaults to false. */
+  readonly usePersistentIpcRunners?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
   /** Idle resource expiration in an attached daemon warm set. Defaults to 300 seconds. */
@@ -28,6 +30,7 @@ const defaults: Required<IDaemonConfigurationJson> = {
   idleTimeoutSeconds: 900,
   autoStart: true,
   watch: false,
+  usePersistentIpcRunners: false,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
@@ -42,6 +45,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     idleTimeoutSeconds: 'RUSH_DAEMON_IDLE_TIMEOUT_SECONDS',
     autoStart: 'RUSH_DAEMON_AUTO_START',
     watch: 'RUSH_DAEMON_WATCH',
+    usePersistentIpcRunners: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
@@ -82,6 +86,7 @@ export function resolveDaemonConfiguration(
     enabled: booleanOption('enabled', json, environment),
     autoStart: booleanOption('autoStart', json, environment),
     watch: booleanOption('watch', json, environment),
+    usePersistentIpcRunners: booleanOption('usePersistentIpcRunners', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
@@ -92,7 +97,7 @@ export function resolveDaemonConfiguration(
 }
 
 function booleanOption(
-  key: 'enabled' | 'autoStart' | 'watch' | 'autoWarmByTelemetry',
+  key: 'enabled' | 'autoStart' | 'watch' | 'autoWarmByTelemetry' | 'usePersistentIpcRunners',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

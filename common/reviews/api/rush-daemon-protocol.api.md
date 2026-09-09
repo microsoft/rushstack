@@ -672,6 +672,18 @@ export interface IDaemonUnsubscribeMessage {
 }
 
 // @beta
+export interface IDaemonWarmProjectRank {
+    // (undocumented)
+    readonly frequency: number;
+    readonly lastUsed: number;
+    readonly measuredRunnerMemoryBytes?: number;
+    // (undocumented)
+    readonly projectName: string;
+    // (undocumented)
+    readonly timeSavedMs?: number;
+}
+
+// @beta
 export interface IDaemonWarmSetConfiguration {
     // (undocumented)
     readonly autoWarmByTelemetry: boolean;
@@ -702,6 +714,7 @@ export interface IDaemonWarmSetStatus {
     readonly overMemoryBudget: boolean;
     // (undocumented)
     readonly overProjectLimit: boolean;
+    readonly projectRanks?: ReadonlyArray<IDaemonWarmProjectRank>;
     // (undocumented)
     readonly protectedProjectNames: ReadonlyArray<string>;
     readonly retainedProjectNames: ReadonlyArray<string>;

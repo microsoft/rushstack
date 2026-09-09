@@ -142,10 +142,24 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Host idle shutdown after request/output/cleanup drain |
 | `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Sent through existing admission contract |
 | `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
+| `usePersistentIpcRunners` | `RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS` | false | Enables explicit per-operation `daemonIpc` Node launchers for unsharded incremental daemon builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |
 | `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling |
 | `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort retained-project limit; never trims requested execution |
 | `autoWarmByTelemetry` | `RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY` | false | Measured retention ranking with conservative LRU fallback; no speculative scripts |
+
+For genuine persistent Node execution, enable `usePersistentIpcRunners` and add
+`operationSettings[].daemonIpc: { entryPoint, args? }` in the project's `config/rush-project.json`.
+`entryPoint` is explicitly project-root-relative, including for inherited/rig settings, and must reside in a
+dedicated implementation subdirectory. Node is spawned directly on Linux and Windows; args are literal tokens,
+followed by non-ignored native custom parameters. Arbitrary shell strings are not reinterpreted.
+The complete implementation directory is fingerprinted (256 entries, 16 levels, 8 MiB maximum); imports outside
+it other than Node built-ins are unsupported. Ordinary input/output files must live outside that directory.
+Code or descriptor changes replace the old generation, while ordinary input changes reuse the child.
+The tool must implement the native IPC protocol and report real RSS; no extra runs manufacture telemetry.
+IPC is non-cacheable. Rebuild, NoOp/missing-script behavior, preassigned shards and non-opted-in/native paths
+stay unchanged, and existing watch-only IPC declarations do not activate this mode.
+Ordinary `daemon status` reports raw measured `workspace.warmSet.projectRanks` when available.
 
 Timeouts must be positive and at most 2147483.647 seconds; queue timeout additionally
 accepts zero and is rounded down to milliseconds. Memory budget must be positive

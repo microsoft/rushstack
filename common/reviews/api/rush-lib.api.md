@@ -320,6 +320,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_AUTO_START: "RUSH_DAEMON_AUTO_START";
     readonly RUSH_DAEMON_WATCH: "RUSH_DAEMON_WATCH";
+    readonly RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: "RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
@@ -517,10 +518,17 @@ export interface IDaemonConfigurationJson {
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
     readonly queueTimeoutSeconds?: number;
+    readonly usePersistentIpcRunners?: boolean;
     readonly warmIdleTimeoutSeconds?: number;
     readonly warmMemoryBudgetMB?: number;
     readonly warmSetMaxProjects?: number;
     readonly watch?: boolean;
+}
+
+// @alpha
+export interface IDaemonIpcConfiguration {
+    args?: string[];
+    entryPoint: string;
 }
 
 // @beta (undocumented)
@@ -834,6 +842,7 @@ export interface IOperationRunnerContext {
 // @alpha (undocumented)
 export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
+    daemonIpc?: IDaemonIpcConfiguration;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
     dependsOnNodeVersion?: boolean | NodeVersionGranularity;

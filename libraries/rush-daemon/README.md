@@ -182,6 +182,60 @@ its normal disposer to its owned delegates.
 `rushx build` and other script invocations custom. The resolver also validates the native parsed
 action; identical script names alone never authorize a workspace build.
 
+### Explicit persistent Node operations
+
+Persistent tools are a separate, false-default execution opt-in, not a side effect of `daemon.watch`
+or `autoWarmByTelemetry`. Set `daemon.usePersistentIpcRunners: true` in `rush.json` (or
+`RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS=1`) and declare a Node launcher for each eligible operation:
+
+```json
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:compile",
+      "daemonIpc": {
+        "entryPoint": "tools/ipc/build.cjs",
+        "args": ["--mode", "development"]
+      }
+    }
+  ]
+}
+```
+
+The descriptor belongs in the project's `config/rush-project.json`; inherited and rig-provided descriptors
+still resolve relative to the consuming **project root**, not the configuration file. Both opt-ins are required.
+The actual selected Node executable (`process.execPath`) starts the entrypoint directly with `shell: false`,
+including on Windows. Descriptor args and non-ignored native custom parameter tokens are passed as raw argv;
+quotes, spaces and shell metacharacters are not parsed or expanded. Native cwd, environment, IPC stdio and
+process ownership are preserved. No shell string is rewritten to obtain a launcher.
+
+Only unsharded incremental daemon builds use this path. Rebuild, ordinary/native fallback, empty/missing
+canonical scripts, and preassigned runners (including shard/collator and architectural NoOp nodes) retain their
+native behavior. Existing watch-only `:ipc` declarations and the graph's `isWatch` setting are unchanged.
+The existing `--no-ipc` is honored when the native command registers it. IPC runners remain **non-cacheable**,
+as in native watch mode; this is an explicit execution/cache-policy choice. Their hash still uses the native
+canonical command and non-ignored custom parameters, not an invented command identity.
+
+The entrypoint must be a `.js`, `.cjs` or `.mjs` file in a dedicated implementation subdirectory. That directory's
+complete contents, names and physical identity are fingerprinted, bounded to 256 entries, 16 nested directory
+levels and 8 MiB. Links/special files inside the implementation tree and oversized trees fail explicitly. Keep build inputs and outputs
+outside it. Changes to descriptors, entrypoint code or other files inside this implementation tree replace the
+generation and join the old child before another run. Unchanged content, metadata touches, and ordinary inputs
+outside the tree retain warm reuse. This is **not arbitrary module-closure tracking**: imports outside that tree,
+other than Node built-ins, are unsupported. Bundle third-party implementation code into the dedicated tree.
+
+The tool must implement the existing Node IPC contract: announce `sync`, execute only when sent `run`,
+finish stdout/stderr writes before `after-execute`, and join its work and exit when sent `exit`. An explicit tool
+that exits without IPC readiness fails without native fallback or replay. `WatchLoop.runIPCAsync()` can supply
+this contract when included in the tool's implementation bundle. Its completion RSS is an actual process sample,
+not a descendant-memory estimate. Only requested executions establish cold/reused timing and frequency; the
+daemon never runs additional work just to collect telemetry. Unchanged builds do not send another `run`.
+
+`warmSet.projectRanks` in ordinary CLI status exposes optional raw ranking inputs (request frequency, monotonic
+recency, measured savings and child RSS), allowing the ordering to be independently inspected. Missing samples
+remain absent. Proven native `NullOperationRunner` nodes are excluded from child-resource score inputs, not
+from graph/results or daemon RSS; a custom runner returning NoOp is not assumed resource-free.
+
 ### Warm-set generation attachment (WS3)
 
 `WorkspaceSession` automatically owns the warm controller for each real graph and

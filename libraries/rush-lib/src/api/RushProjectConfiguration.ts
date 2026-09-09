@@ -86,6 +86,21 @@ export interface IRushPhaseSharding {
 export type NodeVersionGranularity = 'major' | 'minor' | 'patch';
 
 /**
+ * An explicitly selected, non-cacheable Node IPC tool for an unsharded daemon build operation.
+ * @alpha
+ */
+export interface IDaemonIpcConfiguration {
+  /**
+   * A project-root-relative .js, .cjs or .mjs entrypoint in a dedicated implementation subdirectory.
+   * The directory's complete file tree is fingerprinted; imports outside it (other than Node built-ins)
+   * are unsupported. Do not write build outputs or ordinary input files into this directory.
+   */
+  entryPoint: string;
+  /** Literal tool arguments, followed by the operation's non-ignored raw custom parameters. */
+  args?: string[];
+}
+
+/**
  * @alpha
  */
 export interface IOperationSettings {
@@ -93,6 +108,11 @@ export interface IOperationSettings {
    * The name of the operation. This should be a key in the `package.json`'s `scripts` object.
    */
   operationName: string;
+  /**
+   * Explicit Node IPC launcher, used only with daemon.usePersistentIpcRunners for incremental daemon builds.
+   * Native shell, rebuild, missing-script/NoOp, and preassigned sharded runners remain unchanged.
+   */
+  daemonIpc?: IDaemonIpcConfiguration;
 
   /**
    * Specify the folders where this operation writes its output files. If enabled, the Rush build

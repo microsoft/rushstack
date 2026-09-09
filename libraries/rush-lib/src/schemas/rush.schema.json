@@ -272,6 +272,11 @@
           "default": false,
           "description": "Retain host observation of warm project files between requests; never schedule builds. Root/config guards and request-time input reconciliation remain active when false. RUSH_DAEMON_WATCH overrides."
         },
+        "usePersistentIpcRunners": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable explicit operationSettings[].daemonIpc Node launchers for incremental daemon builds. Never enables watch mode or unrequested execution. RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS overrides."
+        },
         "queueTimeoutSeconds": {
           "type": "number",
           "minimum": 0,

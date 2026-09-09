@@ -90,6 +90,7 @@ export { RushConfigurationProject } from './api/RushConfigurationProject';
 export {
   type IRushProjectJson as _IRushProjectJson,
   type IOperationSettings,
+  type IDaemonIpcConfiguration,
   type NodeVersionGranularity,
   RushProjectConfiguration,
   type IRushPhaseSharding

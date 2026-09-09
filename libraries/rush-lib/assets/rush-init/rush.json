@@ -343,6 +343,7 @@
     /*[LINE "HYPOTHETICAL"]*/ "idleTimeoutSeconds": 900,
     /*[LINE "HYPOTHETICAL"]*/ "autoStart": true,
     /*[LINE "HYPOTHETICAL"]*/ "watch": false,
+    /*[LINE "HYPOTHETICAL"]*/ "usePersistentIpcRunners": false,
     /*[LINE "HYPOTHETICAL"]*/ "queueTimeoutSeconds": 30,
     /*[LINE "HYPOTHETICAL"]*/ "warmIdleTimeoutSeconds": 300,
     /*[LINE "HYPOTHETICAL"]*/ "warmMemoryBudgetMB": 512,

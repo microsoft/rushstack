@@ -20,7 +20,10 @@ it.each([
   { ...WARM_STATUS, maintenanceState: 'evicted' },
   { ...WARM_STATUS, deferredReason: 'success' },
   { ...WARM_STATUS, maintenanceFailure: {} },
-  { ...WARM_STATUS, cleanupFailures: [false] }
+  { ...WARM_STATUS, cleanupFailures: [false] },
+  { ...WARM_STATUS, projectRanks: {} },
+  { ...WARM_STATUS, projectRanks: [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO, timeSavedMs: INVALID_NUMBER }] },
+  { ...WARM_STATUS, projectRanks: [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO, measuredRunnerMemoryBytes: ZERO }] }
 ])('rejects malformed warm accounting', (warmSet: unknown) => {
   expect(() => decodeDaemonControlMessage(statusFrame(workspaceStatus(warmSet)))).toThrow();
 });
@@ -55,3 +58,9 @@ it.each(['workspace-busy', 'native-busy', 'graph-busy', 'disposed'])(
     });
   }
 );
+
+it('round-trips real ranking inputs while preserving unknown measurements', () => {
+  const projectRanks: ReadonlyArray<object> = [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO }];
+  const frame: Uint8Array = statusFrame(workspaceStatus({ ...WARM_STATUS, projectRanks }));
+  expect(encodeDaemonControlMessage(decodeDaemonControlMessage(frame))).toEqual(frame);
+});
