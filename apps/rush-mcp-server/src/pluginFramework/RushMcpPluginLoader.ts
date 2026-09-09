@@ -71,17 +71,17 @@ const _rushMcpJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(rushMcpJsonSc
 const _rushMcpPluginSchemaObject: JsonSchema = JsonSchema.fromLoadedObject(rushMcpPluginSchemaObject);
 
 export class RushMcpPluginLoader {
-  private readonly _rushWorkspacePath: string;
-  private readonly _mcpServer: McpServer;
+  readonly #rushWorkspacePath: string;
+  readonly #mcpServer: McpServer;
 
   public constructor(rushWorkspacePath: string, mcpServer: McpServer) {
-    this._rushWorkspacePath = rushWorkspacePath;
-    this._mcpServer = mcpServer;
+    this.#rushWorkspacePath = rushWorkspacePath;
+    this.#mcpServer = mcpServer;
   }
 
   public async loadAsync(): Promise<void> {
     const rushMcpFilePath: string = path.join(
-      this._rushWorkspacePath,
+      this.#rushWorkspacePath,
       'common/config/rush-mcp/rush-mcp.json'
     );
 
@@ -90,7 +90,7 @@ export class RushMcpPluginLoader {
     }
 
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
-      startingFolder: this._rushWorkspacePath
+      startingFolder: this.#rushWorkspacePath
     });
 
     const jsonRushMcpConfig: IJsonRushMcpConfig = await JsonFile.loadAndValidateAsync(
@@ -144,7 +144,7 @@ export class RushMcpPluginLoader {
         );
         const mcpPluginSchema: JsonSchema = await JsonSchema.fromFile(mcpPluginSchemaFilePath);
         const rushMcpPluginOptionsFilePath: string = path.resolve(
-          this._rushWorkspacePath,
+          this.#rushWorkspacePath,
           `common/config/rush-mcp/${jsonManifest.pluginName}.json`
         );
         // Example: /path/to/my-repo/common/config/rush-mcp/rush-mcp-example-plugin.json
@@ -166,7 +166,7 @@ export class RushMcpPluginLoader {
         throw new Error(`Unable to load plugin entry point at ${fullEntryPointPath}:\n` + _formatError(e));
       }
 
-      const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal(this._mcpServer);
+      const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal(this.#mcpServer);
 
       let plugin: IRushMcpPlugin;
       try {

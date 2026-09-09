@@ -140,11 +140,11 @@ async function _writeCacheAsync(
  * @internal
  */
 export class PackageUpdateChecker {
-  private readonly _packageName: string;
-  private readonly _currentVersion: string;
-  private readonly _skip: boolean;
-  private readonly _forceCheck: boolean;
-  private readonly _cacheExpiryMs: number;
+  readonly #packageName: string;
+  readonly #currentVersion: string;
+  readonly #skip: boolean;
+  readonly #forceCheck: boolean;
+  readonly #cacheExpiryMs: number;
 
   public constructor(options: IPackageUpdateCheckerOptions) {
     const {
@@ -154,11 +154,11 @@ export class PackageUpdateChecker {
       forceCheck = false,
       cacheExpiryMs = DEFAULT_CACHE_EXPIRY_MS
     } = options;
-    this._packageName = packageName;
-    this._currentVersion = currentVersion;
-    this._skip = skip;
-    this._forceCheck = forceCheck;
-    this._cacheExpiryMs = cacheExpiryMs;
+    this.#packageName = packageName;
+    this.#currentVersion = currentVersion;
+    this.#skip = skip;
+    this.#forceCheck = forceCheck;
+    this.#cacheExpiryMs = cacheExpiryMs;
   }
 
   /**
@@ -166,19 +166,19 @@ export class PackageUpdateChecker {
    * was skipped or the registry could not be reached.
    */
   public async tryGetUpdateAsync(): Promise<IPackageUpdateResult | undefined> {
-    if (this._skip) {
+    if (this.#skip) {
       return undefined;
     }
 
-    const cacheFilePath: string = this._getCacheFilePath();
+    const cacheFilePath: string = this.#getCacheFilePath();
 
     let latestVersion: string | undefined;
-    if (!this._forceCheck) {
+    if (!this.#forceCheck) {
       const cached: IUpdateCheckCache | undefined = await _readCacheAsync(cacheFilePath);
       if (cached !== undefined) {
         const { checkedAt, latestVersion: latestVersionFromCache } = cached;
         const ageMs: number = Date.now() - checkedAt;
-        if (ageMs < this._cacheExpiryMs) {
+        if (ageMs < this.#cacheExpiryMs) {
           latestVersion = latestVersionFromCache;
         }
       }
@@ -186,7 +186,7 @@ export class PackageUpdateChecker {
 
     if (latestVersion === undefined) {
       // Cache is missing or stale — fetch from the registry.
-      latestVersion = await _tryFetchLatestVersionAsync(this._packageName);
+      latestVersion = await _tryFetchLatestVersionAsync(this.#packageName);
       if (latestVersion === undefined) {
         return undefined;
       }
@@ -196,13 +196,13 @@ export class PackageUpdateChecker {
 
     return {
       latestVersion,
-      isOutdated: semver.gt(latestVersion, this._currentVersion)
+      isOutdated: semver.gt(latestVersion, this.#currentVersion)
     };
   }
 
-  private _getCacheFilePath(): string {
+  #getCacheFilePath(): string {
     // Replace characters that are unsafe in file names (e.g. the "/" in scoped package names).
-    const sanitizedName: string = this._packageName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const sanitizedName: string = this.#packageName.replace(/[^a-zA-Z0-9._-]/g, '_');
     return `${CACHE_FOLDER}/${sanitizedName}.json`;
   }
 }

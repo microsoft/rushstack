@@ -29,59 +29,59 @@ export interface IOperationStreamRegistryOptions {
  * @beta
  */
 export class OperationStreamRegistry {
-  private readonly _collator: StreamCollator;
-  private readonly _collatedTerminal: CollatedTerminal;
-  private readonly _headers: OperationHeaderTracker = new OperationHeaderTracker();
-  private readonly _writers: Map<string, CollatedWriter> = new Map();
-  private readonly _quiet: boolean;
+  readonly #collator: StreamCollator;
+  readonly #collatedTerminal: CollatedTerminal;
+  readonly #headers: OperationHeaderTracker = new OperationHeaderTracker();
+  readonly #writers: Map<string, CollatedWriter> = new Map();
+  readonly #quiet: boolean;
 
   public constructor(options: IOperationStreamRegistryOptions) {
-    this._quiet = options.quiet;
+    this.#quiet = options.quiet;
     const transform: TextRewriterTransform = new TextRewriterTransform({
       destination: options.destination,
       normalizeNewlines: NewlineKind.OsDefault,
       removeColors: options.removeColors
     });
-    this._collatedTerminal = new CollatedTerminal(transform);
-    this._collator = new StreamCollator({
+    this.#collatedTerminal = new CollatedTerminal(transform);
+    this.#collator = new StreamCollator({
       destination: transform,
-      onWriterActive: (writer: CollatedWriter | undefined) => this._onWriterActive(writer)
+      onWriterActive: (writer: CollatedWriter | undefined) => this.#onWriterActive(writer)
     });
   }
 
   /** Increments the total-operation count shown in headers. */
   public registerOperation(): void {
-    this._headers.registerOperation();
+    this.#headers.registerOperation();
   }
 
   /** Records engine-authoritative counters before an operation's stream activates. */
   public setOperationHeader(header: IDaemonOperationHeaderPayload): void {
-    this._headers.setOperationHeader(header);
+    this.#headers.setOperationHeader(header);
   }
 
   /** Writes one raw chunk to the operation's collated stream. */
   public writeChunk(operationId: string, chunk: ITerminalChunk): void {
-    let writer: CollatedWriter | undefined = this._writers.get(operationId);
+    let writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer === undefined) {
-      writer = this._collator.registerTask(operationId);
-      this._writers.set(operationId, writer);
+      writer = this.#collator.registerTask(operationId);
+      this.#writers.set(operationId, writer);
     }
     writer.writeChunk(chunk);
   }
 
   /** Closes the operation's stream, flushing its collated output. */
   public closeOperation(operationId: string): void {
-    const writer: CollatedWriter | undefined = this._writers.get(operationId);
+    const writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer !== undefined && writer.isOpen) {
       writer.close();
     }
   }
 
-  private _onWriterActive(writer: CollatedWriter | undefined): void {
+  #onWriterActive(writer: CollatedWriter | undefined): void {
     if (writer === undefined) {
       return;
     }
-    const counters: IDaemonOperationHeaderPayload = this._headers.takeOperationHeader(
+    const counters: IDaemonOperationHeaderPayload = this.#headers.takeOperationHeader(
       writer.taskName
     );
     const header: string = formatDaemonOperationHeader(
@@ -89,9 +89,9 @@ export class OperationStreamRegistry {
       counters.completedOperations,
       counters.totalOperations
     );
-    this._collatedTerminal.writeStdoutLine(`\n${header}`);
-    if (!this._quiet) {
-      this._collatedTerminal.writeStdoutLine('');
+    this.#collatedTerminal.writeStdoutLine(`\n${header}`);
+    if (!this.#quiet) {
+      this.#collatedTerminal.writeStdoutLine('');
     }
   }
 }
