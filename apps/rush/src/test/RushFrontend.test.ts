@@ -665,7 +665,7 @@ describe(launchRushFrontendAsync.name, () => {
         expect(selection).toMatchObject({
           reporter: 'legacy',
           enabled: false,
-          reporterControlsOwnedByFrontend: false
+          reporterControlsOwnedByFrontend: rollback
         });
         expect(
           JSON.parse(

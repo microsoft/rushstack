@@ -270,7 +270,7 @@ describe(resolveRushReporterSelection.name, () => {
       expect(selection).toMatchObject({
         enabled: false,
         reporter: 'legacy',
-        reporterControlsOwnedByFrontend: false,
+        reporterControlsOwnedByFrontend: true,
         reporterValueFlagsToStrip: []
       });
       expect(
@@ -572,16 +572,18 @@ describe(resolveRushReporterSelection.name, () => {
 
 describe(initializeRushReporterHostAsync.name, () => {
   it.each([
-    { target: 'stdout', outputs: ['json://stdout'] },
-    { target: 'stderr', outputs: ['json://stderr', 'file://stderr'] }
-  ])('rejects conflicting $target ownership before opening files', async ({ target, outputs }) => {
+    { reporter: 'json', target: 'stdout', outputs: ['json://stdout'] },
+    { reporter: 'json', target: 'stderr', outputs: ['json://stderr', 'file://stderr'] },
+    { reporter: 'file', target: 'stderr', outputs: ['json://stderr'] }
+  ])('rejects conflicting $target ownership before opening files', async ({ reporter, target, outputs }) => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-stream-conflict-'));
     try {
       await expect(
         initializeRushReporterHostAsync({
-          argv: ['build', '--reporter=json', ...outputs.map((output) => `--output=${output}`)],
+          argv: ['build', `--reporter=${reporter}`, ...outputs.map((output) => `--output=${output}`)],
           env: {},
           cwd: directory,
+          commonTempFolder: directory,
           stdout: { write: () => undefined },
           includeDefaultFileReporter: false
         }).then(async (initialized) => {
@@ -599,15 +601,14 @@ describe(initializeRushReporterHostAsync.name, () => {
     'writes reserved %s output to the stream without creating a same-named file',
     async (target) => {
       const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-stream-output-'));
-      const osModule: typeof os = jest.requireActual('node:os');
-      const tmpdirSpy: jest.SpyInstance = jest.spyOn(osModule, 'tmpdir').mockReturnValue(directory);
       const stdout = { write: jest.fn(), end: jest.fn() };
       const stderr = { write: jest.fn(), end: jest.fn() };
       try {
         const initialized = await initializeRushReporterHostAsync({
-          argv: ['build', '--reporter=file', `--output=json://${target}`],
+          argv: ['build', `--reporter=${target === 'stdout' ? 'file' : 'json'}`, `--output=json://${target}`],
           env: {},
           cwd: directory,
+          commonTempFolder: directory,
           stdout,
           stderr,
           includeDefaultFileReporter: false
@@ -616,16 +617,20 @@ describe(initializeRushReporterHostAsync.name, () => {
         await initialized.closeAsync();
 
         const stream = target === 'stdout' ? stdout : stderr;
-        expect(JSON.parse(stream.write.mock.calls.map(([text]) => text).join('')).type).toBe(
-          'commandStarted'
-        );
+        expect(
+          stream.write.mock.calls
+            .map(([text]) => text)
+            .join('')
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line))
+        ).toContainEqual(expect.objectContaining({ type: 'commandStarted' }));
         expect(stdout.end).not.toHaveBeenCalled();
         expect(stderr.end).not.toHaveBeenCalled();
         await expect(fs.promises.stat(path.join(directory, target))).rejects.toMatchObject({
           code: 'ENOENT'
         });
       } finally {
-        tmpdirSpy.mockRestore();
         await fs.promises.rm(directory, { recursive: true, force: true });
       }
     }

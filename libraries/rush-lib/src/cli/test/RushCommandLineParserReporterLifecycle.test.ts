@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { JsonFile, LockFile } from '@rushstack/node-core-library';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
@@ -37,6 +37,7 @@ describe('RushCommandLineParser reporter lifecycle', () => {
   let originalArgv: string[];
   let stdoutSpy: jest.SpyInstance;
   let stderrSpy: jest.SpyInstance;
+  let lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire>;
 
   async function copyRepositoryAsync(): Promise<string> {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-reporter-lifecycle-'));
@@ -54,9 +55,15 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     EnvironmentConfiguration.reset();
     stdoutSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     stderrSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    lockSpy = jest.spyOn(LockFile, 'tryAcquire');
   });
 
   afterEach(async () => {
+    for (const result of lockSpy.mock.results) {
+      if (result.type === 'return' && result.value && !result.value.isReleased) {
+        result.value.release();
+      }
+    }
     await Promise.all(
       temporaryFolders
         .splice(0)
@@ -81,7 +88,8 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     for (const reporting of [false, true]) {
       process.exitCode = undefined;
       EnvironmentConfiguration.reset();
-      jest.clearAllMocks();
+      stdoutSpy.mockClear();
+      stderrSpy.mockClear();
       const sink: CapturingReporterSink = new CapturingReporterSink();
       let eventsAtExit: readonly IReporterEmitEventInput<unknown>[] = [];
       let eventsAtClose: readonly IReporterEmitEventInput<unknown>[] = [];
@@ -92,15 +100,15 @@ describe('RushCommandLineParser reporter lifecycle', () => {
       const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => {
         eventsAtClose = [...sink.events];
       });
+      const flushAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => undefined);
       const parser: RushCommandLineParser = new RushCommandLineParser({
         cwd: repoPath,
-        reporter: reporting ? { eventSink: sink, sessionId: 'initialization-failure' } : undefined,
+        reporter: reporting
+          ? { eventSink: sink, sessionId: 'initialization-failure', flushAsync }
+          : undefined,
         reporterCloseAsync: withClose ? closeAsync : undefined
       });
 
-      if (!withClose) {
-        expect(exitSpy).toHaveBeenCalledWith(1);
-      }
       await expect(parser.executeAsync(['custom-output'])).resolves.toBe(false);
       await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -108,6 +116,7 @@ describe('RushCommandLineParser reporter lifecycle', () => {
       expect(exitSpy).toHaveBeenCalledTimes(1);
       expect(exitSpy).toHaveBeenCalledWith(1);
       expect(closeAsync).toHaveBeenCalledTimes(withClose ? 1 : 0);
+      expect(flushAsync).toHaveBeenCalledTimes(reporting && !withClose ? 1 : 0);
       expect(sink.events.map(({ type }) => type)).toEqual(
         reporting ? ['sessionStarted', 'diagnosticEmitted', 'sessionCompleted'] : []
       );
@@ -134,6 +143,50 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     }
 
     expect(visibleOutput[1]).toEqual(visibleOutput[0]);
+  });
+
+  it('binds the native reporter terminal before configuration failure and waits for its sink flush', async () => {
+    const repoPath: string = await copyRepositoryAsync();
+    await fs.promises.writeFile(path.join(repoPath, 'rush.json'), '{');
+    const sink: CapturingReporterSink = new CapturingReporterSink();
+    const exitSpy: jest.SpyInstance = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    let releaseFlush: (() => void) | undefined;
+    const flushGate: Promise<void> = new Promise((resolve) => {
+      releaseFlush = resolve;
+    });
+    const flushAsync: jest.Mock<Promise<void>, []> = jest.fn(() => flushGate);
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: repoPath,
+      reporter: {
+        eventSink: sink,
+        sessionId: 'native-initialization-failure',
+        operationStreamEnabled: true,
+        flushAsync
+      }
+    });
+    await expect(parser.executeAsync(['custom-output'])).resolves.toBe(false);
+    const exitsBeforeFlush: number = exitSpy.mock.calls.length;
+    const flushCalls: number = flushAsync.mock.calls.length;
+    releaseFlush!();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
+    expect(exitsBeforeFlush).toBe(0);
+    expect(flushCalls).toBe(1);
+    expect(sink.events[0].type).toBe('sessionStarted');
+    expect(sink.events[1].type).toBe('diagnosticEmitted');
+    expect(sink.events.slice(2, -1)).toContainEqual(
+      expect.objectContaining({
+        type: 'messageEmitted',
+        payload: expect.objectContaining({ severity: 'error', text: expect.stringContaining('rush.json') })
+      })
+    );
+    expect(sink.events.at(-1)).toMatchObject({ type: 'sessionCompleted', payload: { exitCode: 1 } });
+    expect(stdoutSpy).not.toHaveBeenCalled();
+    expect(stderrSpy).not.toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledTimes(1);
+    expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
   it('emits and correlates a session diagnostic when plugin initialization fails before action selection', async () => {
@@ -172,7 +225,8 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     for (const reporting of [false, true]) {
       process.exitCode = undefined;
       EnvironmentConfiguration.reset();
-      jest.clearAllMocks();
+      stdoutSpy.mockClear();
+      stderrSpy.mockClear();
       const repoPath: string = await copyRepositoryAsync();
       const rushJsonPath: string = path.join(repoPath, 'rush.json');
       const rushJson: IRushConfigurationJson = JsonFile.load(rushJsonPath);
