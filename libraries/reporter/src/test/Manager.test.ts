@@ -66,6 +66,38 @@ function makeInput(
 }
 
 describe('ReporterManager ordering and assignment', () => {
+  it('reserves the disposal lifecycle lane before concurrent shutdown can flush or close', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('blocked-disposal-flush');
+    let notifyFlushStarted!: () => void;
+    let finishFlush!: () => void;
+    const flushStarted: Promise<void> = new Promise((resolve) => (notifyFlushStarted = resolve));
+    const flushFinished: Promise<void> = new Promise((resolve) => (finishFlush = resolve));
+    jest.spyOn(reporter, 'flushAsync').mockImplementation(async () => {
+      reporter.flushCount++;
+      if (reporter.flushCount === 1) {
+        notifyFlushStarted();
+        await flushFinished;
+      }
+    });
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    const disposing: Promise<void> = manager._disposeInitializedReportersAsync();
+    await flushStarted;
+    const closing: Promise<void> = manager.closeAsync();
+    try {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(reporter.flushCount).toBe(1);
+      expect(reporter.closeCount).toBe(0);
+    } finally {
+      finishFlush();
+      await Promise.all([disposing, closing]);
+    }
+    expect(reporter.flushCount).toBe(1);
+    expect(reporter.closeCount).toBe(1);
+  });
+
   it('shares one close operation between concurrent shutdown and initialization disposal', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter('shared-close');

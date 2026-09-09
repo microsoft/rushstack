@@ -212,16 +212,22 @@ export class ReporterManager implements IReporterEventSink {
       const results: PromiseSettledResult<void>[] = await Promise.allSettled(
         this._entries
           .filter((entry: IReporterEntry) => entry.initializationStarted)
-          .map(async (entry: IReporterEntry): Promise<void> => {
-            try {
-              await entry.lifecyclePromise;
-              await entry.drainPromise;
-              if (this._canFlushEntry(entry)) {
-                await entry.reporter.flushAsync();
+          .map((entry: IReporterEntry): Promise<void> => {
+            const previousLifecycle: Promise<void> = entry.lifecyclePromise;
+            const disposal: Promise<void> = (async () => {
+              try {
+                await previousLifecycle;
+                await entry.drainPromise;
+                if (this._canFlushEntry(entry)) {
+                  await entry.reporter.flushAsync();
+                }
+              } finally {
+                await this._closeEntryAsync(entry);
               }
-            } finally {
-              await this._closeEntryAsync(entry);
-            }
+            })();
+            // Reserve the lifecycle lane without swallowing failures needed by the aggregate.
+            entry.lifecyclePromise = disposal;
+            return disposal;
           })
       );
       const errors: unknown[] = results
