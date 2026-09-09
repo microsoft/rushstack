@@ -521,6 +521,7 @@ describe(launchRushFrontendAsync.name, () => {
       name: 'unsupported reporter as a custom value',
       reporter: 'junit',
       env: {},
+      repositoryOptIn: false,
       expectedArguments: [
         '--reporter',
         'junit',
@@ -536,6 +537,7 @@ describe(launchRushFrontendAsync.name, () => {
       name: 'supported reporter as frontend ownership',
       reporter: 'json',
       env: {},
+      repositoryOptIn: false,
       expectedArguments: ['--verbose'],
       expectedEnabled: true
     },
@@ -543,7 +545,24 @@ describe(launchRushFrontendAsync.name, () => {
       name: 'explicit legacy under the emergency override',
       reporter: 'legacy',
       env: { RUSH_REPORTER: 'legacy' },
+      repositoryOptIn: false,
       expectedArguments: ['--output', 'custom.zip', '--log-level', 'custom', '--verbose'],
+      expectedEnabled: false
+    },
+    {
+      name: 'custom reporter under repository emergency rollback',
+      reporter: 'junit',
+      env: { RUSH_REPORTER: 'legacy' },
+      repositoryOptIn: true,
+      expectedArguments: [
+        '--reporter',
+        'junit',
+        '--output',
+        'custom.zip',
+        '--log-level',
+        'custom',
+        '--verbose'
+      ],
       expectedEnabled: false
     }
   ])('runs the real custom command fixture with $name', async (testCase) => {
@@ -580,7 +599,7 @@ describe(launchRushFrontendAsync.name, () => {
       await launchRushFrontendAsync({
         currentPackageVersion: '5.178.1',
         rushVersionToLoad: undefined,
-        configuration: undefined,
+        configuration: { useRushReporter: testCase.repositoryOptIn } as MinimalRushConfiguration,
         launchOptions: { isManaged: true },
         currentRushLib: rushLib,
         initializeReporterHostAsync: async (options) => {
@@ -653,76 +672,83 @@ describe(launchRushFrontendAsync.name, () => {
     }
   });
 
-  it('runs a value-less custom reporter flag through the real frontend and parser boundary', async () => {
-    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-custom-reporter-flag-'));
-    const repoPath: string = path.join(directory, 'repo');
-    const fixturePath: string = path.resolve(
-      __dirname,
-      '../../../../libraries/rush-lib/src/cli/test/basicAndRunRebuildActionRepo'
-    );
-    await fs.promises.cp(fixturePath, repoPath, { recursive: true });
-    const originalArgv: string[] = process.argv;
-    const originalExitCode: string | number | null | undefined = process.exitCode;
-    process.argv = ['node', 'rush', 'custom-reporter-flag', '--reporter'];
-    const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    let selection: IRushReporterSelection | undefined;
-    const lockSpy = jest.spyOn(LockFile, 'tryAcquire');
+  it.each([false, true])(
+    'runs a value-less custom reporter flag with repository rollback %s',
+    async (rollback) => {
+      const directory: string = await fs.promises.mkdtemp(
+        path.join(os.tmpdir(), 'rush-custom-reporter-flag-')
+      );
+      const repoPath: string = path.join(directory, 'repo');
+      const fixturePath: string = path.resolve(
+        __dirname,
+        '../../../../libraries/rush-lib/src/cli/test/basicAndRunRebuildActionRepo'
+      );
+      await fs.promises.cp(fixturePath, repoPath, { recursive: true });
+      const originalArgv: string[] = process.argv;
+      const originalExitCode: string | number | null | undefined = process.exitCode;
+      process.argv = ['node', 'rush', 'custom-reporter-flag', '--reporter'];
+      const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
+      let selection: IRushReporterSelection | undefined;
+      const lockSpy = jest.spyOn(LockFile, 'tryAcquire');
 
-    try {
-      EnvironmentConfiguration.reset();
-      await launchRushFrontendAsync({
-        currentPackageVersion: '5.178.1',
-        rushVersionToLoad: undefined,
-        configuration: undefined,
-        launchOptions: { isManaged: true },
-        currentRushLib: rushLib,
-        initializeReporterHostAsync: async (options) => {
-          const initialized: IInitializedRushReporterHost = await initializeRushReporterHostAsync({
-            ...options,
-            argv: process.argv.slice(2),
-            cwd: repoPath,
-            env: {},
-            stdout: { isTTY: false, write: () => undefined },
-            includeDefaultFileReporter: false
-          });
-          selection = initialized.selection;
-          return initialized;
-        },
-        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
-          void version;
-          void selectedRushLib;
-          const parser: RushCommandLineParser = new RushCommandLineParser({
-            cwd: repoPath,
-            reporterCloseAsync: launchOptions.reporterCloseAsync
-          });
-          return parser.executeAsync().then(() => undefined);
-        },
-        processLifecycle
-      });
+      try {
+        EnvironmentConfiguration.reset();
+        await launchRushFrontendAsync({
+          currentPackageVersion: '5.178.1',
+          rushVersionToLoad: undefined,
+          configuration: { useRushReporter: rollback } as MinimalRushConfiguration,
+          launchOptions: { isManaged: true },
+          currentRushLib: rushLib,
+          initializeReporterHostAsync: async (options) => {
+            const initialized: IInitializedRushReporterHost = await initializeRushReporterHostAsync({
+              ...options,
+              argv: process.argv.slice(2),
+              cwd: repoPath,
+              env: rollback ? { RUSH_REPORTER: 'legacy' } : {},
+              stdout: { isTTY: false, write: () => undefined },
+              includeDefaultFileReporter: false
+            });
+            selection = initialized.selection;
+            return initialized;
+          },
+          executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+            void version;
+            void selectedRushLib;
+            const parser: RushCommandLineParser = new RushCommandLineParser({
+              cwd: repoPath,
+              reporterCloseAsync: launchOptions.reporterCloseAsync
+            });
+            return parser.executeAsync().then(() => undefined);
+          },
+          processLifecycle
+        });
 
-      expect(selection).toMatchObject({
-        reporter: 'legacy',
-        enabled: false,
-        reporterControlsOwnedByFrontend: false
-      });
-      expect(
-        JSON.parse(await fs.promises.readFile(path.join(repoPath, 'custom-reporter-flag-args.json'), 'utf8'))
-      ).toEqual(['--reporter']);
-      expect(processLifecycle.beforeExitListener).toBeUndefined();
-      expect(processLifecycle.signalListeners.size).toBe(0);
-      expect(
-        lockSpy.mock.results.some(
-          (result) => result.type === 'return' && result.value && !result.value.isReleased
-        )
-      ).toBe(true);
-    } finally {
-      EnvironmentConfiguration.reset();
-      process.argv = originalArgv;
-      process.exitCode = originalExitCode;
-      releaseParserTestLocks(lockSpy);
-      await fs.promises.rm(directory, { recursive: true, force: true });
+        expect(selection).toMatchObject({
+          reporter: 'legacy',
+          enabled: false,
+          reporterControlsOwnedByFrontend: rollback
+        });
+        expect(
+          JSON.parse(
+            await fs.promises.readFile(path.join(repoPath, 'custom-reporter-flag-args.json'), 'utf8')
+          )
+        ).toEqual(['--reporter']);
+        expect(processLifecycle.beforeExitListener).toBeUndefined();
+        expect(processLifecycle.signalListeners.size).toBe(0);
+        expect(
+          lockSpy.mock.results.some(
+            (result) => result.type === 'return' && result.value && !result.value.isReleased
+          )
+        ).toBe(true);
+      } finally {
+        EnvironmentConfiguration.reset();
+        process.argv = originalArgv;
+        process.exitCode = originalExitCode;
+        releaseParserTestLocks(lockSpy);
+        await fs.promises.rm(directory, { recursive: true, force: true });
+      }
     }
-  });
+  );
 
   it('flushes and closes an explicit output through the real frontend boundary on success', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));

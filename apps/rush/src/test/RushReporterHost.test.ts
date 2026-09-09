@@ -278,6 +278,54 @@ describe(resolveRushReporterSelection.name, () => {
     });
   });
 
+  it.each([['--reporter=junit'], ['--reporter'], ['--reporter', '--verbose']])(
+    'preserves custom reporter controls during repository rollback: %j',
+    (...argv: string[]) => {
+      const selection: IRushReporterSelection = resolve(
+        ['custom', ...argv],
+        { RUSH_REPORTER: 'legacy' },
+        false,
+        true
+      );
+
+      expect(selection).toMatchObject({
+        enabled: false,
+        reporter: 'legacy',
+        reporterControlsOwnedByFrontend: true,
+        reporterValueFlagsToStrip: []
+      });
+      expect(
+        stripReporterValueControls(['custom', ...argv], new Set(selection.reporterValueFlagsToStrip))
+      ).toEqual(['custom', ...argv]);
+    }
+  );
+
+  it('rolls back contradictory reporter selections without consuming pass-through arguments', () => {
+    const argv: string[] = [
+      'build',
+      '--reporter=legacy',
+      '--reporter=json',
+      '--reporter=ai',
+      '--log-level=invalid',
+      '--quiet',
+      '--debug',
+      '--',
+      '--reporter=junit',
+      '--output=child-output'
+    ];
+    const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
+
+    expect(selection.enabled).toBe(false);
+    expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+      'build',
+      '--quiet',
+      '--debug',
+      '--',
+      '--reporter=junit',
+      '--output=child-output'
+    ]);
+  });
+
   it('removes reporter-only value controls before invoking a legacy engine', () => {
     expect(
       stripReporterValueControls([
@@ -515,9 +563,108 @@ describe(resolveRushReporterSelection.name, () => {
       /only supported query parameter is logLevel/
     );
   });
+
+  it('distinguishes reserved stream targets from explicit relative file paths', () => {
+    expect(
+      resolve([
+        'build',
+        '--reporter=json',
+        '--output=json://stdout',
+        '--output=json://stderr',
+        '--output=json://./stdout',
+        '--output=json://./stderr'
+      ]).outputs.map(({ target }) => target)
+    ).toEqual(['stdout', 'stderr', path.resolve('/repo', 'stdout'), path.resolve('/repo', 'stderr')]);
+  });
 });
 
 describe(initializeRushReporterHostAsync.name, () => {
+  it.each([
+    { reporter: 'json', target: 'stdout', outputs: ['json://stdout'] },
+    { reporter: 'json', target: 'stderr', outputs: ['json://stderr', 'file://stderr'] },
+    { reporter: 'file', target: 'stderr', outputs: ['json://stderr'] }
+  ])('rejects conflicting $target ownership before opening files', async ({ reporter, target, outputs }) => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-stream-conflict-'));
+    try {
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: ['build', `--reporter=${reporter}`, ...outputs.map((output) => `--output=${output}`)],
+          env: {},
+          cwd: directory,
+          commonTempFolder: directory,
+          stdout: { write: () => undefined },
+          includeDefaultFileReporter: false
+        }).then(async (initialized) => {
+          await initialized.closeAsync();
+          return initialized;
+        })
+      ).rejects.toThrow(`The destination "${target}" is already owned by another reporter.`);
+      expect(await fs.promises.readdir(directory)).toEqual([]);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it.each(['stdout', 'stderr'] as const)(
+    'writes reserved %s output to the stream without creating a same-named file',
+    async (target) => {
+      const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-stream-output-'));
+      const stdout = { write: jest.fn(), end: jest.fn() };
+      const stderr = { write: jest.fn(), end: jest.fn() };
+      try {
+        const initialized = await initializeRushReporterHostAsync({
+          argv: ['build', `--reporter=${target === 'stdout' ? 'file' : 'json'}`, `--output=json://${target}`],
+          env: {},
+          cwd: directory,
+          commonTempFolder: directory,
+          stdout,
+          stderr,
+          includeDefaultFileReporter: false
+        });
+        emitCommandStarted(initialized.sink);
+        await initialized.closeAsync();
+
+        const stream = target === 'stdout' ? stdout : stderr;
+        expect(
+          stream.write.mock.calls
+            .map(([text]) => text)
+            .join('')
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line))
+        ).toContainEqual(expect.objectContaining({ type: 'commandStarted' }));
+        expect(stdout.end).not.toHaveBeenCalled();
+        expect(stderr.end).not.toHaveBeenCalled();
+        await expect(fs.promises.stat(path.join(directory, target))).rejects.toMatchObject({
+          code: 'ENOENT'
+        });
+      } finally {
+        await fs.promises.rm(directory, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it('writes ./stdout to a file without conflicting with the primary stdout reporter', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-stream-path-'));
+    let stdoutText: string = '';
+    try {
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=json', '--output=json://./stdout'],
+        env: {},
+        cwd: directory,
+        stdout: { write: (text: string) => (stdoutText += text) },
+        includeDefaultFileReporter: false
+      });
+      emitCommandStarted(initialized.sink);
+      await initialized.closeAsync();
+
+      expect(await fs.promises.readFile(path.join(directory, 'stdout'), 'utf8')).toBe(stdoutText);
+      expect(JSON.parse(stdoutText).type).toBe('commandStarted');
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it('hands callers a typed sink while leaving no-opt-in output unchanged', async () => {
     let output: string = '';
     const stdout: IRushReporterOutputStream = {
