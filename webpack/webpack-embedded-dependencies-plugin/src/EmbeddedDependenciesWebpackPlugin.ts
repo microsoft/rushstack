@@ -283,7 +283,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    *   // do some operation
    *   FileSystem.readFile('some-file');
    * } catch (error: unknown) {
-   *   this._emitWebpackError(compilation, 'Failed to do some operation', error);
+   *   this.#emitWebpackError(compilation, 'Failed to do some operation', error);
    * }
    * ```
    */
