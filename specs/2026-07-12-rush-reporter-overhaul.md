@@ -417,6 +417,10 @@ rush build --reporter=json --output=file://./rush-debug.log?logLevel=debug
 rush build --output=json://./rush-events.jsonl
 ```
 
+Literal `stdout` and `stderr` output targets reserve the corresponding stream;
+they are not file paths. Conflicting stream owners are rejected before reporters
+initialize. Use `./stdout` or `./stderr` to name an ordinary file instead.
+
 Environment controls:
 
 - `RUSH_REPORTER`;
@@ -443,6 +447,10 @@ Precedence:
 4. CI detection (`CI` plus known vendor variables).
 5. Interactive TTY.
 6. Generic non-TTY plaintext.
+
+During pre-major opt-in, `RUSH_REPORTER=legacy` is an emergency override of both
+explicit selection and the repository experiment. It is applied before strict
+reporter validation, preserving custom command controls that Rush does not own.
 
 Legacy flags remain permanent compatibility aliases for the primary reporter:
 

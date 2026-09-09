@@ -17,6 +17,10 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 import { measureAsyncFn } from '../utilities/performance';
 
+interface IRushFrontendLaunchOptions extends ILaunchOptions {
+  reporterCloseAsync?: () => Promise<void>;
+}
+
 /**
  * Options to pass to the rush "launch" functions.
  *
@@ -78,6 +82,7 @@ export class Rush {
    */
   public static launch(launcherVersion: string, options: ILaunchOptions): void {
     options = _normalizeLaunchOptions(options);
+    const frontendOptions: IRushFrontendLaunchOptions = options;
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
@@ -92,7 +97,8 @@ export class Rush {
     _assignRushInvokedFolder();
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
-      builtInPluginConfigurations: options.builtInPluginConfigurations
+      builtInPluginConfigurations: options.builtInPluginConfigurations,
+      reporterCloseAsync: frontendOptions.reporterCloseAsync
     });
     // CommandLineParser.executeAsync() should never reject the promise
     // eslint-disable-next-line no-console
