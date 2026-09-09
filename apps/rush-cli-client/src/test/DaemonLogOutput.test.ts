@@ -8,6 +8,12 @@ import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import {
+  captureTestProcessIdentity,
+  isTestProcessRunning,
+  waitForTestProcessExitAsync
+} from '@rushstack/rush-daemon/lib/test/TestProcessExit';
+
 import { DaemonLogOutput } from '../DaemonLogOutput';
 import { MAX_LOG_OUTPUT_BYTES } from '../DaemonLogOutputProtocol';
 
@@ -119,10 +125,13 @@ describe(DaemonLogOutput.name, () => {
         })
       ]);
       await delayAsync(150);
+      const workerIdentity = captureTestProcessIdentity(workerPid);
+      expect(isTestProcessRunning(workerIdentity)).toBe(true);
+      const exitDeadline: number = Date.now() + 3000;
       deadline = setTimeout(() => {
         forcedCleanup = true;
         try {
-          process.kill(workerPid!, 'SIGKILL');
+          if (isTestProcessRunning(workerIdentity)) process.kill(workerPid!, 'SIGKILL');
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
         }
@@ -130,8 +139,11 @@ describe(DaemonLogOutput.name, () => {
       }, 3000);
       owner.kill('SIGKILL');
       await closed;
+      const remaining: number = exitDeadline - Date.now();
+      expect(remaining).toBeGreaterThanOrEqual(0);
+      await waitForTestProcessExitAsync(workerIdentity, remaining);
+      expect(Date.now()).toBeLessThanOrEqual(exitDeadline);
       expect(forcedCleanup).toBe(false);
-      expect(() => process.kill(workerPid!, 0)).toThrow();
     } finally {
       clearTimeout(deadline);
       if (owner.exitCode === null && owner.signalCode === null) owner.kill('SIGKILL');

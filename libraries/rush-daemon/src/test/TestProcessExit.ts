@@ -25,27 +25,60 @@ export async function removeTestFolderAsync(folder: string, force: boolean = fal
   }
 }
 
-/** Only for PIDs captured from this test's own spawned fixtures, never for daemon ownership reclamation. */
-export async function waitForTestProcessExitAsync(pid: number): Promise<void> {
-  if (!Number.isSafeInteger(pid) || pid <= 0 || pid === process.pid) {
-    throw new Error(`Invalid fixture process PID: ${pid}`);
+export interface ITestProcessIdentity {
+  readonly pid: number;
+  readonly linuxStartTime?: string;
+}
+
+/** Captures kernel identity before an owned Linux process can exit and its PID can be reused. */
+export function captureTestProcessIdentity(pid: number): ITestProcessIdentity {
+  validatePid(pid);
+  return Object.freeze({
+    pid,
+    linuxStartTime: process.platform === 'linux' ? readLinuxStat(pid).startTime : undefined
+  });
+}
+
+/** Only for captured fixture processes, never for daemon ownership reclamation. */
+export async function waitForTestProcessExitAsync(
+  processIdentity: number | ITestProcessIdentity,
+  timeoutMs: number = 5000
+): Promise<void> {
+  const pid: number = typeof processIdentity === 'number' ? processIdentity : processIdentity.pid;
+  validatePid(pid);
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 0 || timeoutMs > 0x7fffffff) {
+    throw new RangeError('Expected a bounded nonnegative fixture exit timeout.');
   }
-  const deadline: number = Date.now() + 5000;
-  while (isRunning(pid)) {
-    if (Date.now() >= deadline) throw new Error(`Fixture process ${pid} did not exit before cleanup.`);
-    await delayAsync(10);
+  const deadline: number = Date.now() + timeoutMs;
+  while (isTestProcessRunning(processIdentity)) {
+    const remaining: number = deadline - Date.now();
+    if (remaining <= 0) throw new Error(`Fixture process ${pid} did not exit before cleanup.`);
+    await delayAsync(Math.min(10, remaining));
   }
 }
 
-function isRunning(pid: number): boolean {
+function validatePid(pid: number): void {
+  if (!Number.isSafeInteger(pid) || pid <= 0 || pid === process.pid) {
+    throw new Error(`Invalid fixture process PID: ${pid}`);
+  }
+}
+
+/** A replaced PID or a zombie with no descriptor table no longer owns the fixture's executable work. */
+export function isTestProcessRunning(processIdentity: number | ITestProcessIdentity): boolean {
+  const identity: ITestProcessIdentity =
+    typeof processIdentity === 'number' ? { pid: processIdentity } : processIdentity;
+  const { pid, linuxStartTime } = identity;
+  validatePid(pid);
   try {
     process.kill(pid, 0);
     if (process.platform === 'linux') {
-      const stat: string = fs.readFileSync(`/proc/${pid}/stat`, 'utf8');
-      const separator: number = stat.lastIndexOf(') ');
-      if (separator < 0) throw new Error(`Cannot inspect fixture process ${pid}.`);
-      // Orphans may await reaping after their starter dies, but zombies have released their resources.
-      return stat[separator + 2] !== 'Z';
+      const stat = readLinuxStat(pid);
+      if (linuxStartTime !== undefined && stat.startTime !== linuxStartTime) return false;
+      if (stat.state !== 'Z') return true;
+      const status: string = fs.readFileSync(`/proc/${pid}/status`, 'utf8');
+      const fdSize: RegExpExecArray | null = /^FDSize:\s*(\d+)\s*$/m.exec(status);
+      if (!fdSize) throw new Error(`Cannot inspect fixture process ${pid} descriptors.`);
+      return fdSize[1] !== '0';
     }
     return true;
   } catch (error) {
@@ -58,4 +91,17 @@ function isRunning(pid: number): boolean {
       return false;
     throw error;
   }
+}
+
+function readLinuxStat(pid: number): { state: string; startTime: string } {
+  const stat: string = fs.readFileSync(`/proc/${pid}/stat`, 'utf8');
+  const separator: number = stat.lastIndexOf(') ');
+  const fields: string[] = stat
+    .slice(separator + 2)
+    .trim()
+    .split(/\s+/);
+  if (separator < 0 || !/^\d+$/.test(fields[19] ?? '')) {
+    throw new Error(`Cannot inspect fixture process ${pid}.`);
+  }
+  return { state: fields[0], startTime: fields[19] };
 }
