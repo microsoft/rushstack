@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
 import { redactReporterEvent } from './ReporterRedaction';
+import { writeAllSync, WriteAllSyncError } from '../utilities/writeAllSync';
 
 /**
  * The subdirectory that holds full-detail invocation logs. `rush purge` removes it.
@@ -373,9 +374,14 @@ export class FileReporter implements IReporter {
       if (operation.spoolFileDescriptor === undefined) {
         throw new Error('The grouped-output spool descriptor is not available.');
       }
-      fs.writeSync(operation.spoolFileDescriptor, text, null, 'utf8');
+      writeAllSync(operation.spoolFileDescriptor, text);
       return [];
     } catch (error) {
+      this._complete = false;
+      this._canComplete = false;
+      const remainingOutput: Buffer = Buffer.from(text, 'utf8').subarray(
+        error instanceof WriteAllSyncError ? error.bytesWritten : 0
+      );
       const closeError: Error | undefined = this._closeOperationSpool(operation, false);
       if (closeError) {
         this._complete = false;
@@ -383,7 +389,7 @@ export class FileReporter implements IReporter {
       }
       if (operation.spoolPath) {
         this._writeOrBuffer(`# [${operationId} ${stream}]\n`);
-        if (!this._appendSpoolFile(operation.spoolPath)) {
+        if (!this._appendSpoolFile(operation.spoolPath, false)) {
           this._complete = false;
           this._canComplete = false;
         }
@@ -398,7 +404,8 @@ export class FileReporter implements IReporter {
       this._emergencyWarn(
         `[reporter] Unable to spool grouped output for ${JSON.stringify(operationId)}; output will remain ungrouped: ${(error as Error).message}`
       );
-      return [text];
+      this._writeLine(remainingOutput);
+      return [];
     }
   }
 
@@ -438,7 +445,7 @@ export class FileReporter implements IReporter {
     this._writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
   }
 
-  private _appendSpoolFile(spoolPath: string): boolean {
+  private _appendSpoolFile(spoolPath: string, ensureNewlineAtEnd: boolean = true): boolean {
     if (this._fileDescriptor === undefined) {
       return false;
     }
@@ -451,10 +458,10 @@ export class FileReporter implements IReporter {
       let bytesRead: number;
       let lastByte: number | undefined;
       while ((bytesRead = fs.readSync(source, buffer, 0, buffer.length, null)) > 0) {
-        fs.writeSync(this._fileDescriptor, buffer, 0, bytesRead);
+        writeAllSync(this._fileDescriptor, buffer.subarray(0, bytesRead));
         lastByte = buffer[bytesRead - 1];
       }
-      if (lastByte !== undefined && lastByte !== 0x0a) {
+      if (ensureNewlineAtEnd && lastByte !== undefined && lastByte !== 0x0a) {
         this._writeLine('\n');
       }
       appended = true;
@@ -502,12 +509,12 @@ export class FileReporter implements IReporter {
     }
   }
 
-  private _writeLine(line: string): boolean {
+  private _writeLine(line: string | Uint8Array): boolean {
     if (this._fileDescriptor === undefined) {
       return false;
     }
     try {
-      fs.writeSync(this._fileDescriptor, line, null, 'utf8');
+      writeAllSync(this._fileDescriptor, line);
       return true;
     } catch (error) {
       this._markUnavailable(error as Error);

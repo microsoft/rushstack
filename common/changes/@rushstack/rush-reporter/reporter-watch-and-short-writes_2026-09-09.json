@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Show bounded interactive errors immediately and warnings once per watch cycle, and preserve grouped output across short writes without overstating log completeness.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
