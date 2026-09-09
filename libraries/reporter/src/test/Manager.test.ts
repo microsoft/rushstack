@@ -297,6 +297,45 @@ describe('ReporterManager ordering and assignment', () => {
     expect(reporter.closeCount).toBe(1);
   });
 
+  it.each([false, true])(
+    'caches synchronous close throws across both lifecycle orders, disposal first=%s',
+    async (disposeFirst: boolean) => {
+      const manager: ReporterManager = new ReporterManager({ emergencyDiagnosticWriter: () => undefined });
+      const reporter: RecordingReporter = new RecordingReporter('synchronous-close');
+      const failure: Error = new Error('synchronous close failed');
+      jest.spyOn(reporter, 'closeAsync').mockImplementation(() => {
+        reporter.closeCount++;
+        throw failure;
+      });
+      manager.addReporter(reporter, { required: true });
+      await manager.initializeAsync();
+      const close = (): Promise<void> => manager.closeAsync();
+      const dispose = (): Promise<void> => manager._disposeInitializedReportersAsync(failure);
+
+      for (const operation of disposeFirst ? [dispose, close] : [close, dispose]) {
+        await expect(operation()).rejects.toThrow('synchronous close failed');
+      }
+      expect(reporter.closeCount).toBe(1);
+    }
+  );
+
+  it('keeps optional runtime failure abort-only until manager-owned shutdown', async () => {
+    const manager: ReporterManager = new ReporterManager({ emergencyDiagnosticWriter: () => undefined });
+    const reporter: RecordingReporter = new RecordingReporter('runtime-abort-only');
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+    const failure: Error = new Error('runtime failed');
+
+    reporter.context?.runWithErrorHandling?.(() => {
+      throw failure;
+    });
+    expect(reporter.context?.abortSignal?.reason).toBe(failure);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(reporter.closeCount).toBe(0);
+    await manager.closeAsync();
+    expect(reporter.closeCount).toBe(1);
+  });
+
   it('closes attempted initializations even when a prior lifecycle error reporter rejected', async () => {
     const manager: ReporterManager = new ReporterManager({
       emergencyDiagnosticWriter: () => {
