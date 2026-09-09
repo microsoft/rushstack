@@ -211,7 +211,7 @@ function filterPackages(repoPath, packagesPath, cohort) {
 
     const retainPackage =
       isProjectInCohort(project, cohort) &&
-      project.shouldPublish &&
+      (project.shouldPublish || project.versionPolicyName) &&
       !packageIsPublished(packageJson.name, packageJson.version, repoPath, registryUrl);
 
     if (retainPackage) {

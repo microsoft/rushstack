@@ -27,6 +27,7 @@
     "build": "heft build --clean",
     "start": "node lib/start-dev-docs.js",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "bin": {
