@@ -3,25 +3,27 @@
 const childProcess = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const { parseArgs } = require('node:util');
 
 function parseArguments() {
-  const [command, ...args] = process.argv.slice(2);
-  const options = new Map();
-
-  for (let index = 0; index < args.length; index += 2) {
-    const name = args[index];
-    const value = args[index + 1];
-    if (!name?.startsWith('--') || value === undefined) {
-      throw new Error(`Invalid argument: ${name || '<missing>'}`);
+  const { positionals, values } = parseArgs({
+    allowPositionals: true,
+    options: {
+      'backup-path': { type: 'string' },
+      cohort: { type: 'string' },
+      'packages-path': { type: 'string' },
+      'repo-path': { type: 'string' }
     }
-    options.set(name.slice(2), value);
+  });
+  if (positionals.length !== 1) {
+    throw new Error('Expected exactly one command.');
   }
 
-  return { command, options };
+  return { command: positionals[0], options: values };
 }
 
 function getRequiredOption(options, name) {
-  const value = options.get(name);
+  const value = options[name];
   if (!value) {
     throw new Error(`Missing required option: --${name}`);
   }
@@ -67,26 +69,35 @@ function isProjectInCohort(project, cohort) {
   throw new Error(`Unsupported publishing cohort: ${cohort}`);
 }
 
-function getFilesRecursively(folderPath, extension) {
-  if (!fs.existsSync(folderPath)) {
-    return [];
-  }
+function forEachFileRecursive(folderPath, extension, callback) {
+  const pendingFolders = [{ absolutePath: folderPath, relativePath: '' }];
+  while (pendingFolders.length > 0) {
+    const currentFolder = pendingFolders.pop();
+    let entries;
+    try {
+      entries = fs.readdirSync(currentFolder.absolutePath, { withFileTypes: true });
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
+        continue;
+      }
+      throw error;
+    }
 
-  const result = [];
-  for (const entry of fs.readdirSync(folderPath, { withFileTypes: true })) {
-    const entryPath = path.join(folderPath, entry.name);
-    if (entry.isDirectory()) {
-      result.push(...getFilesRecursively(entryPath, extension));
-    } else if (!extension || entry.name.endsWith(extension)) {
-      result.push(entryPath);
+    for (const entry of entries) {
+      const absolutePath = path.join(currentFolder.absolutePath, entry.name);
+      const relativePath = path.join(currentFolder.relativePath, entry.name);
+      if (entry.isDirectory()) {
+        pendingFolders.push({ absolutePath, relativePath });
+      } else if (entry.isFile() && (!extension || entry.name.endsWith(extension))) {
+        callback(absolutePath, relativePath);
+      }
     }
   }
-  return result;
 }
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(value, undefined, 2)}\n`);
+  fs.writeFileSync(filePath, `${JSON.stringify(value)}\n`);
 }
 
 function partitionChanges(repoPath, backupPath, cohort) {
@@ -95,7 +106,7 @@ function partitionChanges(repoPath, backupPath, cohort) {
 
   fs.rmSync(backupPath, { recursive: true, force: true });
 
-  for (const changeFilePath of getFilesRecursively(changesPath, '.json')) {
+  forEachFileRecursive(changesPath, '.json', (changeFilePath, relativePath) => {
     const changeFileText = fs.readFileSync(changeFilePath, 'utf8');
     const changeFile = JSON.parse(changeFileText);
     const includedChanges = [];
@@ -110,7 +121,6 @@ function partitionChanges(repoPath, backupPath, cohort) {
       (isProjectInCohort(project, cohort) ? includedChanges : excludedChanges).push(change);
     }
 
-    const relativePath = path.relative(changesPath, changeFilePath);
     if (excludedChanges.length > 0) {
       const backupFilePath = path.join(backupPath, relativePath);
       if (includedChanges.length === 0) {
@@ -126,14 +136,13 @@ function partitionChanges(repoPath, backupPath, cohort) {
     } else {
       fs.rmSync(changeFilePath);
     }
-  }
+  });
 }
 
 function restoreChanges(repoPath, backupPath) {
   const changesPath = path.join(repoPath, 'common/changes');
 
-  for (const backupFilePath of getFilesRecursively(backupPath, '.json')) {
-    const relativePath = path.relative(backupPath, backupFilePath);
+  forEachFileRecursive(backupPath, '.json', (backupFilePath, relativePath) => {
     const changeFilePath = path.join(changesPath, relativePath);
     const backupChangeFile = JSON.parse(fs.readFileSync(backupFilePath, 'utf8'));
 
@@ -146,7 +155,7 @@ function restoreChanges(repoPath, backupPath) {
     } else {
       writeJson(changeFilePath, backupChangeFile);
     }
-  }
+  });
 }
 
 function readPackageJsonFromTarball(tarballPath) {
@@ -193,7 +202,7 @@ function filterPackages(repoPath, packagesPath, cohort) {
   const registryUrl = registryMatch[1].trim();
   let retainedPackageCount = 0;
 
-  for (const tarballPath of getFilesRecursively(packagesPath, '.tgz')) {
+  forEachFileRecursive(packagesPath, '.tgz', (tarballPath) => {
     const packageJson = readPackageJsonFromTarball(tarballPath);
     const project = projects.get(packageJson.name);
     if (!project) {
@@ -211,7 +220,7 @@ function filterPackages(repoPath, packagesPath, cohort) {
     } else {
       fs.rmSync(tarballPath);
     }
-  }
+  });
 
   console.log(`Retained ${retainedPackageCount} unpublished ${cohort} package(s).`);
   console.log(
@@ -221,7 +230,7 @@ function filterPackages(repoPath, packagesPath, cohort) {
 
 function main() {
   const { command, options } = parseArguments();
-  const repoPath = path.resolve(options.get('repo-path') || process.cwd());
+  const repoPath = path.resolve(options['repo-path'] || process.cwd());
 
   switch (command) {
     case 'partition-changes':
