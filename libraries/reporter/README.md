@@ -30,10 +30,15 @@ these gates only produces a reusable qualification decision; it does not enable 
 reporter selection. That decision also requires the separate telemetry privacy prerequisite to be accepted.
 The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
 authoritative.
+The Jest setup hook has a bounded 15-second allowance for the three file-backed corpus passes, matching
+the integration test setup policy. This allowance does not change any quality gate or production deadline.
 
 AI output reserves final-record space, including its supplied log reference, before emitting progress.
 Progress is buffered within the invocation byte limit until the primary log reservation is known, or until
 close if no log is supplied. Excess progress/details set `truncated`; the final result remains valid JSON.
+An unrendered start acknowledgement is coalesced into a known final result. Ongoing commands still expose
+buffered status at the next non-terminal event or explicit flush; watch history and every final field,
+including the supplied log reference, are retained. No path shortening or measurement normalization is used.
 The final scope carries the command name, and standard `diagnostic.<code>.summary` keys are implicit rather
 than repeated alongside the same code. Custom summary keys are preserved.
 

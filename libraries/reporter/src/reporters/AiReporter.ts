@@ -45,6 +45,11 @@ interface IAiWatchCycleState {
   watchCompleted: boolean;
 }
 
+interface IPendingAiProgress {
+  readonly kind: 'ai.status' | 'ai.watchCycle';
+  readonly line: string;
+}
+
 function createDiagnosticState(): IAiDiagnosticState {
   return {
     errorDiagnostics: [],
@@ -174,7 +179,7 @@ export class AiReporter implements IReporter {
   private _pendingResult: { succeeded: boolean; exitCode: number } | undefined;
   private _legacyIterationId: number;
   private _latestIterationId: number;
-  private readonly _pendingProgress: string[] = [];
+  private readonly _pendingProgress: IPendingAiProgress[] = [];
   private _pendingProgressBytes: number = 0;
   private _writtenBytes: number = 0;
   private _progressTruncated: boolean = false;
@@ -226,6 +231,14 @@ export class AiReporter implements IReporter {
         default:
           return;
       }
+    }
+    if (
+      this._logPath !== undefined &&
+      event.type !== 'artifactAvailable' &&
+      event.type !== 'commandResult' &&
+      event.type !== 'sessionCompleted'
+    ) {
+      this._flushPendingProgress();
     }
     switch (event.type) {
       case 'commandStarted': {
@@ -342,7 +355,6 @@ export class AiReporter implements IReporter {
           this._logPath = payload.path;
           this._logFormat = payload.format;
           this._artifactComplete = payload.complete !== false;
-          this._flushPendingProgress();
         }
         break;
       }
@@ -367,7 +379,9 @@ export class AiReporter implements IReporter {
   }
 
   public async flushAsync(): Promise<void> {
-    /* no-op */
+    if (this._logPath !== undefined) {
+      this._flushPendingProgress();
+    }
   }
 
   public async closeAsync(): Promise<void> {
@@ -544,13 +558,15 @@ export class AiReporter implements IReporter {
     );
   }
 
-  private _writeProgressRecord(record: Readonly<Record<string, unknown>>): void {
+  private _writeProgressRecord(
+    record: Readonly<Record<string, unknown>> & { readonly kind: IPendingAiProgress['kind'] }
+  ): void {
     const line: string = `${JSON.stringify(record)}\n`;
     if (this._logPath === undefined) {
       // Delay progress until the log reservation is known; the pending queue is itself byte-bounded.
       const bytes: number = Buffer.byteLength(line, 'utf8');
       if (this._pendingProgressBytes + bytes <= this._maxBytes) {
-        this._pendingProgress.push(line);
+        this._pendingProgress.push({ kind: record.kind, line });
         this._pendingProgressBytes += bytes;
       } else {
         this._progressTruncated = true;
@@ -561,9 +577,13 @@ export class AiReporter implements IReporter {
   }
 
   private _flushPendingProgress(): void {
-    const pending: string[] = this._pendingProgress.splice(0);
+    const pending: IPendingAiProgress[] = this._pendingProgress.splice(0);
     this._pendingProgressBytes = 0;
-    for (const line of pending) {
+    for (const { kind, line } of pending) {
+      // A completed result supersedes an unrendered start acknowledgement, not watch history.
+      if (kind === 'ai.status' && (this._pendingResult !== undefined || this._finalEmitted)) {
+        continue;
+      }
       this._writeProgressLine(line);
     }
   }
