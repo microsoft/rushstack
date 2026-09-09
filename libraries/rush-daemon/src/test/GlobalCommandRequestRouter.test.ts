@@ -15,6 +15,7 @@ import type {
 
 import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
 import type { IGlobalCommandExecutionContext, IGlobalCommandSpawnOptions } from '../GlobalCommandExecutionContext';
+import { GlobalCommandExecutionContext } from '../GlobalCommandExecutionContext';
 import type {
   IResolvedGlobalCommandRequest,
   IResolveGlobalCommandRequestOptions
@@ -31,6 +32,13 @@ import {
 } from '../InteractiveRequestInputRouter';
 import { TestWorkspaceSession, TEST_REPO_ROOT } from './TestWorkspaceSession';
 import * as linuxProcessGroupExit from '../LinuxProcessGroupExit';
+import { createDeferred } from './DaemonRequestWireTestUtilities';
+import {
+  assertWorkspaceRequestResourcesHealthy,
+  WorkspaceRequestResourceCleanupError
+} from '../WorkspaceRequestResources';
+import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
+import { RequestExclusivityClass } from '../RequestScheduler';
 
 const TEXT_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder();
 const FIRST_CWD: string = path.join(TEST_REPO_ROOT, 'libraries', 'rush-daemon');
@@ -461,6 +469,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       exitCode: 1,
       outcome: 'failure'
     });
+    expect(() => assertWorkspaceRequestResourcesHealthy(session)).not.toThrow();
   });
 
   it('rejects non-string values in untrusted environment snapshots and overlays', async () => {
@@ -820,11 +829,111 @@ describe(GlobalCommandRequestRouter.name, () => {
         new TestGlobalCommandClient()
       )
     ).resolves.toMatchObject({
-      errorMessage: 'synchronous cleanup failure',
+      errorMessage: expect.stringContaining('synchronous cleanup failure'),
       exitCode: 1,
       outcome: 'failure'
     });
     expect(disposalOrder).toEqual(['last', 'throwing', 'first']);
+    expect(() => assertWorkspaceRequestResourcesHealthy(session)).toThrow(WorkspaceRequestResourceCleanupError);
+  });
+
+  it('drains a failed resource result but fences already queued and later workspace admission', async () => {
+    const session = new TestWorkspaceSession(TEST_REPO_ROOT);
+    const router = new GlobalCommandRequestRouter(session);
+    const entered = createDeferred<void>();
+    const release = createDeferred<void>();
+    const resultDraining = createDeferred<void>();
+    const resultRelease = createDeferred<void>();
+    const client = new TestGlobalCommandClient();
+    client.onResultAsync = async () => {
+      resultDraining.resolve();
+      await resultRelease.promise;
+    };
+    const first = router.executeAsync(
+      router.resolveRequest(createRequestOptions('failed-owner', FIRST_CWD, {}, 80)),
+      async (context) => {
+        context.registerDisposable({
+          [Symbol.asyncDispose]: async () => {
+            entered.resolve();
+            await release.promise;
+            throw new Error('owned resource still active');
+          }
+        });
+        return { exitCode: 0 };
+      },
+      client
+    );
+    await entered.promise;
+    const next = jest.fn(async () => ({ exitCode: 0 }));
+    const queued = router.executeAsync(
+      router.resolveRequest(createRequestOptions('queued-after-owner', FIRST_CWD, {}, 80)),
+      next,
+      new TestGlobalCommandClient()
+    );
+    const rejected = expect(queued).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+    try {
+      release.resolve();
+      await resultDraining.promise;
+      expect(client.results).toEqual([]);
+      expect(next).not.toHaveBeenCalled();
+      await expect(getWorkspaceRequestScheduler(session).acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive,
+        noWait: true
+      })).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+      resultRelease.resolve();
+      expect(await first).toMatchObject({ exitCode: 1, outcome: 'failure' });
+      await rejected;
+      expect(next).not.toHaveBeenCalled();
+      expect(client.results).toHaveLength(1);
+      await expect(router.executeAsync(
+        router.resolveRequest(createRequestOptions('later-after-owner', FIRST_CWD, {}, 80)),
+        next,
+        new TestGlobalCommandClient()
+      )).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+    } finally {
+      release.resolve();
+      resultRelease.resolve();
+      await first;
+      await rejected;
+    }
+  });
+
+  it('shares disposal and its sticky failure with concurrent, reentrant and later callers', async () => {
+    const session = new TestWorkspaceSession(TEST_REPO_ROOT);
+    const router = new GlobalCommandRequestRouter(session);
+    const context = new GlobalCommandExecutionContext(
+      router.resolveRequest(createRequestOptions('shared-cleanup', FIRST_CWD, {}, 80)),
+      new TestGlobalCommandClient(),
+      session
+    );
+    const entered = createDeferred<void>();
+    const release = createDeferred<void>();
+    const dispose = jest.fn(async () => {
+      entered.resolve();
+      await release.promise;
+      throw new Error('shared resource failure');
+    });
+    context.registerDisposable({ [Symbol.asyncDispose]: dispose });
+    let reentrant: Promise<void> | undefined;
+    context.abortSignal.addEventListener('abort', () => {
+      reentrant = context[Symbol.asyncDispose]();
+    }, { once: true });
+    const first = context[Symbol.asyncDispose]();
+    const second = context[Symbol.asyncDispose]();
+    const rejected = expect(first).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+    try {
+      await entered.promise;
+      expect(second).toBe(first);
+      expect(reentrant).toBe(first);
+      expect(dispose).toHaveBeenCalledTimes(1);
+      release.resolve();
+      await rejected;
+      expect(context[Symbol.asyncDispose]()).toBe(first);
+      await expect(second).rejects.toThrow('shared resource failure');
+    } finally {
+      release.resolve();
+      await rejected;
+    }
   });
 
   it('surfaces disconnect write failures after deterministic cleanup', async () => {
@@ -855,6 +964,12 @@ describe(GlobalCommandRequestRouter.name, () => {
       )
     ).rejects.toThrow('client disconnected');
     expect(resourceDisposed).toBe(true);
+    expect(() => assertWorkspaceRequestResourcesHealthy(session)).not.toThrow();
+    await expect(router.executeAsync(
+      router.resolveRequest(createRequestOptions('after-disconnect', FIRST_CWD, {}, 80)),
+      async () => ({ exitCode: 0 }),
+      new TestGlobalCommandClient()
+    )).resolves.toMatchObject({ exitCode: 0 });
   });
 
   it('rejects invalid or cross-workspace resolved requests before execution', async () => {

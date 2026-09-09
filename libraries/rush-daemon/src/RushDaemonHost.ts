@@ -303,10 +303,8 @@ export class RushDaemonHost {
     this._idleTimer[Symbol.dispose]();
     this._lifecycle.closing = true;
     const errors: unknown[] = [];
-    const listenerClosePromise: Promise<unknown | undefined> = this._listener.stopAcceptingAsync().then(
-      () => undefined,
-      (error: unknown) => error
-    );
+    // Refuse new sessions but keep the listener's live ownership until every resource join succeeds.
+    // A failed standalone host must not exit naturally and become reclaimable over unjoined children.
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this._sessions, (session: DaemonControlSession) => session.closeAsync(!!this._restartPromise))
     );
@@ -314,10 +312,6 @@ export class RushDaemonHost {
       if (settlement.status === 'rejected') {
         errors.push(settlement.reason);
       }
-    }
-    const listenerError: unknown | undefined = await listenerClosePromise;
-    if (listenerError !== undefined) {
-      errors.push(listenerError);
     }
     try {
       const workspace: IWorkspaceSession = await this._workspaceSessionProvider.getSessionAsync();

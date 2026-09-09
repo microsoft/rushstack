@@ -7,6 +7,7 @@ import type {
   WorkspaceSessionFactory
 } from './WorkspaceSession';
 import { getWorkspaceGenerationToken } from './WorkspaceGeneration';
+import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 
 export class WorkspaceSessionProvider implements AsyncDisposable {
   readonly #factory: WorkspaceSessionFactory;
@@ -86,9 +87,11 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
   async #reloadOnceAsync(): Promise<IWorkspaceSession> {
     const oldSession: IWorkspaceSession | undefined = this.#session ?? (await this.#initializationPromise);
     if (oldSession) {
-      oldSession.operationGraph?.discardScheduledIteration();
       try {
+        assertWorkspaceRequestResourcesHealthy(oldSession);
+        oldSession.operationGraph?.discardScheduledIteration();
         await oldSession[Symbol.asyncDispose]();
+        assertWorkspaceRequestResourcesHealthy(oldSession);
       } catch (error) {
         this.#cleanupFailure = error;
         throw error;
@@ -112,6 +115,7 @@ export class WorkspaceSessionProvider implements AsyncDisposable {
         ));
       if (session) {
         await session[Symbol.asyncDispose]();
+        assertWorkspaceRequestResourcesHealthy(session);
       } else {
         await this.#initializationDisposalPromise;
       }

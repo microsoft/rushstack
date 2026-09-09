@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Retain failed request-resource ownership across result delivery, queued work, reload, shutdown and mutation restart. Keep the failed listener alive to prevent competing startup over unjoined children, while preserving ordinary failed-command restarts and successfully cleaned output failures.",
+      "type": "patch"
+    }
+  ]
+}

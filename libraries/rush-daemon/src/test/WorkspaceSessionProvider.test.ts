@@ -4,6 +4,10 @@
 import type { IWorkspaceSession, IWorkspaceSessionOptions } from '../WorkspaceSession';
 import { WorkspaceSessionProvider } from '../WorkspaceSessionProvider';
 import { TestWorkspaceSession } from './TestWorkspaceSession';
+import {
+  recordWorkspaceRequestCleanupFailure,
+  WorkspaceRequestResourceCleanupError
+} from '../WorkspaceRequestResources';
 
 const OPTIONS: IWorkspaceSessionOptions = {
   repoRoot: 'repo',
@@ -11,6 +15,25 @@ const OPTIONS: IWorkspaceSessionOptions = {
 };
 
 describe(WorkspaceSessionProvider.name, () => {
+  it('retains failed request ownership across reload and disposal of an injected session', async () => {
+    const dispose = jest.fn();
+    const session = new TestWorkspaceSession(OPTIONS.repoRoot, dispose);
+    const create = jest.fn(async () => session);
+    const provider = new WorkspaceSessionProvider(create, OPTIONS);
+    await provider.getSessionAsync();
+    const generation = provider.generation;
+    const token = provider.currentGenerationToken;
+    const failure = recordWorkspaceRequestCleanupFailure(session, 'request-owner', new Error('unjoined'));
+    expect(failure).toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+    await expect(provider.reloadAsync()).rejects.toBe(failure);
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(provider.generation).toBe(generation);
+    expect(provider.currentGenerationToken).toBe(token);
+    await expect(provider[Symbol.asyncDispose]()).rejects.toBe(failure);
+    await expect(provider[Symbol.asyncDispose]()).rejects.toBe(failure);
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
   it('waits for complete cleanup before publishing a replacement generation', async () => {
     let finishDisposal: (() => void) | undefined;
     const first: IWorkspaceSession = new TestWorkspaceSession(

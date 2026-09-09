@@ -10,12 +10,14 @@ import type {
 
 import {
   type IRequestLease,
+  type IRequestSchedulerAcquireOptions,
   type RequestExclusivityClass,
   RequestScheduler,
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 
 export interface IRequestAdmissionClient {
   readonly abortSignal: AbortSignal;
@@ -30,6 +32,27 @@ export interface IRequestAdmissionControllerOptions {
 }
 
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
+
+class WorkspaceRequestScheduler extends RequestScheduler {
+  readonly #session: IWorkspaceSession;
+
+  public constructor(session: IWorkspaceSession) {
+    super();
+    this.#session = session;
+  }
+
+  public override async acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
+    assertWorkspaceRequestResourcesHealthy(this.#session);
+    const lease: IRequestLease = await super.acquireAsync(options);
+    try {
+      assertWorkspaceRequestResourcesHealthy(this.#session);
+      return lease;
+    } catch (error) {
+      lease.release();
+      throw error;
+    }
+  }
+}
 
 class QueuePositionWriter {
   readonly #abortController: AbortController;
@@ -174,7 +197,7 @@ export function getRequestAdmissionErrorCode(error: RequestSchedulerError): Daem
 export function getWorkspaceRequestScheduler(workspaceSession: IWorkspaceSession): RequestScheduler {
   let scheduler: RequestScheduler | undefined = REQUEST_SCHEDULER_BY_SESSION.get(workspaceSession);
   if (!scheduler) {
-    scheduler = new RequestScheduler();
+    scheduler = new WorkspaceRequestScheduler(workspaceSession);
     REQUEST_SCHEDULER_BY_SESSION.set(workspaceSession, scheduler);
   }
   return scheduler;

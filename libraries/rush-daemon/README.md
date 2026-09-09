@@ -24,6 +24,15 @@ and workspace disposal both succeed; cleanup failures retain the live owner's lo
 than allowing a successor to overlap still-resident engine state. Ping responses include the live PID
 and resident memory; they do not claim that the loaded projects have a warm operation graph.
 
+Request-owned child joins and registered resource disposers participate in the same ownership barrier.
+A failed join is recorded as a sticky, typed workspace failure before its command result drains. Queued and
+new workspace work, background maintenance, and generation reload cannot clear that failure. Shutdown still
+attempts independent resource cleanup, but retains the listener and ownership record if any cleanup failed;
+the closing listener refuses new sessions and keeps the failed standalone owner alive rather than letting it
+exit naturally and become reclaimable over unjoined children. `closeAsync()` and an attempted
+`restartCompleted` reject. A transport/output failure or a spawn failure whose child never started does not
+by itself poison resource ownership after successful cleanup.
+
 The host loads `RushConfiguration` once before signaling readiness and keeps a headless file watcher
 active for the daemon lifetime. Its invalidation tracker retains changes while no clients are
 connected so a later request can reconcile them. The tracker starts with a conservative unknown
@@ -142,6 +151,9 @@ may have changed files: its exact result is drained before old generation cleanu
 Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
 launched, the host stops without silently starting an incorrect successor. A mutation that started is never
 replayed, even after failure; an unstarted request can retry only through the typed pre-execution contract above.
+An ordinary nonzero mutation result still permits restart once its resources have joined. A failed worker
+join is different: its failure result drains, but the sticky workspace ownership barrier forbids both the
+host's successor and a competing client's auto-start, even after the result connection closes.
 
 The opt-in CLI forwards positively identified built-in `install` and `update` only to peers supporting protocol
 0.10. Other administrative commands remain native; Rushx script names are not reinterpreted as Rush built-ins.

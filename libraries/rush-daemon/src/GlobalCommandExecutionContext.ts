@@ -24,6 +24,7 @@ import type {
 } from './InteractiveRequestInputRouter';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { waitForLinuxProcessGroupExitAsync } from './LinuxProcessGroupExit';
+import { recordWorkspaceRequestCleanupFailure } from './WorkspaceRequestResources';
 
 const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
 
@@ -171,6 +172,7 @@ export class GlobalCommandExecutionContext
   readonly #childCompletionErrors: unknown[] = [];
   readonly #childTerminationErrors: unknown[] = [];
   readonly #writer: OrderedTerminalWriter;
+  #disposePromise: Promise<void> | undefined;
   #closed: boolean = false;
   #requestAborted: boolean = false;
 
@@ -297,11 +299,15 @@ export class GlobalCommandExecutionContext
     });
   }
 
-  public async [Symbol.asyncDispose](): Promise<void> {
-    if (this.#closed) {
-      return;
+  public [Symbol.asyncDispose](): Promise<void> {
+    if (!this.#disposePromise) {
+      this.#closed = true;
+      this.#disposePromise = Promise.resolve().then(() => this.#disposeOnceAsync());
     }
-    this.#closed = true;
+    return this.#disposePromise;
+  }
+
+  async #disposeOnceAsync(): Promise<void> {
     this.#abortController.abort(new Error('The global command execution context was disposed.'));
     const cleanupErrors: unknown[] = [];
     try {
@@ -314,7 +320,11 @@ export class GlobalCommandExecutionContext
       cleanupErrors.push(...this.#childTerminationErrors);
       for (const disposable of this.#disposables.reverse()) {
         await collectCleanupErrorAsync(
-          Promise.resolve().then(() => disposable[Symbol.asyncDispose]()),
+          Promise.resolve()
+            .then(() => disposable[Symbol.asyncDispose]())
+            .catch((error: unknown) => {
+              throw this.#recordResourceCleanupFailure(error);
+            }),
           cleanupErrors
         );
       }
@@ -335,23 +345,39 @@ export class GlobalCommandExecutionContext
       try {
         SubprocessTerminator.killProcessTree(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
       } catch (error) {
-        this.#childTerminationErrors.push(error);
-        child.kill('SIGKILL');
+        this.#childTerminationErrors.push(this.#recordResourceCleanupFailure(error));
+        try {
+          child.kill('SIGKILL');
+        } catch (fallbackError) {
+          this.#childTerminationErrors.push(this.#recordResourceCleanupFailure(fallbackError));
+        }
       }
     };
     this.abortSignal.addEventListener('abort', terminateChild, { once: true });
+    let childError: Error | undefined;
     try {
-      await new Promise<void>((resolve, reject) => {
-        child.once('error', reject);
+      await new Promise<void>((resolve) => {
+        child.once('error', (error: Error) => {
+          childError = error;
+        });
         child.once('close', () => resolve());
       });
     } finally {
       this.abortSignal.removeEventListener('abort', terminateChild);
     }
-    terminateExitedChildProcessGroup(child);
-    if (process.platform === 'linux' && child.pid !== undefined) {
-      await waitForLinuxProcessGroupExitAsync(child.pid);
+    try {
+      terminateExitedChildProcessGroup(child);
+      if (process.platform === 'linux' && child.pid !== undefined) {
+        await waitForLinuxProcessGroupExitAsync(child.pid);
+      }
+    } catch (error) {
+      throw this.#recordResourceCleanupFailure(error);
     }
+    if (childError) throw childError;
+  }
+
+  #recordResourceCleanupFailure(error: unknown): Error {
+    return recordWorkspaceRequestCleanupFailure(this.workspaceSession, this.#request.requestId, error);
   }
 
   #forwardChildOutput(

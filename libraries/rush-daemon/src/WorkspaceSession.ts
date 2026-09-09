@@ -11,6 +11,7 @@ import { WorkspaceInvalidationTracker } from './WorkspaceInvalidationTracker';
 import { WorkspaceSessionFileWatcher } from './WorkspaceSessionFileWatcher';
 import { WorkspaceWarmSet, type IWorkspaceWarmSetStatus } from './WorkspaceWarmSet';
 import { getWorkspaceRequestScheduler } from './WorkspaceRequestAdmission';
+import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
@@ -219,6 +220,7 @@ export class WorkspaceSession implements IWorkspaceSession {
   }
 
   public assertActive(): void {
+    assertWorkspaceRequestResourcesHealthy(this);
     if (this.#isDisposing)
       throw new Error('This workspace generation has been disposed; execution has not begun.');
   }
@@ -229,6 +231,7 @@ export class WorkspaceSession implements IWorkspaceSession {
 
   /** Installs one all-project engine without replacing the watcher or losing retained invalidations. */
   public async initializeEngineAsync(factory: CreateWorkspaceSessionComponentsAsync): Promise<void> {
+    assertWorkspaceRequestResourcesHealthy(this);
     if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
     if (this.#warmSetQuiescence)
       throw new Error('The workspace session is quiescing; no new engine may attach.');
@@ -255,6 +258,7 @@ export class WorkspaceSession implements IWorkspaceSession {
   }
 
   public async acquireExecutionLeaseAsync(): Promise<AsyncDisposable | undefined> {
+    assertWorkspaceRequestResourcesHealthy(this);
     if (this.#isDisposing) throw new Error('The workspace session is being disposed.');
     return await this.#components.acquireExecutionLeaseAsync?.();
   }
@@ -395,6 +399,7 @@ export class WorkspaceSession implements IWorkspaceSession {
 
   /** Reconciles retained watcher changes with injected reusable engine state, when configured. */
   public async reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined> {
+    assertWorkspaceRequestResourcesHealthy(this);
     if (this.#isDisposing) {
       throw new Error('The workspace session is being disposed.');
     }
@@ -429,6 +434,7 @@ export class WorkspaceSession implements IWorkspaceSession {
     if (watcherError !== undefined) {
       throw watcherError;
     }
+    assertWorkspaceRequestResourcesHealthy(this);
   }
 }
 

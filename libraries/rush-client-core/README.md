@@ -69,6 +69,9 @@ callers share one replacement; no command is submitted to the old version or rep
 Passive clients never replace a daemon, and unverifiable ownership or unsupported lifecycle
 protocol fails closed. `requestDaemonShutdownAsync()` is the shared ownership-checked
 shutdown primitive used by both this path and explicit CLI restart.
+Socket resets and broken pipes during hello/ping readiness are retried within the same startup deadline:
+a closing host may still retain its listener while joining owned resources. This applies only before
+`requestStart`; a connection failure after execution begins still never permits replay.
 
 `getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
 and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across
