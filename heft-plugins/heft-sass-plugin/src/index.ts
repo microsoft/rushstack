@@ -3,3 +3,11 @@
 
 export { PLUGIN_NAME as SassPluginName } from './constants';
 export type { ISassPluginAccessor } from './SassPlugin';
+export {
+  createClassPositionRecorder,
+  resolveStylesheetPositions,
+  resolveSourceUrl,
+  type IClassPositionRecorder,
+  type IResolvedClassPosition,
+  type IRawSourceMap
+} from './SassDeclarationMaps';

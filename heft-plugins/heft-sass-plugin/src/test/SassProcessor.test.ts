@@ -29,6 +29,7 @@ type ICreateProcessorOptions = Partial<
     | 'dtsOutputFolders'
     | 'exportAsDefault'
     | 'fileExtensions'
+    | 'generateDeclarationMaps'
     | 'nonModuleFileExtensions'
     | 'postProcessCssAsync'
     | 'preserveIcssExports'
@@ -154,7 +155,7 @@ describe(SassProcessor.name, () => {
       // Source map contents include the absolute-relative path back to the source file and the
       // verbatim source file bytes. Both vary by checkout location and OS line endings, which makes
       // raw snapshots non-portable. Normalize them to stable forms before storing.
-      if (filePath.endsWith('.css.map')) {
+      if (filePath.endsWith('.map')) {
         serialized = normalizeSourceMapForSnapshot(serialized);
       }
       writtenFiles.set(filePath, serialized);
@@ -824,6 +825,152 @@ describe(SassProcessor.name, () => {
 
       const css: string = getWrittenFile('classes-and-exports.module.scss.css');
       expect(css).toMatch(/\/\*# sourceMappingURL=classes-and-exports\.module\.scss\.css\.map \*\//);
+    });
+  });
+
+  describe('declaration maps', () => {
+    interface IDecodedMapping {
+      generatedLine: number;
+      name: string;
+      source: string;
+      sourceLine: number;
+    }
+
+    /**
+     * Decodes a `.d.ts.map` and pairs each mapping with the declaration text on the generated line
+     * it points at, so assertions can be written in terms of class names rather than offsets.
+     */
+    function decodeDeclarationMap(mapJson: string, dtsContent: string): IDecodedMapping[] {
+      const map: { sources: string[]; mappings: string } = JSON.parse(mapJson);
+      const dtsLines: string[] = dtsContent.split('\n');
+      const base64: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+      const results: IDecodedMapping[] = [];
+      let sourceIndex: number = 0;
+      let sourceLine: number = 0;
+      let generatedLine: number = 0;
+
+      for (const lineText of map.mappings.split(';')) {
+        if (lineText) {
+          for (const segmentText of lineText.split(',')) {
+            let index: number = 0;
+            const readVlq: () => number = () => {
+              let result: number = 0;
+              let shift: number = 0;
+              let isContinuation: boolean = true;
+              while (isContinuation) {
+                const digit: number = base64.indexOf(segmentText[index++]);
+                /* eslint-disable no-bitwise */
+                isContinuation = (digit & 32) !== 0;
+                result += (digit & 31) << shift;
+                shift += 5;
+              }
+              const isNegative: boolean = (result & 1) === 1;
+              result >>>= 1;
+              /* eslint-enable no-bitwise */
+              return isNegative ? -result : result;
+            };
+
+            readVlq(); // generated column
+            if (index < segmentText.length) {
+              sourceIndex += readVlq();
+              sourceLine += readVlq();
+              readVlq(); // source column
+              const declaration: string = (dtsLines[generatedLine] || '').trim();
+              const nameMatch: RegExpMatchArray | null = declaration.match(/([A-Za-z_$][A-Za-z0-9_$]*)\s*:/);
+              results.push({
+                generatedLine,
+                name: nameMatch ? nameMatch[1] : '',
+                source: map.sources[sourceIndex],
+                sourceLine
+              });
+            }
+          }
+        }
+
+        generatedLine++;
+      }
+
+      return results;
+    }
+
+    it('does not emit a map when the option is disabled', async () => {
+      const { processor } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      expect(getAllWrittenPathsMatching('.d.ts.map')).toHaveLength(0);
+    });
+
+    it('resolves each declaration to the rule that declares it', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        generateDeclarationMaps: true,
+        exportAsDefault: false
+      });
+      await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+
+      const decoded: IDecodedMapping[] = decodeDeclarationMap(
+        getWrittenFile('classes-and-exports.module.scss.d.ts.map'),
+        getDtsOutput('classes-and-exports.module.scss')
+      );
+
+      // .root is declared on line 2 and .highlighted on line 7 of the fixture (one-based).
+      const byName: Map<string, IDecodedMapping> = new Map(decoded.map((m) => [m.name, m]));
+      expect(byName.get('root')?.sourceLine).toBe(1);
+      expect(byName.get('highlighted')?.sourceLine).toBe(6);
+    });
+
+    it('maps every class in a compound or element-qualified selector', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        generateDeclarationMaps: true,
+        exportAsDefault: false
+      });
+      await compileFixtureAsync(processor, 'compound-selectors.module.scss');
+
+      const decoded: IDecodedMapping[] = decodeDeclarationMap(
+        getWrittenFile('compound-selectors.module.scss.d.ts.map'),
+        getDtsOutput('compound-selectors.module.scss')
+      );
+      const byName: Map<string, IDecodedMapping> = new Map(decoded.map((m) => [m.name, m]));
+
+      // Both classes of `.primary.secondary` are exported, so both need a mapping.
+      expect(byName.get('primary')?.sourceLine).toBe(2);
+      expect(byName.get('secondary')?.sourceLine).toBe(2);
+      // A class qualified by an element is still the subject of the rule.
+      expect(byName.get('qualified')?.sourceLine).toBe(6);
+    });
+
+    it('resolves a class declared in a partial into that partial', async () => {
+      const { processor } = createProcessor(terminalProvider, {
+        generateDeclarationMaps: true,
+        exportAsDefault: false
+      });
+      await compileFixtureAsync(processor, 'partial-class.module.scss');
+
+      const decoded: IDecodedMapping[] = decodeDeclarationMap(
+        getWrittenFile('partial-class.module.scss.d.ts.map'),
+        getDtsOutput('partial-class.module.scss')
+      );
+      const byName: Map<string, IDecodedMapping> = new Map(decoded.map((m) => [m.name, m]));
+
+      // The class is declared in _partial-with-class.scss, not in the file that imports it.
+      expect(byName.get('fromPartial')?.source).toMatch(/_partial-with-class\.scss$/);
+      expect(byName.get('fromPartial')?.sourceLine).toBe(2);
+
+      // Sources must be plain relative paths. A URL scheme surviving into the map would still end
+      // with the right file name while being unresolvable by an editor.
+      for (const mapping of decoded) {
+        expect(mapping.source).not.toMatch(/^[A-Za-z][A-Za-z0-9+.-]*:/);
+      }
+
+      // .localClass is restated inside a media query; the primary rule wins.
+      expect(byName.get('localClass')?.source).toMatch(/partial-class\.module\.scss$/);
+      expect(byName.get('localClass')?.sourceLine).toBe(4);
+
+      // Generated line 0 is always mapped to source index 0, so the entry stylesheet must occupy
+      // that slot even though a partial declares the first class. Otherwise navigating to the
+      // module itself would land in the partial.
+      const map: { sources: string[] } = JSON.parse(getWrittenFile('partial-class.module.scss.d.ts.map'));
+      expect(map.sources[0]).toMatch(/partial-class\.module\.scss$/);
     });
   });
 });

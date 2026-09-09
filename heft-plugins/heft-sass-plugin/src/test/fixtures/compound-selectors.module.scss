@@ -1,0 +1,9 @@
+// Classes that only ever appear in a compound selector or qualified by an element. CSS Modules
+// exports all of them, so each needs a mapping in the declaration map.
+.primary.secondary {
+  color: red;
+}
+
+div.qualified {
+  color: blue;
+}

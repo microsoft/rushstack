@@ -1,0 +1,13 @@
+// Imports a partial that declares a class, and restates a class inside a media query so that the
+// declaration map can be checked for preferring the primary rule.
+@use 'partial-with-class';
+
+.localClass {
+  padding: 4px;
+}
+
+@media (max-width: 600px) {
+  .localClass {
+    padding: 0;
+  }
+}

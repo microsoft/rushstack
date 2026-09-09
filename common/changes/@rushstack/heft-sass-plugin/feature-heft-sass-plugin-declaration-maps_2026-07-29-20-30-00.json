@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Add an opt-in \"generateDeclarationMaps\" option that emits a \".d.ts.map\" beside each generated typings file, so that \"go to definition\" on a CSS module class resolves to the rule in the stylesheet instead of the generated typings.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
