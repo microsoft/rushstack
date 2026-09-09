@@ -42,6 +42,7 @@ import {
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
+import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 import type {
   GetWorkspaceSuccessorLaunchAsync,
   IWorkspaceProcessRestartContext,
@@ -291,6 +292,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
       if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
       let session: IWorkspaceSession = await this.#options.provider.getSessionAsync();
+      assertWorkspaceRequestResourcesHealthy(session);
       if (isRushxInvocation(envelope)) {
         return {
           session,
@@ -728,6 +730,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   }
 
   #assertGeneration(generation: IPreparedGeneration): void {
+    assertWorkspaceRequestResourcesHealthy(generation.session);
     generation.session.assertActive?.();
     if (generation.generation !== this.#options.provider.generation) {
       throw new Error(

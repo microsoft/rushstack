@@ -17,7 +17,7 @@ import {
 import { DaemonFrameConnection, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { connectOrStartDaemonAsync } from '../connectOrStartDaemon';
-import type { DaemonClient } from '../DaemonClient';
+import { DaemonClient } from '../DaemonClient';
 import { DaemonClientError } from '../DaemonClientError';
 
 describe('startup cancellation during readiness', () => {
@@ -64,6 +64,7 @@ describe('startup cancellation during readiness', () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     await client?.closeAsync();
     await connection?.closeAsync();
     await new Promise<void>((resolve, reject) =>
@@ -115,4 +116,30 @@ describe('startup cancellation during readiness', () => {
     await Promise.all([expect(pending).rejects.toBe(abort.signal.reason), connection!.closeAsync()]);
     expect(client).toBeUndefined();
   });
+
+  it.each(['ECONNRESET', 'EPIPE'])(
+    'retries a pre-request %s from a closing listener without starting a second daemon',
+    async (code) => {
+      const failure = Object.assign(new Error('Owner closed before readiness'), { code });
+      const connect = jest.spyOn(DaemonClient, 'connectAsync').mockRejectedValueOnce(failure);
+      const pending = connectOrStartDaemonAsync({
+        paths,
+        startupTimeoutMs: 1000,
+        startCommand: {
+          command: process.execPath,
+          args: ['-e', "throw new Error('Unexpected competing daemon launch')"],
+          cwd: folder,
+          environment: {}
+        }
+      }).then((ready) => {
+        client = ready;
+        return ready;
+      });
+      await pingReceived;
+      await sendAsync({ kind: 'pong', payload: { uptimeMs: 1, daemonVersion: 'closing-successor' } });
+      expect((await (await pending).status).daemonVersion).toBe('closing-successor');
+      expect(connect).toHaveBeenCalledTimes(2);
+      expect(fs.existsSync(`${paths.lockfilePath}.starting`)).toBe(false);
+    }
+  );
 });

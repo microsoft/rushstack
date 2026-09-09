@@ -241,6 +241,9 @@ async function tryConnectAsync(
     if (error instanceof DaemonClientError && (error.code === 'timeout' || error.code === 'disconnected')) {
       return undefined;
     }
+    // A closing owner can refuse the handshake while retaining its listener through resource cleanup.
+    // No request has been sent by connectAsync(), so this does not authorize replay of executed work.
+    if (hasErrorCode(error, 'ECONNRESET') || hasErrorCode(error, 'EPIPE')) return undefined;
     if (
       error instanceof DaemonClientError &&
       error.code === 'versionMismatch' &&
