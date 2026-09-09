@@ -66,6 +66,148 @@ function makeInput(
 }
 
 describe('ReporterManager ordering and assignment', () => {
+  it('reserves the disposal lifecycle lane before concurrent shutdown can flush or close', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('blocked-disposal-flush');
+    let notifyFlushStarted!: () => void;
+    let finishFlush!: () => void;
+    const flushStarted: Promise<void> = new Promise((resolve) => (notifyFlushStarted = resolve));
+    const flushFinished: Promise<void> = new Promise((resolve) => (finishFlush = resolve));
+    jest.spyOn(reporter, 'flushAsync').mockImplementation(async () => {
+      reporter.flushCount++;
+      if (reporter.flushCount === 1) {
+        notifyFlushStarted();
+        await flushFinished;
+      }
+    });
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    const disposing: Promise<void> = manager._disposeInitializedReportersAsync();
+    await flushStarted;
+    const closing: Promise<void> = manager.closeAsync();
+    try {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(reporter.flushCount).toBe(1);
+      expect(reporter.closeCount).toBe(0);
+    } finally {
+      finishFlush();
+      await Promise.all([disposing, closing]);
+    }
+    expect(reporter.flushCount).toBe(1);
+    expect(reporter.closeCount).toBe(1);
+  });
+
+  it('shares one close operation between concurrent shutdown and initialization disposal', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('shared-close');
+    let notifyCloseStarted!: () => void;
+    let finishClose!: () => void;
+    const closeStarted: Promise<void> = new Promise((resolve) => (notifyCloseStarted = resolve));
+    const closeFinished: Promise<void> = new Promise((resolve) => (finishClose = resolve));
+    jest.spyOn(reporter, 'closeAsync').mockImplementation(async () => {
+      reporter.closeCount++;
+      notifyCloseStarted();
+      await closeFinished;
+    });
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    const closing: Promise<void> = manager.closeAsync();
+    const disposing: Promise<void> = manager._disposeInitializedReportersAsync();
+    await closeStarted;
+    expect(reporter.closeCount).toBe(1);
+    finishClose();
+    await Promise.all([closing, disposing]);
+    const flushCount: number = reporter.flushCount;
+    await manager.flushAsync();
+    await manager.closeAsync();
+    expect(reporter.closeCount).toBe(1);
+    expect(reporter.flushCount).toBe(flushCount);
+  });
+
+  it('caches a rejected close across normal shutdown and disposal without retrying it', async () => {
+    const manager: ReporterManager = new ReporterManager({ emergencyDiagnosticWriter: () => undefined });
+    const reporter: RecordingReporter = new RecordingReporter('failed-close');
+    reporter.throwOnClose = true;
+    manager.addReporter(reporter, { required: true });
+    await manager.initializeAsync();
+
+    await expect(manager.closeAsync()).rejects.toThrow('close failed failed-close');
+    await expect(manager._disposeInitializedReportersAsync()).rejects.toThrow('close failed failed-close');
+    await expect(manager.closeAsync()).rejects.toThrow('close failed failed-close');
+    expect(reporter.closeCount).toBe(1);
+  });
+
+  it('closes attempted initializations even when a prior lifecycle error reporter rejected', async () => {
+    const manager: ReporterManager = new ReporterManager({
+      emergencyDiagnosticWriter: () => {
+        throw new Error('emergency writer failed');
+      }
+    });
+    const reporter: RecordingReporter = new RecordingReporter('lifecycle-failure');
+    reporter.flushAsync = async () => {
+      throw new Error('flush failed');
+    };
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    await expect(manager.flushAsync()).rejects.toThrow('emergency writer failed');
+    await expect(manager._disposeInitializedReportersAsync()).rejects.toThrow('emergency writer failed');
+    expect(reporter.closeCount).toBe(1);
+  });
+
+  it('disposes every attempted initialization once without closing unstarted reporters', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const first: RecordingReporter = new RecordingReporter('first');
+    const failed: RecordingReporter = new RecordingReporter('failed');
+    const unstarted: RecordingReporter = new RecordingReporter('unstarted');
+    failed.throwOnInit = true;
+    first.throwOnClose = true;
+    manager.addReporter(first);
+    manager.addReporter(failed);
+    manager.addReporter(unstarted);
+
+    await expect(manager.initializeAsync()).rejects.toThrow('init failed failed');
+    const disposal: Promise<void> = manager._disposeInitializedReportersAsync();
+    expect(manager._disposeInitializedReportersAsync()).toBe(disposal);
+    await expect(disposal).rejects.toThrow('close failed first');
+    expect([first.closeCount, failed.closeCount, unstarted.closeCount]).toEqual([1, 1, 0]);
+    expect([first.flushCount, failed.flushCount, unstarted.flushCount]).toEqual([0, 0, 0]);
+  });
+
+  it('joins other destination cleanup after one close rejects', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const first: RecordingReporter = new RecordingReporter('first');
+    first.throwOnClose = true;
+    const second: RecordingReporter = new RecordingReporter('second');
+    let releaseClose!: () => void;
+    let notifyCloseStarted!: () => void;
+    const closeStarted: Promise<void> = new Promise((resolve) => (notifyCloseStarted = resolve));
+    const closeFinished: Promise<void> = new Promise((resolve) => (releaseClose = resolve));
+    second.closeAsync = async () => {
+      notifyCloseStarted();
+      await closeFinished;
+      second.closeCount++;
+    };
+    manager.addReporter(first);
+    manager.addReporter(second);
+    await manager.initializeAsync();
+
+    let settled: boolean = false;
+    const disposal: Promise<void> = manager._disposeInitializedReportersAsync();
+    const assertion: Promise<void> = expect(disposal).rejects.toThrow('close failed first');
+    void disposal.then(
+      () => (settled = true),
+      () => (settled = true)
+    );
+    await closeStarted;
+    expect(settled).toBe(false);
+    releaseClose();
+    await assertion;
+    expect(second.closeCount).toBe(1);
+  });
+
   it('rejects in-process events before reporters are initialized', () => {
     const manager: ReporterManager = new ReporterManager();
     manager.addReporter(new RecordingReporter('a'));

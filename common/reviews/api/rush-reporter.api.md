@@ -249,7 +249,6 @@ export interface IAiDiagnostic {
     readonly severity: string;
     // (undocumented)
     readonly summary?: string;
-    // (undocumented)
     readonly summaryKey?: string;
 }
 
@@ -1601,6 +1600,8 @@ export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
+    // @internal
+    _disposeInitializedReportersAsync(): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     // @internal
     _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;

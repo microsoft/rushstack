@@ -8,6 +8,15 @@ Rush 5 keeps legacy terminal output by default. See the
 [experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
 privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
 
+Bootstrap initialization failures close every destination whose initialization was attempted, including
+partially initialized reporters, before propagating the original failure. Abandoned handoff cleanup applies
+the 14-day retention window and a 20-session cap to files verifiably owned by the current user whose producer
+process has exited. Live/current handoffs, foreign files, and entries without verifiable ownership are not
+removed; timestamp ties are resolved by filename.
+Each registration shares a cached manager-owned close operation across normal shutdown and initialization
+disposal, including rejected closes. The frontend's eager full-log close for artifact publication remains
+unchanged.
+
 ## AI reporter qualification
 
 The network-free qualification corpus runs representative bootstrap/version, configuration, input,
@@ -26,13 +35,25 @@ Scenario-specific external output is included only where the real failure or con
 | Stdout/warnings | 100% payload-only NDJSON and warning suppression/detail compliance |
 
 Run `rushx build && node scripts/runAiReporterQualification.js` from this project to print the
-machine-readable result. Machine-specific paths are normalized before hashing and are not stored. Passing
+machine-readable result. Byte gates measure the actual emitted UTF-8 strings, including absolute paths and
+NDJSON delimiters. Paths are normalized only for deterministic comparison/hashing and are not stored.
+Separate near-limit and sustained-watch probes enforce the invocation budget without adding artificial
+baseline volume to the comparison corpus. Passing
 these gates only produces a reusable qualification decision; it does not enable environment-based automatic
 reporter selection. That decision also requires the separate telemetry privacy prerequisite to be accepted.
 The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
 authoritative.
 
-AI fallback message text is emitted only for public envelopes. Non-public fallback errors remain countable
+AI output reserves final-record space, including its supplied log reference, before emitting progress.
+Progress is buffered within the invocation byte limit until the primary log reservation is known, or until
+close if no log is supplied. Excess progress/details set `truncated`; the final result remains valid JSON.
+The final scope carries the command name, and standard `diagnostic.<code>.summary` keys are implicit rather
+than repeated alongside the same code. Custom summary keys are preserved.
+
+AI fallback message text is emitted only for public envelopes. Its context retains the known command, and
+the usage-review action invokes that command's help (or `rush --help` when the command is unavailable).
+Qualification checks exact expected context, remediation commands/URLs, descriptions, and execution safety;
+summary-only failures and unrelated actions do not qualify. Non-public fallback errors remain countable
 and refer to the protected full-detail log. JSON oversized-record markers preserve the original privacy
 classification and omit non-public source and scope metadata.
 

@@ -8,11 +8,16 @@ import {
   formatAiReporterQualificationFailures,
   getQualifiedAiReporterDecision,
   runAiReporterQualificationCorpusAsync,
+  type IAiDiagnostic,
   type IReporterEventEnvelope,
   type IAiReporterQualificationCaseResult,
+  type IAiReporterQualificationGateResult,
   type IAiReporterQualificationResult
 } from '../index';
-import { normalizeAiReporterQualificationOutput } from '../qualification/AiReporterQualificationCorpus';
+import {
+  hasExpectedAiQualificationDiagnostic,
+  normalizeAiReporterQualificationOutput
+} from '../qualification/AiReporterQualificationCorpus';
 
 describe('AI reporter deterministic qualification corpus', () => {
   let qualification: IAiReporterQualificationResult;
@@ -61,7 +66,36 @@ describe('AI reporter deterministic qualification corpus', () => {
       minimumStdoutContractPassPercent: 100,
       minimumWarningContractPassPercent: 100
     });
+    expect(qualification.gates.find(({ id }) => id === 'size.invocation-boundary')).toMatchObject({
+      passed: true,
+      failedCases: []
+    });
   });
+
+  it('measures unnormalized emitted UTF-8 output including every delimiter', async () => {
+    const byteLength: typeof Buffer.byteLength = Buffer.byteLength;
+    const byteLengthSpy: jest.SpiedFunction<typeof Buffer.byteLength> = jest.spyOn(Buffer, 'byteLength');
+    try {
+      const result: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
+      const capturedOutput: string[] = byteLengthSpy.mock.calls
+        .map(([value]) => value)
+        .filter(
+          (value): value is string =>
+            typeof value === 'string' &&
+            value.startsWith('{"kind":"ai.status"') &&
+            value.includes('"kind":"ai.final"')
+        )
+        .slice(0, result.cases.length);
+      expect(capturedOutput).toHaveLength(result.cases.length);
+      expect(capturedOutput.every((output) => output.endsWith('\n'))).toBe(true);
+      expect(capturedOutput.every((output) => !output.includes('<ABSOLUTE_LOG_PATH>'))).toBe(true);
+      expect(capturedOutput.map((output) => byteLength(output, 'utf8'))).toEqual(
+        result.cases.map(({ aiOutputBytes }) => aiOutputBytes)
+      );
+    } finally {
+      byteLengthSpy.mockRestore();
+    }
+  }, 15000);
 
   it('normalizes Windows and POSIX paths without storing machine-specific separators', () => {
     expect(
@@ -116,6 +150,83 @@ describe('AI reporter deterministic qualification corpus', () => {
     } finally {
       reportSpy.mockRestore();
     }
+  });
+
+  it('fails qualification when a renderer substitutes unrelated remediation', async () => {
+    const report: typeof AiReporter.prototype.report = AiReporter.prototype.report;
+    const reportSpy: jest.SpiedFunction<typeof AiReporter.prototype.report> = jest
+      .spyOn(AiReporter.prototype, 'report')
+      .mockImplementation(function (this: AiReporter, event: IReporterEventEnvelope<unknown>): void {
+        const payload: { remediation?: unknown } = event.payload as { remediation?: unknown };
+        report.call(
+          this,
+          event.type === 'diagnosticEmitted' && payload.remediation !== undefined
+            ? {
+                ...event,
+                payload: {
+                  ...payload,
+                  remediation: [
+                    {
+                      descriptionKey: 'remediation.unrelated',
+                      command: 'rush --version',
+                      automatedExecutionSafety: 'safe'
+                    }
+                  ]
+                }
+              }
+            : event
+        );
+      });
+    try {
+      const result: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
+      const actionability: IAiReporterQualificationGateResult | undefined = result.gates.find(
+        ({ id }) => id === 'actionability'
+      );
+      expect(actionability?.passed).toBe(false);
+      expect(actionability?.failedCases).toContain('bootstrap-unsupported-node');
+      expect(actionability?.failedCases).toContain('configuration-invalid-json');
+      expect(result.passed).toBe(false);
+    } finally {
+      reportSpy.mockRestore();
+    }
+  }, 15000);
+});
+
+describe('AI qualification actionable diagnostic contract', () => {
+  const expected: Parameters<typeof hasExpectedAiQualificationDiagnostic>[1] = {
+    code: 'RUSH_COMMAND_FAILED',
+    category: 'command',
+    summaryKey: 'diagnostic.RUSH_COMMAND_FAILED.summary',
+    parameters: { commandName: { value: 'build', privacy: 'public' } },
+    remediation: [
+      {
+        descriptionKey: 'remediation.review-command-usage',
+        command: 'rush build --help',
+        automatedExecutionSafety: 'safe'
+      }
+    ]
+  };
+  const valid: IAiDiagnostic = {
+    code: expected.code,
+    category: expected.category,
+    severity: 'error',
+    summary: 'The requested command could not be parsed.',
+    context: { commandName: 'build' },
+    remediation: expected.remediation
+  };
+
+  it('accepts genuinely retained fallback context and the correct usage action', () => {
+    expect(hasExpectedAiQualificationDiagnostic(valid, expected)).toBe(true);
+  });
+
+  it.each<Partial<IAiDiagnostic>>([
+    { context: undefined, remediation: undefined },
+    { context: { commandName: 'other' } },
+    { remediation: [] },
+    { remediation: [{ ...expected.remediation[0], command: 'rush --version' }] },
+    { remediation: [{ ...expected.remediation[0], automatedExecutionSafety: 'unsafe' }] }
+  ])('rejects missing or incorrect fallback evidence: %j', (change) => {
+    expect(hasExpectedAiQualificationDiagnostic({ ...valid, ...change }, expected)).toBe(false);
   });
 });
 
