@@ -96,6 +96,7 @@ interface IReporterEntry {
   draining: boolean;
   drainPromise: Promise<void>;
   lifecyclePromise: Promise<void>;
+  closePromise: Promise<void> | undefined;
 }
 
 /**
@@ -177,7 +178,8 @@ export class ReporterManager implements IReporterEventSink {
       queue: [],
       draining: false,
       drainPromise: Promise.resolve(),
-      lifecyclePromise: Promise.resolve()
+      lifecyclePromise: Promise.resolve(),
+      closePromise: undefined
     });
   }
 
@@ -211,14 +213,14 @@ export class ReporterManager implements IReporterEventSink {
         this._entries
           .filter((entry: IReporterEntry) => entry.initializationStarted)
           .map(async (entry: IReporterEntry): Promise<void> => {
-            await entry.lifecyclePromise;
-            await entry.drainPromise;
             try {
-              if (this._initialized && !entry.disabled) {
+              await entry.lifecyclePromise;
+              await entry.drainPromise;
+              if (this._canFlushEntry(entry)) {
                 await entry.reporter.flushAsync();
               }
             } finally {
-              await entry.reporter.closeAsync();
+              await this._closeEntryAsync(entry);
             }
           })
       );
@@ -305,7 +307,7 @@ export class ReporterManager implements IReporterEventSink {
   public async flushAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (!entry.disabled) {
+      if (this._canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -322,7 +324,7 @@ export class ReporterManager implements IReporterEventSink {
   public async _flushAndConfirmAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<boolean> {
     return await this._settleAndConfirmAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (!entry.disabled) {
+      if (this._canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -338,7 +340,7 @@ export class ReporterManager implements IReporterEventSink {
   public async signalFlushAsync(timeoutMs: number = DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS): Promise<void> {
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (!entry.disabled) {
+      if (this._canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -357,7 +359,7 @@ export class ReporterManager implements IReporterEventSink {
       flushError = error as Error;
     }
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
-      await entry.reporter.closeAsync();
+      await this._closeEntryAsync(entry);
     }, timeoutMs);
     if (flushError) {
       throw flushError;
@@ -365,6 +367,18 @@ export class ReporterManager implements IReporterEventSink {
     if (this._fatalError) {
       throw this._fatalError;
     }
+  }
+
+  private _canFlushEntry(entry: IReporterEntry): boolean {
+    return this._initialized && !entry.disabled && entry.closePromise === undefined;
+  }
+
+  private _closeEntryAsync(entry: IReporterEntry): Promise<void> {
+    if (!entry.initializationStarted) {
+      return Promise.resolve();
+    }
+    entry.closePromise ??= Promise.resolve().then(() => entry.reporter.closeAsync());
+    return entry.closePromise;
   }
 
   private _fanOut(envelope: IReporterEventEnvelope<unknown>): void {

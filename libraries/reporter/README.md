@@ -13,6 +13,9 @@ partially initialized reporters, before propagating the original failure. Abando
 the 14-day retention window and a 20-session cap to files verifiably owned by the current user whose producer
 process has exited. Live/current handoffs, foreign files, and entries without verifiable ownership are not
 removed; timestamp ties are resolved by filename.
+Each registration shares a cached manager-owned close operation across normal shutdown and initialization
+disposal, including rejected closes. The frontend's eager full-log close for artifact publication remains
+unchanged.
 
 ## AI reporter qualification
 

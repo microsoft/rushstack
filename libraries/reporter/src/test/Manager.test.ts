@@ -66,6 +66,65 @@ function makeInput(
 }
 
 describe('ReporterManager ordering and assignment', () => {
+  it('shares one close operation between concurrent shutdown and initialization disposal', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporter: RecordingReporter = new RecordingReporter('shared-close');
+    let notifyCloseStarted!: () => void;
+    let finishClose!: () => void;
+    const closeStarted: Promise<void> = new Promise((resolve) => (notifyCloseStarted = resolve));
+    const closeFinished: Promise<void> = new Promise((resolve) => (finishClose = resolve));
+    jest.spyOn(reporter, 'closeAsync').mockImplementation(async () => {
+      reporter.closeCount++;
+      notifyCloseStarted();
+      await closeFinished;
+    });
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    const closing: Promise<void> = manager.closeAsync();
+    const disposing: Promise<void> = manager._disposeInitializedReportersAsync();
+    await closeStarted;
+    expect(reporter.closeCount).toBe(1);
+    finishClose();
+    await Promise.all([closing, disposing]);
+    const flushCount: number = reporter.flushCount;
+    await manager.flushAsync();
+    await manager.closeAsync();
+    expect(reporter.closeCount).toBe(1);
+    expect(reporter.flushCount).toBe(flushCount);
+  });
+
+  it('caches a rejected close across normal shutdown and disposal without retrying it', async () => {
+    const manager: ReporterManager = new ReporterManager({ emergencyDiagnosticWriter: () => undefined });
+    const reporter: RecordingReporter = new RecordingReporter('failed-close');
+    reporter.throwOnClose = true;
+    manager.addReporter(reporter, { required: true });
+    await manager.initializeAsync();
+
+    await expect(manager.closeAsync()).rejects.toThrow('close failed failed-close');
+    await expect(manager._disposeInitializedReportersAsync()).rejects.toThrow('close failed failed-close');
+    await expect(manager.closeAsync()).rejects.toThrow('close failed failed-close');
+    expect(reporter.closeCount).toBe(1);
+  });
+
+  it('closes attempted initializations even when a prior lifecycle error reporter rejected', async () => {
+    const manager: ReporterManager = new ReporterManager({
+      emergencyDiagnosticWriter: () => {
+        throw new Error('emergency writer failed');
+      }
+    });
+    const reporter: RecordingReporter = new RecordingReporter('lifecycle-failure');
+    reporter.flushAsync = async () => {
+      throw new Error('flush failed');
+    };
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    await expect(manager.flushAsync()).rejects.toThrow('emergency writer failed');
+    await expect(manager._disposeInitializedReportersAsync()).rejects.toThrow('emergency writer failed');
+    expect(reporter.closeCount).toBe(1);
+  });
+
   it('disposes every attempted initialization once without closing unstarted reporters', async () => {
     const manager: ReporterManager = new ReporterManager();
     const first: RecordingReporter = new RecordingReporter('first');
