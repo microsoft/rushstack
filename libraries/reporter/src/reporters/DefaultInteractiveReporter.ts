@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
-import type { IReporter } from '../manager/IReporter';
+import type { IReporter, IReporterContext } from '../manager/IReporter';
 import { getHumanReadableMessageText } from './ReporterRedaction';
+import { startReporterTimer } from '../utilities/startReporterTimer';
 import {
   SPINNER_FRAMES,
   MIN_REFRESH_INTERVAL_MS,
@@ -127,7 +128,8 @@ export class DefaultInteractiveReporter implements IReporter {
   private _paintedRowCount: number;
   private _cursorHidden: boolean;
   private _finalized: boolean;
-  private _refreshTimer: ReturnType<typeof setInterval> | undefined;
+  private _stopRefreshTimer: (() => void) | undefined;
+  private _abortSignal: AbortSignal | undefined;
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
     this._terminal = options.terminal;
@@ -153,9 +155,11 @@ export class DefaultInteractiveReporter implements IReporter {
     this._finalized = false;
   }
 
-  public async initializeAsync(): Promise<void> {
-    if (!this._refreshTimer && this._terminal.isTTY && !this._finalized) {
-      this._refreshTimer = setInterval(
+  public async initializeAsync(context?: IReporterContext): Promise<void> {
+    this._abortSignal = context?.abortSignal;
+    if (!this._stopRefreshTimer && this._terminal.isTTY && !this._finalized) {
+      this._stopRefreshTimer = startReporterTimer(
+        context,
         () => {
           if (
             this._terminal.isTTY &&
@@ -168,7 +172,6 @@ export class DefaultInteractiveReporter implements IReporter {
         },
         Math.max(MIN_REFRESH_INTERVAL_MS, this._minRefreshIntervalMs)
       );
-      this._refreshTimer.unref();
     }
   }
 
@@ -190,9 +193,16 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    if (this._refreshTimer) {
-      clearInterval(this._refreshTimer);
-      this._refreshTimer = undefined;
+    this._stopRefreshTimer?.();
+    this._stopRefreshTimer = undefined;
+    if (this._abortSignal?.aborted && this._abortSignal.reason instanceof Error) {
+      this._finalized = true;
+      this._paintedRowCount = 0;
+      if (this._cursorHidden) {
+        this._cursorHidden = false;
+        this._terminal.write(SHOW_CURSOR);
+      }
+      return;
     }
     this._finalize();
   }
