@@ -166,7 +166,9 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     reporterCloseAsync,
     reporterEnabled: reporterHost.selection.enabled,
     reporterStdoutIsMachineReadable:
-      reporterHost.selection.reporter === 'ai' || reporterHost.selection.reporter === 'json',
+      reporterHost.selection.reporter === 'ai' ||
+      reporterHost.selection.reporter === 'json' ||
+      reporterHost.selection.outputs.some((output) => output.target === 'stdout'),
     reporterSelectionReason: reporterHost.selection.reason
   };
 
