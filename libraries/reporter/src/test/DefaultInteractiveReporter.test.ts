@@ -295,6 +295,131 @@ describe('DefaultInteractiveReporter', () => {
     ).toHaveLength(1);
   });
 
+  it('renders errors immediately during watch and never repeats them at close', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(ev('operationRegistered', { iterationId: 1, operationId: 'op' }));
+    const diagnostic: IReporterEventEnvelope<unknown> = ev('diagnosticEmitted', {
+      diagnosticId: 'problem',
+      iterationId: 1,
+      code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+      severity: 'error',
+      summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+      parameters: {
+        tool: { value: 'typescript', privacy: 'public' },
+        code: { value: 'TS1005', privacy: 'public' },
+        message: { value: 'ACTIONABLE-WATCH-ERROR', privacy: 'local-sensitive' }
+      }
+    });
+    try {
+      reporter.report(diagnostic);
+      expect(terminal.output).toContain('ACTIONABLE-WATCH-ERROR');
+      reporter.report(diagnostic);
+      reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+      reporter.report(ev('commandResult', { succeeded: false, exitCode: 1 }));
+      await reporter.closeAsync();
+      expect(terminal.output.match(/ACTIONABLE-WATCH-ERROR/g)).toHaveLength(1);
+    } finally {
+      await reporter.closeAsync();
+    }
+  });
+
+  it('renders warnings once per completed cycle, including successful recovery', async () => {
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      nowMs: () => 0
+    });
+    await reporter.initializeAsync();
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    try {
+      for (const iterationId of [1, 2]) {
+        reporter.report(ev('operationRegistered', { iterationId, operationId: 'op' }));
+        const warning: IReporterEventEnvelope<unknown> = ev('diagnosticEmitted', {
+          diagnosticId: 'same-id-in-another-cycle',
+          iterationId,
+          code: 'RUSH_OPERATION_FAILED',
+          severity: 'warning'
+        });
+        const beforeWarning: string = terminal.output;
+        reporter.report(warning);
+        reporter.report(warning);
+        expect(terminal.output).toBe(beforeWarning);
+        reporter.report(ev('watchCycleCompleted', { iterationId, succeeded: iterationId === 2 }));
+        expect(terminal.output.match(/\[warning\] RUSH_OPERATION_FAILED/g)).toHaveLength(iterationId);
+      }
+      const beforeClose: string = terminal.output;
+      reporter.report(ev('commandResult', { succeeded: true, exitCode: 0 }));
+      await reporter.closeAsync();
+      expect(terminal.output.slice(beforeClose.length)).not.toContain('[warning]');
+    } finally {
+      await reporter.closeAsync();
+    }
+  });
+
+  it('bounds diagnostic details per cycle and renders warning-only success', async () => {
+    const terminal: FakeTerminal = new FakeTerminal(80, false);
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({ terminal, color: false });
+    await reporter.initializeAsync();
+    try {
+      for (let index: number = 0; index < 100; index++) {
+        reporter.report(
+          ev('messageEmitted', {
+            severity: 'warning',
+            text: `bounded-warning-${index} ${'x'.repeat(10000)}`
+          })
+        );
+      }
+      reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+      await reporter.closeAsync();
+      expect(terminal.output.match(/bounded-warning-/g)).toHaveLength(10);
+      expect(terminal.output).toContain('+90 more diagnostic');
+      expect(terminal.output.length).toBeLessThan(16000);
+    } finally {
+      await reporter.closeAsync();
+    }
+  });
+
+  it('flushes startup warnings at the first explicit watch boundary', async () => {
+    const terminal: FakeTerminal = new FakeTerminal(80, false);
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({ terminal, color: false });
+    reporter.report(ev('messageEmitted', { severity: 'warning', text: 'startup warning' }));
+    reporter.report(ev('operationRegistered', { iterationId: 1, operationId: 'op' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: true }));
+    expect(terminal.output.match(/startup warning/g)).toHaveLength(1);
+    const previousOutput: string = terminal.output;
+    await reporter.closeAsync();
+    expect(terminal.output.slice(previousOutput.length)).not.toContain('startup warning');
+  });
+
+  it('does not let held warnings consume the capacity needed to show an error', async () => {
+    const terminal: FakeTerminal = new FakeTerminal(80, false);
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({
+      terminal,
+      color: false,
+      logPath: '/abs/watch.log'
+    });
+    reporter.report(ev('operationRegistered', { iterationId: 1, operationId: 'op' }));
+    for (let index: number = 0; index < 10; index++) {
+      reporter.report(ev('messageEmitted', { severity: 'warning', text: `held-warning-${index}` }));
+    }
+    reporter.report(ev('messageEmitted', { severity: 'error', text: 'urgent error' }));
+    expect(terminal.output).toContain('urgent error');
+    reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+    expect(terminal.output.match(/held-warning-/g)).toHaveLength(9);
+    expect(terminal.output).toContain('+1 more diagnostic');
+    expect(terminal.output).toContain('Log: /abs/watch.log');
+    await reporter.closeAsync();
+    expect(terminal.output.match(/urgent error/g)).toHaveLength(1);
+  });
+
   it('redacts secret message text', async () => {
     const terminal: FakeTerminal = new FakeTerminal(80, false);
     const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({

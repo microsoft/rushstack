@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as fs from 'node:fs';
+
 import { PlaintextReporter, type IReporterEventEnvelope } from '../index';
 
 function ev(
@@ -169,6 +171,66 @@ describe('PlaintextReporter', () => {
 
     expect(capture.getOutput()).toContain('Building project-a\nproject-a: success');
     expect(capture.getOutput()).not.toContain('Building \nproject-a');
+  });
+
+  it.each([3, 0])('preserves grouped UTF-8 when the first spool write returns %s bytes', async (count) => {
+    const fsModule: typeof fs = jest.requireActual('node:fs');
+    const originalWrite: typeof fs.writeSync = fsModule.writeSync;
+    const capture: ICapture = makeDetailed();
+    const text: string = 'A\u{1f680}B\n';
+    capture.reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+    const writeSpy = jest
+      .spyOn(fsModule, 'writeSync')
+      .mockImplementationOnce((fd, data: string | NodeJS.ArrayBufferView) => {
+        const buffer: Buffer =
+          typeof data === 'string'
+            ? Buffer.from(data, 'utf8')
+            : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+        return count === 0 ? 0 : originalWrite(fd, buffer, 0, count);
+      });
+    try {
+      capture.reporter.report(ev('externalOutput', { text }, { operationId: 'op' }));
+      capture.reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+      await capture.reporter.closeAsync();
+    } finally {
+      writeSpy.mockRestore();
+      await capture.reporter.closeAsync();
+    }
+
+    expect(capture.getOutput().split(text)).toHaveLength(2);
+    expect(capture.getOutput().includes('Unable to spool')).toBe(count === 0);
+    expect(capture.getOutput()).not.toContain('\ufffd');
+  });
+
+  it('does not repeat a partially persisted UTF-8 prefix when the spool then fails', async () => {
+    const fsModule: typeof fs = jest.requireActual('node:fs');
+    const originalWrite: typeof fs.writeSync = fsModule.writeSync;
+    const capture: ICapture = makeDetailed();
+    const text: string = 'A\u{1f680}B\n';
+    capture.reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
+    const writeSpy = jest
+      .spyOn(fsModule, 'writeSync')
+      .mockImplementationOnce((fd, data: string | NodeJS.ArrayBufferView) => {
+        const buffer: Buffer =
+          typeof data === 'string'
+            ? Buffer.from(data, 'utf8')
+            : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+        return originalWrite(fd, buffer, 0, 3);
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('spool full');
+      });
+    try {
+      capture.reporter.report(ev('externalOutput', { text }, { operationId: 'op' }));
+      capture.reporter.report(ev('operationCompleted', { operationId: 'op', status: 'success' }));
+      await capture.reporter.closeAsync();
+    } finally {
+      writeSpy.mockRestore();
+      await capture.reporter.closeAsync();
+    }
+    expect(capture.getOutput().split(text)).toHaveLength(2);
+    expect(capture.getOutput()).toContain('Unable to spool');
+    expect(capture.getOutput()).not.toContain('\ufffd');
   });
 
   it('treats duplicate active registration as idempotent', () => {
