@@ -23,6 +23,7 @@ import { launchRushFrontendAsync, type IRushFrontendProcessLifecycle } from '../
 import type { IRushFrontendLaunchOptions } from '../IRushFrontendLaunchOptions';
 import {
   initializeRushReporterHostAsync,
+  resolveRushReporterSelection,
   type IInitializedRushReporterHost,
   type IRushReporterSelection
 } from '../RushReporterHost';
@@ -199,6 +200,57 @@ function releaseParserTestLocks(spy: jest.SpiedFunction<typeof LockFile.tryAcqui
 }
 
 describe(launchRushFrontendAsync.name, () => {
+  it.each([
+    { reporter: 'file', output: undefined, commandJson: false, machineStdout: false },
+    { reporter: 'json', output: undefined, commandJson: false, machineStdout: true },
+    { reporter: 'file', output: 'json://stdout', commandJson: false, machineStdout: true },
+    { reporter: 'file', output: 'file://stdout', commandJson: false, machineStdout: true },
+    { reporter: 'file', output: 'json://stderr', commandJson: false, machineStdout: false },
+    { reporter: 'file', output: 'json://./stdout', commandJson: false, machineStdout: false },
+    { reporter: 'file', output: 'json://stdout', commandJson: true, machineStdout: true }
+  ])('classifies $reporter / $output stdout ownership with command JSON $commandJson', async (testCase) => {
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'list', `--reporter=${testCase.reporter}`];
+    if (testCase.output) {
+      process.argv.push(`--output=${testCase.output}`);
+    }
+    if (testCase.commandJson) {
+      process.argv.push('--json');
+    }
+    let receivedOptions: IRushFrontendLaunchOptions | undefined;
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async (options) => ({
+          ...(await createEnabledHostAsync()),
+          selection: resolveRushReporterSelection({
+            ...options,
+            env: {},
+            stdout: { isTTY: false, write: () => undefined }
+          })
+        }),
+        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+          void version;
+          void selectedRushLib;
+          receivedOptions = launchOptions;
+          return launchOptions.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(receivedOptions?.reporterEnabled).toBe(true);
+      expect(receivedOptions?.reporterSelectionReason).toBe('explicit --reporter');
+      expect(receivedOptions?.reporterStdoutIsMachineReadable).toBe(testCase.machineStdout);
+      expect(receivedOptions?.reporterStdoutIsReserved).toBe(true);
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
   it.each([
     ['file', false, true],
     ['file', true, false],
