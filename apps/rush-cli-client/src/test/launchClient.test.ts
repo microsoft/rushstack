@@ -16,7 +16,8 @@ import {
   removeTestFolderAsync,
   waitForTestProcessExitAsync
 } from '@rushstack/rush-daemon/lib/test/TestProcessExit';
-import { readDaemonLockfile, removeDaemonArtifacts } from '@rushstack/rush-daemon-transport';
+import { captureTestDaemonListenerAsync } from '@rushstack/rush-daemon/lib/test/TestDaemonListener';
+import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
 
@@ -307,27 +308,31 @@ describe('standalone rushx fallback', () => {
 
   it('bounds restart after failed workspace cleanup without deleting live ownership', async () => {
     const errors: Error[] = [];
-    const failedHost: RushDaemonHost = await RushDaemonHost.startAsync({
-      repoRoot: folder,
-      rushVersion: Rush.version,
-      daemonVersion: 'cleanup-failure-test',
-      onError: (error) => {
-        errors.push(error);
-      },
-      createWorkspaceSessionAsync: async (sessionOptions) =>
-        WorkspaceSession.createAsync({
-          ...sessionOptions,
-          createComponentsAsync: async () => ({
-            [Symbol.asyncDispose]: async () => {
-              throw new Error('workspace cleanup failed');
-            }
+    const cleanupFailure: Error = new Error('workspace cleanup failed');
+    const { value: failedHost, listener } = await captureTestDaemonListenerAsync(() =>
+      RushDaemonHost.startAsync({
+        repoRoot: folder,
+        rushVersion: Rush.version,
+        daemonVersion: 'cleanup-failure-test',
+        onError: (error) => {
+          errors.push(error);
+        },
+        createWorkspaceSessionAsync: async (sessionOptions) =>
+          WorkspaceSession.createAsync({
+            ...sessionOptions,
+            createComponentsAsync: async () => ({
+              [Symbol.asyncDispose]: async () => {
+                throw cleanupFailure;
+              }
+            })
           })
-        })
-    });
-    const originalRecord: string = fs.readFileSync(failedHost.paths.lockfilePath, 'utf8');
-    const previousDaemon = readDaemonLockfile(failedHost.paths.lockfilePath)!;
-    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: failedHost.paths.socketPath });
+      })
+    );
+    let client: DaemonClient | undefined;
     try {
+      const originalRecord: string = fs.readFileSync(failedHost.paths.lockfilePath, 'utf8');
+      const previousDaemon = readDaemonLockfile(failedHost.paths.lockfilePath)!;
+      client = await DaemonClient.connectAsync({ socketPath: failedHost.paths.socketPath });
       await client.shutdownAsync();
       await failedHost.closed;
       await expect(failedHost.closeAsync()).rejects.toThrow('workspace cleanup failed');
@@ -340,10 +345,21 @@ describe('standalone rushx fallback', () => {
         })
       ).rejects.toThrow('previous daemon still owns');
       expect(fs.readFileSync(failedHost.paths.lockfilePath, 'utf8')).toBe(originalRecord);
+      if (process.platform !== 'win32') expect(fs.existsSync(failedHost.paths.socketPath)).toBe(true);
     } finally {
-      await client.closeAsync();
-      removeDaemonArtifacts(failedHost.paths.lockfilePath, failedHost.paths.socketPath);
+      const cleanup = await Promise.allSettled([client?.closeAsync(), failedHost.closeAsync()]);
+      try {
+        expect(cleanup).toEqual([
+          { status: 'fulfilled', value: undefined },
+          { status: 'rejected', reason: cleanupFailure }
+        ]);
+      } finally {
+        // The only injected failure owns no live resources; release the real fixture listener last.
+        await listener.closeAsync();
+      }
     }
+    expect(fs.existsSync(failedHost.paths.lockfilePath)).toBe(false);
+    if (process.platform !== 'win32') expect(fs.existsSync(failedHost.paths.socketPath)).toBe(false);
   });
 
   it('rejects extra management arguments without silently ignoring them', async () => {
