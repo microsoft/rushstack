@@ -71,6 +71,9 @@ export interface IAiDiagnostic {
   readonly category: string;
   readonly severity: string;
   readonly summary?: string;
+  /**
+   * A nonstandard summary key. The standard `diagnostic.${code}.summary` key is implicit.
+   */
   readonly summaryKey?: string;
   readonly detailKey?: string;
   readonly context?: Readonly<Record<string, ReporterJsonValue | '[local-sensitive]' | '[secret]'>>;
@@ -125,7 +128,8 @@ export interface IAiReporterOptions {
   readonly write: (text: string) => void;
 
   /**
-   * The maximum size of the final record in bytes. Defaults to 64 KiB.
+   * The maximum UTF-8 size of the entire invocation, including NDJSON delimiters.
+   * Defaults to 64 KiB.
    */
   readonly maxBytes?: number;
 
@@ -170,6 +174,10 @@ export class AiReporter implements IReporter {
   private _pendingResult: { succeeded: boolean; exitCode: number } | undefined;
   private _legacyIterationId: number;
   private _latestIterationId: number;
+  private readonly _pendingProgress: string[] = [];
+  private _pendingProgressBytes: number = 0;
+  private _writtenBytes: number = 0;
+  private _progressTruncated: boolean = false;
 
   public constructor(options: IAiReporterOptions) {
     this._write = options.write;
@@ -204,6 +212,9 @@ export class AiReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
+    if (this._finalEmitted) {
+      return;
+    }
     this._protocolVersion = event.protocolVersion;
     if (event.privacy === 'secret') {
       switch (event.type) {
@@ -219,13 +230,7 @@ export class AiReporter implements IReporter {
     switch (event.type) {
       case 'commandStarted': {
         this._commandName = (event.payload as { commandName: string }).commandName;
-        this._write(
-          `${JSON.stringify({
-            kind: 'ai.status',
-            protocolVersion: this._protocolVersion,
-            commandName: this._commandName
-          })}\n`
-        );
+        this._writeProgressRecord({ kind: 'ai.status', protocolVersion: this._protocolVersion });
         break;
       }
       case 'operationRegistered': {
@@ -298,15 +303,13 @@ export class AiReporter implements IReporter {
         };
         const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
         const succeeded: boolean = payload.succeeded === true;
-        this._write(
-          `${JSON.stringify({
-            kind: 'ai.watchCycle',
-            protocolVersion: this._protocolVersion,
-            succeeded,
-            operationCounts: { ...cycle.operationCounts },
-            failedProjects: [...cycle.failedProjects]
-          })}\n`
-        );
+        this._writeProgressRecord({
+          kind: 'ai.watchCycle',
+          protocolVersion: this._protocolVersion,
+          succeeded,
+          operationCounts: { ...cycle.operationCounts },
+          failedProjects: [...cycle.failedProjects]
+        });
         if (payload.iterationId === undefined) {
           this._legacyIterationId++;
         }
@@ -339,6 +342,7 @@ export class AiReporter implements IReporter {
           this._logPath = payload.path;
           this._logFormat = payload.format;
           this._artifactComplete = payload.complete !== false;
+          this._flushPendingProgress();
         }
         break;
       }
@@ -402,7 +406,8 @@ export class AiReporter implements IReporter {
       category: diagnostic.category,
       severity: diagnostic.severity,
       summary: diagnostic.summary,
-      summaryKey: diagnostic.summaryKey,
+      summaryKey:
+        diagnostic.summaryKey === `diagnostic.${diagnostic.code}.summary` ? undefined : diagnostic.summaryKey,
       detailKey: diagnostic.detailKey,
       context: this._projectDiagnosticContext(diagnostic.parameters),
       remediation: diagnostic.remediation,
@@ -515,6 +520,74 @@ export class AiReporter implements IReporter {
     return ordered;
   }
 
+  private _getFinalReserveBytes(): number {
+    const minimal: IAiFinalRecord = {
+      kind: 'ai.final',
+      protocolVersion: this._protocolVersion,
+      result: 'succeeded',
+      exitCode: Number.MIN_SAFE_INTEGER,
+      scope: { failedProjects: [] },
+      errorCodes: [],
+      diagnosticCategoryCounts: {},
+      diagnostics: [],
+      errorCount: Number.MAX_SAFE_INTEGER,
+      warningCount: Number.MAX_SAFE_INTEGER,
+      operationCounts: {},
+      ...(this._logPath === undefined
+        ? {}
+        : { log: { path: this._logPath, format: this._logFormat, complete: false } }),
+      truncated: true
+    };
+    return Math.max(
+      Math.min(this._maxBytes, Math.max(MIN_AI_MAX_BYTES, Math.floor(this._maxBytes / 2))),
+      Buffer.byteLength(JSON.stringify(minimal), 'utf8') + 1
+    );
+  }
+
+  private _writeProgressRecord(record: Readonly<Record<string, unknown>>): void {
+    const line: string = `${JSON.stringify(record)}\n`;
+    if (this._logPath === undefined) {
+      // Delay progress until the log reservation is known; the pending queue is itself byte-bounded.
+      const bytes: number = Buffer.byteLength(line, 'utf8');
+      if (this._pendingProgressBytes + bytes <= this._maxBytes) {
+        this._pendingProgress.push(line);
+        this._pendingProgressBytes += bytes;
+      } else {
+        this._progressTruncated = true;
+      }
+    } else {
+      this._writeProgressLine(line);
+    }
+  }
+
+  private _flushPendingProgress(): void {
+    const pending: string[] = this._pendingProgress.splice(0);
+    this._pendingProgressBytes = 0;
+    for (const line of pending) {
+      this._writeProgressLine(line);
+    }
+  }
+
+  private _writeProgressLine(line: string): void {
+    if (
+      this._writtenBytes + Buffer.byteLength(line, 'utf8') + this._getFinalReserveBytes() <=
+      this._maxBytes
+    ) {
+      this._writeLine(line);
+    } else {
+      this._progressTruncated = true;
+    }
+  }
+
+  private _writeLine(line: string): void {
+    const bytes: number = Buffer.byteLength(line, 'utf8');
+    if (this._writtenBytes + bytes > this._maxBytes) {
+      throw new Error(`AI reporter output exceeds the invocation budget of ${this._maxBytes} bytes.`);
+    }
+    this._writtenBytes += bytes;
+    this._write(line);
+  }
+
   private _emitFinal(succeeded: boolean, exitCode: number): void {
     if (this._finalEmitted) {
       return;
@@ -541,12 +614,26 @@ export class AiReporter implements IReporter {
     ]);
     const fallbackDiagnostics: IAiDiagnostic[] =
       errorCountWithoutFallback === 0
-        ? this._fallbackErrorMessages.map((summary) => ({
-            code: 'RUSH_COMMAND_FAILED',
-            category: 'command',
-            severity: 'error',
-            summary
-          }))
+        ? this._fallbackErrorMessages.map(
+            (summary: string): IAiDiagnostic => ({
+              code: 'RUSH_COMMAND_FAILED',
+              category: 'command',
+              severity: 'error',
+              summary,
+              context:
+                this._commandName === undefined ? { tool: 'rush' } : { commandName: this._commandName },
+              remediation: [
+                {
+                  descriptionKey: 'remediation.review-command-usage',
+                  command:
+                    this._commandName !== undefined && /^[a-z][a-z0-9:-]*$/i.test(this._commandName)
+                      ? `rush ${this._commandName} --help`
+                      : 'rush --help',
+                  automatedExecutionSafety: 'safe'
+                }
+              ]
+            })
+          )
         : [];
     const hasFallbackErrors: boolean = errorCountWithoutFallback === 0 && this._fallbackErrorCount > 0;
     const errorDiagnostics: IAiDiagnostic[] = hasFallbackErrors
@@ -613,6 +700,11 @@ export class AiReporter implements IReporter {
       record.log = { path: this._logPath, format: this._logFormat, complete: this._artifactComplete };
     }
 
+    this._flushPendingProgress();
+    record.truncated ||= this._progressTruncated;
+    const finalBudgetBytes: number = this._maxBytes - this._writtenBytes;
+    const serializedBytes = (): number => Buffer.byteLength(JSON.stringify(record), 'utf8') + 1;
+
     // Enforce the byte cap by progressively trimming detailed diagnostics, then
     // error codes, then failed projects, so the record always fits the budget.
     const trimTargets: Array<{ get: () => unknown[]; set: (value: unknown[]) => void }> = [
@@ -627,29 +719,33 @@ export class AiReporter implements IReporter {
       }
     ];
     for (const target of trimTargets) {
-      while (Buffer.byteLength(JSON.stringify(record), 'utf8') > this._maxBytes && target.get().length > 0) {
+      while (serializedBytes() > finalBudgetBytes && target.get().length > 0) {
         target.set(target.get().slice(0, target.get().length - 1));
         record.truncated = true;
       }
-      if (Buffer.byteLength(JSON.stringify(record), 'utf8') <= this._maxBytes) {
+      if (serializedBytes() <= finalBudgetBytes) {
         break;
       }
     }
 
     let serialized: string = JSON.stringify(record);
-    if (Buffer.byteLength(serialized, 'utf8') > this._maxBytes) {
+    if (Buffer.byteLength(serialized, 'utf8') + 1 > finalBudgetBytes) {
       record.scope = { failedProjects: [] };
       record.errorCodes = [];
       record.diagnosticCategoryCounts = {};
       record.diagnostics = [];
       record.operationCounts = {};
-      delete record.log;
       record.truncated = true;
       serialized = JSON.stringify(record);
     }
-    if (Buffer.byteLength(serialized, 'utf8') > this._maxBytes) {
+    if (Buffer.byteLength(serialized, 'utf8') + 1 > finalBudgetBytes && record.log !== undefined) {
+      // This can only fit by omitting an intrinsically oversized reference, even with no progress output.
+      delete record.log;
+      serialized = JSON.stringify(record);
+    }
+    if (Buffer.byteLength(serialized, 'utf8') + 1 > finalBudgetBytes) {
       throw new Error(`The minimal AI final record exceeds maxBytes=${this._maxBytes}`);
     }
-    this._write(`${serialized}\n`);
+    this._writeLine(`${serialized}\n`);
   }
 }

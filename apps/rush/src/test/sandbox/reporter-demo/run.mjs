@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateHeftOutput } from './validateHeftOutput.mjs';
 
 const scriptFolder = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptFolder, '..', '..', '..', '..', '..', '..');
@@ -177,39 +178,7 @@ for (const [name, events] of [
     }
   }
 }
-const heftChildEvents = heftChild
-  .split('\n')
-  .filter(Boolean)
-  .map((line) => JSON.parse(line));
-const correlatedChildEvents = heftChildEvents.filter((event) => event.parentSessionId);
-if (correlatedChildEvents.length === 0) {
-  throw new Error('The current Heft child did not negotiate structured reporting.');
-}
-if (
-  correlatedChildEvents.some(
-    (event, index) => index > 0 && event.sourceSequence <= correlatedChildEvents[index - 1].sourceSequence
-  )
-) {
-  throw new Error('The current Heft child source sequence was not preserved in order.');
-}
-if (
-  correlatedChildEvents.some(
-    (event) =>
-      event.source.packageName !== '@rushstack/heft' ||
-      !event.parentRequestId ||
-      !event.parentOperationId ||
-      event.scope?.operationId !== event.parentOperationId
-  )
-) {
-  throw new Error('The current Heft child events were not correlated to their parent operation.');
-}
-if (
-  correlatedChildEvents.some(
-    (event) => event.type === 'externalOutput' && Buffer.byteLength(event.payload.text, 'utf8') > 64 * 1024
-  )
-) {
-  throw new Error('The current Heft child exceeded the external output chunk limit.');
-}
+validateHeftOutput(parseNdjson(heftChild, 'Heft child'));
 
 const logMatch = plaintext.match(/^Full log: (.+)$/m);
 if (!logMatch || !path.isAbsolute(logMatch[1]) || !fs.existsSync(logMatch[1])) {

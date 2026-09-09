@@ -324,6 +324,7 @@ describe('AiReporter', () => {
     events: IReporterEventEnvelope<unknown>[],
     options?: { maxBytes?: number }
   ): {
+    output: string;
     records: Record<string, unknown>[];
     final: IAiFinalRecord;
   } {
@@ -337,7 +338,7 @@ describe('AiReporter', () => {
     }
     void reporter.closeAsync();
     const records: Record<string, unknown>[] = parseLines(output);
-    return { records, final: records[records.length - 1] as unknown as IAiFinalRecord };
+    return { output, records, final: records[records.length - 1] as unknown as IAiFinalRecord };
   }
 
   it('fails closed when commandResult is missing', async () => {
@@ -387,7 +388,15 @@ describe('AiReporter', () => {
       expect.objectContaining({
         category: 'command',
         severity: 'error',
-        summary: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
+        summary: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.',
+        context: { commandName: 'build' },
+        remediation: [
+          {
+            descriptionKey: 'remediation.review-command-usage',
+            command: 'rush build --help',
+            automatedExecutionSafety: 'safe'
+          }
+        ]
       })
     ]);
   });
@@ -670,8 +679,105 @@ describe('AiReporter', () => {
     }
     void reporter.closeAsync();
     const finalLine: string = output.trim().split('\n').pop() ?? '';
-    expect(Buffer.byteLength(finalLine, 'utf8')).toBeLessThanOrEqual(512);
+    expect(Buffer.byteLength(output, 'utf8')).toBeLessThanOrEqual(512);
     expect((JSON.parse(finalLine) as IAiFinalRecord).truncated).toBe(true);
+  });
+
+  it('includes status records and newline delimiters in the invocation budget', () => {
+    const { output, final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      ev('diagnosticEmitted', {
+        diagnosticId: 'root',
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error',
+        summary: 'x'.repeat(65115)
+      }),
+      ev('commandResult', { succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(Buffer.byteLength(output, 'utf8')).toBeLessThanOrEqual(64 * 1024);
+    expect(final).toMatchObject({ kind: 'ai.final', result: 'failed', exitCode: 1, truncated: true });
+    expect(output.endsWith('\n')).toBe(true);
+  });
+
+  it.each([true, false])(
+    'bounds watch output and retains the log when published early=%s',
+    async (early: boolean) => {
+      let output: string = '';
+      const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
+      const logPath: string = `/protected/${'logs/'.repeat(200)}full.log`;
+      const artifact: IReporterEventEnvelope<unknown> = ev('artifactAvailable', {
+        role: 'log',
+        path: logPath,
+        format: 'plaintext',
+        complete: true
+      });
+      reporter.report(ev('commandStarted', { commandName: 'build' }));
+      if (early) reporter.report(artifact);
+      for (let iterationId: number = 0; iterationId < 1000; iterationId++) {
+        reporter.report(ev('watchCycleCompleted', { succeeded: true, iterationId }));
+      }
+      if (!early) reporter.report(artifact);
+      reporter.report(ev('commandResult', { succeeded: false, exitCode: 1 }));
+      await reporter.closeAsync();
+
+      const records: Record<string, unknown>[] = parseLines(output);
+      const final: IAiFinalRecord = records.at(-1) as unknown as IAiFinalRecord;
+      expect(Buffer.byteLength(output, 'utf8')).toBeLessThanOrEqual(64 * 1024);
+      expect(records.filter(({ kind }) => kind === 'ai.watchCycle').length).toBeLessThan(1000);
+      expect(final).toMatchObject({ result: 'failed', exitCode: 1, truncated: true });
+      expect(final.log).toEqual({ path: logPath, format: 'plaintext', complete: true });
+      expect(final.diagnostics.length).toBeLessThanOrEqual(20);
+    }
+  );
+
+  it('reserves a late log reference before spending a tight progress budget', async () => {
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({
+      write: (text: string) => (output += text),
+      maxBytes: 2048
+    });
+    const logPath: string = `/protected/${'logs/'.repeat(250)}full.log`;
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    for (let iterationId: number = 0; iterationId < 100; iterationId++) {
+      reporter.report(ev('watchCycleCompleted', { succeeded: true, iterationId }));
+    }
+    expect(output).toBe('');
+    reporter.report(ev('artifactAvailable', { role: 'log', path: logPath, complete: true }));
+    reporter.report(ev('commandResult', { succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    const final: IAiFinalRecord = parseLines(output).at(-1) as unknown as IAiFinalRecord;
+    expect(Buffer.byteLength(output, 'utf8')).toBeLessThanOrEqual(2048);
+    expect(final.log?.path).toBe(logPath);
+    expect(final).toMatchObject({ result: 'failed', exitCode: 1, truncated: true });
+  });
+
+  it('budgets escaped paths and multibyte diagnostics without exposing secrets', () => {
+    const logPath: string = `C:\\logs\\${'x'.repeat(80)}\\report-\u00e9.log`;
+    const { output, final } = run(
+      [
+        ev('commandStarted', { commandName: 'build' }),
+        ev('diagnosticEmitted', {
+          code: 'RUSH_OPERATION_FAILED',
+          category: 'operation',
+          severity: 'error',
+          parameters: {
+            message: { value: '\u00e9\u{1f680}'.repeat(200), privacy: 'public' },
+            token: { value: 'budget-secret-value', privacy: 'secret' }
+          }
+        }),
+        ev('artifactAvailable', { role: 'log', path: logPath, complete: true }),
+        ev('commandResult', { succeeded: false, exitCode: 1 })
+      ],
+      { maxBytes: 512 }
+    );
+
+    expect(Buffer.byteLength(output, 'utf8')).toBeLessThanOrEqual(512);
+    expect(final.log?.path).toBe(logPath);
+    expect(final).toMatchObject({ kind: 'ai.final', result: 'failed', exitCode: 1 });
+    expect(output).not.toContain('budget-secret-value');
   });
 
   it('falls back to a minimal bounded record when fixed fields are oversized', () => {
@@ -766,13 +872,26 @@ describe('AiReporter', () => {
     ]);
 
     expect(final.diagnostics[0]).toMatchObject({
-      summaryKey: 'diagnostic.RUSH_NETWORK_AUTH_UNAUTHORIZED.summary',
       context: {
         registryUrl: 'https://registry.example.test/',
         token: '[secret]'
       }
     });
+    expect(final.diagnostics[0].summaryKey).toBeUndefined();
     expect(JSON.stringify(final)).not.toContain('qualification-fake-secret-token');
+  });
+
+  it('preserves nonstandard summary keys rather than treating them as derived metadata', () => {
+    const { final } = run([
+      ev('diagnosticEmitted', {
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error',
+        summaryKey: 'plugin.custom.failure-summary'
+      }),
+      ev('commandResult', { succeeded: false, exitCode: 1 })
+    ]);
+    expect(final.diagnostics[0].summaryKey).toBe('plugin.custom.failure-summary');
   });
 
   it('counts secret diagnostics while marking their omitted details as truncated', () => {

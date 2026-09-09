@@ -123,7 +123,7 @@ export class DefaultInteractiveReporter implements IReporter {
     // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
-    initializeAsync(): Promise<void>;
+    initializeAsync(context?: IReporterContext): Promise<void>;
     // (undocumented)
     readonly name: string;
     // (undocumented)
@@ -249,7 +249,6 @@ export interface IAiDiagnostic {
     readonly severity: string;
     // (undocumented)
     readonly summary?: string;
-    // (undocumented)
     readonly summaryKey?: string;
 }
 
@@ -886,8 +885,10 @@ export interface IReporterCompatibilityDecision {
 
 // @beta
 export interface IReporterContext {
+    readonly abortSignal?: AbortSignal;
     readonly destination?: string;
     readonly protocolVersion: IReporterProtocolVersion;
+    readonly runWithErrorHandling?: (action: () => void) => void;
 }
 
 // @beta
@@ -1478,7 +1479,7 @@ export class PlaintextReporter implements IReporter {
     // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
-    initializeAsync(): Promise<void>;
+    initializeAsync(context?: IReporterContext): Promise<void>;
     // (undocumented)
     readonly name: string;
     // (undocumented)
@@ -1601,6 +1602,8 @@ export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
+    // @internal
+    _disposeInitializedReportersAsync(failure?: unknown): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     // @internal
     _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;

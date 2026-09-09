@@ -8,6 +8,7 @@ import * as path from 'node:path';
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { ReporterPrivacyClassification } from '../events/ReporterPrivacyClassification';
+import type { IRushRemediationAction } from '../diagnostics/IRushRemediationAction';
 import type { IAiDiagnostic, IAiFinalRecord } from '../reporters/AiReporter';
 import { AiReporter } from '../reporters/AiReporter';
 import { FileReporter, type IFileReporterArtifact } from '../reporters/FileReporter';
@@ -18,6 +19,7 @@ import {
   AI_REPORTER_QUALIFICATION_THRESHOLDS,
   evaluateAiReporterQualification,
   type IAiReporterQualificationCaseResult,
+  type IAiReporterQualificationGateResult,
   type IAiReporterQualificationResult
 } from './AiReporterQualification';
 
@@ -91,6 +93,37 @@ interface ICaseRun {
   readonly normalizedPlaintextOutput: string;
   readonly normalizedLegacyOutput: string;
   readonly result: Omit<IAiReporterQualificationCaseResult, 'deterministic' | 'normalizedAiOutputSha256'>;
+}
+
+/** @internal */
+export function hasExpectedAiQualificationDiagnostic(
+  actual: IAiDiagnostic | undefined,
+  expected: ICorpusDiagnostic
+): boolean {
+  return Boolean(
+    actual &&
+      actual.code === expected.code &&
+      actual.category === expected.category &&
+      (actual.summaryKey ?? `diagnostic.${actual.code}.summary`) === expected.summaryKey &&
+      Object.keys(actual.context ?? {}).length === Object.keys(expected.parameters).length &&
+      Object.entries(expected.parameters).every(([name, parameter]) => {
+        const expectedValue: string | number | boolean =
+          parameter.privacy === 'public' ? parameter.value : `[${parameter.privacy}]`;
+        return actual.context?.[name] === expectedValue;
+      }) &&
+      expected.remediation.length > 0 &&
+      actual.remediation?.length === expected.remediation.length &&
+      expected.remediation.every((action, index) => {
+        const projected: IRushRemediationAction | undefined = actual.remediation?.[index];
+        return (
+          Boolean(action.command || action.documentationUrl) &&
+          projected?.descriptionKey === action.descriptionKey &&
+          projected.command === action.command &&
+          projected.documentationUrl === action.documentationUrl &&
+          projected.automatedExecutionSafety === action.automatedExecutionSafety
+        );
+      })
+  );
 }
 
 const CORPUS: readonly ICorpusCase[] = [
@@ -463,6 +496,79 @@ function parseAiOutput(output: string): {
   }
 }
 
+async function runInvocationBudgetGateAsync(tempRoot: string): Promise<IAiReporterQualificationGateResult> {
+  const failedCases: string[] = [];
+  let maximumBytes: number = 0;
+  for (const name of ['near-limit-diagnostic', 'watch-early-log', 'watch-late-log']) {
+    let output: string = '';
+    let sequence: number = 0;
+    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
+    const emit = (type: IReporterEventEnvelope<unknown>['type'], payload: unknown): void => {
+      reporter.report({
+        protocolVersion: { major: 1, minor: 1 },
+        eventId: `budget-${++sequence}`,
+        sessionId: 'qualification-budget',
+        sequence,
+        timestamp: FIXED_TIMESTAMP,
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.200.0' },
+        privacy: 'public',
+        required: true,
+        type,
+        payload
+      });
+    };
+    const logPath: string | undefined =
+      name === 'near-limit-diagnostic'
+        ? undefined
+        : path.join(tempRoot, ...Array<string>(name === 'watch-late-log' ? 200 : 1).fill('logs'), 'full.log');
+    const emitLog = (): void =>
+      emit('artifactAvailable', { role: 'log', path: logPath, format: 'plaintext', complete: true });
+    emit('commandStarted', { commandName: 'build' });
+    if (name === 'near-limit-diagnostic') {
+      emit('diagnosticEmitted', {
+        diagnosticId: 'root',
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error',
+        summary: 'x'.repeat(65115)
+      });
+    } else {
+      if (name === 'watch-early-log') emitLog();
+      for (let iterationId: number = 0; iterationId < 1000; iterationId++) {
+        emit('watchCycleCompleted', { succeeded: true, iterationId });
+      }
+      if (name === 'watch-late-log') emitLog();
+    }
+    emit('commandResult', { succeeded: false, exitCode: 1 });
+    await reporter.closeAsync();
+    const bytes: number = Buffer.byteLength(output, 'utf8');
+    maximumBytes = Math.max(maximumBytes, bytes);
+    const parsed: ReturnType<typeof parseAiOutput> = parseAiOutput(output);
+    const final: IAiFinalRecord | undefined = parsed.records.at(-1) as IAiFinalRecord | undefined;
+    if (
+      bytes > AI_REPORTER_QUALIFICATION_THRESHOLDS.maximumOutputBytesPerCase ||
+      !parsed.valid ||
+      final?.kind !== 'ai.final' ||
+      final.result !== 'failed' ||
+      final.exitCode !== 1 ||
+      !Array.isArray(final.diagnostics) ||
+      final.diagnostics.length > 20 ||
+      (logPath !== undefined && (final.log?.path !== logPath || final.log.complete !== true))
+    ) {
+      failedCases.push(name);
+    }
+  }
+  return {
+    id: 'size.invocation-boundary',
+    passed: failedCases.length === 0,
+    actual: maximumBytes,
+    threshold:
+      `<= ${AI_REPORTER_QUALIFICATION_THRESHOLDS.maximumOutputBytesPerCase} emitted UTF-8 bytes, ` +
+      'including delimiters, with a valid final result and preserved supplied log reference',
+    failedCases
+  };
+}
+
 function createEvents(testCase: ICorpusCase, logPath: string): IReporterEventEnvelope<unknown>[] {
   const events: IReporterEventEnvelope<unknown>[] = [];
   let sequence: number = 0;
@@ -793,15 +899,6 @@ async function runCaseAsync(
   const matchingDiagnostic: IAiDiagnostic | undefined = diagnostic
     ? final?.diagnostics.find(({ code }) => code === diagnostic.code)
     : undefined;
-  const expectedContextKeys: readonly string[] = diagnostic ? Object.keys(diagnostic.parameters).sort() : [];
-  const actualContextKeys: readonly string[] = Object.keys(matchingDiagnostic?.context ?? {}).sort();
-  const contextValuesMatch: boolean = diagnostic
-    ? Object.entries(diagnostic.parameters).every(([name, parameter]) => {
-        const expectedValue: string | number | boolean =
-          parameter.privacy === 'public' ? parameter.value : `[${parameter.privacy}]`;
-        return matchingDiagnostic?.context?.[name] === expectedValue;
-      })
-    : true;
   const fallbackMessages: readonly {
     readonly text: string;
     readonly privacy: ReporterPrivacyClassification;
@@ -809,6 +906,19 @@ async function runCaseAsync(
   const publicFallbackMessages: readonly string[] = fallbackMessages
     .filter(({ privacy }) => privacy === 'public')
     .map(({ text }) => text);
+  const expectedFallbackDiagnostic: ICorpusDiagnostic = {
+    code: 'RUSH_COMMAND_FAILED',
+    category: 'command',
+    summaryKey: 'diagnostic.RUSH_COMMAND_FAILED.summary',
+    parameters: { commandName: { value: 'build', privacy: 'public' } },
+    remediation: [
+      {
+        descriptionKey: 'remediation.review-command-usage',
+        command: 'rush build --help',
+        automatedExecutionSafety: 'safe'
+      }
+    ]
+  };
   const actionable: boolean =
     testCase.expectedResult === 'succeeded'
       ? true
@@ -816,13 +926,7 @@ async function runCaseAsync(
         ? Boolean(
             final?.result === 'failed' &&
               final.errorCodes.includes(diagnostic.code) &&
-              matchingDiagnostic?.category === diagnostic.category &&
-              matchingDiagnostic.summaryKey === diagnostic.summaryKey &&
-              expectedContextKeys.every((key) => actualContextKeys.includes(key)) &&
-              contextValuesMatch &&
-              matchingDiagnostic.remediation?.some(({ command, documentationUrl }) =>
-                Boolean(command || documentationUrl)
-              )
+              hasExpectedAiQualificationDiagnostic(matchingDiagnostic, diagnostic)
           )
         : Boolean(
             fallbackMessages.length > 0 &&
@@ -832,8 +936,10 @@ async function runCaseAsync(
               final.diagnosticCategoryCounts.command === fallbackMessages.length &&
               final.diagnostics.length === publicFallbackMessages.length &&
               final.diagnostics.every(
-                ({ category, severity, summary }, index) =>
-                  category === 'command' && severity === 'error' && summary === publicFallbackMessages[index]
+                (projected, index) =>
+                  projected.severity === 'error' &&
+                  projected.summary === publicFallbackMessages[index] &&
+                  hasExpectedAiQualificationDiagnostic(projected, expectedFallbackDiagnostic)
               ) &&
               final.truncated
           );
@@ -945,9 +1051,9 @@ async function runCaseAsync(
       name: testCase.name,
       scenario: testCase.scenario,
       expectedResult: testCase.expectedResult,
-      aiOutputBytes: Buffer.byteLength(normalizedAiOutput, 'utf8'),
-      plaintextOutputBytes: Buffer.byteLength(normalizedPlaintextOutput, 'utf8'),
-      legacyOutputBytes: Buffer.byteLength(normalizedLegacyOutput, 'utf8'),
+      aiOutputBytes: Buffer.byteLength(aiOutput, 'utf8'),
+      plaintextOutputBytes: Buffer.byteLength(plaintextOutput, 'utf8'),
+      legacyOutputBytes: Buffer.byteLength(legacyOutput, 'utf8'),
       actionable,
       privacySafe,
       fullLogValid,
@@ -1012,7 +1118,13 @@ export async function runAiReporterQualificationCorpusAsync(): Promise<IAiReport
         };
       }
     );
-    return evaluateAiReporterQualification(results);
+    const qualification: IAiReporterQualificationResult = evaluateAiReporterQualification(results);
+    const invocationBudget: IAiReporterQualificationGateResult = await runInvocationBudgetGateAsync(tempRoot);
+    return {
+      ...qualification,
+      passed: qualification.passed && invocationBudget.passed,
+      gates: [...qualification.gates, invocationBudget]
+    };
   } finally {
     await fs.promises.rm(tempRoot, { recursive: true, force: true });
   }
