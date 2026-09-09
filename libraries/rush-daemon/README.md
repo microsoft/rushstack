@@ -327,6 +327,14 @@ exit status. Native console ANSI bytes are preserved separately from color-aware
 output; pnpm synchronization keeps native quiet/debug behavior. Cancellation retains the
 existing typed global-request abort result rather than inventing a second exit policy.
 
+The Rushx spawn seam applies the existing terminal policy's TTY color/width
+overrides after lifecycle environment preparation. Non-TTY explicit environment
+values remain intact, and daemon process globals are never merged into a request.
+The standalone client keeps unknown interactive Rushx scripts (any TTY stdio) native
+before connecting or consuming input. Embedded clients may forward known pipe-safe
+scripts with terminal capabilities, but must declare controlling-terminal needs;
+the daemon does not turn child pipes into terminal devices.
+
 On Linux, completion also waits for the captured detached process group/session to disappear
 or contain only nonexecuting zombies. This uses a procps-compatible `ps --sid` with a bounded
 cleanup wait; signal delivery and the leader's stream closure alone do not authorize completion.

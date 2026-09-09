@@ -12,7 +12,10 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient, connectOrStartDaemonAsync, getDaemonLogFilePath } from '@rushstack/rush-client-core';
 import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
-import { removeTestFolderAsync, waitForTestProcessExitAsync } from '@rushstack/rush-daemon/lib/test/TestProcessExit';
+import {
+  removeTestFolderAsync,
+  waitForTestProcessExitAsync
+} from '@rushstack/rush-daemon/lib/test/TestProcessExit';
 import { readDaemonLockfile, removeDaemonArtifacts } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
@@ -116,8 +119,11 @@ describe('standalone rushx fallback', () => {
     const closed: Promise<unknown[]> = once(child, 'close');
     invocationClosures.push(closed);
     const [code] = await closed;
-    if (code === 0 && managementArgs?.[0] === 'daemon' &&
-        (managementArgs[1] === 'start' || managementArgs[1] === 'restart')) {
+    if (
+      code === 0 &&
+      managementArgs?.[0] === 'daemon' &&
+      (managementArgs[1] === 'start' || managementArgs[1] === 'restart')
+    ) {
       const { pid }: { pid: unknown } = JSON.parse(stdout);
       if (typeof pid !== 'number' || !Number.isSafeInteger(pid) || pid <= 0) {
         throw new Error('The started fixture daemon did not report a valid PID.');
@@ -133,7 +139,7 @@ describe('standalone rushx fallback', () => {
     expect(await invokeAsync(true, true)).toEqual(native);
   }, 15000);
 
-  it('falls back after the actual standalone host rejects an unsupported request', async () => {
+  it('keeps unknown interactive scripts on the native path even when a daemon is running', async () => {
     const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
     host = await RushDaemonHost.startAsync({
       repoRoot: folder,
@@ -144,8 +150,7 @@ describe('standalone rushx fallback', () => {
     const client: IInvocationResult = await invokeAsync(true, true, true);
     expect(client.code).toBe(native.code);
     expect(client.stdout).toBe(native.stdout);
-    expect(client.stderr).toContain('using in-process Rush');
-    expect(client.stderr).toContain(native.stderr);
+    expect(client).toEqual(native);
   }, 15000);
 
   it('starts idempotently and reports real readiness in CI without execution opt-in', async () => {
@@ -231,7 +236,7 @@ describe('standalone rushx fallback', () => {
     expect(fs.existsSync(logFilePath)).toBe(false);
   });
 
-  it('accepts an empty launcher log and rejects unsupported follow arguments', async () => {
+  it('accepts an empty launcher log and rejects extra follow arguments', async () => {
     fs.mkdirSync(path.dirname(logFilePath), { recursive: true, mode: 0o700 });
     fs.writeFileSync(logFilePath, '', { mode: 0o600 });
     expect(await invokeAsync(true, false, false, ['daemon', 'logs'])).toEqual({
@@ -239,7 +244,7 @@ describe('standalone rushx fallback', () => {
       stdout: '',
       stderr: ''
     });
-    expect((await invokeAsync(true, false, false, ['daemon', 'logs', '--follow'])).code).toBe(1);
+    expect((await invokeAsync(true, false, false, ['daemon', 'logs', '--follow', 'extra'])).code).toBe(1);
   });
 
   it('does not start an absent daemon when stop or restart cannot be acknowledged', async () => {
@@ -374,15 +379,21 @@ describe('standalone rushx fallback', () => {
       const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start'], {
         HOME: home,
         USERPROFILE: home,
-        RUSH_GLOBAL_FOLDER: path.join(folder, 'global')
+        RUSH_GLOBAL_FOLDER: path.join(folder, 'global'),
+        // Use Node's npm rather than a user-specific wrapper that depends on the real HOME.
+        PATH: [path.dirname(process.execPath), process.env.PATH].filter(Boolean).join(path.delimiter)
       });
       expect(result.code).toBe(1);
       expect(result.stderr).toContain('Cannot launch selected Rush 0.0.0');
       expect(result.stdout).toBe('');
       expect(registryRequests).toBeGreaterThan(0);
-      expect(fs.existsSync(getDaemonConnectionOptions(folder, '0.0.0', {}, false).paths.lockfilePath)).toBe(false);
+      expect(fs.existsSync(getDaemonConnectionOptions(folder, '0.0.0', {}, false).paths.lockfilePath)).toBe(
+        false
+      );
     } finally {
-      await new Promise<void>((resolve, reject) => registry.close((error) => error ? reject(error) : resolve()));
+      await new Promise<void>((resolve, reject) =>
+        registry.close((error) => (error ? reject(error) : resolve()))
+      );
     }
   }, 15000);
 
