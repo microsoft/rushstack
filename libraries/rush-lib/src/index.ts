@@ -168,9 +168,25 @@ export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 export {
   RushSession,
   type IRushSessionOptions,
+  type IRushSessionReporterOptions,
   type CloudBuildCacheProviderFactory,
   type CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
+
+export {
+  createRushDiagnostic,
+  parseReporterExtensionEventName,
+  type ICreateRushDiagnosticOptions,
+  type IReporterEventScope,
+  type IReporterEventSink,
+  type IRushDiagnostic,
+  type IScopedLogger,
+  type IScopedMessageOptions,
+  type IScopedReporter,
+  type ReporterExtensionEventName,
+  type ReporterJsonValue,
+  type ReporterPrivacyClassification
+} from '@rushstack/rush-reporter';
 
 export {
   type IRushCommand,
