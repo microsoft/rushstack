@@ -8,6 +8,11 @@
 parameters:
   - name: VersionPolicyName
     type: string
+  - name: BumpNonRushFirst
+    type: boolean
+    default: false
+  - name: PackageCohort
+    type: string
   - name: StageName
     type: string
   - name: StageDisplayName
@@ -71,9 +76,35 @@ stages:
 
           - template: /common/config/azure-pipelines/templates/build.yaml@self
 
-          - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
-            parameters:
-              VersionPolicyName: ${{ parameters.VersionPolicyName }}
+          - ${{ if eq(parameters.BumpNonRushFirst, true) }}:
+              # The Rush lockstep packages can depend on independently versioned packages. Preserve
+              # the old release ordering by applying all individual changes before the Rush bump.
+              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
+                parameters:
+                  VersionPolicyName: noRush
+
+              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
+                parameters:
+                  VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+          - ${{ else }}:
+              # "noRush" is a pipeline cohort, not a Rush version policy. Hide Rush change files so
+              # the independently scheduled non-Rush flow cannot consume lockstep release changes.
+              - script: >
+                  node common/scripts/publish-cohort.js partition-changes
+                  --cohort ${{ parameters.VersionPolicyName }}
+                  --backup-path $(Agent.TempDirectory)/excluded-publish-changes
+                displayName: 'Select ${{ parameters.VersionPolicyName }} change files'
+
+              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
+                parameters:
+                  VersionPolicyName: ${{ parameters.VersionPolicyName }}
+
+              - script: >
+                  node common/scripts/publish-cohort.js restore-changes
+                  --backup-path $(Agent.TempDirectory)/excluded-publish-changes
+                displayName: 'Restore other publishing cohort change files'
+                condition: succeededOrFailed()
 
           - bash: |
               git add -u -- common/changes
@@ -116,6 +147,14 @@ stages:
           - template: /common/config/azure-pipelines/templates/pack.yaml@self
             parameters:
               VersionPolicyName: ${{ parameters.VersionPolicyName }}
+              PackageCohort: ${{ parameters.PackageCohort }}
+
+          - bash: |
+              if [ "$(HasChanges)" = "true" ] && [ "$(HasPackages)" != "true" ]; then
+                echo "##[error]Version bump produced no unpublished package tarballs."
+                exit 1
+              fi
+            displayName: 'Verify package artifact'
 
           - template: /common/config/azure-pipelines/templates/post-publish.yaml@self
 
