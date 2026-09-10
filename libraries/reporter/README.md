@@ -94,6 +94,10 @@ text, as well as the actual bytes on each stdout/stderr stream.
 
 ## Full-detail log completion
 
+The automatic invocation log retains debug detail regardless of the primary log level, including
+in `--reporter=file` mode. An additional `--output=file://...` destination can independently select
+its level with `?logLevel=...`; it does not replace or reduce the canonical full-detail artifact.
+
 The frontend reports an invocation log as complete only after its accepted events and grouped
 output have been persisted and the file has closed successfully. Its final `artifactAvailable`
 notification is delivered to the remaining reporters after that close; it is not appended to the
