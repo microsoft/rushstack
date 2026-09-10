@@ -810,6 +810,7 @@ export async function initializeRushReporterHostAsync(
         enabled: false,
         reporterControlsOwnedByFrontend: selection.reporterControlsOwnedByFrontend,
         reporterValueFlagsToStrip: selection.reporterValueFlagsToStrip,
+        ...(selection.reporterFlagsToStrip ? { reporterFlagsToStrip: selection.reporterFlagsToStrip } : {}),
         reason: 'bootstrap compatibility fallback'
       };
       sink = new LegacyFallbackSink();
