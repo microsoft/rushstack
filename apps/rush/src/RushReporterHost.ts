@@ -35,6 +35,11 @@ import {
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
 } from '@rushstack/rush-reporter';
 
+import {
+  getReporterCommandLineOwnership,
+  type IReporterCommandLineOwnership
+} from './RushReporterCommandLine';
+
 export interface IRushReporterOutputStream {
   readonly isTTY?: boolean;
   readonly columns?: number;
@@ -68,6 +73,7 @@ export interface IRushReporterSelection {
   readonly enabled: boolean;
   readonly reporterControlsOwnedByFrontend: boolean;
   readonly reporterValueFlagsToStrip: readonly string[];
+  readonly reporterFlagsToStrip?: readonly string[];
   readonly reason:
     | 'explicit --reporter'
     | 'repository experiment'
@@ -385,7 +391,8 @@ function readValue(
 
 export function stripReporterValueControls(
   argv: readonly string[],
-  valueFlagsToStrip: ReadonlySet<string> = REPORTER_VALUE_FLAGS
+  valueFlagsToStrip: ReadonlySet<string> = REPORTER_VALUE_FLAGS,
+  flagsToStrip: ReadonlySet<string> = new Set()
 ): string[] {
   const result: string[] = [];
   for (let index: number = 0; index < argv.length; index++) {
@@ -393,6 +400,9 @@ export function stripReporterValueControls(
     if (argument === '--') {
       result.push(...argv.slice(index));
       break;
+    }
+    if (flagsToStrip.has(argument)) {
+      continue;
     }
     const equalsIndex: number = argument.indexOf('=');
     const flagName: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
@@ -410,7 +420,8 @@ export function stripReporterValueControls(
 function parseReporterControls(
   argv: readonly string[],
   includeOutputAndLogLevelControls: boolean,
-  tolerateMissingReporterValue: boolean = false
+  tolerateMissingReporterValue: boolean = false,
+  valueFlagsToParse: ReadonlySet<string> = REPORTER_VALUE_FLAGS
 ): IParsedReporterControls {
   const reporters: string[] = [];
   const logLevels: string[] = [];
@@ -442,21 +453,15 @@ function parseReporterControls(
       continue;
     }
     if (includeOutputAndLogLevelControls) {
-      const logLevel: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
-        argv,
-        index,
-        '--log-level'
-      );
+      const logLevel: { readonly value: string; readonly consumedNext: boolean } | undefined =
+        valueFlagsToParse.has('--log-level') ? readValue(argv, index, '--log-level') : undefined;
       if (logLevel) {
         logLevels.push(logLevel.value);
         index += logLevel.consumedNext ? 1 : 0;
         continue;
       }
-      const output: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
-        argv,
-        index,
-        '--output'
-      );
+      const output: { readonly value: string; readonly consumedNext: boolean } | undefined =
+        valueFlagsToParse.has('--output') ? readValue(argv, index, '--output') : undefined;
       if (output) {
         outputs.push(output.value);
         index += output.consumedNext ? 1 : 0;
@@ -754,6 +759,28 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     return 'rush';
   }
 
+  let commandOwnership: IReporterCommandLineOwnership | undefined;
+  function getCommandOwnership(): IReporterCommandLineOwnership {
+    if (!commandOwnership) {
+      const separator: number = argv.indexOf('--');
+      const actionName: string | undefined = stripReporterValueControls(
+        separator < 0 ? argv : argv.slice(0, separator)
+      ).find((argument) => !argument.startsWith('-'));
+      commandOwnership = getReporterCommandLineOwnership(actionName, cwd);
+    }
+    return commandOwnership;
+  }
+
+  function getFlagsToStrip(controls: IParsedReporterControls): readonly string[] {
+    if (controls.verbose) {
+      const ownership: IReporterCommandLineOwnership = getCommandOwnership();
+      if (ownership.known && !ownership.parameters.has('--verbose')) {
+        return ['--verbose'];
+      }
+    }
+    return [];
+  }
+
   if (requestedReporter === undefined) {
     const environmentReporter: string | undefined = env.RUSH_REPORTER;
     if (environmentReporter?.trim()) {
@@ -764,53 +791,28 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     }
     if (options.repositoryOptIn) {
       const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
-      const ownsOutputControls: boolean = hasReporterOutputControl(argv);
-      const ownsLogLevelControls: boolean = hasReporterLogLevelControl(argv);
-      const candidateValueControls: IParsedReporterControls =
-        ownsOutputControls || ownsLogLevelControls ? parseReporterControls(argv, true) : selectionControls;
-      const ownsLogLevelControl: boolean =
-        ownsLogLevelControls &&
-        !ownsOutputControls &&
-        candidateValueControls.logLevels.length > 0 &&
-        candidateValueControls.logLevels.every((logLevel: string) => isSupportedLogLevel(logLevel));
-      const ownsValueControls: boolean = ownsOutputControls || ownsLogLevelControl;
-      const ownsEnvironmentControls: boolean = env.RUSH_LOG_LEVEL !== undefined;
-      const parsedValueControls: IParsedReporterControls = ownsValueControls
-        ? candidateValueControls
-        : selectionControls;
-      const outputControlsAreUnambiguous: boolean =
-        !parsedValueControls.logLevels.some((logLevel: string) => !isSupportedLogLevel(logLevel)) &&
-        parsedValueControls.outputs.every((outputValue: string) => {
-          try {
-            const output: IReporterOutputTarget = parseOutputControl(outputValue);
-            return output.reporter === 'file' || output.reporter === 'json';
-          } catch {
-            return false;
-          }
-        });
-      const implicitControls: IParsedReporterControls =
-        ownsOutputControls && !outputControlsAreUnambiguous
-          ? {
-              ...parsedValueControls,
-              logLevels: [],
-              outputs: []
-            }
-          : parsedValueControls;
-      validateReporterControlMultiplicity(implicitControls, ownsValueControls);
+      const ownership: IReporterCommandLineOwnership = getCommandOwnership();
+      const valueFlagsToParse: Set<string> = new Set(
+        ['--output', '--log-level'].filter((flag) => ownership.known && !ownership.parameters.has(flag))
+      );
+      const controls: IParsedReporterControls = parseReporterControls(argv, true, false, valueFlagsToParse);
+      validateReporterControlMultiplicity(controls, true);
+      const reporterValueFlagsToStrip: string[] = [];
+      if (controls.outputs.length > 0) reporterValueFlagsToStrip.push('--output');
+      if (controls.logLevels.length > 0) reporterValueFlagsToStrip.push('--log-level');
+      const reporterFlagsToStrip: readonly string[] = getFlagsToStrip(controls);
       return {
         reporter: commandJson ? 'file' : isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
-        logLevel: resolveLogLevel(implicitControls, env, true, true),
-        outputs: resolveOutputs(implicitControls.outputs, cwd),
+        logLevel: resolveLogLevel(controls, env, true, true),
+        outputs: resolveOutputs(controls.outputs, cwd),
         commandJson,
         enabled: true,
         reporterControlsOwnedByFrontend:
-          ownsLogLevelControl || ownsEnvironmentControls || implicitControls.outputs.length > 0,
-        reporterValueFlagsToStrip:
-          implicitControls.outputs.length > 0
-            ? REPORTER_OUTPUT_VALUE_FLAGS
-            : ownsLogLevelControl
-              ? ['--log-level']
-              : [],
+          reporterValueFlagsToStrip.length > 0 ||
+          reporterFlagsToStrip.length > 0 ||
+          env.RUSH_LOG_LEVEL !== undefined,
+        reporterValueFlagsToStrip,
+        ...(reporterFlagsToStrip.length > 0 ? { reporterFlagsToStrip } : {}),
         reason: 'repository experiment'
       };
     }
@@ -863,6 +865,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     enabled: true,
     reporterControlsOwnedByFrontend: true,
     reporterValueFlagsToStrip: ALL_REPORTER_VALUE_FLAGS,
+    reporterFlagsToStrip: getFlagsToStrip(controls),
     reason: 'explicit --reporter'
   };
 }
