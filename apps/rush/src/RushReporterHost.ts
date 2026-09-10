@@ -536,6 +536,42 @@ function hasHelpControl(argv: readonly string[]): boolean {
   return false;
 }
 
+function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly string[] {
+  const outputs: (string | undefined)[] = [];
+  const logLevels: (string | undefined)[] = [];
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    const equalsIndex: number = argument.indexOf('=');
+    const flag: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
+    const values: (string | undefined)[] | undefined =
+      flag === '--output' ? outputs : flag === '--log-level' ? logLevels : undefined;
+    if (values) {
+      const nextArgument: string | undefined = argv[index + 1];
+      values.push(
+        equalsIndex >= 0
+          ? argument.slice(equalsIndex + 1)
+          : nextArgument && !nextArgument.startsWith('-')
+            ? argv[++index]
+            : undefined
+      );
+    }
+  }
+
+  // Help must tolerate command-owned flags without parsing their values as reporter controls.
+  const logLevelsAreOwned: boolean = logLevels.every(
+    (value: string | undefined) => value !== undefined && isSupportedLogLevel(value)
+  );
+  const isReporterOutput = (value: string | undefined): boolean =>
+    value !== undefined && /^(?:file|json):\/\//.test(value);
+  if (outputs.some(isReporterOutput)) {
+    return outputs.every(isReporterOutput) && logLevelsAreOwned ? REPORTER_OUTPUT_VALUE_FLAGS : [];
+  }
+  return logLevels.length > 0 && logLevelsAreOwned ? ['--log-level'] : [];
+}
+
 function resolveLogLevel(
   controls: IParsedReporterControls,
   env: Record<string, string | undefined>,
@@ -736,14 +772,24 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
   }
 
   if (hasHelpControl(argv)) {
+    const reporterValueFlagsToStrip: readonly string[] =
+      requestedReporter !== undefined
+        ? requestedReporter === 'legacy'
+          ? REPORTER_SELECTION_FLAG
+          : ALL_REPORTER_VALUE_FLAGS
+        : options.repositoryOptIn
+          ? getImplicitHelpValueFlagsToStrip(argv)
+          : [];
     return {
       reporter: 'legacy',
       logLevel: 'normal',
       outputs: [],
       commandJson,
       enabled: false,
-      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
-      reporterValueFlagsToStrip: requestedReporter === undefined ? [] : REPORTER_SELECTION_FLAG,
+      reporterControlsOwnedByFrontend:
+        reporterValueFlagsToStrip.length > 0 ||
+        (options.repositoryOptIn === true && env.RUSH_LOG_LEVEL !== undefined),
+      reporterValueFlagsToStrip,
       reason: requestedReporter === undefined ? 'pre-major legacy default' : 'explicit --reporter'
     };
   }
