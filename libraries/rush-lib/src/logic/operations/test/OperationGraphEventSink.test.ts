@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Deterministic Stopwatch timing, matching OperationGraph.test.ts
+// Exercise the color-preserving terminal pipeline on every test platform.
 jest.mock('@rushstack/terminal', () => {
   const originalModule = jest.requireActual('@rushstack/terminal');
   return {
@@ -38,6 +38,7 @@ import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rus
 import {
   MockWritable,
   StringBufferTerminalProvider,
+  TerminalChunkKind,
   TerminalProviderSeverity,
   type ITerminalChunk
 } from '@rushstack/terminal';
@@ -59,6 +60,9 @@ import {
   RushSession
 } from '../../../pluginFramework/RushSession';
 import { attachReporterOperationEventSink } from '../ReporterOperationEventSink';
+import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
+import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
+import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -319,7 +323,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
     tappedGraph.eventSink = new RecordingSink();
     await tappedGraph.executeAsync({});
 
-    expect(tappedWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(tappedWritable.chunks).toEqual(plainWritable.chunks);
   });
 
   it('emits phase-aware status and diagnostic events without routing operation chunks', async () => {
@@ -372,7 +376,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
       })
     );
     expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
-    expect(mockWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(mockWritable.chunks).toEqual(plainWritable.chunks);
   });
 
   it('emits the opted-in canonical stream without duplicating or losing operation chunks', async () => {
@@ -423,7 +427,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
     attachReporterOperationEventSink(graph, rushSession, 'build');
     await graph.executeAsync({});
 
-    expect(streamedWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(streamedWritable.chunks).toEqual(plainWritable.chunks);
 
     const operationEvents: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
       ({ scope }) => scope?.operationId === '@scope/project#phase'
@@ -1014,11 +1018,59 @@ describe('OperationGraph event sink (dual-emit)', () => {
     }
   });
 
+  it('registers final silence after the standard plugin disables unchanged watch operations', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'unchanged-watch' }
+    });
+    const execute: jest.Mock<Promise<OperationStatus>, []> = jest.fn(async () => OperationStatus.Success);
+    const operations: Set<Operation> = new Set(
+      ['first', 'second'].map((name) =>
+        createOperation(name, new MockOperationRunner(name, execute), mockPhase, '@scope/unchanged')
+      )
+    );
+    const graph: OperationGraph = new OperationGraph(operations, createGraphOptions(mockWritable, false));
+    const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+    new PhasedOperationPlugin().apply(hooks);
+    await hooks.onGraphCreatedAsync.promise(graph, {} as IOperationGraphContext);
+    const registrationSink: RecordingSink = new RecordingSink();
+    graph.eventSink = registrationSink;
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    const inputsSnapshot: IInputsSnapshot = {
+      hashes: new Map(),
+      rootDirectory: '/repo',
+      hasUncommittedChanges: false,
+      getTrackedFileHashesForOperation: () => new Map(),
+      getOperationOwnStateHash: () => 'unchanged'
+    };
+
+    await graph.executeAsync({ inputsSnapshot });
+    const eventsAfterFirstRun: IReporterEmitEventInput<unknown>[] = [...reporterSink.inputs];
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(eventsAfterFirstRun.some(({ type }) => type === 'operationRegistered')).toBe(true);
+    expect(registrationSink.registered).toEqual([
+      ['first', false],
+      ['second', false]
+    ]);
+
+    await graph.executeAsync({ inputsSnapshot });
+
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect([...operations].every((operation) => operation.enabled)).toBe(true);
+    expect(registrationSink.registered.slice(2)).toEqual([
+      ['first', true],
+      ['second', true]
+    ]);
+    expect(reporterSink.inputs).toEqual(eventsAfterFirstRun);
+  });
+
   it('leaves stdout, stderr, and StreamCollator rendering byte-identical with shadow reporting', async () => {
     const createOutputRunner = (): MockOperationRunner =>
       new MockOperationRunner('output', async (terminal: CollatedTerminal) => {
-        terminal.writeStdoutLine('shadow parity stdout');
-        terminal.writeStderrLine('shadow parity stderr');
+        terminal.writeStdoutLine('\u001b[32mshadow parity stdout\u001b[0m');
+        terminal.writeStderrLine('\u001b[31mshadow parity stderr\u001b[0m');
         return OperationStatus.Success;
       });
 
@@ -1046,7 +1098,26 @@ describe('OperationGraph event sink (dual-emit)', () => {
     attachReporterOperationEventSink(shadowGraph, rushSession, 'build');
     expect(shadowGraph.eventSink?.onOperationChunk).toBeUndefined();
     await shadowGraph.executeAsync({});
-    expect(shadowWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(shadowWritable.chunks).toEqual(plainWritable.chunks);
+    for (const [kind, text] of [
+      [TerminalChunkKind.Stdout, '\u001b[32mshadow parity stdout\u001b[0m'],
+      [TerminalChunkKind.Stderr, '\u001b[31mshadow parity stderr\u001b[0m']
+    ] as const) {
+      const plainBytes: Buffer = Buffer.from(
+        plainWritable.chunks
+          .filter((chunk) => chunk.kind === kind)
+          .map((chunk) => chunk.text)
+          .join('')
+      );
+      const shadowBytes: Buffer = Buffer.from(
+        shadowWritable.chunks
+          .filter((chunk) => chunk.kind === kind)
+          .map((chunk) => chunk.text)
+          .join('')
+      );
+      expect(plainBytes.includes(Buffer.from(text))).toBe(true);
+      expect(shadowBytes).toEqual(plainBytes);
+    }
     expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
   });
 });

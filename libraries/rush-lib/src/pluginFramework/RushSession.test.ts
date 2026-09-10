@@ -24,6 +24,7 @@ import {
   _getRushSessionLifecycleEmitter,
   _getRushSessionTelemetryAggregate,
   _isRushSessionErrorRepresented,
+  _setRushSessionExitStatusOptions,
   type IRushSessionReporterOptions,
   RushSession
 } from './RushSession';
@@ -323,6 +324,35 @@ describe(RushSession.name, () => {
         })
       ).toEqual({ exitCode: 1, outcome: 'failed' });
     }
+  });
+
+  it('retains command cancellation through completion and scoped observations, but not the next command', () => {
+    const session: RushSession = createSession({
+      eventSink: new CapturingSink(),
+      sessionId: 'cancelled-command'
+    });
+    const pluginSession: RushSession = _createRushSessionForPlugin(session, () => ({
+      packageName: '@acme/plugin',
+      packageVersion: '1.0.0'
+    }));
+    const emitter: LifecycleEmitter = _getRushSessionLifecycleEmitter(session, { commandName: 'build' })!;
+    emitter.emitCommandStarted({ commandName: 'build' });
+    _setRushSessionExitStatusOptions(session, { cancelled: true });
+    emitter.emitCommandResult({ commandName: 'build', succeeded: true, exitCode: 0 });
+    emitter.emitCommandCompleted({ commandName: 'build', exitCode: 0 });
+    emitter.emitSessionCompleted({ exitCode: 0 });
+
+    expect(_getRushSessionDerivedExitStatus(session)).toEqual({ exitCode: 1, outcome: 'cancelled' });
+    expect(_getRushSessionDerivedExitStatus(pluginSession)).toEqual({ exitCode: 1, outcome: 'cancelled' });
+    expect(_getRushSessionDerivedExitStatus(session, { cancelled: false })).toEqual({
+      exitCode: 0,
+      outcome: 'succeeded'
+    });
+    expect(_getRushSessionDerivedExitStatus(session, { signal: 'SIGTERM' })?.outcome).toBe('signal');
+    expect(_getRushSessionDerivedExitStatus(session)).toEqual({ exitCode: 1, outcome: 'cancelled' });
+
+    emitter.emitCommandStarted({ commandName: 'build' });
+    expect(_getRushSessionDerivedExitStatus(pluginSession)).toEqual({ exitCode: 0, outcome: 'succeeded' });
   });
 
   it('excludes non-public plugin envelopes from the shadow telemetry projection', () => {

@@ -77,6 +77,7 @@ import {
   _correlateRushSessionError,
   _flushRushSessionReporterAsync,
   _getRushSessionDerivedExitStatus,
+  _setRushSessionExitStatusOptions,
   _getRushSessionLifecycleEmitter,
   _getRushSessionReporterSourceVersion,
   _isRushSessionOperationStreamEnabled,
@@ -396,6 +397,16 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
+  public override async executeWithoutErrorHandlingAsync(args?: string[]): Promise<void> {
+    try {
+      await super.executeWithoutErrorHandlingAsync(args);
+    } catch (error) {
+      // Capture the original parse error before the base executeAsync renders it and returns false.
+      this._emitReporterFailureDiagnostic(error as Error, !this._commandLifecycleEmitter);
+      throw error;
+    }
+  }
+
   protected override async onExecuteAsync(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
@@ -676,20 +687,35 @@ export class RushCommandLineParser extends CommandLineParser {
     );
   }
 
-  private _reportErrorAndSetExitCode(error: Error): void {
+  private _emitReporterFailureDiagnostic(error: Error, includeMessage: boolean = false): void {
     const rushSession: RushSession | undefined = this.rushSession;
-    if (rushSession && !_isRushSessionErrorRepresented(rushSession, error)) {
+    const emitter: LifecycleEmitter | undefined =
+      this._commandLifecycleEmitter ?? this._sessionLifecycleEmitter;
+    if (rushSession && emitter && !_isRushSessionErrorRepresented(rushSession, error)) {
       const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_COMMAND_FAILED', {
         parameters: {
           commandName: {
             value: this.selectedAction?.actionName ?? 'unknown',
             privacy: 'public'
-          }
+          },
+          ...(includeMessage
+            ? {
+                message: {
+                  value: error instanceof Error ? error.message : String(error),
+                  privacy: 'local-sensitive' as const
+                }
+              }
+            : {})
         }
       });
-      this._commandLifecycleEmitter?.emitDiagnostic(diagnostic);
+      emitter.emitDiagnostic(diagnostic);
       _correlateRushSessionError(rushSession, error, diagnostic.diagnosticId);
     }
+  }
+
+  private _reportErrorAndSetExitCode(error: Error): void {
+    const rushSession: RushSession | undefined = this.rushSession;
+    this._emitReporterFailureDiagnostic(error);
 
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
@@ -787,6 +813,14 @@ export class RushCommandLineParser extends CommandLineParser {
       return;
     }
     this._reporterCompletionEmitted = true;
+
+    if (this.rushSession) {
+      _setRushSessionExitStatusOptions(this.rushSession, {
+        cancelled:
+          this.selectedAction instanceof PhasedScriptAction &&
+          this.selectedAction.sessionAbortController.signal.aborted
+      });
+    }
 
     const commandName: string | undefined = this.selectedAction?.actionName;
     if (commandName && this._commandLifecycleEmitter) {
