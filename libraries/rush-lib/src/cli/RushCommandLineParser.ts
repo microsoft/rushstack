@@ -80,7 +80,8 @@ import {
   _getRushSessionLifecycleEmitter,
   _getRushSessionReporterSourceVersion,
   _isRushSessionOperationStreamEnabled,
-  _isRushSessionErrorRepresented
+  _isRushSessionErrorRepresented,
+  _setRushSessionExitStatusOptions
 } from '../pluginFramework/RushSession';
 
 /**
@@ -840,6 +841,12 @@ export class RushCommandLineParser extends CommandLineParser {
       return;
     }
     this.#reporterCompletionEmitted = true;
+
+    _setRushSessionExitStatusOptions(this.rushSession, {
+      cancelled:
+        this.selectedAction instanceof PhasedScriptAction &&
+        this.selectedAction.sessionAbortController.signal.aborted
+    });
 
     const commandName: string | undefined = this.selectedAction?.actionName;
     if (commandName && this.#commandLifecycleEmitter) {
