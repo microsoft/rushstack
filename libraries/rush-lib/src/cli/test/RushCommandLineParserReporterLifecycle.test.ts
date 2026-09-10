@@ -420,8 +420,9 @@ describe('RushCommandLineParser reporter lifecycle', () => {
           'process.stdout.write("watch child output\\n");\n'
         );
       }
-      execFileSync('git', ['init', '--quiet'], { cwd: repoPath });
-      execFileSync('git', ['add', '.'], { cwd: repoPath });
+      // Capture successful fixture setup diagnostics; failed Git commands still throw with their stderr.
+      execFileSync('git', ['init', '--quiet'], { cwd: repoPath, stdio: 'pipe' });
+      execFileSync('git', ['add', '.'], { cwd: repoPath, stdio: 'pipe' });
       execFileSync(
         'git',
         [
@@ -436,7 +437,7 @@ describe('RushCommandLineParser reporter lifecycle', () => {
           '-m',
           'Initialize watch fixture'
         ],
-        { cwd: repoPath }
+        { cwd: repoPath, stdio: 'pipe' }
       );
       const sink: CapturingReporterSink = new CapturingReporterSink();
       const exitSpy: jest.SpyInstance = jest
