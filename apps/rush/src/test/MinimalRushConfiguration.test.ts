@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
-import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
 
@@ -115,6 +115,37 @@ describe(MinimalRushConfiguration.name, () => {
     ]);
   });
 
+  it.each<[string, string[], string | undefined, boolean]>([
+    ['legacy', ['build', '--verbose'], undefined, true],
+    ['explicit JSON', ['build', '--reporter=json'], undefined, false],
+    ['explicit legacy', ['build', '--reporter=legacy'], undefined, true],
+    ['emergency legacy', ['build', '--reporter=json'], 'legacy', true],
+    ['help', ['build', '--reporter=json', '--help'], undefined, true],
+    ['custom reporter', ['custom', '--reporter=junit'], undefined, true],
+    ['custom flag', ['custom', '--reporter', '--verbose'], undefined, true],
+    ['pass-through', ['build', '--', '--reporter=json'], undefined, true],
+    ['quiet', ['--quiet', 'build'], undefined, false]
+  ])('preserves discovery ownership when rush.json cannot load: %s', (name, args, reporter, visible) => {
+    void name;
+    const repo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(process, 'cwd').mockReturnValue(path.join(repo, 'project'));
+    jest.spyOn(JsonFile, 'load').mockImplementation(() => {
+      throw new SyntaxError('Malformed rush.json');
+    });
+    process.argv = ['node', 'rush', ...args];
+    if (reporter === undefined) {
+      delete process.env.RUSH_REPORTER;
+    } else {
+      process.env.RUSH_REPORTER = reporter;
+    }
+
+    expect(MinimalRushConfiguration.loadFromDefaultLocation()).toBeUndefined();
+    expect(consoleLog.mock.calls).toEqual(
+      visible ? [[`Found configuration in ${path.join(repo, 'rush.json')}`], ['']] : []
+    );
+  });
+
   it('suppresses legacy discovery output for an explicit reporter', () => {
     const legacyRepo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
     const consoleLog: jest.SpiedFunction<typeof console.log> = jest
@@ -123,6 +154,21 @@ describe(MinimalRushConfiguration.name, () => {
     jest.spyOn(PackageJsonLookup, 'loadOwnPackageJson').mockReturnValue({
       name: '@microsoft/rush',
       version: '2.5.0'
+    });
+
+    it('uses the caller-owned discovery writer when rush.json cannot load', () => {
+      const repo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+      const writeLine = jest.fn();
+      jest.spyOn(process, 'cwd').mockReturnValue(repo);
+      jest.spyOn(JsonFile, 'load').mockImplementation(() => {
+        throw new SyntaxError('Malformed rush.json');
+      });
+      process.argv = ['node', 'rush', 'build'];
+
+      expect(MinimalRushConfiguration.loadFromDefaultLocation(writeLine)).toBeUndefined();
+      expect(writeLine.mock.calls).toEqual([[`Found configuration in ${path.join(repo, 'rush.json')}`], ['']]);
+      expect(consoleLog).not.toHaveBeenCalled();
     });
     jest.spyOn(process, 'cwd').mockReturnValue(path.join(legacyRepo, 'project'));
     process.argv = ['node', 'rush', 'build', '--verbose', '--reporter=json'];

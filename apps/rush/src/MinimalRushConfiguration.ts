@@ -65,32 +65,28 @@ export class MinimalRushConfiguration {
     if (rushJsonLocation) {
       const minimalRushConfigurationJson: IMinimalRushConfigurationJson | undefined =
         _loadConfigurationJson(rushJsonLocation);
+      const explicitReporter: ReporterName | undefined = _getExplicitReporter(process.argv.slice(2));
+      const legacyFallbackRequested: boolean =
+        explicitReporter === 'legacy' ||
+        process.env.RUSH_REPORTER?.trim().toLowerCase() === 'legacy' ||
+        _hasHelpControl(process.argv.slice(2));
+      let configuration: MinimalRushConfiguration | undefined;
+      let legacyPresentation: boolean = legacyFallbackRequested || explicitReporter === undefined;
       if (minimalRushConfigurationJson) {
-        const configuration: MinimalRushConfiguration = new MinimalRushConfiguration(
-          minimalRushConfigurationJson,
-          rushJsonLocation
-        );
-        const explicitReporter: ReporterName | undefined = _getExplicitReporter(process.argv.slice(2));
+        configuration = new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonLocation);
         const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
         const effectiveRushVersion: string = getRushPreviewVersion() ?? configuration.rushVersion;
-        const legacyFallbackRequested: boolean =
-          explicitReporter === 'legacy' ||
-          process.env.RUSH_REPORTER?.trim().toLowerCase() === 'legacy' ||
-          _hasHelpControl(process.argv.slice(2)) ||
-          (effectiveRushVersion !== currentPackageVersion && explicitReporter === undefined);
-        if (
-          showVerbose &&
-          (legacyFallbackRequested ||
-            (!configuration.useRushReporter &&
-              (explicitReporter === undefined || explicitReporter === 'legacy')))
-        ) {
-          // Preserve the legacy discovery message exactly when the reporter path is not taking ownership.
-          writeLine('Found configuration in ' + rushJsonLocation);
-          writeLine('');
-        }
-        return configuration;
+        legacyPresentation =
+          legacyFallbackRequested ||
+          (effectiveRushVersion !== currentPackageVersion && explicitReporter === undefined) ||
+          (!configuration.useRushReporter && explicitReporter === undefined);
       }
-      return undefined;
+      if (showVerbose && legacyPresentation) {
+        // Preserve discovery even when the full engine must report a configuration load error.
+        writeLine('Found configuration in ' + rushJsonLocation);
+        writeLine('');
+      }
+      return configuration;
     } else {
       return undefined;
     }
