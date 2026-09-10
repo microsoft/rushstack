@@ -80,7 +80,9 @@ export interface IFileReporterArtifact {
   readonly path?: string;
 
   /**
-   * Whether every event and grouped output chunk has been persisted.
+   * Whether all events and grouped output chunks accepted before closing were persisted
+   * and the log closed successfully. The frontend publishes the final completeness
+   * notification after closure; that notification is not appended to this log.
    */
   readonly complete: boolean;
 }
