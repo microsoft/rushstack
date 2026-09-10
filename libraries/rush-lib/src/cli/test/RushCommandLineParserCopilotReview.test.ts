@@ -177,9 +177,14 @@ describe('old review baseline parser compatibility', () => {
     expect(sink.events.at(-1)?.payload).toMatchObject({ exitCode: 0 });
   });
 
-  it.each([false, true])(
-    'observes a real watch cancellation without changing legacy exit (shadow: %s)',
-    async (reporting) => {
+  it.each([
+    { reporting: false, useAlias: false },
+    { reporting: true, useAlias: false },
+    { reporting: false, useAlias: true },
+    { reporting: true, useAlias: true }
+  ])(
+    'observes a real watch cancellation without changing legacy exit (shadow: $reporting, alias: $useAlias)',
+    async ({ reporting, useAlias }) => {
       const repoPath: string = await copyRepositoryAsync();
       JsonFile.save(
         {
@@ -231,8 +236,16 @@ describe('old review baseline parser compatibility', () => {
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
       const watchSpy: jest.SpyInstance = jest.spyOn(fs, 'watch');
+      const cwd: string = useAlias ? path.join(path.dirname(repoPath), 'repo-alias') : repoPath;
+      if (useAlias) {
+        await fs.promises.symlink(
+          fs.realpathSync.native(repoPath),
+          cwd,
+          process.platform === 'win32' ? 'junction' : 'dir'
+        );
+      }
       const parser: RushCommandLineParser = new RushCommandLineParser({
-        cwd: repoPath,
+        cwd,
         reporter: reporting ? { eventSink: sink, sessionId: 'real-watch-cancellation' } : undefined
       });
       await new FlagFile(
@@ -260,6 +273,7 @@ describe('old review baseline parser compatibility', () => {
         await expect(execution).resolves.toBe(true);
         await Promise.all(closedWatchers);
         expect(reachedWatchIdle).toBe(true);
+        expect(parser.cwd).toBe(fs.realpathSync.native(repoPath));
         expect(watchSpy.mock.calls.length).toBeGreaterThan(0);
         expect(action.sessionAbortController.signal.aborted).toBe(true);
         expect(exitSpy).not.toHaveBeenCalled();
