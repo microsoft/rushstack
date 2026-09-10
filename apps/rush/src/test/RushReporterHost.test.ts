@@ -286,6 +286,19 @@ describe(resolveRushReporterSelection.name, () => {
     ]);
   });
 
+  it.each(['--reporter', '--output', '--log-level'])(
+    'does not consume legacy flags after a value-less %s during rollback',
+    (flag) => {
+      const argv: string[] = ['build', '--reporter=json', flag, '--quiet', '--debug'];
+      const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
+      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+        'build',
+        '--quiet',
+        '--debug'
+      ]);
+    }
+  );
+
   it('removes reporter-only value controls before invoking a legacy engine', () => {
     expect(
       stripReporterValueControls([
@@ -375,6 +388,25 @@ describe(resolveRushReporterSelection.name, () => {
     expect(() => resolve(['build', '--reporter=plaintext', '--quiet', '--debug'])).toThrow(
       /Contradictory reporter verbosity/
     );
+  });
+
+  it('defaults only an unqualified primary file reporter to debug', () => {
+    expect(resolve(['build', '--reporter=file']).logLevel).toBe('debug');
+    expect(resolve(['build', '--reporter=plaintext']).logLevel).toBe('normal');
+    for (const level of ['quiet', 'normal', 'verbose', 'debug']) {
+      expect(resolve(['build', '--reporter=file', `--log-level=${level}`]).logLevel).toBe(level);
+      expect(resolve(['build', '--reporter=file'], { RUSH_LOG_LEVEL: level }).logLevel).toBe(level);
+    }
+    expect(resolve(['build', '--reporter=file', '--quiet'], { RUSH_LOG_LEVEL: 'debug' }).logLevel).toBe(
+      'quiet'
+    );
+    expect(resolve(['build', '--reporter=file', '--verbose'], { RUSH_LOG_LEVEL: 'quiet' }).logLevel).toBe(
+      'verbose'
+    );
+    expect(resolve(['build', '--reporter=file', '--debug'], { RUSH_LOG_LEVEL: 'normal' }).logLevel).toBe(
+      'debug'
+    );
+    expect(resolve(['build', '--reporter=file'], { RUSH_REPORTER: 'legacy' }).enabled).toBe(false);
   });
 
   it('preserves legacy verbosity combinations when the reporter path is disabled', () => {
@@ -511,6 +543,44 @@ describe(resolveRushReporterSelection.name, () => {
 });
 
 describe(initializeRushReporterHostAsync.name, () => {
+  it.each([false, true])(
+    'retains primary file debug details unless normal is explicit: %s',
+    async (normal) => {
+      const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-level-'));
+      const osModule: typeof os = jest.requireActual('node:os');
+      const tmpdirSpy: jest.SpyInstance = jest.spyOn(osModule, 'tmpdir').mockReturnValue(directory);
+      try {
+        const initialized = await initializeRushReporterHostAsync({
+          argv: ['build', '--reporter=file', ...(normal ? ['--log-level=normal'] : [])],
+          env: {},
+          stdout: { write: () => undefined },
+          includeDefaultFileReporter: false
+        });
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 0 },
+          sessionId: 'primary-file-level',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.179.0' },
+          privacy: 'public',
+          type: 'messageEmitted',
+          payload: { severity: 'debug', text: 'retained-debug-detail' }
+        });
+        await initialized.closeAsync();
+
+        const [logFolder]: string[] = await fs.promises.readdir(directory);
+        const names: string[] = await fs.promises.readdir(path.join(directory, logFolder));
+        const logName: string | undefined = names.find(
+          (name) => name.endsWith('.log') && name !== 'latest.log'
+        );
+        expect(logName).toBeDefined();
+        const text: string = await fs.promises.readFile(path.join(directory, logFolder, logName!), 'utf8');
+        expect(text.includes('retained-debug-detail')).toBe(!normal);
+      } finally {
+        tmpdirSpy.mockRestore();
+        await fs.promises.rm(directory, { recursive: true, force: true });
+      }
+    }
+  );
+
   it.each([
     { target: 'stdout', outputs: ['json://stdout'] },
     { target: 'stderr', outputs: ['json://stderr', 'file://stderr'] }
