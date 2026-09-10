@@ -16,6 +16,8 @@ import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
 
 describe('reporter help forwarding', () => {
   it.each([
+    { optIn: false, command: undefined, verbose: undefined },
+    { optIn: true, command: undefined, verbose: undefined },
     { optIn: false, command: 'build', verbose: undefined },
     { optIn: true, command: 'build', verbose: undefined },
     { optIn: false, command: 'list', verbose: '--verbose' },
@@ -45,7 +47,7 @@ describe('reporter help forwarding', () => {
     process.argv = [
       'node',
       'rush',
-      command,
+      ...(command ? [command] : []),
       ...(optIn ? [] : ['--reporter=json']),
       '--output=json://./help-events.jsonl',
       '--log-level=debug',
@@ -68,7 +70,7 @@ describe('reporter help forwarding', () => {
           expect(process.argv).toEqual([
             'node',
             'rush',
-            command,
+            ...(command ? [command] : []),
             ...(verbose && (verbose === '-v' || command === 'build') ? [verbose] : []),
             '--help'
           ]);
@@ -83,7 +85,7 @@ describe('reporter help forwarding', () => {
           });
         }
       });
-      expect(output.join('')).toContain(`usage: rush ${command}`);
+      expect(output.join('')).toContain(command ? `usage: rush ${command}` : 'usage: rush');
       expect(errors).toEqual([]);
     } finally {
       process.argv = originalArgv;
