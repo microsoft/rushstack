@@ -4,6 +4,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { CommandLineConfiguration, type Command } from '@microsoft/rush-lib/lib/api/CommandLineConfiguration';
+import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import {
   AiReporter,
   DefaultInteractiveReporter,
@@ -536,7 +538,36 @@ function hasHelpControl(argv: readonly string[]): boolean {
   return false;
 }
 
-function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly string[] {
+function getImplicitHelpValueFlagsToStrip(argv: readonly string[], cwd: string): readonly string[] {
+  let commandName: string | undefined;
+  for (const argument of stripReporterValueControls(argv)) {
+    if (argument === '--') {
+      break;
+    }
+    if (!argument.startsWith('-')) {
+      commandName = argument;
+      break;
+    }
+  }
+  const rushJsonPath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+    startingFolder: cwd,
+    showVerbose: false
+  });
+  const commandLine: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
+    rushJsonPath && path.join(path.dirname(rushJsonPath), 'common', 'config', 'rush', 'command-line.json')
+  );
+  const command: Command | undefined =
+    commandName === undefined ? undefined : commandLine.commands.get(commandName);
+  if (
+    commandName !== undefined &&
+    (!command || (command.commandKind === 'global' && command.providedByPlugin))
+  ) {
+    // An unknown or plugin-owned command can declare options outside the repository configuration.
+    return [];
+  }
+  const commandOwnedFlags: Set<string> = new Set(
+    [...(command?.associatedParameters ?? [])].map((parameter) => parameter.longName)
+  );
   const outputs: (string | undefined)[] = [];
   const logLevels: (string | undefined)[] = [];
   for (let index: number = 0; index < argv.length; index++) {
@@ -546,6 +577,9 @@ function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly str
     }
     const equalsIndex: number = argument.indexOf('=');
     const flag: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
+    if (commandOwnedFlags.has(flag)) {
+      continue;
+    }
     const values: (string | undefined)[] | undefined =
       flag === '--output' ? outputs : flag === '--log-level' ? logLevels : undefined;
     if (values) {
@@ -567,7 +601,9 @@ function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly str
   const isReporterOutput = (value: string | undefined): boolean =>
     value !== undefined && /^(?:file|json):\/\//.test(value);
   if (outputs.some(isReporterOutput)) {
-    return outputs.every(isReporterOutput) && logLevelsAreOwned ? REPORTER_OUTPUT_VALUE_FLAGS : [];
+    return outputs.every(isReporterOutput) && logLevelsAreOwned
+      ? REPORTER_OUTPUT_VALUE_FLAGS.filter((flag) => !commandOwnedFlags.has(flag))
+      : [];
   }
   return logLevels.length > 0 && logLevelsAreOwned ? ['--log-level'] : [];
 }
@@ -778,7 +814,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
           ? REPORTER_SELECTION_FLAG
           : ALL_REPORTER_VALUE_FLAGS
         : options.repositoryOptIn
-          ? getImplicitHelpValueFlagsToStrip(argv)
+          ? getImplicitHelpValueFlagsToStrip(argv, cwd)
           : [];
     return {
       reporter: 'legacy',

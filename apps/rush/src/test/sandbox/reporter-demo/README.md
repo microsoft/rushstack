@@ -78,3 +78,8 @@ After the demo exits, inspect the latest invocation log with:
 ls -lt common/temp/rush-logs
 sed -n '1,120p' common/temp/rush-logs/latest.log
 ```
+
+Help stays on the legacy parser path. With repository opt-in, parameters declared for a command remain
+command-owned even when their values look like reporter controls (for example, `--output=json://...`
+or `--log-level=debug`). Custom `--verbose` flags are preserved as well; help does not run the command
+or open reporter output files.

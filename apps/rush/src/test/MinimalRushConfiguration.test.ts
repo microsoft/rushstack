@@ -123,6 +123,12 @@ describe(MinimalRushConfiguration.name, () => {
     ['help', ['build', '--reporter=json', '--help'], undefined, true],
     ['custom reporter', ['custom', '--reporter=junit'], undefined, true],
     ['custom flag', ['custom', '--reporter', '--verbose'], undefined, true],
+    [
+      'reporter-shaped custom values',
+      ['custom-output', '--output=json://./custom.jsonl', '--log-level=debug', '--verbose'],
+      undefined,
+      true
+    ],
     ['pass-through', ['build', '--', '--reporter=json'], undefined, true],
     ['quiet', ['--quiet', 'build'], undefined, false]
   ])('preserves discovery ownership when rush.json cannot load: %s', (name, args, reporter, visible) => {
