@@ -499,6 +499,7 @@ export interface IExperimentsJson {
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
     usePnpmSyncForInjectedDependencies?: boolean;
+    useRushReporter?: boolean;
 }
 
 // @beta
@@ -971,6 +972,11 @@ export interface _IRushProjectJson {
     incrementalBuildIgnoredGlobs?: string[];
     // (undocumented)
     operationSettings?: IOperationSettings[];
+}
+
+// @beta
+export interface IRushReportingConfiguration {
+    readonly agentEnvironmentVariables: readonly string[];
 }
 
 // @beta (undocumented)
@@ -1473,6 +1479,8 @@ export class RushConfiguration {
     get projectsByName(): ReadonlyMap<string, RushConfigurationProject>;
     // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
+    // @beta
+    readonly reportingConfiguration: IRushReportingConfiguration;
     readonly repositoryDefaultBranch: string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     readonly repositoryDefaultRemote: string;
