@@ -1319,6 +1319,7 @@ describe(initializeRushReporterHostAsync.name, () => {
   it('restores ordered legacy output when repository opt-in meets an incompatible handoff', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
     const env: Record<string, string | undefined> = {};
+    const argv: string[] = ['list', '--verbose', '--log-level=verbose'];
     let stdoutText: string = '';
     try {
       const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
@@ -1334,7 +1335,7 @@ describe(initializeRushReporterHostAsync.name, () => {
       env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
 
       const initialized = await initializeRushReporterHostAsync({
-        argv: ['build'],
+        argv,
         env,
         repositoryOptIn: true,
         handoffDirectory: directory,
@@ -1346,12 +1347,22 @@ describe(initializeRushReporterHostAsync.name, () => {
         },
         includeDefaultFileReporter: false
       });
+      await initialized.closeAsync();
 
       expect(initialized.bootstrapReplay.skipReason).toBe('incompatible-protocol');
       expect(initialized.selection).toMatchObject({
         enabled: false,
-        reason: 'bootstrap compatibility fallback'
+        reason: 'bootstrap compatibility fallback',
+        reporterValueFlagsToStrip: ['--log-level'],
+        reporterFlagsToStrip: ['--verbose']
       });
+      expect(
+        stripReporterValueControls(
+          argv,
+          new Set(initialized.selection.reporterValueFlagsToStrip),
+          new Set(initialized.selection.reporterFlagsToStrip)
+        )
+      ).toEqual(['list']);
       expect(stdoutText).toBe('installing Rush\nnpm output\n');
       expect(fs.existsSync(handoffPath)).toBe(false);
     } finally {
@@ -1362,6 +1373,7 @@ describe(initializeRushReporterHostAsync.name, () => {
   it('falls back when repository opt-in meets an unsupported required bootstrap event', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
     const env: Record<string, string | undefined> = {};
+    const argv: string[] = ['list', '--verbose', '--log-level=verbose'];
     let stdoutText: string = '';
     try {
       const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
@@ -1384,7 +1396,7 @@ describe(initializeRushReporterHostAsync.name, () => {
       env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
 
       const initialized = await initializeRushReporterHostAsync({
-        argv: ['build'],
+        argv,
         env,
         repositoryOptIn: true,
         handoffDirectory: directory,
@@ -1396,12 +1408,22 @@ describe(initializeRushReporterHostAsync.name, () => {
         },
         includeDefaultFileReporter: false
       });
+      await initialized.closeAsync();
 
       expect(initialized.bootstrapReplay.skipReason).toBe('unsupported-required-event');
       expect(initialized.selection).toMatchObject({
         enabled: false,
-        reason: 'bootstrap compatibility fallback'
+        reason: 'bootstrap compatibility fallback',
+        reporterValueFlagsToStrip: ['--log-level'],
+        reporterFlagsToStrip: ['--verbose']
       });
+      expect(
+        stripReporterValueControls(
+          argv,
+          new Set(initialized.selection.reporterValueFlagsToStrip),
+          new Set(initialized.selection.reporterFlagsToStrip)
+        )
+      ).toEqual(['list']);
       expect(stdoutText).toBe('npm output\n');
       expect(fs.existsSync(handoffPath)).toBe(false);
     } finally {
