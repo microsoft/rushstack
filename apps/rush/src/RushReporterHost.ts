@@ -473,7 +473,14 @@ function hasHelpControl(argv: readonly string[]): boolean {
   return false;
 }
 
-function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly string[] {
+function getImplicitHelpValueFlagsToStrip(
+  argv: readonly string[],
+  ownership: IReporterCommandLineOwnership
+): readonly string[] {
+  if (!ownership.known) {
+    return [];
+  }
+  const commandOwnedFlags: ReadonlySet<string> = ownership.parameters;
   const outputs: (string | undefined)[] = [];
   const logLevels: (string | undefined)[] = [];
   for (let index: number = 0; index < argv.length; index++) {
@@ -483,6 +490,9 @@ function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly str
     }
     const equalsIndex: number = argument.indexOf('=');
     const flag: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
+    if (commandOwnedFlags.has(flag)) {
+      continue;
+    }
     const values: (string | undefined)[] | undefined =
       flag === '--output' ? outputs : flag === '--log-level' ? logLevels : undefined;
     if (values) {
@@ -504,7 +514,9 @@ function getImplicitHelpValueFlagsToStrip(argv: readonly string[]): readonly str
   const isReporterOutput = (value: string | undefined): boolean =>
     value !== undefined && /^(?:file|json):\/\//.test(value);
   if (outputs.some(isReporterOutput)) {
-    return outputs.every(isReporterOutput) && logLevelsAreOwned ? REPORTER_OUTPUT_VALUE_FLAGS : [];
+    return outputs.every(isReporterOutput) && logLevelsAreOwned
+      ? REPORTER_OUTPUT_VALUE_FLAGS.filter((flag) => !commandOwnedFlags.has(flag))
+      : [];
   }
   return logLevels.length > 0 && logLevelsAreOwned ? ['--log-level'] : [];
 }
@@ -644,6 +656,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
 
   const cwd: string = options.cwd ?? process.cwd();
   const commandJson: boolean = separateJsonControls(argv).commandJson;
+  let commandOwnership: IReporterCommandLineOwnership | undefined;
 
   const reporterProbe: IParsedReporterControls = parseReporterControls(argv, false, true);
   if (isLegacyEmergencyFallbackRequested(env)) {
@@ -715,8 +728,13 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
           ? REPORTER_SELECTION_FLAG
           : ALL_REPORTER_VALUE_FLAGS
         : options.repositoryOptIn
-          ? getImplicitHelpValueFlagsToStrip(argv)
+          ? getImplicitHelpValueFlagsToStrip(argv, getCommandOwnership())
           : [];
+    const reporterFlagsToStrip: readonly string[] = (
+      requestedReporter === undefined ? options.repositoryOptIn === true : requestedReporter !== 'legacy'
+    )
+      ? getFlagsToStrip(selectionControls)
+      : [];
     return {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -725,8 +743,10 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       enabled: false,
       reporterControlsOwnedByFrontend:
         reporterValueFlagsToStrip.length > 0 ||
+        reporterFlagsToStrip.length > 0 ||
         (options.repositoryOptIn === true && env.RUSH_LOG_LEVEL !== undefined),
       reporterValueFlagsToStrip,
+      ...(reporterFlagsToStrip.length > 0 ? { reporterFlagsToStrip } : {}),
       reason: requestedReporter === undefined ? 'pre-major legacy default' : 'explicit --reporter'
     };
   }
@@ -742,7 +762,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     return 'rush';
   }
 
-  let commandOwnership: IReporterCommandLineOwnership | undefined;
   function getCommandOwnership(): IReporterCommandLineOwnership {
     if (!commandOwnership) {
       const separator: number = argv.indexOf('--');

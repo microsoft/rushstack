@@ -345,11 +345,11 @@ describe(resolveRushReporterSelection.name, () => {
     ],
     [
       ['custom', '--output', 'artifact.zip', '--log-level', 'debug', '--help'],
-      ['custom', '--output', 'artifact.zip', '--help']
+      ['custom', '--output', 'artifact.zip', '--log-level', 'debug', '--help']
     ],
     [
       ['custom', '--output', '--log-level=debug', '--help'],
-      ['custom', '--output', '--help']
+      ['custom', '--output', '--log-level=debug', '--help']
     ],
     [
       ['custom', '--output=file://./log', '--log-level=custom', '--help'],
@@ -362,6 +362,10 @@ describe(resolveRushReporterSelection.name, () => {
     [
       ['custom', '--log-level', '--help'],
       ['custom', '--log-level', '--help']
+    ],
+    [
+      ['plugin-command', '--output=json://./custom.jsonl', '--log-level=debug', '--verbose', '--help'],
+      ['plugin-command', '--output=json://./custom.jsonl', '--log-level=debug', '--verbose', '--help']
     ],
     [
       ['build', '--log-level=debug', '--help', '--', '--output=json://./child'],
