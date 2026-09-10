@@ -113,6 +113,7 @@ interface IRushSessionReportingState {
 interface IRushSessionShadowEventObserver {
   ingest<TPayload>(event: IReporterEmitEventInput<TPayload>, eventId: string): void;
   buildTelemetryAggregate(): ITelemetryAggregate;
+  setExitStatusOptions(options: IResolveExitStatusFromEventsOptions): void;
   resolveExitStatus(options?: IResolveExitStatusFromEventsOptions): IRushExitStatus;
   correlateError(error: unknown, diagnosticId: string): void;
   isErrorRepresented(error: unknown): boolean;
@@ -189,6 +190,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
   const operationStatuses: Map<string, string> = new Map();
   let sequence: number = 0;
   let derivedExitStatus: IRushExitStatus = { exitCode: 0, outcome: 'succeeded' };
+  let commandExitStatusOptions: IResolveExitStatusFromEventsOptions = {};
   let hasUnscopedFailure: boolean = false;
 
   const updateDerivedOperationStatus = (): void => {
@@ -216,6 +218,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
           case 'commandStarted': {
             operationStatuses.clear();
             hasUnscopedFailure = false;
+            commandExitStatusOptions = {};
             derivedExitStatus = { exitCode: 0, outcome: 'succeeded' };
             break;
           }
@@ -275,8 +278,16 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
       return telemetrySubscriber.buildAggregate();
     },
 
+    setExitStatusOptions(options: IResolveExitStatusFromEventsOptions): void {
+      commandExitStatusOptions = { ...options };
+    },
+
     resolveExitStatus(options: IResolveExitStatusFromEventsOptions = {}): IRushExitStatus {
-      return resolveRushExitStatus({ hasFailures: derivedExitStatus.exitCode !== 0, ...options });
+      return resolveRushExitStatus({
+        hasFailures: derivedExitStatus.exitCode !== 0,
+        ...commandExitStatusOptions,
+        ...options
+      });
     },
 
     correlateError(error: unknown, diagnosticId: string): void {
@@ -501,6 +512,19 @@ export function _getRushSessionOperationStreamEmitter(
  */
 export function _getRushSessionTelemetryAggregate(rushSession: RushSession): ITelemetryAggregate | undefined {
   return _getSessionState(rushSession).reporting?.observer.buildTelemetryAggregate();
+}
+
+/**
+ * Records real command cancellation/signal state for subsequent shadow observations.
+ * Legacy completion payloads and telemetry retain their authoritative process exit code.
+ *
+ * @internal
+ */
+export function _setRushSessionExitStatusOptions(
+  rushSession: RushSession,
+  options: IResolveExitStatusFromEventsOptions
+): void {
+  _getSessionState(rushSession).reporting?.observer.setExitStatusOptions(options);
 }
 
 /**

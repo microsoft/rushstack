@@ -4,6 +4,27 @@ Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
 This package is released as a public beta. Exported contracts may change before the stable release.
 
+## Shadow lifecycle compatibility
+
+Error correlation uses external weak metadata, so frozen and non-extensible errors retain their original
+identity, cause, and properties. Correlation remains visible across bridge instances without keeping errors alive.
+
+Rush command-line parse failures emit one session-scoped `RUSH_COMMAND_FAILED` diagnostic before completion.
+The original parser message is retained in the diagnostic's local-sensitive `message` parameter; native error
+rendering and exit codes remain unchanged. Operation registration observes the final iteration configuration,
+so unchanged watch operations do not produce visible shadow registration or status events.
+
+## Shadow parity
+
+Rush's shadow session observer records the selected phased action's real cancellation state at completion.
+A gracefully stopped watch command therefore derives the existing logical `cancelled` outcome on subsequent
+observations, even when native Rush returns normally with process exit code 0. Legacy completion payloads and
+binary telemetry results continue to describe that native exit; shadow reporting does not change process status.
+The recorded cancellation state is reset when a new command starts.
+
+Operation output parity tests compare raw terminal chunks, including stream identity and unnormalized ANSI
+text, as well as the actual bytes on each stdout/stderr stream.
+
 ## Links
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out
