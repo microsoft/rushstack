@@ -14,6 +14,11 @@ These tests ensure the tar 7.x upgrade works correctly with these workflows.
 
 The test suite is written in TypeScript using `@rushstack/node-core-library` for cross-platform compatibility.
 
+### testLinkIdentity.ts
+Verifies local dependency links through physical and aliased repository paths, while rejecting wrong
+and missing targets. Both sides of the target comparison use native-backed realpath resolution so
+Windows short-name aliases do not cause false failures.
+
 ### testNpmMode.ts
 Tests Rush npm mode by:
 - Initializing a Rush repo with `npmVersion` configured
