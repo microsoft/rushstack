@@ -254,6 +254,8 @@ export class EnvironmentConfiguration {
     //
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
+    // @internal
+    static _getRushTempFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
     static get hasBeenValidated(): boolean;
     // (undocumented)
@@ -640,6 +642,7 @@ export interface _IOperationBuildCacheOptions {
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
     readonly error: Error | undefined;
+    readonly iterationId: number;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly problemCollector: IProblemCollector;
@@ -683,12 +686,12 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 // @internal
 export interface _IOperationGraphEventSink {
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
-    onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult): void;
+    onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult): void;
+    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
-    onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult): void;
+    onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult, iterationId?: number): void;
 }
 
 // @alpha
@@ -1017,6 +1020,8 @@ export interface IRushSessionOptions {
 // @beta
 export interface IRushSessionReporterOptions {
     readonly eventSink: IReporterEventSink;
+    // @internal
+    readonly flushAsync?: () => Promise<void>;
     // @internal
     readonly operationStreamEnabled?: boolean;
     readonly sessionId: string;

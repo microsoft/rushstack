@@ -13,7 +13,8 @@ import {
 function ev(
   type: string,
   payload: unknown = {},
-  scope?: { operationId?: string; projectName?: string }
+  scope?: { operationId?: string; projectName?: string },
+  privacy: IReporterEventEnvelope<unknown>['privacy'] = 'public'
 ): IReporterEventEnvelope<unknown> {
   return {
     protocolVersion: { major: 1, minor: 0 },
@@ -22,7 +23,7 @@ function ev(
     sequence: 1,
     timestamp: '2026-01-01T00:00:00.000Z',
     source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.2' },
-    privacy: 'public',
+    privacy,
     required: true,
     type,
     payload,
@@ -90,6 +91,44 @@ describe('JsonReporter', () => {
     expect(output).toContain('[secret]');
     expect(output).toContain('/tmp/log');
   });
+
+  it('redacts local-sensitive message text from machine output', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
+    reporter.report(
+      ev('messageEmitted', { severity: 'error', text: '/private/path' }, undefined, 'local-sensitive')
+    );
+
+    expect(output).toContain('[local-sensitive]');
+    expect(output).not.toContain('/private/path');
+  });
+
+  it('removes secret envelope metadata from machine output', () => {
+    let output: string = '';
+    const reporter: JsonReporter = new JsonReporter({ write: (text: string) => (output += text) });
+    reporter.report({
+      ...ev(
+        'messageEmitted',
+        { severity: 'error', text: 'TOP_SECRET_VALUE' },
+        { operationId: 'private-operation', projectName: '@private/project' },
+        'secret'
+      ),
+      source: { packageName: '@private/producer', packageVersion: '1.0.0' },
+      parentSessionId: 'private-parent-session',
+      parentOperationId: 'private-parent-operation'
+    });
+
+    const record: Record<string, unknown> = parseLines(output)[0];
+    expect(record.source).toEqual({
+      packageName: '[private-producer]',
+      packageVersion: '[private-version]'
+    });
+    expect(record.scope).toBeUndefined();
+    expect(record.parentSessionId).toBeUndefined();
+    expect(record.parentOperationId).toBeUndefined();
+    expect(output).not.toContain('TOP_SECRET_VALUE');
+    expect(output).not.toContain('@private/project');
+  });
 });
 
 describe('AiReporter', () => {
@@ -108,6 +147,7 @@ describe('AiReporter', () => {
     for (const event of events) {
       reporter.report(event);
     }
+    void reporter.closeAsync();
     const records: Record<string, unknown>[] = parseLines(output);
     return { records, final: records[records.length - 1] as unknown as IAiFinalRecord };
   }
@@ -123,11 +163,72 @@ describe('AiReporter', () => {
     expect(final.exitCode).toBe(1);
   });
 
+  it('counts secret fallback errors without rendering their text', () => {
+    const { final } = run([
+      ev('messageEmitted', { severity: 'error', text: 'TOP_SECRET_VALUE' }, undefined, 'secret'),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCount).toBe(1);
+    expect(JSON.stringify(final)).not.toContain('TOP_SECRET_VALUE');
+  });
+
+  it('uses sessionCompleted as the parser-only fallback result', () => {
+    const { final } = run([
+      ev('sessionStarted', { rushVersion: '5.178.1' }),
+      ev('sessionCompleted', { exitCode: 0 })
+    ]);
+
+    expect(final.result).toBe('succeeded');
+    expect(final.exitCode).toBe(0);
+  });
+
+  it('preserves an actionable parser error when no structured diagnostic was emitted', () => {
+    const { final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      ev('messageEmitted', {
+        severity: 'error',
+        text: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
+      }),
+      ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 })
+    ]);
+
+    expect(final.errorCodes).toEqual(['RUSH_COMMAND_FAILED']);
+    expect(final.errorCount).toBe(1);
+    expect(final.diagnostics).toEqual([
+      expect.objectContaining({
+        category: 'command',
+        severity: 'error',
+        summary: 'The project \"missing\" passed to \"--only\" does not exist in rush.json.'
+      })
+    ]);
+  });
+
+  it('counts fallback errors even when detailed diagnostics are disabled', async () => {
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({
+      write: (text: string) => (output += text),
+      maxDetailedDiagnostics: 0
+    });
+    reporter.report(ev('messageEmitted', { severity: 'error', text: 'first error' }));
+    reporter.report(ev('messageEmitted', { severity: 'error', text: 'second error' }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: false, exitCode: 1 }));
+    await reporter.closeAsync();
+
+    const final: IAiFinalRecord = parseLines(output).at(-1)! as unknown as IAiFinalRecord;
+    expect(final.errorCount).toBe(2);
+    expect(final.errorCodes).toEqual(['RUSH_COMMAND_FAILED']);
+    expect(final.diagnosticCategoryCounts.command).toBe(2);
+    expect(final.diagnostics).toEqual([]);
+    expect(final.truncated).toBe(true);
+  });
+
   it('emits a status record and a bounded final record with scope, codes, and log', () => {
     const { records, final } = run([
       ev('commandStarted', { commandName: 'build' }),
       ev('operationRegistered', { operationId: 'op1', projectName: 'project-a' }),
       ev('operationStatusChanged', { operationId: 'op1', status: 'failure' }),
+      ev('operationCompleted', { operationId: 'op1', status: 'failure' }),
       ev('diagnosticEmitted', {
         code: 'RUSH_OPERATION_FAILED',
         category: 'operation',
@@ -148,6 +249,95 @@ describe('AiReporter', () => {
     expect(final.diagnostics[0].remediation?.[0].command).toBe('rush rebuild');
     expect(final.operationCounts).toEqual({ failure: 1 });
     expect(final.log).toEqual({ path: '/abs/rush.log', format: 'plaintext', complete: true });
+  });
+
+  it('excludes silent operations from AI result counts', () => {
+    const { final } = run([
+      ev('commandStarted', { commandName: 'build' }),
+      ev('operationRegistered', { operationId: 'hidden', projectName: 'hidden', silent: true }),
+      ev('operationStatusChanged', { operationId: 'hidden', status: 'success' }),
+      ev('operationCompleted', { operationId: 'hidden', status: 'success' }),
+      ev('operationRegistered', { operationId: 'visible', projectName: 'visible' }),
+      ev('operationStatusChanged', { operationId: 'visible', status: 'fromCache' }),
+      ev('operationCompleted', { operationId: 'visible', status: 'fromCache' }),
+      ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 })
+    ]);
+
+    expect(final.operationCounts).toEqual({ fromCache: 1 });
+  });
+
+  it('keeps overlapping AI watch iterations and final recovery scope coherent', async () => {
+    let output: string = '';
+    const reporter: AiReporter = new AiReporter({ write: (text: string) => (output += text) });
+    reporter.report(ev('commandStarted', { commandName: 'build' }));
+    reporter.report(
+      ev('operationRegistered', { iterationId: 1, operationId: 'op1', projectName: 'project-a' })
+    );
+    reporter.report(
+      ev('operationRegistered', { iterationId: 1, operationId: 'abort', projectName: 'project-abort' })
+    );
+    reporter.report(
+      ev('operationRegistered', { iterationId: 2, operationId: 'op1', projectName: 'project-a' })
+    );
+    reporter.report(
+      ev('operationRegistered', {
+        iterationId: 2,
+        operationId: 'silent',
+        projectName: 'hidden',
+        silent: true
+      })
+    );
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'op1', status: 'failure' }));
+    reporter.report(
+      ev('diagnosticEmitted', {
+        iterationId: 1,
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        severity: 'error'
+      })
+    );
+    reporter.report(ev('operationCompleted', { iterationId: 1, operationId: 'abort', status: 'aborted' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 1, succeeded: false }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'op1', status: 'success' }));
+    reporter.report(ev('operationCompleted', { iterationId: 2, operationId: 'silent', status: 'noOp' }));
+    reporter.report(ev('watchCycleCompleted', { iterationId: 2, succeeded: true }));
+    reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    await reporter.closeAsync();
+
+    const records: Record<string, unknown>[] = parseLines(output);
+    const cycles: Array<{
+      succeeded: boolean;
+      operationCounts: Record<string, number>;
+      failedProjects: string[];
+    }> = records.filter(({ kind }) => kind === 'ai.watchCycle') as Array<{
+      succeeded: boolean;
+      operationCounts: Record<string, number>;
+      failedProjects: string[];
+    }>;
+    expect(
+      cycles.map(({ succeeded, operationCounts, failedProjects }) => ({
+        succeeded,
+        operationCounts,
+        failedProjects
+      }))
+    ).toEqual([
+      {
+        succeeded: false,
+        operationCounts: { failure: 1, aborted: 1 },
+        failedProjects: ['project-a']
+      },
+      {
+        succeeded: true,
+        operationCounts: { success: 1 },
+        failedProjects: []
+      }
+    ]);
+    const final: IAiFinalRecord = records.at(-1) as unknown as IAiFinalRecord;
+    expect(final.operationCounts).toEqual({ success: 1 });
+    expect(final.scope.failedProjects).toEqual([]);
+    expect(final.errorCount).toBe(0);
+    expect(final.errorCodes).toEqual([]);
+    expect(final.diagnostics).toEqual([]);
   });
 
   it('caps detailed diagnostics at 20 and marks the record truncated', () => {
@@ -188,6 +378,7 @@ describe('AiReporter', () => {
     for (const event of events) {
       reporter.report(event);
     }
+    void reporter.closeAsync();
     const finalLine: string = output.trim().split('\n').pop() ?? '';
     expect(Buffer.byteLength(finalLine, 'utf8')).toBeLessThanOrEqual(512);
     expect((JSON.parse(finalLine) as IAiFinalRecord).truncated).toBe(true);
@@ -204,6 +395,7 @@ describe('AiReporter', () => {
     for (const event of events) {
       reporter.report(event);
     }
+    void reporter.closeAsync();
 
     const finalLine: string = output.trim().split('\n').pop()!;
     const final: IAiFinalRecord = JSON.parse(finalLine) as IAiFinalRecord;
@@ -252,6 +444,7 @@ describe('AiReporter', () => {
     reporter.report(ev('commandStarted', { commandName: 'build' }));
     reporter.report(ev('externalOutput', { stream: 'stdout', text: 'SENSITIVE-RAW-abc' }));
     reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+    void reporter.closeAsync();
 
     expect(output).not.toContain('SENSITIVE-RAW-abc');
     // Every emitted line parses as JSON.
