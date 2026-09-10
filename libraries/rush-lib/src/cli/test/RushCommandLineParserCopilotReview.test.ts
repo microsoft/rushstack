@@ -221,14 +221,15 @@ describe('old review baseline parser compatibility', () => {
         GIT_CONFIG_KEY_1: 'user.email',
         GIT_CONFIG_VALUE_1: 'TheLarkInn@users.noreply.github.com'
       };
-      execFileSync('git', ['init', '--quiet'], { cwd: repoPath, env: gitEnv });
-      execFileSync('git', ['add', '.'], { cwd: repoPath, env: gitEnv });
+      execFileSync('git', ['init', '--quiet'], { cwd: repoPath, env: gitEnv, stdio: 'pipe' });
+      execFileSync('git', ['add', '.'], { cwd: repoPath, env: gitEnv, stdio: 'pipe' });
       execFileSync(
         'git',
         ['-c', 'commit.gpgSign=false', 'commit', '--quiet', '-m', 'Initialize watch fixture'],
         {
           cwd: repoPath,
-          env: gitEnv
+          env: gitEnv,
+          stdio: 'pipe'
         }
       );
       const sink: CapturingReporterSink = new CapturingReporterSink();
