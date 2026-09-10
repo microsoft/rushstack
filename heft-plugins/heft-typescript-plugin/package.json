@@ -42,7 +42,8 @@
   "scripts": {
     "build": "heft test --clean",
     "start": "heft build-watch",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "peerDependencies": {
     "@rushstack/heft": "1.2.26"

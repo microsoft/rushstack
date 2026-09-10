@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/rush-daemon-protocol"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "5100938+bmiddha@users.noreply.github.com"
+}
