@@ -15,9 +15,8 @@ function mockReportErrorAndSetExitCode(error: Error): void {
 jest.mock('../RushCommandLineParser', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const actualModule: any = jest.requireActual('../RushCommandLineParser');
-  if (actualModule.RushCommandLineParser) {
-    // Stub out the troublesome method that calls `process.exit`
-    actualModule.RushCommandLineParser.prototype._reportErrorAndSetExitCode = mockReportErrorAndSetExitCode;
+  if (actualModule._setReportErrorAndSetExitCodeForTesting) {
+    actualModule._setReportErrorAndSetExitCodeForTesting(mockReportErrorAndSetExitCode);
   }
   return actualModule;
 });

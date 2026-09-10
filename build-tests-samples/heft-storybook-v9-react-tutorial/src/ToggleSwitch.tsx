@@ -82,7 +82,7 @@ export class ToggleSwitch extends React.Component<IToggleSwitchProps, IToggleSwi
     }
 
     return (
-      <div style={frameStyle} onClick={this._onClickSlider}>
+      <div style={frameStyle} onClick={this.#onClickSlider}>
         <div style={sliderStyle} />
       </div>
     );
@@ -91,7 +91,7 @@ export class ToggleSwitch extends React.Component<IToggleSwitchProps, IToggleSwi
   // React event handlers should be represented as fields instead of methods to ensure the "this" pointer
   // is bound correctly.  This form does not work with virtual/override inheritance, so use regular methods
   // everywhere else.
-  private _onClickSlider = (event: React.MouseEvent): void => {
+  #onClickSlider = (event: React.MouseEvent): void => {
     if (this.state.sliderPosition === ToggleSwitchPosition.Left) {
       this.setState({ sliderPosition: ToggleSwitchPosition.Right });
     } else {

@@ -16,7 +16,6 @@ import type { DaemonEventType, IDaemonFrame } from '@rushstack/rush-daemon-proto
 import { TerminalChunkKind } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
 
-
 import { buildWireEnvelope } from './WireEnvelope';
 import type { IWireEnvelopeOptions } from './WireEnvelope';
 
@@ -30,17 +29,14 @@ function toActivityStream(options?: { stderr?: boolean }): 'stdout' | 'stderr' {
 /** Converts engine dual-emit callbacks into an ordered wire frame stream. */
 export class WireAdapter implements IOperationGraphEventSink {
   public readonly frames: IDaemonFrame[] = [];
-  private _sequence: number = FIRST_SEQUENCE;
+  #sequence: number = FIRST_SEQUENCE;
 
   public onOperationRegistered(operationId: string, silent: boolean): void {
-    this._pushEvent('operationRegistered', { operationId, silent });
+    this.#pushEvent('operationRegistered', { operationId, silent });
   }
 
-  public onOperationStatusChanged(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void {
-    this._pushEvent('operationStatusChanged', {
+  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
+    this.#pushEvent('operationStatusChanged', {
       operationId: result.operation.name,
       status: result.status,
       previousStatus
@@ -48,7 +44,7 @@ export class WireAdapter implements IOperationGraphEventSink {
   }
 
   public onOperationHeader(operationId: string, completed: number, total: number): void {
-    this._pushEvent('extension', {
+    this.#pushEvent('extension', {
       name: RUSHD_OPERATION_HEADER,
       data: { operationId, completedOperations: completed, totalOperations: total }
     });
@@ -67,33 +63,29 @@ export class WireAdapter implements IOperationGraphEventSink {
     const stream: 'stdout' | 'stderr' = toActivityStream(options);
     const operationId: string | undefined = options?.operationId;
     if (operationId === undefined) {
-      this._pushEvent('activityChanged', { text, stream });
+      this.#pushEvent('activityChanged', { text, stream });
       return;
     }
     // Operation-scoped status lines are part of the operation's output block:
     // scope the event and mark it required so it is never verbosity-filtered.
-    this._pushEvent(
-      'activityChanged',
-      { text, stream },
-      { scope: { operationId }, required: true }
-    );
+    this.#pushEvent('activityChanged', { text, stream }, { scope: { operationId }, required: true });
   }
 
   public onOperationStreamClosed(operationId: string): void {
-    this._pushEvent('extension', {
+    this.#pushEvent('extension', {
       name: RUSHD_OPERATION_STREAM_CLOSED,
       data: { operationId }
     });
   }
 
-  private _pushEvent(type: DaemonEventType, payload: unknown, options?: IWireEnvelopeOptions): void {
+  #pushEvent(type: DaemonEventType, payload: unknown, options?: IWireEnvelopeOptions): void {
     const envelope: ReturnType<typeof buildWireEnvelope> = buildWireEnvelope(
       type,
       payload,
-      this._sequence,
+      this.#sequence,
       options
     );
-    this._sequence += 1;
+    this.#sequence += 1;
     this.frames.push({ kind: DaemonFrameType.event, payload: encodeDaemonEventFrame(envelope) });
   }
 }

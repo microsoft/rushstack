@@ -31,7 +31,7 @@ class MyApp {
     });
   }
 
-  private async _startAsync(): Promise<void> {
+  async #startAsync(): Promise<void> {
     this.server.get('/', async (request, reply) => {
       return { hello: 'world' };
     });
@@ -42,7 +42,7 @@ class MyApp {
   }
 
   public start(): void {
-    this._startAsync().catch((error) => {
+    this.#startAsync().catch((error) => {
       process.exitCode = 1;
       this.server.log.error(error);
 

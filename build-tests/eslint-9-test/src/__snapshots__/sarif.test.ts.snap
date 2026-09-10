@@ -28,7 +28,7 @@ Object {
                   "uri": "src/index.ts",
                 },
                 "region": Object {
-                  "endColumn": 24,
+                  "endColumn": 16,
                   "endLine": 6,
                   "startColumn": 3,
                   "startLine": 6,
@@ -37,7 +37,7 @@ Object {
             },
           ],
           "message": Object {
-            "text": "Expected _bar to have a type annotation.",
+            "text": "Expected a type annotation.",
           },
           "ruleId": "@typescript-eslint/typedef",
           "ruleIndex": 0,

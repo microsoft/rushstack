@@ -117,177 +117,179 @@ export interface IFileReporterOptions {
 export class FileReporter implements IReporter {
   public readonly name: string = 'file';
 
-  private readonly _commonTempFolder: string | undefined;
-  private readonly _osTempFolder: string;
-  private readonly _actionName: string;
-  private readonly _pid: number;
-  private readonly _nowMs: () => number;
-  private readonly _retentionDays: number;
-  private readonly _maxSessions: number;
-  private readonly _emergencyWarn: (message: string) => void;
+  readonly #commonTempFolder: string | undefined;
+  readonly #osTempFolder: string;
+  readonly #actionName: string;
+  readonly #pid: number;
+  readonly #nowMs: () => number;
+  readonly #retentionDays: number;
+  readonly #maxSessions: number;
+  readonly #emergencyWarn: (message: string) => void;
 
-  private readonly _lines: string[];
-  private _fileDescriptor: number | undefined;
-  private _targetResolved: boolean;
-  private _available: boolean;
-  private _targetPath: string | undefined;
-  private _latestCopyPath: string | undefined;
-  private readonly _fileName: string;
+  readonly #lines: string[];
+  #fileDescriptor: number | undefined;
+  #targetResolved: boolean;
+  #available: boolean;
+  #targetPath: string | undefined;
+  #latestCopyPath: string | undefined;
+  readonly #fileName: string;
 
   public constructor(options: IFileReporterOptions = {}) {
-    this._commonTempFolder = options.commonTempFolder;
-    this._osTempFolder = options.osTempFolder ?? os.tmpdir();
-    this._actionName = options.actionName ?? 'rush';
-    this._pid = options.pid ?? process.pid;
-    this._nowMs = options.nowMs ?? (() => Date.now());
-    this._retentionDays = options.retentionDays ?? DEFAULT_RETENTION_DAYS;
-    this._maxSessions = options.maxSessions ?? DEFAULT_MAX_SESSIONS;
-    this._emergencyWarn =
+    this.#commonTempFolder = options.commonTempFolder;
+    this.#osTempFolder = options.osTempFolder ?? os.tmpdir();
+    this.#actionName = options.actionName ?? 'rush';
+    this.#pid = options.pid ?? process.pid;
+    this.#nowMs = options.nowMs ?? (() => Date.now());
+    this.#retentionDays = options.retentionDays ?? DEFAULT_RETENTION_DAYS;
+    this.#maxSessions = options.maxSessions ?? DEFAULT_MAX_SESSIONS;
+    this.#emergencyWarn =
       options.emergencyWarn ??
       ((message: string) => {
         process.stderr.write(`${message}\n`);
       });
 
-    this._lines = [];
-    this._fileDescriptor = undefined;
-    this._targetResolved = false;
-    this._available = false;
-    this._targetPath = undefined;
-    this._latestCopyPath = undefined;
+    this.#lines = [];
+    this.#fileDescriptor = undefined;
+    this.#targetResolved = false;
+    this.#available = false;
+    this.#targetPath = undefined;
+    this.#latestCopyPath = undefined;
 
-    const timestamp: string = new Date(this._nowMs()).toISOString().replace(/[:.]/g, '-');
-    this._fileName = `${timestamp}-${this._pid}-${this._actionName}.log`;
+    const timestamp: string = new Date(this.#nowMs()).toISOString().replace(/[:.]/g, '-');
+    this.#fileName = `${timestamp}-${this.#pid}-${this.#actionName}.log`;
   }
 
   public async initializeAsync(): Promise<void> {
-    await this._ensureTargetAsync();
-    this._writeBufferedLines();
+    await this.#ensureTargetAsync();
+    this.#writeBufferedLines();
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    const line: string = this._formatLine(event);
-    if (this._fileDescriptor === undefined) {
-      if (!this._targetResolved) {
-        this._lines.push(line);
+    const line: string = this.#formatLine(event);
+    if (this.#fileDescriptor === undefined) {
+      if (!this.#targetResolved) {
+        this.#lines.push(line);
       }
       return;
     }
-    this._writeLine(line);
+    this.#writeLine(line);
   }
 
   public async flushAsync(): Promise<void> {
-    await this._ensureTargetAsync();
-    this._writeBufferedLines();
-    if (this._fileDescriptor !== undefined) {
+    await this.#ensureTargetAsync();
+    this.#writeBufferedLines();
+    if (this.#fileDescriptor !== undefined) {
       try {
-        fs.fsyncSync(this._fileDescriptor);
+        fs.fsyncSync(this.#fileDescriptor);
       } catch (error) {
-        this._markUnavailable(error as Error);
+        this.#markUnavailable(error as Error);
       }
     }
-    await this._refreshLatestCopyAsync();
+    await this.#refreshLatestCopyAsync();
   }
 
   public async closeAsync(): Promise<void> {
     await this.flushAsync();
-    if (this._fileDescriptor !== undefined) {
+    if (this.#fileDescriptor !== undefined) {
       try {
-        fs.closeSync(this._fileDescriptor);
+        fs.closeSync(this.#fileDescriptor);
       } catch (error) {
-        this._available = false;
-        this._emergencyWarn(
-          `[reporter] Unable to close the full-detail log; the artifact is unavailable: ${(error as Error).message}`
+        this.#available = false;
+        this.#emergencyWarn(
+          `[reporter] Unable to close the full-detail log; the artifact is unavailable: ${
+            (error as Error).message
+          }`
         );
       } finally {
-        this._fileDescriptor = undefined;
+        this.#fileDescriptor = undefined;
       }
     }
-    await this._refreshLatestCopyAsync();
+    await this.#refreshLatestCopyAsync();
   }
 
   /**
    * Returns the resolved log artifact.
    */
   public getArtifact(): IFileReporterArtifact {
-    return this._targetPath !== undefined
-      ? { available: this._available, path: this._targetPath }
-      : { available: this._available };
+    return this.#targetPath !== undefined
+      ? { available: this.#available, path: this.#targetPath }
+      : { available: this.#available };
   }
 
-  private _formatLine(event: IReporterEventEnvelope<unknown>): string {
+  #formatLine(event: IReporterEventEnvelope<unknown>): string {
     return `${JSON.stringify(redactReporterEvent(event))}\n`;
   }
 
-  private async _ensureTargetAsync(): Promise<void> {
-    if (!this._targetResolved) {
-      this._targetResolved = true;
-      await this._resolveTargetAsync();
+  async #ensureTargetAsync(): Promise<void> {
+    if (!this.#targetResolved) {
+      this.#targetResolved = true;
+      await this.#resolveTargetAsync();
     }
   }
 
-  private _writeBufferedLines(): void {
-    if (this._fileDescriptor === undefined) {
-      this._lines.length = 0;
+  #writeBufferedLines(): void {
+    if (this.#fileDescriptor === undefined) {
+      this.#lines.length = 0;
       return;
     }
-    const newLines: string[] = this._lines.splice(0);
+    const newLines: string[] = this.#lines.splice(0);
     for (const line of newLines) {
-      if (!this._writeLine(line)) {
+      if (!this.#writeLine(line)) {
         break;
       }
     }
   }
 
-  private _writeLine(line: string): boolean {
-    if (this._fileDescriptor === undefined) {
+  #writeLine(line: string): boolean {
+    if (this.#fileDescriptor === undefined) {
       return false;
     }
     try {
-      fs.writeSync(this._fileDescriptor, line, null, 'utf8');
+      fs.writeSync(this.#fileDescriptor, line, null, 'utf8');
       return true;
     } catch (error) {
-      this._markUnavailable(error as Error);
+      this.#markUnavailable(error as Error);
       return false;
     }
   }
 
-  private async _refreshLatestCopyAsync(): Promise<void> {
-    if (this._latestCopyPath === undefined || this._targetPath === undefined || !this._available) {
+  async #refreshLatestCopyAsync(): Promise<void> {
+    if (this.#latestCopyPath === undefined || this.#targetPath === undefined || !this.#available) {
       return;
     }
     try {
-      await fs.promises.copyFile(this._targetPath, this._latestCopyPath);
+      await fs.promises.copyFile(this.#targetPath, this.#latestCopyPath);
     } catch {
       /* latest.log is best-effort. */
     }
   }
 
-  private _markUnavailable(error: Error): void {
-    if (!this._available) {
+  #markUnavailable(error: Error): void {
+    if (!this.#available) {
       return;
     }
-    this._available = false;
-    this._lines.length = 0;
-    if (this._fileDescriptor !== undefined) {
+    this.#available = false;
+    this.#lines.length = 0;
+    if (this.#fileDescriptor !== undefined) {
       try {
-        fs.closeSync(this._fileDescriptor);
+        fs.closeSync(this.#fileDescriptor);
       } catch {
         /* The original write failure is more useful. */
       }
-      this._fileDescriptor = undefined;
+      this.#fileDescriptor = undefined;
     }
-    this._emergencyWarn(
+    this.#emergencyWarn(
       `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${error.message}`
     );
   }
 
-  private async _resolveTargetAsync(): Promise<void> {
+  async #resolveTargetAsync(): Promise<void> {
     const candidateDirs: Array<{ path: string; ownerOnly: boolean }> = [];
-    if (this._commonTempFolder !== undefined) {
-      candidateDirs.push({ path: path.join(this._commonTempFolder, RUSH_LOGS_DIR_NAME), ownerOnly: false });
+    if (this.#commonTempFolder !== undefined) {
+      candidateDirs.push({ path: path.join(this.#commonTempFolder, RUSH_LOGS_DIR_NAME), ownerOnly: false });
     }
     candidateDirs.push({
-      path: path.join(this._osTempFolder, getUserTempDirectoryName()),
+      path: path.join(this.#osTempFolder, getUserTempDirectoryName()),
       ownerOnly: true
     });
 
@@ -302,40 +304,42 @@ export class FileReporter implements IReporter {
         if (candidate.ownerOnly) {
           await fs.promises.chmod(dir, OWNER_ONLY_DIRECTORY_MODE);
         }
-        const filePath: string = path.join(dir, this._fileName);
+        const filePath: string = path.join(dir, this.#fileName);
         await fs.promises.writeFile(filePath, '', { mode: OWNER_ONLY_MODE });
         await fs.promises.chmod(filePath, OWNER_ONLY_MODE);
         const fileDescriptor: number = fs.openSync(filePath, 'a');
-        this._fileDescriptor = fileDescriptor;
-        this._targetPath = filePath;
-        this._available = true;
-        await this._updateLatestAsync(dir, filePath);
-        await this._applyRetentionAsync(dir);
+        this.#fileDescriptor = fileDescriptor;
+        this.#targetPath = filePath;
+        this.#available = true;
+        await this.#updateLatestAsync(dir, filePath);
+        await this.#applyRetentionAsync(dir);
         return;
       } catch (error) {
         lastError = error as Error;
       }
     }
 
-    this._available = false;
-    this._lines.length = 0;
-    this._emergencyWarn(
-      `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${lastError?.message ?? 'unknown error'}`
+    this.#available = false;
+    this.#lines.length = 0;
+    this.#emergencyWarn(
+      `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${
+        lastError?.message ?? 'unknown error'
+      }`
     );
   }
 
-  private async _updateLatestAsync(dir: string, filePath: string): Promise<void> {
+  async #updateLatestAsync(dir: string, filePath: string): Promise<void> {
     const latestPath: string = path.join(dir, LATEST_LOG_NAME);
     try {
       await fs.promises.rm(latestPath, { force: true });
       await fs.promises.symlink(path.basename(filePath), latestPath);
-      this._latestCopyPath = undefined;
+      this.#latestCopyPath = undefined;
     } catch {
-      this._latestCopyPath = latestPath;
+      this.#latestCopyPath = latestPath;
     }
   }
 
-  private async _applyRetentionAsync(dir: string): Promise<void> {
+  async #applyRetentionAsync(dir: string): Promise<void> {
     let entries: string[];
     try {
       entries = await fs.promises.readdir(dir);
@@ -343,7 +347,7 @@ export class FileReporter implements IReporter {
       return;
     }
 
-    const cutoff: number = this._nowMs() - this._retentionDays * MS_PER_DAY;
+    const cutoff: number = this.#nowMs() - this.#retentionDays * MS_PER_DAY;
     const logs: { path: string; mtimeMs: number }[] = [];
     for (const entry of entries) {
       if (entry === LATEST_LOG_NAME || !entry.endsWith('.log')) {
@@ -362,9 +366,9 @@ export class FileReporter implements IReporter {
       }
     }
 
-    if (logs.length > this._maxSessions) {
+    if (logs.length > this.#maxSessions) {
       logs.sort((a, b) => a.mtimeMs - b.mtimeMs);
-      const excess: number = logs.length - this._maxSessions;
+      const excess: number = logs.length - this.#maxSessions;
       for (let index: number = 0; index < excess; index++) {
         try {
           await fs.promises.rm(logs[index].path, { force: true });

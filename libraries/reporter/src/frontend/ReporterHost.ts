@@ -11,10 +11,7 @@ import type { ReporterEventType } from '../events/ReporterEventType';
 import type { IReporterEventSink } from '../producers/IReporterEventSink';
 import { REPORTER_EVENT_TYPES } from '../events/ReporterEventType';
 import { ReporterManager } from '../manager/ReporterManager';
-import {
-  REPORTER_PROTOCOL_VERSION,
-  isReporterProtocolCompatible
-} from '../protocol/ReporterProtocol';
+import { REPORTER_PROTOCOL_VERSION, isReporterProtocolCompatible } from '../protocol/ReporterProtocol';
 import {
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
@@ -101,7 +98,12 @@ export interface IBootstrapReplayResult {
    * The reason no events were replayed, when a handoff path was present.
    * `nonce-mismatch` means the file failed authentication and was rejected.
    */
-  readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
+  readonly skipReason?:
+    | 'unreadable'
+    | 'invalid-path'
+    | 'nonce-mismatch'
+    | 'invalid-event'
+    | 'incompatible-protocol';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -156,25 +158,25 @@ function isReporterEventEnvelope(value: unknown): value is IReporterEventEnvelop
  * @beta
  */
 export class ReporterHost {
-  private readonly _manager: ReporterManager;
-  private readonly _env: Record<string, string | undefined>;
-  private readonly _handoffDirectory: string;
-  private readonly _retentionMs: number;
-  private readonly _nowMs: () => number;
+  readonly #manager: ReporterManager;
+  readonly #env: Record<string, string | undefined>;
+  readonly #handoffDirectory: string;
+  readonly #retentionMs: number;
+  readonly #nowMs: () => number;
 
   public constructor(options: IReporterHostOptions = {}) {
-    this._manager = options.manager ?? new ReporterManager();
-    this._env = options.env ?? process.env;
-    this._handoffDirectory = options.handoffDirectory ?? os.tmpdir();
-    this._retentionMs = options.retentionMs ?? DEFAULT_HANDOFF_RETENTION_MS;
-    this._nowMs = options.nowMs ?? (() => Date.now());
+    this.#manager = options.manager ?? new ReporterManager();
+    this.#env = options.env ?? process.env;
+    this.#handoffDirectory = options.handoffDirectory ?? os.tmpdir();
+    this.#retentionMs = options.retentionMs ?? DEFAULT_HANDOFF_RETENTION_MS;
+    this.#nowMs = options.nowMs ?? (() => Date.now());
   }
 
   /**
    * The manager the host owns, used by the frontend to register reporters.
    */
   public get manager(): ReporterManager {
-    return this._manager;
+    return this.#manager;
   }
 
   /**
@@ -185,7 +187,7 @@ export class ReporterHost {
    * cannot register reporters, flush, or otherwise own selection.
    */
   public getSink(): IReporterEventSink {
-    return this._manager;
+    return this.#manager;
   }
 
   /**
@@ -200,12 +202,12 @@ export class ReporterHost {
    * handoff in the configured directory, and the header nonce must match.
    */
   public async replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult> {
-    const handoffPath: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
+    const handoffPath: string | undefined = this.#env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
     if (!handoffPath) {
       return { direct: true, replayed: false, eventCount: 0 };
     }
 
-    if (!this._isOwnedHandoffPath(handoffPath)) {
+    if (!this.#isOwnedHandoffPath(handoffPath)) {
       return {
         direct: false,
         replayed: false,
@@ -215,7 +217,7 @@ export class ReporterHost {
       };
     }
 
-    const expectedNonce: string | undefined = this._env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+    const expectedNonce: string | undefined = this.#env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
     if (!expectedNonce) {
       return {
         direct: false,
@@ -247,10 +249,7 @@ export class ReporterHost {
     let skippedEventCount: number = discardedRecordCount;
     for (const event of events) {
       const protocolVersion: IReporterProtocolVersion | undefined = getProtocolVersion(event);
-      if (
-        protocolVersion &&
-        !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)
-      ) {
+      if (protocolVersion && !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)) {
         await deleteBootstrapHandoffFileAsync(handoffPath);
         return {
           direct: false,
@@ -291,7 +290,7 @@ export class ReporterHost {
 
     try {
       for (const event of acceptedEvents) {
-        this._manager.ingestForeignEnvelope(event);
+        this.#manager.ingestForeignEnvelope(event);
       }
     } finally {
       await deleteBootstrapHandoffFileAsync(handoffPath);
@@ -314,17 +313,17 @@ export class ReporterHost {
     const deleted: string[] = [];
     let fileNames: string[];
     try {
-      fileNames = await fs.promises.readdir(this._handoffDirectory);
+      fileNames = await fs.promises.readdir(this.#handoffDirectory);
     } catch {
       return deleted;
     }
 
-    const cutoff: number = this._nowMs() - this._retentionMs;
+    const cutoff: number = this.#nowMs() - this.#retentionMs;
     for (const fileName of fileNames) {
       if (!isBootstrapHandoffFileName(fileName)) {
         continue;
       }
-      const filePath: string = path.join(this._handoffDirectory, fileName);
+      const filePath: string = path.join(this.#handoffDirectory, fileName);
       try {
         const stats: fs.Stats = await fs.promises.stat(filePath);
         if (stats.mtimeMs < cutoff) {
@@ -338,10 +337,10 @@ export class ReporterHost {
     return deleted;
   }
 
-  private _isOwnedHandoffPath(handoffPath: string): boolean {
+  #isOwnedHandoffPath(handoffPath: string): boolean {
     const resolvedPath: string = path.resolve(handoffPath);
     return (
-      path.dirname(resolvedPath) === path.resolve(this._handoffDirectory) &&
+      path.dirname(resolvedPath) === path.resolve(this.#handoffDirectory) &&
       isBootstrapHandoffFileName(path.basename(resolvedPath))
     );
   }

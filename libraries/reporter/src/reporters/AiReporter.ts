@@ -102,57 +102,57 @@ export interface IAiReporterOptions {
 export class AiReporter implements IReporter {
   public readonly name: string = 'ai';
 
-  private readonly _write: (text: string) => void;
-  private readonly _maxBytes: number;
-  private readonly _maxDetailedDiagnostics: number;
+  readonly #write: (text: string) => void;
+  readonly #maxBytes: number;
+  readonly #maxDetailedDiagnostics: number;
 
-  private _protocolVersion: IReporterProtocolVersion;
-  private _commandName: string | undefined;
-  private readonly _projectByOperation: Map<string, string>;
-  private readonly _operationCounts: { [status: string]: number };
-  private readonly _failedProjects: string[];
-  private readonly _errorDiagnostics: IAiDiagnostic[];
-  private readonly _warningDiagnostics: IAiDiagnostic[];
-  private readonly _errorCodes: Set<string>;
-  private readonly _diagnosticCategoryCounts: { [category: string]: number };
-  private _errorDiagnosticsTruncated: boolean;
-  private _warningDiagnosticsTruncated: boolean;
-  private _errorCount: number;
-  private _warningCount: number;
-  private _logPath: string | undefined;
-  private _logFormat: string | undefined;
-  private _artifactComplete: boolean;
-  private _finalEmitted: boolean;
+  #protocolVersion: IReporterProtocolVersion;
+  #commandName: string | undefined;
+  readonly #projectByOperation: Map<string, string>;
+  readonly #operationCounts: { [status: string]: number };
+  readonly #failedProjects: string[];
+  readonly #errorDiagnostics: IAiDiagnostic[];
+  readonly #warningDiagnostics: IAiDiagnostic[];
+  readonly #errorCodes: Set<string>;
+  readonly #diagnosticCategoryCounts: { [category: string]: number };
+  #errorDiagnosticsTruncated: boolean;
+  #warningDiagnosticsTruncated: boolean;
+  #errorCount: number;
+  #warningCount: number;
+  #logPath: string | undefined;
+  #logFormat: string | undefined;
+  #artifactComplete: boolean;
+  #finalEmitted: boolean;
 
   public constructor(options: IAiReporterOptions) {
-    this._write = options.write;
-    this._maxBytes = options.maxBytes ?? REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes;
-    this._maxDetailedDiagnostics =
+    this.#write = options.write;
+    this.#maxBytes = options.maxBytes ?? REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes;
+    this.#maxDetailedDiagnostics =
       options.maxDetailedDiagnostics ?? REPORTER_PERFORMANCE_BUDGETS.maxAiDetailedDiagnostics;
-    if (!Number.isInteger(this._maxBytes) || this._maxBytes < MIN_AI_MAX_BYTES) {
+    if (!Number.isInteger(this.#maxBytes) || this.#maxBytes < MIN_AI_MAX_BYTES) {
       throw new RangeError(`maxBytes must be an integer of at least ${MIN_AI_MAX_BYTES}`);
     }
-    if (!Number.isInteger(this._maxDetailedDiagnostics) || this._maxDetailedDiagnostics < 0) {
+    if (!Number.isInteger(this.#maxDetailedDiagnostics) || this.#maxDetailedDiagnostics < 0) {
       throw new RangeError('maxDetailedDiagnostics must be a nonnegative integer');
     }
 
-    this._protocolVersion = REPORTER_PROTOCOL_VERSION;
-    this._commandName = undefined;
-    this._projectByOperation = new Map();
-    this._operationCounts = {};
-    this._failedProjects = [];
-    this._errorDiagnostics = [];
-    this._warningDiagnostics = [];
-    this._errorCodes = new Set();
-    this._diagnosticCategoryCounts = {};
-    this._errorDiagnosticsTruncated = false;
-    this._warningDiagnosticsTruncated = false;
-    this._errorCount = 0;
-    this._warningCount = 0;
-    this._logPath = undefined;
-    this._logFormat = undefined;
-    this._artifactComplete = true;
-    this._finalEmitted = false;
+    this.#protocolVersion = REPORTER_PROTOCOL_VERSION;
+    this.#commandName = undefined;
+    this.#projectByOperation = new Map();
+    this.#operationCounts = {};
+    this.#failedProjects = [];
+    this.#errorDiagnostics = [];
+    this.#warningDiagnostics = [];
+    this.#errorCodes = new Set();
+    this.#diagnosticCategoryCounts = {};
+    this.#errorDiagnosticsTruncated = false;
+    this.#warningDiagnosticsTruncated = false;
+    this.#errorCount = 0;
+    this.#warningCount = 0;
+    this.#logPath = undefined;
+    this.#logFormat = undefined;
+    this.#artifactComplete = true;
+    this.#finalEmitted = false;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -160,15 +160,15 @@ export class AiReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    this._protocolVersion = event.protocolVersion;
+    this.#protocolVersion = event.protocolVersion;
     switch (event.type) {
       case 'commandStarted': {
-        this._commandName = (event.payload as { commandName: string }).commandName;
-        this._write(
+        this.#commandName = (event.payload as { commandName: string }).commandName;
+        this.#write(
           `${JSON.stringify({
             kind: 'ai.status',
-            protocolVersion: this._protocolVersion,
-            commandName: this._commandName
+            protocolVersion: this.#protocolVersion,
+            commandName: this.#commandName
           })}\n`
         );
         break;
@@ -179,7 +179,7 @@ export class AiReporter implements IReporter {
           projectName?: string;
         };
         if (payload.projectName !== undefined) {
-          this._projectByOperation.set(payload.operationId, payload.projectName);
+          this.#projectByOperation.set(payload.operationId, payload.projectName);
         }
         break;
       }
@@ -189,28 +189,28 @@ export class AiReporter implements IReporter {
           status: string;
         };
         if (TERMINAL_STATUSES.has(payload.status)) {
-          this._operationCounts[payload.status] = (this._operationCounts[payload.status] ?? 0) + 1;
+          this.#operationCounts[payload.status] = (this.#operationCounts[payload.status] ?? 0) + 1;
           if (payload.status === 'failure') {
             const projectName: string =
-              this._projectByOperation.get(payload.operationId) ??
+              this.#projectByOperation.get(payload.operationId) ??
               event.scope?.projectName ??
               payload.operationId;
-            this._failedProjects.push(projectName);
+            this.#failedProjects.push(projectName);
           }
         }
         break;
       }
       case 'diagnosticEmitted': {
-        this._collectDiagnostic(event.payload as IAiDiagnostic);
+        this.#collectDiagnostic(event.payload as IAiDiagnostic);
         break;
       }
       case 'artifactAvailable': {
         const payload: { role?: string; path?: string; format?: string; complete?: boolean } =
           event.payload as { role?: string; path?: string; format?: string; complete?: boolean };
         if (payload.role === 'log' && payload.path !== undefined) {
-          this._logPath = payload.path;
-          this._logFormat = payload.format;
-          this._artifactComplete = payload.complete !== false;
+          this.#logPath = payload.path;
+          this.#logFormat = payload.format;
+          this.#artifactComplete = payload.complete !== false;
         }
         break;
       }
@@ -219,7 +219,7 @@ export class AiReporter implements IReporter {
           succeeded: boolean;
           exitCode: number;
         };
-        this._emitFinal(payload.succeeded, payload.exitCode);
+        this.#emitFinal(payload.succeeded, payload.exitCode);
         break;
       }
       default:
@@ -232,54 +232,54 @@ export class AiReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    if (!this._finalEmitted) {
-      this._emitFinal(false, 1);
+    if (!this.#finalEmitted) {
+      this.#emitFinal(false, 1);
     }
   }
 
-  private _collectDiagnostic(diagnostic: IAiDiagnostic): void {
+  #collectDiagnostic(diagnostic: IAiDiagnostic): void {
     if (diagnostic.category !== undefined) {
-      this._diagnosticCategoryCounts[diagnostic.category] =
-        (this._diagnosticCategoryCounts[diagnostic.category] ?? 0) + 1;
+      this.#diagnosticCategoryCounts[diagnostic.category] =
+        (this.#diagnosticCategoryCounts[diagnostic.category] ?? 0) + 1;
     }
     if (diagnostic.severity === 'error') {
-      this._errorCount++;
-      this._errorCodes.add(diagnostic.code);
-      if (this._errorDiagnostics.length < this._maxDetailedDiagnostics) {
-        this._errorDiagnostics.push({
+      this.#errorCount++;
+      this.#errorCodes.add(diagnostic.code);
+      if (this.#errorDiagnostics.length < this.#maxDetailedDiagnostics) {
+        this.#errorDiagnostics.push({
           code: diagnostic.code,
           category: diagnostic.category,
           severity: 'error',
           remediation: diagnostic.remediation
         });
       } else {
-        this._errorDiagnosticsTruncated = true;
+        this.#errorDiagnosticsTruncated = true;
       }
     } else if (diagnostic.severity === 'warning') {
-      this._warningCount++;
-      if (this._warningDiagnostics.length < this._maxDetailedDiagnostics) {
-        this._warningDiagnostics.push({
+      this.#warningCount++;
+      if (this.#warningDiagnostics.length < this.#maxDetailedDiagnostics) {
+        this.#warningDiagnostics.push({
           code: diagnostic.code,
           category: diagnostic.category,
           severity: 'warning',
           remediation: diagnostic.remediation
         });
       } else {
-        this._warningDiagnosticsTruncated = true;
+        this.#warningDiagnosticsTruncated = true;
       }
     }
   }
 
-  private _emitFinal(succeeded: boolean, exitCode: number): void {
-    if (this._finalEmitted) {
+  #emitFinal(succeeded: boolean, exitCode: number): void {
+    if (this.#finalEmitted) {
       return;
     }
-    this._finalEmitted = true;
+    this.#finalEmitted = true;
 
-    const hasFailures: boolean = !succeeded || this._errorCount > 0;
+    const hasFailures: boolean = !succeeded || this.#errorCount > 0;
     // When failures exist, warnings are represented by counts only. Warning-only
     // success may include bounded warning details.
-    const detailedSource: IAiDiagnostic[] = hasFailures ? this._errorDiagnostics : this._warningDiagnostics;
+    const detailedSource: IAiDiagnostic[] = hasFailures ? this.#errorDiagnostics : this.#warningDiagnostics;
 
     const record: {
       kind: 'ai.final';
@@ -297,21 +297,21 @@ export class AiReporter implements IReporter {
       truncated: boolean;
     } = {
       kind: 'ai.final',
-      protocolVersion: this._protocolVersion,
+      protocolVersion: this.#protocolVersion,
       result: succeeded ? 'succeeded' : 'failed',
       exitCode,
-      scope: { commandName: this._commandName, failedProjects: [...this._failedProjects] },
-      errorCodes: [...this._errorCodes].sort(),
-      diagnosticCategoryCounts: { ...this._diagnosticCategoryCounts },
-      diagnostics: detailedSource.slice(0, this._maxDetailedDiagnostics),
-      errorCount: this._errorCount,
-      warningCount: this._warningCount,
-      operationCounts: { ...this._operationCounts },
-      truncated: hasFailures ? this._errorDiagnosticsTruncated : this._warningDiagnosticsTruncated
+      scope: { commandName: this.#commandName, failedProjects: [...this.#failedProjects] },
+      errorCodes: [...this.#errorCodes].sort(),
+      diagnosticCategoryCounts: { ...this.#diagnosticCategoryCounts },
+      diagnostics: detailedSource.slice(0, this.#maxDetailedDiagnostics),
+      errorCount: this.#errorCount,
+      warningCount: this.#warningCount,
+      operationCounts: { ...this.#operationCounts },
+      truncated: hasFailures ? this.#errorDiagnosticsTruncated : this.#warningDiagnosticsTruncated
     };
 
-    if (this._logPath !== undefined) {
-      record.log = { path: this._logPath, format: this._logFormat, complete: this._artifactComplete };
+    if (this.#logPath !== undefined) {
+      record.log = { path: this.#logPath, format: this.#logFormat, complete: this.#artifactComplete };
     }
 
     // Enforce the byte cap by progressively trimming detailed diagnostics, then
@@ -328,17 +328,17 @@ export class AiReporter implements IReporter {
       }
     ];
     for (const target of trimTargets) {
-      while (Buffer.byteLength(JSON.stringify(record), 'utf8') > this._maxBytes && target.get().length > 0) {
+      while (Buffer.byteLength(JSON.stringify(record), 'utf8') > this.#maxBytes && target.get().length > 0) {
         target.set(target.get().slice(0, target.get().length - 1));
         record.truncated = true;
       }
-      if (Buffer.byteLength(JSON.stringify(record), 'utf8') <= this._maxBytes) {
+      if (Buffer.byteLength(JSON.stringify(record), 'utf8') <= this.#maxBytes) {
         break;
       }
     }
 
     let serialized: string = JSON.stringify(record);
-    if (Buffer.byteLength(serialized, 'utf8') > this._maxBytes) {
+    if (Buffer.byteLength(serialized, 'utf8') > this.#maxBytes) {
       record.scope = { failedProjects: [] };
       record.errorCodes = [];
       record.diagnosticCategoryCounts = {};
@@ -348,9 +348,9 @@ export class AiReporter implements IReporter {
       record.truncated = true;
       serialized = JSON.stringify(record);
     }
-    if (Buffer.byteLength(serialized, 'utf8') > this._maxBytes) {
-      throw new Error(`The minimal AI final record exceeds maxBytes=${this._maxBytes}`);
+    if (Buffer.byteLength(serialized, 'utf8') > this.#maxBytes) {
+      throw new Error(`The minimal AI final record exceeds maxBytes=${this.#maxBytes}`);
     }
-    this._write(`${serialized}\n`);
+    this.#write(`${serialized}\n`);
   }
 }

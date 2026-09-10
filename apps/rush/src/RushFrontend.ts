@@ -47,59 +47,59 @@ export interface IRushFrontendProcessLifecycle {
 }
 
 class RushFrontendReporterLifecycle {
-  private readonly _reporterHost: IInitializedRushReporterHost;
-  private readonly _processLifecycle: IRushFrontendProcessLifecycle;
-  private _disposeBeforeExit: (() => void) | undefined;
-  private readonly _disposeSignalHandlers: Array<() => void> = [];
-  private _closePromise: Promise<void> | undefined;
+  readonly #reporterHost: IInitializedRushReporterHost;
+  readonly #processLifecycle: IRushFrontendProcessLifecycle;
+  #disposeBeforeExit: (() => void) | undefined;
+  readonly #disposeSignalHandlers: Array<() => void> = [];
+  #closePromise: Promise<void> | undefined;
 
   public constructor(
     reporterHost: IInitializedRushReporterHost,
     processLifecycle: IRushFrontendProcessLifecycle
   ) {
-    this._reporterHost = reporterHost;
-    this._processLifecycle = processLifecycle;
+    this.#reporterHost = reporterHost;
+    this.#processLifecycle = processLifecycle;
   }
 
   public start(): void {
-    this._disposeBeforeExit = this._processLifecycle.registerBeforeExit(() => {
+    this.#disposeBeforeExit = this.#processLifecycle.registerBeforeExit(() => {
       void this.closeAsync().catch((error: Error) => {
-        this._processLifecycle.reportCloseError(error);
-        this._processLifecycle.setExitCode(1);
+        this.#processLifecycle.reportCloseError(error);
+        this.#processLifecycle.setExitCode(1);
       });
     });
     for (const signal of ['SIGINT', 'SIGTERM'] as const) {
-      this._disposeSignalHandlers.push(
-        this._processLifecycle.registerSignal(signal, () => {
-          this._disposeSignals();
-          void this._closeForSignalAsync(signal);
+      this.#disposeSignalHandlers.push(
+        this.#processLifecycle.registerSignal(signal, () => {
+          this.#disposeSignals();
+          void this.#closeForSignalAsync(signal);
         })
       );
     }
   }
 
   public closeAsync(timeoutMs?: number): Promise<void> {
-    if (!this._closePromise) {
-      this._closePromise = Promise.resolve()
-        .then(() => this._reporterHost.closeAsync(timeoutMs))
-        .finally(() => this._dispose());
+    if (!this.#closePromise) {
+      this.#closePromise = Promise.resolve()
+        .then(() => this.#reporterHost.closeAsync(timeoutMs))
+        .finally(() => this.#dispose());
     }
-    return this._closePromise;
+    return this.#closePromise;
   }
 
-  private _dispose(): void {
-    this._disposeBeforeExit?.();
-    this._disposeBeforeExit = undefined;
-    this._disposeSignals();
+  #dispose(): void {
+    this.#disposeBeforeExit?.();
+    this.#disposeBeforeExit = undefined;
+    this.#disposeSignals();
   }
 
-  private _disposeSignals(): void {
-    for (const dispose of this._disposeSignalHandlers.splice(0)) {
+  #disposeSignals(): void {
+    for (const dispose of this.#disposeSignalHandlers.splice(0)) {
       dispose();
     }
   }
 
-  private async _closeForSignalAsync(signal: RushTerminationSignal): Promise<void> {
+  async #closeForSignalAsync(signal: RushTerminationSignal): Promise<void> {
     const closeResult: Promise<Error | undefined> = this.closeAsync(DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS).then(
       () => undefined,
       (error: Error) => error
@@ -114,14 +114,14 @@ class RushFrontendReporterLifecycle {
       clearTimeout(timeout);
     }
     if (result === 'deadline') {
-      this._processLifecycle.reportCloseError(
+      this.#processLifecycle.reportCloseError(
         new Error(`Reporter close exceeded the ${DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS}ms signal deadline.`)
       );
     } else if (result) {
-      this._processLifecycle.reportCloseError(result);
+      this.#processLifecycle.reportCloseError(result);
     }
-    this._dispose();
-    this._processLifecycle.terminate(signal);
+    this.#dispose();
+    this.#processLifecycle.terminate(signal);
   }
 }
 

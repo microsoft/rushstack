@@ -90,42 +90,42 @@ interface IParsedReporterControls {
 class LogLevelReporter implements IReporter {
   public readonly name: string;
 
-  private readonly _reporter: IReporter;
-  private readonly _logLevel: ReporterLogLevel;
+  readonly #reporter: IReporter;
+  readonly #logLevel: ReporterLogLevel;
 
   public constructor(reporter: IReporter, logLevel: ReporterLogLevel) {
-    this._reporter = reporter;
-    this._logLevel = logLevel;
+    this.#reporter = reporter;
+    this.#logLevel = logLevel;
     this.name = reporter.name;
   }
 
   public initializeAsync(context: IReporterContext): Promise<void> {
-    return this._reporter.initializeAsync(context);
+    return this.#reporter.initializeAsync(context);
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    if (shouldRenderAtLogLevel(this._logLevel, event)) {
-      this._reporter.report(event);
+    if (shouldRenderAtLogLevel(this.#logLevel, event)) {
+      this.#reporter.report(event);
     }
   }
 
   public flushAsync(): Promise<void> {
-    return this._reporter.flushAsync();
+    return this.#reporter.flushAsync();
   }
 
   public closeAsync(): Promise<void> {
-    return this._reporter.closeAsync();
+    return this.#reporter.closeAsync();
   }
 }
 
 class ExplicitOutputReporter implements IReporter {
   public readonly name: string;
 
-  private readonly _reporter: JsonReporter;
-  private readonly _filteredReporter: LogLevelReporter;
-  private readonly _outputPath: string;
-  private readonly _outputStream: IRushReporterOutputStream | undefined;
-  private _fileDescriptor: number | undefined;
+  readonly #reporter: JsonReporter;
+  readonly #filteredReporter: LogLevelReporter;
+  readonly #outputPath: string;
+  readonly #outputStream: IRushReporterOutputStream | undefined;
+  #fileDescriptor: number | undefined;
 
   public constructor(
     reporterName: string,
@@ -134,49 +134,49 @@ class ExplicitOutputReporter implements IReporter {
     outputStream?: IRushReporterOutputStream
   ) {
     this.name = `${reporterName}-output`;
-    this._outputPath = outputPath;
-    this._outputStream = outputStream;
-    this._reporter = new JsonReporter({
+    this.#outputPath = outputPath;
+    this.#outputStream = outputStream;
+    this.#reporter = new JsonReporter({
       write: (text: string) => {
-        if (this._outputStream) {
-          this._outputStream.write(text);
+        if (this.#outputStream) {
+          this.#outputStream.write(text);
           return;
         }
-        if (this._fileDescriptor === undefined) {
-          throw new Error(`Reporter output ${JSON.stringify(this._outputPath)} is not initialized.`);
+        if (this.#fileDescriptor === undefined) {
+          throw new Error(`Reporter output ${JSON.stringify(this.#outputPath)} is not initialized.`);
         }
-        fs.writeSync(this._fileDescriptor, text);
+        fs.writeSync(this.#fileDescriptor, text);
       }
     });
-    this._filteredReporter = new LogLevelReporter(this._reporter, logLevel);
+    this.#filteredReporter = new LogLevelReporter(this.#reporter, logLevel);
   }
 
   public async initializeAsync(context: IReporterContext): Promise<void> {
-    if (!this._outputStream) {
-      await fs.promises.mkdir(path.dirname(this._outputPath), { recursive: true });
-      this._fileDescriptor = fs.openSync(this._outputPath, 'w', 0o600);
+    if (!this.#outputStream) {
+      await fs.promises.mkdir(path.dirname(this.#outputPath), { recursive: true });
+      this.#fileDescriptor = fs.openSync(this.#outputPath, 'w', 0o600);
     }
-    await this._filteredReporter.initializeAsync(context);
+    await this.#filteredReporter.initializeAsync(context);
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    this._filteredReporter.report(event);
+    this.#filteredReporter.report(event);
   }
 
   public async flushAsync(): Promise<void> {
-    await this._filteredReporter.flushAsync();
-    if (this._fileDescriptor !== undefined) {
-      fs.fsyncSync(this._fileDescriptor);
+    await this.#filteredReporter.flushAsync();
+    if (this.#fileDescriptor !== undefined) {
+      fs.fsyncSync(this.#fileDescriptor);
     }
   }
 
   public async closeAsync(): Promise<void> {
     try {
-      await this._filteredReporter.closeAsync();
+      await this.#filteredReporter.closeAsync();
     } finally {
-      if (this._fileDescriptor !== undefined) {
-        fs.closeSync(this._fileDescriptor);
-        this._fileDescriptor = undefined;
+      if (this.#fileDescriptor !== undefined) {
+        fs.closeSync(this.#fileDescriptor);
+        this.#fileDescriptor = undefined;
       }
     }
   }

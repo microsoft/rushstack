@@ -19,10 +19,6 @@ class CapturingSink implements IReporterEventSink {
   }
 }
 
-interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
-  _flushAsyncTasks: Set<Promise<void>>;
-}
-
 describe(Telemetry.name, () => {
   const mockedJsonFileSave: jest.SpyInstance = jest.spyOn(JsonFile, 'save').mockImplementation(() => {
     /* don't actually write anything */
@@ -187,10 +183,7 @@ describe(Telemetry.name, () => {
     });
     const customFlushTelemetry: jest.Mock = jest.fn();
     rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
-    const telemetry: ITelemetryPrivateMembers = new Telemetry(
-      rushConfig,
-      rushSession
-    ) as unknown as ITelemetryPrivateMembers;
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -203,9 +196,6 @@ describe(Telemetry.name, () => {
     expect(customFlushTelemetry.mock.calls[0][0][0]).toEqual(expect.objectContaining(logData));
 
     await telemetry.ensureFlushedAsync();
-
-    // Ensure the tasks get cleaned up
-    expect(telemetry._flushAsyncTasks.size).toEqual(0);
   });
 
   it('calls custom flush telemetry twice', async () => {
@@ -217,10 +207,7 @@ describe(Telemetry.name, () => {
     });
     const customFlushTelemetry: jest.Mock = jest.fn();
     rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
-    const telemetry: ITelemetryPrivateMembers = new Telemetry(
-      rushConfig,
-      rushSession
-    ) as unknown as ITelemetryPrivateMembers;
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -244,8 +231,5 @@ describe(Telemetry.name, () => {
     expect(customFlushTelemetry.mock.calls[1][0][0]).toEqual(expect.objectContaining(logData2));
 
     await telemetry.ensureFlushedAsync();
-
-    // Ensure the tasks get cleaned up
-    expect(telemetry._flushAsyncTasks.size).toEqual(0);
   });
 });

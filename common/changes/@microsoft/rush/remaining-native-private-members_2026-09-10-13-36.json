@@ -1,0 +1,39 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use ECMAScript private syntax for remaining eligible internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/heft-localization-typings-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rush-mcp-docs-plugin",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    }
+  ]
+}
