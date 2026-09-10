@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Resolve the command working directory to its physical path so watch input snapshots work with Windows short names and directory aliases. Preserve real watch cancellation and watcher cleanup coverage for both legacy and shadow reporting.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}
