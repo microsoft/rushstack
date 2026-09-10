@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Clarify that final full-detail artifact completeness is published only after physical closure and is not appended back to the closed log.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

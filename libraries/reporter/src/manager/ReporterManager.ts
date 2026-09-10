@@ -90,12 +90,14 @@ interface IReporterEntry {
   readonly destination: string | undefined;
   readonly required: boolean;
   readonly abortController: AbortController;
+  initializationStarted: boolean;
   disabled: boolean;
   failureNotified: boolean;
   readonly queue: IReporterEventEnvelope<unknown>[];
   draining: boolean;
   drainPromise: Promise<void>;
   lifecyclePromise: Promise<void>;
+  closePromise: Promise<void> | undefined;
 }
 
 /**
@@ -122,6 +124,7 @@ export class ReporterManager implements IReporterEventSink {
   private _nextEventId: number;
   private _initialized: boolean;
   private _fatalError: Error | undefined;
+  private _disposalPromise: Promise<void> | undefined;
 
   public constructor(options: IReporterManagerOptions = {}) {
     const {
@@ -171,12 +174,14 @@ export class ReporterManager implements IReporterEventSink {
       destination,
       required: options.required ?? false,
       abortController: new AbortController(),
+      initializationStarted: false,
       disabled: false,
       failureNotified: false,
       queue: [],
       draining: false,
       drainPromise: Promise.resolve(),
-      lifecyclePromise: Promise.resolve()
+      lifecyclePromise: Promise.resolve(),
+      closePromise: undefined
     });
   }
 
@@ -204,9 +209,76 @@ export class ReporterManager implements IReporterEventSink {
           }
         }
       };
+      entry.initializationStarted = true;
       await entry.reporter.initializeAsync(context);
     }
     this._initialized = true;
+  }
+
+  /**
+   * Joins cleanup of every attempted initialization, including a partially initialized reporter.
+   *
+   * @internal
+   */
+  public _disposeInitializedReportersAsync(failure?: unknown): Promise<void> {
+    if (this._disposalPromise) {
+      return this._disposalPromise;
+    }
+    const attempted: IReporterEntry[] = this._entries.filter(
+      (entry: IReporterEntry) => entry.initializationStarted
+    );
+    const reason: Error =
+      failure instanceof Error ? failure : new Error('Reporter initialization failed.', { cause: failure });
+    let resolveDisposal!: () => void;
+    let rejectDisposal!: (error: unknown) => void;
+    // Publish the promise before abort listeners can reenter disposal.
+    this._disposalPromise = new Promise<void>((resolve, reject) => {
+      resolveDisposal = resolve;
+      rejectDisposal = reject;
+    });
+    const errors: unknown[] = [];
+    for (const entry of attempted) {
+      try {
+        entry.abortController.abort(reason);
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    void this._disposeEntriesAsync(attempted, errors).then(resolveDisposal, rejectDisposal);
+    return this._disposalPromise;
+  }
+
+  private async _disposeEntriesAsync(entries: readonly IReporterEntry[], errors: unknown[]): Promise<void> {
+    const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+      entries.map((entry: IReporterEntry): Promise<void> => {
+        const previousLifecycle: Promise<void> = entry.lifecyclePromise;
+        const disposal: Promise<void> = (async () => {
+          try {
+            await previousLifecycle;
+            await entry.drainPromise;
+            if (this._canFlushEntry(entry)) {
+              await entry.reporter.flushAsync();
+            }
+          } finally {
+            await this._closeEntryAsync(entry);
+          }
+        })();
+        // Reserve the lifecycle lane without swallowing failures needed by the aggregate.
+        entry.lifecyclePromise = disposal;
+        return disposal;
+      })
+    );
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        errors.push(result.reason);
+      }
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(
+        errors,
+        `Reporter initialization cleanup failed: ${errors.map((error: unknown) => String(error)).join('; ')}`
+      );
+    }
   }
 
   /**
@@ -279,7 +351,7 @@ export class ReporterManager implements IReporterEventSink {
   public async flushAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (!entry.disabled) {
+      if (this._canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -296,7 +368,7 @@ export class ReporterManager implements IReporterEventSink {
   public async _flushAndConfirmAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<boolean> {
     return await this._settleAndConfirmAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (!entry.disabled) {
+      if (this._canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -312,7 +384,7 @@ export class ReporterManager implements IReporterEventSink {
   public async signalFlushAsync(timeoutMs: number = DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS): Promise<void> {
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (!entry.disabled) {
+      if (this._canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -334,7 +406,7 @@ export class ReporterManager implements IReporterEventSink {
       flushError = error as Error;
     }
     await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
-      await entry.reporter.closeAsync();
+      await this._closeEntryAsync(entry);
     }, timeoutMs);
     if (flushError) {
       throw flushError;
@@ -342,6 +414,18 @@ export class ReporterManager implements IReporterEventSink {
     if (this._fatalError) {
       throw this._fatalError;
     }
+  }
+
+  private _canFlushEntry(entry: IReporterEntry): boolean {
+    return this._initialized && !entry.disabled && entry.closePromise === undefined;
+  }
+
+  private _closeEntryAsync(entry: IReporterEntry): Promise<void> {
+    if (!entry.initializationStarted) {
+      return Promise.resolve();
+    }
+    entry.closePromise ??= Promise.resolve().then(() => entry.reporter.closeAsync());
+    return entry.closePromise;
   }
 
   private _fanOut(envelope: IReporterEventEnvelope<unknown>): void {
