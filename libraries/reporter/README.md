@@ -92,6 +92,15 @@ The recorded cancellation state is reset when a new command starts.
 Operation output parity tests compare raw terminal chunks, including stream identity and unnormalized ANSI
 text, as well as the actual bytes on each stdout/stderr stream.
 
+## Full-detail log completion
+
+The frontend reports an invocation log as complete only after its accepted events and grouped
+output have been persisted and the file has closed successfully. Its final `artifactAvailable`
+notification is delivered to the remaining reporters after that close; it is not appended to the
+same closed log. The log retains command results and session completion, including failed commands.
+Flush or close failures leave the artifact incomplete or unavailable and produce an emergency warning
+without replacing the command's native exit result.
+
 ## Links
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out
