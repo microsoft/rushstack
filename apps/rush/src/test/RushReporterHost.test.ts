@@ -706,7 +706,7 @@ describe(resolveRushReporterSelection.name, () => {
     ]);
     expect(selection).toMatchObject({
       reporterControlsOwnedByFrontend: true,
-      reporterValueFlagsToStrip: ['--output', '--log-level']
+      reporterValueFlagsToStrip: ['--output']
     });
     expect(resolve(['list', '--json', '--reporter=file']).reporter).toBe('file');
   });
@@ -812,7 +812,7 @@ describe(initializeRushReporterHostAsync.name, () => {
   );
 
   it.each([false, true])(
-    'retains primary file debug details unless normal is explicit: %s',
+    'retains the automatic full-detail log independently of the selected display level: %s',
     async (normal) => {
       const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-level-'));
       const osModule: typeof os = jest.requireActual('node:os');
@@ -824,6 +824,7 @@ describe(initializeRushReporterHostAsync.name, () => {
           stdout: { write: () => undefined },
           includeDefaultFileReporter: false
         });
+        expect(initialized.selection.logLevel).toBe(normal ? 'normal' : 'debug');
         initialized.sink.emit({
           protocolVersion: { major: 1, minor: 0 },
           sessionId: 'primary-file-level',
@@ -841,7 +842,7 @@ describe(initializeRushReporterHostAsync.name, () => {
         );
         expect(logName).toBeDefined();
         const text: string = await fs.promises.readFile(path.join(directory, logFolder, logName!), 'utf8');
-        expect(text.includes('retained-debug-detail')).toBe(!normal);
+        expect(text).toContain('retained-debug-detail');
       } finally {
         tmpdirSpy.mockRestore();
         await fs.promises.rm(directory, { recursive: true, force: true });

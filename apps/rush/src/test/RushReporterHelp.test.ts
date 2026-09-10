@@ -19,6 +19,11 @@ describe('reporter help forwarding', () => {
     const originalArgv: string[] = process.argv;
     const originalEnv: NodeJS.ProcessEnv = { ...process.env };
     const originalExitCode: typeof process.exitCode = process.exitCode;
+    const repoPath: string = path.resolve(
+      __dirname,
+      '../../../../libraries/rush-lib/src/cli/test/basicAndRunBuildActionRepo'
+    );
+    const cwdSpy = jest.spyOn(process, 'cwd').mockReturnValue(repoPath);
     const output: string[] = [];
     const errors: string[] = [];
     const stdoutSpy = jest.spyOn(process.stdout, 'write').mockImplementation((text) => {
@@ -56,10 +61,7 @@ describe('reporter help forwarding', () => {
           expect(process.env.RUSH_LOG_LEVEL).toBeUndefined();
           expect(options.reporter.operationStreamEnabled).toBe(false);
           const parser: RushCommandLineParser = new RushCommandLineParser({
-            cwd: path.resolve(
-              __dirname,
-              '../../../../libraries/rush-lib/src/cli/test/basicAndRunBuildActionRepo'
-            ),
+            cwd: repoPath,
             reporterCloseAsync: options.reporterCloseAsync
           });
           return parser.executeAsync().then((succeeded) => {
@@ -77,6 +79,7 @@ describe('reporter help forwarding', () => {
       stdoutSpy.mockRestore();
       stderrSpy.mockRestore();
       logSpy.mockRestore();
+      cwdSpy.mockRestore();
     }
   });
 

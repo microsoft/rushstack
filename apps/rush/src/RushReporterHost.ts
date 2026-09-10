@@ -4,8 +4,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { CommandLineConfiguration, type Command } from '@microsoft/rush-lib/lib/api/CommandLineConfiguration';
-import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import {
   AiReporter,
   DefaultInteractiveReporter,
@@ -510,22 +508,6 @@ function hasReporterOutputControl(argv: readonly string[]): boolean {
   return false;
 }
 
-function hasReporterLogLevelControl(argv: readonly string[]): boolean {
-  for (let index: number = 0; index < argv.length; index++) {
-    const argument: string = argv[index];
-    if (argument === '--') {
-      break;
-    }
-    if (argument.startsWith('--log-level=') && argument.length > '--log-level='.length) {
-      return true;
-    }
-    if (argument === '--log-level' && argv[index + 1] !== undefined && !argv[index + 1].startsWith('-')) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function hasHelpControl(argv: readonly string[]): boolean {
   for (const argument of argv) {
     if (argument === '--') {
@@ -549,25 +531,12 @@ function getImplicitHelpValueFlagsToStrip(argv: readonly string[], cwd: string):
       break;
     }
   }
-  const rushJsonPath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-    startingFolder: cwd,
-    showVerbose: false
-  });
-  const commandLine: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
-    rushJsonPath && path.join(path.dirname(rushJsonPath), 'common', 'config', 'rush', 'command-line.json')
-  );
-  const command: Command | undefined =
-    commandName === undefined ? undefined : commandLine.commands.get(commandName);
-  if (
-    commandName !== undefined &&
-    (!command || (command.commandKind === 'global' && command.providedByPlugin))
-  ) {
+  const ownership: IReporterCommandLineOwnership = getReporterCommandLineOwnership(commandName, cwd);
+  if (commandName !== undefined && !ownership.known) {
     // An unknown or plugin-owned command can declare options outside the repository configuration.
     return [];
   }
-  const commandOwnedFlags: Set<string> = new Set(
-    [...(command?.associatedParameters ?? [])].map((parameter) => parameter.longName)
-  );
+  const commandOwnedFlags: ReadonlySet<string> = ownership.parameters;
   const outputs: (string | undefined)[] = [];
   const logLevels: (string | undefined)[] = [];
   for (let index: number = 0; index < argv.length; index++) {
@@ -807,6 +776,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     };
   }
 
+  let commandOwnership: IReporterCommandLineOwnership | undefined;
   if (hasHelpControl(argv)) {
     const reporterValueFlagsToStrip: readonly string[] =
       requestedReporter !== undefined
@@ -816,6 +786,11 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
         : options.repositoryOptIn
           ? getImplicitHelpValueFlagsToStrip(argv, cwd)
           : [];
+    const reporterFlagsToStrip: readonly string[] =
+      (requestedReporter !== undefined && requestedReporter !== 'legacy') ||
+      (requestedReporter === undefined && options.repositoryOptIn)
+        ? getFlagsToStrip(selectionControls)
+        : [];
     return {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -824,8 +799,10 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
       enabled: false,
       reporterControlsOwnedByFrontend:
         reporterValueFlagsToStrip.length > 0 ||
+        reporterFlagsToStrip.length > 0 ||
         (options.repositoryOptIn === true && env.RUSH_LOG_LEVEL !== undefined),
       reporterValueFlagsToStrip,
+      ...(reporterFlagsToStrip.length > 0 ? { reporterFlagsToStrip } : {}),
       reason: requestedReporter === undefined ? 'pre-major legacy default' : 'explicit --reporter'
     };
   }
@@ -841,7 +818,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     return 'rush';
   }
 
-  let commandOwnership: IReporterCommandLineOwnership | undefined;
   function getCommandOwnership(): IReporterCommandLineOwnership {
     if (!commandOwnership) {
       const separator: number = argv.indexOf('--');
