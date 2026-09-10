@@ -12,7 +12,7 @@ import { type ISubspacesConfigurationJson, SubspacesConfiguration } from '../../
 import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
 
 export class InitSubspaceAction extends BaseRushAction {
-  private readonly _subspaceNameParameter: IRequiredCommandLineStringParameter;
+  readonly #subspaceNameParameter: IRequiredCommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -23,7 +23,7 @@ export class InitSubspaceAction extends BaseRushAction {
       parser
     });
 
-    this._subspaceNameParameter = this.defineStringParameter({
+    this.#subspaceNameParameter = this.defineStringParameter({
       parameterLongName: '--name',
       parameterShortName: '-n',
       argumentName: 'SUBSPACE_NAME',
@@ -43,10 +43,10 @@ export class InitSubspaceAction extends BaseRushAction {
       .subspacesConfiguration as SubspacesConfiguration;
     // Verify this subspace name does not already exist
     const existingSubspaceNames: ReadonlySet<string> = subspacesConfiguration.subspaceNames;
-    const newSubspaceName: string = this._subspaceNameParameter.value;
+    const newSubspaceName: string = this.#subspaceNameParameter.value;
     if (existingSubspaceNames.has(newSubspaceName)) {
       throw new Error(
-        `The subspace name: ${this._subspaceNameParameter.value} already exists in the subspace.json file.`
+        `The subspace name: ${this.#subspaceNameParameter.value} already exists in the subspace.json file.`
       );
     }
     if (

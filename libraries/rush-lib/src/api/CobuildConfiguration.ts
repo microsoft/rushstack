@@ -76,9 +76,9 @@ export class CobuildConfiguration {
    */
   public readonly cobuildWithoutCacheAllowed: boolean;
 
-  private _cobuildLockProvider: ICobuildLockProvider | undefined;
-  private readonly _cobuildLockProviderFactory: CobuildLockProviderFactory;
-  private readonly _cobuildJson: ICobuildJson;
+  #cobuildLockProvider: ICobuildLockProvider | undefined;
+  readonly #cobuildLockProviderFactory: CobuildLockProviderFactory;
+  readonly #cobuildJson: ICobuildJson;
 
   private constructor(options: ICobuildConfigurationOptions) {
     const { cobuildJson, cobuildLockProviderFactory, rushConfiguration } = options;
@@ -91,8 +91,8 @@ export class CobuildConfiguration {
     this.cobuildWithoutCacheAllowed =
       rushConfiguration.experimentsConfiguration.configuration.allowCobuildWithoutCache ?? false;
 
-    this._cobuildLockProviderFactory = cobuildLockProviderFactory;
-    this._cobuildJson = cobuildJson;
+    this.#cobuildLockProviderFactory = cobuildLockProviderFactory;
+    this.#cobuildJson = cobuildJson;
   }
 
   /**
@@ -127,25 +127,25 @@ export class CobuildConfiguration {
   public async createLockProviderAsync(terminal: ITerminal): Promise<void> {
     if (this.cobuildFeatureEnabled) {
       terminal.writeLine(`Running cobuild (runner ${this.cobuildContextId}/${this.cobuildRunnerId})`);
-      const cobuildLockProvider: ICobuildLockProvider = await this._cobuildLockProviderFactory(
-        this._cobuildJson
+      const cobuildLockProvider: ICobuildLockProvider = await this.#cobuildLockProviderFactory(
+        this.#cobuildJson
       );
-      this._cobuildLockProvider = cobuildLockProvider;
-      await this._cobuildLockProvider.connectAsync();
+      this.#cobuildLockProvider = cobuildLockProvider;
+      await this.#cobuildLockProvider.connectAsync();
     }
   }
 
   public async destroyLockProviderAsync(): Promise<void> {
     if (this.cobuildFeatureEnabled) {
-      await this._cobuildLockProvider?.disconnectAsync();
+      await this.#cobuildLockProvider?.disconnectAsync();
     }
   }
 
   public getCobuildLockProvider(): ICobuildLockProvider {
-    if (!this._cobuildLockProvider) {
+    if (!this.#cobuildLockProvider) {
       throw new Error(`Cobuild lock provider has not been created`);
     }
-    return this._cobuildLockProvider;
+    return this.#cobuildLockProvider;
   }
 }
 

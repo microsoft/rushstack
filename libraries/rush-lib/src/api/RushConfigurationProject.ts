@@ -66,12 +66,12 @@ export interface IRushConfigurationProjectOptions {
  * @public
  */
 export class RushConfigurationProject {
-  private readonly _shouldPublish: boolean;
+  readonly #shouldPublish: boolean;
 
-  private _versionPolicy: VersionPolicy | undefined = undefined;
-  private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
-  private _consumingProjects: Set<RushConfigurationProject> | undefined = undefined;
-  private _packageJson: IPackageJson;
+  #versionPolicy: VersionPolicy | undefined = undefined;
+  #dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
+  #consumingProjects: Set<RushConfigurationProject> | undefined = undefined;
+  #packageJson: IPackageJson;
 
   /**
    * The name of the NPM package.  An error is reported if this name is not
@@ -139,7 +139,7 @@ export class RushConfigurationProject {
    * The parsed NPM "package.json" file from projectFolder.
    */
   public get packageJson(): IPackageJson {
-    return this._packageJson;
+    return this.#packageJson;
   }
 
   /**
@@ -242,7 +242,7 @@ export class RushConfigurationProject {
     try {
       const packageJsonText: string = FileSystem.readFile(packageJsonFilename);
       // JSON.parse is native and runs in less than 1/2 the time of jju.parse. package.json is required to be strict JSON by NodeJS.
-      this._packageJson = JSON.parse(packageJsonText);
+      this.#packageJson = JSON.parse(packageJsonText);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(`Could not find package.json for ${packageName} at ${packageJsonFilename}`);
@@ -300,8 +300,8 @@ export class RushConfigurationProject {
       filename: packageJsonFilename,
       onSaved: (newObject) => {
         // Just update the in-memory copy, don't bother doing the validation again
-        this._packageJson = newObject;
-        this._dependencyProjects = undefined; // Reset the cached dependency projects
+        this.#packageJson = newObject;
+        this.#dependencyProjects = undefined; // Reset the cached dependency projects
       }
     });
 
@@ -324,11 +324,11 @@ export class RushConfigurationProject {
         this.decoupledLocalDependencies.add(cyclicDependencyProject);
       }
     }
-    this._shouldPublish = !!projectJson.shouldPublish;
+    this.#shouldPublish = !!projectJson.shouldPublish;
     this.skipRushCheck = !!projectJson.skipRushCheck;
     this.versionPolicyName = projectJson.versionPolicyName;
 
-    if (this._shouldPublish && this.packageJson.private) {
+    if (this.#shouldPublish && this.packageJson.private) {
       throw new Error(
         `The project "${packageName}" specifies "shouldPublish": true, ` +
           `but the package.json file specifies "private": true.`
@@ -402,9 +402,9 @@ export class RushConfigurationProject {
    * referenced from this project.
    */
   public get dependencyProjects(): ReadonlySet<RushConfigurationProject> {
-    let dependencyProjects: Set<RushConfigurationProject> | undefined = this._dependencyProjects;
+    let dependencyProjects: Set<RushConfigurationProject> | undefined = this.#dependencyProjects;
     if (!dependencyProjects) {
-      this._dependencyProjects = dependencyProjects = new Set();
+      this.#dependencyProjects = dependencyProjects = new Set();
       const { packageJson } = this;
       for (const dependencySet of [
         packageJson.dependencies,
@@ -454,23 +454,23 @@ export class RushConfigurationProject {
    * graph to find all projects which will be impacted by changes to this project.
    */
   public get consumingProjects(): ReadonlySet<RushConfigurationProject> {
-    if (!this._consumingProjects) {
+    if (!this.#consumingProjects) {
       // Force initialize all dependency relationships
       // This needs to operate on every project in the set because the relationships are only specified
       // in the consuming project
       const { projects } = this.rushConfiguration;
 
       for (const project of projects) {
-        project._consumingProjects = new Set();
+        project.#consumingProjects = new Set();
       }
 
       for (const project of projects) {
         for (const dependency of project.dependencyProjects) {
-          dependency._consumingProjects!.add(project);
+          dependency.#consumingProjects!.add(project);
         }
       }
     }
-    return this._consumingProjects!;
+    return this.#consumingProjects!;
   }
 
   /**
@@ -479,7 +479,7 @@ export class RushConfigurationProject {
    * should be published during `rush publish`.
    */
   public get shouldPublish(): boolean {
-    return this._shouldPublish || !!this.versionPolicyName;
+    return this.#shouldPublish || !!this.versionPolicyName;
   }
 
   /**
@@ -487,14 +487,14 @@ export class RushConfigurationProject {
    * @beta
    */
   public get versionPolicy(): VersionPolicy | undefined {
-    if (!this._versionPolicy) {
+    if (!this.#versionPolicy) {
       if (this.versionPolicyName && this.rushConfiguration.versionPolicyConfiguration) {
-        this._versionPolicy = this.rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+        this.#versionPolicy = this.rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
           this.versionPolicyName
         );
       }
     }
-    return this._versionPolicy;
+    return this.#versionPolicy;
   }
 
   /**

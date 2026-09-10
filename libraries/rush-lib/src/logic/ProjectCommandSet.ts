@@ -9,7 +9,7 @@ import type { IPackageJson, IPackageJsonScriptTable } from '@rushstack/node-core
 export class ProjectCommandSet {
   public readonly malformedScriptNames: string[] = [];
   public readonly commandNames: string[] = [];
-  private readonly _scriptsByName: Map<string, string> = new Map<string, string>();
+  readonly #scriptsByName: Map<string, string> = new Map<string, string>();
 
   public constructor(packageJson: IPackageJson) {
     const scripts: IPackageJsonScriptTable = packageJson.scripts || {};
@@ -19,7 +19,7 @@ export class ProjectCommandSet {
         this.malformedScriptNames.push(scriptName);
       } else {
         this.commandNames.push(scriptName);
-        this._scriptsByName.set(scriptName, scripts[scriptName]);
+        this.#scriptsByName.set(scriptName, scripts[scriptName]);
       }
     }
 
@@ -27,7 +27,7 @@ export class ProjectCommandSet {
   }
 
   public tryGetScriptBody(commandName: string): string | undefined {
-    return this._scriptsByName.get(commandName);
+    return this.#scriptsByName.get(commandName);
   }
 
   public getScriptBody(commandName: string): string {

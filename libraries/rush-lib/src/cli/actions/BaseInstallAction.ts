@@ -269,7 +269,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
             };
           }
 
-          await this._doInstallAsync(
+          await this.#doInstallAsync(
             installManagerFactoryModule,
             purgeManager,
             installManagerOptionsForInstall
@@ -277,7 +277,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         }
       } else {
         // Simple case when subspacesFeatureEnabled=false
-        await this._doInstallAsync(installManagerFactoryModule, purgeManager, {
+        await this.#doInstallAsync(installManagerFactoryModule, purgeManager, {
           ...installManagerOptions,
           subspace: this.rushConfiguration.defaultSubspace
         });
@@ -291,7 +291,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       );
       stopwatch.stop();
 
-      this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
+      this.#collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
       this.parser.flushTelemetry();
       this.eventHooksManager.handle(
         Event.postRushInstall,
@@ -317,7 +317,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     );
   }
 
-  private async _doInstallAsync(
+  async #doInstallAsync(
     installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory'),
     purgeManager: PurgeManager,
     installManagerOptions: IInstallManagerOptions
@@ -333,7 +333,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     await measureAsyncFn('rush:installManager:doInstallAsync', () => installManager.doInstallAsync());
   }
 
-  private _collectTelemetry(
+  #collectTelemetry(
     stopwatch: Stopwatch,
     installManagerOptions: Omit<IInstallManagerOptions, 'subspace'>,
     success: boolean

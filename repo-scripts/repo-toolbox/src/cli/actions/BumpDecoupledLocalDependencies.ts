@@ -38,7 +38,7 @@ interface IProjectLike {
 }
 
 export class BumpDecoupledLocalDependencies extends CommandLineAction {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -47,11 +47,11 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
       documentation: ''
     });
 
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });

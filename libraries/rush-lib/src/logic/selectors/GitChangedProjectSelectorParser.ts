@@ -21,30 +21,30 @@ export interface IGitSelectorParserOptions {
 }
 
 export class GitChangedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _options: IGitSelectorParserOptions;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #options: IGitSelectorParserOptions;
 
   public constructor(rushConfiguration: RushConfiguration, options: IGitSelectorParserOptions) {
-    this._rushConfiguration = rushConfiguration;
-    this._options = options;
+    this.#rushConfiguration = rushConfiguration;
+    this.#options = options;
   }
 
   public async evaluateSelectorAsync({
     unscopedSelector,
     terminal
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.#rushConfiguration);
 
     const options: IGetChangedProjectsOptions = {
       terminal,
       targetBranchName: unscopedSelector,
-      ...this._options
+      ...this.#options
     };
 
     return await projectChangeAnalyzer.getChangedProjectsAsync(options);
   }
 
   public getCompletions(): Iterable<string> {
-    return [this._rushConfiguration.repositoryDefaultBranch, 'HEAD~1', 'HEAD'];
+    return [this.#rushConfiguration.repositoryDefaultBranch, 'HEAD~1', 'HEAD'];
   }
 }

@@ -25,11 +25,11 @@ class GenericCommandLine extends CommandLineParser {
 
 class AmbiguousAction extends CommandLineAction {
   public done: boolean = false;
-  private _short1Arg: CommandLineStringParameter;
-  private _shortArg2: CommandLineStringParameter;
-  private _scope1Arg: CommandLineStringParameter;
-  private _scope2Arg: CommandLineStringParameter;
-  private _nonConflictingArg: CommandLineStringParameter;
+  #short1Arg: CommandLineStringParameter;
+  #shortArg2: CommandLineStringParameter;
+  #scope1Arg: CommandLineStringParameter;
+  #scope2Arg: CommandLineStringParameter;
+  #nonConflictingArg: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -38,31 +38,31 @@ class AmbiguousAction extends CommandLineAction {
       documentation: 'a longer description'
     });
 
-    this._short1Arg = this.defineStringParameter({
+    this.#short1Arg = this.defineStringParameter({
       parameterLongName: '--short1',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._shortArg2 = this.defineStringParameter({
+    this.#shortArg2 = this.defineStringParameter({
       parameterLongName: '--short2',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope1Arg = this.defineStringParameter({
+    this.#scope1Arg = this.defineStringParameter({
       parameterLongName: '--arg',
       parameterScope: 'scope1',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope2Arg = this.defineStringParameter({
+    this.#scope2Arg = this.defineStringParameter({
       parameterLongName: '--arg',
       parameterScope: 'scope2',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._nonConflictingArg = this.defineStringParameter({
+    this.#nonConflictingArg = this.defineStringParameter({
       parameterLongName: '--non-conflicting-arg',
       parameterScope: 'scope',
       argumentName: 'ARG',
@@ -71,11 +71,11 @@ class AmbiguousAction extends CommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._short1Arg.value).toEqual('short1value');
-    expect(this._shortArg2.value).toEqual('short2value');
-    expect(this._scope1Arg.value).toEqual('scope1value');
-    expect(this._scope2Arg.value).toEqual('scope2value');
-    expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
+    expect(this.#short1Arg.value).toEqual('short1value');
+    expect(this.#shortArg2.value).toEqual('short2value');
+    expect(this.#scope1Arg.value).toEqual('scope1value');
+    expect(this.#scope2Arg.value).toEqual('scope2value');
+    expect(this.#nonConflictingArg.value).toEqual('nonconflictingvalue');
     this.done = true;
   }
 }
@@ -119,12 +119,12 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
   public scope1Value: string | undefined;
   public scope2Value: string | undefined;
   public nonConflictingValue: string | undefined;
-  private _scopingArg: CommandLineFlagParameter | undefined;
-  private _short1Arg: CommandLineStringParameter | undefined;
-  private _short2Arg: CommandLineStringParameter | undefined;
-  private _scope1Arg: CommandLineStringParameter | undefined;
-  private _scope2Arg: CommandLineStringParameter | undefined;
-  private _nonConflictingArg: CommandLineStringParameter | undefined;
+  #scopingArg: CommandLineFlagParameter | undefined;
+  #short1Arg: CommandLineStringParameter | undefined;
+  #short2Arg: CommandLineStringParameter | undefined;
+  #scope1Arg: CommandLineStringParameter | undefined;
+  #scope2Arg: CommandLineStringParameter | undefined;
+  #nonConflictingArg: CommandLineStringParameter | undefined;
 
   public constructor() {
     super({
@@ -134,7 +134,7 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
     });
 
     // At least one scoping parameter is required to be defined on a scoped action
-    this._scopingArg = this.defineFlagParameter({
+    this.#scopingArg = this.defineFlagParameter({
       parameterLongName: '--scoping',
       description: 'The scoping parameter',
       parameterGroup: SCOPING_PARAMETER_GROUP
@@ -142,53 +142,53 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._scopingArg?.value).toEqual(true);
-    if (this._short1Arg?.value) {
-      this.short1Value = this._short1Arg.value;
+    expect(this.#scopingArg?.value).toEqual(true);
+    if (this.#short1Arg?.value) {
+      this.short1Value = this.#short1Arg.value;
     }
-    if (this._short2Arg?.value) {
-      this.short2Value = this._short2Arg.value;
+    if (this.#short2Arg?.value) {
+      this.short2Value = this.#short2Arg.value;
     }
-    if (this._scope1Arg?.value) {
-      this.scope1Value = this._scope1Arg.value;
+    if (this.#scope1Arg?.value) {
+      this.scope1Value = this.#scope1Arg.value;
     }
-    if (this._scope2Arg?.value) {
-      this.scope2Value = this._scope2Arg.value;
+    if (this.#scope2Arg?.value) {
+      this.scope2Value = this.#scope2Arg.value;
     }
-    if (this._nonConflictingArg?.value) {
-      this.nonConflictingValue = this._nonConflictingArg.value;
+    if (this.#nonConflictingArg?.value) {
+      this.nonConflictingValue = this.#nonConflictingArg.value;
     }
     this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    this._short1Arg = scopedParameterProvider.defineStringParameter({
+    this.#short1Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--short1',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._short2Arg = scopedParameterProvider.defineStringParameter({
+    this.#short2Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--short2',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope1Arg = scopedParameterProvider.defineStringParameter({
+    this.#scope1Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--arg',
       parameterShortName: '-a',
       parameterScope: 'scope1',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope2Arg = scopedParameterProvider.defineStringParameter({
+    this.#scope2Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--arg',
       parameterShortName: '-a',
       parameterScope: 'scope2',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._nonConflictingArg = scopedParameterProvider.defineStringParameter({
+    this.#nonConflictingArg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--non-conflicting-arg',
       parameterShortName: '-a',
       parameterScope: 'scope',
@@ -208,8 +208,8 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
   public unscopedAbbreviationFlag: CommandLineFlagParameter | undefined;
   public scopedAbbreviationFlag: CommandLineFlagParameter | undefined;
 
-  private readonly _scopingArg: CommandLineFlagParameter;
-  private _includeScopedAbbreviationFlag: boolean;
+  readonly #scopingArg: CommandLineFlagParameter;
+  #includeScopedAbbreviationFlag: boolean;
 
   public constructor(options: IAbbreviationScopedActionOptions) {
     super({
@@ -225,10 +225,10 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
       });
     }
 
-    this._includeScopedAbbreviationFlag = !!options?.includeScopedAbbreviationFlag;
+    this.#includeScopedAbbreviationFlag = !!options?.includeScopedAbbreviationFlag;
 
     // At least one scoping parameter is required to be defined on a scoped action
-    this._scopingArg = this.defineFlagParameter({
+    this.#scopingArg = this.defineFlagParameter({
       parameterLongName: '--scoping',
       description: 'The scoping parameter',
       parameterGroup: SCOPING_PARAMETER_GROUP
@@ -236,12 +236,12 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._scopingArg.value).toEqual(true);
+    expect(this.#scopingArg.value).toEqual(true);
     this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    if (this._includeScopedAbbreviationFlag) {
+    if (this.#includeScopedAbbreviationFlag) {
       this.scopedAbbreviationFlag = scopedParameterProvider.defineFlagParameter({
         parameterLongName: '--abbreviation-flag',
         description: 'A flag used to test abbreviation logic'

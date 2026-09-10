@@ -197,24 +197,24 @@ export async function runWithLoggingAsync(
 }
 
 export class HeftActionRunner {
-  private readonly _action: IHeftAction;
-  private readonly _terminal: ITerminal;
-  private readonly _internalHeftSession: InternalHeftSession;
-  private readonly _metricsCollector: MetricsCollector;
-  private readonly _loggingManager: LoggingManager;
-  private readonly _heftConfiguration: HeftConfiguration;
-  private _parameterManager: HeftParameterManager | undefined;
-  private readonly _parallelism: number;
+  readonly #action: IHeftAction;
+  readonly #terminal: ITerminal;
+  readonly #internalHeftSession: InternalHeftSession;
+  readonly #metricsCollector: MetricsCollector;
+  readonly #loggingManager: LoggingManager;
+  readonly #heftConfiguration: HeftConfiguration;
+  #parameterManager: HeftParameterManager | undefined;
+  readonly #parallelism: number;
 
   public constructor(options: IHeftActionRunnerOptions) {
     const { action, internalHeftSession, heftConfiguration, loggingManager, terminal, metricsCollector } =
       options;
-    this._action = action;
-    this._internalHeftSession = internalHeftSession;
-    this._heftConfiguration = heftConfiguration;
-    this._loggingManager = loggingManager;
-    this._terminal = terminal;
-    this._metricsCollector = metricsCollector;
+    this.#action = action;
+    this.#internalHeftSession = internalHeftSession;
+    this.#heftConfiguration = heftConfiguration;
+    this.#loggingManager = loggingManager;
+    this.#terminal = terminal;
+    this.#metricsCollector = metricsCollector;
 
     const numberOfCores: number = heftConfiguration.numberOfCores;
 
@@ -224,26 +224,26 @@ export class HeftActionRunner {
       // On desktop Windows, some people have complained that their system becomes
       // sluggish if Node is using all the CPU cores.  Leave one thread for
       // other operations. For CI environments, you can use the "max" argument to use all available cores.
-      this._parallelism = Math.max(numberOfCores - 1, 1);
+      this.#parallelism = Math.max(numberOfCores - 1, 1);
     } else {
       // Unix-like operating systems have more balanced scheduling, so default
       // to the number of CPU cores
-      this._parallelism = numberOfCores;
+      this.#parallelism = numberOfCores;
     }
   }
 
   protected get parameterManager(): HeftParameterManager {
-    if (!this._parameterManager) {
+    if (!this.#parameterManager) {
       throw new InternalError(`HeftActionRunner.defineParameters() has not been called.`);
     }
-    return this._parameterManager;
+    return this.#parameterManager;
   }
 
   public defineParameters(parameterProvider?: CommandLineParameterProvider | undefined): void {
-    if (!this._parameterManager) {
+    if (!this.#parameterManager) {
       // Use the provided parameter provider if one was provided. This is used by the RunAction
       // to allow for the Heft plugin parameters to be applied as scoped parameters.
-      parameterProvider = parameterProvider || this._action;
+      parameterProvider = parameterProvider || this.#action;
     } else {
       throw new InternalError(`HeftActionParameters.defineParameters() has already been called.`);
     }
@@ -265,7 +265,7 @@ export class HeftActionRunner {
 
     let cleanFlagDescription: string =
       'If specified, clean the outputs at the beginning of the lifecycle and before running each phase.';
-    if (this._action.watch) {
+    if (this.#action.watch) {
       cleanFlagDescription =
         `${cleanFlagDescription} Cleaning will only be performed once for the lifecycle and each phase, ` +
         `and further incremental runs will not be cleaned for the duration of execution.`;
@@ -276,21 +276,21 @@ export class HeftActionRunner {
     });
 
     const parameterManager: HeftParameterManager = new HeftParameterManager({
-      getIsDebug: () => this._internalHeftSession.debug,
+      getIsDebug: () => this.#internalHeftSession.debug,
       getIsVerbose: () => verboseFlag.value,
       getIsProduction: () => productionFlag.value,
-      getIsWatch: () => this._action.watch,
+      getIsWatch: () => this.#action.watch,
       getLocales: () => localesParameter.values,
       getIsClean: () => !!cleanFlag?.value
     });
 
     // Add all the lifecycle parameters for the action
-    for (const lifecyclePluginDefinition of this._internalHeftSession.lifecycle.pluginDefinitions) {
+    for (const lifecyclePluginDefinition of this.#internalHeftSession.lifecycle.pluginDefinitions) {
       parameterManager.addPluginParameters(lifecyclePluginDefinition);
     }
 
     // Add all the task parameters for the action
-    for (const phase of this._action.selectedPhases) {
+    for (const phase of this.#action.selectedPhases) {
       for (const task of phase.tasks) {
         parameterManager.addPluginParameters(task.pluginDefinition);
       }
@@ -298,33 +298,33 @@ export class HeftActionRunner {
 
     // Finalize and apply to the CommandLineParameterProvider
     parameterManager.finalizeParameters(parameterProvider);
-    this._parameterManager = parameterManager;
+    this.#parameterManager = parameterManager;
   }
 
   public async executeAsync(): Promise<void> {
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
     // Set the parameter manager on the internal session, which is used to provide the selected
     // parameters to plugins. Set this in onExecute() since we now know that this action is being
     // executed, and the session should be populated with the executing parameters.
-    this._internalHeftSession.parameterManager = this.parameterManager;
+    this.#internalHeftSession.parameterManager = this.parameterManager;
 
-    initializeHeft(this._heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
+    initializeHeft(this.#heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
     const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> =
-      this._generateOperations();
+      this.#generateOperations();
 
     const executionManager: OperationExecutionManager<
       IHeftTaskOperationMetadata,
       IHeftPhaseOperationMetadata
     > = new OperationExecutionManager(operations);
 
-    const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
+    const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this.#terminal);
 
     try {
-      await _startLifecycleAsync(this._internalHeftSession);
+      await _startLifecycleAsync(this.#internalHeftSession);
 
-      if (this._action.watch) {
-        const watchLoop: WatchLoop = this._createWatchLoop(executionManager);
+      if (this.#action.watch) {
+        const watchLoop: WatchLoop = this.#createWatchLoop(executionManager);
 
         if (process.send) {
           await watchLoop.runIPCAsync();
@@ -335,19 +335,19 @@ export class HeftActionRunner {
           });
         }
       } else {
-        await this._executeOnceAsync(executionManager, cliAbortSignal);
+        await this.#executeOnceAsync(executionManager, cliAbortSignal);
       }
     } finally {
       // Invoke this here both to ensure it always runs and that it does so after recordMetrics
       // This is treated as a finalizer for any assets created in lifecycle plugins.
       // It is the responsibility of the lifecycle plugin to ensure that finish gracefully handles
       // aborted runs.
-      await _finishLifecycleAsync(this._internalHeftSession);
+      await _finishLifecycleAsync(this.#internalHeftSession);
     }
   }
 
-  private _createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {
-    const { _terminal: terminal } = this;
+  #createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {
+    const terminal: ITerminal = this.#terminal;
     const watchLoop: WatchLoop = new WatchLoop({
       onBeforeExecute: () => {
         // Write an empty line to the terminal for separation between iterations. We've already iterated
@@ -356,7 +356,7 @@ export class HeftActionRunner {
         terminal.writeLine(Colorize.bold('Starting incremental build...'));
       },
       executeAsync: (state: IWatchLoopState): Promise<OperationStatus> => {
-        return this._executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
+        return this.#executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
       },
       onRequestRun: (requestor?: string) => {
         terminal.writeLine(Colorize.bold(`New run requested by ${requestor || 'unknown task'}`));
@@ -368,14 +368,14 @@ export class HeftActionRunner {
     return watchLoop;
   }
 
-  private async _executeOnceAsync(
+  async #executeOnceAsync(
     executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
     abortSignal: AbortSignal,
     requestRun?: OperationRequestRunCallback
   ): Promise<OperationStatus> {
-    const { taskStart, taskFinish, phaseStart, phaseFinish } = this._internalHeftSession.lifecycle.hooks;
+    const { taskStart, taskFinish, phaseStart, phaseFinish } = this.#internalHeftSession.lifecycle.hooks;
     // Record this as the start of task execution.
-    this._metricsCollector.setStartTime();
+    this.#metricsCollector.setStartTime();
     // Execute the action operations
     return await runWithLoggingAsync(
       () => {
@@ -383,8 +383,8 @@ export class HeftActionRunner {
           IHeftTaskOperationMetadata,
           IHeftPhaseOperationMetadata
         > = {
-          terminal: this._terminal,
-          parallelism: this._parallelism,
+          terminal: this.#terminal,
+          parallelism: this.#parallelism,
           abortSignal,
           requestRun,
           beforeExecuteOperation(
@@ -419,24 +419,24 @@ export class HeftActionRunner {
 
         return executionManager.executeAsync(operationExecutionManagerOptions);
       },
-      this._action,
-      this._loggingManager,
-      this._terminal,
-      this._metricsCollector,
+      this.#action,
+      this.#loggingManager,
+      this.#terminal,
+      this.#metricsCollector,
       abortSignal,
       !requestRun
     );
   }
 
-  private _generateOperations(): Set<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> {
-    const { selectedPhases } = this._action;
+  #generateOperations(): Set<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> {
+    const { selectedPhases } = this.#action;
 
     const operations: Map<
       string,
       Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
     > = new Map();
     const operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>> = new Map();
-    const internalHeftSession: InternalHeftSession = this._internalHeftSession;
+    const internalHeftSession: InternalHeftSession = this.#internalHeftSession;
 
     let hasWarnedAboutSkippedPhases: boolean = false;
     for (const phase of selectedPhases) {
@@ -446,7 +446,7 @@ export class HeftActionRunner {
           if (!selectedPhases.has(dependencyPhase)) {
             // Only write once, and write with yellow to make it stand out without writing a warning to stderr
             hasWarnedAboutSkippedPhases = true;
-            this._terminal.writeLine(
+            this.#terminal.writeLine(
               Colorize.bold(
                 'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
                   'excluded phases manually.'
@@ -485,7 +485,7 @@ export class HeftActionRunner {
 
         // Set all tasks in a in a phase as dependencies of the consuming phase
         for (const consumingPhase of phase.consumingPhases) {
-          if (this._action.selectedPhases.has(consumingPhase)) {
+          if (this.#action.selectedPhases.has(consumingPhase)) {
             // Set all tasks in a dependency phase as dependencies of the consuming phase to ensure the dependency
             // tasks run first
             const consumingPhaseOperation: Operation = _getOrCreatePhaseOperation(

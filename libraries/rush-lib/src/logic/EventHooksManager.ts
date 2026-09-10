@@ -11,22 +11,22 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 export class EventHooksManager {
-  private _rushConfiguration: RushConfiguration;
-  private _eventHooks: EventHooks;
-  private _commonTempFolder: string;
+  #rushConfiguration: RushConfiguration;
+  #eventHooks: EventHooks;
+  #commonTempFolder: string;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._eventHooks = rushConfiguration.eventHooks;
-    this._commonTempFolder = rushConfiguration.commonTempFolder;
+    this.#rushConfiguration = rushConfiguration;
+    this.#eventHooks = rushConfiguration.eventHooks;
+    this.#commonTempFolder = rushConfiguration.commonTempFolder;
   }
 
   public handle(event: Event, isDebug: boolean, ignoreHooks: boolean): void {
-    if (!this._eventHooks) {
+    if (!this.#eventHooks) {
       return;
     }
 
-    const scripts: string[] = this._eventHooks.get(event);
+    const scripts: string[] = this.#eventHooks.get(event);
     if (scripts.length > 0) {
       if (ignoreHooks) {
         // eslint-disable-next-line no-console
@@ -40,7 +40,7 @@ export class EventHooksManager {
 
       const printEventHooksOutputToConsole: boolean | undefined =
         isDebug ||
-        this._rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
+        this.#rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
       scripts.forEach((script) => {
         try {
           const environment: IEnvironment = { ...process.env };
@@ -51,9 +51,9 @@ export class EventHooksManager {
           environment[EnvironmentVariableNames.RUSH_INVOKED_ARGS] = JSON.stringify(process.argv);
 
           Utilities.executeLifecycleCommand(script, {
-            rushConfiguration: this._rushConfiguration,
-            workingDirectory: this._rushConfiguration.rushJsonFolder,
-            initCwd: this._commonTempFolder,
+            rushConfiguration: this.#rushConfiguration,
+            workingDirectory: this.#rushConfiguration.rushJsonFolder,
+            initCwd: this.#commonTempFolder,
             handleOutput: !printEventHooksOutputToConsole,
             initialEnvironment: environment,
             environmentPathOptions: {

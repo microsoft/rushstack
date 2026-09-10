@@ -49,10 +49,10 @@ export interface ILogChunkStorage {
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
   public readonly logFilenameIdentifier: string;
-  private readonly _metadataFolderPath: string;
-  private readonly _logPath: string;
-  private readonly _errorLogPath: string;
-  private readonly _logChunksPath: string;
+  readonly #metadataFolderPath: string;
+  readonly #logPath: string;
+  readonly #errorLogPath: string;
+  readonly #logChunksPath: string;
   public wasCobuilt: boolean = false;
 
   public constructor(options: IOperationMetadataManagerOptions) {
@@ -70,10 +70,10 @@ export class OperationMetadataManager {
       metadataFolder: metadataFolderPath
     });
 
-    this._metadataFolderPath = metadataFolderPath;
-    this._logPath = `${projectFolder}/${metadataFolderPath}/all.log`;
-    this._errorLogPath = `${projectFolder}/${metadataFolderPath}/error.log`;
-    this._logChunksPath = `${projectFolder}/${metadataFolderPath}/log-chunks.jsonl`;
+    this.#metadataFolderPath = metadataFolderPath;
+    this.#logPath = `${projectFolder}/${metadataFolderPath}/all.log`;
+    this.#errorLogPath = `${projectFolder}/${metadataFolderPath}/error.log`;
+    this.#logChunksPath = `${projectFolder}/${metadataFolderPath}/log-chunks.jsonl`;
   }
 
   /**
@@ -84,7 +84,7 @@ export class OperationMetadataManager {
    * Example: `.rush/temp/operation/_phase_build/error.log`
    */
   public get metadataFolderPath(): string {
-    return this._metadataFolderPath;
+    return this.#metadataFolderPath;
   }
 
   public async saveAsync({
@@ -105,15 +105,15 @@ export class OperationMetadataManager {
     const copyFileOptions: IFileSystemCopyFileOptions[] = [
       {
         sourcePath: logPath,
-        destinationPath: this._logPath
+        destinationPath: this.#logPath
       },
       {
         sourcePath: errorLogPath,
-        destinationPath: this._errorLogPath
+        destinationPath: this.#errorLogPath
       },
       {
         sourcePath: logChunksPath,
-        destinationPath: this._logChunksPath
+        destinationPath: this.#logChunksPath
       }
     ];
 
@@ -150,7 +150,7 @@ export class OperationMetadataManager {
       this.stateFile.state?.cobuildRunnerId !== cobuildRunnerId;
 
     try {
-      const rawLogChunks: string = await FileSystem.readFileAsync(this._logChunksPath);
+      const rawLogChunks: string = await FileSystem.readFileAsync(this.#logChunksPath);
       const chunks: ITerminalChunk[] = [];
       for (const chunk of rawLogChunks.split('\n')) {
         if (chunk) {
@@ -167,7 +167,7 @@ export class OperationMetadataManager {
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         // Log chunks file doesn't exist, try to restore log file
-        await restoreFromLogFile(terminal, this._logPath);
+        await restoreFromLogFile(terminal, this.#logPath);
       } else {
         throw e;
       }
@@ -176,7 +176,7 @@ export class OperationMetadataManager {
     // Try to restore cached error log as error log file
     try {
       await FileSystem.copyFileAsync({
-        sourcePath: this._errorLogPath,
+        sourcePath: this.#errorLogPath,
         destinationPath: errorLogPath
       });
     } catch (e) {
