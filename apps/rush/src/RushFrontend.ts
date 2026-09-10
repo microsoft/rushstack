@@ -155,7 +155,8 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   if (reporterHost.selection.reporterControlsOwnedByFrontend) {
     process.argv = stripReporterValueControls(
       process.argv,
-      new Set(reporterHost.selection.reporterValueFlagsToStrip)
+      new Set(reporterHost.selection.reporterValueFlagsToStrip),
+      new Set(reporterHost.selection.reporterFlagsToStrip)
     );
     delete process.env.RUSH_REPORTER;
     delete process.env.RUSH_LOG_LEVEL;

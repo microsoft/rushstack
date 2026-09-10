@@ -9,6 +9,7 @@ import {
   ReporterManager,
   type IReporter,
   type IReporterContext,
+  OldEngineOutputAdapter,
   type IReporterEventEnvelope,
   type IReporterEventSink
 } from '@rushstack/rush-reporter';
@@ -313,6 +314,129 @@ describe(resolveRushReporterSelection.name, () => {
     });
   });
 
+  it.each([
+    ['build', '--reporter=json', '--output=file://./help.log', '--log-level=debug', '--help'],
+    ['build', '--help', '--reporter=default', '--output', 'json://./events.jsonl', '--log-level', 'quiet']
+  ])('strips explicit reporter-owned value controls for help: %s', (...argv: string[]) => {
+    const selection: IRushReporterSelection = resolve(argv);
+    expect(selection).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
+    expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+      'build',
+      '--help'
+    ]);
+  });
+
+  it.each([
+    [
+      ['build', '--output=json://./events.jsonl', '--log-level=debug', '--help'],
+      ['build', '--help']
+    ],
+    [
+      ['build', '--log-level=debug', '--help'],
+      ['build', '--help']
+    ],
+    [
+      ['custom', '--output', 'artifact.zip', '--log-level', 'custom-level', '--help'],
+      ['custom', '--output', 'artifact.zip', '--log-level', 'custom-level', '--help']
+    ],
+    [
+      ['custom', '--output', 'artifact.zip', '--log-level', 'debug', '--help'],
+      ['custom', '--output', 'artifact.zip', '--log-level', 'debug', '--help']
+    ],
+    [
+      ['custom', '--output', '--log-level=debug', '--help'],
+      ['custom', '--output', '--log-level=debug', '--help']
+    ],
+    [
+      ['custom', '--output=file://./log', '--log-level=custom', '--help'],
+      ['custom', '--output=file://./log', '--log-level=custom', '--help']
+    ],
+    [
+      ['custom', '--output=file://./log', '--output=custom.zip', '--log-level=debug', '--help'],
+      ['custom', '--output=file://./log', '--output=custom.zip', '--log-level=debug', '--help']
+    ],
+    [
+      ['custom', '--log-level', '--help'],
+      ['custom', '--log-level', '--help']
+    ],
+    [
+      ['plugin-command', '--output=json://./custom.jsonl', '--log-level=debug', '--verbose', '--help'],
+      ['plugin-command', '--output=json://./custom.jsonl', '--log-level=debug', '--verbose', '--help']
+    ],
+    [
+      ['build', '--log-level=debug', '--help', '--', '--output=json://./child'],
+      ['build', '--help', '--', '--output=json://./child']
+    ]
+  ])('uses selective implicit ownership for repository help: %j', (argv, expected) => {
+    const selection: IRushReporterSelection = resolve(argv, {}, false, true);
+    expect(selection.enabled).toBe(false);
+    expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual(expected);
+  });
+
+  it('owns RUSH_LOG_LEVEL for repository help without enabling reporters', () => {
+    expect(resolve(['build', '--help'], { RUSH_LOG_LEVEL: 'debug' }, false, true)).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip: []
+    });
+    expect(resolve(['custom', '--help'], { RUSH_LOG_LEVEL: 'debug' })).toMatchObject({
+      reporterControlsOwnedByFrontend: false,
+      reporterValueFlagsToStrip: []
+    });
+  });
+
+  it('does not use implicit reporter value controls to opt in on help', () => {
+    const argv: string[] = ['custom', '--output=file://./log', '--log-level=debug', '--help'];
+    const selection: IRushReporterSelection = resolve(argv);
+    expect(selection.reporterControlsOwnedByFrontend).toBe(false);
+    expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual(argv);
+  });
+
+  it('preserves command-owned help values under explicit and emergency legacy', () => {
+    const argv: string[] = [
+      'custom',
+      '--reporter=legacy',
+      '--output',
+      'artifact.zip',
+      '--log-level',
+      'custom',
+      '--help'
+    ];
+    for (const env of [{}, { RUSH_REPORTER: 'legacy', RUSH_LOG_LEVEL: 'invalid' }]) {
+      const selection: IRushReporterSelection = resolve(argv, env, false, true);
+      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+        'custom',
+        '--output',
+        'artifact.zip',
+        '--log-level',
+        'custom',
+        '--help'
+      ]);
+    }
+  });
+
+  it('does not consume following flags while stripping incomplete owned controls for help', () => {
+    expect(stripReporterValueControls(['build', '--reporter=json', '--output', '--help'])).toEqual([
+      'build',
+      '--help'
+    ]);
+    expect(
+      stripReporterValueControls([
+        'build',
+        '--reporter=json',
+        '--log-level',
+        '--help',
+        '--',
+        '--output=child'
+      ])
+    ).toEqual(['build', '--help', '--', '--output=child']);
+  });
+
   it('ignores help controls after the pass-through separator', () => {
     expect(resolve(['build', '--reporter=json', '--', '--help'])).toMatchObject({
       reporter: 'json',
@@ -320,6 +444,19 @@ describe(resolveRushReporterSelection.name, () => {
       reporterControlsOwnedByFrontend: true
     });
   });
+
+  it.each(['--reporter', '--output', '--log-level'])(
+    'does not consume legacy flags after a value-less %s during rollback',
+    (flag) => {
+      const argv: string[] = ['build', '--reporter=json', flag, '--quiet', '--debug'];
+      const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
+      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+        'build',
+        '--quiet',
+        '--debug'
+      ]);
+    }
+  );
 
   it('removes reporter-only value controls before invoking a legacy engine', () => {
     expect(
@@ -417,6 +554,25 @@ describe(resolveRushReporterSelection.name, () => {
     expect(() =>
       resolve(['build', '--reporter=plaintext'], { RUSH_QUIET_MODE: '1', RUSH_LOG_LEVEL: 'debug' })
     ).toThrow(/contradicts RUSH_LOG_LEVEL/);
+  });
+
+  it('defaults only an unqualified primary file reporter to debug', () => {
+    expect(resolve(['build', '--reporter=file']).logLevel).toBe('debug');
+    expect(resolve(['build', '--reporter=plaintext']).logLevel).toBe('normal');
+    for (const level of ['quiet', 'normal', 'verbose', 'debug']) {
+      expect(resolve(['build', '--reporter=file', `--log-level=${level}`]).logLevel).toBe(level);
+      expect(resolve(['build', '--reporter=file'], { RUSH_LOG_LEVEL: level }).logLevel).toBe(level);
+    }
+    expect(resolve(['build', '--reporter=file', '--quiet'], { RUSH_LOG_LEVEL: 'debug' }).logLevel).toBe(
+      'quiet'
+    );
+    expect(resolve(['build', '--reporter=file', '--verbose'], { RUSH_LOG_LEVEL: 'quiet' }).logLevel).toBe(
+      'verbose'
+    );
+    expect(resolve(['build', '--reporter=file', '--debug'], { RUSH_LOG_LEVEL: 'normal' }).logLevel).toBe(
+      'debug'
+    );
+    expect(resolve(['build', '--reporter=file'], { RUSH_REPORTER: 'legacy' }).enabled).toBe(false);
   });
 
   it('preserves legacy verbosity combinations when the reporter path is disabled', () => {
@@ -526,7 +682,7 @@ describe(resolveRushReporterSelection.name, () => {
     ]);
     expect(selection).toMatchObject({
       reporterControlsOwnedByFrontend: true,
-      reporterValueFlagsToStrip: ['--output', '--log-level']
+      reporterValueFlagsToStrip: ['--output']
     });
     expect(resolve(['list', '--json', '--reporter=file']).reporter).toBe('file');
   });
@@ -571,6 +727,45 @@ describe(resolveRushReporterSelection.name, () => {
 });
 
 describe(initializeRushReporterHostAsync.name, () => {
+  it.each([false, true])(
+    'retains full log debug details independently of the selected level: %s',
+    async (normal) => {
+      const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-level-'));
+      const osModule: typeof os = jest.requireActual('node:os');
+      const tmpdirSpy: jest.SpyInstance = jest.spyOn(osModule, 'tmpdir').mockReturnValue(directory);
+      try {
+        const initialized = await initializeRushReporterHostAsync({
+          argv: ['build', '--reporter=file', ...(normal ? ['--log-level=normal'] : [])],
+          env: {},
+          stdout: { write: () => undefined },
+          includeDefaultFileReporter: false
+        });
+        expect(initialized.selection.logLevel).toBe(normal ? 'normal' : 'debug');
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 0 },
+          sessionId: 'primary-file-level',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.179.0' },
+          privacy: 'public',
+          type: 'messageEmitted',
+          payload: { severity: 'debug', text: 'retained-debug-detail' }
+        });
+        await initialized.closeAsync();
+
+        const [logFolder]: string[] = await fs.promises.readdir(directory);
+        const names: string[] = await fs.promises.readdir(path.join(directory, logFolder));
+        const logName: string | undefined = names.find(
+          (name) => name.endsWith('.log') && name !== 'latest.log'
+        );
+        expect(logName).toBeDefined();
+        const text: string = await fs.promises.readFile(path.join(directory, logFolder, logName!), 'utf8');
+        expect(text).toContain('retained-debug-detail');
+      } finally {
+        tmpdirSpy.mockRestore();
+        await fs.promises.rm(directory, { recursive: true, force: true });
+      }
+    }
+  );
+
   it.each([
     { reporter: 'json', target: 'stdout', outputs: ['json://stdout'] },
     { reporter: 'json', target: 'stderr', outputs: ['json://stderr', 'file://stderr'] },
@@ -696,7 +891,20 @@ describe(initializeRushReporterHostAsync.name, () => {
       expect(initialized.logArtifact?.path).toMatch(
         new RegExp(`^${directory.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
       );
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'automatic-file-level',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'messageEmitted',
+        payload: { severity: 'debug', text: 'automatic-full-detail' }
+      });
       await initialized.closeAsync();
+      const logPath: string | undefined = initialized.logArtifact?.path;
+      if (!logPath) {
+        throw new Error('Expected the automatic full-detail log path');
+      }
+      expect(await fs.promises.readFile(logPath, 'utf8')).toContain('automatic-full-detail');
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
@@ -953,4 +1161,80 @@ describe(initializeRushReporterHostAsync.name, () => {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
+
+  it.each(['json', 'plaintext'])(
+    'preserves unscoped and command-scoped output alongside presented operations: %s',
+    async (reporter) => {
+      let output: string = '';
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
+        env: { CI: 'true' },
+        stdout: { isTTY: false, write: (text: string) => (output += text) },
+        includeDefaultFileReporter: false
+      });
+      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+        sink: initialized.sink,
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
+      });
+      try {
+        emitCommandStarted(initialized.sink);
+        adapter.capture('stdout', 'bootstrap stdout\n');
+        emitOperationEvents(initialized.sink);
+        adapter.capture('stderr', 'bootstrap stderr\n');
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 1 },
+          sessionId: 'session',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+          scope: { commandName: 'build' },
+          privacy: 'local-sensitive',
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'command output\n' }
+        });
+        await initialized.closeAsync();
+
+        if (reporter === 'json') {
+          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line));
+          expect(events.map((event) => event.type)).toEqual([
+            'commandStarted',
+            'externalOutput',
+            'operationRegistered',
+            'operationStatusChanged',
+            'externalOutput',
+            'operationStreamClosed',
+            'operationCompleted',
+            'externalOutput',
+            'externalOutput'
+          ]);
+          expect(
+            events.filter((event) => event.type === 'externalOutput').map((event) => event.payload)
+          ).toEqual([
+            { stream: 'stdout', text: 'bootstrap stdout\n' },
+            { stream: 'stdout', text: 'raw operation output\n' },
+            { stream: 'stderr', text: 'bootstrap stderr\n' },
+            { stream: 'stdout', text: 'command output\n' }
+          ]);
+        } else {
+          expect(output.startsWith('Starting "rush build"\n')).toBe(true);
+          let previousOffset: number = -1;
+          for (const text of [
+            'bootstrap stdout\n',
+            'raw operation output\n',
+            'bootstrap stderr\n',
+            'command output\n'
+          ]) {
+            expect(output.split(text)).toHaveLength(2);
+            const offset: number = output.indexOf(text);
+            expect(offset).toBeGreaterThan(previousOffset);
+            previousOffset = offset;
+          }
+        }
+      } finally {
+        await initialized.closeAsync();
+      }
+    }
+  );
 });
