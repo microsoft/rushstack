@@ -384,9 +384,14 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     expect(visibleErrors[1]).toEqual(visibleErrors[0]);
   });
 
-  it.each([false, true])(
-    'observes a real watch cancellation without changing legacy exit (shadow: %s)',
-    async (reporting) => {
+  it.each([
+    { reporting: false, useAlias: false },
+    { reporting: true, useAlias: false },
+    { reporting: false, useAlias: true },
+    { reporting: true, useAlias: true }
+  ])(
+    'observes a real watch cancellation without changing legacy exit (shadow: $reporting, alias: $useAlias)',
+    async ({ reporting, useAlias }) => {
       const repoPath: string = await copyRepositoryAsync();
       JsonFile.save(
         {
@@ -438,8 +443,16 @@ describe('RushCommandLineParser reporter lifecycle', () => {
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
       const watchSpy: jest.SpyInstance = jest.spyOn(fs, 'watch');
+      const cwd: string = useAlias ? path.join(path.dirname(repoPath), 'repo-alias') : repoPath;
+      if (useAlias) {
+        await fs.promises.symlink(
+          await fs.promises.realpath(repoPath),
+          cwd,
+          process.platform === 'win32' ? 'junction' : 'dir'
+        );
+      }
       const parser: RushCommandLineParser = new RushCommandLineParser({
-        cwd: repoPath,
+        cwd,
         reporter: reporting ? { eventSink: sink, sessionId: 'real-watch-cancellation' } : undefined
       });
       await new FlagFile(
@@ -467,6 +480,7 @@ describe('RushCommandLineParser reporter lifecycle', () => {
         await expect(execution).resolves.toBe(true);
         await Promise.all(closedWatchers);
         expect(reachedWatchIdle).toBe(true);
+        expect(parser.cwd).toBe(await fs.promises.realpath(repoPath));
         expect(watchSpy.mock.calls.length).toBeGreaterThan(0);
         expect(action.sessionAbortController.signal.aborted).toBe(true);
         expect(exitSpy).not.toHaveBeenCalled();

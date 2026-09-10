@@ -38,7 +38,8 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "peerDependencies": {
     "webpack": "^5.68.0",
