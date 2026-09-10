@@ -5,6 +5,7 @@ import {
   REPORTER_PROTOCOL_VERSION,
   REPORTER_PROTOCOL_LIMITS,
   isReporterProtocolCompatible,
+  isReporterEventRequired,
   encodeNdjsonRecord,
   NdjsonDecoder,
   NdjsonInvalidRecordError,
@@ -18,6 +19,7 @@ import {
 describe('ReporterProtocol', () => {
   it('advertises protocol major 1 and the specified byte limits', () => {
     expect(REPORTER_PROTOCOL_VERSION.major).toBe(1);
+    expect(REPORTER_PROTOCOL_VERSION.minor).toBe(1);
     expect(REPORTER_PROTOCOL_LIMITS.bootstrapBufferBytes).toBe(1024 * 1024);
     expect(REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes).toBe(1024 * 1024);
     expect(REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes).toBe(64 * 1024);
@@ -26,6 +28,12 @@ describe('ReporterProtocol', () => {
   it('treats an equal major as compatible regardless of minor', () => {
     expect(isReporterProtocolCompatible({ major: 1, minor: 0 }, { major: 1, minor: 9 })).toBe(true);
     expect(isReporterProtocolCompatible({ major: 1, minor: 0 }, { major: 2, minor: 0 })).toBe(false);
+  });
+
+  it('marks event types added in protocol 1.1 as optional for protocol 1.0 consumers', () => {
+    expect(isReporterEventRequired('operationStreamClosed')).toBe(false);
+    expect(isReporterEventRequired('operationCompleted')).toBe(false);
+    expect(isReporterEventRequired('commandResult')).toBe(true);
   });
 });
 
@@ -175,10 +183,7 @@ describe('negotiateReporterHello', () => {
 
   it('rejects a malformed wire hello with a predictable validation error', () => {
     expect(() =>
-      negotiateReporterHello(
-        { kind: 'hello' },
-        { supportedProtocolVersion: { major: 1, minor: 0 } }
-      )
+      negotiateReporterHello({ kind: 'hello' }, { supportedProtocolVersion: { major: 1, minor: 0 } })
     ).toThrow(InvalidReporterHelloError);
     expect(() =>
       negotiateReporterHello(
