@@ -42,6 +42,10 @@ removed.
 
 ## Shadow lifecycle compatibility
 
+Frontend initialization failure cancels attempted reporter work synchronously, then joins serialized,
+exactly-once destination cleanup. Cleanup and emergency-output failures do not replace the original
+initialization failure. This is the selected cleanup path, not an early runtime full-close alternative.
+
 Error correlation uses external weak metadata, so frozen and non-extensible errors retain their original
 identity, cause, and properties. Correlation remains visible across bridge instances without keeping errors alive.
 

@@ -19,6 +19,11 @@ export interface IReporterContext {
    * The exclusive destination the reporter owns, when one was declared.
    */
   readonly destination?: string;
+
+  /**
+   * Cancels background work before initialization-failure cleanup, when supplied by the manager.
+   */
+  readonly abortSignal?: AbortSignal;
 }
 
 /**

@@ -886,6 +886,7 @@ export interface IReporterCompatibilityDecision {
 
 // @beta
 export interface IReporterContext {
+    readonly abortSignal?: AbortSignal;
     readonly destination?: string;
     readonly protocolVersion: IReporterProtocolVersion;
 }
@@ -1601,6 +1602,8 @@ export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
+    // @internal
+    _disposeInitializedReportersAsync(failure?: unknown): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     // @internal
     _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;

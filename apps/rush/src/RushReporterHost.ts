@@ -1075,6 +1075,17 @@ export async function initializeRushReporterHostAsync(
         return closePromise;
       }
     };
+  } catch (error) {
+    const [disposal]: PromiseSettledResult<void>[] = await Promise.allSettled([
+      host.manager._disposeInitializedReportersAsync(error)
+    ]);
+    if (disposal.status === 'rejected') {
+      // Even a failed emergency write must not replace the original startup failure.
+      await Promise.allSettled([
+        Promise.resolve().then(() => stderr.write(`[reporter] ${String(disposal.reason)}\n`))
+      ]);
+    }
+    throw error;
   } finally {
     if (!handoffReplayAttempted) {
       await host.discardBootstrapHandoffAsync();
