@@ -71,7 +71,7 @@ export abstract class LinterBase<TLintResult> {
 
   protected _fixesPossible: boolean = false;
 
-  private readonly _linterName: string;
+  readonly #linterName: string;
 
   protected constructor(linterName: string, options: ILinterBaseOptions) {
     this._scopedLogger = options.scopedLogger;
@@ -79,7 +79,7 @@ export abstract class LinterBase<TLintResult> {
     this._buildFolderPath = options.buildFolderPath;
     this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
-    this._linterName = linterName;
+    this.#linterName = linterName;
     this._fix = options.fix || false;
   }
 
@@ -131,7 +131,7 @@ export abstract class LinterBase<TLintResult> {
     const linterCacheVersion: string = await this.getCacheVersionAsync();
     const linterCacheFilePath: string = path.resolve(
       this._buildMetadataFolderPath,
-      `_${this._linterName}-${hashSuffix}.json`
+      `_${this.#linterName}-${hashSuffix}.json`
     );
 
     let linterCacheData: ILinterCacheData | undefined;
