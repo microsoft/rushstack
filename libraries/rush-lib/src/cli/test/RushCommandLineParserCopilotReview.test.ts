@@ -221,6 +221,7 @@ describe('old review baseline parser compatibility', () => {
         GIT_CONFIG_KEY_1: 'user.email',
         GIT_CONFIG_VALUE_1: 'TheLarkInn@users.noreply.github.com'
       };
+      // Capture successful fixture setup diagnostics; failed Git commands still throw with their stderr.
       execFileSync('git', ['init', '--quiet'], { cwd: repoPath, env: gitEnv, stdio: 'pipe' });
       execFileSync('git', ['add', '.'], { cwd: repoPath, env: gitEnv, stdio: 'pipe' });
       execFileSync(
