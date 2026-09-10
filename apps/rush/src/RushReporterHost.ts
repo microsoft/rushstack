@@ -122,6 +122,7 @@ class LogLevelReporter implements IReporter {
 
 /**
  * Keeps operation presentation on the legacy collator until R5B transfers terminal ownership.
+ * Output without an operation scope remains owned by the primary reporter.
  */
 class DeferredOperationPresentationReporter implements IReporter {
   public readonly name: string;
@@ -138,7 +139,10 @@ class DeferredOperationPresentationReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    if (!DEFERRED_OPERATION_EVENT_TYPES.has(event.type)) {
+    if (
+      !DEFERRED_OPERATION_EVENT_TYPES.has(event.type) ||
+      (event.type === 'externalOutput' && event.scope?.operationId === undefined)
+    ) {
       this._reporter.report(event);
     }
   }
