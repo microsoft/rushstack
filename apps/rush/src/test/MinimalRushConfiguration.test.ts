@@ -146,6 +146,21 @@ describe(MinimalRushConfiguration.name, () => {
     );
   });
 
+  it('uses the caller-owned discovery writer when rush.json cannot load', () => {
+    const repo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    const writeLine = jest.fn();
+    jest.spyOn(process, 'cwd').mockReturnValue(repo);
+    jest.spyOn(JsonFile, 'load').mockImplementation(() => {
+      throw new SyntaxError('Malformed rush.json');
+    });
+    process.argv = ['node', 'rush', 'build'];
+
+    expect(MinimalRushConfiguration.loadFromDefaultLocation(writeLine)).toBeUndefined();
+    expect(writeLine.mock.calls).toEqual([[`Found configuration in ${path.join(repo, 'rush.json')}`], ['']]);
+    expect(consoleLog).not.toHaveBeenCalled();
+  });
+
   it('suppresses legacy discovery output for an explicit reporter', () => {
     const legacyRepo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
     const consoleLog: jest.SpiedFunction<typeof console.log> = jest
@@ -154,21 +169,6 @@ describe(MinimalRushConfiguration.name, () => {
     jest.spyOn(PackageJsonLookup, 'loadOwnPackageJson').mockReturnValue({
       name: '@microsoft/rush',
       version: '2.5.0'
-    });
-
-    it('uses the caller-owned discovery writer when rush.json cannot load', () => {
-      const repo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
-      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
-      const writeLine = jest.fn();
-      jest.spyOn(process, 'cwd').mockReturnValue(repo);
-      jest.spyOn(JsonFile, 'load').mockImplementation(() => {
-        throw new SyntaxError('Malformed rush.json');
-      });
-      process.argv = ['node', 'rush', 'build'];
-
-      expect(MinimalRushConfiguration.loadFromDefaultLocation(writeLine)).toBeUndefined();
-      expect(writeLine.mock.calls).toEqual([[`Found configuration in ${path.join(repo, 'rush.json')}`], ['']]);
-      expect(consoleLog).not.toHaveBeenCalled();
     });
     jest.spyOn(process, 'cwd').mockReturnValue(path.join(legacyRepo, 'project'));
     process.argv = ['node', 'rush', 'build', '--verbose', '--reporter=json'];
