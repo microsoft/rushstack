@@ -679,7 +679,6 @@ export class OperationGraph implements IOperationGraph {
       );
 
       executionRecords.set(operation, executionRecord);
-      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent, executionRecord);
     }
 
     for (const [operation, record] of executionRecords) {
@@ -708,6 +707,7 @@ export class OperationGraph implements IOperationGraph {
     });
 
     for (const executionRecord of executionRecords.values()) {
+      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent, executionRecord);
       if (!executionRecord.silent) {
         // Only count non-silent operations
         iterationContext.totalOperations++;
