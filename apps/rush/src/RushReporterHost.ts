@@ -35,6 +35,11 @@ import {
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
 } from '@rushstack/rush-reporter';
 
+import {
+  getReporterCommandLineOwnership,
+  type IReporterCommandLineOwnership
+} from './RushReporterCommandLine';
+
 export interface IRushReporterOutputStream {
   readonly isTTY?: boolean;
   readonly columns?: number;
@@ -68,6 +73,7 @@ export interface IRushReporterSelection {
   readonly enabled: boolean;
   readonly reporterControlsOwnedByFrontend: boolean;
   readonly reporterValueFlagsToStrip: readonly string[];
+  readonly reporterFlagsToStrip?: readonly string[];
   readonly reason:
     | 'explicit --reporter'
     | 'repository experiment'
@@ -341,6 +347,10 @@ class ArtifactCompletionReporterSink implements IReporterEventSink {
   }
 }
 
+function isSeparatedControlValue(value: string | undefined): value is string {
+  return value !== undefined && value.length > 0 && !value.startsWith('-');
+}
+
 function readValue(
   argv: readonly string[],
   index: number,
@@ -360,7 +370,7 @@ function readValue(
   }
 
   const value: string | undefined = argv[index + 1];
-  if (!value || value.startsWith('-')) {
+  if (!isSeparatedControlValue(value)) {
     throw new Error(`${flag} requires a value.`);
   }
   return { value, consumedNext: true };
@@ -368,7 +378,8 @@ function readValue(
 
 export function stripReporterValueControls(
   argv: readonly string[],
-  valueFlagsToStrip: ReadonlySet<string> = REPORTER_VALUE_FLAGS
+  valueFlagsToStrip: ReadonlySet<string> = REPORTER_VALUE_FLAGS,
+  flagsToStrip: ReadonlySet<string> = new Set()
 ): string[] {
   const result: string[] = [];
   for (let index: number = 0; index < argv.length; index++) {
@@ -377,13 +388,16 @@ export function stripReporterValueControls(
       result.push(...argv.slice(index));
       break;
     }
+    if (flagsToStrip.has(argument)) {
+      continue;
+    }
     const equalsIndex: number = argument.indexOf('=');
     const flagName: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
     if (!valueFlagsToStrip.has(flagName)) {
       result.push(argument);
       continue;
     }
-    if (equalsIndex < 0 && index + 1 < argv.length && argv[index + 1] !== '--') {
+    if (equalsIndex < 0 && isSeparatedControlValue(argv[index + 1])) {
       index++;
     }
   }
@@ -393,7 +407,8 @@ export function stripReporterValueControls(
 function parseReporterControls(
   argv: readonly string[],
   includeOutputAndLogLevelControls: boolean,
-  tolerateMissingReporterValue: boolean = false
+  tolerateMissingReporterValue: boolean = false,
+  valueFlagsToParse: ReadonlySet<string> = REPORTER_VALUE_FLAGS
 ): IParsedReporterControls {
   const reporters: string[] = [];
   const logLevels: string[] = [];
@@ -410,7 +425,7 @@ function parseReporterControls(
     if (
       tolerateMissingReporterValue &&
       argument === '--reporter' &&
-      (!argv[index + 1] || argv[index + 1].startsWith('-'))
+      !isSeparatedControlValue(argv[index + 1])
     ) {
       continue;
     }
@@ -425,21 +440,15 @@ function parseReporterControls(
       continue;
     }
     if (includeOutputAndLogLevelControls) {
-      const logLevel: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
-        argv,
-        index,
-        '--log-level'
-      );
+      const logLevel: { readonly value: string; readonly consumedNext: boolean } | undefined =
+        valueFlagsToParse.has('--log-level') ? readValue(argv, index, '--log-level') : undefined;
       if (logLevel) {
         logLevels.push(logLevel.value);
         index += logLevel.consumedNext ? 1 : 0;
         continue;
       }
-      const output: { readonly value: string; readonly consumedNext: boolean } | undefined = readValue(
-        argv,
-        index,
-        '--output'
-      );
+      const output: { readonly value: string; readonly consumedNext: boolean } | undefined =
+        valueFlagsToParse.has('--output') ? readValue(argv, index, '--output') : undefined;
       if (output) {
         outputs.push(output.value);
         index += output.consumedNext ? 1 : 0;
@@ -486,22 +495,6 @@ function hasReporterOutputControl(argv: readonly string[]): boolean {
   return false;
 }
 
-function hasReporterLogLevelControl(argv: readonly string[]): boolean {
-  for (let index: number = 0; index < argv.length; index++) {
-    const argument: string = argv[index];
-    if (argument === '--') {
-      break;
-    }
-    if (argument.startsWith('--log-level=') && argument.length > '--log-level='.length) {
-      return true;
-    }
-    if (argument === '--log-level' && argv[index + 1] !== undefined && !argv[index + 1].startsWith('-')) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function hasHelpControl(argv: readonly string[]): boolean {
   for (const argument of argv) {
     if (argument === '--') {
@@ -514,11 +507,57 @@ function hasHelpControl(argv: readonly string[]): boolean {
   return false;
 }
 
+function getImplicitHelpValueFlagsToStrip(
+  argv: readonly string[],
+  ownership: IReporterCommandLineOwnership
+): readonly string[] {
+  if (!ownership.known) {
+    return [];
+  }
+  const outputs: (string | undefined)[] = [];
+  const logLevels: (string | undefined)[] = [];
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    const equalsIndex: number = argument.indexOf('=');
+    const flag: string = equalsIndex < 0 ? argument : argument.slice(0, equalsIndex);
+    if (ownership.parameters.has(flag)) {
+      continue;
+    }
+    const values: (string | undefined)[] | undefined =
+      flag === '--output' ? outputs : flag === '--log-level' ? logLevels : undefined;
+    if (values) {
+      const nextArgument: string | undefined = argv[index + 1];
+      values.push(
+        equalsIndex >= 0
+          ? argument.slice(equalsIndex + 1)
+          : isSeparatedControlValue(nextArgument)
+            ? argv[++index]
+            : undefined
+      );
+    }
+  }
+  const logLevelsAreOwned: boolean = logLevels.every(
+    (value: string | undefined) => value !== undefined && isSupportedLogLevel(value)
+  );
+  const isReporterOutput = (value: string | undefined): boolean =>
+    value !== undefined && /^(?:file|json):\/\//.test(value);
+  if (outputs.some(isReporterOutput)) {
+    return outputs.every(isReporterOutput) && logLevelsAreOwned
+      ? REPORTER_OUTPUT_VALUE_FLAGS.filter((flag) => !ownership.parameters.has(flag))
+      : [];
+  }
+  return logLevels.length > 0 && logLevelsAreOwned ? ['--log-level'] : [];
+}
+
 function resolveLogLevel(
   controls: IParsedReporterControls,
   env: Record<string, string | undefined>,
   includeEnvironment: boolean,
-  useLegacyAliasPrecedence: boolean = false
+  useLegacyAliasPrecedence: boolean = false,
+  defaultLogLevel: ReporterLogLevel = 'normal'
 ): ReporterLogLevel {
   const requestedLevels: ReporterLogLevel[] = [];
   const explicitLogLevel: string | undefined = controls.logLevels[0];
@@ -588,7 +627,7 @@ function resolveLogLevel(
     return normalizedLogLevel;
   }
 
-  return 'normal';
+  return defaultLogLevel;
 }
 
 function resolveOutputs(outputValues: readonly string[], cwd: string): readonly IReporterOutputTarget[] {
@@ -644,8 +683,50 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
 
   const cwd: string = options.cwd ?? process.cwd();
   const commandJson: boolean = separateJsonControls(argv).commandJson;
+  let commandOwnership: IReporterCommandLineOwnership | undefined;
+
+  function getCommandOwnership(): IReporterCommandLineOwnership {
+    if (!commandOwnership) {
+      const separator: number = argv.indexOf('--');
+      const actionName: string | undefined = stripReporterValueControls(
+        separator < 0 ? argv : argv.slice(0, separator)
+      ).find((argument) => !argument.startsWith('-'));
+      commandOwnership = getReporterCommandLineOwnership(actionName, cwd);
+    }
+    return commandOwnership;
+  }
+
+  function getFlagsToStrip(controls: IParsedReporterControls): readonly string[] {
+    if (controls.verbose) {
+      const ownership: IReporterCommandLineOwnership = getCommandOwnership();
+      if (ownership.known && !ownership.parameters.has('--verbose')) {
+        return ['--verbose'];
+      }
+    }
+    return [];
+  }
 
   const reporterProbe: IParsedReporterControls = parseReporterControls(argv, false, true);
+  if (isLegacyEmergencyFallbackRequested(env)) {
+    const reporterValueFlagsToStrip: readonly string[] = reporterProbe.reporters.some(
+      (reporter) => isSupportedReporterName(reporter) && reporter !== 'legacy'
+    )
+      ? ALL_REPORTER_VALUE_FLAGS
+      : reporterProbe.reporters.includes('legacy')
+        ? REPORTER_SELECTION_FLAG
+        : [];
+    return {
+      reporter: 'legacy',
+      logLevel: 'normal',
+      outputs: [],
+      commandJson,
+      enabled: false,
+      reporterControlsOwnedByFrontend: true,
+      reporterValueFlagsToStrip,
+      reason: 'RUSH_REPORTER=legacy'
+    };
+  }
+
   const reporterOwnershipEstablished: boolean =
     options.repositoryOptIn === true ||
     hasReporterOutputControl(argv) ||
@@ -666,25 +747,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     );
   }
   const requestedReporter: ReporterName | undefined = reporterValue;
-
-  if (isLegacyEmergencyFallbackRequested(env)) {
-    const reporterValueFlagsToStrip: readonly string[] =
-      requestedReporter === 'legacy'
-        ? REPORTER_SELECTION_FLAG
-        : requestedReporter === undefined
-          ? []
-          : ALL_REPORTER_VALUE_FLAGS;
-    return {
-      reporter: 'legacy',
-      logLevel: 'normal',
-      outputs: [],
-      commandJson,
-      enabled: false,
-      reporterControlsOwnedByFrontend: true,
-      reporterValueFlagsToStrip,
-      reason: 'RUSH_REPORTER=legacy'
-    };
-  }
 
   if (options.forceLegacy) {
     if (requestedReporter !== undefined && requestedReporter !== 'legacy') {
@@ -708,14 +770,31 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
   }
 
   if (hasHelpControl(argv)) {
+    const reporterValueFlagsToStrip: readonly string[] =
+      requestedReporter !== undefined
+        ? requestedReporter === 'legacy'
+          ? REPORTER_SELECTION_FLAG
+          : ALL_REPORTER_VALUE_FLAGS
+        : options.repositoryOptIn
+          ? getImplicitHelpValueFlagsToStrip(argv, getCommandOwnership())
+          : [];
+    const reporterFlagsToStrip: readonly string[] = (
+      requestedReporter !== undefined ? requestedReporter !== 'legacy' : options.repositoryOptIn === true
+    )
+      ? getFlagsToStrip(selectionControls)
+      : [];
     return {
       reporter: 'legacy',
       logLevel: 'normal',
       outputs: [],
       commandJson,
       enabled: false,
-      reporterControlsOwnedByFrontend: requestedReporter !== undefined,
-      reporterValueFlagsToStrip: requestedReporter === undefined ? [] : REPORTER_SELECTION_FLAG,
+      reporterControlsOwnedByFrontend:
+        reporterValueFlagsToStrip.length > 0 ||
+        reporterFlagsToStrip.length > 0 ||
+        (options.repositoryOptIn === true && env.RUSH_LOG_LEVEL !== undefined),
+      reporterValueFlagsToStrip,
+      ...(reporterFlagsToStrip.length > 0 ? { reporterFlagsToStrip } : {}),
       reason: requestedReporter === undefined ? 'pre-major legacy default' : 'explicit --reporter'
     };
   }
@@ -741,53 +820,27 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     }
     if (options.repositoryOptIn) {
       const stdout: IRushReporterOutputStream = options.stdout ?? process.stdout;
-      const ownsOutputControls: boolean = hasReporterOutputControl(argv);
-      const ownsLogLevelControls: boolean = hasReporterLogLevelControl(argv);
-      const candidateValueControls: IParsedReporterControls =
-        ownsOutputControls || ownsLogLevelControls ? parseReporterControls(argv, true) : selectionControls;
-      const ownsLogLevelControl: boolean =
-        ownsLogLevelControls &&
-        !ownsOutputControls &&
-        candidateValueControls.logLevels.length > 0 &&
-        candidateValueControls.logLevels.every((logLevel: string) => isSupportedLogLevel(logLevel));
-      const ownsValueControls: boolean = ownsOutputControls || ownsLogLevelControl;
+      const ownership: IReporterCommandLineOwnership = getCommandOwnership();
+      const valueFlagsToParse: Set<string> = new Set(
+        ['--output', '--log-level'].filter((flag) => ownership.known && !ownership.parameters.has(flag))
+      );
+      const controls: IParsedReporterControls = parseReporterControls(argv, true, false, valueFlagsToParse);
+      validateReporterControlMultiplicity(controls, true);
+      const reporterValueFlagsToStrip: string[] = [];
+      if (controls.outputs.length > 0) reporterValueFlagsToStrip.push('--output');
+      if (controls.logLevels.length > 0) reporterValueFlagsToStrip.push('--log-level');
+      const reporterFlagsToStrip: readonly string[] = getFlagsToStrip(controls);
       const ownsEnvironmentControls: boolean = env.RUSH_LOG_LEVEL !== undefined;
-      const parsedValueControls: IParsedReporterControls = ownsValueControls
-        ? candidateValueControls
-        : selectionControls;
-      const outputControlsAreUnambiguous: boolean =
-        !parsedValueControls.logLevels.some((logLevel: string) => !isSupportedLogLevel(logLevel)) &&
-        parsedValueControls.outputs.every((outputValue: string) => {
-          try {
-            const output: IReporterOutputTarget = parseOutputControl(outputValue);
-            return output.reporter === 'file' || output.reporter === 'json';
-          } catch {
-            return false;
-          }
-        });
-      const implicitControls: IParsedReporterControls =
-        ownsOutputControls && !outputControlsAreUnambiguous
-          ? {
-              ...parsedValueControls,
-              logLevels: [],
-              outputs: []
-            }
-          : parsedValueControls;
-      validateReporterControlMultiplicity(implicitControls, ownsValueControls);
       return {
         reporter: commandJson ? 'file' : isCiDetected(env) || !stdout.isTTY ? 'plaintext' : 'default',
-        logLevel: resolveLogLevel(implicitControls, env, true, true),
-        outputs: resolveOutputs(implicitControls.outputs, cwd),
+        logLevel: resolveLogLevel(controls, env, true, true),
+        outputs: resolveOutputs(controls.outputs, cwd),
         commandJson,
         enabled: true,
         reporterControlsOwnedByFrontend:
-          ownsLogLevelControl || ownsEnvironmentControls || implicitControls.outputs.length > 0,
-        reporterValueFlagsToStrip:
-          implicitControls.outputs.length > 0
-            ? REPORTER_OUTPUT_VALUE_FLAGS
-            : ownsLogLevelControl
-              ? ['--log-level']
-              : [],
+          reporterValueFlagsToStrip.length > 0 || reporterFlagsToStrip.length > 0 || ownsEnvironmentControls,
+        reporterValueFlagsToStrip,
+        ...(reporterFlagsToStrip.length > 0 ? { reporterFlagsToStrip } : {}),
         reason: 'repository experiment'
       };
     }
@@ -834,12 +887,13 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
 
   return {
     reporter: requestedReporter,
-    logLevel: resolveLogLevel(controls, env, true),
+    logLevel: resolveLogLevel(controls, env, true, false, requestedReporter === 'file' ? 'debug' : 'normal'),
     outputs: resolveOutputs(controls.outputs, cwd),
     commandJson,
     enabled: true,
     reporterControlsOwnedByFrontend: true,
     reporterValueFlagsToStrip: ALL_REPORTER_VALUE_FLAGS,
+    reporterFlagsToStrip: getFlagsToStrip(controls),
     reason: 'explicit --reporter'
   };
 }

@@ -8,8 +8,9 @@ import type { ILaunchOptions, IRushSessionReporterOptions } from '@microsoft/rus
  *
  * @remarks
  * Reporter selection remains in `@microsoft/rush`. The selected `rush-lib`
- * receives only the typed producer sink in addition to its existing launch
- * options, so an older engine can safely ignore the new property.
+ * receives a reporter channel containing the typed producer event sink and the
+ * frontend-assigned `sessionId`, in addition to its existing launch options.
+ * An older engine can safely ignore this additive reporter property.
  */
 export interface IRushFrontendLaunchOptions extends ILaunchOptions {
   readonly reporter: IRushSessionReporterOptions;

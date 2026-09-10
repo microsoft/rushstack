@@ -70,6 +70,10 @@ same closed log. The log retains command results and session completion, includi
 Flush or close failures leave the artifact incomplete or unavailable and produce an emergency warning
 without replacing the command's native exit result.
 
+Full-detail invocation artifacts remain unfiltered even when a lower primary presentation level is
+selected. In the combined frontend, file mode exposes that complete artifact rather than a separately
+filtered primary transcript.
+
 ## Links
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out

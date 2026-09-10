@@ -48,6 +48,11 @@ Repositories can opt in without a command-line flag by setting `"useRushReporter
 `common/config/rush/experiments.json`. Remove that setting or use `RUSH_REPORTER=legacy` for immediate
 rollback.
 
+Help stays on the legacy parser path. With repository opt-in, parameters declared for a command remain
+command-owned even when their values look like reporter controls (for example, `--output=json://...`
+or `--log-level=debug`). Custom `--verbose` flags are preserved as well; help does not run the command
+or open reporter output files.
+
 The expected output is shape-based:
 
 - legacy keeps the existing Rush banner, operation blocks, and final status sections;
