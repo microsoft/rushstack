@@ -93,19 +93,19 @@ const LOG_CHUNKS_FOLDER_RELATIVE_PATH: string = `${RushConstants.projectRushFold
 export class JsonLFileWritable extends TerminalWritable {
   public readonly logPath: string;
 
-  private _writer: FileWriter | undefined;
+  #writer: FileWriter | undefined;
 
   public constructor(logPath: string) {
     super();
 
     this.logPath = logPath;
 
-    this._writer = FileWriter.open(logPath);
+    this.#writer = FileWriter.open(logPath);
   }
 
   // Override writeChunk function to throw custom error
   public override writeChunk(chunk: ITerminalChunk): void {
-    if (!this._writer) {
+    if (!this.#writer) {
       throw new InternalError(`Log writer was closed for ${this.logPath}`);
     }
     // Stderr can always get written to a error log writer
@@ -113,20 +113,20 @@ export class JsonLFileWritable extends TerminalWritable {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    if (!this._writer) {
+    if (!this.#writer) {
       throw new InternalError(`Log writer was closed for ${this.logPath}`);
     }
-    this._writer.write(JSON.stringify(chunk) + '\n');
+    this.#writer.write(JSON.stringify(chunk) + '\n');
   }
 
   protected override onClose(): void {
-    if (this._writer) {
+    if (this.#writer) {
       try {
-        this._writer.close();
+        this.#writer.close();
       } catch (error) {
-        throw new InternalError('Failed to close file handle for ' + this._writer.filePath);
+        throw new InternalError('Failed to close file handle for ' + this.#writer.filePath);
       }
-      this._writer = undefined;
+      this.#writer = undefined;
     }
   }
 }
@@ -138,8 +138,8 @@ export class SplitLogFileWritable extends TerminalWritable {
   public readonly logPath: string;
   public readonly errorLogPath: string;
 
-  private _logWriter: FileWriter | undefined = undefined;
-  private _errorLogWriter: FileWriter | undefined = undefined;
+  #logWriter: FileWriter | undefined = undefined;
+  #errorLogWriter: FileWriter | undefined = undefined;
 
   public constructor(logPath: string, errorLogPath: string) {
     super();
@@ -147,13 +147,13 @@ export class SplitLogFileWritable extends TerminalWritable {
     this.logPath = logPath;
     this.errorLogPath = errorLogPath;
 
-    this._logWriter = FileWriter.open(logPath);
-    this._errorLogWriter = undefined;
+    this.#logWriter = FileWriter.open(logPath);
+    this.#errorLogWriter = undefined;
   }
 
   // Override writeChunk function to throw custom error
   public override writeChunk(chunk: ITerminalChunk): void {
-    if (!this._logWriter) {
+    if (!this.#logWriter) {
       throw new InternalError(`Log writer was closed for ${this.logPath}`);
     }
     // Stderr can always get written to a error log writer
@@ -161,38 +161,38 @@ export class SplitLogFileWritable extends TerminalWritable {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    if (!this._logWriter) {
+    if (!this.#logWriter) {
       throw new InternalError('Output file was closed');
     }
     // Both stderr and stdout get written to *.<phaseName>.log
-    this._logWriter.write(chunk.text);
+    this.#logWriter.write(chunk.text);
 
     if (chunk.kind === TerminalChunkKind.Stderr) {
       // Only stderr gets written to *.<phaseName>.error.log
-      if (!this._errorLogWriter) {
-        this._errorLogWriter = FileWriter.open(this.errorLogPath);
+      if (!this.#errorLogWriter) {
+        this.#errorLogWriter = FileWriter.open(this.errorLogPath);
       }
-      this._errorLogWriter.write(chunk.text);
+      this.#errorLogWriter.write(chunk.text);
     }
   }
 
   protected override onClose(): void {
-    if (this._logWriter) {
+    if (this.#logWriter) {
       try {
-        this._logWriter.close();
+        this.#logWriter.close();
       } catch (error) {
-        throw new InternalError('Failed to close file handle for ' + this._logWriter.filePath);
+        throw new InternalError('Failed to close file handle for ' + this.#logWriter.filePath);
       }
-      this._logWriter = undefined;
+      this.#logWriter = undefined;
     }
 
-    if (this._errorLogWriter) {
+    if (this.#errorLogWriter) {
       try {
-        this._errorLogWriter.close();
+        this.#errorLogWriter.close();
       } catch (error) {
-        throw new InternalError('Failed to close file handle for ' + this._errorLogWriter.filePath);
+        throw new InternalError('Failed to close file handle for ' + this.#errorLogWriter.filePath);
       }
-      this._errorLogWriter = undefined;
+      this.#errorLogWriter = undefined;
     }
   }
 }

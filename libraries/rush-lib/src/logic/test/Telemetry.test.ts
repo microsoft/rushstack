@@ -20,7 +20,7 @@ class CapturingSink implements IReporterEventSink {
 }
 
 interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
-  _flushAsyncTasks: Map<symbol, Promise<void>>;
+  _flushAsyncTasks: Set<Promise<void>>;
 }
 
 describe(Telemetry.name, () => {

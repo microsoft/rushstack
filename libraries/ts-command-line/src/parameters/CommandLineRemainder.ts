@@ -8,7 +8,7 @@ import type { ICommandLineRemainderDefinition } from './CommandLineDefinition';
  * @public
  */
 export class CommandLineRemainder {
-  private _values: string[] = [];
+  #values: string[] = [];
 
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
@@ -26,7 +26,7 @@ export class CommandLineRemainder {
    * The array will be empty if the command-line has not been parsed yet.
    */
   public get values(): ReadonlyArray<string> {
-    return this._values;
+    return this.#values;
   }
 
   /**
@@ -39,7 +39,7 @@ export class CommandLineRemainder {
       throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));
     }
 
-    this._values.push(...data);
+    this.#values.push(...data);
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */

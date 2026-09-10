@@ -4,6 +4,17 @@
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+
+class CapturingReporterSink implements IReporterEventSink {
+  public readonly events: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.events.push(event);
+    return `event-${this.events.length}`;
+  }
+}
 
 describe('RushCommandLineParser reporter close', () => {
   let originalExitCode: string | number | undefined;
@@ -33,11 +44,10 @@ describe('RushCommandLineParser reporter close', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     await parser.executeAsync(['not-a-rush-command']);
 
-    const terminalProvider: { debugEnabled: boolean; verboseEnabled: boolean } = (
-      parser as unknown as {
-        _terminalProvider: { debugEnabled: boolean; verboseEnabled: boolean };
-      }
-    )._terminalProvider;
+    const terminalProvider = parser.rushSession.terminalProvider;
+    if (!(terminalProvider instanceof ConsoleTerminalProvider)) {
+      throw new Error('Expected the native console terminal provider.');
+    }
     expect(terminalProvider.debugEnabled).toBe(false);
     expect(terminalProvider.verboseEnabled).toBe(false);
   });
@@ -74,30 +84,29 @@ describe('RushCommandLineParser reporter close', () => {
           resolveClose = resolve;
         })
     );
-    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-    Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
-    Object.defineProperty(parser, '_rushOptions', { value: { reporterCloseAsync: closeAsync } });
-    const emitReporterCompletion: jest.Mock<void, [number]> = jest.fn();
-    Object.defineProperty(parser, '_emitReporterCompletion', { value: emitReporterCompletion });
+    const sink: CapturingReporterSink = new CapturingReporterSink();
     const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
       .spyOn(process, 'exit')
       .mockImplementation(() => undefined as never);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     process.exitCode = 0;
-
-    const reportErrorAndSetExitCode: (error: Error) => void = (
-      parser as unknown as {
-        _reportErrorAndSetExitCode(error: Error): void;
-      }
-    )._reportErrorAndSetExitCode.bind(parser);
-    reportErrorAndSetExitCode(new Error('parser failed'));
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('parser failed');
+    });
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporter: { eventSink: sink, sessionId: 'parser-exit-close' },
+      reporterCloseAsync: closeAsync
+    });
+    const execution: Promise<boolean> = parser.executeAsync();
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
-    expect(emitReporterCompletion).toHaveBeenCalledWith(1);
+    expect(sink.events.at(-1)).toMatchObject({ type: 'sessionCompleted', payload: { exitCode: 1 } });
     expect(exitSpy).not.toHaveBeenCalled();
     process.exitCode = 0;
 
     resolveClose!();
+    await expect(execution).resolves.toBe(false);
     await new Promise<void>((resolve: () => void) => setImmediate(resolve));
 
     expect(exitSpy).toHaveBeenCalledWith(1);
@@ -133,19 +142,17 @@ describe('RushCommandLineParser reporter close', () => {
   });
 
   it('reports close failure without rejecting from parser finalization', async () => {
-    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-    Object.defineProperty(parser, '_rushOptions', {
-      value: { reporterCloseAsync: async () => Promise.reject(new Error('close failed')) }
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: async () => {
+        throw new Error('close failed');
+      }
     });
     const errorSpy: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
     process.exitCode = 0;
 
-    const closeReporterAsync: () => Promise<void> = (
-      parser as unknown as {
-        _closeReporterAsync(): Promise<void>;
-      }
-    )._closeReporterAsync.bind(parser);
-    await expect(closeReporterAsync()).resolves.toBeUndefined();
+    await expect(parser.executeAsync(['--help'])).resolves.toBe(true);
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith('[reporter] Unable to finalize reporters: close failed\n');
@@ -159,20 +166,25 @@ describe('RushCommandLineParser reporter close', () => {
           resolveClose = resolve;
         })
     );
-    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-    Object.defineProperty(parser, '_rushOptions', { value: { reporterCloseAsync: closeAsync } });
-
-    const closeReporterAsync: () => Promise<void> = (
-      parser as unknown as {
-        _closeReporterAsync(): Promise<void>;
-      }
-    )._closeReporterAsync.bind(parser);
-    const firstClose: Promise<void> = closeReporterAsync();
-    const secondClose: Promise<void> = closeReporterAsync();
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('configuration failed');
+    });
+    const exitSpy: jest.SpyInstance = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    const firstClose: Promise<boolean> = parser.executeAsync();
+    const secondClose: Promise<boolean> = parser.executeAsync();
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
     resolveClose!();
-    await expect(Promise.all([firstClose, secondClose])).resolves.toEqual([undefined, undefined]);
+    await expect(Promise.all([firstClose, secondClose])).resolves.toEqual([false, false]);
+    await new Promise<void>((resolve) => setImmediate(resolve));
     expect(closeAsync).toHaveBeenCalledTimes(1);
+    expect(exitSpy).toHaveBeenCalledTimes(1);
   });
 });

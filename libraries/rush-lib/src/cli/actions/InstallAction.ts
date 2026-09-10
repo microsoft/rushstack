@@ -12,8 +12,8 @@ import type { Subspace } from '../../api/Subspace';
 import { getVariantAsync } from '../../api/Variants';
 
 export class InstallAction extends BaseInstallAction {
-  private readonly _checkOnlyParameter: CommandLineFlagParameter;
-  private readonly _resolutionOnlyParameter: CommandLineFlagParameter | undefined;
+  readonly #checkOnlyParameter: CommandLineFlagParameter;
+  readonly #resolutionOnlyParameter: CommandLineFlagParameter | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -45,13 +45,13 @@ export class InstallAction extends BaseInstallAction {
       cwd: this.parser.cwd
     });
 
-    this._checkOnlyParameter = this.defineFlagParameter({
+    this.#checkOnlyParameter = this.defineFlagParameter({
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
 
     if (this.rushConfiguration?.isPnpm) {
-      this._resolutionOnlyParameter = this.defineFlagParameter({
+      this.#resolutionOnlyParameter = this.defineFlagParameter({
         parameterLongName: '--resolution-only',
         description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date. Note that this flag is only supported when using the pnpm package manager.`
       });
@@ -88,8 +88,8 @@ export class InstallAction extends BaseInstallAction {
       selectedProjects,
       pnpmFilterArgumentValues:
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this.terminal)) ?? [],
-      checkOnly: this._checkOnlyParameter.value,
-      resolutionOnly: this._resolutionOnlyParameter?.value,
+      checkOnly: this.#checkOnlyParameter.value,
+      resolutionOnly: this.#resolutionOnlyParameter?.value,
       beforeInstallAsync: (subspace: Subspace) =>
         this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
       afterInstallAsync: (subspace: Subspace) =>

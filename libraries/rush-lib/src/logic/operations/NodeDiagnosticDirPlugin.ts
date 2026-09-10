@@ -20,10 +20,10 @@ export interface INodeDiagnosticDirPluginOptions {
  * Phased command plugin that configures the NodeJS --diagnostic-dir option to contain the project and phase name.
  */
 export class NodeDiagnosticDirPlugin implements IPhasedCommandPlugin {
-  private readonly _diagnosticsDir: string;
+  readonly #diagnosticsDir: string;
 
   public constructor(options: INodeDiagnosticDirPluginOptions) {
-    this._diagnosticsDir = options.diagnosticDir;
+    this.#diagnosticsDir = options.diagnosticDir;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -31,7 +31,7 @@ export class NodeDiagnosticDirPlugin implements IPhasedCommandPlugin {
       const { associatedProject } = operation;
 
       const diagnosticDir: string = path.resolve(
-        this._diagnosticsDir,
+        this.#diagnosticsDir,
         associatedProject.packageName,
         operation.logFilenameIdentifier
       );

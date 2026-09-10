@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import * as rushLib from '@microsoft/rush-lib';
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
+import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 import {
   ReporterHost,
@@ -342,7 +343,7 @@ describe(launchRushFrontendAsync.name, () => {
 
   it('keeps an implicit repository opt-in on the legacy path for an incompatible engine', async () => {
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
+    const versionSelector: RushVersionSelector = new RushVersionSelector('5.178.1');
     let receivedArgv: string[] | undefined;
     versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
       void version;
@@ -414,7 +415,7 @@ describe(launchRushFrontendAsync.name, () => {
     }
   ])('preserves the old-engine $name escape path', async ({ reporter, expectedArgv }) => {
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
+    const versionSelector: RushVersionSelector = new RushVersionSelector('5.178.1');
     let receivedArgv: string[] | undefined;
     versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
       void version;
@@ -756,11 +757,6 @@ describe(launchRushFrontendAsync.name, () => {
           void version;
           void selectedRushLib;
           emitCommandStarted(launchOptions.reporter.eventSink);
-          const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-          Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
-          Object.defineProperty(parser, '_rushOptions', {
-            value: { reporterCloseAsync: launchOptions.reporterCloseAsync }
-          });
           process.exitCode = 1;
 
           return new Promise<void>((resolve: () => void) => {
@@ -770,11 +766,14 @@ describe(launchRushFrontendAsync.name, () => {
               return undefined as never;
             });
             jest.spyOn(console, 'error').mockImplementation(() => undefined);
-            (
-              parser as unknown as {
-                _reportErrorAndSetExitCode(error: Error): void;
-              }
-            )._reportErrorAndSetExitCode(new Error('parser failed'));
+            jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+              throw new Error('parser failed');
+            });
+            const parser: RushCommandLineParser = new RushCommandLineParser({
+              cwd: directory,
+              reporterCloseAsync: launchOptions.reporterCloseAsync
+            });
+            void parser.executeAsync();
           });
         },
         processLifecycle: createTestProcessLifecycle()

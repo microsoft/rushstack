@@ -50,12 +50,12 @@ export interface ICredentialCacheOptions {
  * @public
  */
 export class CredentialCache implements Disposable {
-  private readonly _cacheFilePath: string;
-  private readonly _cacheEntries: Map<string, ICacheEntryJson>;
-  private _modified: boolean = false;
-  private _disposed: boolean = false;
-  private readonly _supportsEditing: boolean;
-  private readonly _lockfile: LockFile | undefined;
+  readonly #cacheFilePath: string;
+  readonly #cacheEntries: Map<string, ICacheEntryJson>;
+  #modified: boolean = false;
+  #disposed: boolean = false;
+  readonly #supportsEditing: boolean;
+  readonly #lockfile: LockFile | undefined;
 
   private constructor(
     cacheFilePath: string,
@@ -66,10 +66,10 @@ export class CredentialCache implements Disposable {
       throw new Error(`Unexpected ${cacheFilePath} file version: ${loadedJson.version}`);
     }
 
-    this._cacheFilePath = cacheFilePath;
-    this._cacheEntries = new Map<string, ICacheEntryJson>(Object.entries(loadedJson?.cacheEntries || {}));
-    this._supportsEditing = !!lockfile;
-    this._lockfile = lockfile;
+    this.#cacheFilePath = cacheFilePath;
+    this.#cacheEntries = new Map<string, ICacheEntryJson>(Object.entries(loadedJson?.cacheEntries || {}));
+    this.#supportsEditing = !!lockfile;
+    this.#lockfile = lockfile;
   }
 
   public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
@@ -117,18 +117,18 @@ export class CredentialCache implements Disposable {
   }
 
   public setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void {
-    this._validate(true);
+    this.#validate(true);
 
     const { expires, credential, credentialMetadata } = entry;
     const expiresMilliseconds: number = expires?.getTime() || 0;
-    const existingCacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
+    const existingCacheEntry: ICacheEntryJson | undefined = this.#cacheEntries.get(cacheId);
     if (
       existingCacheEntry?.credential !== credential ||
       existingCacheEntry?.expires !== expiresMilliseconds ||
       !Objects.areDeepEqual(existingCacheEntry?.credentialMetadata, credentialMetadata)
     ) {
-      this._modified = true;
-      this._cacheEntries.set(cacheId, {
+      this.#modified = true;
+      this.#cacheEntries.set(cacheId, {
         expires: expiresMilliseconds,
         credential,
         credentialMetadata
@@ -137,9 +137,9 @@ export class CredentialCache implements Disposable {
   }
 
   public tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined {
-    this._validate(false);
+    this.#validate(false);
 
-    const cacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
+    const cacheEntry: ICacheEntryJson | undefined = this.#cacheEntries.get(cacheId);
     if (cacheEntry) {
       const result: ICredentialCacheEntry = {
         expires: cacheEntry.expires ? new Date(cacheEntry.expires) : undefined,
@@ -154,32 +154,32 @@ export class CredentialCache implements Disposable {
   }
 
   public deleteCacheEntry(cacheId: string): void {
-    this._validate(true);
+    this.#validate(true);
 
-    if (this._cacheEntries.has(cacheId)) {
-      this._modified = true;
-      this._cacheEntries.delete(cacheId);
+    if (this.#cacheEntries.has(cacheId)) {
+      this.#modified = true;
+      this.#cacheEntries.delete(cacheId);
     }
   }
 
   public trimExpiredEntries(): void {
-    this._validate(true);
+    this.#validate(true);
 
     const now: number = Date.now();
-    for (const [cacheId, cacheEntry] of this._cacheEntries.entries()) {
+    for (const [cacheId, cacheEntry] of this.#cacheEntries.entries()) {
       if (cacheEntry.expires < now) {
-        this._cacheEntries.delete(cacheId);
-        this._modified = true;
+        this.#cacheEntries.delete(cacheId);
+        this.#modified = true;
       }
     }
   }
 
   public async saveIfModifiedAsync(): Promise<void> {
-    this._validate(true);
+    this.#validate(true);
 
-    if (this._modified) {
+    if (this.#modified) {
       const cacheEntriesJson: { [cacheId: string]: ICacheEntryJson } = {};
-      for (const [cacheId, cacheEntry] of this._cacheEntries.entries()) {
+      for (const [cacheId, cacheEntry] of this.#cacheEntries.entries()) {
         cacheEntriesJson[cacheId] = cacheEntry;
       }
 
@@ -187,13 +187,13 @@ export class CredentialCache implements Disposable {
         version: LATEST_CREDENTIALS_JSON_VERSION,
         cacheEntries: cacheEntriesJson
       };
-      await JsonFile.saveAsync(newJson, this._cacheFilePath, {
+      await JsonFile.saveAsync(newJson, this.#cacheFilePath, {
         ensureFolderExists: true,
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });
 
-      this._modified = false;
+      this.#modified = false;
     }
   }
 
@@ -202,16 +202,16 @@ export class CredentialCache implements Disposable {
   }
 
   public dispose(): void {
-    this._lockfile?.release();
-    this._disposed = true;
+    this.#lockfile?.release();
+    this.#disposed = true;
   }
 
-  private _validate(requiresEditing: boolean): void {
-    if (!this._supportsEditing && requiresEditing) {
+  #validate(requiresEditing: boolean): void {
+    if (!this.#supportsEditing && requiresEditing) {
       throw new Error(`This instance of ${CredentialCache.name} does not support editing.`);
     }
 
-    if (this._disposed) {
+    if (this.#disposed) {
       throw new Error(`This instance of ${CredentialCache.name} has been disposed.`);
     }
   }

@@ -45,7 +45,7 @@ export class NpmLinkManager extends BaseLinkManager {
     for (const rushProject of this._rushConfiguration.projects) {
       // eslint-disable-next-line no-console
       console.log(`\nLINKING: ${rushProject.packageName}`);
-      await this._linkProjectAsync(rushProject, commonRootPackage, commonPackageLookup);
+      await this.#linkProjectAsync(rushProject, commonRootPackage, commonPackageLookup);
     }
   }
 
@@ -55,7 +55,7 @@ export class NpmLinkManager extends BaseLinkManager {
    * @param commonRootPackage   The common/temp/package.json package
    * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
    */
-  private async _linkProjectAsync(
+  async #linkProjectAsync(
     project: RushConfigurationProject,
     commonRootPackage: NpmPackage,
     commonPackageLookup: PackageLookup

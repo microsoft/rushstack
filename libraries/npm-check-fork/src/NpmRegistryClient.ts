@@ -62,16 +62,16 @@ const DEFAULT_TIMEOUT_MS: number = 30000;
  * @public
  */
 export class NpmRegistryClient {
-  private readonly _registryUrl: string;
-  private readonly _userAgent: string;
-  private readonly _timeoutMs: number;
+  readonly #registryUrl: string;
+  readonly #userAgent: string;
+  readonly #timeoutMs: number;
 
   public constructor(options?: INpmRegistryClientOptions) {
     // trim trailing slash if one was provided
-    this._registryUrl = (options?.registryUrl ?? DEFAULT_REGISTRY_URL).replace(/\/$/, '');
-    this._userAgent =
+    this.#registryUrl = (options?.registryUrl ?? DEFAULT_REGISTRY_URL).replace(/\/$/, '');
+    this.#userAgent =
       options?.userAgent ?? `npm-check-fork node/${process.version} ${os.platform()} ${os.arch()}`;
-    this._timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.#timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
   /**
@@ -84,11 +84,11 @@ export class NpmRegistryClient {
    * @param packageName - The name of the package
    * @returns The full URL for fetching the package metadata
    */
-  private _buildPackageUrl(packageName: string): string {
+  #buildPackageUrl(packageName: string): string {
     // Scoped packages need the slash encoded
     // @scope/name -> @scope%2Fname
     const encodedName: string = packageName.replace(/\//g, '%2F');
-    return `${this._registryUrl}/${encodedName}`;
+    return `${this.#registryUrl}/${encodedName}`;
   }
 
   /**
@@ -109,7 +109,7 @@ export class NpmRegistryClient {
    * ```
    */
   public async fetchPackageMetadataAsync(packageName: string): Promise<INpmRegistryClientResult> {
-    const url: string = this._buildPackageUrl(packageName);
+    const url: string = this.#buildPackageUrl(packageName);
 
     return new Promise<INpmRegistryClientResult>((resolve) => {
       const parsedUrl: URL = new URL(url);
@@ -121,11 +121,11 @@ export class NpmRegistryClient {
         port: parsedUrl.port || (isHttps ? 443 : 80),
         path: parsedUrl.pathname + parsedUrl.search,
         method: 'GET',
-        timeout: this._timeoutMs,
+        timeout: this.#timeoutMs,
         headers: {
           Accept: 'application/json',
           'Accept-Encoding': 'gzip, deflate',
-          'User-Agent': this._userAgent
+          'User-Agent': this.#userAgent
         }
       };
 
@@ -191,7 +191,7 @@ export class NpmRegistryClient {
 
       request.on('timeout', () => {
         request.destroy();
-        resolve({ error: `Request timed out after ${this._timeoutMs}ms` });
+        resolve({ error: `Request timed out after ${this.#timeoutMs}ms` });
       });
 
       request.end();

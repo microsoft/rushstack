@@ -86,10 +86,12 @@ describe(HeftChildReporter.name, () => {
     }
   });
 
-  it('negotiates context and emits ordered structured output and diagnostics', async () => {
+  it('negotiates context and emits ordered diagnostics through native scoped loggers', async () => {
     const modulePath: string = require.resolve('./HeftChildReporter');
+    const loggingManagerPath: string = require.resolve('./LoggingManager');
     const childScript: string = `
       const { HeftChildReporter } = require(process.argv[1]);
+      const { LoggingManager } = require(process.argv[2]);
       const reporter = HeftChildReporter.tryInitialize(process.env);
       if (!reporter) {
         process.stdout.write('fallback');
@@ -99,11 +101,19 @@ describe(HeftChildReporter.name, () => {
       reporter.setCommandName('build');
       reporter.write('visible output\\n', 0);
       reporter.write('hidden verbose output\\n', 3);
-      reporter.emitDiagnostic('typescript', new Error('structured failure'), 'error');
+      const loggingManager = new LoggingManager({ terminalProvider: reporter, childReporter: reporter });
+      const logger = loggingManager.requestScopedLogger('typescript');
+      logger.emitError(new Error('structured failure'));
+      logger.emitWarning(new Error('structured warning'));
+      if (!logger.hasErrors || !loggingManager.errorsHaveBeenEmitted ||
+          !loggingManager.warningsHaveBeenEmitted) process.exit(4);
+      loggingManager.resetScopedLoggerErrorsAndWarnings();
+      if (logger.hasErrors || logger.warnings.length || loggingManager.errorsHaveBeenEmitted ||
+          loggingManager.warningsHaveBeenEmitted) process.exit(5);
     `;
     const child: childProcess.ChildProcess = childProcess.spawn(
       process.execPath,
-      ['-e', childScript, modulePath],
+      ['-e', childScript, modulePath, loggingManagerPath],
       {
         env: {
           ...process.env,
@@ -155,11 +165,16 @@ describe(HeftChildReporter.name, () => {
       .split('\n')
       .map((line: string) => JSON.parse(line) as Record<string, unknown>);
     expect(records[0].kind).toBe('hello');
-    expect(records.slice(1).map((record) => record.type)).toEqual(['externalOutput', 'diagnosticEmitted']);
-    expect(records.slice(1).map((record) => record.sequence)).toEqual([1, 2]);
+    expect(records.slice(1).map((record) => record.type)).toEqual([
+      'externalOutput',
+      'diagnosticEmitted',
+      'diagnosticEmitted'
+    ]);
+    expect(records.slice(1).map((record) => record.sequence)).toEqual([1, 2, 3]);
     expect((records[1].scope as { commandName?: string }).commandName).toBe('build');
     expect((records[1].payload as { text?: string }).text).toBe('visible output\n');
     expect((records[2].payload as { severity?: string }).severity).toBe('error');
+    expect((records[3].payload as { severity?: string }).severity).toBe('warning');
   });
 
   it('uses safe context defaults when the accepted context capability has no payload', async () => {

@@ -51,17 +51,17 @@ export interface ILegacySkipPluginOptions {
  * Core phased command plugin that implements the legacy skip detection logic, used when build cache is disabled.
  */
 export class LegacySkipPlugin implements IPhasedCommandPlugin {
-  private readonly _options: ILegacySkipPluginOptions;
+  readonly #options: ILegacySkipPluginOptions;
 
   public constructor(options: ILegacySkipPluginOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
     const stateMap: WeakMap<Operation, ILegacySkipRecord> = new WeakMap();
 
     const { terminal, changedProjectsOnly, isIncrementalBuildAllowed, allowWarningsInSuccessfulBuild } =
-      this._options;
+      this.#options;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
       graph.hooks.beforeExecuteIterationAsync.tap(

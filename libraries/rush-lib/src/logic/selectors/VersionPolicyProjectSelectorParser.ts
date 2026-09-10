@@ -8,10 +8,10 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
 
 export class VersionPolicyProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public async evaluateSelectorAsync({
@@ -21,14 +21,14 @@ export class VersionPolicyProjectSelectorParser implements ISelectorParser<RushC
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const selection: Set<RushConfigurationProject> = new Set();
 
-    if (!this._rushConfiguration.versionPolicyConfiguration.versionPolicies.has(unscopedSelector)) {
+    if (!this.#rushConfiguration.versionPolicyConfiguration.versionPolicies.has(unscopedSelector)) {
       terminal.writeErrorLine(
         `The version policy "${unscopedSelector}" passed to "${parameterName}" does not exist in version-policies.json.`
       );
       throw new AlreadyReportedError();
     }
 
-    for (const project of this._rushConfiguration.projects) {
+    for (const project of this.#rushConfiguration.projects) {
       if (project.versionPolicyName === unscopedSelector) {
         selection.add(project);
       }
@@ -38,6 +38,6 @@ export class VersionPolicyProjectSelectorParser implements ISelectorParser<RushC
   }
 
   public getCompletions(): Iterable<string> {
-    return this._rushConfiguration.versionPolicyConfiguration.versionPolicies.keys();
+    return this.#rushConfiguration.versionPolicyConfiguration.versionPolicies.keys();
   }
 }

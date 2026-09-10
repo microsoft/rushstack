@@ -21,13 +21,13 @@ export interface IDocTableParameters extends IDocNodeParameters {
 export class DocTable extends DocNode {
   public readonly header: DocTableRow;
 
-  private _rows: DocTableRow[];
+  #rows: DocTableRow[];
 
   public constructor(parameters: IDocTableParameters, rows?: ReadonlyArray<DocTableRow>) {
     super(parameters);
 
     this.header = new DocTableRow({ configuration: this.configuration });
-    this._rows = [];
+    this.#rows = [];
 
     if (parameters) {
       if (parameters.headerTitles) {
@@ -59,11 +59,11 @@ export class DocTable extends DocNode {
   }
 
   public get rows(): ReadonlyArray<DocTableRow> {
-    return this._rows;
+    return this.#rows;
   }
 
   public addRow(row: DocTableRow): void {
-    this._rows.push(row);
+    this.#rows.push(row);
   }
 
   public createAndAddRow(): DocTableRow {
@@ -73,6 +73,6 @@ export class DocTable extends DocNode {
   }
 
   protected override onGetChildNodes(): ReadonlyArray<DocNode | undefined> {
-    return [this.header, ...this._rows];
+    return [this.header, ...this.#rows];
   }
 }

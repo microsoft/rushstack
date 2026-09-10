@@ -13,9 +13,9 @@ import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;
   public scopedValue: string | undefined;
-  private _verboseArg: CommandLineFlagParameter;
-  private _scopeArg: CommandLineStringParameter;
-  private _scopedArg: CommandLineStringParameter | undefined;
+  #verboseArg: CommandLineFlagParameter;
+  #scopeArg: CommandLineStringParameter;
+  #scopedArg: CommandLineStringParameter | undefined;
 
   public constructor() {
     super({
@@ -24,12 +24,12 @@ class TestScopedAction extends ScopedCommandLineAction {
       documentation: 'a longer description'
     });
 
-    this._verboseArg = this.defineFlagParameter({
+    this.#verboseArg = this.defineFlagParameter({
       parameterLongName: '--verbose',
       description: 'A flag parameter.'
     });
 
-    this._scopeArg = this.defineStringParameter({
+    this.#scopeArg = this.defineStringParameter({
       parameterLongName: '--scope',
       parameterGroup: ScopedCommandLineAction.ScopingParameterGroup,
       argumentName: 'SCOPE',
@@ -38,17 +38,17 @@ class TestScopedAction extends ScopedCommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    if (this._scopedArg) {
-      expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
-      this.scopedValue = this._scopedArg.value;
+    if (this.#scopedArg) {
+      expect(this.#scopedArg.longName).toBe(`--scoped-${this.#scopeArg.value}`);
+      this.scopedValue = this.#scopedArg.value;
     }
     this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    if (this._scopeArg.value) {
-      this._scopedArg = scopedParameterProvider.defineStringParameter({
-        parameterLongName: `--scoped-${this._scopeArg.value}`,
+    if (this.#scopeArg.value) {
+      this.#scopedArg = scopedParameterProvider.defineStringParameter({
+        parameterLongName: `--scoped-${this.#scopeArg.value}`,
         argumentName: 'SCOPED',
         description: 'The scoped argument.'
       });

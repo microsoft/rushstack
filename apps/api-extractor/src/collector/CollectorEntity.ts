@@ -25,14 +25,14 @@ export class CollectorEntity {
    */
   public readonly astEntity: AstEntity;
 
-  private _exportNames: Set<string> = new Set();
-  private _exportNamesSorted: boolean = false;
-  private _singleExportName: string | undefined = undefined;
-  private _localExportNamesByParent: Map<CollectorEntity, Set<string>> = new Map();
+  #exportNames: Set<string> = new Set();
+  #exportNamesSorted: boolean = false;
+  #singleExportName: string | undefined = undefined;
+  #localExportNamesByParent: Map<CollectorEntity, Set<string>> = new Map();
 
-  private _nameForEmit: string | undefined = undefined;
+  #nameForEmit: string | undefined = undefined;
 
-  private _sortKey: string | undefined = undefined;
+  #sortKey: string | undefined = undefined;
 
   public constructor(astEntity: AstEntity) {
     this.astEntity = astEntity;
@@ -44,12 +44,12 @@ export class CollectorEntity {
    * global names (e.g. `Promise`) and (2) if local, other local names across different files.
    */
   public get nameForEmit(): string | undefined {
-    return this._nameForEmit;
+    return this.#nameForEmit;
   }
 
   public set nameForEmit(value: string | undefined) {
-    this._nameForEmit = value;
-    this._sortKey = undefined; // invalidate the cached value
+    this.#nameForEmit = value;
+    this.#sortKey = undefined; // invalidate the cached value
   }
 
   /**
@@ -64,11 +64,11 @@ export class CollectorEntity {
    * ```
    */
   public get exportNames(): ReadonlySet<string> {
-    if (!this._exportNamesSorted) {
-      Sort.sortSet(this._exportNames);
-      this._exportNamesSorted = true;
+    if (!this.#exportNamesSorted) {
+      Sort.sortSet(this.#exportNames);
+      this.#exportNamesSorted = true;
     }
-    return this._exportNames;
+    return this.#exportNames;
   }
 
   /**
@@ -76,7 +76,7 @@ export class CollectorEntity {
    * In all other cases, it is undefined.
    */
   public get singleExportName(): string | undefined {
-    return this._singleExportName;
+    return this.#singleExportName;
   }
 
   /**
@@ -92,9 +92,9 @@ export class CollectorEntity {
     // We don't inline an AstImport
     if (this.astEntity instanceof AstSymbol) {
       // We don't inline a symbol with more than one exported name
-      if (this._singleExportName !== undefined && this._singleExportName !== ts.InternalSymbolName.Default) {
+      if (this.#singleExportName !== undefined && this.#singleExportName !== ts.InternalSymbolName.Default) {
         // We can't inline a symbol whose emitted name is different from the export name
-        if (this._nameForEmit === undefined || this._nameForEmit === this._singleExportName) {
+        if (this.#nameForEmit === undefined || this.#nameForEmit === this.#singleExportName) {
           return true;
         }
       }
@@ -133,7 +133,7 @@ export class CollectorEntity {
     if (this.exportedFromEntryPoint) return true;
 
     // Exported from parent?
-    for (const localExportNames of this._localExportNamesByParent.values()) {
+    for (const localExportNames of this.#localExportNamesByParent.values()) {
       if (localExportNames.size > 0) {
         return true;
       }
@@ -173,7 +173,7 @@ export class CollectorEntity {
     if (this.exportedFromEntryPoint) return true;
 
     // Exported from consumable parent?
-    for (const [parent, localExportNames] of this._localExportNamesByParent) {
+    for (const [parent, localExportNames] of this.#localExportNamesByParent) {
       if (localExportNames.size > 0 && parent.consumable) {
         return true;
       }
@@ -187,7 +187,7 @@ export class CollectorEntity {
    * `undefined`.
    */
   public getFirstExportingConsumableParent(): CollectorEntity | undefined {
-    for (const [parent, localExportNames] of this._localExportNamesByParent) {
+    for (const [parent, localExportNames] of this.#localExportNamesByParent) {
       if (parent.consumable && localExportNames.size > 0) {
         return parent;
       }
@@ -199,14 +199,14 @@ export class CollectorEntity {
    * Adds a new export name to the entity.
    */
   public addExportName(exportName: string): void {
-    if (!this._exportNames.has(exportName)) {
-      this._exportNamesSorted = false;
-      this._exportNames.add(exportName);
+    if (!this.#exportNames.has(exportName)) {
+      this.#exportNamesSorted = false;
+      this.#exportNames.add(exportName);
 
-      if (this._exportNames.size === 1) {
-        this._singleExportName = exportName;
+      if (this.#exportNames.size === 1) {
+        this.#singleExportName = exportName;
       } else {
-        this._singleExportName = undefined;
+        this.#singleExportName = undefined;
       }
     }
   }
@@ -229,19 +229,19 @@ export class CollectorEntity {
    * `add` is the local export name for the `CollectorEntity` for `add`.
    */
   public addLocalExportName(localExportName: string, parent: CollectorEntity): void {
-    const localExportNames: Set<string> = this._localExportNamesByParent.get(parent) || new Set();
+    const localExportNames: Set<string> = this.#localExportNamesByParent.get(parent) || new Set();
     localExportNames.add(localExportName);
 
-    this._localExportNamesByParent.set(parent, localExportNames);
+    this.#localExportNamesByParent.set(parent, localExportNames);
   }
 
   /**
    * A sorting key used by DtsRollupGenerator._makeUniqueNames()
    */
   public getSortKey(): string {
-    if (!this._sortKey) {
-      this._sortKey = Collector.getSortKeyIgnoringUnderscore(this.nameForEmit || this.astEntity.localName);
+    if (!this.#sortKey) {
+      this.#sortKey = Collector.getSortKeyIgnoringUnderscore(this.nameForEmit || this.astEntity.localName);
     }
-    return this._sortKey;
+    return this.#sortKey;
   }
 }

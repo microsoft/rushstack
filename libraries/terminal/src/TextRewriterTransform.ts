@@ -60,8 +60,8 @@ export interface ITextRewriterTransformOptions extends ITerminalTransformOptions
  * @public
  */
 export class TextRewriterTransform extends TerminalTransform {
-  private readonly _stderrStates: TextRewriterState[];
-  private readonly _stdoutStates: TextRewriterState[];
+  readonly #stderrStates: TextRewriterState[];
+  readonly #stdoutStates: TextRewriterState[];
 
   public readonly textRewriters: ReadonlyArray<TextRewriter>;
 
@@ -95,21 +95,21 @@ export class TextRewriterTransform extends TerminalTransform {
 
     this.textRewriters = textRewriters;
 
-    this._stderrStates = this.textRewriters.map((x) => x.initialize());
-    this._stdoutStates = this.textRewriters.map((x) => x.initialize());
+    this.#stderrStates = this.textRewriters.map((x) => x.initialize());
+    this.#stdoutStates = this.textRewriters.map((x) => x.initialize());
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
     if (chunk.kind === TerminalChunkKind.Stderr) {
-      this._processText(chunk, this._stderrStates);
+      this.#processText(chunk, this.#stderrStates);
     } else if (chunk.kind === TerminalChunkKind.Stdout) {
-      this._processText(chunk, this._stdoutStates);
+      this.#processText(chunk, this.#stdoutStates);
     } else {
       this.destination.writeChunk(chunk);
     }
   }
 
-  private _processText(chunk: ITerminalChunk, states: TextRewriterState[]): void {
+  #processText(chunk: ITerminalChunk, states: TextRewriterState[]): void {
     let text: string = chunk.text;
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
@@ -129,7 +129,7 @@ export class TextRewriterTransform extends TerminalTransform {
     }
   }
 
-  private _closeRewriters(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
+  #closeRewriters(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
     let text: string = '';
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
@@ -146,8 +146,8 @@ export class TextRewriterTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
-    this._closeRewriters(this._stderrStates, TerminalChunkKind.Stderr);
-    this._closeRewriters(this._stdoutStates, TerminalChunkKind.Stdout);
+    this.#closeRewriters(this.#stderrStates, TerminalChunkKind.Stderr);
+    this.#closeRewriters(this.#stdoutStates, TerminalChunkKind.Stdout);
 
     this.autocloseDestination();
   }
