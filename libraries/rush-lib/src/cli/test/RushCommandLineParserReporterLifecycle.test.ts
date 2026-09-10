@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { once } from 'node:events';
 
 import { JsonFile } from '@rushstack/node-core-library';
-import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+import type { IReporterEmitEventInput, IReporterEventSink, IRushDiagnostic } from '@rushstack/rush-reporter';
 
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { IRushConfigurationJson } from '../../api/RushConfiguration';
@@ -142,7 +142,7 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     expect(visibleOutput[1]).toEqual(visibleOutput[0]);
   });
 
-  it('emits and correlates a session diagnostic when plugin initialization fails before action selection', async () => {
+  it.each([false, true])('correlates a plugin initialization failure (frozen: %s)', async (frozen) => {
     const repoPath: string = await copyRepositoryAsync();
     const sink: CapturingReporterSink = new CapturingReporterSink();
     const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => undefined);
@@ -155,6 +155,9 @@ describe('RushCommandLineParser reporter lifecycle', () => {
       reporterCloseAsync: closeAsync
     });
     const error: Error = new Error('plugin initialization failed');
+    if (frozen) {
+      Object.freeze(error);
+    }
     jest.spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync').mockRejectedValue(error);
 
     await expect(parser.executeAsync(['custom-output'])).resolves.toBe(false);
@@ -171,6 +174,80 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     expect(closeAsync).toHaveBeenCalledTimes(1);
     expect(exitSpy).toHaveBeenCalledTimes(1);
     expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(stderrSpy.mock.calls.flat().join('\n')).toContain(error.message);
+    expect(stderrSpy.mock.calls.flat().join('\n')).not.toContain('TypeError');
+  });
+
+  it.each([
+    { args: ['not-a-rush-command'], message: 'not-a-rush-command' },
+    { args: ['list', '--not-a-rush-option'], message: '--not-a-rush-option' }
+  ])('reports one real pre-execution parse diagnostic for $args', async ({ args, message }) => {
+    const repoPath: string = await copyRepositoryAsync();
+    const visibleOutput: unknown[] = [];
+    const stdoutWriteSpy: jest.SpyInstance = jest.spyOn(process.stdout, 'write').mockReturnValue(true);
+    const stderrWriteSpy: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockReturnValue(true);
+    for (const reporting of [false, true]) {
+      process.exitCode = undefined;
+      EnvironmentConfiguration.reset();
+      jest.clearAllMocks();
+      const sink: CapturingReporterSink = new CapturingReporterSink();
+      const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => undefined);
+      const exitSpy: jest.SpyInstance = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+      const parser: RushCommandLineParser = new RushCommandLineParser({
+        cwd: repoPath,
+        reporter: reporting ? { eventSink: sink, sessionId: 'parse-failure' } : undefined,
+        reporterCloseAsync: closeAsync
+      });
+
+      await expect(parser.executeAsync(args)).resolves.toBe(false);
+
+      expect(process.exitCode).toBe(2);
+      expect(exitSpy).not.toHaveBeenCalled();
+      expect(closeAsync).toHaveBeenCalledTimes(1);
+      const stderr: string = stderrSpy.mock.calls.flat().join('\n');
+      expect(stderr).toContain(message);
+      expect(sink.events.map(({ type }) => type)).toEqual(
+        reporting ? ['sessionStarted', 'diagnosticEmitted', 'sessionCompleted'] : []
+      );
+      if (reporting) {
+        const diagnosticEvent: IReporterEmitEventInput<unknown> = sink.events[1];
+        const diagnostic: IRushDiagnostic = diagnosticEvent.payload as IRushDiagnostic;
+        expect(diagnostic.code).toBe('RUSH_COMMAND_FAILED');
+        expect(diagnosticEvent.scope?.commandName).toBeUndefined();
+        expect(diagnostic.parameters?.message).toEqual({
+          value: expect.stringContaining(message),
+          privacy: 'local-sensitive'
+        });
+        expect(stderr).toContain(diagnostic.parameters?.message.value);
+        expect(_getRushSessionDerivedExitStatus(parser.rushSession)).toEqual({
+          exitCode: 1,
+          outcome: 'failed'
+        });
+      }
+      visibleOutput.push({
+        stdout: stdoutSpy.mock.calls.map((call) => [...call]),
+        stderr: stderrSpy.mock.calls.map((call) => [...call]),
+        stdoutWrites: stdoutWriteSpy.mock.calls.map(([chunk]) => chunk),
+        stderrWrites: stderrWriteSpy.mock.calls.map(([chunk]) => chunk)
+      });
+      exitSpy.mockRestore();
+    }
+    expect(visibleOutput[1]).toEqual(visibleOutput[0]);
+  });
+
+  it('does not diagnose a successful help request as a parse failure', async () => {
+    jest.spyOn(process.stdout, 'write').mockReturnValue(true);
+    const sink: CapturingReporterSink = new CapturingReporterSink();
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: await copyRepositoryAsync(),
+      reporter: { eventSink: sink, sessionId: 'help' }
+    });
+
+    await expect(parser.executeAsync(['--help'])).resolves.toBe(true);
+    expect(sink.events.filter(({ type }) => type === 'diagnosticEmitted')).toEqual([]);
+    expect(sink.events.at(-1)?.payload).toMatchObject({ exitCode: 0 });
   });
 
   it.each([false, true])('awaits a real delayed public telemetry hook (reject: %s)', async (reject) => {

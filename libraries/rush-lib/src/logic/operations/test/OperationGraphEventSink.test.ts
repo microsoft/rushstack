@@ -59,6 +59,9 @@ import {
   RushSession
 } from '../../../pluginFramework/RushSession';
 import { attachReporterOperationEventSink } from '../ReporterOperationEventSink';
+import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
+import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
+import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -437,6 +440,55 @@ describe('OperationGraph event sink (dual-emit)', () => {
           type === 'diagnosticEmitted' && (payload as { code?: string }).code === 'RUSH_OPERATION_FAILED'
       )
     ).toHaveLength(2);
+  });
+
+  it('registers final silence after the standard plugin disables unchanged watch operations', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'unchanged-watch' }
+    });
+    const execute: jest.Mock<Promise<OperationStatus>, []> = jest.fn(async () => OperationStatus.Success);
+    const operations: Set<Operation> = new Set(
+      ['first', 'second'].map((name) =>
+        createOperation(name, new MockOperationRunner(name, execute), mockPhase, '@scope/unchanged')
+      )
+    );
+    const graph: OperationGraph = new OperationGraph(operations, createGraphOptions(mockWritable, false));
+    const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+    new PhasedOperationPlugin().apply(hooks);
+    // This plugin's graph-configuration callback does not consume the command context.
+    await hooks.onGraphCreatedAsync.promise(graph, {} as IOperationGraphContext);
+    const registrationSink: RecordingSink = new RecordingSink();
+    graph.eventSink = registrationSink;
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    const inputsSnapshot: IInputsSnapshot = {
+      hashes: new Map(),
+      rootDirectory: '/repo',
+      hasUncommittedChanges: false,
+      getTrackedFileHashesForOperation: () => new Map(),
+      getOperationOwnStateHash: () => 'unchanged'
+    };
+
+    await graph.executeAsync({ inputsSnapshot });
+    const eventsAfterFirstRun: IReporterEmitEventInput<unknown>[] = [...reporterSink.inputs];
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(eventsAfterFirstRun.some(({ type }) => type === 'operationRegistered')).toBe(true);
+    expect(registrationSink.registered).toEqual([
+      ['first', false],
+      ['second', false]
+    ]);
+
+    await graph.executeAsync({ inputsSnapshot });
+
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect([...operations].every((operation) => operation.enabled)).toBe(true);
+    expect(registrationSink.registered.slice(2)).toEqual([
+      ['first', true],
+      ['second', true]
+    ]);
+    expect(reporterSink.inputs).toEqual(eventsAfterFirstRun);
   });
 
   it('recomputes grouped silence for each watch-style iteration', async () => {

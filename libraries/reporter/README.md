@@ -4,6 +4,16 @@ Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
 This package is released as a public beta. Exported contracts may change before the stable release.
 
+## Shadow lifecycle compatibility
+
+Error correlation uses external weak metadata, so frozen and non-extensible errors retain their original
+identity, cause, and properties. Correlation remains visible across bridge instances without keeping errors alive.
+
+Rush command-line parse failures emit one session-scoped `RUSH_COMMAND_FAILED` diagnostic before completion.
+The original parser message is retained in the diagnostic's local-sensitive `message` parameter; native error
+rendering and exit codes remain unchanged. Operation registration observes the final iteration configuration,
+so unchanged watch operations do not produce visible shadow registration or status events.
+
 ## Shadow parity
 
 Rush's shadow session observer records the selected phased action's real cancellation state at completion.
