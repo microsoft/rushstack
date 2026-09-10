@@ -176,6 +176,10 @@ class ExplicitOutputReporter implements IReporter {
   }
 }
 
+function isSeparatedControlValue(value: string | undefined): value is string {
+  return value !== undefined && value.length > 0 && !value.startsWith('-');
+}
+
 function readValue(
   argv: readonly string[],
   index: number,
@@ -195,7 +199,7 @@ function readValue(
   }
 
   const value: string | undefined = argv[index + 1];
-  if (!value || value.startsWith('-')) {
+  if (!isSeparatedControlValue(value)) {
     throw new Error(`${flag} requires a value.`);
   }
   return { value, consumedNext: true };
@@ -218,7 +222,7 @@ export function stripReporterValueControls(
       result.push(argument);
       continue;
     }
-    if (equalsIndex < 0 && index + 1 < argv.length && argv[index + 1] !== '--') {
+    if (equalsIndex < 0 && isSeparatedControlValue(argv[index + 1])) {
       index++;
     }
   }
@@ -245,7 +249,7 @@ function parseReporterControls(
     if (
       tolerateMissingReporterValue &&
       argument === '--reporter' &&
-      (!argv[index + 1] || argv[index + 1].startsWith('-'))
+      !isSeparatedControlValue(argv[index + 1])
     ) {
       continue;
     }
@@ -325,7 +329,8 @@ function resolveLogLevel(
   controls: IParsedReporterControls,
   env: Record<string, string | undefined>,
   includeEnvironment: boolean,
-  useLegacyAliasPrecedence: boolean = false
+  useLegacyAliasPrecedence: boolean = false,
+  defaultLogLevel: ReporterLogLevel = 'normal'
 ): ReporterLogLevel {
   const requestedLevels: ReporterLogLevel[] = [];
   const explicitLogLevel: string | undefined = controls.logLevels[0];
@@ -382,7 +387,7 @@ function resolveLogLevel(
     return normalizedLogLevel;
   }
 
-  return 'normal';
+  return defaultLogLevel;
 }
 
 function isReporterStreamTarget(target: string): target is 'stdout' | 'stderr' {
@@ -574,7 +579,7 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
 
   return {
     reporter: requestedReporter,
-    logLevel: resolveLogLevel(controls, env, true),
+    logLevel: resolveLogLevel(controls, env, true, false, requestedReporter === 'file' ? 'debug' : 'normal'),
     outputs: resolveOutputs(controls.outputs, cwd),
     commandJson,
     enabled: true,
