@@ -770,7 +770,6 @@ export class OperationGraph implements IOperationGraph {
     });
 
     for (const executionRecord of executionRecords.values()) {
-      eventSink?.onOperationRegistered?.(executionRecord.name, executionRecord.silent, executionRecord);
       if (!executionRecord.silent) {
         // Only count non-silent operations
         iterationContext.totalOperations++;
