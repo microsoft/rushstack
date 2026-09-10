@@ -8,7 +8,7 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
-import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError, FileSystem, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
   Terminal,
@@ -391,7 +391,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   #normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     return {
-      cwd: options.cwd || process.cwd(),
+      // Git reports physical paths, including when cwd contains a Windows short name or directory alias.
+      cwd: FileSystem.getRealPath(options.cwd || process.cwd()),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
       reporter: options.reporter,
