@@ -22,7 +22,7 @@ export class LintCommandLineParser extends CommandLineParser {
 
     this.globalTerminal = terminal;
 
-    this._populateActions();
+    this.#populateActions();
   }
 
   protected override async onExecuteAsync(): Promise<void> {
@@ -33,7 +33,7 @@ export class LintCommandLineParser extends CommandLineParser {
     await super.onExecuteAsync();
   }
 
-  private _populateActions(): void {
+  #populateActions(): void {
     const terminal: ITerminal = this.globalTerminal;
     this.addAction(new InitAction(terminal));
     this.addAction(new CheckAction(terminal));

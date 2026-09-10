@@ -52,18 +52,18 @@ export class VersionMismatchFinder {
    *   }
    * }
    */
-  private _allowedAlternativeVersion: Map<string, ReadonlyArray<string>>;
-  private _mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
-  private _projects: VersionMismatchFinderEntity[];
+  #allowedAlternativeVersion: Map<string, ReadonlyArray<string>>;
+  #mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
+  #projects: VersionMismatchFinderEntity[];
 
   public constructor(
     projects: VersionMismatchFinderEntity[],
     allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
   ) {
-    this._projects = projects;
-    this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
-    this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
-    this._analyze();
+    this.#projects = projects;
+    this.#mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
+    this.#allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
+    this.#analyze();
   }
 
   public static rushCheck(
@@ -130,19 +130,19 @@ export class VersionMismatchFinder {
   }
 
   public get mismatches(): ReadonlyMap<string, ReadonlyMap<string, readonly VersionMismatchFinderEntity[]>> {
-    return this._mismatches;
+    return this.#mismatches;
   }
 
   public get numberOfMismatches(): number {
-    return this._mismatches.size;
+    return this.#mismatches.size;
   }
 
   public getMismatches(): string[] {
-    return this._getKeys(this._mismatches);
+    return this.#getKeys(this.#mismatches);
   }
 
   public getVersionsOfMismatch(mismatch: string): string[] | undefined {
-    return this._mismatches.has(mismatch) ? this._getKeys(this._mismatches.get(mismatch)) : undefined;
+    return this.#mismatches.has(mismatch) ? this.#getKeys(this.#mismatches.get(mismatch)) : undefined;
   }
 
   public getConsumersOfMismatch(
@@ -150,7 +150,7 @@ export class VersionMismatchFinder {
     version: string
   ): VersionMismatchFinderEntity[] | undefined {
     const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined =
-      this._mismatches.get(mismatch);
+      this.#mismatches.get(mismatch);
     if (!mismatchedPackage) {
       return undefined;
     }
@@ -228,8 +228,8 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _analyze(): void {
-    this._projects.forEach((project: VersionMismatchFinderEntity) => {
+  #analyze(): void {
+    this.#projects.forEach((project: VersionMismatchFinderEntity) => {
       if (!project.skipRushCheck) {
         // NOTE: We do not consider peer dependencies here.  The purpose of "rush check" is
         // mainly to avoid side-by-side duplicates in the node_modules folder, whereas
@@ -244,16 +244,16 @@ export class VersionMismatchFinder {
 
             const isCyclic: boolean = project.decoupledLocalDependencies.has(dependency.name);
 
-            if (this._isVersionAllowedAlternative(dependency.name, version)) {
+            if (this.#isVersionAllowedAlternative(dependency.name, version)) {
               return;
             }
 
             const name: string = dependency.name + (isCyclic ? ' (cyclic)' : '');
 
             let dependencyVersions: Map<string, VersionMismatchFinderEntity[]> | undefined =
-              this._mismatches.get(name);
+              this.#mismatches.get(name);
             if (!dependencyVersions) {
-              this._mismatches.set(
+              this.#mismatches.set(
                 name,
                 (dependencyVersions = new Map<string, VersionMismatchFinderEntity[]>())
               );
@@ -270,21 +270,21 @@ export class VersionMismatchFinder {
       }
     });
 
-    this._mismatches.forEach((mismatches: Map<string, VersionMismatchFinderEntity[]>, project: string) => {
+    this.#mismatches.forEach((mismatches: Map<string, VersionMismatchFinderEntity[]>, project: string) => {
       if (mismatches.size <= 1) {
-        this._mismatches.delete(project);
+        this.#mismatches.delete(project);
       }
     });
   }
 
-  private _isVersionAllowedAlternative(dependency: string, version: string): boolean {
+  #isVersionAllowedAlternative(dependency: string, version: string): boolean {
     const allowedAlternatives: ReadonlyArray<string> | undefined =
-      this._allowedAlternativeVersion.get(dependency);
+      this.#allowedAlternativeVersion.get(dependency);
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _getKeys(iterable: Map<string, any> | undefined): string[] {
+  #getKeys(iterable: Map<string, any> | undefined): string[] {
     const keys: string[] = [];
     if (iterable) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

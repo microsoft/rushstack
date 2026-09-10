@@ -4,6 +4,7 @@
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 describe('RushCommandLineParser reporter close', () => {
   let originalExitCode: string | number | undefined;
@@ -33,11 +34,10 @@ describe('RushCommandLineParser reporter close', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     await parser.executeAsync(['not-a-rush-command']);
 
-    const terminalProvider: { debugEnabled: boolean; verboseEnabled: boolean } = (
-      parser as unknown as {
-        _terminalProvider: { debugEnabled: boolean; verboseEnabled: boolean };
-      }
-    )._terminalProvider;
+    const terminalProvider = parser.rushSession.terminalProvider;
+    if (!(terminalProvider instanceof ConsoleTerminalProvider)) {
+      throw new Error('Expected the native console terminal provider.');
+    }
     expect(terminalProvider.debugEnabled).toBe(false);
     expect(terminalProvider.verboseEnabled).toBe(false);
   });
@@ -74,27 +74,26 @@ describe('RushCommandLineParser reporter close', () => {
           resolveClose = resolve;
         })
     );
-    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-    Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
-    Object.defineProperty(parser, '_rushOptions', { value: { reporterCloseAsync: closeAsync } });
     const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
       .spyOn(process, 'exit')
       .mockImplementation(() => undefined as never);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     process.exitCode = 0;
-
-    const reportErrorAndSetExitCode: (error: Error) => void = (
-      parser as unknown as {
-        _reportErrorAndSetExitCode(error: Error): void;
-      }
-    )._reportErrorAndSetExitCode.bind(parser);
-    reportErrorAndSetExitCode(new Error('parser failed'));
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('parser failed');
+    });
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    const execution: Promise<boolean> = parser.executeAsync();
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
     expect(exitSpy).not.toHaveBeenCalled();
     process.exitCode = 0;
 
     resolveClose!();
+    await expect(execution).resolves.toBe(false);
     await new Promise<void>((resolve: () => void) => setImmediate(resolve));
 
     expect(exitSpy).toHaveBeenCalledWith(1);
@@ -130,19 +129,17 @@ describe('RushCommandLineParser reporter close', () => {
   });
 
   it('reports close failure without rejecting from parser finalization', async () => {
-    const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-    Object.defineProperty(parser, '_rushOptions', {
-      value: { reporterCloseAsync: async () => Promise.reject(new Error('close failed')) }
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: async () => {
+        throw new Error('close failed');
+      }
     });
     const errorSpy: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
     process.exitCode = 0;
 
-    const closeReporterAsync: () => Promise<void> = (
-      parser as unknown as {
-        _closeReporterAsync(): Promise<void>;
-      }
-    )._closeReporterAsync.bind(parser);
-    await expect(closeReporterAsync()).resolves.toBeUndefined();
+    await expect(parser.executeAsync(['--help'])).resolves.toBe(true);
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith('[reporter] Unable to finalize reporters: close failed\n');

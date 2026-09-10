@@ -244,11 +244,11 @@ export class RigConfig implements IRigConfig {
 
   // Example: /path/to/your-project/node_modules/example-rig/
   // If the value is `undefined`, then getResolvedProfileFolder() has not calculated it yet
-  private _resolvedRigPackageFolder: string | undefined;
+  #resolvedRigPackageFolder: string | undefined;
 
   // Example: /path/to/your-project/node_modules/example-rig/profiles/example-profile
   // If the value is `undefined`, then getResolvedProfileFolder() has not calculated it yet
-  private _resolvedProfileFolder: string | undefined;
+  #resolvedProfileFolder: string | undefined;
 
   private constructor(options: IRigConfigOptions) {
     const { projectFolderPath, rigFound, filePath, rigPackageName, rigProfile = 'default' } = options;
@@ -381,7 +381,7 @@ export class RigConfig implements IRigConfig {
    * {@inheritdoc IRigConfig.getResolvedProfileFolder}
    */
   public getResolvedProfileFolder(): string {
-    if (this._resolvedRigPackageFolder === undefined) {
+    if (this.#resolvedRigPackageFolder === undefined) {
       if (!this.rigFound) {
         throw new Error('Cannot resolve the rig package because no rig was specified for this project');
       }
@@ -393,13 +393,13 @@ export class RigConfig implements IRigConfig {
         resolveOptions
       );
 
-      this._resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
+      this.#resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
     }
 
-    if (this._resolvedProfileFolder === undefined) {
-      this._resolvedProfileFolder = path.join(this._resolvedRigPackageFolder, this.relativeProfileFolderPath);
+    if (this.#resolvedProfileFolder === undefined) {
+      this.#resolvedProfileFolder = path.join(this.#resolvedRigPackageFolder, this.relativeProfileFolderPath);
 
-      if (!fs.existsSync(this._resolvedProfileFolder)) {
+      if (!fs.existsSync(this.#resolvedProfileFolder)) {
         throw new Error(
           `The rig profile "${this.rigProfile}" is not defined` +
             ` by the rig package "${this.rigPackageName}"`
@@ -407,14 +407,14 @@ export class RigConfig implements IRigConfig {
       }
     }
 
-    return this._resolvedProfileFolder;
+    return this.#resolvedProfileFolder;
   }
 
   /**
    * {@inheritdoc IRigConfig.getResolvedProfileFolderAsync}
    */
   public async getResolvedProfileFolderAsync(): Promise<string> {
-    if (this._resolvedRigPackageFolder === undefined) {
+    if (this.#resolvedRigPackageFolder === undefined) {
       if (!this.rigFound) {
         throw new Error('Cannot resolve the rig package because no rig was specified for this project');
       }
@@ -426,13 +426,13 @@ export class RigConfig implements IRigConfig {
         resolveOptions
       );
 
-      this._resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
+      this.#resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
     }
 
-    if (this._resolvedProfileFolder === undefined) {
-      this._resolvedProfileFolder = path.join(this._resolvedRigPackageFolder, this.relativeProfileFolderPath);
+    if (this.#resolvedProfileFolder === undefined) {
+      this.#resolvedProfileFolder = path.join(this.#resolvedRigPackageFolder, this.relativeProfileFolderPath);
 
-      if (!(await Helpers.fsExistsAsync(this._resolvedProfileFolder))) {
+      if (!(await Helpers.fsExistsAsync(this.#resolvedProfileFolder))) {
         throw new Error(
           `The rig profile "${this.rigProfile}" is not defined` +
             ` by the rig package "${this.rigPackageName}"`
@@ -440,7 +440,7 @@ export class RigConfig implements IRigConfig {
       }
     }
 
-    return this._resolvedProfileFolder;
+    return this.#resolvedProfileFolder;
   }
 
   /**

@@ -24,21 +24,21 @@ interface INpmShrinkwrapJson {
 
 export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly isWorkspaceCompatible: boolean;
-  private _shrinkwrapJson: INpmShrinkwrapJson;
+  #shrinkwrapJson: INpmShrinkwrapJson;
 
   private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
     super();
-    this._shrinkwrapJson = shrinkwrapJson;
+    this.#shrinkwrapJson = shrinkwrapJson;
 
     // Normalize the data
-    if (!this._shrinkwrapJson.version) {
-      this._shrinkwrapJson.version = '';
+    if (!this.#shrinkwrapJson.version) {
+      this.#shrinkwrapJson.version = '';
     }
-    if (!this._shrinkwrapJson.name) {
-      this._shrinkwrapJson.name = '';
+    if (!this.#shrinkwrapJson.name) {
+      this.#shrinkwrapJson.name = '';
     }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = {};
+    if (!this.#shrinkwrapJson.dependencies) {
+      this.#shrinkwrapJson.dependencies = {};
     }
 
     // Workspaces not supported in NPM
@@ -68,17 +68,17 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public override getTempProjectNames(): ReadonlyArray<string> {
-    return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
+    return this._getTempProjectNames(this.#shrinkwrapJson.dependencies);
   }
 
   protected override serialize(): string {
-    return JsonFile.stringify(this._shrinkwrapJson);
+    return JsonFile.stringify(this.#shrinkwrapJson);
   }
 
   protected override getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     // First, check under tempProjectName, as this is the first place we look during linking.
     const dependencyJson: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.dependencies,
+      this.#shrinkwrapJson.dependencies,
       dependencyName
     );
 
@@ -102,7 +102,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     let dependencyJson: INpmShrinkwrapDependencyJson | undefined = undefined;
 
     const tempDependency: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.dependencies,
+      this.#shrinkwrapJson.dependencies,
       tempProjectName
     );
     if (tempDependency && tempDependency.dependencies) {

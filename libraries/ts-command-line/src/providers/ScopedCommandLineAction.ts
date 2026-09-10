@@ -26,11 +26,11 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
  * for a ScopedCommandLineAction.
  */
 class InternalScopedCommandLineParser extends CommandLineParser {
-  private _canExecute: boolean;
-  private readonly _internalOptions: IInternalScopedCommandLineParserOptions;
+  #canExecute: boolean;
+  readonly #internalOptions: IInternalScopedCommandLineParserOptions;
 
   public get canExecute(): boolean {
-    return this._canExecute;
+    return this.#canExecute;
   }
 
   public constructor(options: IInternalScopedCommandLineParserOptions) {
@@ -58,21 +58,21 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     };
 
     super(scopedCommandLineParserOptions);
-    this._canExecute = false;
-    this._internalOptions = options;
-    this._internalOptions.onDefineScopedParameters(this);
+    this.#canExecute = false;
+    this.#internalOptions = options;
+    this.#internalOptions.onDefineScopedParameters(this);
   }
 
   public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
     // Since we are in a separate parser, we need to register the parameters using the state
     // from the parent parser.
-    super._registerDefinedParameters(this._internalOptions.registerDefinedParametersState);
+    super._registerDefinedParameters(this.#internalOptions.registerDefinedParametersState);
   }
 
   protected override async onExecuteAsync(): Promise<void> {
     // Only set if we made it this far, which may not be the case if an error occurred or
     // if '--help' was specified.
-    this._canExecute = true;
+    this.#canExecute = true;
   }
 }
 
@@ -98,11 +98,11 @@ class InternalScopedCommandLineParser extends CommandLineParser {
  * @public
  */
 export abstract class ScopedCommandLineAction extends CommandLineAction {
-  private _options: ICommandLineActionOptions;
-  private _scopingParameters: CommandLineParameter[];
-  private _unscopedParserOptions: ICommandLineParserOptions | undefined;
-  private _scopedCommandLineParser: InternalScopedCommandLineParser | undefined;
-  private _subparserState: IRegisterDefinedParametersState | undefined;
+  #options: ICommandLineActionOptions;
+  #scopingParameters: CommandLineParameter[];
+  #unscopedParserOptions: ICommandLineParserOptions | undefined;
+  #scopedCommandLineParser: InternalScopedCommandLineParser | undefined;
+  #subparserState: IRegisterDefinedParametersState | undefined;
 
   /**
    * The required group name to apply to all scoping parameters. At least one parameter
@@ -113,8 +113,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   public constructor(options: ICommandLineActionOptions) {
     super(options);
 
-    this._options = options;
-    this._scopingParameters = [];
+    this.#options = options;
+    this.#scopingParameters = [];
 
     // Consume the remainder of the command-line, which will later be passed the scoped parser.
     // This will also prevent developers from calling this.defineCommandLineRemainder(...) since
@@ -130,8 +130,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * {@inheritDoc CommandLineParameterProvider.parameters}
    */
   public get parameters(): ReadonlyArray<CommandLineParameter> {
-    if (this._scopedCommandLineParser) {
-      return [...super.parameters, ...this._scopedCommandLineParser.parameters];
+    if (this.#scopedCommandLineParser) {
+      return [...super.parameters, ...this.#scopedCommandLineParser.parameters];
     } else {
       return super.parameters;
     }
@@ -149,21 +149,21 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
     // This should never happen because the super method should throw if parameters haven't been registered,
     // but guard against this just in-case.
-    if (this._subparserState === undefined) {
+    if (this.#subparserState === undefined) {
       throw new Error('Parameters have not been registered');
     }
 
-    this._unscopedParserOptions = parserOptions;
+    this.#unscopedParserOptions = parserOptions;
 
     // Generate the scoped parser using the parent parser information. We can only create this after we
     // have parsed the data, since the parameter values are used during construction.
-    this._scopedCommandLineParser = new InternalScopedCommandLineParser({
+    this.#scopedCommandLineParser = new InternalScopedCommandLineParser({
       ...parserOptions,
-      actionOptions: this._options,
+      actionOptions: this.#options,
       aliasAction: data.aliasAction,
       aliasDocumentation: data.aliasDocumentation,
       unscopedActionParameters: this.parameters as CommandLineParameter[],
-      registerDefinedParametersState: this._subparserState,
+      registerDefinedParametersState: this.#subparserState,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });
   }
@@ -173,7 +173,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * @internal
    */
   public override async _executeAsync(): Promise<void> {
-    if (!this._unscopedParserOptions || !this._scopedCommandLineParser) {
+    if (!this.#unscopedParserOptions || !this.#scopedCommandLineParser) {
       throw new Error('The CommandLineAction parameters must be processed before execution.');
     }
     if (!this.remainder) {
@@ -189,7 +189,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
           // argparse sets exit code 2 for invalid arguments
           2,
           // model the message off of the built-in "unrecognized arguments" message
-          `${this.renderUsageText()}\n${this._unscopedParserOptions.toolFilename} ${this.actionName}: ` +
+          `${this.renderUsageText()}\n${this.#unscopedParserOptions.toolFilename} ${this.actionName}: ` +
             `error: Unrecognized arguments: ${this.remainder.values[0]}.\n`
         );
       }
@@ -199,11 +199,11 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     // Call the scoped parser using only the scoped args to handle parsing
-    await this._scopedCommandLineParser.executeWithoutErrorHandlingAsync(scopedArgs);
+    await this.#scopedCommandLineParser.executeWithoutErrorHandlingAsync(scopedArgs);
 
     // Only call execute if the parser reached the execute stage. This may not be true if
     // the parser exited early due to a specified '--help' parameter.
-    if (this._scopedCommandLineParser.canExecute) {
+    if (this.#scopedCommandLineParser.canExecute) {
       await super._executeAsync();
     }
 
@@ -212,7 +212,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
   /** @internal */
   public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
-    if (!this._scopingParameters.length) {
+    if (!this.#scopingParameters.length) {
       throw new Error(
         'No scoping parameters defined. At least one scoping parameter must be defined. ' +
           'Scoping parameters are defined by setting the parameterGroupName to ' +
@@ -228,7 +228,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       ...this._registeredParameterParserKeysByName.keys()
     ]);
 
-    this._subparserState = {
+    this.#subparserState = {
       ...state,
       parentParameterNames: updatedParentParameterNames
     };
@@ -239,17 +239,17 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * @internal
    */
   protected _getScopedCommandLineParser(): CommandLineParser {
-    if (!this._scopedCommandLineParser) {
+    if (!this.#scopedCommandLineParser) {
       throw new Error('The scoped CommandLineParser is only populated after the action is executed.');
     }
-    return this._scopedCommandLineParser;
+    return this.#scopedCommandLineParser;
   }
 
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
     super._defineParameter(parameter);
     if (parameter.parameterGroup === ScopedCommandLineAction.ScopingParameterGroup) {
-      this._scopingParameters.push(parameter);
+      this.#scopingParameters.push(parameter);
     }
   }
 

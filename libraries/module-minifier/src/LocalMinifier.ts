@@ -28,15 +28,15 @@ export interface ILocalMinifierOptions {
  * @public
  */
 export class LocalMinifier implements IModuleMinifier {
-  private readonly _terserOptions: MinifyOptions;
+  readonly #terserOptions: MinifyOptions;
 
-  private readonly _resultCache: Map<string, IModuleMinificationResult>;
-  private readonly _configHash: string;
+  readonly #resultCache: Map<string, IModuleMinificationResult>;
+  readonly #configHash: string;
 
   public constructor(options: ILocalMinifierOptions) {
     const { terserOptions = {} } = options || {};
 
-    this._terserOptions = {
+    this.#terserOptions = {
       ...terserOptions,
       output: terserOptions.output
         ? {
@@ -47,13 +47,13 @@ export class LocalMinifier implements IModuleMinifier {
 
     const { version: terserVersion } = require('terser/package.json');
 
-    this._configHash = createHash('sha256')
+    this.#configHash = createHash('sha256')
       .update(LocalMinifier.name, 'utf8')
       .update(`terser@${terserVersion}`)
       .update(serialize(terserOptions))
       .digest('base64');
 
-    this._resultCache = new Map();
+    this.#resultCache = new Map();
   }
 
   /**
@@ -64,14 +64,14 @@ export class LocalMinifier implements IModuleMinifier {
   public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
     const { hash } = request;
 
-    const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
+    const cached: IModuleMinificationResult | undefined = this.#resultCache.get(hash);
     if (cached) {
       return callback(cached);
     }
 
-    minifySingleFileAsync(request, this._terserOptions)
+    minifySingleFileAsync(request, this.#terserOptions)
       .then((result: IModuleMinificationResult) => {
-        this._resultCache.set(hash, result);
+        this.#resultCache.set(hash, result);
         callback(result);
       })
       .catch((error) => {
@@ -93,7 +93,7 @@ export class LocalMinifier implements IModuleMinifier {
       // Do nothing.
     };
     return {
-      configHash: this._configHash,
+      configHash: this.#configHash,
       disconnectAsync,
       disconnect: disconnectAsync
     };

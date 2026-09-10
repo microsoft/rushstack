@@ -22,14 +22,14 @@ interface IMinimalExperimentsConfigurationJson {
  * decide which version of Rush should be installed/used.
  */
 export class MinimalRushConfiguration {
-  private _rushVersion: string;
-  private _commonRushConfigFolder: string;
-  private _useRushReporter: boolean;
+  #rushVersion: string;
+  #commonRushConfigFolder: string;
+  #useRushReporter: boolean;
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
-    this._rushVersion =
+    this.#rushVersion =
       minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
-    this._commonRushConfigFolder = path.join(
+    this.#commonRushConfigFolder = path.join(
       path.dirname(rushJsonFilename),
       RushConstants.commonFolderName,
       'config',
@@ -37,7 +37,7 @@ export class MinimalRushConfiguration {
     );
 
     const experimentsJsonFilename: string = path.join(
-      this._commonRushConfigFolder,
+      this.#commonRushConfigFolder,
       RushConstants.experimentsFilename
     );
     const experimentsConfiguration: IMinimalExperimentsConfigurationJson | undefined =
@@ -48,7 +48,7 @@ export class MinimalRushConfiguration {
     ) {
       throw new Error(`The "useRushReporter" setting in "${experimentsJsonFilename}" must be true or false.`);
     }
-    this._useRushReporter = experimentsConfiguration?.useRushReporter === true;
+    this.#useRushReporter = experimentsConfiguration?.useRushReporter === true;
   }
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
@@ -73,7 +73,7 @@ export class MinimalRushConfiguration {
    *  a semver style version number like "4.0.0"
    */
   public get rushVersion(): string {
-    return this._rushVersion;
+    return this.#rushVersion;
   }
 
   /**
@@ -85,14 +85,14 @@ export class MinimalRushConfiguration {
    * Example: "C:\MyRepo\common\config\rush"
    */
   public get commonRushConfigFolder(): string {
-    return this._commonRushConfigFolder;
+    return this.#commonRushConfigFolder;
   }
 
   /**
    * Whether the repository explicitly opted in to the experimental Rush reporter frontend.
    */
   public get useRushReporter(): boolean {
-    return this._useRushReporter;
+    return this.#useRushReporter;
   }
 }
 

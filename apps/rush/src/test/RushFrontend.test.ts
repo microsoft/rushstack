@@ -8,7 +8,9 @@ import * as path from 'node:path';
 import * as rushLib from '@microsoft/rush-lib';
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
+import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
+import { LockFile } from '@rushstack/node-core-library';
 import {
   ReporterHost,
   ReporterManager,
@@ -185,6 +187,39 @@ function emitCommandStarted(sink: IReporterEventSink): void {
 }
 
 describe(launchRushFrontendAsync.name, () => {
+  it('retains the frontend version in startup envelopes after native-private parent alignment', async () => {
+    const host: ReporterHost = new ReporterHost({ env: {} });
+    await host.manager.initializeAsync();
+    const emitSpy: jest.SpiedFunction<typeof host.manager.emit> = jest.spyOn(host.manager, 'emit');
+    const markerSpy: jest.SpiedFunction<typeof rushLib._FlagFile.prototype.isValidAsync> = jest
+      .spyOn(rushLib._FlagFile.prototype, 'isValidAsync')
+      .mockResolvedValue(false);
+    const stopBeforeInstall: Error = new Error('stop before package installation');
+    const lockSpy: jest.SpiedFunction<typeof LockFile.acquireAsync> = jest
+      .spyOn(LockFile, 'acquireAsync')
+      .mockRejectedValue(stopBeforeInstall);
+    try {
+      await expect(
+        new RushVersionSelector('5.178.1-native').ensureRushVersionInstalledAsync('5.177.0', undefined, {
+          isManaged: false,
+          reporter: { eventSink: host.getSink(), sessionId: 'startup-session' },
+          reporterCloseAsync: () => host.manager.closeAsync(),
+          reporterEnabled: true,
+          reporterSelectionReason: 'explicit --reporter'
+        })
+      ).rejects.toBe(stopBeforeInstall);
+      expect(emitSpy.mock.calls.map(([event]) => event.source)).toEqual([
+        { packageName: '@microsoft/rush', packageVersion: '5.178.1-native' },
+        { packageName: '@microsoft/rush', packageVersion: '5.178.1-native' }
+      ]);
+    } finally {
+      emitSpy.mockRestore();
+      markerSpy.mockRestore();
+      lockSpy.mockRestore();
+      await host.manager.closeAsync();
+    }
+  });
+
   it.each([
     { reporter: 'file', output: undefined, machineStdout: false },
     { reporter: 'json', output: undefined, machineStdout: true },
@@ -353,7 +388,7 @@ describe(launchRushFrontendAsync.name, () => {
 
   it('keeps an implicit repository opt-in on the legacy path for an incompatible engine', async () => {
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
+    const versionSelector: RushVersionSelector = new RushVersionSelector('5.178.1');
     let receivedArgv: string[] | undefined;
     versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
       void version;
@@ -425,7 +460,7 @@ describe(launchRushFrontendAsync.name, () => {
     }
   ])('preserves the old-engine $name escape path', async ({ reporter, expectedArgv }) => {
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
+    const versionSelector: RushVersionSelector = new RushVersionSelector('5.178.1');
     let receivedArgv: string[] | undefined;
     versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
       void version;
@@ -767,11 +802,6 @@ describe(launchRushFrontendAsync.name, () => {
           void version;
           void selectedRushLib;
           emitCommandStarted(launchOptions.reporter.eventSink);
-          const parser: RushCommandLineParser = Object.create(RushCommandLineParser.prototype);
-          Object.defineProperty(parser, '_debugParameter', { value: { value: false } });
-          Object.defineProperty(parser, '_rushOptions', {
-            value: { reporterCloseAsync: launchOptions.reporterCloseAsync }
-          });
           process.exitCode = 1;
 
           return new Promise<void>((resolve: () => void) => {
@@ -781,11 +811,14 @@ describe(launchRushFrontendAsync.name, () => {
               return undefined as never;
             });
             jest.spyOn(console, 'error').mockImplementation(() => undefined);
-            (
-              parser as unknown as {
-                _reportErrorAndSetExitCode(error: Error): void;
-              }
-            )._reportErrorAndSetExitCode(new Error('parser failed'));
+            jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+              throw new Error('parser failed');
+            });
+            const parser: RushCommandLineParser = new RushCommandLineParser({
+              cwd: directory,
+              reporterCloseAsync: launchOptions.reporterCloseAsync
+            });
+            void parser.executeAsync();
           });
         },
         processLifecycle: createTestProcessLifecycle()

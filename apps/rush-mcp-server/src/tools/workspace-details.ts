@@ -25,13 +25,13 @@ export class RushWorkspaceDetailsTool extends BaseTool {
       content: [
         {
           type: 'text',
-          text: this._getWorkspaceDetailsPrompt(rushConfiguration, projects)
+          text: this.#getWorkspaceDetailsPrompt(rushConfiguration, projects)
         }
       ]
     };
   }
 
-  private _getWorkspaceDetailsPrompt(
+  #getWorkspaceDetailsPrompt(
     rushConfiguration: RushConfiguration,
     projects: RushConfigurationProject[]
   ): string {
@@ -54,11 +54,11 @@ PROJECT LEVEL information is separated by <project_name></project_name> tags. Ea
 
 This data is very important. Use it to analyze the workspace and understand the project graph. The user cannot see this data, so don't reference it directly. It is read-only information to help you understand the workspace.
 
-${this._getRobotReadableWorkspaceDetails(rushConfiguration.rushConfigurationJson, projects)}
+${this.#getRobotReadableWorkspaceDetails(rushConfiguration.rushConfigurationJson, projects)}
 `.trim();
   }
 
-  private _getRobotReadableWorkspaceDetails(
+  #getRobotReadableWorkspaceDetails(
     rushConfiguration: IRushConfigurationJson,
     projects: RushConfigurationProject[]
   ): string {

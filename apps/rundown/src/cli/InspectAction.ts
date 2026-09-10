@@ -7,7 +7,7 @@ import { BaseReportAction } from './BaseReportAction';
 import { Rundown } from '../Rundown';
 
 export class InspectAction extends BaseReportAction {
-  private readonly _traceParameter: CommandLineFlagParameter;
+  readonly #traceParameter: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -18,7 +18,7 @@ export class InspectAction extends BaseReportAction {
         ' to inspect performance regressions.'
     });
 
-    this._traceParameter = this.defineFlagParameter({
+    this.#traceParameter = this.defineFlagParameter({
       parameterLongName: '--trace-imports',
       parameterShortName: '-t',
       description: 'Reports the call chain for each module path, showing how it was imported'
@@ -33,6 +33,6 @@ export class InspectAction extends BaseReportAction {
       this.quietParameter.value,
       this.ignoreExitCodeParameter.value
     );
-    rundown.writeInspectReport(this._traceParameter.value);
+    rundown.writeInspectReport(this.#traceParameter.value);
   }
 }

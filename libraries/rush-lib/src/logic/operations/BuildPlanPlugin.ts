@@ -34,14 +34,14 @@ interface ICobuildPlan {
 }
 
 export class BuildPlanPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
       graph.hooks.configureIteration.tap(PLUGIN_NAME, (currentStates, lastStates, iterationOptions) => {

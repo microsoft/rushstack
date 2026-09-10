@@ -17,12 +17,12 @@ import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export class RushVersionSelector {
-  private _rushGlobalFolder: _RushGlobalFolder;
-  private _currentPackageVersion: string;
+  #rushGlobalFolder: _RushGlobalFolder;
+  #currentPackageVersion: string;
 
   public constructor(currentPackageVersion: string) {
-    this._rushGlobalFolder = new _RushGlobalFolder();
-    this._currentPackageVersion = currentPackageVersion;
+    this.#rushGlobalFolder = new _RushGlobalFolder();
+    this.#currentPackageVersion = currentPackageVersion;
   }
 
   public async ensureRushVersionInstalledAsync(
@@ -31,7 +31,7 @@ export class RushVersionSelector {
     executeOptions: IRushFrontendLaunchOptions
   ): Promise<void> {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
-    const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
+    const expectedRushPath: string = path.join(this.#rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
 
     const installMarker: _FlagFile = new _FlagFile(expectedRushPath, 'last-install', {
       node: process.versions.node
@@ -40,19 +40,19 @@ export class RushVersionSelector {
     let installIsValid: boolean = await installMarker.isValidAsync();
     if (!installIsValid) {
       // Need to install Rush
-      this._reportStartupMessage(
+      this.#reportStartupMessage(
         executeOptions,
         `Rush version ${version} is not currently installed. Installing...`
       );
 
       const resourceName: string = `rush-${version}`;
 
-      this._reportStartupMessage(executeOptions, `Trying to acquire lock for ${resourceName}`);
+      this.#reportStartupMessage(executeOptions, `Trying to acquire lock for ${resourceName}`);
 
       const lock: LockFile = await LockFile.acquireAsync(expectedRushPath, resourceName);
       installIsValid = await installMarker.isValidAsync();
       if (installIsValid) {
-        this._reportStartupMessage(executeOptions, 'Another process performed the installation.');
+        this.#reportStartupMessage(executeOptions, 'Another process performed the installation.');
       } else {
         await Utilities.installPackageInDirectoryAsync({
           directory: expectedRushPath,
@@ -73,7 +73,7 @@ export class RushVersionSelector {
           filterNpmIncompatibleProperties: true
         });
 
-        this._reportStartupMessage(
+        this.#reportStartupMessage(
           executeOptions,
           `Successfully installed Rush version ${version} in ${expectedRushPath}.`
         );
@@ -105,16 +105,16 @@ export class RushVersionSelector {
       });
       const rushCliEntrypoint: typeof import('@microsoft/rush-lib') = require(rushLibEntrypoint);
       // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
-      RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
+      RushCommandSelector.execute(this.#currentPackageVersion, rushCliEntrypoint, executeOptions);
     }
   }
 
-  private _reportStartupMessage(options: IRushFrontendLaunchOptions, text: string): void {
+  #reportStartupMessage(options: IRushFrontendLaunchOptions, text: string): void {
     if (options.reporterEnabled) {
       options.reporter.eventSink.emit({
         protocolVersion: REPORTER_PROTOCOL_VERSION,
         sessionId: options.reporter.sessionId,
-        source: { packageName: '@microsoft/rush', packageVersion: this._currentPackageVersion },
+        source: { packageName: '@microsoft/rush', packageVersion: this.#currentPackageVersion },
         privacy: 'public',
         type: 'activityChanged',
         payload: { kind: 'version-selection', text }

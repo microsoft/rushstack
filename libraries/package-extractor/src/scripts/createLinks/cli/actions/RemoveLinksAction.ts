@@ -28,7 +28,7 @@ export async function removeLinksAsync(
 }
 
 export class RemoveLinksAction extends CommandLineAction {
-  private _terminal: ITerminal;
+  #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -37,13 +37,13 @@ export class RemoveLinksAction extends CommandLineAction {
       documentation: 'This action removes the symlinks created by the "create" action.'
     });
 
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
     const extractorMetadataObject: IExtractorMetadataJson = await getExtractorMetadataAsync();
 
-    this._terminal.writeLine(`Removing links for extraction at path "${TARGET_ROOT_FOLDER}"`);
-    await removeLinksAsync(this._terminal, TARGET_ROOT_FOLDER, extractorMetadataObject);
+    this.#terminal.writeLine(`Removing links for extraction at path "${TARGET_ROOT_FOLDER}"`);
+    await removeLinksAsync(this.#terminal, TARGET_ROOT_FOLDER, extractorMetadataObject);
   }
 }

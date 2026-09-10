@@ -18,10 +18,10 @@ const ANSI_ESCAPE_HIDE_CURSOR: string = '\u001B[?25h';
 export class KeyboardLoop {
   protected stdin: NodeJS.ReadStream;
   protected stderr: NodeJS.WriteStream;
-  private _readlineInterface: readline.Interface | undefined;
-  private _resolvePromise: (() => void) | undefined;
-  private _rejectPromise: ((error: Error) => void) | undefined;
-  private _cursorHidden: boolean = false;
+  #readlineInterface: readline.Interface | undefined;
+  #resolvePromise: (() => void) | undefined;
+  #rejectPromise: ((error: Error) => void) | undefined;
+  #cursorHidden: boolean = false;
 
   public constructor() {
     this.stdin = process.stdin;
@@ -29,24 +29,24 @@ export class KeyboardLoop {
   }
 
   public get capturedInput(): boolean {
-    return this._readlineInterface !== undefined;
+    return this.#readlineInterface !== undefined;
   }
 
-  private _captureInput(): void {
-    if (this._readlineInterface) {
+  #captureInput(): void {
+    if (this.#readlineInterface) {
       return;
     }
 
-    this._checkForTTY();
+    this.#checkForTTY();
 
-    this._readlineInterface = readline.createInterface({ input: this.stdin });
+    this.#readlineInterface = readline.createInterface({ input: this.stdin });
 
     readline.emitKeypressEvents(process.stdin);
     this.stdin.setRawMode(true);
-    this.stdin.addListener('keypress', this._onKeypress);
+    this.stdin.addListener('keypress', this.#onKeypress);
   }
 
-  private _checkForTTY(): void {
+  #checkForTTY(): void {
     // Typescript thinks setRawMode always extists, but we're testing that assumption here.
     if (this.stdin.isTTY && (this.stdin as Partial<NodeJS.ReadStream>).setRawMode) {
       return;
@@ -83,63 +83,63 @@ export class KeyboardLoop {
     throw new AlreadyReportedError();
   }
 
-  private _uncaptureInput(): void {
-    if (!this._readlineInterface) {
+  #uncaptureInput(): void {
+    if (!this.#readlineInterface) {
       return;
     }
 
-    this.stdin.removeListener('keypress', this._onKeypress);
+    this.stdin.removeListener('keypress', this.#onKeypress);
     this.stdin.setRawMode(false);
-    this._readlineInterface.close();
-    this._readlineInterface = undefined;
+    this.#readlineInterface.close();
+    this.#readlineInterface = undefined;
   }
 
   protected hideCursor(): void {
-    if (this._cursorHidden) {
+    if (this.#cursorHidden) {
       return;
     }
-    this._cursorHidden = true;
+    this.#cursorHidden = true;
     this.stderr.write(ANSI_ESCAPE_SHOW_CURSOR);
   }
 
   protected unhideCursor(): void {
-    if (!this._cursorHidden) {
+    if (!this.#cursorHidden) {
       return;
     }
-    this._cursorHidden = false;
+    this.#cursorHidden = false;
     this.stderr.write(ANSI_ESCAPE_HIDE_CURSOR);
   }
 
   public async startAsync(): Promise<void> {
     try {
-      this._captureInput();
+      this.#captureInput();
       this.onStart();
       await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-        this._resolvePromise = resolve;
-        this._rejectPromise = reject;
+        this.#resolvePromise = resolve;
+        this.#rejectPromise = reject;
       });
     } finally {
-      this._uncaptureInput();
+      this.#uncaptureInput();
       this.unhideCursor();
     }
   }
 
   protected resolveAsync(): void {
-    if (!this._resolvePromise) {
+    if (!this.#resolvePromise) {
       return;
     }
-    this._resolvePromise();
-    this._resolvePromise = undefined;
-    this._rejectPromise = undefined;
+    this.#resolvePromise();
+    this.#resolvePromise = undefined;
+    this.#rejectPromise = undefined;
   }
 
   protected rejectAsync(error: Error): void {
-    if (!this._rejectPromise) {
+    if (!this.#rejectPromise) {
       return;
     }
-    this._rejectPromise(error);
-    this._resolvePromise = undefined;
-    this._rejectPromise = undefined;
+    this.#rejectPromise(error);
+    this.#resolvePromise = undefined;
+    this.#rejectPromise = undefined;
   }
 
   /** @virtual */
@@ -148,7 +148,7 @@ export class KeyboardLoop {
   /** @virtual */
   protected onKeypress(character: string, key: readline.Key): void {}
 
-  private _onKeypress = (character: string, key: readline.Key): void => {
+  #onKeypress = (character: string, key: readline.Key): void => {
     if (key.name === 'c' && key.ctrl && !key.meta && !key.shift) {
       // Intercept CTRL+C
       process.kill(process.pid, 'SIGINT');

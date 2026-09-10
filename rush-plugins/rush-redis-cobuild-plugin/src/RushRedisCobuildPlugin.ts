@@ -24,16 +24,16 @@ export type IRushRedisCobuildPluginOptions = IRedisCobuildLockProviderOptions;
 export class RushRedisCobuildPlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
-  private _options: IRushRedisCobuildPluginOptions;
+  #options: IRushRedisCobuildPluginOptions;
 
   public constructor(options: IRushRedisCobuildPluginOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
       rushSession.registerCobuildLockProviderFactory('redis', (): RedisCobuildLockProvider => {
-        const options: IRushRedisCobuildPluginOptions = this._options;
+        const options: IRushRedisCobuildPluginOptions = this.#options;
         return new RedisCobuildLockProviderModule.RedisCobuildLockProvider(options, rushSession);
       });
     });
