@@ -151,7 +151,8 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   if (reporterHost.selection.reporterControlsOwnedByFrontend) {
     process.argv = stripReporterValueControls(
       process.argv,
-      new Set(reporterHost.selection.reporterValueFlagsToStrip)
+      new Set(reporterHost.selection.reporterValueFlagsToStrip),
+      new Set(reporterHost.selection.reporterFlagsToStrip)
     );
   }
   const reporterCloseAsync: () => Promise<void> = () =>
