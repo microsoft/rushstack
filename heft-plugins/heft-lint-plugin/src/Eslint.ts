@@ -83,18 +83,18 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
 ]);
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult> {
-  private readonly _eslintPackage: typeof TEslint | typeof TEslintLegacy;
-  private readonly _eslintPackageVersion: semver.SemVer;
-  private readonly _linter: TEslint.ESLint | TEslintLegacy.ESLint;
-  private readonly _eslintTimings: Map<string, number> = new Map();
-  private readonly _currentFixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
+  readonly #eslintPackage: typeof TEslint | typeof TEslintLegacy;
+  readonly #eslintPackageVersion: semver.SemVer;
+  readonly #linter: TEslint.ESLint | TEslintLegacy.ESLint;
+  readonly #eslintTimings: Map<string, number> = new Map();
+  readonly #currentFixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
     [];
-  private readonly _fixMessagesByResult: Map<
+  readonly #fixMessagesByResult: Map<
     TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[]
   > = new Map();
-  private readonly _sarifLogPath: string | undefined;
-  private readonly _configHashMap: WeakMap<object, string> = new WeakMap();
+  readonly #sarifLogPath: string | undefined;
+  readonly #configHashMap: WeakMap<object, string> = new WeakMap();
 
   protected constructor(options: IEslintOptions) {
     super('eslint', options);
@@ -108,16 +108,16 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       fix,
       sarifLogPath
     } = options;
-    this._eslintPackage = eslintPackage;
-    this._eslintPackageVersion = new semver.SemVer(eslintPackage.ESLint.version);
+    this.#eslintPackage = eslintPackage;
+    this.#eslintPackageVersion = new semver.SemVer(eslintPackage.ESLint.version);
     const linterConfigFileName: string = path.basename(linterConfigFilePath);
-    if (this._eslintPackageVersion.major < 9 && !ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)) {
+    if (this.#eslintPackageVersion.major < 9 && !ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)) {
       throw new Error(
         `You must use a ${LEGACY_ESLINTRC_JS_FILENAME} or a ${LEGACY_ESLINTRC_CJS_FILENAME} file with ESLint ` +
           `8 or older. The provided config file is "${linterConfigFilePath}".`
       );
     } else if (
-      this._eslintPackageVersion.major >= 9 &&
+      this.#eslintPackageVersion.major >= 9 &&
       ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)
     ) {
       throw new Error(
@@ -127,7 +127,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       );
     }
 
-    this._sarifLogPath = sarifLogPath;
+    this.#sarifLogPath = sarifLogPath;
 
     let overrideConfig: TEslint.Linter.Config | TEslintLegacy.Linter.Config | undefined;
     let fixFn: Exclude<TEslint.ESLint.Options['fix'] | TEslintLegacy.ESLint.Options['fix'], boolean>;
@@ -137,10 +137,10 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // and subsequently mapped to the results in the ESLint.lintFileAsync method below. After the messages
       // are mapped, the array will be cleared so that it is ready for the next fix operation.
       fixFn = (message: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage) => {
-        this._currentFixMessages.push(message);
+        this.#currentFixMessages.push(message);
         return true;
       };
-    } else if (this._eslintPackageVersion.major <= 8) {
+    } else if (this.#eslintPackageVersion.major <= 8) {
       // The @typescript-eslint/parser package allows providing an existing TypeScript program to avoid needing
       // to reparse. However, fixers in ESLint run in multiple passes against the underlying code until the
       // fix fully succeeds. This conflicts with providing an existing program as the code no longer maps to
@@ -161,7 +161,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         // ESlint's merge logic for parserOptions is a "replace", so we need to set this again
         tsconfigRootDir: buildFolderPath
       };
-      if (this._eslintPackageVersion.minor < 28) {
+      if (this.#eslintPackageVersion.minor < 28) {
         overrideParserOptions = Object.defineProperties(overrideParserOptions, {
           // Support for `toJSON` within languageOptions was added in ESLint 9.28.0
           // This hack tells ESLint's `languageOptionsToJSON` function to replace the entire `parserOptions` object with `@rushstack/heft-lint-plugin@${version}`
@@ -186,7 +186,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       overrideConfig = eslintOverrideConfig;
     }
 
-    this._linter = new eslintPackage.ESLint({
+    this.#linter = new eslintPackage.ESLint({
       cwd: buildFolderPath,
       overrideConfigFile: linterConfigFilePath,
       // Override config takes precedence over overrideConfigFile
@@ -195,7 +195,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       fix: fixFn as any
     });
-    this._eslintTimings = eslintTimings;
+    this.#eslintTimings = eslintTimings;
   }
 
   public static async resolveEslintConfigFilePathAsync(
@@ -236,7 +236,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   public override printVersionHeader(): void {
-    const { version, major } = this._eslintPackageVersion;
+    const { version, major } = this.#eslintPackageVersion;
     this._terminal.writeLine(`Using ESLint version ${version}`);
 
     if (major < 7) {
@@ -251,11 +251,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   protected override async getCacheVersionAsync(): Promise<string> {
-    return `${this._eslintPackageVersion.version}_${process.version}`;
+    return `${this.#eslintPackageVersion.version}_${process.version}`;
   }
 
   protected override async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
-    const sourceFileEslintConfiguration: TEslint.Linter.Config = await this._linter.calculateConfigForFile(
+    const sourceFileEslintConfiguration: TEslint.Linter.Config = await this.#linter.calculateConfigForFile(
       sourceFile.fileName
     );
 
@@ -275,15 +275,15 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     sourceFile: TTypescript.SourceFile
   ): Promise<TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[]> {
     const lintResults: TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[] =
-      await this._linter.lintText(sourceFile.text, { filePath: sourceFile.fileName });
+      await this.#linter.lintText(sourceFile.text, { filePath: sourceFile.fileName });
 
     // Map the fix messages to the results. This API should only return one result per file, so we can be sure
     // that the fix messages belong to the returned result. If we somehow receive multiple results, we will
     // drop the messages on the floor, but since they are only used for logging, this should not be a problem.
     const fixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
-      this._currentFixMessages.splice(0);
+      this.#currentFixMessages.splice(0);
     if (lintResults.length === 1) {
-      this._fixMessagesByResult.set(lintResults[0], fixMessages);
+      this.#fixMessagesByResult.set(lintResults[0], fixMessages);
     }
 
     this._fixesPossible ||=
@@ -297,7 +297,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
   protected override async lintingFinishedAsync(lintResults: TEslint.ESLint.LintResult[]): Promise<void> {
     let omittedRuleCount: number = 0;
-    const timings: [string, number][] = Array.from(this._eslintTimings).sort(
+    const timings: [string, number][] = Array.from(this.#eslintTimings).sort(
       (x: [string, number], y: [string, number]) => {
         return y[1] - x[1];
       }
@@ -314,25 +314,25 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       this._terminal.writeVerboseLine(`${omittedRuleCount} rules took 0ms`);
     }
 
-    if (this._fix && this._fixMessagesByResult.size > 0) {
-      await this._eslintPackage.ESLint.outputFixes(lintResults);
+    if (this._fix && this.#fixMessagesByResult.size > 0) {
+      await this.#eslintPackage.ESLint.outputFixes(lintResults);
     }
 
     for (const lintResult of lintResults) {
       // Report linter fixes to the logger. These will only be returned when the underlying failure was fixed
       const fixMessages: TEslint.Linter.LintMessage[] | TEslintLegacy.Linter.LintMessage[] | undefined =
-        this._fixMessagesByResult.get(lintResult);
+        this.#fixMessagesByResult.get(lintResult);
       if (fixMessages) {
         for (const fixMessage of fixMessages) {
           const formattedMessage: string = `[FIXED] ${getFormattedErrorMessage(fixMessage)}`;
-          const errorObject: FileError = this._getLintFileError(lintResult, fixMessage, formattedMessage);
+          const errorObject: FileError = this.#getLintFileError(lintResult, fixMessage, formattedMessage);
           this._scopedLogger.emitWarning(errorObject);
         }
       }
 
       // Report linter errors and warnings to the logger
       for (const lintMessage of lintResult.messages) {
-        const errorObject: FileError = this._getLintFileError(lintResult, lintMessage);
+        const errorObject: FileError = this.#getLintFileError(lintResult, lintMessage);
         switch (lintMessage.severity) {
           case EslintMessageSeverity.error: {
             this._scopedLogger.emitError(errorObject);
@@ -347,15 +347,15 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       }
     }
 
-    const sarifLogPath: string | undefined = this._sarifLogPath;
+    const sarifLogPath: string | undefined = this.#sarifLogPath;
     if (sarifLogPath) {
       const rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'] =
-        this._linter.getRulesMetaForResults(lintResults);
+        this.#linter.getRulesMetaForResults(lintResults);
       const { formatEslintResultsAsSARIF } = await import('./SarifFormatter');
       const sarifString: string = JSON.stringify(
         formatEslintResultsAsSARIF(lintResults, rulesMeta, {
           ignoreSuppressed: false,
-          eslintVersion: this._eslintPackage.ESLint.version,
+          eslintVersion: this.#eslintPackage.ESLint.version,
           buildFolderPath: this._buildFolderPath
         }),
         undefined,
@@ -367,7 +367,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   protected override async isFileExcludedAsync(filePath: string): Promise<boolean> {
-    return await this._linter.isPathIgnored(filePath);
+    return await this.#linter.isPathIgnored(filePath);
   }
 
   protected override hasLintFailures(
@@ -380,7 +380,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     });
   }
 
-  private _getLintFileError(
+  #getLintFileError(
     lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage,
     message?: string

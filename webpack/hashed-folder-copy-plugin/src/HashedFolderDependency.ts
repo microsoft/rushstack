@@ -84,7 +84,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
     public /* readonly - except for the `deserialize` function */ requireFolderOptions: IRequireFolderOptions;
     public /* readonly - except for the `deserialize` function */ range: Range;
     public expression: string | undefined;
-    private _hashUpdate: string | undefined;
+    #hashUpdate: string | undefined;
 
     public constructor(
       requireFolderOptions: IRequireFolderOptions,
@@ -103,12 +103,12 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
     }
 
     public override updateHash(hash: WebpackHash, context: UpdateHashContextDependency): void {
-      if (!this._hashUpdate) {
+      if (!this.#hashUpdate) {
         const requireFolderOptionsStr: string = JSON.stringify(this.requireFolderOptions);
-        this._hashUpdate = `${requireFolderOptionsStr}|${this.range}`;
+        this.#hashUpdate = `${requireFolderOptionsStr}|${this.range}`;
       }
 
-      hash.update(this._hashUpdate);
+      hash.update(this.#hashUpdate);
     }
 
     public override getModuleEvaluationSideEffectsState(moduleGraph: webpack.ModuleGraph): ConnectionState {
@@ -134,11 +134,11 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
       globFs: glob.FileSystemAdapter
     ): Promise<void> {
       if (!this.expression) {
-        this.expression = await this._collectAssetsAndGetExpressionAsync(compilation, globFs);
+        this.expression = await this.#collectAssetsAndGetExpressionAsync(compilation, globFs);
       }
     }
 
-    private async _collectAssetsAndGetExpressionAsync(
+    async #collectAssetsAndGetExpressionAsync(
       compilation: webpack.Compilation,
       globFs: glob.FileSystemAdapter
     ): Promise<string> {
