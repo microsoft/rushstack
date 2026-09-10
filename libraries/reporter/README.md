@@ -71,6 +71,16 @@ removed.
 Human diagnostic source labels that duplicate an explicitly secret parameter are also redacted. Unrelated
 local-sensitive tool names and locations remain available in local human output.
 
+## Shadow lifecycle compatibility
+
+Error correlation uses external weak metadata, so frozen and non-extensible errors retain their original
+identity, cause, and properties. Correlation remains visible across bridge instances without keeping errors alive.
+
+Rush command-line parse failures emit one session-scoped `RUSH_COMMAND_FAILED` diagnostic before completion.
+The original parser message is retained in the diagnostic's local-sensitive `message` parameter; native error
+rendering and exit codes remain unchanged. Operation registration observes the final iteration configuration,
+so unchanged watch operations do not produce visible shadow registration or status events.
+
 ## Links
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/reporter/CHANGELOG.md) - Find out

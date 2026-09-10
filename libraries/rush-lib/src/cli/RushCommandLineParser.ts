@@ -403,6 +403,16 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
+  public override async executeWithoutErrorHandlingAsync(args?: string[]): Promise<void> {
+    try {
+      await super.executeWithoutErrorHandlingAsync(args);
+    } catch (error) {
+      // Capture the original parse error before the base executeAsync renders it and returns false.
+      this.#emitReporterFailureDiagnostic(error as Error, !this.#commandLifecycleEmitter);
+      throw error;
+    }
+  }
+
   protected override async onExecuteAsync(): Promise<void> {
     if (this.#rushOptions.engine) {
       return;
@@ -700,7 +710,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  #emitReporterFailureDiagnostic(error: Error): void {
+  #emitReporterFailureDiagnostic(error: Error, includeMessage: boolean = false): void {
     this.#startReporterSession();
     const emitter: LifecycleEmitter | undefined =
       this.#commandLifecycleEmitter ?? this.#sessionLifecycleEmitter;
@@ -711,7 +721,15 @@ export class RushCommandLineParser extends CommandLineParser {
           commandName: {
             value: this.selectedAction?.actionName ?? 'unknown',
             privacy: 'public'
-          }
+          },
+          ...(includeMessage
+            ? {
+                message: {
+                  value: error instanceof Error ? error.message : String(error),
+                  privacy: 'local-sensitive' as const
+                }
+              }
+            : {})
         }
       });
       emitter.emitDiagnostic(diagnostic);
