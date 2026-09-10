@@ -8,10 +8,10 @@ type IntermediateFileSystem = Compiler['intermediateFileSystem'];
 
 const PLUGIN_NAME: 'MemFSPlugin' = 'MemFSPlugin';
 export class MemFSPlugin implements WebpackPluginInstance {
-  private readonly _memfs: Volume;
+  readonly #memfs: Volume;
 
   public constructor(memfs: Volume) {
-    this._memfs = memfs;
+    this.#memfs = memfs;
   }
 
   public apply(compiler: Compiler): void {
@@ -19,9 +19,9 @@ export class MemFSPlugin implements WebpackPluginInstance {
     if (!nodeFileSystem) {
       throw new Error('MemFSPlugin requires compiler.inputFileSystem to be defined');
     }
-    compiler.inputFileSystem = this._memfs as unknown as InputFileSystem;
-    compiler.intermediateFileSystem = this._memfs as unknown as IntermediateFileSystem;
-    compiler.outputFileSystem = this._memfs as unknown as OutputFileSystem;
+    compiler.inputFileSystem = this.#memfs as unknown as InputFileSystem;
+    compiler.intermediateFileSystem = this.#memfs as unknown as IntermediateFileSystem;
+    compiler.outputFileSystem = this.#memfs as unknown as OutputFileSystem;
     compiler.resolverFactory.hooks.resolveOptions.for('loader').tap(
       {
         stage: 10,

@@ -42,7 +42,8 @@
   "scripts": {
     "build": "heft test --clean",
     "start": "heft test --clean --watch",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "dependencies": {
     "@rushstack/ts-command-line": "workspace:*",
