@@ -52,8 +52,8 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
   public readonly watcherOptions: WatchOptions;
   public watcher: Watchpack | undefined;
 
-  private readonly _onChange: () => void;
-  private _state: IWatchState | undefined;
+  readonly #onChange: () => void;
+  #state: IWatchState | undefined;
 
   public constructor(inputFileSystem: InputFileSystem, onChange: () => void) {
     this.inputFileSystem = inputFileSystem;
@@ -61,11 +61,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
       aggregateTimeout: 0
     };
     this.watcher = new Watchpack(this.watcherOptions);
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public flush(): boolean {
-    const state: IWatchState | undefined = this._state;
+    const state: IWatchState | undefined = this.#state;
 
     if (!state) {
       return false;
@@ -91,9 +91,9 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     }
 
     if (changes.size > 0 || removals.size > 0) {
-      this._purge(removals, changes);
+      this.#purge(removals, changes);
 
-      const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
+      const { fileTimeInfoEntries, contextTimeInfoEntries } = this.#fetchTimeInfo();
 
       callback(null, fileTimeInfoEntries, contextTimeInfoEntries, changes, removals);
 
@@ -121,7 +121,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     const changes: Set<string> = new Set();
     const removals: Set<string> = new Set();
 
-    this._state = {
+    this.#state = {
       changes,
       removals,
 
@@ -138,7 +138,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         removals.add(removal);
       }
 
-      this._onChange();
+      this.#onChange();
     });
 
     this.watcher.watch({
@@ -167,8 +167,8 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
       getInfo: () => {
         const newRemovals: Set<string> | undefined = this.watcher?.aggregatedRemovals;
         const newChanges: Set<string> | undefined = this.watcher?.aggregatedChanges;
-        this._purge(newRemovals, newChanges);
-        const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
+        this.#purge(newRemovals, newChanges);
+        const { fileTimeInfoEntries, contextTimeInfoEntries } = this.#fetchTimeInfo();
         return {
           changes: newChanges!,
           removals: newRemovals!,
@@ -177,24 +177,24 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         };
       },
       getContextTimeInfoEntries: () => {
-        const { contextTimeInfoEntries } = this._fetchTimeInfo();
+        const { contextTimeInfoEntries } = this.#fetchTimeInfo();
         return contextTimeInfoEntries;
       },
       getFileTimeInfoEntries: () => {
-        const { fileTimeInfoEntries } = this._fetchTimeInfo();
+        const { fileTimeInfoEntries } = this.#fetchTimeInfo();
         return fileTimeInfoEntries;
       }
     };
   }
 
-  private _fetchTimeInfo(): ITimeInfoEntries {
+  #fetchTimeInfo(): ITimeInfoEntries {
     const fileTimeInfoEntries: IRawFileSystemMap = new Map();
     const contextTimeInfoEntries: IRawFileSystemMap = new Map();
     this.watcher?.collectTimeInfoEntries(fileTimeInfoEntries, contextTimeInfoEntries);
     return { fileTimeInfoEntries, contextTimeInfoEntries };
   }
 
-  private _purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
+  #purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
     const fs: InputFileSystem = this.inputFileSystem;
     if (fs.purge) {
       if (removals) {
@@ -213,10 +213,10 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
 export class OverrideNodeWatchFSPlugin implements RspackPluginInstance {
   public readonly fileSystems: Set<DeferredWatchFileSystem> = new Set();
-  private readonly _onChange: () => void;
+  readonly #onChange: () => void;
 
   public constructor(onChange: () => void) {
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public apply(compiler: Compiler): void {
@@ -227,7 +227,7 @@ export class OverrideNodeWatchFSPlugin implements RspackPluginInstance {
 
     const watchFileSystem: DeferredWatchFileSystem = new DeferredWatchFileSystem(
       inputFileSystem,
-      this._onChange
+      this.#onChange
     );
     this.fileSystems.add(watchFileSystem);
     compiler.watchFileSystem = watchFileSystem;
