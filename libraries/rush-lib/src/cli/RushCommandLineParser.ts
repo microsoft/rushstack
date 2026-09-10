@@ -80,7 +80,8 @@ import {
   _getRushSessionLifecycleEmitter,
   _getRushSessionReporterSourceVersion,
   _isRushSessionOperationStreamEnabled,
-  _isRushSessionErrorRepresented
+  _isRushSessionErrorRepresented,
+  _setRushSessionExitStatusOptions
 } from '../pluginFramework/RushSession';
 
 /**
@@ -392,6 +393,16 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
+  public override async executeWithoutErrorHandlingAsync(args?: string[]): Promise<void> {
+    try {
+      await super.executeWithoutErrorHandlingAsync(args);
+    } catch (error) {
+      // Capture the original parse error before the base executeAsync renders it and returns false.
+      this._emitReporterFailureDiagnostic(error as Error, !this.#commandLifecycleEmitter);
+      throw error;
+    }
+  }
+
   protected override async onExecuteAsync(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
@@ -682,7 +693,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _emitReporterFailureDiagnostic(error: Error): void {
+  private _emitReporterFailureDiagnostic(error: Error, includeMessage: boolean = false): void {
     this._startReporterSession();
     const emitter: LifecycleEmitter | undefined =
       this.#commandLifecycleEmitter ?? this.#sessionLifecycleEmitter;
@@ -693,7 +704,15 @@ export class RushCommandLineParser extends CommandLineParser {
           commandName: {
             value: this.selectedAction?.actionName ?? 'unknown',
             privacy: 'public'
-          }
+          },
+          ...(includeMessage
+            ? {
+                message: {
+                  value: error instanceof Error ? error.message : String(error),
+                  privacy: 'local-sensitive' as const
+                }
+              }
+            : {})
         }
       });
       emitter.emitDiagnostic(diagnostic);
@@ -801,6 +820,12 @@ export class RushCommandLineParser extends CommandLineParser {
       return;
     }
     this.#reporterCompletionEmitted = true;
+
+    _setRushSessionExitStatusOptions(this.rushSession, {
+      cancelled:
+        this.selectedAction instanceof PhasedScriptAction &&
+        this.selectedAction.sessionAbortController.signal.aborted
+    });
 
     const commandName: string | undefined = this.selectedAction?.actionName;
     if (commandName && this.#commandLifecycleEmitter) {

@@ -62,10 +62,7 @@ export interface IRushReporterSelection {
   readonly reporterControlsOwnedByFrontend: boolean;
   readonly reporterValueFlagsToStrip: readonly string[];
   readonly reason:
-    | 'explicit --reporter'
-    | 'repository experiment'
-    | 'RUSH_REPORTER=legacy'
-    | 'pre-major legacy default';
+    'explicit --reporter' | 'repository experiment' | 'RUSH_REPORTER=legacy' | 'pre-major legacy default';
 }
 
 export interface IInitializedRushReporterHost {

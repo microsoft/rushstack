@@ -9,6 +9,7 @@ import {
   ReporterManager,
   type IReporter,
   type IReporterContext,
+  OldEngineOutputAdapter,
   type IReporterEventEnvelope,
   type IReporterEventSink
 } from '@rushstack/rush-reporter';
@@ -1072,4 +1073,80 @@ describe(initializeRushReporterHostAsync.name, () => {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
+
+  it.each(['json', 'plaintext'])(
+    'preserves unscoped and command-scoped output alongside presented operations: %s',
+    async (reporter) => {
+      let output: string = '';
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
+        env: { CI: 'true' },
+        stdout: { isTTY: false, write: (text: string) => (output += text) },
+        includeDefaultFileReporter: false
+      });
+      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+        sink: initialized.sink,
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
+      });
+      try {
+        emitCommandStarted(initialized.sink);
+        adapter.capture('stdout', 'bootstrap stdout\n');
+        emitOperationEvents(initialized.sink);
+        adapter.capture('stderr', 'bootstrap stderr\n');
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 1 },
+          sessionId: 'session',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+          scope: { commandName: 'build' },
+          privacy: 'local-sensitive',
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'command output\n' }
+        });
+        await initialized.closeAsync();
+
+        if (reporter === 'json') {
+          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line));
+          expect(events.map((event) => event.type)).toEqual([
+            'commandStarted',
+            'externalOutput',
+            'operationRegistered',
+            'operationStatusChanged',
+            'externalOutput',
+            'operationStreamClosed',
+            'operationCompleted',
+            'externalOutput',
+            'externalOutput'
+          ]);
+          expect(
+            events.filter((event) => event.type === 'externalOutput').map((event) => event.payload)
+          ).toEqual([
+            { stream: 'stdout', text: 'bootstrap stdout\n' },
+            { stream: 'stdout', text: 'raw operation output\n' },
+            { stream: 'stderr', text: 'bootstrap stderr\n' },
+            { stream: 'stdout', text: 'command output\n' }
+          ]);
+        } else {
+          expect(output.startsWith('Starting "rush build"\n')).toBe(true);
+          let previousOffset: number = -1;
+          for (const text of [
+            'bootstrap stdout\n',
+            'raw operation output\n',
+            'bootstrap stderr\n',
+            'command output\n'
+          ]) {
+            expect(output.split(text)).toHaveLength(2);
+            const offset: number = output.indexOf(text);
+            expect(offset).toBeGreaterThan(previousOffset);
+            previousOffset = offset;
+          }
+        }
+      } finally {
+        await initialized.closeAsync();
+      }
+    }
+  );
 });
