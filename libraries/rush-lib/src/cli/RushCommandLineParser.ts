@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import {
@@ -15,7 +16,7 @@ import {
   type LifecycleEmitter,
   type ReporterMessageSeverity
 } from '@rushstack/rush-reporter';
-import { InternalError, AlreadyReportedError, FileSystem, Text } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
   Terminal,
@@ -496,7 +497,7 @@ export class RushCommandLineParser extends CommandLineParser {
   #normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     return {
       // Git reports physical paths, including when cwd contains a Windows short name or directory alias.
-      cwd: FileSystem.getRealPath(options.cwd || process.cwd()),
+      cwd: fs.realpathSync.native(options.cwd || process.cwd()),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
       reporter: options.reporter,
