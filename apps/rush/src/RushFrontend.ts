@@ -186,7 +186,13 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
       sessionId,
       operationStreamEnabled: reporterHost.selection.enabled
     },
-    reporterCloseAsync
+    reporterCloseAsync,
+    reporterEnabled: reporterHost.selection.enabled,
+    reporterStdoutIsMachineReadable:
+      reporterHost.selection.reporter === 'ai' ||
+      reporterHost.selection.reporter === 'json' ||
+      reporterHost.selection.outputs.some((output) => output.target === 'stdout'),
+    reporterSelectionReason: reporterHost.selection.reason
   };
 
   try {

@@ -10,6 +10,8 @@ import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
+import { Import, LockFile } from '@rushstack/node-core-library';
+import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import {
   ReporterHost,
   ReporterManager,
@@ -23,6 +25,7 @@ import { launchRushFrontendAsync, type IRushFrontendProcessLifecycle } from '../
 import type { IRushFrontendLaunchOptions } from '../IRushFrontendLaunchOptions';
 import {
   initializeRushReporterHostAsync,
+  resolveRushReporterSelection,
   type IInitializedRushReporterHost,
   type IRushReporterSelection
 } from '../RushReporterHost';
@@ -41,6 +44,8 @@ async function createInitializedHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     logArtifact: undefined,
     selection: {
       reporter: 'legacy',
@@ -70,6 +75,8 @@ async function createEnabledHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     logArtifact: undefined,
     selection: {
       reporter: 'json',
@@ -108,6 +115,8 @@ async function createPhaseHangingHostAsync(
   return {
     host,
     sink: host.getSink(),
+    bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
+    abandonedHandoffFilesDeleted: [],
     logArtifact: undefined,
     selection: {
       reporter: 'json',
@@ -182,6 +191,146 @@ function emitCommandStarted(sink: IReporterEventSink): void {
 }
 
 describe(launchRushFrontendAsync.name, () => {
+  it.each([true, false])(
+    'keeps installed-path activity local-sensitive without changing plain status (reporter: %s)',
+    async (reporterEnabled) => {
+      const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-version-privacy-'));
+      const originalGlobalFolder: string | undefined = process.env.RUSH_GLOBAL_FOLDER;
+      process.env.RUSH_GLOBAL_FOLDER = directory;
+      const host: ReporterHost = new ReporterHost({ env: {} });
+      await host.manager.initializeAsync();
+      const emitSpy = jest.spyOn(host.manager, 'emit');
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+      const markerSpy = jest.spyOn(rushLib._FlagFile.prototype, 'isValidAsync').mockResolvedValue(false);
+      const createSpy = jest.spyOn(rushLib._FlagFile.prototype, 'createAsync').mockResolvedValue(undefined);
+      const installSpy = jest.spyOn(Utilities, 'installPackageInDirectoryAsync').mockResolvedValue(undefined);
+      const stopBeforeLaunch: Error = new Error('stop before loading installed engine');
+      const resolveSpy = jest.spyOn(Import, 'resolveModuleAsync').mockRejectedValue(stopBeforeLaunch);
+      const expectedPath: string = path.join(new rushLib._RushGlobalFolder().nodeSpecificPath, 'rush-5.177.0');
+      const messages: string[] = [
+        'Rush version 5.177.0 is not currently installed. Installing...',
+        'Trying to acquire lock for rush-5.177.0',
+        `Successfully installed Rush version 5.177.0 in ${expectedPath}.`
+      ];
+      try {
+        await expect(
+          new RushVersionSelector('5.178.1').ensureRushVersionInstalledAsync('5.177.0', undefined, {
+            isManaged: false,
+            reporter: { eventSink: host.getSink(), sessionId: 'startup-session' },
+            reporterCloseAsync: () => host.manager.closeAsync(),
+            reporterEnabled,
+            reporterSelectionReason: reporterEnabled ? 'explicit --reporter' : 'pre-major legacy default'
+          })
+        ).rejects.toBe(stopBeforeLaunch);
+        expect(installSpy).toHaveBeenCalledWith(expect.objectContaining({ directory: expectedPath }));
+        if (reporterEnabled) {
+          expect(emitSpy.mock.calls.map(([event]) => event.privacy)).toEqual([
+            'public',
+            'public',
+            'local-sensitive'
+          ]);
+          expect(emitSpy.mock.calls.map(([event]) => event.payload)).toEqual(
+            messages.map((text) => ({ kind: 'version-selection', text }))
+          );
+          expect(consoleSpy).not.toHaveBeenCalled();
+        } else {
+          expect(emitSpy).not.toHaveBeenCalled();
+          expect(consoleSpy.mock.calls).toEqual(messages.map((text) => [text]));
+        }
+      } finally {
+        emitSpy.mockRestore();
+        consoleSpy.mockRestore();
+        markerSpy.mockRestore();
+        createSpy.mockRestore();
+        installSpy.mockRestore();
+        resolveSpy.mockRestore();
+        await host.manager.closeAsync();
+        if (originalGlobalFolder === undefined) delete process.env.RUSH_GLOBAL_FOLDER;
+        else process.env.RUSH_GLOBAL_FOLDER = originalGlobalFolder;
+        await fs.promises.rm(directory, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it('retains the frontend version in startup envelopes after native-private parent alignment', async () => {
+    const host: ReporterHost = new ReporterHost({ env: {} });
+    await host.manager.initializeAsync();
+    const emitSpy: jest.SpiedFunction<typeof host.manager.emit> = jest.spyOn(host.manager, 'emit');
+    const markerSpy: jest.SpiedFunction<typeof rushLib._FlagFile.prototype.isValidAsync> = jest
+      .spyOn(rushLib._FlagFile.prototype, 'isValidAsync')
+      .mockResolvedValue(false);
+    const stopBeforeInstall: Error = new Error('stop before package installation');
+    const lockSpy: jest.SpiedFunction<typeof LockFile.acquireAsync> = jest
+      .spyOn(LockFile, 'acquireAsync')
+      .mockRejectedValue(stopBeforeInstall);
+    try {
+      await expect(
+        new RushVersionSelector('5.178.1-native').ensureRushVersionInstalledAsync('5.177.0', undefined, {
+          isManaged: false,
+          reporter: { eventSink: host.getSink(), sessionId: 'startup-session' },
+          reporterCloseAsync: () => host.manager.closeAsync(),
+          reporterEnabled: true,
+          reporterSelectionReason: 'explicit --reporter'
+        })
+      ).rejects.toBe(stopBeforeInstall);
+      expect(emitSpy.mock.calls.map(([event]) => event.source)).toEqual([
+        { packageName: '@microsoft/rush', packageVersion: '5.178.1-native' },
+        { packageName: '@microsoft/rush', packageVersion: '5.178.1-native' }
+      ]);
+    } finally {
+      emitSpy.mockRestore();
+      markerSpy.mockRestore();
+      lockSpy.mockRestore();
+      await host.manager.closeAsync();
+    }
+  });
+
+  it.each([
+    { reporter: 'file', output: undefined, machineStdout: false },
+    { reporter: 'json', output: undefined, machineStdout: true },
+    { reporter: 'file', output: 'json://stdout', machineStdout: true },
+    { reporter: 'file', output: 'file://stdout', machineStdout: true },
+    { reporter: 'file', output: 'json://stderr', machineStdout: false },
+    { reporter: 'file', output: 'json://./stdout', machineStdout: false }
+  ])('preserves legacy-engine stdout ownership for $reporter / $output', async (testCase) => {
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'build', `--reporter=${testCase.reporter}`];
+    if (testCase.output) {
+      process.argv.push(`--output=${testCase.output}`);
+    }
+    let receivedOptions: IRushFrontendLaunchOptions | undefined;
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async (options) => ({
+          ...(await createEnabledHostAsync()),
+          selection: resolveRushReporterSelection({
+            ...options,
+            env: {},
+            stdout: { isTTY: false, write: () => undefined }
+          })
+        }),
+        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+          void version;
+          void selectedRushLib;
+          receivedOptions = launchOptions;
+          return launchOptions.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(receivedOptions?.reporterEnabled).toBe(true);
+      expect(receivedOptions?.reporterSelectionReason).toBe('explicit --reporter');
+      expect(receivedOptions?.reporterStdoutIsMachineReadable).toBe(testCase.machineStdout);
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
   it('creates the authoritative host before invoking the bundled rush-lib and passes only its channel', async () => {
     const order: string[] = [];
     let receivedOptions: IRushFrontendLaunchOptions | undefined;

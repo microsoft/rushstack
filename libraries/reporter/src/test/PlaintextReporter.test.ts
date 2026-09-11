@@ -90,6 +90,15 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).toMatchSnapshot();
   });
 
+  it('does not replay old-engine output that was already rendered', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('externalOutput', { stream: 'stdout', text: 'already rendered\n', wasRendered: true })
+    );
+
+    expect(capture.getOutput()).toBe('');
+  });
+
   it('redacts secret message text', () => {
     const capture: ICapture = makeConcise();
     capture.reporter.report(

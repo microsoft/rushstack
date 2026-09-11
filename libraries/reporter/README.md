@@ -4,6 +4,21 @@ Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
 This package is released as a public beta. Exported contracts may change before the stable release.
 
+Bootstrap initialization failures close every destination whose initialization was attempted, including
+partially initialized reporters, before propagating the original failure. Abandoned handoff cleanup applies
+the 14-day retention window and a 20-session cap to files verifiably owned by the current user whose producer
+process has exited. Live/current handoffs, foreign files, and entries without verifiable ownership are not
+removed; timestamp ties are resolved by filename.
+
+Bootstrap replay shares the frontend's canonical full-detail invocation log. That log remains
+unfiltered at debug level even with `--reporter=file --log-level=normal`; selected levels filter
+the visible reporter and explicit output destinations, not the canonical log.
+
+An owned additional `--output=json://stdout` or `--output=file://stdout` also reserves stdout during
+bootstrap installation. Repository-implicit selection respects declared command-owned output controls.
+Old-engine capture forwards reentrant reporter writes without recapturing them, and version-selection
+messages containing installation paths are local-sensitive while ordinary status remains public.
+
 Rush 5 keeps legacy terminal output by default. See the
 [experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
 privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
