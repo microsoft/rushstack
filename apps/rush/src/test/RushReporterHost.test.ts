@@ -5,7 +5,11 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { IReporterEventSink } from '@rushstack/rush-reporter';
+import {
+  OldEngineOutputAdapter,
+  type IReporterEventEnvelope,
+  type IReporterEventSink
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -41,6 +45,45 @@ function emitCommandStarted(sink: IReporterEventSink): void {
     privacy: 'public',
     type: 'commandStarted',
     payload: { commandName: 'build' }
+  });
+}
+
+function emitOperationEvents(sink: IReporterEventSink): void {
+  const base = {
+    protocolVersion: { major: 1, minor: 1 },
+    sessionId: 'session',
+    source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+    scope: { commandName: 'build', operationId: 'project#phase' }
+  } as const;
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationRegistered',
+    payload: { operationId: 'project#phase', projectName: 'project', phaseName: 'phase' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationStatusChanged',
+    payload: { operationId: 'project#phase', previousStatus: 'queued', status: 'executing' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'local-sensitive',
+    type: 'externalOutput',
+    payload: { stream: 'stdout', text: 'raw operation output\n' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationStreamClosed',
+    payload: { operationId: 'project#phase' }
+  });
+  sink.emit({
+    ...base,
+    privacy: 'public',
+    type: 'operationCompleted',
+    payload: { operationId: 'project#phase', status: 'success' }
   });
 }
 
@@ -648,7 +691,12 @@ describe(initializeRushReporterHostAsync.name, () => {
     let stdoutText: string = '';
     try {
       const initialized = await initializeRushReporterHostAsync({
-        argv: ['build', '--reporter=json', `--output=json://${outputPath}`],
+        argv: [
+          'build',
+          '--reporter=json',
+          '--log-level=debug',
+          `--output=json://${outputPath}?logLevel=debug`
+        ],
         env: {},
         stdout: {
           isTTY: false,
@@ -660,14 +708,86 @@ describe(initializeRushReporterHostAsync.name, () => {
       });
 
       emitCommandStarted(initialized.sink);
+      emitOperationEvents(initialized.sink);
       const firstClose: Promise<void> = initialized.closeAsync();
       expect(initialized.closeAsync()).toBe(firstClose);
       await firstClose;
 
-      expect(JSON.parse(stdoutText).type).toBe('commandStarted');
-      expect(JSON.parse(await fs.promises.readFile(outputPath, 'utf8')).type).toBe('commandStarted');
+      const stdoutEvents: Record<string, unknown>[] = stdoutText
+        .trim()
+        .split('\n')
+        .map((line: string) => JSON.parse(line) as Record<string, unknown>);
+      const fileEvents: Record<string, unknown>[] = (await fs.promises.readFile(outputPath, 'utf8'))
+        .trim()
+        .split('\n')
+        .map((line: string) => JSON.parse(line) as Record<string, unknown>);
+      expect(stdoutEvents.map(({ type }) => type)).toEqual(['commandStarted']);
+      expect(fileEvents.map(({ type }) => type)).toEqual([
+        'commandStarted',
+        'operationRegistered',
+        'operationStatusChanged',
+        'externalOutput',
+        'operationStreamClosed',
+        'operationCompleted'
+      ]);
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
+
+  it.each(['json', 'plaintext'])(
+    'preserves unscoped and command-scoped output while deferring collated operations: %s',
+    async (reporter) => {
+      let output: string = '';
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
+        env: { CI: 'true' },
+        stdout: { isTTY: false, write: (text: string) => (output += text) },
+        includeDefaultFileReporter: false
+      });
+      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+        sink: initialized.sink,
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
+      });
+      try {
+        emitCommandStarted(initialized.sink);
+        adapter.capture('stdout', 'bootstrap stdout\n');
+        emitOperationEvents(initialized.sink);
+        adapter.capture('stderr', 'bootstrap stderr\n');
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 1 },
+          sessionId: 'session',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+          scope: { commandName: 'build' },
+          privacy: 'local-sensitive',
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'command output\n' }
+        });
+        await initialized.closeAsync();
+
+        if (reporter === 'json') {
+          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line));
+          expect(events.map((event) => event.type)).toEqual([
+            'commandStarted',
+            'externalOutput',
+            'externalOutput',
+            'externalOutput'
+          ]);
+          expect(events.slice(1).map((event) => event.payload)).toEqual([
+            { stream: 'stdout', text: 'bootstrap stdout\n' },
+            { stream: 'stderr', text: 'bootstrap stderr\n' },
+            { stream: 'stdout', text: 'command output\n' }
+          ]);
+        } else {
+          expect(output).toBe('Starting "rush build"\nbootstrap stdout\nbootstrap stderr\ncommand output\n');
+        }
+      } finally {
+        await initialized.closeAsync();
+      }
+    }
+  );
 });

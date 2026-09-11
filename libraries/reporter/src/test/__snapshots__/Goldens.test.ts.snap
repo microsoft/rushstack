@@ -3,7 +3,7 @@
 exports[`compatibility goldens advertises the current protocol version as the negotiation baseline 1`] = `
 Object {
   "major": 1,
-  "minor": 0,
+  "minor": 1,
 }
 `;
 

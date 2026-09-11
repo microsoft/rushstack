@@ -5,14 +5,16 @@ import {
   createRushDiagnostic,
   type IRushDiagnostic,
   type LifecycleEmitter,
+  type OperationStreamEmitter,
   type OperationStatus as ReporterOperationStatus
 } from '@rushstack/rush-reporter';
-import type { ITerminalChunk } from '@rushstack/terminal';
+import { TerminalChunkKind, type ITerminalChunk } from '@rushstack/terminal';
 
 import type { RushSession } from '../../pluginFramework/RushSession';
 import {
   _correlateRushSessionError,
-  _getRushSessionLifecycleEmitter
+  _getRushSessionLifecycleEmitter,
+  _getRushSessionOperationStreamEmitter
 } from '../../pluginFramework/RushSession';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { IOperationGraphEventSink, IOperationActivityOptions } from './OperationEventSink';
@@ -26,18 +28,30 @@ interface IReporterOperation {
   readonly operationId: string;
   readonly phaseName: string;
   readonly projectName: string;
+  readonly streamEmitter: OperationStreamEmitter | undefined;
   registrationCycle: IReporterOperationCycle | undefined;
 }
 
 interface IReporterOperationCycle {
   readonly registeredOperationIds: Set<string>;
   readonly statuses: Map<string, OperationStatus>;
+  readonly closedOperationIds: Set<string>;
+  readonly completedResults: Map<string, IOperationExecutionResult>;
   diagnosed: boolean;
   lastEmittedStatus: ReporterOperationStatus | undefined;
   silent: boolean;
+  streamClosed: boolean;
 }
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
+  public readonly onOperationChunk:
+    | ((operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult) => void)
+    | undefined;
+  public readonly onOperationStreamClosed:
+    | ((operationId: string, result?: IOperationExecutionResult) => void)
+    | undefined;
+  public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
+
   private readonly _operationsByLegacyId: Map<string, IReporterOperation> = new Map();
   private readonly _cyclesByResult: WeakMap<IOperationExecutionResult, IReporterOperationCycle> =
     new WeakMap();
@@ -62,18 +76,40 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
         if (!emitter) {
           continue;
         }
+        const streamEmitter: OperationStreamEmitter | undefined = _getRushSessionOperationStreamEmitter(
+          rushSession,
+          {
+            commandName,
+            operationId,
+            projectName,
+            phaseName
+          }
+        );
         reporterOperation = {
           emitter,
           legacyOperationIds: new Set(),
           operationId,
           phaseName,
           projectName,
+          streamEmitter,
           registrationCycle: undefined
         };
         operationsByReporterId.set(operationId, reporterOperation);
       }
       reporterOperation.legacyOperationIds.add(operation.name);
       this._operationsByLegacyId.set(operation.name, reporterOperation);
+    }
+
+    if (Array.from(this._operationsByLegacyId.values()).some(({ streamEmitter }) => !!streamEmitter)) {
+      this.onOperationChunk = (operationId, chunk, result) =>
+        this._onOperationChunk(operationId, chunk, result);
+      this.onOperationStreamClosed = (operationId, result) =>
+        this._onOperationStreamClosed(operationId, result);
+      this.onOperationCompleted = (result) => this._onOperationCompleted(result);
+    } else {
+      this.onOperationChunk = undefined;
+      this.onOperationStreamClosed = undefined;
+      this.onOperationCompleted = undefined;
     }
   }
 
@@ -96,9 +132,12 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       cycle = {
         registeredOperationIds: new Set(),
         statuses: new Map(),
+        closedOperationIds: new Set(),
+        completedResults: new Map(),
         diagnosed: false,
         lastEmittedStatus: undefined,
-        silent: true
+        silent: true,
+        streamClosed: false
       };
       operation.registrationCycle = cycle;
     }
@@ -106,18 +145,27 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     this._cyclesByResult.set(result, cycle);
     cycle.registeredOperationIds.add(operationId);
     cycle.silent &&= silent;
-    if (cycle.registeredOperationIds.size !== operation.legacyOperationIds.size || cycle.silent) {
+    if (cycle.registeredOperationIds.size !== operation.legacyOperationIds.size) {
       return;
     }
 
-    operation.emitter.emitOperationRegistered({
-      operationId: operation.operationId,
-      projectName: operation.projectName,
-      phaseName: operation.phaseName
-    });
+    if (operation.streamEmitter) {
+      operation.streamEmitter.registerOperation(
+        operation.operationId,
+        operation.projectName,
+        operation.phaseName,
+        cycle.silent
+      );
+    } else if (!cycle.silent) {
+      operation.emitter.emitOperationRegistered({
+        operationId: operation.operationId,
+        projectName: operation.projectName,
+        phaseName: operation.phaseName
+      });
+    }
   }
 
-  public onOperationStatusChanged(result: IOperationExecutionResult): void {
+  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
     const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
     if (!operation) {
       return;
@@ -152,12 +200,22 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     if (status === undefined || status === cycle.lastEmittedStatus) {
       return;
     }
+    const aggregatePreviousStatus: ReporterOperationStatus | undefined =
+      cycle.lastEmittedStatus ??
+      (operation.legacyOperationIds.size === 1 ? _toReporterStatus(previousStatus) : undefined);
     cycle.lastEmittedStatus = status;
-    if (!cycle.silent) {
-      const durationMs: number | undefined =
-        operation.legacyOperationIds.size === 1 && result.stopwatch.startTime !== undefined
-          ? result.stopwatch.duration * 1000
-          : undefined;
+    const durationMs: number | undefined =
+      operation.legacyOperationIds.size === 1 && result.stopwatch.startTime !== undefined
+        ? result.stopwatch.duration * 1000
+        : undefined;
+    if (operation.streamEmitter) {
+      operation.streamEmitter.changeStatus(
+        operation.operationId,
+        status,
+        durationMs,
+        aggregatePreviousStatus
+      );
+    } else if (!cycle.silent) {
       operation.emitter.emitOperationStatusChanged({
         operationId: operation.operationId,
         status,
@@ -165,11 +223,67 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       });
     }
   }
+
+  private _onOperationChunk(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult
+  ): void {
+    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    if (!operation?.streamEmitter || !result || !this._cyclesByResult.has(result)) {
+      return;
+    }
+
+    if (chunk.kind === TerminalChunkKind.Stdout) {
+      operation.streamEmitter.writeOutput(operation.operationId, 'stdout', chunk.text);
+    } else if (chunk.kind === TerminalChunkKind.Stderr) {
+      operation.streamEmitter.writeOutput(operation.operationId, 'stderr', chunk.text);
+    }
+  }
+
+  private _onOperationStreamClosed(operationId: string, result?: IOperationExecutionResult): void {
+    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const cycle: IReporterOperationCycle | undefined = result ? this._cyclesByResult.get(result) : undefined;
+    if (!operation?.streamEmitter || !cycle || cycle.streamClosed) {
+      return;
+    }
+    cycle.closedOperationIds.add(operationId);
+    if (cycle.closedOperationIds.size === operation.legacyOperationIds.size) {
+      cycle.streamClosed = true;
+      operation.streamEmitter.closeOperationStream(operation.operationId);
+    }
+  }
+
+  private _onOperationCompleted(result: IOperationExecutionResult): void {
+    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
+    if (!operation?.streamEmitter) {
+      return;
+    }
+    const cycle: IReporterOperationCycle | undefined = this._cyclesByResult.get(result);
+    if (!cycle) {
+      return;
+    }
+
+    cycle.completedResults.set(result.operation.name, result);
+    if (cycle.completedResults.size !== operation.legacyOperationIds.size) {
+      return;
+    }
+    const status: ReporterOperationStatus = _getAggregateTerminalStatus(
+      Array.from(cycle.completedResults.values(), ({ status: resultStatus }) => resultStatus)
+    );
+    const durationMs: number | undefined = _getAggregateDurationMs(cycle.completedResults);
+    operation.streamEmitter.completeOperation(operation.operationId, status, durationMs);
+  }
 }
 
 class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
-  public readonly onOperationChunk: ((operationId: string, chunk: ITerminalChunk) => void) | undefined;
-  public readonly onOperationStreamClosed: ((operationId: string) => void) | undefined;
+  public readonly onOperationChunk:
+    | ((operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult) => void)
+    | undefined;
+  public readonly onOperationStreamClosed:
+    | ((operationId: string, result?: IOperationExecutionResult) => void)
+    | undefined;
+  public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
   private readonly _first: IOperationGraphEventSink;
   private readonly _second: IOperationGraphEventSink;
@@ -179,16 +293,23 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     this._second = second;
     this.onOperationChunk =
       first.onOperationChunk || second.onOperationChunk
-        ? (operationId, chunk) => {
-            first.onOperationChunk?.(operationId, chunk);
-            second.onOperationChunk?.(operationId, chunk);
+        ? (operationId, chunk, result) => {
+            first.onOperationChunk?.(operationId, chunk, result);
+            second.onOperationChunk?.(operationId, chunk, result);
           }
         : undefined;
     this.onOperationStreamClosed =
       first.onOperationStreamClosed || second.onOperationStreamClosed
-        ? (operationId) => {
-            first.onOperationStreamClosed?.(operationId);
-            second.onOperationStreamClosed?.(operationId);
+        ? (operationId, result) => {
+            first.onOperationStreamClosed?.(operationId, result);
+            second.onOperationStreamClosed?.(operationId, result);
+          }
+        : undefined;
+    this.onOperationCompleted =
+      first.onOperationCompleted || second.onOperationCompleted
+        ? (result) => {
+            first.onOperationCompleted?.(result);
+            second.onOperationCompleted?.(result);
           }
         : undefined;
   }
@@ -219,7 +340,7 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
 }
 
 /**
- * Adds status-only reporter emission without changing the graph's visible output or raw chunk routing.
+ * Adds reporter emission without changing the graph's visible output or collator routing.
  *
  * @internal
  */
@@ -333,4 +454,31 @@ function _isTerminalStatus(status: OperationStatus): boolean {
     default:
       return false;
   }
+}
+
+function _getAggregateDurationMs(
+  results: ReadonlyMap<string, IOperationExecutionResult>
+): number | undefined {
+  let startTime: number | undefined;
+  let endTime: number | undefined;
+  for (const result of results.values()) {
+    if (result.stopwatch.startTime !== undefined) {
+      startTime =
+        startTime === undefined
+          ? result.stopwatch.startTime
+          : Math.min(startTime, result.stopwatch.startTime);
+    }
+    if (result.stopwatch.endTime !== undefined) {
+      endTime =
+        endTime === undefined ? result.stopwatch.endTime : Math.max(endTime, result.stopwatch.endTime);
+    }
+  }
+  if (startTime !== undefined && endTime !== undefined) {
+    return Math.max(0, endTime - startTime);
+  }
+  if (results.size === 1) {
+    const result: IOperationExecutionResult | undefined = results.values().next().value;
+    return result?.stopwatch.startTime === undefined ? undefined : result.stopwatch.duration * 1000;
+  }
+  return undefined;
 }

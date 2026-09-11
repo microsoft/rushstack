@@ -762,15 +762,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       cacheConsoleWritable = collatedWriter;
     }
 
-    let cacheCollatedTerminal: CollatedTerminal;
+    let cacheDestination: TerminalWritable;
     if (cacheProjectLogWritable) {
-      const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
+      cacheDestination = new SplitterTransform({
         destinations: [cacheConsoleWritable, cacheProjectLogWritable]
       });
-      cacheCollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
     } else {
-      cacheCollatedTerminal = new CollatedTerminal(cacheConsoleWritable);
+      cacheDestination = cacheConsoleWritable;
     }
+    const cacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(
+      record.addOperationChunkTap(cacheDestination)
+    );
 
     const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
       cacheCollatedTerminal,

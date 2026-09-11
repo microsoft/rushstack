@@ -11,10 +11,7 @@ import type { ReporterEventType } from '../events/ReporterEventType';
 import type { IReporterEventSink } from '../producers/IReporterEventSink';
 import { REPORTER_EVENT_TYPES } from '../events/ReporterEventType';
 import { ReporterManager } from '../manager/ReporterManager';
-import {
-  REPORTER_PROTOCOL_VERSION,
-  isReporterProtocolCompatible
-} from '../protocol/ReporterProtocol';
+import { REPORTER_PROTOCOL_VERSION, isReporterProtocolCompatible } from '../protocol/ReporterProtocol';
 import {
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
@@ -64,6 +61,11 @@ export interface IReporterHostOptions {
    * Returns the current time in milliseconds. Injectable for testing.
    */
   readonly nowMs?: () => number;
+
+  /**
+   * The protocol version supported by this host. Defaults to the current version.
+   */
+  readonly supportedProtocolVersion?: IReporterProtocolVersion;
 }
 
 /**
@@ -101,7 +103,12 @@ export interface IBootstrapReplayResult {
    * The reason no events were replayed, when a handoff path was present.
    * `nonce-mismatch` means the file failed authentication and was rejected.
    */
-  readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
+  readonly skipReason?:
+    | 'unreadable'
+    | 'invalid-path'
+    | 'nonce-mismatch'
+    | 'invalid-event'
+    | 'incompatible-protocol';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -161,6 +168,7 @@ export class ReporterHost {
   private readonly _handoffDirectory: string;
   private readonly _retentionMs: number;
   private readonly _nowMs: () => number;
+  private readonly _supportedProtocolVersion: IReporterProtocolVersion;
 
   public constructor(options: IReporterHostOptions = {}) {
     this._manager = options.manager ?? new ReporterManager();
@@ -168,6 +176,7 @@ export class ReporterHost {
     this._handoffDirectory = options.handoffDirectory ?? os.tmpdir();
     this._retentionMs = options.retentionMs ?? DEFAULT_HANDOFF_RETENTION_MS;
     this._nowMs = options.nowMs ?? (() => Date.now());
+    this._supportedProtocolVersion = options.supportedProtocolVersion ?? REPORTER_PROTOCOL_VERSION;
   }
 
   /**
@@ -247,10 +256,7 @@ export class ReporterHost {
     let skippedEventCount: number = discardedRecordCount;
     for (const event of events) {
       const protocolVersion: IReporterProtocolVersion | undefined = getProtocolVersion(event);
-      if (
-        protocolVersion &&
-        !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)
-      ) {
+      if (protocolVersion && !isReporterProtocolCompatible(this._supportedProtocolVersion, protocolVersion)) {
         await deleteBootstrapHandoffFileAsync(handoffPath);
         return {
           direct: false,

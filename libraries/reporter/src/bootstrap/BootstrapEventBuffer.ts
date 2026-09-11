@@ -7,7 +7,7 @@ import {
   BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
   encodeBootstrapEnvelope
 } from './BootstrapProtocol';
-import type { ReporterEventType } from '../events/ReporterEventType';
+import { isReporterEventRequired, type ReporterEventType } from '../events/ReporterEventType';
 import { chunkUtf8Text } from '../utilities/chunkUtf8Text';
 
 const TRUNCATION_NOTICE_RESERVE_BYTES: number = 512;
@@ -191,7 +191,7 @@ export class BootstrapEventBuffer {
    */
   public emit(input: IBootstrapEventInput): string {
     const eventId: string = `boot_${this._nextEventId++}`;
-    const required: boolean = input.type !== 'activityChanged';
+    const required: boolean = isReporterEventRequired(input.type);
     const line: string = encodeBootstrapEnvelope({
       eventId,
       sessionId: this._sessionId,
