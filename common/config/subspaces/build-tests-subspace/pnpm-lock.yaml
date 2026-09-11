@@ -4990,6 +4990,7 @@ snapshots:
       '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@20.17.19)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@20.17.19)
+      '@rushstack/rush-reporter': file:../../../libraries/reporter(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       tapable: 2.2.1
     transitivePeerDependencies:
