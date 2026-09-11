@@ -40,11 +40,18 @@ the integration test setup policy. This allowance does not change any quality ga
 AI output reserves final-record space, including its supplied log reference, before emitting progress.
 Progress is buffered within the invocation byte limit until the primary log reservation is known, or until
 close if no log is supplied. Excess progress/details set `truncated`; the final result remains valid JSON.
-An unrendered start acknowledgement is coalesced into a known final result. Ongoing commands still expose
-buffered status at the next non-terminal event or explicit flush; watch history and every final field,
+An unrendered start acknowledgement is coalesced into a known final result. Once the log reservation is
+known, ongoing commands expose buffered status at the next non-terminal event or explicit flush; watch history and every final field,
 including the supplied log reference, are retained. No path shortening or measurement normalization is used.
 The final scope carries the command name, and standard `diagnostic.<code>.summary` keys are implicit rather
 than repeated alongside the same code. Custom summary keys are preserved.
+
+Before a log artifact arrives, AI flush and signal-flush retain bounded progress rather than spend bytes
+that a late, individually representable log reference may require. Reserving half the invocation budget is
+not sufficient for every supplied reference. Closing drains this bounded progress and emits the final
+result even if no artifact arrives; it does not invent a log path or claim full-log completeness.
+This is a limitation of eager no-artifact flushing, not permission to drop a required late artifact or
+exceed the invocation budget.
 
 AI fallback message text is emitted only for public envelopes. Its context retains the known command, and
 the usage-review action invokes that command's help (or `rush --help` when the command is unavailable).
@@ -56,6 +63,13 @@ classification and omit non-public source and scope metadata.
 Secret envelopes retain only protocol, event identity, ordering, timing, type, privacy, and fully redacted
 source and payload fields. Contextual parent, command, operation, project, phase, and scope metadata is
 removed.
+
+Machine JSON also applies the existing nonempty secret-value alias classifier to diagnostic sources.
+A producer package name that repeats a secret value hides the associated producer identity; otherwise
+only matching version/component or diagnostic file/tool fields are redacted. Unrelated source context
+remains available. Owner-only full-detail files retain their existing local-sensitive source context
+while redacting the classified parameter itself. Qualification checks both AI and JSON output for the
+private producer and component, independently of the full-log preservation check.
 
 ## Full-detail log completion
 

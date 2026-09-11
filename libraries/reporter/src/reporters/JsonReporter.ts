@@ -60,7 +60,9 @@ export class JsonReporter implements IReporter {
             }
           }
         : event;
-    const redactedEvent: IReporterEventEnvelope<unknown> = redactReporterEvent(machineEvent);
+    const redactedEvent: IReporterEventEnvelope<unknown> = redactReporterEvent(machineEvent, {
+      forMachineOutput: true
+    });
     try {
       this._write(encodeNdjsonRecord(redactedEvent, { maxRecordBytes: this._maxRecordBytes }));
     } catch (error) {
