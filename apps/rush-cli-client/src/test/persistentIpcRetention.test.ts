@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { setTimeout as delayAsync } from 'node:timers/promises';
+import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -14,6 +15,7 @@ import {
   type IPersistentIpcTestFixture
 } from './PersistentIpcTestFixture';
 import { getPressureAllocationBytes, type IPressureMemorySample } from './PersistentIpcPressure';
+import { writeIpcFixtureFile } from './IpcFixtureFile';
 
 const BUDGET_MB: number = 512;
 const BYTES_PER_MB: number = 1024 * 1024;
@@ -135,7 +137,7 @@ describe('measured production IPC retention through the public client', () => {
       // A cold public invocation contains the complete native cold operation. Real pressure work lasting
       // longer than that upper bound must have zero savings under the unchanged production formula.
       const pressureDelayMs = Math.ceil(coldInvocationMs[newer]) + PRESSURE_WORK_MARGIN_MS;
-      const pressureGate = path.join(fixture.folder, 'common/temp/pressure-gate.json');
+      const pressureGate = path.join(fixture.folder, `common/temp/pressure-gate-${randomUUID()}.json`);
       fixture.input(newer, {
         value: 'pressure',
         memoryBytes: MEMORY_BYTES[newer],
@@ -156,7 +158,9 @@ describe('measured production IPC retention through the public client', () => {
           kind: 'pressure-ready' | 'pressure-allocated' | 'pressure-adjusted'
         ): Promise<IIpcEvent & { residentMemoryBytes: number }> => {
           let sample: IIpcEvent | undefined;
-          while (!(sample = fixture.events().find((event) => event.project === newer && event.kind === kind))) {
+          while (!(sample = fixture.events().find((event) =>
+            event.project === newer && event.kind === kind && event.pressureGate === pressureGate
+          ))) {
             if (requestEnded) {
               await request;
               throw new Error(`The real pressure operation completed before ${kind}.`);
@@ -188,7 +192,7 @@ describe('measured production IPC retention through the public client', () => {
         });
         allocation = getPressureAllocationBytes(sampleMemory(pressureAccounting, ready.residentMemoryBytes));
         expect(allocation).toBeGreaterThan(16 * BYTES_PER_MB);
-        fs.writeFileSync(pressureGate, JSON.stringify({ additionalMemoryBytes: allocation }));
+        writeIpcFixtureFile(pressureGate, JSON.stringify({ additionalMemoryBytes: allocation }));
 
         // A real daemon working-set drop can invalidate the first sizing sample. Recalibrate once,
         // then verify actual pressure while this request still owns admission, before releasing it.
@@ -196,19 +200,22 @@ describe('measured production IPC retention through the public client', () => {
         pressureAdjustment = getPressureAllocationBytes(sampleMemory(
           await readPressureAccountingAsync(), allocated.residentMemoryBytes
         ));
-        fs.writeFileSync(`${pressureGate}.adjust`, JSON.stringify({ additionalMemoryBytes: pressureAdjustment }));
+        writeIpcFixtureFile(`${pressureGate}.adjust`, JSON.stringify({ additionalMemoryBytes: pressureAdjustment }));
         const adjusted = await waitForPressureSampleAsync('pressure-adjusted');
         verifiedPressure = sampleMemory(await readPressureAccountingAsync(), adjusted.residentMemoryBytes);
         const retainedBytes: number = verifiedPressure.daemonBytes + verifiedPressure.pressureRunnerBytes;
         expect(retainedBytes + verifiedPressure.otherRunnerBytes).toBeGreaterThan(verifiedPressure.budgetBytes);
         expect(retainedBytes).toBeLessThan(verifiedPressure.budgetBytes);
-        fs.writeFileSync(`${pressureGate}.release`, '{}');
+        writeIpcFixtureFile(`${pressureGate}.release`, '{}');
         await request;
       } finally {
-        for (const gate of [pressureGate, `${pressureGate}.adjust`, `${pressureGate}.release`]) {
-          if (!fs.existsSync(gate)) fs.writeFileSync(gate, '{"cancelled":true}');
+        try {
+          for (const gate of [pressureGate, `${pressureGate}.adjust`, `${pressureGate}.release`]) {
+            if (!fs.existsSync(gate)) writeIpcFixtureFile(gate, '{"cancelled":true}');
+          }
+        } finally {
+          await Promise.allSettled([request]);
         }
-        await Promise.allSettled([request]);
       }
       const pressure = fixture.events().filter((event) => event.project === newer && event.kind === 'complete').at(-1);
       expect(pressure?.durationMs).toBeGreaterThanOrEqual(coldInvocationMs[newer]);

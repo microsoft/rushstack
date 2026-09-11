@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import type { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 
 import { createNativeBuildTestFixture, type INativeBuildTestFixture, type INativeBuildResult } from './NativeBuildTestFixture';
+import { readIpcFixtureEvents, writeIpcFixtureFile } from './IpcFixtureFile';
 
 export interface IIpcEvent {
   readonly kind:
@@ -16,6 +17,7 @@ export interface IIpcEvent {
   readonly pid: number;
   readonly iteration?: number;
   readonly residentMemoryBytes?: number;
+  readonly pressureGate?: string;
   readonly durationMs?: number;
   readonly implementation?: string;
   readonly args?: string[];
@@ -39,7 +41,7 @@ export function createPersistentIpcTestFixture(options: {
   const write = (relative: string, text: string): void => {
     const filename = path.join(base.folder, relative);
     fs.mkdirSync(path.dirname(filename), { recursive: true });
-    fs.writeFileSync(filename, text);
+    writeIpcFixtureFile(filename, text);
   };
   for (const name of ['RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS', 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
     'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB', 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS']) delete base.environment[name];
@@ -104,7 +106,7 @@ export function createPersistentIpcTestFixture(options: {
     events: () => {
       const filename = path.join(base.folder, 'common/temp/ipc-events.jsonl');
       return fs.existsSync(filename)
-        ? fs.readFileSync(filename, 'utf8').trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+        ? readIpcFixtureEvents<IIpcEvent>(filename)
         : [];
     },
     statusAsync: async () => {
@@ -126,6 +128,7 @@ function createIpcToolSource(): string {
   return `
 const fs = require('node:fs');
 const path = require('node:path');
+const { readPressureGateAsync } = require(${JSON.stringify(require.resolve('./IpcFixtureFile'))});
 const implementation = require('./implementation.cjs');
 const project = require(path.join(process.cwd(), 'package.json')).name;
 const events = path.resolve('../common/temp/ipc-events.jsonl');
@@ -136,15 +139,6 @@ let additionalMemory;
 let pressureAdjustment;
 let pending = Promise.resolve();
 let closing = false;
-async function readPressureGate(gatePath, deadline) {
-  while (!fs.existsSync(gatePath)) {
-    if (performance.now() >= deadline) throw new Error('Pressure fixture gate was not released.');
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  const gate = JSON.parse(fs.readFileSync(gatePath, 'utf8'));
-  if (gate.cancelled) throw new Error('Pressure fixture setup was cancelled.');
-  return gate;
-}
 record({ kind: 'ready', args: process.argv.slice(2), implementation: implementation.version });
 process.on('message', (message) => {
   if (message.command === 'run' && !closing) {
@@ -166,20 +160,20 @@ process.on('message', (message) => {
       if (input.warning) await new Promise(resolve => process.stderr.write('ipc-warning\\n', resolve));
       if (input.pressureGate) {
         memory.fill(1);
-        record({ kind: 'pressure-ready', iteration, residentMemoryBytes: process.memoryUsage().rss });
+        record({ kind: 'pressure-ready', pressureGate: input.pressureGate, iteration, residentMemoryBytes: process.memoryUsage().rss });
         const deadline = performance.now() + 10000;
-        const gate = await readPressureGate(input.pressureGate, deadline);
+        const gate = await readPressureGateAsync(input.pressureGate, deadline);
         additionalMemory = Buffer.alloc(gate.additionalMemoryBytes, 1);
         memory.fill(1);
         additionalMemory.fill(1);
-        record({ kind: 'pressure-allocated', iteration, residentMemoryBytes: process.memoryUsage().rss });
-        const adjustment = await readPressureGate(input.pressureGate + '.adjust', deadline);
+        record({ kind: 'pressure-allocated', pressureGate: input.pressureGate, iteration, residentMemoryBytes: process.memoryUsage().rss });
+        const adjustment = await readPressureGateAsync(input.pressureGate + '.adjust', deadline);
         if (adjustment.additionalMemoryBytes > 0) pressureAdjustment = Buffer.alloc(adjustment.additionalMemoryBytes, 1);
         memory.fill(1);
         additionalMemory.fill(1);
         if (pressureAdjustment) pressureAdjustment.fill(1);
-        record({ kind: 'pressure-adjusted', iteration, residentMemoryBytes: process.memoryUsage().rss });
-        await readPressureGate(input.pressureGate + '.release', deadline);
+        record({ kind: 'pressure-adjusted', pressureGate: input.pressureGate, iteration, residentMemoryBytes: process.memoryUsage().rss });
+        await readPressureGateAsync(input.pressureGate + '.release', deadline);
       }
       const residentMemoryBytes = process.memoryUsage().rss;
       record({ kind: 'complete', iteration, residentMemoryBytes, durationMs: performance.now() - startedAt, implementation: implementation.version });
