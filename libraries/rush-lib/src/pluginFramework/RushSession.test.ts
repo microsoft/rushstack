@@ -7,7 +7,10 @@ import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type {
   IReporterEmitEventInput,
   IReporterEventSource,
-  IReporterEventSink
+  IReporterEventSink,
+  IResolveExitStatusFromEventsOptions,
+  IRushExitStatus,
+  LifecycleEmitter
 } from '@rushstack/rush-reporter';
 import { createRushDiagnostic } from '@rushstack/rush-reporter';
 import { StringBufferTerminalProvider } from '@rushstack/terminal';
@@ -21,6 +24,7 @@ import {
   _getRushSessionLifecycleEmitter,
   _getRushSessionTelemetryAggregate,
   _isRushSessionErrorRepresented,
+  _setRushSessionExitStatusOptions,
   type IRushSessionReporterOptions,
   RushSession
 } from './RushSession';
@@ -45,11 +49,15 @@ function createSession(reporter?: IRushSessionReporterOptions): RushSession {
 describe(RushSession.name, () => {
   it('preserves legacy APIs and returns undefined when no event sink is supplied', () => {
     const session: RushSession = createSession();
+    const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: os.tmpdir() });
+    const action = parser.actions.find(({ actionName }) => actionName === 'list') as unknown as
+      { reporter?: ReturnType<RushSession['getReporter']> } | undefined;
 
     expect(session.getReporter()).toBeUndefined();
     expect(session.getScopedLogger()).toBeUndefined();
     expect(session.getLogger('legacy')).toBeDefined();
     expect(session.terminalProvider).toBeInstanceOf(StringBufferTerminalProvider);
+    expect(action?.reporter).toBeUndefined();
   });
 
   it('binds session and rush-lib source identity without exposing the sink or concrete reporters', () => {
@@ -153,8 +161,7 @@ describe(RushSession.name, () => {
       reporter: { eventSink: sink, sessionId: 'session-4' }
     });
     const action = parser.actions.find(({ actionName }) => actionName === 'list') as unknown as
-      | { reporter?: ReturnType<RushSession['getReporter']> }
-      | undefined;
+      { reporter?: ReturnType<RushSession['getReporter']> } | undefined;
 
     expect(action?.reporter).toBeDefined();
     action!.reporter!.emitMessage({ severity: 'debug', text: 'action' });
@@ -223,6 +230,129 @@ describe(RushSession.name, () => {
     });
   });
 
+  it('preserves event order, correlation, session identity, and trusted producer identity', () => {
+    const sink: CapturingSink = new CapturingSink();
+    const session: RushSession = createSession({ eventSink: sink, sessionId: 'ordered-session' });
+    const pluginSession: RushSession = _createRushSessionForPlugin(session, () => ({
+      packageName: '@acme/rush-plugin',
+      packageVersion: '1.2.3',
+      component: 'acme-plugin'
+    }));
+    const sessionEmitter: LifecycleEmitter = _getRushSessionLifecycleEmitter(session)!;
+    const commandEmitter: LifecycleEmitter = _getRushSessionLifecycleEmitter(session, {
+      commandName: 'build'
+    })!;
+    const diagnostic = createRushDiagnostic('RUSH_COMMAND_FAILED');
+    const error: Error = new Error('represented');
+
+    sessionEmitter.emitSessionStarted({ rushVersion: Rush.version });
+    commandEmitter.emitCommandStarted({ commandName: 'build' });
+    pluginSession.getReporter({ commandName: 'build' })!.emitMessage({
+      severity: 'info',
+      text: 'plugin message'
+    });
+    commandEmitter.emitDiagnostic(diagnostic);
+    _correlateRushSessionError(session, error, diagnostic.diagnosticId);
+    commandEmitter.emitCommandResult({ commandName: 'build', succeeded: false, exitCode: 1 });
+    commandEmitter.emitCommandCompleted({ commandName: 'build', exitCode: 1 });
+    sessionEmitter.emitSessionCompleted({ exitCode: 1 });
+
+    expect(sink.inputs.map(({ type }) => type)).toEqual([
+      'sessionStarted',
+      'commandStarted',
+      'messageEmitted',
+      'diagnosticEmitted',
+      'commandResult',
+      'commandCompleted',
+      'sessionCompleted'
+    ]);
+    expect(new Set(sink.inputs.map(({ sessionId }) => sessionId))).toEqual(new Set(['ordered-session']));
+    expect(sink.inputs[0].source).toMatchObject({
+      packageName: '@microsoft/rush-lib',
+      packageVersion: Rush.version
+    });
+    expect(sink.inputs[2].source).toEqual({
+      packageName: '@acme/rush-plugin',
+      packageVersion: '1.2.3',
+      component: 'acme-plugin'
+    });
+    expect(sink.inputs[3].payload).toMatchObject({ diagnosticId: diagnostic.diagnosticId });
+    expect(_isRushSessionErrorRepresented(session, error)).toBe(true);
+  });
+
+  it('derives legacy-compatible exit status for success, warnings, failures, cancellation, and errors', () => {
+    const derive = (
+      emitEvents: (emitter: LifecycleEmitter) => void,
+      options?: IResolveExitStatusFromEventsOptions
+    ): IRushExitStatus => {
+      const session: RushSession = createSession({
+        eventSink: new CapturingSink(),
+        sessionId: 'exit-session'
+      });
+      emitEvents(_getRushSessionLifecycleEmitter(session, { commandName: 'build' })!);
+      return _getRushSessionDerivedExitStatus(session, options)!;
+    };
+
+    expect(
+      derive((emitter) => {
+        emitter.emitCommandResult({ commandName: 'build', succeeded: true, exitCode: 0 });
+        emitter.emitCommandCompleted({ commandName: 'build', exitCode: 0 });
+      })
+    ).toEqual({ exitCode: 0, outcome: 'succeeded' });
+
+    expect(
+      derive((emitter) => {
+        emitter.emitDiagnostic(createRushDiagnostic('RUSH_OPERATION_FAILED', { severity: 'warning' }));
+        emitter.emitCommandResult({ commandName: 'build', succeeded: true, exitCode: 0 });
+      })
+    ).toEqual({ exitCode: 0, outcome: 'succeeded' });
+
+    expect(
+      derive((emitter) => {
+        emitter.emitOperationStatusChanged({ operationId: '@scope/project#_phase:build', status: 'failure' });
+      })
+    ).toEqual({ exitCode: 1, outcome: 'failed' });
+
+    expect(derive(() => {}, { cancelled: true })).toEqual({ exitCode: 1, outcome: 'cancelled' });
+
+    for (const code of ['RUSH_CONFIG_INVALID_JSON', 'RUSH_INTERNAL_UNEXPECTED'] as const) {
+      expect(
+        derive((emitter) => {
+          emitter.emitDiagnostic(createRushDiagnostic(code));
+        })
+      ).toEqual({ exitCode: 1, outcome: 'failed' });
+    }
+  });
+
+  it('retains command cancellation through completion and scoped observations, but not the next command', () => {
+    const session: RushSession = createSession({
+      eventSink: new CapturingSink(),
+      sessionId: 'cancelled-command'
+    });
+    const pluginSession: RushSession = _createRushSessionForPlugin(session, () => ({
+      packageName: '@acme/plugin',
+      packageVersion: '1.0.0'
+    }));
+    const emitter: LifecycleEmitter = _getRushSessionLifecycleEmitter(session, { commandName: 'build' })!;
+    emitter.emitCommandStarted({ commandName: 'build' });
+    _setRushSessionExitStatusOptions(session, { cancelled: true });
+    emitter.emitCommandResult({ commandName: 'build', succeeded: true, exitCode: 0 });
+    emitter.emitCommandCompleted({ commandName: 'build', exitCode: 0 });
+    emitter.emitSessionCompleted({ exitCode: 0 });
+
+    expect(_getRushSessionDerivedExitStatus(session)).toEqual({ exitCode: 1, outcome: 'cancelled' });
+    expect(_getRushSessionDerivedExitStatus(pluginSession)).toEqual({ exitCode: 1, outcome: 'cancelled' });
+    expect(_getRushSessionDerivedExitStatus(session, { cancelled: false })).toEqual({
+      exitCode: 0,
+      outcome: 'succeeded'
+    });
+    expect(_getRushSessionDerivedExitStatus(session, { signal: 'SIGTERM' })?.outcome).toBe('signal');
+    expect(_getRushSessionDerivedExitStatus(session)).toEqual({ exitCode: 1, outcome: 'cancelled' });
+
+    emitter.emitCommandStarted({ commandName: 'build' });
+    expect(_getRushSessionDerivedExitStatus(pluginSession)).toEqual({ exitCode: 0, outcome: 'succeeded' });
+  });
+
   it('excludes non-public plugin envelopes from the shadow telemetry projection', () => {
     const sink: CapturingSink = new CapturingSink();
     const session: RushSession = createSession({ eventSink: sink, sessionId: 'session-private' });
@@ -235,11 +365,28 @@ describe(RushSession.name, () => {
       severity: 'info',
       text: '/local/private/path'
     });
-    _getRushSessionLifecycleEmitter(session)!.emitSessionStarted({ rushVersion: Rush.version });
+    pluginSession.getReporter()!.emitDiagnostic(
+      createRushDiagnostic('RUSH_DEPENDENCY_TOOL_FAILED', {
+        parameters: {
+          token: { value: 'private-secret-token', privacy: 'secret' }
+        }
+      })
+    );
+    const emitter: LifecycleEmitter = _getRushSessionLifecycleEmitter(session)!;
+    emitter.emitSessionStarted({ rushVersion: Rush.version });
+    emitter.emitCommandStarted({ commandName: 'build', argv: ['--auth-token=public-envelope-secret'] });
+    emitter.emitCommandResult({ commandName: 'build', succeeded: true, exitCode: 0 });
 
     const aggregate = _getRushSessionTelemetryAggregate(session)!;
     expect(JSON.stringify(aggregate)).not.toContain('@private/plugin');
     expect(JSON.stringify(aggregate)).not.toContain('/local/private/path');
+    expect(JSON.stringify(aggregate)).not.toContain('private-secret-token');
+    expect(JSON.stringify(aggregate)).not.toContain('--auth-token=public-envelope-secret');
+    expect(aggregate).toMatchObject({
+      commandName: 'build',
+      result: 'succeeded',
+      exitCode: 0
+    });
     expect(aggregate.producerVersions).toEqual([`@microsoft/rush-lib@${Rush.version}`]);
   });
 });

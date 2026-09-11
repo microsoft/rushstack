@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Deterministic Stopwatch timing, matching OperationGraph.test.ts
+// Exercise the color-preserving terminal pipeline on every test platform.
 jest.mock('@rushstack/terminal', () => {
   const originalModule = jest.requireActual('@rushstack/terminal');
   return {
@@ -35,7 +35,12 @@ jest.mock('../ProjectLogWritable', () => {
 });
 
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
-import { MockWritable, StringBufferTerminalProvider, type ITerminalChunk } from '@rushstack/terminal';
+import {
+  MockWritable,
+  StringBufferTerminalProvider,
+  TerminalChunkKind,
+  type ITerminalChunk
+} from '@rushstack/terminal';
 import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
@@ -230,7 +235,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
     tappedGraph.eventSink = new RecordingSink();
     await tappedGraph.executeAsync({});
 
-    expect(tappedWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(tappedWritable.chunks).toEqual(plainWritable.chunks);
   });
 
   it('emits phase-aware status and diagnostic events without routing operation chunks', async () => {
@@ -279,7 +284,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
       })
     );
     expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
-    expect(mockWritable.getAllOutput()).toEqual(plainWritable.getAllOutput());
+    expect(mockWritable.chunks).toEqual(plainWritable.chunks);
   });
 
   it('aggregates sharded records across mixed outcomes and repeated watch-style iterations', async () => {
@@ -531,5 +536,110 @@ describe('OperationGraph event sink (dual-emit)', () => {
 
     expect(countEvents('operationRegistered')).toBe(registrationCount);
     expect(countEvents('operationStatusChanged')).toBe(statusCount);
+  });
+
+  it('keeps project x phase identities stable across repeated watch-style iterations', async () => {
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'operation-retries' }
+    });
+    const compilePhase: IPhase = {
+      ...mockPhase,
+      name: '_phase:compile',
+      logFilenameIdentifier: '_phase_compile'
+    };
+    const testPhase: IPhase = {
+      ...mockPhase,
+      name: '_phase:test',
+      logFilenameIdentifier: '_phase_test'
+    };
+    const graph: OperationGraph = new OperationGraph(
+      new Set([
+        createOperation(
+          '@scope/project compile',
+          new MockOperationRunner('@scope/project (_phase:compile)'),
+          compilePhase,
+          '@scope/project'
+        ),
+        createOperation(
+          '@scope/project test',
+          new MockOperationRunner('@scope/project (_phase:test)'),
+          testPhase,
+          '@scope/project'
+        )
+      ]),
+      createGraphOptions(mockWritable, false)
+    );
+
+    attachReporterOperationEventSink(graph, rushSession, 'build');
+    await graph.executeAsync({});
+    graph.invalidateOperations(undefined, 'watch iteration');
+    await graph.executeAsync({});
+
+    const registrations: IReporterEmitEventInput<unknown>[] = reporterSink.inputs.filter(
+      ({ type }) => type === 'operationRegistered'
+    );
+    expect(registrations.map(({ scope }) => scope?.operationId)).toEqual([
+      '@scope/project#_phase:compile',
+      '@scope/project#_phase:test',
+      '@scope/project#_phase:compile',
+      '@scope/project#_phase:test'
+    ]);
+    for (const event of reporterSink.inputs.filter(({ type }) => type === 'operationStatusChanged')) {
+      expect(event.scope?.operationId).toBe(`@scope/project#${event.scope?.phaseName}`);
+      expect((event.payload as { operationId: string }).operationId).toBe(event.scope?.operationId);
+    }
+  });
+
+  it('leaves stdout, stderr, and StreamCollator rendering byte-identical with shadow reporting', async () => {
+    const createOutputRunner = (): MockOperationRunner =>
+      new MockOperationRunner('output', async (terminal: CollatedTerminal) => {
+        terminal.writeStdoutLine('\u001b[32mshadow parity stdout\u001b[0m');
+        terminal.writeStderrLine('\u001b[31mshadow parity stderr\u001b[0m');
+        return OperationStatus.Success;
+      });
+
+    const plainWritable: MockWritable = new MockWritable();
+    await new OperationGraph(
+      new Set([createOperation('output', createOutputRunner())]),
+      createGraphOptions(plainWritable, false)
+    ).executeAsync({});
+
+    const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new StringBufferTerminalProvider(),
+      getIsDebugMode: () => false,
+      reporter: { eventSink: reporterSink, sessionId: 'output-parity' }
+    });
+    const shadowWritable: MockWritable = new MockWritable();
+    const shadowGraph: OperationGraph = new OperationGraph(
+      new Set([createOperation('output', createOutputRunner())]),
+      createGraphOptions(shadowWritable, false)
+    );
+    attachReporterOperationEventSink(shadowGraph, rushSession, 'build');
+    await shadowGraph.executeAsync({});
+    expect(shadowWritable.chunks).toEqual(plainWritable.chunks);
+    for (const [kind, text] of [
+      [TerminalChunkKind.Stdout, '\u001b[32mshadow parity stdout\u001b[0m'],
+      [TerminalChunkKind.Stderr, '\u001b[31mshadow parity stderr\u001b[0m']
+    ] as const) {
+      const plainBytes: Buffer = Buffer.from(
+        plainWritable.chunks
+          .filter((chunk) => chunk.kind === kind)
+          .map((chunk) => chunk.text)
+          .join('')
+      );
+      const shadowBytes: Buffer = Buffer.from(
+        shadowWritable.chunks
+          .filter((chunk) => chunk.kind === kind)
+          .map((chunk) => chunk.text)
+          .join('')
+      );
+      expect(plainBytes.includes(Buffer.from(text))).toBe(true);
+      expect(shadowBytes).toEqual(plainBytes);
+    }
+    expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import {
@@ -70,7 +71,8 @@ import {
   _getRushSessionDerivedExitStatus,
   _getRushSessionLifecycleEmitter,
   _getRushSessionReporterSourceVersion,
-  _isRushSessionErrorRepresented
+  _isRushSessionErrorRepresented,
+  _setRushSessionExitStatusOptions
 } from '../pluginFramework/RushSession';
 
 /**
@@ -390,7 +392,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   #normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     return {
-      cwd: options.cwd || process.cwd(),
+      // Git reports physical paths, including when cwd contains a Windows short name or directory alias.
+      cwd: fs.realpathSync.native(options.cwd || process.cwd()),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
       reporter: options.reporter,
@@ -715,6 +718,12 @@ export class RushCommandLineParser extends CommandLineParser {
       return;
     }
     this.#reporterCompletionEmitted = true;
+
+    _setRushSessionExitStatusOptions(this.rushSession, {
+      cancelled:
+        this.selectedAction instanceof PhasedScriptAction &&
+        this.selectedAction.sessionAbortController.signal.aborted
+    });
 
     const commandName: string | undefined = this.selectedAction?.actionName;
     if (commandName && this.#commandLifecycleEmitter) {
