@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add the opt-in direct build reporter demo path with reporter-owned output, a complete full-detail log, and an immediate legacy rollback.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

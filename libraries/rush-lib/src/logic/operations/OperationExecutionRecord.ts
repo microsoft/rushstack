@@ -44,6 +44,7 @@ import {
  * @internal
  */
 export interface IOperationExecutionRecordContext {
+  iterationId: number;
   streamCollator: StreamCollator;
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
@@ -207,6 +208,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this.runner.name;
   }
 
+  public get iterationId(): number {
+    return this.#context.iterationId;
+  }
+
   public get debugMode(): boolean {
     return this.#context.debugMode;
   }
@@ -293,7 +298,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public closeOperationStream(): void {
     if (!this.#operationStreamClosed) {
       this.#operationStreamClosed = true;
-      this.#context.eventSink?.onOperationStreamClosed?.(this.name, this);
+      this.#context.eventSink?.onOperationStreamClosed?.(this.name, this, this.iterationId);
     }
   }
 
@@ -333,11 +338,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return new SplitterTransform({
       destinations: [
         destination,
-        new OperationChunkTap(this.name, (operationId, chunk) => {
-          if (operationId === this.name) {
-            eventSink.onOperationChunk?.(operationId, chunk, this);
-          }
-        })
+        new OperationChunkTap(this.name, (operationId, chunk) =>
+          eventSink.onOperationChunk?.(operationId, chunk, this, this.iterationId)
+        )
       ]
     });
   }

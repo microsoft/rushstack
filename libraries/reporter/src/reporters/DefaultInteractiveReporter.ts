@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'node:crypto';
+
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 import type { IReporter } from '../manager/IReporter';
+import { getHumanReadableMessageText } from './ReporterRedaction';
+import { formatHumanReadableDiagnostic } from './HumanReadableDiagnostic';
 import {
   SPINNER_FRAMES,
   MIN_REFRESH_INTERVAL_MS,
@@ -17,15 +21,27 @@ import {
 const HIDE_CURSOR: string = '\u001b[?25l';
 const SHOW_CURSOR: string = '\u001b[?25h';
 const MAX_FINAL_DIAGNOSTICS: number = 10;
-const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
-  'success',
-  'successWithWarnings',
-  'failure',
-  'blocked',
-  'skipped',
-  'fromCache',
-  'noOp'
-]);
+const MAX_DIAGNOSTIC_TEXT_LENGTH: number = 512;
+
+interface IDiagnosticState {
+  readonly identities: Set<string>;
+  readonly warnings: Map<string, string>;
+  suppressed: number;
+  summarized: boolean;
+}
+
+interface IWatchCycleState {
+  totalOperations: number;
+  completedOperations: number;
+  failedOperations: number;
+  readonly registeredOperations: Set<string>;
+  readonly projectByOperation: Map<string, string>;
+  readonly silentOperations: Set<string>;
+  readonly activeProjects: Map<string, string>;
+  latestActivity: string;
+  watchCompleted: boolean;
+  readonly diagnostics: IDiagnosticState;
+}
 
 /**
  * The terminal an interactive reporter writes to.
@@ -110,13 +126,11 @@ export class DefaultInteractiveReporter implements IReporter {
   private readonly _minRefreshIntervalMs: number;
 
   private _commandName: string | undefined;
-  private _totalOperations: number;
-  private _completedOperations: number;
-  private _failedOperations: number;
-  private readonly _projectByOperation: Map<string, string>;
-  private readonly _activeProjects: Map<string, string>;
+  private readonly _watchCycles: Map<number, IWatchCycleState>;
+  private _legacyIterationId: number;
+  private _latestIterationId: number;
   private _latestActivity: string;
-  private readonly _diagnostics: string[];
+  private _latestCompletedIterationId: number;
   private _result: { succeeded: boolean; exitCode: number } | undefined;
   private _logPath: string | undefined;
 
@@ -135,13 +149,11 @@ export class DefaultInteractiveReporter implements IReporter {
     this._minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
 
     this._commandName = undefined;
-    this._totalOperations = 0;
-    this._completedOperations = 0;
-    this._failedOperations = 0;
-    this._projectByOperation = new Map();
-    this._activeProjects = new Map();
+    this._watchCycles = new Map();
+    this._legacyIterationId = 0;
+    this._latestIterationId = 0;
     this._latestActivity = '';
-    this._diagnostics = [];
+    this._latestCompletedIterationId = -1;
     this._result = undefined;
     this._logPath = options.logPath;
 
@@ -157,6 +169,9 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
+    if (this._finalized) {
+      return;
+    }
     this._update(event);
     if (event.type === 'watchCycleCompleted') {
       this._appendWatchSummary(event);
@@ -184,54 +199,122 @@ export class DefaultInteractiveReporter implements IReporter {
         break;
       }
       case 'operationRegistered': {
-        const payload: { operationId: string; projectName?: string } = event.payload as {
+        const payload: {
           operationId: string;
           projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
         };
-        this._totalOperations++;
-        this._projectByOperation.set(
+        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        if (cycle.registeredOperations.has(payload.operationId)) {
+          break;
+        }
+        cycle.registeredOperations.add(payload.operationId);
+        if (payload.silent) {
+          cycle.silentOperations.add(payload.operationId);
+          break;
+        }
+        cycle.silentOperations.delete(payload.operationId);
+        cycle.totalOperations++;
+        const projectName: string = payload.projectName ?? event.scope?.projectName ?? payload.operationId;
+        cycle.projectByOperation.set(
           payload.operationId,
-          payload.projectName ?? event.scope?.projectName ?? payload.operationId
+          payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName
         );
         break;
       }
       case 'operationStatusChanged': {
-        const payload: { operationId: string; status: string; projectName?: string } = event.payload as {
+        const payload: {
           operationId: string;
           status: string;
           projectName?: string;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          status: string;
+          projectName?: string;
+          iterationId?: number;
         };
+        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
         const projectName: string =
           payload.projectName ??
           event.scope?.projectName ??
-          this._projectByOperation.get(payload.operationId) ??
+          cycle.projectByOperation.get(payload.operationId) ??
           payload.operationId;
-        if (payload.status === 'executing') {
-          this._activeProjects.set(payload.operationId, projectName);
-        } else if (TERMINAL_STATUSES.has(payload.status)) {
-          this._activeProjects.delete(payload.operationId);
-          this._completedOperations++;
-          if (payload.status === 'failure') {
-            this._failedOperations++;
-          }
+        if (cycle.silentOperations.has(payload.operationId)) {
+          break;
         }
-        this._latestActivity = `${payload.status} ${projectName}`;
+        if (payload.status === 'executing') {
+          cycle.activeProjects.set(payload.operationId, projectName);
+        }
+        cycle.latestActivity = `${payload.status} ${projectName}`;
+        break;
+      }
+      case 'operationCompleted': {
+        const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
+          operationId: string;
+          status: string;
+          iterationId?: number;
+        };
+        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        if (cycle.silentOperations.delete(payload.operationId)) {
+          break;
+        }
+        const projectName: string =
+          cycle.projectByOperation.get(payload.operationId) ??
+          event.scope?.projectName ??
+          payload.operationId;
+        cycle.activeProjects.delete(payload.operationId);
+        cycle.completedOperations++;
+        if (payload.status === 'failure') {
+          cycle.failedOperations++;
+        }
+        cycle.latestActivity = `${payload.status} ${projectName}`;
         break;
       }
       case 'activityChanged': {
         const payload: { kind?: string; text?: string } = event.payload as { kind?: string; text?: string };
         if (payload.text !== undefined) {
-          this._latestActivity = payload.text;
+          this._latestActivity = this._toSingleLine(payload.text);
+        }
+        break;
+      }
+      case 'messageEmitted': {
+        const payload: { severity?: string; iterationId?: number } = event.payload as {
+          severity?: string;
+          iterationId?: number;
+        };
+        const text: string | undefined = getHumanReadableMessageText(event);
+        if (text !== undefined) {
+          if (payload.severity === 'error' || payload.severity === 'warning') {
+            this._recordDiagnostic(event, payload.severity, text, payload.iterationId);
+          } else {
+            this._latestActivity = this._toSingleLine(text);
+          }
         }
         break;
       }
       case 'diagnosticEmitted': {
-        const payload: { code?: string; severity?: string } = event.payload as {
-          code?: string;
+        const payload: { diagnosticId?: string; severity?: string; iterationId?: number } = event.payload as {
+          diagnosticId?: string;
           severity?: string;
+          iterationId?: number;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._diagnostics.push(`[${payload.severity}] ${payload.code ?? 'unknown'}`);
+          this._recordDiagnostic(
+            event,
+            payload.severity,
+            formatHumanReadableDiagnostic(event),
+            payload.iterationId,
+            payload.diagnosticId
+          );
         }
         break;
       }
@@ -251,14 +334,81 @@ export class DefaultInteractiveReporter implements IReporter {
     }
   }
 
+  private _toSingleLine(text: string): string {
+    const lines: string[] = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return lines.at(-1) ?? '';
+  }
+
+  private _recordDiagnostic(
+    event: IReporterEventEnvelope<unknown>,
+    severity: 'error' | 'warning',
+    text: string,
+    iterationId: number = this._latestIterationId,
+    diagnosticId?: string
+  ): void {
+    const existingCycle: IWatchCycleState | undefined = this._watchCycles.get(iterationId);
+    if (
+      existingCycle?.watchCompleted ||
+      (!existingCycle && iterationId <= this._latestCompletedIterationId)
+    ) {
+      return;
+    }
+    const { diagnostics } = this._getWatchCycle(iterationId);
+    const identity: string = createHash('sha256')
+      .update(`${event.sessionId ?? ''}\0${diagnosticId ?? event.eventId ?? `${severity}\0${text}`}`)
+      .digest('hex');
+    if (diagnostics.identities.has(identity)) {
+      return;
+    }
+    if (diagnostics.identities.size >= MAX_FINAL_DIAGNOSTICS) {
+      diagnostics.suppressed++;
+      const warningIdentity: string | undefined = diagnostics.warnings.keys().next().value;
+      if (severity !== 'error' || warningIdentity === undefined) {
+        return;
+      }
+      diagnostics.warnings.delete(warningIdentity);
+      diagnostics.identities.delete(warningIdentity);
+    }
+    diagnostics.identities.add(identity);
+    const singleLine: string = text.replace(/\s+/g, ' ').trim();
+    const boundedText: string =
+      singleLine.length > MAX_DIAGNOSTIC_TEXT_LENGTH
+        ? `${singleLine.slice(0, MAX_DIAGNOSTIC_TEXT_LENGTH - 1).replace(/[\uD800-\uDBFF]$/, '')}…`
+        : singleLine;
+    if (severity === 'error') {
+      this._terminal.write(`${this._clearRegion()}${boundedText}\n`);
+      this._paintedRowCount = 0;
+    } else {
+      diagnostics.warnings.set(identity, boundedText);
+    }
+  }
+
+  private _takeDiagnosticSummary(cycle: IWatchCycleState): string[] {
+    const { diagnostics } = cycle;
+    if (diagnostics.summarized) {
+      return [];
+    }
+    diagnostics.summarized = true;
+    const lines: string[] = [...diagnostics.warnings.values()];
+    diagnostics.warnings.clear();
+    if (diagnostics.suppressed > 0) {
+      lines.push(`+${diagnostics.suppressed} more diagnostic events; see the full log`);
+    }
+    return lines;
+  }
+
   private _snapshot(): ILiveRegionState {
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     return {
       commandName: this._commandName,
-      totalOperations: this._totalOperations,
-      completedOperations: this._completedOperations,
-      failedOperations: this._failedOperations,
-      activeProjects: [...this._activeProjects.values()],
-      latestActivity: this._latestActivity
+      totalOperations: cycle.totalOperations,
+      completedOperations: cycle.completedOperations,
+      failedOperations: cycle.failedOperations,
+      activeProjects: [...cycle.activeProjects.values()],
+      latestActivity: cycle.latestActivity || this._latestActivity
     };
   }
 
@@ -287,13 +437,78 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   private _appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
-    const payload: { succeeded?: boolean } = event.payload as { succeeded?: boolean };
+    const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
+      succeeded?: boolean;
+      iterationId?: number;
+    };
+    const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
     const marker: string = payload.succeeded ? this._color.green('✔') : this._color.red('✖');
-    const summary: string = `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'}`;
-    this._terminal.write(`${this._clearRegion()}${summary}\n`);
+    const summary: string =
+      `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'} - ` +
+      `${cycle.completedOperations}/${cycle.totalOperations} operations`;
+    const diagnosticLines: string[] = [];
+    const startupCycle: IWatchCycleState | undefined = this._watchCycles.get(0);
+    if (payload.iterationId !== undefined && payload.iterationId > 0 && startupCycle && startupCycle !== cycle) {
+      diagnosticLines.push(...this._takeDiagnosticSummary(startupCycle));
+      startupCycle.watchCompleted = true;
+    }
+    diagnosticLines.push(...this._takeDiagnosticSummary(cycle));
+    if (this._logPath && (!payload.succeeded || cycle.diagnostics.suppressed > 0)) {
+      diagnosticLines.push(`Log: ${this._logPath}`);
+    }
+    this._terminal.write(`${this._clearRegion()}${[...diagnosticLines, summary].join('\n')}\n`);
     this._paintedRowCount = 0;
+    cycle.watchCompleted = true;
+    this._latestCompletedIterationId = Math.max(
+      this._latestCompletedIterationId,
+      payload.iterationId ?? this._legacyIterationId
+    );
+    this._pruneCompletedWatchCycles();
+    if (payload.iterationId === undefined) {
+      this._legacyIterationId++;
+    }
     if (this._terminal.isTTY) {
       this._paint();
+    }
+  }
+
+  private _getWatchCycle(iterationId?: number): IWatchCycleState {
+    const resolvedIterationId: number = iterationId ?? this._legacyIterationId;
+    let cycle: IWatchCycleState | undefined = this._watchCycles.get(resolvedIterationId);
+    if (!cycle) {
+      cycle = {
+        totalOperations: 0,
+        completedOperations: 0,
+        failedOperations: 0,
+        registeredOperations: new Set(),
+        projectByOperation: new Map(),
+        silentOperations: new Set(),
+        activeProjects: new Map(),
+        latestActivity: '',
+        watchCompleted: false,
+        diagnostics: {
+          identities: new Set(),
+          warnings: new Map(),
+          suppressed: 0,
+          summarized: false
+        }
+      };
+      this._watchCycles.set(resolvedIterationId, cycle);
+    }
+    this._latestIterationId = Math.max(this._latestIterationId, resolvedIterationId);
+    this._pruneCompletedWatchCycles();
+    return cycle;
+  }
+
+  private _getLatestWatchCycle(): IWatchCycleState {
+    return this._getWatchCycle(this._latestIterationId);
+  }
+
+  private _pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this._watchCycles) {
+      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+        this._watchCycles.delete(iterationId);
+      }
     }
   }
 
@@ -304,22 +519,23 @@ export class DefaultInteractiveReporter implements IReporter {
     this._finalized = true;
 
     const lines: string[] = [];
+    for (const cycle of this._watchCycles.values()) {
+      lines.push(...this._takeDiagnosticSummary(cycle));
+    }
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
     const succeeded: boolean = this._result?.succeeded ?? false;
     if (succeeded) {
       lines.push(
         `${this._color.green('✔')} ${this._commandName ?? 'rush'} succeeded — ` +
-          `${this._completedOperations}/${this._totalOperations} operations`
+          `${cycle.completedOperations}/${cycle.totalOperations} operations`
       );
+      if (this._logPath !== undefined) {
+        lines.push(this._color.dim(`Log: ${this._logPath}`));
+      }
     } else {
       lines.push(
-        `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${this._failedOperations} failed`
+        `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${cycle.failedOperations} failed`
       );
-      for (const diagnostic of this._diagnostics.slice(0, MAX_FINAL_DIAGNOSTICS)) {
-        lines.push(`  ${diagnostic}`);
-      }
-      if (this._diagnostics.length > MAX_FINAL_DIAGNOSTICS) {
-        lines.push(`  +${this._diagnostics.length - MAX_FINAL_DIAGNOSTICS} more diagnostics`);
-      }
       if (this._logPath !== undefined) {
         lines.push(`  ${this._color.dim(`Log: ${this._logPath}`)}`);
       }

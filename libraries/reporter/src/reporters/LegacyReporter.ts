@@ -12,7 +12,8 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'blocked',
   'skipped',
   'fromCache',
-  'noOp'
+  'noOp',
+  'aborted'
 ]);
 
 /**
@@ -249,5 +250,4 @@ export class LegacyReporter implements IReporter {
   private _seconds(durationMs: number): string {
     return (durationMs / 1000).toFixed(2);
   }
-
 }

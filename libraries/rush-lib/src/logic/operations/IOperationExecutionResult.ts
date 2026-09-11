@@ -81,6 +81,11 @@ export interface IConfigurableOperation extends IBaseOperationExecutionResult {
  */
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
   /**
+   * The graph iteration that owns this result.
+   */
+  readonly iterationId: number;
+
+  /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
    * the operation is executing. Once execution is complete, it is either 'success' or
