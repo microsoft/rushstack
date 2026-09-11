@@ -3,10 +3,19 @@
 
 import { InternalError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
 import {
+  LifecycleEmitter,
+  LegacyErrorBridge,
   RushSessionReporting,
+  TelemetrySubscriber,
+  isReporterEventRequired,
+  resolveExitStatus,
+  type IReporterEmitEventInput,
+  type IReporterEventEnvelope,
   type IReporterEventScope,
   type IReporterEventSink,
   type IReporterEventSource,
+  type IRushExitStatus,
+  type ITelemetryAggregate,
   type IScopedLogger,
   type IScopedReporter
 } from '@rushstack/rush-reporter';
@@ -77,7 +86,23 @@ interface IRushSessionState {
   readonly cloudBuildCacheProviderFactories: Map<string, CloudBuildCacheProviderFactory>;
   readonly cobuildLockProviderFactories: Map<string, CobuildLockProviderFactory>;
   readonly hooks: RushLifecycleHooks;
-  readonly reporting: RushSessionReporting | undefined;
+  readonly reporting: IRushSessionReportingState | undefined;
+}
+
+interface IRushSessionReportingState {
+  readonly eventSink: IReporterEventSink;
+  readonly sessionId: string;
+  readonly source: IReporterEventSource;
+  readonly sessionReporting: RushSessionReporting;
+  readonly observer: IRushSessionShadowEventObserver;
+}
+
+interface IRushSessionShadowEventObserver {
+  ingest<TPayload>(event: IReporterEmitEventInput<TPayload>, eventId: string): void;
+  buildTelemetryAggregate(): ITelemetryAggregate;
+  resolveExitStatus(): IRushExitStatus;
+  correlateError(error: unknown, diagnosticId: string): void;
+  isErrorRepresented(error: unknown): boolean;
 }
 
 let _rushLibSource: IReporterEventSource | undefined;
@@ -107,8 +132,9 @@ function _getRushLibSource(): IReporterEventSource {
 
 function _createReporting(
   reporterOptions: IRushSessionReporterOptions | undefined,
-  source: IReporterEventSource
-): RushSessionReporting | undefined {
+  source: IReporterEventSource,
+  observer?: IRushSessionShadowEventObserver
+): IRushSessionReportingState | undefined {
   if (!reporterOptions) {
     return undefined;
   }
@@ -121,10 +147,148 @@ function _createReporting(
     throw new TypeError('RushSession reporter.sessionId must be a non-empty string');
   }
 
-  return new RushSessionReporting({
-    sink: eventSink,
+  const shadowObserver: IRushSessionShadowEventObserver = observer ?? _createRushSessionShadowEventObserver();
+  const observedEventSink: IReporterEventSink = {
+    emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+      const eventId: string = eventSink.emit(event);
+      shadowObserver.ingest(event, eventId);
+      return eventId;
+    }
+  };
+  const boundSource: IReporterEventSource = { ...source };
+
+  return {
+    eventSink: observedEventSink,
     sessionId,
-    source: { ...source }
+    source: boundSource,
+    observer: shadowObserver,
+    sessionReporting: new RushSessionReporting({
+      sink: observedEventSink,
+      sessionId,
+      source: boundSource
+    })
+  };
+}
+
+function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserver {
+  const legacyErrorBridge: LegacyErrorBridge = new LegacyErrorBridge();
+  const telemetrySubscriber: TelemetrySubscriber = new TelemetrySubscriber();
+  const operationStatuses: Map<string, string> = new Map();
+  let sequence: number = 0;
+  let derivedExitStatus: IRushExitStatus = { exitCode: 0, outcome: 'succeeded' };
+  let hasUnscopedFailure: boolean = false;
+
+  const updateDerivedOperationStatus = (): void => {
+    const hasOperationFailure: boolean = [...operationStatuses.values()].some(
+      (status) => status === 'failure' || status === 'aborted'
+    );
+    derivedExitStatus = resolveExitStatus({
+      hasFailures: hasUnscopedFailure || hasOperationFailure
+    });
+  };
+
+  return {
+    ingest<TPayload>(event: IReporterEmitEventInput<TPayload>, eventId: string): void {
+      const envelope: IReporterEventEnvelope<TPayload> = {
+        ...event,
+        eventId,
+        sequence: ++sequence,
+        timestamp: new Date().toISOString(),
+        required: isReporterEventRequired(event.type)
+      };
+      legacyErrorBridge.ingest(envelope);
+
+      if (envelope.parentSessionId === undefined) {
+        switch (envelope.type) {
+          case 'commandStarted': {
+            operationStatuses.clear();
+            hasUnscopedFailure = false;
+            derivedExitStatus = { exitCode: 0, outcome: 'succeeded' };
+            break;
+          }
+          case 'operationRegistered': {
+            const { operationId } = envelope.payload as { operationId: string };
+            operationStatuses.set(operationId, 'ready');
+            updateDerivedOperationStatus();
+            break;
+          }
+          case 'operationStatusChanged': {
+            const { operationId, status } = envelope.payload as {
+              operationId: string;
+              status: string;
+            };
+            operationStatuses.set(operationId, status);
+            updateDerivedOperationStatus();
+            break;
+          }
+          case 'diagnosticEmitted': {
+            const { severity } = envelope.payload as { severity?: string };
+            if (severity === 'error' && envelope.scope?.operationId === undefined) {
+              hasUnscopedFailure = true;
+              updateDerivedOperationStatus();
+            }
+            break;
+          }
+          case 'commandResult': {
+            const { succeeded, exitCode } = envelope.payload as {
+              succeeded: boolean;
+              exitCode: number;
+            };
+            derivedExitStatus = resolveExitStatus({
+              hasFailures: !succeeded || exitCode !== 0
+            });
+            break;
+          }
+          case 'commandCompleted':
+          case 'sessionCompleted': {
+            const { exitCode } = envelope.payload as { exitCode: number };
+            derivedExitStatus = resolveExitStatus({ hasFailures: exitCode !== 0 });
+            break;
+          }
+          default:
+            break;
+        }
+      }
+
+      // Match the privacy behavior from #5990 without duplicating its reporter-package changes:
+      // only public envelopes contribute source, protocol, lifecycle, or diagnostic telemetry.
+      // Remove this outer gate after #5990 reaches shared main and the hardened subscriber is in this ancestry.
+      if (envelope.privacy === 'public') {
+        telemetrySubscriber.ingest(envelope);
+      }
+    },
+
+    buildTelemetryAggregate(): ITelemetryAggregate {
+      return telemetrySubscriber.buildAggregate();
+    },
+
+    resolveExitStatus(): IRushExitStatus {
+      return derivedExitStatus;
+    },
+
+    correlateError(error: unknown, diagnosticId: string): void {
+      legacyErrorBridge.correlate(error, diagnosticId);
+    },
+
+    isErrorRepresented(error: unknown): boolean {
+      return legacyErrorBridge.shouldSuppressRendering(error);
+    }
+  };
+}
+
+function _createLifecycleEmitter(
+  state: IRushSessionReportingState | undefined,
+  scope?: IReporterEventScope
+): LifecycleEmitter | undefined {
+  if (!state) {
+    return undefined;
+  }
+
+  return new LifecycleEmitter({
+    sink: state.eventSink,
+    sessionId: state.sessionId,
+    source: state.source,
+    scope: scope ? { ...scope } : undefined
   });
 }
 
@@ -181,7 +345,9 @@ export class RushSession {
    * source identity bound by Rush.
    */
   public getReporter(scope?: IReporterEventScope): IScopedReporter | undefined {
-    return _getSessionState(this).reporting?.createScopedReporter(scope ? { ...scope } : undefined);
+    return _getSessionState(this).reporting?.sessionReporting.createScopedReporter(
+      scope ? { ...scope } : undefined
+    );
   }
 
   /**
@@ -193,7 +359,9 @@ export class RushSession {
    * available during the pre-major compatibility period.
    */
   public getScopedLogger(scope?: IReporterEventScope): IScopedLogger | undefined {
-    return _getSessionState(this).reporting?.createScopedLogger(scope ? { ...scope } : undefined);
+    return _getSessionState(this).reporting?.sessionReporting.createScopedLogger(
+      scope ? { ...scope } : undefined
+    );
   }
 
   public registerCloudBuildCacheProviderFactory(
@@ -248,7 +416,8 @@ export function _createRushSessionForPlugin(
   getSource: () => IReporterEventSource
 ): RushSession {
   const state: IRushSessionState = _getSessionState(rushSession);
-  if (!state.options.reporter) {
+  const reporting: IRushSessionReportingState | undefined = state.reporting;
+  if (!state.options.reporter || !reporting) {
     return rushSession;
   }
 
@@ -264,7 +433,68 @@ export function _createRushSessionForPlugin(
     cloudBuildCacheProviderFactories: state.cloudBuildCacheProviderFactories,
     cobuildLockProviderFactories: state.cobuildLockProviderFactories,
     hooks: state.hooks,
-    reporting: _createReporting(state.options.reporter, getSource())
+    reporting: _createReporting(state.options.reporter, getSource(), reporting.observer)
   });
   return pluginSession;
+}
+
+/**
+ * Creates a Rush-owned lifecycle emitter for internal command and operation paths.
+ *
+ * @internal
+ */
+export function _getRushSessionLifecycleEmitter(
+  rushSession: RushSession,
+  scope?: IReporterEventScope
+): LifecycleEmitter | undefined {
+  return _createLifecycleEmitter(_getSessionState(rushSession).reporting, scope);
+}
+
+/**
+ * Returns the current allowlisted reporter telemetry projection.
+ *
+ * @internal
+ */
+export function _getRushSessionTelemetryAggregate(rushSession: RushSession): ITelemetryAggregate | undefined {
+  return _getSessionState(rushSession).reporting?.observer.buildTelemetryAggregate();
+}
+
+/**
+ * Derives the shadow exit status without changing the authoritative process exit code.
+ *
+ * @internal
+ */
+export function _getRushSessionDerivedExitStatus(rushSession: RushSession): IRushExitStatus | undefined {
+  return _getSessionState(rushSession).reporting?.observer.resolveExitStatus();
+}
+
+/**
+ * Returns the Rush version bound to structured events for this session.
+ *
+ * @internal
+ */
+export function _getRushSessionReporterSourceVersion(rushSession: RushSession): string | undefined {
+  return _getSessionState(rushSession).reporting?.source.packageVersion;
+}
+
+/**
+ * Correlates a legacy failure sentinel with an emitted structured diagnostic.
+ *
+ * @internal
+ */
+export function _correlateRushSessionError(
+  rushSession: RushSession,
+  error: unknown,
+  diagnosticId: string
+): void {
+  _getSessionState(rushSession).reporting?.observer.correlateError(error, diagnosticId);
+}
+
+/**
+ * Returns whether a failure is already represented by an emitted diagnostic or legacy sentinel.
+ *
+ * @internal
+ */
+export function _isRushSessionErrorRepresented(rushSession: RushSession, error: unknown): boolean {
+  return _getSessionState(rushSession).reporting?.observer.isErrorRepresented(error) ?? false;
 }

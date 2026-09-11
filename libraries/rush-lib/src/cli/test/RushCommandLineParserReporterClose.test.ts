@@ -5,6 +5,16 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+
+class CapturingReporterSink implements IReporterEventSink {
+  public readonly events: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.events.push(event);
+    return `event-${this.events.length}`;
+  }
+}
 
 describe('RushCommandLineParser reporter close', () => {
   let originalExitCode: string | number | undefined;
@@ -74,6 +84,7 @@ describe('RushCommandLineParser reporter close', () => {
           resolveClose = resolve;
         })
     );
+    const sink: CapturingReporterSink = new CapturingReporterSink();
     const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
       .spyOn(process, 'exit')
       .mockImplementation(() => undefined as never);
@@ -84,11 +95,13 @@ describe('RushCommandLineParser reporter close', () => {
     });
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: `${__dirname}/repo`,
+      reporter: { eventSink: sink, sessionId: 'parser-exit-close' },
       reporterCloseAsync: closeAsync
     });
     const execution: Promise<boolean> = parser.executeAsync();
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
+    expect(sink.events.at(-1)).toMatchObject({ type: 'sessionCompleted', payload: { exitCode: 1 } });
     expect(exitSpy).not.toHaveBeenCalled();
     process.exitCode = 0;
 
@@ -143,5 +156,35 @@ describe('RushCommandLineParser reporter close', () => {
 
     expect(process.exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith('[reporter] Unable to finalize reporters: close failed\n');
+  });
+
+  it('shares one reporter close operation across failure and finalization paths', async () => {
+    let resolveClose: (() => void) | undefined;
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      () =>
+        new Promise<void>((resolve: () => void) => {
+          resolveClose = resolve;
+        })
+    );
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('configuration failed');
+    });
+    const exitSpy: jest.SpyInstance = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    const firstClose: Promise<boolean> = parser.executeAsync();
+    const secondClose: Promise<boolean> = parser.executeAsync();
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    resolveClose!();
+    await expect(Promise.all([firstClose, secondClose])).resolves.toEqual([false, false]);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    expect(exitSpy).toHaveBeenCalledTimes(1);
   });
 });
