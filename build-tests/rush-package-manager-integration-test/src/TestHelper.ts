@@ -4,7 +4,13 @@
 import * as path from 'node:path';
 import type * as child_process from 'node:child_process';
 
-import { FileSystem, Executable, JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  Executable,
+  JsonFile,
+  type FileSystemStats,
+  type JsonObject
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 /**
@@ -23,7 +29,11 @@ export class TestHelper {
   /**
    * Execute a Rush command using the locally-built Rush
    */
-  public async executeRushAsync(args: string[], workingDirectory: string): Promise<void> {
+  public async executeRushAsync(
+    args: string[],
+    workingDirectory: string,
+    environment?: NodeJS.ProcessEnv
+  ): Promise<void> {
     this._terminal.writeLine(`Executing: ${process.argv0} ${this._rushBinPath} ${args.join(' ')}`);
 
     const childProcess: child_process.ChildProcess = Executable.spawn(
@@ -31,6 +41,7 @@ export class TestHelper {
       [this._rushBinPath, ...args],
       {
         currentWorkingDirectory: workingDirectory,
+        environment,
         stdio: 'inherit'
       }
     );
@@ -45,7 +56,7 @@ export class TestHelper {
    */
   public async createTestRepoAsync(
     testRepoPath: string,
-    packageManagerType: 'npm' | 'yarn',
+    packageManagerType: 'npm' | 'pnpm' | 'yarn',
     packageManagerVersion: string
   ): Promise<void> {
     // Clean up previous test run and create empty test repo directory
@@ -66,6 +77,10 @@ export class TestHelper {
       delete rushJson.pnpmVersion;
       delete rushJson.yarnVersion;
       rushJson.npmVersion = packageManagerVersion;
+    } else if (packageManagerType === 'pnpm') {
+      delete rushJson.npmVersion;
+      delete rushJson.yarnVersion;
+      rushJson.pnpmVersion = packageManagerVersion;
     } else if (packageManagerType === 'yarn') {
       delete rushJson.pnpmVersion;
       delete rushJson.npmVersion;
@@ -151,8 +166,9 @@ export class TestHelper {
       // Verify symlinks resolve correctly for local dependencies
       if (dep.startsWith('test-project-')) {
         const depRealPath: string = await FileSystem.getRealPathAsync(depPath);
-        const expectedRealPath: string = path.join(testRepoPath, 'projects', dep);
-        if (depRealPath !== expectedRealPath) {
+        const expectedPath: string = path.join(testRepoPath, 'projects', dep);
+        const expectedRealPath: string = await FileSystem.getRealPathAsync(expectedPath);
+        if (!(await this._doPathsReferToSameObjectAsync(depPath, expectedPath))) {
           throw new Error(
             `ERROR: Symlink for ${dep} does not resolve correctly!\n` +
               `Expected: ${expectedRealPath}\n` +
@@ -162,6 +178,85 @@ export class TestHelper {
       }
     }
     this._terminal.writeLine('✓ Dependencies installed correctly');
+  }
+
+  private async _doPathsReferToSameObjectAsync(path1: string, path2: string): Promise<boolean> {
+    const path1Stats: FileSystemStats = await FileSystem.getStatisticsAsync(path1);
+    const path2Stats: FileSystemStats = await FileSystem.getStatisticsAsync(path2);
+    return path1Stats.dev === path2Stats.dev && path1Stats.ino === path2Stats.ino;
+  }
+
+  /**
+   * Verify that PNPM's global virtual store was enabled and moved out of the workspace node_modules folder.
+   */
+  public async verifyPnpmGlobalVirtualStoreAsync(
+    testRepoPath: string,
+    sharedStorePath: string
+  ): Promise<void> {
+    this._terminal.writeLine('\nVerifying PNPM global virtual store structure...');
+
+    const workspaceFilePath: string = path.join(testRepoPath, 'common/temp/pnpm-workspace.yaml');
+    const workspaceFileContents: string = await FileSystem.readFileAsync(workspaceFilePath);
+    if (!workspaceFileContents.includes('enableGlobalVirtualStore: true')) {
+      throw new Error(`ERROR: enableGlobalVirtualStore was not written to ${workspaceFilePath}`);
+    }
+
+    const localVirtualStorePath: string = path.join(testRepoPath, 'common/temp/node_modules/.pnpm');
+    if (await FileSystem.existsAsync(localVirtualStorePath)) {
+      const localVirtualStoreItemNames: string[] =
+        await FileSystem.readFolderItemNamesAsync(localVirtualStorePath);
+      const unexpectedLocalPackageFolders: string[] = localVirtualStoreItemNames.filter(
+        (itemName) => itemName !== 'lock.yaml' && itemName !== 'node_modules'
+      );
+      if (unexpectedLocalPackageFolders.length > 0) {
+        throw new Error(
+          `ERROR: Expected ${localVirtualStorePath} to omit package instance folders, but found: ` +
+            unexpectedLocalPackageFolders.join(', ')
+        );
+      }
+    }
+
+    if (!(await FileSystem.existsAsync(sharedStorePath))) {
+      throw new Error(`ERROR: Shared PNPM store was not created at ${sharedStorePath}`);
+    }
+
+    const sharedStoreItemNames: string[] = await FileSystem.readFolderItemNamesAsync(sharedStorePath);
+    if (sharedStoreItemNames.length === 0) {
+      throw new Error(`ERROR: Shared PNPM store is empty at ${sharedStorePath}`);
+    }
+
+    const globalVirtualStorePath: string = await this._findPnpmGlobalVirtualStorePathAsync(sharedStorePath);
+    if (!(await FileSystem.existsAsync(globalVirtualStorePath))) {
+      throw new Error(
+        `ERROR: Expected PNPM global virtual store package links under ${sharedStorePath}, ` +
+          `but ${globalVirtualStorePath} was not found.`
+      );
+    }
+
+    const globalVirtualStoreItemNames: string[] =
+      await FileSystem.readFolderItemNamesAsync(globalVirtualStorePath);
+    if (globalVirtualStoreItemNames.length === 0) {
+      throw new Error(
+        `ERROR: PNPM global virtual store package links folder is empty at ${globalVirtualStorePath}`
+      );
+    }
+
+    this._terminal.writeLine('✓ PNPM global virtual store structure verified');
+  }
+
+  private async _findPnpmGlobalVirtualStorePathAsync(sharedStorePath: string): Promise<string> {
+    const sharedStoreVersionFolderNames: string[] =
+      await FileSystem.readFolderItemNamesAsync(sharedStorePath);
+    for (const folderName of sharedStoreVersionFolderNames) {
+      if (folderName.startsWith('v')) {
+        const linksPath: string = path.join(sharedStorePath, folderName, 'links');
+        if (await FileSystem.existsAsync(linksPath)) {
+          return linksPath;
+        }
+      }
+    }
+
+    return path.join(sharedStorePath, '<version>', 'links');
   }
 
   /**

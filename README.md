@@ -228,7 +228,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-amazon-s3-build-cache-plugin-integration-test](./build-tests/rush-amazon-s3-build-cache-plugin-integration-test/) | Tests connecting to an amazon S3 endpoint |
 | [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-mcp-example-plugin](./build-tests/rush-mcp-example-plugin/) | Example showing how to create a plugin for @rushstack/mcp-server |
-| [/build-tests/rush-package-manager-integration-test](./build-tests/rush-package-manager-integration-test/) | Integration tests for non-pnpm package managers in Rush. |
+| [/build-tests/rush-package-manager-integration-test](./build-tests/rush-package-manager-integration-test/) | Integration tests for package managers in Rush. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
 | [/build-tests/rushd-wire-e2e-test](./build-tests/rushd-wire-e2e-test/) | End-to-end conformance tests for the rushd wire layer (protocol + transport + renderer against the rush-lib engine) |
