@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import * as semver from 'semver';
 
 import { LockFile, Import } from '@rushstack/node-core-library';
-import { REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
+import { REPORTER_PROTOCOL_VERSION, type ReporterPrivacyClassification } from '@rushstack/rush-reporter';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { _FlagFile, _RushGlobalFolder } from '@microsoft/rush-lib';
 
@@ -75,7 +75,8 @@ export class RushVersionSelector {
 
         this.#reportStartupMessage(
           executeOptions,
-          `Successfully installed Rush version ${version} in ${expectedRushPath}.`
+          `Successfully installed Rush version ${version} in ${expectedRushPath}.`,
+          'local-sensitive'
         );
 
         // If we've made it here without exception, write the flag file
@@ -109,13 +110,17 @@ export class RushVersionSelector {
     }
   }
 
-  #reportStartupMessage(options: IRushFrontendLaunchOptions, text: string): void {
+  #reportStartupMessage(
+    options: IRushFrontendLaunchOptions,
+    text: string,
+    privacy: ReporterPrivacyClassification = 'public'
+  ): void {
     if (options.reporterEnabled) {
       options.reporter.eventSink.emit({
         protocolVersion: REPORTER_PROTOCOL_VERSION,
         sessionId: options.reporter.sessionId,
         source: { packageName: '@microsoft/rush', packageVersion: this.#currentPackageVersion },
-        privacy: 'public',
+        privacy,
         type: 'activityChanged',
         payload: { kind: 'version-selection', text }
       });

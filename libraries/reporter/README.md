@@ -14,6 +14,11 @@ Bootstrap replay shares the frontend's canonical full-detail invocation log. Tha
 unfiltered at debug level even with `--reporter=file --log-level=normal`; selected levels filter
 the visible reporter and explicit output destinations, not the canonical log.
 
+An owned additional `--output=json://stdout` or `--output=file://stdout` also reserves stdout during
+bootstrap installation. Repository-implicit selection respects declared command-owned output controls.
+Old-engine capture forwards reentrant reporter writes without recapturing them, and version-selection
+messages containing installation paths are local-sensitive while ordinary status remains public.
+
 Rush 5 keeps legacy terminal output by default. See the
 [experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
 privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
