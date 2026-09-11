@@ -50,6 +50,11 @@
         "category": "Playwright"
       },
       {
+        "command": "playwright-local-browser-server.restart",
+        "title": "Restart Playwright Browser Tunnel",
+        "category": "Playwright"
+      },
+      {
         "command": "playwright-local-browser-server.manageAllowlist",
         "title": "Manage Launch Options Allowlist",
         "category": "Playwright Local Browser Server"
