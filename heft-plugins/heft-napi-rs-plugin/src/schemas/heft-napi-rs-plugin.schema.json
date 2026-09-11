@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "NAPI-RS Plugin Configuration",
+  "description": "Defines options for NAPI-RS plugin execution.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "configurationPath": {
+      "description": "Specifies a relative path to the NAPI-RS configuration. The default value is \"./napi-rs.config.mjs\".",
+      "type": "string"
+    }
+  }
+}
