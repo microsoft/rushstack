@@ -417,6 +417,10 @@ rush build --reporter=json --output=file://./rush-debug.log?logLevel=debug
 rush build --output=json://./rush-events.jsonl
 ```
 
+Literal `stdout` and `stderr` output targets reserve the corresponding stream;
+they are not file paths. Conflicting stream owners are rejected before reporters
+initialize. Use `./stdout` or `./stderr` to name an ordinary file instead.
+
 Environment controls:
 
 - `RUSH_REPORTER`;
@@ -444,12 +448,26 @@ Precedence:
 5. Interactive TTY.
 6. Generic non-TTY plaintext.
 
+During pre-major opt-in, `RUSH_REPORTER=legacy` is an emergency override of both
+explicit selection and the repository experiment. It is applied before strict
+reporter validation, preserving custom command controls that Rush does not own.
+
+Repository opt-in consumes `--output` and `--log-level` only when the frontend
+can establish that the command does not declare them. Custom command parameters
+remain command-owned even when their values look like reporter URLs or levels.
+For unknown or plugin-resolved command namespaces, use an explicit non-legacy
+`--reporter` request to claim reporter value controls.
+
 Legacy flags remain permanent compatibility aliases for the primary reporter:
 
 - `--quiet` maps to `quiet`;
 - `--verbose` maps to `verbose`;
 - `--debug` maps to `debug`;
 - contradictory verbosity controls are rejected.
+
+The frontend consumes reporter `--verbose` for known actions that do not define
+it. Phased actions, `check`, and custom commands that define `--verbose` retain
+their native option; `-v` always keeps its command-specific meaning.
 
 Command-specific `--json` behavior remains unchanged and is not an alias for
 `--reporter=json`.
