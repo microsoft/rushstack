@@ -8,7 +8,12 @@ import * as path from 'node:path';
 import { DaemonClient } from '@rushstack/rush-client-core';
 import type { IDaemonWarmProjectRank, IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 
-import { createPersistentIpcTestFixture, type IPersistentIpcTestFixture } from './PersistentIpcTestFixture';
+import {
+  createPersistentIpcTestFixture,
+  type IIpcEvent,
+  type IPersistentIpcTestFixture
+} from './PersistentIpcTestFixture';
+import { getPressureAllocationBytes, type IPressureMemorySample } from './PersistentIpcPressure';
 
 const BUDGET_MB: number = 512;
 const BYTES_PER_MB: number = 1024 * 1024;
@@ -139,39 +144,70 @@ describe('measured production IPC retention through the public client', () => {
         delayMs: pressureDelayMs
       });
       let allocation: number;
+      let pressureAdjustment: number;
       let pressureAccounting: IDaemonWarmSetStatus | undefined;
+      let verifiedPressure: IPressureMemorySample | undefined;
       let requestEnded = false;
       const request = fixture.buildAsync('--only', newer);
       void request.finally(() => { requestEnded = true; }).catch(() => undefined);
       try {
         const readyDeadline = Date.now() + pressureDelayMs + 15_000;
-        while (!fixture.events().some((event) => event.project === newer && event.kind === 'pressure-ready')) {
-          if (requestEnded) {
-            await request;
-            throw new Error('The real pressure operation completed without reaching its allocation barrier.');
+        const waitForPressureSampleAsync = async (
+          kind: 'pressure-ready' | 'pressure-allocated' | 'pressure-adjusted'
+        ): Promise<IIpcEvent & { residentMemoryBytes: number }> => {
+          let sample: IIpcEvent | undefined;
+          while (!(sample = fixture.events().find((event) => event.project === newer && event.kind === kind))) {
+            if (requestEnded) {
+              await request;
+              throw new Error(`The real pressure operation completed before ${kind}.`);
+            }
+            if (Date.now() >= readyDeadline) throw new Error(`The real pressure operation did not reach ${kind}.`);
+            await delayAsync(10);
           }
-          if (Date.now() >= readyDeadline) throw new Error('The real pressure operation did not reach its allocation barrier.');
-          await delayAsync(10);
-        }
-        // Query the public control protocol while this CLI request owns admission. Sampling immediately
-        // before allocation avoids using an RSS snapshot from before the deliberately slow work.
-        const client = await DaemonClient.connectAsync({ socketPath: fixture.paths.socketPath });
-        try {
-          pressureAccounting = (await client.status).workspace?.warmSet;
-        } finally {
-          await client.closeAsync();
-        }
-        if (!pressureAccounting) throw new Error('Missing live pre-allocation accounting.');
+          if (!sample.residentMemoryBytes) throw new Error(`Missing real child RSS at ${kind}.`);
+          return { ...sample, residentMemoryBytes: sample.residentMemoryBytes };
+        };
+        const readPressureAccountingAsync = async (): Promise<IDaemonWarmSetStatus> => {
+          const client = await DaemonClient.connectAsync({ socketPath: fixture.paths.socketPath });
+          try {
+            const status = (await client.status).workspace?.warmSet;
+            if (!status) throw new Error('Missing live pressure accounting.');
+            return status;
+          } finally {
+            await client.closeAsync();
+          }
+        };
+        const ready = await waitForPressureSampleAsync('pressure-ready');
+        pressureAccounting = await readPressureAccountingAsync();
         expect([...pressureAccounting.retainedProjectNames].sort()).toEqual(['a', 'b']);
-        const ready = fixture.events().find((event) => event.project === newer && event.kind === 'pressure-ready');
-        if (!ready?.residentMemoryBytes) throw new Error('Missing real pre-allocation child RSS.');
-        allocation = Math.floor(BUDGET_MB * BYTES_PER_MB - pressureAccounting.daemonResidentMemoryBytes -
-          ready.residentMemoryBytes - high.measuredRunnerMemoryBytes / 2);
+        const sampleMemory = (daemon: IDaemonWarmSetStatus, child: number): IPressureMemorySample => ({
+          budgetBytes: BUDGET_MB * BYTES_PER_MB,
+          daemonBytes: daemon.daemonResidentMemoryBytes,
+          pressureRunnerBytes: child,
+          otherRunnerBytes: high.measuredRunnerMemoryBytes
+        });
+        allocation = getPressureAllocationBytes(sampleMemory(pressureAccounting, ready.residentMemoryBytes));
         expect(allocation).toBeGreaterThan(16 * BYTES_PER_MB);
         fs.writeFileSync(pressureGate, JSON.stringify({ additionalMemoryBytes: allocation }));
+
+        // A real daemon working-set drop can invalidate the first sizing sample. Recalibrate once,
+        // then verify actual pressure while this request still owns admission, before releasing it.
+        const allocated = await waitForPressureSampleAsync('pressure-allocated');
+        pressureAdjustment = getPressureAllocationBytes(sampleMemory(
+          await readPressureAccountingAsync(), allocated.residentMemoryBytes
+        ));
+        fs.writeFileSync(`${pressureGate}.adjust`, JSON.stringify({ additionalMemoryBytes: pressureAdjustment }));
+        const adjusted = await waitForPressureSampleAsync('pressure-adjusted');
+        verifiedPressure = sampleMemory(await readPressureAccountingAsync(), adjusted.residentMemoryBytes);
+        const retainedBytes: number = verifiedPressure.daemonBytes + verifiedPressure.pressureRunnerBytes;
+        expect(retainedBytes + verifiedPressure.otherRunnerBytes).toBeGreaterThan(verifiedPressure.budgetBytes);
+        expect(retainedBytes).toBeLessThan(verifiedPressure.budgetBytes);
+        fs.writeFileSync(`${pressureGate}.release`, '{}');
         await request;
       } finally {
-        if (!fs.existsSync(pressureGate)) fs.writeFileSync(pressureGate, '{"cancelled":true}');
+        for (const gate of [pressureGate, `${pressureGate}.adjust`, `${pressureGate}.release`]) {
+          if (!fs.existsSync(gate)) fs.writeFileSync(gate, '{"cancelled":true}');
+        }
         await Promise.allSettled([request]);
       }
       const pressure = fixture.events().filter((event) => event.project === newer && event.kind === 'complete').at(-1);
@@ -215,7 +251,9 @@ describe('measured production IPC retention through the public client', () => {
           pressureDelayMs,
           pressure,
           allocation,
+          pressureAdjustment,
           pressureAccounting,
+          verifiedPressure,
           retained: after.workspace?.warmSet?.retainedProjectNames,
           watched: after.workspace?.warmSet?.watchedProjectNames,
           events: fixture.events()
