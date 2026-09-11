@@ -20,10 +20,25 @@ import { createDeferred, type DaemonRequestWireClient } from './DaemonRequestWir
 
 describe('experimental native graph over daemon transport', () => {
   let fixture: DaemonGraphTestFixture;
-  beforeEach(async () => {
-    fixture = await DaemonGraphTestFixture.createAsync();
+  let initialization: Promise<void>;
+  let setupAbortController: AbortController;
+  beforeEach(() => {
+    setupAbortController = new AbortController();
+    initialization = DaemonGraphTestFixture.createAsync(undefined, true, setupAbortController.signal).then(
+      (created) => {
+        fixture = created;
+      }
+    );
+    return initialization;
   });
   afterEach(async () => {
+    // A Jest hook timeout does not cancel initialization or its assignment continuation.
+    setupAbortController.abort();
+    const [result] = await Promise.allSettled([initialization]);
+    if (result.status === 'rejected') {
+      if (result.reason !== setupAbortController.signal.reason) throw result.reason;
+      return;
+    }
     await fixture[Symbol.asyncDispose]();
   });
 

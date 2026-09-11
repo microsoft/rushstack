@@ -47,11 +47,13 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
 
   public static async createAsync(
     configure?: (fixture: DaemonGraphTestFixture) => void,
-    lifecycle: boolean = true
+    lifecycle: boolean = true,
+    signal?: AbortSignal
   ): Promise<DaemonGraphTestFixture> {
     const fixture: DaemonGraphTestFixture = new DaemonGraphTestFixture();
     fixture._lifecycle = lifecycle;
     try {
+      signal?.throwIfAborted();
       fixture.write(
         'rush.json',
         JSON.stringify({
@@ -101,6 +103,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
         );
       }
       configure?.(fixture);
+      signal?.throwIfAborted();
       execFileSync('git', ['init', '--quiet'], { cwd: fixture.folder });
       execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: fixture.folder });
       execFileSync('git', ['add', '.'], { cwd: fixture.folder });
@@ -119,9 +122,18 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
         { cwd: fixture.folder }
       );
       await fixture._startAsync();
+      // Host startup owns its partial resources; join it before disposing a late result.
+      signal?.throwIfAborted();
       return fixture;
     } catch (error) {
-      await fixture[Symbol.asyncDispose]();
+      try {
+        await fixture[Symbol.asyncDispose]();
+      } catch (cleanupError) {
+        throw new AggregateError(
+          [error, cleanupError],
+          'Failed to initialize and dispose the graph fixture.'
+        );
+      }
       throw error;
     }
   }
