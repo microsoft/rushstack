@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Await bounded Linux child-group quiescence after termination and stream closure before completing global requests, preserving immediate descendant-stop assertions and surfacing cleanup inspection failures.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

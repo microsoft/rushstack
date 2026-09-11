@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Preserve negotiated child-reporter routing and scoped diagnostic accounting when integrating native private members.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

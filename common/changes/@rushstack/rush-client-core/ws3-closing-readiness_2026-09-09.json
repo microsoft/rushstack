@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Retry pre-request handshake resets within the startup deadline while a closing daemon retains resource ownership. Preserve fail-closed ownership checks and prohibit replay after execution begins.",
+      "type": "patch"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Accept Windows EOF alongside EPIPE when a test script exits without reading stdin, preserving its authoritative exit status and byte-for-byte native parity assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

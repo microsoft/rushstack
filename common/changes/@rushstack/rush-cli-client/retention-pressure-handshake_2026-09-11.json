@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Confirm real IPC retention-test memory pressure after allocation and one measured adjustment before releasing admission, preserving retention policies, budgets, and deadlines.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

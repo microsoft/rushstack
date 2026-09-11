@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add optional validated workspace generation and warm-resource accounting to pong without changing request/rejection types or the protocol 0.9 generation-fencing contract.",
+      "type": "patch"
+    }
+  ]
+}

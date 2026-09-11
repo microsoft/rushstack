@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Validate daemon startup configuration and forward idleTimeoutSeconds for the WS3 host lifecycle integration.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

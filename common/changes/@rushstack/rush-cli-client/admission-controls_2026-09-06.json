@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Parse --no-wait and --wait-timeout into daemon admission options, preserve script arguments, and report queue failures without leaking controls to scripts.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

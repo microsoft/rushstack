@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateHeftOutput } from './validateHeftOutput.mjs';
 
 const scriptFolder = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptFolder, '..', '..', '..', '..', '..', '..');
@@ -12,6 +13,7 @@ const rushVersion = JSON.parse(
 ).version;
 const outputFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-reporter-demo-'));
 const commonArgs = ['build', '--only', '@rushstack/rush-reporter'];
+// Exercise the built frontend and engine even when rush.json pins an older release.
 const baseEnv = { ...process.env, RUSH_PREVIEW_VERSION: rushVersion };
 delete baseEnv.RUSH_REPORTER;
 delete baseEnv.RUSH_LOG_LEVEL;
@@ -72,6 +74,15 @@ const flagOffHelp = run('help-flag-off', ['--help']).stdout;
 const help = run('help', ['--help', '--reporter=json'], { RUSH_REPORTER: 'legacy' }).stdout;
 const commandJson = run('command-json', ['list', '--json', '--reporter=file']);
 const commandJsonConflict = run('command-json-conflict', ['list', '--json', '--reporter=json'], {}, 1);
+const listReporterJson = run('list-reporter-json', ['list', '--reporter=json', '--log-level=debug']);
+const listReporterFile = run('list-reporter-file', ['list', '--reporter=file']);
+const heftChild = run('heft-child', [
+  'rebuild',
+  '--only',
+  '@rushstack/rush-reporter',
+  '--reporter=json',
+  '--log-level=debug'
+]).stdout;
 const duplicateOutputPath = path.join(outputFolder, 'duplicate-output.jsonl');
 const outputConflict = run(
   'output-conflict',
@@ -97,12 +108,15 @@ if (
   throw new Error('RUSH_TEMP_FOLDER did not own the full-detail log path.');
 }
 const tempPurge = run('temp-purge', ['purge', '--reporter=file'], { RUSH_TEMP_FOLDER: tempOverride });
-if (!tempPurge.stdout.includes(`Purging ${tempOverride}`)) {
-  throw new Error('rush purge did not use the same normalized RUSH_TEMP_FOLDER path as the reporter log.');
-}
 const purgeLogMatch = tempPurge.stderr.match(/^Rush full log: (.+)$/m);
 if (!purgeLogMatch || purgeLogMatch[1].startsWith(tempOverride) || !fs.existsSync(purgeLogMatch[1])) {
   throw new Error('The active purge reporter log was not preserved outside RUSH_TEMP_FOLDER.');
+}
+if (
+  tempPurge.stdout !== '' ||
+  !fs.readFileSync(purgeLogMatch[1], 'utf8').includes(`Purging ${tempOverride}`)
+) {
+  throw new Error('File-mode purge must log the normalized RUSH_TEMP_FOLDER without writing to stdout.');
 }
 
 function parseNdjson(text, name) {
@@ -121,6 +135,19 @@ const aiRecords = parseNdjson(ai, 'ai');
 const failureJsonEvents = parseNdjson(failureJson, 'failure-json');
 const failureAiRecords = parseNdjson(failureAi, 'failure-ai');
 const plaintextEvents = parseNdjson(fs.readFileSync(plaintextEventsPath, 'utf8'), 'plaintext sidecar');
+const listingOutput = parseNdjson(listReporterJson.stdout, 'list reporter JSON')
+  .filter((event) => event.type === 'externalOutput')
+  .map((event) => event.payload.text)
+  .join('');
+const listingLogMatch = listReporterFile.stderr.match(/^Rush full log: (.+)$/m);
+if (
+  !listingOutput.includes('@rushstack/rush-reporter') ||
+  listReporterFile.stdout !== '' ||
+  !listingLogMatch ||
+  !fs.readFileSync(listingLogMatch[1], 'utf8').includes('@rushstack/rush-reporter')
+) {
+  throw new Error('Non-phased command output bypassed reporter stdout ownership or its full-detail log.');
+}
 
 for (const [name, events] of [
   ['json', jsonEvents],
@@ -151,6 +178,7 @@ for (const [name, events] of [
     }
   }
 }
+validateHeftOutput(parseNdjson(heftChild, 'Heft child'));
 
 const logMatch = plaintext.match(/^Full log: (.+)$/m);
 if (!logMatch || !path.isAbsolute(logMatch[1]) || !fs.existsSync(logMatch[1])) {

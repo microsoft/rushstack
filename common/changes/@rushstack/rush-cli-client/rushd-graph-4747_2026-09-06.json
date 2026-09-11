@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Implement RUSH_DAEMON_EXPERIMENTAL-gated daemon graph show/status/scope-in/scope-out/invalidate/watch/pause/resume as a public wire/core NDJSON client with no native fallback.",
+      "type": "minor"
+    }
+  ]
+}

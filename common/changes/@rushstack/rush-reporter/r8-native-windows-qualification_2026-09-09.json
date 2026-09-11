@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Coalesce buffered start acknowledgements superseded by final results without dropping final context or log references, keeping native Windows AI output within the unchanged raw-byte qualification budget.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

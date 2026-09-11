@@ -84,6 +84,7 @@ export {
   NdjsonDecoder
 } from './protocol/Ndjson';
 export type {
+  IReporterChildContext,
   IReporterHello,
   IReporterHelloAck,
   IReporterHandshakeOptions,
@@ -91,8 +92,10 @@ export type {
   ReporterCapability
 } from './protocol/ReporterHandshake';
 export {
+  InvalidReporterHelloAckError,
   InvalidReporterHelloError,
   negotiateReporterHello,
+  parseReporterHelloAck,
   parseReporterHello,
   REPORTER_KNOWN_CAPABILITIES
 } from './protocol/ReporterHandshake';
@@ -138,7 +141,11 @@ export {
 export type { IEarlyReporterControls } from './bootstrap/EarlyReporterControls';
 export { parseEarlyReporterControls } from './bootstrap/EarlyReporterControls';
 
-export type { IReporterHostOptions, IBootstrapReplayResult } from './frontend/ReporterHost';
+export type {
+  IReporterHostOptions,
+  IBootstrapReplayResult,
+  IBootstrapLegacyOutput
+} from './frontend/ReporterHost';
 export { ReporterHost, DEFAULT_HANDOFF_RETENTION_MS } from './frontend/ReporterHost';
 
 export type {
@@ -295,7 +302,7 @@ export type { IProblemMatch, IProblemMatcher } from './matchers/ProblemMatcher';
 export type { IGetMatchersOptions } from './matchers/ProblemMatcherRegistry';
 export { ProblemMatcherRegistry } from './matchers/ProblemMatcherRegistry';
 export type { IRunProblemMatchersOptions, IProblemMatcherResult } from './matchers/ProblemMatcherRunner';
-export { runProblemMatchers } from './matchers/ProblemMatcherRunner';
+export { ProblemMatcherRunner, runProblemMatchers } from './matchers/ProblemMatcherRunner';
 
 export type {
   IChildDescriptorPlan,
@@ -303,8 +310,10 @@ export type {
   IHeftChildOutputTargets
 } from './heft/HeftDescriptor';
 export {
+  RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR,
   RUSH_REPORTER_CHILD_FD_ENV_VAR,
   allocateChildDescriptor,
+  readChildAckDescriptorFd,
   readChildDescriptorFd,
   relayHeftChildOutput
 } from './heft/HeftDescriptor';
@@ -336,6 +345,22 @@ export {
   isWithinWallTimeBudget,
   isWithinMemoryBudget
 } from './perf/PerformanceBudgets';
+
+export type {
+  IAiReporterQualificationThresholds,
+  IAiReporterQualificationCaseResult,
+  IAiReporterQualificationGateResult,
+  IAiReporterQualificationResult,
+  IQualifiedAiReporterDecision
+} from './qualification/AiReporterQualification';
+export {
+  AI_REPORTER_QUALIFICATION_SCHEMA_VERSION,
+  AI_REPORTER_QUALIFICATION_THRESHOLDS,
+  evaluateAiReporterQualification,
+  formatAiReporterQualificationFailures,
+  getQualifiedAiReporterDecision
+} from './qualification/AiReporterQualification';
+export { runAiReporterQualificationCorpusAsync } from './qualification/AiReporterQualificationCorpus';
 
 export type { ReporterMigrationPhaseId, IReporterMigrationPhase } from './migration/MigrationPhase';
 export { REPORTER_MIGRATION_PHASES, getReporterMigrationPhase } from './migration/MigrationPhase';

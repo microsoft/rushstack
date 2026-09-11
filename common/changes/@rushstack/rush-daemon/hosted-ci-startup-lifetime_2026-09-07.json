@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Wait for selected installer closure and strengthen launcher and native-mutation fixture teardown, retaining startup diagnostics and keeping fixture socket paths short.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

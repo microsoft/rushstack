@@ -4,7 +4,11 @@
 import { randomUUID } from 'node:crypto';
 
 import type { ILaunchOptions } from '@microsoft/rush-lib';
-import { DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS, REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
+import {
+  DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS,
+  REPORTER_PROTOCOL_VERSION,
+  resolveColorEnabled
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -164,6 +168,12 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
   const reporterCloseAsync: () => Promise<void> = () =>
     reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
   const sessionId: string = createSessionId();
+  const requestId: string = sessionId;
+  const stdoutColumns: number | undefined = process.stdout.columns;
+  const terminalWidth: number =
+    stdoutColumns !== undefined && Number.isSafeInteger(stdoutColumns) && stdoutColumns > 0
+      ? stdoutColumns
+      : 80;
   if (reporterHost.selection.enabled && reporterHost.logArtifact?.path) {
     reporterHost.sink.emit({
       protocolVersion: REPORTER_PROTOCOL_VERSION,
@@ -179,14 +189,44 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
       }
     });
   }
+  const hasReporterStdoutOutput: boolean = reporterHost.selection.outputs.some(
+    (output) => output.target === 'stdout'
+  );
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
     ...launchOptions,
     reporter: {
       eventSink: reporterHost.sink,
       sessionId,
-      operationStreamEnabled: reporterHost.selection.enabled
+      operationStreamEnabled: reporterHost.selection.enabled,
+      childProcessReporter: reporterHost.selection.enabled
+        ? {
+            requestId,
+            context: {
+              reporter: reporterHost.selection.reporter,
+              logLevel: reporterHost.selection.logLevel,
+              color:
+                reporterHost.selection.reporter === 'default'
+                  ? resolveColorEnabled(process.env, process.stdout.isTTY === true)
+                  : false,
+              terminalWidth
+            },
+            ingestForeignEnvelope: (envelope) => reporterHost.host.manager.ingestForeignEnvelope(envelope)
+          }
+        : undefined
     },
-    reporterCloseAsync
+    reporterCloseAsync,
+    reporterEnabled: reporterHost.selection.enabled,
+    reporterStdoutIsMachineReadable:
+      reporterHost.selection.reporter === 'ai' ||
+      reporterHost.selection.reporter === 'json' ||
+      hasReporterStdoutOutput,
+    reporterStdoutIsReserved:
+      hasReporterStdoutOutput ||
+      (!reporterHost.selection.commandJson &&
+        (reporterHost.selection.reporter === 'ai' ||
+          reporterHost.selection.reporter === 'json' ||
+          reporterHost.selection.reporter === 'file')),
+    reporterSelectionReason: reporterHost.selection.reason
   };
 
   try {

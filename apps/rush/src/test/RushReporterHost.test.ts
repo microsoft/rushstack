@@ -6,18 +6,23 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import {
+  OldEngineOutputAdapter,
   ReporterManager,
   type IReporter,
   type IReporterContext,
-  OldEngineOutputAdapter,
   type IReporterEventEnvelope,
-  type IReporterEventSink
+  type IReporterEventSink,
+  BootstrapEventBuffer,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
+  writeBootstrapHandoffFileAsync
 } from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
   resolveRushReporterSelection,
   stripReporterValueControls,
+  type IInitializedRushReporterHost,
   type IRushReporterOutputStream,
   type IRushReporterSelection
 } from '../RushReporterHost';
@@ -258,6 +263,22 @@ describe(resolveRushReporterSelection.name, () => {
     ).toEqual(['node', 'rush', 'custom', '--output', 'custom.zip', '--log-level', 'custom', '--verbose']);
   });
 
+  it('keeps help on the legacy parser-only path', () => {
+    expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
+  it('ignores help controls after the pass-through separator', () => {
+    expect(resolve(['build', '--reporter=json', '--', '--help'])).toMatchObject({
+      reporter: 'json',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
   it.each([['--reporter=junit'], ['--reporter'], ['--reporter', '--verbose']])(
     'preserves custom reporter controls during repository rollback: %j',
     (...argv: string[]) => {
@@ -305,6 +326,19 @@ describe(resolveRushReporterSelection.name, () => {
       '--output=child-output'
     ]);
   });
+
+  it.each(['--reporter', '--output', '--log-level'])(
+    'does not consume legacy flags after a value-less %s during rollback',
+    (flag) => {
+      const argv: string[] = ['build', '--reporter=json', flag, '--quiet', '--debug'];
+      const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
+      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+        'build',
+        '--quiet',
+        '--debug'
+      ]);
+    }
+  );
 
   it('keeps help on the legacy parser-only path', () => {
     expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
@@ -445,19 +479,6 @@ describe(resolveRushReporterSelection.name, () => {
     });
   });
 
-  it.each(['--reporter', '--output', '--log-level'])(
-    'does not consume legacy flags after a value-less %s during rollback',
-    (flag) => {
-      const argv: string[] = ['build', '--reporter=json', flag, '--quiet', '--debug'];
-      const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
-      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
-        'build',
-        '--quiet',
-        '--debug'
-      ]);
-    }
-  );
-
   it('removes reporter-only value controls before invoking a legacy engine', () => {
     expect(
       stripReporterValueControls([
@@ -537,6 +558,9 @@ describe(resolveRushReporterSelection.name, () => {
       enabled: false,
       reason: 'pre-major legacy default'
     });
+    expect(
+      resolve(['build', '--reporter=json', '--', '--reporter=unknown', '--log-level=invalid'])
+    ).toMatchObject({ reporter: 'json', enabled: true });
   });
 
   it('applies CLI log-level controls before RUSH_LOG_LEVEL and rejects contradictions', () => {
@@ -727,8 +751,68 @@ describe(resolveRushReporterSelection.name, () => {
 });
 
 describe(initializeRushReporterHostAsync.name, () => {
+  it.each(['json', 'plaintext'])(
+    'preserves unrendered unscoped and command-scoped output alongside native operations: %s',
+    async (reporter) => {
+      let output: string = '';
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
+        env: { CI: 'true' },
+        stdout: { isTTY: false, write: (text: string) => (output += text) },
+        includeDefaultFileReporter: false
+      });
+      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+        sink: initialized.sink,
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
+      });
+      try {
+        emitCommandStarted(initialized.sink);
+        adapter.capture('stdout', 'bootstrap stdout\n', false);
+        emitOperationEvents(initialized.sink);
+        adapter.capture('stderr', 'bootstrap stderr\n', false);
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 1 },
+          sessionId: 'session',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+          scope: { commandName: 'build' },
+          privacy: 'local-sensitive',
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'command output\n' }
+        });
+        await initialized.closeAsync();
+
+        if (reporter === 'json') {
+          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line));
+          expect(
+            events.filter((event) => event.type === 'externalOutput').map((event) => event.payload)
+          ).toEqual([
+            { stream: 'stdout', text: 'bootstrap stdout\n' },
+            { stream: 'stdout', text: 'raw operation output\n' },
+            { stream: 'stderr', text: 'bootstrap stderr\n' },
+            { stream: 'stdout', text: 'command output\n' }
+          ]);
+          expect(events.filter((event) => event.type === 'operationRegistered')).toHaveLength(1);
+          expect(events.filter((event) => event.type === 'operationCompleted')).toHaveLength(1);
+        } else {
+          const unscopedText: string[] = ['bootstrap stdout\n', 'bootstrap stderr\n', 'command output\n'];
+          for (const text of [...unscopedText, 'raw operation output\n']) {
+            expect(output.split(text)).toHaveLength(2);
+          }
+          expect(output.indexOf(unscopedText[0])).toBeLessThan(output.indexOf(unscopedText[1]));
+          expect(output.indexOf(unscopedText[1])).toBeLessThan(output.indexOf(unscopedText[2]));
+        }
+      } finally {
+        await initialized.closeAsync();
+      }
+    }
+  );
+
   it.each([false, true])(
-    'retains full log debug details independently of the selected level: %s',
+    'retains the automatic full-detail log independently of the selected display level: %s',
     async (normal) => {
       const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-level-'));
       const osModule: typeof os = jest.requireActual('node:os');
@@ -831,6 +915,73 @@ describe(initializeRushReporterHostAsync.name, () => {
     }
   );
 
+  it.each(['incompatible-protocol', 'unsupported-required-event'])(
+    'closes initialized output descriptors when rejecting %s',
+    async (skipReason: string) => {
+      const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-host-disposal-'));
+      const outputPath: string = path.join(directory, 'output.ndjson');
+      let outputDescriptor: number | undefined;
+      const filesystem: typeof fs = jest.requireActual<typeof fs>('node:fs');
+      const originalOpen: typeof fs.openSync = filesystem.openSync;
+      const openSpy: jest.SpyInstance = jest
+        .spyOn(filesystem, 'openSync')
+        .mockImplementation((filePath, flags, mode) => {
+          const descriptor: number = originalOpen(filePath, flags, mode);
+          if (filePath === outputPath) {
+            outputDescriptor = descriptor;
+          }
+          return descriptor;
+        });
+      try {
+        const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+          sessionId: 'bootstrap-session',
+          source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+        });
+        buffer.emit({ type: 'sessionStarted', payload: {} });
+        const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+        const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+        const event: Record<string, unknown> = JSON.parse(lines[1]);
+        if (skipReason === 'incompatible-protocol') {
+          event.protocolVersion = { major: 99, minor: 0 };
+        } else {
+          event.type = 'futureRequiredEvent';
+          event.required = true;
+        }
+        lines[1] = JSON.stringify(event);
+        await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+        const env: Record<string, string | undefined> = {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        };
+
+        await expect(
+          initializeRushReporterHostAsync({
+            argv: ['build', '--reporter=json', `--output=json://${outputPath}`],
+            env,
+            handoffDirectory: directory,
+            includeDefaultFileReporter: false,
+            stdout: { isTTY: false, write: () => undefined },
+            stderr: { write: () => undefined }
+          })
+        ).rejects.toThrow(/bootstrap reporter/);
+        expect(outputDescriptor).toBeDefined();
+        expect(() => fs.fstatSync(outputDescriptor!)).toThrow(expect.objectContaining({ code: 'EBADF' }));
+        expect(fs.existsSync(handoffPath)).toBe(false);
+        expect(env).toEqual({});
+      } finally {
+        openSpy.mockRestore();
+        if (outputDescriptor !== undefined) {
+          try {
+            fs.closeSync(outputDescriptor);
+          } catch (error) {
+            expect(error).toMatchObject({ code: 'EBADF' });
+          }
+        }
+        await fs.promises.rm(directory, { recursive: true, force: true });
+      }
+    }
+  );
+
   it('writes ./stdout to a file without conflicting with the primary stdout reporter', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-stream-path-'));
     let stdoutText: string = '';
@@ -849,6 +1000,53 @@ describe(initializeRushReporterHostAsync.name, () => {
       expect(JSON.parse(stdoutText).type).toBe('commandStarted');
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('preserves the initialization error after cleanup and emergency reporting fail', async () => {
+    const originalError: Error = new Error('original initialization failure');
+    let context: IReporterContext | undefined;
+    let abortedWhenClosing: boolean | undefined;
+    const close: jest.Mock = jest.fn(async () => {
+      abortedWhenClosing = context?.abortSignal?.aborted;
+      throw new Error('cleanup failure');
+    });
+    const reporter: IReporter = {
+      name: 'partially-initialized',
+      initializeAsync: async (reporterContext: IReporterContext) => {
+        context = reporterContext;
+        throw originalError;
+      },
+      report: () => undefined,
+      flushAsync: async () => undefined,
+      closeAsync: close
+    };
+    const initialize: typeof ReporterManager.prototype.initializeAsync =
+      ReporterManager.prototype.initializeAsync;
+    const initializeSpy: jest.SpiedFunction<typeof initialize> = jest
+      .spyOn(ReporterManager.prototype, 'initializeAsync')
+      .mockImplementation(async function (this: ReporterManager): Promise<void> {
+        this.addReporter(reporter);
+        await initialize.call(this);
+      });
+    try {
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: [],
+          env: {},
+          includeDefaultFileReporter: false,
+          stderr: {
+            write: () => {
+              throw new Error('emergency output failed');
+            }
+          }
+        })
+      ).rejects.toBe(originalError);
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(abortedWhenClosing).toBe(true);
+      expect(context?.abortSignal?.reason).toBe(originalError);
+    } finally {
+      initializeSpy.mockRestore();
     }
   });
 
@@ -891,20 +1089,7 @@ describe(initializeRushReporterHostAsync.name, () => {
       expect(initialized.logArtifact?.path).toMatch(
         new RegExp(`^${directory.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
       );
-      initialized.sink.emit({
-        protocolVersion: { major: 1, minor: 1 },
-        sessionId: 'automatic-file-level',
-        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
-        privacy: 'public',
-        type: 'messageEmitted',
-        payload: { severity: 'debug', text: 'automatic-full-detail' }
-      });
       await initialized.closeAsync();
-      const logPath: string | undefined = initialized.logArtifact?.path;
-      if (!logPath) {
-        throw new Error('Expected the automatic full-detail log path');
-      }
-      expect(await fs.promises.readFile(logPath, 'utf8')).toContain('automatic-full-detail');
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
@@ -1096,7 +1281,63 @@ describe(initializeRushReporterHostAsync.name, () => {
     }
   });
 
-  it('publishes artifact completeness as a frozen boolean snapshot', async () => {
+  it('observes terminal resizing after binding the default stdout writer', async () => {
+    const originalColumns: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+      process.stdout,
+      'columns'
+    );
+    const originalIsTTY: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+      process.stdout,
+      'isTTY'
+    );
+    let output: string = '';
+    const writeSpy = jest.spyOn(process.stdout, 'write').mockImplementation((chunk: string | Uint8Array) => {
+      output += chunk.toString();
+      return true;
+    });
+    let initialized: IInitializedRushReporterHost | undefined;
+    try {
+      Object.defineProperty(process.stdout, 'columns', { configurable: true, writable: true, value: 80 });
+      Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
+      initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=default'],
+        env: { NO_COLOR: '' },
+        includeDefaultFileReporter: false
+      });
+      const activity: string = 'a'.repeat(60);
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 0 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'activityChanged',
+        payload: { text: activity }
+      });
+      await initialized.host.manager.flushAsync();
+      expect(output).toContain(activity);
+
+      output = '';
+      process.stdout.columns = 20;
+      await initialized.host.manager.flushAsync();
+      expect(output).not.toContain(activity);
+      expect(output).toContain('a'.repeat(19));
+    } finally {
+      await initialized?.closeAsync();
+      writeSpy.mockRestore();
+      for (const [property, descriptor] of [
+        ['columns', originalColumns],
+        ['isTTY', originalIsTTY]
+      ] as const) {
+        if (descriptor) {
+          Object.defineProperty(process.stdout, property, descriptor);
+        } else {
+          Reflect.deleteProperty(process.stdout, property);
+        }
+      }
+    }
+  });
+
+  it('publishes a frozen complete artifact after archiving replayed bootstrap output', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-artifact-snapshot-'));
     const reported: IReporterEventEnvelope<unknown>[] = [];
     const manager: ReporterManager = new ReporterManager();
@@ -1113,9 +1354,23 @@ describe(initializeRushReporterHostAsync.name, () => {
     };
     manager.addReporter(captureReporter);
     try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'bootstrap output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
       const initialized = await initializeRushReporterHostAsync({
         argv: ['build', '--reporter=json'],
-        env: {},
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory,
         commonTempFolder: directory,
         actionName: 'build',
         stdout: { isTTY: false, write: () => undefined },
@@ -1144,6 +1399,11 @@ describe(initializeRushReporterHostAsync.name, () => {
       });
       await initialized.closeAsync();
 
+      expect(initialized.bootstrapReplay).toMatchObject({ replayed: true, eventCount: 1 });
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(await fs.promises.readFile(initialized.logArtifact!.path!, 'utf8')).toContain(
+        'bootstrap output\n'
+      );
       const finalArtifact: IReporterEventEnvelope<unknown> = reported
         .filter(({ type }) => type === 'artifactAvailable')
         .at(-1)!;
@@ -1162,79 +1422,352 @@ describe(initializeRushReporterHostAsync.name, () => {
     }
   });
 
-  it.each(['json', 'plaintext'])(
-    'preserves unscoped and command-scoped output alongside presented operations: %s',
-    async (reporter) => {
-      let output: string = '';
+  it('replays and deletes a bootstrap handoff before returning the authoritative host', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({ type: 'sessionStarted', payload: { rushVersion: '5.178.1' } });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
       const initialized = await initializeRushReporterHostAsync({
-        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
-        env: { CI: 'true' },
-        stdout: { isTTY: false, write: (text: string) => (output += text) },
+        argv: ['build', '--reporter=json'],
+        env,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
         includeDefaultFileReporter: false
       });
-      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
-        sink: initialized.sink,
-        sessionId: 'session',
-        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
-      });
-      try {
-        emitCommandStarted(initialized.sink);
-        adapter.capture('stdout', 'bootstrap stdout\n');
-        emitOperationEvents(initialized.sink);
-        adapter.capture('stderr', 'bootstrap stderr\n');
-        initialized.sink.emit({
-          protocolVersion: { major: 1, minor: 1 },
-          sessionId: 'session',
-          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
-          scope: { commandName: 'build' },
-          privacy: 'local-sensitive',
-          type: 'externalOutput',
-          payload: { stream: 'stdout', text: 'command output\n' }
-        });
-        await initialized.closeAsync();
+      await initialized.host.manager.flushAsync();
 
-        if (reporter === 'json') {
-          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
-            .trim()
-            .split('\n')
-            .map((line) => JSON.parse(line));
-          expect(events.map((event) => event.type)).toEqual([
-            'commandStarted',
-            'externalOutput',
-            'operationRegistered',
-            'operationStatusChanged',
-            'externalOutput',
-            'operationStreamClosed',
-            'operationCompleted',
-            'externalOutput',
-            'externalOutput'
-          ]);
-          expect(
-            events.filter((event) => event.type === 'externalOutput').map((event) => event.payload)
-          ).toEqual([
-            { stream: 'stdout', text: 'bootstrap stdout\n' },
-            { stream: 'stdout', text: 'raw operation output\n' },
-            { stream: 'stderr', text: 'bootstrap stderr\n' },
-            { stream: 'stdout', text: 'command output\n' }
-          ]);
-        } else {
-          expect(output.startsWith('Starting "rush build"\n')).toBe(true);
-          let previousOffset: number = -1;
-          for (const text of [
-            'bootstrap stdout\n',
-            'raw operation output\n',
-            'bootstrap stderr\n',
-            'command output\n'
-          ]) {
-            expect(output.split(text)).toHaveLength(2);
-            const offset: number = output.indexOf(text);
-            expect(offset).toBeGreaterThan(previousOffset);
-            previousOffset = offset;
-          }
-        }
-      } finally {
-        await initialized.closeAsync();
-      }
+      expect(initialized.bootstrapReplay).toMatchObject({ replayed: true, eventCount: 1 });
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
+      expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBeUndefined();
+      expect(JSON.parse(stdoutText).type).toBe('sessionStarted');
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
     }
-  );
+  });
+
+  it('does not replay live bootstrap output to the same visible destination', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    const outputPath: string = path.join(directory, 'events.jsonl');
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'npm output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv: [
+          'build',
+          '--reporter=plaintext',
+          '--log-level=debug',
+          `--output=json://${outputPath}?logLevel=debug`
+        ],
+        env,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 0 },
+        sessionId: 'old-engine-session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.177.0' },
+        privacy: 'local-sensitive',
+        type: 'externalOutput',
+        payload: { stream: 'stderr', text: 'old engine output\n', wasRendered: true }
+      });
+      await initialized.host.manager.closeAsync();
+
+      expect(stdoutText).toBe('');
+      expect(
+        (await fs.promises.readFile(outputPath, 'utf8'))
+          .trim()
+          .split('\n')
+          .map((line: string) => JSON.parse(line))
+      ).toEqual([
+        expect.objectContaining({
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'npm output\n', wasRendered: true }
+        }),
+        expect.objectContaining({
+          type: 'externalOutput',
+          payload: { stream: 'stderr', text: 'old engine output\n', wasRendered: true }
+        })
+      ]);
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('retains bootstrap stdout and stderr records in the primary JSON stream', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'captured stdout\n' }
+      });
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stderr', text: 'live stderr\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=json', '--log-level=debug'],
+        env,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+      await initialized.closeAsync();
+
+      expect(
+        stdoutText
+          .trim()
+          .split('\n')
+          .map((line: string) => JSON.parse(line).payload)
+      ).toEqual([
+        { stream: 'stdout', text: 'captured stdout\n' },
+        { stream: 'stderr', text: 'live stderr\n', wasRendered: true }
+      ]);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('restores ordered legacy output when repository opt-in meets an incompatible handoff', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    const argv: string[] = ['list', '--verbose', '--log-level=verbose'];
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({ type: 'activityChanged', payload: { text: 'installing Rush' } });
+      buffer.addExternalOutput('stdout', 'npm output\n');
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
+      await fs.promises.writeFile(handoffPath, contents.replace(/"major":1/g, '"major":2'));
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv,
+        env,
+        repositoryOptIn: true,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+      await initialized.closeAsync();
+
+      expect(initialized.bootstrapReplay.skipReason).toBe('incompatible-protocol');
+      expect(initialized.selection).toMatchObject({
+        enabled: false,
+        reason: 'bootstrap compatibility fallback',
+        reporterValueFlagsToStrip: ['--log-level'],
+        reporterFlagsToStrip: ['--verbose']
+      });
+      expect(
+        stripReporterValueControls(
+          argv,
+          new Set(initialized.selection.reporterValueFlagsToStrip),
+          new Set(initialized.selection.reporterFlagsToStrip)
+        )
+      ).toEqual(['list']);
+      expect(stdoutText).toBe('installing Rush\nnpm output\n');
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('falls back when repository opt-in meets an unsupported required bootstrap event', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    const argv: string[] = ['list', '--verbose', '--log-level=verbose'];
+    let stdoutText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.addExternalOutput('stdout', 'npm output\n');
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      const requiredEvent: Record<string, unknown> = {
+        ...(JSON.parse(lines[1]) as Record<string, unknown>),
+        eventId: 'future-required',
+        type: 'futureRequiredEvent',
+        required: true,
+        protocolVersion: { major: 1, minor: 1 }
+      };
+      lines.push(JSON.stringify(requiredEvent));
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      const initialized = await initializeRushReporterHostAsync({
+        argv,
+        env,
+        repositoryOptIn: true,
+        handoffDirectory: directory,
+        stdout: {
+          isTTY: false,
+          write: (text: string) => {
+            stdoutText += text;
+          }
+        },
+        includeDefaultFileReporter: false
+      });
+      await initialized.closeAsync();
+
+      expect(initialized.bootstrapReplay.skipReason).toBe('unsupported-required-event');
+      expect(initialized.selection).toMatchObject({
+        enabled: false,
+        reason: 'bootstrap compatibility fallback',
+        reporterValueFlagsToStrip: ['--log-level'],
+        reporterFlagsToStrip: ['--verbose']
+      });
+      expect(
+        stripReporterValueControls(
+          argv,
+          new Set(initialized.selection.reporterValueFlagsToStrip),
+          new Set(initialized.selection.reporterFlagsToStrip)
+        )
+      ).toEqual(['list']);
+      expect(stdoutText).toBe('npm output\n');
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('fails an explicit reporter request for an unsupported required bootstrap event', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    let stderrText: string = '';
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.addExternalOutput('stdout', 'npm output\n');
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const lines: string[] = (await fs.promises.readFile(handoffPath, 'utf8')).trimEnd().split('\n');
+      const requiredEvent: Record<string, unknown> = {
+        ...(JSON.parse(lines[1]) as Record<string, unknown>),
+        eventId: 'future-required',
+        type: 'futureRequiredEvent',
+        required: true,
+        protocolVersion: { major: 1, minor: 1 }
+      };
+      lines.push(JSON.stringify(requiredEvent));
+      await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: ['build', '--reporter=json'],
+          env,
+          handoffDirectory: directory,
+          stdout: { isTTY: false, write: () => undefined },
+          stderr: {
+            write: (text: string) => {
+              stderrText += text;
+            }
+          },
+          includeDefaultFileReporter: false
+        })
+      ).rejects.toThrow(/unsupported required event/);
+
+      expect(stderrText).toBe('npm output\n');
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('deletes an authenticated handoff when explicit reporter validation fails', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-frontend-'));
+    const env: Record<string, string | undefined> = {};
+    try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+      env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+
+      await expect(
+        initializeRushReporterHostAsync({
+          argv: ['build', '--reporter=default'],
+          env,
+          handoffDirectory: directory,
+          stdout: { isTTY: false, write: () => undefined },
+          includeDefaultFileReporter: false
+        })
+      ).rejects.toThrow(/requires an interactive TTY/);
+
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
+      expect(env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]).toBeUndefined();
+    } finally {
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
 });

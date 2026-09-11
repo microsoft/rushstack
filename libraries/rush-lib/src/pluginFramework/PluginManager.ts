@@ -119,6 +119,10 @@ export class PluginManager {
     return this.#error;
   }
 
+  public get loadedPluginNames(): ReadonlySet<string> {
+    return this.#loadedPluginNames;
+  }
+
   public async updateAsync(): Promise<void> {
     await this._preparePluginAutoinstallersAsync(this.#autoinstallerPluginLoaders);
     const preparedAutoinstallerNames: Set<string> = new Set<string>();

@@ -3,6 +3,7 @@
 
 import { isDaemonControlRecord } from './ControlRecord';
 import { isDaemonControlMessageKind } from './DaemonControlKinds';
+import { validateDaemonPong } from './DaemonPongValidation';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { isDaemonVerbosity } from './DaemonVerbosity';
 import {
@@ -12,7 +13,7 @@ import {
 } from './InteractiveControlValidation';
 import { validateRequestAdmissionCapability, validateRequestQueuePositionControl } from './RequestAdmissionControlValidation';
 import { validateRequestCancelControl, validateRequestRejectedControl, validateRequestResultControl, validateRequestStartControl } from './RequestControlValidation';
-import { validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
+import { validateInputLifecycleCapability, validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);
 }
@@ -42,16 +43,12 @@ function validateHelloAck(payload: Record<string, unknown>): void {
   requireVersion(payload);
   requireStringField(payload, 'sessionId');
 }
-function validatePong(payload: Record<string, unknown>): void {
-  if (payload.daemonVersion !== undefined) requireStringField(payload, 'daemonVersion');
-  if (payload.protocolVersion !== undefined) requireVersion(payload);
-  requireNumberField(payload, 'uptimeMs');
-}
 function validateSubscribe(payload: Record<string, unknown>): void {
   if (typeof payload.isTTY !== 'boolean') {
     fail('Subscribe message payload.isTTY must be a boolean.');
   }
   validateInteractiveCapability(payload);
+  validateInputLifecycleCapability(payload);
   validateRequestAdmissionCapability(payload);
   validateRequestLifecycleCapability(payload);
   requireSubscribeVerbosity(payload);
@@ -74,7 +71,7 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   subscribe: validateSubscribe,
   unsubscribe: noopValidator,
   ping: noopValidator,
-  pong: validatePong,
+  pong: validateDaemonPong,
   error: validateError,
   setRawMode: validateRawModeControl,
   rawModeChanged: validateRawModeControl,
@@ -83,7 +80,11 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   requestStart: validateRequestStartControl,
   requestCancel: validateRequestCancelControl,
   requestRejected: validateRequestRejectedControl,
-  requestResult: validateRequestResultControl
+  requestResult: validateRequestResultControl,
+  shutdown: noopValidator,
+  shutdownAck: noopValidator,
+  stdinReady: validateRequestCancelControl,
+  stdinEnd: validateRequestCancelControl
 };
 
 /** Structurally validates a parsed control message. @beta */

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add optional validated raw warm-project ranking inputs to workspace status while preserving unknown measurements and older-peer compatibility.",
+      "type": "minor"
+    }
+  ]
+}

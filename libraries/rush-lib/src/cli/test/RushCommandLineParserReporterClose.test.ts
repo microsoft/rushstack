@@ -78,27 +78,32 @@ describe('RushCommandLineParser reporter close', () => {
 
   it('waits for reporter close before an explicit parser exit', async () => {
     let resolveClose: (() => void) | undefined;
+    let markCloseStarted!: () => void;
+    const closeStarted: Promise<void> = new Promise((resolve) => { markCloseStarted = resolve; });
     const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
-      () =>
-        new Promise<void>((resolve: () => void) => {
+      () => {
+        markCloseStarted();
+        return new Promise<void>((resolve: () => void) => {
           resolveClose = resolve;
-        })
+        });
+      }
     );
     const sink: CapturingReporterSink = new CapturingReporterSink();
-    const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
-      .spyOn(process, 'exit')
-      .mockImplementation(() => undefined as never);
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    process.exitCode = 0;
-    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
-      throw new Error('parser failed');
-    });
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: `${__dirname}/repo`,
       reporter: { eventSink: sink, sessionId: 'parser-exit-close' },
       reporterCloseAsync: closeAsync
     });
-    const execution: Promise<boolean> = parser.executeAsync();
+    jest.spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+      .mockRejectedValue(new Error('parser failed'));
+    const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    process.exitCode = 0;
+
+    const execution: Promise<boolean> = parser.executeAsync(['build']);
+    await closeStarted;
 
     expect(closeAsync).toHaveBeenCalledTimes(1);
     expect(sink.events.at(-1)).toMatchObject({ type: 'sessionCompleted', payload: { exitCode: 1 } });
@@ -144,9 +149,7 @@ describe('RushCommandLineParser reporter close', () => {
   it('reports close failure without rejecting from parser finalization', async () => {
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: `${__dirname}/repo`,
-      reporterCloseAsync: async () => {
-        throw new Error('close failed');
-      }
+      reporterCloseAsync: async () => { throw new Error('close failed'); }
     });
     const errorSpy: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
@@ -169,9 +172,7 @@ describe('RushCommandLineParser reporter close', () => {
     jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
       throw new Error('configuration failed');
     });
-    const exitSpy: jest.SpyInstance = jest
-      .spyOn(process, 'exit')
-      .mockImplementation(() => undefined as never);
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: `${__dirname}/repo`,

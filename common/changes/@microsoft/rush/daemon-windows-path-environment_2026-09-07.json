@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve the inherited Windows Path when preparing native daemon operation environments.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

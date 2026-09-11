@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "comment": "Decode split UTF-8 independently per operation/output stream and preserve global activity stderr and newline semantics.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-terminal-renderer",
+  "email": "selarkin@microsoft.com"
+}

@@ -128,6 +128,12 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
   declare protected readonly rushConfiguration: RushConfiguration;
 
   protected override async onExecuteAsync(): Promise<void> {
+    await this.initializePluginsAsync();
+    return super.onExecuteAsync();
+  }
+
+  /** Initializes the native command plugins without CLI environment or process-lock side effects. */
+  protected async initializePluginsAsync(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
@@ -147,8 +153,6 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
         await sessionHooks.initialize.promise(this);
       }
     });
-
-    return super.onExecuteAsync();
   }
 
   /**

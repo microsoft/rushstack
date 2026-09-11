@@ -8,6 +8,7 @@ import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { IEnvironment } from '../../utilities/Utilities';
+import type { IOperationChildProcessReporter } from './OperationEventSink';
 
 /**
  * A snapshot of a previous operation execution, passed to runners to inform incremental behavior.
@@ -82,12 +83,23 @@ export interface IOperationRunnerContext {
   getInvalidateCallback(): (reason: string) => void;
 
   /**
+   * Allocates a negotiated reporter channel for a child process, when enabled.
+   *
+   * @internal
+   */
+  createChildProcessReporter(): IOperationChildProcessReporter | undefined;
+
+  /**
    * Invokes the specified callback with a terminal that is associated with this operation.
    *
    * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
    */
   runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
       logFileSuffix?: string;
@@ -144,6 +156,13 @@ export interface IOperationRunner {
   readonly isActive?: boolean;
 
   /**
+   * Last measured RSS of this runner's retained child process, in bytes.
+   * Undefined if unmeasured or no longer resident. This is a sample, not a limit, allocation estimate,
+   * or measurement of descendants. Runners sharing a process must not each report its RSS.
+   */
+  readonly residentMemoryBytes?: number;
+
+  /**
    * Method to be executed for the operation.
    * @param context - The context object containing information about the execution environment.
    * @param lastState - The last execution result of this operation, if any.
@@ -157,6 +176,7 @@ export interface IOperationRunner {
 
   /**
    * If this runner performs any background work to optimize future runs, this method will clean it up.
+   * Must be safe to call again after the resources have been released.
    */
   closeAsync?(): Promise<void>;
 }

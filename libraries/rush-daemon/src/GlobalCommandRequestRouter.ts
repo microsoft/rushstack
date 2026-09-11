@@ -33,6 +33,7 @@ import {
   RequestSchedulerErrorCode
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 
 /**
  * Executes caller-resolved global command logic.
@@ -143,6 +144,8 @@ async function executeAdmittedAsync(
   interactiveSession: IInteractiveRequestSession | undefined,
   workspaceSession: IWorkspaceSession
 ): Promise<IGlobalCommandRequestResult> {
+  assertWorkspaceRequestResourcesHealthy(workspaceSession);
+  workspaceSession.assertActive?.();
   const context: GlobalCommandExecutionContext = new GlobalCommandExecutionContext(
     request,
     client,

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Refresh quiet interactive operations and emit plaintext heartbeats using unrefed timers that stop when reporters close.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

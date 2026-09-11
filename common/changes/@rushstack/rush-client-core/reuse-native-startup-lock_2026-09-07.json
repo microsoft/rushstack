@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Reuse the validated native Windows LockFile exclusion for startup instead of maintaining a separate pipe mutex, preserving durable crash reservations and fail-closed handoff behavior.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

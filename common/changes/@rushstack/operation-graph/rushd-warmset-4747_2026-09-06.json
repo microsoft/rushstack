@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Include an optional measured process RSS sample in WatchLoop IPC completion messages for compatible hosts' best-effort warm resource accounting.",
+      "type": "patch"
+    }
+  ]
+}

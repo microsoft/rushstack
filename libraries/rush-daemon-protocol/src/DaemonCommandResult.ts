@@ -16,6 +16,11 @@ export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure
  * @beta
  */
 export interface IDaemonCommandResult {
+  /**
+   * Protocol 0.10: no execution or request IO occurred, and a successor has been selected.
+   * Retry at most once, after attested predecessor ownership release. Never infer this from an error.
+   */
+  readonly retryAfterRestart?: true;
   /** Whether cancellation or disconnect was observed, even if a cleanup failure determines the outcome. */
   readonly aborted: boolean;
   /** The typed admission failure, when execution never started. */

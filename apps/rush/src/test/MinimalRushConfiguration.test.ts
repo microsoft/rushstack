@@ -152,6 +152,21 @@ describe(MinimalRushConfiguration.name, () => {
     );
   });
 
+  it('uses the caller-owned discovery writer when rush.json cannot load', () => {
+    const repo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    const writeLine = jest.fn();
+    jest.spyOn(process, 'cwd').mockReturnValue(repo);
+    jest.spyOn(JsonFile, 'load').mockImplementation(() => {
+      throw new SyntaxError('Malformed rush.json');
+    });
+    process.argv = ['node', 'rush', 'build'];
+
+    expect(MinimalRushConfiguration.loadFromDefaultLocation(writeLine)).toBeUndefined();
+    expect(writeLine.mock.calls).toEqual([[`Found configuration in ${path.join(repo, 'rush.json')}`], ['']]);
+    expect(consoleLog).not.toHaveBeenCalled();
+  });
+
   it('suppresses legacy discovery output for an explicit reporter', () => {
     const legacyRepo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
     const consoleLog: jest.SpiedFunction<typeof console.log> = jest
@@ -186,11 +201,30 @@ describe(MinimalRushConfiguration.name, () => {
     ]);
   });
 
+  it.each(['json', 'ai', 'file'])(
+    'keeps discovery off stdout when an incompatible engine rejects %s',
+    (reporter) => {
+      const legacyRepo: string = path.join(__dirname, 'sandbox', 'legacy-repo');
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+      jest.spyOn(PackageJsonLookup, 'loadOwnPackageJson').mockReturnValue({
+        name: '@microsoft/rush',
+        version: '5.178.1'
+      });
+      jest.spyOn(process, 'cwd').mockReturnValue(path.join(legacyRepo, 'project'));
+      delete process.env.RUSH_REPORTER;
+      process.argv = ['node', 'rush', 'build', `--reporter=${reporter}`];
+
+      MinimalRushConfiguration.loadFromDefaultLocation();
+
+      expect(consoleLog).not.toHaveBeenCalled();
+    }
+  );
+
   it.each([
     ['environment fallback', ['build', '--reporter=json'], 'legacy'],
     ['explicit legacy reporter', ['build', '--reporter=legacy'], undefined],
     ['help fallback', ['build', '--reporter=json', '--help'], undefined],
-    ['cross-version fallback', ['build', '--reporter=json'], undefined]
+    ['cross-version fallback', ['build'], undefined]
   ])('restores legacy discovery output in an opted-in repository for %s', (testName, args, envValue) => {
     void testName;
     const repo: string = path.join(__dirname, 'sandbox', 'repo');

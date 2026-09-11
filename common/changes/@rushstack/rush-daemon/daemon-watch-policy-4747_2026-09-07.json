@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Apply daemon.watch to persistent project file observation with safe idle teardown/re-attachment, preserved runners/results and truthful cleanup accounting. Keep root/config guards and explicit request reconciliation active; never schedule autonomous scripts.",
+      "type": "patch"
+    }
+  ]
+}

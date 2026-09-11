@@ -3,6 +3,7 @@
 
 import { RushDaemonHost } from './RushDaemonHost';
 import type { IRushDaemonHostOptions } from './RushDaemonHost';
+import { getInstalledWorkspaceSuccessorLaunchAsync } from './WorkspaceProcessRestart';
 
 /**
  * Options for the daemon serve lifecycle.
@@ -27,9 +28,21 @@ export async function serveRushDaemonAsync(options: IRushDaemonServeOptions): Pr
     : createProcessShutdownSignal();
   let host: RushDaemonHost | undefined;
   try {
-    host = await RushDaemonHost.startAsync(options);
+    host = await RushDaemonHost.startAsync({
+      ...options,
+      getSuccessorLaunchAsync:
+        options.getSuccessorLaunchAsync ??
+        (async (context) => {
+          if (options.startupOptions && Object.keys(options.startupOptions).length > 0) {
+            throw new Error('Custom startup options require an explicit successor launcher.');
+          }
+          return await getInstalledWorkspaceSuccessorLaunchAsync(context);
+        })
+    });
     await options.onReady?.(host);
-    await waitForAbortAsync(signalRegistration.signal);
+    await waitForShutdownAsync(host, signalRegistration.signal);
+    await host.closeAsync();
+    await host.restartCompleted;
   } finally {
     signalRegistration.dispose();
     await host?.closeAsync();
@@ -55,9 +68,16 @@ function createProcessShutdownSignal(): IShutdownSignalRegistration {
   };
 }
 
-function waitForAbortAsync(signal: AbortSignal): Promise<void> {
+function waitForShutdownAsync(host: RushDaemonHost, signal: AbortSignal): Promise<void> {
   if (signal.aborted) {
     return Promise.resolve();
   }
-  return new Promise<void>((resolve: () => void) => signal.addEventListener('abort', () => resolve(), { once: true }));
+  return new Promise<void>((resolve: () => void) => {
+    const onAbort: () => void = () => resolve();
+    signal.addEventListener('abort', onAbort, { once: true });
+    void host.closed.then(() => {
+      signal.removeEventListener('abort', onAbort);
+      resolve();
+    });
+  });
 }

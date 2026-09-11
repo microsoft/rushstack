@@ -25,6 +25,11 @@ export {
   type IRushReportingConfiguration,
   type ITryFindRushJsonLocationOptions
 } from './api/RushConfiguration';
+export {
+  resolveDaemonConfiguration,
+  daemonEnvironmentVariables,
+  type IDaemonConfigurationJson
+} from './api/DaemonConfiguration';
 
 export { Subspace } from './api/Subspace';
 export { SubspacesConfiguration } from './api/SubspacesConfiguration';
@@ -76,6 +81,7 @@ export {
 } from './api/EnvironmentConfiguration';
 
 export { RushConstants } from './logic/RushConstants';
+export { RushXCommand, type IRushXCommandLineArguments, type IRushXCommandOptions } from './cli/RushXCommandLine';
 
 export { type PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
@@ -84,6 +90,7 @@ export { RushConfigurationProject } from './api/RushConfigurationProject';
 export {
   type IRushProjectJson as _IRushProjectJson,
   type IOperationSettings,
+  type IDaemonIpcConfiguration,
   type NodeVersionGranularity,
   RushProjectConfiguration,
   type IRushPhaseSharding
@@ -163,6 +170,22 @@ export type {
 export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
 export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export {
+  PhasedCommandEngine,
+  type IPhasedCommandEngine,
+  type IParsePhasedCommandOptions
+} from './api/PhasedCommandEngine';
+export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
+export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
+export {
+  captureWorkspaceInputFingerprintAsync,
+  captureProjectConfigurationFingerprintAsync,
+  classifyWorkspaceInputChange,
+  WorkspaceInputChangeTier,
+  WorkspaceRuntimeFingerprintCache,
+  type IWorkspaceInputFingerprint,
+  type IWorkspaceInputFingerprintOptions
+} from './api/WorkspaceInputFingerprint';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {
@@ -203,6 +226,7 @@ export {
 } from './pluginFramework/PhasedCommandHooks';
 export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
 export type {
+  IOperationChildProcessReporter as _IOperationChildProcessReporter,
   IOperationGraphEventSink as _IOperationGraphEventSink,
   IOperationActivityOptions as _IOperationActivityOptions
 } from './logic/operations/OperationEventSink';

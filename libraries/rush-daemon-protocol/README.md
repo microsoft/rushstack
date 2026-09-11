@@ -29,6 +29,40 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
 - **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
   typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
   and Rush action construction remain outside the protocol.
+- **Daemon lifecycle controls (0.6)** — after a compatible `hello`, a client can send
+  `shutdown` and receive `shutdownAck` before connection closure. Clients must negotiate at least
+  `DAEMON_LIFECYCLE_PROTOCOL_MINOR` before sending this control. `pong` can also report the daemon's
+  PID and resident memory in bytes; older peers may omit these fields.
+- **Input lifecycle controls (0.7)** — `supportsInputLifecycle` negotiates `stdinReady`
+  and `stdinEnd`. The host grants the first write credit only after the request attaches
+  its input destination, then grants another after each write drains. The client sends
+  one bounded chunk per credit and EOF after all chunks. Empty data is never interpreted
+  as EOF. Peers that did not negotiate the capability receive no new controls.
+- **Invocation kind (0.8)** - optional `invocationKind: "rush" | "rushx"` selects the
+  native parser independently of `commandOrigin`. Omission retains legacy Rush
+  routing; custom workspace commands are never inferred to be package scripts.
+  A Rushx client must negotiate at least `DAEMON_INVOCATION_KIND_PROTOCOL_MINOR`
+  before submitting its request. Older peers could ignore the discriminator,
+  so the client falls back before `requestStart` or input consumption.
+- **Graph generation fencing (0.9)** - graph snapshots carry an opaque
+  `workspaceGeneration` token. Mutation requests must echo it in
+  `expectedWorkspaceGeneration`; the server checks it under exclusive admission
+  before touching operations. Tokens change on session or process replacement.
+  Clients must negotiate `DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR` before mutation;
+  an older server could otherwise ignore the reference.
+- **Workspace restart (0.10)** - native `install`/`update` routing is capability-gated.
+  A failure result may include `retryAfterRestart: true` only when no execution or
+  request IO occurred and an available successor was selected. It cannot coexist
+  with cancellation, admission errors or operation results. Clients may retry once
+  after attested predecessor ownership release, never on transport loss or an error
+  string. The ordinary mutation result has no retry flag and drains before restart.
+- **Read-only workspace status** - optional `pong.payload.workspace` reports the provider generation,
+  installed session token, graph existence and real warm accounting. An absent token means no session is
+  installed; an absent `warmSet` means no controller is attached, not zero memory. Warm status includes
+  effective configuration, maintenance state/failure, retained/protected/watched projects, measured RSS,
+  unmeasured runners, pressure and cleanup diagnostics. Child RSS is a last-completion sample, not a
+  process-tree ceiling. Nested records and numeric fields are validated. Older pong shapes remain valid;
+  this additive field does not change the 0.9 request, generation-fencing or retry contracts.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

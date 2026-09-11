@@ -8,6 +8,34 @@ import {
   RequestSchedulerErrorCode
 } from '../RequestScheduler';
 
+describe('exclusive generation handoff', () => {
+  it('atomically downgrades without admitting a queued writer before the initiating reader finishes', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const owner: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    let writerAdmitted: boolean = false;
+    const writer: Promise<IRequestLease> = scheduler
+      .acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive
+      })
+      .then((lease) => {
+        writerAdmitted = true;
+        return lease;
+      });
+    scheduler.downgradeExclusiveLease(owner, RequestExclusivityClass.SharedBuild);
+    expect(owner.exclusivityClass).toBe(RequestExclusivityClass.SharedBuild);
+    await Promise.resolve();
+    expect(writerAdmitted).toBe(false);
+    owner.release();
+    const next: IRequestLease = await writer;
+    expect(writerAdmitted).toBe(true);
+    next.release();
+    expect(scheduler.activeRequestCount).toBe(0);
+    expect(() => scheduler.downgradeExclusiveLease(owner, RequestExclusivityClass.SharedBuild)).toThrow();
+  });
+});
+
 describe(RequestScheduler.name, () => {
   it('admits requests from the same shared class concurrently', async () => {
     const scheduler: RequestScheduler = new RequestScheduler();

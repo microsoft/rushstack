@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Exercise real warm Node IPC children directly on Windows, canonicalize fixture workspace paths for watcher expectations, preserve native active/protected lifetime coverage without timeout increases, and surface complete operation failures in test diagnostics.",
+      "type": "patch"
+    }
+  ]
+}

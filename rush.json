@@ -1296,6 +1296,18 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/rush-client-core",
+      "projectFolder": "libraries/rush-client-core",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "projectFolder": "apps/rush-cli-client",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",

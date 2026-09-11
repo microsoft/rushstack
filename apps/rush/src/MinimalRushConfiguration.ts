@@ -55,7 +55,9 @@ export class MinimalRushConfiguration {
     this.#useRushReporter = experimentsConfiguration?.useRushReporter === true;
   }
 
-  public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
+  public static loadFromDefaultLocation(
+    writeLine: (message: string) => void = (message) => console.log(message)
+  ): MinimalRushConfiguration | undefined {
     const showVerbose: boolean = !RushCommandLineParser.shouldRestrictConsoleOutput();
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
       showVerbose: false
@@ -76,13 +78,13 @@ export class MinimalRushConfiguration {
         const effectiveRushVersion: string = getRushPreviewVersion() ?? configuration.rushVersion;
         legacyPresentation =
           legacyFallbackRequested ||
-          effectiveRushVersion !== currentPackageVersion ||
+          (effectiveRushVersion !== currentPackageVersion && explicitReporter === undefined) ||
           (!configuration.useRushReporter && explicitReporter === undefined);
       }
       if (showVerbose && legacyPresentation) {
         // Preserve discovery even when the full engine must report a configuration load error.
-        console.log('Found configuration in ' + rushJsonLocation);
-        console.log('');
+        writeLine('Found configuration in ' + rushJsonLocation);
+        writeLine('');
       }
       return configuration;
     } else {

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Document daemon.watch as persistent host observation of warm projects, defaulting to root/config guards only without enabling automatic builds.",
+      "type": "patch"
+    }
+  ]
+}

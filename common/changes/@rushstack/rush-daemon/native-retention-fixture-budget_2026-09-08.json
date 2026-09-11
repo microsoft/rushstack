@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Isolate native retention fixtures from the surrounding Jest worker's RSS, following the graph-fixture pattern; leave production memory defaults and dedicated pressure tests unchanged.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

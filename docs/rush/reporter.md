@@ -156,6 +156,11 @@ The Rush temp folder is normally `<repo>/common/temp`. If `RUSH_TEMP_FOLDER` is
 set, Rush applies its normal path resolution and uses that same folder for
 reporter logs and purge behavior.
 
+This automatic invocation log always retains `debug` detail, including in
+`--reporter=file` mode. Selecting a quieter primary `--log-level` does not
+reduce the full-log artifact. For an additional filtered file, use a destination
+such as `--output=file://./summary.jsonl?logLevel=normal`.
+
 `<rush-temp-folder>/rush-logs/latest.log` points to, or copies, the current or
 latest successfully opened invocation log. It can be incomplete while Rush is
 still running; after the command exits, it contains the finalized log when

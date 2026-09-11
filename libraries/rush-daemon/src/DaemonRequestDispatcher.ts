@@ -19,6 +19,9 @@ import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { PhasedRequestRouter } from './PhasedRequestRouter';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
+import { getDaemonGraphObserver } from './DaemonGraphObserver';
+import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 
 /** A request resolved by the integration that owns Rush command parsing. @beta */
 export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaemonGlobalRequest;
@@ -27,6 +30,8 @@ export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaem
 export interface IResolvedDaemonPhasedRequest {
   readonly kind: 'phased';
   readonly request: IDaemonPhasedRequest;
+  /** Native selection has already resolved all required project/phase dependencies. */
+  readonly exactSelection?: boolean;
 }
 
 /** A resolver outcome that uses the existing isolated global executor contract. @beta */
@@ -45,6 +50,7 @@ export interface IResolveDaemonRequestOptions {
 
 /** Resolves a validated wire envelope without coupling rushd to CLI parser internals. @beta */
 export interface IDaemonRequestResolver {
+  readonly workspaceLifecycle?: IWorkspaceResolverLifecycle;
   readonly [Symbol.asyncDispose]?: () => Promise<void>;
   resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
 }
@@ -78,64 +84,134 @@ export interface IDaemonRequestDispatchClient {
   writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
 }
 
+/** Immutable generation selected before command resolution. @beta */
+export interface IDispatchWorkspaceRequestOptions {
+  readonly envelope: IDaemonRequestEnvelope;
+  readonly client: IDaemonRequestDispatchClient;
+  readonly workspaceSession: IWorkspaceSession;
+  readonly resolver: IDaemonRequestResolver | undefined;
+  readonly onExecutionStarting?: () => void;
+}
+
+/** Executes an already admitted workspace generation without resolving against another session. @beta */
+export type DispatchWorkspaceRequestAsync = (
+  options: IDispatchWorkspaceRequestOptions
+) => Promise<IDaemonCommandResult | undefined>;
+
+/** Host-owned lifecycle admission surrounding existing command routers. @beta */
+export interface IDaemonRequestLifecycle extends AsyncDisposable {
+  dispatchAsync(
+    envelope: IDaemonRequestEnvelope,
+    client: IDaemonRequestDispatchClient,
+    dispatchAsync: DispatchWorkspaceRequestAsync
+  ): Promise<void>;
+}
+
 /**
  * Shared resolver-backed integration between wire requests and the accumulated typed WS2 routers.
  *
  * @beta
  */
 export class DaemonRequestDispatcher implements AsyncDisposable {
-  readonly #globalRouter: GlobalCommandRequestRouter;
-  readonly #phasedRouter: PhasedRequestRouter;
   readonly #resolver: IDaemonRequestResolver | undefined;
-  readonly #workspaceSession: IWorkspaceSession;
+  readonly #workspaceSession: IWorkspaceSession | undefined;
+  readonly #lifecycle: IDaemonRequestLifecycle | undefined;
   #disposePromise: Promise<void> | undefined;
 
-  public constructor(workspaceSession: IWorkspaceSession, resolver?: IDaemonRequestResolver) {
-    this.#workspaceSession = workspaceSession;
-    this.#resolver = resolver;
-    this.#globalRouter = new GlobalCommandRequestRouter(workspaceSession);
-    this.#phasedRouter = new PhasedRequestRouter(workspaceSession);
+  public constructor(
+    workspaceSession: IWorkspaceSession,
+    resolver?: IDaemonRequestResolver,
+    lifecycle?: IDaemonRequestLifecycle
+  ) {
+    this.#workspaceSession = lifecycle ? undefined : workspaceSession;
+    this.#resolver = lifecycle ? undefined : resolver;
+    this.#lifecycle = lifecycle;
   }
 
   public async dispatchAsync(
     envelope: IDaemonRequestEnvelope,
     client: IDaemonRequestDispatchClient
   ): Promise<void> {
-    if (!this.#resolver) {
-      throw new DaemonRequestDispatchError(
-        'unsupported',
-        'This daemon host has no command request integration configured.'
-      );
+    if (this.#lifecycle) {
+      await this.#lifecycle.dispatchAsync(envelope, client, dispatchWorkspaceRequestAsync);
+    } else {
+      await dispatchWorkspaceRequestAsync({
+        envelope,
+        client,
+        workspaceSession: this.#workspaceSession!,
+        resolver: this.#resolver
+      });
     }
-    const resolved: ResolvedDaemonRequest = await this.#resolver.resolveRequestAsync({
-      abortSignal: client.abortSignal,
-      envelope,
-      workspaceSession: this.#workspaceSession
-    });
-    if (resolved.kind === 'phased') {
-      validateResolvedPhasedRequest(envelope, resolved.request);
-      await this.#phasedRouter.executeAsync(resolved.request, createPhasedClient(client));
-      return;
-    }
-    const request: IResolvedGlobalCommandRequest = this.#globalRouter.resolveRequest({
-      admission: envelope.admission,
-      commandName: envelope.commandName,
-      commandOrigin: envelope.commandOrigin,
-      cwd: envelope.cwd,
-      environment: envelope.environment,
-      requestId: envelope.requestId,
-      terminal: {
-        ...envelope.terminal,
-        columns: envelope.terminal.columns
-      }
-    });
-    await this.#globalRouter.executeAsync(request, resolved.executor, createGlobalClient(client));
   }
 
   public [Symbol.asyncDispose](): Promise<void> {
-    this.#disposePromise ??= this.#resolver?.[Symbol.asyncDispose]?.() ?? Promise.resolve();
+    this.#disposePromise ??= this.#lifecycle
+      ? Promise.resolve(this.#lifecycle[Symbol.asyncDispose]())
+      : (this.#resolver?.[Symbol.asyncDispose]?.() ?? Promise.resolve());
     return this.#disposePromise;
   }
+}
+
+async function dispatchWorkspaceRequestAsync(
+  options: IDispatchWorkspaceRequestOptions
+): Promise<IDaemonCommandResult | undefined> {
+  const { envelope, client, workspaceSession, resolver, onExecutionStarting } = options;
+  workspaceSession.assertActive?.();
+  if (
+    !isRushxInvocation(envelope) &&
+    envelope.commandOrigin === 'built-in' &&
+    (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
+  ) {
+    onExecutionStarting?.();
+    await new DaemonGraphRequestRouter(workspaceSession).executeAsync(envelope, client);
+    return undefined;
+  }
+  if (!resolver) {
+    throw new DaemonRequestDispatchError(
+      'unsupported',
+      'This daemon host has no command request integration configured.'
+    );
+  }
+  const resolved: ResolvedDaemonRequest = await resolver.resolveRequestAsync({
+    abortSignal: client.abortSignal,
+    envelope,
+    workspaceSession
+  });
+  workspaceSession.assertActive?.();
+  if (workspaceSession.operationGraph) {
+    getDaemonGraphObserver(workspaceSession.operationGraph);
+  }
+  if (resolved.kind === 'phased') {
+    validateResolvedPhasedRequest(envelope, resolved.request);
+    return await new PhasedRequestRouter(workspaceSession).executeAsync(
+      resolved.request,
+      createPhasedClient(client),
+      resolved.exactSelection,
+      onExecutionStarting
+    );
+  }
+  const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);
+  const request: IResolvedGlobalCommandRequest = globalRouter.resolveRequest({
+    admission: envelope.admission,
+    commandName: envelope.commandName,
+    commandOrigin: isRushxInvocation(envelope) ? 'custom' : envelope.commandOrigin,
+    cwd: envelope.cwd,
+    environment: envelope.environment,
+    requestId: envelope.requestId,
+    terminal: {
+      ...envelope.terminal,
+      columns: envelope.terminal.columns
+    }
+  });
+  return await globalRouter.executeAsync(
+    request,
+    async (context) => {
+      workspaceSession.assertActive?.();
+      onExecutionStarting?.();
+      return await resolved.executor(context);
+    },
+    createGlobalClient(client)
+  );
 }
 
 function validateResolvedPhasedRequest(

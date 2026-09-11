@@ -17,8 +17,12 @@ plaintext, JSON, AI, file, and quiet modes, plus parser failure, help, and comma
 It verifies payload-only machine stdout, one visible writer, ordered/lossless plaintext grouping from a
 same-invocation JSON sidecar, final artifact completeness, owner-only log permissions, failure flushing,
 AI parser-error context, command-JSON ownership, exclusive sidecar destinations, and the
-`RUSH_REPORTER=legacy` rollback transcript. Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
-`RUSH_QUIET_MODE` values are removed from the self-check matrix. It also verifies CI plaintext output,
+`RUSH_REPORTER=legacy` rollback transcript. Non-phased `rush list` output must also remain structured in
+JSON mode and reach the full-detail log without leaking onto stdout in file mode.
+Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
+`RUSH_QUIET_MODE` values are removed from the self-check matrix. The matrix sets `RUSH_PREVIEW_VERSION`
+to the locally built Rush package version so it exercises the integrated frontend and engine even when
+`rush.json` pins an older release; preview warnings remain on stderr. It also verifies CI plaintext output,
 cache-path output, a matching `RUSH_PREVIEW_VERSION`, normalized `RUSH_TEMP_FOLDER` log placement, and
 matching purge-path selection. Captured stdout/stderr files are written to a temporary folder.
 
@@ -52,11 +56,6 @@ Repositories can opt in without a command-line flag by setting `"useRushReporter
 `common/config/rush/experiments.json`. Remove that setting or use `RUSH_REPORTER=legacy` for immediate
 rollback.
 
-Help stays on the legacy parser path. With repository opt-in, parameters declared for a command remain
-command-owned even when their values look like reporter controls (for example, `--output=json://...`
-or `--log-level=debug`). Custom `--verbose` flags are preserved as well; help does not run the command
-or open reporter output files.
-
 The expected output is shape-based:
 
 - legacy keeps the existing Rush banner, operation blocks, and final status sections;
@@ -79,3 +78,8 @@ After the demo exits, inspect the latest invocation log with:
 ls -lt common/temp/rush-logs
 sed -n '1,120p' common/temp/rush-logs/latest.log
 ```
+
+Help stays on the legacy parser path. With repository opt-in, parameters declared for a command remain
+command-owned even when their values look like reporter controls (for example, `--output=json://...`
+or `--log-level=debug`). Custom `--verbose` flags are preserved as well; help does not run the command
+or open reporter output files.

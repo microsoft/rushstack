@@ -1,0 +1,39 @@
+{
+  "name": "@rushstack/rush-cli-client",
+  "version": "0.1.0",
+  "description": "Opt-in Rush and rushx daemon clients",
+  "bin": {
+    "rush-client": "./bin/rush-client",
+    "rushx-client": "./bin/rushx-client"
+  },
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "apps/rush-cli-client"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@microsoft/rush": "workspace:*",
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-client-core": "workspace:*",
+    "@rushstack/rush-daemon": "workspace:*",
+    "@rushstack/rush-daemon-transport": "workspace:*",
+    "@rushstack/rush-daemon-protocol": "workspace:*",
+    "@rushstack/rush-terminal-renderer": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  }
+}
