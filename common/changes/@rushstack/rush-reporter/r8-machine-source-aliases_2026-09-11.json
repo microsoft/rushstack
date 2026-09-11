@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Redact classified secret source aliases in machine JSON without losing owner-only file context, qualify every machine output for producer privacy, and document/test late-artifact-safe AI flush reservation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}
