@@ -1,0 +1,914 @@
+{
+  "suppressions": [
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".applyStaticStyles",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".handleMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".handleMessage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".wireActions",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/dashboard.ts",
+      "scopeId": ".wireActions.hasSelection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser._ansiStateToStyle",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser._applySgr",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser._applySgr",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser._applySgr",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser._parseSgrParams",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser._parseSgrParams",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser.process",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser.process",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/ansiSgrParser.ts",
+      "scopeId": ".AnsiSgrParser.process",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/dashboardMutations.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/dashboardWebSocket.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/dashboardWebSocket.ts",
+      "scopeId": ".createDashboardWebSocketController",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/dashboardWebSocket.ts",
+      "scopeId": ".createDashboardWebSocketController.connect",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/dashboardWebSocket.ts",
+      "scopeId": ".createDashboardWebSocketController.connect",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/dashboardWebSocket.ts",
+      "scopeId": ".createDashboardWebSocketController.disconnect",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/dashboardWebSocket.ts",
+      "scopeId": ".createDashboardWebSocketController.scheduleReconnect",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".computeFilterSetsCore",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".computeFilterSetsCore",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".pruneGraphOperations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".pruneGraphOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".pruneGraphOperations",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphFiltering.ts",
+      "scopeId": ".pruneGraphOperations.resolveDeps",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._beginDragSelection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._beginDragSelection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._expandSelectionConsumers",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._expandSelectionConsumers",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._expandSelectionDependencies",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._updateDragModifierMode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._updateMarquee",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._updateMarquee",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphSelection.ts",
+      "scopeId": ".createGraphSelectionController._wireGraphMarqueeSelection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph.criticalPathLen",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph.criticalPathLen",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.buildGraph.getReachable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.computeGraphOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.computeLevels",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.computeLevels",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.computeLevels",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.dimColor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.dimColor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.getStatusColors",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.updateGraph",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.updateGraph",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.updateGraph",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.updateGraph",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/graphView.ts",
+      "scopeId": ".createGraphViewController.updateGraph.quadratic",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/leftBar.ts",
+      "scopeId": ".wireLeftBarActions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/leftBar.ts",
+      "scopeId": ".wireLeftBarActions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/leftBar.ts",
+      "scopeId": ".wireLeftBarActions",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/mainBar.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/mainBar.ts",
+      "scopeId": ".isTextEditingTarget",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/mainBar.ts",
+      "scopeId": ".wireMainBarActions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/mainBar.ts",
+      "scopeId": ".wireMainBarActions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/mainBar.ts",
+      "scopeId": ".wireMainBarActions",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.computePhaseSummaries",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.computePhaseSummaries",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.computePhaseSummaries",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderLegend",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderLegend",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderLegend",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderLegend.makeNodeBox",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderPhasePane",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderPhasePane",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderPhasePane",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/modules/phaseLegend.ts",
+      "scopeId": ".createPhaseLegendController.renderPhasePane",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/selectionBar.ts",
+      "scopeId": ".createSelectionBarController",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/selectionBar.ts",
+      "scopeId": ".createSelectionBarController.updateSelectionUI",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/selectionBar.ts",
+      "scopeId": ".createSelectionBarController.updateSelectionUI",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/selectionBar.ts",
+      "scopeId": ".createSelectionBarController.updateSelectionUI",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".buildRunPolicyText",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".computeDisplayStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".enabledGlyph",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/statusHelpers.ts",
+      "scopeId": ".getStatusColors",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.buildPivotData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.handleMultiSelectGroup",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.handleMultiSelectGroup",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.handlePivotCellClick",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.handlePivotCellClick",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.handlePivotCellClick",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.renderTable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/tableView.ts",
+      "scopeId": ".createTableViewController.renderTable",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._appendChunk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._appendChunk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._appendChunk",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._wireResizer",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._wireResizer",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._wireResizer",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._wireToggle",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/terminalPane.ts",
+      "scopeId": "._wireToggle",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".computeWsUrl",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".overallStatusText",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".setConnected",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".setConnected",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".updateManagerState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".updateManagerState",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/modules/topBar.ts",
+      "scopeId": ".updateStatusPill",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/urlState.ts",
+      "scopeId": ".loadDashboardUrlState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/viewBar.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/modules/viewBar.ts",
+      "scopeId": "._applyViewVisibility",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/viewBar.ts",
+      "scopeId": ".wireViewBar",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modules/viewBar.ts",
+      "scopeId": ".wireViewBar",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/actionWiring.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/actionWiring.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/actionWiring.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/actionWiring.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/actionWiring.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/actionWiring.test.ts",
+      "scopeId": ".getRefs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/dashboard.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/dashboard.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/dashboard.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/dashboard.test.ts",
+      "scopeId": ".MockWebSocket",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/dashboardState.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/dashboardState.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/dashboardState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/dashboardState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/dashboardWebSocket.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/dashboardWebSocket.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/dashboardWebSocket.test.ts",
+      "scopeId": ".MockWebSocket",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/graphSelection.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/graphSelection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/graphView.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/graphView.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/graphView.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/graphView.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/outputPanels.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/outputPanels.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/outputPanels.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/outputPanels.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/outputPanels.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/tableView.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/tableView.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/tableView.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/tableView.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/viewBar.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/viewBar.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/viewBar.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

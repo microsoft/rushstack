@@ -1,0 +1,79 @@
+{
+  "suppressions": [
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeAsSubprocessAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeAsSubprocessAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeAsSubprocessAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeSync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeSync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeSync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._invokeSync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._prepareStorybookAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._prepareStorybookAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._runStorybookAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin._runStorybookAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/StorybookPlugin.ts",
+      "scopeId": ".StorybookPlugin.apply",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

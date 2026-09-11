@@ -1,0 +1,209 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem._purge",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.flush",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.flush",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.flush",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.watch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.watch",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".WatchCallback",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".WatchUndelayedCallback",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".tryLoadRspackConfigurationAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".tryLoadRspackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".tryLoadRspackConfigurationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".tryLoadRspackConfigurationFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackConfigurationLoader.ts",
+      "scopeId": ".tryLoadRspackConfigurationFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._getRspackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._getRspackConfigurationAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._getRspackConfigurationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._normalizeError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._normalizeError",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._normalizeError",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._recordErrors",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._recordErrors",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._recordErrors",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin._runRspackWatchAsync.defaultDevServerOptions.onListening",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin.accessor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".IRspackPluginAccessorHooks",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

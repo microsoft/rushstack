@@ -1,0 +1,224 @@
+{
+  "suppressions": [
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".SassPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".SassPlugin.apply.compileFilesAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".SassPlugin.apply.initializeSassProcessorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassPlugin.ts",
+      "scopeId": ".SassPlugin.apply.initializeSassProcessorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._cache",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._cache",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizeFileInnerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizeFileInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizeFileInnerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizeHeftInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizePackageInnerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._canonicalizePackageInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._compileFileAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._compileFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor._compileFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.compileFilesAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.compileFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.compileFilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.loadCacheAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".buildExtensionClassifier",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".buildExtensionClassifier",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".buildExtensionClassifier",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".createDTS",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".createDTS",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".createDTS",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".generateJsShimContent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".heftUrlToPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".isSassPartial",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".replaceTilde",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/SassProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/SassProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/SassProcessor.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/SassProcessor.test.ts",
+      "scopeId": ".getCssOutput",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/SassProcessor.test.ts",
+      "scopeId": ".normalizeSourceMapForSnapshot",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

@@ -1,0 +1,1124 @@
+{
+  "suppressions": [
+    {
+      "file": "src/cli/ApiDocumenterCommandLine.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".BaseAction._applyInheritDoc",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".BaseAction._applyInheritDoc",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".BaseAction._applyInheritDoc",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/BaseAction.ts",
+      "scopeId": ".BaseAction.buildApiModel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/GenerateAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/GenerateAction.ts",
+      "scopeId": ".GenerateAction.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/GenerateAction.ts",
+      "scopeId": ".GenerateAction.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/MarkdownAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/YamlAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/cli/YamlAction.ts",
+      "scopeId": ".YamlAction.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/DocumenterConfig.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/documenters/DocumenterConfig.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/documenters/DocumenterConfig.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._buildTocItems2",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._buildTocItems2",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._buildTocItems2",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._filterItem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._filterItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._filterItem",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._findInlineTagByName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._generateTocPointersMap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._generateTocPointersMap",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._generateTocPointersMap",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/ExperimentalYamlDocumenter.ts",
+      "scopeId": ".ExperimentalYamlDocumenter._shouldNotIncludeInPointersMap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/IConfigFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._appendAndMergeSection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._appendExcerptTokenWithHyperlinks",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._appendExcerptTokenWithHyperlinks",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._createDescriptionCell",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._createDescriptionCell",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._createModifiersCell",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._createModifiersCell",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._getFilenameForApiItem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._getFilenameForApiItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._getFilenameForApiItem",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._getMembersAndWriteIncompleteWarning",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._getMembersAndWriteIncompleteWarning",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeApiItemPage",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeApiItemPage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeApiItemPage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeBreadcrumb",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeBreadcrumb",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeClassTables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeClassTables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeClassTables",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeDefaultValueSection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeDefaultValueSection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeDefaultValueSection",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeEnumTables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeInterfaceTables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeInterfaceTables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeInterfaceTables",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeModelTable",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeModelTable",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writePackageOrNamespaceTables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writePackageOrNamespaceTables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writePackageOrNamespaceTables",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeParameterTables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeParameterTables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeParameterTables",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeRemarksSection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeRemarksSection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeRemarksSection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeThrowsSection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeThrowsSection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/MarkdownDocumenter.ts",
+      "scopeId": ".MarkdownDocumenter._writeThrowsSection",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/OfficeYamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/documenters/OfficeYamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/documenters/OfficeYamlDocumenter.ts",
+      "scopeId": ".OfficeYamlDocumenter.onCustomizeYamlItem",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/documenters/OfficeYamlDocumenter.ts",
+      "scopeId": ".OfficeYamlDocumenter.onCustomizeYamlItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._buildTocItems",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._buildTocItems",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._ensureYamlReferences",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._flattenNamespaces",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._flattenNamespaces",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._flattenNamespaces",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._flattenNamespaces",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._generateYamlItem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._generateYamlItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._generateYamlItem",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._generateYamlItem",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getLogicalChildren",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getLogicalChildren",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getTocItemName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getTocItemName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getYamlFilePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getYamlFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getYamlItemName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._getYamlItemName",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._initApiItemsRecursive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._populateYamlClassOrInterface",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._populateYamlClassOrInterface",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._populateYamlClassOrInterface",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._populateYamlFunctionLike",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._populateYamlFunctionLike",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._populateYamlTypeParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._recordYamlReference",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._recordYamlReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._recordYamlReference",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._recordYamlReference",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._recordYamlReference",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._renderInheritance",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._renderInheritance",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._renderInheritance",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._renderType",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._renderType",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._renderType",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._shouldEmbed",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._shouldInclude",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._visitApiItems",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._visitApiItems",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._visitApiItems",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._visitApiItems",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter._visitApiItems",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeLinkTagWithCodeDestination",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeLinkTagWithCodeDestination",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeLinkTagWithCodeDestination",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeNode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeNode",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/markdown/CustomMarkdownEmitter.ts",
+      "scopeId": ".CustomMarkdownEmitter.writeNode",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writeLinkTagWithUrlDestination",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writeNode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writeNode",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writeNodes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writePlainText",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writePlainText",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/markdown/MarkdownEmitter.ts",
+      "scopeId": ".MarkdownEmitter.writePlainText",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/markdown/test/CustomMarkdownEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/markdown/test/CustomMarkdownEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/markdown/test/CustomMarkdownEmitter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/nodes/CustomDocNodeKind.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/nodes/CustomDocNodeKind.ts",
+      "scopeId": ".CustomDocNodes.configuration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/nodes/DocHeading.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/nodes/DocHeading.ts",
+      "scopeId": ".DocHeading.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/nodes/DocHeading.ts",
+      "scopeId": ".DocHeading.constructor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/nodes/DocHeading.ts",
+      "scopeId": ".DocHeading.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/nodes/DocNoteBox.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/nodes/DocTable.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/nodes/DocTable.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/nodes/DocTable.ts",
+      "scopeId": ".DocTable.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/nodes/DocTableCell.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/nodes/DocTableRow.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/plugin/IApiDocumenterPluginManifest.ts",
+      "scopeId": ".IApiDocumenterPluginManifest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/plugin/MarkdownDocumenterFeature.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/plugin/MarkdownDocumenterFeature.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".PluginLoader.load",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".PluginLoader.load",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".PluginLoader.load",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/plugin/PluginLoader.ts",
+      "scopeId": ".PluginLoader.load",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeLinePart",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeLinePart",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter._writeNewLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.constructor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.ensureSkippedLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.increaseIndent",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.peekLastCharacter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.peekSecondLastCharacter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.peekSecondLastCharacter",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.write",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeTentative",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".assignPackageModelFields",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convert",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convert",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertCommonYamlModel",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertCommonYamlModel",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertCommonYamlModel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertCommonYamlModel",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertSelfTypeToXref",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertSelfTypeToXref",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertSelfTypeToXref",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertSelfTypeToXref",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToEnumSDP",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToEnumSDP",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToPackageSDP",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToPackageSDP",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToPackageSDP",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToPackageSDP",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToSDP",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToSDP",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToTypeSDP",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToTypeSDP",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/ToSdpConvertHelper.ts",
+      "scopeId": ".convertToTypeSDP",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utils/Utilities.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/yaml/ISDPYamlFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/yaml/IYamlApiFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    }
+  ]
+}

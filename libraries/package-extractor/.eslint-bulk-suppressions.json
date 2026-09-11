@@ -1,0 +1,289 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ArchiveManager.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ArchiveManager.ts",
+      "scopeId": ".ArchiveManager.addToArchiveAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".AssetHandler._extractSymlinkAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".AssetHandler.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".AssetHandler.finalizeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".AssetHandler.includeAssetAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".AssetHandler.includeAssetAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/AssetHandler.ts",
+      "scopeId": ".AssetHandler.includeAssetAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._collectFoldersAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._collectFoldersAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._extractFolderAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._extractFolderAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._extractFolderAsync.isFileExcluded",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._extractFolderAsync.isFileExcluded",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._extractFolderAsync.isFileExcluded.excludeFileByPatterns",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._performExtractionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._performExtractionAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._performExtractionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._writeExtractorMetadataAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._writeExtractorMetadataAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor._writeExtractorMetadataAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor.extractAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor.extractAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor.extractAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": "._normalizeOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SymlinkAnalyzer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SymlinkAnalyzer.ts",
+      "scopeId": ".SymlinkAnalyzer.analyzePathAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SymlinkAnalyzer.ts",
+      "scopeId": ".SymlinkAnalyzer.analyzePathAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SymlinkAnalyzer.ts",
+      "scopeId": ".SymlinkAnalyzer.analyzePathAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/SymlinkAnalyzer.ts",
+      "scopeId": ".SymlinkAnalyzer.analyzePathAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Utils.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Utils.ts",
+      "scopeId": ".makeBinLinksAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/CreateLinksCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/CreateLinksAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/CreateLinksAction.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/CreateLinksAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/CreateLinksAction.ts",
+      "scopeId": ".createLinksAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/CreateLinksAction.ts",
+      "scopeId": ".createLinksAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/RemoveLinksAction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/scripts/createLinks/cli/actions/RemoveLinksAction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/scripts/createLinks/start.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/scripts/createLinks/utilities/constants.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PackageExtractor.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PackageExtractor.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PackageExtractor.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

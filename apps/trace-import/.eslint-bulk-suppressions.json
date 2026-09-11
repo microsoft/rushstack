@@ -1,0 +1,84 @@
+{
+  "suppressions": [
+    {
+      "file": "src/TraceImportCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/TraceImportCommandLineParser.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TraceImportCommandLineParser.ts",
+      "scopeId": ".TraceImportCommandLineParser.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TraceImportCommandLineParser.ts",
+      "scopeId": ".TraceImportCommandLineParser.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".logInputField",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".logOutputField",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceImportInner",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceImportInner",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceImportInner",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceImportInner",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceTypeScriptPackage",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceTypeScriptPackage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/traceImport.ts",
+      "scopeId": ".traceTypeScriptPackage",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

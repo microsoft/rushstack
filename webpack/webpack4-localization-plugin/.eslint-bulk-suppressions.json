@@ -1,0 +1,304 @@
+{
+  "suppressions": [
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".AssetProcessor.processLocalizedAsset",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".AssetProcessor.processLocalizedAsset",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".AssetProcessor.processNonLocalizedAsset",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": ".AssetProcessor.processNonLocalizedAsset",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._getJsonpFunction",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._getJsonpFunction",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._getJsonpFunction",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._parseStringToReconstructionSequence",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._parseStringToReconstructionSequence",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._parseStringToReconstructionSequence.dynamicElement",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructLocalized",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructLocalized",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructLocalized",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructLocalized",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructLocalized",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructNonLocalized",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AssetProcessor.ts",
+      "scopeId": "._reconstructNonLocalized",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._addLocFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._addLocFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._chunkHasLocalizedModules",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._chunkHasLocalizedModules",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addDefaultLocFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addDefaultLocFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addDefaultLocFile",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addDefaultLocFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.apply",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.apply",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.apply.processChunkJsFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": "._addLoadersForLocFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": "._addRulesToConfiguration",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": "._tryUpdateLocaleTokenInPublicPathPlugin",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": "._tryUpdateLocaleTokenInPublicPathPlugin",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/WebpackConfigurationUpdater.ts",
+      "scopeId": "._tryUpdateSourceMapFilename",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/interfaces.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/interfaces.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/loaders/InPlaceLocFileLoader.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/loaders/InPlaceLocFileLoader.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/loaders/LoaderFactory.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/loaders/LocLoader.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/loaders/LocLoader.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/loaders/LocLoader.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/loaders/LocLoader.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "suppressions": [
+    {
+      "file": "src/TreePattern.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TreePattern.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TreePattern.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TreePattern.test.ts",
+      "scopeId": ".tree1",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TreePattern.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TreePattern.ts",
+      "scopeId": "._matchTreeRecursive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TreePattern.ts",
+      "scopeId": "._matchTreeRecursive",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/TreePattern.ts",
+      "scopeId": "._matchTreeRecursive",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

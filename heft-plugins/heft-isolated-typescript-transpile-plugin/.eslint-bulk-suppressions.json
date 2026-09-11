@@ -1,0 +1,114 @@
+{
+  "suppressions": [
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".endsWithCharacterX",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".normalizeRelativeDir",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".printTiming",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync.getOptionsByExtension",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync.getOptionsByExtension",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SwcIsolatedTranspilePlugin.ts",
+      "scopeId": ".transpileProjectAsync.getOptionsByExtension",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".ISourceMap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".handleMessageAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".handleMessageAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".handleMessageAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TranspileWorker.ts",
+      "scopeId": ".handleMessageAsync.createFolder",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "suppressions": [
+    {
+      "file": "src/TestHelper.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/TestHelper.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TestHelper.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TestHelper.ts",
+      "scopeId": ".TestHelper.createTestProjectAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/TestHelper.ts",
+      "scopeId": ".TestHelper.createTestRepoAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TestHelper.ts",
+      "scopeId": ".TestHelper.verifyDependenciesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".runTestsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".runTestsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".runTestsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/testNpmMode.ts",
+      "scopeId": ".testNpmModeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/testYarnMode.ts",
+      "scopeId": ".testYarnModeAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

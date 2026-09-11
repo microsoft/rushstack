@@ -1,0 +1,19 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleLifecyclePlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".ExampleLifecyclePlugin.apply",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

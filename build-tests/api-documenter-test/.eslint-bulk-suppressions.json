@@ -1,0 +1,24 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DocClass1.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DocEnums.ts",
+      "scopeId": ".DocEnum",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/snapshot.test.ts",
+      "scopeId": ".runApiDocumenterAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/snapshot.test.ts",
+      "scopeId": ".runApiDocumenterAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

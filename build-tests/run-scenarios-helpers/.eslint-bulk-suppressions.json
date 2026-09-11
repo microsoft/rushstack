@@ -1,0 +1,39 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".runScenariosAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".runScenariosAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".runScenariosAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".runScenariosAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

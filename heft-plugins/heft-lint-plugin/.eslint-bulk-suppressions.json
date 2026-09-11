@@ -1,0 +1,274 @@
+{
+  "suppressions": [
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint._getLintFileError",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.hasLintFailures",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.hasLintFailures",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.lintFileAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.lintFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.lintingFinishedAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.lintingFinishedAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.lintingFinishedAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.printVersionHeader",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.resolveEslintConfigFilePathAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".patchTimerAsync.patchedTime",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".LintPlugin._lintAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".LintPlugin._lintAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".LintPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".LintPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LintPlugin.ts",
+      "scopeId": ".checkFix",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".LinterBase.performLintingAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".LinterBase.performLintingAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinterBase.ts",
+      "scopeId": ".LinterBase.performLintingAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SarifFormatter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/SarifFormatter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SarifFormatter.ts",
+      "scopeId": ".formatEslintResultsAsSARIF",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SarifFormatter.ts",
+      "scopeId": ".formatEslintResultsAsSARIF",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SarifFormatter.ts",
+      "scopeId": ".formatEslintResultsAsSARIF",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/SarifFormatter.ts",
+      "scopeId": ".formatEslintResultsAsSARIF",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint._getLintFileError",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint._getLintFileError",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.getConfigHashAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.getConfigHashAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.hasLintFailures",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.lintFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.lintingFinishedAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/SarifFormatter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/SarifFormatter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

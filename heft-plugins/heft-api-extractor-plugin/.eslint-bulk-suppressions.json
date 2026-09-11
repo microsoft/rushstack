@@ -1,0 +1,69 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".ApiExtractorPlugin._getApiExtractorConfigurationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".ApiExtractorPlugin._getApiExtractorConfigurationFilePathAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".ApiExtractorPlugin._runApiExtractorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".ApiExtractorPlugin._runApiExtractorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ApiExtractorPlugin.ts",
+      "scopeId": ".ApiExtractorPlugin._runApiExtractorAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/ApiExtractorRunner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ApiExtractorRunner.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ApiExtractorRunner.ts",
+      "scopeId": ".invokeApiExtractorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ApiExtractorRunner.ts",
+      "scopeId": ".invokeApiExtractorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ApiExtractorRunner.ts",
+      "scopeId": ".invokeApiExtractorAsync.extractorOptions.messageCallback",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ApiExtractorRunner.ts",
+      "scopeId": ".invokeApiExtractorAsync.extractorOptions.messageCallback",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

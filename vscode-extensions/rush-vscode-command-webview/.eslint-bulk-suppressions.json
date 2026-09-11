@@ -1,0 +1,199 @@
+{
+  "suppressions": [
+    {
+      "file": "src/App.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/App.tsx",
+      "scopeId": ".App",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ControlledFormComponents/ControlledComboBox.tsx",
+      "scopeId": ".ControlledComboBox",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ControlledFormComponents/ControlledTextFieldArray.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ControlledFormComponents/ControlledTextFieldArray.tsx",
+      "scopeId": ".ControlledTextFieldArray",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ControlledFormComponents/ControlledTextFieldArray.tsx",
+      "scopeId": ".ControlledTextFieldArray",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ControlledFormComponents/interface.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/Watcher.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/index.tsx",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/index.tsx",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/index.tsx",
+      "scopeId": ".ParameterForm",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/index.tsx",
+      "scopeId": ".ParameterForm",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ParameterView/ParameterForm/index.tsx",
+      "scopeId": ".ParameterForm",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ParameterView/ParameterNav.tsx",
+      "scopeId": ".ParameterNav",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ParameterView/ParameterNav.tsx",
+      "scopeId": ".ParameterNav",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ParameterView/ParameterNav.tsx",
+      "scopeId": ".ParameterNav",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ParameterView/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ParameterView/index.tsx",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Toolbar/RunButton.tsx",
+      "scopeId": ".RunButton",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Toolbar/SearchBar.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Toolbar/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/components/IconButton.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/entry.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/hooks/parametersFormScroll.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/hooks/parametersFormScroll.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/hooks/parametersFormScroll.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/hooks/parametersFormScroll.ts",
+      "scopeId": ".useScrollableElement",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/hooks/parametersFormScroll.ts",
+      "scopeId": ".useScrollableElement",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/hooks/parametersFormScroll.ts",
+      "scopeId": ".useScrollableElement",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/store/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".patchStateByFormValues",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".patchStateByFormValues",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".useArgsTextList",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".useArgsTextList",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/store/slices/parameter.ts",
+      "scopeId": ".useParameterArgs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/store/slices/ui.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

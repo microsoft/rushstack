@@ -1,0 +1,859 @@
+{
+  "suppressions": [
+    {
+      "file": "src/aedoc/AedocDefinitions.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/aedoc/AedocDefinitions.ts",
+      "scopeId": ".AedocDefinitions.tsdocConfiguration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/aedoc/ReleaseTag.ts",
+      "scopeId": ".getTagName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".ApiDeclaredItem._buildSourceLocation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".ApiDeclaredItem.getExcerptWithModifiers",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".ApiDeclaredItem.getExcerptWithModifiers",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".ApiDeclaredItem.getExcerptWithModifiers",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".ApiDeclaredItem.serializeInto",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiDeclaredItem.ts",
+      "scopeId": ".ApiDeclaredItem.sourceLocation",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/items/ApiDocumentedItem.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/items/ApiDocumentedItem.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".ApiItem.canonicalReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".ApiItem.displayName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".ApiItem.getScopedNameWithinPackage",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".ApiItem.getScopedNameWithinPackage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".ApiItem.getScopedNameWithinPackage",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/items/ApiItem.ts",
+      "scopeId": ".ApiItem.getScopedNameWithinPackage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/items/ApiPropertyItem.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/items/ApiPropertyItem.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiAbstractMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiAbstractMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiAbstractMixin.ts",
+      "scopeId": ".ApiAbstractMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiAbstractMixin.ts",
+      "scopeId": ".ApiAbstractMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiExportedMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiExportedMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiExportedMixin.ts",
+      "scopeId": ".ApiExportedMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiExportedMixin.ts",
+      "scopeId": ".ApiExportedMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiInitializerMixin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mixins/ApiInitializerMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiInitializerMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiInitializerMixin.ts",
+      "scopeId": ".ApiInitializerMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiInitializerMixin.ts",
+      "scopeId": ".ApiInitializerMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin.MixedClass._ensureMemberMaps",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin.MixedClass.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin.MixedClass.findMembersWithInheritance",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin.MixedClass.findMembersWithInheritance",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/mixins/ApiItemContainerMixin.ts",
+      "scopeId": ".ApiItemContainerMixin.MixedClass.findMembersWithInheritance",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiNameMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiNameMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiNameMixin.ts",
+      "scopeId": ".ApiNameMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiNameMixin.ts",
+      "scopeId": ".ApiNameMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiOptionalMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiOptionalMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiOptionalMixin.ts",
+      "scopeId": ".ApiOptionalMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiOptionalMixin.ts",
+      "scopeId": ".ApiOptionalMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiParameterListMixin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mixins/ApiParameterListMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiParameterListMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiParameterListMixin.ts",
+      "scopeId": ".ApiParameterListMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiParameterListMixin.ts",
+      "scopeId": ".ApiParameterListMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiParameterListMixin.ts",
+      "scopeId": ".ApiParameterListMixin.MixedClass.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mixins/ApiProtectedMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiProtectedMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiProtectedMixin.ts",
+      "scopeId": ".ApiProtectedMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiProtectedMixin.ts",
+      "scopeId": ".ApiProtectedMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiReadonlyMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiReadonlyMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiReadonlyMixin.ts",
+      "scopeId": ".ApiReadonlyMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiReadonlyMixin.ts",
+      "scopeId": ".ApiReadonlyMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiReleaseTagMixin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mixins/ApiReleaseTagMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiReleaseTagMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiReleaseTagMixin.ts",
+      "scopeId": ".ApiReleaseTagMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiReleaseTagMixin.ts",
+      "scopeId": ".ApiReleaseTagMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiReturnTypeMixin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mixins/ApiReturnTypeMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiReturnTypeMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiReturnTypeMixin.ts",
+      "scopeId": ".ApiReturnTypeMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiReturnTypeMixin.ts",
+      "scopeId": ".ApiReturnTypeMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiStaticMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiStaticMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiStaticMixin.ts",
+      "scopeId": ".ApiStaticMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiStaticMixin.ts",
+      "scopeId": ".ApiStaticMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".ApiTypeParameterListMixin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".ApiTypeParameterListMixin.MixedClass.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".ApiTypeParameterListMixin.MixedClass.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mixins/ApiTypeParameterListMixin.ts",
+      "scopeId": ".ApiTypeParameterListMixin.MixedClass.serializeInto",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/Excerpt.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/mixins/Excerpt.ts",
+      "scopeId": ".Excerpt.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/mixins/Excerpt.ts",
+      "scopeId": ".Excerpt.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/mixins/Excerpt.ts",
+      "scopeId": ".Excerpt.text",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/model/ApiCallSignature.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiCallSignature.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiClass.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiClass.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiClass.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiConstructSignature.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiConstructSignature.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiConstructor.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiConstructor.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiEntryPoint.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiEntryPoint.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiEnum.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiEnum.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiEnumMember.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiEnumMember.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiFunction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiFunction.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiIndexSignature.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiIndexSignature.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiInterface.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiInterface.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiInterface.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiMethod.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiMethod.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiMethod.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiMethodSignature.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiMethodSignature.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".ApiModel._initApiItemsRecursive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".ApiModel.resolveDeclarationReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".ApiModel.resolveDeclarationReference",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".ApiModel.tryGetPackageByName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".ApiModel.tryGetPackageByName",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/model/ApiModel.ts",
+      "scopeId": ".ApiModel.tryGetPackageByName",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/ApiNamespace.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiNamespace.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".ApiPackage.loadFromJsonFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".ApiPackage.loadFromJsonFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".ApiPackage.saveToJsonFile",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/model/ApiPackage.ts",
+      "scopeId": ".ApiPackage.saveToJsonFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ApiProperty.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiProperty.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiPropertySignature.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiTypeAlias.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiTypeAlias.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiTypeAlias.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/ApiVariable.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ApiVariable.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ApiVariable.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/Deserializer.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/Deserializer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/model/Deserializer.ts",
+      "scopeId": ".Deserializer.deserialize",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/Deserializer.ts",
+      "scopeId": ".Deserializer.deserialize",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/DeserializerContext.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver._selectUsingIndexSelector",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver._selectUsingIndexSelector",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver._selectUsingIndexSelector",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver._selectUsingSystemSelector",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver._selectUsingSystemSelector",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver._selectUsingSystemSelector",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver.resolve",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver.resolve",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/ModelReferenceResolver.ts",
+      "scopeId": ".ModelReferenceResolver.resolve",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/model/Parameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/SourceLocation.ts",
+      "scopeId": ".SourceLocation.fileUrl",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/model/TypeParameter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/model/TypeParameter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    }
+  ]
+}

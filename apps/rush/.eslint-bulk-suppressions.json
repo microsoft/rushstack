@@ -1,0 +1,94 @@
+{
+  "suppressions": [
+    {
+      "file": "src/MinimalRushConfiguration.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/MinimalRushConfiguration.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RushCommandSelector.ts",
+      "scopeId": ".RushCommandSelector.execute",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushCommandSelector.ts",
+      "scopeId": ".RushCommandSelector.execute",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushCommandSelector.ts",
+      "scopeId": "._failWithError",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushCommandSelector.ts",
+      "scopeId": "._getCommandName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushCommandSelector.ts",
+      "scopeId": "._getCommandName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushVersionSelector.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RushVersionSelector.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RushVersionSelector.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushVersionSelector.ts",
+      "scopeId": ".RushVersionSelector.ensureRushVersionInstalledAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushVersionSelector.ts",
+      "scopeId": ".RushVersionSelector.ensureRushVersionInstalledAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/start-dev.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/start-dev.ts",
+      "scopeId": ".includePlugin",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "suppressions": [
+    {
+      "file": "src/pluginFramework/RushMcpPluginLoader.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/pluginFramework/RushMcpPluginLoader.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/RushMcpPluginLoader.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/pluginFramework/RushMcpPluginLoader.ts",
+      "scopeId": ".RushMcpPluginLoader.loadAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pluginFramework/RushMcpPluginLoader.ts",
+      "scopeId": ".RushMcpPluginLoader.loadAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pluginFramework/RushMcpPluginLoader.ts",
+      "scopeId": ".RushMcpPluginLoader.loadAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pluginFramework/RushMcpPluginSession.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pluginFramework/zodTypes.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/server.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/server.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".main",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tools/base.tool.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/tools/conflict-resolver.tool.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tools/migrate-project.tool.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tools/migrate-project.tool.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tools/migrate-project.tool.ts",
+      "scopeId": ".RushMigrateProjectTool.executeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tools/migrate-project.tool.ts",
+      "scopeId": ".RushMigrateProjectTool.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tools/project-details.tool.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tools/project-details.tool.ts",
+      "scopeId": ".RushProjectDetailsTool.executeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tools/project-details.tool.ts",
+      "scopeId": ".RushProjectDetailsTool.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tools/rush-command-validator.tool.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tools/rush-command-validator.tool.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tools/rush-command-validator.tool.ts",
+      "scopeId": ".RushCommandValidatorTool.executeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tools/rush-command-validator.tool.ts",
+      "scopeId": ".RushCommandValidatorTool.executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tools/rush-command-validator.tool.ts",
+      "scopeId": ".RushCommandValidatorTool.executeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tools/workspace-details.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/tools/workspace-details.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tools/workspace-details.ts",
+      "scopeId": ".RushWorkspaceDetailsTool._getRobotReadableWorkspaceDetails",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tools/workspace-details.ts",
+      "scopeId": ".RushWorkspaceDetailsTool._getRobotReadableWorkspaceDetails",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tools/workspace-details.ts",
+      "scopeId": ".RushWorkspaceDetailsTool._getRobotReadableWorkspaceDetails",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/command-runner.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities/command-runner.ts",
+      "scopeId": "._executeCommandAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/command-runner.ts",
+      "scopeId": "._executeCommandAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/command-runner.ts",
+      "scopeId": "._executeCommandAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/command-runner.ts",
+      "scopeId": "._resolveCommand",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/log.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

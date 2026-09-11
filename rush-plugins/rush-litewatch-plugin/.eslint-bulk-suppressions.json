@@ -1,0 +1,84 @@
+{
+  "suppressions": [
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager._calculateCriticalPathLength",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager._calculateCriticalPathLength",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager._clearActiveProject",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager._printCompletedAndActivateSomething",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager._printCompletedAndActivateSomething",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager._printCompletedAndActivateSomething",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WatchManager.ts",
+      "scopeId": ".WatchManager.writeBuildLines",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WatchProject.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WatchProject.ts",
+      "scopeId": ".WatchProject",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WatchProject.ts",
+      "scopeId": ".WatchProject.printBufferedLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WatchProject.ts",
+      "scopeId": ".WatchProject.reported",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WatchProject.ts",
+      "scopeId": ".WatchProject.setState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WatchManager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WatchManager.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WatchManager.test.ts",
+      "scopeId": ".TestTerminalProvider.write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

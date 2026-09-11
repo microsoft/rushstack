@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/PublishedVersionsJsonPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/PublishedVersionsJsonPlugin.ts",
+      "scopeId": ".PublishedVersionsJsonPlugin.apply",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

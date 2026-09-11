@@ -1,0 +1,254 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem._purge",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.flush",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.flush",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.flush",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.watch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.watch",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".WatchCallback",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".WatchUndelayedCallback",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._getWebpackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._getWebpackConfigurationAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._getWebpackConfigurationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._normalizeError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._normalizeError",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._normalizeError",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._recordErrors",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._recordErrors",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._recordErrors",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync.defaultDevServerOptions.onListening",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin.accessor",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": "._tryLoadWebpackConfigurationFileInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".tryLoadWebpackConfigurationAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".tryLoadWebpackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".tryLoadWebpackConfigurationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".tryLoadWebpackConfigurationFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WebpackConfigurationLoader.ts",
+      "scopeId": ".tryLoadWebpackConfigurationFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/shared.ts",
+      "scopeId": ".IWebpackPluginAccessorHooks",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WebpackConfigurationLoader.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WebpackConfigurationLoader.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WebpackConfigurationLoader.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WebpackConfigurationLoader.test.ts",
+      "scopeId": ".createOptions",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

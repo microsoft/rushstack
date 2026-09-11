@@ -1,0 +1,364 @@
+{
+  "suppressions": [
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.findNestedPackageJsonsForContextAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.findNestedPackageJsonsForContextAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.findNestedPackageJsonsForContextAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.tryFindNestedPackageJsonsForContextAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.tryFindNestedPackageJsonsForContextAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.tryFindNestedPackageJsonsForContextAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".afterInstallAsync.afterExternalPackagesAsync.tryFindNestedPackageJsonsForContextAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/afterInstallAsync.ts",
+      "scopeId": ".getPlatformInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".computeResolverCacheFromLockfileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".computeResolverCacheFromLockfileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".extractBundledDependencies",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".extractBundledDependencies",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".extractBundledDependencies",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/computeResolverCacheFromLockfileAsync.ts",
+      "scopeId": ".isPackageCompatible",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/externals.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".createContextSerializer",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".createContextSerializer",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".extractNameAndVersionFromKey",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".extractNameAndVersionFromKey",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".getDescriptionFileRootFromKey",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".getDescriptionFileRootFromKey",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".resolveDependencies",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".resolveDependencyKey",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".resolveDependencyKey",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers.ts",
+      "scopeId": ".resolveDependencyKey",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".RushResolverCachePlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".RushResolverCachePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/pnpm/depPath/common.ts",
+      "scopeId": ".createDepPathToFilename",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/depPath/common.ts",
+      "scopeId": ".createDepPathToFilename",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pnpm/depPath/common.ts",
+      "scopeId": ".depPathToFilenameUnescaped",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/depPath/common.ts",
+      "scopeId": ".depPathToFilenameUnescaped",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pnpm/depPath/hash.ts",
+      "scopeId": ".createBase32Hash",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/depPath/hash.ts",
+      "scopeId": ".createBase32Hash",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pnpm/depPath/hash.ts",
+      "scopeId": ".createShortSha256Hash",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/depPath/v10.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/depPath/v8.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/depPath/v9.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/pnpmVersionHelpers.ts",
+      "scopeId": ".PnpmMajorVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/pnpmVersionHelpers.ts",
+      "scopeId": ".getPnpmVersionHelpersAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/pnpmVersionHelpers.ts",
+      "scopeId": ".getPnpmVersionHelpersAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pnpm/store/v10.ts",
+      "scopeId": ".getStoreIndexPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/store/v10.ts",
+      "scopeId": ".getStoreIndexPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/pnpm/store/v3.ts",
+      "scopeId": ".getStoreIndexPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/pnpm/v10.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pnpm/v8.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/pnpm/v9.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/test/computeResolverCacheFromLockfileAsync.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/computeResolverCacheFromLockfileAsync.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/computeResolverCacheFromLockfileAsync.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/computeResolverCacheFromLockfileAsync.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/computeResolverCacheFromLockfileAsync.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/computeResolverCacheFromLockfileAsync.test.ts",
+      "scopeId": ".afterExternalPackagesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/helpers.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/helpers.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/helpers.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/helpers.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/helpers.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

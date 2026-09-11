@@ -1,0 +1,129 @@
+{
+  "suppressions": [
+    {
+      "file": "src/SetPublicPathCurrentScriptPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SetPublicPathCurrentScriptPlugin.ts",
+      "scopeId": ".CodeGenerationResults",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SetPublicPathCurrentScriptPlugin.ts",
+      "scopeId": ".SetPublicPathCurrentScriptPlugin._applyCompilation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SetPublicPathCurrentScriptPlugin.ts",
+      "scopeId": ".SetPublicPathCurrentScriptPlugin._applyCompilation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin._applyCompilation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin._applyCompilation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin._applyCompilation",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin._applyCompilation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin._applyCompilation.SetPublicPathRuntimeModule.generate",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin._applyCompilation.SetPublicPathRuntimeModule.generate",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SetPublicPathPlugin.ts",
+      "scopeId": ".SetPublicPathPlugin.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SetPublicPathPluginBase.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/SetPublicPathPluginBase.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/SetPublicPathPluginBase.ts",
+      "scopeId": ".SetPublicPathPluginBase.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/codeGenerator.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/codeGenerator.ts",
+      "scopeId": ".getSetPublicPathCode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/codeGenerator.ts",
+      "scopeId": ".getSetPublicPathCode",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/SetPublicPathPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/testBase.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/testBase.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/testBase.ts",
+      "scopeId": ".testForPlugin",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/testBase.ts",
+      "scopeId": ".testForPlugin.testForLibraryType",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/testBase.ts",
+      "scopeId": ".testForPlugin.testForLibraryType",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

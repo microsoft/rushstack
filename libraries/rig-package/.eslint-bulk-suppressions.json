@@ -1,0 +1,89 @@
+{
+  "suppressions": [
+    {
+      "file": "src/Helpers.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.getResolvedProfileFolder",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.getResolvedProfileFolderAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.loadForProjectFolder",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.loadForProjectFolder",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.loadForProjectFolder",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.loadForProjectFolderAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.loadForProjectFolderAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.loadForProjectFolderAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.tryResolveConfigFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": ".RigConfig.tryResolveConfigFilePathAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": "._validateSchema",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RigConfig.ts",
+      "scopeId": "._validateSchema",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RigConfig.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RigConfig.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

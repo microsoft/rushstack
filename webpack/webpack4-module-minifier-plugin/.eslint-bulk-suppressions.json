@@ -1,0 +1,319 @@
+{
+  "suppressions": [
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".AsyncImportCompressionPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".AsyncImportCompressionPlugin.apply",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".AsyncImportCompressionPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".AsyncImportCompressionPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".AsyncImportCompressionPlugin.apply.customTemplate.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".getImportTypeExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AsyncImportCompressionPlugin.ts",
+      "scopeId": ".needChunkOnDemandLoadingCode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Constants.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".getAllComments",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GenerateLicenseFileForAsset.ts",
+      "scopeId": ".getAllComments",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.minifyModule",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.apply.onFileMinified",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".ModuleMinifierPlugin.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".defaultRehydrateAssets",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.ts",
+      "scopeId": ".stringifyIdSortPredicate",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ModuleMinifierPlugin.types.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".formatTime",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".formatTime",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".runParallel",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".runParallel",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ParallelCompiler.ts",
+      "scopeId": ".runParallel",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PortableMinifierIdsPlugin.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/PortableMinifierIdsPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PortableMinifierIdsPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/PortableMinifierIdsPlugin.ts",
+      "scopeId": ".PortableMinifierModuleIdsPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PortableMinifierIdsPlugin.ts",
+      "scopeId": ".PortableMinifierModuleIdsPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PortableMinifierIdsPlugin.ts",
+      "scopeId": ".PortableMinifierModuleIdsPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".handleExternals",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".handleExternals",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/RehydrateAsset.ts",
+      "scopeId": ".rehydrateAsset",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RehydrateAsset.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RehydrateAsset.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RehydrateAsset.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RehydrateAsset.test.ts",
+      "scopeId": ".asset",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/workerPool/WebpackWorker.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/workerPool/WebpackWorker.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/workerPool/WebpackWorker.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/workerPool/WebpackWorker.ts",
+      "scopeId": ".processTaskAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/workerPool/WebpackWorker.ts",
+      "scopeId": ".processTaskAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

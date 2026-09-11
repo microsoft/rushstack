@@ -1,0 +1,159 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._annotateProperties",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._contextualizeConfigurationFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._finalizeConfigurationFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._finalizeConfigurationFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntry",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntry",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntryAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntryAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntryAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntryWithCache",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._loadConfigurationFileEntryWithCacheAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._mergeObjects",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._mergeObjects",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._mergeObjects",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._mergeObjects",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._resolvePathProperty",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._resolvePathProperty",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase._schema",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/ConfigurationFileBase.ts",
+      "scopeId": ".ConfigurationFileBase.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProjectConfigurationFile.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ProjectConfigurationFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ProjectConfigurationFile.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TestUtilities.ts",
+      "scopeId": ".stripAnnotations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/ConfigurationFile.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ConfigurationFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ConfigurationFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ConfigurationFile.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ConfigurationFile.test.ts",
+      "scopeId": ".runTests",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

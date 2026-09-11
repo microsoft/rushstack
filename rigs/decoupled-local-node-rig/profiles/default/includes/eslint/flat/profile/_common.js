@@ -89,6 +89,9 @@ module.exports = {
 
         // Rationale: Including the `type` annotation in the import statement for imports
         // only used as types prevents the import from being emitted in the compiled output.
+        // strict-codegen: house style is inline type specifiers (`import { type X, Y }`),
+        // which also keeps import/no-duplicates satisfied; ratchet to 'error' once
+        // onboarding completes.
         '@typescript-eslint/consistent-type-imports': [
           'warn',
           { prefer: 'type-imports', disallowTypeAnnotations: false, fixStyle: 'inline-type-imports' }
@@ -141,16 +144,21 @@ module.exports = {
         ],
 
         // Require `node:` protocol for imports of Node.js built-in modules
+        // strict-codegen: ratchet to 'error' once onboarding completes.
         'import/enforce-node-protocol-usage': ['warn', 'always'],
 
         // Group imports in the following way:
         // 1. Built-in modules (fs, path, etc.)
         // 2. External modules (lodash, react, etc.)
         //    a. `@rushstack` and `@microsoft` scoped packages
-        // 3. Internal modules (and other types: parent, sibling, index)
+        // 3. Internal modules
+        // 4. Parent, sibling, and index imports
+        // strict-codegen: alphabetize within groups and give internal/parent/sibling/index
+        // their own groups; ratchet to 'error' once onboarding completes.
         'import/order': [
           'warn',
           {
+            alphabetize: { order: 'asc', caseInsensitive: true },
             // This option ensures that the @rushstack and @microsoft packages end up in their own group
             distinctGroup: true,
             pathGroups: [
@@ -163,11 +171,7 @@ module.exports = {
             // Ensure the @rushstack and @microsoft packages are grouped with other external packages. By default this
             // option includes 'external'
             pathGroupsExcludedImportTypes: ['builtin', 'object'],
-            groups: [
-              'builtin',
-              'external'
-              // And then everything else (internal, parent, sibling, index)
-            ],
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
             'newlines-between': 'always'
           }
         ],
@@ -189,7 +193,79 @@ module.exports = {
             selector: 'PropertyDefinition[accessibility="private"][static=true]',
             message: 'Use a module-scoped variable instead of a `private static` property.'
           }
-        ]
+        ],
+
+        // ====================================================================
+        // STRICT CODEGEN RULES
+        // ====================================================================
+        // An ultra-strict rule set, originally designed for newly generated packages
+        // (for example the rushd wire-layer packages), being rolled out to every package
+        // in the repository.  These rules currently run at 'warn' while packages onboard
+        // via bulk suppressions (`eslint-bulk suppress`); they will ratchet to 'error'
+        // once onboarding completes.  Only rules that already ship with this repository's
+        // ESLint toolchain (@typescript-eslint, eslint-plugin-import, and ESLint core)
+        // are used.  See AGENTS.md for the lint policy and rollout plan.
+
+        // Rationale: Complexity budget -- tiny functions, tiny files, shallow nesting,
+        //            few parameters.
+        // strict-codegen: ratchet to 'error'
+        complexity: ['warn', 3],
+        // strict-codegen: ratchet to 'error'
+        'max-depth': ['warn', 3],
+        // strict-codegen: ratchet to 'error'
+        'max-lines-per-function': ['warn', 30],
+        // strict-codegen: overrides the published profile's more lenient warn at 2000
+        // lines; ratchet to 'error'
+        'max-lines': ['warn', 100],
+        // strict-codegen: ratchet to 'error'
+        'max-params': ['warn', 4],
+
+        // Rationale: Every numeric literal earns a name.  (TS-aware successor of the core
+        // no-magic-numbers rule.)  Enum members and readonly class property initializers
+        // are already named declarations, so they satisfy the rule's intent.  Variable
+        // declaration initializers (`const x = 42`) are not flagged -- the declared name
+        // is the name.
+        // strict-codegen: ratchet to 'error'
+        '@typescript-eslint/no-magic-numbers': [
+          'warn',
+          { ignoreEnums: true, ignoreReadonlyClassProperties: true }
+        ],
+
+        // Rationale: `??` instead of `||`/ternary nullish guards.  All exemptions are
+        // disabled explicitly -- the library default `ignoreConditionalTests: true` would
+        // otherwise exempt exactly the `if`/ternary guards this rule exists to catch.
+        // strict-codegen: ratchet to 'error'
+        '@typescript-eslint/prefer-nullish-coalescing': [
+          'warn',
+          {
+            ignoreConditionalTests: false,
+            ignoreTernaryTests: false,
+            ignorePrimitives: { bigint: false, boolean: false, number: false, string: false }
+          }
+        ],
+
+        // Rationale: Sort named members within a single import declaration.  Declaration
+        // sorting is left to import/order (ignoreDeclarationSort) to avoid conflicts.
+        // strict-codegen: ratchet to 'error'
+        'sort-imports': ['warn', { ignoreDeclarationSort: true, ignoreMemberSort: false }],
+
+        // Rationale: Production source must never reach outside its own directory via
+        // "..".  Unit tests import implementation modules relatively (repo convention),
+        // so test files are exempted in the test-files config entry below.
+        // strict-codegen: ratchet to 'error'
+        'import/no-relative-parent-imports': 'warn',
+
+        // strict-codegen: claimed from the published profile (which sets 'warn');
+        // ratchet to 'error'
+        'no-eval': 'warn',
+
+        // Rationale: The @typescript-eslint extension rule subsumes the core rule
+        // (catches `setTimeout("code")` and friends via type information); extension
+        // rules must replace their base rule to avoid double-reporting.
+        // strict-codegen: kept at 'error' immediately, matching the published profile's
+        // severity for the core rule it replaces.
+        'no-implied-eval': 'off',
+        '@typescript-eslint/no-implied-eval': 'error'
       }
     },
     {
@@ -212,7 +288,10 @@ module.exports = {
       ],
       rules: {
         'import/order': 'off',
-        'import/no-duplicates': 'off'
+        'import/no-duplicates': 'off',
+        // strict-codegen: unit tests import implementation modules relatively (repo
+        // convention), so they are exempt from the production-source rule above.
+        'import/no-relative-parent-imports': 'off'
       }
     }
   ]
