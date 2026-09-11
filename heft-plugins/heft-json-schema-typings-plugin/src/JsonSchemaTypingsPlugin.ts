@@ -19,6 +19,7 @@ export interface IJsonSchemaTypingsPluginOptions {
   srcFolder?: string;
   generatedTsFolders?: string[];
   formatWithPrettier?: boolean;
+  includeSchemaMetadata?: boolean;
 }
 
 export default class JsonSchemaTypingsPlugin implements IHeftTaskPlugin<IJsonSchemaTypingsPluginOptions> {
@@ -35,7 +36,12 @@ export default class JsonSchemaTypingsPlugin implements IHeftTaskPlugin<IJsonSch
       hooks: { run, runIncremental }
     } = taskSession;
     const { buildFolderPath } = heftConfiguration;
-    const { srcFolder = 'src', generatedTsFolders = ['temp/schemas-ts'], formatWithPrettier } = options;
+    const {
+      srcFolder = 'src',
+      generatedTsFolders = ['temp/schemas-ts'],
+      formatWithPrettier,
+      includeSchemaMetadata
+    } = options;
 
     const resolvedTsFolders: string[] = [];
     for (const generatedTsFolder of generatedTsFolders) {
@@ -49,7 +55,8 @@ export default class JsonSchemaTypingsPlugin implements IHeftTaskPlugin<IJsonSch
       generatedTsFolder,
       secondaryGeneratedTsFolders,
       terminal,
-      formatWithPrettier
+      formatWithPrettier,
+      includeSchemaMetadata
     });
 
     run.tapPromise(PLUGIN_NAME, async () => {
