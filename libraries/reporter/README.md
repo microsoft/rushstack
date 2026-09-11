@@ -4,6 +4,10 @@ Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
 This package is released as a public beta. Exported contracts may change before the stable release.
 
+Rush 5 keeps legacy terminal output by default. See the
+[experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
+privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
+
 ## Full-detail log completion
 
 The frontend reports an invocation log as complete only after its accepted events and grouped
