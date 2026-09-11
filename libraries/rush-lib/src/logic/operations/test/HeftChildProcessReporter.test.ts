@@ -4,7 +4,11 @@
 import * as childProcess from 'node:child_process';
 import { PassThrough, Writable } from 'node:stream';
 
-import { PlaintextReporter, type IReporterEventEnvelope, type IRushDiagnostic } from '@rushstack/rush-reporter';
+import {
+  PlaintextReporter,
+  type IReporterEventEnvelope,
+  type IRushDiagnostic
+} from '@rushstack/rush-reporter';
 import { StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { HeftChildProcessReporter, HeftChildReporterNonFatalError } from '../HeftChildProcessReporter';
@@ -751,25 +755,32 @@ describe(HeftChildProcessReporter.name, () => {
     }
   });
 
-  it.each(['malformed', 'oversized', 'truncated'] as const)(
-    'rejects an accepted %s stream even when the child exits successfully',
-    async (corruption) => {
-      const diagnostics: IRushDiagnostic[] = [];
-      const envelopes: IReporterEventEnvelope<unknown>[] = [];
-      const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
-        parentSessionId: 'parent-session',
-        parentRequestId: 'parent-request',
-        parentOperationId: 'project#build',
-        iterationId: 7,
-        context: CONTEXT,
-        ingestForeignEnvelope: (envelope) => {
-          envelopes.push(envelope);
-          return envelope.eventId;
-        },
-        onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
-        onStructuredNegotiated: () => undefined
-      });
-      const script: string = `
+  it.each([
+    'malformed',
+    'oversized',
+    'truncated',
+    'forged-category',
+    'forged-summary',
+    'forged-detail',
+    'zero-line',
+    'zero-column'
+  ] as const)('rejects an accepted %s stream even when the child exits successfully', async (corruption) => {
+    const diagnostics: IRushDiagnostic[] = [];
+    const envelopes: IReporterEventEnvelope<unknown>[] = [];
+    const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+      parentSessionId: 'parent-session',
+      parentRequestId: 'parent-request',
+      parentOperationId: 'project#build',
+      iterationId: 7,
+      context: CONTEXT,
+      ingestForeignEnvelope: (envelope) => {
+        envelopes.push(envelope);
+        return envelope.eventId;
+      },
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+      onStructuredNegotiated: () => undefined
+    });
+    const script: string = `
         const fs = require('node:fs');
         const eventFd = Number(process.env._RUSH_REPORTER_CHILD_FD);
         const ackFd = Number(process.env._RUSH_REPORTER_CHILD_ACK_FD);
@@ -795,32 +806,51 @@ describe(HeftChildProcessReporter.name, () => {
         };
         fs.writeSync(eventFd, JSON.stringify(event) + '\\n');
         const corruption = ${JSON.stringify(corruption)};
-        fs.writeSync(eventFd, corruption === 'oversized'
-          ? 'x'.repeat(1024 * 1024 + 1) + '\\n'
-          : corruption === 'malformed' ? '{invalid}\\n' : '{"eventId":');
+        if (corruption === 'oversized' || corruption === 'malformed' || corruption === 'truncated') {
+          fs.writeSync(eventFd, corruption === 'oversized'
+            ? 'x'.repeat(1024 * 1024 + 1) + '\\n'
+            : corruption === 'malformed' ? '{invalid}\\n' : '{"eventId":');
+        } else {
+          const payload = {
+            diagnosticId: 'child-diagnostic',
+            code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+            category: 'dependency-tool',
+            severity: 'error',
+            summaryKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary',
+            detailKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail',
+            parameters: { exitCode: { value: 1, privacy: 'public' } }
+          };
+          if (corruption === 'forged-category') payload.category = 'network-auth';
+          if (corruption === 'forged-summary') payload.summaryKey = 'diagnostic.RUSH_COMMAND_FAILED.summary';
+          if (corruption === 'forged-detail') payload.detailKey = 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail';
+          if (corruption === 'zero-line') payload.source = { kind: 'file', file: 'index.ts', line: 0 };
+          if (corruption === 'zero-column') payload.source = { kind: 'file', file: 'index.ts', column: 0 };
+          fs.writeSync(eventFd, JSON.stringify({
+            ...event, eventId: 'child_2', sequence: 2, type: 'diagnosticEmitted', payload
+          }) + '\\n');
+        }
         if (corruption !== 'truncated') {
           fs.writeSync(eventFd, JSON.stringify({
-            ...event, eventId: 'child_2', sequence: 2,
+            ...event, eventId: 'child_3', sequence: 3,
             payload: { stream: 'stdout', text: 'cannot recover after corruption\\n' }
           }) + '\\n');
         }
       `;
-      const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
-        env: { ...process.env, ...reporter.environment },
-        stdio: reporter.stdio
-      });
-      const closePromise: Promise<number | null> = waitForCloseAsync(child);
+    const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
+      env: { ...process.env, ...reporter.environment },
+      stdio: reporter.stdio
+    });
+    const closePromise: Promise<number | null> = waitForCloseAsync(child);
 
-      await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
-        'The negotiated Heft reporter stream was corrupt or incomplete.'
-      );
-      expect(await closePromise).toBe(0);
-      expect(envelopes.map((envelope) => envelope.payload)).toEqual([
-        { stream: 'stdout', text: 'preserved before corruption\n', iterationId: 7 }
-      ]);
-      expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['RUSH_PROTOCOL_INVALID_CHILD_STREAM']);
-    }
-  );
+    await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
+      'The negotiated Heft reporter stream was corrupt or incomplete.'
+    );
+    expect(await closePromise).toBe(0);
+    expect(envelopes.map((envelope) => envelope.payload)).toEqual([
+      { stream: 'stdout', text: 'preserved before corruption\n', iterationId: 7 }
+    ]);
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['RUSH_PROTOCOL_INVALID_CHILD_STREAM']);
+  });
 
   it('rejects a truncated accepted descriptor stream without hiding the child crash', async () => {
     const diagnostics: IRushDiagnostic[] = [];

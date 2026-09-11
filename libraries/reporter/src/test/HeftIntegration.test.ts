@@ -6,10 +6,12 @@ import { PassThrough, type Readable, type Writable } from 'node:stream';
 
 import {
   allocateChildDescriptor,
+  createRushDiagnostic,
   encodeNdjsonRecord,
   readChildAckDescriptorFd,
   readChildDescriptorFd,
   REPORTER_PROTOCOL_LIMITS,
+  RUSH_DIAGNOSTIC_CODE_DEFINITIONS,
   RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR,
   RUSH_REPORTER_CHILD_FD_ENV_VAR,
   HeftChildEmitter,
@@ -1011,6 +1013,124 @@ describe('HeftDescriptorHost new descriptor path', () => {
       })
     ).toBe(false);
     expect(host.processChildRecords([]).diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+  });
+
+  describe('diagnostic contract validation', () => {
+    function acceptDiagnostic(payload: unknown): {
+      result: IHeftChildResult;
+      forwarded: IReporterEventEnvelope<unknown>[];
+    } {
+      const forwarded: IReporterEventEnvelope<unknown>[] = [];
+      const host: HeftDescriptorHost = new HeftDescriptorHost({
+        parentSessionId: 'parent-sess',
+        supportedProtocolVersion: { major: 1, minor: 2 },
+        forwardEnvelope: (envelope) => forwarded.push(envelope)
+      });
+      expect(
+        host.processChildRecord({
+          kind: 'hello',
+          protocolVersion: { major: 1, minor: 2 },
+          producerVersion: '@rushstack/heft 1.2.25',
+          capabilities: ['heft-child-events-v1'],
+          requiredFeatures: []
+        })
+      ).toBe(true);
+      const result: IHeftChildResult = host.processChildRecords([
+        {
+          protocolVersion: { major: 1, minor: 2 },
+          eventId: 'child_1',
+          sessionId: 'child-sess',
+          sequence: 1,
+          timestamp: '2026-01-01T00:00:00.000Z',
+          source: SOURCE,
+          privacy: 'local-sensitive',
+          required: true,
+          type: 'diagnosticEmitted',
+          payload
+        }
+      ]);
+      return { result, forwarded };
+    }
+
+    it.each(RUSH_DIAGNOSTIC_CODE_DEFINITIONS)(
+      'accepts registered $code identity with its canonical or omitted detail',
+      (definition) => {
+        for (const detailKey of [definition.detailKey, undefined]) {
+          const diagnostic = {
+            ...createRushDiagnostic(definition.code, { severity: 'warning' }),
+            detailKey
+          };
+          const { result, forwarded } = acceptDiagnostic(diagnostic);
+          expect(result.accepted).toBe(true);
+          expect(result.eventCount).toBe(1);
+          expect(result.diagnostic).toBeUndefined();
+          expect(forwarded[0].payload).toMatchObject({
+            code: definition.code,
+            category: definition.category,
+            severity: 'warning',
+            summaryKey: definition.summaryKey
+          });
+          if (detailKey === undefined) {
+            expect(forwarded[0].payload).not.toHaveProperty('detailKey');
+          } else {
+            expect(forwarded[0].payload).toHaveProperty('detailKey', detailKey);
+          }
+        }
+      }
+    );
+
+    it.each([
+      { category: 'network-auth' },
+      { category: 'unregistered-category' },
+      { summaryKey: 'diagnostic.RUSH_COMMAND_FAILED.summary' },
+      { summaryKey: 'unregistered.summary' },
+      { detailKey: 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail' },
+      { detailKey: '' },
+      { code: 'RUSH_UNREGISTERED_CHILD' },
+      {
+        code: 'RUSH_OPERATION_FAILED',
+        category: 'operation',
+        summaryKey: 'diagnostic.RUSH_OPERATION_FAILED.summary',
+        detailKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail'
+      }
+    ])('rejects forged registered diagnostic identity %j', (override) => {
+      const { result, forwarded } = acceptDiagnostic({
+        ...createRushDiagnostic('RUSH_DEPENDENCY_TOOL_FAILED'),
+        ...override
+      });
+      expect(result.accepted).toBe(false);
+      expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+      expect(forwarded).toEqual([]);
+    });
+
+    it.each([
+      {},
+      { line: 1 },
+      { column: 1 },
+      { line: 1, column: 1 },
+      { line: Number.MAX_SAFE_INTEGER, column: Number.MAX_SAFE_INTEGER }
+    ])('accepts omitted or positive diagnostic source coordinates %j', (coordinates) => {
+      const source = { kind: 'file', file: 'src/index.ts', ...coordinates };
+      const { result, forwarded } = acceptDiagnostic({
+        ...createRushDiagnostic('RUSH_EXTERNAL_TOOL_PROBLEM'),
+        source
+      });
+      expect(result.accepted).toBe(true);
+      expect(result.diagnostic).toBeUndefined();
+      expect(forwarded[0].payload).toHaveProperty('source', source);
+    });
+
+    it.each(['line', 'column'])('rejects zero and invalid %s coordinates', (coordinate) => {
+      for (const value of [0, -1, 1.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1, '1']) {
+        const { result, forwarded } = acceptDiagnostic({
+          ...createRushDiagnostic('RUSH_EXTERNAL_TOOL_PROBLEM'),
+          source: { kind: 'file', file: 'src/index.ts', [coordinate]: value }
+        });
+        expect(result.accepted).toBe(false);
+        expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_INVALID_CHILD_STREAM');
+        expect(forwarded).toEqual([]);
+      }
+    });
   });
 
   it('does not let child events drive parent lifecycle presentation', () => {
