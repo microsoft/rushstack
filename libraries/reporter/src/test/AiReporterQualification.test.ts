@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+
 import {
   AiReporter,
   AI_REPORTER_QUALIFICATION_THRESHOLDS,
@@ -9,7 +11,6 @@ import {
   getQualifiedAiReporterDecision,
   runAiReporterQualificationCorpusAsync,
   type IAiDiagnostic,
-  type IReporterEventEnvelope,
   type IAiReporterQualificationCaseResult,
   type IAiReporterQualificationGateResult,
   type IAiReporterQualificationResult
@@ -18,9 +19,38 @@ import {
   hasExpectedAiQualificationDiagnostic,
   normalizeAiReporterQualificationOutput
 } from '../qualification/AiReporterQualificationCorpus';
+import {
+  AiQualificationTestSession,
+  QUALIFICATION_CLEANUP_TIMEOUT_MS,
+  QUALIFICATION_TEST_TIMEOUT_MS
+} from './helpers/AiQualificationTestSession';
+import type { AiQualificationMutation } from './helpers/AiQualificationWorker';
 
 describe('AI reporter deterministic qualification corpus', () => {
   let qualification: IAiReporterQualificationResult;
+  const sessions: Set<AiQualificationTestSession> = new Set();
+
+  function startSession(
+    mutation: AiQualificationMutation,
+    options?: ConstructorParameters<typeof AiQualificationTestSession>[1]
+  ): AiQualificationTestSession {
+    const session: AiQualificationTestSession = new AiQualificationTestSession(mutation, options);
+    sessions.add(session);
+    return session;
+  }
+
+  afterEach(async () => {
+    const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+      [...sessions].map((session) => session.stopAsync())
+    );
+    sessions.clear();
+    const errors: unknown[] = results
+      .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+      .map((result) => result.reason);
+    if (errors.length > 0) {
+      throw new AggregateError(errors, 'Failed to join qualification test workers');
+    }
+  }, QUALIFICATION_CLEANUP_TIMEOUT_MS + 1000);
 
   // Three file-backed corpus passes can exceed Jest's default setup allowance on Windows CI.
   beforeAll(async () => {
@@ -73,27 +103,22 @@ describe('AI reporter deterministic qualification corpus', () => {
     });
   });
 
-  it('measures unnormalized emitted UTF-8 output including every delimiter', async () => {
-    const byteLength: typeof Buffer.byteLength = Buffer.byteLength;
-    const byteLengthSpy: jest.SpiedFunction<typeof Buffer.byteLength> = jest.spyOn(Buffer, 'byteLength');
-    try {
-      const result: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
+  it(
+    'measures unnormalized emitted UTF-8 output including every delimiter',
+    async () => {
+      const { qualification: result, outputs } = await startSession('capture-bytes').resultAsync();
+      expect(result.passed).toBe(true);
       const outputByLogPath: Map<string, string> = new Map();
-      for (const [value] of byteLengthSpy.mock.calls) {
-        if (
-          typeof value !== 'string' ||
-          !value.startsWith('{"kind":"ai.') ||
-          !value.includes('"kind":"ai.final"') ||
-          !value.endsWith('\n')
-        ) {
-          continue;
-        }
+      for (const value of outputs) {
         const final: { kind?: string; log?: { path?: string } } = JSON.parse(
           value.trimEnd().split('\n').at(-1)!
         );
         if (final.kind === 'ai.final' && final.log?.path !== undefined) {
           const previous: string | undefined = outputByLogPath.get(final.log.path);
-          if (previous === undefined || byteLength(value, 'utf8') > byteLength(previous, 'utf8')) {
+          if (
+            previous === undefined ||
+            Buffer.byteLength(value, 'utf8') > Buffer.byteLength(previous, 'utf8')
+          ) {
             outputByLogPath.set(final.log.path, value);
           }
         }
@@ -102,13 +127,12 @@ describe('AI reporter deterministic qualification corpus', () => {
       expect(capturedOutput).toHaveLength(result.cases.length);
       expect(capturedOutput.every((output) => output.endsWith('\n'))).toBe(true);
       expect(capturedOutput.every((output) => !output.includes('<ABSOLUTE_LOG_PATH>'))).toBe(true);
-      expect(capturedOutput.map((output) => byteLength(output, 'utf8'))).toEqual(
+      expect(capturedOutput.map((output) => Buffer.byteLength(output, 'utf8'))).toEqual(
         result.cases.map(({ aiOutputBytes }) => aiOutputBytes)
       );
-    } finally {
-      byteLengthSpy.mockRestore();
-    }
-  }, 15000);
+    },
+    QUALIFICATION_TEST_TIMEOUT_MS
+  );
 
   it('normalizes Windows and POSIX paths without storing machine-specific separators', () => {
     expect(
@@ -141,57 +165,22 @@ describe('AI reporter deterministic qualification corpus', () => {
   });
 
   it('fails with an actionable case list when the AI reporter omits its log reference', async () => {
-    const originalReport: typeof AiReporter.prototype.report = AiReporter.prototype.report;
-    const reportSpy: jest.SpiedFunction<typeof AiReporter.prototype.report> = jest
-      .spyOn(AiReporter.prototype, 'report')
-      .mockImplementation(function (this: AiReporter, event: IReporterEventEnvelope<unknown>): void {
-        if (event.type !== 'artifactAvailable') {
-          originalReport.call(this, event);
-        }
-      });
-    try {
-      const failed: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
-      expect(failed.passed).toBe(false);
-      expect(formatAiReporterQualificationFailures(failed)).toContain(
-        'full-log: actual=0.00, required=>= 100%; cases='
-      );
-      expect(
-        failed.cases.every(({ failures }) =>
-          failures.includes('full log path, permissions, completeness, or correlation invalid')
-        )
-      ).toBe(true);
-    } finally {
-      reportSpy.mockRestore();
-    }
+    const { qualification: failed } = await startSession('missing-log').resultAsync();
+    expect(failed.passed).toBe(false);
+    expect(formatAiReporterQualificationFailures(failed)).toContain(
+      'full-log: actual=0.00, required=>= 100%; cases='
+    );
+    expect(
+      failed.cases.every(({ failures }) =>
+        failures.includes('full log path, permissions, completeness, or correlation invalid')
+      )
+    ).toBe(true);
   });
 
-  it('fails qualification when a renderer substitutes unrelated remediation', async () => {
-    const report: typeof AiReporter.prototype.report = AiReporter.prototype.report;
-    const reportSpy: jest.SpiedFunction<typeof AiReporter.prototype.report> = jest
-      .spyOn(AiReporter.prototype, 'report')
-      .mockImplementation(function (this: AiReporter, event: IReporterEventEnvelope<unknown>): void {
-        const payload: { remediation?: unknown } = event.payload as { remediation?: unknown };
-        report.call(
-          this,
-          event.type === 'diagnosticEmitted' && payload.remediation !== undefined
-            ? {
-                ...event,
-                payload: {
-                  ...payload,
-                  remediation: [
-                    {
-                      descriptionKey: 'remediation.unrelated',
-                      command: 'rush --version',
-                      automatedExecutionSafety: 'safe'
-                    }
-                  ]
-                }
-              }
-            : event
-        );
-      });
-    try {
-      const result: IAiReporterQualificationResult = await runAiReporterQualificationCorpusAsync();
+  it(
+    'fails qualification when a renderer substitutes unrelated remediation',
+    async () => {
+      const { qualification: result } = await startSession('unrelated-remediation').resultAsync();
       const actionability: IAiReporterQualificationGateResult | undefined = result.gates.find(
         ({ id }) => id === 'actionability'
       );
@@ -199,10 +188,61 @@ describe('AI reporter deterministic qualification corpus', () => {
       expect(actionability?.failedCases).toContain('bootstrap-unsupported-node');
       expect(actionability?.failedCases).toContain('configuration-invalid-json');
       expect(result.passed).toBe(false);
-    } finally {
-      reportSpy.mockRestore();
-    }
-  }, 15000);
+    },
+    QUALIFICATION_TEST_TIMEOUT_MS
+  );
+
+  it(
+    'keeps a delayed mutation isolated while another actual corpus completes',
+    async () => {
+      const report: typeof AiReporter.prototype.report = AiReporter.prototype.report;
+      const delayed: AiQualificationTestSession = startSession('missing-log', { waitForRelease: true });
+      await delayed.ready;
+      expect(AiReporter.prototype.report).toBe(report);
+      const { qualification: next } = await startSession('unrelated-remediation').resultAsync();
+      expect(next.gates.find(({ id }) => id === 'full-log')?.passed).toBe(true);
+      expect(next.gates.find(({ id }) => id === 'actionability')?.passed).toBe(false);
+      expect(delayed.worker.threadId).not.toBe(-1);
+      delayed.worker.postMessage('run');
+      const { qualification: previous } = await delayed.resultAsync();
+      expect(previous.gates.find(({ id }) => id === 'full-log')?.actual).toBe(0);
+      expect(delayed.worker.threadId).toBe(-1);
+      expect(fs.existsSync(delayed.tempRoot)).toBe(false);
+    },
+    QUALIFICATION_TEST_TIMEOUT_MS
+  );
+
+  it.each(['timeout', 'reject', 'cancel'] as const)(
+    'joins %s mutation work before the next negative corpus',
+    async (failure) => {
+      const report: typeof AiReporter.prototype.report = AiReporter.prototype.report;
+      const interrupted: AiQualificationTestSession = startSession('missing-log', {
+        waitForRelease: true,
+        timeoutAfterReadyMs: failure === 'timeout' ? 50 : undefined
+      });
+      await interrupted.ready;
+      expect(AiReporter.prototype.report).toBe(report);
+      if (failure === 'reject') {
+        interrupted.worker.postMessage('reject');
+      } else if (failure === 'cancel') {
+        await interrupted.stopAsync();
+      }
+      const outcome = await interrupted.done;
+      expect(outcome.success).toBe(false);
+      if (!outcome.success) {
+        expect(outcome.error.message).toContain(
+          failure === 'timeout' ? 'timed out' : failure === 'reject' ? 'rejection' : 'cancelled'
+        );
+      }
+      expect(interrupted.worker.threadId).toBe(-1);
+      expect(fs.existsSync(interrupted.tempRoot)).toBe(false);
+      expect(AiReporter.prototype.report).toBe(report);
+      const { qualification: next } = await startSession('unrelated-remediation').resultAsync();
+      expect(next.gates.find(({ id }) => id === 'full-log')?.passed).toBe(true);
+      expect(next.gates.find(({ id }) => id === 'actionability')?.passed).toBe(false);
+    },
+    QUALIFICATION_TEST_TIMEOUT_MS
+  );
 });
 
 describe('AI qualification actionable diagnostic contract', () => {

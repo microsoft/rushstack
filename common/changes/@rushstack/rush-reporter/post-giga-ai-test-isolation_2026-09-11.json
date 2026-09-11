@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Isolate integration AI qualification test mutations and join worker cleanup after delayed, rejected, cancelled, or timed-out corpus work without changing existing test deadlines or production qualification gates.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}
