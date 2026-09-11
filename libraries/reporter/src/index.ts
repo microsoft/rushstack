@@ -181,6 +181,8 @@ export type {
   ICommandCompletedPayload,
   IOperationRegisteredPayload,
   IOperationStatusChangedPayload,
+  IOperationStreamClosedPayload,
+  IOperationCompletedPayload,
   ICommandResultPayload,
   IWatchCycleCompletedPayload
 } from './lifecycle/LifecycleEvents';

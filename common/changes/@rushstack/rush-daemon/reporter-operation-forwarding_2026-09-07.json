@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Forward reporter operation completion and iteration identity through phased request event multiplexing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

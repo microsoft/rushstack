@@ -266,7 +266,7 @@ describe('ReporterHost handoff replay', () => {
     });
   });
 
-  it('skips an unknown additive event and replays known events', async () => {
+  it('lets a 1.0 consumer skip an unknown optional 1.1 event and replay the remaining stream', async () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();
       buffer.emit({ type: 'sessionStarted', payload: {} });
@@ -283,12 +283,15 @@ describe('ReporterHost handoff replay', () => {
       lines.splice(2, 0, JSON.stringify(unknownEvent));
       await fs.promises.writeFile(handoffPath, `${lines.join('\n')}\n`);
 
-      const manager: ReporterManager = new ReporterManager();
+      const manager: ReporterManager = new ReporterManager({
+        protocolVersion: { major: 1, minor: 0 }
+      });
       const reporter: RecordingReporter = new RecordingReporter();
       manager.addReporter(reporter);
       await manager.initializeAsync();
       const host: ReporterHost = new ReporterHost({
         manager,
+        supportedProtocolVersion: { major: 1, minor: 0 },
         env: {
           [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
           [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce

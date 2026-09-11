@@ -45,6 +45,7 @@ async function createInitializedHostAsync(
     sink: host.getSink(),
     bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
     abandonedHandoffFilesDeleted: [],
+    logArtifact: undefined,
     selection: {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -75,6 +76,7 @@ async function createEnabledHostAsync(
     sink: host.getSink(),
     bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
     abandonedHandoffFilesDeleted: [],
+    logArtifact: undefined,
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -114,6 +116,7 @@ async function createPhaseHangingHostAsync(
     sink: host.getSink(),
     bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
     abandonedHandoffFilesDeleted: [],
+    logArtifact: undefined,
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -266,7 +269,7 @@ describe(launchRushFrontendAsync.name, () => {
     }
   });
 
-  it('creates the authoritative host before invoking the bundled rush-lib and passes only its sink', async () => {
+  it('creates the authoritative host before invoking the bundled rush-lib and passes only its channel', async () => {
     const order: string[] = [];
     let receivedOptions: IRushFrontendLaunchOptions | undefined;
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
@@ -295,7 +298,8 @@ describe(launchRushFrontendAsync.name, () => {
       expect(process.argv).toEqual(['node', 'rush', 'build', '--json']);
       expect(receivedOptions?.reporter).toEqual({
         eventSink: expect.objectContaining({ emit: expect.any(Function) }),
-        sessionId: expect.any(String)
+        sessionId: expect.any(String),
+        operationStreamEnabled: false
       });
       expect(receivedOptions).not.toHaveProperty('selection');
       expect(receivedOptions).not.toHaveProperty('host');
@@ -337,12 +341,50 @@ describe(launchRushFrontendAsync.name, () => {
       expect(createSessionId).toHaveBeenCalledTimes(1);
       expect(receivedOptions?.reporter).toEqual({
         eventSink: initialized.sink,
-        sessionId: 'session-from-frontend'
+        sessionId: 'session-from-frontend',
+        operationStreamEnabled: false
       });
       await initialized.closeAsync();
       expect(order).toEqual(['host', 'close']);
     } finally {
       launchSpy.mockRestore();
+      process.argv = originalArgv;
+    }
+  });
+
+  it('keeps an active purge reporter log outside the temp folder being purged', async () => {
+    const order: string[] = [];
+    let commonTempFolder: string | undefined = 'not-captured';
+    let actionName: string | undefined;
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'purge', '--reporter=file'];
+
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: {
+          commonTempFolder: '/repo/common/temp',
+          useRushReporter: false
+        } as MinimalRushConfiguration,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async (options) => {
+          commonTempFolder = options.commonTempFolder;
+          actionName = options.actionName;
+          return createInitializedHostAsync(order, 'explicit --reporter');
+        },
+        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+          void version;
+          void selectedRushLib;
+          return launchOptions.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(actionName).toBe('purge');
+      expect(commonTempFolder).toBeUndefined();
+    } finally {
       process.argv = originalArgv;
     }
   });
@@ -711,7 +753,7 @@ describe(launchRushFrontendAsync.name, () => {
         expect(selection).toMatchObject({
           reporter: 'legacy',
           enabled: false,
-          reporterControlsOwnedByFrontend: false
+          reporterControlsOwnedByFrontend: rollback
         });
         expect(
           JSON.parse(

@@ -269,6 +269,57 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(result.diagnostic?.code).toBe('RUSH_PROTOCOL_UPDATE_REQUIRED');
   });
 
+  it('lets a 1.0 consumer skip an unknown optional 1.1 event and continue the stream', () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 0 },
+      forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => forwarded.push(envelope)
+    });
+
+    expect(
+      host.processChildRecord({
+        kind: 'hello',
+        protocolVersion: { major: 1, minor: 1 },
+        producerVersion: '@rushstack/heft 1.2.19',
+        capabilities: [],
+        requiredFeatures: []
+      })
+    ).toBe(true);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 1 },
+        eventId: 'future_optional',
+        sessionId: 'child-sess',
+        sequence: 1,
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: false,
+        type: 'futureMinorEvent',
+        payload: {}
+      })
+    ).toBe(true);
+    expect(
+      host.processChildRecord({
+        protocolVersion: { major: 1, minor: 1 },
+        eventId: 'known_after_future',
+        sessionId: 'child-sess',
+        sequence: 2,
+        timestamp: '2026-01-01T00:00:00.001Z',
+        source: SOURCE,
+        privacy: 'public',
+        required: true,
+        type: 'commandCompleted',
+        payload: { commandName: 'build', exitCode: 0 }
+      })
+    ).toBe(true);
+
+    const result: IHeftChildResult = host.processChildRecords([]);
+    expect(result).toMatchObject({ accepted: true, eventCount: 1 });
+    expect(forwarded.map(({ eventId }) => eventId)).toEqual(['known_after_future']);
+  });
+
   it('rejects malformed records without throwing from the streaming drain', () => {
     const negotiationResults: boolean[] = [];
     const host: HeftDescriptorHost = new HeftDescriptorHost({

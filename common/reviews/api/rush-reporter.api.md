@@ -222,6 +222,8 @@ export interface IAiDiagnostic {
     readonly remediation?: readonly IRushRemediationAction[];
     // (undocumented)
     readonly severity: string;
+    // (undocumented)
+    readonly summary?: string;
 }
 
 // @beta
@@ -455,6 +457,7 @@ export interface IEngineSinkResolution {
 
 // @beta
 export interface IExternalOutputChunk {
+    readonly iterationId?: number;
     readonly operationId?: string;
     readonly stream: string;
     readonly text: string;
@@ -463,6 +466,7 @@ export interface IExternalOutputChunk {
 // @beta
 export interface IFileReporterArtifact {
     readonly available: boolean;
+    readonly complete: boolean;
     readonly path?: string;
 }
 
@@ -587,6 +591,7 @@ export interface ILiveRegionState {
 
 // @beta
 export interface IMessageEmittedPayload {
+    readonly minimumLogLevel?: ReporterLogLevel;
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
     readonly text: string;
@@ -612,17 +617,35 @@ export interface IOldEngineOutputAdapterOptions {
 }
 
 // @beta
+export interface IOperationCompletedPayload {
+    readonly durationMs?: number;
+    readonly iterationId?: number;
+    readonly operationId: string;
+    readonly status: OperationStatus;
+}
+
+// @beta
 export interface IOperationRegisteredPayload {
+    readonly iterationId?: number;
     readonly operationId: string;
     readonly phaseName?: string;
     readonly projectName?: string;
+    readonly silent?: boolean;
 }
 
 // @beta
 export interface IOperationStatusChangedPayload {
     readonly durationMs?: number;
+    readonly iterationId?: number;
     readonly operationId: string;
+    readonly previousStatus?: OperationStatus;
     readonly status: OperationStatus;
+}
+
+// @beta
+export interface IOperationStreamClosedPayload {
+    readonly iterationId?: number;
+    readonly operationId: string;
 }
 
 // @beta
@@ -639,6 +662,7 @@ export interface IOperationStreamEmitterOptions {
 export interface IPlaintextReporterOptions {
     readonly color?: boolean;
     readonly heartbeatIntervalMs?: number;
+    readonly logLevel?: ReporterLogLevel;
     readonly nowMs?: () => number;
     readonly variant?: PlaintextVariant;
     readonly write: (text: string) => void;
@@ -812,6 +836,7 @@ export interface IReporterHostOptions {
     readonly manager?: ReporterManager;
     readonly nowMs?: () => number;
     readonly retentionMs?: number;
+    readonly supportedProtocolVersion?: IReporterProtocolVersion;
 }
 
 // @beta
@@ -933,6 +958,7 @@ export interface IRushDiagnostic {
     readonly code: RushDiagnosticCode;
     readonly detailKey?: string;
     readonly diagnosticId: string;
+    readonly iterationId?: number;
     readonly parameters?: {
         readonly [name: string]: IClassifiedDiagnosticValue;
     };
@@ -1025,6 +1051,7 @@ export interface IScopedLogger {
 
 // @beta
 export interface IScopedMessageOptions {
+    readonly minimumLogLevel?: ReporterLogLevel;
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
     readonly text: string;
@@ -1122,6 +1149,7 @@ export function iterateExternalOutput(events: readonly IReporterEventEnvelope<un
 // @beta
 export interface IWatchCycleCompletedPayload {
     readonly changedProjects?: readonly string[];
+    readonly iterationId?: number;
     readonly succeeded: boolean;
 }
 
@@ -1258,12 +1286,14 @@ export type OperationStatus = 'ready' | 'waiting' | 'queued' | 'executing' | 'su
 // @beta
 export class OperationStreamEmitter {
     constructor(options: IOperationStreamEmitterOptions);
-    changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string;
+    changeStatus(operationId: string, status: OperationStatus, durationMs?: number, previousStatus?: OperationStatus, iterationId?: number): string;
+    closeOperationStream(operationId: string, iterationId?: number): string;
     completeCommand(commandName: string, succeeded: boolean, exitCode: number, operationCounts?: {
         readonly [status: string]: number;
     }): string;
-    registerOperation(operationId: string, projectName?: string, phaseName?: string): string;
-    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[];
+    completeOperation(operationId: string, status: OperationStatus, durationMs?: number, iterationId?: number): string;
+    registerOperation(operationId: string, projectName?: string, phaseName?: string, silent?: boolean, iterationId?: number): string;
+    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string, iterationId?: number): string[];
 }
 
 // @beta
@@ -1335,7 +1365,7 @@ export function renderActiveProjectsRow(projects: readonly string[], width: numb
 export function renderLiveRegion(state: ILiveRegionState, options: IRenderLiveRegionOptions): string[];
 
 // @beta
-export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension"];
+export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension", "operationStreamClosed", "operationCompleted"];
 
 // @beta
 export const REPORTER_KNOWN_CAPABILITIES: readonly [];
@@ -1398,6 +1428,8 @@ export class ReporterManager implements IReporterEventSink {
     // @internal
     _disposeInitializedReportersAsync(): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
+    // @internal
+    _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;
     flushAsync(timeoutMs?: number): Promise<void>;
     getPendingEventCount(): number;
     ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string;
@@ -1515,6 +1547,12 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly [{
     readonly category: "operation";
     readonly defaultSeverity: "error";
     readonly summaryKey: "diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary";
+    readonly detailKey: undefined;
+}, {
+    readonly code: "RUSH_COMMAND_FAILED";
+    readonly category: "operation";
+    readonly defaultSeverity: "error";
+    readonly summaryKey: "diagnostic.RUSH_COMMAND_FAILED.summary";
     readonly detailKey: undefined;
 }];
 

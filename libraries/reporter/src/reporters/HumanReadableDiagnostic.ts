@@ -1,0 +1,65 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
+import type { IClassifiedDiagnosticValue } from '../diagnostics/IClassifiedDiagnosticValue';
+import { RUSH_DIAGNOSTIC_TEMPLATES } from '../diagnostics/RushDiagnosticCodeRegistry';
+import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
+
+export function formatHumanReadableDiagnostic(event: IReporterEventEnvelope<unknown>): string {
+  if (event.privacy === 'secret') {
+    return '[secret]';
+  }
+
+  const diagnostic: Partial<IRushDiagnostic> = event.payload as Partial<IRushDiagnostic>;
+  const secretStrings: string[] = [];
+  for (const parameter of Object.values(diagnostic.parameters ?? {})) {
+    if (parameter.privacy === 'secret' && typeof parameter.value === 'string' && parameter.value.length > 0) {
+      secretStrings.push(parameter.value);
+    }
+  }
+  // Source metadata and other parameters can repeat a value classified as secret elsewhere.
+  function containsSecret(text: string): boolean {
+    return secretStrings.some((secret: string) => text.includes(secret));
+  }
+
+  const templates: Readonly<Record<string, string>> = RUSH_DIAGNOSTIC_TEMPLATES;
+  const template: string | undefined = diagnostic.summaryKey ? templates[diagnostic.summaryKey] : undefined;
+  const summary: string | undefined =
+    typeof template === 'string'
+      ? template.replace(/\{([^}]+)\}/g, (placeholder: string, name: string) => {
+          const parameter: IClassifiedDiagnosticValue | undefined = diagnostic.parameters?.[name];
+          if (!parameter) {
+            return placeholder;
+          }
+          if (parameter.privacy === 'secret') {
+            return '[secret]';
+          }
+          const value: string =
+            typeof parameter.value === 'string' ? parameter.value : JSON.stringify(parameter.value);
+          return containsSecret(value) ? '[secret]' : value;
+        })
+      : undefined;
+
+  const source: IRushDiagnostic['source'] = diagnostic.source;
+  let location: string = '';
+  if (source?.kind === 'file' && !containsSecret(source.file)) {
+    location = source.file;
+    if (source.line !== undefined) {
+      location += `:${source.line}`;
+      if (source.column !== undefined) {
+        location += `:${source.column}`;
+      }
+    }
+  }
+  if (
+    source?.toolName &&
+    diagnostic.parameters?.tool === undefined &&
+    !containsSecret(source.toolName)
+  ) {
+    location = location ? `[${source.toolName}] ${location}` : source.toolName;
+  }
+
+  const detail: string = [location, summary].filter(Boolean).join(' - ');
+  return `[${diagnostic.severity ?? 'error'}] ${diagnostic.code ?? 'unknown'}${detail ? `: ${detail}` : ''}`;
+}

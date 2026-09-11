@@ -40,16 +40,18 @@ export interface IOperationGraphEventSink {
   /**
    * Invoked when an operation is prepared for an iteration.
    */
-  onOperationRegistered?(operationId: string, silent: boolean): void;
+  onOperationRegistered?(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void;
 
   /**
    * Invoked synchronously on every operation status transition. The result's
    * `status`, `error`, and `stopwatch` reflect the new state.
    */
-  onOperationStatusChanged?(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void;
+  onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
 
   /**
    * Invoked when an operation's collated output is about to be displayed,
@@ -60,17 +62,30 @@ export interface IOperationGraphEventSink {
 
   /**
    * Invoked for each chunk of an operation's raw output, upstream of any
-   * quiet-mode filtering. Concatenated chunks for one operation exactly match
-   * what the collated sink receives for that operation.
+   * newline normalization or quiet-mode filtering.
    */
-  onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
+  onOperationChunk?(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void;
 
   /**
    * Invoked when an operation's collated output stream is closed at the end of
    * its execution, after all status lines and output have been written. This
    * is the authoritative "no more output for this operation" signal.
    */
-  onOperationStreamClosed?(operationId: string): void;
+  onOperationStreamClosed?(
+    operationId: string,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void;
+
+  /**
+   * Invoked after the operation stream is closed and the final outcome is authoritative.
+   */
+  onOperationCompleted?(result: IOperationExecutionResult): void;
 
   /**
    * Invoked for each human-oriented status line written to the terminal,

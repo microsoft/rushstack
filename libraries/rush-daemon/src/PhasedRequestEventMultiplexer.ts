@@ -39,17 +39,19 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationRegistered(operationId: string, silent: boolean): void {
-    this.#workspaceSink?.onOperationRegistered?.(operationId, silent);
+  public onOperationRegistered(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    this.#workspaceSink?.onOperationRegistered?.(operationId, silent, result, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationRegistered?.(operationId, silent);
+      requestSink.onOperationRegistered?.(operationId, silent, result, iterationId);
     }
   }
 
-  public onOperationStatusChanged(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void {
+  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
     this.#workspaceSink?.onOperationStatusChanged?.(result, previousStatus);
     for (const requestSink of this.#requestSinks) {
       requestSink.onOperationStatusChanged?.(result, previousStatus);
@@ -63,17 +65,33 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     }
   }
 
-  public onOperationChunk(operationId: string, chunk: ITerminalChunk): void {
-    this.#workspaceSink?.onOperationChunk?.(operationId, chunk);
+  public onOperationChunk(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    this.#workspaceSink?.onOperationChunk?.(operationId, chunk, result, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationChunk?.(operationId, chunk);
+      requestSink.onOperationChunk?.(operationId, chunk, result, iterationId);
     }
   }
 
-  public onOperationStreamClosed(operationId: string): void {
-    this.#workspaceSink?.onOperationStreamClosed?.(operationId);
+  public onOperationStreamClosed(
+    operationId: string,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    this.#workspaceSink?.onOperationStreamClosed?.(operationId, result, iterationId);
     for (const requestSink of this.#requestSinks) {
-      requestSink.onOperationStreamClosed?.(operationId);
+      requestSink.onOperationStreamClosed?.(operationId, result, iterationId);
+    }
+  }
+
+  public onOperationCompleted(result: IOperationExecutionResult): void {
+    this.#workspaceSink?.onOperationCompleted?.(result);
+    for (const requestSink of this.#requestSinks) {
+      requestSink.onOperationCompleted?.(result);
     }
   }
 

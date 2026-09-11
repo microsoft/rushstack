@@ -72,6 +72,11 @@ export interface IReporterHostOptions {
    * Returns the current time in milliseconds. Injectable for testing.
    */
   readonly nowMs?: () => number;
+
+  /**
+   * The protocol version supported by this host. Defaults to the current version.
+   */
+  readonly supportedProtocolVersion?: IReporterProtocolVersion;
 }
 
 /**
@@ -218,6 +223,7 @@ export class ReporterHost {
   private readonly _handoffDirectory: string;
   private readonly _retentionMs: number;
   private readonly _nowMs: () => number;
+  private readonly _supportedProtocolVersion: IReporterProtocolVersion;
 
   public constructor(options: IReporterHostOptions = {}) {
     this._manager = options.manager ?? new ReporterManager();
@@ -225,6 +231,7 @@ export class ReporterHost {
     this._handoffDirectory = options.handoffDirectory ?? os.tmpdir();
     this._retentionMs = options.retentionMs ?? DEFAULT_HANDOFF_RETENTION_MS;
     this._nowMs = options.nowMs ?? (() => Date.now());
+    this._supportedProtocolVersion = options.supportedProtocolVersion ?? REPORTER_PROTOCOL_VERSION;
   }
 
   /**
@@ -304,7 +311,7 @@ export class ReporterHost {
     let skippedEventCount: number = discardedRecordCount;
     for (const event of events) {
       const protocolVersion: IReporterProtocolVersion | undefined = getProtocolVersion(event);
-      if (protocolVersion && !isReporterProtocolCompatible(REPORTER_PROTOCOL_VERSION, protocolVersion)) {
+      if (protocolVersion && !isReporterProtocolCompatible(this._supportedProtocolVersion, protocolVersion)) {
         const legacyFallbackOutput: IBootstrapLegacyOutput[] = getLegacyFallbackOutput(events);
         await deleteBootstrapHandoffFileAsync(handoffPath);
         return {

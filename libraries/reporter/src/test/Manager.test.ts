@@ -86,14 +86,16 @@ describe('ReporterManager ordering and assignment', () => {
     const disposing: Promise<void> = manager._disposeInitializedReportersAsync();
     await flushStarted;
     const closing: Promise<void> = manager.closeAsync();
+    const confirming: Promise<boolean> = manager._flushAndConfirmAsync();
     try {
       await new Promise<void>((resolve) => setImmediate(resolve));
       expect(reporter.flushCount).toBe(1);
       expect(reporter.closeCount).toBe(0);
     } finally {
       finishFlush();
-      await Promise.all([disposing, closing]);
+      await Promise.all([disposing, closing, confirming]);
     }
+    await expect(confirming).resolves.toBe(true);
     expect(reporter.flushCount).toBe(1);
     expect(reporter.closeCount).toBe(1);
   });
@@ -277,12 +279,16 @@ describe('ReporterManager ordering and assignment', () => {
     manager.emit(makeInput('activityChanged'));
     manager.emit(makeInput('messageEmitted'));
     manager.emit(makeInput('commandStarted'));
+    manager.emit(makeInput('operationStreamClosed'));
+    manager.emit(makeInput('operationCompleted'));
     await manager.flushAsync();
 
     expect(reporter.reported.map((e: IReporterEventEnvelope<unknown>) => e.required)).toEqual([
       false,
       true,
-      true
+      true,
+      false,
+      false
     ]);
   });
 
@@ -476,6 +482,30 @@ describe('ReporterManager coalescing', () => {
 });
 
 describe('ReporterManager flush and close', () => {
+  it.each(['never-started', 'initialization-failed', 'closed'])(
+    'does not flush a %s reporter while confirming full-log completion',
+    async (state) => {
+      const manager: ReporterManager = new ReporterManager();
+      const reporter: RecordingReporter = new RecordingReporter(state);
+      manager.addReporter(reporter);
+      if (state === 'initialization-failed') {
+        reporter.throwOnInit = true;
+        await expect(manager.initializeAsync()).rejects.toThrow('init failed initialization-failed');
+      } else if (state === 'closed') {
+        await manager.initializeAsync();
+        await manager.closeAsync();
+      }
+      const flushCount: number = reporter.flushCount;
+      const closeCount: number = reporter.closeCount;
+
+      await expect(manager._flushAndConfirmAsync()).resolves.toBe(true);
+
+      expect(reporter.flushCount).toBe(flushCount);
+      expect(reporter.closeCount).toBe(closeCount);
+      await manager._disposeInitializedReportersAsync();
+    }
+  );
+
   it('flushes and closes every reporter', async () => {
     const manager: ReporterManager = new ReporterManager();
     const reporter: RecordingReporter = new RecordingReporter('a');
@@ -526,6 +556,21 @@ describe('ReporterManager flush and close', () => {
     manager.emit(makeInput('commandStarted'));
     await manager.flushAsync(50);
     expect(true).toBe(true);
+  });
+
+  it('reports whether a flush completed before its timeout', async () => {
+    let resolveFlush: (() => void) | undefined;
+    const reporter: RecordingReporter = new RecordingReporter('confirm');
+    reporter.flushAsync = () =>
+      new Promise<void>((resolve: () => void) => {
+        resolveFlush = resolve;
+      });
+    const manager: ReporterManager = new ReporterManager();
+    manager.addReporter(reporter);
+    await manager.initializeAsync();
+
+    await expect(manager._flushAndConfirmAsync(10)).resolves.toBe(false);
+    resolveFlush?.();
   });
 
   it('does not overlap close with a timed-out flush', async () => {
