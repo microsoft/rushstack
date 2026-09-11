@@ -75,28 +75,28 @@ export interface ILegacyReporterOptions {
 export class LegacyReporter implements IReporter {
   public readonly name: string = 'legacy';
 
-  private readonly _write: (text: string) => void;
-  private readonly _maxParallelism: number | undefined;
+  readonly #write: (text: string) => void;
+  readonly #maxParallelism: number | undefined;
 
-  private _commandName: string | undefined;
-  private _total: number;
-  private _ordinal: number;
-  private _totalDurationMs: number;
-  private readonly _registry: Map<string, string>;
-  private readonly _outputBuffers: Map<string, string[]>;
-  private readonly _recordsByStatus: Map<string, ILegacyOperationRecord[]>;
+  #commandName: string | undefined;
+  #total: number;
+  #ordinal: number;
+  #totalDurationMs: number;
+  readonly #registry: Map<string, string>;
+  readonly #outputBuffers: Map<string, string[]>;
+  readonly #recordsByStatus: Map<string, ILegacyOperationRecord[]>;
 
   public constructor(options: ILegacyReporterOptions) {
-    this._write = options.write;
-    this._maxParallelism = options.maxParallelism;
+    this.#write = options.write;
+    this.#maxParallelism = options.maxParallelism;
 
-    this._commandName = undefined;
-    this._total = 0;
-    this._ordinal = 0;
-    this._totalDurationMs = 0;
-    this._registry = new Map();
-    this._outputBuffers = new Map();
-    this._recordsByStatus = new Map();
+    this.#commandName = undefined;
+    this.#total = 0;
+    this.#ordinal = 0;
+    this.#totalDurationMs = 0;
+    this.#registry = new Map();
+    this.#outputBuffers = new Map();
+    this.#recordsByStatus = new Map();
   }
 
   public async initializeAsync(): Promise<void> {
@@ -106,10 +106,10 @@ export class LegacyReporter implements IReporter {
   public report(event: IReporterEventEnvelope<unknown>): void {
     switch (event.type) {
       case 'commandStarted': {
-        this._commandName = (event.payload as { commandName: string }).commandName;
-        this._write(`Starting "rush ${this._commandName}"\n\n`);
-        if (this._maxParallelism !== undefined) {
-          this._write(`Executing a maximum of ${this._maxParallelism} simultaneous processes...\n`);
+        this.#commandName = (event.payload as { commandName: string }).commandName;
+        this.#write(`Starting "rush ${this.#commandName}"\n\n`);
+        if (this.#maxParallelism !== undefined) {
+          this.#write(`Executing a maximum of ${this.#maxParallelism} simultaneous processes...\n`);
         }
         break;
       }
@@ -119,36 +119,36 @@ export class LegacyReporter implements IReporter {
           projectName?: string;
           phaseName?: string;
         };
-        this._registry.set(payload.operationId, this._title(payload.projectName, payload.phaseName));
-        this._outputBuffers.set(payload.operationId, []);
-        this._total++;
+        this.#registry.set(payload.operationId, this.#title(payload.projectName, payload.phaseName));
+        this.#outputBuffers.set(payload.operationId, []);
+        this.#total++;
         break;
       }
       case 'operationStatusChanged': {
-        this._onStatusChanged(event);
+        this.#onStatusChanged(event);
         break;
       }
       case 'externalOutput': {
         const text: string = (event.payload as { text?: string }).text ?? '';
         const operationId: string | undefined = event.scope?.operationId;
         const buffer: string[] | undefined =
-          operationId === undefined ? undefined : this._outputBuffers.get(operationId);
+          operationId === undefined ? undefined : this.#outputBuffers.get(operationId);
         if (buffer) {
           buffer.push(text);
         } else {
-          this._write(text);
+          this.#write(text);
         }
         break;
       }
       case 'commandCompleted': {
         const durationMs: number | undefined = (event.payload as { durationMs?: number }).durationMs;
         if (durationMs !== undefined) {
-          this._totalDurationMs = durationMs;
+          this.#totalDurationMs = durationMs;
         }
         break;
       }
       case 'commandResult': {
-        this._onResult(event.payload as { succeeded: boolean });
+        this.#onResult(event.payload as { succeeded: boolean });
         break;
       }
       default:
@@ -164,90 +164,89 @@ export class LegacyReporter implements IReporter {
     /* no-op */
   }
 
-  private _onStatusChanged(event: IReporterEventEnvelope<unknown>): void {
+  #onStatusChanged(event: IReporterEventEnvelope<unknown>): void {
     const payload: { operationId: string; status: string; durationMs?: number } = event.payload as {
       operationId: string;
       status: string;
       durationMs?: number;
     };
-    const title: string = this._registry.get(payload.operationId) ?? payload.operationId;
+    const title: string = this.#registry.get(payload.operationId) ?? payload.operationId;
 
     if (TERMINAL_STATUSES.has(payload.status)) {
-      this._ordinal++;
-      this._write(`\n${this._header(title, this._ordinal, this._total)}\n`);
-      const output: string = this._outputBuffers.get(payload.operationId)?.join('') ?? '';
-      this._write(output);
+      this.#ordinal++;
+      this.#write(`\n${this.#header(title, this.#ordinal, this.#total)}\n`);
+      const output: string = this.#outputBuffers.get(payload.operationId)?.join('') ?? '';
+      this.#write(output);
       if (output.length > 0 && !output.endsWith('\n')) {
-        this._write('\n');
+        this.#write('\n');
       }
-      this._outputBuffers.delete(payload.operationId);
+      this.#outputBuffers.delete(payload.operationId);
 
       const record: ILegacyOperationRecord = {
         title,
         durationMs: payload.durationMs ?? 0,
         status: payload.status
       };
-      const records: ILegacyOperationRecord[] = this._recordsByStatus.get(payload.status) ?? [];
+      const records: ILegacyOperationRecord[] = this.#recordsByStatus.get(payload.status) ?? [];
       records.push(record);
-      this._recordsByStatus.set(payload.status, records);
+      this.#recordsByStatus.set(payload.status, records);
     }
   }
 
-  private _onResult(payload: { succeeded: boolean }): void {
-    const commandName: string = this._commandName ?? 'rush';
+  #onResult(payload: { succeeded: boolean }): void {
+    const commandName: string = this.#commandName ?? 'rush';
     if (payload.succeeded) {
       const count: number =
-        (this._recordsByStatus.get('success')?.length ?? 0) +
-        (this._recordsByStatus.get('successWithWarnings')?.length ?? 0);
-      this._write(`\n\n${this._summaryHeader(`SUCCESS: ${count} operations`)}\n\n`);
+        (this.#recordsByStatus.get('success')?.length ?? 0) +
+        (this.#recordsByStatus.get('successWithWarnings')?.length ?? 0);
+      this.#write(`\n\n${this.#summaryHeader(`SUCCESS: ${count} operations`)}\n\n`);
     } else {
-      const count: number = this._recordsByStatus.get('failure')?.length ?? 0;
-      this._write(`\n\n${this._summaryHeader(`FAILURE: ${count} operation`)}\n\n`);
+      const count: number = this.#recordsByStatus.get('failure')?.length ?? 0;
+      this.#write(`\n\n${this.#summaryHeader(`FAILURE: ${count} operation`)}\n\n`);
     }
-    this._writeStatusGroup('skipped', 'These operations were already up to date:');
-    this._writeStatusGroup('noOp', 'These operations did not define any work:');
-    this._writeStatusGroup('fromCache', 'These operations were restored from the build cache:');
-    this._writeStatusGroup('success', 'These operations completed successfully:');
-    this._writeStatusGroup('successWithWarnings', 'These operations succeeded with warnings:');
-    this._writeStatusGroup('blocked', 'These operations were blocked by dependencies that failed:');
-    this._writeStatusGroup('failure', 'The following projects failed to build:');
+    this.#writeStatusGroup('skipped', 'These operations were already up to date:');
+    this.#writeStatusGroup('noOp', 'These operations did not define any work:');
+    this.#writeStatusGroup('fromCache', 'These operations were restored from the build cache:');
+    this.#writeStatusGroup('success', 'These operations completed successfully:');
+    this.#writeStatusGroup('successWithWarnings', 'These operations succeeded with warnings:');
+    this.#writeStatusGroup('blocked', 'These operations were blocked by dependencies that failed:');
+    this.#writeStatusGroup('failure', 'The following projects failed to build:');
 
     const suffix: string = payload.succeeded ? '' : ' ==> ERROR: Project(s) failed to build';
-    this._write(`rush ${commandName} (${this._seconds(this._totalDurationMs)} seconds)${suffix}\n`);
+    this.#write(`rush ${commandName} (${this.#seconds(this.#totalDurationMs)} seconds)${suffix}\n`);
   }
 
-  private _writeStatusGroup(status: string, heading: string): void {
-    const records: readonly ILegacyOperationRecord[] | undefined = this._recordsByStatus.get(status);
+  #writeStatusGroup(status: string, heading: string): void {
+    const records: readonly ILegacyOperationRecord[] | undefined = this.#recordsByStatus.get(status);
     if (!records || records.length === 0) {
       return;
     }
-    this._write(`${heading}\n`);
+    this.#write(`${heading}\n`);
     for (const record of records) {
-      this._write(`  ${record.title}    ${this._seconds(record.durationMs)} seconds\n`);
+      this.#write(`  ${record.title}    ${this.#seconds(record.durationMs)} seconds\n`);
     }
-    this._write('\n');
+    this.#write('\n');
   }
 
-  private _title(projectName: string | undefined, phaseName: string | undefined): string {
+  #title(projectName: string | undefined, phaseName: string | undefined): string {
     const project: string = projectName ?? 'unknown';
     return phaseName ? `${project} (${phaseName})` : project;
   }
 
-  private _header(title: string, ordinal: number, total: number): string {
+  #header(title: string, ordinal: number, total: number): string {
     const left: string = `==[ ${title} ]`;
     const right: string = `[ ${ordinal} of ${total} ]==`;
     const fill: number = Math.max(2, HEADER_WIDTH - left.length - right.length);
     return `${left}${'='.repeat(fill)}${right}`;
   }
 
-  private _summaryHeader(label: string): string {
+  #summaryHeader(label: string): string {
     const left: string = `==[ ${label} ]`;
     const fill: number = Math.max(2, HEADER_WIDTH - left.length);
     return `${left}${'='.repeat(fill)}`;
   }
 
-  private _seconds(durationMs: number): string {
+  #seconds(durationMs: number): string {
     return (durationMs / 1000).toFixed(2);
   }
-
 }

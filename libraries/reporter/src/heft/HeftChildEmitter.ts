@@ -109,53 +109,53 @@ export class HeftChildEmitter {
    */
   public readonly mode: HeftChildReporterMode;
 
-  private readonly _writeDescriptor: ((text: string) => void) | undefined;
-  private readonly _writeStdout: ((text: string) => void) | undefined;
-  private readonly _writeStderr: ((text: string) => void) | undefined;
-  private readonly _childSessionId: string;
-  private readonly _source: IReporterEventSource;
-  private readonly _producerVersion: string;
-  private readonly _protocolVersion: IReporterProtocolVersion;
-  private readonly _capabilities: readonly string[];
-  private readonly _requiredFeatures: readonly string[];
-  private readonly _now: () => string;
-  private _sequence: number;
-  private _nextEventId: number;
+  readonly #writeDescriptor: ((text: string) => void) | undefined;
+  readonly #writeStdout: ((text: string) => void) | undefined;
+  readonly #writeStderr: ((text: string) => void) | undefined;
+  readonly #childSessionId: string;
+  readonly #source: IReporterEventSource;
+  readonly #producerVersion: string;
+  readonly #protocolVersion: IReporterProtocolVersion;
+  readonly #capabilities: readonly string[];
+  readonly #requiredFeatures: readonly string[];
+  readonly #now: () => string;
+  #sequence: number;
+  #nextEventId: number;
 
   public constructor(options: IHeftChildEmitterOptions) {
     const fd: number | undefined = readChildDescriptorFd(options.env);
     delete options.env[RUSH_REPORTER_CHILD_FD_ENV_VAR];
     this.mode = fd !== undefined && options.writeDescriptor !== undefined ? 'structured' : 'raw-fallback';
 
-    this._writeDescriptor = options.writeDescriptor;
-    this._writeStdout = options.writeStdout;
-    this._writeStderr = options.writeStderr;
-    this._childSessionId = options.childSessionId;
-    this._source = options.source;
-    this._producerVersion = options.producerVersion;
-    this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
-    this._capabilities = options.capabilities ?? [];
-    this._requiredFeatures = options.requiredFeatures ?? [];
-    this._now = options.now ?? (() => new Date().toISOString());
-    this._sequence = 1;
-    this._nextEventId = 1;
+    this.#writeDescriptor = options.writeDescriptor;
+    this.#writeStdout = options.writeStdout;
+    this.#writeStderr = options.writeStderr;
+    this.#childSessionId = options.childSessionId;
+    this.#source = options.source;
+    this.#producerVersion = options.producerVersion;
+    this.#protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
+    this.#capabilities = options.capabilities ?? [];
+    this.#requiredFeatures = options.requiredFeatures ?? [];
+    this.#now = options.now ?? (() => new Date().toISOString());
+    this.#sequence = 1;
+    this.#nextEventId = 1;
   }
 
   /**
    * Sends the hello handshake over the descriptor. Returns `false` in fallback mode.
    */
   public sendHello(): boolean {
-    if (this.mode !== 'structured' || this._writeDescriptor === undefined) {
+    if (this.mode !== 'structured' || this.#writeDescriptor === undefined) {
       return false;
     }
     const hello: IReporterHello = {
       kind: 'hello',
-      protocolVersion: this._protocolVersion,
-      producerVersion: this._producerVersion,
-      capabilities: [...this._capabilities],
-      requiredFeatures: [...this._requiredFeatures]
+      protocolVersion: this.#protocolVersion,
+      producerVersion: this.#producerVersion,
+      capabilities: [...this.#capabilities],
+      requiredFeatures: [...this.#requiredFeatures]
     };
-    this._writeDescriptor(encodeNdjsonRecord(hello));
+    this.#writeDescriptor(encodeNdjsonRecord(hello));
     return true;
   }
 
@@ -164,24 +164,24 @@ export class HeftChildEmitter {
    * `undefined` in fallback mode.
    */
   public emitEvent(input: IHeftChildEventInput): string | undefined {
-    if (this.mode !== 'structured' || this._writeDescriptor === undefined) {
+    if (this.mode !== 'structured' || this.#writeDescriptor === undefined) {
       return undefined;
     }
-    const eventId: string = `child_${this._nextEventId++}`;
+    const eventId: string = `child_${this.#nextEventId++}`;
     const envelope: Record<string, unknown> = {
-      protocolVersion: this._protocolVersion,
+      protocolVersion: this.#protocolVersion,
       eventId,
-      sessionId: this._childSessionId,
-      sequence: this._sequence++,
-      timestamp: this._now(),
-      source: this._source,
+      sessionId: this.#childSessionId,
+      sequence: this.#sequence++,
+      timestamp: this.#now(),
+      source: this.#source,
       scope: input.scope,
       privacy: input.privacy ?? 'public',
       required: isReporterEventRequired(input.type),
       type: input.type,
       payload: input.payload ?? {}
     };
-    this._writeDescriptor(encodeNdjsonRecord(envelope));
+    this.#writeDescriptor(encodeNdjsonRecord(envelope));
     return eventId;
   }
 
@@ -190,9 +190,9 @@ export class HeftChildEmitter {
    */
   public writeRaw(stream: 'stdout' | 'stderr', text: string): void {
     if (stream === 'stderr') {
-      this._writeStderr?.(text);
+      this.#writeStderr?.(text);
     } else {
-      this._writeStdout?.(text);
+      this.#writeStdout?.(text);
     }
   }
 }

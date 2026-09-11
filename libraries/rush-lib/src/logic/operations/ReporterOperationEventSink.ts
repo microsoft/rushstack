@@ -38,13 +38,12 @@ interface IReporterOperationCycle {
 }
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
-  private readonly _operationsByLegacyId: Map<string, IReporterOperation> = new Map();
-  private readonly _cyclesByResult: WeakMap<IOperationExecutionResult, IReporterOperationCycle> =
-    new WeakMap();
-  private readonly _rushSession: RushSession;
+  readonly #operationsByLegacyId: Map<string, IReporterOperation> = new Map();
+  readonly #cyclesByResult: WeakMap<IOperationExecutionResult, IReporterOperationCycle> = new WeakMap();
+  readonly #rushSession: RushSession;
 
   public constructor(rushSession: RushSession, commandName: string, operations: Iterable<Operation>) {
-    this._rushSession = rushSession;
+    this.#rushSession = rushSession;
     const operationsByReporterId: Map<string, IReporterOperation> = new Map();
 
     for (const operation of operations) {
@@ -73,12 +72,12 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
         operationsByReporterId.set(operationId, reporterOperation);
       }
       reporterOperation.legacyOperationIds.add(operation.name);
-      this._operationsByLegacyId.set(operation.name, reporterOperation);
+      this.#operationsByLegacyId.set(operation.name, reporterOperation);
     }
   }
 
   public get isEnabled(): boolean {
-    return this._operationsByLegacyId.size > 0;
+    return this.#operationsByLegacyId.size > 0;
   }
 
   public onOperationRegistered(
@@ -86,7 +85,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     silent: boolean,
     result?: IOperationExecutionResult
   ): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
     if (!operation || !result) {
       return;
     }
@@ -103,7 +102,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       operation.registrationCycle = cycle;
     }
 
-    this._cyclesByResult.set(result, cycle);
+    this.#cyclesByResult.set(result, cycle);
     cycle.registeredOperationIds.add(operationId);
     cycle.silent &&= silent;
     if (cycle.registeredOperationIds.size !== operation.legacyOperationIds.size || cycle.silent) {
@@ -118,11 +117,11 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(result.operation.name);
     if (!operation) {
       return;
     }
-    const cycle: IReporterOperationCycle | undefined = this._cyclesByResult.get(result);
+    const cycle: IReporterOperationCycle | undefined = this.#cyclesByResult.get(result);
     if (!cycle) {
       return;
     }
@@ -144,7 +143,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       });
       operation.emitter.emitDiagnostic(diagnostic);
       if (result.error) {
-        _correlateRushSessionError(this._rushSession, result.error, diagnostic.diagnosticId);
+        _correlateRushSessionError(this.#rushSession, result.error, diagnostic.diagnosticId);
       }
     }
 
@@ -171,12 +170,12 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
   public readonly onOperationChunk: ((operationId: string, chunk: ITerminalChunk) => void) | undefined;
   public readonly onOperationStreamClosed: ((operationId: string) => void) | undefined;
 
-  private readonly _first: IOperationGraphEventSink;
-  private readonly _second: IOperationGraphEventSink;
+  readonly #first: IOperationGraphEventSink;
+  readonly #second: IOperationGraphEventSink;
 
   public constructor(first: IOperationGraphEventSink, second: IOperationGraphEventSink) {
-    this._first = first;
-    this._second = second;
+    this.#first = first;
+    this.#second = second;
     this.onOperationChunk =
       first.onOperationChunk || second.onOperationChunk
         ? (operationId, chunk) => {
@@ -198,23 +197,23 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     silent: boolean,
     result?: IOperationExecutionResult
   ): void {
-    this._first.onOperationRegistered?.(operationId, silent, result);
-    this._second.onOperationRegistered?.(operationId, silent, result);
+    this.#first.onOperationRegistered?.(operationId, silent, result);
+    this.#second.onOperationRegistered?.(operationId, silent, result);
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
-    this._first.onOperationStatusChanged?.(result, previousStatus);
-    this._second.onOperationStatusChanged?.(result, previousStatus);
+    this.#first.onOperationStatusChanged?.(result, previousStatus);
+    this.#second.onOperationStatusChanged?.(result, previousStatus);
   }
 
   public onOperationHeader(operationId: string, completedOperations: number, totalOperations: number): void {
-    this._first.onOperationHeader?.(operationId, completedOperations, totalOperations);
-    this._second.onOperationHeader?.(operationId, completedOperations, totalOperations);
+    this.#first.onOperationHeader?.(operationId, completedOperations, totalOperations);
+    this.#second.onOperationHeader?.(operationId, completedOperations, totalOperations);
   }
 
   public onActivity(text: string, options?: IOperationActivityOptions): void {
-    this._first.onActivity?.(text, options);
-    this._second.onActivity?.(text, options);
+    this.#first.onActivity?.(text, options);
+    this.#second.onActivity?.(text, options);
   }
 }
 

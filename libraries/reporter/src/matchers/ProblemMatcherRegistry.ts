@@ -31,20 +31,20 @@ export interface IGetMatchersOptions {
  * @beta
  */
 export class ProblemMatcherRegistry {
-  private readonly _matchers: IProblemMatcher[] = [];
+  readonly #matchers: IProblemMatcher[] = [];
 
   /**
    * Registers a matcher.
    */
   public register(matcher: IProblemMatcher): void {
-    this._matchers.push(matcher);
+    this.#matchers.push(matcher);
   }
 
   /**
    * Returns the matchers that apply to a tool and version.
    */
   public getMatchers(tool: string, options: IGetMatchersOptions = {}): IProblemMatcher[] {
-    return this._matchers.filter((matcher: IProblemMatcher) => {
+    return this.#matchers.filter((matcher: IProblemMatcher) => {
       if (matcher.tool !== tool) {
         return false;
       }

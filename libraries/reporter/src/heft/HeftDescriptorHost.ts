@@ -183,24 +183,24 @@ export interface IHeftChildResult {
  * @beta
  */
 export class HeftDescriptorHost {
-  private readonly _parentSessionId: string;
-  private readonly _parentOperationId: string | undefined;
-  private readonly _supportedProtocolVersion: IReporterProtocolVersion;
-  private readonly _supportedCapabilities: readonly string[] | undefined;
-  private readonly _forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
-  private readonly _onNegotiation: ((result: IReporterHandshakeResult) => void) | undefined;
+  readonly #parentSessionId: string;
+  readonly #parentOperationId: string | undefined;
+  readonly #supportedProtocolVersion: IReporterProtocolVersion;
+  readonly #supportedCapabilities: readonly string[] | undefined;
+  readonly #forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
+  readonly #onNegotiation: ((result: IReporterHandshakeResult) => void) | undefined;
 
-  private _negotiation: IReporterHandshakeResult | undefined;
-  private _protocolFailure: IRushDiagnostic | undefined;
-  private _eventCount: number = 0;
+  #negotiation: IReporterHandshakeResult | undefined;
+  #protocolFailure: IRushDiagnostic | undefined;
+  #eventCount: number = 0;
 
   public constructor(options: IHeftDescriptorHostOptions) {
-    this._parentSessionId = options.parentSessionId;
-    this._parentOperationId = options.parentOperationId;
-    this._supportedProtocolVersion = options.supportedProtocolVersion;
-    this._supportedCapabilities = options.supportedCapabilities;
-    this._forwardEnvelope = options.forwardEnvelope;
-    this._onNegotiation = options.onNegotiation;
+    this.#parentSessionId = options.parentSessionId;
+    this.#parentOperationId = options.parentOperationId;
+    this.#supportedProtocolVersion = options.supportedProtocolVersion;
+    this.#supportedCapabilities = options.supportedCapabilities;
+    this.#forwardEnvelope = options.forwardEnvelope;
+    this.#onNegotiation = options.onNegotiation;
   }
 
   /**
@@ -213,50 +213,50 @@ export class HeftDescriptorHost {
    * is accepted.
    */
   public processChildRecord(record: unknown): boolean {
-    if (this._protocolFailure !== undefined) {
+    if (this.#protocolFailure !== undefined) {
       return false;
     }
 
-    if (this._negotiation === undefined) {
+    if (this.#negotiation === undefined) {
       if (!isReporterHello(record)) {
-        return this._rejectMalformedStream('the first record was not a valid hello');
+        return this.#rejectMalformedStream('the first record was not a valid hello');
       }
       const result: IReporterHandshakeResult = negotiateReporterHello(record, {
-        supportedProtocolVersion: this._supportedProtocolVersion,
-        supportedCapabilities: this._supportedCapabilities
+        supportedProtocolVersion: this.#supportedProtocolVersion,
+        supportedCapabilities: this.#supportedCapabilities
       });
-      this._negotiation = result;
-      this._onNegotiation?.(result);
+      this.#negotiation = result;
+      this.#onNegotiation?.(result);
       return result.accepted;
     }
-    if (!this._negotiation.accepted) {
+    if (!this.#negotiation.accepted) {
       return false;
     }
 
     if (!isReporterEventRecord(record)) {
-      return this._rejectMalformedStream('an event record did not contain a valid reporter envelope');
+      return this.#rejectMalformedStream('an event record did not contain a valid reporter envelope');
     }
-    if (record.protocolVersion.major !== this._negotiation.ack.protocolVersion.major) {
-      return this._rejectMalformedStream(
+    if (record.protocolVersion.major !== this.#negotiation.ack.protocolVersion.major) {
+      return this.#rejectMalformedStream(
         'an event record used a protocol major different from the negotiated stream'
       );
     }
     if (!isReporterEventType(record.type)) {
       if (record.required) {
-        return this._rejectMalformedStream('a required event type was not recognized');
+        return this.#rejectMalformedStream('a required event type was not recognized');
       }
       return true;
     }
 
     const correlated: IReporterEventEnvelope<unknown> = {
       ...record,
-      parentSessionId: this._parentSessionId,
-      parentOperationId: this._parentOperationId,
+      parentSessionId: this.#parentSessionId,
+      parentOperationId: this.#parentOperationId,
       required: isReporterEventRequired(record.type),
       type: record.type
     };
-    this._forwardEnvelope(correlated);
-    this._eventCount++;
+    this.#forwardEnvelope(correlated);
+    this.#eventCount++;
     return true;
   }
 
@@ -273,14 +273,14 @@ export class HeftDescriptorHost {
     const decoder: NdjsonDecoder = new NdjsonDecoder();
     return {
       write: (chunk: string): void => {
-        if (this._protocolFailure !== undefined || this._negotiation?.accepted === false) {
+        if (this.#protocolFailure !== undefined || this.#negotiation?.accepted === false) {
           return;
         }
         let records: unknown[];
         try {
           records = decoder.decode(chunk);
         } catch {
-          this._rejectMalformedStream('its NDJSON could not be decoded within the protocol limits');
+          this.#rejectMalformedStream('its NDJSON could not be decoded within the protocol limits');
           return;
         }
         for (const record of records) {
@@ -288,20 +288,20 @@ export class HeftDescriptorHost {
         }
       },
       flush: (): IHeftChildResult => {
-        if (this._protocolFailure === undefined && this._negotiation?.accepted !== false) {
+        if (this.#protocolFailure === undefined && this.#negotiation?.accepted !== false) {
           let records: unknown[];
           try {
             records = decoder.flush();
           } catch {
-            this._rejectMalformedStream('its trailing NDJSON record was invalid');
-            return this._result();
+            this.#rejectMalformedStream('its trailing NDJSON record was invalid');
+            return this.#result();
           }
           for (const record of records) {
             this.processChildRecord(record);
           }
         }
 
-        return this._result();
+        return this.#result();
       }
     };
   }
@@ -313,7 +313,7 @@ export class HeftDescriptorHost {
     for (const record of records) {
       this.processChildRecord(record);
     }
-    return this._result();
+    return this.#result();
   }
 
   /**
@@ -329,45 +329,45 @@ export class HeftDescriptorHost {
     return processor.flush();
   }
 
-  private _result(): IHeftChildResult {
-    const negotiation: IReporterHandshakeResult | undefined = this._negotiation;
+  #result(): IHeftChildResult {
+    const negotiation: IReporterHandshakeResult | undefined = this.#negotiation;
     if (negotiation === undefined) {
       return { accepted: false, eventCount: 0 };
     }
     return {
-      accepted: negotiation.accepted && this._protocolFailure === undefined,
-      eventCount: this._eventCount,
+      accepted: negotiation.accepted && this.#protocolFailure === undefined,
+      eventCount: this.#eventCount,
       ...('ack' in negotiation && negotiation.ack !== undefined ? { ack: negotiation.ack } : {}),
-      ...(this._protocolFailure !== undefined
-        ? { diagnostic: this._protocolFailure }
+      ...(this.#protocolFailure !== undefined
+        ? { diagnostic: this.#protocolFailure }
         : 'diagnostic' in negotiation && negotiation.diagnostic !== undefined
           ? { diagnostic: negotiation.diagnostic }
           : {})
     };
   }
 
-  private _rejectMalformedStream(reason: string): false {
-    if (this._protocolFailure === undefined) {
-      this._protocolFailure = createRushDiagnostic('RUSH_PROTOCOL_INVALID_CHILD_STREAM', {
+  #rejectMalformedStream(reason: string): false {
+    if (this.#protocolFailure === undefined) {
+      this.#protocolFailure = createRushDiagnostic('RUSH_PROTOCOL_INVALID_CHILD_STREAM', {
         parameters: {
           reason: { value: reason, privacy: 'public' }
         }
       });
     }
 
-    if (this._negotiation === undefined) {
+    if (this.#negotiation === undefined) {
       const result: IReporterHandshakeResult = {
         accepted: false,
         ack: {
           kind: 'helloAck',
-          protocolVersion: this._supportedProtocolVersion,
+          protocolVersion: this.#supportedProtocolVersion,
           acceptedCapabilities: [],
           rejectedRequiredFeatures: []
         },
-        diagnostic: this._protocolFailure
+        diagnostic: this.#protocolFailure
       };
-      this._negotiation = result;
-      this._onNegotiation?.(result);
+      this.#negotiation = result;
+      this.#onNegotiation?.(result);
     }
     return false;
   }

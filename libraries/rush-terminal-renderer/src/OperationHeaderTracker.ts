@@ -7,32 +7,31 @@ const INITIAL_OPERATION_COUNT: number = 0;
 const OPERATION_COUNT_INCREMENT: number = 1;
 
 export class OperationHeaderTracker {
-  private readonly _headerByOperation: Map<string, IDaemonOperationHeaderPayload> = new Map();
-  private _completedOperations: number = INITIAL_OPERATION_COUNT;
-  private _totalOperations: number = INITIAL_OPERATION_COUNT;
+  readonly #headerByOperation: Map<string, IDaemonOperationHeaderPayload> = new Map();
+  #completedOperations: number = INITIAL_OPERATION_COUNT;
+  #totalOperations: number = INITIAL_OPERATION_COUNT;
 
   public registerOperation(): void {
-    this._totalOperations += OPERATION_COUNT_INCREMENT;
+    this.#totalOperations += OPERATION_COUNT_INCREMENT;
   }
 
   public setOperationHeader(header: IDaemonOperationHeaderPayload): void {
-    this._headerByOperation.set(header.operationId, header);
+    this.#headerByOperation.set(header.operationId, header);
   }
 
   public takeOperationHeader(operationId: string): IDaemonOperationHeaderPayload {
-    const header: IDaemonOperationHeaderPayload | undefined =
-      this._headerByOperation.get(operationId);
+    const header: IDaemonOperationHeaderPayload | undefined = this.#headerByOperation.get(operationId);
     if (header !== undefined) {
-      this._headerByOperation.delete(operationId);
-      this._completedOperations = header.completedOperations;
-      this._totalOperations = header.totalOperations;
+      this.#headerByOperation.delete(operationId);
+      this.#completedOperations = header.completedOperations;
+      this.#totalOperations = header.totalOperations;
       return header;
     }
-    this._completedOperations += OPERATION_COUNT_INCREMENT;
+    this.#completedOperations += OPERATION_COUNT_INCREMENT;
     return {
-      completedOperations: this._completedOperations,
+      completedOperations: this.#completedOperations,
       operationId,
-      totalOperations: this._totalOperations
+      totalOperations: this.#totalOperations
     };
   }
 }

@@ -103,53 +103,53 @@ export interface IDefaultInteractiveReporterOptions {
 export class DefaultInteractiveReporter implements IReporter {
   public readonly name: string = 'default';
 
-  private readonly _terminal: IInteractiveTerminal;
-  private readonly _color: IColorizer;
-  private readonly _colorEnabled: boolean;
-  private readonly _nowMs: () => number;
-  private readonly _minRefreshIntervalMs: number;
+  readonly #terminal: IInteractiveTerminal;
+  readonly #color: IColorizer;
+  readonly #colorEnabled: boolean;
+  readonly #nowMs: () => number;
+  readonly #minRefreshIntervalMs: number;
 
-  private _commandName: string | undefined;
-  private _totalOperations: number;
-  private _completedOperations: number;
-  private _failedOperations: number;
-  private readonly _projectByOperation: Map<string, string>;
-  private readonly _activeProjects: Map<string, string>;
-  private _latestActivity: string;
-  private readonly _diagnostics: string[];
-  private _result: { succeeded: boolean; exitCode: number } | undefined;
-  private _logPath: string | undefined;
+  #commandName: string | undefined;
+  #totalOperations: number;
+  #completedOperations: number;
+  #failedOperations: number;
+  readonly #projectByOperation: Map<string, string>;
+  readonly #activeProjects: Map<string, string>;
+  #latestActivity: string;
+  readonly #diagnostics: string[];
+  #result: { succeeded: boolean; exitCode: number } | undefined;
+  #logPath: string | undefined;
 
-  private _spinnerIndex: number;
-  private _lastPaintMs: number;
-  private _paintedRowCount: number;
-  private _cursorHidden: boolean;
-  private _finalized: boolean;
+  #spinnerIndex: number;
+  #lastPaintMs: number;
+  #paintedRowCount: number;
+  #cursorHidden: boolean;
+  #finalized: boolean;
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
-    this._terminal = options.terminal;
-    this._colorEnabled =
+    this.#terminal = options.terminal;
+    this.#colorEnabled =
       options.color ?? resolveColorEnabled(options.env ?? process.env, options.terminal.isTTY);
-    this._color = createColorizer(this._colorEnabled);
-    this._nowMs = options.nowMs ?? (() => Date.now());
-    this._minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
+    this.#color = createColorizer(this.#colorEnabled);
+    this.#nowMs = options.nowMs ?? (() => Date.now());
+    this.#minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
 
-    this._commandName = undefined;
-    this._totalOperations = 0;
-    this._completedOperations = 0;
-    this._failedOperations = 0;
-    this._projectByOperation = new Map();
-    this._activeProjects = new Map();
-    this._latestActivity = '';
-    this._diagnostics = [];
-    this._result = undefined;
-    this._logPath = options.logPath;
+    this.#commandName = undefined;
+    this.#totalOperations = 0;
+    this.#completedOperations = 0;
+    this.#failedOperations = 0;
+    this.#projectByOperation = new Map();
+    this.#activeProjects = new Map();
+    this.#latestActivity = '';
+    this.#diagnostics = [];
+    this.#result = undefined;
+    this.#logPath = options.logPath;
 
-    this._spinnerIndex = 0;
-    this._lastPaintMs = Number.NEGATIVE_INFINITY;
-    this._paintedRowCount = 0;
-    this._cursorHidden = false;
-    this._finalized = false;
+    this.#spinnerIndex = 0;
+    this.#lastPaintMs = Number.NEGATIVE_INFINITY;
+    this.#paintedRowCount = 0;
+    this.#cursorHidden = false;
+    this.#finalized = false;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -157,30 +157,30 @@ export class DefaultInteractiveReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    this._update(event);
+    this.#update(event);
     if (event.type === 'watchCycleCompleted') {
-      this._appendWatchSummary(event);
+      this.#appendWatchSummary(event);
       return;
     }
-    if (this._terminal.isTTY && shouldRefresh(this._lastPaintMs, this._nowMs(), this._minRefreshIntervalMs)) {
-      this._paint();
+    if (this.#terminal.isTTY && shouldRefresh(this.#lastPaintMs, this.#nowMs(), this.#minRefreshIntervalMs)) {
+      this.#paint();
     }
   }
 
   public async flushAsync(): Promise<void> {
-    if (this._terminal.isTTY && !this._finalized) {
-      this._paint();
+    if (this.#terminal.isTTY && !this.#finalized) {
+      this.#paint();
     }
   }
 
   public async closeAsync(): Promise<void> {
-    this._finalize();
+    this.#finalize();
   }
 
-  private _update(event: IReporterEventEnvelope<unknown>): void {
+  #update(event: IReporterEventEnvelope<unknown>): void {
     switch (event.type) {
       case 'commandStarted': {
-        this._commandName = (event.payload as { commandName?: string }).commandName;
+        this.#commandName = (event.payload as { commandName?: string }).commandName;
         break;
       }
       case 'operationRegistered': {
@@ -188,8 +188,8 @@ export class DefaultInteractiveReporter implements IReporter {
           operationId: string;
           projectName?: string;
         };
-        this._totalOperations++;
-        this._projectByOperation.set(
+        this.#totalOperations++;
+        this.#projectByOperation.set(
           payload.operationId,
           payload.projectName ?? event.scope?.projectName ?? payload.operationId
         );
@@ -204,24 +204,24 @@ export class DefaultInteractiveReporter implements IReporter {
         const projectName: string =
           payload.projectName ??
           event.scope?.projectName ??
-          this._projectByOperation.get(payload.operationId) ??
+          this.#projectByOperation.get(payload.operationId) ??
           payload.operationId;
         if (payload.status === 'executing') {
-          this._activeProjects.set(payload.operationId, projectName);
+          this.#activeProjects.set(payload.operationId, projectName);
         } else if (TERMINAL_STATUSES.has(payload.status)) {
-          this._activeProjects.delete(payload.operationId);
-          this._completedOperations++;
+          this.#activeProjects.delete(payload.operationId);
+          this.#completedOperations++;
           if (payload.status === 'failure') {
-            this._failedOperations++;
+            this.#failedOperations++;
           }
         }
-        this._latestActivity = `${payload.status} ${projectName}`;
+        this.#latestActivity = `${payload.status} ${projectName}`;
         break;
       }
       case 'activityChanged': {
         const payload: { kind?: string; text?: string } = event.payload as { kind?: string; text?: string };
         if (payload.text !== undefined) {
-          this._latestActivity = payload.text;
+          this.#latestActivity = payload.text;
         }
         break;
       }
@@ -231,19 +231,19 @@ export class DefaultInteractiveReporter implements IReporter {
           severity?: string;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._diagnostics.push(`[${payload.severity}] ${payload.code ?? 'unknown'}`);
+          this.#diagnostics.push(`[${payload.severity}] ${payload.code ?? 'unknown'}`);
         }
         break;
       }
       case 'artifactAvailable': {
         const payload: { role?: string; path?: string } = event.payload as { role?: string; path?: string };
         if (payload.role === 'log' && payload.path !== undefined) {
-          this._logPath = payload.path;
+          this.#logPath = payload.path;
         }
         break;
       }
       case 'commandResult': {
-        this._result = event.payload as { succeeded: boolean; exitCode: number };
+        this.#result = event.payload as { succeeded: boolean; exitCode: number };
         break;
       }
       default:
@@ -251,84 +251,84 @@ export class DefaultInteractiveReporter implements IReporter {
     }
   }
 
-  private _snapshot(): ILiveRegionState {
+  #snapshot(): ILiveRegionState {
     return {
-      commandName: this._commandName,
-      totalOperations: this._totalOperations,
-      completedOperations: this._completedOperations,
-      failedOperations: this._failedOperations,
-      activeProjects: [...this._activeProjects.values()],
-      latestActivity: this._latestActivity
+      commandName: this.#commandName,
+      totalOperations: this.#totalOperations,
+      completedOperations: this.#completedOperations,
+      failedOperations: this.#failedOperations,
+      activeProjects: [...this.#activeProjects.values()],
+      latestActivity: this.#latestActivity
     };
   }
 
-  private _paint(): void {
-    if (!this._cursorHidden) {
-      this._terminal.write(HIDE_CURSOR);
-      this._cursorHidden = true;
+  #paint(): void {
+    if (!this.#cursorHidden) {
+      this.#terminal.write(HIDE_CURSOR);
+      this.#cursorHidden = true;
     }
-    const spinnerFrame: string = SPINNER_FRAMES[this._spinnerIndex % SPINNER_FRAMES.length];
-    this._spinnerIndex++;
-    const rows: string[] = renderLiveRegion(this._snapshot(), {
-      width: this._terminal.columns,
+    const spinnerFrame: string = SPINNER_FRAMES[this.#spinnerIndex % SPINNER_FRAMES.length];
+    this.#spinnerIndex++;
+    const rows: string[] = renderLiveRegion(this.#snapshot(), {
+      width: this.#terminal.columns,
       spinnerFrame,
-      color: this._color
+      color: this.#color
     });
-    this._terminal.write(`${this._clearRegion()}${rows.join('\n')}\n`);
-    this._paintedRowCount = rows.length;
-    this._lastPaintMs = this._nowMs();
+    this.#terminal.write(`${this.#clearRegion()}${rows.join('\n')}\n`);
+    this.#paintedRowCount = rows.length;
+    this.#lastPaintMs = this.#nowMs();
   }
 
-  private _clearRegion(): string {
-    if (this._paintedRowCount === 0) {
+  #clearRegion(): string {
+    if (this.#paintedRowCount === 0) {
       return '';
     }
-    return `\u001b[${this._paintedRowCount}A\u001b[0J`;
+    return `\u001b[${this.#paintedRowCount}A\u001b[0J`;
   }
 
-  private _appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
+  #appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
     const payload: { succeeded?: boolean } = event.payload as { succeeded?: boolean };
-    const marker: string = payload.succeeded ? this._color.green('✔') : this._color.red('✖');
+    const marker: string = payload.succeeded ? this.#color.green('✔') : this.#color.red('✖');
     const summary: string = `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'}`;
-    this._terminal.write(`${this._clearRegion()}${summary}\n`);
-    this._paintedRowCount = 0;
-    if (this._terminal.isTTY) {
-      this._paint();
+    this.#terminal.write(`${this.#clearRegion()}${summary}\n`);
+    this.#paintedRowCount = 0;
+    if (this.#terminal.isTTY) {
+      this.#paint();
     }
   }
 
-  private _finalize(): void {
-    if (this._finalized) {
+  #finalize(): void {
+    if (this.#finalized) {
       return;
     }
-    this._finalized = true;
+    this.#finalized = true;
 
     const lines: string[] = [];
-    const succeeded: boolean = this._result?.succeeded ?? false;
+    const succeeded: boolean = this.#result?.succeeded ?? false;
     if (succeeded) {
       lines.push(
-        `${this._color.green('✔')} ${this._commandName ?? 'rush'} succeeded — ` +
-          `${this._completedOperations}/${this._totalOperations} operations`
+        `${this.#color.green('✔')} ${this.#commandName ?? 'rush'} succeeded — ` +
+          `${this.#completedOperations}/${this.#totalOperations} operations`
       );
     } else {
       lines.push(
-        `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${this._failedOperations} failed`
+        `${this.#color.red('✖')} ${this.#commandName ?? 'rush'} failed — ${this.#failedOperations} failed`
       );
-      for (const diagnostic of this._diagnostics.slice(0, MAX_FINAL_DIAGNOSTICS)) {
+      for (const diagnostic of this.#diagnostics.slice(0, MAX_FINAL_DIAGNOSTICS)) {
         lines.push(`  ${diagnostic}`);
       }
-      if (this._diagnostics.length > MAX_FINAL_DIAGNOSTICS) {
-        lines.push(`  +${this._diagnostics.length - MAX_FINAL_DIAGNOSTICS} more diagnostics`);
+      if (this.#diagnostics.length > MAX_FINAL_DIAGNOSTICS) {
+        lines.push(`  +${this.#diagnostics.length - MAX_FINAL_DIAGNOSTICS} more diagnostics`);
       }
-      if (this._logPath !== undefined) {
-        lines.push(`  ${this._color.dim(`Log: ${this._logPath}`)}`);
+      if (this.#logPath !== undefined) {
+        lines.push(`  ${this.#color.dim(`Log: ${this.#logPath}`)}`);
       }
     }
 
-    const clear: string = this._clearRegion();
-    const restore: string = this._cursorHidden ? SHOW_CURSOR : '';
-    this._cursorHidden = false;
-    this._paintedRowCount = 0;
-    this._terminal.write(`${clear}${lines.join('\n')}\n${restore}`);
+    const clear: string = this.#clearRegion();
+    const restore: string = this.#cursorHidden ? SHOW_CURSOR : '';
+    this.#cursorHidden = false;
+    this.#paintedRowCount = 0;
+    this.#terminal.write(`${clear}${lines.join('\n')}\n${restore}`);
   }
 }

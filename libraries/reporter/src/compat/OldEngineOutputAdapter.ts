@@ -54,18 +54,18 @@ export interface IOldEngineOutputAdapterOptions {
  * @beta
  */
 export class OldEngineOutputAdapter {
-  private readonly _sink: IReporterEventSink;
-  private readonly _sessionId: string;
-  private readonly _source: IReporterEventSource;
-  private readonly _protocolVersion: IReporterProtocolVersion;
-  private readonly _maxChunkBytes: number;
+  readonly #sink: IReporterEventSink;
+  readonly #sessionId: string;
+  readonly #source: IReporterEventSource;
+  readonly #protocolVersion: IReporterProtocolVersion;
+  readonly #maxChunkBytes: number;
 
   public constructor(options: IOldEngineOutputAdapterOptions) {
-    this._sink = options.sink;
-    this._sessionId = options.sessionId;
-    this._source = options.source;
-    this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
-    this._maxChunkBytes = options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
+    this.#sink = options.sink;
+    this.#sessionId = options.sessionId;
+    this.#source = options.source;
+    this.#protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
+    this.#maxChunkBytes = options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
   }
 
   /**
@@ -76,12 +76,12 @@ export class OldEngineOutputAdapter {
    */
   public capture(stream: 'stdout' | 'stderr', text: string): string[] {
     const eventIds: string[] = [];
-    for (const chunk of chunkUtf8Text(text, this._maxChunkBytes)) {
+    for (const chunk of chunkUtf8Text(text, this.#maxChunkBytes)) {
       eventIds.push(
-        this._sink.emit({
-          protocolVersion: this._protocolVersion,
-          sessionId: this._sessionId,
-          source: this._source,
+        this.#sink.emit({
+          protocolVersion: this.#protocolVersion,
+          sessionId: this.#sessionId,
+          source: this.#source,
           privacy: 'local-sensitive',
           type: 'externalOutput',
           payload: { stream, text: chunk }

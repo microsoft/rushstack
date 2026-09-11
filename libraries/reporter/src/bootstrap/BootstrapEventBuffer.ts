@@ -131,46 +131,46 @@ export interface IBootstrapEventBufferOptions {
  * @beta
  */
 export class BootstrapEventBuffer {
-  private readonly _entries: IBufferEntry[];
-  private readonly _maxBytes: number;
-  private readonly _entryByteLimit: number;
-  private readonly _sessionId: string;
-  private readonly _source: IBootstrapEventSource;
-  private readonly _now: () => string;
-  private _usedBytes: number;
-  private _nextSequence: number;
-  private _nextEventId: number;
-  private _truncated: boolean;
-  private _failed: boolean;
-  private _droppedReplaceable: number;
-  private _droppedOther: number;
-  private _droppedRequired: number;
+  readonly #entries: IBufferEntry[];
+  readonly #maxBytes: number;
+  readonly #entryByteLimit: number;
+  readonly #sessionId: string;
+  readonly #source: IBootstrapEventSource;
+  readonly #now: () => string;
+  #usedBytes: number;
+  #nextSequence: number;
+  #nextEventId: number;
+  #truncated: boolean;
+  #failed: boolean;
+  #droppedReplaceable: number;
+  #droppedOther: number;
+  #droppedRequired: number;
 
   public constructor(options: IBootstrapEventBufferOptions) {
-    this._entries = [];
-    this._maxBytes = options.maxBytes ?? BOOTSTRAP_BUFFER_MAX_BYTES;
-    this._entryByteLimit = this._maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
-    if (this._entryByteLimit <= 0) {
+    this.#entries = [];
+    this.#maxBytes = options.maxBytes ?? BOOTSTRAP_BUFFER_MAX_BYTES;
+    this.#entryByteLimit = this.#maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
+    if (this.#entryByteLimit <= 0) {
       throw new RangeError(`maxBytes must be greater than ${TRUNCATION_NOTICE_RESERVE_BYTES}.`);
     }
-    this._sessionId = options.sessionId;
-    this._source = options.source;
-    this._now = options.now ?? (() => new Date().toISOString());
-    this._usedBytes = 0;
-    this._nextSequence = 1;
-    this._nextEventId = 1;
-    this._truncated = false;
-    this._failed = false;
-    this._droppedReplaceable = 0;
-    this._droppedOther = 0;
-    this._droppedRequired = 0;
+    this.#sessionId = options.sessionId;
+    this.#source = options.source;
+    this.#now = options.now ?? (() => new Date().toISOString());
+    this.#usedBytes = 0;
+    this.#nextSequence = 1;
+    this.#nextEventId = 1;
+    this.#truncated = false;
+    this.#failed = false;
+    this.#droppedReplaceable = 0;
+    this.#droppedOther = 0;
+    this.#droppedRequired = 0;
   }
 
   /**
    * Whether a required or diagnostic event could not be preserved.
    */
   public get failed(): boolean {
-    return this._failed;
+    return this.#failed;
   }
 
   /**
@@ -178,11 +178,11 @@ export class BootstrapEventBuffer {
    */
   public get truncation(): IBootstrapTruncation {
     return {
-      truncated: this._truncated,
-      failed: this._failed,
-      droppedReplaceable: this._droppedReplaceable,
-      droppedOther: this._droppedOther,
-      droppedRequired: this._droppedRequired
+      truncated: this.#truncated,
+      failed: this.#failed,
+      droppedReplaceable: this.#droppedReplaceable,
+      droppedOther: this.#droppedOther,
+      droppedRequired: this.#droppedRequired
     };
   }
 
@@ -190,14 +190,14 @@ export class BootstrapEventBuffer {
    * Encodes and buffers an event, returning its assigned event id.
    */
   public emit(input: IBootstrapEventInput): string {
-    const eventId: string = `boot_${this._nextEventId++}`;
+    const eventId: string = `boot_${this.#nextEventId++}`;
     const required: boolean = input.type !== 'activityChanged';
     const line: string = encodeBootstrapEnvelope({
       eventId,
-      sessionId: this._sessionId,
-      sequence: this._nextSequence++,
-      timestamp: this._now(),
-      source: this._source,
+      sessionId: this.#sessionId,
+      sequence: this.#nextSequence++,
+      timestamp: this.#now(),
+      source: this.#source,
       privacy: input.privacy ?? 'public',
       required,
       type: input.type,
@@ -207,26 +207,26 @@ export class BootstrapEventBuffer {
     const mustPreserve: boolean = required;
     const replaceable: boolean = input.type === 'activityChanged';
 
-    if (this._usedBytes + bytes <= this._entryByteLimit) {
-      this._entries.push({ line, bytes, mustPreserve, replaceable });
-      this._usedBytes += bytes;
+    if (this.#usedBytes + bytes <= this.#entryByteLimit) {
+      this.#entries.push({ line, bytes, mustPreserve, replaceable });
+      this.#usedBytes += bytes;
       return eventId;
     }
 
-    this._truncated = true;
+    this.#truncated = true;
     if (mustPreserve) {
-      this._evictToFit(bytes);
-      if (this._usedBytes + bytes <= this._entryByteLimit) {
-        this._entries.push({ line, bytes, mustPreserve, replaceable });
-        this._usedBytes += bytes;
+      this.#evictToFit(bytes);
+      if (this.#usedBytes + bytes <= this.#entryByteLimit) {
+        this.#entries.push({ line, bytes, mustPreserve, replaceable });
+        this.#usedBytes += bytes;
       } else {
-        this._failed = true;
-        this._droppedRequired++;
+        this.#failed = true;
+        this.#droppedRequired++;
       }
     } else if (replaceable) {
-      this._droppedReplaceable++;
+      this.#droppedReplaceable++;
     } else {
-      this._droppedOther++;
+      this.#droppedOther++;
     }
     return eventId;
   }
@@ -253,23 +253,23 @@ export class BootstrapEventBuffer {
    * extension event when any events were lost.
    */
   public serialize(): string {
-    const lines: string[] = this._entries.map((entry: IBufferEntry) => entry.line);
-    if (this._truncated) {
+    const lines: string[] = this.#entries.map((entry: IBufferEntry) => entry.line);
+    if (this.#truncated) {
       const noticeLine: string = encodeBootstrapEnvelope({
         eventId: 'boot_bufferTruncated',
-        sessionId: this._sessionId,
-        sequence: this._nextSequence++,
-        timestamp: this._now(),
-        source: this._source,
+        sessionId: this.#sessionId,
+        sequence: this.#nextSequence++,
+        timestamp: this.#now(),
+        source: this.#source,
         privacy: 'public',
         required: true,
         type: 'extension',
         payload: {
           name: BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
-          droppedReplaceable: this._droppedReplaceable,
-          droppedOther: this._droppedOther,
-          droppedRequired: this._droppedRequired,
-          failed: this._failed
+          droppedReplaceable: this.#droppedReplaceable,
+          droppedOther: this.#droppedOther,
+          droppedRequired: this.#droppedRequired,
+          failed: this.#failed
         }
       });
       const noticeBytes: number = Buffer.byteLength(noticeLine, 'utf8') + 1;
@@ -281,20 +281,20 @@ export class BootstrapEventBuffer {
     return lines.length > 0 ? `${lines.join('\n')}\n` : '';
   }
 
-  private _evictToFit(requiredBytes: number): void {
+  #evictToFit(requiredBytes: number): void {
     let index: number = 0;
-    while (this._usedBytes + requiredBytes > this._entryByteLimit && index < this._entries.length) {
-      const entry: IBufferEntry = this._entries[index];
+    while (this.#usedBytes + requiredBytes > this.#entryByteLimit && index < this.#entries.length) {
+      const entry: IBufferEntry = this.#entries[index];
       if (entry.mustPreserve) {
         index++;
         continue;
       }
-      this._entries.splice(index, 1);
-      this._usedBytes -= entry.bytes;
+      this.#entries.splice(index, 1);
+      this.#usedBytes -= entry.bytes;
       if (entry.replaceable) {
-        this._droppedReplaceable++;
+        this.#droppedReplaceable++;
       } else {
-        this._droppedOther++;
+        this.#droppedOther++;
       }
     }
   }

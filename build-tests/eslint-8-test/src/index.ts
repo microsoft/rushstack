@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 export class Foo {
-  private _bar: string = 'bar';
-  public baz: string = this._bar;
+  #bar: string = 'bar';
+  public baz: string = this.#bar;
 }

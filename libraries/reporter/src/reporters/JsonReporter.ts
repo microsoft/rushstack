@@ -37,12 +37,12 @@ export interface IJsonReporterOptions {
 export class JsonReporter implements IReporter {
   public readonly name: string = 'json';
 
-  private readonly _write: (text: string) => void;
-  private readonly _maxRecordBytes: number;
+  readonly #write: (text: string) => void;
+  readonly #maxRecordBytes: number;
 
   public constructor(options: IJsonReporterOptions) {
-    this._write = options.write;
-    this._maxRecordBytes = options.maxRecordBytes ?? REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes;
+    this.#write = options.write;
+    this.#maxRecordBytes = options.maxRecordBytes ?? REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -51,12 +51,10 @@ export class JsonReporter implements IReporter {
 
   public report(event: IReporterEventEnvelope<unknown>): void {
     try {
-      this._write(
-        encodeNdjsonRecord(redactReporterEvent(event), { maxRecordBytes: this._maxRecordBytes })
-      );
+      this.#write(encodeNdjsonRecord(redactReporterEvent(event), { maxRecordBytes: this.#maxRecordBytes }));
     } catch (error) {
       if (error instanceof NdjsonRecordTooLargeError) {
-        this._write(
+        this.#write(
           encodeNdjsonRecord(
             {
               ...event,
@@ -67,7 +65,7 @@ export class JsonReporter implements IReporter {
                 payload: { originalType: event.type }
               }
             },
-            { maxRecordBytes: this._maxRecordBytes }
+            { maxRecordBytes: this.#maxRecordBytes }
           )
         );
         return;

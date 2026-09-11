@@ -106,12 +106,12 @@ export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): st
  * @beta
  */
 export class NdjsonDecoder {
-  private readonly _maxRecordBytes: number;
-  private _buffer: string;
+  readonly #maxRecordBytes: number;
+  #buffer: string;
 
   public constructor(options?: INdjsonOptions) {
-    this._maxRecordBytes = options?.maxRecordBytes ?? REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes;
-    this._buffer = '';
+    this.#maxRecordBytes = options?.maxRecordBytes ?? REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes;
+    this.#buffer = '';
   }
 
   /**
@@ -122,20 +122,20 @@ export class NdjsonDecoder {
    * @throws {@link NdjsonInvalidRecordError} if a completed record is malformed
    */
   public decode(chunk: string): unknown[] {
-    this._buffer += chunk;
+    this.#buffer += chunk;
     const records: unknown[] = [];
 
-    let newlineIndex: number = this._buffer.indexOf('\n');
+    let newlineIndex: number = this.#buffer.indexOf('\n');
     while (newlineIndex >= 0) {
-      const line: string = this._buffer.slice(0, newlineIndex);
-      this._buffer = this._buffer.slice(newlineIndex + 1);
-      this._processLine(line, records);
-      newlineIndex = this._buffer.indexOf('\n');
+      const line: string = this.#buffer.slice(0, newlineIndex);
+      this.#buffer = this.#buffer.slice(newlineIndex + 1);
+      this.#processLine(line, records);
+      newlineIndex = this.#buffer.indexOf('\n');
     }
 
     // A partial line that already exceeds the limit can never become a valid record.
-    if (Buffer.byteLength(this._buffer, 'utf8') > this._maxRecordBytes) {
-      throw new NdjsonRecordTooLargeError(this._maxRecordBytes, records);
+    if (Buffer.byteLength(this.#buffer, 'utf8') > this.#maxRecordBytes) {
+      throw new NdjsonRecordTooLargeError(this.#maxRecordBytes, records);
     }
 
     return records;
@@ -149,17 +149,17 @@ export class NdjsonDecoder {
    */
   public flush(): unknown[] {
     const records: unknown[] = [];
-    if (this._buffer.length > 0) {
-      const line: string = this._buffer;
-      this._buffer = '';
-      this._processLine(line, records);
+    if (this.#buffer.length > 0) {
+      const line: string = this.#buffer;
+      this.#buffer = '';
+      this.#processLine(line, records);
     }
     return records;
   }
 
-  private _processLine(line: string, records: unknown[]): void {
-    if (Buffer.byteLength(line, 'utf8') > this._maxRecordBytes) {
-      throw new NdjsonRecordTooLargeError(this._maxRecordBytes, records);
+  #processLine(line: string, records: unknown[]): void {
+    if (Buffer.byteLength(line, 'utf8') > this.#maxRecordBytes) {
+      throw new NdjsonRecordTooLargeError(this.#maxRecordBytes, records);
     }
     const trimmed: string = line.trim();
     if (trimmed.length === 0) {

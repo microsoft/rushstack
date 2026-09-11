@@ -11,24 +11,24 @@ import type { ITerminal } from '@rushstack/terminal';
  * Helper class for running integration tests with Rush package managers
  */
 export class TestHelper {
-  private readonly _rushBinPath: string;
-  private readonly _terminal: ITerminal;
+  readonly #rushBinPath: string;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
     // Resolve rush bin path from @microsoft/rush dependency
-    this._rushBinPath = require.resolve('@microsoft/rush/lib/start-dev');
+    this.#rushBinPath = require.resolve('@microsoft/rush/lib/start-dev');
   }
 
   /**
    * Execute a Rush command using the locally-built Rush
    */
   public async executeRushAsync(args: string[], workingDirectory: string): Promise<void> {
-    this._terminal.writeLine(`Executing: ${process.argv0} ${this._rushBinPath} ${args.join(' ')}`);
+    this.#terminal.writeLine(`Executing: ${process.argv0} ${this.#rushBinPath} ${args.join(' ')}`);
 
     const childProcess: child_process.ChildProcess = Executable.spawn(
       process.argv0,
-      [this._rushBinPath, ...args],
+      [this.#rushBinPath, ...args],
       {
         currentWorkingDirectory: workingDirectory,
         stdio: 'inherit'
@@ -49,15 +49,15 @@ export class TestHelper {
     packageManagerVersion: string
   ): Promise<void> {
     // Clean up previous test run and create empty test repo directory
-    this._terminal.writeLine(`Creating test repository at ${testRepoPath}...`);
+    this.#terminal.writeLine(`Creating test repository at ${testRepoPath}...`);
     await FileSystem.ensureEmptyFolderAsync(testRepoPath);
 
     // Initialize Rush repo
-    this._terminal.writeLine('Initializing Rush repo...');
+    this.#terminal.writeLine('Initializing Rush repo...');
     await this.executeRushAsync(['init'], testRepoPath);
 
     // Configure rush.json for the specified package manager
-    this._terminal.writeLine(`Configuring rush.json for ${packageManagerType} mode...`);
+    this.#terminal.writeLine(`Configuring rush.json for ${packageManagerType} mode...`);
     const rushJsonPath: string = path.join(testRepoPath, 'rush.json');
     const rushJson: JsonObject = await JsonFile.loadAsync(rushJsonPath);
 
@@ -120,14 +120,14 @@ export class TestHelper {
    * Verify that temp project tarballs were created
    */
   public async verifyTempTarballsAsync(testRepoPath: string, projectNames: string[]): Promise<void> {
-    this._terminal.writeLine('\nVerifying temp project tarballs were created...');
+    this.#terminal.writeLine('\nVerifying temp project tarballs were created...');
     for (const projectName of projectNames) {
       const tarballPath: string = path.join(testRepoPath, 'common/temp/projects', `${projectName}.tgz`);
       if (!(await FileSystem.existsAsync(tarballPath))) {
         throw new Error(`ERROR: ${projectName}.tgz was not created!`);
       }
     }
-    this._terminal.writeLine('✓ Temp project tarballs created successfully');
+    this.#terminal.writeLine('✓ Temp project tarballs created successfully');
   }
 
   /**
@@ -138,7 +138,7 @@ export class TestHelper {
     projectName: string,
     expectedDependencies: string[]
   ): Promise<void> {
-    this._terminal.writeLine('\nVerifying node_modules structure...');
+    this.#terminal.writeLine('\nVerifying node_modules structure...');
     const projectPath: string = path.join(testRepoPath, 'projects', projectName);
     const projectNodeModules: string = path.join(projectPath, 'node_modules');
 
@@ -161,28 +161,28 @@ export class TestHelper {
         }
       }
     }
-    this._terminal.writeLine('✓ Dependencies installed correctly');
+    this.#terminal.writeLine('✓ Dependencies installed correctly');
   }
 
   /**
    * Verify that build outputs were created
    */
   public async verifyBuildOutputsAsync(testRepoPath: string, projectNames: string[]): Promise<void> {
-    this._terminal.writeLine('\nVerifying build outputs...');
+    this.#terminal.writeLine('\nVerifying build outputs...');
     for (const projectName of projectNames) {
       const outputPath: string = path.join(testRepoPath, 'projects', projectName, 'lib/index.js');
       if (!(await FileSystem.existsAsync(outputPath))) {
         throw new Error(`ERROR: ${projectName} build output not found!`);
       }
     }
-    this._terminal.writeLine('✓ Build completed successfully');
+    this.#terminal.writeLine('✓ Build completed successfully');
   }
 
   /**
    * Test that the built code executes correctly
    */
   public async testBuiltCodeAsync(testRepoPath: string, projectName: string): Promise<void> {
-    this._terminal.writeLine('\nTesting built code...');
+    this.#terminal.writeLine('\nTesting built code...');
     const projectLib: string = path.join(testRepoPath, 'projects', projectName, 'lib/index.js');
 
     // Use forward slashes for require() path on all platforms
@@ -200,6 +200,6 @@ export class TestHelper {
     if (!result.includes('Using: Hello from A')) {
       throw new Error('ERROR: Built code did not execute as expected!');
     }
-    this._terminal.writeLine('✓ Built code executes correctly');
+    this.#terminal.writeLine('✓ Built code executes correctly');
   }
 }

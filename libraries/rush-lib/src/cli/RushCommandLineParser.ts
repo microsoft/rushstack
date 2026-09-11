@@ -84,6 +84,20 @@ export interface IRushCommandLineParserOptions {
   reporterCloseAsync?: () => Promise<void>;
 }
 
+type ReportErrorAndSetExitCodeTestOverride = typeof _setReportErrorAndSetExitCodeForTesting & {
+  callback?: (error: Error) => never;
+};
+
+/**
+ * Overrides error reporting for unit tests that need thrown errors instead of process termination.
+ * @internal
+ */
+export function _setReportErrorAndSetExitCodeForTesting(
+  callback: ((error: Error) => never) | undefined
+): void {
+  (_setReportErrorAndSetExitCodeForTesting as ReportErrorAndSetExitCodeTestOverride).callback = callback;
+}
+
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder: RushGlobalFolder;
@@ -167,7 +181,7 @@ export class RushCommandLineParser extends CommandLineParser {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
       }
     } catch (error) {
-      this._reportInitializationErrorAndSetExitCode(error as Error);
+      this.#reportInitializationErrorAndSetExitCode(error as Error);
     }
 
     NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -210,7 +224,7 @@ export class RushCommandLineParser extends CommandLineParser {
       try {
         this.#addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
-        this._reportInitializationErrorAndSetExitCode(
+        this.#reportInitializationErrorAndSetExitCode(
           new Error(
             `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
               e as Error
@@ -266,7 +280,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   public override async executeAsync(args?: string[]): Promise<boolean> {
     if (this.#initializationFailed) {
-      await this._closeReporterAsync();
+      await this.#closeReporterAsync();
       return false;
     }
 
@@ -279,7 +293,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this.#terminalProvider.verboseEnabled = this.#terminalProvider.debugEnabled =
       rushArgv.includes('--debug') || rushArgv.includes('-d');
 
-    this._startReporterSession();
+    this.#startReporterSession();
 
     try {
       await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
@@ -288,17 +302,17 @@ export class RushCommandLineParser extends CommandLineParser {
 
       const succeeded: boolean = await super.executeAsync(args);
       if (!this.#reporterCompletionEmitted) {
-        this._emitReporterCompletion(succeeded ? 0 : _getNumericProcessExitCode(1));
+        this.#emitReporterCompletion(succeeded ? 0 : _getNumericProcessExitCode(1));
       }
       return succeeded;
     } catch (error) {
       if (!process.exitCode) {
         process.exitCode = 1;
       }
-      this._reportErrorAndSetExitCode(error as Error);
+      this.#reportErrorAndSetExitCode(error as Error);
       return false;
     } finally {
-      await this._closeReporterAsync();
+      await this.#closeReporterAsync();
     }
   }
 
@@ -307,7 +321,7 @@ export class RushCommandLineParser extends CommandLineParser {
       await super.executeWithoutErrorHandlingAsync(args);
     } catch (error) {
       // Capture the original parse error before the base executeAsync renders it and returns false.
-      this._emitReporterFailureDiagnostic(error as Error, !this.#commandLifecycleEmitter);
+      this.#emitReporterFailureDiagnostic(error as Error, !this.#commandLifecycleEmitter);
       throw error;
     }
   }
@@ -376,14 +390,14 @@ export class RushCommandLineParser extends CommandLineParser {
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
     } catch (error) {
-      this._reportErrorAndSetExitCode(error as Error);
+      this.#reportErrorAndSetExitCode(error as Error);
     }
 
     // This only gets hit if the wrapped execution completes successfully
     try {
       await this.telemetry?.ensureFlushedAsync();
     } catch (error) {
-      this._emitReporterFailureDiagnostic(error as Error);
+      this.#emitReporterFailureDiagnostic(error as Error);
       throw error;
     }
   }
@@ -444,7 +458,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       this.#populateScriptActions();
     } catch (error) {
-      this._reportInitializationErrorAndSetExitCode(error as Error);
+      this.#reportInitializationErrorAndSetExitCode(error as Error);
     }
   }
 
@@ -593,7 +607,7 @@ export class RushCommandLineParser extends CommandLineParser {
     );
   }
 
-  private _startReporterSession(): void {
+  #startReporterSession(): void {
     if (this.#sessionLifecycleEmitter && this.#sessionStartTimeMs === undefined) {
       this.#sessionStartTimeMs = performance.now();
       this.#sessionLifecycleEmitter.emitSessionStarted({
@@ -602,8 +616,8 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _emitReporterFailureDiagnostic(error: Error, includeMessage: boolean = false): void {
-    this._startReporterSession();
+  #emitReporterFailureDiagnostic(error: Error, includeMessage: boolean = false): void {
+    this.#startReporterSession();
     const emitter: LifecycleEmitter | undefined =
       this.#commandLifecycleEmitter ?? this.#sessionLifecycleEmitter;
     const rushSession: RushSession | undefined = this.rushSession;
@@ -629,8 +643,15 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _reportErrorAndSetExitCode(error: Error): void {
-    this._emitReporterFailureDiagnostic(error);
+  #reportErrorAndSetExitCode(error: Error): void {
+    const testOverride: ((error: Error) => never) | undefined = (
+      _setReportErrorAndSetExitCodeForTesting as ReportErrorAndSetExitCodeTestOverride
+    ).callback;
+    if (testOverride) {
+      testOverride(error);
+    }
+
+    this.#emitReporterFailureDiagnostic(error);
 
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
@@ -659,7 +680,7 @@ export class RushCommandLineParser extends CommandLineParser {
         ? numericExitCode
         : 1;
     process.exitCode = exitCode;
-    this._emitReporterCompletion(exitCode);
+    this.#emitReporterCompletion(exitCode);
     this.flushTelemetry();
 
     const handleExit = (): never => {
@@ -680,7 +701,7 @@ export class RushCommandLineParser extends CommandLineParser {
     if (this.#rushOptions.reporterCloseAsync || telemetryFlushAsync) {
       const pendingFlushes: Promise<unknown>[] = [];
       if (this.#rushOptions.reporterCloseAsync) {
-        pendingFlushes.push(this._closeReporterAsync());
+        pendingFlushes.push(this.#closeReporterAsync());
       }
       if (telemetryFlushAsync) {
         pendingFlushes.push(telemetryFlushAsync);
@@ -691,12 +712,12 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _reportInitializationErrorAndSetExitCode(error: Error): void {
+  #reportInitializationErrorAndSetExitCode(error: Error): void {
     this.#initializationFailed = true;
-    this._reportErrorAndSetExitCode(error);
+    this.#reportErrorAndSetExitCode(error);
   }
 
-  private _closeReporterAsync(): Promise<void> {
+  #closeReporterAsync(): Promise<void> {
     if (!this.#reporterClosePromise) {
       this.#reporterClosePromise = (async (): Promise<void> => {
         try {
@@ -710,7 +731,7 @@ export class RushCommandLineParser extends CommandLineParser {
     return this.#reporterClosePromise;
   }
 
-  private _emitReporterCompletion(exitCode: number): void {
+  #emitReporterCompletion(exitCode: number): void {
     if (!this.#sessionLifecycleEmitter || this.#reporterCompletionEmitted) {
       return;
     }
