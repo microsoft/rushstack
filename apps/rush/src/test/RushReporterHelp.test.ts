@@ -15,15 +15,23 @@ import { launchRushFrontendAsync } from '../RushFrontend';
 import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
 
 describe('reporter help forwarding', () => {
-  it.each([false, true])('forwards only help to the real engine with repository opt-in %s', async (optIn) => {
-    const originalArgv: string[] = process.argv;
-    const originalEnv: NodeJS.ProcessEnv = { ...process.env };
-    const originalExitCode: typeof process.exitCode = process.exitCode;
+  it.each([
+    { optIn: false, command: undefined, verbose: undefined },
+    { optIn: true, command: undefined, verbose: undefined },
+    { optIn: false, command: 'build', verbose: undefined },
+    { optIn: true, command: 'build', verbose: undefined },
+    { optIn: false, command: 'list', verbose: '--verbose' },
+    { optIn: true, command: 'list', verbose: '--verbose' },
+    { optIn: true, command: 'build', verbose: '--verbose' },
+    { optIn: true, command: 'list', verbose: '-v' }
+  ])('forwards command-owned help flags to the real engine: %j', async ({ optIn, command, verbose }) => {
     const repoPath: string = path.resolve(
       __dirname,
       '../../../../libraries/rush-lib/src/cli/test/basicAndRunBuildActionRepo'
     );
-    const cwdSpy = jest.spyOn(process, 'cwd').mockReturnValue(repoPath);
+    const originalArgv: string[] = process.argv;
+    const originalEnv: NodeJS.ProcessEnv = { ...process.env };
+    const originalExitCode: typeof process.exitCode = process.exitCode;
     const output: string[] = [];
     const errors: string[] = [];
     const stdoutSpy = jest.spyOn(process.stdout, 'write').mockImplementation((text) => {
@@ -35,13 +43,15 @@ describe('reporter help forwarding', () => {
       return true;
     });
     const logSpy = jest.spyOn(console, 'log').mockImplementation((text) => output.push(String(text)));
+    const cwdSpy = jest.spyOn(process, 'cwd').mockReturnValue(repoPath);
     process.argv = [
       'node',
       'rush',
-      'build',
+      ...(command ? [command] : []),
       ...(optIn ? [] : ['--reporter=json']),
       '--output=json://./help-events.jsonl',
       '--log-level=debug',
+      ...(verbose ? [verbose] : []),
       '--help'
     ];
     delete process.env.RUSH_REPORTER;
@@ -57,7 +67,13 @@ describe('reporter help forwarding', () => {
         executeCurrentRush: (version, selectedRushLib, options) => {
           void version;
           void selectedRushLib;
-          expect(process.argv).toEqual(['node', 'rush', 'build', '--help']);
+          expect(process.argv).toEqual([
+            'node',
+            'rush',
+            ...(command ? [command] : []),
+            ...(verbose && (verbose === '-v' || command === 'build') ? [verbose] : []),
+            '--help'
+          ]);
           expect(process.env.RUSH_LOG_LEVEL).toBeUndefined();
           expect(options.reporter.operationStreamEnabled).toBe(false);
           const parser: RushCommandLineParser = new RushCommandLineParser({
@@ -69,7 +85,7 @@ describe('reporter help forwarding', () => {
           });
         }
       });
-      expect(output.join('')).toContain('usage: rush build');
+      expect(output.join('')).toContain(command ? `usage: rush ${command}` : 'usage: rush');
       expect(errors).toEqual([]);
     } finally {
       process.argv = originalArgv;
