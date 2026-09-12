@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateHeftOutput } from './validateHeftOutput.mjs';
 
 const scriptFolder = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptFolder, '..', '..', '..', '..', '..', '..');
@@ -72,6 +73,13 @@ const flagOffHelp = run('help-flag-off', ['--help']).stdout;
 const help = run('help', ['--help', '--reporter=json'], { RUSH_REPORTER: 'legacy' }).stdout;
 const commandJson = run('command-json', ['list', '--json', '--reporter=file']);
 const commandJsonConflict = run('command-json-conflict', ['list', '--json', '--reporter=json'], {}, 1);
+const heftChild = run('heft-child', [
+  'rebuild',
+  '--only',
+  '@rushstack/rush-reporter',
+  '--reporter=json',
+  '--log-level=debug'
+]).stdout;
 const duplicateOutputPath = path.join(outputFolder, 'duplicate-output.jsonl');
 const outputConflict = run(
   'output-conflict',
@@ -151,6 +159,7 @@ for (const [name, events] of [
     }
   }
 }
+validateHeftOutput(parseNdjson(heftChild, 'Heft child'));
 
 const logMatch = plaintext.match(/^Full log: (.+)$/m);
 if (!logMatch || !path.isAbsolute(logMatch[1]) || !fs.existsSync(logMatch[1])) {

@@ -25,6 +25,9 @@ matching purge-path selection. Captured stdout/stderr files are written to a tem
 The final matrix case invokes `rush purge` with an isolated `RUSH_TEMP_FOLDER`. This also unlinks project
 dependencies, so run the install command again before continuing development in the checkout.
 
+The direct Unix Heft path must negotiate structured output; the Windows shell path must retain readable
+raw fallback.
+
 For individual invocations, first select the locally built engine in the same shell. The local
 `apps/rush/bin/rush` still honors the version in `rush.json`; without this override, an older pinned
 engine can reject the explicit reporter request. The override selects the engine, not the reporter:

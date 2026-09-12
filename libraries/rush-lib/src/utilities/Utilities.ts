@@ -113,6 +113,20 @@ export interface ILifecycleCommandOptions {
    * If true, wire up SubprocessTerminator to the child process.
    */
   connectSubprocessTerminator?: boolean;
+
+  /**
+   * Additional private environment variables for inherited child channels.
+   *
+   * @internal
+   */
+  additionalEnvironment?: IEnvironment;
+
+  /**
+   * An explicit stdio plan for private inherited child channels.
+   *
+   * @internal
+   */
+  stdio?: child_process.StdioOptions;
 }
 
 export interface IEnvironmentPathOptions {
@@ -678,7 +692,9 @@ function _executeLifecycleCommandInternal<TCommandResult>(
     workingDirectory,
     handleOutput,
     ipc,
-    connectSubprocessTerminator
+    connectSubprocessTerminator,
+    additionalEnvironment,
+    stdio: explicitStdio
   } = options;
   const environment: IEnvironment = _createEnvironmentForRushCommand({
     initCwd,
@@ -691,10 +707,15 @@ function _executeLifecycleCommandInternal<TCommandResult>(
     }
   });
 
-  const stdio: child_process.StdioOptions = handleOutput ? ['ignore', 'pipe', 'pipe'] : [0, 1, 2];
+  let stdio: child_process.StdioOptions =
+    explicitStdio ?? (handleOutput ? ['ignore', 'pipe', 'pipe'] : [0, 1, 2]);
   if (ipc) {
-    stdio.push('ipc');
+    if (!Array.isArray(stdio)) {
+      throw new Error('An IPC lifecycle command requires an array stdio configuration.');
+    }
+    stdio = [...stdio, 'ipc'];
   }
+  Object.assign(environment, additionalEnvironment);
 
   const spawnOptions: child_process.SpawnOptions = {
     cwd: workingDirectory,

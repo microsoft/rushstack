@@ -535,6 +535,7 @@ describe('OperationGraph event sink (dual-emit)', () => {
         operationStreamEnabled: true
       }
     });
+
     const graph: OperationGraph = new OperationGraph(
       new Set([
         createOperation('visible', new MockOperationRunner('visible'), mockPhase, '@scope/visible'),
