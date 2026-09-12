@@ -76,6 +76,13 @@ removed.
 Human diagnostic source labels that duplicate an explicitly secret parameter are also redacted. Unrelated
 local-sensitive tool names and locations remain available in local human output.
 
+Machine JSON also applies the existing nonempty secret-value alias classifier to diagnostic sources.
+A producer package name that repeats a secret value hides the associated producer identity; otherwise
+only matching version/component or diagnostic file/tool fields are redacted. Unrelated source context
+remains available. Owner-only full-detail files retain their existing local-sensitive source context
+while redacting the classified parameter itself. Qualification checks both AI and JSON output for the
+private producer and component, independently of the full-log preservation check.
+
 ## Shadow lifecycle compatibility
 
 Error correlation uses external weak metadata, so frozen and non-extensible errors retain their original
