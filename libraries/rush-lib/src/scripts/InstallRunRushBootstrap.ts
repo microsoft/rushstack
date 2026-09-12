@@ -8,6 +8,8 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import type { CommandJson, ICommandLineJson } from '../api/CommandLineJson';
+import { NATIVE_RUSH_COMMANDS } from '../logic/RushCommandLineConstants';
 import type { ILogger, LogPrivacyClassification } from '../utilities/npmrcUtilities';
 import {
   BOOTSTRAP_BUFFER_MAX_BYTES,
@@ -116,6 +118,91 @@ function readFlagValues(argv: readonly string[], flag: string, strict: boolean):
     }
   }
   return result;
+}
+
+function readMultipleFlagValues(argv: readonly string[], flag: string): string[] {
+  const result: string[] = [];
+  const prefix: string = `${flag}=`;
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    let value: string | undefined;
+    if (argument.startsWith(prefix)) {
+      value = argument.slice(prefix.length);
+    } else if (argument === flag) {
+      value = argv[index + 1];
+      if (!value || value.startsWith('-')) {
+        throw new Error(`${flag} requires a value.`);
+      }
+      index++;
+    }
+
+    if (value !== undefined) {
+      if (!value) {
+        throw new Error(`${flag} requires a value.`);
+      }
+      result.push(value);
+    }
+  }
+  return result;
+}
+
+function readBootstrapConfiguration<T>(filePath: string): T | undefined {
+  let contents: string;
+  try {
+    contents = fs.readFileSync(filePath, 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return undefined;
+    }
+    throw error;
+  }
+  // Remove trailing commas only outside quoted strings, after stripping comments.
+  return JSON.parse(
+    stripJsonComments(contents).replace(
+      /("(?:\\.|[^"\\])*")|,\s*(?=[}\]])/g,
+      (match: string, quoted: string | undefined) => (quoted === undefined ? '' : match)
+    )
+  ) as T;
+}
+
+function ownsImplicitOutput(options: IInstallRunRushBootstrapOptions): boolean {
+  let actionName: string | undefined;
+  for (let index: number = 0; index < options.argv.length; index++) {
+    const argument: string = options.argv[index];
+    if (argument === '--') break;
+    if (argument === '--reporter' || argument === '--log-level' || argument === '--output') {
+      if (options.argv[index + 1] && !options.argv[index + 1].startsWith('-')) index++;
+    } else if (!argument.startsWith('-')) {
+      actionName = argument;
+      break;
+    }
+  }
+  if (!actionName) return false;
+  if (NATIVE_RUSH_COMMANDS.has(actionName)) return true;
+
+  const configFolder: string = path.join(options.rushJsonFolder, 'common', 'config', 'rush');
+  const plugins: { plugins?: readonly unknown[] } | undefined = readBootstrapConfiguration(
+    path.join(configFolder, 'rush-plugins.json')
+  );
+  if (plugins?.plugins?.length) return false;
+
+  const commandLine: ICommandLineJson | undefined = readBootstrapConfiguration(
+    path.join(configFolder, 'command-line.json')
+  );
+  const command: CommandJson | undefined = commandLine?.commands?.find(
+    (candidate) => candidate.name === actionName
+  );
+  if (!command && actionName !== 'build' && actionName !== 'rebuild') return false;
+  const usesBuildParameters: boolean = actionName === 'rebuild' && !command;
+  return !commandLine?.parameters?.some(
+    (parameter) =>
+      parameter.longName === '--output' &&
+      (parameter.associatedCommands?.includes(actionName) ||
+        (usesBuildParameters && parameter.associatedCommands?.includes('build')))
+  );
 }
 
 function repositoryUsesRushReporter(rushJsonFolder: string): boolean {
@@ -606,10 +693,23 @@ export function createInstallRunRushBootstrap(
   const separatorIndex: number = options.argv.indexOf('--');
   const commandArgs: readonly string[] =
     separatorIndex < 0 ? options.argv : options.argv.slice(0, separatorIndex);
+  const isHelp: boolean = commandArgs.includes('--help') || commandArgs.includes('-h');
+  const outputs: readonly string[] =
+    !isHelp && (explicitOptIn || ownsImplicitOutput(options))
+      ? readMultipleFlagValues(options.argv, '--output')
+      : [];
+  const outputOwnsStdout: boolean = outputs.some((output: string) => {
+    const match: RegExpExecArray | null = /^([a-z][a-z0-9]*):\/\/(.*)$/i.exec(output);
+    if (!match) {
+      throw new Error(`Invalid --output control: ${JSON.stringify(output)}`);
+    }
+    return match[2].split('?', 1)[0] === 'stdout';
+  });
   const stdoutReserved: boolean =
     explicitReporter === 'json' ||
     explicitReporter === 'ai' ||
     explicitReporter === 'file' ||
-    commandArgs.includes('--json');
+    commandArgs.includes('--json') ||
+    outputOwnsStdout;
   return new InstallRunRushBootstrap(options, !stdoutReserved);
 }

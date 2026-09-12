@@ -918,8 +918,8 @@ async function runCaseAsync(
     !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_PRODUCER) &&
     !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_COMPONENT) &&
     !machinePresentedOutput.includes(OVERSIZED_LOCAL_SENSITIVE_SCOPE) &&
-    !aiOutput.includes(PRIVATE_PRODUCER) &&
-    !aiOutput.includes(PRIVATE_COMPONENT) &&
+    !machinePresentedOutput.includes(PRIVATE_PRODUCER) &&
+    !machinePresentedOutput.includes(PRIVATE_COMPONENT) &&
     !humanPresentedOutput.includes(PRIVATE_PRODUCER) &&
     !humanPresentedOutput.includes(PRIVATE_COMPONENT);
   const warningContractValid: boolean =

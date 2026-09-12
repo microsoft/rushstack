@@ -228,6 +228,113 @@ describe(createInstallRunRushBootstrap.name, () => {
     });
   });
 
+  it.each([
+    ['--reporter=file', '--output=json://stdout'],
+    ['--reporter', 'file', '--output', 'json://stdout'],
+    ['--reporter=file', '--output=file://stdout?logLevel=normal'],
+    ['--reporter=file', '--output=json://./events.jsonl', '--output', 'json://stdout'],
+    ['--reporter=file', '--output=json://stdout', '--output', 'json://stderr']
+  ])('reserves bootstrap stdout for an owned additional output: %j', async (...controls: string[]) => {
+    await withTempDir(async (directory: string) => {
+      const { options, env, stdout, stderr } = makeOptions(directory, { argv: ['build', ...controls] });
+      const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+      expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: false, stderr: true });
+      bootstrap.externalOutputHandler?.('stdout', 'npm stdout\n', false);
+      bootstrap.prepareToRun?.();
+      expect(readHandoff(env).records.at(-1)).toMatchObject({
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'npm stdout\n' }
+      });
+      bootstrap.logger.error('installation failed');
+      expect(stdout).toEqual([]);
+      expect(stderr).toEqual(['npm stdout\n', 'installation failed\n']);
+    });
+  });
+
+  it.each([
+    ['--reporter=file'],
+    ['--reporter=plaintext'],
+    ['--reporter=file', '--output=json://stderr'],
+    ['--reporter=file', '--output=json://./stdout'],
+    ['--reporter=file', '--output=file://./stdout?logLevel=normal'],
+    ['--reporter=file', '--', '--output=json://stdout'],
+    ['--reporter=file', '--help', '--output'],
+    ['--reporter=file', '-h', '--output=json://stdout']
+  ])('preserves live bootstrap stdout when no additional output owns it: %j', async (...controls: string[]) => {
+    await withTempDir(async (directory: string) => {
+      const bootstrap = createInstallRunRushBootstrap(
+        makeOptions(directory, { argv: ['build', ...controls] }).options
+      );
+      expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: true, stderr: true });
+    });
+  });
+
+  it.each([
+    { argv: ['build', '--output=json://stdout'], env: {} },
+    { argv: ['build', '--reporter=legacy', '--output'], env: {} },
+    { argv: ['build', '--reporter=file', '--output'], env: { RUSH_REPORTER: 'legacy' } }
+  ])('does not claim additional outputs on the legacy path: $argv', async ({ argv, env }) => {
+    await withTempDir(async (directory: string) => {
+      const { options, stdout } = makeOptions(directory, { argv, env });
+      const bootstrap = createInstallRunRushBootstrap(options);
+      bootstrap.logger.info('legacy startup');
+      expect(bootstrap.enabled).toBe(false);
+      expect(bootstrap.externalOutputLiveStreams).toBeUndefined();
+      expect(stdout).toEqual(['legacy startup\n']);
+    });
+  });
+
+  it.each([['--output'], ['--output='], ['--output', '--verbose'], ['--output=invalid']])(
+    'rejects malformed owned additional outputs: %j',
+    async (...controls: string[]) => {
+      await withTempDir(async (directory: string) => {
+        expect(() =>
+          createInstallRunRushBootstrap(
+            makeOptions(directory, { argv: ['build', '--reporter=file', ...controls] }).options
+          )
+        ).toThrow(/--output/);
+      });
+    }
+  );
+
+  it('uses declared command ownership for implicit outputs, including synthetic rebuild and plugins', async () => {
+    await withTempDir(async (directory: string) => {
+      const configFolder: string = path.join(directory, 'common', 'config', 'rush');
+      await fs.promises.mkdir(configFolder, { recursive: true });
+      await fs.promises.writeFile(path.join(configFolder, 'experiments.json'), '{"useRushReporter":true}');
+      await fs.promises.writeFile(
+        path.join(configFolder, 'command-line.json'),
+        `{
+          // Reporter-shaped custom values must remain command-owned.
+          "commands": [
+            { "name": "custom", "commandKind": "global", "shellCommand": "echo custom,}" },
+            { "name": "build", "commandKind": "bulk" },
+          ],
+          "parameters": [
+            { "longName": "--output", "parameterKind": "stringList", "associatedCommands": ["custom","build"], },
+          ],
+        }`
+      );
+      const liveStdout = (argv: readonly string[]): boolean | undefined =>
+        createInstallRunRushBootstrap(makeOptions(directory, { argv }).options).externalOutputLiveStreams
+          ?.stdout;
+      for (const command of ['custom', 'build', 'rebuild', 'unknown-command']) {
+        expect(liveStdout([command, '--output=json://stdout'])).toBe(true);
+        expect(liveStdout([command, '--output', 'custom-artifact.zip'])).toBe(true);
+        expect(liveStdout([command, '--output'])).toBe(true);
+      }
+      expect(liveStdout(['list', '--output=json://stdout'])).toBe(false);
+      expect(liveStdout(['custom', '--reporter=file', '--output=json://stdout'])).toBe(false);
+
+      await fs.promises.writeFile(path.join(configFolder, 'command-line.json'), '{}');
+      expect(liveStdout(['build', '--output', 'json://stdout'])).toBe(false);
+      expect(liveStdout(['rebuild', '--output=json://stdout'])).toBe(false);
+      await fs.promises.writeFile(path.join(configFolder, 'rush-plugins.json'), '{"plugins":[{}]}');
+      expect(liveStdout(['build', '--output=json://stdout'])).toBe(true);
+      expect(liveStdout(['list', '--output=json://stdout'])).toBe(false);
+    });
+  });
+
   it('does not publish the working directory or full argv as public bootstrap data', async () => {
     await withTempDir(async (directory: string) => {
       const secretArgument: string = '--token=bootstrap-secret-value';

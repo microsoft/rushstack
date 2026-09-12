@@ -4,6 +4,11 @@ Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
 This package is released as a public beta. Exported contracts may change before the stable release.
 
+An owned additional `--output=json://stdout` or `--output=file://stdout` also reserves stdout during
+bootstrap installation. Repository-implicit selection respects declared command-owned output controls.
+Old-engine capture forwards reentrant reporter writes without recapturing them, and version-selection
+messages containing installation paths are local-sensitive while ordinary status remains public.
+
 Rush 5 keeps legacy terminal output by default. See the
 [experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
 privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
@@ -39,6 +44,13 @@ classification and omit non-public source and scope metadata.
 Secret envelopes retain only protocol, event identity, ordering, timing, type, privacy, and fully redacted
 source and payload fields. Contextual parent, command, operation, project, phase, and scope metadata is
 removed.
+
+Machine JSON also applies the existing nonempty secret-value alias classifier to diagnostic sources.
+A producer package name that repeats a secret value hides the associated producer identity; otherwise
+only matching version/component or diagnostic file/tool fields are redacted. Unrelated source context
+remains available. Owner-only full-detail files retain their existing local-sensitive source context
+while redacting the classified parameter itself. Qualification checks both AI and JSON output for the
+private producer and component, independently of the full-log preservation check.
 
 ## Shadow lifecycle compatibility
 
