@@ -209,11 +209,30 @@ function sanitizeDiagnosticRecord(
   value: Record<string, unknown>,
   envelopePrivacy: ReporterPrivacyClassification
 ): Record<string, unknown> {
+  const secretStrings: string[] = [];
+  if (isObjectRecord(value.parameters)) {
+    for (const parameter of Object.values(value.parameters)) {
+      const classified: Record<string, unknown> = parameter as Record<string, unknown>;
+      if (
+        classified.privacy === 'secret' &&
+        typeof classified.value === 'string' &&
+        classified.value.length > 0
+      ) {
+        secretStrings.push(classified.value);
+      }
+    }
+  }
+  const containsSecret: (text: string) => boolean = (text: string) =>
+    secretStrings.some((secret: string) => text.includes(secret));
+
   const parameters: Record<string, unknown> | undefined = isObjectRecord(value.parameters)
     ? Object.fromEntries(
         Object.entries(value.parameters).map(([name, parameter]: [string, unknown]) => {
           const classified: Record<string, unknown> = parameter as Record<string, unknown>;
-          const redact: boolean = envelopePrivacy === 'secret' || classified.privacy === 'secret';
+          const redact: boolean =
+            envelopePrivacy === 'secret' ||
+            classified.privacy === 'secret' ||
+            (typeof classified.value === 'string' && containsSecret(classified.value));
           return [
             name,
             {
@@ -226,19 +245,26 @@ function sanitizeDiagnosticRecord(
     : undefined;
   let source: Record<string, unknown> | undefined;
   if (envelopePrivacy !== 'secret' && isObjectRecord(value.source)) {
-    source =
-      value.source.kind === 'file'
-        ? {
-            kind: 'file',
-            file: value.source.file,
-            ...(value.source.line === undefined ? {} : { line: value.source.line }),
-            ...(value.source.column === undefined ? {} : { column: value.source.column }),
-            ...(value.source.toolName === undefined ? {} : { toolName: value.source.toolName })
-          }
-        : {
-            kind: 'tool',
-            toolName: value.source.toolName
-          };
+    const toolName: string | undefined =
+      typeof value.source.toolName === 'string' && !containsSecret(value.source.toolName)
+        ? value.source.toolName
+        : undefined;
+    if (value.source.kind === 'file') {
+      source =
+        typeof value.source.file === 'string' && !containsSecret(value.source.file)
+          ? {
+              kind: 'file',
+              file: value.source.file,
+              ...(value.source.line === undefined ? {} : { line: value.source.line }),
+              ...(value.source.column === undefined ? {} : { column: value.source.column }),
+              ...(toolName === undefined ? {} : { toolName })
+            }
+          : toolName === undefined
+            ? undefined
+            : { kind: 'tool', toolName };
+    } else if (toolName !== undefined) {
+      source = { kind: 'tool', toolName };
+    }
   }
   return {
     diagnosticId: value.diagnosticId,
