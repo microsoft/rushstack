@@ -48,6 +48,38 @@ export interface IReporterPerformanceBudgets {
 }
 
 /**
+ * The capacity limits applied when reporter events are projected into telemetry
+ * aggregates.
+ *
+ * @beta
+ */
+export interface IReporterTelemetryLimits {
+  /**
+   * The maximum number of distinct diagnostic codes retained in a telemetry
+   * aggregate. Defaults to `20`.
+   */
+  readonly maxTelemetryDiagnosticCodes: number;
+
+  /**
+   * The maximum number of diagnostic category buckets retained in a telemetry
+   * aggregate. Defaults to `20`.
+   */
+  readonly maxTelemetryDiagnosticCategories: number;
+
+  /**
+   * The maximum number of distinct producer versions retained in a telemetry
+   * aggregate. Defaults to `20`.
+   */
+  readonly maxTelemetryProducerVersions: number;
+
+  /**
+   * The maximum character length of one `packageName@packageVersion` telemetry
+   * entry. Longer entries are omitted. Defaults to `256`.
+   */
+  readonly maxTelemetryProducerVersionLength: number;
+}
+
+/**
  * One mebibyte, in bytes.
  */
 const BYTES_PER_MIB: number = 1024 * 1024;
@@ -63,12 +95,16 @@ const BYTES_PER_KIB: number = 1024;
  *
  * @beta
  */
-export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets = {
+export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets & IReporterTelemetryLimits = {
   maxWallTimeRegressionPercent: 3,
   maxAdditionalPeakMemoryBytes: 32 * BYTES_PER_MIB,
   maxInteractiveRefreshHz: 10,
   maxAiOutputBytes: 64 * BYTES_PER_KIB,
-  maxAiDetailedDiagnostics: 20
+  maxAiDetailedDiagnostics: 20,
+  maxTelemetryDiagnosticCodes: 20,
+  maxTelemetryDiagnosticCategories: 20,
+  maxTelemetryProducerVersions: 20,
+  maxTelemetryProducerVersionLength: 256
 };
 
 /**
