@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
+import { createSecretValueMatcher } from '../diagnostics/DiagnosticSecretValues';
 
 interface IClassifiedValue {
   readonly value: unknown;
@@ -16,7 +17,10 @@ export function getHumanReadableMessageText(event: IReporterEventEnvelope<unknow
   return typeof text === 'string' ? text : undefined;
 }
 
-export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IReporterEventEnvelope<unknown> {
+export function redactReporterEvent(
+  event: IReporterEventEnvelope<unknown>,
+  options: { readonly forMachineOutput?: boolean } = {}
+): IReporterEventEnvelope<unknown> {
   if (event.privacy === 'secret') {
     return {
       protocolVersion: event.protocolVersion,
@@ -37,7 +41,7 @@ export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IRe
   }
 
   let payload: unknown = event.payload;
-  const source: IReporterEventEnvelope<unknown>['source'] = event.source;
+  let source: IReporterEventEnvelope<unknown>['source'] = event.source;
   if (event.type === 'diagnosticEmitted') {
     const diagnostic: {
       readonly parameters?: Readonly<Record<string, IClassifiedValue>>;
@@ -50,6 +54,38 @@ export function redactReporterEvent(event: IReporterEventEnvelope<unknown>): IRe
       parameters?: Record<string, IClassifiedValue>;
       source?: unknown;
     } = { ...diagnostic };
+    if (options.forMachineOutput) {
+      const containsSecret: (text: string) => boolean = createSecretValueMatcher(
+        Object.values(diagnostic.parameters ?? {})
+      );
+      if (containsSecret(source.packageName)) {
+        // A component/version still identifies the producer whose package name is classified secret.
+        source = { packageName: '[private-producer]', packageVersion: '[private-version]' };
+      } else {
+        source = {
+          ...source,
+          packageVersion: containsSecret(source.packageVersion) ? '[private-version]' : source.packageVersion,
+          component:
+            source.component !== undefined && containsSecret(source.component) ? undefined : source.component
+        };
+      }
+      if (
+        diagnostic.source !== null &&
+        typeof diagnostic.source === 'object' &&
+        !Array.isArray(diagnostic.source)
+      ) {
+        redactedDiagnostic.source = Object.fromEntries(
+          Object.entries(diagnostic.source).map(([name, value]) => [
+            name,
+            (name === 'file' || name === 'toolName') &&
+            typeof value === 'string' &&
+            containsSecret(value)
+              ? '[secret]'
+              : value
+          ])
+        );
+      }
+    }
     if (diagnostic.parameters) {
       const parameters: Record<string, IClassifiedValue> = {};
       for (const [name, classified] of Object.entries(diagnostic.parameters)) {

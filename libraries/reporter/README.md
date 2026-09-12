@@ -45,6 +45,13 @@ Secret envelopes retain only protocol, event identity, ordering, timing, type, p
 source and payload fields. Contextual parent, command, operation, project, phase, and scope metadata is
 removed.
 
+Machine JSON also applies the existing nonempty secret-value alias classifier to diagnostic sources.
+A producer package name that repeats a secret value hides the associated producer identity; otherwise
+only matching version/component or diagnostic file/tool fields are redacted. Unrelated source context
+remains available. Owner-only full-detail files retain their existing local-sensitive source context
+while redacting the classified parameter itself. Qualification checks both AI and JSON output for the
+private producer and component, independently of the full-log preservation check.
+
 ## Shadow lifecycle compatibility
 
 Frontend initialization failure cancels attempted reporter work synchronously, then joins serialized,
