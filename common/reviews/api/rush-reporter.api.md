@@ -1038,10 +1038,6 @@ export interface IReporterPerformanceBudgets {
     readonly maxAiDetailedDiagnostics: number;
     readonly maxAiOutputBytes: number;
     readonly maxInteractiveRefreshHz: number;
-    readonly maxTelemetryDiagnosticCategories: number;
-    readonly maxTelemetryDiagnosticCodes: number;
-    readonly maxTelemetryProducerVersionLength: number;
-    readonly maxTelemetryProducerVersions: number;
     readonly maxWallTimeRegressionPercent: number;
 }
 
@@ -1089,6 +1085,14 @@ export interface IReporterSelectionInput {
     readonly argv: readonly string[];
     readonly env: Record<string, string | undefined>;
     readonly isTTY: boolean;
+}
+
+// @beta
+export interface IReporterTelemetryLimits {
+    readonly maxTelemetryDiagnosticCategories: number;
+    readonly maxTelemetryDiagnosticCodes: number;
+    readonly maxTelemetryProducerVersionLength: number;
+    readonly maxTelemetryProducerVersions: number;
 }
 
 // @beta
@@ -1554,7 +1558,7 @@ export const REPORTER_MIGRATION_PHASES: readonly IReporterMigrationPhase[];
 export const REPORTER_PACKAGE_NAME: '@rushstack/rush-reporter';
 
 // @beta
-export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets;
+export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets & IReporterTelemetryLimits;
 
 // @beta
 export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
