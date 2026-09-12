@@ -45,7 +45,15 @@ export interface IReporterPerformanceBudgets {
    * before summarizing the remainder. Defaults to `20`.
    */
   readonly maxAiDetailedDiagnostics: number;
+}
 
+/**
+ * The capacity limits applied when reporter events are projected into telemetry
+ * aggregates.
+ *
+ * @beta
+ */
+export interface IReporterTelemetryLimits {
   /**
    * The maximum number of distinct diagnostic codes retained in a telemetry
    * aggregate. Defaults to `20`.
@@ -87,7 +95,7 @@ const BYTES_PER_KIB: number = 1024;
  *
  * @beta
  */
-export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets = {
+export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets & IReporterTelemetryLimits = {
   maxWallTimeRegressionPercent: 3,
   maxAdditionalPeakMemoryBytes: 32 * BYTES_PER_MIB,
   maxInteractiveRefreshHz: 10,
