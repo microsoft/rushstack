@@ -13,6 +13,7 @@ import {
   type IReporter,
   type IReporterEmitEventInput,
   type IReporterEventEnvelope,
+  type IReporterPerformanceBudgets,
   type ReporterEventType,
   type ReporterJsonValue
 } from '../index';
@@ -130,6 +131,19 @@ describe('reporter performance budgets', () => {
     expect(isWithinWallTimeBudget(1000, 1030)).toBe(true);
     expect(isWithinWallTimeBudget(1000, 1031)).toBe(false);
     expect(() => computeWallTimeRegressionPercent(0, 10)).toThrow();
+  });
+
+  it('accepts the original five-field performance budget contract', () => {
+    const legacyBudgets: IReporterPerformanceBudgets = {
+      maxWallTimeRegressionPercent: 5,
+      maxAdditionalPeakMemoryBytes: 64 * 1024 * 1024,
+      maxInteractiveRefreshHz: 10,
+      maxAiOutputBytes: 64 * 1024,
+      maxAiDetailedDiagnostics: 20
+    };
+
+    expect(isWithinWallTimeBudget(1000, 1050, legacyBudgets)).toBe(true);
+    expect(isWithinMemoryBudget(64 * 1024 * 1024, legacyBudgets)).toBe(true);
   });
 
   it('evaluates additional peak memory against the 32 MiB budget', () => {
