@@ -751,7 +751,16 @@ describe(HeftChildProcessReporter.name, () => {
     }
   });
 
-  it.each(['malformed', 'oversized', 'truncated'] as const)(
+  it.each([
+    'malformed',
+    'oversized',
+    'truncated',
+    'forged-category',
+    'forged-summary',
+    'forged-detail',
+    'zero-line',
+    'zero-column'
+  ] as const)(
     'rejects an accepted %s stream even when the child exits successfully',
     async (corruption) => {
       const diagnostics: IRushDiagnostic[] = [];
@@ -795,12 +804,32 @@ describe(HeftChildProcessReporter.name, () => {
         };
         fs.writeSync(eventFd, JSON.stringify(event) + '\\n');
         const corruption = ${JSON.stringify(corruption)};
-        fs.writeSync(eventFd, corruption === 'oversized'
-          ? 'x'.repeat(1024 * 1024 + 1) + '\\n'
-          : corruption === 'malformed' ? '{invalid}\\n' : '{"eventId":');
+        if (corruption === 'oversized' || corruption === 'malformed' || corruption === 'truncated') {
+          fs.writeSync(eventFd, corruption === 'oversized'
+            ? 'x'.repeat(1024 * 1024 + 1) + '\\n'
+            : corruption === 'malformed' ? '{invalid}\\n' : '{"eventId":');
+        } else {
+          const payload = {
+            diagnosticId: 'child-diagnostic',
+            code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+            category: 'dependency-tool',
+            severity: 'error',
+            summaryKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.summary',
+            detailKey: 'diagnostic.RUSH_DEPENDENCY_TOOL_FAILED.detail',
+            parameters: { exitCode: { value: 1, privacy: 'public' } }
+          };
+          if (corruption === 'forged-category') payload.category = 'network-auth';
+          if (corruption === 'forged-summary') payload.summaryKey = 'diagnostic.RUSH_COMMAND_FAILED.summary';
+          if (corruption === 'forged-detail') payload.detailKey = 'diagnostic.RUSH_PROTOCOL_UPDATE_REQUIRED.detail';
+          if (corruption === 'zero-line') payload.source = { kind: 'file', file: 'index.ts', line: 0 };
+          if (corruption === 'zero-column') payload.source = { kind: 'file', file: 'index.ts', column: 0 };
+          fs.writeSync(eventFd, JSON.stringify({
+            ...event, eventId: 'child_2', sequence: 2, type: 'diagnosticEmitted', payload
+          }) + '\\n');
+        }
         if (corruption !== 'truncated') {
           fs.writeSync(eventFd, JSON.stringify({
-            ...event, eventId: 'child_2', sequence: 2,
+            ...event, eventId: 'child_3', sequence: 3,
             payload: { stream: 'stdout', text: 'cannot recover after corruption\\n' }
           }) + '\\n');
         }

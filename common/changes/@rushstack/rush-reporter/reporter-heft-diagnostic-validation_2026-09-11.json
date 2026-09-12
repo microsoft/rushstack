@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Reject negotiated Heft diagnostics that forge registered categories or template keys or supply invalid one-based source coordinates, while preserving optional diagnostic fields and severity overrides.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}
