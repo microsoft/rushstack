@@ -932,7 +932,7 @@ describe('HeftDescriptorHost new descriptor path', () => {
       reporter.report(forwarded[0]);
       await reporter.closeAsync();
       expect(output).not.toContain('TOP_SECRET_ALIAS');
-      expect(output).not.toContain('TOP_SECRET_ALIAS');
+      expect(output).toContain('RUSH_EXTERNAL_TOOL_PROBLEM');
     }
   });
 
