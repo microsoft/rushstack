@@ -338,7 +338,7 @@ export {
   parseReporterExtensionEventName
 } from './producers/ReporterExtensionEventName';
 
-export type { IReporterPerformanceBudgets } from './perf/PerformanceBudgets';
+export type { IReporterPerformanceBudgets, IReporterTelemetryLimits } from './perf/PerformanceBudgets';
 export {
   REPORTER_PERFORMANCE_BUDGETS,
   computeWallTimeRegressionPercent,
