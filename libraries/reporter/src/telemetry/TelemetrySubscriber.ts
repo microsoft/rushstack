@@ -14,6 +14,7 @@ import { REPORTER_PERFORMANCE_BUDGETS } from '../perf/PerformanceBudgets';
 import type { ITelemetryAggregate, TelemetryResult } from './TelemetryAggregate';
 
 const OTHER_DIAGNOSTIC_CATEGORY: 'other' = 'other';
+const MAX_TELEMETRY_DIAGNOSTIC_CODE_LENGTH: number = 256;
 const REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = new Map(
   RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
     (definition: IRushDiagnosticCodeDefinition): readonly [string, IRushDiagnosticCodeDefinition] => [
@@ -101,11 +102,13 @@ function recordBoundedPrioritizedValue(
  * The subscriber runs before reporter filtering, so it observes every event. It
  * projects envelope metadata and lifecycle values only from effectively public
  * events. A diagnostic containing any non-public parameter is treated as
- * non-public even when its envelope floor is `public`. From a non-public
- * diagnostic it keeps only a registered code and that code's registry category,
- * never parameters, remediation, or templates. It ignores all other values from
- * non-public events, messages, raw external output, and command arguments
- * entirely.
+ * non-public even when its envelope floor is `public`. The fallback for
+ * non-public diagnostics keeps only a registered code and its registry category
+ * when the envelope is `local-sensitive`, never parameters, remediation, or
+ * templates. Secret envelopes contribute no values. Diagnostic codes over 256
+ * characters are omitted before registry lookup or syntax validation, never
+ * truncated. It ignores all other values from non-public events, messages, raw
+ * external output, and command arguments entirely.
  *
  * @beta
  */
@@ -154,23 +157,24 @@ export class TelemetrySubscriber {
     }
 
     if (event.type === 'diagnosticEmitted') {
-      // Code and category are public schema fields even when classified
-      // parameters make the diagnostic envelope non-public.
+      // Only registered schema fields are allowlisted for local-sensitive diagnostics.
       const payload: { code?: unknown; category?: unknown } = isRecord(event.payload) ? event.payload : {};
-      const registeredDefinition: IRushDiagnosticCodeDefinition | undefined =
-        typeof payload.code === 'string'
-          ? REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS.get(payload.code)
+      const code: string | undefined =
+        typeof payload.code === 'string' && payload.code.length <= MAX_TELEMETRY_DIAGNOSTIC_CODE_LENGTH
+          ? payload.code
           : undefined;
+      const registeredDefinition: IRushDiagnosticCodeDefinition | undefined =
+        code === undefined ? undefined : REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS.get(code);
       if (isEffectivelyPublicEnvelope) {
-        if (typeof payload.code === 'string' && isValidRushDiagnosticCode(payload.code)) {
-          this._recordDiagnosticCode(payload.code, registeredDefinition !== undefined);
+        if (code !== undefined && isValidRushDiagnosticCode(code)) {
+          this._recordDiagnosticCode(code, registeredDefinition !== undefined);
         }
         if (typeof payload.category === 'string') {
           this._recordDiagnosticCategory(
             KNOWN_DIAGNOSTIC_CATEGORIES.has(payload.category) ? payload.category : OTHER_DIAGNOSTIC_CATEGORY
           );
         }
-      } else if (registeredDefinition !== undefined) {
+      } else if (event.privacy === 'local-sensitive' && registeredDefinition !== undefined) {
         this._recordDiagnosticCode(registeredDefinition.code, true);
         this._recordDiagnosticCategory(registeredDefinition.category);
       }

@@ -47,12 +47,20 @@ export interface ITelemetryAggregate {
   readonly operationStatusCounts: { readonly [status: string]: number };
 
   /**
-   * The distinct diagnostic codes emitted, sorted.
+   * The distinct diagnostic codes admitted by telemetry, sorted.
+   *
+   * @remarks
+   * Codes from effectively public diagnostics and registered codes from
+   * local-sensitive envelopes are eligible. Secret envelopes contribute no
+   * values. Codes over 256 characters are omitted, not truncated, and the
+   * number retained is bounded by the reporter telemetry budgets.
    */
   readonly diagnosticCodes: readonly string[];
 
   /**
-   * The number of diagnostics emitted in each category.
+   * The number of eligible diagnostics in each category. Local-sensitive
+   * diagnostics contribute only their registered code's category; secret
+   * envelopes never contribute.
    */
   readonly diagnosticCategoryCounts: { readonly [category: string]: number };
 
