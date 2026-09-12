@@ -81,6 +81,79 @@ function readHandoff(env: Record<string, string | undefined>): {
 }
 
 describe(createInstallRunRushBootstrap.name, () => {
+  it.each([
+    { argv: ['custom', '--reporter'] },
+    { argv: ['custom', '--reporter='] },
+    { argv: ['custom', '--reporter=custom'] },
+    { argv: ['custom', '--reporter', '--log-level=custom'] },
+    { argv: ['custom', '--log-level'] },
+    { argv: ['custom', '--log-level=custom'] },
+    { argv: ['custom', '--reporter=one', '--reporter=two'] },
+    { argv: ['custom', '--reporter', '--', '--reporter=json'] },
+    { argv: ['custom', '--reporter=legacy', '--log-level'] }
+  ])('preserves command-owned reporter controls without opt-in: $argv', async ({ argv }) => {
+    await withTempDir(async (directory: string) => {
+      const { options, env } = makeOptions(directory, { argv });
+      expect(createInstallRunRushBootstrap(options).enabled).toBe(false);
+      expect(env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]).toBeUndefined();
+    });
+  });
+
+  it.each([
+    { argv: ['build', '--reporter=json', '--reporter=custom'] },
+    { argv: ['build', '--reporter=custom', '--reporter=json'] },
+    { argv: ['build', '--reporter=json', '--log-level'] },
+    { argv: ['build', '--reporter=json', '--log-level=custom'] }
+  ])('validates controls once reporter ownership is established: $argv', async ({ argv }) => {
+    await withTempDir(async (directory: string) => {
+      expect(() => createInstallRunRushBootstrap(makeOptions(directory, { argv }).options)).toThrow();
+    });
+  });
+
+  it.each([{ argv: ['custom', '--log-level'] }, { argv: ['custom', '--log-level=custom'] }])(
+    'preserves command-owned log-level flags under repository opt-in: $argv',
+    async ({ argv }) => {
+      await withTempDir(async (directory: string) => {
+        const configFolder: string = path.join(directory, 'common', 'config', 'rush');
+        await fs.promises.mkdir(configFolder, { recursive: true });
+        await fs.promises.writeFile(path.join(configFolder, 'experiments.json'), '{"useRushReporter":true}');
+        expect(createInstallRunRushBootstrap(makeOptions(directory, { argv }).options).enabled).toBe(true);
+      });
+    }
+  );
+
+  it.each([
+    { argv: ['build', '--reporter=file'], repositoryOptIn: false },
+    { argv: ['list', '--json', '--reporter=file'], repositoryOptIn: false },
+    { argv: ['list', '--json'], repositoryOptIn: true }
+  ])('keeps bootstrap output out of exclusive stdout: $argv', async ({ argv, repositoryOptIn }) => {
+    await withTempDir(async (directory: string) => {
+      if (repositoryOptIn) {
+        const configFolder: string = path.join(directory, 'common', 'config', 'rush');
+        await fs.promises.mkdir(configFolder, { recursive: true });
+        await fs.promises.writeFile(path.join(configFolder, 'experiments.json'), '{"useRushReporter":true}');
+      }
+      const { options, env, stdout, stderr } = makeOptions(directory, { argv });
+      const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
+      bootstrap.logger.info('installing Rush');
+      bootstrap.externalOutputHandler?.('stdout', 'npm stdout\n', false);
+      bootstrap.prepareToRun?.();
+
+      expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: false, stderr: true });
+      expect(readHandoff(env).records).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'externalOutput',
+            payload: { stream: 'stdout', text: 'npm stdout\n' }
+          })
+        ])
+      );
+      bootstrap.logger.error('bootstrap failed');
+      expect(stdout).toEqual([]);
+      expect(stderr.join('')).toBe('installing Rush\nnpm stdout\nbootstrap failed\n');
+    });
+  });
+
   it('preserves direct legacy bootstrap output without an opt-in', async () => {
     await withTempDir(async (directory: string) => {
       const { options, env, stdout } = makeOptions(directory);
@@ -179,22 +252,25 @@ describe(createInstallRunRushBootstrap.name, () => {
   });
 
   it.each([
-    ['--reporter=file'],
-    ['--reporter=plaintext'],
-    ['--reporter=file', '--output=json://stderr'],
-    ['--reporter=file', '--output=json://./stdout'],
-    ['--reporter=file', '--output=file://./stdout?logLevel=normal'],
-    ['--reporter=file', '--', '--output=json://stdout'],
-    ['--reporter=file', '--help', '--output'],
-    ['--reporter=file', '-h', '--output=json://stdout']
-  ])('preserves live bootstrap stdout when no additional output owns it: %j', async (...controls: string[]) => {
-    await withTempDir(async (directory: string) => {
-      const bootstrap = createInstallRunRushBootstrap(
-        makeOptions(directory, { argv: ['build', ...controls] }).options
-      );
-      expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: true, stderr: true });
-    });
-  });
+    [false, '--reporter=file'],
+    [true, '--reporter=plaintext'],
+    [false, '--reporter=file', '--output=json://stderr'],
+    [false, '--reporter=file', '--output=json://./stdout'],
+    [false, '--reporter=file', '--output=file://./stdout?logLevel=normal'],
+    [false, '--reporter=file', '--', '--output=json://stdout'],
+    [false, '--reporter=file', '--help', '--output'],
+    [false, '--reporter=file', '-h', '--output=json://stdout']
+  ])(
+    'preserves existing stdout ownership when no additional output owns it: %j',
+    async (stdoutLive: boolean, ...controls: string[]) => {
+      await withTempDir(async (directory: string) => {
+        const bootstrap = createInstallRunRushBootstrap(
+          makeOptions(directory, { argv: ['build', ...controls] }).options
+        );
+        expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: stdoutLive, stderr: true });
+      });
+    }
+  );
 
   it.each([
     { argv: ['build', '--output=json://stdout'], env: {} },
@@ -369,6 +445,13 @@ describe(createInstallRunRushBootstrap.name, () => {
           }).options
         ).enabled
       ).toBe(true);
+      expect(
+        createInstallRunRushBootstrap(
+          makeOptions(directory, {
+            argv: ['build', '--reporter=plaintext', '--', '--json']
+          }).options
+        ).externalOutputLiveStreams
+      ).toEqual({ stdout: true, stderr: true });
     });
   });
 
@@ -426,6 +509,9 @@ describe(createInstallRunRushBootstrap.name, () => {
 
   it('fails unsupported explicit requests and explicit requests for an old frontend', async () => {
     await withTempDir(async (directory: string) => {
+      const configFolder: string = path.join(directory, 'common', 'config', 'rush');
+      await fs.promises.mkdir(configFolder, { recursive: true });
+      await fs.promises.writeFile(path.join(configFolder, 'experiments.json'), '{"useRushReporter":true}');
       expect(() =>
         createInstallRunRushBootstrap(
           makeOptions(directory, { argv: ['build', '--reporter=unknown'] }).options
@@ -495,10 +581,10 @@ describe(createInstallRunRushBootstrap.name, () => {
     });
   });
 
-  it('keeps machine-reporter failure fallback off stdout', async () => {
+  it.each(['json', 'ai', 'file'])('keeps %s reporter failure fallback off stdout', async (reporter) => {
     await withTempDir(async (directory: string) => {
       const { options, stdout, stderr } = makeOptions(directory, {
-        argv: ['build', '--reporter=json']
+        argv: ['build', `--reporter=${reporter}`]
       });
       const bootstrap: IInstallRunRushBootstrap = createInstallRunRushBootstrap(options);
       bootstrap.logger.info('installing Rush');

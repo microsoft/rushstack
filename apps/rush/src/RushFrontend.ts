@@ -215,6 +215,11 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     reporterEnabled: reporterHost.selection.enabled,
     reporterStdoutIsMachineReadable:
       reporterHost.selection.reporter === 'ai' || reporterHost.selection.reporter === 'json',
+    reporterStdoutIsReserved:
+      !reporterHost.selection.commandJson &&
+      (reporterHost.selection.reporter === 'ai' ||
+        reporterHost.selection.reporter === 'json' ||
+        reporterHost.selection.reporter === 'file'),
     reporterSelectionReason: reporterHost.selection.reason
   };
 

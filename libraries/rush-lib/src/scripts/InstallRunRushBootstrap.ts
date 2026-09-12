@@ -82,11 +82,45 @@ export interface IInstallRunRushBootstrap {
   readonly prepareToRun: (() => void) | undefined;
 }
 
-function readSingleFlagValue(argv: readonly string[], flag: string): string | undefined {
-  return readFlagValues(argv, flag, false)[0];
+function readFlagValues(argv: readonly string[], flag: string, strict: boolean): string[] {
+  const result: string[] = [];
+  const prefix: string = `${flag}=`;
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    let value: string | undefined;
+    if (argument.startsWith(prefix)) {
+      value = argument.slice(prefix.length);
+    } else if (argument === flag) {
+      value = argv[index + 1];
+      if (!value || value.startsWith('-')) {
+        if (strict) {
+          throw new Error(`${flag} requires a value.`);
+        }
+        continue;
+      }
+      index++;
+    }
+
+    if (value !== undefined) {
+      if (!value) {
+        if (strict) {
+          throw new Error(`${flag} requires a value.`);
+        }
+        continue;
+      }
+      if (strict && result.length > 0) {
+        throw new Error(`${flag} may be specified only once.`);
+      }
+      result.push(value);
+    }
+  }
+  return result;
 }
 
-function readFlagValues(argv: readonly string[], flag: string, allowMultiple: boolean): string[] {
+function readMultipleFlagValues(argv: readonly string[], flag: string): string[] {
   const result: string[] = [];
   const prefix: string = `${flag}=`;
   for (let index: number = 0; index < argv.length; index++) {
@@ -108,9 +142,6 @@ function readFlagValues(argv: readonly string[], flag: string, allowMultiple: bo
     if (value !== undefined) {
       if (!value) {
         throw new Error(`${flag} requires a value.`);
-      }
-      if (!allowMultiple && result.length > 0) {
-        throw new Error(`${flag} may be specified only once.`);
       }
       result.push(value);
     }
@@ -613,14 +644,32 @@ export function createInstallRunRushBootstrap(
     return createLegacyBootstrap(options);
   }
 
-  const explicitReporter: string | undefined = readSingleFlagValue(options.argv, '--reporter');
-  const explicitLogLevel: string | undefined = readSingleFlagValue(options.argv, '--log-level');
+  const repositoryOptIn: boolean = repositoryUsesRushReporter(options.rushJsonFolder);
+  const reporterControlsOwned: boolean =
+    repositoryOptIn ||
+    readFlagValues(options.argv, '--reporter', false).some((value: string) => SUPPORTED_REPORTERS.has(value));
+  if (!reporterControlsOwned) {
+    return createLegacyBootstrap(options);
+  }
+
+  const explicitReporter: string | undefined = readFlagValues(options.argv, '--reporter', true)[0];
   if (explicitReporter !== undefined && !SUPPORTED_REPORTERS.has(explicitReporter)) {
     throw new Error(
       `Unsupported reporter ${JSON.stringify(explicitReporter)}. ` +
         'Supported values are default, ai, json, plaintext, file, and legacy.'
     );
   }
+  if (explicitReporter === 'legacy') {
+    return createLegacyBootstrap(options);
+  }
+
+  const logLevelProbe: string[] = readFlagValues(options.argv, '--log-level', false);
+  const logLevelOwned: boolean =
+    explicitReporter !== undefined ||
+    (logLevelProbe.length > 0 && logLevelProbe.every((value: string) => SUPPORTED_LOG_LEVELS.has(value)));
+  const explicitLogLevel: string | undefined = logLevelOwned
+    ? readFlagValues(options.argv, '--log-level', true)[0]
+    : undefined;
   if (explicitLogLevel !== undefined && !SUPPORTED_LOG_LEVELS.has(explicitLogLevel)) {
     throw new Error(
       `Unsupported log level ${JSON.stringify(explicitLogLevel)}. ` +
@@ -628,15 +677,7 @@ export function createInstallRunRushBootstrap(
     );
   }
 
-  if (explicitReporter === 'legacy') {
-    return createLegacyBootstrap(options);
-  }
-
-  const repositoryOptIn: boolean = repositoryUsesRushReporter(options.rushJsonFolder);
   const explicitOptIn: boolean = explicitReporter !== undefined;
-  if (!explicitOptIn && !repositoryOptIn) {
-    return createLegacyBootstrap(options);
-  }
 
   if (!supportsBootstrapHandoff(options.rushVersion, options.bootstrapVersion)) {
     if (explicitOptIn) {
@@ -649,12 +690,13 @@ export function createInstallRunRushBootstrap(
     return createLegacyBootstrap(options);
   }
 
-  const separator: number = options.argv.indexOf('--');
-  const frontendArgs: readonly string[] = separator < 0 ? options.argv : options.argv.slice(0, separator);
-  const isHelp: boolean = frontendArgs.includes('--help') || frontendArgs.includes('-h');
+  const separatorIndex: number = options.argv.indexOf('--');
+  const commandArgs: readonly string[] =
+    separatorIndex < 0 ? options.argv : options.argv.slice(0, separatorIndex);
+  const isHelp: boolean = commandArgs.includes('--help') || commandArgs.includes('-h');
   const outputs: readonly string[] =
     !isHelp && (explicitOptIn || ownsImplicitOutput(options))
-      ? readFlagValues(options.argv, '--output', true)
+      ? readMultipleFlagValues(options.argv, '--output')
       : [];
   const outputOwnsStdout: boolean = outputs.some((output: string) => {
     const match: RegExpExecArray | null = /^([a-z][a-z0-9]*):\/\/(.*)$/i.exec(output);
@@ -663,8 +705,11 @@ export function createInstallRunRushBootstrap(
     }
     return match[2].split('?', 1)[0] === 'stdout';
   });
-  return new InstallRunRushBootstrap(
-    options,
-    explicitReporter !== 'json' && explicitReporter !== 'ai' && !outputOwnsStdout
-  );
+  const stdoutReserved: boolean =
+    explicitReporter === 'json' ||
+    explicitReporter === 'ai' ||
+    explicitReporter === 'file' ||
+    commandArgs.includes('--json') ||
+    outputOwnsStdout;
+  return new InstallRunRushBootstrap(options, !stdoutReserved);
 }

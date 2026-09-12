@@ -189,6 +189,41 @@ function emitCommandStarted(sink: IReporterEventSink): void {
 }
 
 describe(launchRushFrontendAsync.name, () => {
+  it.each([
+    ['file', false, true],
+    ['file', true, false],
+    ['json', false, true],
+    ['ai', false, true],
+    ['plaintext', false, false]
+  ] as const)('reserves stdout for %s with command JSON %s: %s', async (reporter, commandJson, reserved) => {
+    const initialized: IInitializedRushReporterHost = await createEnabledHostAsync();
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'list'];
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async () => ({
+          ...initialized,
+          selection: { ...initialized.selection, reporter, commandJson }
+        }),
+        executeCurrentRush: (version, selectedRushLib, options) => {
+          void version;
+          void selectedRushLib;
+          expect(options.reporterStdoutIsReserved).toBe(reserved);
+          return options.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+    } finally {
+      await initialized.closeAsync();
+      process.argv = originalArgv;
+    }
+  });
+
   it.each([true, false])(
     'keeps installed-path activity local-sensitive without changing plain status (reporter: %s)',
     async (reporterEnabled) => {

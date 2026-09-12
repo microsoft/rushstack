@@ -17,6 +17,7 @@ export interface IRushFrontendLaunchOptions extends ILaunchOptions {
   readonly reporterCloseAsync: () => Promise<void>;
   readonly reporterEnabled: boolean;
   readonly reporterStdoutIsMachineReadable?: boolean;
+  readonly reporterStdoutIsReserved?: boolean;
   readonly reporterSelectionReason:
     | 'explicit --reporter'
     | 'repository experiment'
