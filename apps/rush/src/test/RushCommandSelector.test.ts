@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
+  JsonReporter,
   LegacyFallbackSink,
   ReporterManager,
   REPORTER_PROTOCOL_VERSION,
@@ -331,6 +332,151 @@ describe(RushCommandSelector.name, () => {
       text: 'legacy stdout\n'
     });
   });
+
+  it('delivers reentrant JSON records without recapturing either legacy stream', async () => {
+    const manager: ReporterManager = new ReporterManager();
+    const reporterWriteResults: boolean[] = [];
+    const reporterCallback: jest.Mock = jest.fn();
+    const legacyCallback: jest.Mock = jest.fn();
+    manager.addReporter(
+      new JsonReporter({
+        write: (text: string) => {
+          reporterWriteResults.push(process.stdout.write(text, 'utf8', reporterCallback));
+        }
+      }),
+      { required: true }
+    );
+    await manager.initializeAsync();
+
+    const originalArgv: string[] = process.argv;
+    const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
+    const originalStderrWrite: typeof process.stderr.write = process.stderr.write;
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+    const writeError: Error = new Error('write callback error');
+    process.argv = ['node', 'rush', 'build'];
+    process.stdout.write = ((
+      text: string,
+      encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
+      callback?: (error?: Error | null) => void
+    ): boolean => {
+      stdoutChunks.push(text);
+      const completed = typeof encodingOrCallback === 'function' ? encodingOrCallback : callback;
+      if (completed) process.nextTick(completed, writeError);
+      return false;
+    }) as typeof process.stdout.write;
+    process.stderr.write = ((text: string): boolean => {
+      stderrChunks.push(text);
+      return false;
+    }) as typeof process.stderr.write;
+    const previousBeforeExitListeners = process.listeners('beforeExit') as BeforeExitListener[];
+    const legacyWriteResults: boolean[] = [];
+    try {
+      RushCommandSelector.execute(
+        '5.178.1',
+        {
+          Rush: {
+            version: '5.177.0',
+            launch: () => {
+              legacyWriteResults.push(process.stdout.write('legacy stdout 1\n', legacyCallback));
+              legacyWriteResults.push(process.stderr.write('legacy stderr\n'));
+              legacyWriteResults.push(process.stdout.write('legacy stdout 2\n', 'utf8', legacyCallback));
+              process.stdout.write(Buffer.from([0xe2]));
+              process.stdout.write(Buffer.from([0x82, 0xac]));
+              process.stdout.write(Buffer.from([0xe2]));
+            }
+          }
+        } as unknown as typeof import('@microsoft/rush-lib'),
+        {
+          isManaged: true,
+          reporter: { eventSink: manager, sessionId: 'test-session' },
+          reporterCloseAsync: () => manager.closeAsync(),
+          reporterEnabled: true,
+          reporterStdoutIsMachineReadable: true,
+          reporterSelectionReason: 'explicit --reporter'
+        }
+      );
+      restoreObservedOutput(previousBeforeExitListeners);
+      await manager.closeAsync();
+      await new Promise<void>((resolve) => process.nextTick(resolve));
+    } finally {
+      restoreObservedOutput(previousBeforeExitListeners, false);
+      process.stdout.write = originalStdoutWrite;
+      process.stderr.write = originalStderrWrite;
+      process.argv = originalArgv;
+    }
+
+    expect(stdoutChunks.map((text) => JSON.parse(text).payload)).toEqual([
+      { stream: 'stdout', text: 'legacy stdout 1\n' },
+      { stream: 'stderr', text: 'legacy stderr\n', wasRendered: true },
+      { stream: 'stdout', text: 'legacy stdout 2\n' },
+      { stream: 'stdout', text: '\u20ac' },
+      { stream: 'stdout', text: '\ufffd' }
+    ]);
+    expect(stderrChunks).toEqual(['legacy stderr\n']);
+    expect(reporterWriteResults).toEqual([false, false, false, false, false]);
+    expect(legacyWriteResults).toEqual([true, false, true]);
+    expect(reporterCallback.mock.calls).toEqual([
+      [writeError],
+      [writeError],
+      [writeError],
+      [writeError],
+      [writeError]
+    ]);
+    expect(legacyCallback.mock.calls).toEqual([[], []]);
+  });
+
+  it.each([false, true])(
+    'preserves original writer error identity and cause (machine stdout: %s)',
+    async (machineStdout) => {
+      const cause: Error = new Error('original cause');
+      const originalError: Error = Object.freeze(new Error('original writer error', { cause }));
+      const manager: ReporterManager = new ReporterManager();
+      manager.addReporter(new JsonReporter({ write: (text) => process.stdout.write(text) }), {
+        required: true
+      });
+      await manager.initializeAsync();
+      const originalArgv: string[] = process.argv;
+      const originalStdoutWrite: typeof process.stdout.write = process.stdout.write;
+      const originalStderrWrite: typeof process.stderr.write = process.stderr.write;
+      process.argv = ['node', 'rush', 'build'];
+      process.stdout.write = () => {
+        throw originalError;
+      };
+      process.stderr.write = () => true;
+      const previousBeforeExitListeners = process.listeners('beforeExit') as BeforeExitListener[];
+      let launchError: unknown;
+      try {
+        RushCommandSelector.execute(
+          '5.178.1',
+          {
+            Rush: {
+              version: '5.177.0',
+              launch: () => process.stdout.write('legacy stdout\n')
+            }
+          } as unknown as typeof import('@microsoft/rush-lib'),
+          {
+            isManaged: true,
+            reporter: { eventSink: manager, sessionId: 'test-session' },
+            reporterCloseAsync: () => manager.closeAsync(),
+            reporterEnabled: true,
+            reporterStdoutIsMachineReadable: machineStdout,
+            reporterSelectionReason: 'explicit --reporter'
+          }
+        );
+      } catch (error) {
+        launchError = error;
+      } finally {
+        restoreObservedOutput(previousBeforeExitListeners, false);
+        process.stdout.write = originalStdoutWrite;
+        process.stderr.write = originalStderrWrite;
+        process.argv = originalArgv;
+      }
+      expect(launchError).toBe(machineStdout ? undefined : originalError);
+      await expect(manager.closeAsync()).rejects.toBe(originalError);
+      expect(originalError.cause).toBe(cause);
+    }
+  );
 
   it('preserves a UTF-8 code point split across old-engine buffer writes', async () => {
     const manager: ReporterManager = new ReporterManager();
