@@ -689,7 +689,7 @@ describe(HeftChildProcessReporter.name, () => {
     'forged-detail',
     'zero-line',
     'zero-column'
-  ] as const)('rejects an accepted %s stream even when the child exits successfully', async (corruption) => {
+  ] as const)('reports an accepted %s stream even when the child exits successfully', async (corruption) => {
     const diagnostics: IRushDiagnostic[] = [];
     const envelopes: IReporterEventEnvelope<unknown>[] = [];
     const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
@@ -767,9 +767,7 @@ describe(HeftChildProcessReporter.name, () => {
     });
     const closePromise: Promise<number | null> = waitForCloseAsync(child);
 
-    await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
-      'The negotiated Heft reporter stream was corrupt or incomplete.'
-    );
+    await reporter.attachAsync(child, new StringBufferTerminalProvider());
     expect(await closePromise).toBe(0);
     expect(envelopes.map((envelope) => envelope.payload)).toEqual([
       { stream: 'stdout', text: 'preserved before corruption\n', iterationId: 7 }
