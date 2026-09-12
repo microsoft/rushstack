@@ -8,6 +8,7 @@ import * as path from 'node:path';
 
 import type { ILogger, LogPrivacyClassification } from '../../utilities/npmrcUtilities';
 import { finalizeCapturedNpmOutput, NPM_OUTPUT_CAPTURE_SCRIPT } from '../install-run';
+import { createInstallRunRushBootstrap } from '../InstallRunRushBootstrap';
 
 async function withTempDir(action: (directory: string) => Promise<void>): Promise<void> {
   const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'install-run-script-test-'));
@@ -115,6 +116,50 @@ describe('install-run script integration', () => {
       ).toEqual([
         { stream: 'stdout', text: 'stdout\n', wasRendered: false },
         { stream: 'stderr', text: 'stderr\n', wasRendered: true }
+      ]);
+    });
+  });
+
+  it('uses bootstrap additional-output ownership for real npm capture without raw stdout', async () => {
+    await withTempDir(async (directory: string) => {
+      const bootstrap = createInstallRunRushBootstrap({
+        argv: ['build', '--reporter=file', '--output=json://stdout'],
+        env: {},
+        rushJsonFolder: directory,
+        rushVersion: '5.178.1',
+        bootstrapVersion: '5.178.1',
+        commandName: 'rush',
+        quiet: false,
+        handoffDirectory: directory
+      });
+      const capturePath: string = path.join(directory, 'additional-output-capture.ndjson');
+      await fs.promises.writeFile(capturePath, '');
+      const wrapper = childProcess.spawnSync(
+        process.execPath,
+        [
+          '-e',
+          NPM_OUTPUT_CAPTURE_SCRIPT,
+          process.execPath,
+          JSON.stringify([
+            '-e',
+            "process.stdout.write('npm stdout\\n'); setTimeout(() => process.stderr.write('npm stderr\\n'), 25);"
+          ]),
+          capturePath,
+          '0',
+          String(bootstrap.externalOutputCaptureMaxBytes),
+          bootstrap.externalOutputLiveStreams?.stdout ? '1' : '0',
+          bootstrap.externalOutputLiveStreams?.stderr ? '1' : '0'
+        ],
+        { cwd: directory, encoding: 'utf8' }
+      );
+      expect(wrapper.status).toBe(0);
+      expect(wrapper.stdout).toBe('');
+      expect(wrapper.stderr).toBe('npm stderr\n');
+      expect(
+        (await fs.promises.readFile(capturePath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line))
+      ).toEqual([
+        { stream: 'stdout', text: 'npm stdout\n', wasRendered: false },
+        { stream: 'stderr', text: 'npm stderr\n', wasRendered: true }
       ]);
     });
   });

@@ -117,6 +117,7 @@ export class RushCommandSelector {
 }
 
 function _observeEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): () => void {
+  const captureState: { inProgress: boolean } = { inProgress: false };
   const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
     sink: options.reporter.eventSink,
     sessionId: options.reporter.sessionId,
@@ -127,14 +128,16 @@ function _observeEngineOutput(options: IRushFrontendLaunchOptions, engineVersion
     'stdout',
     adapter,
     process.stdout.write.bind(process.stdout),
-    (options.reporterStdoutIsReserved ?? options.reporterStdoutIsMachineReadable) !== true
+    (options.reporterStdoutIsReserved ?? options.reporterStdoutIsMachineReadable) !== true,
+    captureState
   );
   const restoreStderr: () => void = _observeStream(
     process.stderr,
     'stderr',
     adapter,
     process.stderr.write.bind(process.stderr),
-    true
+    true,
+    captureState
   );
   let restored: boolean = false;
   const restore: () => void = () => {
@@ -157,7 +160,8 @@ function _observeStream(
   streamName: 'stdout' | 'stderr',
   adapter: OldEngineOutputAdapter,
   legacyWrite: typeof process.stdout.write,
-  renderLive: boolean
+  renderLive: boolean,
+  captureState: { inProgress: boolean }
 ): () => void {
   const marker: symbol = Symbol.for(`rush.reporter.old-engine-output.${streamName}`);
   const markedStream: NodeJS.WriteStream & { [key: symbol]: boolean | undefined } =
@@ -167,26 +171,34 @@ function _observeStream(
   }
   markedStream[marker] = true;
 
-  let captureInProgress: boolean = false;
   const decoder: StringDecoder = new StringDecoder('utf8');
   const originalWrite: typeof stream.write = stream.write;
+  function captureText(text: string): void {
+    if (text) {
+      captureState.inProgress = true;
+      try {
+        adapter.capture(streamName, text, renderLive);
+      } finally {
+        captureState.inProgress = false;
+      }
+    }
+  }
   stream.write = ((
     chunk: string | Uint8Array,
     encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
     callback?: (error?: Error | null) => void
   ): boolean => {
+    // Reporter writes can reenter either stream while an old-engine write is captured.
+    if (captureState.inProgress) {
+      return typeof encodingOrCallback === 'function'
+        ? legacyWrite(chunk, encodingOrCallback)
+        : legacyWrite(chunk, encodingOrCallback, callback);
+    }
     const text: string =
       typeof chunk === 'string'
         ? chunk
         : decoder.write(Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength));
-    if (text && !captureInProgress) {
-      captureInProgress = true;
-      try {
-        adapter.capture(streamName, text, renderLive);
-      } finally {
-        captureInProgress = false;
-      }
-    }
+    captureText(text);
     if (!renderLive) {
       const writeCallback: ((error?: Error | null) => void) | undefined =
         typeof encodingOrCallback === 'function' ? encodingOrCallback : callback;
@@ -201,12 +213,12 @@ function _observeStream(
     return legacyWrite(chunk, encodingOrCallback, callback);
   }) as typeof stream.write;
   return () => {
-    const remaining: string = decoder.end();
-    if (remaining) {
-      adapter.capture(streamName, remaining, renderLive);
+    try {
+      captureText(decoder.end());
+    } finally {
+      stream.write = originalWrite;
+      delete markedStream[marker];
     }
-    stream.write = originalWrite;
-    delete markedStream[marker];
   };
 }
 
