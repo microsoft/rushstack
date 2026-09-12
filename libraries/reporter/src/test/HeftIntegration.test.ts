@@ -6,9 +6,11 @@ import { PassThrough, type Readable, type Writable } from 'node:stream';
 
 import {
   allocateChildDescriptor,
+  DefaultInteractiveReporter,
   encodeNdjsonRecord,
   readChildAckDescriptorFd,
   readChildDescriptorFd,
+  PlaintextReporter,
   REPORTER_PROTOCOL_LIMITS,
   RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR,
   RUSH_REPORTER_CHILD_FD_ENV_VAR,
@@ -854,6 +856,85 @@ describe('HeftDescriptorHost new descriptor path', () => {
     expect(diagnostic.parameters?.message?.leaked).toBeUndefined();
     expect(diagnostic.source?.leaked).toBeUndefined();
     expect(diagnostic.remediation).toBeUndefined();
+  });
+
+  it('redacts secret aliases before forwarding and rendering a diagnostic', async () => {
+    const forwarded: IReporterEventEnvelope<unknown>[] = [];
+    const host: HeftDescriptorHost = new HeftDescriptorHost({
+      parentSessionId: 'parent-sess',
+      supportedProtocolVersion: { major: 1, minor: 2 },
+      trustedSource: { packageName: '@rushstack/heft', packageVersion: 'trusted' },
+      trustedPrivacy: 'local-sensitive',
+      forwardEnvelope: (envelope) => forwarded.push(envelope)
+    });
+    host.processChildRecord({
+      kind: 'hello',
+      protocolVersion: { major: 1, minor: 2 },
+      producerVersion: '@rushstack/heft 1.2.25',
+      capabilities: ['heft-child-events-v1'],
+      requiredFeatures: []
+    });
+    const childRecord: Record<string, unknown> = {
+      protocolVersion: { major: 1, minor: 2 },
+      eventId: 'child_1',
+      sessionId: 'child-sess',
+      sequence: 1,
+      timestamp: '2026-01-01T00:00:00.000Z',
+      source: SOURCE,
+      privacy: 'local-sensitive',
+      required: true,
+      type: 'diagnosticEmitted',
+      payload: {
+        diagnosticId: 'diagnostic-1',
+        code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+        category: 'operation',
+        severity: 'error',
+        summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
+        parameters: {
+          secretAlias: { value: 'TOP_SECRET_ALIAS', privacy: 'secret' },
+          tool: { value: 'typescript', privacy: 'public' },
+          code: { value: 'TS1005', privacy: 'public' },
+          message: { value: 'Failure inside TOP_SECRET_ALIAS', privacy: 'local-sensitive' }
+        },
+        source: {
+          kind: 'file',
+          file: '/repo/TOP_SECRET_ALIAS/index.ts',
+          line: 1,
+          column: 2,
+          toolName: 'typescript'
+        }
+      }
+    };
+    const originalChildRecord: string = JSON.stringify(childRecord);
+    expect(host.processChildRecord(childRecord)).toBe(true);
+
+    const serialized: string = JSON.stringify(forwarded[0]);
+    expect(serialized).not.toContain('TOP_SECRET_ALIAS');
+    expect(JSON.stringify(childRecord)).toBe(originalChildRecord);
+    expect(serialized).toContain('"message":{"privacy":"local-sensitive","value":"[secret]"}');
+    expect(forwarded[0].payload).toHaveProperty('source', {
+      kind: 'tool',
+      toolName: 'typescript'
+    });
+
+    for (const kind of ['default', 'plaintext'] as const) {
+      let output: string = '';
+      const write = (text: string): void => {
+        output += text;
+      };
+      const reporter: IReporter =
+        kind === 'default'
+          ? new DefaultInteractiveReporter({
+              terminal: { isTTY: false, columns: 100, write },
+              color: false
+            })
+          : new PlaintextReporter({ write, variant: 'detailed', color: false });
+      reporter.report(forwarded[0]);
+      await reporter.closeAsync();
+
+      expect(output).not.toContain('TOP_SECRET_ALIAS');
+      expect(output).toContain('typescript reported TS1005: [secret]');
+    }
   });
 
   it('validates parent reporter context once and rejects zero terminal width', () => {
