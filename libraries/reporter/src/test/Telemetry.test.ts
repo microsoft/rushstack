@@ -230,17 +230,48 @@ describe('TelemetrySubscriber', () => {
     await manager.flushAsync();
 
     const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
-    expect(aggregate.diagnosticCodes).toEqual(['RUSH_DEPENDENCY_TOOL_FAILED', 'RUSH_OPERATION_FAILED']);
-    expect(aggregate.diagnosticCategoryCounts).toEqual({
-      'dependency-tool': 1,
-      operation: 1
-    });
-    expect(Object.keys(aggregate.diagnosticCategoryCounts)).toEqual(['dependency-tool', 'operation']);
+    expect(aggregate.diagnosticCodes).toEqual(['RUSH_OPERATION_FAILED']);
+    expect(aggregate.diagnosticCategoryCounts).toEqual({ operation: 1 });
+    expect(Object.keys(aggregate.diagnosticCategoryCounts)).toEqual(['operation']);
     const serialized: string = JSON.stringify(aggregate);
     for (const forbidden of [TOKEN_CODE, TOKEN_CATEGORY, PATH_CODE, PATH_CATEGORY]) {
       expect(serialized).not.toContain(forbidden);
     }
   });
+
+  it.each([false, true])(
+    'does not change any aggregate field for a secret diagnostic (child: %s)',
+    async (isChild: boolean) => {
+      const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+      const recording: RecordingReporter = new RecordingReporter();
+      const manager: ReporterManager = new ReporterManager();
+      manager.addReporter(createTelemetryReporter(telemetry));
+      manager.addReporter(recording);
+      await manager.initializeAsync();
+      const before: ITelemetryAggregate = telemetry.buildAggregate();
+
+      manager.ingestForeignEnvelope(
+        foreignDiagnosticEnvelope(
+          1,
+          'secret',
+          {
+            code: 'RUSH_DEPENDENCY_TOOL_FAILED',
+            category: 'dependency-tool',
+            parameters: { token: { value: 'private-token', privacy: 'secret' } }
+          },
+          {
+            source: { packageName: '@private/secret-plugin', packageVersion: '1.0.0-private' },
+            protocolVersion: { major: 99, minor: 1 },
+            parentSessionId: isChild ? 'sess' : undefined
+          }
+        )
+      );
+      await manager.flushAsync();
+
+      expect(recording.reported).toHaveLength(1);
+      expect(telemetry.buildAggregate()).toEqual(before);
+    }
+  );
 
   it('preserves allowlisted diagnostics across mixed privacy ordering', async () => {
     const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
@@ -281,35 +312,50 @@ describe('TelemetrySubscriber', () => {
     await manager.flushAsync();
 
     expect(telemetry.buildAggregate()).toMatchObject({
-      diagnosticCodes: [
-        'RUSH_CONFIG_INVALID_JSON',
-        'RUSH_DEPENDENCY_TOOL_FAILED',
-        'RUSH_FUTURE_PUBLIC_CODE',
-        'RUSH_OPERATION_FAILED'
-      ],
+      diagnosticCodes: ['RUSH_CONFIG_INVALID_JSON', 'RUSH_FUTURE_PUBLIC_CODE', 'RUSH_OPERATION_FAILED'],
       diagnosticCategoryCounts: {
         configuration: 1,
-        'dependency-tool': 1,
         operation: 1,
         other: 1
       }
     });
     expect(Object.keys(telemetry.buildAggregate().diagnosticCategoryCounts)).toEqual([
       'configuration',
-      'dependency-tool',
       'operation',
       'other'
     ]);
   });
 
+  it.each([255, 256, 257])(
+    'omits public diagnostic codes over the 256-character budget without truncation (length: %s)',
+    async (length: number) => {
+      const code: string = 'RUSH_BOUNDARY_'.padEnd(length, 'A');
+      const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+      const manager: ReporterManager = new ReporterManager();
+      manager.addReporter(createTelemetryReporter(telemetry));
+      await manager.initializeAsync();
+
+      manager.ingestForeignEnvelope(foreignDiagnosticEnvelope(1, 'public', { code, category: 'operation' }));
+      await manager.flushAsync();
+
+      const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
+      expect(aggregate.diagnosticCodes).toEqual(length <= 256 ? [code] : []);
+      expect(aggregate.diagnosticCategoryCounts).toEqual({ operation: 1 });
+      expect(aggregate.producerVersions).toEqual(['@foreign/reporter-plugin@1.0.0']);
+    }
+  );
+
   it('bounds diagnostic dimensions deterministically under cardinality flooding', async () => {
+    const maximumCodeLength: number = 256;
     const publicCodes: string[] = [];
+    const oversizedPublicCodes: string[] = [];
     for (
       let index: number = 0;
       index < REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes * 3;
       index++
     ) {
-      publicCodes.push(`RUSH_FOREIGN_CODE${String(index).padStart(3, '0')}`);
+      publicCodes.push(`RUSH_FOREIGN_CODE${String(index).padStart(3, '0')}`.padEnd(maximumCodeLength, 'A'));
+      oversizedPublicCodes.push(`RUSH_A_FOREIGN${index}_${'A'.repeat(8 * 1024)}`);
     }
     const hostilePrivateCodes: string[] = publicCodes.map((code: string): string => `${code}_PRIVATE`);
     const payloads: Array<{
@@ -322,12 +368,18 @@ describe('TelemetrySubscriber', () => {
         code,
         category: `/private/category/${index}`
       })),
+      ...oversizedPublicCodes.map((code: string) => ({
+        privacy: 'public' as const,
+        code,
+        category: 'future-public-category'
+      })),
       ...hostilePrivateCodes.map((code: string, index: number) => ({
         privacy: index % 2 === 0 ? ('local-sensitive' as const) : ('secret' as const),
         code,
         category: `token-${index}`
       })),
       { privacy: 'secret', code: 'RUSH_OPERATION_FAILED', category: 'operation' },
+      { privacy: 'public', code: 'RUSH_CONFIG_INVALID_JSON', category: 'configuration' },
       {
         privacy: 'local-sensitive',
         code: 'RUSH_DEPENDENCY_TOOL_FAILED',
@@ -354,17 +406,29 @@ describe('TelemetrySubscriber', () => {
 
     const forward: ITelemetryAggregate = await aggregatePayloads(payloads);
     const reverse: ITelemetryAggregate = await aggregatePayloads([...payloads].reverse());
-    expect(reverse.diagnosticCodes).toEqual(forward.diagnosticCodes);
+    expect(forward.diagnosticCodes.every((code: string): boolean => code.length <= maximumCodeLength)).toBe(
+      true
+    );
+    expect(reverse).toEqual(forward);
     expect(forward.diagnosticCodes).toHaveLength(REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes);
-    expect(forward.diagnosticCodes).toContain('RUSH_OPERATION_FAILED');
-    expect(forward.diagnosticCodes).toContain('RUSH_DEPENDENCY_TOOL_FAILED');
+    expect(forward.diagnosticCodes).toEqual(
+      [
+        'RUSH_CONFIG_INVALID_JSON',
+        'RUSH_DEPENDENCY_TOOL_FAILED',
+        ...publicCodes.slice(0, REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes - 2)
+      ].sort()
+    );
+    expect(forward.diagnosticCodes).not.toContain('RUSH_OPERATION_FAILED');
     expect(forward.diagnosticCodes).not.toContain(hostilePrivateCodes[0]);
     expect(forward.diagnosticCategoryCounts).toEqual({
-      other: publicCodes.length,
-      operation: 1,
+      other: publicCodes.length + oversizedPublicCodes.length,
+      configuration: 1,
       'dependency-tool': 1
     });
     expect(Object.keys(forward.diagnosticCategoryCounts)).toHaveLength(3);
+    expect(Buffer.byteLength(JSON.stringify(forward))).toBeLessThanOrEqual(
+      REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes * (maximumCodeLength + 3) + 1024
+    );
   });
 
   it('keeps protocol root-owned while attributing safe child diagnostics', async () => {
@@ -411,8 +475,8 @@ describe('TelemetrySubscriber', () => {
     expect(telemetry.buildAggregate()).toMatchObject({
       protocolVersion: { major: 1, minor: 0 },
       producerVersions: ['@microsoft/rush-lib@5.177.2', '@rushstack/heft@1.2.19'],
-      diagnosticCodes: ['RUSH_DEPENDENCY_TOOL_FAILED', 'RUSH_OPERATION_FAILED'],
-      diagnosticCategoryCounts: { 'dependency-tool': 1, operation: 1 }
+      diagnosticCodes: ['RUSH_OPERATION_FAILED'],
+      diagnosticCategoryCounts: { operation: 1 }
     });
   });
 
@@ -525,44 +589,51 @@ describe('TelemetrySubscriber', () => {
     expect(rootFirstForward.protocolVersion).toEqual({ major: 1, minor: 0 });
   });
 
-  it('does not admit producer metadata for lifecycle diagnostics with mixed privacy', async () => {
-    const SECRET: string = 'mixed-privacy-secret';
-    const MIXED_SOURCE: IReporterEventSource = {
-      packageName: '@private/mixed-diagnostic-plugin',
-      packageVersion: '1.0.0-private'
-    };
-    const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
-    const recording: RecordingReporter = new RecordingReporter();
-    const manager: ReporterManager = new ReporterManager();
-    manager.addReporter(createTelemetryReporter(telemetry));
-    manager.addReporter(recording);
-    await manager.initializeAsync();
-    const emitter: LifecycleEmitter = new LifecycleEmitter({
-      sink: manager,
-      sessionId: 'sess',
-      source: MIXED_SOURCE,
-      protocolVersion: { major: 7, minor: 0 }
-    });
+  it.each(['public', 'local-sensitive', 'secret'] as const)(
+    'restricts mixed-privacy lifecycle diagnostics to the local-sensitive allowlist (floor: %s)',
+    async (privacy: IReporterEventEnvelope<unknown>['privacy']) => {
+      const SECRET: string = 'mixed-privacy-secret';
+      const MIXED_SOURCE: IReporterEventSource = {
+        packageName: '@private/mixed-diagnostic-plugin',
+        packageVersion: '1.0.0-private'
+      };
+      const telemetry: TelemetrySubscriber = new TelemetrySubscriber();
+      const recording: RecordingReporter = new RecordingReporter();
+      const manager: ReporterManager = new ReporterManager();
+      manager.addReporter(createTelemetryReporter(telemetry));
+      manager.addReporter(recording);
+      await manager.initializeAsync();
+      const emitter: LifecycleEmitter = new LifecycleEmitter({
+        sink: manager,
+        sessionId: 'sess',
+        source: MIXED_SOURCE,
+        protocolVersion: { major: 7, minor: 0 }
+      });
 
-    emitter.emitDiagnostic(
-      createRushDiagnostic('RUSH_OPERATION_FAILED', {
-        parameters: {
-          publicValue: { value: 'safe', privacy: 'public' },
-          token: { value: SECRET, privacy: 'secret' }
-        }
-      })
-    );
-    await manager.flushAsync();
+      emitter.emitDiagnostic(
+        createRushDiagnostic('RUSH_OPERATION_FAILED', {
+          parameters: {
+            floorValue: { value: 'safe', privacy },
+            token: { value: SECRET, privacy: 'secret' }
+          }
+        })
+      );
+      await manager.flushAsync();
 
-    expect(recording.reported[0].privacy).toBe('public');
-    const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
-    expect(aggregate.protocolVersion).toBeUndefined();
-    expect(aggregate.producerVersions).toEqual([]);
-    expect(aggregate.diagnosticCodes).toEqual(['RUSH_OPERATION_FAILED']);
-    expect(aggregate.diagnosticCategoryCounts).toEqual({ operation: 1 });
-    expect(JSON.stringify(aggregate)).not.toContain(SECRET);
-    expect(JSON.stringify(aggregate)).not.toContain(MIXED_SOURCE.packageName);
-  });
+      expect(recording.reported[0].privacy).toBe(privacy);
+      const aggregate: ITelemetryAggregate = telemetry.buildAggregate();
+      expect(aggregate.protocolVersion).toBeUndefined();
+      expect(aggregate.producerVersions).toEqual([]);
+      expect(aggregate.diagnosticCodes).toEqual(
+        privacy === 'local-sensitive' ? ['RUSH_OPERATION_FAILED'] : []
+      );
+      expect(aggregate.diagnosticCategoryCounts).toEqual(
+        privacy === 'local-sensitive' ? { operation: 1 } : {}
+      );
+      expect(JSON.stringify(aggregate)).not.toContain(SECRET);
+      expect(JSON.stringify(aggregate)).not.toContain(MIXED_SOURCE.packageName);
+    }
+  );
 
   it('projects public envelopes while preserving allowlisted diagnostic fields deterministically', async () => {
     const PUBLIC_EXTENSION_SOURCE: IReporterEventSource = {
@@ -632,8 +703,8 @@ describe('TelemetrySubscriber', () => {
       result: 'succeeded',
       exitCode: 0,
       operationStatusCounts: { success: 1 },
-      diagnosticCodes: ['RUSH_DEPENDENCY_TOOL_FAILED', 'RUSH_OPERATION_FAILED'],
-      diagnosticCategoryCounts: { operation: 1, 'dependency-tool': 1 },
+      diagnosticCodes: ['RUSH_OPERATION_FAILED'],
+      diagnosticCategoryCounts: { operation: 1 },
       protocolVersion: { major: 1, minor: 0 },
       producerVersions: ['@microsoft/rush-lib@5.177.2', '@rushstack/public-reporter-plugin@1.2.3']
     });
