@@ -16,6 +16,10 @@ import {
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import { createRushDiagnostic } from '../diagnostics/createRushDiagnostic';
 import { isValidRushDiagnosticCode } from '../diagnostics/RushDiagnosticCode';
+import {
+  RUSH_DIAGNOSTIC_CODES,
+  type IRushDiagnosticCodeDefinition
+} from '../diagnostics/RushDiagnosticCodeRegistry';
 import { NdjsonDecoder, NdjsonInvalidRecordError, NdjsonRecordTooLargeError } from '../protocol/Ndjson';
 import { REPORTER_PROTOCOL_LIMITS } from '../protocol/ReporterProtocol';
 import {
@@ -30,6 +34,7 @@ import {
 } from '../protocol/ReporterHandshake';
 
 const REPORTER_EVENT_TYPE_SET: ReadonlySet<string> = new Set(REPORTER_EVENT_TYPES);
+const DIAGNOSTIC_DEFINITIONS: ReadonlyMap<string, IRushDiagnosticCodeDefinition> = RUSH_DIAGNOSTIC_CODES;
 const HEFT_CHILD_EVENT_TYPES: ReadonlySet<ReporterEventType> = new Set([
   'diagnosticEmitted',
   'externalOutput'
@@ -45,6 +50,10 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
 
 function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return isNonNegativeInteger(value) && value > 0;
 }
 
 function isProtocolVersion(value: unknown): value is IReporterProtocolVersion {
@@ -118,6 +127,15 @@ function isDiagnosticRecord(value: unknown): boolean {
   ) {
     return false;
   }
+  const definition: IRushDiagnosticCodeDefinition | undefined = DIAGNOSTIC_DEFINITIONS.get(value.code);
+  if (
+    !definition ||
+    value.category !== definition.category ||
+    value.summaryKey !== definition.summaryKey ||
+    (value.detailKey !== undefined && value.detailKey !== definition.detailKey)
+  ) {
+    return false;
+  }
   if (value.parameters !== undefined) {
     if (!isObjectRecord(value.parameters)) {
       return false;
@@ -170,8 +188,8 @@ function isDiagnosticRecord(value: unknown): boolean {
     if (value.source.kind === 'file') {
       if (
         typeof value.source.file !== 'string' ||
-        (value.source.line !== undefined && !isNonNegativeInteger(value.source.line)) ||
-        (value.source.column !== undefined && !isNonNegativeInteger(value.source.column)) ||
+        (value.source.line !== undefined && !isPositiveInteger(value.source.line)) ||
+        (value.source.column !== undefined && !isPositiveInteger(value.source.column)) ||
         (value.source.toolName !== undefined && typeof value.source.toolName !== 'string')
       ) {
         return false;
