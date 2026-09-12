@@ -252,22 +252,25 @@ describe(createInstallRunRushBootstrap.name, () => {
   });
 
   it.each([
-    ['--reporter=file'],
-    ['--reporter=plaintext'],
-    ['--reporter=file', '--output=json://stderr'],
-    ['--reporter=file', '--output=json://./stdout'],
-    ['--reporter=file', '--output=file://./stdout?logLevel=normal'],
-    ['--reporter=file', '--', '--output=json://stdout'],
-    ['--reporter=file', '--help', '--output'],
-    ['--reporter=file', '-h', '--output=json://stdout']
-  ])('preserves live bootstrap stdout when no additional output owns it: %j', async (...controls: string[]) => {
-    await withTempDir(async (directory: string) => {
-      const bootstrap = createInstallRunRushBootstrap(
-        makeOptions(directory, { argv: ['build', ...controls] }).options
-      );
-      expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: true, stderr: true });
-    });
-  });
+    [false, '--reporter=file'],
+    [true, '--reporter=plaintext'],
+    [false, '--reporter=file', '--output=json://stderr'],
+    [false, '--reporter=file', '--output=json://./stdout'],
+    [false, '--reporter=file', '--output=file://./stdout?logLevel=normal'],
+    [false, '--reporter=file', '--', '--output=json://stdout'],
+    [false, '--reporter=file', '--help', '--output'],
+    [false, '--reporter=file', '-h', '--output=json://stdout']
+  ])(
+    'preserves existing stdout ownership when no additional output owns it: %j',
+    async (stdoutLive: boolean, ...controls: string[]) => {
+      await withTempDir(async (directory: string) => {
+        const bootstrap = createInstallRunRushBootstrap(
+          makeOptions(directory, { argv: ['build', ...controls] }).options
+        );
+        expect(bootstrap.externalOutputLiveStreams).toEqual({ stdout: stdoutLive, stderr: true });
+      });
+    }
+  );
 
   it.each([
     { argv: ['build', '--output=json://stdout'], env: {} },
