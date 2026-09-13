@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Group the type-aware rules separately (exposed as `typeAwareRules`/`nonTypeAwareRules`) and add a `flat/without-type-information` helper for linting files that are not part of the TypeScript program with only the non-type-aware rules.",
+      "type": "minor"
+    }
+  ]
+}
