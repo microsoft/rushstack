@@ -11,10 +11,10 @@ import type * as TEslintLegacy from 'eslint-8';
 import * as semver from 'semver';
 import stableStringify from 'json-stable-stringify-without-jsonify';
 
-import { FileError, FileSystem } from '@rushstack/node-core-library';
+import { FileError, FileSystem, Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 
-import { LinterBase, type ILinterBaseOptions } from './LinterBase';
+import { LinterBase, type IAdditionalLintFile, type ILinterBaseOptions } from './LinterBase';
 import type { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 import { name as pluginName, version as pluginVersion } from '../package.json';
 
@@ -81,11 +81,16 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
   LEGACY_ESLINTRC_JS_FILENAME,
   LEGACY_ESLINTRC_CJS_FILENAME
 ]);
+const ESLINT_DEFAULT_EXTENSIONS: Set<string> = new Set(['.js', '.mjs', '.cjs']);
 
-export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult> {
+export class Eslint extends LinterBase<
+  TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
+  IAdditionalLintFile
+> {
   readonly #eslintPackage: typeof TEslint | typeof TEslintLegacy;
   readonly #eslintPackageVersion: semver.SemVer;
   readonly #linter: TEslint.ESLint | TEslintLegacy.ESLint;
+  readonly #additionalFilesLinter: TEslint.ESLint | undefined;
   readonly #eslintTimings: Map<string, number> = new Map();
   readonly #currentFixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
     [];
@@ -93,8 +98,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[]
   > = new Map();
+  readonly #additionalLintResults: Set<TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult> =
+    new Set();
   readonly #sarifLogPath: string | undefined;
   readonly #configHashMap: WeakMap<object, string> = new WeakMap();
+  readonly #fileEnumerator: TEslint.ESLint | undefined;
+  readonly #typeScriptFilenames: ReadonlySet<string>;
 
   protected constructor(options: IEslintOptions) {
     super('eslint', options);
@@ -106,7 +115,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       tsProgram,
       eslintTimings,
       fix,
-      sarifLogPath
+      sarifLogPath,
+      additionalFileIgnorePatterns
     } = options;
     this.#eslintPackage = eslintPackage;
     this.#eslintPackageVersion = new semver.SemVer(eslintPackage.ESLint.version);
@@ -195,6 +205,31 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       fix: fixFn as any
     });
+    this.#typeScriptFilenames = new Set(
+      tsProgram.getRootFileNames().map((filePath: string) => path.resolve(filePath))
+    );
+    if (this.#eslintPackageVersion.major >= 9) {
+      const typeScriptIgnorePatterns: string[] = Array.from(this.#typeScriptFilenames, (filePath: string) =>
+        Path.convertToSlashes(path.relative(buildFolderPath, filePath))
+      ).filter((relativePath: string) => relativePath !== '..' && !relativePath.startsWith('../'));
+      const flatEslintPackage: typeof TEslint = eslintPackage as typeof TEslint;
+      this.#additionalFilesLinter = new flatEslintPackage.ESLint({
+        cwd: buildFolderPath,
+        overrideConfigFile: linterConfigFilePath,
+        fix: fixFn
+      });
+      this.#fileEnumerator = new flatEslintPackage.ESLint({
+        cwd: buildFolderPath,
+        errorOnUnmatchedPattern: false,
+        overrideConfigFile: linterConfigFilePath,
+        overrideConfig: {
+          name: `${pluginName}/ignore-typescript-program-files`,
+          ignores: [...typeScriptIgnorePatterns, ...(additionalFileIgnorePatterns || [])]
+        },
+        ruleFilter: () => false
+      });
+    }
+
     this.#eslintTimings = eslintTimings;
   }
 
@@ -250,12 +285,45 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     }
   }
 
+  public async getAdditionalLintFilesAsync(): Promise<ReadonlySet<IAdditionalLintFile>> {
+    if (!this.#fileEnumerator) {
+      return new Set();
+    }
+
+    const lintResults: TEslint.ESLint.LintResult[] = await this.#fileEnumerator.lintFiles(['.']);
+    lintResults.sort((left: TEslint.ESLint.LintResult, right: TEslint.ESLint.LintResult) =>
+      left.filePath.localeCompare(right.filePath)
+    );
+
+    const additionalLintFiles: IAdditionalLintFile[] = await Promise.all(
+      lintResults
+        .filter(
+          (lintResult: TEslint.ESLint.LintResult) =>
+            !this.#typeScriptFilenames.has(path.resolve(lintResult.filePath)) &&
+            !ESLINT_DEFAULT_EXTENSIONS.has(path.extname(lintResult.filePath))
+        )
+        .map(async (lintResult: TEslint.ESLint.LintResult): Promise<IAdditionalLintFile> => {
+          return {
+            kind: 'additional',
+            fileName: lintResult.filePath,
+            text: await FileSystem.readFileAsync(lintResult.filePath),
+            version: ''
+          };
+        })
+    );
+
+    return new Set(additionalLintFiles);
+  }
+
   protected override async getCacheVersionAsync(): Promise<string> {
     return `${this.#eslintPackageVersion.version}_${process.version}`;
   }
 
-  protected override async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
-    const sourceFileEslintConfiguration: TEslint.Linter.Config = await this.#linter.calculateConfigForFile(
+  protected override async getSourceFileHashAsync(
+    sourceFile: IExtendedSourceFile | IAdditionalLintFile
+  ): Promise<string> {
+    const linter: TEslint.ESLint | TEslintLegacy.ESLint = this.#getLinterForSourceFile(sourceFile);
+    const sourceFileEslintConfiguration: TEslint.Linter.Config = await linter.calculateConfigForFile(
       sourceFile.fileName
     );
 
@@ -272,10 +340,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   protected override async lintFileAsync(
-    sourceFile: TTypescript.SourceFile
+    sourceFile: TTypescript.SourceFile | IAdditionalLintFile
   ): Promise<TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[]> {
+    const linter: TEslint.ESLint | TEslintLegacy.ESLint = this.#getLinterForSourceFile(sourceFile);
     const lintResults: TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[] =
-      await this.#linter.lintText(sourceFile.text, { filePath: sourceFile.fileName });
+      await linter.lintText(sourceFile.text, { filePath: sourceFile.fileName });
 
     // Map the fix messages to the results. This API should only return one result per file, so we can be sure
     // that the fix messages belong to the returned result. If we somehow receive multiple results, we will
@@ -284,6 +353,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       this.#currentFixMessages.splice(0);
     if (lintResults.length === 1) {
       this.#fixMessagesByResult.set(lintResults[0], fixMessages);
+    }
+
+    if (linter === this.#additionalFilesLinter) {
+      for (const lintResult of lintResults) {
+        this.#additionalLintResults.add(lintResult);
+      }
     }
 
     this._fixesPossible ||=
@@ -349,8 +424,19 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
     const sarifLogPath: string | undefined = this.#sarifLogPath;
     if (sarifLogPath) {
-      const rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'] =
-        this.#linter.getRulesMetaForResults(lintResults);
+      const primaryLintResults: TEslint.ESLint.LintResult[] = [];
+      const additionalLintResults: TEslint.ESLint.LintResult[] = [];
+      for (const lintResult of lintResults) {
+        const resultSet: TEslint.ESLint.LintResult[] = this.#additionalLintResults.has(lintResult)
+          ? additionalLintResults
+          : primaryLintResults;
+        resultSet.push(lintResult);
+      }
+
+      const rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'] = {
+        ...this.#linter.getRulesMetaForResults(primaryLintResults),
+        ...this.#additionalFilesLinter?.getRulesMetaForResults(additionalLintResults)
+      };
       const { formatEslintResultsAsSARIF } = await import('./SarifFormatter');
       const sarifString: string = JSON.stringify(
         formatEslintResultsAsSARIF(lintResults, rulesMeta, {
@@ -378,6 +464,20 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         !lintResult.suppressedMessages?.length && (lintResult.errorCount > 0 || lintResult.warningCount > 0)
       );
     });
+  }
+
+  #getLinterForSourceFile(
+    sourceFile: TTypescript.SourceFile | IAdditionalLintFile
+  ): TEslint.ESLint | TEslintLegacy.ESLint {
+    if (sourceFile.kind === 'additional') {
+      if (!this.#additionalFilesLinter) {
+        throw new Error('The ESLint instance for additional files has not been initialized.');
+      }
+
+      return this.#additionalFilesLinter;
+    }
+
+    return this.#linter;
   }
 
   #getLintFileError(

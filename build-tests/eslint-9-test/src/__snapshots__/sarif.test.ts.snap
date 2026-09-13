@@ -16,6 +16,11 @@ Object {
             "uri": "src/sarif.test.ts",
           },
         },
+        Object {
+          "location": Object {
+            "uri": "src/non-program.custom",
+          },
+        },
       ],
       "results": Array [
         Object {
@@ -78,6 +83,36 @@ Object {
             },
           ],
         },
+        Object {
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 2,
+                  "uri": "src/non-program.custom",
+                },
+                "region": Object {
+                  "endColumn": 14,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "'missingGlobal' is not defined.",
+          },
+          "ruleId": "no-undef",
+          "ruleIndex": 2,
+          "suppressions": Array [
+            Object {
+              "justification": "",
+              "kind": "external",
+            },
+          ],
+        },
       ],
       "tool": Object {
         "driver": Object {
@@ -98,6 +133,14 @@ Object {
               "properties": Object {},
               "shortDescription": Object {
                 "text": "Enforce naming conventions for everything across a codebase",
+              },
+            },
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-undef",
+              "id": "no-undef",
+              "properties": Object {},
+              "shortDescription": Object {
+                "text": "Disallow the use of undeclared variables unless mentioned in \`/*global */\` comments",
               },
             },
           ],
