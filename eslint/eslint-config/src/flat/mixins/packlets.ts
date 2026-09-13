@@ -1,0 +1,29 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+// This mixin implements the "packlet" formalism for organizing source files.
+// For more information, see the documentation here:
+// https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets
+//
+// IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
+
+import type { ESLint, Linter } from 'eslint';
+
+import rushstackPackletsEslintPlugin = require('@rushstack/eslint-plugin-packlets');
+
+function toEslintPlugin(plugin: object): ESLint.Plugin {
+  return plugin;
+}
+
+const config: Linter.Config = {
+  files: ['**/*.ts', '**/*.tsx'],
+  plugins: {
+    '@rushstack/packlets': toEslintPlugin(rushstackPackletsEslintPlugin)
+  },
+  rules: {
+    '@rushstack/packlets/mechanics': 'warn',
+    '@rushstack/packlets/circular-deps': 'warn'
+  }
+};
+
+export = config;
