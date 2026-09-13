@@ -11,7 +11,7 @@ import type * as TEslintLegacy from 'eslint-8';
 import * as semver from 'semver';
 import stableStringify from 'json-stable-stringify-without-jsonify';
 
-import { FileError, FileSystem, Path } from '@rushstack/node-core-library';
+import { Async, FileError, FileSystem, Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 
 import { LinterBase, type IAdditionalLintFile, type ILinterBaseOptions } from './LinterBase';
@@ -83,6 +83,10 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
 ]);
 const ESLINT_DEFAULT_EXTENSIONS: Set<string> = new Set(['.js', '.mjs', '.cjs']);
 
+// Limits the number of additional files that are read from disk concurrently while enumerating the files to
+// lint that are not part of the TypeScript program.
+const MAX_ADDITIONAL_FILE_READ_CONCURRENCY: number = 10;
+
 export class Eslint extends LinterBase<
   TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
   IAdditionalLintFile
@@ -140,10 +144,14 @@ export class Eslint extends LinterBase<
     );
     // ESLint configuration paths are relative to the project folder. Compute the project-relative paths of the
     // files in the TypeScript program so that the injected program can be scoped to just those files, and so
-    // that those files can be excluded when enumerating the additional files to lint.
-    const typeScriptFilePatterns: string[] = Array.from(this.#typeScriptFilenames, (filePath: string) =>
-      Path.convertToSlashes(path.relative(buildFolderPath, filePath))
-    ).filter((relativePath: string) => relativePath !== '..' && !relativePath.startsWith('../'));
+    // that those files can be excluded when enumerating the additional files to lint. Only files under the
+    // project folder can be expressed as ESLint configuration patterns.
+    const typeScriptFilePatterns: string[] = [];
+    for (const filePath of this.#typeScriptFilenames) {
+      if (Path.isUnder(filePath, buildFolderPath)) {
+        typeScriptFilePatterns.push(Path.convertToSlashes(path.relative(buildFolderPath, filePath)));
+      }
+    }
 
     let overrideConfig: TEslint.Linter.Config | TEslintLegacy.Linter.Config | undefined;
     let fixFn: Exclude<TEslint.ESLint.Options['fix'] | TEslintLegacy.ESLint.Options['fix'], boolean>;
@@ -225,6 +233,9 @@ export class Eslint extends LinterBase<
         errorOnUnmatchedPattern: false,
         overrideConfigFile: linterConfigFilePath,
         overrideConfig: {
+          // This is the label for the flat-config object (used in ESLint debug output/config inspection); it is
+          // not a plugin reference. It ignores the TypeScript program files so enumeration returns only the
+          // additional files.
           name: `${pluginName}/ignore-typescript-program-files`,
           ignores: [...typeScriptFilePatterns, ...(additionalFileIgnorePatterns || [])]
         },
@@ -293,25 +304,42 @@ export class Eslint extends LinterBase<
     }
 
     const lintResults: TEslint.ESLint.LintResult[] = await this.#fileEnumerator.lintFiles(['.']);
-    lintResults.sort((left: TEslint.ESLint.LintResult, right: TEslint.ESLint.LintResult) =>
-      left.filePath.localeCompare(right.filePath)
-    );
 
-    const additionalLintFiles: IAdditionalLintFile[] = await Promise.all(
-      lintResults
-        .filter(
-          (lintResult: TEslint.ESLint.LintResult) =>
-            !this.#typeScriptFilenames.has(path.resolve(lintResult.filePath)) &&
-            !ESLINT_DEFAULT_EXTENSIONS.has(path.extname(lintResult.filePath))
-        )
-        .map(async (lintResult: TEslint.ESLint.LintResult): Promise<IAdditionalLintFile> => {
-          return {
-            kind: 'additional',
-            fileName: lintResult.filePath,
-            text: await FileSystem.readFileAsync(lintResult.filePath),
-            version: ''
-          };
-        })
+    // ESLint reports absolute file paths, so they can be compared directly against the TypeScript program's
+    // (already resolved) file paths. Files that ESLint lints by default (for example ".js"/".cjs"/".mjs"
+    // configuration files) are excluded because they are not TypeScript sources selected by this feature.
+    const additionalFilePaths: string[] = [];
+    for (const { filePath } of lintResults) {
+      if (
+        !this.#typeScriptFilenames.has(filePath) &&
+        !ESLINT_DEFAULT_EXTENSIONS.has(path.extname(filePath))
+      ) {
+        additionalFilePaths.push(filePath);
+      }
+    }
+    // Sort for a stable ordering across runs.
+    additionalFilePaths.sort((left: string, right: string) => {
+      if (left < right) {
+        return -1;
+      } else if (left > right) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    const additionalLintFiles: IAdditionalLintFile[] = new Array(additionalFilePaths.length);
+    await Async.forEachAsync(
+      additionalFilePaths,
+      async (filePath: string, index: number) => {
+        additionalLintFiles[index] = {
+          kind: 'additional',
+          fileName: filePath,
+          text: await FileSystem.readFileAsync(filePath),
+          version: ''
+        };
+      },
+      { concurrency: MAX_ADDITIONAL_FILE_READ_CONCURRENCY }
     );
 
     return new Set(additionalLintFiles);
@@ -463,7 +491,7 @@ export class Eslint extends LinterBase<
     // TypeScript program or project. Files that are selected by the ESLint configuration but excluded from the
     // TypeScript program hit this case, so surface actionable guidance instead of the raw parser error. Files
     // that are part of the program (or non-fatal messages) are reported normally.
-    if (!lintMessage.fatal || this.#typeScriptFilenames.has(path.resolve(lintResult.filePath))) {
+    if (!lintMessage.fatal || this.#typeScriptFilenames.has(lintResult.filePath)) {
       return undefined;
     }
 

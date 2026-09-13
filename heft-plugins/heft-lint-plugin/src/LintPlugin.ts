@@ -17,7 +17,7 @@ import type {
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import type { IAdditionalLintFile, LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
@@ -321,7 +321,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
     const { buildFolderPath } = heftConfiguration;
     return Array.from(outputFolderPaths, (outputFolderPath: string) => {
-      const relativePath: string = path.relative(buildFolderPath, outputFolderPath).replaceAll('\\', '/');
+      const relativePath: string = Path.convertToSlashes(path.relative(buildFolderPath, outputFolderPath));
       return `${relativePath}/**`;
     }).filter(
       (relativePath: string) =>
