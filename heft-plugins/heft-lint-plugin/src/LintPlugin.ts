@@ -250,11 +250,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     // multiple times will only init once.
     await this.#ensureInitializedAsync(taskSession, heftConfiguration);
 
-    const linters: LinterBase<unknown, IAdditionalLintFile>[] = [];
-    const additionalFilesByLinter: Map<
-      LinterBase<unknown, IAdditionalLintFile>,
-      ReadonlySet<IAdditionalLintFile>
-    > = new Map();
+    const lintOperations: (() => Promise<void>)[] = [];
     if (this.#eslintConfigFilePath && this.#eslintToolPath) {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
@@ -267,11 +263,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         buildMetadataFolderPath: taskSession.tempFolderPath,
         additionalFileIgnorePatterns
       });
-      if (includeAdditionalFiles) {
-        additionalFilesByLinter.set(eslintLinter, await eslintLinter.getAdditionalLintFilesAsync());
-      }
-
-      linters.push(eslintLinter);
+      const additionalFiles: ReadonlySet<IAdditionalLintFile> | undefined = includeAdditionalFiles
+        ? await eslintLinter.getAdditionalLintFilesAsync()
+        : undefined;
+      lintOperations.push(() => this.#runLinterAsync(eslintLinter, tsProgram, changedFiles, additionalFiles));
     }
 
     if (this.#tslintConfigFilePath && this.#tslintToolPath) {
@@ -284,22 +279,18 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath
       });
-      linters.push(tslintLinter);
+      lintOperations.push(() => this.#runLinterAsync<never>(tslintLinter, tsProgram, changedFiles));
     }
 
     // Now that we know we have initialized properly, run the linter(s)
-    await Promise.all(
-      linters.map((linter) =>
-        this.#runLinterAsync(linter, tsProgram, changedFiles, additionalFilesByLinter.get(linter))
-      )
-    );
+    await Promise.all(lintOperations.map((lintOperation) => lintOperation()));
   }
 
-  async #runLinterAsync(
-    linter: LinterBase<unknown, IAdditionalLintFile>,
+  async #runLinterAsync<TAdditionalLintFile extends IAdditionalLintFile = never>(
+    linter: LinterBase<unknown, TAdditionalLintFile>,
     tsProgram: IExtendedProgram,
     changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined,
-    additionalFiles?: ReadonlySet<IAdditionalLintFile> | undefined
+    additionalFiles?: ReadonlySet<TAdditionalLintFile> | undefined
   ): Promise<void> {
     linter.printVersionHeader();
 
