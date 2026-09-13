@@ -202,7 +202,11 @@ const commonNamingConventionSelectors: INamingConventionSelectorMacroBlock[] = [
 // (for example config files or tests that are not included by tsconfig.json) can be linted with only the
 // non-type-aware rules.  See the "without-type-information" helper (flat/without-type-information.js), which
 // disables these rules and type-aware parsing for a given set of files.
-const typeAwareRules: Linter.RulesRecord = {
+//
+// Use `satisfies` (rather than a type annotation) so that the literal rule names are preserved in the inferred
+// type, which lets "./without-type-information" derive `keyof typeof typeAwareRules`.
+// eslint-disable-next-line @typescript-eslint/typedef
+const typeAwareRules = {
   // NOTE: This new rule replaces several deprecated rules from @typescript-eslint/eslint-plugin@2.3.3:
   //
   // - @typescript-eslint/camelcase
@@ -230,7 +234,7 @@ const typeAwareRules: Linter.RulesRecord = {
 
   // RATIONALE:         Catches a common coding mistake.
   '@typescript-eslint/no-for-in-array': 'error'
-};
+} as const satisfies Linter.RulesRecord;
 
 const commonConfig: Linter.Config[] = [
   // Manually authored .d.ts files are generally used to describe external APIs that are  not expected

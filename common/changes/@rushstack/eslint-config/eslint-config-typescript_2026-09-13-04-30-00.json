@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Author the package in TypeScript (built to CommonJS via Heft). The existing subpath entry points are preserved via a package.json \"exports\" map and the compiled configuration is runtime-identical to the previous JavaScript.",
+      "type": "patch"
+    }
+  ]
+}

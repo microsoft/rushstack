@@ -67,7 +67,7 @@ interface INamingConventionSelectorMacroBlock {
   [optionName: string]: unknown;
 }
 
-interface INamingConventionSelectorBlock {
+export interface INamingConventionSelectorBlock {
   selector: string;
   selectors?: string[];
   enforceLeadingUnderscoreWhenPrivate?: boolean;

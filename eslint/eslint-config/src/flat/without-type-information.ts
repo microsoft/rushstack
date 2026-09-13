@@ -3,9 +3,12 @@
 
 import type { Linter } from 'eslint';
 
-// The profile's type-aware rules, turned off. Keep this in sync with the typeAwareRules group in
-// ./profile/_common.js.
-const disabledTypeAwareRules: Linter.RulesRecord = {
+import type { typeAwareRules } from './profile/_common';
+
+// The profile's type-aware rules, turned off. Typing this as `Record<keyof typeof typeAwareRules, 'off'>` keeps
+// it in sync with the typeAwareRules group in ./profile/_common: adding a type-aware rule there becomes a compile
+// error until it is disabled here as well.
+const disabledTypeAwareRules: Record<keyof typeof typeAwareRules, 'off'> = {
   '@typescript-eslint/naming-convention': 'off',
   '@typescript-eslint/no-floating-promises': 'off',
   '@typescript-eslint/no-for-in-array': 'off'
