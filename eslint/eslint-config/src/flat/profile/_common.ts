@@ -22,12 +22,12 @@
 
 import type { ESLint, Linter } from 'eslint';
 import { globalIgnores } from 'eslint/config';
-import promiseEslintPlugin = require('eslint-plugin-promise');
-import typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
-import typescriptEslintParser = require('@typescript-eslint/parser');
+import promiseEslintPlugin from 'eslint-plugin-promise';
+import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
+import typescriptEslintParser from '@typescript-eslint/parser';
 
-import rushstackEslintPlugin = require('@rushstack/eslint-plugin');
-import rushstackSecurityEslintPlugin = require('@rushstack/eslint-plugin-security');
+import rushstackEslintPlugin from '@rushstack/eslint-plugin';
+import rushstackSecurityEslintPlugin from '@rushstack/eslint-plugin-security';
 
 import { expandNamingConventionSelectors } from './_macros';
 

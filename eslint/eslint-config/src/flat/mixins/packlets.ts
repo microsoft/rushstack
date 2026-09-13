@@ -9,7 +9,7 @@
 
 import type { ESLint, Linter } from 'eslint';
 
-import rushstackPackletsEslintPlugin = require('@rushstack/eslint-plugin-packlets');
+import rushstackPackletsEslintPlugin from '@rushstack/eslint-plugin-packlets';
 
 function toEslintPlugin(plugin: object): ESLint.Plugin {
   return plugin;

@@ -7,7 +7,7 @@
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
 import type { Linter } from 'eslint';
-import reactEslintPlugin = require('eslint-plugin-react');
+import reactEslintPlugin from 'eslint-plugin-react';
 
 const config: Linter.Config[] = [
   {

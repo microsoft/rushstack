@@ -23,7 +23,7 @@
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
 import type { ESLint, Linter } from 'eslint';
-import typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
+import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 
 function toEslintPlugin(plugin: object): ESLint.Plugin {
   return plugin;

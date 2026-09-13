@@ -7,7 +7,7 @@
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
 import type { Linter } from 'eslint';
-import tsdocEslintPlugin = require('eslint-plugin-tsdoc');
+import tsdocEslintPlugin from 'eslint-plugin-tsdoc';
 
 const config: Linter.Config[] = [
   {
