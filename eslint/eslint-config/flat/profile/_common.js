@@ -785,18 +785,4 @@ const commonConfig = [
   }
 ];
 
-// Derive the non-type-aware rule group from the authored TypeScript source-file config so that it stays in sync
-// with the rules above. Everything that is not part of typeAwareRules can be applied to files that lack type
-// information.
-const typeScriptSourceFileConfig = commonConfig.find(
-  (configObject) =>
-    Array.isArray(configObject.files) && configObject.files.includes('**/*.ts') && configObject.rules
-);
-const nonTypeAwareRules = {};
-for (const [ruleName, ruleValue] of Object.entries(typeScriptSourceFileConfig.rules)) {
-  if (!(ruleName in typeAwareRules)) {
-    nonTypeAwareRules[ruleName] = ruleValue;
-  }
-}
-
-module.exports = { commonNamingConventionSelectors, commonConfig, typeAwareRules, nonTypeAwareRules };
+module.exports = { commonNamingConventionSelectors, commonConfig, typeAwareRules };

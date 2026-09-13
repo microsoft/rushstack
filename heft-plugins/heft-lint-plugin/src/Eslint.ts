@@ -140,7 +140,7 @@ export class Eslint extends LinterBase<
     this.#sarifLogPath = sarifLogPath;
 
     this.#typeScriptFilenames = new Set(
-      tsProgram.getRootFileNames().map((filePath: string) => path.resolve(filePath))
+      tsProgram.getRootFileNames().map((filePath: string) => path.resolve(buildFolderPath, filePath))
     );
     // ESLint configuration paths are relative to the project folder. Compute the project-relative paths of the
     // files in the TypeScript program so that the injected program can be scoped to just those files, and so
@@ -149,7 +149,9 @@ export class Eslint extends LinterBase<
     const typeScriptFilePatterns: string[] = [];
     for (const filePath of this.#typeScriptFilenames) {
       if (Path.isUnder(filePath, buildFolderPath)) {
-        typeScriptFilePatterns.push(Path.convertToSlashes(path.relative(buildFolderPath, filePath)));
+        // filePath is already an absolute path under buildFolderPath, so strip the prefix (plus the separator)
+        // instead of recomputing the relative path.
+        typeScriptFilePatterns.push(Path.convertToSlashes(filePath.slice(buildFolderPath.length + 1)));
       }
     }
 

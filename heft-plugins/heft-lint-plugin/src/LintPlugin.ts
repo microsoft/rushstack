@@ -307,25 +307,29 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     heftConfiguration: HeftConfiguration,
     tsPrograms: IExtendedProgram[]
   ): string[] {
+    const { buildFolderPath } = heftConfiguration;
     const outputFolderPaths: Set<string> = new Set();
     for (const tsProgram of tsPrograms) {
       const { outDir, declarationDir } = tsProgram.getCompilerOptions();
       if (outDir) {
-        outputFolderPaths.add(outDir);
+        outputFolderPaths.add(path.resolve(buildFolderPath, outDir));
       }
 
       if (declarationDir) {
-        outputFolderPaths.add(declarationDir);
+        outputFolderPaths.add(path.resolve(buildFolderPath, declarationDir));
       }
     }
 
-    const { buildFolderPath } = heftConfiguration;
-    return Array.from(outputFolderPaths, (outputFolderPath: string) => {
-      const relativePath: string = Path.convertToSlashes(path.relative(buildFolderPath, outputFolderPath));
-      return `${relativePath}/**`;
-    }).filter(
-      (relativePath: string) =>
-        relativePath !== '/**' && relativePath !== '../**' && !relativePath.startsWith('../')
-    );
+    const ignorePatterns: string[] = [];
+    for (const outputFolderPath of outputFolderPaths) {
+      // Only output folders under the project folder can be expressed as ESLint ignore patterns.
+      if (Path.isUnder(outputFolderPath, buildFolderPath)) {
+        ignorePatterns.push(
+          `${Path.convertToSlashes(outputFolderPath.slice(buildFolderPath.length + 1))}/**`
+        );
+      }
+    }
+
+    return ignorePatterns;
   }
 }
