@@ -24,7 +24,11 @@ import type { ESLint, Linter } from 'eslint';
 import { globalIgnores } from 'eslint/config';
 import promiseEslintPlugin from 'eslint-plugin-promise';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
-import typescriptEslintParser from '@typescript-eslint/parser';
+// `@typescript-eslint/parser` marks its CommonJS export with `__esModule` but exposes the parser API
+// (`parseForESLint`) directly on `module.exports` with no `default` export. A default `import` would therefore
+// resolve to `undefined` at runtime (ESLint would silently fall back to its built-in parser and fail to parse
+// TypeScript), so use a namespace import to bind the module export itself.
+import * as typescriptEslintParser from '@typescript-eslint/parser';
 
 import rushstackEslintPlugin from '@rushstack/eslint-plugin';
 import rushstackSecurityEslintPlugin from '@rushstack/eslint-plugin-security';
