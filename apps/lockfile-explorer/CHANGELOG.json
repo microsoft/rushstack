@@ -2,6 +2,23 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "2.2.28",
+      "tag": "@rushstack/lockfile-explorer_v2.2.28",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.27",
       "tag": "@rushstack/lockfile-explorer_v2.2.27",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",

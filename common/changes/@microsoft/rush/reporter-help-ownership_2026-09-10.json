@@ -1,10 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Remove reporter-owned output and log-level controls from legacy help while preserving custom command options and emergency rollback behavior.",
-      "type": "none"
-    }
-  ],
-  "packageName": "@microsoft/rush"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Remove reporter-owned output and log-level controls from legacy help while preserving custom command options and emergency rollback behavior.","type":"none"}],"packageName":"@microsoft/rush"}

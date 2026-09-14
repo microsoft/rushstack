@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-daemon
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+
+## 0.5.1
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Patches
+
+- Forward reporter operation completion and iteration identity through phased request event multiplexing.
 
 ## 0.5.0
 Sat, 05 Sep 2026 00:15:08 GMT
