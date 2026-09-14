@@ -11,7 +11,7 @@ overrides:
   loader-utils@^2.0.0: 2.0.4
   fast-xml-parser@^5.3.3: 5.3.5
 
-packageExtensionsChecksum: sha256-X4+Xs9WDTMcR0G6ffHhXVwXZEtOoa0Fy3JeVU0aTaUM=
+packageExtensionsChecksum: sha256-oUDDH9n0S+YRKY1TEmsTuFsNCNlmI4mpaLdAtVDhjgY=
 
 pnpmfileChecksum: sha256-E1T7OJ3DLTjpDqf4RdJzK9VDtAxgm4gDEQCLYdHD8nI=
 
@@ -1437,7 +1437,7 @@ importers:
     devDependencies:
       '@rushstack/eslint-config':
         specifier: 3.7.1
-        version: 3.7.1(@types/eslint@9.6.1)(eslint@7.11.0)(typescript@5.8.2)
+        version: 3.7.1(eslint@7.11.0)(typescript@5.8.2)
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -1461,7 +1461,7 @@ importers:
     devDependencies:
       '@rushstack/eslint-config':
         specifier: 3.7.1
-        version: 3.7.1(@types/eslint@9.6.1)(eslint@7.7.0)(typescript@5.8.2)
+        version: 3.7.1(eslint@7.7.0)(typescript@5.8.2)
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -1485,7 +1485,7 @@ importers:
     devDependencies:
       '@rushstack/eslint-config':
         specifier: 3.7.1
-        version: 3.7.1(@types/eslint@9.6.1)(eslint@7.30.0)(typescript@5.8.2)
+        version: 3.7.1(eslint@7.30.0)(typescript@5.8.2)
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -1614,7 +1614,7 @@ importers:
         version: link:../../eslint/eslint-bulk
       '@rushstack/eslint-config':
         specifier: 3.7.1
-        version: 3.7.1(@types/eslint@9.6.1)(eslint@8.57.1)(typescript@5.8.2)
+        version: 3.7.1(eslint@8.57.1)(typescript@5.8.2)
       '@rushstack/eslint-patch':
         specifier: workspace:*
         version: link:../../eslint/eslint-patch
@@ -2360,7 +2360,7 @@ importers:
         version: link:../../apps/api-extractor
       '@rushstack/eslint-config':
         specifier: 4.6.5
-        version: 4.6.5(@types/eslint@9.6.1)(eslint@8.57.1)(typescript@4.9.5)
+        version: 4.6.5(eslint@8.57.1)(typescript@4.9.5)
       '@rushstack/eslint-patch':
         specifier: workspace:*
         version: link:../../eslint/eslint-patch
@@ -2988,7 +2988,7 @@ importers:
         version: 7.37.5(eslint@9.37.0)
       eslint-plugin-tsdoc:
         specifier: ~0.5.1
-        version: 0.5.2(@types/eslint@9.6.1)(eslint@9.37.0)(typescript@5.8.2)
+        version: 0.5.2(eslint@9.37.0)(typescript@5.8.2)
     devDependencies:
       '@rushstack/heft':
         specifier: 1.2.25
@@ -4737,7 +4737,7 @@ importers:
         version: 7.59.0(@types/node@20.17.19)
       '@rushstack/eslint-config':
         specifier: 4.6.5
-        version: 4.6.5(@types/eslint@9.6.1)(eslint@9.37.0)(typescript@5.8.2)
+        version: 4.6.5(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/eslint-patch':
         specifier: 1.16.1
         version: 1.16.1
@@ -4749,7 +4749,7 @@ importers:
         version: 1.2.25(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.48
-        version: 2.11.48(@rushstack/heft@1.2.25(@types/node@20.17.19))(@types/eslint@9.6.1)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        version: 2.11.48(@rushstack/heft@1.2.25(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -13267,17 +13267,17 @@ packages:
   eslint-plugin-tsdoc@0.3.0:
     resolution: {integrity: sha512-0MuFdBrrJVBjT/gyhkP2BqpD0np1NxNLfQ38xXDlSs/KVVpKI2A6vN7jx2Rve/CyUsvOsMGwp9KKrinv7q9g3A==}
     peerDependencies:
-      '@types/eslint': '*'
+      eslint: '*'
     peerDependenciesMeta:
-      '@types/eslint':
+      eslint:
         optional: true
 
   eslint-plugin-tsdoc@0.5.2:
     resolution: {integrity: sha512-BlvqjWZdBJDIPO/YU3zcPCF23CvjYT3gyu63yo6b609NNV3D1b6zceAREy2xnweuBoDpZcLNuPyAUq9cvx6bbQ==}
     peerDependencies:
-      '@types/eslint': '*'
+      eslint: '*'
     peerDependenciesMeta:
-      '@types/eslint':
+      eslint:
         optional: true
 
   eslint-scope@4.0.3:
@@ -24573,7 +24573,7 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@rushstack/eslint-config@3.7.1(@types/eslint@9.6.1)(eslint@7.11.0)(typescript@5.8.2)':
+  '@rushstack/eslint-config@3.7.1(eslint@7.11.0)(typescript@5.8.2)':
     dependencies:
       '@rushstack/eslint-patch': 1.10.4
       '@rushstack/eslint-plugin': 0.15.2(eslint@7.11.0)(typescript@5.8.2)
@@ -24586,13 +24586,12 @@ snapshots:
       eslint: 7.11.0
       eslint-plugin-promise: 6.1.1(eslint@7.11.0)
       eslint-plugin-react: 7.33.2(eslint@7.11.0)
-      eslint-plugin-tsdoc: 0.3.0(@types/eslint@9.6.1)
+      eslint-plugin-tsdoc: 0.3.0(eslint@7.11.0)
       typescript: 5.8.2
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
-  '@rushstack/eslint-config@3.7.1(@types/eslint@9.6.1)(eslint@7.30.0)(typescript@5.8.2)':
+  '@rushstack/eslint-config@3.7.1(eslint@7.30.0)(typescript@5.8.2)':
     dependencies:
       '@rushstack/eslint-patch': 1.10.4
       '@rushstack/eslint-plugin': 0.15.2(eslint@7.30.0)(typescript@5.8.2)
@@ -24605,13 +24604,12 @@ snapshots:
       eslint: 7.30.0
       eslint-plugin-promise: 6.1.1(eslint@7.30.0)
       eslint-plugin-react: 7.33.2(eslint@7.30.0)
-      eslint-plugin-tsdoc: 0.3.0(@types/eslint@9.6.1)
+      eslint-plugin-tsdoc: 0.3.0(eslint@7.30.0)
       typescript: 5.8.2
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
-  '@rushstack/eslint-config@3.7.1(@types/eslint@9.6.1)(eslint@7.7.0)(typescript@5.8.2)':
+  '@rushstack/eslint-config@3.7.1(eslint@7.7.0)(typescript@5.8.2)':
     dependencies:
       '@rushstack/eslint-patch': 1.10.4
       '@rushstack/eslint-plugin': 0.15.2(eslint@7.7.0)(typescript@5.8.2)
@@ -24624,13 +24622,12 @@ snapshots:
       eslint: 7.7.0
       eslint-plugin-promise: 6.1.1(eslint@7.7.0)
       eslint-plugin-react: 7.33.2(eslint@7.7.0)
-      eslint-plugin-tsdoc: 0.3.0(@types/eslint@9.6.1)
+      eslint-plugin-tsdoc: 0.3.0(eslint@7.7.0)
       typescript: 5.8.2
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
-  '@rushstack/eslint-config@3.7.1(@types/eslint@9.6.1)(eslint@8.57.1)(typescript@5.8.2)':
+  '@rushstack/eslint-config@3.7.1(eslint@8.57.1)(typescript@5.8.2)':
     dependencies:
       '@rushstack/eslint-patch': 1.10.4
       '@rushstack/eslint-plugin': 0.15.2(eslint@8.57.1)(typescript@5.8.2)
@@ -24643,13 +24640,12 @@ snapshots:
       eslint: 8.57.1
       eslint-plugin-promise: 6.1.1(eslint@8.57.1)
       eslint-plugin-react: 7.33.2(eslint@8.57.1)
-      eslint-plugin-tsdoc: 0.3.0(@types/eslint@9.6.1)
+      eslint-plugin-tsdoc: 0.3.0(eslint@8.57.1)
       typescript: 5.8.2
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
-  '@rushstack/eslint-config@4.6.5(@types/eslint@9.6.1)(eslint@8.57.1)(typescript@4.9.5)':
+  '@rushstack/eslint-config@4.6.5(eslint@8.57.1)(typescript@4.9.5)':
     dependencies:
       '@rushstack/eslint-patch': 1.16.1
       '@rushstack/eslint-plugin': 0.23.3(eslint@8.57.1)(typescript@4.9.5)
@@ -24662,13 +24658,12 @@ snapshots:
       eslint: 8.57.1
       eslint-plugin-promise: 7.2.1(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
-      eslint-plugin-tsdoc: 0.5.2(@types/eslint@9.6.1)(eslint@8.57.1)(typescript@4.9.5)
+      eslint-plugin-tsdoc: 0.5.2(eslint@8.57.1)(typescript@4.9.5)
       typescript: 4.9.5
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
-  '@rushstack/eslint-config@4.6.5(@types/eslint@9.6.1)(eslint@9.37.0)(typescript@5.8.2)':
+  '@rushstack/eslint-config@4.6.5(eslint@9.37.0)(typescript@5.8.2)':
     dependencies:
       '@rushstack/eslint-patch': 1.16.1
       '@rushstack/eslint-plugin': 0.23.3(eslint@9.37.0)(typescript@5.8.2)
@@ -24681,10 +24676,9 @@ snapshots:
       eslint: 9.37.0
       eslint-plugin-promise: 7.2.1(eslint@9.37.0)
       eslint-plugin-react: 7.37.5(eslint@9.37.0)
-      eslint-plugin-tsdoc: 0.5.2(@types/eslint@9.6.1)(eslint@9.37.0)(typescript@5.8.2)
+      eslint-plugin-tsdoc: 0.5.2(eslint@9.37.0)(typescript@5.8.2)
       typescript: 5.8.2
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
   '@rushstack/eslint-patch@1.10.4': {}
@@ -24912,10 +24906,10 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.48(@rushstack/heft@1.2.25(@types/node@20.17.19))(@types/eslint@9.6.1)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.48(@rushstack/heft@1.2.25(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.59.0(@types/node@20.17.19)
-      '@rushstack/eslint-config': 4.6.5(@types/eslint@9.6.1)(eslint@9.37.0)(typescript@5.8.2)
+      '@rushstack/eslint-config': 4.6.5(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.2.25(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.25(@rushstack/heft@1.2.25(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-jest-plugin': 2.0.15(@rushstack/heft@1.2.25(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
@@ -24926,7 +24920,6 @@ snapshots:
       jest-environment-node: 30.3.0
       typescript: 5.8.2
     transitivePeerDependencies:
-      - '@types/eslint'
       - '@types/node'
       - babel-plugin-macros
       - esbuild-register
@@ -30822,34 +30815,53 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-tsdoc@0.3.0(@types/eslint@9.6.1):
+  eslint-plugin-tsdoc@0.3.0(eslint@7.11.0):
     dependencies:
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
     optionalDependencies:
-      '@types/eslint': 9.6.1
+      eslint: 7.11.0
 
-  eslint-plugin-tsdoc@0.5.2(@types/eslint@9.6.1)(eslint@8.57.1)(typescript@4.9.5):
+  eslint-plugin-tsdoc@0.3.0(eslint@7.30.0):
+    dependencies:
+      '@microsoft/tsdoc': 0.15.0
+      '@microsoft/tsdoc-config': 0.17.0
+    optionalDependencies:
+      eslint: 7.30.0
+
+  eslint-plugin-tsdoc@0.3.0(eslint@7.7.0):
+    dependencies:
+      '@microsoft/tsdoc': 0.15.0
+      '@microsoft/tsdoc-config': 0.17.0
+    optionalDependencies:
+      eslint: 7.7.0
+
+  eslint-plugin-tsdoc@0.3.0(eslint@8.57.1):
+    dependencies:
+      '@microsoft/tsdoc': 0.15.0
+      '@microsoft/tsdoc-config': 0.17.0
+    optionalDependencies:
+      eslint: 8.57.1
+
+  eslint-plugin-tsdoc@0.5.2(eslint@8.57.1)(typescript@4.9.5):
     dependencies:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@typescript-eslint/utils': 8.56.1(eslint@8.57.1)(typescript@4.9.5)
     optionalDependencies:
-      '@types/eslint': 9.6.1
+      eslint: 8.57.1
     transitivePeerDependencies:
-      - eslint
       - supports-color
       - typescript
 
-  eslint-plugin-tsdoc@0.5.2(@types/eslint@9.6.1)(eslint@9.37.0)(typescript@5.8.2):
+  eslint-plugin-tsdoc@0.5.2(eslint@9.37.0)(typescript@5.8.2):
     dependencies:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@typescript-eslint/utils': 8.56.1(eslint@9.37.0)(typescript@5.8.2)
     optionalDependencies:
-      '@types/eslint': 9.6.1
+      eslint: 9.37.0
     transitivePeerDependencies:
-      - eslint
       - supports-color
       - typescript
 

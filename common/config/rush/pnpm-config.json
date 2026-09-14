@@ -478,12 +478,12 @@
 
     "eslint-plugin-tsdoc": {
       "peerDependenciesMeta": {
-        "@types/eslint": {
+        "eslint": {
           "optional": true
         }
       },
       "peerDependencies": {
-        "@types/eslint": "*"
+        "eslint": "*"
       }
     },
 

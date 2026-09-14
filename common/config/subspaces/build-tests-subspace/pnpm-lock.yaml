@@ -11,7 +11,7 @@ overrides:
   loader-utils@^2.0.0: 2.0.4
   fast-xml-parser@^5.3.3: 5.3.5
 
-packageExtensionsChecksum: sha256-X4+Xs9WDTMcR0G6ffHhXVwXZEtOoa0Fy3JeVU0aTaUM=
+packageExtensionsChecksum: sha256-oUDDH9n0S+YRKY1TEmsTuFsNCNlmI4mpaLdAtVDhjgY=
 
 pnpmfileChecksum: sha256-E1T7OJ3DLTjpDqf4RdJzK9VDtAxgm4gDEQCLYdHD8nI=
 
@@ -114,7 +114,7 @@ importers:
     devDependencies:
       '@rushstack/eslint-config':
         specifier: file:../../eslint/eslint-config
-        version: file:../../../eslint/eslint-config(@types/eslint@9.6.1)(eslint@9.25.1)(typescript@4.9.5)
+        version: file:../../../eslint/eslint-config(eslint@9.25.1)(typescript@4.9.5)
       '@rushstack/heft':
         specifier: file:../../apps/heft
         version: file:../../../apps/heft(@types/node@20.17.19)
@@ -1971,9 +1971,9 @@ packages:
   eslint-plugin-tsdoc@0.5.2:
     resolution: {integrity: sha512-BlvqjWZdBJDIPO/YU3zcPCF23CvjYT3gyu63yo6b609NNV3D1b6zceAREy2xnweuBoDpZcLNuPyAUq9cvx6bbQ==}
     peerDependencies:
-      '@types/eslint': '*'
+      eslint: '*'
     peerDependenciesMeta:
-      '@types/eslint':
+      eslint:
         optional: true
 
   eslint-scope@5.1.1:
@@ -4712,7 +4712,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/eslint-config@file:../../../eslint/eslint-config(@types/eslint@9.6.1)(eslint@9.25.1)(typescript@4.9.5)':
+  '@rushstack/eslint-config@file:../../../eslint/eslint-config(eslint@9.25.1)(typescript@4.9.5)':
     dependencies:
       '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
       '@rushstack/eslint-plugin': file:../../../eslint/eslint-plugin(eslint@9.25.1)(typescript@4.9.5)
@@ -4725,10 +4725,9 @@ snapshots:
       eslint: 9.25.1
       eslint-plugin-promise: 7.2.1(eslint@9.25.1)
       eslint-plugin-react: 7.37.5(eslint@9.25.1)
-      eslint-plugin-tsdoc: 0.5.2(@types/eslint@9.6.1)(eslint@9.25.1)(typescript@4.9.5)
+      eslint-plugin-tsdoc: 0.5.2(eslint@9.25.1)(typescript@4.9.5)
       typescript: 4.9.5
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
   '@rushstack/eslint-config@file:../../../eslint/eslint-config(eslint@9.37.0)(typescript@5.8.3)':
@@ -4747,7 +4746,6 @@ snapshots:
       eslint-plugin-tsdoc: 0.5.2(eslint@9.37.0)(typescript@5.8.3)
       typescript: 5.8.3
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
   '@rushstack/eslint-patch@file:../../../eslint/eslint-patch': {}
@@ -4869,7 +4867,6 @@ snapshots:
       jest-environment-node: 30.3.0
       typescript: 5.8.3
     transitivePeerDependencies:
-      - '@types/eslint'
       - '@types/node'
       - babel-plugin-macros
       - esbuild-register
@@ -6216,15 +6213,14 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-tsdoc@0.5.2(@types/eslint@9.6.1)(eslint@9.25.1)(typescript@4.9.5):
+  eslint-plugin-tsdoc@0.5.2(eslint@9.25.1)(typescript@4.9.5):
     dependencies:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@typescript-eslint/utils': 8.56.1(eslint@9.25.1)(typescript@4.9.5)
     optionalDependencies:
-      '@types/eslint': 9.6.1
+      eslint: 9.25.1
     transitivePeerDependencies:
-      - eslint
       - supports-color
       - typescript
 
@@ -6233,8 +6229,9 @@ snapshots:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@typescript-eslint/utils': 8.56.1(eslint@9.37.0)(typescript@5.8.3)
+    optionalDependencies:
+      eslint: 9.37.0
     transitivePeerDependencies:
-      - eslint
       - supports-color
       - typescript
 
@@ -7243,7 +7240,6 @@ snapshots:
       eslint-plugin-react-hooks: 5.2.0(eslint@9.37.0)
       typescript: 5.8.3
     transitivePeerDependencies:
-      - '@types/eslint'
       - supports-color
 
   local-node-rig@file:../../../rigs/local-node-rig:
@@ -7259,7 +7255,6 @@ snapshots:
       local-eslint-config: file:../../../eslint/local-eslint-config(eslint@9.37.0)(typescript@5.8.3)
       typescript: 5.8.3
     transitivePeerDependencies:
-      - '@types/eslint'
       - babel-plugin-macros
       - esbuild-register
       - jest-environment-jsdom
