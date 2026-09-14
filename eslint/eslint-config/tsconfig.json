@@ -2,6 +2,12 @@
   "extends": "./node_modules/decoupled-local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
+    // The rig's base config uses "module": "commonjs", which implies the legacy "node" module resolution.
+    // That resolution mode ignores the "exports" maps in dependencies' package.json files, so imports that are
+    // only reachable through an "exports" subpath (for example `eslint/config`, which provides `globalIgnores`,
+    // and various `@typescript-eslint/*` entry points) fail to resolve. "Node16" switches to Node16 module
+    // resolution, which honors "exports" maps. It still emits CommonJS here because this package's package.json
+    // has no "type": "module", so the require()-compatible output is preserved.
     "module": "Node16"
   }
 }
