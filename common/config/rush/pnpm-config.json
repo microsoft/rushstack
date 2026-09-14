@@ -476,6 +476,17 @@
       }
     },
 
+    "eslint-plugin-tsdoc": {
+      "peerDependenciesMeta": {
+        "@types/eslint": {
+          "optional": true
+        }
+      },
+      "peerDependencies": {
+        "@types/eslint": "*"
+      }
+    },
+
     "query-ast": {
       "dependencies": {
         "lodash": "~4.17.15"
