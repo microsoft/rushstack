@@ -1,6 +1,31 @@
 # Change Log - @rushstack/rush-reporter
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+
+## 0.3.0
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Minor changes
+
+- Extend OperationStreamEmitter with silent registration metadata, previous status, stream-close, and operation-completion events.
+- Render phase-aware compact progress and grouped plaintext full logs from the canonical operation stream.
+- Add bidirectional Heft child negotiation, parent-owned rendering context, bounded structured output, and streaming problem matcher recovery.
+
+### Patches
+
+- Add the opt-in reporter guide covering built-in renderers, full logs, privacy, and rollout safety.
+- Add a stable structured diagnostic code for Rush command failures.
+- Preserve ordered legacy fallback output when a bootstrap handoff protocol is incompatible.
+- Prevent non-public reporter events from contributing unvalidated or unbounded values to telemetry aggregates, protect parent-owned producer and protocol metadata, and preserve the original five-field performance budget contract.
+- Correlate diagnostics using weak metadata instead of mutating potentially frozen or non-extensible errors.
+- Reject negotiated Heft diagnostics that forge registered categories or template keys or supply invalid one-based source coordinates, while preserving optional diagnostic fields and severity overrides.
+- Preserve readable tool, compiler code, source location, and message details in human diagnostic output while redacting secret values.
+- Honor the pass-through separator when distinguishing command JSON from reporter JSON controls.
+- Prevent human diagnostic source labels, lower-classified parameters, and forwarded Heft diagnostics from redisplaying explicitly secret parameter values.
+- Show bounded interactive errors immediately and warnings once per watch cycle, and preserve grouped output across short writes without overstating log completeness.
+- Bound individual telemetry diagnostic codes without truncation and exclude secret diagnostic codes and categories from aggregates.
+- Dispose attempted reporter initialization safely and bound owned abandoned bootstrap handoffs by age and session count.
+- Share once-only reporter close operations and serialized lifecycle ordering across manager shutdown and initialization disposal, including failed closes and lifecycle errors.
 
 ## 0.2.0
 Sat, 05 Sep 2026 00:15:08 GMT

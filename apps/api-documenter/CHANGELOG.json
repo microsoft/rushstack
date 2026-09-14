@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.30.15",
+      "tag": "@microsoft/api-documenter_v7.30.15",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.14",
       "tag": "@microsoft/api-documenter_v7.30.14",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",
