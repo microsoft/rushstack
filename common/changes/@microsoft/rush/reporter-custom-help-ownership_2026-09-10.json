@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve command-declared output and log-level parameters on repository-opted-in help, even when their values resemble valid reporter controls.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

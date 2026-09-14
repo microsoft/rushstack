@@ -12,11 +12,6 @@
     },
     {
       "file": "src/DeferredWatchFileSystem.ts",
-      "scopeId": ".DeferredWatchFileSystem._purge",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/DeferredWatchFileSystem.ts",
       "scopeId": ".DeferredWatchFileSystem.flush",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -29,6 +24,11 @@
       "file": "src/DeferredWatchFileSystem.ts",
       "scopeId": ".DeferredWatchFileSystem.flush",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.purge",
+      "rule": "complexity"
     },
     {
       "file": "src/DeferredWatchFileSystem.ts",
@@ -67,92 +67,87 @@
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._getWebpackConfigurationAsync",
+      "scopeId": ".Webpack5Plugin.apply",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._getWebpackConfigurationAsync",
+      "scopeId": ".Webpack5Plugin.getWebpackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack5Plugin.ts",
+      "scopeId": ".Webpack5Plugin.getWebpackConfigurationAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._getWebpackConfigurationAsync",
+      "scopeId": ".Webpack5Plugin.getWebpackConfigurationAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._normalizeError",
+      "scopeId": ".Webpack5Plugin.normalizeError",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._normalizeError",
+      "scopeId": ".Webpack5Plugin.normalizeError",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._normalizeError",
+      "scopeId": ".Webpack5Plugin.normalizeError",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._recordErrors",
+      "scopeId": ".Webpack5Plugin.recordErrors",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._recordErrors",
+      "scopeId": ".Webpack5Plugin.recordErrors",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._recordErrors",
+      "scopeId": ".Webpack5Plugin.recordErrors",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackAsync",
+      "scopeId": ".Webpack5Plugin.runWebpackAsync",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackAsync",
+      "scopeId": ".Webpack5Plugin.runWebpackAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack5Plugin.runWebpackWatchAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack5Plugin.runWebpackWatchAsync",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack5Plugin.runWebpackWatchAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack5Plugin.runWebpackWatchAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin._runWebpackWatchAsync.defaultDevServerOptions.onListening",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin.accessor",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Webpack5Plugin.ts",
-      "scopeId": ".Webpack5Plugin.apply",
+      "scopeId": ".Webpack5Plugin.runWebpackWatchAsync.defaultDevServerOptions.onListening",
       "rule": "complexity"
     },
     {

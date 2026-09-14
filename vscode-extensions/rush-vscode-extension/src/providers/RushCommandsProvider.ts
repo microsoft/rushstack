@@ -28,22 +28,22 @@ class RushCommand extends vscode.TreeItem {
 }
 
 export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand> {
-  private _context: vscode.ExtensionContext;
-  private _commandLineActions: CommandLineAction[] | undefined;
-  private readonly _onDidChangeTreeData: vscode.EventEmitter<RushCommand | undefined> =
+  #context: vscode.ExtensionContext;
+  #commandLineActions: CommandLineAction[] | undefined;
+  readonly #onDidChangeTreeData: vscode.EventEmitter<RushCommand | undefined> =
     new vscode.EventEmitter();
 
   public readonly onDidChangeTreeData: vscode.Event<RushCommand | undefined> =
-    this._onDidChangeTreeData.event;
+    this.#onDidChangeTreeData.event;
 
   public constructor(context: vscode.ExtensionContext) {
-    this._context = context;
+    this.#context = context;
     const rushWorkspace: RushWorkspace = RushWorkspace.getCurrentInstance();
     RushWorkspace.onDidChangeWorkspace((newWorkspace: RushWorkspace) => {
-      this._commandLineActions = newWorkspace.commandLineActions;
+      this.#commandLineActions = newWorkspace.commandLineActions;
       this.refresh();
     });
-    this._commandLineActions = rushWorkspace.commandLineActions;
+    this.#commandLineActions = rushWorkspace.commandLineActions;
 
     const commandNames: readonly ['openParameterViewPanel', 'runRushCommand'] = [
       'openParameterViewPanel',
@@ -63,7 +63,7 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
 
   public refresh(): void {
     terminal.writeDebugLine('Refreshing Rush commands');
-    this._onDidChangeTreeData.fire(undefined);
+    this.#onDidChangeTreeData.fire(undefined);
   }
 
   public async refreshEntryAsync(): Promise<void> {
@@ -114,10 +114,10 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
 
   public getChildren(element?: vscode.TreeItem): Thenable<RushCommand[]> {
     // eslint-disable-next-line no-console
-    console.log('children: ', this._commandLineActions);
+    console.log('children: ', this.#commandLineActions);
     // eslint-disable-next-line no-console
     console.log('element: ', element);
-    if (!this._commandLineActions) {
+    if (!this.#commandLineActions) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showInformationMessage('No RushProjects in empty workspace');
       return Promise.resolve([]);

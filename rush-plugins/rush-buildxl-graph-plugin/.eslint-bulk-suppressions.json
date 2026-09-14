@@ -37,32 +37,32 @@
     },
     {
       "file": "src/GraphProcessor.ts",
-      "scopeId": ".GraphProcessor._operationAsHashedEntry",
+      "scopeId": ".GraphProcessor.operationAsHashedEntry",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/GraphProcessor.ts",
-      "scopeId": ".GraphProcessor._operationAsHashedEntry",
+      "scopeId": ".GraphProcessor.operationAsHashedEntry",
       "rule": "complexity"
     },
     {
       "file": "src/GraphProcessor.ts",
-      "scopeId": ".GraphProcessor._operationAsHashedEntry",
+      "scopeId": ".GraphProcessor.operationAsHashedEntry",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/GraphProcessor.ts",
-      "scopeId": ".GraphProcessor._pruneNoOps",
+      "scopeId": ".GraphProcessor.pruneNoOps",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/GraphProcessor.ts",
-      "scopeId": ".GraphProcessor._pruneNoOps.getNonEmptyDependencies",
+      "scopeId": ".GraphProcessor.pruneNoOps.getNonEmptyDependencies",
       "rule": "complexity"
     },
     {
       "file": "src/GraphProcessor.ts",
-      "scopeId": ".GraphProcessor._pruneNoOps.getNonEmptyDependencies",
+      "scopeId": ".GraphProcessor.pruneNoOps.getNonEmptyDependencies",
       "rule": "max-depth"
     },
     {

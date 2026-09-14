@@ -24,6 +24,10 @@ parameters:
     type: boolean
   - name: CommitShaOverride
     type: string
+  # Allows a packaging run to be replayed when a previous release artifact was incomplete.
+  - name: BumpPipelineRunIdOverride
+    type: number
+    default: 0
 
 stages:
   - stage: Prepare${{ parameters.StageNameSuffix }}
@@ -60,13 +64,23 @@ stages:
             displayName: 'Initialize artifact staging directories'
             condition: always()
 
-          - template: /common/config/azure-pipelines/templates/find-bump-pipeline-run.yaml@self
-            parameters:
-              PipelineId: ${{ parameters.BumpPipelineId }}
-              CommitSha: ${{ coalesce(parameters.CommitShaOverride, '$(Build.SourceVersion)') }}
-              TeamProject: ${{ parameters.BumpPipelineProject }}
-              Name: FindBumpRun
-              WorkingDirectory: $(Build.SourcesDirectory)
+          - ${{ if gt(parameters.BumpPipelineRunIdOverride, 0) }}:
+              - bash: |
+                  echo "Using bump pipeline run override ${{ parameters.BumpPipelineRunIdOverride }}"
+                  echo "##vso[task.setvariable variable=IsVersionBumpMerge;isOutput=true]true"
+                  echo "##vso[task.setvariable variable=BumpPipelineDefinitionId;isOutput=true]${{ parameters.BumpPipelineId }}"
+                  echo "##vso[task.setvariable variable=BumpPipelineRunId;isOutput=true]${{ parameters.BumpPipelineRunIdOverride }}"
+                name: FindBumpRun
+                displayName: 'Use Bump Pipeline Run Override'
+
+          - ${{ else }}:
+              - template: /common/config/azure-pipelines/templates/find-bump-pipeline-run.yaml@self
+                parameters:
+                  PipelineId: ${{ parameters.BumpPipelineId }}
+                  CommitSha: ${{ coalesce(parameters.CommitShaOverride, '$(Build.SourceVersion)') }}
+                  TeamProject: ${{ parameters.BumpPipelineProject }}
+                  Name: FindBumpRun
+                  WorkingDirectory: $(Build.SourcesDirectory)
 
           - task: DownloadPipelineArtifact@2
             condition: eq(variables['FindBumpRun.IsVersionBumpMerge'], 'true')

@@ -217,16 +217,16 @@ function _resolveTsdocMetadataPathFromPackageJson(
 export class PackageMetadataManager {
   public static tsdocMetadataFilename: string = TSDOC_METADATA_FILENAME;
 
-  private readonly _packageJsonLookup: PackageJsonLookup;
-  private readonly _messageRouter: MessageRouter;
-  private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata> = new Map<
+  readonly #packageJsonLookup: PackageJsonLookup;
+  readonly #messageRouter: MessageRouter;
+  readonly #packageMetadataByPackageJsonPath: Map<string, PackageMetadata> = new Map<
     string,
     PackageMetadata
   >();
 
   public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
-    this._packageJsonLookup = packageJsonLookup;
-    this._messageRouter = messageRouter;
+    this.#packageJsonLookup = packageJsonLookup;
+    this.#messageRouter = messageRouter;
   }
 
   /**
@@ -278,15 +278,15 @@ export class PackageMetadataManager {
    */
   public tryFetchPackageMetadata(sourceFilePath: string): PackageMetadata | undefined {
     const packageJsonFilePath: string | undefined =
-      this._packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
+      this.#packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
     if (!packageJsonFilePath) {
       return undefined;
     }
     let packageMetadata: PackageMetadata | undefined =
-      this._packageMetadataByPackageJsonPath.get(packageJsonFilePath);
+      this.#packageMetadataByPackageJsonPath.get(packageJsonFilePath);
 
     if (!packageMetadata) {
-      const packageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(packageJsonFilePath);
+      const packageJson: INodePackageJson = this.#packageJsonLookup.loadNodePackageJson(packageJsonFilePath);
 
       const packageJsonFolder: string = path.dirname(packageJsonFilePath);
 
@@ -298,7 +298,7 @@ export class PackageMetadataManager {
       );
 
       if (FileSystem.exists(tsdocMetadataPath)) {
-        this._messageRouter.logVerbose(
+        this.#messageRouter.logVerbose(
           ConsoleMessageId.FoundTSDocMetadata,
           'Found metadata in ' + tsdocMetadataPath
         );
@@ -307,7 +307,7 @@ export class PackageMetadataManager {
       }
 
       packageMetadata = new PackageMetadata(packageJsonFilePath, packageJson, aedocSupported);
-      this._packageMetadataByPackageJsonPath.set(packageJsonFilePath, packageMetadata);
+      this.#packageMetadataByPackageJsonPath.set(packageJsonFilePath, packageMetadata);
     }
 
     return packageMetadata;

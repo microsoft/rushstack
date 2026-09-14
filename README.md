@@ -14,7 +14,7 @@ for large scale TypeScript monorepos.
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
 
 <table><tr><td>
-<a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" /> Open in VS Code web view</a>
+<a href="https://vscode.dev/github/microsoft/rushstack"><img src="https://vscode.dev/static/stable/favicon.ico" width="14px" /> Open in VS Code web view</a>
 </td></tr></table>
 
 ## Documentation Links

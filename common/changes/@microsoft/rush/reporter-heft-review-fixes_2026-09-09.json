@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fail corrupted negotiated Heft reporter streams while preserving genuine raw fallback, and validate the demo's intentional Windows fallback.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

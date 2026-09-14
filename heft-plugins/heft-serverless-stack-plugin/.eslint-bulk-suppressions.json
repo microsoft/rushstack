@@ -22,22 +22,22 @@
     },
     {
       "file": "src/ServerlessStackPlugin.ts",
-      "scopeId": ".ServerlessStackPlugin._runServerlessStackAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/ServerlessStackPlugin.ts",
-      "scopeId": ".ServerlessStackPlugin._runServerlessStackAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/ServerlessStackPlugin.ts",
-      "scopeId": ".ServerlessStackPlugin._runServerlessStackAsync",
+      "scopeId": ".ServerlessStackPlugin.apply",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/ServerlessStackPlugin.ts",
-      "scopeId": ".ServerlessStackPlugin.apply",
+      "scopeId": ".ServerlessStackPlugin.runServerlessStackAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".ServerlessStackPlugin.runServerlessStackAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ServerlessStackPlugin.ts",
+      "scopeId": ".ServerlessStackPlugin.runServerlessStackAsync",
       "rule": "max-lines-per-function"
     }
   ]

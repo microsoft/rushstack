@@ -12,12 +12,12 @@
     },
     {
       "file": "src/RushStackFeature.ts",
-      "scopeId": ".RushStackFeature._buildNavigation",
+      "scopeId": ".RushStackFeature.buildNavigation",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/RushStackFeature.ts",
-      "scopeId": ".RushStackFeature._buildNavigation",
+      "scopeId": ".RushStackFeature.buildNavigation",
       "rule": "complexity"
     }
   ]

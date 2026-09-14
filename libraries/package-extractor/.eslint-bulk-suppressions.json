@@ -32,13 +32,13 @@
     },
     {
       "file": "src/AssetHandler.ts",
-      "scopeId": ".AssetHandler._extractSymlinkAsync",
-      "rule": "max-lines-per-function"
+      "scopeId": ".AssetHandler.constructor",
+      "rule": "complexity"
     },
     {
       "file": "src/AssetHandler.ts",
-      "scopeId": ".AssetHandler.constructor",
-      "rule": "complexity"
+      "scopeId": ".AssetHandler.extractSymlinkAsync",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/AssetHandler.ts",
@@ -82,102 +82,102 @@
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "scopeId": ".PackageExtractor.applyDependencyFilters",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "scopeId": ".PackageExtractor.applyDependencyFilters",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "scopeId": ".PackageExtractor.applyDependencyFilters",
       "rule": "max-depth"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._applyDependencyFilters",
+      "scopeId": ".PackageExtractor.applyDependencyFilters",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._collectFoldersAsync",
+      "scopeId": ".PackageExtractor.collectFoldersAsync",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._collectFoldersAsync",
+      "scopeId": ".PackageExtractor.collectFoldersAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._extractFolderAsync",
+      "scopeId": ".PackageExtractor.extractAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor.extractAsync",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._extractFolderAsync",
+      "scopeId": ".PackageExtractor.extractAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._extractFolderAsync.isFileExcluded",
+      "scopeId": ".PackageExtractor.extractFolderAsync",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._extractFolderAsync.isFileExcluded",
+      "scopeId": ".PackageExtractor.extractFolderAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._extractFolderAsync.isFileExcluded.excludeFileByPatterns",
+      "scopeId": ".PackageExtractor.extractFolderAsync.isFileExcluded",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._performExtractionAsync",
+      "scopeId": ".PackageExtractor.extractFolderAsync.isFileExcluded",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor.extractFolderAsync.isFileExcluded.excludeFileByPatterns",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._performExtractionAsync",
+      "scopeId": ".PackageExtractor.performExtractionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PackageExtractor.ts",
+      "scopeId": ".PackageExtractor.performExtractionAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._performExtractionAsync",
+      "scopeId": ".PackageExtractor.performExtractionAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._writeExtractorMetadataAsync",
+      "scopeId": ".PackageExtractor.writeExtractorMetadataAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._writeExtractorMetadataAsync",
+      "scopeId": ".PackageExtractor.writeExtractorMetadataAsync",
       "rule": "complexity"
     },
     {
       "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor._writeExtractorMetadataAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor.extractAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor.extractAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/PackageExtractor.ts",
-      "scopeId": ".PackageExtractor.extractAsync",
+      "scopeId": ".PackageExtractor.writeExtractorMetadataAsync",
       "rule": "max-lines-per-function"
     },
     {

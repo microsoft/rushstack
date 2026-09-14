@@ -86,4 +86,26 @@ describe('LegacyErrorBridge', () => {
     bridge.recordEmittedDiagnostic('diag_2');
     expect(bridge.shouldSuppressRendering(sentinel)).toBe(true);
   });
+
+  it.each([Object.freeze, Object.seal, Object.preventExtensions])(
+    'correlates an immutable error without modifying its identity, cause, or properties (%p)',
+    (restrict) => {
+      const cause: Error = new Error('original cause');
+      const error: Error = new Error('original failure', { cause });
+      restrict(error);
+      const descriptors: PropertyDescriptorMap = Object.getOwnPropertyDescriptors(error);
+      const bridge: LegacyErrorBridge = new LegacyErrorBridge();
+      const otherBridge: LegacyErrorBridge = new LegacyErrorBridge();
+
+      bridge.correlate(error, 'immutable-error');
+
+      expect(Object.getOwnPropertyDescriptors(error)).toEqual(descriptors);
+      expect(error.cause).toBe(cause);
+      expect(otherBridge.getCorrelatedDiagnosticId(error)).toBe('immutable-error');
+      expect(otherBridge.shouldSuppressRendering(error)).toBe(false);
+      otherBridge.recordEmittedDiagnostic('immutable-error');
+      expect(otherBridge.shouldSuppressRendering(error)).toBe(true);
+      expect(otherBridge.shouldSuppressRendering(new Error(error.message, { cause }))).toBe(false);
+    }
+  );
 });

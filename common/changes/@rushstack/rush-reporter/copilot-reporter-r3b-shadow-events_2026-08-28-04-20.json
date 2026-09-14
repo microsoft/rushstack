@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Add a stable structured diagnostic code for Rush command failures.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

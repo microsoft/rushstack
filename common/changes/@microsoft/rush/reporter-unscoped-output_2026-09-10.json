@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve unscoped and command-scoped external output in the primary reporter while operation output remains owned by the legacy collator.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

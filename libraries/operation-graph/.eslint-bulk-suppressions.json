@@ -17,36 +17,6 @@
     },
     {
       "file": "src/Operation.ts",
-      "scopeId": ".Operation._executeAsync",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Operation.ts",
-      "scopeId": ".Operation._executeInnerAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/Operation.ts",
-      "scopeId": ".Operation._executeInnerAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/Operation.ts",
-      "scopeId": ".Operation._executeInnerAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/Operation.ts",
-      "scopeId": ".Operation._executeInnerAsync.innerContext",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/Operation.ts",
-      "scopeId": ".Operation._executeInnerAsync.innerContext",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/Operation.ts",
       "scopeId": ".Operation.constructor",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -54,6 +24,31 @@
       "file": "src/Operation.ts",
       "scopeId": ".Operation.constructor",
       "rule": "complexity"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.executeInnerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.executeInnerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.executeInnerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.executeInnerAsync.innerContext",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Operation.ts",
+      "scopeId": ".Operation.executeInnerAsync.innerContext",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/Operation.ts",
@@ -147,11 +142,6 @@
     },
     {
       "file": "src/Stopwatch.ts",
-      "scopeId": ".Stopwatch.duration",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Stopwatch.ts",
       "scopeId": ".Stopwatch.toString",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -189,11 +179,6 @@
       "file": "src/WorkQueue.ts",
       "scopeId": ".WorkQueue",
       "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/WorkQueue.ts",
-      "scopeId": ".WorkQueue._resolvePushDebounced",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/calculateCriticalPath.ts",

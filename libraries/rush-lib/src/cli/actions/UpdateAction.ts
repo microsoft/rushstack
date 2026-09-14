@@ -12,8 +12,8 @@ import type { Subspace } from '../../api/Subspace';
 import { getVariantAsync } from '../../api/Variants';
 
 export class UpdateAction extends BaseInstallAction {
-  private readonly _fullParameter: CommandLineFlagParameter;
-  private readonly _recheckParameter: CommandLineFlagParameter;
+  readonly #fullParameter: CommandLineFlagParameter;
+  readonly #recheckParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -50,7 +50,7 @@ export class UpdateAction extends BaseInstallAction {
       });
     }
 
-    this._fullParameter = this.defineFlagParameter({
+    this.#fullParameter = this.defineFlagParameter({
       parameterLongName: '--full',
       description:
         'Normally "rush update" tries to preserve your existing installed versions' +
@@ -60,7 +60,7 @@ export class UpdateAction extends BaseInstallAction {
         ' to the latest SemVer-compatible version.  This should be done periodically by a person' +
         ' or robot whose role is to deal with potential upgrade regressions.'
     });
-    this._recheckParameter = this.defineFlagParameter({
+    this.#recheckParameter = this.defineFlagParameter({
       parameterLongName: '--recheck',
       description:
         'If the shrinkwrap file appears to already satisfy the package.json files,' +
@@ -98,8 +98,8 @@ export class UpdateAction extends BaseInstallAction {
       bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
-      fullUpgrade: this._fullParameter.value!,
-      recheckShrinkwrap: this._recheckParameter.value!,
+      fullUpgrade: this.#fullParameter.value!,
+      recheckShrinkwrap: this.#recheckParameter.value!,
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,

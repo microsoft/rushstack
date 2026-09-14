@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Correlate diagnostics using weak metadata instead of mutating potentially frozen or non-extensible errors.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

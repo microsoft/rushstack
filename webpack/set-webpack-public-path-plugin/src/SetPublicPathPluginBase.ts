@@ -10,10 +10,10 @@ import { PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-libra
  * @public
  */
 export abstract class SetPublicPathPluginBase implements webpack.WebpackPluginInstance {
-  private readonly _pluginName: string;
+  readonly #pluginName: string;
 
   public constructor(pluginName: string) {
-    this._pluginName = pluginName;
+    this.#pluginName = pluginName;
   }
 
   public apply(compiler: webpack.Compiler): void {
@@ -30,7 +30,7 @@ export abstract class SetPublicPathPluginBase implements webpack.WebpackPluginIn
     const initialOutputPublicPathSetting: typeof compiler.options.output.publicPath =
       compiler.options.output.publicPath;
 
-    compiler.hooks.thisCompilation.tap(this._pluginName, (compilation: webpack.Compilation) => {
+    compiler.hooks.thisCompilation.tap(this.#pluginName, (compilation: webpack.Compilation) => {
       if (initialOutputPublicPathSetting) {
         compilation.warnings.push(
           new compiler.webpack.WebpackError(
@@ -41,7 +41,7 @@ export abstract class SetPublicPathPluginBase implements webpack.WebpackPluginIn
         );
       } else {
         compilation.hooks.runtimeRequirementInTree.for(thisWebpack.RuntimeGlobals.publicPath).intercept({
-          name: this._pluginName,
+          name: this.#pluginName,
           register: (tap) => {
             if (tap.name === 'RuntimePlugin') {
               // Disable the default public path runtime plugin

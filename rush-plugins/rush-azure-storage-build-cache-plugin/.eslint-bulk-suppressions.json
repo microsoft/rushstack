@@ -12,7 +12,7 @@
     },
     {
       "file": "src/AdoCodespacesAuthCredential.ts",
-      "scopeId": ".AdoCodespacesAuthCredential._decodeToken",
+      "scopeId": ".AdoCodespacesAuthCredential.decodeToken",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
@@ -47,18 +47,18 @@
     },
     {
       "file": "src/AzureAuthenticationBase.ts",
-      "scopeId": ".AzureAuthenticationBase._getCredentialAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/AzureAuthenticationBase.ts",
-      "scopeId": ".AzureAuthenticationBase._getCredentialAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/AzureAuthenticationBase.ts",
       "scopeId": ".AzureAuthenticationBase.constructor",
       "rule": "complexity"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.getCredentialAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureAuthenticationBase.ts",
+      "scopeId": ".AzureAuthenticationBase.getCredentialAsync",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/AzureAuthenticationBase.ts",
@@ -117,37 +117,37 @@
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._getContainerClientAsync",
+      "scopeId": ".AzureStorageBuildCacheProvider.getContainerClientAsync",
       "rule": "complexity"
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._getContainerClientAsync",
+      "scopeId": ".AzureStorageBuildCacheProvider.getContainerClientAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._logBlobError",
+      "scopeId": ".AzureStorageBuildCacheProvider.logBlobError",
       "rule": "complexity"
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._logBlobError",
+      "scopeId": ".AzureStorageBuildCacheProvider.logBlobError",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._trySetBlobDataAsync",
+      "scopeId": ".AzureStorageBuildCacheProvider.trySetBlobDataAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._trySetBlobDataAsync",
+      "scopeId": ".AzureStorageBuildCacheProvider.trySetBlobDataAsync",
       "rule": "complexity"
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
-      "scopeId": ".AzureStorageBuildCacheProvider._trySetBlobDataAsync",
+      "scopeId": ".AzureStorageBuildCacheProvider.trySetBlobDataAsync",
       "rule": "max-lines-per-function"
     },
     {

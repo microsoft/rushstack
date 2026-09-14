@@ -17,11 +17,6 @@
     },
     {
       "file": "src/CredentialCache.ts",
-      "scopeId": ".CredentialCache._validate",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/CredentialCache.ts",
       "scopeId": ".CredentialCache.constructor",
       "rule": "complexity"
     },
@@ -48,6 +43,11 @@
     {
       "file": "src/CredentialCache.ts",
       "scopeId": ".CredentialCache.setCacheEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".CredentialCache.validate",
       "rule": "complexity"
     },
     {

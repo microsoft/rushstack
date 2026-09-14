@@ -18,6 +18,7 @@
     "start": "node lib/start",
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

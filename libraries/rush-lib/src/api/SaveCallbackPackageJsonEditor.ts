@@ -12,12 +12,12 @@ export interface IFromObjectOptions {
 }
 
 export class SaveCallbackPackageJsonEditor extends PackageJsonEditor {
-  private readonly _onSaved: ((newObject: IPackageJson) => void) | undefined;
+  readonly #onSaved: ((newObject: IPackageJson) => void) | undefined;
 
   private constructor(options: IFromObjectOptions) {
     super(options.filename, options.object);
 
-    this._onSaved = options.onSaved;
+    this.#onSaved = options.onSaved;
   }
 
   public static fromObjectWithCallback(options: IFromObjectOptions): SaveCallbackPackageJsonEditor {
@@ -26,8 +26,8 @@ export class SaveCallbackPackageJsonEditor extends PackageJsonEditor {
 
   public override async saveIfModifiedAsync(): Promise<boolean> {
     const modified: boolean = await super.saveIfModifiedAsync();
-    if (this._onSaved) {
-      this._onSaved(this.saveToObject());
+    if (this.#onSaved) {
+      this.#onSaved(this.saveToObject());
     }
 
     return modified;

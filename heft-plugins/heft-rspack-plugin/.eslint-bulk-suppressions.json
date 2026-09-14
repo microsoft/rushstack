@@ -12,11 +12,6 @@
     },
     {
       "file": "src/DeferredWatchFileSystem.ts",
-      "scopeId": ".DeferredWatchFileSystem._purge",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/DeferredWatchFileSystem.ts",
       "scopeId": ".DeferredWatchFileSystem.flush",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -29,6 +24,11 @@
       "file": "src/DeferredWatchFileSystem.ts",
       "scopeId": ".DeferredWatchFileSystem.flush",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeferredWatchFileSystem.ts",
+      "scopeId": ".DeferredWatchFileSystem.purge",
+      "rule": "complexity"
     },
     {
       "file": "src/DeferredWatchFileSystem.ts",
@@ -102,92 +102,87 @@
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._getRspackConfigurationAsync",
+      "scopeId": ".RspackPlugin.apply",
       "rule": "complexity"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._getRspackConfigurationAsync",
+      "scopeId": ".RspackPlugin.getRspackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RspackPlugin.ts",
+      "scopeId": ".RspackPlugin.getRspackConfigurationAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._getRspackConfigurationAsync",
+      "scopeId": ".RspackPlugin.getRspackConfigurationAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._normalizeError",
+      "scopeId": ".RspackPlugin.normalizeError",
       "rule": "complexity"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._normalizeError",
+      "scopeId": ".RspackPlugin.normalizeError",
       "rule": "max-depth"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._normalizeError",
+      "scopeId": ".RspackPlugin.normalizeError",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._recordErrors",
+      "scopeId": ".RspackPlugin.recordErrors",
       "rule": "complexity"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._recordErrors",
+      "scopeId": ".RspackPlugin.recordErrors",
       "rule": "max-depth"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._recordErrors",
+      "scopeId": ".RspackPlugin.recordErrors",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackAsync",
+      "scopeId": ".RspackPlugin.runRspackAsync",
       "rule": "complexity"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackAsync",
+      "scopeId": ".RspackPlugin.runRspackAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "scopeId": ".RspackPlugin.runRspackWatchAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "scopeId": ".RspackPlugin.runRspackWatchAsync",
       "rule": "complexity"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "scopeId": ".RspackPlugin.runRspackWatchAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackWatchAsync",
+      "scopeId": ".RspackPlugin.runRspackWatchAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin._runRspackWatchAsync.defaultDevServerOptions.onListening",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin.accessor",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/RspackPlugin.ts",
-      "scopeId": ".RspackPlugin.apply",
+      "scopeId": ".RspackPlugin.runRspackWatchAsync.defaultDevServerOptions.onListening",
       "rule": "complexity"
     },
     {

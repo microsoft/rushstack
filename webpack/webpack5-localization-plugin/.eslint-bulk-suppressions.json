@@ -147,36 +147,6 @@
     },
     {
       "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._addLocFileAndGetPlaceholders",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._addLocFileAndGetPlaceholders",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
       "scopeId": ".LocalizationPlugin.addDefaultLocFileAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -193,6 +163,16 @@
     {
       "file": "src/LocalizationPlugin.ts",
       "scopeId": ".LocalizationPlugin.addDefaultLocFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addLocFileAndGetPlaceholders",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addLocFileAndGetPlaceholders",
       "rule": "max-lines-per-function"
     },
     {
@@ -219,6 +199,26 @@
       "file": "src/LocalizationPlugin.ts",
       "scopeId": ".LocalizationPlugin.apply.chunkMapping",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/LocalizationPlugin.ts",

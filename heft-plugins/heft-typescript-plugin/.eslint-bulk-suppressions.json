@@ -52,121 +52,6 @@
     },
     {
       "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._addModuleKindToEmit",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._addModuleKindToEmit",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._addModuleKindToEmit",
-      "rule": "max-params"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._changeCompilerHostToUseCache",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._changeCompilerHostToUseCache.getSourceFile",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._emitModulePackageJsonFiles",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._emitModulePackageJsonFiles",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getAdjustedDiagnosticCategory",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getCreateBuilderProgram",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getCreateBuilderProgram.createMultiEmitBuilderProgram",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getCreateBuilderProgram.createMultiEmitBuilderProgram",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getCreateBuilderProgram.createMultiEmitBuilderProgram",
-      "rule": "max-params"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getCreateBuilderProgram.createMultiEmitBuilderProgram.emit",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._getCreateBuilderProgram.createMultiEmitBuilderProgram.emit",
-      "rule": "max-params"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._logDiagnostics",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._logDiagnostics",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._logDiagnostics",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._parseModuleKind",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._printDiagnosticMessage",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._printDiagnosticMessage",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._printDiagnosticMessage",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._queueTranspileInWorker",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._queueTranspileInWorker",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
       "scopeId": ".TypeScriptBuilder._runBuildAsync",
       "rule": "complexity"
     },
@@ -212,28 +97,73 @@
     },
     {
       "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._tsCacheFilePath",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._tsCacheFilePath",
+      "scopeId": ".TypeScriptBuilder.addModuleKindToEmit",
       "rule": "complexity"
     },
     {
       "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._validateTsconfig",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._validateTsconfig",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/TypeScriptBuilder.ts",
-      "scopeId": ".TypeScriptBuilder._validateTsconfig",
+      "scopeId": ".TypeScriptBuilder.addModuleKindToEmit",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.addModuleKindToEmit",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.changeCompilerHostToUseCache",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.changeCompilerHostToUseCache.getSourceFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.emitModulePackageJsonFiles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.emitModulePackageJsonFiles",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getAdjustedDiagnosticCategory",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getCreateBuilderProgram",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getCreateBuilderProgram.createMultiEmitBuilderProgram",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getCreateBuilderProgram.createMultiEmitBuilderProgram",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getCreateBuilderProgram.createMultiEmitBuilderProgram",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getCreateBuilderProgram.createMultiEmitBuilderProgram.emit",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.getCreateBuilderProgram.createMultiEmitBuilderProgram.emit",
+      "rule": "max-params"
     },
     {
       "file": "src/TypeScriptBuilder.ts",
@@ -254,6 +184,76 @@
       "file": "src/TypeScriptBuilder.ts",
       "scopeId": ".TypeScriptBuilder.invokeAsync.setTimeout",
       "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.logDiagnostics",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.logDiagnostics",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.logDiagnostics",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.parseModuleKind",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.printDiagnosticMessage",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.printDiagnosticMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.printDiagnosticMessage",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.queueTranspileInWorker",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.queueTranspileInWorker",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.tsCacheFilePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.tsCacheFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.validateTsconfig",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.validateTsconfig",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/TypeScriptBuilder.ts",
+      "scopeId": ".TypeScriptBuilder.validateTsconfig",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/TypeScriptBuilder.ts",
@@ -282,32 +282,32 @@
     },
     {
       "file": "src/TypeScriptPlugin.ts",
-      "scopeId": ".TypeScriptPlugin._getStaticAssetCopyOperationsAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptPlugin.ts",
-      "scopeId": ".TypeScriptPlugin._getStaticAssetCopyOperationsAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptPlugin.ts",
-      "scopeId": ".TypeScriptPlugin._getTypeScriptBuilderAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypeScriptPlugin.ts",
-      "scopeId": ".TypeScriptPlugin._getTypeScriptBuilderAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypeScriptPlugin.ts",
       "scopeId": ".TypeScriptPlugin.apply",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/TypeScriptPlugin.ts",
       "scopeId": ".TypeScriptPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptPlugin.ts",
+      "scopeId": ".TypeScriptPlugin.getStaticAssetCopyOperationsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptPlugin.ts",
+      "scopeId": ".TypeScriptPlugin.getStaticAssetCopyOperationsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypeScriptPlugin.ts",
+      "scopeId": ".TypeScriptPlugin.getTypeScriptBuilderAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypeScriptPlugin.ts",
+      "scopeId": ".TypeScriptPlugin.getTypeScriptBuilderAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -367,16 +367,6 @@
     },
     {
       "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
-      "scopeId": ".TypeScriptCachedFileSystem._sortFolderEntries",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
-      "scopeId": ".TypeScriptCachedFileSystem._withCaching",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
       "scopeId": ".TypeScriptCachedFileSystem.deleteFile",
       "rule": "complexity"
     },
@@ -393,6 +383,16 @@
     {
       "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
       "scopeId": ".TypeScriptCachedFileSystem.readFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
+      "scopeId": ".TypeScriptCachedFileSystem.sortFolderEntries",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
+      "scopeId": ".TypeScriptCachedFileSystem.withCaching",
       "rule": "complexity"
     },
     {

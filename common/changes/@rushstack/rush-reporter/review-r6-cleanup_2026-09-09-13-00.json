@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Dispose attempted reporter initialization safely and bound owned abandoned bootstrap handoffs by age and session count.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

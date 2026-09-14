@@ -128,7 +128,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
    */
   public readonly workspaceFilename: string;
 
-  private readonly _workspacePackages: Set<string>;
+  readonly #workspacePackages: Set<string>;
   public catalogs: IPnpmWorkspaceYaml['catalogs'];
   public allowBuilds: IPnpmWorkspaceYaml['allowBuilds'];
   public overrides: IPnpmWorkspaceYaml['overrides'];
@@ -154,7 +154,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this.workspaceFilename = workspaceYamlFilename;
     // Ignore any existing file since this file is generated and we need to handle deleting packages
     // If we need to support manual customization, that should be an additional parameter for "base file"
-    this._workspacePackages = new Set<string>();
+    this.#workspacePackages = new Set<string>();
   }
 
   /**
@@ -230,12 +230,12 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
     // Glob can't handle Windows paths
     const globPath: string = Path.convertToSlashes(packagePath);
-    this._workspacePackages.add(globEscape(globPath));
+    this.#workspacePackages.add(globEscape(globPath));
   }
 
   protected override async serializeAsync(): Promise<string> {
+    const workspacePackages: Set<string> = this.#workspacePackages;
     const {
-      _workspacePackages: workspacePackages,
       catalogs,
       allowBuilds,
       overrides,

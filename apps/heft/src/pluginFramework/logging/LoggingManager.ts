@@ -8,55 +8,60 @@ import {
 } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
+import type { HeftChildReporter } from './HeftChildReporter';
 import { ScopedLogger } from './ScopedLogger';
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
+  childReporter?: HeftChildReporter;
 }
 
 export class LoggingManager {
-  private _options: ILoggingManagerOptions;
-  private _scopedLoggers: Map<string, ScopedLogger> = new Map<string, ScopedLogger>();
-  private _shouldPrintStacks: boolean = false;
-  private _hasAnyWarnings: boolean = false;
-  private _hasAnyErrors: boolean = false;
+  #options: ILoggingManagerOptions;
+  #scopedLoggers: Map<string, ScopedLogger> = new Map<string, ScopedLogger>();
+  #shouldPrintStacks: boolean = false;
+  #hasAnyWarnings: boolean = false;
+  #hasAnyErrors: boolean = false;
 
   public get errorsHaveBeenEmitted(): boolean {
-    return this._hasAnyErrors;
+    return this.#hasAnyErrors;
   }
 
   public get warningsHaveBeenEmitted(): boolean {
-    return this._hasAnyWarnings;
+    return this.#hasAnyWarnings;
   }
 
   public constructor(options: ILoggingManagerOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public enablePrintStacks(): void {
-    this._shouldPrintStacks = true;
+    this.#shouldPrintStacks = true;
   }
 
   public resetScopedLoggerErrorsAndWarnings(): void {
-    this._hasAnyErrors = false;
-    this._hasAnyWarnings = false;
-    for (const scopedLogger of this._scopedLoggers.values()) {
+    this.#hasAnyErrors = false;
+    this.#hasAnyWarnings = false;
+    for (const scopedLogger of this.#scopedLoggers.values()) {
       scopedLogger.resetErrorsAndWarnings();
     }
   }
 
   public requestScopedLogger(loggerName: string): ScopedLogger {
-    const existingScopedLogger: ScopedLogger | undefined = this._scopedLoggers.get(loggerName);
+    const existingScopedLogger: ScopedLogger | undefined = this.#scopedLoggers.get(loggerName);
     if (existingScopedLogger) {
       throw new Error(`A named logger with name ${JSON.stringify(loggerName)} has already been requested.`);
     } else {
       const scopedLogger: ScopedLogger = new ScopedLogger({
         loggerName,
-        terminalProvider: this._options.terminalProvider,
-        getShouldPrintStacks: () => this._shouldPrintStacks,
-        errorHasBeenEmittedCallback: () => (this._hasAnyErrors = true),
-        warningHasBeenEmittedCallback: () => (this._hasAnyWarnings = true)
+        terminalProvider: this.#options.terminalProvider,
+        getShouldPrintStacks: () => this.#shouldPrintStacks,
+        errorHasBeenEmittedCallback: () => (this.#hasAnyErrors = true),
+        warningHasBeenEmittedCallback: () => (this.#hasAnyWarnings = true),
+        structuredDiagnosticCallback: this.#options.childReporter
+          ? (error, severity) => this.#options.childReporter!.emitDiagnostic(loggerName, error, severity)
+          : undefined
       });
-      this._scopedLoggers.set(loggerName, scopedLogger);
+      this.#scopedLoggers.set(loggerName, scopedLogger);
       return scopedLogger;
     }
   }
@@ -64,7 +69,7 @@ export class LoggingManager {
   public getErrorStrings(fileLocationStyle?: FileLocationStyle): string[] {
     const result: string[] = [];
 
-    for (const scopedLogger of this._scopedLoggers.values()) {
+    for (const scopedLogger of this.#scopedLoggers.values()) {
       result.push(
         ...scopedLogger.errors.map(
           (error) =>
@@ -80,7 +85,7 @@ export class LoggingManager {
   public getWarningStrings(fileErrorFormat?: FileLocationStyle): string[] {
     const result: string[] = [];
 
-    for (const scopedLogger of this._scopedLoggers.values()) {
+    for (const scopedLogger of this.#scopedLoggers.values()) {
       result.push(
         ...scopedLogger.warnings.map(
           (warning) =>

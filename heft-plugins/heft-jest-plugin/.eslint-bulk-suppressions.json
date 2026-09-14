@@ -17,58 +17,58 @@
     },
     {
       "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter._formatWithPlural",
+      "scopeId": ".HeftJestReporter.formatWithPlural",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter._writeConsoleOutput",
+      "scopeId": ".HeftJestReporter.onRunComplete",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onRunComplete",
       "rule": "complexity"
     },
     {
       "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter._writeConsoleOutput",
+      "scopeId": ".HeftJestReporter.onTestResult",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onTestResult",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.onTestResult",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.writeConsoleOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HeftJestReporter.ts",
+      "scopeId": ".HeftJestReporter.writeConsoleOutput",
       "rule": "max-depth"
     },
     {
       "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter._writeConsoleOutput",
+      "scopeId": ".HeftJestReporter.writeConsoleOutput",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter._writeConsoleOutputWithLabel",
+      "scopeId": ".HeftJestReporter.writeConsoleOutputWithLabel",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter._writeConsoleOutputWithLabel",
+      "scopeId": ".HeftJestReporter.writeConsoleOutputWithLabel",
       "rule": "complexity"
-    },
-    {
-      "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter.onRunComplete",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter.onRunComplete",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter.onTestResult",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter.onTestResult",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/HeftJestReporter.ts",
-      "scopeId": ".HeftJestReporter.onTestResult",
-      "rule": "max-lines-per-function"
     },
     {
       "file": "src/HeftJestResolver.ts",
@@ -102,21 +102,6 @@
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._createJestArgvAsync",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._createJestArgvAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._createJestArgvAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/JestPlugin.ts",
       "scopeId": ".JestPlugin._getJestConfigurationLoader",
       "rule": "max-lines-per-function"
     },
@@ -132,78 +117,93 @@
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestAsync",
+      "scopeId": ".JestPlugin.apply",
       "rule": "complexity"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestAsync",
+      "scopeId": ".JestPlugin.apply",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
+      "scopeId": ".JestPlugin.createJestArgvAsync",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "scopeId": ".JestPlugin.createJestArgvAsync",
       "rule": "complexity"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "scopeId": ".JestPlugin.createJestArgvAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.runJestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.runJestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.runJestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.runJestWatchAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.runJestWatchAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JestPlugin.ts",
+      "scopeId": ".JestPlugin.runJestWatchAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync",
+      "scopeId": ".JestPlugin.runJestWatchAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync.runJest.patchedRunJest",
+      "scopeId": ".JestPlugin.runJestWatchAsync.runJest.patchedRunJest",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync.runJest.patchedRunJest",
+      "scopeId": ".JestPlugin.runJestWatchAsync.runJest.patchedRunJest",
       "rule": "complexity"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync.runJest.patchedRunJest",
+      "scopeId": ".JestPlugin.runJestWatchAsync.runJest.patchedRunJest",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync.watch.patchedWatch",
+      "scopeId": ".JestPlugin.runJestWatchAsync.watch.patchedWatch",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._runJestWatchAsync.watch.patchedWatch",
+      "scopeId": ".JestPlugin.runJestWatchAsync.watch.patchedWatch",
       "rule": "max-params"
     },
     {
       "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin._setNodeEnvIfRequested",
+      "scopeId": ".JestPlugin.setNodeEnvIfRequested",
       "rule": "complexity"
-    },
-    {
-      "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin.apply",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/JestPlugin.ts",
-      "scopeId": ".JestPlugin.apply",
-      "rule": "max-lines-per-function"
     },
     {
       "file": "src/JestPlugin.ts",

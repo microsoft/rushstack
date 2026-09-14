@@ -17,17 +17,17 @@
     },
     {
       "file": "src/AmazonS3BuildCacheProvider.ts",
-      "scopeId": ".AmazonS3BuildCacheProvider._getS3ClientAsync",
+      "scopeId": ".AmazonS3BuildCacheProvider.getS3ClientAsync",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3BuildCacheProvider.ts",
-      "scopeId": ".AmazonS3BuildCacheProvider._getS3ClientAsync",
+      "scopeId": ".AmazonS3BuildCacheProvider.getS3ClientAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/AmazonS3BuildCacheProvider.ts",
-      "scopeId": ".AmazonS3BuildCacheProvider._getS3ClientAsync",
+      "scopeId": ".AmazonS3BuildCacheProvider.getS3ClientAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -57,92 +57,92 @@
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._buildSignedRequest",
+      "scopeId": ".AmazonS3Client.buildSignedRequest",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._buildSignedRequest",
+      "scopeId": ".AmazonS3Client.buildSignedRequest",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._buildSignedRequest",
+      "scopeId": ".AmazonS3Client.buildSignedRequest",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._getIsoDateString",
+      "scopeId": ".AmazonS3Client.getIsoDateString",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._handleGetResponseAsync",
+      "scopeId": ".AmazonS3Client.handleGetResponseAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._handleGetResponseAsync",
+      "scopeId": ".AmazonS3Client.handleGetResponseAsync",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._handleGetResponseAsync",
+      "scopeId": ".AmazonS3Client.handleGetResponseAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._makeSignedRequestAsync",
+      "scopeId": ".AmazonS3Client.makeSignedRequestAsync",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._makeSignedRequestAsync",
+      "scopeId": ".AmazonS3Client.makeSignedRequestAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._makeSignedRequestAsync",
+      "scopeId": ".AmazonS3Client.makeSignedRequestAsync",
       "rule": "max-params"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync",
+      "scopeId": ".AmazonS3Client.sendCacheRequestWithRetriesAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync",
+      "scopeId": ".AmazonS3Client.sendCacheRequestWithRetriesAsync",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync",
+      "scopeId": ".AmazonS3Client.sendCacheRequestWithRetriesAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync.retry",
+      "scopeId": ".AmazonS3Client.sendCacheRequestWithRetriesAsync.retry",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._sendCacheRequestWithRetriesAsync.retry",
+      "scopeId": ".AmazonS3Client.sendCacheRequestWithRetriesAsync.retry",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._validateEndpoint",
+      "scopeId": ".AmazonS3Client.validateEndpoint",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._validateEndpoint",
+      "scopeId": ".AmazonS3Client.validateEndpoint",
       "rule": "complexity"
     },
     {
       "file": "src/AmazonS3Client.ts",
-      "scopeId": ".AmazonS3Client._validateEndpoint",
+      "scopeId": ".AmazonS3Client.validateEndpoint",
       "rule": "max-lines-per-function"
     },
     {

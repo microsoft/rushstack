@@ -1,0 +1,59 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/zipsync",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    }
+  ]
+}

@@ -10,17 +10,29 @@ import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
+import type * as child_process from 'node:child_process';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
+import { createRushDiagnostic } from '@rushstack/rush-reporter';
 import { CredentialCache } from '@rushstack/credential-cache';
 import { HookMap } from 'tapable';
+import { ICreateRushDiagnosticOptions } from '@rushstack/rush-reporter';
 import { ICredentialCacheEntry } from '@rushstack/credential-cache';
 import { ICredentialCacheOptions } from '@rushstack/credential-cache';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IProblemCollector } from '@rushstack/terminal';
+import { IReporterChildContext } from '@rushstack/rush-reporter';
+import { IReporterEventEnvelope } from '@rushstack/rush-reporter';
+import { IReporterEventScope } from '@rushstack/rush-reporter';
+import { IReporterEventSink } from '@rushstack/rush-reporter';
+import { IRushDiagnostic } from '@rushstack/rush-reporter';
+import { IScopedLogger } from '@rushstack/rush-reporter';
+import { IScopedMessageOptions } from '@rushstack/rush-reporter';
+import { IScopedReporter } from '@rushstack/rush-reporter';
+import type { ITelemetryAggregate } from '@rushstack/rush-reporter';
 import { ITerminal } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
@@ -28,7 +40,11 @@ import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import { parseReporterExtensionEventName } from '@rushstack/rush-reporter';
 import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
+import { ReporterExtensionEventName } from '@rushstack/rush-reporter';
+import { ReporterJsonValue } from '@rushstack/rush-reporter';
+import { ReporterPrivacyClassification } from '@rushstack/rush-reporter';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -148,6 +164,8 @@ export class CommonVersionsConfiguration {
     saveAsync(): Promise<boolean>;
 }
 
+export { createRushDiagnostic }
+
 export { CredentialCache }
 
 // @beta
@@ -239,6 +257,8 @@ export class EnvironmentConfiguration {
     //
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
+    // @internal
+    static _getRushTempFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
     static get hasBeenValidated(): boolean;
     // (undocumented)
@@ -439,6 +459,8 @@ export interface ICreateOperationsContext {
     readonly rushConfiguration: RushConfiguration;
 }
 
+export { ICreateRushDiagnosticOptions }
+
 export { ICredentialCacheEntry }
 
 export { ICredentialCacheOptions }
@@ -499,6 +521,7 @@ export interface IExperimentsJson {
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
     usePnpmSyncForInjectedDependencies?: boolean;
+    useRushReporter?: boolean;
 }
 
 // @beta
@@ -556,6 +579,8 @@ export interface ILaunchOptions {
     // @internal
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
+    // @internal
+    reporter?: IRushSessionReporterOptions;
     terminalProvider?: ITerminalProvider;
 }
 
@@ -616,10 +641,23 @@ export interface _IOperationBuildCacheOptions {
     useDirectFileTransfersForBuildCache: boolean;
 }
 
+// @internal
+export interface _IOperationChildProcessReporter {
+    // (undocumented)
+    attachAsync(child: child_process.ChildProcess, structuredOutputTerminalProvider: ITerminalProvider): Promise<void>;
+    // (undocumented)
+    readonly environment: Readonly<Record<string, string>>;
+    // (undocumented)
+    readonly hasWarningOrError: boolean;
+    // (undocumented)
+    readonly stdio: child_process.StdioOptions;
+}
+
 // @alpha
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
     readonly error: Error | undefined;
+    readonly iterationId: number;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly problemCollector: IProblemCollector;
@@ -662,12 +700,14 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 
 // @internal
 export interface _IOperationGraphEventSink {
+    createChildProcessReporter?(operationId: string, iterationId: number): _IOperationChildProcessReporter | undefined;
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
-    onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
+    onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
+    onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
-    onOperationRegistered?(operationId: string, silent: boolean): void;
+    onOperationRegistered?(operationId: string, silent: boolean, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
-    onOperationStreamClosed?(operationId: string): void;
+    onOperationStreamClosed?(operationId: string, result?: IOperationExecutionResult, iterationId?: number): void;
 }
 
 // @alpha
@@ -731,6 +771,8 @@ export interface IOperationRunner {
 // @beta
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
+    // @internal
+    createChildProcessReporter(): _IOperationChildProcessReporter | undefined;
     debugMode: boolean;
     environment: IEnvironment | undefined;
     error?: Error;
@@ -738,7 +780,7 @@ export interface IOperationRunnerContext {
     // @internal
     _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
-    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider, structuredChildOutputTerminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
@@ -910,6 +952,10 @@ export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
     phaseName: string;
 };
 
+export { IReporterEventScope }
+
+export { IReporterEventSink }
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -942,6 +988,8 @@ export interface IRushCommandLineSpec {
 // @beta (undocumented)
 export type IRushConfigurationProjectForSnapshot = Pick<RushConfigurationProject, 'projectFolder' | 'projectRelativeFolder'>;
 
+export { IRushDiagnostic }
+
 // @alpha (undocumented)
 export interface IRushPhaseSharding {
     count: number;
@@ -973,13 +1021,41 @@ export interface _IRushProjectJson {
     operationSettings?: IOperationSettings[];
 }
 
+// @beta
+export interface IRushReportingConfiguration {
+    readonly agentEnvironmentVariables: readonly string[];
+}
+
 // @beta (undocumented)
 export interface IRushSessionOptions {
     // (undocumented)
     getIsDebugMode: () => boolean;
+    reporter?: IRushSessionReporterOptions;
     // (undocumented)
     terminalProvider: ITerminalProvider;
 }
+
+// @beta
+export interface IRushSessionReporterOptions {
+    // @internal
+    readonly childProcessReporter?: {
+        readonly requestId: string;
+        readonly context: IReporterChildContext;
+        readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+    };
+    readonly eventSink: IReporterEventSink;
+    // @internal
+    readonly flushAsync?: () => Promise<void>;
+    // @internal
+    readonly operationStreamEnabled?: boolean;
+    readonly sessionId: string;
+}
+
+export { IScopedLogger }
+
+export { IScopedMessageOptions }
+
+export { IScopedReporter }
 
 // @beta
 export interface IStopwatchResult {
@@ -1001,6 +1077,7 @@ export interface ITelemetryData {
     readonly operationResults?: Record<string, ITelemetryOperationResult>;
     readonly performanceEntries?: readonly PerformanceEntry_2[];
     readonly platform?: string;
+    readonly reporterData?: ITelemetryAggregate;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;
     readonly timestampMs?: number;
@@ -1282,6 +1359,8 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 // @beta
 export type Parallelism = number | IParallelismScalar;
 
+export { parseReporterExtensionEventName }
+
 // @alpha
 export class PhasedCommandHooks {
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
@@ -1358,6 +1437,12 @@ export class ProjectChangeAnalyzer {
     // @internal
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
+
+export { ReporterExtensionEventName }
+
+export { ReporterJsonValue }
+
+export { ReporterPrivacyClassification }
 
 // @public
 export class RepoStateFile {
@@ -1473,6 +1558,8 @@ export class RushConfiguration {
     get projectsByName(): ReadonlyMap<string, RushConfigurationProject>;
     // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
+    // @beta
+    readonly reportingConfiguration: IRushReportingConfiguration;
     readonly repositoryDefaultBranch: string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     readonly repositoryDefaultRemote: string;
@@ -1694,6 +1781,8 @@ export class RushSession {
     getCobuildLockProviderFactory(cobuildLockProviderName: string): CobuildLockProviderFactory | undefined;
     // (undocumented)
     getLogger(name: string): ILogger;
+    getReporter(scope?: IReporterEventScope): IScopedReporter | undefined;
+    getScopedLogger(scope?: IReporterEventScope): IScopedLogger | undefined;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)

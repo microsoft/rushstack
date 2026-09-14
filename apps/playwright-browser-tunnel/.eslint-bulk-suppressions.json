@@ -62,68 +62,68 @@
     },
     {
       "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._getPlaywrightBrowserServerProxyAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._initPlaywrightBrowserTunnelAsync.onMessageHandler",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._pollConnectionAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._setupForwardingAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._validateHandshake",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._validateHandshake",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
-      "scopeId": ".PlaywrightTunnel._waitForIncomingConnectionAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PlaywrightBrowserTunnel.ts",
       "scopeId": ".PlaywrightTunnel.constructor",
       "rule": "complexity"
     },
     {
       "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.getPlaywrightBrowserServerProxyAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.initPlaywrightBrowserTunnelAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.initPlaywrightBrowserTunnelAsync.onMessageHandler",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.pollConnectionAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.setupForwardingAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
       "scopeId": ".PlaywrightTunnel.startAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.validateHandshake",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.validateHandshake",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PlaywrightBrowserTunnel.ts",
+      "scopeId": ".PlaywrightTunnel.waitForIncomingConnectionAsync",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/tunneledBrowserConnection/TunneledBrowser.ts",

@@ -67,8 +67,8 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
   public readonly watcherOptions: WatchOptions;
   public watcher: Watchpack | undefined;
 
-  private readonly _onChange: () => void;
-  private _state: IWatchState | undefined;
+  readonly #onChange: () => void;
+  #state: IWatchState | undefined;
 
   public constructor(inputFileSystem: IPurgeable, onChange: () => void) {
     this.inputFileSystem = inputFileSystem;
@@ -76,11 +76,11 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
       aggregateTimeout: 0
     };
     this.watcher = new Watchpack(this.watcherOptions);
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public flush(): boolean {
-    const state: IWatchState | undefined = this._state;
+    const state: IWatchState | undefined = this.#state;
 
     if (!state) {
       return false;
@@ -136,7 +136,7 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
     const changes: Set<string> = new Set();
     const removals: Set<string> = new Set();
 
-    this._state = {
+    this.#state = {
       files: new Set(files),
       dirs: new Set(directories),
       missing: new Set(missing),
@@ -158,7 +158,7 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
         removals.add(removal);
       }
 
-      this._onChange();
+      this.#onChange();
     });
 
     watcher.watch({
@@ -198,16 +198,16 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
 
 export class OverrideNodeWatchFSPlugin implements Plugin {
   public readonly fileSystems: Set<DeferredWatchFileSystem> = new Set();
-  private readonly _onChange: () => void;
+  readonly #onChange: () => void;
 
   public constructor(onChange: () => void) {
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public apply(compiler: Compiler): void {
     const watchFileSystem: DeferredWatchFileSystem = new DeferredWatchFileSystem(
       compiler.inputFileSystem,
-      this._onChange
+      this.#onChange
     );
     this.fileSystems.add(watchFileSystem);
     (compiler as { watchFileSystem?: IWatchFileSystem }).watchFileSystem = watchFileSystem;

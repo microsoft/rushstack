@@ -495,6 +495,18 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * Reads and normalizes `RUSH_TEMP_FOLDER` without initializing the global environment state.
+   *
+   * @internal
+   */
+  public static _getRushTempFolderOverride(processEnv: IEnvironment): string | undefined {
+    const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_TEMP_FOLDER];
+    if (value) {
+      return _normalizeDeepestParentFolderPath(value) || value;
+    }
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
   public static validate(options: IEnvironmentConfigurationInitializeOptions = {}): void {
@@ -510,7 +522,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             _rushTempFolderOverride =
               value && !options.doNotNormalizePaths
-                ? _normalizeDeepestParentFolderPath(value) || value
+                ? EnvironmentConfiguration._getRushTempFolderOverride(process.env)
                 : value;
             break;
           }

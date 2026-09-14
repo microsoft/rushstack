@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Emit negotiated structured child output and diagnostics when Rush provides a reporter descriptor, while preserving standalone terminal behavior.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

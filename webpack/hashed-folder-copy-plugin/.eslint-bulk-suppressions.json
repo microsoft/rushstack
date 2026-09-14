@@ -57,27 +57,27 @@
     },
     {
       "file": "src/HashedFolderDependency.ts",
-      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency.collectAssetsAndGetExpressionAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/HashedFolderDependency.ts",
-      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency.collectAssetsAndGetExpressionAsync",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/HashedFolderDependency.ts",
-      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency.collectAssetsAndGetExpressionAsync",
       "rule": "complexity"
     },
     {
       "file": "src/HashedFolderDependency.ts",
-      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency.collectAssetsAndGetExpressionAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/HashedFolderDependency.ts",
-      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency._collectAssetsAndGetExpressionAsync",
+      "scopeId": "._getHashedFolderDependencyForWebpackInstance.HashedFolderDependency.collectAssetsAndGetExpressionAsync",
       "rule": "max-lines-per-function"
     },
     {

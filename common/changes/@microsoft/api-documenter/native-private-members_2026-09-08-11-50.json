@@ -1,0 +1,54 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/credential-cache",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/stream-collator",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
+      "packageName": "@rushstack/worker-pool",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    }
+  ]
+}

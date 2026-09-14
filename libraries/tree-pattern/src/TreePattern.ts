@@ -54,10 +54,10 @@ export type ITreePatternCaptureSet =
  * @public
  */
 export class TreePattern {
-  private readonly _pattern: TreeNode;
+  readonly #pattern: TreeNode;
 
   public constructor(pattern: TreeNode) {
-    this._pattern = pattern;
+    this.#pattern = pattern;
   }
 
   /**
@@ -128,7 +128,7 @@ export class TreePattern {
    * @returns `true` if `root` matches the pattern, or `false` otherwise
    */
   public match(root: TreeNode, captures: ITreePatternCaptureSet = {}): boolean {
-    return _matchTreeRecursive(root, this._pattern, captures, 'root');
+    return _matchTreeRecursive(root, this.#pattern, captures, 'root');
   }
 }
 

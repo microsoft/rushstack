@@ -7,32 +7,32 @@
     },
     {
       "file": "src/WatchManager.ts",
-      "scopeId": ".WatchManager._calculateCriticalPathLength",
+      "scopeId": ".WatchManager.calculateCriticalPathLength",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/WatchManager.ts",
-      "scopeId": ".WatchManager._calculateCriticalPathLength",
+      "scopeId": ".WatchManager.calculateCriticalPathLength",
       "rule": "complexity"
     },
     {
       "file": "src/WatchManager.ts",
-      "scopeId": ".WatchManager._clearActiveProject",
+      "scopeId": ".WatchManager.clearActiveProject",
       "rule": "complexity"
     },
     {
       "file": "src/WatchManager.ts",
-      "scopeId": ".WatchManager._printCompletedAndActivateSomething",
+      "scopeId": ".WatchManager.printCompletedAndActivateSomething",
       "rule": "complexity"
     },
     {
       "file": "src/WatchManager.ts",
-      "scopeId": ".WatchManager._printCompletedAndActivateSomething",
+      "scopeId": ".WatchManager.printCompletedAndActivateSomething",
       "rule": "max-depth"
     },
     {
       "file": "src/WatchManager.ts",
-      "scopeId": ".WatchManager._printCompletedAndActivateSomething",
+      "scopeId": ".WatchManager.printCompletedAndActivateSomething",
       "rule": "max-lines-per-function"
     },
     {

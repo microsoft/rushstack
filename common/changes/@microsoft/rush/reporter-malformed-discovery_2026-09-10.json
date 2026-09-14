@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve legacy configuration discovery output when rush.json cannot be loaded, without contaminating explicitly selected reporter output.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

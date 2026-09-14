@@ -55,6 +55,14 @@
         "watchPhases": ["_phase:lite-build", "_phase:build", "_phase:test"]
       }
     },
+    {
+      "commandKind": "phased",
+      "name": "pack",
+      "summary": "Packs publishable projects into npm tarballs.",
+      "phases": ["_phase:pack"],
+      "enableParallelism": true,
+      "incremental": false
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
@@ -267,6 +275,11 @@
         // Dependency on _phase:lite-build is transitive via _phase:build
         "self": ["_phase:build"]
       },
+      "missingScriptBehavior": "silent",
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:pack",
       "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
     }
@@ -525,6 +538,15 @@
       "description": "Automatically fix problems encountered while linting",
       "associatedPhases": ["_phase:build"],
       "associatedCommands": ["build", "rebuild", "test", "retest"]
+    },
+    {
+      "longName": "--pack-destination",
+      "parameterKind": "string",
+      "argumentName": "FOLDER",
+      "description": "Write packed npm tarballs to this folder",
+      "required": true,
+      "associatedPhases": ["_phase:pack"],
+      "associatedCommands": ["pack"]
     }
   ]
 }

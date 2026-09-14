@@ -30,6 +30,10 @@ parameters:
     displayName: 'Commit SHA Override (for testing)'
     type: string
     default: $(Build.SourceVersion)
+  - name: BumpPipelineRunIdOverride
+    displayName: 'Bump pipeline run ID override (for recovery)'
+    type: number
+    default: 0
 
 variables:
   - name: FORCE_COLOR
@@ -68,3 +72,4 @@ extends:
           NpmTag: ${{ parameters.NpmTag }}
           DryRun: ${{ parameters.DryRun }}
           CommitShaOverride: ${{ parameters.CommitShaOverride }}
+          BumpPipelineRunIdOverride: ${{ parameters.BumpPipelineRunIdOverride }}

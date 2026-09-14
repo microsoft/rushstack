@@ -18,8 +18,8 @@ export class KnownDescriptionFilePlugin {
   public readonly source: string;
   public readonly target: string;
 
-  private readonly _skipForContext: boolean;
-  private readonly _cache: WorkspaceLayoutCache;
+  readonly #skipForContext: boolean;
+  readonly #cache: WorkspaceLayoutCache;
 
   /**
    * Constructs a new instance of `KnownDescriptionFilePlugin`.
@@ -31,12 +31,12 @@ export class KnownDescriptionFilePlugin {
   public constructor(cache: WorkspaceLayoutCache, source: string, target: string, skipForContext?: boolean) {
     this.source = source;
     this.target = target;
-    this._cache = cache;
-    this._skipForContext = !!skipForContext;
+    this.#cache = cache;
+    this.#skipForContext = !!skipForContext;
   }
 
   public apply(resolver: Resolver): void {
-    if (this._skipForContext && resolver.options.resolveToContext) {
+    if (this.#skipForContext && resolver.options.resolveToContext) {
       return;
     }
 
@@ -71,7 +71,7 @@ export class KnownDescriptionFilePlugin {
           return callback();
         }
 
-        const cache: WorkspaceLayoutCache = this._cache;
+        const cache: WorkspaceLayoutCache = this.#cache;
 
         const match: IPrefixMatch<IResolveContext> | undefined =
           cache.contextLookup.findLongestPrefixMatch(path);

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Relay compatible Heft child events through the selected Rush reporter with ordered raw fallback and problem matcher diagnostics.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

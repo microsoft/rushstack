@@ -87,31 +87,6 @@
     },
     {
       "file": "src/TypingsGenerator.ts",
-      "scopeId": ".TypingsGenerator._parseFileAndGenerateTypingsAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TypingsGenerator.ts",
-      "scopeId": ".TypingsGenerator._parseFileAndGenerateTypingsAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypingsGenerator.ts",
-      "scopeId": ".TypingsGenerator._parseFileAndGenerateTypingsAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypingsGenerator.ts",
-      "scopeId": ".TypingsGenerator._reprocessFilesAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TypingsGenerator.ts",
-      "scopeId": ".TypingsGenerator._reprocessFilesAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/TypingsGenerator.ts",
       "scopeId": ".TypingsGenerator.constructor",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -123,6 +98,31 @@
     {
       "file": "src/TypingsGenerator.ts",
       "scopeId": ".TypingsGenerator.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.parseFileAndGenerateTypingsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.parseFileAndGenerateTypingsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.parseFileAndGenerateTypingsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.reprocessFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.reprocessFilesAsync",
       "rule": "max-lines-per-function"
     },
     {

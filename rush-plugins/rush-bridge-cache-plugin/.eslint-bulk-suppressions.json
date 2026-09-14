@@ -12,26 +12,6 @@
     },
     {
       "file": "src/BridgeCachePlugin.ts",
-      "scopeId": ".BridgeCachePlugin._getCacheAction",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/BridgeCachePlugin.ts",
-      "scopeId": ".BridgeCachePlugin._getCacheAction",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/BridgeCachePlugin.ts",
-      "scopeId": ".BridgeCachePlugin._getCacheAction",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/BridgeCachePlugin.ts",
-      "scopeId": ".BridgeCachePlugin._isRequireOutputFoldersFlagSet",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/BridgeCachePlugin.ts",
       "scopeId": ".BridgeCachePlugin.apply",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -44,6 +24,26 @@
       "file": "src/BridgeCachePlugin.ts",
       "scopeId": ".BridgeCachePlugin.apply",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/BridgeCachePlugin.ts",
+      "scopeId": ".BridgeCachePlugin.getCacheAction",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/BridgeCachePlugin.ts",
+      "scopeId": ".BridgeCachePlugin.getCacheAction",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/BridgeCachePlugin.ts",
+      "scopeId": ".BridgeCachePlugin.getCacheAction",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/BridgeCachePlugin.ts",
+      "scopeId": ".BridgeCachePlugin.isRequireOutputFoldersFlagSet",
+      "rule": "complexity"
     }
   ]
 }

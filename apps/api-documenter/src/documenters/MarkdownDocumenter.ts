@@ -77,32 +77,32 @@ export interface IMarkdownDocumenterOptions {
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
 export class MarkdownDocumenter {
-  private readonly _apiModel: ApiModel;
-  private readonly _documenterConfig: DocumenterConfig | undefined;
-  private readonly _tsdocConfiguration: TSDocConfiguration;
-  private readonly _markdownEmitter: CustomMarkdownEmitter;
-  private readonly _outputFolder: string;
-  private readonly _pluginLoader: PluginLoader;
+  readonly #apiModel: ApiModel;
+  readonly #documenterConfig: DocumenterConfig | undefined;
+  readonly #tsdocConfiguration: TSDocConfiguration;
+  readonly #markdownEmitter: CustomMarkdownEmitter;
+  readonly #outputFolder: string;
+  readonly #pluginLoader: PluginLoader;
 
   public constructor(options: IMarkdownDocumenterOptions) {
-    this._apiModel = options.apiModel;
-    this._documenterConfig = options.documenterConfig;
-    this._outputFolder = options.outputFolder;
-    this._tsdocConfiguration = CustomDocNodes.configuration;
-    this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
+    this.#apiModel = options.apiModel;
+    this.#documenterConfig = options.documenterConfig;
+    this.#outputFolder = options.outputFolder;
+    this.#tsdocConfiguration = CustomDocNodes.configuration;
+    this.#markdownEmitter = new CustomMarkdownEmitter(this.#apiModel);
 
-    this._pluginLoader = new PluginLoader();
+    this.#pluginLoader = new PluginLoader();
   }
 
   public generateFiles(): void {
-    if (this._documenterConfig) {
-      this._pluginLoader.load(this._documenterConfig, () => {
+    if (this.#documenterConfig) {
+      this.#pluginLoader.load(this.#documenterConfig, () => {
         return new MarkdownDocumenterFeatureContext({
-          apiModel: this._apiModel,
-          outputFolder: this._outputFolder,
+          apiModel: this.#apiModel,
+          outputFolder: this.#outputFolder,
           documenter: new MarkdownDocumenterAccessor({
             getLinkForApiItem: (apiItem: ApiItem) => {
-              return this._getLinkFilenameForApiItem(apiItem);
+              return this.#getLinkFilenameForApiItem(apiItem);
             }
           })
         });
@@ -110,20 +110,20 @@ export class MarkdownDocumenter {
     }
 
     console.log();
-    this._deleteOldOutputFiles();
+    this.#deleteOldOutputFiles();
 
-    this._writeApiItemPage(this._apiModel);
+    this.#writeApiItemPage(this.#apiModel);
 
-    if (this._pluginLoader.markdownDocumenterFeature) {
-      this._pluginLoader.markdownDocumenterFeature.onFinished({});
+    if (this.#pluginLoader.markdownDocumenterFeature) {
+      this.#pluginLoader.markdownDocumenterFeature.onFinished({});
     }
   }
 
-  private _writeApiItemPage(apiItem: ApiItem): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeApiItemPage(apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
     const output: DocSection = new DocSection({ configuration });
 
-    this._writeBreadcrumb(output, apiItem);
+    this.#writeBreadcrumb(output, apiItem);
 
     const scopedName: string = apiItem.getScopedNameWithinPackage();
 
@@ -175,9 +175,9 @@ export class MarkdownDocumenter {
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
       if (apiItem.releaseTag === ReleaseTag.Alpha) {
-        this._writeAlphaWarning(output);
+        this.#writeAlphaWarning(output);
       } else if (apiItem.releaseTag === ReleaseTag.Beta) {
-        this._writeBetaWarning(output);
+        this.#writeBetaWarning(output);
       }
     }
 
@@ -207,7 +207,7 @@ export class MarkdownDocumenter {
           );
         }
 
-        this._appendSection(output, tsdocComment.summarySection);
+        this.#appendSection(output, tsdocComment.summarySection);
       }
     }
 
@@ -229,7 +229,7 @@ export class MarkdownDocumenter {
         );
       }
 
-      this._writeHeritageTypes(output, apiItem);
+      this.#writeHeritageTypes(output, apiItem);
     }
 
     if (decoratorBlocks.length > 0) {
@@ -251,91 +251,91 @@ export class MarkdownDocumenter {
       case ApiItemKind.Interface:
       case ApiItemKind.Namespace:
       case ApiItemKind.Package:
-        this._writeRemarksSection(output, apiItem);
+        this.#writeRemarksSection(output, apiItem);
         appendRemarks = false;
         break;
     }
 
     switch (apiItem.kind) {
       case ApiItemKind.Class:
-        this._writeClassTables(output, apiItem as ApiClass);
+        this.#writeClassTables(output, apiItem as ApiClass);
         break;
       case ApiItemKind.Enum:
-        this._writeEnumTables(output, apiItem as ApiEnum);
+        this.#writeEnumTables(output, apiItem as ApiEnum);
         break;
       case ApiItemKind.Interface:
-        this._writeInterfaceTables(output, apiItem as ApiInterface);
+        this.#writeInterfaceTables(output, apiItem as ApiInterface);
         break;
       case ApiItemKind.Constructor:
       case ApiItemKind.ConstructSignature:
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
       case ApiItemKind.Function:
-        this._writeParameterTables(output, apiItem as ApiParameterListMixin);
-        this._writeThrowsSection(output, apiItem);
-        this._writeDefaultValueSection(output, apiItem);
+        this.#writeParameterTables(output, apiItem as ApiParameterListMixin);
+        this.#writeThrowsSection(output, apiItem);
+        this.#writeDefaultValueSection(output, apiItem);
         break;
       case ApiItemKind.Namespace:
-        this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
+        this.#writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
         break;
       case ApiItemKind.Model:
-        this._writeModelTable(output, apiItem as ApiModel);
+        this.#writeModelTable(output, apiItem as ApiModel);
         break;
       case ApiItemKind.Package:
-        this._writePackageOrNamespaceTables(output, apiItem as ApiPackage);
+        this.#writePackageOrNamespaceTables(output, apiItem as ApiPackage);
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
-        this._writeDefaultValueSection(output, apiItem);
+        this.#writeDefaultValueSection(output, apiItem);
         break;
       case ApiItemKind.TypeAlias:
-        this._writeDefaultValueSection(output, apiItem);
+        this.#writeDefaultValueSection(output, apiItem);
         break;
       case ApiItemKind.Variable:
-        this._writeDefaultValueSection(output, apiItem);
+        this.#writeDefaultValueSection(output, apiItem);
         break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
     }
 
     if (appendRemarks) {
-      this._writeRemarksSection(output, apiItem);
+      this.#writeRemarksSection(output, apiItem);
     }
 
-    const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
+    const filename: string = path.join(this.#outputFolder, this.#getFilenameForApiItem(apiItem));
     const stringBuilder: StringBuilder = new StringBuilder();
 
     stringBuilder.append(
       '<!-- Do not edit this file. It is automatically generated by API Documenter. -->\n\n'
     );
 
-    this._markdownEmitter.emit(stringBuilder, output, {
+    this.#markdownEmitter.emit(stringBuilder, output, {
       contextApiItem: apiItem,
       onGetFilenameForApiItem: (apiItemForFilename: ApiItem) => {
-        return this._getLinkFilenameForApiItem(apiItemForFilename);
+        return this.#getLinkFilenameForApiItem(apiItemForFilename);
       }
     });
 
     let pageContent: string = stringBuilder.toString();
 
-    if (this._pluginLoader.markdownDocumenterFeature) {
+    if (this.#pluginLoader.markdownDocumenterFeature) {
       // Allow the plugin to customize the pageContent
       const eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs = {
         apiItem: apiItem,
         outputFilename: filename,
         pageContent: pageContent
       };
-      this._pluginLoader.markdownDocumenterFeature.onBeforeWritePage(eventArgs);
+      this.#pluginLoader.markdownDocumenterFeature.onBeforeWritePage(eventArgs);
       pageContent = eventArgs.pageContent;
     }
 
     FileSystem.writeFile(filename, pageContent, {
-      convertLineEndings: this._documenterConfig ? this._documenterConfig.newlineKind : NewlineKind.CrLf
+      convertLineEndings: this.#documenterConfig ? this.#documenterConfig.newlineKind : NewlineKind.CrLf
     });
   }
 
-  private _writeHeritageTypes(output: DocSection, apiItem: ApiDeclaredItem): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeHeritageTypes(output: DocSection, apiItem: ApiDeclaredItem): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     if (apiItem instanceof ApiClass) {
       if (apiItem.extendsType) {
@@ -344,7 +344,7 @@ export class MarkdownDocumenter {
             new DocPlainText({ configuration, text: 'Extends: ' })
           ])
         ]);
-        this._appendExcerptWithHyperlinks(extendsParagraph, apiItem.extendsType.excerpt);
+        this.#appendExcerptWithHyperlinks(extendsParagraph, apiItem.extendsType.excerpt);
         output.appendNode(extendsParagraph);
       }
       if (apiItem.implementsTypes.length > 0) {
@@ -358,7 +358,7 @@ export class MarkdownDocumenter {
           if (needsComma) {
             implementsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
-          this._appendExcerptWithHyperlinks(implementsParagraph, implementsType.excerpt);
+          this.#appendExcerptWithHyperlinks(implementsParagraph, implementsType.excerpt);
           needsComma = true;
         }
         output.appendNode(implementsParagraph);
@@ -377,7 +377,7 @@ export class MarkdownDocumenter {
           if (needsComma) {
             extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
-          this._appendExcerptWithHyperlinks(extendsParagraph, extendsType.excerpt);
+          this.#appendExcerptWithHyperlinks(extendsParagraph, extendsType.excerpt);
           needsComma = true;
         }
         output.appendNode(extendsParagraph);
@@ -389,7 +389,7 @@ export class MarkdownDocumenter {
         (token) =>
           token.kind === ExcerptTokenKind.Reference &&
           token.canonicalReference &&
-          this._apiModel.resolveDeclarationReference(token.canonicalReference, undefined).resolvedApiItem
+          this.#apiModel.resolveDeclarationReference(token.canonicalReference, undefined).resolvedApiItem
       );
       if (refs.length > 0) {
         const referencesParagraph: DocParagraph = new DocParagraph({ configuration }, [
@@ -409,7 +409,7 @@ export class MarkdownDocumenter {
             referencesParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
 
-          this._appendExcerptTokenWithHyperlinks(referencesParagraph, ref);
+          this.#appendExcerptTokenWithHyperlinks(referencesParagraph, ref);
           needsComma = true;
         }
         output.appendNode(referencesParagraph);
@@ -417,8 +417,8 @@ export class MarkdownDocumenter {
     }
   }
 
-  private _writeRemarksSection(output: DocSection, apiItem: ApiItem): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeRemarksSection(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
@@ -427,7 +427,7 @@ export class MarkdownDocumenter {
         // Write the @remarks block
         if (tsdocComment.remarksBlock) {
           output.appendNode(new DocHeading({ configuration, title: 'Remarks' }));
-          this._appendSection(output, tsdocComment.remarksBlock.content);
+          this.#appendSection(output, tsdocComment.remarksBlock.content);
         }
 
         // Write the @example blocks
@@ -441,7 +441,7 @@ export class MarkdownDocumenter {
 
           output.appendNode(new DocHeading({ configuration, title: heading }));
 
-          this._appendSection(output, exampleBlock.content);
+          this.#appendSection(output, exampleBlock.content);
 
           ++exampleNumber;
         }
@@ -449,8 +449,8 @@ export class MarkdownDocumenter {
     }
   }
 
-  private _writeThrowsSection(output: DocSection, apiItem: ApiItem): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeThrowsSection(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
@@ -466,15 +466,15 @@ export class MarkdownDocumenter {
           output.appendNode(new DocHeading({ configuration, title: heading }));
 
           for (const throwsBlock of throwsBlocks) {
-            this._appendSection(output, throwsBlock.content);
+            this.#appendSection(output, throwsBlock.content);
           }
         }
       }
     }
   }
 
-  private _writeDefaultValueSection(output: DocSection, apiItem: ApiItem): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeDefaultValueSection(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
@@ -490,7 +490,7 @@ export class MarkdownDocumenter {
           output.appendNode(new DocHeading({ configuration, title: heading }));
 
           for (const defaultValueBlock of defaultValueBlocks) {
-            this._appendSection(output, defaultValueBlock.content);
+            this.#appendSection(output, defaultValueBlock.content);
           }
         }
       }
@@ -500,8 +500,8 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: MODEL
    */
-  private _writeModelTable(output: DocSection, apiModel: ApiModel): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeModelTable(output: DocSection, apiModel: ApiModel): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const packagesTable: DocTable = new DocTable({
       configuration,
@@ -510,14 +510,14 @@ export class MarkdownDocumenter {
 
     for (const apiMember of apiModel.members) {
       const row: DocTableRow = new DocTableRow({ configuration }, [
-        this._createTitleCell(apiMember),
-        this._createDescriptionCell(apiMember)
+        this.#createTitleCell(apiMember),
+        this.#createDescriptionCell(apiMember)
       ]);
 
       switch (apiMember.kind) {
         case ApiItemKind.Package:
           packagesTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
       }
     }
@@ -531,8 +531,8 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: PACKAGE or NAMESPACE
    */
-  private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const abstractClassesTable: DocTable = new DocTable({
       configuration,
@@ -581,8 +581,8 @@ export class MarkdownDocumenter {
 
     for (const apiMember of apiMembers) {
       const row: DocTableRow = new DocTableRow({ configuration }, [
-        this._createTitleCell(apiMember),
-        this._createDescriptionCell(apiMember)
+        this.#createTitleCell(apiMember),
+        this.#createDescriptionCell(apiMember)
       ]);
 
       switch (apiMember.kind) {
@@ -592,37 +592,37 @@ export class MarkdownDocumenter {
           } else {
             classesTable.addRow(row);
           }
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Enum:
           enumerationsTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Interface:
           interfacesTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Namespace:
           namespacesTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Function:
           functionsTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.TypeAlias:
           typeAliasesTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Variable:
           variablesTable.addRow(row);
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
       }
     }
@@ -670,8 +670,8 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: CLASS
    */
-  private _writeClassTables(output: DocSection, apiClass: ApiClass): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeClassTables(output: DocSection, apiClass: ApiClass): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({
       configuration,
@@ -693,56 +693,56 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Modifiers', 'Description']
     });
 
-    const apiMembers: readonly ApiItem[] = this._getMembersAndWriteIncompleteWarning(apiClass, output);
+    const apiMembers: readonly ApiItem[] = this.#getMembersAndWriteIncompleteWarning(apiClass, output);
     for (const apiMember of apiMembers) {
       const isInherited: boolean = apiMember.parent !== apiClass;
       switch (apiMember.kind) {
         case ApiItemKind.Constructor: {
           constructorsTable.addRow(
             new DocTableRow({ configuration }, [
-              this._createTitleCell(apiMember),
-              this._createModifiersCell(apiMember),
-              this._createDescriptionCell(apiMember, isInherited)
+              this.#createTitleCell(apiMember),
+              this.#createModifiersCell(apiMember),
+              this.#createDescriptionCell(apiMember, isInherited)
             ])
           );
 
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
         }
         case ApiItemKind.Method: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
-              this._createTitleCell(apiMember),
-              this._createModifiersCell(apiMember),
-              this._createDescriptionCell(apiMember, isInherited)
+              this.#createTitleCell(apiMember),
+              this.#createModifiersCell(apiMember),
+              this.#createDescriptionCell(apiMember, isInherited)
             ])
           );
 
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
         }
         case ApiItemKind.Property: {
           if ((apiMember as ApiPropertyItem).isEventProperty) {
             eventsTable.addRow(
               new DocTableRow({ configuration }, [
-                this._createTitleCell(apiMember),
-                this._createModifiersCell(apiMember),
-                this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember, isInherited)
+                this.#createTitleCell(apiMember),
+                this.#createModifiersCell(apiMember),
+                this.#createPropertyTypeCell(apiMember),
+                this.#createDescriptionCell(apiMember, isInherited)
               ])
             );
           } else {
             propertiesTable.addRow(
               new DocTableRow({ configuration }, [
-                this._createTitleCell(apiMember),
-                this._createModifiersCell(apiMember),
-                this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember, isInherited)
+                this.#createTitleCell(apiMember),
+                this.#createModifiersCell(apiMember),
+                this.#createPropertyTypeCell(apiMember),
+                this.#createDescriptionCell(apiMember, isInherited)
               ])
             );
           }
 
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
         }
       }
@@ -772,8 +772,8 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: ENUM
    */
-  private _writeEnumTables(output: DocSection, apiEnum: ApiEnum): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeEnumTables(output: DocSection, apiEnum: ApiEnum): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const enumMembersTable: DocTable = new DocTable({
       configuration,
@@ -788,8 +788,8 @@ export class MarkdownDocumenter {
               new DocPlainText({ configuration, text: Utilities.getConciseSignature(apiEnumMember) })
             ])
           ]),
-          this._createInitializerCell(apiEnumMember),
-          this._createDescriptionCell(apiEnumMember)
+          this.#createInitializerCell(apiEnumMember),
+          this.#createDescriptionCell(apiEnumMember)
         ])
       );
     }
@@ -803,8 +803,8 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfaceTables(output: DocSection, apiInterface: ApiInterface): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeInterfaceTables(output: DocSection, apiInterface: ApiInterface): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({
       configuration,
@@ -821,7 +821,7 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Description']
     });
 
-    const apiMembers: readonly ApiItem[] = this._getMembersAndWriteIncompleteWarning(apiInterface, output);
+    const apiMembers: readonly ApiItem[] = this.#getMembersAndWriteIncompleteWarning(apiInterface, output);
     for (const apiMember of apiMembers) {
       const isInherited: boolean = apiMember.parent !== apiInterface;
       switch (apiMember.kind) {
@@ -829,36 +829,36 @@ export class MarkdownDocumenter {
         case ApiItemKind.MethodSignature: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
-              this._createTitleCell(apiMember),
-              this._createDescriptionCell(apiMember, isInherited)
+              this.#createTitleCell(apiMember),
+              this.#createDescriptionCell(apiMember, isInherited)
             ])
           );
 
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
         }
         case ApiItemKind.PropertySignature: {
           if ((apiMember as ApiPropertyItem).isEventProperty) {
             eventsTable.addRow(
               new DocTableRow({ configuration }, [
-                this._createTitleCell(apiMember),
-                this._createModifiersCell(apiMember),
-                this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember, isInherited)
+                this.#createTitleCell(apiMember),
+                this.#createModifiersCell(apiMember),
+                this.#createPropertyTypeCell(apiMember),
+                this.#createDescriptionCell(apiMember, isInherited)
               ])
             );
           } else {
             propertiesTable.addRow(
               new DocTableRow({ configuration }, [
-                this._createTitleCell(apiMember),
-                this._createModifiersCell(apiMember),
-                this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember, isInherited)
+                this.#createTitleCell(apiMember),
+                this.#createModifiersCell(apiMember),
+                this.#createPropertyTypeCell(apiMember),
+                this.#createDescriptionCell(apiMember, isInherited)
               ])
             );
           }
 
-          this._writeApiItemPage(apiMember);
+          this.#writeApiItemPage(apiMember);
           break;
         }
       }
@@ -883,8 +883,8 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: FUNCTION-LIKE
    */
-  private _writeParameterTables(output: DocSection, apiParameterListMixin: ApiParameterListMixin): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeParameterTables(output: DocSection, apiParameterListMixin: ApiParameterListMixin): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const parametersTable: DocTable = new DocTable({
       configuration,
@@ -903,7 +903,7 @@ export class MarkdownDocumenter {
       }
 
       if (apiParameter.tsdocParamBlock) {
-        this._appendAndMergeSection(parameterDescription, apiParameter.tsdocParamBlock.content);
+        this.#appendAndMergeSection(parameterDescription, apiParameter.tsdocParamBlock.content);
       }
 
       parametersTable.addRow(
@@ -914,7 +914,7 @@ export class MarkdownDocumenter {
             ])
           ]),
           new DocTableCell({ configuration }, [
-            this._createParagraphForTypeExcerpt(apiParameter.parameterTypeExcerpt)
+            this.#createParagraphForTypeExcerpt(apiParameter.parameterTypeExcerpt)
           ]),
           new DocTableCell({ configuration }, parameterDescription.nodes)
         ])
@@ -936,38 +936,38 @@ export class MarkdownDocumenter {
         ])
       );
 
-      output.appendNode(this._createParagraphForTypeExcerpt(returnTypeExcerpt));
+      output.appendNode(this.#createParagraphForTypeExcerpt(returnTypeExcerpt));
 
       if (apiParameterListMixin instanceof ApiDocumentedItem) {
         if (apiParameterListMixin.tsdocComment && apiParameterListMixin.tsdocComment.returnsBlock) {
-          this._appendSection(output, apiParameterListMixin.tsdocComment.returnsBlock.content);
+          this.#appendSection(output, apiParameterListMixin.tsdocComment.returnsBlock.content);
         }
       }
     }
   }
 
-  private _createParagraphForTypeExcerpt(excerpt: Excerpt): DocParagraph {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #createParagraphForTypeExcerpt(excerpt: Excerpt): DocParagraph {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const paragraph: DocParagraph = new DocParagraph({ configuration });
 
     if (!excerpt.text.trim()) {
       paragraph.appendNode(new DocPlainText({ configuration, text: '(not declared)' }));
     } else {
-      this._appendExcerptWithHyperlinks(paragraph, excerpt);
+      this.#appendExcerptWithHyperlinks(paragraph, excerpt);
     }
 
     return paragraph;
   }
 
-  private _appendExcerptWithHyperlinks(docNodeContainer: DocNodeContainer, excerpt: Excerpt): void {
+  #appendExcerptWithHyperlinks(docNodeContainer: DocNodeContainer, excerpt: Excerpt): void {
     for (const token of excerpt.spannedTokens) {
-      this._appendExcerptTokenWithHyperlinks(docNodeContainer, token);
+      this.#appendExcerptTokenWithHyperlinks(docNodeContainer, token);
     }
   }
 
-  private _appendExcerptTokenWithHyperlinks(docNodeContainer: DocNodeContainer, token: ExcerptToken): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #appendExcerptTokenWithHyperlinks(docNodeContainer: DocNodeContainer, token: ExcerptToken): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
     // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
@@ -976,7 +976,7 @@ export class MarkdownDocumenter {
 
     // If it's hyperlinkable, then append a DocLinkTag
     if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
-      const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+      const apiItemResult: IResolveDeclarationReferenceResult = this.#apiModel.resolveDeclarationReference(
         token.canonicalReference,
         undefined
       );
@@ -987,7 +987,7 @@ export class MarkdownDocumenter {
             configuration,
             tagName: '@link',
             linkText: unwrappedTokenText,
-            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
+            urlDestination: this.#getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
           })
         );
         return;
@@ -998,8 +998,8 @@ export class MarkdownDocumenter {
     docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
   }
 
-  private _createTitleCell(apiItem: ApiItem): DocTableCell {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #createTitleCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     let linkText: string = Utilities.getConciseSignature(apiItem);
     if (ApiOptionalMixin.isBaseClassOf(apiItem) && apiItem.isOptional) {
@@ -1012,7 +1012,7 @@ export class MarkdownDocumenter {
           configuration,
           tagName: '@link',
           linkText: linkText,
-          urlDestination: this._getLinkFilenameForApiItem(apiItem)
+          urlDestination: this.#getLinkFilenameForApiItem(apiItem)
         })
       ])
     ]);
@@ -1025,8 +1025,8 @@ export class MarkdownDocumenter {
    * We mostly assume that the input is an ApiDocumentedItem, but it's easier to perform this as a runtime
    * check than to have each caller perform a type cast.
    */
-  private _createDescriptionCell(apiItem: ApiItem, isInherited: boolean = false): DocTableCell {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #createDescriptionCell(apiItem: ApiItem, isInherited: boolean = false): DocTableCell {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
 
@@ -1055,7 +1055,7 @@ export class MarkdownDocumenter {
 
     if (apiItem instanceof ApiDocumentedItem) {
       if (apiItem.tsdocComment !== undefined) {
-        this._appendAndMergeSection(section, apiItem.tsdocComment.summarySection);
+        this.#appendAndMergeSection(section, apiItem.tsdocComment.summarySection);
       }
     }
 
@@ -1067,7 +1067,7 @@ export class MarkdownDocumenter {
             configuration,
             tagName: '@link',
             linkText: apiItem.parent.displayName,
-            urlDestination: this._getLinkFilenameForApiItem(apiItem.parent)
+            urlDestination: this.#getLinkFilenameForApiItem(apiItem.parent)
           }),
           new DocPlainText({ configuration, text: ')' })
         ])
@@ -1077,8 +1077,8 @@ export class MarkdownDocumenter {
     return new DocTableCell({ configuration }, section.nodes);
   }
 
-  private _createModifiersCell(apiItem: ApiItem): DocTableCell {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #createModifiersCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
 
@@ -1121,20 +1121,20 @@ export class MarkdownDocumenter {
     return new DocTableCell({ configuration }, section.nodes);
   }
 
-  private _createPropertyTypeCell(apiItem: ApiItem): DocTableCell {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #createPropertyTypeCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
 
     if (apiItem instanceof ApiPropertyItem) {
-      section.appendNode(this._createParagraphForTypeExcerpt(apiItem.propertyTypeExcerpt));
+      section.appendNode(this.#createParagraphForTypeExcerpt(apiItem.propertyTypeExcerpt));
     }
 
     return new DocTableCell({ configuration }, section.nodes);
   }
 
-  private _createInitializerCell(apiItem: ApiItem): DocTableCell {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #createInitializerCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
 
@@ -1149,15 +1149,15 @@ export class MarkdownDocumenter {
     return new DocTableCell({ configuration }, section.nodes);
   }
 
-  private _writeBreadcrumb(output: DocSection, apiItem: ApiItem): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeBreadcrumb(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
 
     output.appendNodeInParagraph(
       new DocLinkTag({
         configuration,
         tagName: '@link',
         linkText: 'Home',
-        urlDestination: this._getLinkFilenameForApiItem(this._apiModel)
+        urlDestination: this.#getLinkFilenameForApiItem(this.#apiModel)
       })
     );
 
@@ -1179,15 +1179,15 @@ export class MarkdownDocumenter {
               configuration,
               tagName: '@link',
               linkText: hierarchyItem.displayName,
-              urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
+              urlDestination: this.#getLinkFilenameForApiItem(hierarchyItem)
             })
           ]);
       }
     }
   }
 
-  private _writeAlphaWarning(output: DocSection): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeAlphaWarning(output: DocSection): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
     const betaWarning: string =
       'This API is provided as an alpha preview for developers and may change' +
       ' based on feedback that we receive.  Do not use this API in a production environment.';
@@ -1198,8 +1198,8 @@ export class MarkdownDocumenter {
     );
   }
 
-  private _writeBetaWarning(output: DocSection): void {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+  #writeBetaWarning(output: DocSection): void {
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
     const betaWarning: string =
       'This API is provided as a beta preview for developers and may change' +
       ' based on feedback that we receive.  Do not use this API in a production environment.';
@@ -1210,13 +1210,13 @@ export class MarkdownDocumenter {
     );
   }
 
-  private _appendSection(output: DocSection, docSection: DocSection): void {
+  #appendSection(output: DocSection, docSection: DocSection): void {
     for (const node of docSection.nodes) {
       output.appendNode(node);
     }
   }
 
-  private _appendAndMergeSection(output: DocSection, docSection: DocSection): void {
+  #appendAndMergeSection(output: DocSection, docSection: DocSection): void {
     let firstNode: boolean = true;
     for (const node of docSection.nodes) {
       if (firstNode) {
@@ -1232,12 +1232,12 @@ export class MarkdownDocumenter {
     }
   }
 
-  private _getMembersAndWriteIncompleteWarning(
+  #getMembersAndWriteIncompleteWarning(
     apiClassOrInterface: ApiClass | ApiInterface,
     output: DocSection
   ): readonly ApiItem[] {
-    const configuration: TSDocConfiguration = this._tsdocConfiguration;
-    const showInheritedMembers: boolean = !!this._documenterConfig?.configFile.showInheritedMembers;
+    const configuration: TSDocConfiguration = this.#tsdocConfiguration;
+    const showInheritedMembers: boolean = !!this.#documenterConfig?.configFile.showInheritedMembers;
     if (!showInheritedMembers) {
       return apiClassOrInterface.members;
     }
@@ -1266,7 +1266,7 @@ export class MarkdownDocumenter {
     return result.items;
   }
 
-  private _getFilenameForApiItem(apiItem: ApiItem): string {
+  #getFilenameForApiItem(apiItem: ApiItem): string {
     if (apiItem.kind === ApiItemKind.Model) {
       return 'index.md';
     }
@@ -1298,12 +1298,12 @@ export class MarkdownDocumenter {
     return baseName + '.md';
   }
 
-  private _getLinkFilenameForApiItem(apiItem: ApiItem): string {
-    return './' + this._getFilenameForApiItem(apiItem);
+  #getLinkFilenameForApiItem(apiItem: ApiItem): string {
+    return './' + this.#getFilenameForApiItem(apiItem);
   }
 
-  private _deleteOldOutputFiles(): void {
-    console.log('Deleting old output from ' + this._outputFolder);
-    FileSystem.ensureEmptyFolder(this._outputFolder);
+  #deleteOldOutputFiles(): void {
+    console.log('Deleting old output from ' + this.#outputFolder);
+    FileSystem.ensureEmptyFolder(this.#outputFolder);
   }
 }

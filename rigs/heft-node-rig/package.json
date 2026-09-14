@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "",
-    "_phase:build": ""
+    "_phase:build": "",
+    "_phase:pack": "rush-pnpm pack"
   },
   "repository": {
     "type": "git",

@@ -52,62 +52,62 @@
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._cache",
+      "scopeId": ".SassProcessor.cache",
       "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._cache",
+      "scopeId": ".SassProcessor.cache",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizeAsync",
+      "scopeId": ".SassProcessor.canonicalizeAsync",
       "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizeFileInnerAsync",
+      "scopeId": ".SassProcessor.canonicalizeFileInnerAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizeFileInnerAsync",
+      "scopeId": ".SassProcessor.canonicalizeFileInnerAsync",
       "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizeFileInnerAsync",
+      "scopeId": ".SassProcessor.canonicalizeFileInnerAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizeHeftInnerAsync",
+      "scopeId": ".SassProcessor.canonicalizeHeftInnerAsync",
       "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizePackageInnerAsync",
+      "scopeId": ".SassProcessor.canonicalizePackageInnerAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._canonicalizePackageInnerAsync",
+      "scopeId": ".SassProcessor.canonicalizePackageInnerAsync",
       "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._compileFileAsync",
+      "scopeId": ".SassProcessor.compileFileAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._compileFileAsync",
+      "scopeId": ".SassProcessor.compileFileAsync",
       "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",
-      "scopeId": ".SassProcessor._compileFileAsync",
+      "scopeId": ".SassProcessor.compileFileAsync",
       "rule": "max-lines-per-function"
     },
     {

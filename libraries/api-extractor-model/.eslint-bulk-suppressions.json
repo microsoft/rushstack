@@ -32,7 +32,7 @@
     },
     {
       "file": "src/items/ApiDeclaredItem.ts",
-      "scopeId": ".ApiDeclaredItem._buildSourceLocation",
+      "scopeId": ".ApiDeclaredItem.buildSourceLocation",
       "rule": "complexity"
     },
     {
@@ -54,11 +54,6 @@
       "file": "src/items/ApiDeclaredItem.ts",
       "scopeId": ".ApiDeclaredItem.serializeInto",
       "rule": "complexity"
-    },
-    {
-      "file": "src/items/ApiDeclaredItem.ts",
-      "scopeId": ".ApiDeclaredItem.sourceLocation",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/items/ApiDocumentedItem.ts",
@@ -471,11 +466,6 @@
       "rule": "complexity"
     },
     {
-      "file": "src/mixins/Excerpt.ts",
-      "scopeId": ".Excerpt.text",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
       "file": "src/model/ApiCallSignature.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -627,7 +617,7 @@
     },
     {
       "file": "src/model/ApiModel.ts",
-      "scopeId": ".ApiModel._initApiItemsRecursive",
+      "scopeId": ".ApiModel.initApiItemsRecursive",
       "rule": "complexity"
     },
     {
@@ -792,47 +782,47 @@
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver._selectUsingIndexSelector",
+      "scopeId": ".ModelReferenceResolver.resolve",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver._selectUsingIndexSelector",
+      "scopeId": ".ModelReferenceResolver.resolve",
       "rule": "complexity"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver._selectUsingIndexSelector",
+      "scopeId": ".ModelReferenceResolver.resolve",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver._selectUsingSystemSelector",
+      "scopeId": ".ModelReferenceResolver.selectUsingIndexSelector",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver._selectUsingSystemSelector",
+      "scopeId": ".ModelReferenceResolver.selectUsingIndexSelector",
       "rule": "complexity"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver._selectUsingSystemSelector",
+      "scopeId": ".ModelReferenceResolver.selectUsingIndexSelector",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver.resolve",
+      "scopeId": ".ModelReferenceResolver.selectUsingSystemSelector",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver.resolve",
+      "scopeId": ".ModelReferenceResolver.selectUsingSystemSelector",
       "rule": "complexity"
     },
     {
       "file": "src/model/ModelReferenceResolver.ts",
-      "scopeId": ".ModelReferenceResolver.resolve",
+      "scopeId": ".ModelReferenceResolver.selectUsingSystemSelector",
       "rule": "max-lines-per-function"
     },
     {

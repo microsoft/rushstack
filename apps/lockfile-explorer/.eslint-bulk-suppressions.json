@@ -62,38 +62,18 @@
     },
     {
       "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._checkVersionCompatibilityAsync",
+      "scopeId": ".CheckAction.checkVersionCompatibilityAsync",
       "rule": "complexity"
     },
     {
       "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._checkVersionCompatibilityAsync",
+      "scopeId": ".CheckAction.checkVersionCompatibilityAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._checkVersionCompatibilityAsync",
+      "scopeId": ".CheckAction.checkVersionCompatibilityAsync",
       "rule": "max-params"
-    },
-    {
-      "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._performVersionRestrictionCheckAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._searchAndValidateDependenciesAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._searchAndValidateDependenciesAsync",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/cli/lint/actions/CheckAction.ts",
-      "scopeId": ".CheckAction._searchAndValidateDependenciesAsync",
-      "rule": "max-lines-per-function"
     },
     {
       "file": "src/cli/lint/actions/CheckAction.ts",
@@ -108,6 +88,26 @@
     {
       "file": "src/cli/lint/actions/CheckAction.ts",
       "scopeId": ".CheckAction.onExecuteAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/lint/actions/CheckAction.ts",
+      "scopeId": ".CheckAction.performVersionRestrictionCheckAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/lint/actions/CheckAction.ts",
+      "scopeId": ".CheckAction.searchAndValidateDependenciesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/lint/actions/CheckAction.ts",
+      "scopeId": ".CheckAction.searchAndValidateDependenciesAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/cli/lint/actions/CheckAction.ts",
+      "scopeId": ".CheckAction.searchAndValidateDependenciesAsync",
       "rule": "max-lines-per-function"
     },
     {

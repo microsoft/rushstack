@@ -12,27 +12,27 @@
     },
     {
       "file": "src/ApiExtractorPlugin.ts",
-      "scopeId": ".ApiExtractorPlugin._getApiExtractorConfigurationAsync",
+      "scopeId": ".ApiExtractorPlugin.getApiExtractorConfigurationAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/ApiExtractorPlugin.ts",
-      "scopeId": ".ApiExtractorPlugin._getApiExtractorConfigurationFilePathAsync",
+      "scopeId": ".ApiExtractorPlugin.getApiExtractorConfigurationFilePathAsync",
       "rule": "complexity"
     },
     {
       "file": "src/ApiExtractorPlugin.ts",
-      "scopeId": ".ApiExtractorPlugin._runApiExtractorAsync",
+      "scopeId": ".ApiExtractorPlugin.runApiExtractorAsync",
       "rule": "complexity"
     },
     {
       "file": "src/ApiExtractorPlugin.ts",
-      "scopeId": ".ApiExtractorPlugin._runApiExtractorAsync",
+      "scopeId": ".ApiExtractorPlugin.runApiExtractorAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/ApiExtractorPlugin.ts",
-      "scopeId": ".ApiExtractorPlugin._runApiExtractorAsync",
+      "scopeId": ".ApiExtractorPlugin.runApiExtractorAsync",
       "rule": "max-params"
     },
     {

@@ -51,15 +51,15 @@ export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
  */
 export class StdioSummarizer extends TerminalWritable {
   // Capture up to this many leading lines
-  private _leadingLines: number;
+  #leadingLines: number;
 
   // Capture up to this many trailing lines
-  private _trailingLines: number;
+  #trailingLines: number;
 
-  private readonly _abridgedLeading: string[];
-  private readonly _abridgedTrailing: string[];
-  private _abridgedOmittedLines: number = 0;
-  private _abridgedStderr: boolean;
+  readonly #abridgedLeading: string[];
+  readonly #abridgedTrailing: string[];
+  #abridgedOmittedLines: number = 0;
+  #abridgedStderr: boolean;
 
   public constructor(options?: IStdioSummarizerOptions) {
     super(options);
@@ -68,12 +68,12 @@ export class StdioSummarizer extends TerminalWritable {
       options = {};
     }
 
-    this._leadingLines = options.leadingLines !== undefined ? options.leadingLines : 10;
-    this._trailingLines = options.trailingLines !== undefined ? options.trailingLines : 10;
+    this.#leadingLines = options.leadingLines !== undefined ? options.leadingLines : 10;
+    this.#trailingLines = options.trailingLines !== undefined ? options.trailingLines : 10;
 
-    this._abridgedLeading = [];
-    this._abridgedTrailing = [];
-    this._abridgedStderr = false;
+    this.#abridgedLeading = [];
+    this.#abridgedTrailing = [];
+    this.#abridgedStderr = false;
   }
 
   /**
@@ -86,14 +86,14 @@ export class StdioSummarizer extends TerminalWritable {
     if (this.isOpen) {
       throw new Error('The summary cannot be prepared until after close() is called.');
     }
-    const report: string[] = [...this._abridgedLeading];
-    if (this._abridgedOmittedLines === 1) {
-      report.push(`  ...${this._abridgedOmittedLines} line omitted...\n`);
+    const report: string[] = [...this.#abridgedLeading];
+    if (this.#abridgedOmittedLines === 1) {
+      report.push(`  ...${this.#abridgedOmittedLines} line omitted...\n`);
     }
-    if (this._abridgedOmittedLines > 1) {
-      report.push(`  ...${this._abridgedOmittedLines} lines omitted...\n`);
+    if (this.#abridgedOmittedLines > 1) {
+      report.push(`  ...${this.#abridgedOmittedLines} lines omitted...\n`);
     }
-    report.push(...this._abridgedTrailing);
+    report.push(...this.#abridgedTrailing);
     return report.join('');
   }
 
@@ -106,29 +106,29 @@ export class StdioSummarizer extends TerminalWritable {
       );
     }
 
-    if (chunk.kind === TerminalChunkKind.Stderr && !this._abridgedStderr) {
+    if (chunk.kind === TerminalChunkKind.Stderr && !this.#abridgedStderr) {
       // The first time we see stderr, switch to capturing stderr
-      this._abridgedStderr = true;
-      this._abridgedLeading.length = 0;
-      this._abridgedTrailing.length = 0;
-      this._abridgedOmittedLines = 0;
-    } else if (this._abridgedStderr && chunk.kind !== TerminalChunkKind.Stderr) {
+      this.#abridgedStderr = true;
+      this.#abridgedLeading.length = 0;
+      this.#abridgedTrailing.length = 0;
+      this.#abridgedOmittedLines = 0;
+    } else if (this.#abridgedStderr && chunk.kind !== TerminalChunkKind.Stderr) {
       // If we're capturing stderr, then ignore non-stderr input
       return;
     }
 
     // Did we capture enough leading lines?
-    if (this._abridgedLeading.length < this._leadingLines) {
-      this._abridgedLeading.push(chunk.text);
+    if (this.#abridgedLeading.length < this.#leadingLines) {
+      this.#abridgedLeading.push(chunk.text);
       return;
     }
 
-    this._abridgedTrailing.push(chunk.text);
+    this.#abridgedTrailing.push(chunk.text);
 
     // If we captured to many trailing lines, omit the extras
-    while (this._abridgedTrailing.length > this._trailingLines) {
-      this._abridgedTrailing.shift();
-      ++this._abridgedOmittedLines;
+    while (this.#abridgedTrailing.length > this.#trailingLines) {
+      this.#abridgedTrailing.shift();
+      ++this.#abridgedOmittedLines;
     }
   }
 }

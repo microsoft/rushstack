@@ -7,21 +7,6 @@
     },
     {
       "file": "src/LookupByPath.ts",
-      "scopeId": ".LookupByPath._findLongestPrefixMatch",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LookupByPath.ts",
-      "scopeId": ".LookupByPath._findLongestPrefixMatch",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/LookupByPath.ts",
-      "scopeId": ".LookupByPath._findNodeAtPrefix",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LookupByPath.ts",
       "scopeId": ".LookupByPath.constructor",
       "rule": "complexity"
     },
@@ -53,6 +38,21 @@
     {
       "file": "src/LookupByPath.ts",
       "scopeId": ".LookupByPath.findChildPathFromSegments",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.findLongestPrefixMatch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.findLongestPrefixMatch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LookupByPath.ts",
+      "scopeId": ".LookupByPath.findNodeAtPrefix",
       "rule": "complexity"
     },
     {

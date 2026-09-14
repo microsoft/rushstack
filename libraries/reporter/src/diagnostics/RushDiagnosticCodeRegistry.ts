@@ -111,16 +111,13 @@ type AreValidRushDiagnosticCodeSegments<
     ? IsValidRushDiagnosticCodeSegment<TSegments>
     : false;
 
-type ValidateRushDiagnosticCode<TCode extends string> =
-  TCode extends `RUSH_${infer Segments}`
-    ? AreValidRushDiagnosticCodeSegments<Segments> extends true
-      ? TCode
-      : never
-    : never;
+type ValidateRushDiagnosticCode<TCode extends string> = TCode extends `RUSH_${infer Segments}`
+  ? AreValidRushDiagnosticCodeSegments<Segments> extends true
+    ? TCode
+    : never
+  : never;
 
-type ValidatedRushDiagnosticCodeDefinitions<
-  TDefinitions extends readonly IRushDiagnosticCodeDefinition[]
-> = {
+type ValidatedRushDiagnosticCodeDefinitions<TDefinitions extends readonly IRushDiagnosticCodeDefinition[]> = {
   readonly [K in keyof TDefinitions]: TDefinitions[K] extends IRushDiagnosticCodeDefinition
     ? TDefinitions[K] & {
         readonly code: ValidateRushDiagnosticCode<TDefinitions[K]['code']>;
@@ -130,9 +127,7 @@ type ValidatedRushDiagnosticCodeDefinitions<
 
 function defineRushDiagnosticCodeDefinitions<
   const TDefinitions extends readonly IRushDiagnosticCodeDefinition[]
->(
-  definitions: TDefinitions & ValidatedRushDiagnosticCodeDefinitions<TDefinitions>
-): TDefinitions {
+>(definitions: TDefinitions & ValidatedRushDiagnosticCodeDefinitions<TDefinitions>): TDefinitions {
   return definitions;
 }
 
@@ -233,6 +228,13 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS = defineRushDiagnosticCodeDefiniti
     defaultSeverity: 'error',
     summaryKey: 'diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary',
     detailKey: undefined
+  },
+  {
+    code: 'RUSH_COMMAND_FAILED',
+    category: 'operation',
+    defaultSeverity: 'error',
+    summaryKey: 'diagnostic.RUSH_COMMAND_FAILED.summary',
+    detailKey: undefined
   }
 ]);
 
@@ -257,12 +259,11 @@ export type RushDiagnosticTemplateKey = NonNullable<
  *
  * @beta
  */
-export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<RushDiagnosticCode, IRushDiagnosticCodeDefinition> =
-  new Map(
-    RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
-      (definition: IRushDiagnosticCodeDefinition) => [definition.code, definition] as const
-    )
-  );
+export const RUSH_DIAGNOSTIC_CODES: ReadonlyMap<RushDiagnosticCode, IRushDiagnosticCodeDefinition> = new Map(
+  RUSH_DIAGNOSTIC_CODE_DEFINITIONS.map(
+    (definition: IRushDiagnosticCodeDefinition) => [definition.code, definition] as const
+  )
+);
 
 export { isValidRushDiagnosticCode } from './RushDiagnosticCode';
 export { RUSH_DIAGNOSTIC_TEMPLATES } from './templates';

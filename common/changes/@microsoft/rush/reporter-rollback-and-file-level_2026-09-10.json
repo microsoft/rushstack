@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve legacy flags after valueless reporter rollback controls and default an unqualified primary file reporter to debug detail.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

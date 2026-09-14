@@ -147,17 +147,17 @@
     },
     {
       "file": "src/tools/workspace-details.ts",
-      "scopeId": ".RushWorkspaceDetailsTool._getRobotReadableWorkspaceDetails",
+      "scopeId": ".RushWorkspaceDetailsTool.getRobotReadableWorkspaceDetails",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/tools/workspace-details.ts",
-      "scopeId": ".RushWorkspaceDetailsTool._getRobotReadableWorkspaceDetails",
+      "scopeId": ".RushWorkspaceDetailsTool.getRobotReadableWorkspaceDetails",
       "rule": "complexity"
     },
     {
       "file": "src/tools/workspace-details.ts",
-      "scopeId": ".RushWorkspaceDetailsTool._getRobotReadableWorkspaceDetails",
+      "scopeId": ".RushWorkspaceDetailsTool.getRobotReadableWorkspaceDetails",
       "rule": "max-lines-per-function"
     },
     {

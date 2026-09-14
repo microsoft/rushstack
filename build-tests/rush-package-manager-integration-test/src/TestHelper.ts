@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type * as child_process from 'node:child_process';
 
@@ -150,8 +151,8 @@ export class TestHelper {
 
       // Verify symlinks resolve correctly for local dependencies
       if (dep.startsWith('test-project-')) {
-        const depRealPath: string = await FileSystem.getRealPathAsync(depPath);
-        const expectedRealPath: string = path.join(testRepoPath, 'projects', dep);
+        const depRealPath: string = await fs.realpath(depPath);
+        const expectedRealPath: string = await fs.realpath(path.join(testRepoPath, 'projects', dep));
         if (depRealPath !== expectedRealPath) {
           throw new Error(
             `ERROR: Symlink for ${dep} does not resolve correctly!\n` +

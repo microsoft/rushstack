@@ -259,7 +259,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         // all source files to this set of static assets. This would allow us to avoid
         // having to copy the static assets multiple times, increasing build times and
         // package size.
-        for (const copyOperation of await this._getStaticAssetCopyOperationsAsync(
+        for (const copyOperation of await this.#getStaticAssetCopyOperationsAsync(
           taskSession,
           heftConfiguration
         )) {
@@ -271,7 +271,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     );
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      const builder: TypeScriptBuilder | false = await this._getTypeScriptBuilderAsync(
+      const builder: TypeScriptBuilder | false = await this.#getTypeScriptBuilderAsync(
         taskSession,
         heftConfiguration
       );
@@ -286,7 +286,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
         if (incrementalBuilder === undefined) {
           // eslint-disable-next-line require-atomic-updates
-          incrementalBuilder = await this._getTypeScriptBuilderAsync(taskSession, heftConfiguration);
+          incrementalBuilder = await this.#getTypeScriptBuilderAsync(taskSession, heftConfiguration);
         }
 
         if (incrementalBuilder) {
@@ -296,11 +296,11 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     );
   }
 
-  private async _getStaticAssetCopyOperationsAsync(
+  async #getStaticAssetCopyOperationsAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyOperation[]> {
-    const { typeScriptConfigurationJson, partialTsconfigFile } = await this._loadConfigAsync(
+    const { typeScriptConfigurationJson, partialTsconfigFile } = await this.#loadConfigAsync(
       taskSession,
       heftConfiguration
     );
@@ -341,11 +341,11 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     return copyOperations;
   }
 
-  private async _getTypeScriptBuilderAsync(
+  async #getTypeScriptBuilderAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<TypeScriptBuilder | false> {
-    const { typeScriptConfigurationJson, partialTsconfigFile } = await this._loadConfigAsync(
+    const { typeScriptConfigurationJson, partialTsconfigFile } = await this.#loadConfigAsync(
       taskSession,
       heftConfiguration
     );
@@ -391,7 +391,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     return typeScriptBuilder;
   }
 
-  private async _loadConfigAsync(
+  async #loadConfigAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<ITypeScriptConfigurationJsonAndPartialTsconfigFile> {

@@ -38,6 +38,16 @@
     {
       "file": "src/runTests.ts",
       "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/runTests.ts",
+      "scopeId": ".",
       "rule": "sort-imports"
     },
     {
@@ -53,6 +63,11 @@
     {
       "file": "src/runTests.ts",
       "scopeId": ".runTestsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/testLinkIdentity.ts",
+      "scopeId": ".testLinkIdentityAsync",
       "rule": "max-lines-per-function"
     },
     {

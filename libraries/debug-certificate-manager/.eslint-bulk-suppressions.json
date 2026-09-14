@@ -27,82 +27,37 @@
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._createCACertificateAsync",
+      "scopeId": ".CertificateManager.createCACertificateAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._createCACertificateAsync",
+      "scopeId": ".CertificateManager.createCACertificateAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._createDevelopmentCertificateAsync",
+      "scopeId": ".CertificateManager.createDevelopmentCertificateAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._createDevelopmentCertificateAsync",
+      "scopeId": ".CertificateManager.createDevelopmentCertificateAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._detectIfCertificateIsTrustedAsync",
+      "scopeId": ".CertificateManager.detectIfCertificateIsTrustedAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._detectIfCertificateIsTrustedAsync",
+      "scopeId": ".CertificateManager.detectIfCertificateIsTrustedAsync",
       "rule": "complexity"
     },
     {
       "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._detectIfCertificateIsTrustedAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._ensureCertificateInternalAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._ensureCertificateInternalAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._parseMacOsMatchingCertificateHash",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._parseMacOsMatchingCertificateHash",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._trySetFriendlyNameAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._trySetFriendlyNameAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._tryTrustCertificateAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._tryTrustCertificateAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/CertificateManager.ts",
-      "scopeId": ".CertificateManager._tryTrustCertificateAsync",
+      "scopeId": ".CertificateManager.detectIfCertificateIsTrustedAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -118,6 +73,51 @@
     {
       "file": "src/CertificateManager.ts",
       "scopeId": ".CertificateManager.ensureCertificateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.ensureCertificateInternalAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.ensureCertificateInternalAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.parseMacOsMatchingCertificateHash",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.parseMacOsMatchingCertificateHash",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.trySetFriendlyNameAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.trySetFriendlyNameAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.tryTrustCertificateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.tryTrustCertificateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CertificateManager.ts",
+      "scopeId": ".CertificateManager.tryTrustCertificateAsync",
       "rule": "max-lines-per-function"
     },
     {

@@ -14,9 +14,9 @@ import {
 import { RushMcpPluginLoader } from './pluginFramework/RushMcpPluginLoader';
 
 export class RushMCPServer extends McpServer {
-  private _rushWorkspacePath: string;
-  private _tools: BaseTool[] = [];
-  private _pluginLoader: RushMcpPluginLoader;
+  #rushWorkspacePath: string;
+  #tools: BaseTool[] = [];
+  #pluginLoader: RushMcpPluginLoader;
 
   public constructor(rushWorkspacePath: string) {
     super({
@@ -24,29 +24,29 @@ export class RushMCPServer extends McpServer {
       version: '1.0.0'
     });
 
-    this._rushWorkspacePath = rushWorkspacePath;
-    this._pluginLoader = new RushMcpPluginLoader(this._rushWorkspacePath, this);
+    this.#rushWorkspacePath = rushWorkspacePath;
+    this.#pluginLoader = new RushMcpPluginLoader(this.#rushWorkspacePath, this);
   }
 
   public async startAsync(): Promise<void> {
-    this._initializeTools();
-    this._registerTools();
+    this.#initializeTools();
+    this.#registerTools();
 
-    await this._pluginLoader.loadAsync();
+    await this.#pluginLoader.loadAsync();
   }
 
-  private _initializeTools(): void {
-    this._tools.push(new RushConflictResolverTool());
-    this._tools.push(new RushMigrateProjectTool(this._rushWorkspacePath));
-    this._tools.push(new RushCommandValidatorTool());
-    this._tools.push(new RushWorkspaceDetailsTool());
-    this._tools.push(new RushProjectDetailsTool());
+  #initializeTools(): void {
+    this.#tools.push(new RushConflictResolverTool());
+    this.#tools.push(new RushMigrateProjectTool(this.#rushWorkspacePath));
+    this.#tools.push(new RushCommandValidatorTool());
+    this.#tools.push(new RushWorkspaceDetailsTool());
+    this.#tools.push(new RushProjectDetailsTool());
   }
 
-  private _registerTools(): void {
-    process.chdir(this._rushWorkspacePath);
+  #registerTools(): void {
+    process.chdir(this.#rushWorkspacePath);
 
-    for (const tool of this._tools) {
+    for (const tool of this.#tools) {
       tool.register(this);
     }
   }

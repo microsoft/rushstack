@@ -14,7 +14,8 @@
   "homepage": "https://rushstack.io",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "bin": {
     "rundown": "./bin/rundown"

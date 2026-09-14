@@ -171,7 +171,7 @@ describe('compatibility goldens', () => {
     // full-detail reporter can retain the complete record.
     const forwardCompatible: Record<string, unknown> = {
       ...({
-        protocolVersion: { major: 1, minor: 1 },
+        protocolVersion: { major: 1, minor: 3 },
         eventId: 'evt_future',
         sessionId: 'sess_root',
         sequence: 9,

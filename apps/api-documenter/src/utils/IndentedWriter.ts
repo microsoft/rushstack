@@ -37,37 +37,37 @@ export class IndentedWriter {
    */
   public defaultIndentPrefix: string = '  ';
 
-  private readonly _builder: IStringBuilder;
+  readonly #builder: IStringBuilder;
 
-  private _latestChunk: string | undefined;
-  private _previousChunk: string | undefined;
-  private _atStartOfLine: boolean;
+  #latestChunk: string | undefined;
+  #previousChunk: string | undefined;
+  #atStartOfLine: boolean;
 
-  private readonly _indentStack: string[];
-  private _indentText: string;
+  readonly #indentStack: string[];
+  #indentText: string;
 
-  private _beforeStack: string[];
-  private _isWritingBeforeStack: boolean;
+  #beforeStack: string[];
+  #isWritingBeforeStack: boolean;
 
   public constructor(builder?: IStringBuilder) {
-    this._builder = builder === undefined ? new StringBuilder() : builder;
+    this.#builder = builder === undefined ? new StringBuilder() : builder;
 
-    this._latestChunk = undefined;
-    this._previousChunk = undefined;
-    this._atStartOfLine = true;
+    this.#latestChunk = undefined;
+    this.#previousChunk = undefined;
+    this.#atStartOfLine = true;
 
-    this._indentStack = [];
-    this._indentText = '';
+    this.#indentStack = [];
+    this.#indentText = '';
 
-    this._beforeStack = [];
-    this._isWritingBeforeStack = false;
+    this.#beforeStack = [];
+    this.#isWritingBeforeStack = false;
   }
 
   /**
    * Retrieves the output that was built so far.
    */
   public getText(): string {
-    return this._builder.toString();
+    return this.#builder.toString();
   }
 
   public toString(): string {
@@ -82,8 +82,8 @@ export class IndentedWriter {
    * corresponding call to IndentedWriter.decreaseIndent().
    */
   public increaseIndent(indentPrefix?: string): void {
-    this._indentStack.push(indentPrefix !== undefined ? indentPrefix : this.defaultIndentPrefix);
-    this._updateIndentText();
+    this.#indentStack.push(indentPrefix !== undefined ? indentPrefix : this.defaultIndentPrefix);
+    this.#updateIndentText();
   }
 
   /**
@@ -91,8 +91,8 @@ export class IndentedWriter {
    * to IndentedWriter.increaseIndent().
    */
   public decreaseIndent(): void {
-    this._indentStack.pop();
-    this._updateIndentText();
+    this.#indentStack.pop();
+    this.#updateIndentText();
   }
 
   /**
@@ -111,7 +111,7 @@ export class IndentedWriter {
   public ensureNewLine(): void {
     const lastCharacter: string = this.peekLastCharacter();
     if (lastCharacter !== '\n' && lastCharacter !== '') {
-      this._writeNewLine();
+      this.#writeNewLine();
     }
   }
 
@@ -120,12 +120,12 @@ export class IndentedWriter {
    */
   public ensureSkippedLine(): void {
     if (this.peekLastCharacter() !== '\n') {
-      this._writeNewLine();
+      this.#writeNewLine();
     }
 
     const secondLastCharacter: string = this.peekSecondLastCharacter();
     if (secondLastCharacter !== '\n' && secondLastCharacter !== '') {
-      this._writeNewLine();
+      this.#writeNewLine();
     }
   }
 
@@ -133,8 +133,8 @@ export class IndentedWriter {
    * Returns the last character that was written, or an empty string if no characters have been written yet.
    */
   public peekLastCharacter(): string {
-    if (this._latestChunk !== undefined) {
-      return this._latestChunk.substr(-1, 1);
+    if (this.#latestChunk !== undefined) {
+      return this.#latestChunk.substr(-1, 1);
     }
     return '';
   }
@@ -144,12 +144,12 @@ export class IndentedWriter {
    * have been written yet.
    */
   public peekSecondLastCharacter(): string {
-    if (this._latestChunk !== undefined) {
-      if (this._latestChunk.length > 1) {
-        return this._latestChunk.substr(-2, 1);
+    if (this.#latestChunk !== undefined) {
+      if (this.#latestChunk.length > 1) {
+        return this.#latestChunk.substr(-2, 1);
       }
-      if (this._previousChunk !== undefined) {
-        return this._previousChunk.substr(-1, 1);
+      if (this.#previousChunk !== undefined) {
+        return this.#previousChunk.substr(-1, 1);
       }
     }
     return '';
@@ -162,7 +162,7 @@ export class IndentedWriter {
    * If `mayWrite` writes nothing, this method will write nothing.
    */
   public writeTentative(before: string, after: string, mayWrite: () => void): void {
-    this._beforeStack.push(before);
+    this.#beforeStack.push(before);
 
     // If this function writes anything, then _all_ messages in the "before stack" will also be
     // written. This means that the stack will be empty (as when we write a message from the stack,
@@ -172,8 +172,8 @@ export class IndentedWriter {
     // If the stack is not empty, it means that `mayWrite` didn't write anything. Pop the last-
     // added message from the stack, we'll never write it. Otherwise, if the stack is empty, then
     // write the "after" message.
-    if (this._beforeStack.length > 0) {
-      this._beforeStack.pop();
+    if (this.#beforeStack.length > 0) {
+      this.#beforeStack.pop();
     } else {
       this.write(after);
     }
@@ -189,13 +189,13 @@ export class IndentedWriter {
       return;
     }
 
-    if (!this._isWritingBeforeStack) {
-      this._writeBeforeStack();
+    if (!this.#isWritingBeforeStack) {
+      this.#writeBeforeStack();
     }
 
     // If there are no newline characters, then append the string verbatim
     if (!/[\r\n]/.test(message)) {
-      this._writeLinePart(message);
+      this.#writeLinePart(message);
       return;
     }
 
@@ -203,12 +203,12 @@ export class IndentedWriter {
     let first: boolean = true;
     for (const linePart of message.split('\n')) {
       if (!first) {
-        this._writeNewLine();
+        this.#writeNewLine();
       } else {
         first = false;
       }
       if (linePart) {
-        this._writeLinePart(linePart.replace(/[\r]/g, ''));
+        this.#writeLinePart(linePart.replace(/[\r]/g, ''));
       }
     }
   }
@@ -220,57 +220,57 @@ export class IndentedWriter {
   public writeLine(message: string = ''): void {
     if (message.length > 0) {
       this.write(message);
-    } else if (!this._isWritingBeforeStack) {
-      this._writeBeforeStack();
+    } else if (!this.#isWritingBeforeStack) {
+      this.#writeBeforeStack();
     }
 
-    this._writeNewLine();
+    this.#writeNewLine();
   }
 
   /**
    * Writes a string that does not contain any newline characters.
    */
-  private _writeLinePart(message: string): void {
+  #writeLinePart(message: string): void {
     if (message.length > 0) {
-      if (this._atStartOfLine && this._indentText.length > 0) {
-        this._write(this._indentText);
+      if (this.#atStartOfLine && this.#indentText.length > 0) {
+        this.#write(this.#indentText);
       }
-      this._write(message);
-      this._atStartOfLine = false;
+      this.#write(message);
+      this.#atStartOfLine = false;
     }
   }
 
-  private _writeNewLine(): void {
-    if (this._atStartOfLine && this._indentText.length > 0) {
-      this._write(this._indentText);
+  #writeNewLine(): void {
+    if (this.#atStartOfLine && this.#indentText.length > 0) {
+      this.#write(this.#indentText);
     }
 
-    this._write('\n');
-    this._atStartOfLine = true;
+    this.#write('\n');
+    this.#atStartOfLine = true;
   }
 
-  private _write(s: string): void {
-    this._previousChunk = this._latestChunk;
-    this._latestChunk = s;
-    this._builder.append(s);
+  #write(s: string): void {
+    this.#previousChunk = this.#latestChunk;
+    this.#latestChunk = s;
+    this.#builder.append(s);
   }
 
   /**
    * Writes all messages in our before stack, processing them in FIFO order. This stack is
    * populated by the `writeTentative` method.
    */
-  private _writeBeforeStack(): void {
-    this._isWritingBeforeStack = true;
+  #writeBeforeStack(): void {
+    this.#isWritingBeforeStack = true;
 
-    for (const message of this._beforeStack) {
+    for (const message of this.#beforeStack) {
       this.write(message);
     }
 
-    this._isWritingBeforeStack = false;
-    this._beforeStack = [];
+    this.#isWritingBeforeStack = false;
+    this.#beforeStack = [];
   }
 
-  private _updateIndentText(): void {
-    this._indentText = this._indentStack.join('');
+  #updateIndentText(): void {
+    this.#indentText = this.#indentStack.join('');
   }
 }

@@ -90,7 +90,7 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
    * Returns true if the file exists and the contents match the current state.
    */
   public override async isValidAsync(): Promise<boolean> {
-    return await this._isValidAsync(false, {});
+    return await this.#isValidAsync(false, {});
   }
 
   /**
@@ -102,10 +102,10 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
   public async checkValidAndReportStoreIssuesAsync(
     options: ILockfileValidityCheckOptions & { rushVerb: string }
   ): Promise<boolean> {
-    return this._isValidAsync(true, options);
+    return this.#isValidAsync(true, options);
   }
 
-  private async _isValidAsync(
+  async #isValidAsync(
     checkValidAndReportStoreIssues: boolean,
     { rushVerb = 'update', statePropertiesToIgnore }: ILockfileValidityCheckOptions = {}
   ): Promise<boolean> {

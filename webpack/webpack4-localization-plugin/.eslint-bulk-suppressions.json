@@ -127,46 +127,6 @@
     },
     {
       "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._addLocFile",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._addLocFile",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._chunkHasLocalizedModules",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._chunkHasLocalizedModules",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
-      "scopeId": ".LocalizationPlugin._initializeAndValidateOptions",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/LocalizationPlugin.ts",
       "scopeId": ".LocalizationPlugin.addDefaultLocFile",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -183,6 +143,16 @@
     {
       "file": "src/LocalizationPlugin.ts",
       "scopeId": ".LocalizationPlugin.addDefaultLocFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addLocFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.addLocFile",
       "rule": "max-lines-per-function"
     },
     {
@@ -217,8 +187,38 @@
     },
     {
       "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.chunkHasLocalizedModules",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.chunkHasLocalizedModules",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
       "scopeId": ".LocalizationPlugin.constructor",
       "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/LocalizationPlugin.ts",
+      "scopeId": ".LocalizationPlugin.initializeAndValidateOptions",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/WebpackConfigurationUpdater.ts",

@@ -38,7 +38,7 @@ const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
  * It configures the "rush setup" command.
  */
 export class ArtifactoryConfiguration {
-  private readonly _jsonFileName: string;
+  readonly #jsonFileName: string;
 
   /**
    * Get the artifactory configuration.
@@ -49,7 +49,7 @@ export class ArtifactoryConfiguration {
    * @internal
    */
   public constructor(jsonFileName: string) {
-    this._jsonFileName = jsonFileName;
+    this.#jsonFileName = jsonFileName;
 
     this.configuration = {
       packageRegistry: {
@@ -59,8 +59,8 @@ export class ArtifactoryConfiguration {
       }
     };
 
-    if (FileSystem.exists(this._jsonFileName)) {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, _jsonSchema);
+    if (FileSystem.exists(this.#jsonFileName)) {
+      this.configuration = JsonFile.loadAndValidate(this.#jsonFileName, _jsonSchema);
       if (!this.configuration.packageRegistry.credentialType) {
         this.configuration.packageRegistry.credentialType = 'password';
       }

@@ -40,6 +40,7 @@
     "build": "heft build --clean",
     "test": "heft run --only test",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

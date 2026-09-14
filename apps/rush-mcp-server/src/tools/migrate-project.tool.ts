@@ -15,7 +15,7 @@ import { BaseTool, type CallToolResult } from './base.tool';
 import { getRushConfiguration } from '../utilities/common';
 
 export class RushMigrateProjectTool extends BaseTool {
-  private _rushWorkspacePath: string;
+  #rushWorkspacePath: string;
 
   public constructor(rushWorkspacePath: string) {
     super({
@@ -28,10 +28,10 @@ export class RushMigrateProjectTool extends BaseTool {
       }
     });
 
-    this._rushWorkspacePath = rushWorkspacePath;
+    this.#rushWorkspacePath = rushWorkspacePath;
   }
 
-  private async _modifyAndSaveSubspaceJsonFileAsync(
+  async #modifyAndSaveSubspaceJsonFileAsync(
     rushConfiguration: RushConfiguration,
     cb: (subspaceNames: string[]) => Promise<string[]> | string[]
   ): Promise<void> {
@@ -47,7 +47,7 @@ export class RushMigrateProjectTool extends BaseTool {
     });
   }
 
-  private async _modifyAndSaveRushConfigurationAsync(
+  async #modifyAndSaveRushConfigurationAsync(
     rushConfiguration: RushConfiguration,
     cb: (
       projects: IRushConfigurationProjectJson[]
@@ -81,7 +81,7 @@ export class RushMigrateProjectTool extends BaseTool {
       };
     }
 
-    const rootPath: string = this._rushWorkspacePath;
+    const rootPath: string = this.#rushWorkspacePath;
     const sourceProjectSubspaceName: string = project.subspace.subspaceName;
     const sourceProjectPath: string = project.projectFolder;
     const destinationPath: string = path.resolve(rootPath, targetProjectPath);
@@ -100,7 +100,7 @@ export class RushMigrateProjectTool extends BaseTool {
     });
 
     // 3. Update rush configuration
-    await this._modifyAndSaveRushConfigurationAsync(rushConfiguration, (projects) => {
+    await this.#modifyAndSaveRushConfigurationAsync(rushConfiguration, (projects) => {
       const projectIndex: number = projects.findIndex(({ packageName }) => packageName === projectName);
       projects[projectIndex] = {
         ...projects[projectIndex],
@@ -111,7 +111,7 @@ export class RushMigrateProjectTool extends BaseTool {
     });
 
     // 4. Update `subspaces.json`
-    await this._modifyAndSaveSubspaceJsonFileAsync(rushConfiguration, (subspaceNames) => {
+    await this.#modifyAndSaveSubspaceJsonFileAsync(rushConfiguration, (subspaceNames) => {
       if (subspacehasOnlyOneProject) {
         subspaceNames.splice(subspaceNames.indexOf(sourceProjectSubspaceName), 1);
       }

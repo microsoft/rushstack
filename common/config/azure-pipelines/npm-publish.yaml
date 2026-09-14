@@ -51,6 +51,7 @@ extends:
       - template: /common/config/azure-pipelines/templates/bump-versions-stages.yaml@self
         parameters:
           VersionPolicyName: noRush
+          PackageCohort: noRush
           StageName: BumpRushstackVersions
           StageDisplayName: 'Bump Rushstack Versions and Create PR'
           CheckoutRepository: rushstackGitHubApp

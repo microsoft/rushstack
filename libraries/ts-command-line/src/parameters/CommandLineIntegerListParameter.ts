@@ -10,7 +10,7 @@ import { EnvironmentVariableParser } from './EnvironmentVariableParser';
  * @public
  */
 export class CommandLineIntegerListParameter extends CommandLineParameterWithArgument {
-  private _values: number[] = [];
+  #values: number[] = [];
 
   /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.IntegerList = CommandLineParameterKind.IntegerList;
@@ -35,7 +35,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
           this.reportInvalidData(data);
         }
       }
-      this._values = data;
+      this.#values = data;
       return;
     }
 
@@ -54,14 +54,14 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
           }
           parsedValues.push(parsed);
         }
-        this._values = parsedValues;
+        this.#values = parsedValues;
         return;
       }
     }
 
     // (No default value for integer lists)
 
-    this._values = [];
+    this.#values = [];
   }
 
   /**
@@ -72,7 +72,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
    * or if the parameter was omitted and has no default value.
    */
   public get values(): ReadonlyArray<number> {
-    return this._values;
+    return this.#values;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */

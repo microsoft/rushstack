@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve reentrant machine reporter output from old engines, reserve bootstrap stdout for owned additional output destinations without claiming custom controls, and classify installation paths as local-sensitive.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

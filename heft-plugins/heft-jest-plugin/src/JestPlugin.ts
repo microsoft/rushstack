@@ -142,21 +142,21 @@ interface IPendingTestRun {
  * @internal
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
-  private _jestPromise: Promise<unknown> | undefined;
-  private _pendingTestRuns: Set<IPendingTestRun> = new Set();
-  private _executing: boolean = false;
+  #jestPromise: Promise<unknown> | undefined;
+  #pendingTestRuns: Set<IPendingTestRun> = new Set();
+  #executing: boolean = false;
 
-  private _jestOutputStream: TerminalWritableStream | undefined;
-  private _changedFiles: Set<string> = new Set();
-  private _requestRun!: () => void;
-  private _nodeEnvSet: boolean | undefined;
+  #jestOutputStream: TerminalWritableStream | undefined;
+  #changedFiles: Set<string> = new Set();
+  #requestRun!: () => void;
+  #nodeEnvSet: boolean | undefined;
 
-  private _resolveFirstRunQueued!: () => void;
-  private _firstRunQueuedPromise: Promise<void>;
+  #resolveFirstRunQueued!: () => void;
+  #firstRunQueuedPromise: Promise<void>;
 
   public constructor() {
-    this._firstRunQueuedPromise = new Promise((resolve) => {
-      this._resolveFirstRunQueued = resolve;
+    this.#firstRunQueuedPromise = new Promise((resolve) => {
+      this.#resolveFirstRunQueued = resolve;
     });
   }
 
@@ -228,13 +228,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     };
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, options);
+      await this.#runJestAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runJestWatchAsync(
+        await this.#runJestWatchAsync(
           taskSession,
           heftConfiguration,
           options,
@@ -247,7 +247,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Runs Jest using the provided options.
    */
-  private async _runJestAsync(
+  async #runJestAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions
@@ -255,13 +255,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
 
-    this._setNodeEnvIfRequested(options, logger);
+    this.#setNodeEnvIfRequested(options, logger);
 
     const { getVersion, runCLI } = await import(`@jest/core`);
     terminal.writeLine(`Using Jest version ${getVersion()}`);
 
     const buildFolderPath: string = heftConfiguration.buildFolderPath;
-    const jestArgv: Config.Argv | undefined = await this._createJestArgvAsync(
+    const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
       taskSession,
       heftConfiguration,
       options,
@@ -279,7 +279,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
 
-    this._resetNodeEnv();
+    this.#resetNodeEnv();
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(
@@ -301,7 +301,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Runs Jest using the provided options.
    */
-  private async _runJestWatchAsync(
+  async #runJestWatchAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions,
@@ -310,10 +310,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
 
-    const pendingTestRuns: Set<IPendingTestRun> = this._pendingTestRuns;
-    this._requestRun = requestRun;
+    const pendingTestRuns: Set<IPendingTestRun> = this.#pendingTestRuns;
+    this.#requestRun = requestRun;
 
-    if (!this._jestPromise) {
+    if (!this.#jestPromise) {
       // Monkey-patch Jest's watch mode so that we can orchestrate it.
       const jestCoreDir: string = path.dirname(require.resolve('@jest/core'));
 
@@ -349,7 +349,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       });
 
       const wrappedStdOut: TerminalWritableStream = new TerminalWritableStream(terminal);
-      this._jestOutputStream = wrappedStdOut;
+      this.#jestOutputStream = wrappedStdOut;
 
       // Shim watch so that we can intercept the output stream
       const watchModulePath: string = path.resolve(jestCoreDir, 'watch.js');
@@ -381,7 +381,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           hasteMap.on('change', ({ eventsQueue }: { eventsQueue: { filePath: string }[] }) => {
             for (const file of eventsQueue) {
               // Record all changed files for the next test run
-              host._changedFiles.add(file.filePath);
+              host.#changedFiles.add(file.filePath);
             }
           });
         });
@@ -389,7 +389,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         return originalWatch(
           initialGlobalConfig,
           contexts,
-          host._jestOutputStream as unknown as NodeJS.WriteStream,
+          host.#jestOutputStream as unknown as NodeJS.WriteStream,
           hasteMapInstances,
           stdin,
           hooks,
@@ -418,23 +418,23 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           throw new Error(`Patched Jest expected JestPlugin on globalConfig`);
         }
 
-        if (!host._executing) {
-          host._requestRun();
+        if (!host.#executing) {
+          host.#requestRun();
         }
 
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-          host._pendingTestRuns.add(async (): Promise<AggregatedResult | undefined> => {
+          host.#pendingTestRuns.add(async (): Promise<AggregatedResult | undefined> => {
             let result: AggregatedResult | undefined;
             const { onComplete } = params;
 
-            const findRelatedTests: boolean = params.globalConfig.onlyChanged && host._changedFiles.size > 0;
+            const findRelatedTests: boolean = params.globalConfig.onlyChanged && host.#changedFiles.size > 0;
 
             const globalConfig: IRunJestParams['globalConfig'] = Object.freeze({
               ...params.globalConfig,
               // Use the knowledge of changed files to implement the "onlyChanged" behavior via
               // findRelatedTests and the list of changed files
               findRelatedTests,
-              nonFlagArgs: findRelatedTests ? Array.from(host._changedFiles) : [],
+              nonFlagArgs: findRelatedTests ? Array.from(host.#changedFiles) : [],
               // This property can only be true when the files are tracked directly by Git
               // Since we run tests on compiled files, this is not the case.
               onlyChanged: false
@@ -457,7 +457,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
             return result;
           });
-          host._resolveFirstRunQueued();
+          host.#resolveFirstRunQueued();
         });
       };
 
@@ -471,29 +471,29 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       terminal.writeLine(`Using Jest version ${getVersion()}`);
 
       const buildFolderPath: string = heftConfiguration.buildFolderPath;
-      const jestArgv: Config.Argv | undefined = await this._createJestArgvAsync(
+      const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
         taskSession,
         heftConfiguration,
         options,
         true
       );
       if (!jestArgv) {
-        this._jestPromise = Promise.resolve();
+        this.#jestPromise = Promise.resolve();
         return;
       }
 
-      this._jestPromise = runCLI(jestArgv, [buildFolderPath]);
+      this.#jestPromise = runCLI(jestArgv, [buildFolderPath]);
     }
 
     // Wait for the initial run to be queued.
-    await this._firstRunQueuedPromise;
+    await this.#firstRunQueuedPromise;
     // Explicitly wait an async tick for any file watchers
     await Promise.resolve();
 
     if (pendingTestRuns.size > 0) {
-      this._setNodeEnvIfRequested(options, logger);
+      this.#setNodeEnvIfRequested(options, logger);
 
-      this._executing = true;
+      this.#executing = true;
       for (const pendingTestRun of pendingTestRuns) {
         pendingTestRuns.delete(pendingTestRun);
         const jestResults: AggregatedResult | undefined = await pendingTestRun();
@@ -518,21 +518,21 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         }
       }
 
-      this._resetNodeEnv();
+      this.#resetNodeEnv();
 
       if (!logger.hasErrors) {
         // If we ran tests and they succeeded, consider the files to no longer be changed.
         // This might be overly-permissive, but there isn't a great way to identify if the changes
         // are no longer relevant, unfortunately.
-        this._changedFiles.clear();
+        this.#changedFiles.clear();
       }
-      this._executing = false;
+      this.#executing = false;
     } else {
       terminal.writeLine(`No pending test runs.`);
     }
   }
 
-  private async _createJestArgvAsync(
+  async #createJestArgvAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions,
@@ -796,7 +796,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     return _jestConfigurationFileLoader;
   }
 
-  private _setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
+  #setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
     if (options.enableNodeEnvManagement) {
       if (process.env.NODE_ENV) {
         if (process.env.NODE_ENV !== 'test') {
@@ -807,14 +807,14 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         }
       } else {
         process.env.NODE_ENV = 'test';
-        this._nodeEnvSet = true;
+        this.#nodeEnvSet = true;
       }
     }
   }
 
-  private _resetNodeEnv(): void {
+  #resetNodeEnv(): void {
     // unset the NODE_ENV only if we have set it
-    if (this._nodeEnvSet) {
+    if (this.#nodeEnvSet) {
       delete process.env.NODE_ENV;
     }
   }

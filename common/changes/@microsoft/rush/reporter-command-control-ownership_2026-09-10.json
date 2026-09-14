@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Consume reporter verbose and repository opt-in value controls only when command ownership is known, preserving native aliases and declared custom parameters.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

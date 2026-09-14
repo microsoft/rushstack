@@ -27,11 +27,6 @@
     },
     {
       "file": "src/Eslint.ts",
-      "scopeId": ".Eslint._getLintFileError",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Eslint.ts",
       "scopeId": ".Eslint.constructor",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -44,6 +39,11 @@
       "file": "src/Eslint.ts",
       "scopeId": ".Eslint.constructor",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Eslint.ts",
+      "scopeId": ".Eslint.getLintFileError",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/Eslint.ts",
@@ -117,22 +117,22 @@
     },
     {
       "file": "src/LintPlugin.ts",
-      "scopeId": ".LintPlugin._lintAsync",
+      "scopeId": ".LintPlugin.apply",
       "rule": "complexity"
     },
     {
       "file": "src/LintPlugin.ts",
-      "scopeId": ".LintPlugin._lintAsync",
+      "scopeId": ".LintPlugin.apply",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/LintPlugin.ts",
-      "scopeId": ".LintPlugin.apply",
+      "scopeId": ".LintPlugin.lintAsync",
       "rule": "complexity"
     },
     {
       "file": "src/LintPlugin.ts",
-      "scopeId": ".LintPlugin.apply",
+      "scopeId": ".LintPlugin.lintAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -227,16 +227,6 @@
     },
     {
       "file": "src/Tslint.ts",
-      "scopeId": ".Tslint._getLintFileError",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/Tslint.ts",
-      "scopeId": ".Tslint._getLintFileError",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Tslint.ts",
       "scopeId": ".Tslint.getConfigHashAsync",
       "rule": "complexity"
     },
@@ -244,6 +234,16 @@
       "file": "src/Tslint.ts",
       "scopeId": ".Tslint.getConfigHashAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.getLintFileError",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/Tslint.ts",
+      "scopeId": ".Tslint.getLintFileError",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/Tslint.ts",

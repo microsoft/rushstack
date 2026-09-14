@@ -12,9 +12,30 @@
     "node": ">=20.9.0"
   },
   "homepage": "https://rushstack.io",
+  "main": "./lib-commonjs/index.js",
+  "types": "./lib-dts/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dts/index.d.ts",
+      "default": "./lib-commonjs/index.js"
+    },
+    "./*": {
+      "types": "./lib-dts/*.d.ts",
+      "default": "./lib-commonjs/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
-    "build": "",
-    "_phase:build": ""
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "keywords": [
     "eslint",
@@ -43,6 +64,8 @@
     "eslint-plugin-tsdoc": "~0.5.1"
   },
   "devDependencies": {
+    "@rushstack/heft": "1.2.25",
+    "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.37.0",
     "typescript": "~5.8.2"
   },

@@ -27,17 +27,17 @@
     },
     {
       "file": "src/cli/BaseAction.ts",
-      "scopeId": ".BaseAction._applyInheritDoc",
+      "scopeId": ".BaseAction.applyInheritDoc",
       "rule": "complexity"
     },
     {
       "file": "src/cli/BaseAction.ts",
-      "scopeId": ".BaseAction._applyInheritDoc",
+      "scopeId": ".BaseAction.applyInheritDoc",
       "rule": "max-depth"
     },
     {
       "file": "src/cli/BaseAction.ts",
-      "scopeId": ".BaseAction._applyInheritDoc",
+      "scopeId": ".BaseAction.applyInheritDoc",
       "rule": "max-lines-per-function"
     },
     {
@@ -107,57 +107,57 @@
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._buildTocItems2",
+      "scopeId": ".ExperimentalYamlDocumenter.buildTocItems2",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._buildTocItems2",
+      "scopeId": ".ExperimentalYamlDocumenter.buildTocItems2",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._buildTocItems2",
+      "scopeId": ".ExperimentalYamlDocumenter.buildTocItems2",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._filterItem",
+      "scopeId": ".ExperimentalYamlDocumenter.filterItem",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._filterItem",
+      "scopeId": ".ExperimentalYamlDocumenter.filterItem",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._filterItem",
+      "scopeId": ".ExperimentalYamlDocumenter.filterItem",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._findInlineTagByName",
+      "scopeId": ".ExperimentalYamlDocumenter.findInlineTagByName",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._generateTocPointersMap",
+      "scopeId": ".ExperimentalYamlDocumenter.generateTocPointersMap",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._generateTocPointersMap",
+      "scopeId": ".ExperimentalYamlDocumenter.generateTocPointersMap",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._generateTocPointersMap",
+      "scopeId": ".ExperimentalYamlDocumenter.generateTocPointersMap",
       "rule": "max-depth"
     },
     {
       "file": "src/documenters/ExperimentalYamlDocumenter.ts",
-      "scopeId": ".ExperimentalYamlDocumenter._shouldNotIncludeInPointersMap",
+      "scopeId": ".ExperimentalYamlDocumenter.shouldNotIncludeInPointersMap",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
@@ -182,227 +182,227 @@
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._appendAndMergeSection",
+      "scopeId": ".MarkdownDocumenter.appendAndMergeSection",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._appendExcerptTokenWithHyperlinks",
+      "scopeId": ".MarkdownDocumenter.appendExcerptTokenWithHyperlinks",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._appendExcerptTokenWithHyperlinks",
+      "scopeId": ".MarkdownDocumenter.appendExcerptTokenWithHyperlinks",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._createDescriptionCell",
+      "scopeId": ".MarkdownDocumenter.createDescriptionCell",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._createDescriptionCell",
+      "scopeId": ".MarkdownDocumenter.createDescriptionCell",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._createModifiersCell",
+      "scopeId": ".MarkdownDocumenter.createModifiersCell",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._createModifiersCell",
+      "scopeId": ".MarkdownDocumenter.createModifiersCell",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._getFilenameForApiItem",
+      "scopeId": ".MarkdownDocumenter.getFilenameForApiItem",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._getFilenameForApiItem",
+      "scopeId": ".MarkdownDocumenter.getFilenameForApiItem",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._getFilenameForApiItem",
+      "scopeId": ".MarkdownDocumenter.getFilenameForApiItem",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._getMembersAndWriteIncompleteWarning",
+      "scopeId": ".MarkdownDocumenter.getMembersAndWriteIncompleteWarning",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._getMembersAndWriteIncompleteWarning",
+      "scopeId": ".MarkdownDocumenter.getMembersAndWriteIncompleteWarning",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeApiItemPage",
+      "scopeId": ".MarkdownDocumenter.writeApiItemPage",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeApiItemPage",
+      "scopeId": ".MarkdownDocumenter.writeApiItemPage",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeApiItemPage",
+      "scopeId": ".MarkdownDocumenter.writeApiItemPage",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeBreadcrumb",
+      "scopeId": ".MarkdownDocumenter.writeBreadcrumb",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeBreadcrumb",
+      "scopeId": ".MarkdownDocumenter.writeBreadcrumb",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeClassTables",
+      "scopeId": ".MarkdownDocumenter.writeClassTables",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeClassTables",
+      "scopeId": ".MarkdownDocumenter.writeClassTables",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeClassTables",
+      "scopeId": ".MarkdownDocumenter.writeClassTables",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeDefaultValueSection",
+      "scopeId": ".MarkdownDocumenter.writeDefaultValueSection",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeDefaultValueSection",
+      "scopeId": ".MarkdownDocumenter.writeDefaultValueSection",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeDefaultValueSection",
+      "scopeId": ".MarkdownDocumenter.writeDefaultValueSection",
       "rule": "max-depth"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeEnumTables",
+      "scopeId": ".MarkdownDocumenter.writeEnumTables",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "scopeId": ".MarkdownDocumenter.writeHeritageTypes",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "scopeId": ".MarkdownDocumenter.writeHeritageTypes",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "scopeId": ".MarkdownDocumenter.writeHeritageTypes",
       "rule": "max-depth"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeHeritageTypes",
+      "scopeId": ".MarkdownDocumenter.writeHeritageTypes",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeInterfaceTables",
+      "scopeId": ".MarkdownDocumenter.writeInterfaceTables",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeInterfaceTables",
+      "scopeId": ".MarkdownDocumenter.writeInterfaceTables",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeInterfaceTables",
+      "scopeId": ".MarkdownDocumenter.writeInterfaceTables",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeModelTable",
+      "scopeId": ".MarkdownDocumenter.writeModelTable",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeModelTable",
+      "scopeId": ".MarkdownDocumenter.writeModelTable",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writePackageOrNamespaceTables",
+      "scopeId": ".MarkdownDocumenter.writePackageOrNamespaceTables",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writePackageOrNamespaceTables",
+      "scopeId": ".MarkdownDocumenter.writePackageOrNamespaceTables",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writePackageOrNamespaceTables",
+      "scopeId": ".MarkdownDocumenter.writePackageOrNamespaceTables",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeParameterTables",
+      "scopeId": ".MarkdownDocumenter.writeParameterTables",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeParameterTables",
+      "scopeId": ".MarkdownDocumenter.writeParameterTables",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeParameterTables",
+      "scopeId": ".MarkdownDocumenter.writeParameterTables",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeRemarksSection",
+      "scopeId": ".MarkdownDocumenter.writeRemarksSection",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeRemarksSection",
+      "scopeId": ".MarkdownDocumenter.writeRemarksSection",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeRemarksSection",
+      "scopeId": ".MarkdownDocumenter.writeRemarksSection",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeThrowsSection",
+      "scopeId": ".MarkdownDocumenter.writeThrowsSection",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeThrowsSection",
+      "scopeId": ".MarkdownDocumenter.writeThrowsSection",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/MarkdownDocumenter.ts",
-      "scopeId": ".MarkdownDocumenter._writeThrowsSection",
+      "scopeId": ".MarkdownDocumenter.writeThrowsSection",
       "rule": "max-depth"
     },
     {
@@ -452,61 +452,6 @@
     },
     {
       "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._buildTocItems",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._buildTocItems",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._ensureYamlReferences",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._flattenNamespaces",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._flattenNamespaces",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._flattenNamespaces",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._flattenNamespaces",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._generateYamlItem",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._generateYamlItem",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._generateYamlItem",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._generateYamlItem",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
       "scopeId": ".YamlDocumenter._getLogicalChildren",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -524,116 +469,6 @@
       "file": "src/documenters/YamlDocumenter.ts",
       "scopeId": ".YamlDocumenter._getTocItemName",
       "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._getYamlFilePath",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._getYamlFilePath",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._getYamlItemName",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._getYamlItemName",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._initApiItemsRecursive",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._populateYamlClassOrInterface",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._populateYamlClassOrInterface",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._populateYamlClassOrInterface",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._populateYamlFunctionLike",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._populateYamlFunctionLike",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._populateYamlTypeParameters",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._recordYamlReference",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._recordYamlReference",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._recordYamlReference",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._recordYamlReference",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._recordYamlReference",
-      "rule": "max-params"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._renderInheritance",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._renderInheritance",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._renderInheritance",
-      "rule": "max-depth"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._renderType",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._renderType",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._renderType",
-      "rule": "max-lines-per-function"
     },
     {
       "file": "src/documenters/YamlDocumenter.ts",
@@ -647,27 +482,187 @@
     },
     {
       "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._visitApiItems",
+      "scopeId": ".YamlDocumenter.buildTocItems",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._visitApiItems",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._visitApiItems",
+      "scopeId": ".YamlDocumenter.buildTocItems",
       "rule": "complexity"
     },
     {
       "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._visitApiItems",
+      "scopeId": ".YamlDocumenter.flattenNamespaces",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.flattenNamespaces",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.flattenNamespaces",
       "rule": "max-depth"
     },
     {
       "file": "src/documenters/YamlDocumenter.ts",
-      "scopeId": ".YamlDocumenter._visitApiItems",
+      "scopeId": ".YamlDocumenter.flattenNamespaces",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.generateYamlItem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.generateYamlItem",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.generateYamlItem",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.generateYamlItem",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.getYamlFilePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.getYamlFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.getYamlItemName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.getYamlItemName",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.initApiItemsRecursive",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.populateYamlClassOrInterface",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.populateYamlClassOrInterface",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.populateYamlClassOrInterface",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.populateYamlFunctionLike",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.populateYamlFunctionLike",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.populateYamlTypeParameters",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.recordYamlReference",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.recordYamlReference",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.recordYamlReference",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.recordYamlReference",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.recordYamlReference",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.renderInheritance",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.renderInheritance",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.renderInheritance",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.renderType",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.renderType",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.renderType",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.visitApiItems",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.visitApiItems",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.visitApiItems",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.visitApiItems",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/documenters/YamlDocumenter.ts",
+      "scopeId": ".YamlDocumenter.visitApiItems",
       "rule": "max-lines-per-function"
     },
     {
@@ -912,21 +907,6 @@
     },
     {
       "file": "src/utils/IndentedWriter.ts",
-      "scopeId": ".IndentedWriter._writeLinePart",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/utils/IndentedWriter.ts",
-      "scopeId": ".IndentedWriter._writeLinePart",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/utils/IndentedWriter.ts",
-      "scopeId": ".IndentedWriter._writeNewLine",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/utils/IndentedWriter.ts",
       "scopeId": ".IndentedWriter.constructor",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
@@ -974,6 +954,21 @@
       "file": "src/utils/IndentedWriter.ts",
       "scopeId": ".IndentedWriter.writeLine",
       "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeLinePart",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeLinePart",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utils/IndentedWriter.ts",
+      "scopeId": ".IndentedWriter.writeNewLine",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/utils/IndentedWriter.ts",

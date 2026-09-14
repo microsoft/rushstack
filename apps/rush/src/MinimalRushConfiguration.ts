@@ -3,14 +3,22 @@
 
 import * as path from 'node:path';
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
+import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
+import { isSupportedReporterName, type ReporterName } from '@rushstack/rush-reporter';
+
+import { getRushPreviewVersion } from './RushPreviewVersion';
 
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
   rushVersion?: string;
+}
+
+interface IMinimalExperimentsConfigurationJson {
+  useRushReporter?: boolean;
 }
 
 /**
@@ -18,31 +26,65 @@ interface IMinimalRushConfigurationJson {
  * decide which version of Rush should be installed/used.
  */
 export class MinimalRushConfiguration {
-  private _rushVersion: string;
-  private _commonRushConfigFolder: string;
+  #rushVersion: string;
+  #commonRushConfigFolder: string;
+  #useRushReporter: boolean;
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
-    this._rushVersion =
+    this.#rushVersion =
       minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
-    this._commonRushConfigFolder = path.join(
+    this.#commonRushConfigFolder = path.join(
       path.dirname(rushJsonFilename),
       RushConstants.commonFolderName,
       'config',
       'rush'
     );
+
+    const experimentsJsonFilename: string = path.join(
+      this.#commonRushConfigFolder,
+      RushConstants.experimentsFilename
+    );
+    const experimentsConfiguration: IMinimalExperimentsConfigurationJson | undefined =
+      _loadExperimentsConfigurationJson(experimentsJsonFilename);
+    if (
+      experimentsConfiguration?.useRushReporter !== undefined &&
+      typeof experimentsConfiguration.useRushReporter !== 'boolean'
+    ) {
+      throw new Error(`The "useRushReporter" setting in "${experimentsJsonFilename}" must be true or false.`);
+    }
+    this.#useRushReporter = experimentsConfiguration?.useRushReporter === true;
   }
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
+    const showVerbose: boolean = !RushCommandLineParser.shouldRestrictConsoleOutput();
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-      showVerbose: !RushCommandLineParser.shouldRestrictConsoleOutput()
+      showVerbose: false
     });
     if (rushJsonLocation) {
       const minimalRushConfigurationJson: IMinimalRushConfigurationJson | undefined =
         _loadConfigurationJson(rushJsonLocation);
+      const explicitReporter: ReporterName | undefined = _getExplicitReporter(process.argv.slice(2));
+      const legacyFallbackRequested: boolean =
+        explicitReporter === 'legacy' ||
+        process.env.RUSH_REPORTER?.trim().toLowerCase() === 'legacy' ||
+        _hasHelpControl(process.argv.slice(2));
+      let configuration: MinimalRushConfiguration | undefined;
+      let legacyPresentation: boolean = legacyFallbackRequested || explicitReporter === undefined;
       if (minimalRushConfigurationJson) {
-        return new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonLocation);
+        configuration = new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonLocation);
+        const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+        const effectiveRushVersion: string = getRushPreviewVersion() ?? configuration.rushVersion;
+        legacyPresentation =
+          legacyFallbackRequested ||
+          effectiveRushVersion !== currentPackageVersion ||
+          (!configuration.useRushReporter && explicitReporter === undefined);
       }
-      return undefined;
+      if (showVerbose && legacyPresentation) {
+        // Preserve discovery even when the full engine must report a configuration load error.
+        console.log('Found configuration in ' + rushJsonLocation);
+        console.log('');
+      }
+      return configuration;
     } else {
       return undefined;
     }
@@ -54,7 +96,7 @@ export class MinimalRushConfiguration {
    *  a semver style version number like "4.0.0"
    */
   public get rushVersion(): string {
-    return this._rushVersion;
+    return this.#rushVersion;
   }
 
   /**
@@ -66,8 +108,62 @@ export class MinimalRushConfiguration {
    * Example: "C:\MyRepo\common\config\rush"
    */
   public get commonRushConfigFolder(): string {
-    return this._commonRushConfigFolder;
+    return this.#commonRushConfigFolder;
   }
+
+  /**
+   * Whether the repository explicitly opted in to the experimental Rush reporter frontend.
+   */
+  public get useRushReporter(): boolean {
+    return this.#useRushReporter;
+  }
+
+  /**
+   * The repository's common temp folder, used for invocation-scoped reporter logs.
+   */
+  public get commonTempFolder(): string {
+    return (
+      EnvironmentConfiguration._getRushTempFolderOverride(process.env) ??
+      path.resolve(this.#commonRushConfigFolder, '..', '..', 'temp')
+    );
+  }
+}
+
+function _getExplicitReporter(argv: readonly string[]): ReporterName | undefined {
+  for (let index: number = 0; index < argv.length; index++) {
+    const argument: string = argv[index];
+    if (argument === '--') {
+      break;
+    }
+    let value: string | undefined;
+    if (argument === '--reporter') {
+      const nextArgument: string | undefined = argv[index + 1];
+      if (!nextArgument || nextArgument.startsWith('-')) {
+        continue;
+      }
+      value = nextArgument;
+      index++;
+    } else if (argument.startsWith('--reporter=')) {
+      value = argument.slice('--reporter='.length);
+    }
+    if (value !== undefined) {
+      const normalizedValue: string = value.trim().toLowerCase();
+      return isSupportedReporterName(normalizedValue) ? normalizedValue : undefined;
+    }
+  }
+  return undefined;
+}
+
+function _hasHelpControl(argv: readonly string[]): boolean {
+  for (const argument of argv) {
+    if (argument === '--') {
+      return false;
+    }
+    if (argument === '--help' || argument === '-h') {
+      return true;
+    }
+  }
+  return false;
 }
 
 function _loadConfigurationJson(rushJsonFilename: string): IMinimalRushConfigurationJson | undefined {
@@ -75,5 +171,18 @@ function _loadConfigurationJson(rushJsonFilename: string): IMinimalRushConfigura
     return JsonFile.load(rushJsonFilename);
   } catch (e) {
     return undefined;
+  }
+}
+
+function _loadExperimentsConfigurationJson(
+  experimentsJsonFilename: string
+): IMinimalExperimentsConfigurationJson | undefined {
+  try {
+    return JsonFile.load(experimentsJsonFilename);
+  } catch (e) {
+    if (FileSystem.isNotExistError(e)) {
+      return undefined;
+    }
+    throw e;
   }
 }

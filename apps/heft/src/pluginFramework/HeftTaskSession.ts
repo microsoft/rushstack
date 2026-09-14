@@ -238,9 +238,9 @@ export class HeftTaskSession implements IHeftTaskSession {
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
 
-  private readonly _options: IHeftTaskSessionOptions;
-  private _parameters: IHeftParameters | undefined;
-  private _parsedCommandLine: IHeftParsedCommandLine;
+  readonly #options: IHeftTaskSessionOptions;
+  #parameters: IHeftParameters | undefined;
+  #parsedCommandLine: IHeftParsedCommandLine;
 
   /**
    * @internal
@@ -249,16 +249,16 @@ export class HeftTaskSession implements IHeftTaskSession {
 
   public get parameters(): IHeftParameters {
     // Delay loading the parameters for the task until they're actually needed
-    if (!this._parameters) {
-      const parameterManager: HeftParameterManager = this._options.internalHeftSession.parameterManager;
-      const task: HeftTask = this._options.task;
-      this._parameters = parameterManager.getParametersForPlugin(task.pluginDefinition);
+    if (!this.#parameters) {
+      const parameterManager: HeftParameterManager = this.#options.internalHeftSession.parameterManager;
+      const task: HeftTask = this.#options.task;
+      this.#parameters = parameterManager.getParametersForPlugin(task.pluginDefinition);
     }
-    return this._parameters;
+    return this.#parameters;
   }
 
   public get parsedCommandLine(): IHeftParsedCommandLine {
-    return this._parsedCommandLine;
+    return this.#parsedCommandLine;
   }
 
   public constructor(options: IHeftTaskSessionOptions) {
@@ -276,7 +276,7 @@ export class HeftTaskSession implements IHeftTaskSession {
       // This should not happen
       throw new InternalError('Attempt to construct HeftTaskSession before command line has been parsed');
     }
-    this._parsedCommandLine = options.internalHeftSession.parsedCommandLine;
+    this.#parsedCommandLine = options.internalHeftSession.parsedCommandLine;
 
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
     this.metricsCollector = metricsCollector;
@@ -298,7 +298,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     // <projectFolder>/temp/<phaseName>/<taskName>
     this.tempFolderPath = `${tempFolder}/${uniqueTaskFolderName}`;
 
-    this._options = options;
+    this.#options = options;
   }
 
   public requestAccessToPluginByName<T extends object>(
@@ -306,7 +306,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     pluginToAccessName: string,
     pluginApply: (pluginAccessor: T) => void
   ): void {
-    this._options.pluginHost.requestAccessToPluginByName(
+    this.#options.pluginHost.requestAccessToPluginByName(
       this.taskName,
       pluginToAccessPackage,
       pluginToAccessName,

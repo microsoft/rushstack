@@ -24,18 +24,18 @@ interface IRushPluginsConfigurationJson {
 const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
 export class RushPluginsConfiguration {
-  private _jsonFilename: string;
+  #jsonFilename: string;
 
   public readonly configuration: Readonly<IRushPluginsConfigurationJson>;
 
   public constructor(jsonFilename: string) {
-    this._jsonFilename = jsonFilename;
+    this.#jsonFilename = jsonFilename;
     this.configuration = {
       plugins: []
     };
 
-    if (FileSystem.exists(this._jsonFilename)) {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFilename, _jsonSchema);
+    if (FileSystem.exists(this.#jsonFilename)) {
+      this.configuration = JsonFile.loadAndValidate(this.#jsonFilename, _jsonSchema);
     }
   }
 }

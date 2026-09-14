@@ -165,5 +165,11 @@
    * registry and proxy settings must likewise be supplied through trusted user, global, CLI, or
    * environment configuration rather than a project .npmrc.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "provideNpmrcCredentialsViaEnvironment": true
+  /*[LINE "HYPOTHETICAL"]*/ "provideNpmrcCredentialsViaEnvironment": true,
+
+  /**
+   * If true, Rush may use the experimental Rush reporter system. If omitted or false,
+   * Rush preserves the legacy reporting behavior.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "useRushReporter": true
 }

@@ -11,7 +11,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
 
 export class InitAction extends CommandLineAction {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -21,7 +21,7 @@ export class InitAction extends CommandLineAction {
         `This command initializes a new ${LOCKFILE_LINT_JSON_FILENAME} config file.` +
         `  The created template file includes source code comments that document the settings.`
     });
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
@@ -43,12 +43,12 @@ export class InitAction extends CommandLineAction {
     );
 
     if (await FileSystem.existsAsync(outputFilePath)) {
-      this._terminal.writeError('The output file already exists:');
-      this._terminal.writeLine('\n  ' + outputFilePath + '\n');
+      this.#terminal.writeError('The output file already exists:');
+      this.#terminal.writeLine('\n  ' + outputFilePath + '\n');
       throw new Error('Unable to write output file');
     }
 
-    this._terminal.writeLine(Colorize.green('Writing file: ') + outputFilePath);
+    this.#terminal.writeLine(Colorize.green('Writing file: ') + outputFilePath);
     await FileSystem.copyFileAsync({
       sourcePath: inputFilePath,
       destinationPath: outputFilePath

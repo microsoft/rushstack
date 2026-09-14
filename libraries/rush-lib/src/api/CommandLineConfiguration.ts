@@ -233,7 +233,7 @@ export class CommandLineConfiguration {
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
    */
-  private readonly _syntheticPhasesByTranslatedBulkCommandName: Map<string, IPhase> = new Map();
+  readonly #syntheticPhasesByTranslatedBulkCommandName: Map<string, IPhase> = new Map();
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
@@ -332,7 +332,7 @@ export class CommandLineConfiguration {
       const safePhases: Set<IPhase> = new Set();
       const cycleDetector: Set<IPhase> = new Set();
       for (const phase of this.phases.values()) {
-        this._checkForPhaseSelfCycles(phase, cycleDetector, safePhases);
+        this.#checkForPhaseSelfCycles(phase, cycleDetector, safePhases);
       }
     }
 
@@ -445,7 +445,7 @@ export class CommandLineConfiguration {
 
           case RushConstants.bulkCommandKind: {
             // Translate the bulk command into a phased command
-            normalizedCommand = this._translateBulkCommandToPhasedCommand(command);
+            normalizedCommand = this.#translateBulkCommandToPhasedCommand(command);
             break;
           }
         }
@@ -480,7 +480,7 @@ export class CommandLineConfiguration {
       let buildCommand: Command | undefined = this.commands.get(RushConstants.buildCommandName);
       if (!buildCommand) {
         // If the build command was not specified in the config file, add the default build command
-        buildCommand = this._translateBulkCommandToPhasedCommand(DEFAULT_BUILD_COMMAND_JSON);
+        buildCommand = this.#translateBulkCommandToPhasedCommand(DEFAULT_BUILD_COMMAND_JSON);
         buildCommand.disableBuildCache = DEFAULT_BUILD_COMMAND_JSON.disableBuildCache;
         buildCommandPhases = buildCommand.phases;
         buildCommandOriginalPhases = buildCommand.originalPhases;
@@ -545,7 +545,7 @@ export class CommandLineConfiguration {
         if (normalizedParameter.associatedCommands) {
           for (const associatedCommandName of normalizedParameter.associatedCommands) {
             const syntheticPhase: IPhase | undefined =
-              this._syntheticPhasesByTranslatedBulkCommandName.get(associatedCommandName);
+              this.#syntheticPhasesByTranslatedBulkCommandName.get(associatedCommandName);
             if (syntheticPhase) {
               // If this parameter was associated with a bulk command, include the association
               // with the synthetic phase
@@ -598,7 +598,7 @@ export class CommandLineConfiguration {
    * @param phasesInPath The current path from the start node to `phase`
    * @param cycleFreePhases Phases that have already been fully walked and confirmed to not be in any cycles
    */
-  private _checkForPhaseSelfCycles(
+  #checkForPhaseSelfCycles(
     phase: IPhase,
     phasesInPath: Set<IPhase>,
     cycleFreePhases: Set<IPhase>
@@ -619,7 +619,7 @@ export class CommandLineConfiguration {
         );
       } else {
         phasesInPath.add(dependency);
-        this._checkForPhaseSelfCycles(dependency, phasesInPath, cycleFreePhases);
+        this.#checkForPhaseSelfCycles(dependency, phasesInPath, cycleFreePhases);
         phasesInPath.delete(dependency);
       }
     }
@@ -709,7 +709,7 @@ export class CommandLineConfiguration {
     (this.additionalPathFolders as string[]).unshift(pathFolder);
   }
 
-  private _translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommandConfig {
+  #translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommandConfig {
     const phaseName: string = command.name;
     const phase: IPhase = {
       name: phaseName,
@@ -730,7 +730,7 @@ export class CommandLineConfiguration {
     }
 
     this.phases.set(phaseName, phase);
-    this._syntheticPhasesByTranslatedBulkCommandName.set(command.name, phase);
+    this.#syntheticPhasesByTranslatedBulkCommandName.set(command.name, phase);
 
     const phases: Set<IPhase> = new Set([phase]);
 

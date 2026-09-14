@@ -7,23 +7,23 @@
     },
     {
       "file": "src/Rundown.ts",
-      "scopeId": ".Rundown._spawnLauncherAsync",
+      "scopeId": ".Rundown.invokeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Rundown.ts",
+      "scopeId": ".Rundown.spawnLauncherAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/Rundown.ts",
-      "scopeId": ".Rundown._spawnLauncherAsync",
+      "scopeId": ".Rundown.spawnLauncherAsync",
       "rule": "complexity"
     },
     {
       "file": "src/Rundown.ts",
-      "scopeId": ".Rundown._spawnLauncherAsync",
+      "scopeId": ".Rundown.spawnLauncherAsync",
       "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/Rundown.ts",
-      "scopeId": ".Rundown.invokeAsync",
-      "rule": "complexity"
     },
     {
       "file": "src/Rundown.ts",
@@ -77,11 +77,6 @@
     },
     {
       "file": "src/launcher.ts",
-      "scopeId": ".Launcher._sendIpcTraceBatch",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/launcher.ts",
       "scopeId": ".Launcher.installHook",
       "rule": "max-lines-per-function"
     },
@@ -99,6 +94,11 @@
       "file": "src/launcher.ts",
       "scopeId": ".Launcher.installHook.hookedRequire",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/launcher.ts",
+      "scopeId": ".Launcher.sendIpcTraceBatch",
+      "rule": "@typescript-eslint/no-magic-numbers"
     }
   ]
 }

@@ -47,23 +47,18 @@
     },
     {
       "file": "src/Parser.ts",
-      "scopeId": ".Parser._parseCommand",
+      "scopeId": ".Parser.parseCommand",
       "rule": "complexity"
     },
     {
       "file": "src/Parser.ts",
-      "scopeId": ".Parser._parseCompoundWord",
+      "scopeId": ".Parser.parseCompoundWord",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/Parser.ts",
-      "scopeId": ".Parser._parseCompoundWord",
+      "scopeId": ".Parser.parseCompoundWord",
       "rule": "complexity"
-    },
-    {
-      "file": "src/Parser.ts",
-      "scopeId": ".Parser._peekToken",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/Rushell.ts",
@@ -77,7 +72,7 @@
     },
     {
       "file": "src/Rushell.ts",
-      "scopeId": ".Rushell._evaluateNode",
+      "scopeId": ".Rushell.evaluateNode",
       "rule": "complexity"
     },
     {
@@ -89,16 +84,6 @@
       "file": "src/TextRange.ts",
       "scopeId": ".TextRange",
       "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TextRange.ts",
-      "scopeId": ".TextRange._validateBounds",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TextRange.ts",
-      "scopeId": ".TextRange._validateBounds",
-      "rule": "complexity"
     },
     {
       "file": "src/TextRange.ts",
@@ -131,6 +116,16 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.validateBounds",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRange.ts",
+      "scopeId": ".TextRange.validateBounds",
+      "rule": "complexity"
+    },
+    {
       "file": "src/Tokenizer.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
@@ -152,7 +147,7 @@
     },
     {
       "file": "src/Tokenizer.ts",
-      "scopeId": ".Tokenizer._peekCharacterAfter",
+      "scopeId": ".Tokenizer.peekCharacterAfter",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {

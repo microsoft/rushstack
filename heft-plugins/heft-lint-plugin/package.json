@@ -16,6 +16,7 @@
     "build": "heft build --clean",
     "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {

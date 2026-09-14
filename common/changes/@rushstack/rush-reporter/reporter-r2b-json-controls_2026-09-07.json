@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Honor the pass-through separator when distinguishing command JSON from reporter JSON controls.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

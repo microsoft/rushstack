@@ -44,14 +44,14 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
   /**
    * The set of operations that will be executed
    */
-  private readonly _operations: Operation<TOperationMetadata, TGroupMetadata>[];
+  readonly #operations: Operation<TOperationMetadata, TGroupMetadata>[];
   /**
    * The total number of non-silent operations in the graph.
    * Silent operations are generally used to simplify the construction of the graph.
    */
-  private readonly _trackedOperationCount: number;
+  readonly #trackedOperationCount: number;
 
-  private readonly _groupRecords: Set<OperationGroupRecord<TGroupMetadata>>;
+  readonly #groupRecords: Set<OperationGroupRecord<TGroupMetadata>>;
 
   public constructor(operations: ReadonlySet<Operation<TOperationMetadata, TGroupMetadata>>) {
     let trackedOperationCount: number = 0;
@@ -62,11 +62,11 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
       }
     }
 
-    this._trackedOperationCount = trackedOperationCount;
+    this.#trackedOperationCount = trackedOperationCount;
 
-    this._operations = calculateCriticalPathLengths(operations);
+    this.#operations = calculateCriticalPathLengths(operations);
 
-    this._groupRecords = new Set(Array.from(this._operations, (e) => e.group).filter((e) => e !== undefined));
+    this.#groupRecords = new Set(Array.from(this.#operations, (e) => e.group).filter((e) => e !== undefined));
 
     for (const consumer of operations) {
       for (const dependency of consumer.dependencies) {
@@ -98,13 +98,13 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
     const startedGroups: Set<OperationGroupRecord> = new Set();
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
-    const maxParallelism: number = Math.min(this._operations.length, parallelism);
+    const maxParallelism: number = Math.min(this.#operations.length, parallelism);
 
-    for (const groupRecord of this._groupRecords) {
+    for (const groupRecord of this.#groupRecords) {
       groupRecord.reset();
     }
 
-    for (const operation of this._operations) {
+    for (const operation of this.#operations) {
       operation.reset();
     }
 
@@ -192,7 +192,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
         }
       );
 
-      await Promise.all(this._operations.map((record: Operation) => record._executeAsync(executionContext)));
+      await Promise.all(this.#operations.map((record: Operation) => record._executeAsync(executionContext)));
 
       // Terminate queue execution.
       workQueueAbortController.abort();
@@ -203,7 +203,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
     }
 
     const finalStatus: OperationStatus =
-      this._trackedOperationCount === 0
+      this.#trackedOperationCount === 0
         ? OperationStatus.NoOp
         : abortSignal.aborted
           ? OperationStatus.Aborted

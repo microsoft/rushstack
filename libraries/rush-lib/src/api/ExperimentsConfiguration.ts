@@ -177,6 +177,12 @@ export interface IExperimentsJson {
    * through trusted user, global, CLI, or environment configuration rather than a project `.npmrc`.
    */
   provideNpmrcCredentialsViaEnvironment?: boolean;
+
+  /**
+   * If true, Rush may use the experimental Rush reporter system. If omitted or false,
+   * Rush preserves the legacy reporting behavior.
+   */
+  useRushReporter?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

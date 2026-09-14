@@ -12,8 +12,8 @@ import { CollatedTerminal } from './CollatedTerminal';
  * @beta
  */
 export class CollatedWriter extends TerminalWritable {
-  private readonly _collator: StreamCollator;
-  private readonly _bufferedChunks: ITerminalChunk[];
+  readonly #collator: StreamCollator;
+  readonly #bufferedChunks: ITerminalChunk[];
 
   public readonly taskName: string;
   public readonly terminal: CollatedTerminal;
@@ -24,16 +24,16 @@ export class CollatedWriter extends TerminalWritable {
     this.taskName = taskName;
     this.terminal = new CollatedTerminal(this);
 
-    this._collator = collator;
+    this.#collator = collator;
 
-    this._bufferedChunks = [];
+    this.#bufferedChunks = [];
   }
 
   /**
    * Returns true if this is the active writer for its associated {@link StreamCollator}.
    */
   public get isActive(): boolean {
-    return this._collator.activeWriter === this;
+    return this.#collator.activeWriter === this;
   }
 
   /**
@@ -41,24 +41,24 @@ export class CollatedWriter extends TerminalWritable {
    * not become active yet, they can be inspected via this property.
    */
   public get bufferedChunks(): ReadonlyArray<ITerminalChunk> {
-    return this._bufferedChunks;
+    return this.#bufferedChunks;
   }
 
   /** {@inheritDoc @rushstack/terminal#TerminalWritable.onWriteChunk} */
   public onWriteChunk(chunk: ITerminalChunk): void {
-    this._collator._writerWriteChunk(this, chunk, this._bufferedChunks);
+    this.#collator._writerWriteChunk(this, chunk, this.#bufferedChunks);
   }
 
   /** {@inheritDoc @rushstack/terminal#TerminalWritable.onClose} */
   public override onClose(): void {
-    this._collator._writerClose(this, this._bufferedChunks);
+    this.#collator._writerClose(this, this.#bufferedChunks);
   }
 
   /** @internal */
   public _flushBufferedChunks(): void {
-    for (const chunk of this._bufferedChunks) {
-      this._collator.destination.writeChunk(chunk);
+    for (const chunk of this.#bufferedChunks) {
+      this.#collator.destination.writeChunk(chunk);
     }
-    this._bufferedChunks.length = 0;
+    this.#bufferedChunks.length = 0;
   }
 }

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Capture successful Git setup output in the real watch regression fixture so Windows line-ending notices do not mark the surrounding test operation as warned. Preserve nonzero Git failures and all native watch assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

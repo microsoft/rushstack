@@ -9,21 +9,21 @@ import { type ITerminalChunk, TerminalChunkKind, type TerminalWritable } from '@
  * @beta
  */
 export class CollatedTerminal {
-  private readonly _destination: TerminalWritable;
+  readonly #destination: TerminalWritable;
 
   public constructor(destination: TerminalWritable) {
-    this._destination = destination;
+    this.#destination = destination;
   }
 
   public writeChunk(chunk: ITerminalChunk): void {
-    this._destination.writeChunk(chunk);
+    this.#destination.writeChunk(chunk);
   }
 
   public writeStdoutLine(message: string): void {
-    this._destination.writeChunk({ text: message + '\n', kind: TerminalChunkKind.Stdout });
+    this.#destination.writeChunk({ text: message + '\n', kind: TerminalChunkKind.Stdout });
   }
 
   public writeStderrLine(message: string): void {
-    this._destination.writeChunk({ text: message + '\n', kind: TerminalChunkKind.Stderr });
+    this.#destination.writeChunk({ text: message + '\n', kind: TerminalChunkKind.Stderr });
   }
 }

@@ -52,32 +52,32 @@
     },
     {
       "file": "src/modules/ansiSgrParser.ts",
-      "scopeId": ".AnsiSgrParser._ansiStateToStyle",
+      "scopeId": ".AnsiSgrParser.ansiStateToStyle",
       "rule": "complexity"
     },
     {
       "file": "src/modules/ansiSgrParser.ts",
-      "scopeId": ".AnsiSgrParser._applySgr",
+      "scopeId": ".AnsiSgrParser.applySgr",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/modules/ansiSgrParser.ts",
-      "scopeId": ".AnsiSgrParser._applySgr",
+      "scopeId": ".AnsiSgrParser.applySgr",
       "rule": "complexity"
     },
     {
       "file": "src/modules/ansiSgrParser.ts",
-      "scopeId": ".AnsiSgrParser._applySgr",
+      "scopeId": ".AnsiSgrParser.applySgr",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/modules/ansiSgrParser.ts",
-      "scopeId": ".AnsiSgrParser._parseSgrParams",
+      "scopeId": ".AnsiSgrParser.parseSgrParams",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/modules/ansiSgrParser.ts",
-      "scopeId": ".AnsiSgrParser._parseSgrParams",
+      "scopeId": ".AnsiSgrParser.parseSgrParams",
       "rule": "complexity"
     },
     {

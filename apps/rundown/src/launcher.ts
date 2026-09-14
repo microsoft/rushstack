@@ -14,9 +14,9 @@ class Launcher {
   public action: LauncherAction = LauncherAction.Inspect;
   public targetScriptPathArg: string = '';
   public reportPath: string = '';
-  private _importedModules: Set<unknown> = new Set();
-  private _importedModulePaths: Set<string> = new Set();
-  private _ipcTraceRecordsBatch: IIpcTraceRecord[] = [];
+  #importedModules: Set<unknown> = new Set();
+  #importedModulePaths: Set<string> = new Set();
+  #ipcTraceRecordsBatch: IIpcTraceRecord[] = [];
 
   public transformArgs(argv: ReadonlyArray<string>): string[] {
     let nodeArg: string;
@@ -31,10 +31,10 @@ class Launcher {
     return [nodeArg, this.targetScriptPathArg, ...remainderArgs];
   }
 
-  private _sendIpcTraceBatch(): void {
-    if (this._ipcTraceRecordsBatch.length > 0) {
-      const batch: IIpcTraceRecord[] = [...this._ipcTraceRecordsBatch];
-      this._ipcTraceRecordsBatch.length = 0;
+  #sendIpcTraceBatch(): void {
+    if (this.#ipcTraceRecordsBatch.length > 0) {
+      const batch: IIpcTraceRecord[] = [...this.#ipcTraceRecordsBatch];
+      this.#ipcTraceRecordsBatch.length = 0;
 
       process.send!({
         id: 'trace',
@@ -46,10 +46,10 @@ class Launcher {
   public installHook(): void {
     const realRequire: typeof moduleApi.Module.prototype.require = moduleApi.Module.prototype.require;
 
-    const importedModules: Set<unknown> = this._importedModules; // for closure
-    const importedModulePaths: Set<string> = this._importedModulePaths; // for closure
-    const ipcTraceRecordsBatch: IIpcTraceRecord[] = this._ipcTraceRecordsBatch; // for closure
-    const sendIpcTraceBatch: () => void = this._sendIpcTraceBatch.bind(this); // for closure
+    const importedModules: Set<unknown> = this.#importedModules; // for closure
+    const importedModulePaths: Set<string> = this.#importedModulePaths; // for closure
+    const ipcTraceRecordsBatch: IIpcTraceRecord[] = this.#ipcTraceRecordsBatch; // for closure
+    const sendIpcTraceBatch: () => void = this.#sendIpcTraceBatch.bind(this); // for closure
 
     function hookedRequire(this: NodeModule, moduleName: string): unknown {
       // NOTE: The "this" pointer is the calling NodeModule, so we rely on closure
@@ -100,7 +100,7 @@ class Launcher {
     _copyProperties(hookedRequire, realRequire);
 
     process.on('exit', () => {
-      this._sendIpcTraceBatch();
+      this.#sendIpcTraceBatch();
       process.send!({
         id: 'done'
       } as IIpcDone);

@@ -22,72 +22,72 @@
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._getFailureType",
+      "scopeId": ".HttpBuildCacheProvider.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/HttpBuildCacheProvider.ts",
+      "scopeId": ".HttpBuildCacheProvider.getFailureType",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._getFailureType",
+      "scopeId": ".HttpBuildCacheProvider.getFailureType",
       "rule": "complexity"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._getFailureType",
+      "scopeId": ".HttpBuildCacheProvider.getFailureType",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._makeHttpCoreRequestAsync",
+      "scopeId": ".HttpBuildCacheProvider.makeHttpCoreRequestAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._makeHttpCoreRequestAsync",
+      "scopeId": ".HttpBuildCacheProvider.makeHttpCoreRequestAsync",
       "rule": "complexity"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._makeHttpCoreRequestAsync",
+      "scopeId": ".HttpBuildCacheProvider.makeHttpCoreRequestAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._makeHttpRequestAsync",
+      "scopeId": ".HttpBuildCacheProvider.makeHttpRequestAsync",
       "rule": "complexity"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._reportFailure",
+      "scopeId": ".HttpBuildCacheProvider.reportFailure",
       "rule": "complexity"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._reportFailure",
+      "scopeId": ".HttpBuildCacheProvider.reportFailure",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._reportFailure",
+      "scopeId": ".HttpBuildCacheProvider.reportFailure",
       "rule": "max-params"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._tryGetCredentialsAsync",
+      "scopeId": ".HttpBuildCacheProvider.tryGetCredentialsAsync",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._tryGetCredentialsAsync",
+      "scopeId": ".HttpBuildCacheProvider.tryGetCredentialsAsync",
       "rule": "complexity"
     },
     {
       "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider._tryGetCredentialsFromCacheAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/HttpBuildCacheProvider.ts",
-      "scopeId": ".HttpBuildCacheProvider.constructor",
+      "scopeId": ".HttpBuildCacheProvider.tryGetCredentialsFromCacheAsync",
       "rule": "complexity"
     },
     {

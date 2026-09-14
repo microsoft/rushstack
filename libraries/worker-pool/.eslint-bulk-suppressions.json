@@ -7,31 +7,6 @@
     },
     {
       "file": "src/WorkerPool.ts",
-      "scopeId": ".WorkerPool._createWorker",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/WorkerPool.ts",
-      "scopeId": ".WorkerPool._createWorker",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/WorkerPool.ts",
-      "scopeId": ".WorkerPool._destroyWorker",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/WorkerPool.ts",
-      "scopeId": ".WorkerPool._destroyWorker",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/WorkerPool.ts",
-      "scopeId": ".WorkerPool._onError",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/WorkerPool.ts",
       "scopeId": ".WorkerPool.checkinWorker",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -47,6 +22,26 @@
     },
     {
       "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.createWorker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.createWorker",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.destroyWorker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.destroyWorker",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPool.ts",
       "scopeId": ".WorkerPool.finishAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -54,6 +49,11 @@
       "file": "src/WorkerPool.ts",
       "scopeId": ".WorkerPool.finishAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPool.ts",
+      "scopeId": ".WorkerPool.onError",
+      "rule": "@typescript-eslint/no-magic-numbers"
     }
   ]
 }

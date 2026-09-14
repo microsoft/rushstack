@@ -23,7 +23,7 @@ export class AiReporter implements IReporter {
 }
 
 // @beta
-export function allocateChildDescriptor(fdNumber?: number): IChildDescriptorPlan;
+export function allocateChildDescriptor(fdNumber?: number, ackFdNumber?: number): IChildDescriptorPlan;
 
 // @beta
 export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError';
@@ -191,14 +191,18 @@ export function getSignalExitCode(signal: NodeJS.Signals): number;
 // @beta
 export class HeftChildEmitter {
     constructor(options: IHeftChildEmitterOptions);
+    acceptHelloAck(value: unknown): boolean;
+    get context(): IReporterChildContext | undefined;
     emitEvent(input: IHeftChildEventInput): string | undefined;
-    readonly mode: HeftChildReporterMode;
+    emitOutput(stream: 'stdout' | 'stderr', text: string, scope?: IReporterEventScope): readonly string[];
+    handleAckDescriptorClose(): void;
+    get mode(): HeftChildReporterMode;
     sendHello(): boolean;
     writeRaw(stream: 'stdout' | 'stderr', text: string): void;
 }
 
 // @beta
-export type HeftChildReporterMode = 'structured' | 'raw-fallback';
+export type HeftChildReporterMode = 'negotiation-pending' | 'structured' | 'raw-fallback';
 
 // @beta
 export class HeftDescriptorHost {
@@ -222,6 +226,8 @@ export interface IAiDiagnostic {
     readonly remediation?: readonly IRushRemediationAction[];
     // (undocumented)
     readonly severity: string;
+    // (undocumented)
+    readonly summary?: string;
 }
 
 // @beta
@@ -331,13 +337,20 @@ export interface IBootstrapHandoffWriteResult {
 }
 
 // @beta
+export interface IBootstrapLegacyOutput {
+    readonly stream: 'stdout' | 'stderr';
+    readonly text: string;
+}
+
+// @beta
 export interface IBootstrapReplayResult {
     readonly direct: boolean;
     readonly eventCount: number;
     readonly handoffPath?: string;
+    readonly legacyFallbackOutput?: readonly IBootstrapLegacyOutput[];
     readonly replayed: boolean;
     readonly skippedEventCount?: number;
-    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'incompatible-protocol';
+    readonly skipReason?: 'unreadable' | 'invalid-path' | 'nonce-mismatch' | 'invalid-event' | 'unsupported-required-event' | 'incompatible-protocol';
 }
 
 // @beta
@@ -351,6 +364,7 @@ export interface IBootstrapTruncation {
 
 // @beta
 export interface IChildDescriptorPlan {
+    readonly ackFdNumber: number;
     readonly env: Record<string, string>;
     readonly fdNumber: number;
     readonly stdio: (string | number)[];
@@ -448,6 +462,7 @@ export interface IEngineSinkResolution {
 
 // @beta
 export interface IExternalOutputChunk {
+    readonly iterationId?: number;
     readonly operationId?: string;
     readonly stream: string;
     readonly text: string;
@@ -456,6 +471,7 @@ export interface IExternalOutputChunk {
 // @beta
 export interface IFileReporterArtifact {
     readonly available: boolean;
+    readonly complete: boolean;
     readonly path?: string;
 }
 
@@ -526,12 +542,17 @@ export interface IHeftChildResult {
 
 // @beta
 export interface IHeftDescriptorHostOptions {
+    readonly context?: IReporterChildContext;
     readonly forwardEnvelope: (envelope: IReporterEventEnvelope<unknown>) => void;
     readonly onNegotiation?: (result: IReporterHandshakeResult) => void;
     readonly parentOperationId?: string;
+    readonly parentRequestId?: string;
     readonly parentSessionId: string;
-    readonly supportedCapabilities?: readonly string[];
+    readonly sendHelloAck?: (ack: IReporterHelloAck) => void;
+    readonly supportedCapabilities?: readonly ReporterCapability[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
+    readonly trustedPrivacy?: ReporterPrivacyClassification;
+    readonly trustedSource?: IReporterEventSource;
 }
 
 // @beta
@@ -580,6 +601,7 @@ export interface ILiveRegionState {
 
 // @beta
 export interface IMessageEmittedPayload {
+    readonly minimumLogLevel?: ReporterLogLevel;
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
     readonly text: string;
@@ -588,6 +610,11 @@ export interface IMessageEmittedPayload {
 // @beta
 export interface INdjsonOptions {
     readonly maxRecordBytes?: number;
+}
+
+// @beta
+export class InvalidReporterHelloAckError extends Error {
+    constructor(reason: string);
 }
 
 // @beta
@@ -605,17 +632,35 @@ export interface IOldEngineOutputAdapterOptions {
 }
 
 // @beta
+export interface IOperationCompletedPayload {
+    readonly durationMs?: number;
+    readonly iterationId?: number;
+    readonly operationId: string;
+    readonly status: OperationStatus;
+}
+
+// @beta
 export interface IOperationRegisteredPayload {
+    readonly iterationId?: number;
     readonly operationId: string;
     readonly phaseName?: string;
     readonly projectName?: string;
+    readonly silent?: boolean;
 }
 
 // @beta
 export interface IOperationStatusChangedPayload {
     readonly durationMs?: number;
+    readonly iterationId?: number;
     readonly operationId: string;
+    readonly previousStatus?: OperationStatus;
     readonly status: OperationStatus;
+}
+
+// @beta
+export interface IOperationStreamClosedPayload {
+    readonly iterationId?: number;
+    readonly operationId: string;
 }
 
 // @beta
@@ -632,6 +677,7 @@ export interface IOperationStreamEmitterOptions {
 export interface IPlaintextReporterOptions {
     readonly color?: boolean;
     readonly heartbeatIntervalMs?: number;
+    readonly logLevel?: ReporterLogLevel;
     readonly nowMs?: () => number;
     readonly variant?: PlaintextVariant;
     readonly write: (text: string) => void;
@@ -695,6 +741,14 @@ export interface IReporter {
 }
 
 // @beta
+export interface IReporterChildContext {
+    readonly color: boolean;
+    readonly logLevel: ReporterLogLevel;
+    readonly reporter: ReporterName;
+    readonly terminalWidth: number;
+}
+
+// @beta
 export interface IReporterCompatibilityDecision {
     readonly engineRendersLegacy: boolean;
     readonly legacyRenderingVisible: boolean;
@@ -722,6 +776,7 @@ export interface IReporterEngineDescriptor {
 export interface IReporterEventEnvelope<TPayload = unknown> {
     readonly eventId: string;
     readonly parentOperationId?: string;
+    readonly parentRequestId?: string;
     readonly parentSessionId?: string;
     readonly payload: TPayload;
     readonly privacy: ReporterPrivacyClassification;
@@ -770,6 +825,7 @@ export interface IReporterFrontendDescriptor {
 
 // @beta
 export interface IReporterHandshakeOptions {
+    readonly context?: IReporterChildContext;
     readonly supportedCapabilities?: readonly ReporterCapability[];
     readonly supportedProtocolVersion: IReporterProtocolVersion;
 }
@@ -793,6 +849,7 @@ export interface IReporterHello {
 // @beta
 export interface IReporterHelloAck {
     readonly acceptedCapabilities: readonly string[];
+    readonly context?: IReporterChildContext;
     readonly kind: 'helloAck';
     readonly protocolVersion: IReporterProtocolVersion;
     readonly rejectedRequiredFeatures: readonly string[];
@@ -805,6 +862,7 @@ export interface IReporterHostOptions {
     readonly manager?: ReporterManager;
     readonly nowMs?: () => number;
     readonly retentionMs?: number;
+    readonly supportedProtocolVersion?: IReporterProtocolVersion;
 }
 
 // @beta
@@ -902,6 +960,14 @@ export interface IReporterSelectionInput {
 }
 
 // @beta
+export interface IReporterTelemetryLimits {
+    readonly maxTelemetryDiagnosticCategories: number;
+    readonly maxTelemetryDiagnosticCodes: number;
+    readonly maxTelemetryProducerVersionLength: number;
+    readonly maxTelemetryProducerVersions: number;
+}
+
+// @beta
 export interface IResolveExitStatusFromEventsOptions {
     readonly cancelled?: boolean;
     readonly signal?: NodeJS.Signals;
@@ -917,6 +983,7 @@ export interface IResolveExitStatusOptions {
 // @beta
 export interface IRunProblemMatchersOptions {
     readonly maxDuplicates?: number;
+    readonly maxPartialLineBytes?: number;
 }
 
 // @beta
@@ -926,6 +993,7 @@ export interface IRushDiagnostic {
     readonly code: RushDiagnosticCode;
     readonly detailKey?: string;
     readonly diagnosticId: string;
+    readonly iterationId?: number;
     readonly parameters?: {
         readonly [name: string]: IClassifiedDiagnosticValue;
     };
@@ -1018,6 +1086,7 @@ export interface IScopedLogger {
 
 // @beta
 export interface IScopedMessageOptions {
+    readonly minimumLogLevel?: ReporterLogLevel;
     readonly privacy?: ReporterPrivacyClassification;
     readonly severity: ReporterMessageSeverity;
     readonly text: string;
@@ -1115,6 +1184,7 @@ export function iterateExternalOutput(events: readonly IReporterEventEnvelope<un
 // @beta
 export interface IWatchCycleCompletedPayload {
     readonly changedProjects?: readonly string[];
+    readonly iterationId?: number;
     readonly succeeded: boolean;
 }
 
@@ -1239,7 +1309,7 @@ export function normalizeAnsi(text: string): string;
 // @beta
 export class OldEngineOutputAdapter {
     constructor(options: IOldEngineOutputAdapterOptions);
-    capture(stream: 'stdout' | 'stderr', text: string): string[];
+    capture(stream: 'stdout' | 'stderr', text: string, wasRendered?: boolean): string[];
 }
 
 // @beta
@@ -1251,12 +1321,14 @@ export type OperationStatus = 'ready' | 'waiting' | 'queued' | 'executing' | 'su
 // @beta
 export class OperationStreamEmitter {
     constructor(options: IOperationStreamEmitterOptions);
-    changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string;
+    changeStatus(operationId: string, status: OperationStatus, durationMs?: number, previousStatus?: OperationStatus, iterationId?: number): string;
+    closeOperationStream(operationId: string, iterationId?: number): string;
     completeCommand(commandName: string, succeeded: boolean, exitCode: number, operationCounts?: {
         readonly [status: string]: number;
     }): string;
-    registerOperation(operationId: string, projectName?: string, phaseName?: string): string;
-    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[];
+    completeOperation(operationId: string, status: OperationStatus, durationMs?: number, iterationId?: number): string;
+    registerOperation(operationId: string, projectName?: string, phaseName?: string, silent?: boolean, iterationId?: number): string;
+    writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string, iterationId?: number): string[];
 }
 
 // @beta
@@ -1270,6 +1342,9 @@ export function parseReporterExtensionEventName(name: string): ReporterExtension
 
 // @beta
 export function parseReporterHello(value: unknown): IReporterHello;
+
+// @beta
+export function parseReporterHelloAck(value: unknown): IReporterHelloAck;
 
 // @beta
 export class PlaintextReporter implements IReporter {
@@ -1303,11 +1378,26 @@ export class ProblemMatcherRegistry {
 }
 
 // @beta
+export class ProblemMatcherRunner {
+    constructor(matchers: readonly IProblemMatcher[], options?: IRunProblemMatchersOptions);
+    flush(): readonly IRushDiagnostic[];
+    get matchedLineCount(): number;
+    get result(): IProblemMatcherResult;
+    get suppressedDuplicateCount(): number;
+    get unmatchedLineCount(): number;
+    write(event: IReporterEventEnvelope<unknown>): readonly IRushDiagnostic[];
+    writeOutput(text: string, operationId?: string, stream?: string): readonly IRushDiagnostic[];
+}
+
+// @beta
 export function readBootstrapHandoffFileAsync(filePath: string): Promise<{
     header: IBootstrapHandoffHeader | undefined;
     events: unknown[];
     discardedRecordCount: number;
 }>;
+
+// @beta
+export function readChildAckDescriptorFd(env: Record<string, string | undefined>): number | undefined;
 
 // @beta
 export function readChildDescriptorFd(env: Record<string, string | undefined>): number | undefined;
@@ -1328,10 +1418,10 @@ export function renderActiveProjectsRow(projects: readonly string[], width: numb
 export function renderLiveRegion(state: ILiveRegionState, options: IRenderLiveRegionOptions): string[];
 
 // @beta
-export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension"];
+export const REPORTER_EVENT_TYPES: readonly ["sessionStarted", "sessionCompleted", "commandStarted", "commandCompleted", "operationRegistered", "operationStatusChanged", "activityChanged", "watchCycleCompleted", "diagnosticEmitted", "messageEmitted", "externalProcessStarted", "externalOutput", "externalProcessCompleted", "artifactAvailable", "commandResult", "extension", "operationStreamClosed", "operationCompleted"];
 
 // @beta
-export const REPORTER_KNOWN_CAPABILITIES: readonly [];
+export const REPORTER_KNOWN_CAPABILITIES: readonly ["heft-child-events-v1", "reporter-context-v1"];
 
 // @beta
 export const REPORTER_MIGRATION_PHASES: readonly IReporterMigrationPhase[];
@@ -1340,7 +1430,7 @@ export const REPORTER_MIGRATION_PHASES: readonly IReporterMigrationPhase[];
 export const REPORTER_PACKAGE_NAME: '@rushstack/rush-reporter';
 
 // @beta
-export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets;
+export const REPORTER_PERFORMANCE_BUDGETS: IReporterPerformanceBudgets & IReporterTelemetryLimits;
 
 // @beta
 export const REPORTER_PROTOCOL_LIMITS: IReporterProtocolLimits;
@@ -1366,6 +1456,7 @@ export type ReporterExtensionEventName = `${string}.${string}` & {
 export class ReporterHost {
     constructor(options?: IReporterHostOptions);
     cleanAbandonedHandoffFilesAsync(): Promise<string[]>;
+    discardBootstrapHandoffAsync(): Promise<void>;
     getSink(): IReporterEventSink;
     get manager(): ReporterManager;
     replayBootstrapHandoffAsync(): Promise<IBootstrapReplayResult>;
@@ -1387,7 +1478,11 @@ export class ReporterManager implements IReporterEventSink {
     constructor(options?: IReporterManagerOptions);
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
+    // @internal
+    _disposeInitializedReportersAsync(): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
+    // @internal
+    _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;
     flushAsync(timeoutMs?: number): Promise<void>;
     getPendingEventCount(): number;
     ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string;
@@ -1506,6 +1601,12 @@ export const RUSH_DIAGNOSTIC_CODE_DEFINITIONS: readonly [{
     readonly defaultSeverity: "error";
     readonly summaryKey: "diagnostic.RUSH_EXTERNAL_TOOL_PROBLEM.summary";
     readonly detailKey: undefined;
+}, {
+    readonly code: "RUSH_COMMAND_FAILED";
+    readonly category: "operation";
+    readonly defaultSeverity: "error";
+    readonly summaryKey: "diagnostic.RUSH_COMMAND_FAILED.summary";
+    readonly detailKey: undefined;
 }];
 
 // @beta
@@ -1525,6 +1626,9 @@ export const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_
 
 // @beta
 export const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: '_RUSH_REPORTER_BOOTSTRAP_NONCE';
+
+// @beta
+export const RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_ACK_FD';
 
 // @beta
 export const RUSH_REPORTER_CHILD_FD_ENV_VAR: '_RUSH_REPORTER_CHILD_FD';

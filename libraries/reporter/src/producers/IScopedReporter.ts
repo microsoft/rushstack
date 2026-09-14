@@ -3,6 +3,7 @@
 
 import type { ReporterPrivacyClassification } from '../events/ReporterPrivacyClassification';
 import type { ReporterJsonValue } from '../events/ReporterJsonValue';
+import type { ReporterLogLevel } from '../config/ReporterNames';
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import type { ReporterExtensionEventName } from './ReporterExtensionEventName';
 
@@ -32,6 +33,11 @@ export interface IScopedMessageOptions {
    * The human-readable message text.
    */
   readonly text: string;
+
+  /**
+   * An optional minimum reporter log level for this message.
+   */
+  readonly minimumLogLevel?: ReporterLogLevel;
 
   /**
    * The privacy classification of the message text. Defaults to

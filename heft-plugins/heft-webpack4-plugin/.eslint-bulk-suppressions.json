@@ -47,77 +47,67 @@
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._getWebpackConfigurationAsync",
+      "scopeId": ".Webpack4Plugin.apply",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._getWebpackConfigurationAsync",
+      "scopeId": ".Webpack4Plugin.getWebpackConfigurationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Webpack4Plugin.ts",
+      "scopeId": ".Webpack4Plugin.getWebpackConfigurationAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._getWebpackConfigurationAsync",
+      "scopeId": ".Webpack4Plugin.getWebpackConfigurationAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._loadWebpackAsync",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._recordErrors",
+      "scopeId": ".Webpack4Plugin.recordErrors",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._recordErrors",
+      "scopeId": ".Webpack4Plugin.recordErrors",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackAsync",
+      "scopeId": ".Webpack4Plugin.runWebpackAsync",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackAsync",
+      "scopeId": ".Webpack4Plugin.runWebpackAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack4Plugin.runWebpackWatchAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack4Plugin.runWebpackWatchAsync",
       "rule": "complexity"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack4Plugin.runWebpackWatchAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackWatchAsync",
+      "scopeId": ".Webpack4Plugin.runWebpackWatchAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin._runWebpackWatchAsync.defaultDevServerOptions.onListening",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin.accessor",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/Webpack4Plugin.ts",
-      "scopeId": ".Webpack4Plugin.apply",
+      "scopeId": ".Webpack4Plugin.runWebpackWatchAsync.defaultDevServerOptions.onListening",
       "rule": "complexity"
     },
     {

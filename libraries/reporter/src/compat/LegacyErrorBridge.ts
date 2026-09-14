@@ -11,7 +11,7 @@ import { RushError } from '../diagnostics/RushError';
  */
 export const ALREADY_REPORTED_ERROR_NAME: 'AlreadyReportedError' = 'AlreadyReportedError';
 
-const CORRELATION_KEY: unique symbol = Symbol('rush-reporter-correlated-diagnostic-id');
+const correlatedDiagnosticIds: WeakMap<object, string> = new WeakMap();
 
 /**
  * The criteria that must be met before the legacy error bridge is removed.
@@ -94,11 +94,11 @@ export class LegacyErrorBridge {
   }
 
   /**
-   * Correlates a legacy sentinel error with the diagnostic id it corresponds to.
+   * Correlates an error with its diagnostic id without modifying the supplied object.
    */
   public correlate(error: unknown, diagnosticId: string): void {
     if (typeof error === 'object' && error !== null) {
-      (error as { [CORRELATION_KEY]?: string })[CORRELATION_KEY] = diagnosticId;
+      correlatedDiagnosticIds.set(error, diagnosticId);
     }
   }
 
@@ -107,7 +107,7 @@ export class LegacyErrorBridge {
    */
   public getCorrelatedDiagnosticId(error: unknown): string | undefined {
     if (typeof error === 'object' && error !== null) {
-      return (error as { [CORRELATION_KEY]?: string })[CORRELATION_KEY];
+      return correlatedDiagnosticIds.get(error);
     }
     return undefined;
   }

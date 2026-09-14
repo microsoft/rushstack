@@ -347,21 +347,6 @@
     },
     {
       "file": "src/providers/CommandLineParameterProvider.ts",
-      "scopeId": ".CommandLineParameterProvider._getParameter",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/providers/CommandLineParameterProvider.ts",
-      "scopeId": ".CommandLineParameterProvider._getParameter",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/providers/CommandLineParameterProvider.ts",
-      "scopeId": ".CommandLineParameterProvider._getParameter",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/providers/CommandLineParameterProvider.ts",
       "scopeId": ".CommandLineParameterProvider._processParsedData",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -417,8 +402,18 @@
     },
     {
       "file": "src/providers/CommandLineParameterProvider.ts",
-      "scopeId": ".CommandLineParameterProvider._throwParserExitError",
+      "scopeId": ".CommandLineParameterProvider.getParameter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider.getParameter",
       "rule": "complexity"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider.getParameter",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/providers/CommandLineParameterProvider.ts",
@@ -429,6 +424,11 @@
       "file": "src/providers/CommandLineParameterProvider.ts",
       "scopeId": ".CommandLineParameterProvider.getParameterStringMap",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParameterProvider.ts",
+      "scopeId": ".CommandLineParameterProvider.throwParserExitError",
+      "rule": "complexity"
     },
     {
       "file": "src/providers/CommandLineParser.ts",
@@ -447,16 +447,6 @@
     },
     {
       "file": "src/providers/CommandLineParser.ts",
-      "scopeId": ".CommandLineParser._validateDefinitions",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/providers/CommandLineParser.ts",
-      "scopeId": ".CommandLineParser.addAction",
-      "rule": "@typescript-eslint/prefer-nullish-coalescing"
-    },
-    {
-      "file": "src/providers/CommandLineParser.ts",
       "scopeId": ".CommandLineParser.executeAsync",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
@@ -494,6 +484,11 @@
       "file": "src/providers/CommandLineParser.ts",
       "scopeId": ".CommandLineParser.executeWithoutErrorHandlingAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/CommandLineParser.ts",
+      "scopeId": ".CommandLineParser.validateDefinitions",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/providers/ScopedCommandLineAction.ts",
@@ -542,18 +537,8 @@
     },
     {
       "file": "src/providers/TabCompletionAction.ts",
-      "scopeId": ".TabCompleteAction._completeParameterValues",
+      "scopeId": ".TabCompleteAction.completeParameterValues",
       "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/providers/TabCompletionAction.ts",
-      "scopeId": ".TabCompleteAction._getGlobalParameterOffset",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/providers/TabCompletionAction.ts",
-      "scopeId": ".TabCompleteAction._getParameterValueCompletionsAsync",
-      "rule": "complexity"
     },
     {
       "file": "src/providers/TabCompletionAction.ts",
@@ -584,6 +569,16 @@
       "file": "src/providers/TabCompletionAction.ts",
       "scopeId": ".TabCompleteAction.getCompletionsAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.getGlobalParameterOffset",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/providers/TabCompletionAction.ts",
+      "scopeId": ".TabCompleteAction.getParameterValueCompletionsAsync",
+      "rule": "complexity"
     },
     {
       "file": "src/test/ActionlessParser.test.ts",

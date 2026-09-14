@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Close initialized reporter destinations when bootstrap host creation fails without replacing the original startup error.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

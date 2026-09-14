@@ -42,21 +42,21 @@ export class ResolverFailure {
  * which resolves declaration references by walking the hierarchy loaded from an .api.json file.
  */
 export class AstReferenceResolver {
-  private readonly _collector: Collector;
-  private readonly _astSymbolTable: AstSymbolTable;
-  private readonly _workingPackage: WorkingPackage;
+  readonly #collector: Collector;
+  readonly #astSymbolTable: AstSymbolTable;
+  readonly #workingPackage: WorkingPackage;
 
   public constructor(collector: Collector) {
-    this._collector = collector;
-    this._astSymbolTable = collector.astSymbolTable;
-    this._workingPackage = collector.workingPackage;
+    this.#collector = collector;
+    this.#astSymbolTable = collector.astSymbolTable;
+    this.#workingPackage = collector.workingPackage;
   }
 
   public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | ResolverFailure {
     // Is it referring to the working package?
     if (
       declarationReference.packageName !== undefined &&
-      declarationReference.packageName !== this._workingPackage.name
+      declarationReference.packageName !== this.#workingPackage.name
     ) {
       return new ResolverFailure('External package references are not supported');
     }
@@ -66,8 +66,8 @@ export class AstReferenceResolver {
       return new ResolverFailure('Import paths are not supported');
     }
 
-    const astModule: AstModule = this._astSymbolTable.fetchAstModuleFromWorkingPackage(
-      this._workingPackage.entryPointSourceFile
+    const astModule: AstModule = this.#astSymbolTable.fetchAstModuleFromWorkingPackage(
+      this.#workingPackage.entryPointSourceFile
     );
 
     if (declarationReference.memberReferences.length === 0) {
@@ -76,19 +76,19 @@ export class AstReferenceResolver {
 
     const rootMemberReference: tsdoc.DocMemberReference = declarationReference.memberReferences[0];
 
-    const exportName: string | ResolverFailure = this._getMemberReferenceIdentifier(rootMemberReference);
+    const exportName: string | ResolverFailure = this.#getMemberReferenceIdentifier(rootMemberReference);
     if (exportName instanceof ResolverFailure) {
       return exportName;
     }
 
-    const rootAstEntity: AstEntity | undefined = this._astSymbolTable.tryGetExportOfAstModule(
+    const rootAstEntity: AstEntity | undefined = this.#astSymbolTable.tryGetExportOfAstModule(
       exportName,
       astModule
     );
 
     if (rootAstEntity === undefined) {
       return new ResolverFailure(
-        `The package "${this._workingPackage.name}" does not have an export "${exportName}"`
+        `The package "${this.#workingPackage.name}" does not have an export "${exportName}"`
       );
     }
 
@@ -96,7 +96,7 @@ export class AstReferenceResolver {
       return new ResolverFailure('This type of declaration is not supported yet by the resolver');
     }
 
-    let currentDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(
+    let currentDeclaration: AstDeclaration | ResolverFailure = this.#selectDeclaration(
       rootAstEntity.astDeclarations,
       rootMemberReference,
       rootAstEntity.localName
@@ -109,7 +109,7 @@ export class AstReferenceResolver {
     for (let index: number = 1; index < declarationReference.memberReferences.length; ++index) {
       const memberReference: tsdoc.DocMemberReference = declarationReference.memberReferences[index];
 
-      const memberName: string | ResolverFailure = this._getMemberReferenceIdentifier(memberReference);
+      const memberName: string | ResolverFailure = this.#getMemberReferenceIdentifier(memberReference);
       if (memberName instanceof ResolverFailure) {
         return memberName;
       }
@@ -120,7 +120,7 @@ export class AstReferenceResolver {
         return new ResolverFailure(`No member was found with name "${memberName}"`);
       }
 
-      const selectedDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(
+      const selectedDeclaration: AstDeclaration | ResolverFailure = this.#selectDeclaration(
         matchingChildren,
         memberReference,
         memberName
@@ -136,7 +136,7 @@ export class AstReferenceResolver {
     return currentDeclaration;
   }
 
-  private _getMemberReferenceIdentifier(memberReference: tsdoc.DocMemberReference): string | ResolverFailure {
+  #getMemberReferenceIdentifier(memberReference: tsdoc.DocMemberReference): string | ResolverFailure {
     if (memberReference.memberSymbol !== undefined) {
       return new ResolverFailure('ECMAScript symbol selectors are not supported');
     }
@@ -146,7 +146,7 @@ export class AstReferenceResolver {
     return memberReference.memberIdentifier.identifier;
   }
 
-  private _selectDeclaration(
+  #selectDeclaration(
     astDeclarations: ReadonlyArray<AstDeclaration>,
     memberReference: tsdoc.DocMemberReference,
     astSymbolName: string
@@ -160,7 +160,7 @@ export class AstReferenceResolver {
         // If we found multiple matches, but the extra ones are all ancillary declarations,
         // then return the main declaration.
         const nonAncillaryMatch: AstDeclaration | undefined =
-          this._tryDisambiguateAncillaryMatches(astDeclarations);
+          this.#tryDisambiguateAncillaryMatches(astDeclarations);
         if (nonAncillaryMatch) {
           return nonAncillaryMatch;
         }
@@ -174,15 +174,15 @@ export class AstReferenceResolver {
 
     switch (memberSelector.selectorKind) {
       case tsdoc.SelectorKind.System:
-        return this._selectUsingSystemSelector(astDeclarations, memberSelector, astSymbolName);
+        return this.#selectUsingSystemSelector(astDeclarations, memberSelector, astSymbolName);
       case tsdoc.SelectorKind.Index:
-        return this._selectUsingIndexSelector(astDeclarations, memberSelector, astSymbolName);
+        return this.#selectUsingIndexSelector(astDeclarations, memberSelector, astSymbolName);
     }
 
     return new ResolverFailure(`The selector "${memberSelector.selector}" is not a supported selector type`);
   }
 
-  private _selectUsingSystemSelector(
+  #selectUsingSystemSelector(
     astDeclarations: ReadonlyArray<AstDeclaration>,
     memberSelector: tsdoc.DocMemberSelector,
     astSymbolName: string
@@ -229,7 +229,7 @@ export class AstReferenceResolver {
     if (matches.length > 1) {
       // If we found multiple matches, but the extra ones are all ancillary declarations,
       // then return the main declaration.
-      const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(matches);
+      const nonAncillaryMatch: AstDeclaration | undefined = this.#tryDisambiguateAncillaryMatches(matches);
       if (nonAncillaryMatch) {
         return nonAncillaryMatch;
       }
@@ -241,7 +241,7 @@ export class AstReferenceResolver {
     return matches[0];
   }
 
-  private _selectUsingIndexSelector(
+  #selectUsingIndexSelector(
     astDeclarations: ReadonlyArray<AstDeclaration>,
     memberSelector: tsdoc.DocMemberSelector,
     astSymbolName: string
@@ -250,7 +250,7 @@ export class AstReferenceResolver {
 
     const matches: AstDeclaration[] = [];
     for (const astDeclaration of astDeclarations) {
-      const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
+      const overloadIndex: number = this.#collector.getOverloadIndex(astDeclaration);
       if (overloadIndex === selectorOverloadIndex) {
         matches.push(astDeclaration);
       }
@@ -265,7 +265,7 @@ export class AstReferenceResolver {
     if (matches.length > 1) {
       // If we found multiple matches, but the extra ones are all ancillary declarations,
       // then return the main declaration.
-      const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(matches);
+      const nonAncillaryMatch: AstDeclaration | undefined = this.#tryDisambiguateAncillaryMatches(matches);
       if (nonAncillaryMatch) {
         return nonAncillaryMatch;
       }
@@ -282,13 +282,13 @@ export class AstReferenceResolver {
    * This resolves an ambiguous match in the case where the extra matches are all ancillary declarations,
    * except for one match that is the main declaration.
    */
-  private _tryDisambiguateAncillaryMatches(
+  #tryDisambiguateAncillaryMatches(
     matches: ReadonlyArray<AstDeclaration>
   ): AstDeclaration | undefined {
     let result: AstDeclaration | undefined = undefined;
 
     for (const match of matches) {
-      const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(match);
+      const declarationMetadata: DeclarationMetadata = this.#collector.fetchDeclarationMetadata(match);
       if (!declarationMetadata.isAncillary) {
         if (result) {
           return undefined; // more than one match

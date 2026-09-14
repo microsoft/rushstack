@@ -10,6 +10,11 @@ import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
  */
 export interface IExternalOutputChunk {
   /**
+   * The graph iteration that produced this chunk.
+   */
+  readonly iterationId?: number;
+
+  /**
    * The operation the chunk belongs to, when scoped.
    */
   readonly operationId?: string;
@@ -41,11 +46,13 @@ export function iterateExternalOutput(
   const chunks: IExternalOutputChunk[] = [];
   for (const event of events) {
     if (event.type === 'externalOutput') {
-      const payload: { stream?: string; text?: string } = event.payload as {
+      const payload: { iterationId?: number; stream?: string; text?: string } = event.payload as {
+        iterationId?: number;
         stream?: string;
         text?: string;
       };
       chunks.push({
+        ...(payload.iterationId === undefined ? {} : { iterationId: payload.iterationId }),
         operationId: event.scope?.operationId,
         stream: payload.stream ?? 'stdout',
         text: payload.text ?? ''

@@ -12,9 +12,9 @@ import { TerminalChunkKind } from '../ITerminalChunk';
 
 class ErrorLineMatcher implements IProblemMatcher {
   public readonly name: string = 'errorLine';
-  private readonly _regex: RegExp = /^ERROR:\s*(.*)\n$/;
+  readonly #regex: RegExp = /^ERROR:\s*(.*)\n$/;
   public exec(line: string): IProblem | false {
-    const match: RegExpExecArray | null = this._regex.exec(line);
+    const match: RegExpExecArray | null = this.#regex.exec(line);
     if (match) {
       return {
         matcherName: this.name,

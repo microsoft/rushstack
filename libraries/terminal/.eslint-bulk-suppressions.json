@@ -412,22 +412,22 @@
     },
     {
       "file": "src/Terminal.ts",
-      "scopeId": ".Terminal._normalizeWriteParameters",
+      "scopeId": ".Terminal.normalizeWriteParameters",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/Terminal.ts",
-      "scopeId": ".Terminal._writeSegmentsToProviders",
+      "scopeId": ".Terminal.writeSegmentsToProviders",
       "rule": "complexity"
     },
     {
       "file": "src/Terminal.ts",
-      "scopeId": ".Terminal._writeSegmentsToProviders",
+      "scopeId": ".Terminal.writeSegmentsToProviders",
       "rule": "max-depth"
     },
     {
       "file": "src/Terminal.ts",
-      "scopeId": ".Terminal._writeSegmentsToProviders",
+      "scopeId": ".Terminal.writeSegmentsToProviders",
       "rule": "max-lines-per-function"
     },
     {
@@ -512,22 +512,12 @@
     },
     {
       "file": "src/TextRewriterTransform.ts",
-      "scopeId": ".TextRewriterTransform._closeRewriters",
+      "scopeId": ".TextRewriterTransform.closeRewriters",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/TextRewriterTransform.ts",
-      "scopeId": ".TextRewriterTransform._closeRewriters",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/TextRewriterTransform.ts",
-      "scopeId": ".TextRewriterTransform._processText",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/TextRewriterTransform.ts",
-      "scopeId": ".TextRewriterTransform._processText",
+      "scopeId": ".TextRewriterTransform.closeRewriters",
       "rule": "complexity"
     },
     {
@@ -544,6 +534,16 @@
       "file": "src/TextRewriterTransform.ts",
       "scopeId": ".TextRewriterTransform.constructor",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform.processText",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TextRewriterTransform.ts",
+      "scopeId": ".TextRewriterTransform.processText",
+      "rule": "complexity"
     },
     {
       "file": "src/test/Colorize.test.ts",

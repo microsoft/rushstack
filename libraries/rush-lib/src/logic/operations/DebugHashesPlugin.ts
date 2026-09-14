@@ -10,10 +10,10 @@ import type { IConfigurableOperation, IOperationStateHashComponents } from './IO
 const PLUGIN_NAME: 'DebugHashesPlugin' = 'DebugHashesPlugin';
 
 export class DebugHashesPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -21,7 +21,7 @@ export class DebugHashesPlugin implements IPhasedCommandPlugin {
       graph.hooks.configureIteration.tap(
         PLUGIN_NAME,
         (operations: ReadonlyMap<Operation, IConfigurableOperation>) => {
-          const terminal: ITerminal = this._terminal;
+          const terminal: ITerminal = this.#terminal;
           terminal.writeLine(Colorize.blue(`===== Begin Hash Computation =====`));
           for (const [operation, record] of operations) {
             terminal.writeLine(Colorize.cyan(`--- ${operation.name} ---`));
