@@ -17,7 +17,9 @@ plaintext, JSON, AI, file, and quiet modes, plus parser failure, help, and comma
 It verifies payload-only machine stdout, one visible writer, ordered/lossless plaintext grouping from a
 same-invocation JSON sidecar, final artifact completeness, owner-only log permissions, failure flushing,
 AI parser-error context, command-JSON ownership, exclusive sidecar destinations, and the
-`RUSH_REPORTER=legacy` rollback transcript. Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
+`RUSH_REPORTER=legacy` rollback transcript. Non-phased `rush list` output must also remain structured in
+JSON mode and reach the full-detail log without leaking onto stdout in file mode.
+Inherited `RUSH_REPORTER`, `RUSH_LOG_LEVEL`, and
 `RUSH_QUIET_MODE` values are removed from the self-check matrix. The matrix sets `RUSH_PREVIEW_VERSION`
 to the locally built Rush package version so it exercises the integrated frontend and engine even when
 `rush.json` pins an older release; preview warnings remain on stderr. It also verifies CI plaintext output,

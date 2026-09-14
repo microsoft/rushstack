@@ -76,7 +76,7 @@ export class MinimalRushConfiguration {
         const effectiveRushVersion: string = getRushPreviewVersion() ?? configuration.rushVersion;
         legacyPresentation =
           legacyFallbackRequested ||
-          effectiveRushVersion !== currentPackageVersion ||
+          (effectiveRushVersion !== currentPackageVersion && explicitReporter === undefined) ||
           (!configuration.useRushReporter && explicitReporter === undefined);
       }
       if (showVerbose && legacyPresentation) {

@@ -97,6 +97,33 @@ describe('interactive rendering helpers', () => {
 });
 
 describe('DefaultInteractiveReporter', () => {
+  it('repaints quiet operations at most ten times per second and clears its unrefed timer', async () => {
+    jest.useFakeTimers();
+    const intervalSpy = jest.spyOn(global, 'setInterval');
+    const terminal: FakeTerminal = new FakeTerminal();
+    const reporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({ terminal, color: false });
+    try {
+      await reporter.initializeAsync();
+      expect(intervalSpy.mock.results[0].value.hasRef()).toBe(false);
+      jest.advanceTimersByTime(1000);
+      expect(terminal.output).toBe('');
+      reporter.report(ev('commandStarted', { commandName: 'quiet-build' }));
+      terminal.output = '';
+      jest.advanceTimersByTime(1000);
+      expect(terminal.output.split('quiet-build').length - 1).toBe(10);
+
+      await reporter.closeAsync();
+      const afterClose: string = terminal.output;
+      jest.advanceTimersByTime(1000);
+      expect(terminal.output).toBe(afterClose);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      await reporter.closeAsync();
+      intervalSpy.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+
   it('honors NO_COLOR and FORCE_COLOR when color is not explicit', async () => {
     const noColorTerminal: FakeTerminal = new FakeTerminal();
     const noColorReporter: DefaultInteractiveReporter = new DefaultInteractiveReporter({

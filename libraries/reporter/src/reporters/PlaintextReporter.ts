@@ -7,11 +7,12 @@ import * as path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
-import type { IReporter } from '../manager/IReporter';
+import type { IReporter, IReporterContext } from '../manager/IReporter';
 import { getHumanReadableMessageText } from './ReporterRedaction';
 import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
 import type { ReporterLogLevel } from '../config/ReporterNames';
 import { createColorizer, type IColorizer } from './InteractiveRendering';
+import { startReporterTimer } from '../utilities/startReporterTimer';
 
 const HEARTBEAT_INTERVAL_MS: number = 30000;
 const OWNER_ONLY_MODE: number = 0o600;
@@ -117,6 +118,8 @@ export class PlaintextReporter implements IReporter {
   private _nextSpoolId: number;
   private _legacyIterationId: number;
   private _latestIterationId: number;
+  private _disposeHeartbeat: (() => void) | undefined;
+  private _abortSignal: AbortSignal | undefined;
 
   public constructor(options: IPlaintextReporterOptions) {
     this._write = options.write;
@@ -137,8 +140,19 @@ export class PlaintextReporter implements IReporter {
     this._latestIterationId = 0;
   }
 
-  public async initializeAsync(): Promise<void> {
-    /* no-op */
+  public async initializeAsync(context?: IReporterContext): Promise<void> {
+    this._abortSignal = context?.abortSignal;
+    if (!this._disposeHeartbeat && this._logLevel !== 'quiet') {
+      this._disposeHeartbeat = startReporterTimer(
+        context,
+        () => {
+          if (this._commandName !== undefined) {
+            this.emitHeartbeatIfDue();
+          }
+        },
+        Math.max(1, this._heartbeatIntervalMs)
+      );
+    }
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
@@ -245,6 +259,7 @@ export class PlaintextReporter implements IReporter {
         break;
       }
       case 'commandResult': {
+        this._stopHeartbeat();
         this._onResult(event.payload as { commandName: string; succeeded: boolean; exitCode: number });
         break;
       }
@@ -258,9 +273,11 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
+    this._stopHeartbeat();
+    const failed: boolean = this._abortSignal?.aborted === true && this._abortSignal.reason instanceof Error;
     for (const cycle of this._watchCycles.values()) {
       for (const [operationId, record] of cycle.operations) {
-        if (!record.silent && this._variant === 'detailed') {
+        if (!failed && !record.silent && this._variant === 'detailed') {
           const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
           this._writeLine('');
           this._writeLine(`==[ ${record.projectName}${phase} ]==`);
@@ -289,6 +306,11 @@ export class PlaintextReporter implements IReporter {
       return true;
     }
     return false;
+  }
+
+  private _stopHeartbeat(): void {
+    this._disposeHeartbeat?.();
+    this._disposeHeartbeat = undefined;
   }
 
   private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {

@@ -123,7 +123,7 @@ export class DefaultInteractiveReporter implements IReporter {
     // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
-    initializeAsync(): Promise<void>;
+    initializeAsync(context?: IReporterContext): Promise<void>;
     // (undocumented)
     readonly name: string;
     // (undocumented)
@@ -889,6 +889,7 @@ export interface IReporterContext {
     readonly abortSignal?: AbortSignal;
     readonly destination?: string;
     readonly protocolVersion: IReporterProtocolVersion;
+    readonly runWithErrorHandling?: (action: () => void) => void;
 }
 
 // @beta
@@ -1483,7 +1484,7 @@ export class PlaintextReporter implements IReporter {
     // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
-    initializeAsync(): Promise<void>;
+    initializeAsync(context?: IReporterContext): Promise<void>;
     // (undocumented)
     readonly name: string;
     // (undocumented)

@@ -197,7 +197,17 @@ export class ReporterManager implements IReporterEventSink {
       const context: IReporterContext = {
         protocolVersion: this._protocolVersion,
         destination: entry.destination,
-        abortSignal: entry.abortController.signal
+        abortSignal: entry.abortController.signal,
+        runWithErrorHandling: (action: () => void): void => {
+          if (entry.disabled || entry.abortController.signal.aborted) {
+            return;
+          }
+          try {
+            action();
+          } catch (error) {
+            this._handleReporterFailure(entry, error);
+          }
+        }
       };
       entry.initializationStarted = true;
       await entry.reporter.initializeAsync(context);
@@ -386,6 +396,9 @@ export class ReporterManager implements IReporterEventSink {
    * @throws the captured fatal error if a required reporter failed
    */
   public async closeAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {
+    for (const entry of this._entries) {
+      entry.abortController.abort(null);
+    }
     let flushError: Error | undefined;
     try {
       await this.flushAsync(timeoutMs);
@@ -502,11 +515,13 @@ export class ReporterManager implements IReporterEventSink {
     }
   }
 
-  private _handleReporterFailure(entry: IReporterEntry, error: Error): void {
+  private _handleReporterFailure(entry: IReporterEntry, failure: unknown): void {
+    const error: Error = failure instanceof Error ? failure : new Error(String(failure));
     if (entry.required) {
       if (!this._fatalError) {
         this._fatalError = error;
       }
+      entry.abortController.abort(error);
       // Write the emergency diagnostic once; a failed required reporter keeps
       // receiving events until teardown, and a per-event line would spam stderr.
       if (!entry.failureNotified) {
@@ -518,9 +533,13 @@ export class ReporterManager implements IReporterEventSink {
       return;
     }
     entry.disabled = true;
-    this._emergencyDiagnosticWriter(
-      `[reporter] Disabling optional reporter ${JSON.stringify(entry.reporter.name)} after failure: ${error.message}`
-    );
+    entry.abortController.abort(error);
+    if (!entry.failureNotified) {
+      entry.failureNotified = true;
+      this._emergencyDiagnosticWriter(
+        `[reporter] Disabling optional reporter ${JSON.stringify(entry.reporter.name)} after failure: ${error.message}`
+      );
+    }
   }
 
   private _isCoalescibleStatusEvent(envelope: IReporterEventEnvelope<unknown>): boolean {
