@@ -106,6 +106,7 @@ text, as well as the actual bytes on each stdout/stderr stream.
 
 ## Full-detail log completion
 
+Bootstrap replay shares the frontend's canonical full-detail invocation log.
 The automatic invocation log retains debug detail regardless of the primary log level, including
 in `--reporter=file` mode. An additional `--output=file://...` destination can independently select
 its level with `?logLevel=...`; it does not replace or reduce the canonical full-detail artifact.

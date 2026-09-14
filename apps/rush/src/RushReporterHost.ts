@@ -25,11 +25,11 @@ import {
   type IReporterEventSink,
   type IFileReporterArtifact,
   type IReporterOutputTarget,
+  type IBootstrapReplayResult,
   type ReporterEventType,
   type ReporterLogLevel,
   type ReporterName,
   type ReporterManager,
-  type IBootstrapReplayResult,
   LegacyFallbackSink,
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR
@@ -59,10 +59,10 @@ export interface IRushReporterHostOptions {
   readonly repositoryOptIn?: boolean;
   readonly forceLegacy?: boolean;
   readonly selectedRushVersion?: string;
-  readonly manager?: ReporterManager;
   readonly handoffDirectory?: string;
   readonly handoffRetentionMs?: number;
   readonly nowMs?: () => number;
+  readonly manager?: ReporterManager;
 }
 
 export interface IRushReporterSelection {
@@ -520,19 +520,12 @@ function hasHelpControl(argv: readonly string[]): boolean {
   return false;
 }
 
-function getImplicitHelpValueFlagsToStrip(argv: readonly string[], cwd: string): readonly string[] {
-  let commandName: string | undefined;
-  for (const argument of stripReporterValueControls(argv)) {
-    if (argument === '--') {
-      break;
-    }
-    if (!argument.startsWith('-')) {
-      commandName = argument;
-      break;
-    }
-  }
-  const ownership: IReporterCommandLineOwnership = getReporterCommandLineOwnership(commandName, cwd);
-  if (commandName !== undefined && !ownership.known) {
+function getImplicitHelpValueFlagsToStrip(
+  argv: readonly string[],
+  ownership: IReporterCommandLineOwnership,
+  actionName: string | undefined
+): readonly string[] {
+  if (actionName !== undefined && !ownership.known) {
     // An unknown or plugin-owned command can declare options outside the repository configuration.
     return [];
   }
@@ -712,6 +705,11 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
 
   const cwd: string = options.cwd ?? process.cwd();
   const commandJson: boolean = separateJsonControls(argv).commandJson;
+  const separator: number = argv.indexOf('--');
+  const actionName: string | undefined = stripReporterValueControls(
+    separator < 0 ? argv : argv.slice(0, separator)
+  ).find((argument) => !argument.startsWith('-'));
+  let commandOwnership: IReporterCommandLineOwnership | undefined;
 
   const reporterProbe: IParsedReporterControls = parseReporterControls(argv, false, true);
   if (isLegacyEmergencyFallbackRequested(env)) {
@@ -776,7 +774,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
     };
   }
 
-  let commandOwnership: IReporterCommandLineOwnership | undefined;
   if (hasHelpControl(argv)) {
     const reporterValueFlagsToStrip: readonly string[] =
       requestedReporter !== undefined
@@ -784,13 +781,13 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
           ? REPORTER_SELECTION_FLAG
           : ALL_REPORTER_VALUE_FLAGS
         : options.repositoryOptIn
-          ? getImplicitHelpValueFlagsToStrip(argv, cwd)
+          ? getImplicitHelpValueFlagsToStrip(argv, getCommandOwnership(), actionName)
           : [];
-    const reporterFlagsToStrip: readonly string[] =
-      (requestedReporter !== undefined && requestedReporter !== 'legacy') ||
-      (requestedReporter === undefined && options.repositoryOptIn)
-        ? getFlagsToStrip(selectionControls)
-        : [];
+    const reporterFlagsToStrip: readonly string[] = (
+      requestedReporter === undefined ? options.repositoryOptIn === true : requestedReporter !== 'legacy'
+    )
+      ? getFlagsToStrip(selectionControls)
+      : [];
     return {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -820,10 +817,6 @@ export function resolveRushReporterSelection(options: IRushReporterHostOptions =
 
   function getCommandOwnership(): IReporterCommandLineOwnership {
     if (!commandOwnership) {
-      const separator: number = argv.indexOf('--');
-      const actionName: string | undefined = stripReporterValueControls(
-        separator < 0 ? argv : argv.slice(0, separator)
-      ).find((argument) => !argument.startsWith('-'));
       commandOwnership = getReporterCommandLineOwnership(actionName, cwd);
     }
     return commandOwnership;
@@ -1005,9 +998,7 @@ export async function initializeRushReporterHostAsync(
           commonTempFolder: options.commonTempFolder,
           actionName: options.actionName
         });
-        host.manager.addReporter(fullDetailReporter, {
-          destination: 'file:auto'
-        });
+        host.manager.addReporter(fullDetailReporter, { destination: 'file:auto' });
       }
 
       if (primaryReporter) {

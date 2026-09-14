@@ -7,15 +7,15 @@ import * as path from 'node:path';
 
 import {
   OldEngineOutputAdapter,
+  BootstrapEventBuffer,
   ReporterManager,
+  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
+  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
+  writeBootstrapHandoffFileAsync,
   type IReporter,
   type IReporterContext,
   type IReporterEventEnvelope,
-  type IReporterEventSink,
-  BootstrapEventBuffer,
-  RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
-  RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR,
-  writeBootstrapHandoffFileAsync
+  type IReporterEventSink
 } from '@rushstack/rush-reporter';
 
 import {
@@ -1089,7 +1089,20 @@ describe(initializeRushReporterHostAsync.name, () => {
       expect(initialized.logArtifact?.path).toMatch(
         new RegExp(`^${directory.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
       );
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 1 },
+        sessionId: 'automatic-file-level',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'messageEmitted',
+        payload: { severity: 'debug', text: 'automatic-full-detail' }
+      });
       await initialized.closeAsync();
+      const logPath: string | undefined = initialized.logArtifact?.path;
+      if (!logPath) {
+        throw new Error('Expected the automatic full-detail log path');
+      }
+      expect(await fs.promises.readFile(logPath, 'utf8')).toContain('automatic-full-detail');
     } finally {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }

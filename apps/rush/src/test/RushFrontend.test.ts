@@ -302,7 +302,10 @@ describe(launchRushFrontendAsync.name, () => {
       const installSpy = jest.spyOn(Utilities, 'installPackageInDirectoryAsync').mockResolvedValue(undefined);
       const stopBeforeLaunch: Error = new Error('stop before loading installed engine');
       const resolveSpy = jest.spyOn(Import, 'resolveModuleAsync').mockRejectedValue(stopBeforeLaunch);
-      const expectedPath: string = path.join(new rushLib._RushGlobalFolder().nodeSpecificPath, 'rush-5.177.0');
+      const expectedPath: string = path.join(
+        new rushLib._RushGlobalFolder().nodeSpecificPath,
+        'rush-5.177.0'
+      );
       const messages: string[] = [
         'Rush version 5.177.0 is not currently installed. Installing...',
         'Trying to acquire lock for rush-5.177.0',
@@ -347,6 +350,39 @@ describe(launchRushFrontendAsync.name, () => {
       }
     }
   );
+
+  it('retains the frontend version in startup envelopes after native-private parent alignment', async () => {
+    const host: ReporterHost = new ReporterHost({ env: {} });
+    await host.manager.initializeAsync();
+    const emitSpy: jest.SpiedFunction<typeof host.manager.emit> = jest.spyOn(host.manager, 'emit');
+    const markerSpy: jest.SpiedFunction<typeof rushLib._FlagFile.prototype.isValidAsync> = jest
+      .spyOn(rushLib._FlagFile.prototype, 'isValidAsync')
+      .mockResolvedValue(false);
+    const stopBeforeInstall: Error = new Error('stop before package installation');
+    const lockSpy: jest.SpiedFunction<typeof LockFile.acquireAsync> = jest
+      .spyOn(LockFile, 'acquireAsync')
+      .mockRejectedValue(stopBeforeInstall);
+    try {
+      await expect(
+        new RushVersionSelector('5.178.1-native').ensureRushVersionInstalledAsync('5.177.0', undefined, {
+          isManaged: false,
+          reporter: { eventSink: host.getSink(), sessionId: 'startup-session' },
+          reporterCloseAsync: () => host.manager.closeAsync(),
+          reporterEnabled: true,
+          reporterSelectionReason: 'explicit --reporter'
+        })
+      ).rejects.toBe(stopBeforeInstall);
+      expect(emitSpy.mock.calls.map(([event]) => event.source)).toEqual([
+        { packageName: '@microsoft/rush', packageVersion: '5.178.1-native' },
+        { packageName: '@microsoft/rush', packageVersion: '5.178.1-native' }
+      ]);
+    } finally {
+      emitSpy.mockRestore();
+      markerSpy.mockRestore();
+      lockSpy.mockRestore();
+      await host.manager.closeAsync();
+    }
+  });
 
   it('creates the authoritative host before invoking the bundled rush-lib and passes only its channel', async () => {
     const order: string[] = [];
@@ -941,7 +977,8 @@ describe(launchRushFrontendAsync.name, () => {
             cwd: directory,
             reporterCloseAsync: launchOptions.reporterCloseAsync
           });
-          jest.spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+          jest
+            .spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
             .mockRejectedValue(new Error('parser failed'));
           process.exitCode = 1;
 

@@ -244,14 +244,16 @@ describe('ReporterManager ordering and assignment', () => {
     const disposing: Promise<void> = manager._disposeInitializedReportersAsync();
     await flushStarted;
     const closing: Promise<void> = manager.closeAsync();
+    const confirming: Promise<boolean> = manager._flushAndConfirmAsync();
     try {
       await new Promise<void>((resolve) => setImmediate(resolve));
       expect(reporter.flushCount).toBe(1);
       expect(reporter.closeCount).toBe(0);
     } finally {
       finishFlush();
-      await Promise.all([disposing, closing]);
+      await Promise.all([disposing, closing, confirming]);
     }
+    await expect(confirming).resolves.toBe(true);
     expect(reporter.flushCount).toBe(1);
     expect(reporter.closeCount).toBe(1);
   });
@@ -803,6 +805,30 @@ describe('ReporterManager flush and close', () => {
     await closePromise;
     expect(workCount).toBe(1);
   });
+
+  it.each(['never-started', 'initialization-failed', 'closed'])(
+    'does not flush a %s reporter while confirming full-log completion',
+    async (state) => {
+      const manager: ReporterManager = new ReporterManager();
+      const reporter: RecordingReporter = new RecordingReporter(state);
+      manager.addReporter(reporter);
+      if (state === 'initialization-failed') {
+        reporter.throwOnInit = true;
+        await expect(manager.initializeAsync()).rejects.toThrow('init failed initialization-failed');
+      } else if (state === 'closed') {
+        await manager.initializeAsync();
+        await manager.closeAsync();
+      }
+      const flushCount: number = reporter.flushCount;
+      const closeCount: number = reporter.closeCount;
+
+      await expect(manager._flushAndConfirmAsync()).resolves.toBe(true);
+
+      expect(reporter.flushCount).toBe(flushCount);
+      expect(reporter.closeCount).toBe(closeCount);
+      await manager._disposeInitializedReportersAsync();
+    }
+  );
 
   it('flushes and closes every reporter', async () => {
     const manager: ReporterManager = new ReporterManager();
