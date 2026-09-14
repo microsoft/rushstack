@@ -37,7 +37,8 @@ interface IWithoutTypeInformationOptions {
   files: string[];
 }
 
-function withoutTypeInformation({ files }: IWithoutTypeInformationOptions): Linter.Config[] {
+function withoutTypeInformation(options: IWithoutTypeInformationOptions): Linter.Config[] {
+  const { files } = options;
   return [
     {
       files,

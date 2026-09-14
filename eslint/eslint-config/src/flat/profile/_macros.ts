@@ -60,19 +60,20 @@
 //   },
 //   . . .
 // ]
-interface INamingConventionSelectorMacroBlock {
-  selectors: string[];
+
+interface INamingConventionSelectorBlockBase {
   enforceLeadingUnderscoreWhenPrivate?: boolean;
   modifiers?: string[];
   [optionName: string]: unknown;
 }
 
-export interface INamingConventionSelectorBlock {
+interface INamingConventionSelectorMacroBlock extends INamingConventionSelectorBlockBase {
+  selectors: string[];
+}
+
+export interface INamingConventionSelectorBlock extends INamingConventionSelectorBlockBase {
   selector: string;
   selectors?: string[];
-  enforceLeadingUnderscoreWhenPrivate?: boolean;
-  modifiers?: string[];
-  [optionName: string]: unknown;
 }
 
 function expandNamingConventionSelectors(
