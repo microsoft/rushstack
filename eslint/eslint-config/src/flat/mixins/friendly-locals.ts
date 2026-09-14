@@ -25,15 +25,16 @@
 import type { ESLint, Linter } from 'eslint';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 
-function toEslintPlugin(plugin: object): ESLint.Plugin {
-  return plugin;
-}
+// The third-party @typescript-eslint plugin does not present itself as an `ESLint.Plugin` (its typescript-eslint
+// `RuleModule` types are intentionally not assignable to ESLint's `RuleDefinition`), so widen it through
+// `object` to reference it in a flat-config `plugins` map.
+const typescriptEslintPluginAsEslintPlugin: ESLint.Plugin = typescriptEslintPlugin as object as ESLint.Plugin;
 
 const config: Linter.Config[] = [
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
-      '@typescript-eslint': toEslintPlugin(typescriptEslintPlugin)
+      '@typescript-eslint': typescriptEslintPluginAsEslintPlugin
     },
     rules: {
       '@rushstack/typedef-var': 'off', // <--- disabled by the mixin
@@ -74,7 +75,7 @@ const config: Linter.Config[] = [
       '**/test/**/*.tsx'
     ],
     plugins: {
-      '@typescript-eslint': toEslintPlugin(typescriptEslintPlugin)
+      '@typescript-eslint': typescriptEslintPluginAsEslintPlugin
     },
     rules: {
       '@typescript-eslint/typedef': [

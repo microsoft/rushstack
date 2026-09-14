@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Type the plugin's default export as `ESLint.Plugin` so that it can be referenced in ESLint flat-config `plugins` maps without a cast. This is a type-only change; the runtime export is unchanged.",
+      "type": "patch"
+    }
+  ]
+}

@@ -38,10 +38,6 @@ interface INamingConventionSelectorMacroBlock {
   [optionName: string]: unknown;
 }
 
-function toEslintPlugin(plugin: object): ESLint.Plugin {
-  return plugin;
-}
-
 const commonNamingConventionSelectors: INamingConventionSelectorMacroBlock[] = [
   {
     // We should be stricter about 'enumMember', but it often functions legitimately as an ad hoc namespace.
@@ -260,10 +256,13 @@ const commonConfig: Linter.Config[] = [
       }
     },
     plugins: {
-      '@rushstack': toEslintPlugin(rushstackEslintPlugin),
-      '@rushstack/security': toEslintPlugin(rushstackSecurityEslintPlugin),
-      '@typescript-eslint': toEslintPlugin(typescriptEslintPlugin),
-      promise: toEslintPlugin(promiseEslintPlugin)
+      '@rushstack': rushstackEslintPlugin,
+      '@rushstack/security': rushstackSecurityEslintPlugin,
+      // Unlike the @rushstack plugins, the third-party @typescript-eslint plugin does not present itself as an
+      // `ESLint.Plugin` (its typescript-eslint `RuleModule` types are intentionally not assignable to ESLint's
+      // `RuleDefinition`), so widen it through `object` here.
+      '@typescript-eslint': typescriptEslintPlugin as object as ESLint.Plugin,
+      promise: promiseEslintPlugin
     },
     rules: {
       // ====================================================================
