@@ -183,6 +183,41 @@ const commonNamingConventionSelectors = [
   }
 ];
 
+// These are the only rules in this profile that require type information (i.e. the TypeScript program).
+// They are grouped separately so that TypeScript files which are NOT part of the project's TypeScript program
+// (for example config files or tests that are not included by tsconfig.json) can be linted with only the
+// non-type-aware rules.  See the "without-type-information" helper (flat/without-type-information.js), which
+// disables these rules and type-aware parsing for a given set of files.
+const typeAwareRules = {
+  // NOTE: This new rule replaces several deprecated rules from @typescript-eslint/eslint-plugin@2.3.3:
+  //
+  // - @typescript-eslint/camelcase
+  // - @typescript-eslint/class-name-casing
+  // - @typescript-eslint/interface-name-prefix
+  // - @typescript-eslint/member-naming
+  //
+  // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
+  '@typescript-eslint/naming-convention': [
+    'warn',
+    ...expandNamingConventionSelectors(commonNamingConventionSelectors)
+  ],
+
+  // RATIONALE:         The #1 rule of promises is that every promise chain must be terminated by a catch()
+  //                    handler.  Thus wherever a Promise arises, the code must either append a catch handler,
+  //                    or else return the object to a caller (who assumes this responsibility).  Unterminated
+  //                    promise chains are a serious issue.  Besides causing errors to be silently ignored,
+  //                    they can also cause a NodeJS process to terminate unexpectedly.
+  '@typescript-eslint/no-floating-promises': [
+    'error',
+    {
+      checkThenables: true
+    }
+  ],
+
+  // RATIONALE:         Catches a common coding mistake.
+  '@typescript-eslint/no-for-in-array': 'error'
+};
+
 const commonConfig = [
   // Manually authored .d.ts files are generally used to describe external APIs that are  not expected
   // to follow our coding conventions.  Linting those files tends to produce a lot of spurious suppressions,
@@ -291,18 +326,9 @@ const commonConfig = [
         }
       ],
 
-      // NOTE: This new rule replaces several deprecated rules from @typescript-eslint/eslint-plugin@2.3.3:
-      //
-      // - @typescript-eslint/camelcase
-      // - @typescript-eslint/class-name-casing
-      // - @typescript-eslint/interface-name-prefix
-      // - @typescript-eslint/member-naming
-      //
-      // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
-      '@typescript-eslint/naming-convention': [
-        'warn',
-        ...expandNamingConventionSelectors(commonNamingConventionSelectors)
-      ],
+      // Type-aware rules (require the TypeScript program) are grouped in typeAwareRules so that files outside
+      // the TypeScript program can be linted with only the non-type-aware rules.
+      ...typeAwareRules,
 
       // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
       '@typescript-eslint/no-array-constructor': 'warn',
@@ -314,21 +340,6 @@ const commonConfig = [
       //                    where the type really can be anything.  Even if the type is flexible, another type
       //                    may be more appropriate such as "unknown", "{}", or "Record<k,V>".
       '@typescript-eslint/no-explicit-any': 'warn',
-
-      // RATIONALE:         The #1 rule of promises is that every promise chain must be terminated by a catch()
-      //                    handler.  Thus wherever a Promise arises, the code must either append a catch handler,
-      //                    or else return the object to a caller (who assumes this responsibility).  Unterminated
-      //                    promise chains are a serious issue.  Besides causing errors to be silently ignored,
-      //                    they can also cause a NodeJS process to terminate unexpectedly.
-      '@typescript-eslint/no-floating-promises': [
-        'error',
-        {
-          checkThenables: true
-        }
-      ],
-
-      // RATIONALE:         Catches a common coding mistake.
-      '@typescript-eslint/no-for-in-array': 'error',
 
       // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
       '@typescript-eslint/no-misused-new': 'error',
@@ -774,4 +785,4 @@ const commonConfig = [
   }
 ];
 
-module.exports = { commonNamingConventionSelectors, commonConfig };
+module.exports = { commonNamingConventionSelectors, commonConfig, typeAwareRules };
