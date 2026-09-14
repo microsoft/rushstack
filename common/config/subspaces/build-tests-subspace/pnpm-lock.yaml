@@ -11,7 +11,7 @@ overrides:
   loader-utils@^2.0.0: 2.0.4
   fast-xml-parser@^5.3.3: 5.3.5
 
-packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
+packageExtensionsChecksum: sha256-oUDDH9n0S+YRKY1TEmsTuFsNCNlmI4mpaLdAtVDhjgY=
 
 pnpmfileChecksum: sha256-E1T7OJ3DLTjpDqf4RdJzK9VDtAxgm4gDEQCLYdHD8nI=
 
@@ -1970,6 +1970,11 @@ packages:
 
   eslint-plugin-tsdoc@0.5.2:
     resolution: {integrity: sha512-BlvqjWZdBJDIPO/YU3zcPCF23CvjYT3gyu63yo6b609NNV3D1b6zceAREy2xnweuBoDpZcLNuPyAUq9cvx6bbQ==}
+    peerDependencies:
+      eslint: '*'
+    peerDependenciesMeta:
+      eslint:
+        optional: true
 
   eslint-scope@5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
@@ -6213,8 +6218,9 @@ snapshots:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@typescript-eslint/utils': 8.56.1(eslint@9.25.1)(typescript@4.9.5)
+    optionalDependencies:
+      eslint: 9.25.1
     transitivePeerDependencies:
-      - eslint
       - supports-color
       - typescript
 
@@ -6223,8 +6229,9 @@ snapshots:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
       '@typescript-eslint/utils': 8.56.1(eslint@9.37.0)(typescript@5.8.3)
+    optionalDependencies:
+      eslint: 9.37.0
     transitivePeerDependencies:
-      - eslint
       - supports-color
       - typescript
 
