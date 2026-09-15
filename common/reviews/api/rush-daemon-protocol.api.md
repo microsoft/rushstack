@@ -29,7 +29,11 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'requestStart',
 'requestCancel',
 'requestRejected',
-'requestResult'
+'requestResult',
+'shutdown',
+'shutdownAck',
+'stdinReady',
+'stdinEnd'
 ];
 
 // @beta
@@ -52,7 +56,19 @@ export const DAEMON_EVENT_TYPES: readonly [
 ];
 
 // @beta
+export const DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR: number;
+
+// @beta
+export const DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
+
+// @beta
+export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number;
+
+// @beta
+export const DAEMON_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion;
@@ -64,10 +80,13 @@ export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
 export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number;
+
+// @beta
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonStdinEndMessage | IDaemonStdinReadyMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -111,6 +130,9 @@ export type DaemonHandshakeOutcome = {
     readonly accepted: false;
     readonly error: ProtocolVersionMismatchError;
 };
+
+// @beta
+export type DaemonInvocationKind = 'rush' | 'rushx';
 
 // @beta
 export type DaemonJsonNull = null;
@@ -200,6 +222,7 @@ export interface IDaemonClientCaps {
     readonly colorLevel?: number;
     readonly columns?: number;
     readonly isTTY: boolean;
+    readonly supportsInputLifecycle?: boolean;
     readonly supportsInteractiveIO?: boolean;
     readonly supportsRequestAdmission?: boolean;
     readonly supportsRequestLifecycle?: boolean;
@@ -214,6 +237,7 @@ export interface IDaemonCommandResult {
     readonly exitCode: number;
     readonly outcome: DaemonCommandOutcome;
     readonly requestId: string;
+    readonly retryAfterRestart?: true;
 }
 
 // @beta
@@ -287,6 +311,41 @@ export interface IDaemonFrameDecoderOptions {
 }
 
 // @beta
+export interface IDaemonGraphInvalidations {
+    // (undocumented)
+    readonly changedPathCount: number;
+    // (undocumented)
+    readonly hasUnknownChanges: boolean;
+    // (undocumented)
+    readonly isWatcherHealthy: boolean;
+    // (undocumented)
+    readonly sequence: number;
+}
+
+// @beta
+export interface IDaemonGraphOperation {
+    // (undocumented)
+    readonly dependencyIds: ReadonlyArray<string>;
+    // (undocumented)
+    readonly enabled: false | DaemonPhasedOperationEnabledState;
+    // (undocumented)
+    readonly operationId: string;
+    // (undocumented)
+    readonly phaseName: string;
+    // (undocumented)
+    readonly projectName: string;
+    readonly status: string | null;
+}
+
+// @beta
+export interface IDaemonGraphSnapshotPayload {
+    // (undocumented)
+    readonly requestId: string;
+    // (undocumented)
+    readonly snapshot: IDaemonInitializedGraphSnapshot | IDaemonUninitializedGraphSnapshot;
+}
+
+// @beta
 export interface IDaemonHelloAckMessage {
     // (undocumented)
     readonly kind: 'helloAck';
@@ -305,6 +364,22 @@ export interface IDaemonHelloMessage {
     readonly payload: {
         readonly protocolVersion: IDaemonProtocolVersion;
     };
+}
+
+// @beta
+export interface IDaemonInitializedGraphSnapshot {
+    // (undocumented)
+    readonly hasScheduledIteration: boolean;
+    // (undocumented)
+    readonly initialized: true;
+    // (undocumented)
+    readonly invalidations: IDaemonGraphInvalidations;
+    // (undocumented)
+    readonly operations: ReadonlyArray<IDaemonGraphOperation>;
+    readonly pauseNextIteration: boolean;
+    // (undocumented)
+    readonly status: string;
+    readonly workspaceGeneration?: string;
 }
 
 // @beta
@@ -393,6 +468,9 @@ export interface IDaemonPongMessage {
     readonly payload: {
         readonly daemonVersion?: string;
         readonly protocolVersion?: IDaemonProtocolVersion;
+        readonly pid?: number;
+        readonly residentMemoryBytes?: number;
+        readonly workspace?: IDaemonWorkspaceStatus;
         readonly uptimeMs: number;
     };
 }
@@ -443,6 +521,8 @@ export interface IDaemonRequestEnvelope {
     readonly commandOrigin: DaemonRushCommandOrigin;
     readonly cwd: string;
     readonly environment: Readonly<Record<string, string>>;
+    readonly expectedWorkspaceGeneration?: string;
+    readonly invocationKind?: DaemonInvocationKind;
     readonly requestId: string;
     readonly terminal: IDaemonRequestTerminal;
 }
@@ -507,9 +587,45 @@ export interface IDaemonSetRawModeMessage {
 }
 
 // @beta
+export interface IDaemonShutdownAckMessage {
+    // (undocumented)
+    readonly kind: 'shutdownAck';
+    // (undocumented)
+    readonly payload: Record<string, never>;
+}
+
+// @beta
+export interface IDaemonShutdownMessage {
+    // (undocumented)
+    readonly kind: 'shutdown';
+    // (undocumented)
+    readonly payload: Record<string, never>;
+}
+
+// @beta
 export interface IDaemonStdinChunk {
     readonly chunk: Uint8Array;
     readonly requestId: string;
+}
+
+// @beta
+export interface IDaemonStdinEndMessage {
+    // (undocumented)
+    readonly kind: 'stdinEnd';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
+}
+
+// @beta
+export interface IDaemonStdinReadyMessage {
+    // (undocumented)
+    readonly kind: 'stdinReady';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
 }
 
 // @beta
@@ -539,11 +655,81 @@ export interface IDaemonTerminalPolicyResult {
 }
 
 // @beta
+export interface IDaemonUninitializedGraphSnapshot {
+    // (undocumented)
+    readonly initialized: false;
+    // (undocumented)
+    readonly invalidations: IDaemonGraphInvalidations;
+    readonly workspaceGeneration?: string;
+}
+
+// @beta
 export interface IDaemonUnsubscribeMessage {
     // (undocumented)
     readonly kind: 'unsubscribe';
     // (undocumented)
     readonly payload: DaemonEmptyPayload;
+}
+
+// @beta
+export interface IDaemonWarmProjectRank {
+    // (undocumented)
+    readonly frequency: number;
+    readonly lastUsed: number;
+    readonly measuredRunnerMemoryBytes?: number;
+    // (undocumented)
+    readonly projectName: string;
+    // (undocumented)
+    readonly timeSavedMs?: number;
+}
+
+// @beta
+export interface IDaemonWarmSetConfiguration {
+    // (undocumented)
+    readonly autoWarmByTelemetry: boolean;
+    // (undocumented)
+    readonly warmIdleTimeoutSeconds: number;
+    // (undocumented)
+    readonly warmMemoryBudgetMB: number;
+    // (undocumented)
+    readonly warmSetMaxProjects: number;
+    readonly watch?: boolean;
+}
+
+// @beta
+export interface IDaemonWarmSetStatus {
+    // (undocumented)
+    readonly cleanupFailures: ReadonlyArray<string>;
+    // (undocumented)
+    readonly configuration: IDaemonWarmSetConfiguration;
+    // (undocumented)
+    readonly daemonResidentMemoryBytes: number;
+    // (undocumented)
+    readonly deferredReason: 'workspace-busy' | 'native-busy' | 'graph-busy' | 'disposed' | undefined;
+    // (undocumented)
+    readonly maintenanceFailure?: string;
+    readonly maintenanceState: 'running' | 'quiescing' | 'stopped' | 'failed';
+    readonly measuredRunnerMemoryBytes: number;
+    // (undocumented)
+    readonly overMemoryBudget: boolean;
+    // (undocumented)
+    readonly overProjectLimit: boolean;
+    readonly projectRanks?: ReadonlyArray<IDaemonWarmProjectRank>;
+    // (undocumented)
+    readonly protectedProjectNames: ReadonlyArray<string>;
+    readonly retainedProjectNames: ReadonlyArray<string>;
+    readonly unmeasuredRunnerCount: number;
+    readonly watchedProjectNames: ReadonlyArray<string>;
+}
+
+// @beta
+export interface IDaemonWorkspaceStatus {
+    // (undocumented)
+    readonly generation: number;
+    readonly generationToken?: string;
+    readonly graphInitialized: boolean;
+    readonly lastReloadTier?: number;
+    readonly warmSet?: IDaemonWarmSetStatus;
 }
 
 // @beta
@@ -615,6 +801,9 @@ export const REQUEST_ID_LENGTH_OFFSET: number;
 
 // @beta
 export const RUSHD_EXTENSION_NAMESPACE: 'rushd';
+
+// @beta
+export const RUSHD_GRAPH_SNAPSHOT: 'rushd.graph-snapshot';
 
 // @beta
 export const RUSHD_OPERATION_HEADER: 'rushd.operation-header';

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Capture the native invocation kind, reject Rushx peers older than protocol 0.8 before request submission, and prevent fallback after output or stdin admission.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

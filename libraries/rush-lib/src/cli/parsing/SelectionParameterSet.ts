@@ -58,6 +58,23 @@ export class SelectionParameterSet {
 
   readonly #selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
+  /** Names of the parameters that affect project selection rather than command shape. */
+  public get parameterNames(): ReadonlySet<string> {
+    return new Set(
+      [
+        this.#fromProject,
+        this.#impactedByProject,
+        this.#impactedByExceptProject,
+        this.#onlyProject,
+        this.#toProject,
+        this.#toExceptProject,
+        this.#fromVersionPolicy,
+        this.#toVersionPolicy,
+        ...(this.#subspaceParameter ? [this.#subspaceParameter] : [])
+      ].map((parameter) => parameter.longName)
+    );
+  }
+
   public constructor(
     rushConfiguration: RushConfiguration,
     action: CommandLineParameterProvider,

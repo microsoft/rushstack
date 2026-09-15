@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Preserve Windows Rushx cwd, lifecycle environment and pnpm-sync path spelling while retaining physical workspace identity, confinement and admission-time alias checks.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

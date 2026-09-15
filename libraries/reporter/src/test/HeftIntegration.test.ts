@@ -908,9 +908,7 @@ describe('HeftDescriptorHost new descriptor path', () => {
       }
     };
     const originalChildRecord: string = JSON.stringify(childRecord);
-    expect(
-      host.processChildRecord(childRecord)
-    ).toBe(true);
+    expect(host.processChildRecord(childRecord)).toBe(true);
 
     const serialized: string = JSON.stringify(forwarded[0]);
     expect(serialized).not.toContain('TOP_SECRET_ALIAS');
@@ -935,9 +933,8 @@ describe('HeftDescriptorHost new descriptor path', () => {
           : new PlaintextReporter({ write, variant: 'detailed', color: false });
       reporter.report(forwarded[0]);
       await reporter.closeAsync();
-
       expect(output).not.toContain('TOP_SECRET_ALIAS');
-      expect(output).toContain('typescript reported TS1005: [secret]');
+      expect(output).toContain('RUSH_EXTERNAL_TOOL_PROBLEM');
     }
   });
 

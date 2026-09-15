@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Hand detached daemon startup to an independent helper with a durable pre-bind reservation. Prevent duplicate launches after the starting client dies, preserve explicit launch commands and ownership-based restart, and fail closed on ambiguous launcher failures.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

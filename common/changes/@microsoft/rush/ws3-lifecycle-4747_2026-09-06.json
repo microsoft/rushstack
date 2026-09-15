@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose stable workspace/runtime input fingerprints and safe borrowing of an already-held native preparation lock for generation-scoped engine reload.",
+      "type": "minor"
+    }
+  ]
+}

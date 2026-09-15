@@ -8,6 +8,12 @@ import type { Readable } from 'node:stream';
 import type { Writable } from 'node:stream';
 
 // @beta
+export const AI_REPORTER_QUALIFICATION_SCHEMA_VERSION: '1.0';
+
+// @beta
+export const AI_REPORTER_QUALIFICATION_THRESHOLDS: IAiReporterQualificationThresholds;
+
+// @beta
 export class AiReporter implements IReporter {
     constructor(options: IAiReporterOptions);
     // (undocumented)
@@ -117,7 +123,7 @@ export class DefaultInteractiveReporter implements IReporter {
     // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
-    initializeAsync(): Promise<void>;
+    initializeAsync(context?: IReporterContext): Promise<void>;
     // (undocumented)
     readonly name: string;
     // (undocumented)
@@ -138,6 +144,9 @@ export function detectAgent(env: Record<string, string | undefined>, configuredV
 
 // @beta
 export function encodeNdjsonRecord(value: unknown, options?: INdjsonOptions): string;
+
+// @beta
+export function evaluateAiReporterQualification(cases: readonly IAiReporterQualificationCaseResult[], thresholds?: IAiReporterQualificationThresholds): IAiReporterQualificationResult;
 
 // @beta
 export function evaluatePluginApplyGate(manifests: readonly IRushPluginManifest[], options: IPluginApplyGateOptions): IPluginApplyDecision[];
@@ -171,6 +180,9 @@ export class FileReporter implements IReporter {
 export function filterEventsForLogLevel(logLevel: ReporterLogLevel, events: readonly IReporterEventEnvelope<unknown>[]): IReporterEventEnvelope<unknown>[];
 
 // @beta
+export function formatAiReporterQualificationFailures(result: IAiReporterQualificationResult): string;
+
+// @beta
 export function getBlockedPlugins(decisions: readonly IPluginApplyDecision[]): IPluginApplyDecision[];
 
 // @beta
@@ -181,6 +193,9 @@ export function getLogLevelRank(level: ReporterLogLevel): number;
 
 // @beta
 export function getPrivacyClassificationRank(classification: ReporterPrivacyClassification): number;
+
+// @beta
+export function getQualifiedAiReporterDecision(env: Record<string, string | undefined>, configuredAgentEnvironmentVariables: readonly string[], qualification: IAiReporterQualificationResult | undefined, privacyPrerequisiteAccepted?: boolean): IQualifiedAiReporterDecision;
 
 // @beta
 export function getReporterMigrationPhase(id: ReporterMigrationPhaseId): IReporterMigrationPhase;
@@ -223,11 +238,18 @@ export interface IAiDiagnostic {
     // (undocumented)
     readonly code: string;
     // (undocumented)
+    readonly context?: Readonly<Record<string, ReporterJsonValue | '[local-sensitive]' | '[secret]'>>;
+    // (undocumented)
+    readonly detailKey?: string;
+    // (undocumented)
+    readonly diagnosticId?: string;
+    // (undocumented)
     readonly remediation?: readonly IRushRemediationAction[];
     // (undocumented)
     readonly severity: string;
     // (undocumented)
     readonly summary?: string;
+    readonly summaryKey?: string;
 }
 
 // @beta
@@ -282,6 +304,98 @@ export interface IAiReporterOptions {
     readonly maxBytes?: number;
     readonly maxDetailedDiagnostics?: number;
     readonly write: (text: string) => void;
+}
+
+// @beta
+export interface IAiReporterQualificationCaseResult {
+    // (undocumented)
+    readonly actionable: boolean;
+    // (undocumented)
+    readonly aiOutputBytes: number;
+    // (undocumented)
+    readonly deterministic: boolean;
+    // (undocumented)
+    readonly expectedResult: 'succeeded' | 'failed';
+    // (undocumented)
+    readonly failures: readonly string[];
+    // (undocumented)
+    readonly fullLogValid: boolean;
+    // (undocumented)
+    readonly legacyOutputBytes: number;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly normalizedAiOutputSha256: string;
+    // (undocumented)
+    readonly plaintextOutputBytes: number;
+    // (undocumented)
+    readonly privacySafe: boolean;
+    // (undocumented)
+    readonly scenario: string;
+    // (undocumented)
+    readonly stdoutContractValid: boolean;
+    // (undocumented)
+    readonly warningContractValid: boolean;
+}
+
+// @beta
+export interface IAiReporterQualificationGateResult {
+    // (undocumented)
+    readonly actual: number;
+    // (undocumented)
+    readonly failedCases: readonly string[];
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly passed: boolean;
+    // (undocumented)
+    readonly threshold: string;
+}
+
+// @beta
+export interface IAiReporterQualificationResult {
+    // (undocumented)
+    readonly cases: readonly IAiReporterQualificationCaseResult[];
+    // (undocumented)
+    readonly gates: readonly IAiReporterQualificationGateResult[];
+    // (undocumented)
+    readonly passed: boolean;
+    // (undocumented)
+    readonly schemaVersion: typeof AI_REPORTER_QUALIFICATION_SCHEMA_VERSION;
+    // (undocumented)
+    readonly thresholds: IAiReporterQualificationThresholds;
+}
+
+// @beta
+export interface IAiReporterQualificationThresholds {
+    // (undocumented)
+    readonly deterministicRunCount: number;
+    // (undocumented)
+    readonly maximumAggregateAiToLegacyPercent: number;
+    // (undocumented)
+    readonly maximumAggregateAiToPlaintextPercent: number;
+    // (undocumented)
+    readonly maximumCompactCaseAiOutputBytes: number;
+    // (undocumented)
+    readonly maximumOutputBytesPerCase: number;
+    // (undocumented)
+    readonly maximumPerCaseAiToBaselinePercent: number;
+    // (undocumented)
+    readonly minimumActionableFailurePercent: number;
+    // (undocumented)
+    readonly minimumComparableBaselineBytes: number;
+    // (undocumented)
+    readonly minimumControlCases: number;
+    // (undocumented)
+    readonly minimumFailureCases: number;
+    // (undocumented)
+    readonly minimumFullLogPassPercent: number;
+    // (undocumented)
+    readonly minimumPrivacyPassPercent: number;
+    // (undocumented)
+    readonly minimumStdoutContractPassPercent: number;
+    // (undocumented)
+    readonly minimumWarningContractPassPercent: number;
 }
 
 // @beta
@@ -725,6 +839,18 @@ export interface IProblemMatcherResult {
 }
 
 // @beta
+export interface IQualifiedAiReporterDecision {
+    // (undocumented)
+    readonly agentDetected: boolean;
+    // (undocumented)
+    readonly eligible: boolean;
+    // (undocumented)
+    readonly reason: 'RUSH_REPORTER=legacy' | 'agent not detected' | 'qualification unavailable' | 'qualification failed' | 'privacy prerequisite unavailable' | 'qualified';
+    // (undocumented)
+    readonly reporter?: 'ai';
+}
+
+// @beta
 export interface IRenderLiveRegionOptions {
     readonly color: IColorizer;
     readonly spinnerFrame: string;
@@ -759,8 +885,10 @@ export interface IReporterCompatibilityDecision {
 
 // @beta
 export interface IReporterContext {
+    readonly abortSignal?: AbortSignal;
     readonly destination?: string;
     readonly protocolVersion: IReporterProtocolVersion;
+    readonly runWithErrorHandling?: (action: () => void) => void;
 }
 
 // @beta
@@ -1355,7 +1483,7 @@ export class PlaintextReporter implements IReporter {
     // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
-    initializeAsync(): Promise<void>;
+    initializeAsync(context?: IReporterContext): Promise<void>;
     // (undocumented)
     readonly name: string;
     // (undocumented)
@@ -1479,7 +1607,7 @@ export class ReporterManager implements IReporterEventSink {
     addReporter(reporter: IReporter, options?: IReporterRegistrationOptions): void;
     closeAsync(timeoutMs?: number): Promise<void>;
     // @internal
-    _disposeInitializedReportersAsync(): Promise<void>;
+    _disposeInitializedReportersAsync(failure?: unknown): Promise<void>;
     emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string;
     // @internal
     _flushAndConfirmAsync(timeoutMs?: number): Promise<boolean>;
@@ -1530,6 +1658,9 @@ export function resolveReporterCompatibility(frontend: IReporterFrontendDescript
 
 // @beta
 export function resolveReporterSelection(input: IReporterSelectionInput): IReporterSelection;
+
+// @beta
+export function runAiReporterQualificationCorpusAsync(): Promise<IAiReporterQualificationResult>;
 
 // @beta
 export function runProblemMatchers(events: readonly IReporterEventEnvelope<unknown>[], matchers: readonly IProblemMatcher[], options?: IRunProblemMatchersOptions): IProblemMatcherResult;

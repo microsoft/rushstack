@@ -5,6 +5,8 @@ import { randomUUID } from 'node:crypto';
 
 import {
   DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
@@ -20,7 +22,8 @@ import type {
   IDaemonErrorMessage,
   IDaemonFrame,
   IDaemonPongMessage,
-  IDaemonRequestEnvelope
+  IDaemonRequestEnvelope,
+  IDaemonWorkspaceStatus
 } from '@rushstack/rush-daemon-protocol';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
@@ -44,6 +47,9 @@ export interface IDaemonControlSessionOptions {
   readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   readonly onClosed: (session: DaemonControlSession, error: Error | undefined) => void;
   readonly onError: (error: Error) => void;
+  readonly onRequestStarted?: () => () => void;
+  readonly onShutdownRequested: () => void;
+  readonly getWorkspaceStatus?: () => IDaemonWorkspaceStatus;
 }
 
 interface IRequestState {
@@ -73,6 +79,8 @@ export class DaemonControlSession {
   #isClosing: boolean = false;
   #nextEventSequence: number = 1;
   #peerSupportsInteractiveProtocol: boolean = false;
+  #peerSupportsInputLifecycle: boolean = false;
+  #peerSupportsDaemonLifecycle: boolean = false;
   #peerSupportsRequestAdmission: boolean = false;
   #peerSupportsRequestLifecycle: boolean = false;
   #sendQueue: Promise<void> = Promise.resolve();
@@ -95,8 +103,8 @@ export class DaemonControlSession {
     options.onInteractiveConnection?.(this.#interactiveConnection);
   }
 
-  public closeAsync(): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync();
+  public closeAsync(drainRequests: boolean = false): Promise<void> {
+    this.#closePromise ??= this.#closeOnceAsync(drainRequests);
     return this.#closePromise;
   }
 
@@ -153,11 +161,19 @@ export class DaemonControlSession {
       case 'ping':
         this.#send(this.#createPong());
         return;
+      case 'shutdown':
+        await this.#shutdownHostAsync();
+        return;
       case 'requestStart':
         this.#startRequest(message.payload);
         return;
       case 'requestCancel':
         this.#cancelRequest(message.payload.requestId);
+        return;
+      case 'stdinEnd':
+        void this.#completeInputAsync(
+          this.#interactiveConnection.routeStdinEndAsync(message.payload.requestId)
+        );
         return;
       default:
         throw new DaemonProtocolError(
@@ -190,6 +206,8 @@ export class DaemonControlSession {
     this.#sessionId = outcome.ack.payload.sessionId;
     const peerMinor: number = message.payload.protocolVersion.minor;
     this.#peerSupportsInteractiveProtocol = peerMinor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
+    this.#peerSupportsInputLifecycle = peerMinor >= DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR;
+    this.#peerSupportsDaemonLifecycle = peerMinor >= DAEMON_LIFECYCLE_PROTOCOL_MINOR;
     this.#peerSupportsRequestAdmission = peerMinor >= DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR;
     this.#peerSupportsRequestLifecycle = peerMinor >= DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR;
     this.#send(outcome.ack);
@@ -199,6 +217,7 @@ export class DaemonControlSession {
     if (this.#subscribed) {
       throw new DaemonProtocolError('malformedControlMessage', 'A daemon session may subscribe only once.');
     }
+
     this.#subscribed = true;
     this.#peerSupportsInteractiveProtocol =
       this.#peerSupportsInteractiveProtocol && payload.supportsInteractiveIO === true;
@@ -206,7 +225,23 @@ export class DaemonControlSession {
       this.#peerSupportsRequestAdmission && payload.supportsRequestAdmission === true;
     this.#peerSupportsRequestLifecycle =
       this.#peerSupportsRequestLifecycle && payload.supportsRequestLifecycle === true;
-    this.#interactiveConnection.setEnabled(this.#peerSupportsInteractiveProtocol);
+    this.#peerSupportsInputLifecycle =
+      this.#peerSupportsInputLifecycle && payload.supportsInputLifecycle === true;
+    this.#interactiveConnection.setEnabled(
+      this.#peerSupportsInteractiveProtocol,
+      this.#peerSupportsInputLifecycle
+    );
+  }
+
+  async #shutdownHostAsync(): Promise<void> {
+    if (!this.#peerSupportsDaemonLifecycle) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'Daemon shutdown requires a lifecycle-capable protocol version.'
+      );
+    }
+    await this.#enqueueControlAsync({ kind: 'shutdownAck', payload: {} });
+    this.#options.onShutdownRequested();
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
@@ -257,7 +292,14 @@ export class DaemonControlSession {
     });
     const state: IRequestState = { abortController, client, completion: Promise.resolve() };
     this.#requestById.set(requestId, state);
-    state.completion = Promise.resolve().then(() => this.#dispatchRequestAsync(envelope, state));
+    const releaseActivity: (() => void) | undefined = this.#options.onRequestStarted?.();
+    state.completion = Promise.resolve()
+      .then(() => this.#dispatchRequestAsync(envelope, state))
+      .finally(() => {
+        this.#completeRequest(requestId, state);
+        releaseActivity?.();
+      });
+    void state.completion.catch((error: unknown) => this.#handleSendFailureAsync(error));
   }
 
   #getNextEventSequence(): number {
@@ -300,7 +342,6 @@ export class DaemonControlSession {
       const rejection: IClassifiedRejection = classifyRejection(dispatchError);
       await state.client.writeRejectionAsync(rejection.code, rejection.message);
     }
-    this.#completeRequest(envelope.requestId, state);
   }
 
   #completeRequest(requestId: string, state: IRequestState): void {
@@ -333,6 +374,9 @@ export class DaemonControlSession {
       payload: {
         daemonVersion: this.#options.daemonVersion,
         protocolVersion: DAEMON_PROTOCOL_VERSION,
+        pid: process.pid,
+        residentMemoryBytes: process.memoryUsage().rss,
+        workspace: this.#options.getWorkspaceStatus?.(),
         uptimeMs: Date.now() - this.#options.startedAtMs
       }
     };
@@ -344,10 +388,7 @@ export class DaemonControlSession {
     );
   }
 
-  #enqueueControlAsync(
-    message: DaemonControlMessage,
-    closeAfterSend: boolean = false
-  ): Promise<void> {
+  #enqueueControlAsync(message: DaemonControlMessage, closeAfterSend: boolean = false): Promise<void> {
     return this.#enqueueFrameAsync(
       { kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message) },
       closeAfterSend
@@ -402,13 +443,21 @@ export class DaemonControlSession {
     }
   }
 
-  async #closeOnceAsync(): Promise<void> {
+  async #closeOnceAsync(drainRequests: boolean = false): Promise<void> {
     const closeReason: Error = new Error('The daemon control session is closing.');
+    if (drainRequests) {
+      const pending: Promise<PromiseSettledResult<void>[]> = Promise.allSettled(
+        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
+      );
+      // Lifecycle admission has stopped execution; let accepted requests receive their typed restart result.
+      if (!(await settlesWithinAsync(pending.then(() => undefined), CLOSE_DRAIN_TIMEOUT_MS))) {
+        this.#connection.abort(closeReason);
+      }
+      await pending;
+    }
     this.#markClosing(closeReason);
     const drainPromise: Promise<void> = Promise.all([
-      Promise.allSettled(
-        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
-      ),
+      Promise.allSettled(Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)),
       this.#sendQueue
     ]).then(() => undefined);
     if (!(await settlesWithinAsync(drainPromise, CLOSE_DRAIN_TIMEOUT_MS))) {
@@ -434,7 +483,6 @@ export class DaemonControlSession {
     this.#options.onClosed(this, finalError);
     this.#resolveClosed();
   }
-
 }
 
 function createDeferred(): { promise: Promise<void>; resolve: () => void } {
@@ -471,7 +519,10 @@ function classifyRejection(error: unknown): IClassifiedRejection {
   return { code: 'routingFailed', message: normalizeError(error).message };
 }
 
-function combineCloseErrors(error: Error | undefined, cleanupErrors: ReadonlyArray<Error>): Error | undefined {
+function combineCloseErrors(
+  error: Error | undefined,
+  cleanupErrors: ReadonlyArray<Error>
+): Error | undefined {
   if (cleanupErrors.length === 0) return error;
   return new AggregateError(
     error ? [error, ...cleanupErrors] : cleanupErrors,
@@ -485,7 +536,13 @@ async function settlesWithinAsync(promise: Promise<void>, timeoutMs: number): Pr
     timeout = setTimeout(() => resolve(false), timeoutMs);
     timeout.unref();
   });
-  const settled: boolean = await Promise.race([promise.then(() => true, () => true), timeoutPromise]);
+  const settled: boolean = await Promise.race([
+    promise.then(
+      () => true,
+      () => true
+    ),
+    timeoutPromise
+  ]);
   if (timeout) clearTimeout(timeout);
   return settled;
 }

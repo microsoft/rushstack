@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Reuse unchanged engines, reload changed configuration or command shape in-process under generation admission, and restart process-bound state through existing core ownership/startup contracts. Add isolated native install/update workers with result-before-restart ordering and no post-execution replay.",
+      "type": "minor"
+    }
+  ]
+}

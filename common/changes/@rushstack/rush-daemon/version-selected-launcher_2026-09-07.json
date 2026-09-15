@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Select verified bundled or cached daemon installations and prepare exact-engine published releases with native installation APIs. Attest the actual engine and protocol in isolation before launching selected default daemon APIs.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

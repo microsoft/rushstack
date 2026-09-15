@@ -41,6 +41,24 @@
             "type": "string",
             "description": "The name of the operation. This should be a key in the \"package.json\" file's \"scripts\" section."
           },
+          "daemonIpc": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entryPoint"],
+            "description": "Explicit non-cacheable Node IPC tool, enabled only by daemon.usePersistentIpcRunners for an unsharded incremental daemon build.",
+            "properties": {
+              "entryPoint": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Project-root-relative .js/.cjs/.mjs entrypoint in a dedicated implementation subdirectory. Its complete file tree is fingerprinted; imports outside that tree other than Node built-ins are unsupported."
+              },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Literal argv tokens, without shell quoting or expansion. Native non-ignored operation parameters follow these tokens."
+              }
+            }
+          },
 
           "outputFolderNames": {
             "type": "array",

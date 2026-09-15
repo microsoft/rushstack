@@ -26,34 +26,39 @@ const MAX_TRACKED_CHANGED_PATHS: number = 10_000;
  */
 export class WorkspaceInvalidationTracker {
   readonly #sequenceByPath: Map<string, number> = new Map();
+  readonly #subscribers: Set<() => void> = new Set();
   #initializationSequence: number | undefined;
   #latestSequence: number = 0;
   #unknownChangeSequence: number | undefined;
   #watcherHealthy: boolean = true;
+
+  /** Observes changes and acknowledgements. Callback failures are reported as process warnings. */
+  public subscribe(notify: () => void): () => void {
+    this.#subscribers.add(notify);
+    return () => { this.#subscribers.delete(notify); };
+  }
 
   /** Records a path-specific or unknown workspace change. */
   public invalidate(changedPath?: string): void {
     const sequence: number = ++this.#latestSequence;
     if (changedPath === undefined || this.#unknownChangeSequence !== undefined) {
       this.#unknownChangeSequence = sequence;
-      return;
-    }
-
-    if (
+    } else if (
       !this.#sequenceByPath.has(changedPath) &&
       this.#sequenceByPath.size >= MAX_TRACKED_CHANGED_PATHS
     ) {
       this.#sequenceByPath.clear();
       this.#unknownChangeSequence = sequence;
-      return;
+    } else {
+      this.#sequenceByPath.set(changedPath, sequence);
     }
-
-    this.#sequenceByPath.set(changedPath, sequence);
+    this.#notify();
   }
 
   /** @internal */
   public invalidateForInitialization(): void {
     this.#initializationSequence = ++this.#latestSequence;
+    this.#notify();
   }
 
   /** @internal */
@@ -108,6 +113,19 @@ export class WorkspaceInvalidationTracker {
     }
     if (this.#initializationSequence !== undefined && this.#initializationSequence <= sequence) {
       this.#initializationSequence = undefined;
+    }
+    this.#notify();
+  }
+
+  #notify(): void {
+    for (const notify of this.#subscribers) {
+      try {
+        notify();
+      } catch (error) {
+        process.emitWarning(error instanceof Error ? error : String(error), {
+          code: 'RUSH_DAEMON_INVALIDATION_CALLBACK_ERROR'
+        });
+      }
     }
   }
 }

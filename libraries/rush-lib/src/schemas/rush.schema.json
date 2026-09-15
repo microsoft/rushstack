@@ -244,6 +244,76 @@
       },
       "additionalProperties": false
     },
+    "daemon": {
+      "description": "Opt-in standalone daemon client configuration. Environment overrides config, then defaults. Observation and warm policies use the generation-owned WorkspaceWarmSet host attachment; no automatic build scheduling.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable the separate rush-client/rushx-client binaries. Existing rush/rushx remain unchanged. RUSH_DAEMON overrides."
+        },
+        "idleTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "maximum": 2147483.647,
+          "default": 900,
+          "description": "Idle shutdown timeout. RUSH_DAEMON_IDLE_TIMEOUT_SECONDS overrides."
+        },
+        "autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-start only for opted-in invocations. RUSH_DAEMON_AUTO_START overrides."
+        },
+        "watch": {
+          "type": "boolean",
+          "default": false,
+          "description": "Retain host observation of warm project files between requests; never schedule builds. Root/config guards and request-time input reconciliation remain active when false. RUSH_DAEMON_WATCH overrides."
+        },
+        "usePersistentIpcRunners": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable explicit operationSettings[].daemonIpc Node launchers for incremental daemon builds. Never enables watch mode or unrequested execution. RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS overrides."
+        },
+        "queueTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2147483.647,
+          "default": 30,
+          "description": "Maximum admission queue wait. RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS overrides."
+        },
+        "warmIdleTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "maximum": 2147483.647,
+          "default": 300,
+          "description": "Idle resource expiration for an attached warm set. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
+        },
+        "warmMemoryBudgetMB": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "maximum": 9007199254740991,
+          "default": 512,
+          "description": "Best-effort sampled RSS budget, not a hard process/tree memory ceiling. Active/protected work is exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
+        },
+        "warmSetMaxProjects": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "default": 20,
+          "description": "Best-effort retained project limit for an attached warm set. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
+        },
+        "autoWarmByTelemetry": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts unrequested scripts. RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY overrides."
+        }
+      }
+    },
     "telemetryEnabled": {
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"

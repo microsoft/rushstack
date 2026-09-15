@@ -12,6 +12,7 @@ export type InteractiveInputRoutingErrorCode =
   | 'unknownRequest'
   | 'completedRequest'
   | 'nonInteractiveRequest'
+  | 'inputEnded'
   | 'requestLimitExceeded';
 
 /** A request-scoped stdin routing failure. @beta */
@@ -28,6 +29,8 @@ export class InteractiveInputRoutingError extends Error {
 /** A backpressured destination for arbitrary stdin bytes. @beta */
 export interface IInteractiveRequestInputSink {
   writeInputAsync(chunk: Uint8Array): Promise<void>;
+  /** Delivers EOF after preceding writes. Required when accepting input that can end. */
+  endInputAsync?(): Promise<void>;
 }
 
 /** A client-side terminal control destination for one daemon request. @beta */
@@ -35,6 +38,8 @@ export interface IInteractiveRequestControlClient {
   readonly abortSignal: AbortSignal;
   /** Resolves after the thin client acknowledges that it applied the requested terminal state. */
   writeRawModeControlAsync(message: IDaemonSetRawModeMessage): Promise<void>;
+  /** Available only after stdin-lifecycle capability negotiation. */
+  writeInputReadyAsync?(requestId: string): Promise<void>;
 }
 
 /** Registration options for one request on a connection-scoped input router. @beta */
@@ -61,6 +66,8 @@ interface IRequestState {
   accepting: boolean;
   failure: Error | undefined;
   inputSink: IInteractiveRequestInputSink | undefined;
+  inputEnded: boolean;
+  inputReady: boolean;
   inputTail: Promise<void>;
   pendingInputBytes: number;
   pendingInputFrameCount: number;
@@ -105,6 +112,15 @@ class InteractiveRequestSession implements IInteractiveRequestSession {
     state.inputSink = sink;
     for (const waiter of state.sinkWaiters.splice(0)) {
       waiter.resolve(sink);
+    }
+    const writeInputReadyAsync: IInteractiveRequestControlClient['writeInputReadyAsync'] =
+      state.client.writeInputReadyAsync;
+    if (!state.inputReady && writeInputReadyAsync) {
+      state.inputReady = true;
+      const readyPromise: Promise<void> = state.inputTail.then(() =>
+        writeInputReadyAsync.call(state.client, state.requestId)
+      );
+      state.inputTail = readyPromise.catch((error: unknown) => failState(state, error));
     }
     return {
       [Symbol.dispose]: (): void => {
@@ -176,6 +192,23 @@ export class InteractiveRequestInputRouter {
 
   public async routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
     const { chunk, requestId } = decodeDaemonStdinChunk(payload);
+    await queueInputAsync(this.#getRequestState(requestId), chunk);
+  }
+
+  /** Queues EOF behind already accepted input without blocking other requests or cancellation. */
+  public routeStdinEndAsync(requestId: string): Promise<void> {
+    const state: IRequestState = this.#getRequestState(requestId);
+    const endPromise: Promise<void> = queueInputActionAsync(state, async (sink) => {
+      if (!sink.endInputAsync) {
+        throw new Error(`Input destination for request "${requestId}" does not support EOF.`);
+      }
+      await sink.endInputAsync();
+    }, 0);
+    state.inputEnded = true;
+    return endPromise;
+  }
+
+  #getRequestState(requestId: string): IRequestState {
     const state: IRequestState | undefined = this.#stateByRequestId.get(requestId);
     if (!state) {
       if (this.#completedRequestIds.has(requestId)) {
@@ -183,7 +216,7 @@ export class InteractiveRequestInputRouter {
       }
       throw createRoutingError('unknownRequest', requestId);
     }
-    await queueInputAsync(state, chunk);
+    return state;
   }
 
   #completeRequest(requestId: string, state: IRequestState): void {
@@ -208,6 +241,8 @@ function createRequestState(options: IInteractiveRequestRegistrationOptions): IR
     client: options.client,
     failure: undefined,
     inputSink: undefined,
+    inputEnded: false,
+    inputReady: false,
     inputTail: Promise.resolve(),
     onAbort: () => stopAcceptingInput(state),
     onFailure: options.onFailure,
@@ -223,14 +258,26 @@ function createRequestState(options: IInteractiveRequestRegistrationOptions): IR
 }
 
 function queueInputAsync(state: IRequestState, chunk: Uint8Array): Promise<void> {
+  return queueInputActionAsync(state, async (sink) => {
+    await sink.writeInputAsync(chunk);
+    await state.client.writeInputReadyAsync?.(state.requestId);
+  }, chunk.byteLength);
+}
+
+function queueInputActionAsync(
+  state: IRequestState,
+  actionAsync: (sink: IInteractiveRequestInputSink) => Promise<void>,
+  byteLength: number
+): Promise<void> {
   assertAcceptingInput(state);
-  reserveInputCapacity(state, chunk.byteLength);
+  if (state.inputEnded) throw createRoutingError('inputEnded', state.requestId);
+  reserveInputCapacity(state, byteLength);
   const writePromise: Promise<void> = state.inputTail.then(async () => {
     assertAcceptingInput(state);
     const sink: IInteractiveRequestInputSink = await getInputSinkAsync(state);
     assertAcceptingInput(state);
     try {
-      await sink.writeInputAsync(chunk);
+      await actionAsync(sink);
     } catch (error) {
       const normalizedError: Error = createInputFailure(error);
       failState(state, normalizedError);
@@ -238,7 +285,7 @@ function queueInputAsync(state: IRequestState, chunk: Uint8Array): Promise<void>
     }
   });
   const trackedPromise: Promise<void> = writePromise.finally(() =>
-    releaseInputCapacity(state, chunk.byteLength)
+    releaseInputCapacity(state, byteLength)
   );
   state.inputTail = trackedPromise.catch((error: unknown) => handleQueuedInputError(state, error));
   return trackedPromise;

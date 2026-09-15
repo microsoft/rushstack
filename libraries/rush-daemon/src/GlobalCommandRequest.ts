@@ -105,9 +105,7 @@ export function resolveGlobalCommandRequest(
   validateNonemptyName(options.commandName, 'command name');
   validateCommandOrigin(options.commandOrigin);
   validateDaemonRequestAdmissionOptions(options.admission);
-  const repoRoot: string = getCanonicalDirectory(workspaceSession.metadata.repoRoot, 'workspace root');
-  const cwd: string = getCanonicalDirectory(options.cwd, 'working directory');
-  validatePathWithinWorkspace(cwd, repoRoot);
+  const cwd: string = resolveGlobalCommandWorkingDirectory(options.cwd, workspaceSession);
   const request: IResolvedGlobalCommandRequest = Object.freeze({
     admission: options.admission ? Object.freeze({ ...options.admission }) : undefined,
     commandName: options.commandName,
@@ -119,6 +117,23 @@ export function resolveGlobalCommandRequest(
   });
   REQUEST_SESSION_BY_REQUEST.set(request, workspaceSession);
   return request;
+}
+
+export function resolveGlobalCommandWorkingDirectory(
+  folder: string,
+  workspaceSession: IWorkspaceSession
+): string {
+  if (!path.isAbsolute(folder)) {
+    throw new Error('The global command working directory must be absolute.');
+  }
+  const repoRoot: string = getCanonicalDirectory(workspaceSession.metadata.repoRoot, 'workspace root');
+  const cwd: string = getCanonicalDirectory(folder, 'working directory');
+  validatePathWithinWorkspace(cwd, repoRoot);
+  return cwd;
+}
+
+export function resolveGlobalCommandEnvironment(environment: Readonly<NodeJS.ProcessEnv>): NodeJS.ProcessEnv {
+  return createEnvironmentMap(environment).toObject();
 }
 
 function validateCommandOrigin(value: DaemonRushCommandOrigin): void {

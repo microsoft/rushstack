@@ -7,6 +7,7 @@ import * as child_process from 'node:child_process';
 import { FileSystem } from './FileSystem';
 import { FileWriter } from './FileWriter';
 import { Async } from './Async';
+import { tryAcquireWindowsLockFile, type ILockFileHandle } from './WindowsLockFile';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -153,7 +154,7 @@ export function _setLockFileGetProcessStartTime(fn: (pid: number) => string | un
 }
 
 interface ITryAcquireResult {
-  fileWriter: FileWriter | undefined;
+  fileWriter: ILockFileHandle | undefined;
   filePath: string;
   dirtyWhenAcquired: boolean;
 }
@@ -164,16 +165,18 @@ interface ITryAcquireResult {
  * a single Node.js process.
  * @remarks
  * The implementation works on Windows, Mac, and Linux without requiring any native helpers.
+ * Windows uses native exclusive file sharing and a `.dirty` companion to retain interrupted-owner
+ * state across close/delete handoffs. A clean release removes the companion before relinquishing ownership.
  * On non-Windows systems, the algorithm requires access to the `ps` shell command.  On Linux,
  * it requires access the `/proc/${pidString}/stat` filesystem.
  * @public
  */
 export class LockFile {
-  private _fileWriter: FileWriter | undefined;
+  private _fileWriter: ILockFileHandle | undefined;
   private _filePath: string;
   private _dirtyWhenAcquired: boolean;
 
-  private constructor(fileWriter: FileWriter | undefined, filePath: string, dirtyWhenAcquired: boolean) {
+  private constructor(fileWriter: ILockFileHandle | undefined, filePath: string, dirtyWhenAcquired: boolean) {
     this._fileWriter = fileWriter;
     this._filePath = filePath;
     this._dirtyWhenAcquired = dirtyWhenAcquired;
@@ -296,14 +299,21 @@ export class LockFile {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
-    IN_PROC_LOCKS.delete(this._filePath);
-
+    this._fileWriter!.prepareForRelease?.(deleteFile);
     this._fileWriter!.close();
-    if (deleteFile) {
-      FileSystem.deleteFile(this._filePath);
-    }
-
     this._fileWriter = undefined;
+    IN_PROC_LOCKS.delete(this._filePath);
+    if (deleteFile) {
+      try {
+        FileSystem.deleteFile(this._filePath, { throwIfNotExists: false });
+      } catch (error) {
+        // A new Windows owner may acquire the file between close and unlink. Never remove its lock.
+        if (
+          process.platform !== 'win32' ||
+          typeof error !== 'object' || error === null || !('code' in error) || error.code !== 'EBUSY'
+        ) throw error;
+      }
+    }
   }
 
   /**
@@ -337,7 +347,7 @@ function _tryAcquireInner(
   if (!IN_PROC_LOCKS.has(lockFilePath)) {
     switch (process.platform) {
       case 'win32': {
-        return _tryAcquireWindows(lockFilePath);
+        return tryAcquireWindowsLockFile(lockFilePath);
       }
 
       case 'linux':
@@ -523,48 +533,5 @@ function _tryAcquireMacOrLinux(
       FileSystem.deleteFile(pidLockFilePath);
     }
   }
-  return result;
-}
-
-/**
- * Attempts to acquire the lock using Windows
- * This algorithm is much simpler since we can rely on the operating system
- */
-function _tryAcquireWindows(lockFilePath: string): ITryAcquireResult | undefined {
-  let dirtyWhenAcquired: boolean = false;
-
-  let fileHandle: FileWriter | undefined;
-  let result: ITryAcquireResult | undefined;
-
-  try {
-    if (FileSystem.exists(lockFilePath)) {
-      dirtyWhenAcquired = true;
-
-      // If the lockfile is held by an process with an exclusive lock, then removing it will
-      // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
-
-      // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
-      // the last process to hold it died.
-      FileSystem.deleteFile(lockFilePath);
-    }
-
-    try {
-      // Attempt to open an exclusive lockfile
-      fileHandle = FileWriter.open(lockFilePath, { exclusive: true });
-    } catch (error) {
-      // we tried to delete the lock, but something else is holding it,
-      // (probably an active process), therefore we are unable to create a lock
-      return undefined;
-    }
-
-    // Ensure we can hand off the file descriptor to the lockfile
-    result = { fileWriter: fileHandle, filePath: lockFilePath, dirtyWhenAcquired };
-    fileHandle = undefined;
-  } finally {
-    if (fileHandle) {
-      fileHandle.close();
-    }
-  }
-
   return result;
 }

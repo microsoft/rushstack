@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Join detached startup helper closure without prematurely disconnecting IPC, keep its cwd outside the launched workspace, and drain failed launcher processes before reporting startup failure.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

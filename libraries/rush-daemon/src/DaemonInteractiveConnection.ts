@@ -52,6 +52,7 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
   readonly #pendingRawModeByRequestId: Map<string, IRawModeAcknowledgement> = new Map();
   readonly #sendControlMessageAsync: SendDaemonControlMessageAsync;
   #enabled: boolean = false;
+  #inputLifecycleEnabled: boolean = false;
   #rawModeOwnerRequestId: string | undefined;
   #rawModeTail: Promise<void> = Promise.resolve();
 
@@ -63,8 +64,9 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     return this.#abortController.signal;
   }
 
-  public setEnabled(enabled: boolean): void {
+  public setEnabled(enabled: boolean, inputLifecycleEnabled: boolean = false): void {
     this.#enabled = enabled;
+    this.#inputLifecycleEnabled = enabled && inputLifecycleEnabled;
   }
 
   public registerRequest(options: IDaemonInteractiveRequestOptions): IInteractiveRequestSession {
@@ -75,7 +77,11 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
     const client: IInteractiveRequestControlClient = {
       abortSignal: requestAbortSignal,
       writeRawModeControlAsync: (message: IDaemonSetRawModeMessage): Promise<void> =>
-        this.#queueRawModeControlAsync(message, requestAbortSignal)
+        this.#queueRawModeControlAsync(message, requestAbortSignal),
+      writeInputReadyAsync: this.#inputLifecycleEnabled
+        ? (requestId: string) =>
+          this.#sendControlMessageAsync({ kind: 'stdinReady', payload: { requestId } })
+        : undefined
     };
     return this.#inputRouter.register({ ...options, client });
   }
@@ -87,6 +93,14 @@ export class DaemonInteractiveConnection implements IDaemonInteractiveConnection
   public async routeStdinFrameAsync(payload: Uint8Array): Promise<void> {
     this.#assertEnabled();
     await this.#inputRouter.routeStdinFrameAsync(payload);
+  }
+
+  public async routeStdinEndAsync(requestId: string): Promise<void> {
+    this.#assertEnabled();
+    if (!this.#inputLifecycleEnabled) {
+      throw new Error('The daemon client did not negotiate stdin admission and EOF.');
+    }
+    await this.#inputRouter.routeStdinEndAsync(requestId);
   }
 
   public handleControlMessage(message: DaemonControlMessage): boolean {

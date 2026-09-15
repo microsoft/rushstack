@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add false-default persistent daemon Node runners selected by explicit per-operation daemonIpc descriptors, including the SDK declaration proxy. Preserve raw custom arguments, canonical hashes, native/rebuild/NoOp/shard behavior, and bounded implementation-tree reloads. Keep watch-only IPC unchanged and decode IPC stdout/stderr incrementally.",
+      "type": "minor"
+    }
+  ]
+}

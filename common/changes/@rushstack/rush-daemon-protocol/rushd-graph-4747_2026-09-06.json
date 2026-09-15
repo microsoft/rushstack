@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Define JSON-safe experimental graph snapshot DTOs and the rushd.graph-snapshot extension name without changing transport contracts or runtime dependencies.",
+      "type": "minor"
+    }
+  ]
+}

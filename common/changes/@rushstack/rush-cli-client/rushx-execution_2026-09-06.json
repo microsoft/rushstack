@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Tag Rushx requests explicitly, reuse native argument boundaries and frontend discovery output, and validate real daemon script parity with native Rushx.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}
