@@ -1,0 +1,29 @@
+{
+  "suppressions": [
+    {
+      "file": "src/LoadThemedStylesLoader.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/LoadThemedStylesLoader.ts",
+      "scopeId": ".LoadThemedStylesLoader.pitch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LoadThemedStylesLoader.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}
