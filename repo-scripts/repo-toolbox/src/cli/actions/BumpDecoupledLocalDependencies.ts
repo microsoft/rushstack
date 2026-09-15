@@ -10,24 +10,16 @@ import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushCon
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
 async function _getLatestPublishedVersionAsync(terminal: ITerminal, packageName: string): Promise<string> {
-  return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-    const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version'], {
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-    const stdoutBuffer: string[] = [];
-    childProcess.stdout!.on('data', (chunk) => stdoutBuffer.push(chunk));
-    childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
-      if (exitCode) {
-        reject(new Error(`Exited with ${exitCode}`));
-      } else if (signal) {
-        reject(new Error(`Terminated by ${signal}`));
-      } else {
-        const version: string = stdoutBuffer.join('').trim();
-        terminal.writeLine(`Found version "${version}" for "${packageName}"`);
-        resolve(version);
-      }
-    });
+  const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version'], {
+    stdio: ['ignore', 'pipe', 'pipe']
   });
+  const { stdout: version } = await Executable.waitForExitAsync(childProcess, {
+    encoding: 'utf-8',
+    throwOnNonZeroExitCode: true,
+    throwOnSignal: true
+  });
+  terminal.writeLine(`Found version "${version}" for "${packageName}"`);
+  return version;
 }
 
 interface IProjectLike {
