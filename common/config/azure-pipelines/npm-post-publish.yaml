@@ -20,6 +20,7 @@ resources:
     - pipeline: esrpPublishRushstack
       source: 'rushstack-esrp-publish'
       project: GitHubProjectsPublish
+      branch: refs/heads/main
       trigger:
         enabled: true
         branches:
@@ -28,6 +29,7 @@ resources:
     - pipeline: esrpPublishRush
       source: 'rushstack-esrp-publish-rush'
       project: GitHubProjectsPublish
+      branch: refs/heads/main
       trigger:
         enabled: true
         branches:
@@ -115,12 +117,52 @@ extends:
                     --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
-              # Query the public feed directly to bypass propagation latency in the private feed.
+              # Use the versions recorded during publishing to avoid propagation latency in the package feeds.
+              - bash: |
+                  set -e
+
+                  triggering_alias="$(resources.triggeringAlias)"
+                  rushstack_pipeline_id="$(resources.pipeline.esrpPublishRushstack.pipelineID)"
+                  rushstack_run_id="$(resources.pipeline.esrpPublishRushstack.runID)"
+                  rush_pipeline_id="$(resources.pipeline.esrpPublishRush.pipelineID)"
+                  rush_run_id="$(resources.pipeline.esrpPublishRush.runID)"
+
+                  if [[ "$triggering_alias" == "esrpPublishRushstack" ]]; then
+                    pipeline_id="$rushstack_pipeline_id"
+                    run_id="$rushstack_run_id"
+                  elif [[ "$triggering_alias" == "esrpPublishRush" ]]; then
+                    pipeline_id="$rush_pipeline_id"
+                    run_id="$rush_run_id"
+                  # If this pipeline was not resource-triggered, use whichever publishing pipeline ran latest.
+                  elif (( rushstack_run_id > rush_run_id )); then
+                    pipeline_id="$rushstack_pipeline_id"
+                    run_id="$rushstack_run_id"
+                  else
+                    pipeline_id="$rush_pipeline_id"
+                    run_id="$rush_run_id"
+                  fi
+
+                  echo "Using publishing pipeline $pipeline_id, run $run_id (trigger: ${triggering_alias:-manual})"
+                  echo "##vso[task.setvariable variable=PublishingPipelineId]$pipeline_id"
+                  echo "##vso[task.setvariable variable=PublishingRunId]$run_id"
+                displayName: 'Select publishing pipeline run'
+
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Download published package versions'
+                inputs:
+                  source: specific
+                  project: GitHubProjectsPublish
+                  pipeline: $(PublishingPipelineId)
+                  runVersion: specific
+                  runId: $(PublishingRunId)
+                  artifact: published-versions
+                  path: $(Pipeline.Workspace)/published-versions
+
               - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
                 parameters:
                   Arguments: >
                     bump-decoupled-local-dependencies
-                    --feed-url https://registry.npmjs.org/
+                    --published-versions-path "$(Pipeline.Workspace)/published-versions/published-versions.json"
                   DisplayName: 'Bump decoupled local dependencies'
 
               # If Rush itself was updated by bump-decoupled-local-dependencies, we need to bootstrap

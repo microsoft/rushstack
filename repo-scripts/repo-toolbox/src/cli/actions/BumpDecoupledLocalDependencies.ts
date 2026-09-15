@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
 import type { ChildProcess } from 'node:child_process';
 
 import { Async, Executable, FileSystem, type FolderItem, JsonFile } from '@rushstack/node-core-library';
@@ -12,8 +13,15 @@ import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/t
 async function _getLatestPublishedVersionAsync(
   terminal: ITerminal,
   packageName: string,
+  publishedVersions: Record<string, string> | undefined,
   feedUrl: string | undefined
 ): Promise<string> {
+  const recordedVersion: string | undefined = publishedVersions?.[packageName];
+  if (recordedVersion) {
+    terminal.writeLine(`Found version "${recordedVersion}" for "${packageName}" in published versions file`);
+    return recordedVersion;
+  }
+
   const npmArgs: string[] = ['view', packageName, 'version'];
   if (feedUrl) {
     npmArgs.push('--registry', feedUrl);
@@ -22,11 +30,20 @@ async function _getLatestPublishedVersionAsync(
   const childProcess: ChildProcess = Executable.spawn('npm', npmArgs, {
     stdio: ['ignore', 'pipe', 'pipe']
   });
-  const { stdout: version } = await Executable.waitForExitAsync(childProcess, {
-    encoding: 'utf-8',
-    throwOnNonZeroExitCode: true,
-    throwOnSignal: true
+  const {
+    stdout: version,
+    exitCode,
+    signal,
+    stderr
+  } = await Executable.waitForExitAsync(childProcess, {
+    encoding: 'utf-8'
   });
+  if (exitCode !== 0 || signal) {
+    throw new Error(
+      `Failed to get latest published version for "${packageName}". Exit code: ${exitCode}, Signal: ${signal}, Stderr: ${stderr}`
+    );
+  }
+
   terminal.writeLine(`Found version "${version}" for "${packageName}"`);
   return version;
 }
@@ -40,6 +57,7 @@ interface IProjectLike {
 
 export class BumpDecoupledLocalDependencies extends CommandLineAction {
   readonly #feedUrlParameter: CommandLineStringParameter;
+  readonly #publishedVersionsPathParameter: CommandLineStringParameter;
   readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
@@ -53,14 +71,24 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
     this.#feedUrlParameter = this.defineStringParameter({
       parameterLongName: '--feed-url',
-      description: 'The package feed URL to query for the latest published versions.',
+      description: 'The package feed URL to query for published versions not found in the input file.',
       argumentName: 'FEED_URL'
+    });
+
+    this.#publishedVersionsPathParameter = this.defineStringParameter({
+      parameterLongName: '--published-versions-path',
+      description: 'The path to the published-versions.json file.',
+      argumentName: 'PATH'
     });
   }
 
   protected override async onExecuteAsync(): Promise<void> {
     const terminal: ITerminal = this.#terminal;
     const feedUrl: string | undefined = this.#feedUrlParameter.value;
+    const publishedVersionsPath: string | undefined = this.#publishedVersionsPathParameter.value;
+    const publishedVersions: Record<string, string> | undefined = publishedVersionsPath
+      ? await JsonFile.loadAsync(path.resolve(publishedVersionsPath))
+      : undefined;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
@@ -137,6 +165,7 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
         const version: string = await _getLatestPublishedVersionAsync(
           terminal,
           decoupledLocalDependencyName,
+          publishedVersions,
           feedUrl
         );
         decoupledLocalDependencyVersionsByName.set(decoupledLocalDependencyName, version);
@@ -194,6 +223,7 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     const latestRushVersion: string = await _getLatestPublishedVersionAsync(
       terminal,
       '@microsoft/rush',
+      publishedVersions,
       feedUrl
     );
     const rushJson: IRushConfigurationJson = await JsonFile.loadAsync(rushJsonFile);
