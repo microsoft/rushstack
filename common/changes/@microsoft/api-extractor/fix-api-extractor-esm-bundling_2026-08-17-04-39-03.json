@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an error that occurred when `@microsoft/api-extractor` was bundled into ESM output, caused by loading the default config from a `__dirname`-relative path at module initialization.",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
