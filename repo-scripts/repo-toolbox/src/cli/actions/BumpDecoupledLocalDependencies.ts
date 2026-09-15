@@ -7,10 +7,19 @@ import { Async, Executable, FileSystem, type FolderItem, JsonFile } from '@rushs
 import type { ITerminal } from '@rushstack/terminal';
 import { DependencyType, PackageJsonEditor, RushConfiguration, type Subspace } from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
-import { CommandLineAction } from '@rushstack/ts-command-line';
+import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-async function _getLatestPublishedVersionAsync(terminal: ITerminal, packageName: string): Promise<string> {
-  const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version'], {
+async function _getLatestPublishedVersionAsync(
+  terminal: ITerminal,
+  packageName: string,
+  feedUrl: string | undefined
+): Promise<string> {
+  const npmArgs: string[] = ['view', packageName, 'version'];
+  if (feedUrl) {
+    npmArgs.push('--registry', feedUrl);
+  }
+
+  const childProcess: ChildProcess = Executable.spawn('npm', npmArgs, {
     stdio: ['ignore', 'pipe', 'pipe']
   });
   const { stdout: version } = await Executable.waitForExitAsync(childProcess, {
@@ -30,6 +39,7 @@ interface IProjectLike {
 }
 
 export class BumpDecoupledLocalDependencies extends CommandLineAction {
+  readonly #feedUrlParameter: CommandLineStringParameter;
   readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
@@ -40,10 +50,17 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     });
 
     this.#terminal = terminal;
+
+    this.#feedUrlParameter = this.defineStringParameter({
+      parameterLongName: '--feed-url',
+      description: 'The package feed URL to query for the latest published versions.',
+      argumentName: 'FEED_URL'
+    });
   }
 
   protected override async onExecuteAsync(): Promise<void> {
     const terminal: ITerminal = this.#terminal;
+    const feedUrl: string | undefined = this.#feedUrlParameter.value;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
@@ -117,7 +134,11 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     await Async.forEachAsync(
       allDecoupledLocalDependencyNames,
       async (decoupledLocalDependencyName) => {
-        const version: string = await _getLatestPublishedVersionAsync(terminal, decoupledLocalDependencyName);
+        const version: string = await _getLatestPublishedVersionAsync(
+          terminal,
+          decoupledLocalDependencyName,
+          feedUrl
+        );
         decoupledLocalDependencyVersionsByName.set(decoupledLocalDependencyName, version);
       },
       {
@@ -170,7 +191,11 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     terminal.writeLine();
 
     // Update the Rush version in rush.json
-    const latestRushVersion: string = await _getLatestPublishedVersionAsync(terminal, '@microsoft/rush');
+    const latestRushVersion: string = await _getLatestPublishedVersionAsync(
+      terminal,
+      '@microsoft/rush',
+      feedUrl
+    );
     const rushJson: IRushConfigurationJson = await JsonFile.loadAsync(rushJsonFile);
     const existingRushVersion: string = rushJson.rushVersion;
     const rushWasUpdated: boolean = existingRushVersion !== latestRushVersion;

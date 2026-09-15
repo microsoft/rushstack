@@ -115,9 +115,12 @@ extends:
                     --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
+              # Query the public feed directly to bypass propagation latency in the private feed.
               - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
                 parameters:
-                  Arguments: 'bump-decoupled-local-dependencies'
+                  Arguments: >
+                    bump-decoupled-local-dependencies
+                    --feed-url https://registry.npmjs.org/
                   DisplayName: 'Bump decoupled local dependencies'
 
               # If Rush itself was updated by bump-decoupled-local-dependencies, we need to bootstrap
