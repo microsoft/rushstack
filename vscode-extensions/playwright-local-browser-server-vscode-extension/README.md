@@ -160,6 +160,7 @@ This extension contributes the following commands:
 
 - **Playwright: Start Playwright Browser Tunnel** (`playwright-local-browser-server.start`)
 - **Playwright: Stop Playwright Browser Tunnel** (`playwright-local-browser-server.stop`)
+- **Playwright: Restart Playwright Browser Tunnel** (`playwright-local-browser-server.restart`)
 - **Playwright Local Browser Server: Manage Launch Options Allowlist** (`playwright-local-browser-server.manageAllowlist`)
 - **Playwright Local Browser Server: Show Log** (`playwright-local-browser-server.showLog`)
 - **Playwright Local Browser Server: Show Settings** (`playwright-local-browser-server.showSettings`)
