@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Measure actual AI output bytes, enforce the invocation-wide NDJSON budget, and qualify retained fallback context and exact remediation without inflating baselines.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

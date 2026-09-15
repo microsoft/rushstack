@@ -4,6 +4,7 @@
 import type { IRushDiagnostic } from '../diagnostics/IRushDiagnostic';
 import type { IClassifiedDiagnosticValue } from '../diagnostics/IClassifiedDiagnosticValue';
 import { RUSH_DIAGNOSTIC_TEMPLATES } from '../diagnostics/RushDiagnosticCodeRegistry';
+import { createSecretValueMatcher } from '../diagnostics/DiagnosticSecretValues';
 import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
 
 export function formatHumanReadableDiagnostic(event: IReporterEventEnvelope<unknown>): string {
@@ -12,16 +13,10 @@ export function formatHumanReadableDiagnostic(event: IReporterEventEnvelope<unkn
   }
 
   const diagnostic: Partial<IRushDiagnostic> = event.payload as Partial<IRushDiagnostic>;
-  const secretStrings: string[] = [];
-  for (const parameter of Object.values(diagnostic.parameters ?? {})) {
-    if (parameter.privacy === 'secret' && typeof parameter.value === 'string' && parameter.value.length > 0) {
-      secretStrings.push(parameter.value);
-    }
-  }
   // Source metadata and other parameters can repeat a value classified as secret elsewhere.
-  function containsSecret(text: string): boolean {
-    return secretStrings.some((secret: string) => text.includes(secret));
-  }
+  const containsSecret: (text: string) => boolean = createSecretValueMatcher(
+    Object.values(diagnostic.parameters ?? {})
+  );
 
   const templates: Readonly<Record<string, string>> = RUSH_DIAGNOSTIC_TEMPLATES;
   const template: string | undefined = diagnostic.summaryKey ? templates[diagnostic.summaryKey] : undefined;
