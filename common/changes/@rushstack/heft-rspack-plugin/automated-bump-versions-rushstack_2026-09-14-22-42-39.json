@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "comment": "",
-      "type": "none",
-      "packageName": "@rushstack/heft-rspack-plugin"
-    }
-  ],
-  "packageName": "@rushstack/heft-rspack-plugin",
-  "email": "rushbot@users.noreply.github.com"
-}
+{"changes":[{"comment":"","type":"none","packageName":"@rushstack/heft-rspack-plugin"}],"packageName":"@rushstack/heft-rspack-plugin","email":"rushbot@users.noreply.github.com"}

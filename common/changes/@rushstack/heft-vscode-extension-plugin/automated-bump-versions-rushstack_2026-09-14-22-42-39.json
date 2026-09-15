@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "comment": "",
-      "type": "none",
-      "packageName": "@rushstack/heft-vscode-extension-plugin"
-    }
-  ],
-  "packageName": "@rushstack/heft-vscode-extension-plugin",
-  "email": "rushbot@users.noreply.github.com"
-}
+{"changes":[{"comment":"","type":"none","packageName":"@rushstack/heft-vscode-extension-plugin"}],"packageName":"@rushstack/heft-vscode-extension-plugin","email":"rushbot@users.noreply.github.com"}
