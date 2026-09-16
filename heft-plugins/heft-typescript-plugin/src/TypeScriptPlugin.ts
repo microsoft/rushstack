@@ -128,6 +128,12 @@ export interface IPartialTsconfig {
 export interface IChangedFilesHookOptions {
   program: TTypescript.Program;
   changedFiles?: ReadonlySet<TTypescript.SourceFile>;
+  /**
+   * The absolute paths of the folders that the TypeScript compiler emits output to. This includes the
+   * `outDir` and `declarationDir` from the compiler options as well as any `additionalModuleKindsToEmit`
+   * output folders (for example `lib-esm`). Consumers can use these to avoid processing generated output.
+   */
+  emitFolderPaths: ReadonlySet<string>;
 }
 
 /**
@@ -381,7 +387,25 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       ) => {
         // Provide the typescript program dependent plugins
         if (this.accessor.onChangedFilesHook.isUsed()) {
-          this.accessor.onChangedFilesHook.call({ program, changedFiles });
+          // Collect the folders that the compiler emits output to so that consumers can avoid processing
+          // generated output. `additionalModuleKindsToEmit` output folders (for example `lib-esm`) are not
+          // part of the compiler options, so they must be included from the Heft configuration.
+          const compilerOptions: TTypescript.CompilerOptions = program.getCompilerOptions();
+          const emitFolderPaths: Set<string> = new Set();
+          const { outDir, declarationDir } = compilerOptions;
+          if (outDir) {
+            emitFolderPaths.add(path.resolve(heftConfiguration.buildFolderPath, outDir));
+          }
+
+          if (declarationDir) {
+            emitFolderPaths.add(path.resolve(heftConfiguration.buildFolderPath, declarationDir));
+          }
+
+          for (const { outFolderName } of typeScriptConfigurationJson?.additionalModuleKindsToEmit ?? []) {
+            emitFolderPaths.add(path.resolve(heftConfiguration.buildFolderPath, outFolderName));
+          }
+
+          this.accessor.onChangedFilesHook.call({ program, changedFiles, emitFolderPaths });
         }
       }
     };
