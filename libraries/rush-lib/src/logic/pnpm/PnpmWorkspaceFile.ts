@@ -120,6 +120,12 @@ interface IPnpmWorkspaceYaml {
    * (USED ONLY IN PNPM 11.0.0 AND NEWER)
    */
   globalPnpmfile: string | undefined;
+  /**
+   * Places the virtual store under the configured PNPM store instead of under the workspace
+   * node_modules folder.
+   * (SUPPORTED ONLY IN PNPM 10.12.1 AND NEWER)
+   */
+  enableGlobalVirtualStore: boolean | undefined;
 }
 
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
@@ -143,6 +149,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   public minimumReleaseAge: IPnpmWorkspaceYaml['minimumReleaseAge'];
   public minimumReleaseAgeExclude: IPnpmWorkspaceYaml['minimumReleaseAgeExclude'];
   public globalPnpmfile: IPnpmWorkspaceYaml['globalPnpmfile'];
+  public enableGlobalVirtualStore: IPnpmWorkspaceYaml['enableGlobalVirtualStore'];
 
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
@@ -201,7 +208,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
         trustPolicyIgnoreAfter,
         minimumReleaseAge,
         minimumReleaseAgeExclude,
-        globalPnpmfile
+        globalPnpmfile,
+        enableGlobalVirtualStore
       } = workspaceYaml;
       workspaceFile.catalogs = catalogs;
       workspaceFile.allowBuilds = allowBuilds;
@@ -217,6 +225,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       workspaceFile.minimumReleaseAge = minimumReleaseAge;
       workspaceFile.minimumReleaseAgeExclude = minimumReleaseAgeExclude;
       workspaceFile.globalPnpmfile = globalPnpmfile;
+      workspaceFile.enableGlobalVirtualStore = enableGlobalVirtualStore;
     }
 
     return workspaceFile;
@@ -249,7 +258,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       trustPolicyIgnoreAfter,
       minimumReleaseAge,
       minimumReleaseAgeExclude,
-      globalPnpmfile
+      globalPnpmfile,
+      enableGlobalVirtualStore
     } = this;
     // Ensure stable sort order when serializing
     Sort.sortSet(workspacePackages);
@@ -270,7 +280,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       trustPolicyIgnoreAfter,
       minimumReleaseAge,
       minimumReleaseAgeExclude,
-      globalPnpmfile
+      globalPnpmfile,
+      enableGlobalVirtualStore: enableGlobalVirtualStore ? true : undefined
     };
 
     const yamlModule: typeof import('js-yaml') = await import('js-yaml');
