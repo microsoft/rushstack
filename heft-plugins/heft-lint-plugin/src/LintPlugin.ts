@@ -17,9 +17,9 @@ import type {
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
-import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
-import type { IAdditionalLintFile, LinterBase } from './LinterBase';
+import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
@@ -43,7 +43,6 @@ interface ILintOptions {
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
   includeAdditionalFiles: boolean;
-  additionalFileIgnorePatterns: string[];
 }
 
 function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
@@ -136,12 +135,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
-      const additionalFileIgnorePatterns: string[] = this.#getTypeScriptOutputIgnorePatterns(
-        heftConfiguration,
-        typescriptChangedFiles.map(
-          ([tsProgram]: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>]) => tsProgram
-        )
-      );
       let includeAdditionalFiles: boolean = true;
       for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
         try {
@@ -152,8 +145,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             changedFiles,
             fix,
             sarifLogPath,
-            includeAdditionalFiles,
-            additionalFileIgnorePatterns
+            includeAdditionalFiles
           });
         } catch (error) {
           if (!(error instanceof AlreadyReportedError)) {
@@ -242,8 +234,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       changedFiles,
       fix,
       sarifLogPath,
-      includeAdditionalFiles,
-      additionalFileIgnorePatterns
+      includeAdditionalFiles
     } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
@@ -261,12 +252,11 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         linterConfigFilePath: this.#eslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath,
-        additionalFileIgnorePatterns
+        includeAdditionalFiles
       });
-      const additionalFiles: ReadonlySet<IAdditionalLintFile> | undefined = includeAdditionalFiles
-        ? await eslintLinter.getAdditionalLintFilesAsync()
-        : undefined;
-      lintOperations.push(() => this.#runLinterAsync(eslintLinter, tsProgram, changedFiles, additionalFiles));
+      lintOperations.push(() =>
+        this.#runLinterAsync(eslintLinter, heftConfiguration, tsProgram, changedFiles)
+      );
     }
 
     if (this.#tslintConfigFilePath && this.#tslintToolPath) {
@@ -279,57 +269,33 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath
       });
-      lintOperations.push(() => this.#runLinterAsync<never>(tslintLinter, tsProgram, changedFiles));
+      lintOperations.push(() =>
+        this.#runLinterAsync(tslintLinter, heftConfiguration, tsProgram, changedFiles)
+      );
     }
 
     // Now that we know we have initialized properly, run the linter(s)
     await Promise.all(lintOperations.map((lintOperation) => lintOperation()));
   }
 
-  async #runLinterAsync<TAdditionalLintFile extends IAdditionalLintFile = never>(
-    linter: LinterBase<unknown, TAdditionalLintFile>,
+  async #runLinterAsync(
+    linter: LinterBase<unknown>,
+    heftConfiguration: HeftConfiguration,
     tsProgram: IExtendedProgram,
-    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined,
-    additionalFiles?: ReadonlySet<TAdditionalLintFile> | undefined
+    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
   ): Promise<void> {
     linter.printVersionHeader();
 
-    const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
+    // Resolve the program's root file names against the project folder so that they can be compared against the
+    // absolute paths that ESLint reports for the files it selects.
+    const { buildFolderPath } = heftConfiguration;
+    const typeScriptFilenames: Set<string> = new Set(
+      tsProgram.getRootFileNames().map((filePath: string) => path.resolve(buildFolderPath, filePath))
+    );
     await linter.performLintingAsync({
       tsProgram,
       typeScriptFilenames,
-      changedFiles: changedFiles || new Set(tsProgram.getSourceFiles()),
-      additionalFiles
+      changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
     });
-  }
-
-  #getTypeScriptOutputIgnorePatterns(
-    heftConfiguration: HeftConfiguration,
-    tsPrograms: IExtendedProgram[]
-  ): string[] {
-    const { buildFolderPath } = heftConfiguration;
-    const outputFolderPaths: Set<string> = new Set();
-    for (const tsProgram of tsPrograms) {
-      const { outDir, declarationDir } = tsProgram.getCompilerOptions();
-      if (outDir) {
-        outputFolderPaths.add(path.resolve(buildFolderPath, outDir));
-      }
-
-      if (declarationDir) {
-        outputFolderPaths.add(path.resolve(buildFolderPath, declarationDir));
-      }
-    }
-
-    const ignorePatterns: string[] = [];
-    for (const outputFolderPath of outputFolderPaths) {
-      // Only output folders under the project folder can be expressed as ESLint ignore patterns.
-      if (Path.isUnder(outputFolderPath, buildFolderPath)) {
-        ignorePatterns.push(
-          `${Path.convertToSlashes(outputFolderPath.slice(buildFolderPath.length + 1))}/**`
-        );
-      }
-    }
-
-    return ignorePatterns;
   }
 }

@@ -25,17 +25,24 @@ export interface ILinterBaseOptions {
   tsProgram: IExtendedProgram;
   fix?: boolean;
   sarifLogPath?: string;
-  additionalFileIgnorePatterns?: string[];
 }
 
-export interface IAdditionalLintFile {
-  kind: 'additional';
+/**
+ * A file to lint that is not necessarily part of the TypeScript program (for example a file discovered by the
+ * linter configuration itself). TypeScript source files also satisfy this shape.
+ */
+export interface ISourceFileToLint {
   fileName: string;
   text: string;
-  version: string;
+  /**
+   * A precomputed version identifier used for incremental caching. TypeScript source files carry a version from
+   * the incremental program; other files may omit it, in which case the version is computed from the file
+   * contents.
+   */
+  version?: string;
 }
 
-export interface IRunLinterOptions<TAdditionalLintFile extends IAdditionalLintFile = never> {
+export interface IRunLinterOptions {
   tsProgram: IExtendedProgram;
 
   /**
@@ -47,11 +54,6 @@ export interface IRunLinterOptions<TAdditionalLintFile extends IAdditionalLintFi
    * The set of files that TypeScript has compiled since the last compilation.
    */
   changedFiles: ReadonlySet<IExtendedSourceFile>;
-
-  /**
-   * Files selected by the linter configuration that are not part of the TypeScript program.
-   */
-  additionalFiles?: ReadonlySet<TAdditionalLintFile>;
 }
 
 interface ILinterCacheData {
@@ -74,7 +76,7 @@ interface ILinterCacheData {
   filesHash?: string;
 }
 
-export abstract class LinterBase<TLintResult, TAdditionalLintFile extends IAdditionalLintFile = never> {
+export abstract class LinterBase<TLintResult> {
   protected readonly _scopedLogger: IScopedLogger;
   protected readonly _terminal: ITerminal;
   protected readonly _buildFolderPath: string;
@@ -98,19 +100,25 @@ export abstract class LinterBase<TLintResult, TAdditionalLintFile extends IAddit
 
   public abstract printVersionHeader(): void;
 
-  public async performLintingAsync(options: IRunLinterOptions<TAdditionalLintFile>): Promise<void> {
+  public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
     const startTime: number = performance.now();
     let fileCount: number = 0;
 
     const commonDirectory: string = options.tsProgram.getCommonSourceDirectory();
+
+    // Files to lint that are not part of the TypeScript program (subclasses may enumerate their own). The
+    // default implementation returns none.
+    const extraSourceFiles: Iterable<ISourceFileToLint> = await this.getExtraSourceFilesToLintAsync(
+      options.typeScriptFilenames
+    );
 
     const relativePaths: Map<string, string> = new Map();
 
     // Collect and sort file paths for stable hashing
     const relativePathsArray: string[] = [];
     const lintFilenames: Set<string> = new Set(options.typeScriptFilenames);
-    for (const additionalFile of options.additionalFiles || []) {
-      lintFilenames.add(additionalFile.fileName);
+    for (const extraSourceFile of extraSourceFiles) {
+      lintFilenames.add(extraSourceFile.fileName);
     }
 
     for (const file of lintFilenames) {
@@ -185,9 +193,9 @@ export abstract class LinterBase<TLintResult, TAdditionalLintFile extends IAddit
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
     const lintResults: TLintResult[] = [];
-    const sourceFiles: (IExtendedSourceFile | TAdditionalLintFile)[] = [
+    const sourceFiles: (IExtendedSourceFile | ISourceFileToLint)[] = [
       ...options.tsProgram.getSourceFiles(),
-      ...(options.additionalFiles || [])
+      ...extraSourceFiles
     ];
     const changedFilePaths: Set<string> = new Set(
       Array.from(options.changedFiles, (sourceFile: IExtendedSourceFile) => sourceFile.fileName)
@@ -244,11 +252,21 @@ export abstract class LinterBase<TLintResult, TAdditionalLintFile extends IAddit
     this._terminal.writeVerboseLine(`Lint: ${duration}ms (${fileCount} files)`);
   }
 
+  /**
+   * Returns files to lint that are not part of the TypeScript program. Subclasses may override this to
+   * enumerate additional files selected by the linter configuration. The default implementation returns none.
+   */
+  protected async getExtraSourceFilesToLintAsync(
+    typeScriptFilenames: ReadonlySet<string>
+  ): Promise<Iterable<ISourceFileToLint>> {
+    return [];
+  }
+
   protected async getSourceFileHashAsync(
-    sourceFile: IExtendedSourceFile | TAdditionalLintFile
+    sourceFile: IExtendedSourceFile | ISourceFileToLint
   ): Promise<string> {
     // TypeScript only computes the version during an incremental build.
-    let version: string = sourceFile.version;
+    let version: string | undefined = sourceFile.version;
     if (!version) {
       // Compute the version from the source file content
       const sourceFileHash: Hash = createHash('sha1');
@@ -262,7 +280,7 @@ export abstract class LinterBase<TLintResult, TAdditionalLintFile extends IAddit
   protected abstract getCacheVersionAsync(): Promise<string>;
 
   protected abstract lintFileAsync(
-    sourceFile: IExtendedSourceFile | TAdditionalLintFile
+    sourceFile: IExtendedSourceFile | ISourceFileToLint
   ): Promise<TLintResult[]>;
 
   protected abstract lintingFinishedAsync(lintResults: TLintResult[]): Promise<void>;
