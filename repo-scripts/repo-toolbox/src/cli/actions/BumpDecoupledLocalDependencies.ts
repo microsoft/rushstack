@@ -13,12 +13,12 @@ import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/t
 async function _getLatestPublishedVersionAsync(
   terminal: ITerminal,
   packageName: string,
-  publishedVersions: Record<string, string> | undefined,
+  publishedVersions: Record<string, string>,
   feedUrl: string | undefined
 ): Promise<string> {
-  const recordedVersion: string | undefined = publishedVersions?.[packageName];
+  const recordedVersion: string | undefined = publishedVersions[packageName];
   if (recordedVersion) {
-    terminal.writeLine(`Found version "${recordedVersion}" for "${packageName}" in published versions file`);
+    terminal.writeLine(`Found version "${recordedVersion}" for "${packageName}"`);
     return recordedVersion;
   }
 
@@ -86,13 +86,13 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     const terminal: ITerminal = this.#terminal;
     const feedUrl: string | undefined = this.#feedUrlParameter.value;
     const publishedVersionsPath: string | undefined = this.#publishedVersionsPathParameter.value;
-    const publishedVersions: Record<string, string> | undefined = publishedVersionsPath
-      ? await JsonFile.loadAsync(path.resolve(publishedVersionsPath))
-      : undefined;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
     const { projects, rushJsonFile, commonAutoinstallersFolder } = rushConfiguration;
+    const publishedVersions: Record<string, string> = publishedVersionsPath
+      ? await JsonFile.loadAsync(path.resolve(publishedVersionsPath))
+      : {};
 
     const projectsToUpdate: IProjectLike[] = [];
 
@@ -108,10 +108,13 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
 
     // Collect all package names published from this repo
     const publishedPackageNames: Set<string> = new Set();
-    for (const { shouldPublish, packageName } of projects) {
+    for (const { shouldPublish, packageName, packageJson } of projects) {
       // Note that shouldPublish is also true here if the project is driven by a version policy
       if (shouldPublish) {
         publishedPackageNames.add(packageName);
+        if (!publishedVersionsPath) {
+          publishedVersions[packageName] = packageJson.version;
+        }
       }
     }
 
