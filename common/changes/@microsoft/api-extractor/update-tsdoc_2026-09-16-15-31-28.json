@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Update the `@microsoft/tsdoc` dependency to `~0.17.0` and the `@microsoft/tsdoc-config` dependency to `~0.18.2`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

@@ -11,7 +11,7 @@ overrides:
   loader-utils@^2.0.0: 2.0.4
   fast-xml-parser@^5.3.3: 5.3.5
 
-packageExtensionsChecksum: sha256-oUDDH9n0S+YRKY1TEmsTuFsNCNlmI4mpaLdAtVDhjgY=
+packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
 
 pnpmfileChecksum: sha256-FceiOBivXBfnQ6+mNFF4or5E/6NvJXB3oz3cjl5O7OM=
 
@@ -635,11 +635,11 @@ packages:
     resolution: {directory: ../../../libraries/rush-lib, type: directory}
     engines: {node: '>=20.9.0'}
 
-  '@microsoft/tsdoc-config@0.18.1':
-    resolution: {integrity: sha512-9brPoVdfN9k9g0dcWkFeA7IH9bbcttzDJlXvkf8b2OBzd5MueR1V2wkKBL0abn0otvmkHJC6aapBOTJDDeMCZg==}
+  '@microsoft/tsdoc-config@0.18.2':
+    resolution: {integrity: sha1-NMgHbmDtCq19k/gcVGW/OsJLwpA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/tsdoc-config/-/tsdoc-config-0.18.2.tgz}
 
-  '@microsoft/tsdoc@0.16.0':
-    resolution: {integrity: sha512-xgAyonlVVS+q7Vc7qLW0UrJU7rSFcETRWsqdXZtjzRU8dF+6CkozTK4V4y1LwOX7j8r/vHphjDeMeGI4tNGeGA==}
+  '@microsoft/tsdoc@0.17.0':
+    resolution: {integrity: sha1-YbSmP0i1g6PWDReTGEoaLNnRF14=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@microsoft/tsdoc/-/tsdoc-0.17.0.tgz}
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha1-PniouW5sM6bFF+GJTvvVOFp8tvI=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz}
@@ -1968,10 +1968,10 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
 
-  eslint-plugin-tsdoc@0.5.2:
-    resolution: {integrity: sha512-BlvqjWZdBJDIPO/YU3zcPCF23CvjYT3gyu63yo6b609NNV3D1b6zceAREy2xnweuBoDpZcLNuPyAUq9cvx6bbQ==}
+  eslint-plugin-tsdoc@0.5.3:
+    resolution: {integrity: sha1-njMIsLlZvA332GU8+DbAHvtdcrI=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/eslint-plugin-tsdoc/-/eslint-plugin-tsdoc-0.5.3.tgz}
     peerDependencies:
-      eslint: '*'
+      eslint: '>=7'
     peerDependenciesMeta:
       eslint:
         optional: true
@@ -4327,8 +4327,8 @@ snapshots:
 
   '@microsoft/api-extractor-model@file:../../../libraries/api-extractor-model(@types/node@20.17.19)':
     dependencies:
-      '@microsoft/tsdoc': 0.16.0
-      '@microsoft/tsdoc-config': 0.18.1
+      '@microsoft/tsdoc': 0.17.0
+      '@microsoft/tsdoc-config': 0.18.2
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
     transitivePeerDependencies:
       - '@types/node'
@@ -4336,8 +4336,8 @@ snapshots:
   '@microsoft/api-extractor@file:../../../apps/api-extractor(@types/node@20.17.19)':
     dependencies:
       '@microsoft/api-extractor-model': file:../../../libraries/api-extractor-model(@types/node@20.17.19)
-      '@microsoft/tsdoc': 0.16.0
-      '@microsoft/tsdoc-config': 0.18.1
+      '@microsoft/tsdoc': 0.17.0
+      '@microsoft/tsdoc-config': 0.18.2
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       '@rushstack/rig-package': file:../../../libraries/rig-package
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
@@ -4397,14 +4397,14 @@ snapshots:
       - '@types/node'
       - supports-color
 
-  '@microsoft/tsdoc-config@0.18.1':
+  '@microsoft/tsdoc-config@0.18.2':
     dependencies:
-      '@microsoft/tsdoc': 0.16.0
+      '@microsoft/tsdoc': 0.17.0
       ajv: 8.18.0
       jju: 1.4.0
       resolve: 1.22.11
 
-  '@microsoft/tsdoc@0.16.0': {}
+  '@microsoft/tsdoc@0.17.0': {}
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
@@ -4725,7 +4725,7 @@ snapshots:
       eslint: 9.25.1
       eslint-plugin-promise: 7.2.1(eslint@9.25.1)
       eslint-plugin-react: 7.37.5(eslint@9.25.1)
-      eslint-plugin-tsdoc: 0.5.2(eslint@9.25.1)(typescript@4.9.5)
+      eslint-plugin-tsdoc: 0.5.3(eslint@9.25.1)(typescript@4.9.5)
       typescript: 4.9.5
     transitivePeerDependencies:
       - supports-color
@@ -4743,7 +4743,7 @@ snapshots:
       eslint: 9.37.0
       eslint-plugin-promise: 7.2.1(eslint@9.37.0)
       eslint-plugin-react: 7.37.5(eslint@9.37.0)
-      eslint-plugin-tsdoc: 0.5.2(eslint@9.37.0)(typescript@5.8.3)
+      eslint-plugin-tsdoc: 0.5.3(eslint@9.37.0)(typescript@5.8.3)
       typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
@@ -6213,10 +6213,10 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-tsdoc@0.5.2(eslint@9.25.1)(typescript@4.9.5):
+  eslint-plugin-tsdoc@0.5.3(eslint@9.25.1)(typescript@4.9.5):
     dependencies:
-      '@microsoft/tsdoc': 0.16.0
-      '@microsoft/tsdoc-config': 0.18.1
+      '@microsoft/tsdoc': 0.17.0
+      '@microsoft/tsdoc-config': 0.18.2
       '@typescript-eslint/utils': 8.56.1(eslint@9.25.1)(typescript@4.9.5)
     optionalDependencies:
       eslint: 9.25.1
@@ -6224,10 +6224,10 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-tsdoc@0.5.2(eslint@9.37.0)(typescript@5.8.3):
+  eslint-plugin-tsdoc@0.5.3(eslint@9.37.0)(typescript@5.8.3):
     dependencies:
-      '@microsoft/tsdoc': 0.16.0
-      '@microsoft/tsdoc-config': 0.18.1
+      '@microsoft/tsdoc': 0.17.0
+      '@microsoft/tsdoc-config': 0.18.2
       '@typescript-eslint/utils': 8.56.1(eslint@9.37.0)(typescript@5.8.3)
     optionalDependencies:
       eslint: 9.37.0
