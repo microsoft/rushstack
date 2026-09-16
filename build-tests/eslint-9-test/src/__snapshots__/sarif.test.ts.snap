@@ -18,6 +18,11 @@ Object {
         },
         Object {
           "location": Object {
+            "uri": "eslint.config.js",
+          },
+        },
+        Object {
+          "location": Object {
             "uri": "src/non-program.custom",
           },
         },
@@ -89,7 +94,7 @@ Object {
             Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
-                  "index": 2,
+                  "index": 3,
                   "uri": "src/non-program.custom",
                 },
                 "region": Object {
