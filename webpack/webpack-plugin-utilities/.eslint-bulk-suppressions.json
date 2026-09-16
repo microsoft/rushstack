@@ -1,0 +1,79 @@
+{
+  "suppressions": [
+    {
+      "file": "src/Testing.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": "._processAndHandleStatsErrorsAndWarnings",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": "._processAndHandleStatsErrorsAndWarnings",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": "._processAndHandleStatsErrorsAndWarnings",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": ".getTestingWebpackCompilerAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/Testing.ts",
+      "scopeId": ".getTestingWebpackCompilerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/evaluateConstantEstreeExpression.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/evaluateConstantEstreeExpression.ts",
+      "scopeId": ".evaluateConstantEstreeExpression",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/evaluateConstantEstreeExpression.ts",
+      "scopeId": ".evaluateConstantEstreeExpression",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/evaluateConstantEstreeExpression.ts",
+      "scopeId": ".evaluateConstantEstreeExpression",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/evaluateConstantEstreeExpression.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/evaluateConstantEstreeExpression.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/evaluateConstantEstreeExpression.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

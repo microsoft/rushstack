@@ -1,0 +1,19 @@
+{
+  "suppressions": [
+    {
+      "file": "src/inheritedMembers/index.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/runScenarios.ts",
+      "scopeId": ".runAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/runScenarios.ts",
+      "scopeId": ".runAsync.afterApiExtractorAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}
