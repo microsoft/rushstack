@@ -6,19 +6,40 @@ import type { ChildProcess } from 'node:child_process';
 
 import { Async, Executable, FileSystem, type FolderItem, JsonFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { DependencyType, PackageJsonEditor, RushConfiguration, type Subspace } from '@microsoft/rush-lib';
+import {
+  DependencyType,
+  PackageJsonEditor,
+  RushConfiguration,
+  type RushConfigurationProject,
+  type Subspace
+} from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
+
+function _getLocalPublishedVersions(projects: Iterable<RushConfigurationProject>): Record<string, string> {
+  const localPublishedVersions: Record<string, string> = {};
+  for (const {
+    shouldPublish,
+    packageName,
+    packageJson: { version }
+  } of projects) {
+    if (shouldPublish) {
+      localPublishedVersions[packageName] = version;
+    }
+  }
+
+  return localPublishedVersions;
+}
 
 async function _getLatestPublishedVersionAsync(
   terminal: ITerminal,
   packageName: string,
-  publishedVersions: Record<string, string> | undefined,
+  publishedVersions: Record<string, string>,
   feedUrl: string | undefined
 ): Promise<string> {
-  const recordedVersion: string | undefined = publishedVersions?.[packageName];
+  const recordedVersion: string | undefined = publishedVersions[packageName];
   if (recordedVersion) {
-    terminal.writeLine(`Found version "${recordedVersion}" for "${packageName}" in published versions file`);
+    terminal.writeLine(`Found version "${recordedVersion}" for "${packageName}"`);
     return recordedVersion;
   }
 
@@ -86,13 +107,18 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     const terminal: ITerminal = this.#terminal;
     const feedUrl: string | undefined = this.#feedUrlParameter.value;
     const publishedVersionsPath: string | undefined = this.#publishedVersionsPathParameter.value;
-    const publishedVersions: Record<string, string> | undefined = publishedVersionsPath
-      ? await JsonFile.loadAsync(path.resolve(publishedVersionsPath))
-      : undefined;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
     const { projects, rushJsonFile, commonAutoinstallersFolder } = rushConfiguration;
+    const localPublishedVersions: Record<string, string> = _getLocalPublishedVersions(projects);
+    const publishedVersionsOverride: Record<string, string> | undefined = publishedVersionsPath
+      ? await JsonFile.loadAsync(path.resolve(publishedVersionsPath))
+      : undefined;
+    const publishedVersions: Record<string, string> = {
+      ...localPublishedVersions,
+      ...publishedVersionsOverride
+    };
 
     const projectsToUpdate: IProjectLike[] = [];
 
