@@ -11,7 +11,53 @@ const headersEslintPlugin = require('eslint-plugin-headers');
 
 const nodeImportResolverPath = require.resolve('eslint-import-resolver-node');
 
+// These localCommonConfig rules require type information (i.e. the TypeScript program). They are grouped
+// separately so that TypeScript files which are NOT part of the project's TypeScript program can be linted with
+// only the non-type-aware rules. See the "without-type-information" helper.
+const localTypeAwareRules = {
+  // Rationale: Use of `void` to explicitly indicate that a floating promise is expected
+  // and allowed.
+  '@typescript-eslint/no-floating-promises': [
+    'error',
+    {
+      ignoreVoid: true,
+      checkThenables: true
+    }
+  ],
+
+  // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
+  '@typescript-eslint/naming-convention': [
+    'warn',
+    ...expandNamingConventionSelectors([
+      ...commonNamingConventionSelectors,
+      {
+        selectors: ['method'],
+        modifiers: ['async'],
+        enforceLeadingUnderscoreWhenPrivate: true,
+
+        format: null,
+        custom: {
+          regex: '^_?[a-zA-Z]\\w*Async$',
+          match: true
+        },
+        leadingUnderscore: 'allow',
+
+        filter: {
+          regex: [
+            // Specifically allow ts-command-line's "onExecute" function.
+            '^onExecute$'
+          ]
+            .map((x) => `(${x})`)
+            .join('|'),
+          match: false
+        }
+      }
+    ])
+  ]
+};
+
 module.exports = {
+  localTypeAwareRules,
   localCommonConfig: [
     {
       files: ['**/*.ts', '**/*.tsx'],
@@ -42,15 +88,9 @@ module.exports = {
         // understand where the dependency is coming from.
         '@rushstack/normalized-imports': 'warn',
 
-        // Rationale: Use of `void` to explicitly indicate that a floating promise is expected
-        // and allowed.
-        '@typescript-eslint/no-floating-promises': [
-          'error',
-          {
-            ignoreVoid: true,
-            checkThenables: true
-          }
-        ],
+        // Type-aware rules (require the TypeScript program) are grouped in localTypeAwareRules so that files
+        // outside the TypeScript program can be linted with only the non-type-aware rules.
+        ...localTypeAwareRules,
 
         // Rationale: Redeclaring a variable likely indicates a mistake in the code.
         'no-redeclare': 'off',
@@ -108,36 +148,6 @@ module.exports = {
               'Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\n' +
               'See LICENSE in the project root for license information.'
           }
-        ],
-
-        // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
-        '@typescript-eslint/naming-convention': [
-          'warn',
-          ...expandNamingConventionSelectors([
-            ...commonNamingConventionSelectors,
-            {
-              selectors: ['method'],
-              modifiers: ['async'],
-              enforceLeadingUnderscoreWhenPrivate: true,
-
-              format: null,
-              custom: {
-                regex: '^_?[a-zA-Z]\\w*Async$',
-                match: true
-              },
-              leadingUnderscore: 'allow',
-
-              filter: {
-                regex: [
-                  // Specifically allow ts-command-line's "onExecute" function.
-                  '^onExecute$'
-                ]
-                  .map((x) => `(${x})`)
-                  .join('|'),
-                match: false
-              }
-            }
-          ])
         ],
 
         // Require `node:` protocol for imports of Node.js built-in modules
