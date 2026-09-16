@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "comment": "",
+      "type": "none"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Add `emitFolderPaths` to the `IChangedFilesHookOptions` provided by the TypeScript plugin accessor, so that consumers can identify (and avoid processing) the folders that TypeScript emits output to, including `additionalModuleKindsToEmit` folders.",
+      "type": "minor"
+    }
+  ]
+}
