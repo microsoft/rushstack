@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/playwright-browser-tunnel",
-      "comment": "Lint the Playwright config and test files (which are not part of the TypeScript program) with only the non-type-aware rules via the rig's without-type-information helper.",
+      "comment": "",
       "type": "none"
     }
   ]

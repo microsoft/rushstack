@@ -305,6 +305,8 @@ export class Eslint extends LinterBase<
       return new Set();
     }
 
+    // The enumerator ESLint instance is constructed with `cwd: buildFolderPath`, so linting `'.'` resolves
+    // against the project folder (not the process working directory).
     const lintResults: TEslint.ESLint.LintResult[] = await this.#fileEnumerator.lintFiles(['.']);
 
     // ESLint reports absolute file paths, so they can be compared directly against the TypeScript program's
@@ -319,16 +321,9 @@ export class Eslint extends LinterBase<
         additionalFilePaths.push(filePath);
       }
     }
-    // Sort for a stable ordering across runs.
-    additionalFilePaths.sort((left: string, right: string) => {
-      if (left < right) {
-        return -1;
-      } else if (left > right) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+    // Sort for a stable ordering across runs. ESLint reports absolute paths, so a default lexicographic sort
+    // is sufficient.
+    additionalFilePaths.sort();
 
     const additionalLintFiles: IAdditionalLintFile[] = new Array(additionalFilePaths.length);
     await Async.forEachAsync(
@@ -431,8 +426,12 @@ export class Eslint extends LinterBase<
 
       // Report linter errors and warnings to the logger
       for (const lintMessage of lintResult.messages) {
-        const additionalFileTypeInformationError: string | undefined =
-          this.#getAdditionalFileTypeInformationError(lintResult, lintMessage);
+        const additionalFileTypeInformationError: string | undefined = getAdditionalFileTypeInformationError(
+          this.#typeScriptFilenames,
+          this._buildFolderPath,
+          lintResult,
+          lintMessage
+        );
         const errorObject: FileError = this.#getLintFileError(
           lintResult,
           lintMessage,
@@ -485,40 +484,6 @@ export class Eslint extends LinterBase<
     });
   }
 
-  #getAdditionalFileTypeInformationError(
-    lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
-    lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage
-  ): string | undefined {
-    // ESLint reports a fatal parsing error when a type-aware rule is applied to a file that is not part of any
-    // TypeScript program or project. Files that are selected by the ESLint configuration but excluded from the
-    // TypeScript program hit this case, so surface actionable guidance instead of the raw parser error. Files
-    // that are part of the program (or non-fatal messages) are reported normally.
-    if (!lintMessage.fatal || this.#typeScriptFilenames.has(lintResult.filePath)) {
-      return undefined;
-    }
-
-    const { message } = lintMessage;
-    const indicatesMissingTypeInformation: boolean =
-      message.includes('parserOptions.project') ||
-      message.includes('projectService') ||
-      message.includes('program instance') ||
-      message.includes('does not include this file') ||
-      message.includes('not found by the project service');
-    if (!indicatesMissingTypeInformation) {
-      return undefined;
-    }
-
-    const relativePath: string = Path.convertToSlashes(
-      path.relative(this._buildFolderPath, lintResult.filePath)
-    );
-    return (
-      `The ESLint configuration selected "${relativePath}", which is not part of the TypeScript program, so ` +
-      'type-aware rules cannot run on it. Either exclude this file from ESLint by adding it to the "ignores" ' +
-      'of your ESLint configuration, or lint it with a configuration that does not enable type-aware rules. ' +
-      `(ESLint reported: ${message})`
-    );
-  }
-
   #getLintFileError(
     lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage,
@@ -535,4 +500,38 @@ export class Eslint extends LinterBase<
       column: lintMessage.column
     });
   }
+}
+
+function getAdditionalFileTypeInformationError(
+  typeScriptFilenames: ReadonlySet<string>,
+  buildFolderPath: string,
+  lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
+  lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage
+): string | undefined {
+  // ESLint reports a fatal parsing error when a type-aware rule is applied to a file that is not part of any
+  // TypeScript program or project. Files that are selected by the ESLint configuration but excluded from the
+  // TypeScript program hit this case, so surface actionable guidance instead of the raw parser error. Files
+  // that are part of the program (or non-fatal messages) are reported normally.
+  if (!lintMessage.fatal || typeScriptFilenames.has(lintResult.filePath)) {
+    return undefined;
+  }
+
+  const { message } = lintMessage;
+  const indicatesMissingTypeInformation: boolean =
+    message.includes('parserOptions.project') ||
+    message.includes('projectService') ||
+    message.includes('program instance') ||
+    message.includes('does not include this file') ||
+    message.includes('not found by the project service');
+  if (!indicatesMissingTypeInformation) {
+    return undefined;
+  }
+
+  const relativePath: string = Path.convertToSlashes(path.relative(buildFolderPath, lintResult.filePath));
+  return (
+    `The ESLint configuration selected "${relativePath}", which is not part of the TypeScript program, so ` +
+    'type-aware rules cannot run on it. Either exclude this file from ESLint by adding it to the "ignores" ' +
+    'of your ESLint configuration, or lint it with a configuration that does not enable type-aware rules. ' +
+    `(ESLint reported: ${message})`
+  );
 }
