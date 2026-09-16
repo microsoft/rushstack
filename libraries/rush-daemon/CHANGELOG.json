@@ -2,6 +2,34 @@
   "name": "@rushstack/rush-daemon",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@rushstack/rush-daemon_v0.5.1",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Forward reporter operation completion and iteration identity through phased request event multiplexing."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-transport\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/rush-daemon_v0.5.0",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",

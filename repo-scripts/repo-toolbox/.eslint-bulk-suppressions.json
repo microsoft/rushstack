@@ -31,6 +31,21 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": "._getLatestPublishedVersionAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": "._getLatestPublishedVersionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/actions/BumpDecoupledLocalDependencies.ts",
+      "scopeId": "._getLatestPublishedVersionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
       "file": "src/cli/actions/CollectProjectFilesAction.ts",
       "scopeId": ".",
       "rule": "import/order"
