@@ -19,7 +19,10 @@ import {
   setDaemonPolicy
 } from './WarmGenerationTestUtilities';
 import {
-  captureWarmRankingDurations, createScript, getMeasuredFixtureRetentionOrder, useNativeIpcRunners
+  captureWarmRankingDurations,
+  createScript,
+  getMeasuredFixtureRetentionOrder,
+  useNativeIpcRunners
 } from './WarmSetTestFixture';
 
 jest.setTimeout(30_000);

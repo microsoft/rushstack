@@ -14,7 +14,10 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 
 import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
-import type { IGlobalCommandExecutionContext, IGlobalCommandSpawnOptions } from '../GlobalCommandExecutionContext';
+import type {
+  IGlobalCommandExecutionContext,
+  IGlobalCommandSpawnOptions
+} from '../GlobalCommandExecutionContext';
 import { GlobalCommandExecutionContext } from '../GlobalCommandExecutionContext';
 import type {
   IResolvedGlobalCommandRequest,
@@ -64,10 +67,7 @@ class TestGlobalCommandClient implements IGlobalCommandRequestClient {
     return this.abortController.signal;
   }
 
-  public async writeTerminalChunkAsync(
-    stream: 'stdout' | 'stderr',
-    chunk: Uint8Array
-  ): Promise<void> {
+  public async writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void> {
     const clientChunk: IClientChunk = { stream, text: TEXT_DECODER.decode(chunk) };
     this.chunks.push(clientChunk);
     await this.onWriteAsync?.(clientChunk);
@@ -170,20 +170,16 @@ describe(GlobalCommandRequestRouter.name, () => {
       );
     const firstClient: TestGlobalCommandClient = new TestGlobalCommandClient();
     const secondClient: TestGlobalCommandClient = new TestGlobalCommandClient();
-    const firstRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
-      {
-        ...createRequestOptions('first', FIRST_CWD, { RUSHD_CONTEXT_TEST: 'first' }, 80),
-        commandName: 'list',
-        commandOrigin: 'built-in'
-      }
-    );
-    const secondRequest: IResolvedGlobalCommandRequest = router.resolveRequest(
-      {
-        ...createRequestOptions('second', SECOND_CWD, { RUSHD_CONTEXT_TEST: 'second' }, 160),
-        commandName: 'scan',
-        commandOrigin: 'built-in'
-      }
-    );
+    const firstRequest: IResolvedGlobalCommandRequest = router.resolveRequest({
+      ...createRequestOptions('first', FIRST_CWD, { RUSHD_CONTEXT_TEST: 'first' }, 80),
+      commandName: 'list',
+      commandOrigin: 'built-in'
+    });
+    const secondRequest: IResolvedGlobalCommandRequest = router.resolveRequest({
+      ...createRequestOptions('second', SECOND_CWD, { RUSHD_CONTEXT_TEST: 'second' }, 160),
+      commandName: 'scan',
+      commandOrigin: 'built-in'
+    });
 
     const results: IGlobalCommandRequestResult[] = await Promise.all([
       runAsync(firstRequest, firstClient),
@@ -223,14 +219,21 @@ describe(GlobalCommandRequestRouter.name, () => {
   });
 
   it('uses validated full child environment/cwd overrides without inheriting omitted request variables', async () => {
-    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(new TestWorkspaceSession(TEST_REPO_ROOT));
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
     const client: TestGlobalCommandClient = new TestGlobalCommandClient();
     const result = await router.executeAsync(
       router.resolveRequest(createRequestOptions('overrides', FIRST_CWD, { OMITTED: 'secret' }, 80)),
       async (context) => {
-        const child = context.spawnChild(process.execPath, [
-          '-e', 'console.log(JSON.stringify({cwd:process.cwd(),value:process.env.VALUE,omitted:process.env.OMITTED}))'
-        ], { cwd: SECOND_CWD, environment: { VALUE: 'child' } });
+        const child = context.spawnChild(
+          process.execPath,
+          [
+            '-e',
+            'console.log(JSON.stringify({cwd:process.cwd(),value:process.env.VALUE,omitted:process.env.OMITTED}))'
+          ],
+          { cwd: SECOND_CWD, environment: { VALUE: 'child' } }
+        );
         await new Promise<void>((resolve, reject) => {
           child.once('error', reject);
           child.once('close', () => resolve());
@@ -242,8 +245,10 @@ describe(GlobalCommandRequestRouter.name, () => {
       client
     );
     expect(result.exitCode).toBe(0);
-    expect(JSON.parse(client.chunks.map(({ text }) => text).join('')))
-      .toEqual({ cwd: getCanonicalPath(SECOND_CWD), value: 'child' });
+    expect(JSON.parse(client.chunks.map(({ text }) => text).join(''))).toEqual({
+      cwd: getCanonicalPath(SECOND_CWD),
+      value: 'child'
+    });
   });
 
   it.each<IGlobalCommandSpawnOptions>([
@@ -253,14 +258,17 @@ describe(GlobalCommandRequestRouter.name, () => {
     { environment: { VALUE: 'bad\0value' } },
     { environment: {}, environmentOverlay: {} }
   ])('rejects invalid child overrides before spawning: %j', async (options) => {
-    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(new TestWorkspaceSession(TEST_REPO_ROOT));
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
     const client: TestGlobalCommandClient = new TestGlobalCommandClient();
     await router.executeAsync(
       router.resolveRequest(createRequestOptions('invalid-overrides', FIRST_CWD, {}, 80)),
       async (context) => {
         expect(() => context.spawnChild(process.execPath, ['-e', ''], options)).toThrow();
         return { exitCode: 0 };
-      }, client
+      },
+      client
     );
     expect(client.results[0].exitCode).toBe(0);
   });
@@ -298,8 +306,7 @@ describe(GlobalCommandRequestRouter.name, () => {
 
       const result: IGlobalCommandRequestResult = await router.executeAsync(
         router.resolveRequest(createRequestOptions('invalid-result', FIRST_CWD, {}, 80)),
-        async (): Promise<IGlobalCommandExecutionResult> =>
-          invalidResult as IGlobalCommandExecutionResult,
+        async (): Promise<IGlobalCommandExecutionResult> => invalidResult as IGlobalCommandExecutionResult,
         client
       );
 
@@ -382,9 +389,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       try {
         await router.executeAsync(
           router.resolveRequest(createRequestOptions('completed-child', FIRST_CWD, {}, 80)),
-          async (
-            context: IGlobalCommandExecutionContext
-          ): Promise<IGlobalCommandExecutionResult> => {
+          async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
             const child = context.spawnChild(process.execPath, ['-e', '']);
             childPid = child.pid;
             await new Promise<void>((resolve) => child.once('close', () => resolve()));
@@ -410,26 +415,41 @@ describe(GlobalCommandRequestRouter.name, () => {
       const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
       let release!: () => void;
       let entered!: () => void;
-      const draining = new Promise<void>((resolve) => { release = resolve; });
-      const inspecting = new Promise<void>((resolve) => { entered = resolve; });
-      const waitSpy = jest.spyOn(linuxProcessGroupExit, 'waitForLinuxProcessGroupExitAsync')
-        .mockImplementation(async () => { entered(); await draining; });
+      const draining = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const inspecting = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const waitSpy = jest
+        .spyOn(linuxProcessGroupExit, 'waitForLinuxProcessGroupExitAsync')
+        .mockImplementation(async () => {
+          entered();
+          await draining;
+        });
       let childPid: number | undefined;
       let completed: boolean = false;
-      const execution = router.executeAsync(
-        router.resolveRequest(createRequestOptions('group-quiescence', FIRST_CWD, {}, 80)),
-        async (context) => {
-          const child = context.spawnChild(process.execPath, ['-e', '']);
-          childPid = child.pid;
-          await new Promise<void>((resolve) => child.once('close', () => resolve()));
-          return { exitCode: 0 };
-        },
-        new TestGlobalCommandClient()
-      ).then((result) => { completed = true; return result; });
+      const execution = router
+        .executeAsync(
+          router.resolveRequest(createRequestOptions('group-quiescence', FIRST_CWD, {}, 80)),
+          async (context) => {
+            const child = context.spawnChild(process.execPath, ['-e', '']);
+            childPid = child.pid;
+            await new Promise<void>((resolve) => child.once('close', () => resolve()));
+            return { exitCode: 0 };
+          },
+          new TestGlobalCommandClient()
+        )
+        .then((result) => {
+          completed = true;
+          return result;
+        });
       try {
         await Promise.race([
           inspecting,
-          execution.then(() => { throw new Error('The request completed before group inspection.'); })
+          execution.then(() => {
+            throw new Error('The request completed before group inspection.');
+          })
         ]);
         expect(waitSpy).toHaveBeenCalledWith(childPid);
         expect(completed).toBe(false);
@@ -453,9 +473,7 @@ describe(GlobalCommandRequestRouter.name, () => {
     await expect(
       router.executeAsync(
         router.resolveRequest(createRequestOptions('spawn-failure', FIRST_CWD, {}, 80)),
-        async (
-          context: IGlobalCommandExecutionContext
-        ): Promise<IGlobalCommandExecutionResult> => {
+        async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
           context.spawnChild(path.join(FIRST_CWD, 'missing-global-command'), [], {
             forwardOutput: false
           });
@@ -485,9 +503,7 @@ describe(GlobalCommandRequestRouter.name, () => {
     await expect(
       router.executeAsync(
         router.resolveRequest(createRequestOptions('invalid-overlay', FIRST_CWD, {}, 80)),
-        async (
-          context: IGlobalCommandExecutionContext
-        ): Promise<IGlobalCommandExecutionResult> => {
+        async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
           context.spawnChild(process.execPath, [], { environmentOverlay: invalidOverlay });
           return { exitCode: 0 };
         },
@@ -550,10 +566,7 @@ describe(GlobalCommandRequestRouter.name, () => {
     const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
     const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
     const client: TestGlobalCommandClient = new TestGlobalCommandClient();
-    const killProcessTreeSpy: jest.SpyInstance = jest.spyOn(
-      SubprocessTerminator,
-      'killProcessTree'
-    );
+    const killProcessTreeSpy: jest.SpyInstance = jest.spyOn(SubprocessTerminator, 'killProcessTree');
     const killProcessTreeOnExitSpy: jest.SpyInstance = jest.spyOn(
       SubprocessTerminator,
       'killProcessTreeOnExit'
@@ -813,9 +826,7 @@ describe(GlobalCommandRequestRouter.name, () => {
     await expect(
       router.executeAsync(
         router.resolveRequest(createRequestOptions('cleanup-errors', FIRST_CWD, {}, 80)),
-        async (
-          context: IGlobalCommandExecutionContext
-        ): Promise<IGlobalCommandExecutionResult> => {
+        async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
           context.registerDisposable(createRecordingDisposable('first', disposalOrder));
           context.registerDisposable({
             [Symbol.asyncDispose]: (): Promise<void> => {
@@ -834,7 +845,9 @@ describe(GlobalCommandRequestRouter.name, () => {
       outcome: 'failure'
     });
     expect(disposalOrder).toEqual(['last', 'throwing', 'first']);
-    expect(() => assertWorkspaceRequestResourcesHealthy(session)).toThrow(WorkspaceRequestResourceCleanupError);
+    expect(() => assertWorkspaceRequestResourcesHealthy(session)).toThrow(
+      WorkspaceRequestResourceCleanupError
+    );
   });
 
   it('drains a failed resource result but fences already queued and later workspace admission', async () => {
@@ -876,20 +889,24 @@ describe(GlobalCommandRequestRouter.name, () => {
       await resultDraining.promise;
       expect(client.results).toEqual([]);
       expect(next).not.toHaveBeenCalled();
-      await expect(getWorkspaceRequestScheduler(session).acquireAsync({
-        exclusivityClass: RequestExclusivityClass.Exclusive,
-        noWait: true
-      })).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+      await expect(
+        getWorkspaceRequestScheduler(session).acquireAsync({
+          exclusivityClass: RequestExclusivityClass.Exclusive,
+          noWait: true
+        })
+      ).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
       resultRelease.resolve();
       expect(await first).toMatchObject({ exitCode: 1, outcome: 'failure' });
       await rejected;
       expect(next).not.toHaveBeenCalled();
       expect(client.results).toHaveLength(1);
-      await expect(router.executeAsync(
-        router.resolveRequest(createRequestOptions('later-after-owner', FIRST_CWD, {}, 80)),
-        next,
-        new TestGlobalCommandClient()
-      )).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
+      await expect(
+        router.executeAsync(
+          router.resolveRequest(createRequestOptions('later-after-owner', FIRST_CWD, {}, 80)),
+          next,
+          new TestGlobalCommandClient()
+        )
+      ).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
     } finally {
       release.resolve();
       resultRelease.resolve();
@@ -915,9 +932,13 @@ describe(GlobalCommandRequestRouter.name, () => {
     });
     context.registerDisposable({ [Symbol.asyncDispose]: dispose });
     let reentrant: Promise<void> | undefined;
-    context.abortSignal.addEventListener('abort', () => {
-      reentrant = context[Symbol.asyncDispose]();
-    }, { once: true });
+    context.abortSignal.addEventListener(
+      'abort',
+      () => {
+        reentrant = context[Symbol.asyncDispose]();
+      },
+      { once: true }
+    );
     const first = context[Symbol.asyncDispose]();
     const second = context[Symbol.asyncDispose]();
     const rejected = expect(first).rejects.toBeInstanceOf(WorkspaceRequestResourceCleanupError);
@@ -947,9 +968,7 @@ describe(GlobalCommandRequestRouter.name, () => {
     await expect(
       router.executeAsync(
         router.resolveRequest(createRequestOptions('disconnect', FIRST_CWD, {}, 80)),
-        async (
-          context: IGlobalCommandExecutionContext
-        ): Promise<IGlobalCommandExecutionResult> => {
+        async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
           context.registerDisposable({
             [Symbol.asyncDispose]: (): Promise<void> => {
               resourceDisposed = true;
@@ -965,11 +984,13 @@ describe(GlobalCommandRequestRouter.name, () => {
     ).rejects.toThrow('client disconnected');
     expect(resourceDisposed).toBe(true);
     expect(() => assertWorkspaceRequestResourcesHealthy(session)).not.toThrow();
-    await expect(router.executeAsync(
-      router.resolveRequest(createRequestOptions('after-disconnect', FIRST_CWD, {}, 80)),
-      async () => ({ exitCode: 0 }),
-      new TestGlobalCommandClient()
-    )).resolves.toMatchObject({ exitCode: 0 });
+    await expect(
+      router.executeAsync(
+        router.resolveRequest(createRequestOptions('after-disconnect', FIRST_CWD, {}, 80)),
+        async () => ({ exitCode: 0 }),
+        new TestGlobalCommandClient()
+      )
+    ).resolves.toMatchObject({ exitCode: 0 });
   });
 
   it('rejects invalid or cross-workspace resolved requests before execution', async () => {
@@ -982,25 +1003,23 @@ describe(GlobalCommandRequestRouter.name, () => {
     expect(() =>
       firstRouter.resolveRequest(createRequestOptions('outside', path.dirname(TEST_REPO_ROOT), {}, 80))
     ).toThrow('outside the daemon workspace');
-    expect(() =>
-      firstRouter.resolveRequest(createRequestOptions('columns', FIRST_CWD, {}, 0))
-    ).toThrow('positive safe integer');
+    expect(() => firstRouter.resolveRequest(createRequestOptions('columns', FIRST_CWD, {}, 0))).toThrow(
+      'positive safe integer'
+    );
     const request: IResolvedGlobalCommandRequest = firstRouter.resolveRequest(
       createRequestOptions('first-workspace', FIRST_CWD, {}, 80)
     );
     const executor: jest.Mock<
       Promise<IGlobalCommandExecutionResult>,
       [IGlobalCommandExecutionContext]
-    > = jest.fn(
-      (context: IGlobalCommandExecutionContext) => {
-        void context;
-        return Promise.resolve({ exitCode: 0 });
-      }
-    );
+    > = jest.fn((context: IGlobalCommandExecutionContext) => {
+      void context;
+      return Promise.resolve({ exitCode: 0 });
+    });
 
-    await expect(
-      secondRouter.executeAsync(request, executor, new TestGlobalCommandClient())
-    ).rejects.toThrow('not resolved for this workspace session');
+    await expect(secondRouter.executeAsync(request, executor, new TestGlobalCommandClient())).rejects.toThrow(
+      'not resolved for this workspace session'
+    );
     expect(executor).not.toHaveBeenCalled();
   });
 
@@ -1020,12 +1039,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       onFailure: (error: Error) => client.abortController.abort(error),
       requestId
     });
-    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
-      requestId,
-      FIRST_CWD,
-      {},
-      80
-    );
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(requestId, FIRST_CWD, {}, 80);
     const request: IResolvedGlobalCommandRequest = router.resolveRequest({
       ...options,
       terminal: { ...options.terminal, acceptsStdin: true }
@@ -1039,7 +1053,10 @@ describe(GlobalCommandRequestRouter.name, () => {
       async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
         const child = context.spawnChild(
           process.execPath,
-          ['-e', "process.stdin.once('data',b=>{process.stdout.write(Buffer.from(b).toString('hex'));process.exit(0)})"],
+          [
+            '-e',
+            "process.stdin.once('data',b=>{process.stdout.write(Buffer.from(b).toString('hex'));process.exit(0)})"
+          ],
           { forwardInput: true }
         );
         child.once('spawn', () => markChildStarted?.());
@@ -1084,12 +1101,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       lifecycleOrder.push('result');
       return Promise.resolve();
     };
-    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
-      requestId,
-      FIRST_CWD,
-      {},
-      80
-    );
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(requestId, FIRST_CWD, {}, 80);
 
     await router.executeAsync(
       router.resolveRequest({
@@ -1131,17 +1143,14 @@ describe(GlobalCommandRequestRouter.name, () => {
       new TestWorkspaceSession(TEST_REPO_ROOT)
     );
     const client: TestGlobalCommandClient = new TestGlobalCommandClient();
-    const executor: jest.Mock<Promise<IGlobalCommandExecutionResult>, [IGlobalCommandExecutionContext]> =
-      jest.fn(async (context: IGlobalCommandExecutionContext) => {
-        void context;
-        return { exitCode: 0 };
-      });
-    const options: IResolveGlobalCommandRequestOptions = createRequestOptions(
-      'pty-only',
-      FIRST_CWD,
-      {},
-      80
-    );
+    const executor: jest.Mock<
+      Promise<IGlobalCommandExecutionResult>,
+      [IGlobalCommandExecutionContext]
+    > = jest.fn(async (context: IGlobalCommandExecutionContext) => {
+      void context;
+      return { exitCode: 0 };
+    });
+    const options: IResolveGlobalCommandRequestOptions = createRequestOptions('pty-only', FIRST_CWD, {}, 80);
 
     await expect(
       router.executeAsync(

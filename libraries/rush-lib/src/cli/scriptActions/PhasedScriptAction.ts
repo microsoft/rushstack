@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, EnvironmentMap } from '@rushstack/node-core-library';
+import { AlreadyReportedError, EnvironmentMap, Sort } from '@rushstack/node-core-library';
 import {
   type ITerminal,
   Terminal,
@@ -165,10 +165,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
   readonly #changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   readonly #selectionParameters: SelectionParameterSet;
-  readonly #gitSelectorOptions: IGitSelectorParserOptions = {
-    includeExternalDependencies: true,
-    enableFiltering: true
-  };
   readonly #verboseParameter: CommandLineFlagParameter;
   readonly #parallelismParameter: CommandLineStringParameter | undefined;
   readonly #ignoreHooksParameter: CommandLineFlagParameter;
@@ -244,7 +240,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     });
 
     this.#selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-      gitOptions: this.#gitSelectorOptions,
+      gitOptions: {
+        includeExternalDependencies: true,
+        enableFiltering: true
+      },
       includeSubspaceSelector: false,
       cwd: this.parser.cwd
     });
@@ -378,13 +377,19 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public async selectEngineOperationsAsync(
     graph: IOperationGraph
   ): Promise<ReadonlyMap<Operation, OperationEnabledState>> {
-    this.#gitSelectorOptions.getIncrementalBuildIgnoredGlobsAsync = async (project) => {
-      const configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
-        await RushProjectConfiguration._tryLoadForProjectsUncachedAsync([project], this.#terminal);
-      return configurations.get(project)?.incrementalBuildIgnoredGlobs;
+    const gitOptions: IGitSelectorParserOptions = {
+      includeExternalDependencies: true,
+      enableFiltering: true,
+      getIncrementalBuildIgnoredGlobsAsync: async (project) => {
+        const configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+          await RushProjectConfiguration._tryLoadForProjectsUncachedAsync([project], this.#terminal);
+        return configurations.get(project)?.incrementalBuildIgnoredGlobs;
+      }
     };
     const projects: Set<RushConfigurationProject> = await this.#selectionParameters.getSelectedProjectsAsync(
-      this.#terminal
+      this.#terminal,
+      undefined,
+      gitOptions
     );
     const includePhaseDeps: boolean = !!this.#includePhaseDeps?.value;
     const phases: Set<string> = new Set(
@@ -582,7 +587,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       }
 
       await measureAsyncFn(`${PERF_PREFIX}:applySituationalPlugins`, async () => {
-        if (onEngine && this.rushConfiguration.daemon.usePersistentIpcRunners && !this.#noIPCParameter?.value) {
+        if (
+          onEngine &&
+          this.rushConfiguration.daemon.usePersistentIpcRunners &&
+          !this.#noIPCParameter?.value
+        ) {
           const { DaemonIpcOperationRunnerPlugin } = await import(
             /* webpackChunkName: 'DaemonIpcOperationRunnerPlugin' */ '../../logic/operations/DaemonIpcOperationRunnerPlugin'
           );
@@ -647,8 +656,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         }
 
         if (isPnpm && usePnpmSyncForInjectedDependencies) {
-          const { PnpmSyncCopyOperationPlugin } =
-            await import('../../logic/operations/PnpmSyncCopyOperationPlugin');
+          const { PnpmSyncCopyOperationPlugin } = await import(
+            '../../logic/operations/PnpmSyncCopyOperationPlugin'
+          );
           new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
         }
       });
@@ -666,7 +676,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               : RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
           );
       const projectConfigurationIdentity: string | undefined = onEngine
-        ? await getProjectConfigurationIdentityAsync(projectConfigurations, this.rushConfiguration.daemon.usePersistentIpcRunners)
+        ? await getProjectConfigurationIdentityAsync(
+            projectConfigurations,
+            this.rushConfiguration.daemon.usePersistentIpcRunners
+          )
         : undefined;
 
       const includePhaseDeps: boolean = this.#includePhaseDeps?.value ?? false;
@@ -749,8 +762,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
                 await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal);
               if (
-                await getProjectConfigurationIdentityAsync(currentConfigurations, this.rushConfiguration.daemon.usePersistentIpcRunners) !==
-                projectConfigurationIdentity
+                (await getProjectConfigurationIdentityAsync(
+                  currentConfigurations,
+                  this.rushConfiguration.daemon.usePersistentIpcRunners
+                )) !== projectConfigurationIdentity
               ) {
                 throw new PhasedCommandEngineConfigurationChangedError();
               }
@@ -1004,17 +1019,17 @@ async function getProjectConfigurationIdentityAsync(
   configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>,
   persistentIpc: boolean
 ): Promise<string> {
-  return JSON.stringify(
-    [await getDaemonIpcImplementationIdentityAsync(configurations, persistentIpc),
+  return JSON.stringify([
+    await getDaemonIpcImplementationIdentityAsync(configurations, persistentIpc),
     Array.from(configurations, ([project, configuration]) => ({
       project: project.packageName,
       incrementalBuildIgnoredGlobs: configuration.incrementalBuildIgnoredGlobs,
       disableBuildCacheForProject: configuration.disableBuildCacheForProject,
       operations: Array.from(configuration.operationSettingsByOperationName).sort(([left], [right]) =>
-        left.localeCompare(right)
+        Sort.compareByValue(left, right)
       )
-    })).sort((left, right) => left.project.localeCompare(right.project))]
-  );
+    })).sort((left, right) => Sort.compareByValue(left.project, right.project))
+  ]);
 }
 
 async function disposeEngineGraphAsync(

@@ -21,20 +21,26 @@ export async function executeWithDaemonRestartAsync(
   execution: IDaemonClientExecuteOptions
 ): Promise<DaemonClientOutcome> {
   const startedAt: number = Date.now();
-  const abortSignal: AbortSignal | undefined = execution.abortSignal && connection.abortSignal
-    ? AbortSignal.any([execution.abortSignal, connection.abortSignal])
-    : execution.abortSignal ?? connection.abortSignal;
+  const abortSignal: AbortSignal | undefined =
+    execution.abortSignal && connection.abortSignal
+      ? AbortSignal.any([execution.abortSignal, connection.abortSignal])
+      : (execution.abortSignal ?? connection.abortSignal);
   const owner: IDaemonLockfile | undefined = readDaemonLockfile(connection.paths.lockfilePath);
   const { pid } = await client.status;
   const attested: boolean =
     client.protocolVersion.minor >= DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR &&
-    owner !== undefined && owner.pid === pid && owner.socketPath === connection.paths.socketPath &&
-    Number.isSafeInteger(owner.pid) && owner.pid > 0 && Number.isFinite(Date.parse(owner.startedAt));
+    owner !== undefined &&
+    owner.pid === pid &&
+    owner.socketPath === connection.paths.socketPath &&
+    Number.isSafeInteger(owner.pid) &&
+    owner.pid > 0 &&
+    Number.isFinite(Date.parse(owner.startedAt));
   const outcome: DaemonClientOutcome = await client.executeAsync({ ...execution, abortSignal });
   if (outcome.kind !== 'result' || !outcome.result.retryAfterRestart) return outcome;
   if (!attested || !owner) {
     throw new DaemonClientError(
-      'startupFailed', 'Cannot attest the restarting daemon ownership; the request was not retried.'
+      'startupFailed',
+      'Cannot attest the restarting daemon ownership; the request was not retried.'
     );
   }
   if (abortSignal?.aborted) return abortedOutcome(execution);
@@ -59,17 +65,21 @@ export async function executeWithDaemonRestartAsync(
   const result: DaemonClientOutcome = await successor.executeAsync({
     ...execution,
     abortSignal,
-    request: waitTimeoutMs === undefined ? execution.request : captureDaemonRequest({
-      ...execution.request,
-      admission: {
-        ...execution.request.admission,
-        waitTimeoutMs: Math.max(0, waitTimeoutMs - (Date.now() - startedAt))
-      }
-    })
+    request:
+      waitTimeoutMs === undefined
+        ? execution.request
+        : captureDaemonRequest({
+            ...execution.request,
+            admission: {
+              ...execution.request.admission,
+              waitTimeoutMs: Math.max(0, waitTimeoutMs - (Date.now() - startedAt))
+            }
+          })
   });
   if (result.kind === 'result' && result.result.retryAfterRestart) {
     throw new DaemonClientError(
-      'startupFailed', 'The successor requested another restart; the single safe retry was exhausted.'
+      'startupFailed',
+      'The successor requested another restart; the single safe retry was exhausted.'
     );
   }
   return result;

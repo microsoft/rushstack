@@ -24,14 +24,17 @@ describe('native Rushx invocation namespaces', () => {
     aliasContainer = fs.mkdtempSync(path.join(os.tmpdir(), 'rushx-invocation-alias-'));
     aliasRoot = path.join(aliasContainer, 'workspace');
     fs.symlinkSync(physicalRoot, aliasRoot, process.platform === 'win32' ? 'junction' : 'dir');
-    fixture.write('projects/a/script.cjs', `
+    fixture.write(
+      'projects/a/script.cjs',
+      `
 const path = require('node:path');
 console.log(JSON.stringify({
   cwd: process.cwd(), invoked: process.env.RUSH_INVOKED_FOLDER,
   init: process.env.INIT_CWD, bin: process.env.PATH.split(path.delimiter)[0],
   base: process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER, marker: process.env.CLIENT_MARKER
 }));
-`);
+`
+    );
     await fixture.startAsync();
     serverCwd = process.cwd();
     serverEnvironment = { ...process.env };
@@ -76,11 +79,17 @@ console.log(JSON.stringify({
 
   it('preserves native registration warnings for a project alias instead of substituting physical membership', async () => {
     const cwd: string = path.join(fixture.folder, 'project-alias');
-    fs.symlinkSync(path.join(physicalRoot, 'projects/a'), cwd, process.platform === 'win32' ? 'junction' : 'dir');
+    fs.symlinkSync(
+      path.join(physicalRoot, 'projects/a'),
+      cwd,
+      process.platform === 'win32' ? 'junction' : 'dir'
+    );
     const native: IScriptResult = await fixture.invokeAsync(true, ['-q', 'args'], cwd);
     expect(await fixture.invokeAsync(false, ['-q', 'args'], cwd)).toEqual(native);
     expect(native.exitCode).toBe(0);
-    expect(native.stdout.toString().includes('this project is not registered')).toBe(process.platform === 'win32');
+    expect(native.stdout.toString().includes('this project is not registered')).toBe(
+      process.platform === 'win32'
+    );
   });
 
   it('preserves exact alias-qualified native pnpm-sync diagnostics without rewriting displayed paths', async () => {
@@ -98,59 +107,85 @@ console.log(JSON.stringify({
   it('rejects a workspace alias retargeted outside the physical workspace before reading stdin', async () => {
     const outsideRoot: string = path.join(aliasContainer, 'outside');
     fs.mkdirSync(path.join(outsideRoot, 'projects/a'), { recursive: true });
-    fs.writeFileSync(path.join(outsideRoot, 'projects/a/package.json'), '{"name":"outside","version":"1.0.0"}');
+    fs.writeFileSync(
+      path.join(outsideRoot, 'projects/a/package.json'),
+      '{"name":"outside","version":"1.0.0"}'
+    );
     fs.unlinkSync(aliasRoot);
     fs.symlinkSync(outsideRoot, aliasRoot, process.platform === 'win32' ? 'junction' : 'dir');
     const input: PassThrough = new PassThrough();
     input.end('untouched');
     const result = await fixture.runAsync(
-      fixture.request(['build'], path.join(aliasRoot, 'projects/a')), undefined, { stdin: input }
+      fixture.request(['build'], path.join(aliasRoot, 'projects/a')),
+      undefined,
+      { stdin: input }
     );
     expect(result.outcome).toMatchObject({
-      kind: 'rejected', rejection: { code: 'invalidRequest', message: expect.stringContaining('outside the daemon workspace') }
+      kind: 'rejected',
+      rejection: { code: 'invalidRequest', message: expect.stringContaining('outside the daemon workspace') }
     });
     expect(input.read().toString()).toBe('untouched');
     expect(result.stdout.length).toBe(0);
   });
 
   it('pins physical request identity when an alias changes while waiting for admission', async () => {
-    fixture.write('retargeted/projects/a/package.json', JSON.stringify({
-      name: 'retargeted', version: '1.0.0', scripts: { build: 'node script.cjs' }
-    }));
-    fixture.write('retargeted/projects/a/script.cjs', "require('node:fs').writeFileSync('executed', 'wrong project');");
+    fixture.write(
+      'retargeted/projects/a/package.json',
+      JSON.stringify({
+        name: 'retargeted',
+        version: '1.0.0',
+        scripts: { build: 'node script.cjs' }
+      })
+    );
+    fixture.write(
+      'retargeted/projects/a/script.cjs',
+      "require('node:fs').writeFileSync('executed', 'wrong project');"
+    );
     let started: () => void = () => {};
     let release: () => void = () => {};
-    const holding: Promise<void> = new Promise((resolve) => { started = resolve; });
-    const released: Promise<void> = new Promise((resolve) => { release = resolve; });
+    const holding: Promise<void> = new Promise((resolve) => {
+      started = resolve;
+    });
+    const released: Promise<void> = new Promise((resolve) => {
+      release = resolve;
+    });
     const holdAsync = async (): Promise<{ exitCode: number }> => {
       started();
       await released;
       return { exitCode: 0 };
     };
     jest.spyOn(fixture.phasedResolver, 'resolveRequestAsync').mockResolvedValue({
-      kind: 'global', executor: holdAsync
+      kind: 'global',
+      executor: holdAsync
     });
     const holder = fixture.runAsync({
-      ...fixture.request(['hold'], path.join(physicalRoot, 'projects/a')), invocationKind: 'rush'
+      ...fixture.request(['hold'], path.join(physicalRoot, 'projects/a')),
+      invocationKind: 'rush'
     });
     await holding;
     const input: PassThrough = new PassThrough();
     input.end('not consumed before execution');
     try {
       const result = await fixture.runAsync(
-        fixture.request(['-q', 'build'], path.join(aliasRoot, 'projects/a')), undefined, {
+        fixture.request(['-q', 'build'], path.join(aliasRoot, 'projects/a')),
+        undefined,
+        {
           stdin: input,
           onQueuePositionAsync: async () => {
             fs.unlinkSync(aliasRoot);
-            fs.symlinkSync(path.join(physicalRoot, 'retargeted'), aliasRoot,
-              process.platform === 'win32' ? 'junction' : 'dir');
+            fs.symlinkSync(
+              path.join(physicalRoot, 'retargeted'),
+              aliasRoot,
+              process.platform === 'win32' ? 'junction' : 'dir'
+            );
             release();
           }
         }
       );
       if (process.platform === 'win32') {
         expect(result.outcome).toMatchObject({
-          kind: 'result', result: { exitCode: 1, errorMessage: expect.stringContaining('invocation directory changed') }
+          kind: 'result',
+          result: { exitCode: 1, errorMessage: expect.stringContaining('invocation directory changed') }
         });
         expect(input.read().toString()).toBe('not consumed before execution');
       } else {
@@ -167,11 +202,19 @@ console.log(JSON.stringify({
   it('falls back before input for relative temporary-folder initialization instead of using server cwd', async () => {
     const input: PassThrough = new PassThrough();
     input.end('untouched');
-    const result = await fixture.runAsync(fixture.request(
-      ['build'], path.join(aliasRoot, 'projects/a'), fixture.environment({ RUSH_TEMP_FOLDER: 'relative-temp' })
-    ), undefined, { stdin: input });
+    const result = await fixture.runAsync(
+      fixture.request(
+        ['build'],
+        path.join(aliasRoot, 'projects/a'),
+        fixture.environment({ RUSH_TEMP_FOLDER: 'relative-temp' })
+      ),
+      undefined,
+      { stdin: input }
+    );
     expect(result.outcome).toMatchObject({
-      kind: 'fallback', reason: 'unsupported', message: expect.stringContaining('Relative RUSH_TEMP_FOLDER')
+      kind: 'fallback',
+      reason: 'unsupported',
+      message: expect.stringContaining('Relative RUSH_TEMP_FOLDER')
     });
     expect(input.read().toString()).toBe('untouched');
     expect(result.stdout.length).toBe(0);

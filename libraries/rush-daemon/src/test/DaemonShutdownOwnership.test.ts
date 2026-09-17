@@ -40,10 +40,12 @@ describe('daemon shutdown ownership', () => {
   it('prevents a successor from starting before the old workspace has disposed', async () => {
     const disposing = createDeferred<void>();
     const disposed = createDeferred<void>();
-    const host: RushDaemonHost = await RushDaemonHost.startAsync(createOptions(async () => {
-      disposing.resolve();
-      await disposed.promise;
-    }));
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(
+      createOptions(async () => {
+        disposing.resolve();
+        await disposed.promise;
+      })
+    );
     const closing: Promise<void> = host.closeAsync();
     try {
       await disposing.promise;
@@ -61,9 +63,11 @@ describe('daemon shutdown ownership', () => {
 
   it('fails closed when workspace cleanup cannot complete successfully', async () => {
     const { value: host, listener } = await captureTestDaemonListenerAsync(() =>
-      RushDaemonHost.startAsync(createOptions(async () => {
-        throw new Error('workspace cleanup failed');
-      }))
+      RushDaemonHost.startAsync(
+        createOptions(async () => {
+          throw new Error('workspace cleanup failed');
+        })
+      )
     );
     try {
       await expect(host.closeAsync()).rejects.toThrow('workspace cleanup failed');

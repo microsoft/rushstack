@@ -41,12 +41,16 @@ describe('IPC fixture file publication', () => {
       } else {
         write(target, '{', options);
       }
-      reader = spawnSync(process.execPath, [
-        '-e',
-        "const fs=require('node:fs');const file=process.argv[1];" +
-          "console.log(fs.existsSync(file)?JSON.stringify(JSON.parse(fs.readFileSync(file,'utf8'))):'pending');",
-        filename
-      ], { encoding: 'utf8' });
+      reader = spawnSync(
+        process.execPath,
+        [
+          '-e',
+          "const fs=require('node:fs');const file=process.argv[1];" +
+            "console.log(fs.existsSync(file)?JSON.stringify(JSON.parse(fs.readFileSync(file,'utf8'))):'pending');",
+          filename
+        ],
+        { encoding: 'utf8' }
+      );
       if (typeof target === 'number') {
         fs.ftruncateSync(target, 0);
         fs.writeSync(target, String(data), 0, 'utf8');
@@ -90,9 +94,13 @@ describe('IPC fixture file publication', () => {
     const filename: string = path.join(directory, 'gate.json');
     const failure: Error = new Error('publication failed');
     if (failurePoint === 'write') {
-      jest.spyOn(filesystem, 'writeFileSync').mockImplementationOnce(() => { throw failure; });
+      jest.spyOn(filesystem, 'writeFileSync').mockImplementationOnce(() => {
+        throw failure;
+      });
     } else {
-      jest.spyOn(filesystem, 'renameSync').mockImplementationOnce(() => { throw failure; });
+      jest.spyOn(filesystem, 'renameSync').mockImplementationOnce(() => {
+        throw failure;
+      });
     }
     expect(() => writeIpcFixtureFile(filename, '{}')).toThrow(failure);
     expect(fs.readdirSync(directory)).toEqual(['.other-writer.tmp']);
@@ -133,8 +141,11 @@ describe('IPC fixture file publication', () => {
     writeIpcFixtureFile(path.join(directory, 'old-request.release'), '{}');
     const filename: string = path.join(directory, 'new-request.release');
     let settled: boolean = false;
-    const reading: Promise<unknown> = readPressureGateAsync(filename, performance.now() + 10000)
-      .finally(() => { settled = true; });
+    const reading: Promise<unknown> = readPressureGateAsync(filename, performance.now() + 10000).finally(
+      () => {
+        settled = true;
+      }
+    );
     const rejected: Promise<void> = expect(reading).rejects.toThrow('Pressure fixture setup was cancelled.');
     try {
       expect(settled).toBe(false);

@@ -170,14 +170,19 @@ describe('DaemonClient', () => {
     ]);
   });
 
-  it.each([['install', 9], ['update', 9]])('does not send native %s to protocol 0.%s', async (command, minor) => {
+  it.each([
+    ['install', 9],
+    ['update', 9]
+  ])('does not send native %s to protocol 0.%s', async (command, minor) => {
     peerVersion = { major: 0, minor: Number(minor) };
     const client = await DaemonClient.connectAsync({ socketPath: address });
     const stdin = new PassThrough();
     stdin.end('untouched');
     const envelope = { ...request(), commandName: String(command), commandOrigin: 'built-in' as const };
-    expect(await client.executeAsync({ request: envelope, stdin }))
-      .toMatchObject({ kind: 'fallback', reason: 'unsupported' });
+    expect(await client.executeAsync({ request: envelope, stdin })).toMatchObject({
+      kind: 'fallback',
+      reason: 'unsupported'
+    });
     expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
     expect(stdin.read().toString()).toBe('untouched');
   });
@@ -199,9 +204,16 @@ describe('DaemonClient', () => {
           await connection!.sendFrameAsync({
             kind: DaemonFrameType.event,
             payload: encodeDaemonEventFrame({
-              protocolVersion: DAEMON_PROTOCOL_VERSION, eventId: 'event', sessionId: 'test', sequence: 1,
-              timestamp: new Date().toISOString(), type: 'commandStarted', privacy: 'public', required: true,
-              source: { packageName: 'test', packageVersion: '1.0.0' }, payload: {}
+              protocolVersion: DAEMON_PROTOCOL_VERSION,
+              eventId: 'event',
+              sessionId: 'test',
+              sequence: 1,
+              timestamp: new Date().toISOString(),
+              type: 'commandStarted',
+              privacy: 'public',
+              required: true,
+              source: { packageName: 'test', packageVersion: '1.0.0' },
+              payload: {}
             })
           });
         } else if (mode === 'stdin') {
@@ -211,13 +223,25 @@ describe('DaemonClient', () => {
         }
         await sendAsync({
           kind: 'requestResult',
-          payload: { requestId: envelope.requestId, exitCode: 1, outcome: 'failure', aborted: false, retryAfterRestart: true }
+          payload: {
+            requestId: envelope.requestId,
+            exitCode: 1,
+            outcome: 'failure',
+            aborted: false,
+            retryAfterRestart: true
+          }
         });
       };
       const client = await DaemonClient.connectAsync({ socketPath: address });
-      await expect(client.executeAsync({
-        request: envelope, stdin, setRawMode: () => {}, onStdoutAsync: async () => {}, onEventAsync: async () => {}
-      })).rejects.toThrow(mode === 'old-peer' ? 'Unexpected pre-execution restart' : 'not retried');
+      await expect(
+        client.executeAsync({
+          request: envelope,
+          stdin,
+          setRawMode: () => {},
+          onStdoutAsync: async () => {},
+          onEventAsync: async () => {}
+        })
+      ).rejects.toThrow(mode === 'old-peer' ? 'Unexpected pre-execution restart' : 'not retried');
       stdin.destroy();
       expect(controls.filter((message) => message.kind === 'requestStart')).toHaveLength(1);
     }
@@ -327,11 +351,13 @@ describe('DaemonClient', () => {
       });
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    await expect(client.executeAsync({
-      request: { ...request(), terminal: { ...request().terminal, acceptsStdin: true } },
-      stdin: new PassThrough(),
-      onStdoutAsync: async () => {}
-    })).rejects.toThrow('not retried');
+    await expect(
+      client.executeAsync({
+        request: { ...request(), terminal: { ...request().terminal, acceptsStdin: true } },
+        stdin: new PassThrough(),
+        onStdoutAsync: async () => {}
+      })
+    ).rejects.toThrow('not retried');
   });
 
   it('does not replay after terminal control even when no stdin source was supplied', async () => {
@@ -340,7 +366,8 @@ describe('DaemonClient', () => {
     onRequest = async (message) => {
       if (message.kind === 'requestStart') {
         await sendAsync({
-          kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: true }
+          kind: 'setRawMode',
+          payload: { requestId: envelope.requestId, enabled: true }
         });
       } else if (message.kind === 'rawModeChanged') {
         await sendAsync({
@@ -350,9 +377,12 @@ describe('DaemonClient', () => {
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    await expect(client.executeAsync({
-      request: envelope, setRawMode: (enabled) => rawModes.push(enabled)
-    })).rejects.toThrow('not retried');
+    await expect(
+      client.executeAsync({
+        request: envelope,
+        setRawMode: (enabled) => rawModes.push(enabled)
+      })
+    ).rejects.toThrow('not retried');
     expect(rawModes).toEqual([true, false]);
     expect(controls.filter((message) => message.kind === 'requestStart')).toHaveLength(1);
   });
@@ -364,7 +394,6 @@ describe('DaemonClient', () => {
           kind: 'requestRejected',
           payload: { requestId: message.payload.requestId, code: 'unsupported', message: 'No resolver.' }
         });
-
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
     expect(await client.executeAsync({ request: request() })).toEqual({
@@ -387,36 +416,43 @@ describe('DaemonClient', () => {
     expect(stdin.listenerCount('data')).toBe(0);
   });
 
-  it.each([Buffer.from([0, 3, 255, 13]), Buffer.alloc(0), Buffer.alloc(2 * 1024 * 1024, 3)]
-    .map((input) => ({ input, length: input.length })))(
-    'waits for admission and delivers $length piped bytes followed by EOF',
-    async ({ input }) => {
-      const stdin = new PassThrough();
-      stdin.end(input);
-      const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
-      const received: Buffer[] = [];
-      onStdin = async (bytes) => { received.push(Buffer.from(bytes)); };
-      onRequest = async (message) => {
-        if (message.kind === 'requestStart') {
-          expect(stdin.readableLength).toBe(input.length);
-          expect(received).toHaveLength(0);
-          await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
-        } else if (message.kind === 'stdinEnd') {
-          expect(Buffer.concat(received).equals(input)).toBe(true);
-          await sendAsync({
-            kind: 'requestResult',
-            payload: { requestId: envelope.requestId, exitCode: 0, outcome: 'success', aborted: false }
-          });
-        }
-      };
-      const client = await DaemonClient.connectAsync({ socketPath: address });
-      await expect(client.executeAsync({
-        request: envelope, stdin, requiresStdinEnd: true
-      })).resolves.toMatchObject({ kind: 'result', result: { exitCode: 0 } });
-      expect(controls.filter((message) => message.kind === 'stdinEnd')).toHaveLength(1);
-      expect(stdin.listenerCount('end')).toBe(0);
-    }
-  );
+  it.each(
+    [Buffer.from([0, 3, 255, 13]), Buffer.alloc(0), Buffer.alloc(2 * 1024 * 1024, 3)].map((input) => ({
+      input,
+      length: input.length
+    }))
+  )('waits for admission and delivers $length piped bytes followed by EOF', async ({ input }) => {
+    const stdin = new PassThrough();
+    stdin.end(input);
+    const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+    const received: Buffer[] = [];
+    onStdin = async (bytes) => {
+      received.push(Buffer.from(bytes));
+    };
+    onRequest = async (message) => {
+      if (message.kind === 'requestStart') {
+        expect(stdin.readableLength).toBe(input.length);
+        expect(received).toHaveLength(0);
+        await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+      } else if (message.kind === 'stdinEnd') {
+        expect(Buffer.concat(received).equals(input)).toBe(true);
+        await sendAsync({
+          kind: 'requestResult',
+          payload: { requestId: envelope.requestId, exitCode: 0, outcome: 'success', aborted: false }
+        });
+      }
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(
+      client.executeAsync({
+        request: envelope,
+        stdin,
+        requiresStdinEnd: true
+      })
+    ).resolves.toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    expect(controls.filter((message) => message.kind === 'stdinEnd')).toHaveLength(1);
+    expect(stdin.listenerCount('end')).toBe(0);
+  });
 
   it('keeps control responsive while a large stdin chunk waits for its next write credit', async () => {
     acknowledgeInput = false;
@@ -427,9 +463,11 @@ describe('DaemonClient', () => {
     const received: Buffer[] = [];
     onStdin = async (bytes) => {
       received.push(Buffer.from(bytes));
-      await sendAsync(received.length === 1
-        ? { kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: false } }
-        : { kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+      await sendAsync(
+        received.length === 1
+          ? { kind: 'setRawMode', payload: { requestId: envelope.requestId, enabled: false } }
+          : { kind: 'stdinReady', payload: { requestId: envelope.requestId } }
+      );
     };
     onRequest = async (message) => {
       if (message.kind === 'requestStart' || message.kind === 'rawModeChanged') {
@@ -444,9 +482,14 @@ describe('DaemonClient', () => {
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    await expect(client.executeAsync({
-      request: envelope, stdin, requiresStdinEnd: true, setRawMode: () => {}
-    })).resolves.toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    await expect(
+      client.executeAsync({
+        request: envelope,
+        stdin,
+        requiresStdinEnd: true,
+        setRawMode: () => {}
+      })
+    ).resolves.toMatchObject({ kind: 'result', result: { exitCode: 0 } });
   });
 
   it('rejects a version mismatch without attempting a request', async () => {

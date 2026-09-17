@@ -51,22 +51,24 @@ describe('FileReporter', () => {
       const originalWrite: typeof fs.writeSync = fsModule.writeSync;
       const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
       await reporter.initializeAsync();
-      const writeSpy = jest.spyOn(fsModule, 'writeSync').mockImplementation(
-        (
-          fd: number,
-          data: string | NodeJS.ArrayBufferView,
-          offset?: number | null,
-          length?: number | BufferEncoding | null
-        ): number => {
-          const buffer: Buffer =
-            typeof data === 'string'
-              ? Buffer.from(data, 'utf8')
-              : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-          const start: number = typeof data === 'string' ? 0 : (offset ?? 0);
-          const count: number = typeof length === 'number' ? length : buffer.length - start;
-          return originalWrite(fd, buffer, start, Math.min(3, count));
-        }
-      );
+      const writeSpy = jest
+        .spyOn(fsModule, 'writeSync')
+        .mockImplementation(
+          (
+            fd: number,
+            data: string | NodeJS.ArrayBufferView,
+            offset?: number | null,
+            length?: number | BufferEncoding | null
+          ): number => {
+            const buffer: Buffer =
+              typeof data === 'string'
+                ? Buffer.from(data, 'utf8')
+                : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+            const start: number = typeof data === 'string' ? 0 : (offset ?? 0);
+            const count: number = typeof length === 'number' ? length : buffer.length - start;
+            return originalWrite(fd, buffer, start, Math.min(3, count));
+          }
+        );
       const text: string = 'OUTPUT-BEGIN \u{1f680} \u4e2d OUTPUT-END\n';
       try {
         reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));

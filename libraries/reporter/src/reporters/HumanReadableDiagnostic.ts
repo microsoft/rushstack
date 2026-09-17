@@ -47,11 +47,7 @@ export function formatHumanReadableDiagnostic(event: IReporterEventEnvelope<unkn
       }
     }
   }
-  if (
-    source?.toolName &&
-    diagnostic.parameters?.tool === undefined &&
-    !containsSecret(source.toolName)
-  ) {
+  if (source?.toolName && diagnostic.parameters?.tool === undefined && !containsSecret(source.toolName)) {
     location = location ? `[${source.toolName}] ${location}` : source.toolName;
   }
 

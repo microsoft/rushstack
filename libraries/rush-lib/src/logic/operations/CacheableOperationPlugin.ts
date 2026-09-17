@@ -606,9 +606,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext;
   }
 
-  #tryGetOperationBuildCache(
-    options: ITryGetOperationBuildCacheOptions
-  ): OperationBuildCache | undefined {
+  #tryGetOperationBuildCache(options: ITryGetOperationBuildCacheOptions): OperationBuildCache | undefined {
     const {
       buildCacheConfiguration,
       buildCacheContext,

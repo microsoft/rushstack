@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Document experimental daemon and reporter environment controls and numeric configuration limits, expose the runtime fingerprint cache's cross-package diagnostics, and use ordinal fingerprint ordering.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

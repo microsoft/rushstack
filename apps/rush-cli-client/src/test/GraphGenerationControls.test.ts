@@ -7,12 +7,19 @@ describe(parseGraphGenerationControls.name, () => {
   it.each(['scope-in', 'scope-out', 'invalidate', 'pause', 'resume'])(
     'preserves explicit generation and selectors for %s',
     (verb) => {
-      expect(parseGraphGenerationControls(['graph', verb, '--generation', 'old-token', '--project', 'a']))
-        .toEqual({ argv: ['graph', verb, '--project', 'a'], mutation: true, generation: 'old-token' });
-      expect(parseGraphGenerationControls(['graph', verb, '--generation=old-token']))
-        .toEqual({ argv: ['graph', verb], mutation: true, generation: 'old-token' });
-      expect(parseGraphGenerationControls(['graph', verb]))
-        .toEqual({ argv: ['graph', verb], mutation: true, generation: undefined });
+      expect(
+        parseGraphGenerationControls(['graph', verb, '--generation', 'old-token', '--project', 'a'])
+      ).toEqual({ argv: ['graph', verb, '--project', 'a'], mutation: true, generation: 'old-token' });
+      expect(parseGraphGenerationControls(['graph', verb, '--generation=old-token'])).toEqual({
+        argv: ['graph', verb],
+        mutation: true,
+        generation: 'old-token'
+      });
+      expect(parseGraphGenerationControls(['graph', verb])).toEqual({
+        argv: ['graph', verb],
+        mutation: true,
+        generation: undefined
+      });
     }
   );
 

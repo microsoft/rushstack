@@ -154,7 +154,10 @@ describe('version-selected daemon launcher', () => {
           tmpdir: path.join(repoRoot, 'runtime'),
           uid: process.getuid?.()
         },
-        computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync.native(repoRoot), rushVersion: Rush.version })
+        computeDaemonWorkspaceKey({
+          canonicalRepoRoot: fs.realpathSync.native(repoRoot),
+          rushVersion: Rush.version
+        })
       );
       const client = await connectOrStartDaemonAsync({
         paths,

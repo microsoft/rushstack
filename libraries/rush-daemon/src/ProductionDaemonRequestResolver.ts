@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import type { LockFile } from '@rushstack/node-core-library';
+import { Sort, type LockFile } from '@rushstack/node-core-library';
 import {
   PhasedCommandEngine,
   PhasedCommandEngineBusyError,
@@ -244,7 +244,7 @@ function environmentIdentity(environment: Readonly<Record<string, string | undef
   return JSON.stringify(
     Object.entries(environment)
       .filter(([, value]) => value !== undefined)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => Sort.compareByValue(a, b))
   );
 }
 

@@ -207,7 +207,9 @@ describe(Telemetry.name, () => {
     expect(customFlushTelemetry.mock.calls[0][0][0]).toEqual(expect.objectContaining(logData));
 
     let flushed: boolean = false;
-    const completion: Promise<void> = telemetry.ensureFlushedAsync().then(() => { flushed = true; });
+    const completion: Promise<void> = telemetry.ensureFlushedAsync().then(() => {
+      flushed = true;
+    });
     await Promise.resolve();
     expect(flushed).toBe(false);
     gate.release();
@@ -227,7 +229,8 @@ describe(Telemetry.name, () => {
     });
     const firstGate = createFlushGate();
     const secondGate = createFlushGate();
-    const customFlushTelemetry: jest.Mock = jest.fn()
+    const customFlushTelemetry: jest.Mock = jest
+      .fn()
       .mockImplementationOnce(() => firstGate.promise)
       .mockImplementationOnce(() => secondGate.promise);
     rushSession.hooks.flushTelemetry.tapPromise('test', customFlushTelemetry);
@@ -255,7 +258,9 @@ describe(Telemetry.name, () => {
     expect(customFlushTelemetry.mock.calls[1][0][0]).toEqual(expect.objectContaining(logData2));
 
     let flushed: boolean = false;
-    const completion: Promise<void> = telemetry.ensureFlushedAsync().then(() => { flushed = true; });
+    const completion: Promise<void> = telemetry.ensureFlushedAsync().then(() => {
+      flushed = true;
+    });
     firstGate.release();
     await Promise.resolve();
     expect(flushed).toBe(false);

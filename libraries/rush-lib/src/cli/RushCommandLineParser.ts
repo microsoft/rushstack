@@ -584,10 +584,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  #addCommandLineConfigAction(
-    commandLineConfiguration: CommandLineConfiguration,
-    command: Command
-  ): void {
+  #addCommandLineConfigAction(commandLineConfiguration: CommandLineConfiguration, command: Command): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(
         `${RushConstants.commandLineFilename} defines a command "${command.name}"` +

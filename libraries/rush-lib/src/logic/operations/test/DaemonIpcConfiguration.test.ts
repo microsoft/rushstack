@@ -16,7 +16,10 @@ import {
 
 describe('explicit daemon Node implementation boundary', () => {
   let folder: string;
-  const descriptor: IDaemonIpcConfiguration = { entryPoint: 'tools/entry.cjs', args: ['two words', '"literal"'] };
+  const descriptor: IDaemonIpcConfiguration = {
+    entryPoint: 'tools/entry.cjs',
+    args: ['two words', '"literal"']
+  };
   beforeEach(() => {
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'daemon-ipc-definition-'));
     fs.mkdirSync(path.join(folder, 'tools'));
@@ -27,17 +30,27 @@ describe('explicit daemon Node implementation boundary', () => {
   afterEach(() => fs.rmSync(folder, { recursive: true, force: true }));
 
   it('retains raw args and fingerprints only the bounded implementation tree by content', async () => {
-    const first: IResolvedDaemonIpcConfiguration = await resolveDaemonIpcConfigurationAsync(folder, descriptor);
+    const first: IResolvedDaemonIpcConfiguration = await resolveDaemonIpcConfigurationAsync(
+      folder,
+      descriptor
+    );
     expect(first.args).toEqual(['two words', '"literal"']);
     expect(first.entryPoint).toBe(fs.realpathSync.native(path.join(folder, descriptor.entryPoint)));
     fs.writeFileSync(path.join(folder, 'input.txt'), 'changed ordinary build input');
     fs.utimesSync(path.join(folder, descriptor.entryPoint), new Date(), new Date());
-    expect((await resolveDaemonIpcConfigurationAsync(folder, descriptor)).implementationHash).toBe(first.implementationHash);
+    expect((await resolveDaemonIpcConfigurationAsync(folder, descriptor)).implementationHash).toBe(
+      first.implementationHash
+    );
     fs.writeFileSync(path.join(folder, 'tools/helper.cjs'), 'module.exports = 2;\n');
-    const helperChanged: IResolvedDaemonIpcConfiguration = await resolveDaemonIpcConfigurationAsync(folder, descriptor);
+    const helperChanged: IResolvedDaemonIpcConfiguration = await resolveDaemonIpcConfigurationAsync(
+      folder,
+      descriptor
+    );
     expect(helperChanged.implementationHash).not.toBe(first.implementationHash);
     fs.writeFileSync(path.join(folder, 'tools/added.json'), '{}');
-    expect((await resolveDaemonIpcConfigurationAsync(folder, descriptor)).implementationHash).not.toBe(helperChanged.implementationHash);
+    expect((await resolveDaemonIpcConfigurationAsync(folder, descriptor)).implementationHash).not.toBe(
+      helperChanged.implementationHash
+    );
   });
 
   it.each([
@@ -62,14 +75,22 @@ describe('explicit daemon Node implementation boundary', () => {
     { entryPoint: 'tools/entry.cjs', args: [42] },
     { entryPoint: 'tools/entry.cjs', command: 'arbitrary-shell' }
   ])('schema rejects malformed public descriptors: %j', (invalid: object) => {
-    expect(() => JsonSchema.fromLoadedObject(schemaJson).validateObject({
-      operationSettings: [{ operationName: '_phase:build', daemonIpc: invalid }]
-    }, 'rush-project.json')).toThrow();
+    expect(() =>
+      JsonSchema.fromLoadedObject(schemaJson).validateObject(
+        {
+          operationSettings: [{ operationName: '_phase:build', daemonIpc: invalid }]
+        },
+        'rush-project.json'
+      )
+    ).toThrow();
   });
 
   it('schema accepts the explicit Node descriptor', () => {
-    JsonSchema.fromLoadedObject(schemaJson).validateObject({
-      operationSettings: [{ operationName: '_phase:build', daemonIpc: descriptor }]
-    }, 'rush-project.json');
+    JsonSchema.fromLoadedObject(schemaJson).validateObject(
+      {
+        operationSettings: [{ operationName: '_phase:build', daemonIpc: descriptor }]
+      },
+      'rush-project.json'
+    );
   });
 });

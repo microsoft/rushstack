@@ -23,7 +23,8 @@ describe('native daemon workspace paths', () => {
       const alias: string = path.join(aliasFolder, 'workspace');
       await FileSystem.createSymbolicLinkJunctionAsync({ linkTargetPath: root, newLinkPath: alias });
       const session: WorkspaceSession = await WorkspaceSession.createAsync({
-        repoRoot: alias, rushVersion: Rush.version
+        repoRoot: alias,
+        rushVersion: Rush.version
       });
       try {
         expect(session.metadata.repoRoot).toBe(root);

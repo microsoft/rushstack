@@ -19,7 +19,8 @@ export function validateRestartResult(payload: Record<string, unknown>): void {
   };
   if (Object.entries(expected).some(([key, value]) => payload[key] !== value)) {
     throw new DaemonProtocolError(
-      'malformedControlMessage', 'Restart retry requires a guaranteed pre-execution failure without operation results.'
+      'malformedControlMessage',
+      'Restart retry requires a guaranteed pre-execution failure without operation results.'
     );
   }
 }

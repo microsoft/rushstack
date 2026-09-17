@@ -9,9 +9,14 @@ import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
 import {
-  createDaemonHelloAck, DAEMON_PROTOCOL_VERSION, DaemonFrameType,
-  decodeDaemonControlMessage, encodeDaemonControlMessage, encodeDaemonEventFrame,
-  RUSHD_GRAPH_SNAPSHOT, type DaemonControlMessage
+  createDaemonHelloAck,
+  DAEMON_PROTOCOL_VERSION,
+  DaemonFrameType,
+  decodeDaemonControlMessage,
+  encodeDaemonControlMessage,
+  encodeDaemonEventFrame,
+  RUSHD_GRAPH_SNAPSHOT,
+  type DaemonControlMessage
 } from '@rushstack/rush-daemon-protocol';
 import { DaemonFrameListener, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
@@ -26,19 +31,28 @@ describe('graph client fails closed over the public wire', () => {
       let listener: DaemonFrameListener | undefined;
       let requests: number = 0;
       try {
-        fs.writeFileSync(path.join(folder, 'rush.json'), JSON.stringify({
-          rushVersion: Rush.version, npmVersion: '10.0.0', projects: []
-        }));
+        fs.writeFileSync(
+          path.join(folder, 'rush.json'),
+          JSON.stringify({
+            rushVersion: Rush.version,
+            npmVersion: '10.0.0',
+            projects: []
+          })
+        );
         const { paths } = getDaemonConnectionOptions(folder, Rush.version, process.env, false);
         const protocolVersion = mode === 'old-protocol' ? { major: 0, minor: 1 } : DAEMON_PROTOCOL_VERSION;
         listener = await DaemonFrameListener.listenAsync(paths, {
           protocolVersion,
           onConnection: (connection) => {
             peers.add(connection);
-            connection.onClosed(() => { peers.delete(connection); });
-            const send = (message: DaemonControlMessage): Promise<void> => connection.sendFrameAsync({
-              kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message)
+            connection.onClosed(() => {
+              peers.delete(connection);
             });
+            const send = (message: DaemonControlMessage): Promise<void> =>
+              connection.sendFrameAsync({
+                kind: DaemonFrameType.controlJson,
+                payload: encodeDaemonControlMessage(message)
+              });
             connection.onFrame(async (frame) => {
               const message = decodeDaemonControlMessage(frame.payload);
               if (message.kind === 'hello') {
@@ -48,12 +62,15 @@ describe('graph client fails closed over the public wire', () => {
               } else if (message.kind === 'requestStart') {
                 requests++;
                 expect(message.payload).toMatchObject({
-                  commandOrigin: 'built-in', commandName: 'daemon', argv: ['daemon', 'graph', 'show']
+                  commandOrigin: 'built-in',
+                  commandName: 'daemon',
+                  argv: ['daemon', 'graph', 'show']
                 });
                 const requestId: string = message.payload.requestId;
                 if (mode === 'unsupported') {
                   await send({
-                    kind: 'requestRejected', payload: { requestId, code: 'unsupported', message: 'No graph route.' }
+                    kind: 'requestRejected',
+                    payload: { requestId, code: 'unsupported', message: 'No graph route.' }
                   });
                   return;
                 }
@@ -61,17 +78,26 @@ describe('graph client fails closed over the public wire', () => {
                   await connection.sendFrameAsync({
                     kind: DaemonFrameType.event,
                     payload: encodeDaemonEventFrame({
-                      protocolVersion, eventId: 'bad-event', sessionId: 'old-graph-peer', sequence: 1,
+                      protocolVersion,
+                      eventId: 'bad-event',
+                      sessionId: 'old-graph-peer',
+                      sequence: 1,
                       timestamp: new Date().toISOString(),
                       source: { packageName: '@rushstack/rush-daemon', packageVersion: '0.0.0' },
-                      type: 'extension', privacy: 'local-sensitive', required: true,
-                      payload: { name: RUSHD_GRAPH_SNAPSHOT, data: { requestId, snapshot: { initialized: 'invalid' } } }
+                      type: 'extension',
+                      privacy: 'local-sensitive',
+                      required: true,
+                      payload: {
+                        name: RUSHD_GRAPH_SNAPSHOT,
+                        data: { requestId, snapshot: { initialized: 'invalid' } }
+                      }
                     })
                   });
                   return;
                 }
                 await send({
-                  kind: 'requestResult', payload: { requestId, aborted: false, exitCode: 0, outcome: 'success' }
+                  kind: 'requestResult',
+                  payload: { requestId, aborted: false, exitCode: 0, outcome: 'success' }
                 });
               }
             });
@@ -80,12 +106,20 @@ describe('graph client fails closed over the public wire', () => {
         const child = spawn(
           process.execPath,
           [path.resolve(__dirname, '../../bin/rush-client'), 'daemon', 'graph', 'show'],
-          { cwd: folder, env: { ...process.env, RUSH_DAEMON_EXPERIMENTAL: '1' }, stdio: ['ignore', 'pipe', 'pipe'] }
+          {
+            cwd: folder,
+            env: { ...process.env, RUSH_DAEMON_EXPERIMENTAL: '1' },
+            stdio: ['ignore', 'pipe', 'pipe']
+          }
         );
         let stdout: string = '';
         let stderr: string = '';
-        child.stdout.on('data', (bytes: Buffer) => { stdout += bytes.toString(); });
-        child.stderr.on('data', (bytes: Buffer) => { stderr += bytes.toString(); });
+        child.stdout.on('data', (bytes: Buffer) => {
+          stdout += bytes.toString();
+        });
+        child.stderr.on('data', (bytes: Buffer) => {
+          stderr += bytes.toString();
+        });
         expect((await once(child, 'close'))[0]).toBe(1);
         expect(stderr).toBe('');
         expect(JSON.parse(stdout)).toMatchObject({ kind: 'graphError', message: expect.any(String) });

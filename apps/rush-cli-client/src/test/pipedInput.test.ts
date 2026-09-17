@@ -18,7 +18,7 @@ import {
 
 const SCRIPT: string =
   "const chunks=[];process.stdin.on('data',c=>{chunks.push(c);process.stdin.pause();" +
-  "setTimeout(()=>process.stdin.resume(),1);});" +
+  'setTimeout(()=>process.stdin.resume(),1);});' +
   "process.stdin.on('end',()=>{process.stdout.write(Buffer.concat(chunks));" +
   "process.stderr.write('pipe-ended');process.exitCode=7;});";
 
@@ -38,18 +38,24 @@ describe('standalone client piped input', () => {
     project = path.join(folder, 'project');
     fs.mkdirSync(project);
     fs.mkdirSync(path.join(folder, 'common/config/rush'), { recursive: true });
-    fs.writeFileSync(path.join(folder, 'rush.json'), JSON.stringify({
-      rushVersion: Rush.version,
-      pnpmVersion: '10.27.0',
-      daemon: { enabled: false, autoStart: false },
-      projects: [{ packageName: 'sample', projectFolder: 'project' }],
-      projectFolderMinDepth: 1
-    }));
-    fs.writeFileSync(path.join(project, 'package.json'), JSON.stringify({
-      name: 'sample',
-      version: '1.0.0',
-      scripts: { sample: `node -e "${SCRIPT}"` }
-    }));
+    fs.writeFileSync(
+      path.join(folder, 'rush.json'),
+      JSON.stringify({
+        rushVersion: Rush.version,
+        pnpmVersion: '10.27.0',
+        daemon: { enabled: false, autoStart: false },
+        projects: [{ packageName: 'sample', projectFolder: 'project' }],
+        projectFolderMinDepth: 1
+      })
+    );
+    fs.writeFileSync(
+      path.join(project, 'package.json'),
+      JSON.stringify({
+        name: 'sample',
+        version: '1.0.0',
+        scripts: { sample: `node -e "${SCRIPT}"` }
+      })
+    );
   });
 
   afterEach(async () => {
@@ -80,8 +86,13 @@ describe('standalone client piped input', () => {
     const child = spawn(process.execPath, [entry, 'sample', ...admissionArgs], {
       cwd: project,
       env: {
-        ...process.env, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy', RUSH_QUIET_MODE: '1',
-        CI: 'false', TF_BUILD: 'false', GITHUB_ACTIONS: 'false'
+        ...process.env,
+        RUSH_DAEMON: '1',
+        RUSH_REPORTER: 'legacy',
+        RUSH_QUIET_MODE: '1',
+        CI: 'false',
+        TF_BUILD: 'false',
+        GITHUB_ACTIONS: 'false'
       },
       stdio: 'pipe'
     });
@@ -123,47 +134,61 @@ describe('standalone client piped input', () => {
   it.each([
     { args: ['--no-wait'], admission: { noWait: true }, reason: 'no-wait' },
     { args: ['--wait-timeout=0.01'], admission: { waitTimeoutMs: 10 }, reason: 'wait-timeout' }
-  ])('forwards $args without leaking queue flags to scripts', async ({ args, admission, reason }) => {
-    let started: () => void = () => {};
-    let release: () => void = () => {};
-    const running: Promise<void> = new Promise((resolve) => { started = resolve; });
-    const released: Promise<void> = new Promise((resolve) => { release = resolve; });
-    const runScriptAsync = jest.fn(async () => ({ exitCode: 0 }));
-    const holdAsync: GlobalCommandExecutor = async () => {
-      started();
-      await released;
-      return { exitCode: 0 };
-    };
-    await startHostAsync({
-      resolveRequestAsync: async ({ envelope }) => {
-        if (envelope.commandName === 'hold') return { kind: 'global', executor: holdAsync };
-        expect(envelope.argv).toEqual(['sample']);
-        expect(envelope.admission).toEqual(admission);
-        return { kind: 'global', executor: runScriptAsync };
+  ])(
+    'forwards $args without leaking queue flags to scripts',
+    async ({ args, admission, reason }) => {
+      let started: () => void = () => {};
+      let release: () => void = () => {};
+      const running: Promise<void> = new Promise((resolve) => {
+        started = resolve;
+      });
+      const released: Promise<void> = new Promise((resolve) => {
+        release = resolve;
+      });
+      const runScriptAsync = jest.fn(async () => ({ exitCode: 0 }));
+      const holdAsync: GlobalCommandExecutor = async () => {
+        started();
+        await released;
+        return { exitCode: 0 };
+      };
+      await startHostAsync({
+        resolveRequestAsync: async ({ envelope }) => {
+          if (envelope.commandName === 'hold') return { kind: 'global', executor: holdAsync };
+          expect(envelope.argv).toEqual(['sample']);
+          expect(envelope.admission).toEqual(admission);
+          return { kind: 'global', executor: runScriptAsync };
+        }
+      });
+      const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: host!.paths.socketPath });
+      const holding = client.executeAsync({
+        request: captureDaemonRequest({
+          argv: ['hold'],
+          commandName: 'hold',
+          commandOrigin: 'custom',
+          cwd: project,
+          environment: {},
+          terminal: { isTTY: false, supportsColor: false }
+        })
+      });
+      try {
+        await Promise.race([
+          running,
+          holding.then(() => {
+            throw new Error('The holding request finished before acquiring admission.');
+          })
+        ]);
+        const result: IPipedResult = await invokeAsync(Buffer.alloc(0), true, args);
+        expect(result.code).toBe(1);
+        expect(result.stderr.toString()).toContain(`daemon admission failed (${reason})`);
+        expect(runScriptAsync).not.toHaveBeenCalled();
+      } finally {
+        release();
+        await holding;
+        await client.closeAsync();
       }
-    });
-    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: host!.paths.socketPath });
-    const holding = client.executeAsync({
-      request: captureDaemonRequest({
-        argv: ['hold'], commandName: 'hold', commandOrigin: 'custom', cwd: project,
-        environment: {}, terminal: { isTTY: false, supportsColor: false }
-      })
-    });
-    try {
-      await Promise.race([
-        running,
-        holding.then(() => { throw new Error('The holding request finished before acquiring admission.'); })
-      ]);
-      const result: IPipedResult = await invokeAsync(Buffer.alloc(0), true, args);
-      expect(result.code).toBe(1);
-      expect(result.stderr.toString()).toContain(`daemon admission failed (${reason})`);
-      expect(runScriptAsync).not.toHaveBeenCalled();
-    } finally {
-      release();
-      await holding;
-      await client.closeAsync();
-    }
-  }, 15000);
+    },
+    15000
+  );
 
   it('preserves every byte for native fallback when the host rejects before execution', async () => {
     await startHostAsync({

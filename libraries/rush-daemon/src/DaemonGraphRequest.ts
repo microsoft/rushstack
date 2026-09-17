@@ -7,7 +7,14 @@ import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
 
 export type DaemonGraphVerb =
-  | 'show' | 'status' | 'scope-in' | 'scope-out' | 'invalidate' | 'watch' | 'pause' | 'resume';
+  | 'show'
+  | 'status'
+  | 'scope-in'
+  | 'scope-out'
+  | 'invalidate'
+  | 'watch'
+  | 'pause'
+  | 'resume';
 
 export interface IDaemonGraphRequest {
   readonly verb: DaemonGraphVerb;
@@ -19,23 +26,38 @@ export function parseDaemonGraphRequest(envelope: IDaemonRequestEnvelope): IDaem
     throw new DaemonRequestDispatchError('unsupported', 'Graph commands require RUSH_DAEMON_EXPERIMENTAL=1.');
   }
   if (
-    envelope.commandOrigin !== 'built-in' || envelope.commandName !== 'daemon' ||
-    envelope.argv[0] !== 'daemon' || envelope.argv[1] !== 'graph' || envelope.terminal.acceptsStdin
+    envelope.commandOrigin !== 'built-in' ||
+    envelope.commandName !== 'daemon' ||
+    envelope.argv[0] !== 'daemon' ||
+    envelope.argv[1] !== 'graph' ||
+    envelope.terminal.acceptsStdin
   ) {
-    throw new DaemonRequestDispatchError('invalidRequest', 'Expected a built-in, noninteractive daemon graph request.');
+    throw new DaemonRequestDispatchError(
+      'invalidRequest',
+      'Expected a built-in, noninteractive daemon graph request.'
+    );
   }
   const [, , verb, ...args] = envelope.argv;
   switch (verb) {
-    case 'show': case 'status': case 'watch': case 'pause': case 'resume':
+    case 'show':
+    case 'status':
+    case 'watch':
+    case 'pause':
+    case 'resume':
       if (args.length) throw new DaemonRequestDispatchError('invalidRequest', `${verb} takes no selectors.`);
       return { verb, selectors: [] };
-    case 'scope-in': case 'scope-out': case 'invalidate': {
+    case 'scope-in':
+    case 'scope-out':
+    case 'invalidate': {
       const selectors: IDaemonGraphRequest['selectors'][number][] = [];
       for (let i: number = 0; i < args.length; i += 2) {
         const kind: string = args[i];
         const value: string | undefined = args[i + 1];
         if ((kind !== '--operation' && kind !== '--project') || !value || value.startsWith('--')) {
-          throw new DaemonRequestDispatchError('invalidRequest', 'Selectors must be --operation ID or --project NAME pairs.');
+          throw new DaemonRequestDispatchError(
+            'invalidRequest',
+            'Selectors must be --operation ID or --project NAME pairs.'
+          );
         }
         selectors.push({ kind, value });
       }
@@ -46,7 +68,8 @@ export function parseDaemonGraphRequest(envelope: IDaemonRequestEnvelope): IDaem
     }
     default:
       throw new DaemonRequestDispatchError(
-        'invalidRequest', 'Usage: daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume'
+        'invalidRequest',
+        'Usage: daemon graph show|status|scope-in|scope-out|invalidate|watch|pause|resume'
       );
   }
 }
@@ -60,13 +83,15 @@ export function selectDaemonGraphOperations(
   for (const { kind, value } of request.selectors) {
     let found: boolean = false;
     for (const operation of graph.operations) {
-      const candidate: string = kind === '--operation' ? operation.name : operation.associatedProject.packageName;
+      const candidate: string =
+        kind === '--operation' ? operation.name : operation.associatedProject.packageName;
       if (candidate === value) {
         selected.add(operation);
         found = true;
       }
     }
-    if (!found) throw new DaemonRequestDispatchError('invalidRequest', `Unknown graph selector ${kind} ${value}.`);
+    if (!found)
+      throw new DaemonRequestDispatchError('invalidRequest', `Unknown graph selector ${kind} ${value}.`);
   }
   if (request.verb === 'scope-out') {
     // Native safe-disable prunes unused dependencies but retains dependencies of enabled consumers.

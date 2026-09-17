@@ -450,7 +450,12 @@ export class DaemonControlSession {
         Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
       );
       // Lifecycle admission has stopped execution; let accepted requests receive their typed restart result.
-      if (!(await settlesWithinAsync(pending.then(() => undefined), CLOSE_DRAIN_TIMEOUT_MS))) {
+      if (
+        !(await settlesWithinAsync(
+          pending.then(() => undefined),
+          CLOSE_DRAIN_TIMEOUT_MS
+        ))
+      ) {
         this.#connection.abort(closeReason);
       }
       await pending;

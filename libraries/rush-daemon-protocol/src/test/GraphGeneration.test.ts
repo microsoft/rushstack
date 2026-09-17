@@ -11,8 +11,13 @@ function request(expectedWorkspaceGeneration: unknown): IDaemonRequestStartMessa
   const message: unknown = {
     kind: 'requestStart',
     payload: {
-      argv: ['daemon', 'graph', 'pause'], commandName: 'daemon', commandOrigin: 'built-in',
-      cwd: '/repo', environment: {}, expectedWorkspaceGeneration, requestId: 'graph',
+      argv: ['daemon', 'graph', 'pause'],
+      commandName: 'daemon',
+      commandOrigin: 'built-in',
+      cwd: '/repo',
+      environment: {},
+      expectedWorkspaceGeneration,
+      requestId: 'graph',
       terminal: { isTTY: false, supportsColor: false }
     }
   };
@@ -25,7 +30,8 @@ it.each([undefined, 'session-generation-token'])('round-trips generation %s', (t
 });
 
 it.each(['', null, true, {}, 'x'.repeat(MAX_REQUEST_ID_BYTES + OUT_OF_RANGE_INCREMENT)])(
-  'rejects invalid generation %s', (token: unknown) => {
+  'rejects invalid generation %s',
+  (token: unknown) => {
     expect(() => decodeDaemonControlMessage(encodeDaemonControlMessage(request(token)))).toThrow();
   }
 );

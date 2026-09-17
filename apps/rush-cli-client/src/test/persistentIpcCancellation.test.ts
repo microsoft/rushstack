@@ -24,19 +24,27 @@ describe('public-client cancellation of an admitted Node operation', () => {
     return fixture.runAsync(async () => {
       await fixture.buildAsync('--only', 'a');
       fixture.input('a', { value: 'cancelled-client', delayMs: 1000 });
-      const entry = path.resolve(__dirname,
-        process.platform === 'win32' ? 'CliSignalTestProcess.js' : '../../bin/rush-client');
-      const client = spawn(process.execPath, [entry, 'build', '--only', 'a', '--parallelism', '2', '--verbose'], {
-        cwd: fixture.folder,
-        env: fixture.environment,
-        stdio: process.platform === 'win32' ? ['ignore', 'pipe', 'pipe', 'ipc'] : ['ignore', 'pipe', 'pipe']
-      });
+      const entry = path.resolve(
+        __dirname,
+        process.platform === 'win32' ? 'CliSignalTestProcess.js' : '../../bin/rush-client'
+      );
+      const client = spawn(
+        process.execPath,
+        [entry, 'build', '--only', 'a', '--parallelism', '2', '--verbose'],
+        {
+          cwd: fixture.folder,
+          env: fixture.environment,
+          stdio: process.platform === 'win32' ? ['ignore', 'pipe', 'pipe', 'ipc'] : ['ignore', 'pipe', 'pipe']
+        }
+      );
       const closed = once(client, 'close');
       fixture.trackWatch(client, closed);
       let stderr = '';
       client.stdout!.resume();
       client.stderr!.setEncoding('utf8');
-      client.stderr!.on('data', (text: string) => { stderr += text; });
+      client.stderr!.on('data', (text: string) => {
+        stderr += text;
+      });
       try {
         const deadline = Date.now() + 10_000;
         while (!fixture.events().some((event) => event.kind === 'started' && event.iteration === 2)) {

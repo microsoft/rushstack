@@ -7,7 +7,10 @@ import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFrame
 import type { IDaemonIpcConfiguration } from '../../api/RushProjectConfiguration';
 import type { Operation } from './Operation';
 import { IPCOperationRunner } from './IPCOperationRunner';
-import { resolveDaemonIpcConfigurationAsync, type IResolvedDaemonIpcConfiguration } from './DaemonIpcConfiguration';
+import {
+  resolveDaemonIpcConfigurationAsync,
+  type IResolvedDaemonIpcConfiguration
+} from './DaemonIpcConfiguration';
 import {
   PLUGIN_NAME as ShellOperationPluginName,
   formatCommand,
@@ -23,14 +26,19 @@ export class DaemonIpcOperationRunnerPlugin implements IPhasedCommandPlugin {
       { name: 'DaemonIpcOperationRunnerPlugin', before: ShellOperationPluginName },
       async (operations, context) => {
         if (context.isWatch || !context.isIncrementalBuildAllowed) return operations;
-        const parameters: (operation: Operation) => ICustomParameterValuesForOperation = getCustomParameterValuesByOperation();
+        const parameters: (operation: Operation) => ICustomParameterValuesForOperation =
+          getCustomParameterValuesByOperation();
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, settings } = operation;
           const descriptor: IDaemonIpcConfiguration | undefined = settings?.daemonIpc;
-          const canonical: string | undefined = phase.shellCommand ?? project.packageJson.scripts?.[phase.name];
+          const canonical: string | undefined =
+            phase.shellCommand ?? project.packageJson.scripts?.[phase.name];
           if (operation.runner || settings?.sharding || !descriptor || !canonical) continue;
           const { parameterValues, ignoredParameterValues } = parameters(operation);
-          const resolved: IResolvedDaemonIpcConfiguration = await resolveDaemonIpcConfigurationAsync(project.projectFolder, descriptor);
+          const resolved: IResolvedDaemonIpcConfiguration = await resolveDaemonIpcConfigurationAsync(
+            project.projectFolder,
+            descriptor
+          );
           const childArgs: string[] = [...resolved.args, ...parameterValues];
           operation.runner = new IPCOperationRunner({
             phase,
@@ -44,11 +52,11 @@ export class DaemonIpcOperationRunnerPlugin implements IPhasedCommandPlugin {
             spawn: (command, args, nativeOptions) => {
               void command;
               void args;
-              return spawn(
-                process.execPath,
-                [resolved.entryPoint, ...childArgs],
-                { ...nativeOptions, shell: false, windowsVerbatimArguments: false }
-              );
+              return spawn(process.execPath, [resolved.entryPoint, ...childArgs], {
+                ...nativeOptions,
+                shell: false,
+                windowsVerbatimArguments: false
+              });
             }
           });
         }

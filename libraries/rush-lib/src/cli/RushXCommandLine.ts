@@ -6,7 +6,14 @@ import type * as childProcess from 'node:child_process';
 
 import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
-import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async, EnvironmentMap } from '@rushstack/node-core-library';
+import {
+  PackageJsonLookup,
+  type IPackageJson,
+  Text,
+  FileSystem,
+  Async,
+  EnvironmentMap
+} from '@rushstack/node-core-library';
 import {
   Colorize,
   ConsoleTerminalProvider,
@@ -133,16 +140,25 @@ export class RushXCommand {
   }
 
   public static async executeAsync(options: IRushXCommandOptions): Promise<number> {
-    const { terminal, consoleTerminal, environment, arguments: args, rushConfiguration, launchOptions } = options;
+    const {
+      terminal,
+      consoleTerminal,
+      environment,
+      arguments: args,
+      rushConfiguration,
+      launchOptions
+    } = options;
     try {
-      const reason: string | undefined = rushConfiguration &&
-        RushXCommand.getInProcessReason(args, environment, rushConfiguration);
+      const reason: string | undefined =
+        rushConfiguration && RushXCommand.getInProcessReason(args, environment, rushConfiguration);
       if (reason) throw new Error(reason);
       options.abortSignal?.throwIfAborted();
       const ignoredHooks: EventHooksManager | undefined =
-        rushConfiguration && args.ignoreHooks &&
+        rushConfiguration &&
+        args.ignoreHooks &&
         environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] !== '1'
-          ? new EventHooksManager(rushConfiguration) : undefined;
+          ? new EventHooksManager(rushConfiguration)
+          : undefined;
       ignoredHooks?.handle(Event.preRushx, args.isDebug, true, consoleTerminal);
       await _launchRushXInternalAsync(terminal, args, rushConfiguration, launchOptions, options);
       ignoredHooks?.handle(Event.postRushx, args.isDebug, true, consoleTerminal);
@@ -173,7 +189,8 @@ export class RushXCommandLine {
   public static async launchRushXAsync(launcherVersion: string, options: ILaunchOptions): Promise<void> {
     try {
       const rushxArguments: IRushXCommandLineArguments = _parseCommandLineArguments(
-        process.argv.slice(2), process.env,
+        process.argv.slice(2),
+        process.env,
         // eslint-disable-next-line no-console
         (message) => console.log(message)
       );
@@ -245,8 +262,8 @@ async function _launchRushXInternalAsync(
   const { quiet, help, commandName, commandArgs } = rushxArguments;
   const writeLine: (message: string) => void = execution
     ? (message) => execution.consoleTerminal.writeLine(message)
-    // eslint-disable-next-line no-console
-    : (message) => console.log(message);
+    : // eslint-disable-next-line no-console
+      (message) => console.log(message);
 
   if (!quiet) {
     RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged, execution?.consoleTerminal);
@@ -264,12 +281,18 @@ async function _launchRushXInternalAsync(
 
   const cwd: string = execution?.cwd ?? process.cwd();
   const packageJsonFilePath: string = _getPackageJsonFilePath(packageJsonLookup, cwd);
-  const lifecycleConfiguration: ILifecycleCommandOptions['rushConfiguration'] =
-    _getLifecycleConfiguration(rushConfiguration, execution);
+  const lifecycleConfiguration: ILifecycleCommandOptions['rushConfiguration'] = _getLifecycleConfiguration(
+    rushConfiguration,
+    execution
+  );
   // Match native registration lookup in the discovered configuration's namespace, not by physical project identity.
-  const projectLookupCwd: string = execution?.rushJsonFilePath && rushConfiguration && lifecycleConfiguration
-    ? path.resolve(rushConfiguration.rushJsonFolder, path.relative(lifecycleConfiguration.rushJsonFolder, cwd))
-    : cwd;
+  const projectLookupCwd: string =
+    execution?.rushJsonFilePath && rushConfiguration && lifecycleConfiguration
+      ? path.resolve(
+          rushConfiguration.rushJsonFolder,
+          path.relative(lifecycleConfiguration.rushJsonFolder, cwd)
+        )
+      : cwd;
 
   if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(projectLookupCwd)) {
     // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
@@ -371,13 +394,15 @@ function _getLifecycleConfiguration(
 ): ILifecycleCommandOptions['rushConfiguration'] {
   if (!configuration || !execution?.rushJsonFilePath) return configuration;
   const rushJsonFolder: string = path.dirname(execution.rushJsonFilePath);
-  const tempOverride: string | undefined =
-    new EnvironmentMap(execution.environment).get(EnvironmentVariableNames.RUSH_TEMP_FOLDER);
+  const tempOverride: string | undefined = new EnvironmentMap(execution.environment).get(
+    EnvironmentVariableNames.RUSH_TEMP_FOLDER
+  );
   return {
     rushJsonFolder,
-    commonTempFolder: EnvironmentConfiguration._getRushTempFolderOverride({
-      [EnvironmentVariableNames.RUSH_TEMP_FOLDER]: tempOverride
-    }) || path.join(rushJsonFolder, RushConstants.commonFolderName, RushConstants.rushTempFolderName)
+    commonTempFolder:
+      EnvironmentConfiguration._getRushTempFolderOverride({
+        [EnvironmentVariableNames.RUSH_TEMP_FOLDER]: tempOverride
+      }) || path.join(rushJsonFolder, RushConstants.commonFolderName, RushConstants.rushTempFolderName)
   };
 }
 
@@ -518,9 +543,11 @@ function _executeOwnedLifecycleAsync(
   options: ILifecycleCommandOptions,
   spawn: NonNullable<IRushXCommandOptions['spawn']>
 ): Promise<number> {
-  const child: childProcess.ChildProcess = Utilities.executeLifecycleCommandAsync(
-    command, { ...options, stdio: 'pipe' }, spawn
-  );
+  const child: childProcess.ChildProcess = Utilities.executeLifecycleCommandAsync(command, {
+    ...options,
+    stdio: 'pipe',
+    spawn
+  });
   return new Promise((resolve, reject) => {
     child.once('error', reject);
     child.once('close', (code) => {

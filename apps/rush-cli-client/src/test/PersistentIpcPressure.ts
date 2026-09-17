@@ -12,7 +12,9 @@ export function getPressureAllocationBytes(sample: IPressureMemorySample): numbe
   const { budgetBytes, daemonBytes, pressureRunnerBytes, otherRunnerBytes } = sample;
   if (
     !Object.values(sample).every((value) => Number.isSafeInteger(value) && value >= 0) ||
-    budgetBytes === 0 || pressureRunnerBytes === 0 || otherRunnerBytes === 0
+    budgetBytes === 0 ||
+    pressureRunnerBytes === 0 ||
+    otherRunnerBytes === 0
   ) {
     throw new Error(`Invalid measured pressure sample: ${JSON.stringify(sample)}`);
   }

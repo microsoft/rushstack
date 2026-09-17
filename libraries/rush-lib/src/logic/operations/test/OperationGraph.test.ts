@@ -1163,11 +1163,19 @@ describe('deferred invalidation during active iteration', () => {
 
 describe('discarding prepared iterations', () => {
   function pausedGraph(runner: IOperationRunner): OperationGraph {
-    return createGraph({
-      quietMode: true, debugMode: false, parallelism: 1, allowOversubscription: false,
-      destinations: [mockWritable], abortController: new AbortController(),
-      pauseNextIteration: true, closeRunnersOnAbort: false
-    }, runner);
+    return createGraph(
+      {
+        quietMode: true,
+        debugMode: false,
+        parallelism: 1,
+        allowOversubscription: false,
+        destinations: [mockWritable],
+        abortController: new AbortController(),
+        pauseNextIteration: true,
+        closeRunnersOnAbort: false
+      },
+      runner
+    );
   }
 
   it('drops unstarted work without running or closing its runner', async () => {
@@ -1370,12 +1378,16 @@ describe('runner persistence policy', () => {
       const upstreamRunner: ClosableRunner = new ClosableRunner('upstream');
       const downstreamRun: jest.Mock = jest.fn(async () => OperationStatus.Success);
       const upstream: Operation = new Operation({
-        runner: upstreamRunner, logFilenameIdentifier: 'upstream',
-        phase: mockPhase, project: getOrCreateProject('upstream')
+        runner: upstreamRunner,
+        logFilenameIdentifier: 'upstream',
+        phase: mockPhase,
+        project: getOrCreateProject('upstream')
       });
       const downstream: Operation = new Operation({
         runner: new MockOperationRunner('downstream', downstreamRun),
-        logFilenameIdentifier: 'downstream', phase: mockPhase, project: getOrCreateProject('downstream')
+        logFilenameIdentifier: 'downstream',
+        phase: mockPhase,
+        project: getOrCreateProject('downstream')
       });
       downstream.addDependency(upstream);
       const graph: OperationGraph = new OperationGraph(new Set([upstream, downstream]), graphOptions);

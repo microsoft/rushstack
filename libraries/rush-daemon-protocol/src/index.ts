@@ -44,7 +44,11 @@ export type { IDaemonRawModeChangedMessage, IDaemonSetRawModeMessage } from './D
 export type { IDaemonStdinEndMessage, IDaemonStdinReadyMessage } from './DaemonInteractiveControl';
 export type { IDaemonTerminalPolicyMessage } from './DaemonInteractiveControl';
 export type { IDaemonPongMessage } from './DaemonPongMessage';
-export type { IDaemonWarmProjectRank, IDaemonWarmSetConfiguration, IDaemonWarmSetStatus } from './DaemonWorkspaceStatus';
+export type {
+  IDaemonWarmProjectRank,
+  IDaemonWarmSetConfiguration,
+  IDaemonWarmSetStatus
+} from './DaemonWorkspaceStatus';
 export type { IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
 export type { IDaemonShutdownAckMessage, IDaemonShutdownMessage } from './DaemonLifecycleControl';
 export { isDaemonControlRecord } from './ControlRecord';

@@ -2106,7 +2106,6 @@ export enum WorkspaceInputChangeTier {
 
 // @alpha
 export class WorkspaceRuntimeFingerprintCache {
-    // @internal (undocumented)
     get changedPaths(): ReadonlyArray<string>;
     // @internal (undocumented)
     _hashPaths(paths: ReadonlyArray<string>): string;

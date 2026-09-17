@@ -152,7 +152,10 @@ describe('detached daemon startup', () => {
     const contents: string = JSON.stringify({ pid: process.pid, startedAt: 'not an ownership contract' });
     fs.writeFileSync(startupPath, contents);
     const { result } = startClient({ ...options, startupTimeoutMs: 200 });
-    expect(await result).toMatchObject({ code: 1, stderr: expect.stringContaining('unresolved startup handoff') });
+    expect(await result).toMatchObject({
+      code: 1,
+      stderr: expect.stringContaining('unresolved startup handoff')
+    });
     expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
@@ -165,34 +168,38 @@ describe('detached daemon startup', () => {
     };
     await expect(connectOrStartDaemonAsync(failing)).rejects.toThrow('Unable to start');
     const contents: string = fs.readFileSync(startupPath, 'utf8');
-    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 100 }))
-      .rejects.toThrow('unresolved startup handoff');
+    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 100 })).rejects.toThrow(
+      'unresolved startup handoff'
+    );
     expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
 
-  it.each([false, true])('preserves an explicit launcher and environment (relative cwd: %s)', async (relative) => {
-    const client = await connectOrStartDaemonAsync({
-      ...options,
-      startCommand: {
-        ...options.startCommand!,
-        cwd: relative ? path.relative(process.cwd(), folder) : folder,
-        args: [
-          path.join(__dirname, 'fixtures/launcher.js'),
-          'an argument with spaces',
-          JSON.stringify(paths)
-        ],
-        environment: { ...options.startCommand!.environment, FIXTURE_VALUE: 'explicit environment' }
-      }
-    });
-    expect(JSON.parse(fs.readFileSync(path.join(folder, 'launcher-options'), 'utf8'))).toEqual({
-      cwd: folder,
-      argument: 'an argument with spaces',
-      environment: 'explicit environment'
-    });
-    expect((await client.status).daemonVersion).toBe('fixture');
-    await client.closeAsync();
-  });
+  it.each([false, true])(
+    'preserves an explicit launcher and environment (relative cwd: %s)',
+    async (relative) => {
+      const client = await connectOrStartDaemonAsync({
+        ...options,
+        startCommand: {
+          ...options.startCommand!,
+          cwd: relative ? path.relative(process.cwd(), folder) : folder,
+          args: [
+            path.join(__dirname, 'fixtures/launcher.js'),
+            'an argument with spaces',
+            JSON.stringify(paths)
+          ],
+          environment: { ...options.startCommand!.environment, FIXTURE_VALUE: 'explicit environment' }
+        }
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(folder, 'launcher-options'), 'utf8'))).toEqual({
+        cwd: folder,
+        argument: 'an argument with spaces',
+        environment: 'explicit environment'
+      });
+      expect((await client.status).daemonVersion).toBe('fixture');
+      await client.closeAsync();
+    }
+  );
 
   it('finishes startup helper resources before returning a ready client', async () => {
     const childProcess = jest.requireActual<typeof import('node:child_process')>('node:child_process');
@@ -219,10 +226,14 @@ describe('detached daemon startup', () => {
   });
 
   it('waits for fixture process exit rather than its work-finished marker', async () => {
-    const child = spawn(process.execPath, ['-e', "process.stdout.write('finished'); process.stdin.resume();"], {
-      cwd: folder,
-      stdio: 'pipe'
-    });
+    const child = spawn(
+      process.execPath,
+      ['-e', "process.stdout.write('finished'); process.stdin.resume();"],
+      {
+        cwd: folder,
+        stdio: 'pipe'
+      }
+    );
     starterProcesses.push(child);
     const closed: Promise<unknown[]> = once(child, 'close');
     await once(child.stdout, 'data');
@@ -313,11 +324,16 @@ describe('detached daemon startup', () => {
       expect(fs.existsSync(path.join(folder, `stopped-${previous.pid}`))).toBe(true);
       expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
       const request = captureDaemonRequest({
-        argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
+        argv: ['test'],
+        commandName: 'test',
+        commandOrigin: 'custom',
+        cwd: folder,
+        environment: {},
         terminal: { isTTY: false, supportsColor: false }
       });
       await expect(clients[0].executeAsync({ request })).resolves.toMatchObject({
-        kind: 'result', result: { exitCode: 0 }
+        kind: 'result',
+        result: { exitCode: 0 }
       });
       expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8')).toBe('replacement\n');
     } finally {
@@ -328,11 +344,15 @@ describe('detached daemon startup', () => {
   it('does not replace a mismatched daemon without an explicit launcher', async () => {
     const running = await connectOrStartDaemonAsync(options);
     await running.closeAsync();
-    await expect(connectOrStartDaemonAsync({
-      paths, expectedDaemonVersion: 'replacement'
-    })).rejects.toMatchObject({ code: 'versionMismatch' });
+    await expect(
+      connectOrStartDaemonAsync({
+        paths,
+        expectedDaemonVersion: 'replacement'
+      })
+    ).rejects.toMatchObject({ code: 'versionMismatch' });
     const original = await DaemonClient.connectAsync({
-      socketPath: paths.socketPath, expectedDaemonVersion: 'fixture'
+      socketPath: paths.socketPath,
+      expectedDaemonVersion: 'fixture'
     });
     await original.closeAsync();
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
@@ -347,12 +367,22 @@ describe('detached daemon startup', () => {
       };
       const client = await connectOrStartDaemonAsync(connection);
       const request = captureDaemonRequest({
-        argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
-        terminal: { isTTY: false, supportsColor: false }, admission: { waitTimeoutMs: 1000 }
+        argv: ['test'],
+        commandName: 'test',
+        commandOrigin: 'custom',
+        cwd: folder,
+        environment: {},
+        terminal: { isTTY: false, supportsColor: false },
+        admission: { waitTimeoutMs: 1000 }
       });
-      const pending = executeWithDaemonRestartAsync(client, {
-        ...connection, startupTimeoutMs: mode === 'restart-held' ? 100 : 7000
-      }, { request });
+      const pending = executeWithDaemonRestartAsync(
+        client,
+        {
+          ...connection,
+          startupTimeoutMs: mode === 'restart-held' ? 100 : 7000
+        },
+        { request }
+      );
       if (mode === 'restart-once') {
         expect(await pending).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
         const waits = fs.readFileSync(path.join(folder, 'waits'), 'utf8').trim().split('\n').map(Number);
@@ -365,53 +395,75 @@ describe('detached daemon startup', () => {
           mode === 'restart-held' ? 'previous daemon still owns' : 'single safe retry was exhausted'
         );
       }
-      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n'))
-        .toHaveLength(mode === 'restart-held' ? 1 : 2);
-      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n'))
-        .toHaveLength(mode === 'restart-held' ? 1 : 2);
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(
+        mode === 'restart-held' ? 1 : 2
+      );
+      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(
+        mode === 'restart-held' ? 1 : 2
+      );
     },
     15000
   );
 
-  it.each(['execution', 'connection'])('cancels successor waiting using the %s signal without replay', async (source) => {
-    const connection: IConnectOrStartDaemonOptions = {
-      ...options,
-      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-held'] }
-    };
-    const client = await connectOrStartDaemonAsync(connection);
-    const abort = new AbortController();
-    const request = captureDaemonRequest({
-      argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
-      terminal: { isTTY: false, supportsColor: false }
-    });
-    const timer = setTimeout(() => abort.abort(), 200);
-    try {
-      expect(await executeWithDaemonRestartAsync(
-        client,
-        { ...connection, abortSignal: source === 'connection' ? abort.signal : undefined },
-        { request, abortSignal: source === 'execution' ? abort.signal : undefined }
-      ))
-        .toMatchObject({ kind: 'result', result: { exitCode: 130, aborted: true } });
-      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
-    } finally {
-      clearTimeout(timer);
+  it.each(['execution', 'connection'])(
+    'cancels successor waiting using the %s signal without replay',
+    async (source) => {
+      const connection: IConnectOrStartDaemonOptions = {
+        ...options,
+        startCommand: {
+          ...options.startCommand!,
+          args: [...options.startCommand!.args, 'fixture', 'restart-held']
+        }
+      };
+      const client = await connectOrStartDaemonAsync(connection);
+      const abort = new AbortController();
+      const request = captureDaemonRequest({
+        argv: ['test'],
+        commandName: 'test',
+        commandOrigin: 'custom',
+        cwd: folder,
+        environment: {},
+        terminal: { isTTY: false, supportsColor: false }
+      });
+      const timer = setTimeout(() => abort.abort(), 200);
+      try {
+        expect(
+          await executeWithDaemonRestartAsync(
+            client,
+            { ...connection, abortSignal: source === 'connection' ? abort.signal : undefined },
+            { request, abortSignal: source === 'execution' ? abort.signal : undefined }
+          )
+        ).toMatchObject({ kind: 'result', result: { exitCode: 130, aborted: true } });
+        expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+      } finally {
+        clearTimeout(timer);
+      }
     }
-  });
+  );
 
   it('refuses restart retry if ownership was not attested before submitting', async () => {
     const connection: IConnectOrStartDaemonOptions = {
       ...options,
-      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-held'] }
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'fixture', 'restart-held']
+      }
     };
     const client = await connectOrStartDaemonAsync(connection);
     const owner = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8'));
     fs.writeFileSync(paths.lockfilePath, JSON.stringify({ ...owner, pid: process.pid }));
     const request = captureDaemonRequest({
-      argv: ['test'], commandName: 'test', commandOrigin: 'custom', cwd: folder, environment: {},
+      argv: ['test'],
+      commandName: 'test',
+      commandOrigin: 'custom',
+      cwd: folder,
+      environment: {},
       terminal: { isTTY: false, supportsColor: false }
     });
     try {
-      await expect(executeWithDaemonRestartAsync(client, connection, { request })).rejects.toThrow('Cannot attest');
+      await expect(executeWithDaemonRestartAsync(client, connection, { request })).rejects.toThrow(
+        'Cannot attest'
+      );
     } finally {
       fs.writeFileSync(paths.lockfilePath, JSON.stringify(owner));
     }
@@ -420,7 +472,10 @@ describe('detached daemon startup', () => {
   it('waits through published ownership handoff even without a captured predecessor', async () => {
     const running = await connectOrStartDaemonAsync({
       ...options,
-      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', 'restart-once'] }
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'fixture', 'restart-once']
+      }
     });
     const previous = await running.status;
     await running.shutdownAsync();
@@ -439,7 +494,10 @@ describe('detached daemon startup', () => {
     const previous = JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8')) as IDaemonLockfile;
     await running.shutdownAsync();
     const waiting = connectOrStartDaemonAsync({
-      paths, previousDaemon: previous, expectedDaemonVersion: 'fixture', startupTimeoutMs: 7000
+      paths,
+      previousDaemon: previous,
+      expectedDaemonVersion: 'fixture',
+      startupTimeoutMs: 7000
     });
     const starter = await connectOrStartDaemonAsync(options);
     try {
@@ -456,11 +514,15 @@ describe('detached daemon startup', () => {
     const running = await connectOrStartDaemonAsync(options);
     await running.closeAsync();
     fs.writeFileSync(paths.lockfilePath, 'corrupt');
-    await expect(connectOrStartDaemonAsync({
-      ...options, expectedDaemonVersion: 'replacement'
-    })).rejects.toThrow('shutdown was not sent');
+    await expect(
+      connectOrStartDaemonAsync({
+        ...options,
+        expectedDaemonVersion: 'replacement'
+      })
+    ).rejects.toThrow('shutdown was not sent');
     const original = await DaemonClient.connectAsync({
-      socketPath: paths.socketPath, expectedDaemonVersion: 'fixture'
+      socketPath: paths.socketPath,
+      expectedDaemonVersion: 'fixture'
     });
     await original.closeAsync();
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('corrupt');

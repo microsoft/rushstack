@@ -32,10 +32,12 @@ describe('measured IPC pressure allocation', () => {
   });
 
   it('does not add memory when the measured allocation already reaches the target', () => {
-    expect(getPressureAllocationBytes({
-      ...original,
-      pressureRunnerBytes: 356220928
-    })).toBe(0);
+    expect(
+      getPressureAllocationBytes({
+        ...original,
+        pressureRunnerBytes: 356220928
+      })
+    ).toBe(0);
   });
 
   it('rejects missing measurements and a pressure runner that already exceeds the budget', () => {
@@ -45,9 +47,11 @@ describe('measured IPC pressure allocation', () => {
     expect(() => getPressureAllocationBytes({ ...original, daemonBytes: Number.NaN })).toThrow(
       'Invalid measured pressure sample'
     );
-    expect(() => getPressureAllocationBytes({
-      ...original,
-      pressureRunnerBytes: original.budgetBytes
-    })).toThrow('pressure runner alone cannot fit');
+    expect(() =>
+      getPressureAllocationBytes({
+        ...original,
+        pressureRunnerBytes: original.budgetBytes
+      })
+    ).toThrow('pressure runner alone cannot fit');
   });
 });

@@ -22,9 +22,14 @@ describe('version-selected daemon connection options', () => {
   it('uses the same native filesystem identity as the daemon host', async () => {
     const nativeRoot: string = await fs.promises.realpath(repoRoot);
     const options = getDaemonConnectionOptions(repoRoot, Rush.version, process.env, true);
-    expect(options.paths).toEqual(resolveDaemonPathsFromProcess(computeDaemonWorkspaceKey({
-      canonicalRepoRoot: nativeRoot, rushVersion: Rush.version
-    })));
+    expect(options.paths).toEqual(
+      resolveDaemonPathsFromProcess(
+        computeDaemonWorkspaceKey({
+          canonicalRepoRoot: nativeRoot,
+          rushVersion: Rush.version
+        })
+      )
+    );
     expect(options.startCommand?.cwd).toBe(nativeRoot);
   });
 

@@ -29,9 +29,8 @@ export function parseClientAdmissionControls(argv: ReadonlyArray<string>): IClie
       throw new Error('--no-wait does not accept a value.');
     } else if (arg === '--wait-timeout' || arg.startsWith('--wait-timeout=')) {
       if (waitTimeoutMs !== undefined) throw new Error('--wait-timeout may be specified only once.');
-      const value: string | undefined = arg === '--wait-timeout'
-        ? argv[++index]
-        : arg.slice('--wait-timeout='.length);
+      const value: string | undefined =
+        arg === '--wait-timeout' ? argv[++index] : arg.slice('--wait-timeout='.length);
       if (value === undefined || !/^\d+(?:\.\d+)?$/.test(value)) {
         throw new Error('--wait-timeout requires a nonnegative decimal number of seconds.');
       }
@@ -50,6 +49,8 @@ export function parseClientAdmissionControls(argv: ReadonlyArray<string>): IClie
   }
   const admission: IDaemonRequestAdmissionOptions | undefined = noWait
     ? { noWait: true }
-    : waitTimeoutMs === undefined ? undefined : { waitTimeoutMs };
+    : waitTimeoutMs === undefined
+      ? undefined
+      : { waitTimeoutMs };
   return { argv: remaining, admission };
 }

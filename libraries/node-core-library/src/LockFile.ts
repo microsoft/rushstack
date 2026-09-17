@@ -7,7 +7,7 @@ import * as child_process from 'node:child_process';
 import { FileSystem } from './FileSystem';
 import { FileWriter } from './FileWriter';
 import { Async } from './Async';
-import { tryAcquireWindowsLockFile, type ILockFileHandle } from './WindowsLockFile';
+import { getWindowsLockFileDirtyPath, tryAcquireWindowsLockFile } from './WindowsLockFile';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -153,10 +153,23 @@ export function _setLockFileGetProcessStartTime(fn: (pid: number) => string | un
   _getStartTime = fn;
 }
 
-interface ITryAcquireResult {
-  fileWriter: ILockFileHandle | undefined;
-  filePath: string;
-  dirtyWhenAcquired: boolean;
+/**
+ * Platform-specific ownership of an acquired lock.
+ * @internal
+ */
+export interface ILockFileHandle {
+  prepareForRelease?(deleteFile: boolean): void;
+  close(): void;
+}
+
+/**
+ * A successful acquisition transfers ownership of the handle to LockFile.
+ * @internal
+ */
+export interface ITryAcquireResult {
+  readonly fileWriter: ILockFileHandle;
+  readonly filePath: string;
+  readonly dirtyWhenAcquired: boolean;
 }
 
 /**
@@ -176,7 +189,7 @@ export class LockFile {
   private _filePath: string;
   private _dirtyWhenAcquired: boolean;
 
-  private constructor(fileWriter: ILockFileHandle | undefined, filePath: string, dirtyWhenAcquired: boolean) {
+  private constructor(fileWriter: ILockFileHandle, filePath: string, dirtyWhenAcquired: boolean) {
     this._fileWriter = fileWriter;
     this._filePath = filePath;
     this._dirtyWhenAcquired = dirtyWhenAcquired;
@@ -220,11 +233,29 @@ export class LockFile {
   }
 
   /**
+   * Returns all paths used to manage this process's lock, including platform-specific companion files.
+   * Use these paths when excluding an active lock from folder cleanup; do not remove them while
+   * the lock is held.
+   * @param resourceFolder - The folder where the lock files will be created
+   * @param resourceName - The resource name accepted by {@link LockFile.getLockFilePath}
+   * @param pid - The PID used by the locking algorithm; defaults to `process.pid`
+   */
+  public static getLockFilePaths(
+    resourceFolder: string,
+    resourceName: string,
+    pid: number = process.pid
+  ): ReadonlyArray<string> {
+    const filePath: string = LockFile.getLockFilePath(resourceFolder, resourceName, pid);
+    return process.platform === 'win32' ? [filePath, getWindowsLockFileDirtyPath(filePath)] : [filePath];
+  }
+
+  /**
    * Attempts to create a lockfile with the given filePath.
    * @param resourceFolder - The folder where the lock file will be created
    * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
    *   the filename of the temporary file created to manage the lock.
    * @returns If successful, returns a `LockFile` instance.  If unable to get a lock, returns `undefined`.
+   * This includes Windows volumes that do not enforce exclusive sharing. Unexpected filesystem errors throw.
    */
   public static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined {
     FileSystem.ensureFolder(resourceFolder);
@@ -291,18 +322,36 @@ export class LockFile {
   /**
    * Unlocks a file and optionally removes it from disk.
    * This can only be called once.
+   * @remarks
+   * If release preparation fails, the handle is still closed and recovery files are retained.
+   * If closing fails, ownership is uncertain and {@link LockFile.isReleased} remains false.
    *
    * @param deleteFile - Whether to delete the lockfile from disk. Defaults to true.
    */
   public release(deleteFile: boolean = true): void {
-    if (this.isReleased) {
+    const fileWriter: ILockFileHandle | undefined = this._fileWriter;
+    if (!fileWriter) {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
-    this._fileWriter!.prepareForRelease?.(deleteFile);
-    this._fileWriter!.close();
+    const errors: unknown[] = [];
+    try {
+      fileWriter.prepareForRelease?.(deleteFile);
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      fileWriter.close();
+    } catch (error) {
+      // A failed close does not prove ownership was relinquished. Retain the handle and in-process guard.
+      errors.push(error);
+      if (errors.length === 1) throw error;
+      throw new AggregateError(errors, `Failed to release the lock for file "${this._filePath}".`);
+    }
     this._fileWriter = undefined;
     IN_PROC_LOCKS.delete(this._filePath);
+    // Leave the backing files intact after failed preparation so the next owner recovers dirty state.
+    if (errors.length > 0) throw errors[0];
     if (deleteFile) {
       try {
         FileSystem.deleteFile(this._filePath, { throwIfNotExists: false });
@@ -310,8 +359,12 @@ export class LockFile {
         // A new Windows owner may acquire the file between close and unlink. Never remove its lock.
         if (
           process.platform !== 'win32' ||
-          typeof error !== 'object' || error === null || !('code' in error) || error.code !== 'EBUSY'
-        ) throw error;
+          typeof error !== 'object' ||
+          error === null ||
+          !('code' in error) ||
+          error.code !== 'EBUSY'
+        )
+          throw error;
       }
     }
   }
@@ -332,7 +385,7 @@ export class LockFile {
   }
 
   /**
-   * Returns true if this lock is currently being held.
+   * Returns true if this lock has been released.
    */
   public get isReleased(): boolean {
     return this._fileWriter === undefined;

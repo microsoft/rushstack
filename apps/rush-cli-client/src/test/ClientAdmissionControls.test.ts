@@ -11,12 +11,14 @@ describe(parseClientAdmissionControls.name, () => {
     { argv: ['--wait-timeout', '1.25', 'build'], remaining: ['build'], admission: { waitTimeoutMs: 1250 } },
     { argv: ['build', '--wait-timeout=0'], remaining: ['build'], admission: { waitTimeoutMs: 0 } },
     {
-      argv: ['build', '--wait-timeout=2147483.647'], remaining: ['build'],
+      argv: ['build', '--wait-timeout=2147483.647'],
+      remaining: ['build'],
       admission: { waitTimeoutMs: 2147483647 }
     },
     {
       argv: ['script', '--', '--no-wait', '--wait-timeout', '2'],
-      remaining: ['script', '--', '--no-wait', '--wait-timeout', '2'], admission: undefined
+      remaining: ['script', '--', '--no-wait', '--wait-timeout', '2'],
+      admission: undefined
     }
   ])('parses $argv', ({ argv, remaining, admission }) => {
     expect(parseClientAdmissionControls(argv)).toEqual({ argv: remaining, admission });
@@ -38,12 +40,18 @@ describe(parseClientAdmissionControls.name, () => {
   });
 
   it('removes daemon-only controls before native fallback while retaining script arguments', () => {
-    expect(selectClientRoute({
-      argv: ['build', '--no-daemon', '--no-wait', '--', '--wait-timeout=2'],
-      enabled: true, environment: {}, rushx: false
-    })).toEqual({
+    expect(
+      selectClientRoute({
+        argv: ['build', '--no-daemon', '--no-wait', '--', '--wait-timeout=2'],
+        enabled: true,
+        environment: {},
+        rushx: false
+      })
+    ).toEqual({
       argv: ['build', '--', '--wait-timeout=2'],
-      commandName: 'build', daemon: false, admission: { noWait: true }
+      commandName: 'build',
+      daemon: false,
+      admission: { noWait: true }
     });
   });
 });

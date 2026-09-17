@@ -13,6 +13,7 @@ import {
   FileConstants,
   type FileSystemStats,
   SubprocessTerminator,
+  EnvironmentMap,
   Executable,
   type IWaitForExitResult,
   Async,
@@ -127,6 +128,17 @@ export interface ILifecycleCommandOptions {
    * @internal
    */
   stdio?: child_process.StdioOptions;
+
+  /**
+   * Overrides child creation for asynchronous lifecycle commands so the caller can own child cleanup.
+   *
+   * @internal
+   */
+  spawn?: (
+    command: string,
+    args: ReadonlyArray<string>,
+    options: child_process.SpawnOptions
+  ) => child_process.ChildProcess;
 }
 
 export interface IEnvironmentPathOptions {
@@ -505,16 +517,11 @@ export class Utilities {
    */
   public static executeLifecycleCommandAsync(
     command: string,
-    options: ILifecycleCommandOptions,
-    spawn: (
-      command: string,
-      args: ReadonlyArray<string>,
-      options: child_process.SpawnOptions
-    ) => child_process.ChildProcess = child_process.spawn
+    options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
     const child: child_process.ChildProcess = _executeLifecycleCommandInternal(
       command,
-      spawn,
+      options.spawn ?? child_process.spawn,
       options
     );
     if (options.connectSubprocessTerminator) {
@@ -644,10 +651,14 @@ export class Utilities {
 
   /** @internal */
   public static _convertCommandAndArgsToShell(
-    command: string, isWindows?: boolean, environment?: IEnvironment
+    command: string,
+    isWindows?: boolean,
+    environment?: IEnvironment
   ): ICommandAndArgs;
   public static _convertCommandAndArgsToShell(
-    options: ICommandAndArgs, isWindows?: boolean, environment?: IEnvironment
+    options: ICommandAndArgs,
+    isWindows?: boolean,
+    environment?: IEnvironment
   ): ICommandAndArgs;
   public static _convertCommandAndArgsToShell(
     options: ICommandAndArgs | string,
@@ -657,7 +668,14 @@ export class Utilities {
     let shellCommand: string;
     let commandFlags: string[];
     if (isWindows) {
-      shellCommand = environment.comspec || environment.COMSPEC || 'cmd';
+      const environmentMap: EnvironmentMap = new EnvironmentMap();
+      for (const [name, value] of Object.entries(environment)) {
+        if (value !== undefined) {
+          // isWindows can be supplied independently of the current platform.
+          environmentMap.set(name.toUpperCase(), value);
+        }
+      }
+      shellCommand = environmentMap.get('COMSPEC') || 'cmd.exe';
       commandFlags = ['/d', '/s', '/c'];
     } else {
       shellCommand = 'sh';
@@ -738,14 +756,16 @@ function _executeLifecycleCommandInternal<TCommandResult>(
   }
 
   const { command, args } = Utilities._convertCommandAndArgsToShell(
-    commandAndArgs, IS_WINDOWS, initialEnvironment ? environment : undefined
+    commandAndArgs,
+    IS_WINDOWS,
+    initialEnvironment ? environment : undefined
   );
 
   if (IS_WINDOWS) {
-    const shellCommand: string = [command, ...args].join(' ');
+    const shellCommand: string = [escapeArgumentIfNeeded(command, true), ...args].join(' ');
     return spawnFunction(shellCommand, [], {
       ...spawnOptions,
-      shell: initialEnvironment ? environment.COMSPEC || environment.comspec || 'cmd.exe' : true
+      shell: initialEnvironment ? command : true
     });
   } else {
     return spawnFunction(command, args, spawnOptions);

@@ -22,8 +22,14 @@ it.each([
   { ...WARM_STATUS, maintenanceFailure: {} },
   { ...WARM_STATUS, cleanupFailures: [false] },
   { ...WARM_STATUS, projectRanks: {} },
-  { ...WARM_STATUS, projectRanks: [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO, timeSavedMs: INVALID_NUMBER }] },
-  { ...WARM_STATUS, projectRanks: [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO, measuredRunnerMemoryBytes: ZERO }] }
+  {
+    ...WARM_STATUS,
+    projectRanks: [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO, timeSavedMs: INVALID_NUMBER }]
+  },
+  {
+    ...WARM_STATUS,
+    projectRanks: [{ projectName: 'a', frequency: ZERO, lastUsed: ZERO, measuredRunnerMemoryBytes: ZERO }]
+  }
 ])('rejects malformed warm accounting', (warmSet: unknown) => {
   expect(() => decodeDaemonControlMessage(statusFrame(workspaceStatus(warmSet)))).toThrow();
 });

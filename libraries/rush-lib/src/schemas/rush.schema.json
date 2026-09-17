@@ -260,7 +260,7 @@
           "exclusiveMinimum": true,
           "maximum": 2147483.647,
           "default": 900,
-          "description": "Idle shutdown timeout. RUSH_DAEMON_IDLE_TIMEOUT_SECONDS overrides."
+          "description": "Idle shutdown timeout in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). RUSH_DAEMON_IDLE_TIMEOUT_SECONDS overrides."
         },
         "autoStart": {
           "type": "boolean",
@@ -282,7 +282,7 @@
           "minimum": 0,
           "maximum": 2147483.647,
           "default": 30,
-          "description": "Maximum admission queue wait. RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS overrides."
+          "description": "Maximum admission queue wait in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS overrides."
         },
         "warmIdleTimeoutSeconds": {
           "type": "number",
@@ -290,7 +290,7 @@
           "exclusiveMinimum": true,
           "maximum": 2147483.647,
           "default": 300,
-          "description": "Idle resource expiration for an attached warm set. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
+          "description": "Idle resource expiration for an attached warm set in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
         },
         "warmMemoryBudgetMB": {
           "type": "number",
@@ -298,14 +298,14 @@
           "exclusiveMinimum": true,
           "maximum": 9007199254740991,
           "default": 512,
-          "description": "Best-effort sampled RSS budget, not a hard process/tree memory ceiling. Active/protected work is exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
+          "description": "Best-effort sampled RSS budget in MiB, not a hard process/tree memory ceiling. At most 9007199254740991 (Number.MAX_SAFE_INTEGER). Active/protected work is exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
         },
         "warmSetMaxProjects": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
           "default": 20,
-          "description": "Best-effort retained project limit for an attached warm set. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
+          "description": "Best-effort retained project limit for an attached warm set, at most 9007199254740991 (Number.MAX_SAFE_INTEGER). RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
         },
         "autoWarmByTelemetry": {
           "type": "boolean",

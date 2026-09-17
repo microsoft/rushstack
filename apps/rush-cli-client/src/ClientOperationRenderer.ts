@@ -33,9 +33,15 @@ export class ClientOperationRenderer {
       colorLevel: options.colorLevel,
       verbosity: options.verbosity,
       terminal: {
-        get columns() { return options.terminal.columns; },
-        get isTTY() { return options.terminal.isTTY; },
-        write: (text, stream) => { this.#chunks.push({ text, stream }); }
+        get columns() {
+          return options.terminal.columns;
+        },
+        get isTTY() {
+          return options.terminal.isTTY;
+        },
+        write: (text, stream) => {
+          this.#chunks.push({ text, stream });
+        }
       }
     });
   }

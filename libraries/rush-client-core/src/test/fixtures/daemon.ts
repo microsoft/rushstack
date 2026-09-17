@@ -10,7 +10,11 @@ import {
   decodeDaemonControlMessage,
   encodeDaemonControlMessage
 } from '@rushstack/rush-daemon-protocol';
-import { DaemonFrameListener, type DaemonFrameConnection, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import {
+  DaemonFrameListener,
+  type DaemonFrameConnection,
+  type IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
 async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
@@ -64,7 +68,8 @@ async function mainAsync(): Promise<void> {
           if (message.payload.admission?.waitTimeoutMs !== undefined) {
             fs.appendFileSync(path.join(folder, 'waits'), `${message.payload.admission.waitTimeoutMs}\n`);
           }
-          const restart: boolean = restartMode !== undefined &&
+          const restart: boolean =
+            restartMode !== undefined &&
             (restartMode !== 'restart-once' || !fs.existsSync(path.join(folder, 'restarted')));
           await connection.sendFrameAsync({
             kind: DaemonFrameType.controlJson,

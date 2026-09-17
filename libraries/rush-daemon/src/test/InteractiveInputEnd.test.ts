@@ -46,22 +46,30 @@ describe('request input admission and EOF', () => {
         writing.resolve();
         await written.promise;
       },
-      endInputAsync: async () => { events.push('EOF'); }
+      endInputAsync: async () => {
+        events.push('EOF');
+      }
     };
     expect(ready).not.toHaveBeenCalled();
     session.attachInputSink(sink);
-    const input: Promise<void> = router.routeStdinFrameAsync(encodeDaemonStdinChunk({
-      requestId: REQUEST_ID,
-      chunk: Uint8Array.of(0, 3, 255)
-    }));
+    const input: Promise<void> = router.routeStdinFrameAsync(
+      encodeDaemonStdinChunk({
+        requestId: REQUEST_ID,
+        chunk: Uint8Array.of(0, 3, 255)
+      })
+    );
     await writing.promise;
     expect(ready).toHaveBeenCalledWith(REQUEST_ID);
     const eof: Promise<void> = router.routeStdinEndAsync(REQUEST_ID);
     expect(events).toEqual(['0003ff']);
-    await expect(router.routeStdinFrameAsync(encodeDaemonStdinChunk({
-      requestId: REQUEST_ID,
-      chunk: Uint8Array.of(1)
-    }))).rejects.toMatchObject({ code: 'inputEnded' });
+    await expect(
+      router.routeStdinFrameAsync(
+        encodeDaemonStdinChunk({
+          requestId: REQUEST_ID,
+          chunk: Uint8Array.of(1)
+        })
+      )
+    ).rejects.toMatchObject({ code: 'inputEnded' });
     expect(() => router.routeStdinEndAsync(REQUEST_ID)).toThrow('inputEnded');
     written.resolve();
     await Promise.all([input, eof]);

@@ -57,17 +57,14 @@ export class PurgeManager {
     // eslint-disable-next-line no-console
     console.log('Purging ' + this.#rushConfiguration.commonTempFolder);
 
-    const lockFileName: string = path.basename(
-      LockFile.getLockFilePath(this.#rushConfiguration.commonTempFolder, 'rush')
-    );
-    this.commonTempFolderRecycler.moveAllItemsInFolder(
+    const lockFileNames: string[] = LockFile.getLockFilePaths(
       this.#rushConfiguration.commonTempFolder,
-      [
-        ...this.#getMembersToExclude(this.#rushConfiguration.commonTempFolder, true),
-        lockFileName,
-        `${lockFileName}.dirty`
-      ]
-    );
+      'rush'
+    ).map((filePath) => path.basename(filePath));
+    this.commonTempFolderRecycler.moveAllItemsInFolder(this.#rushConfiguration.commonTempFolder, [
+      ...this.#getMembersToExclude(this.#rushConfiguration.commonTempFolder, true),
+      ...lockFileNames
+    ]);
   }
 
   /**

@@ -4,7 +4,11 @@
 import * as childProcess from 'node:child_process';
 import { PassThrough, Writable } from 'node:stream';
 
-import { PlaintextReporter, type IReporterEventEnvelope, type IRushDiagnostic } from '@rushstack/rush-reporter';
+import {
+  PlaintextReporter,
+  type IReporterEventEnvelope,
+  type IRushDiagnostic
+} from '@rushstack/rush-reporter';
 import { StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { HeftChildProcessReporter, HeftChildReporterNonFatalError } from '../HeftChildProcessReporter';
@@ -760,25 +764,23 @@ describe(HeftChildProcessReporter.name, () => {
     'forged-detail',
     'zero-line',
     'zero-column'
-  ] as const)(
-    'rejects an accepted %s stream even when the child exits successfully',
-    async (corruption) => {
-      const diagnostics: IRushDiagnostic[] = [];
-      const envelopes: IReporterEventEnvelope<unknown>[] = [];
-      const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
-        parentSessionId: 'parent-session',
-        parentRequestId: 'parent-request',
-        parentOperationId: 'project#build',
-        iterationId: 7,
-        context: CONTEXT,
-        ingestForeignEnvelope: (envelope) => {
-          envelopes.push(envelope);
-          return envelope.eventId;
-        },
-        onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
-        onStructuredNegotiated: () => undefined
-      });
-      const script: string = `
+  ] as const)('rejects an accepted %s stream even when the child exits successfully', async (corruption) => {
+    const diagnostics: IRushDiagnostic[] = [];
+    const envelopes: IReporterEventEnvelope<unknown>[] = [];
+    const reporter: HeftChildProcessReporter = new HeftChildProcessReporter({
+      parentSessionId: 'parent-session',
+      parentRequestId: 'parent-request',
+      parentOperationId: 'project#build',
+      iterationId: 7,
+      context: CONTEXT,
+      ingestForeignEnvelope: (envelope) => {
+        envelopes.push(envelope);
+        return envelope.eventId;
+      },
+      onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+      onStructuredNegotiated: () => undefined
+    });
+    const script: string = `
         const fs = require('node:fs');
         const eventFd = Number(process.env._RUSH_REPORTER_CHILD_FD);
         const ackFd = Number(process.env._RUSH_REPORTER_CHILD_ACK_FD);
@@ -834,22 +836,21 @@ describe(HeftChildProcessReporter.name, () => {
           }) + '\\n');
         }
       `;
-      const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
-        env: { ...process.env, ...reporter.environment },
-        stdio: reporter.stdio
-      });
-      const closePromise: Promise<number | null> = waitForCloseAsync(child);
+    const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, ['-e', script], {
+      env: { ...process.env, ...reporter.environment },
+      stdio: reporter.stdio
+    });
+    const closePromise: Promise<number | null> = waitForCloseAsync(child);
 
-      await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
-        'The negotiated Heft reporter stream was corrupt or incomplete.'
-      );
-      expect(await closePromise).toBe(0);
-      expect(envelopes.map((envelope) => envelope.payload)).toEqual([
-        { stream: 'stdout', text: 'preserved before corruption\n', iterationId: 7 }
-      ]);
-      expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['RUSH_PROTOCOL_INVALID_CHILD_STREAM']);
-    }
-  );
+    await expect(reporter.attachAsync(child, new StringBufferTerminalProvider())).rejects.toThrow(
+      'The negotiated Heft reporter stream was corrupt or incomplete.'
+    );
+    expect(await closePromise).toBe(0);
+    expect(envelopes.map((envelope) => envelope.payload)).toEqual([
+      { stream: 'stdout', text: 'preserved before corruption\n', iterationId: 7 }
+    ]);
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['RUSH_PROTOCOL_INVALID_CHILD_STREAM']);
+  });
 
   it('rejects a truncated accepted descriptor stream without hiding the child crash', async () => {
     const diagnostics: IRushDiagnostic[] = [];

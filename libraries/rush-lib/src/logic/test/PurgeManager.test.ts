@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { LockFile } from '@rushstack/node-core-library';
@@ -15,7 +14,7 @@ import { PurgeManager } from '../PurgeManager';
 
 describe(PurgeManager.name, () => {
   it('purges temporary files without deleting the active native repository mutex', async () => {
-    const folder: string = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'rush-purge-lock-')));
+    const folder: string = fs.realpathSync.native(fs.mkdtempSync(path.join(__dirname, 'rush-purge-lock-')));
     const commonTempFolder: string = path.join(folder, 'common/temp');
     const originalTemp: string | undefined = process.env.RUSH_TEMP_FOLDER;
     let lock: LockFile | undefined;
@@ -49,15 +48,16 @@ describe(PurgeManager.name, () => {
       await manager.startDeleteAllAsync();
 
       expect(fs.existsSync(obsoleteFile)).toBe(false);
-      expect(fs.existsSync(lock.filePath)).toBe(true);
+      const lockPaths: ReadonlyArray<string> = LockFile.getLockFilePaths(commonTempFolder, 'rush');
+      for (const lockPath of lockPaths) {
+        expect(fs.existsSync(lockPath)).toBe(true);
+      }
       expect(lock.isReleased).toBe(false);
       expect(LockFile.tryAcquire(commonTempFolder, 'rush')).toBeUndefined();
-      if (process.platform === 'win32') {
-        expect(fs.existsSync(`${lock.filePath}.dirty`)).toBe(true);
-      }
       lock.release();
-      expect(fs.existsSync(lock.filePath)).toBe(false);
-      expect(fs.existsSync(`${lock.filePath}.dirty`)).toBe(false);
+      for (const lockPath of lockPaths) {
+        expect(fs.existsSync(lockPath)).toBe(false);
+      }
     } finally {
       try {
         if (lock && !lock.isReleased) lock.release();

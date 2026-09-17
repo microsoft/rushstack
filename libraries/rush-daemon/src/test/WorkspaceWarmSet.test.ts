@@ -15,8 +15,10 @@ import { WorkspaceWarmSet } from '../WorkspaceWarmSet';
 import { createDeferred } from './DaemonRequestWireTestUtilities';
 import { createNativeScriptGateAsync, runNativeCommandAsync } from './NativeEngineTestCommands';
 import {
-  captureWarmRankingDurations, getMeasuredFixtureRetentionOrder,
-  WarmSetTestFixture, type IWarmFixtureOptions
+  captureWarmRankingDurations,
+  getMeasuredFixtureRetentionOrder,
+  WarmSetTestFixture,
+  type IWarmFixtureOptions
 } from './WarmSetTestFixture';
 
 jest.setTimeout(30_000);
@@ -99,9 +101,13 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     await fixture.buildSuccessfullyAsync();
     await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
     // Actual startup timing/RSS can reverse the projects' value on shared runners. Ties use b's recency.
-    const [retained, evicted] = getMeasuredFixtureRetentionOrder(
-      graph, coldDurations, ['a', 'b', 'a', 'b', 'b']
-    );
+    const [retained, evicted] = getMeasuredFixtureRetentionOrder(graph, coldDurations, [
+      'a',
+      'b',
+      'a',
+      'b',
+      'b'
+    ]);
     test!.update({ autoWarmByTelemetry: true });
     expect(warm.getStatus().retainedProjectNames).toEqual([retained, evicted]);
     test!.update({ autoWarmByTelemetry: false });
@@ -199,11 +205,15 @@ describe('warm policies attached to native graphs and real filesystem watchers',
       reportTiming: false,
       silent: false,
       warningsAreAllowed: false,
-      get isActive() { return active; },
+      get isActive() {
+        return active;
+      },
       residentMemoryBytes: 1024,
       getConfigHash: () => '',
       executeAsync: async () => OperationStatus.NoOp,
-      closeAsync: async () => { active = false; }
+      closeAsync: async () => {
+        active = false;
+      }
     };
     const rank = warm.getStatus().projectRanks?.find((project) => project.projectName === 'a');
     expect(rank?.measuredRunnerMemoryBytes).toBe(1024);
@@ -410,7 +420,8 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     const operation = test!.operation('b');
     const record: IOperationExecutionResult = graph.resultByOperation.get(operation)!;
     const nativeRecord: unknown = record;
-    if (!(nativeRecord instanceof OperationExecutionRecord)) throw new Error('Expected a native execution record.');
+    if (!(nativeRecord instanceof OperationExecutionRecord))
+      throw new Error('Expected a native execution record.');
     const hash: string = record.getStateHash();
     const warnings: string = record.stdioSummarizer.getReport();
     const duration: number = record.stopwatch.duration;
@@ -430,7 +441,9 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(nativeRecord.eventSink).toBeUndefined();
     expect(nativeRecord.environment).toBeUndefined();
     expect(nativeRecord.createChildProcessReporter()).toBeUndefined();
-    expect(() => nativeRecord.collatedWriter).toThrow('Cannot reopen the output of a detached execution record.');
+    expect(() => nativeRecord.collatedWriter).toThrow(
+      'Cannot reopen the output of a detached execution record.'
+    );
     expect(record.getStateHash()).toBe(hash);
     expect(record.stopwatch.duration).toBe(duration);
     expect(record.stdioSummarizer.getReport()).toBe(warnings);

@@ -34,8 +34,12 @@ it('flushes incomplete text once and releases the operation decoder state', () =
   const decoder: OperationTextDecoder = new OperationTextDecoder();
   const chunks: ITerminalChunk[] = [];
   decoder.decode(OP_A, TerminalChunkKind.Stderr, ENCODER.encode(EURO).subarray(START, SPLIT));
-  decoder.flush(OP_A, (chunk: ITerminalChunk) => { chunks.push(chunk); });
-  decoder.flush(OP_A, (chunk: ITerminalChunk) => { chunks.push(chunk); });
+  decoder.flush(OP_A, (chunk: ITerminalChunk) => {
+    chunks.push(chunk);
+  });
+  decoder.flush(OP_A, (chunk: ITerminalChunk) => {
+    chunks.push(chunk);
+  });
   expect(chunks).toEqual([{ kind: TerminalChunkKind.Stderr, text: REPLACEMENT }]);
   expect(decoder.decode(OP_A, TerminalChunkKind.Stdout, ENCODER.encode(EURO)).text).toBe(EURO);
 });

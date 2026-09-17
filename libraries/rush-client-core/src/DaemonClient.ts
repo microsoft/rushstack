@@ -462,7 +462,12 @@ export class DaemonClient {
     if (restart && this.#cancelSent) {
       outcome = {
         kind: 'result',
-        result: { requestId: this.#execution!.request.requestId, outcome: 'aborted', exitCode: 130, aborted: true }
+        result: {
+          requestId: this.#execution!.request.requestId,
+          outcome: 'aborted',
+          exitCode: 130,
+          aborted: true
+        }
       };
     }
     this.#finished = true;
@@ -533,18 +538,26 @@ export class DaemonClient {
     if (!this.#inputStarted || this.#inputEnded || this.#finished) return;
     this.#inputEnded = true;
     this.#stopInput();
-    void this.#inputTail.then(async () => {
-      if (this.#finished || this.#cancelSent) return;
-      await this.#sendControlAsync({
-        kind: 'stdinEnd',
-        payload: { requestId: this.#execution!.request.requestId }
-      });
-    }).catch((error: Error) => this.#connection.abort(error));
+    void this.#inputTail
+      .then(async () => {
+        if (this.#finished || this.#cancelSent) return;
+        await this.#sendControlAsync({
+          kind: 'stdinEnd',
+          payload: { requestId: this.#execution!.request.requestId }
+        });
+      })
+      .catch((error: Error) => this.#connection.abort(error));
   };
 
   #startInput(): void {
     const execution: IDaemonClientExecuteOptions = this.#requireExecution();
-    if (this.#inputStarted || this.#inputEnded || !execution.stdin || !execution.request.terminal.acceptsStdin) return;
+    if (
+      this.#inputStarted ||
+      this.#inputEnded ||
+      !execution.stdin ||
+      !execution.request.terminal.acceptsStdin
+    )
+      return;
     if (execution.stdin.destroyed && !execution.stdin.readableEnded) {
       throw new Error('Daemon stdin closed before admission without reaching EOF.');
     }

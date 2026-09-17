@@ -198,12 +198,16 @@ export class InteractiveRequestInputRouter {
   /** Queues EOF behind already accepted input without blocking other requests or cancellation. */
   public routeStdinEndAsync(requestId: string): Promise<void> {
     const state: IRequestState = this.#getRequestState(requestId);
-    const endPromise: Promise<void> = queueInputActionAsync(state, async (sink) => {
-      if (!sink.endInputAsync) {
-        throw new Error(`Input destination for request "${requestId}" does not support EOF.`);
-      }
-      await sink.endInputAsync();
-    }, 0);
+    const endPromise: Promise<void> = queueInputActionAsync(
+      state,
+      async (sink) => {
+        if (!sink.endInputAsync) {
+          throw new Error(`Input destination for request "${requestId}" does not support EOF.`);
+        }
+        await sink.endInputAsync();
+      },
+      0
+    );
     state.inputEnded = true;
     return endPromise;
   }
@@ -258,10 +262,14 @@ function createRequestState(options: IInteractiveRequestRegistrationOptions): IR
 }
 
 function queueInputAsync(state: IRequestState, chunk: Uint8Array): Promise<void> {
-  return queueInputActionAsync(state, async (sink) => {
-    await sink.writeInputAsync(chunk);
-    await state.client.writeInputReadyAsync?.(state.requestId);
-  }, chunk.byteLength);
+  return queueInputActionAsync(
+    state,
+    async (sink) => {
+      await sink.writeInputAsync(chunk);
+      await state.client.writeInputReadyAsync?.(state.requestId);
+    },
+    chunk.byteLength
+  );
 }
 
 function queueInputActionAsync(
@@ -284,9 +292,7 @@ function queueInputActionAsync(
       throw normalizedError;
     }
   });
-  const trackedPromise: Promise<void> = writePromise.finally(() =>
-    releaseInputCapacity(state, byteLength)
-  );
+  const trackedPromise: Promise<void> = writePromise.finally(() => releaseInputCapacity(state, byteLength));
   state.inputTail = trackedPromise.catch((error: unknown) => handleQueuedInputError(state, error));
   return trackedPromise;
 }

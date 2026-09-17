@@ -53,14 +53,16 @@ export class NodeJsCompatibility {
     // Only increment it when our code base is known to use newer features (e.g. "async"/"await") that
     // have no hope of working with older Node.js.
     if (semver.satisfies(nodeVersion, '<14.18.0')) {
-      const message: string =
-        Colorize.red(
-          `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush. ` +
-            `Please upgrade to the latest Long-Term Support (LTS) version.\n`
-        );
-      if (terminal) terminal.writeErrorLine(message);
-      // eslint-disable-next-line no-console
-      else console.error(message);
+      const message: string = Colorize.red(
+        `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush. ` +
+          `Please upgrade to the latest Long-Term Support (LTS) version.\n`
+      );
+      if (terminal) {
+        terminal.writeErrorLine(message);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error(message);
+      }
       return true;
     } else {
       return false;
@@ -96,7 +98,8 @@ export class NodeJsCompatibility {
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
                 `of the Rush engine. Please consider upgrading the "rushVersion" setting in ${RushConstants.rushJsonFilename}, ` +
                 `or downgrading Node.js.\n`
-            ), options.terminal
+            ),
+            options.terminal
           );
         } else {
           _writeWarning(
@@ -104,7 +107,8 @@ export class NodeJsCompatibility {
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
                 `of Rush. Please consider installing a newer version of the "@microsoft/rush" ` +
                 `package, or downgrading Node.js.\n`
-            ), options.terminal
+            ),
+            options.terminal
           );
         }
       }
@@ -124,13 +128,17 @@ export class NodeJsCompatibility {
   }
 }
 
-function _warnAboutNonLtsVersion(rushConfiguration: RushConfiguration | undefined, terminal?: ITerminal): boolean {
+function _warnAboutNonLtsVersion(
+  rushConfiguration: RushConfiguration | undefined,
+  terminal?: ITerminal
+): boolean {
   if (rushConfiguration && !rushConfiguration.suppressNodeLtsWarning && !NodeJsCompatibility.isLtsVersion) {
     _writeWarning(
       Colorize.yellow(
         `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
           'These versions frequently have bugs. Please consider installing a stable release.\n'
-      ), terminal
+      ),
+      terminal
     );
 
     return true;
@@ -146,18 +154,21 @@ function _warnAboutOddNumberedVersion(terminal?: ITerminal): boolean {
         `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +
           `These releases frequently have bugs. Please consider installing a Long Term Support (LTS) ` +
           `version instead.\n`
-      ), terminal
+      ),
+      terminal
     );
 
     return true;
   } else {
     return false;
   }
-
 }
 
 function _writeWarning(message: string, terminal: ITerminal | undefined): void {
-  if (terminal) terminal.writeWarningLine(message, { doNotOverrideSgrCodes: true });
-  // eslint-disable-next-line no-console
-  else console.warn(message);
+  if (terminal) {
+    terminal.writeWarningLine(message, { doNotOverrideSgrCodes: true });
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  }
 }

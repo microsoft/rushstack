@@ -29,11 +29,19 @@ describe('native Rushx execution boundaries', () => {
     const cwd: string = await startAsync(true);
     const input: PassThrough = new PassThrough();
     input.end('untouched');
-    const result: IRequestResult = await fixture.runAsync(fixture.request(['pipe'], cwd), undefined, { stdin: input });
+    const result: IRequestResult = await fixture.runAsync(fixture.request(['pipe'], cwd), undefined, {
+      stdin: input
+    });
     expect(result.outcome).toMatchObject({ kind: 'fallback', reason: 'unsupported' });
     expect(input.read().toString()).toBe('untouched');
     expect(fs.existsSync(path.join(fixture.folder, 'hooks.txt'))).toBe(false);
-    const fallback: IScriptResult = await fixture.invokeAsync(false, ['-q', 'pipe'], cwd, undefined, Buffer.from('piped'));
+    const fallback: IScriptResult = await fixture.invokeAsync(
+      false,
+      ['-q', 'pipe'],
+      cwd,
+      undefined,
+      Buffer.from('piped')
+    );
     expect(fallback.exitCode).toBe(0);
     expect(fallback.stdout.toString()).toContain('piped');
     expect(fallback.stderr.toString()).toContain('using in-process Rush');
@@ -47,19 +55,27 @@ describe('native Rushx execution boundaries', () => {
       expect(await fixture.invokeAsync(false, argv, cwd)).toEqual(await fixture.invokeAsync(true, argv, cwd));
     }
     const environment = fixture.environment({ _RUSH_RECURSIVE_RUSHX_CALL: '1' });
-    expect(await fixture.invokeAsync(false, ['args'], cwd, environment))
-      .toEqual(await fixture.invokeAsync(true, ['args'], cwd, environment));
+    expect(await fixture.invokeAsync(false, ['args'], cwd, environment)).toEqual(
+      await fixture.invokeAsync(true, ['args'], cwd, environment)
+    );
     expect(fs.existsSync(path.join(fixture.folder, 'hooks.txt'))).toBe(false);
   });
 
   it('executes the governing nested package and its real node_modules/.bin executable', async () => {
     const cwd: string = await startAsync();
-    fixture.write('projects/a/subfolder/package.json', JSON.stringify({
-      name: 'nested', version: '1.0.0', scripts: { bin: 'fixture-bin' }
-    }));
+    fixture.write(
+      'projects/a/subfolder/package.json',
+      JSON.stringify({
+        name: 'nested',
+        version: '1.0.0',
+        scripts: { bin: 'fixture-bin' }
+      })
+    );
     const bin: string = process.platform === 'win32' ? 'fixture-bin.cmd' : 'fixture-bin';
-    fixture.write(`projects/a/subfolder/node_modules/.bin/${bin}`,
-      process.platform === 'win32' ? '@echo path-ok\r\n' : '#!/bin/sh\nprintf "path-ok\\n"\n');
+    fixture.write(
+      `projects/a/subfolder/node_modules/.bin/${bin}`,
+      process.platform === 'win32' ? '@echo path-ok\r\n' : '#!/bin/sh\nprintf "path-ok\\n"\n'
+    );
     fs.chmodSync(path.join(cwd, 'subfolder/node_modules/.bin', bin), 0o755);
     const nested: string = path.join(cwd, 'subfolder');
     const native: IScriptResult = await fixture.invokeAsync(true, ['-q', 'bin'], nested);
@@ -70,21 +86,30 @@ describe('native Rushx execution boundaries', () => {
 
   it('does real injected-dependency synchronization with native quiet/debug behavior', async () => {
     const cwd: string = await startAsync(false, true);
-    fixture.write('projects/a/node_modules/.pnpm-sync.json', JSON.stringify({
-      version: '0.3.4',
-      postbuildInjectedCopy: { sourceFolder: '..', targetFolders: [{ folderPath: '../../../injected/a' }] }
-    }));
+    fixture.write(
+      'projects/a/node_modules/.pnpm-sync.json',
+      JSON.stringify({
+        version: '0.3.4',
+        postbuildInjectedCopy: { sourceFolder: '..', targetFolders: [{ folderPath: '../../../injected/a' }] }
+      })
+    );
     fixture.write('injected/a/output.txt', 'old-content');
-    for (const argv of [['-q', 'sync'], ['-d', 'sync']]) {
+    for (const argv of [
+      ['-q', 'sync'],
+      ['-d', 'sync']
+    ]) {
       const native: IScriptResult = await fixture.invokeAsync(true, argv, cwd);
       const daemon: IScriptResult = await fixture.invokeAsync(false, argv, cwd);
-      const normalize = (value: Buffer): string => value.toString().replace(/Synced (\d+ files?) in \d+ ms/g, 'Synced $1 in N ms');
-      expect({ code: daemon.exitCode, out: normalize(daemon.stdout), err: normalize(daemon.stderr) })
-        .toEqual({ code: native.exitCode, out: normalize(native.stdout), err: normalize(native.stderr) });
+      const normalize = (value: Buffer): string =>
+        value.toString().replace(/Synced (\d+ files?) in \d+ ms/g, 'Synced $1 in N ms');
+      expect({ code: daemon.exitCode, out: normalize(daemon.stdout), err: normalize(daemon.stderr) }).toEqual(
+        { code: native.exitCode, out: normalize(native.stdout), err: normalize(native.stderr) }
+      );
       expect(daemon.exitCode).toBe(0);
       expect(fs.readFileSync(path.join(fixture.folder, 'injected/a/output.txt'), 'utf8')).toBe('new-content');
-      expect(fs.statSync(path.join(fixture.folder, 'injected/a/output.txt')).ino)
-        .toBe(fs.statSync(path.join(cwd, 'output.txt')).ino);
+      expect(fs.statSync(path.join(fixture.folder, 'injected/a/output.txt')).ino).toBe(
+        fs.statSync(path.join(cwd, 'output.txt')).ino
+      );
     }
   });
 
@@ -100,13 +125,17 @@ describe('native Rushx execution boundaries', () => {
   });
 
   it.each(['hooks', 'experiments', 'dotenv-configuration', 'vault', 'invalid-quiet'])(
-    'rejects unsupported %s before consuming stdin or executing', async (kind) => {
+    'rejects unsupported %s before consuming stdin or executing',
+    async (kind) => {
       const cwd: string = await startAsync();
       const environment = fixture.environment();
       if (kind === 'hooks') {
         const file: string = path.join(fixture.folder, 'rush.json');
         const config = JSON.parse(fs.readFileSync(file, 'utf8'));
-        fixture.write('rush.json', JSON.stringify({ ...config, eventHooks: { preRushx: ['node hook.cjs'] } }));
+        fixture.write(
+          'rush.json',
+          JSON.stringify({ ...config, eventHooks: { preRushx: ['node hook.cjs'] } })
+        );
       } else if (kind === 'experiments') {
         fixture.write('common/config/rush/experiments.json', '{"usePnpmSyncForInjectedDependencies":true}');
       } else if (kind === 'dotenv-configuration') {
@@ -118,7 +147,9 @@ describe('native Rushx execution boundaries', () => {
       }
       const stdin: PassThrough = new PassThrough();
       stdin.end('not-read');
-      const result = await fixture.runAsync(fixture.request(['build'], cwd, environment), undefined, { stdin });
+      const result = await fixture.runAsync(fixture.request(['build'], cwd, environment), undefined, {
+        stdin
+      });
       expect(result.outcome).toMatchObject({ kind: 'fallback', reason: 'unsupported' });
       expect(stdin.read().toString()).toBe('not-read');
       expect(fs.existsSync(path.join(cwd, 'runs.txt'))).toBe(false);
@@ -129,15 +160,20 @@ describe('native Rushx execution boundaries', () => {
     const cwd: string = await startAsync();
     let release: () => void = () => {};
     let started: () => void = () => {};
-    const released: Promise<void> = new Promise((resolve) => { release = resolve; });
-    const holding: Promise<void> = new Promise((resolve) => { started = resolve; });
+    const released: Promise<void> = new Promise((resolve) => {
+      release = resolve;
+    });
+    const holding: Promise<void> = new Promise((resolve) => {
+      started = resolve;
+    });
     const holdAsync = async (): Promise<{ exitCode: number }> => {
       started();
       await released;
       return { exitCode: 0 };
     };
     jest.spyOn(fixture.phasedResolver, 'resolveRequestAsync').mockResolvedValue({
-      kind: 'global', executor: holdAsync
+      kind: 'global',
+      executor: holdAsync
     });
     const holder = fixture.runAsync({ ...fixture.request(['hold'], cwd), invocationKind: 'rush' });
     await holding;
@@ -149,7 +185,10 @@ describe('native Rushx execution boundaries', () => {
         onQueuePositionAsync: async () => {
           const file: string = path.join(fixture.folder, 'rush.json');
           const config = JSON.parse(fs.readFileSync(file, 'utf8'));
-          fixture.write('rush.json', JSON.stringify({ ...config, eventHooks: { preRushx: ['node hook.cjs'] } }));
+          fixture.write(
+            'rush.json',
+            JSON.stringify({ ...config, eventHooks: { preRushx: ['node hook.cjs'] } })
+          );
           release();
         }
       });
@@ -168,7 +207,10 @@ describe('native Rushx execution boundaries', () => {
     const phased = jest.spyOn(fixture.phasedResolver, 'resolveRequestAsync');
     for (const invocationKind of [undefined, 'rush'] as const) {
       const request: IDaemonRequestEnvelope = { ...fixture.request(['build'], cwd), invocationKind };
-      expect((await fixture.runAsync(request)).outcome).toMatchObject({ kind: 'fallback', reason: 'unsupported' });
+      expect((await fixture.runAsync(request)).outcome).toMatchObject({
+        kind: 'fallback',
+        reason: 'unsupported'
+      });
     }
     expect(phased).toHaveBeenCalledTimes(2);
     expect(fs.existsSync(path.join(cwd, 'runs.txt'))).toBe(false);
@@ -185,30 +227,39 @@ describe('native Rushx execution boundaries', () => {
         if (output.includes('PARENT:') && output.includes('DESCENDANT:')) controller.abort();
       }
     });
-    expect(result.outcome).toMatchObject({ kind: 'result', result: { exitCode: 1, aborted: true, outcome: 'aborted' } });
+    expect(result.outcome).toMatchObject({
+      kind: 'result',
+      result: { exitCode: 1, aborted: true, outcome: 'aborted' }
+    });
     assertChildrenStopped(output);
     expect((await fixture.runAsync(fixture.request(['-q', 'args'], cwd))).exitCode).toBe(0);
   });
 
   it('cleans disconnected children without retrying the request', async () => {
     const cwd: string = await startAsync();
-    const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: fixture.host.paths.socketPath });
+    const client: DaemonClient = await DaemonClient.connectAsync({
+      socketPath: fixture.host.paths.socketPath
+    });
     let output: string = '';
-    await expect(client.executeAsync({
-      request: fixture.request(['-q', 'tree'], cwd),
-      onStdoutAsync: async (bytes) => {
-        output += Buffer.from(bytes).toString();
-        if (output.includes('PARENT:') && output.includes('DESCENDANT:')) await client.closeAsync();
-      },
-      onStderrAsync: async () => {}
-    })).rejects.toThrow('not retried');
+    await expect(
+      client.executeAsync({
+        request: fixture.request(['-q', 'tree'], cwd),
+        onStdoutAsync: async (bytes) => {
+          output += Buffer.from(bytes).toString();
+          if (output.includes('PARENT:') && output.includes('DESCENDANT:')) await client.closeAsync();
+        },
+        onStderrAsync: async () => {}
+      })
+    ).rejects.toThrow('not retried');
     await fixture.host.closeAsync();
     assertChildrenStopped(output);
   });
 });
 
 function assertChildrenStopped(output: string): void {
-  const pids: number[] = Array.from(output.matchAll(/(?:PARENT|DESCENDANT):(\d+)/g), (match) => Number(match[1]));
+  const pids: number[] = Array.from(output.matchAll(/(?:PARENT|DESCENDANT):(\d+)/g), (match) =>
+    Number(match[1])
+  );
   expect(pids).toHaveLength(2);
   for (const pid of pids) {
     try {
@@ -220,7 +271,10 @@ function assertChildrenStopped(output: string): void {
         throw new Error(`Script descendant ${pid} is still running.`);
       }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ESRCH' && (error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      if (
+        (error as NodeJS.ErrnoException).code !== 'ESRCH' &&
+        (error as NodeJS.ErrnoException).code !== 'ENOENT'
+      ) {
         throw error;
       }
     }

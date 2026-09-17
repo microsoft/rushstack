@@ -3,16 +3,7 @@
 
 import * as fs from 'node:fs';
 
-export interface ILockFileHandle {
-  prepareForRelease?(deleteFile: boolean): void;
-  close(): void;
-}
-
-export interface IWindowsLockFileResult {
-  readonly fileWriter: ILockFileHandle;
-  readonly filePath: string;
-  readonly dirtyWhenAcquired: boolean;
-}
+import type { ILockFileHandle, ITryAcquireResult } from './LockFile';
 
 // Public libuv Windows flag (supported since libuv 1.17), not exposed in fs.constants.
 // https://docs.libuv.org/en/v1.x/fs.html#c.UV_FS_O_EXLOCK
@@ -23,16 +14,24 @@ function hasCode(error: unknown, code: string): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === code;
 }
 
-/** Uses Windows sharing exclusion; O_EXCL alone only guarantees exclusive creation. */
-export function tryAcquireWindowsLockFile(filePath: string): IWindowsLockFileResult | undefined {
-  if (process.platform !== 'win32' || !process.versions.uv.startsWith('1.')) {
-    throw new Error('Native Windows file locking requires the supported libuv 1.x flag ABI.');
-  }
-  const flags: number = fs.constants.O_RDWR + UV_FS_O_EXLOCK;
+/** @internal */
+export function getWindowsLockFileDirtyPath(filePath: string): string {
+  return `${filePath}.dirty`;
+}
+
+/**
+ * Uses Windows sharing exclusion; O_EXCL alone only guarantees exclusive creation.
+ * Called only by the Windows dispatcher. Effective support is checked on every acquisition.
+ * @internal
+ */
+export function tryAcquireWindowsLockFile(filePath: string): ITryAcquireResult | undefined {
+  // eslint-disable-next-line no-bitwise
+  const flags: number = fs.constants.O_RDWR | UV_FS_O_EXLOCK;
   let descriptor: number | undefined;
   let created: boolean = false;
   try {
-    descriptor = fs.openSync(filePath, flags + fs.constants.O_CREAT + fs.constants.O_EXCL);
+    // eslint-disable-next-line no-bitwise
+    descriptor = fs.openSync(filePath, flags | fs.constants.O_CREAT | fs.constants.O_EXCL);
     created = true;
   } catch (error) {
     if (hasCode(error, 'EBUSY')) return undefined;
@@ -46,27 +45,26 @@ export function tryAcquireWindowsLockFile(filePath: string): IWindowsLockFileRes
   }
 
   try {
-    assertExclusiveSharing(filePath);
+    if (!hasExclusiveSharing(filePath)) return undefined;
     const stats: fs.BigIntStats = fs.fstatSync(descriptor, { bigint: true });
     const pathStats: fs.BigIntStats = fs.lstatSync(filePath, { bigint: true });
     if (
-      !stats.isFile() || !pathStats.isFile() || stats.nlink !== 1n ||
-      stats.dev !== pathStats.dev || stats.ino !== pathStats.ino
+      !stats.isFile() ||
+      !pathStats.isFile() ||
+      stats.nlink !== 1n ||
+      stats.dev !== pathStats.dev ||
+      stats.ino !== pathStats.ino
     ) {
       throw new Error(`The lock path must identify one unshared regular file: ${filePath}`);
     }
 
     // A previous release may delete the main pathname after a subsequent owner has already exited.
     // This companion survives that close/delete race and is cleared only under exclusive ownership.
-    const dirtyPath: string = `${filePath}.dirty`;
+    const dirtyPath: string = getWindowsLockFileDirtyPath(filePath);
     const dirtyMarkerExists: boolean = fs.lstatSync(dirtyPath, { throwIfNoEntry: false }) !== undefined;
     const dirtyWhenAcquired: boolean =
       dirtyMarkerExists || (!created && !hasCleanMarker(descriptor, stats.size));
-    try {
-      fs.writeFileSync(dirtyPath, '', { flag: 'wx', mode: 0o600 });
-    } catch (error) {
-      if (!hasCode(error, 'EEXIST')) throw error;
-    }
+    markDirty(dirtyPath);
 
     let heldDescriptor: number | undefined = descriptor;
     const fileWriter: ILockFileHandle = {
@@ -85,7 +83,21 @@ export function tryAcquireWindowsLockFile(filePath: string): IWindowsLockFileRes
       },
       close: () => {
         if (heldDescriptor !== undefined) {
-          fs.closeSync(heldDescriptor);
+          try {
+            fs.closeSync(heldDescriptor);
+          } catch (error) {
+            // Preparation may already have removed the companion. Conservatively restore it without
+            // touching the main file, since a failed close leaves native ownership uncertain.
+            try {
+              markDirty(dirtyPath);
+            } catch (dirtyError) {
+              throw new AggregateError(
+                [error, dirtyError],
+                `Failed to close the lock and restore its dirty marker: ${filePath}`
+              );
+            }
+            throw error;
+          }
           heldDescriptor = undefined;
         }
       }
@@ -97,17 +109,26 @@ export function tryAcquireWindowsLockFile(filePath: string): IWindowsLockFileRes
   }
 }
 
-function assertExclusiveSharing(filePath: string): void {
+function hasExclusiveSharing(filePath: string): boolean {
   let sharedDescriptor: number | undefined;
   try {
     sharedDescriptor = fs.openSync(filePath, fs.constants.O_RDONLY);
   } catch (error) {
-    if (hasCode(error, 'EBUSY')) return;
+    // libuv maps ERROR_SHARING_VIOLATION to EBUSY. Permission errors do not prove exclusion.
+    if (hasCode(error, 'EBUSY')) return true;
     throw error;
   } finally {
     if (sharedDescriptor !== undefined) fs.closeSync(sharedDescriptor);
   }
-  throw new Error(`The runtime did not enforce native exclusive file sharing: ${filePath}`);
+  return false;
+}
+
+function markDirty(dirtyPath: string): void {
+  try {
+    fs.writeFileSync(dirtyPath, '', { flag: 'wx', mode: 0o600 });
+  } catch (error) {
+    if (!hasCode(error, 'EEXIST')) throw error;
+  }
 }
 
 function hasCleanMarker(descriptor: number, size: bigint): boolean {

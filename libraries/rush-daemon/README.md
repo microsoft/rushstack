@@ -8,6 +8,16 @@ The package provides an opt-in `rushd` executable. Run it from a Rush workspace 
 for the nearest `rush.json`; it does not change the default behavior of `rush`, `rushx`, or
 `rush-pnpm`.
 
+The daemon is a local, same-user command executor, not a sandbox or a privilege boundary.
+Run it with the same identity and privileges as its clients, never as an elevated service for
+less-privileged callers, and do not expose its transport to untrusted users. Workspace scripts
+and the submitting client's environment are executable inputs, just as with native Rush.
+On Windows, lifecycle execution resolves `COMSPEC` case-insensitively from the request environment
+and uses that same interpreter for both shell layers. Node's `shell: true` selects from the host's
+`process.env`, not the supplied child environment, so using it for a request would silently change
+native client semantics when the host and client have different shells. Missing or empty request
+`COMSPEC` falls back to `cmd.exe`; it does not inherit the daemon's shell setting.
+
 Embedded hosts can opt into automatic shutdown with `idleTimeoutSeconds`. The timeout starts after
 readiness and resets after the last pending request finishes, including resolution, queueing, execution,
 output drain, and cleanup. An idle connection does not keep the daemon alive. Omitting the option keeps

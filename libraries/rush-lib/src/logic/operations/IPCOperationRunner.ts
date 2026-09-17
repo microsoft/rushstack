@@ -143,22 +143,19 @@ export class IPCOperationRunner implements IOperationRunner {
 
           const { environment: initialEnvironment } = context;
 
-          this.#ipcProcess = Utilities.executeLifecycleCommandAsync(
-            commandToRun,
-            {
-              rushConfiguration,
-              workingDirectory: projectFolder,
-              initCwd: rushConfiguration.commonTempFolder,
-              handleOutput: true,
-              environmentPathOptions: {
-                includeProjectBin: true
-              },
-              ipc: true,
-              connectSubprocessTerminator: true,
-              initialEnvironment
+          this.#ipcProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
+            rushConfiguration,
+            workingDirectory: projectFolder,
+            initCwd: rushConfiguration.commonTempFolder,
+            handleOutput: true,
+            environmentPathOptions: {
+              includeProjectBin: true
             },
-            this.#spawn
-          );
+            ipc: true,
+            connectSubprocessTerminator: true,
+            initialEnvironment,
+            spawn: this.#spawn
+          });
           this.#processClosedPromise = new Promise((resolve) => this.#ipcProcess!.once('close', resolve));
 
           let resolveReadyPromise!: () => void;
@@ -236,7 +233,10 @@ export class IPCOperationRunner implements IOperationRunner {
                 );
                 resolve(OperationStatus.Failure);
               } else if (requireIpc) {
-                context.error = new OperationError('error', 'The explicit daemon Node tool exited without completing IPC readiness.');
+                context.error = new OperationError(
+                  'error',
+                  'The explicit daemon Node tool exited without completing IPC readiness.'
+                );
                 resolve(OperationStatus.Failure);
               } else if (signal) {
                 context.error = new OperationError('error', `Terminated by signal: ${signal}`);

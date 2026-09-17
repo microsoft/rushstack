@@ -16,12 +16,16 @@ const FAILURE_MESSAGE: string = 'Unable to write daemon ownership';
 it('closes its bound endpoint when publishing ownership fails', async () => {
   const paths: IDaemonPaths = createTestDaemonPaths();
   const writeLockfile: jest.SpyInstance = jest.spyOn(daemonLockfile, 'writeDaemonLockfile');
-  writeLockfile.mockImplementationOnce(() => { throw new Error(FAILURE_MESSAGE); });
+  writeLockfile.mockImplementationOnce(() => {
+    throw new Error(FAILURE_MESSAGE);
+  });
   try {
-    await expect(DaemonFrameListener.listenAsync(paths, {
-      onConnection: () => undefined,
-      protocolVersion: DAEMON_PROTOCOL_VERSION
-    })).rejects.toThrow(FAILURE_MESSAGE);
+    await expect(
+      DaemonFrameListener.listenAsync(paths, {
+        onConnection: () => undefined,
+        protocolVersion: DAEMON_PROTOCOL_VERSION
+      })
+    ).rejects.toThrow(FAILURE_MESSAGE);
     await expect(connectDaemonAsync(paths.socketPath)).rejects.toMatchObject({
       code: DaemonTransportErrorCode.connectionRefused
     });

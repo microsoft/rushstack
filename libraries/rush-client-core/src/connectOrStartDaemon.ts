@@ -79,7 +79,9 @@ export async function connectOrStartDaemonAsync(
   if (!options.startCommand) {
     if (options.previousDaemon) {
       while (Date.now() < deadline) {
-        await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
+        await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
+          signal: options.abortSignal
+        });
         const successor: DaemonClient | undefined = await tryConnectAsync(options, deadline);
         if (successor) return successor;
       }
@@ -96,7 +98,9 @@ export async function connectOrStartDaemonAsync(
     options.abortSignal?.throwIfAborted();
     lock = await tryAcquireStartupLockAsync(options.paths);
     if (lock) break;
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
+      signal: options.abortSignal
+    });
     backoffMs = Math.min(500, backoffMs * 2);
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
@@ -150,7 +154,9 @@ export async function connectOrStartDaemonAsync(
           `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`
         );
       }
-      await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
+      await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
+        signal: options.abortSignal
+      });
       backoffMs = Math.min(500, backoffMs * 2);
     }
     throw startupError(options, 'timed out awaiting hello/ping readiness');
@@ -193,14 +199,21 @@ async function replaceMismatchedDaemonAsync(
   deadline: number
 ): Promise<DaemonClient | undefined> {
   if (options.expectedDaemonVersion === undefined) return undefined;
-  const current: DaemonClient | undefined = await tryConnectAsync({
-    ...options, expectedDaemonVersion: undefined, startCommand: undefined
-  }, deadline);
+  const current: DaemonClient | undefined = await tryConnectAsync(
+    {
+      ...options,
+      expectedDaemonVersion: undefined,
+      startCommand: undefined
+    },
+    deadline
+  );
   if (!current) return undefined;
   if ((await current.status).daemonVersion === options.expectedDaemonVersion) return current;
   try {
     const previousDaemon: Pick<IDaemonLockfile, 'pid' | 'startedAt'> = await requestDaemonShutdownAsync(
-      current, options.paths, Math.max(1, deadline - Date.now())
+      current,
+      options.paths,
+      Math.max(1, deadline - Date.now())
     );
     await waitForPreviousDaemonAsync(options.paths, previousDaemon, deadline, options.abortSignal);
   } finally {
@@ -264,8 +277,11 @@ async function waitForHandoffAsync(
   while (Date.now() < deadline) {
     const owner: IDaemonLockfile | undefined = readDaemonLockfile(options.paths.lockfilePath);
     // Only wait on a fully published endpoint; malformed or ambiguous ownership still fails closed.
-    if (!owner || owner.socketPath !== options.paths.socketPath || !isProcessAlive(owner.pid)) return undefined;
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: options.abortSignal });
+    if (!owner || owner.socketPath !== options.paths.socketPath || !isProcessAlive(owner.pid))
+      return undefined;
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
+      signal: options.abortSignal
+    });
     const client: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (client) return client;
     backoffMs = Math.min(500, backoffMs * 2);
@@ -350,7 +366,9 @@ async function readHandoffOwnershipAsync(
       }
     }
     // A sharing-denied record is unknown, not released. Retry only within the existing handoff deadline.
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: abortSignal });
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
+      signal: abortSignal
+    });
     backoffMs = Math.min(100, backoffMs * 2);
   }
 }
@@ -372,7 +390,9 @@ async function waitForPreviousDaemonAsync(
   while (true) {
     abortSignal?.throwIfAborted();
     const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = await readHandoffOwnershipAsync(
-      paths.lockfilePath, deadline, abortSignal
+      paths.lockfilePath,
+      deadline,
+      abortSignal
     );
     if (!owner || owner.pid !== pid || owner.startedAt !== startedAt || !isProcessAlive(owner.pid)) return;
     if (Date.now() >= deadline) {
@@ -381,7 +401,9 @@ async function waitForPreviousDaemonAsync(
         `The previous daemon still owns ${paths.lockfilePath} (PID ${pid}); cleanup is incomplete or failed. No PID was killed and no ownership record was reclaimed.`
       );
     }
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, { signal: abortSignal });
+    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
+      signal: abortSignal
+    });
     backoffMs = Math.min(500, backoffMs * 2);
   }
 }

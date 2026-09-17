@@ -25,13 +25,17 @@ describe('graph invalidation notifications', () => {
     const tracker: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
     const warning = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
     try {
-      tracker.subscribe(() => { throw new Error('subscriber failed'); });
+      tracker.subscribe(() => {
+        throw new Error('subscriber failed');
+      });
       const healthy = jest.fn();
       tracker.subscribe(healthy);
       tracker.invalidate('a/input.txt');
       expect(healthy).toHaveBeenCalledTimes(1);
       expect(tracker.getSnapshot().changedPaths).toEqual(['a/input.txt']);
-      expect(warning).toHaveBeenCalledWith(expect.any(Error), { code: 'RUSH_DAEMON_INVALIDATION_CALLBACK_ERROR' });
+      expect(warning).toHaveBeenCalledWith(expect.any(Error), {
+        code: 'RUSH_DAEMON_INVALIDATION_CALLBACK_ERROR'
+      });
     } finally {
       warning.mockRestore();
     }

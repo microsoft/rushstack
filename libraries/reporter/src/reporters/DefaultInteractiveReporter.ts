@@ -478,7 +478,12 @@ export class DefaultInteractiveReporter implements IReporter {
       `${cycle.completedOperations}/${cycle.totalOperations} operations`;
     const diagnosticLines: string[] = [];
     const startupCycle: IWatchCycleState | undefined = this._watchCycles.get(0);
-    if (payload.iterationId !== undefined && payload.iterationId > 0 && startupCycle && startupCycle !== cycle) {
+    if (
+      payload.iterationId !== undefined &&
+      payload.iterationId > 0 &&
+      startupCycle &&
+      startupCycle !== cycle
+    ) {
       diagnosticLines.push(...this._takeDiagnosticSummary(startupCycle));
       startupCycle.watchCompleted = true;
     }

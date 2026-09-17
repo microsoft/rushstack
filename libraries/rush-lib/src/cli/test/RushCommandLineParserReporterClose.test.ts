@@ -79,22 +79,23 @@ describe('RushCommandLineParser reporter close', () => {
   it('waits for reporter close before an explicit parser exit', async () => {
     let resolveClose: (() => void) | undefined;
     let markCloseStarted!: () => void;
-    const closeStarted: Promise<void> = new Promise((resolve) => { markCloseStarted = resolve; });
-    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
-      () => {
-        markCloseStarted();
-        return new Promise<void>((resolve: () => void) => {
-          resolveClose = resolve;
-        });
-      }
-    );
+    const closeStarted: Promise<void> = new Promise((resolve) => {
+      markCloseStarted = resolve;
+    });
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(() => {
+      markCloseStarted();
+      return new Promise<void>((resolve: () => void) => {
+        resolveClose = resolve;
+      });
+    });
     const sink: CapturingReporterSink = new CapturingReporterSink();
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: `${__dirname}/repo`,
       reporter: { eventSink: sink, sessionId: 'parser-exit-close' },
       reporterCloseAsync: closeAsync
     });
-    jest.spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+    jest
+      .spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
       .mockRejectedValue(new Error('parser failed'));
     const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
       .spyOn(process, 'exit')
@@ -149,7 +150,9 @@ describe('RushCommandLineParser reporter close', () => {
   it('reports close failure without rejecting from parser finalization', async () => {
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: `${__dirname}/repo`,
-      reporterCloseAsync: async () => { throw new Error('close failed'); }
+      reporterCloseAsync: async () => {
+        throw new Error('close failed');
+      }
     });
     const errorSpy: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     jest.spyOn(process.stdout, 'write').mockImplementation(() => true);

@@ -43,9 +43,9 @@ export const GENEROUS_WARM_CONFIGURATION: WorkspaceWarmSetConfiguration = {
 };
 
 export function captureWarmRankingDurations(graph: IOperationGraph): ReadonlyMap<Operation, number> {
-  return new Map([...graph.resultByOperation].map(([operation, result]) => [
-    operation, result.stopwatch.duration
-  ]));
+  return new Map(
+    [...graph.resultByOperation].map(([operation, result]) => [operation, result.stopwatch.duration])
+  );
 }
 
 /** Independent expected scores for the one-operation-per-project native fixtures. */
@@ -63,10 +63,12 @@ export function getMeasuredFixtureRetentionOrder(
       throw new Error(`Expected native timing, request history, and IPC RSS for ${name}.`);
     }
     const savedMs: number = Math.max(0, (coldDuration - result.stopwatch.duration) * 1000);
-    return { name, score: savedMs * frequency / memory, lastUsed: requestedProjects.lastIndexOf(name) };
+    return { name, score: (savedMs * frequency) / memory, lastUsed: requestedProjects.lastIndexOf(name) };
   });
-  measuredRanks.sort((a, b) => b.score - a.score || b.lastUsed - a.lastUsed ||
-    (a.name === b.name ? 0 : a.name < b.name ? -1 : 1));
+  measuredRanks.sort(
+    (a, b) =>
+      b.score - a.score || b.lastUsed - a.lastUsed || (a.name === b.name ? 0 : a.name < b.name ? -1 : 1)
+  );
   return measuredRanks.map(({ name }) => name);
 }
 

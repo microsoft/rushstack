@@ -12,9 +12,23 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { DaemonRequestDispatchError, type IDaemonRequestDispatchClient } from './DaemonRequestDispatcher';
-import { DaemonGraphChanges, getDaemonGraphObserver, snapshotDaemonGraph, type DaemonGraphObserver } from './DaemonGraphObserver';
-import { parseDaemonGraphRequest, selectDaemonGraphOperations, type IDaemonGraphRequest } from './DaemonGraphRequest';
-import { RequestExclusivityClass, RequestSchedulerError, RequestSchedulerErrorCode, type IRequestLease } from './RequestScheduler';
+import {
+  DaemonGraphChanges,
+  getDaemonGraphObserver,
+  snapshotDaemonGraph,
+  type DaemonGraphObserver
+} from './DaemonGraphObserver';
+import {
+  parseDaemonGraphRequest,
+  selectDaemonGraphOperations,
+  type IDaemonGraphRequest
+} from './DaemonGraphRequest';
+import {
+  RequestExclusivityClass,
+  RequestSchedulerError,
+  RequestSchedulerErrorCode,
+  type IRequestLease
+} from './RequestScheduler';
 import {
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler,
@@ -33,7 +47,10 @@ export class DaemonGraphRequestRouter {
     this._session = session;
   }
 
-  public async executeAsync(envelope: IDaemonRequestEnvelope, client: IDaemonRequestDispatchClient): Promise<void> {
+  public async executeAsync(
+    envelope: IDaemonRequestEnvelope,
+    client: IDaemonRequestDispatchClient
+  ): Promise<void> {
     const request: IDaemonGraphRequest = parseDaemonGraphRequest(envelope);
     let result: IDaemonCommandResult;
     try {
@@ -78,17 +95,21 @@ export class DaemonGraphRequestRouter {
     client: IDaemonRequestDispatchClient
   ): Promise<IDaemonGraphSnapshotPayload['snapshot']> {
     const admission: RequestAdmissionController = new RequestAdmissionController({
-      admission: envelope.admission, client, requestId: envelope.requestId
+      admission: envelope.admission,
+      client,
+      requestId: envelope.requestId
     });
     try {
       const lease: IRequestLease = await admission.acquireAsync(
-        getWorkspaceRequestScheduler(this._session), RequestExclusivityClass.Exclusive
+        getWorkspaceRequestScheduler(this._session),
+        RequestExclusivityClass.Exclusive
       );
       try {
         this._session.assertActive?.();
         if (envelope.expectedWorkspaceGeneration !== getWorkspaceGenerationToken(this._session)) {
           throw new DaemonRequestDispatchError(
-            'invalidRequest', 'The graph generation changed or was not supplied; read a fresh snapshot before mutating.'
+            'invalidRequest',
+            'The graph generation changed or was not supplied; read a fresh snapshot before mutating.'
           );
         }
         const graph: IOperationGraph = this._requireGraph();
@@ -102,9 +123,13 @@ export class DaemonGraphRequestRouter {
           await this._resumeAsync(graph);
         } else {
           if (graph.hasScheduledIteration) {
-            throw new DaemonRequestDispatchError('routingFailed', 'Cannot change a prepared graph iteration.');
+            throw new DaemonRequestDispatchError(
+              'routingFailed',
+              'Cannot change a prepared graph iteration.'
+            );
           }
-          if (request.verb === 'invalidate') graph.invalidateOperations(operations, 'daemon graph invalidate');
+          if (request.verb === 'invalidate')
+            graph.invalidateOperations(operations, 'daemon graph invalidate');
           else graph.setEnabledStates(operations, request.verb === 'scope-in', 'safe');
         }
         return snapshotDaemonGraph(this._session);
@@ -136,8 +161,11 @@ export class DaemonGraphRequestRouter {
       }
       const observer: DaemonGraphObserver = getDaemonGraphObserver(graph);
       const idleSequence: number = observer.idleSequence;
-      const changes: DaemonGraphChanges =
-        new DaemonGraphChanges(this._session, graph, graph.abortController.signal);
+      const changes: DaemonGraphChanges = new DaemonGraphChanges(
+        this._session,
+        graph,
+        graph.abortController.signal
+      );
       try {
         setPauseNextIteration(graph, false);
         while (observer.idleSequence === idleSequence) {
@@ -157,7 +185,8 @@ export class DaemonGraphRequestRouter {
     const graph: IOperationGraph | undefined = this._session.operationGraph;
     if (!graph || graph.abortController.signal.aborted) {
       throw new DaemonRequestDispatchError(
-        'routingFailed', 'The graph is uninitialized or closed. Initialize it with an explicit supported build request.'
+        'routingFailed',
+        'The graph is uninitialized or closed. Initialize it with an explicit supported build request.'
       );
     }
     return graph;

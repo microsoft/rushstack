@@ -35,7 +35,9 @@ export class WorkspaceInvalidationTracker {
   /** Observes changes and acknowledgements. Callback failures are reported as process warnings. */
   public subscribe(notify: () => void): () => void {
     this.#subscribers.add(notify);
-    return () => { this.#subscribers.delete(notify); };
+    return () => {
+      this.#subscribers.delete(notify);
+    };
   }
 
   /** Records a path-specific or unknown workspace change. */

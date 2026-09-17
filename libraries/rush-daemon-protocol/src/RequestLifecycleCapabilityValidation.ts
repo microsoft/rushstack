@@ -5,10 +5,7 @@ import { DaemonProtocolError } from './DaemonProtocolError';
 
 /** Validates optional stdin admission/EOF capability negotiation. @internal */
 export function validateInputLifecycleCapability(payload: Record<string, unknown>): void {
-  if (
-    payload.supportsInputLifecycle !== undefined &&
-    typeof payload.supportsInputLifecycle !== 'boolean'
-  ) {
+  if (payload.supportsInputLifecycle !== undefined && typeof payload.supportsInputLifecycle !== 'boolean') {
     throw new DaemonProtocolError(
       'malformedControlMessage',
       'Subscribe message payload.supportsInputLifecycle must be a boolean.'

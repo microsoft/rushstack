@@ -160,9 +160,7 @@ interface ITrackedChild {
   readonly completion: Promise<void>;
 }
 
-export class GlobalCommandExecutionContext
-  implements IGlobalCommandExecutionContext, AsyncDisposable
-{
+export class GlobalCommandExecutionContext implements IGlobalCommandExecutionContext, AsyncDisposable {
   readonly #abortController: AbortController = new AbortController();
   readonly #client: IGlobalCommandRequestClient;
   readonly #disposables: AsyncDisposable[] = [];
@@ -247,23 +245,24 @@ export class GlobalCommandExecutionContext
       throw new Error('The global command did not register an interactive input session.');
     }
     const canonicalCwd: string = resolveGlobalCommandWorkingDirectory(
-      options.cwd ?? this.cwd, this.workspaceSession
+      options.cwd ?? this.cwd,
+      this.workspaceSession
     );
     const child: childProcess.ChildProcessWithoutNullStreams = childProcess.spawn(command, [...args], {
-      cwd: process.platform === 'win32' ? options.cwd ?? canonicalCwd : canonicalCwd,
+      cwd: process.platform === 'win32' ? (options.cwd ?? canonicalCwd) : canonicalCwd,
       detached: SubprocessTerminator.RECOMMENDED_OPTIONS.detached,
-      env: options.environment === undefined
-        ? createGlobalCommandEnvironment(this.environment, options.environmentOverlay)
-        : resolveGlobalCommandEnvironment(options.environment),
+      env:
+        options.environment === undefined
+          ? createGlobalCommandEnvironment(this.environment, options.environmentOverlay)
+          : resolveGlobalCommandEnvironment(options.environment),
       shell: options.shell,
       stdio: 'pipe',
       windowsHide: options.windowsHide
     });
     SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
-    const completion: Promise<void> = this.#trackChildAsync(child)
-      .catch((error: unknown) => {
-        this.#childCompletionErrors.push(error);
-      });
+    const completion: Promise<void> = this.#trackChildAsync(child).catch((error: unknown) => {
+      this.#childCompletionErrors.push(error);
+    });
     const trackedChild: ITrackedChild = { completion };
     this.#trackedChildren.add(trackedChild);
     void completion.then(() => this.#trackedChildren.delete(trackedChild));

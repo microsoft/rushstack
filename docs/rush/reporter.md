@@ -1,5 +1,8 @@
 # Experimental Rush reporters
 
+For the daemon and reporter environment-variable reference, see
+[Experimental daemon and reporter environment variables](environment-variables.md).
+
 Rush 5 keeps its existing terminal output by default. The reporter system is a
 pre-major, explicit opt-in that can render the same command as an interactive
 display, append-only text, machine-readable events, an AI-oriented summary, or

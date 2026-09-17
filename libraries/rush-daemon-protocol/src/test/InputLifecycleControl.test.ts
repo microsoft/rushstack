@@ -22,15 +22,19 @@ it.each(['stdinReady', 'stdinEnd'])('requires a valid request identifier for %s'
 });
 
 it.each([true, false, undefined])('accepts input capability %s', (supportsInputLifecycle) => {
-  expect(() => validateDaemonControlMessage({
-    kind: 'subscribe',
-    payload: { isTTY: false, supportsInputLifecycle }
-  })).not.toThrow();
+  expect(() =>
+    validateDaemonControlMessage({
+      kind: 'subscribe',
+      payload: { isTTY: false, supportsInputLifecycle }
+    })
+  ).not.toThrow();
 });
 
 it('rejects an invalid input lifecycle capability', () => {
-  expect(() => validateDaemonControlMessage({
-    kind: 'subscribe',
-    payload: { isTTY: false, supportsInputLifecycle: 'yes' }
-  })).toThrow('supportsInputLifecycle');
+  expect(() =>
+    validateDaemonControlMessage({
+      kind: 'subscribe',
+      payload: { isTTY: false, supportsInputLifecycle: 'yes' }
+    })
+  ).toThrow('supportsInputLifecycle');
 });

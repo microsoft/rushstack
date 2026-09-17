@@ -453,7 +453,10 @@ if (fs.existsSync(controlFile)) {
       if (errors.length === 0) await removeTestFolderAsync(this.folder, true);
     }
     if (errors.length > 0) {
-      throw new AggregateError(errors, `Failed to clean up native mutation fixtures; retained ${this.folder}.`);
+      throw new AggregateError(
+        errors,
+        `Failed to clean up native mutation fixtures; retained ${this.folder}.`
+      );
     }
   }
 }
@@ -485,10 +488,7 @@ function waitForOwnershipAsync(paths: IDaemonPaths, oldPid: number): Promise<IDa
       () => finish(undefined, new Error('No successor acquired ownership.')),
       20_000
     );
-    const watcher: fs.FSWatcher = fs.watch(
-      fs.realpathSync.native(path.dirname(paths.lockfilePath)),
-      inspect
-    );
+    const watcher: fs.FSWatcher = fs.watch(fs.realpathSync.native(path.dirname(paths.lockfilePath)), inspect);
     function finish(owner?: IDaemonLockfile, error?: Error): void {
       clearTimeout(timeout);
       watcher.close();

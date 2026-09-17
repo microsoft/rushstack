@@ -18,7 +18,9 @@ export function writeOperationStreamHeader(
   if (!writer) return;
   const counters: IDaemonOperationHeaderPayload = headers.takeOperationHeader(writer.taskName);
   const header: string = formatDaemonOperationHeader(
-    writer.taskName, counters.completedOperations, counters.totalOperations
+    writer.taskName,
+    counters.completedOperations,
+    counters.totalOperations
   );
   terminal.writeStdoutLine(`\n${header}`);
   if (!quiet) terminal.writeStdoutLine(EMPTY_LINE);

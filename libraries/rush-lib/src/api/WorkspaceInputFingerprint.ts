@@ -6,7 +6,7 @@ import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import { createHash } from 'node:crypto';
 
-import { Async, FileSystem, JsonFile, PackageJsonLookup, Path } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, PackageJsonLookup, Path, Sort } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from './RushConfiguration';
@@ -36,6 +36,13 @@ export interface IWorkspaceInputFingerprintOptions {
 /**
  * Memoizes runtime content digests behind file identity, size, nanosecond mtime and ctime checks.
  * Changes to metadata alone still produce the same content fingerprint.
+ *
+ * @remarks
+ * Embedding hosts create one cache per workspace lifetime and pass it to
+ * {@link captureWorkspaceInputFingerprintAsync} through `runtimeCache`. The capture function
+ * updates the cache; hosts can inspect {@link WorkspaceRuntimeFingerprintCache.changedPaths}
+ * when reporting why a process restart is required.
+ *
  * @alpha
  */
 export class WorkspaceRuntimeFingerprintCache {
@@ -43,7 +50,10 @@ export class WorkspaceRuntimeFingerprintCache {
   private _baseline: ReadonlyMap<string, string> | undefined;
   private _changedPaths: ReadonlyArray<string> = [];
 
-  /** @internal */
+  /**
+   * Implementation paths whose content or existence differs from the first capture using this cache.
+   * Updated by each capture; metadata-only changes do not appear in this list.
+   */
   public get changedPaths(): ReadonlyArray<string> {
     return this._changedPaths;
   }
@@ -174,7 +184,7 @@ export async function captureWorkspaceInputFingerprintAsync(
       JSON.stringify(
         Object.entries(environment)
           .filter(([, value]) => value !== undefined)
-          .sort(([left], [right]) => left.localeCompare(right))
+          .sort(([left], [right]) => Sort.compareByValue(left, right))
       )
     ),
     installationHash: await hashFilesAsync(installation),
@@ -191,13 +201,16 @@ export async function captureProjectConfigurationFingerprintAsync(
   const configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
     await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(rushConfiguration.projects, terminal);
   return hashText(
-    JSON.stringify(
-      [await getDaemonIpcImplementationIdentityAsync(configurations, rushConfiguration.daemon.usePersistentIpcRunners),
+    JSON.stringify([
+      await getDaemonIpcImplementationIdentityAsync(
+        configurations,
+        rushConfiguration.daemon.usePersistentIpcRunners
+      ),
       Array.from(configurations, ([project, configuration]) => [
         project.packageName,
         configuration._getJsonForFingerprint()
-      ]).sort(([left], [right]) => left.localeCompare(right))]
-    )
+      ]).sort(([left], [right]) => Sort.compareByValue(left, right))
+    ])
   );
 }
 

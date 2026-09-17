@@ -50,7 +50,9 @@ describe('classified source aliases in machine reporters', () => {
     const original: string = JSON.stringify(event);
     let output: string = '';
     const reporter = new JsonReporter({
-      write: (text) => { output += text; },
+      write: (text) => {
+        output += text;
+      },
       maxRecordBytes: oversized ? 768 : undefined
     });
     reporter.report(event);
@@ -73,22 +75,34 @@ describe('classified source aliases in machine reporters', () => {
     expect(JSON.stringify(event)).toBe(original);
   });
 
-  it.each([false, true])('keeps source aliases out of bounded AI output (oversized: %s)', async (oversized) => {
-    const event = diagnosticEvent(oversized);
-    const original: string = JSON.stringify(event);
-    let output: string = '';
-    const reporter = new AiReporter({ write: (text) => { output += text; }, maxBytes: oversized ? 512 : 65536 });
-    reporter.report(event);
-    reporter.report({ ...event, type: 'artifactAvailable', payload: { role: 'log', path: '/protected/full.log', complete: true } });
-    reporter.report({ ...event, type: 'commandResult', payload: { succeeded: false, exitCode: 1 } });
-    await reporter.closeAsync();
+  it.each([false, true])(
+    'keeps source aliases out of bounded AI output (oversized: %s)',
+    async (oversized) => {
+      const event = diagnosticEvent(oversized);
+      const original: string = JSON.stringify(event);
+      let output: string = '';
+      const reporter = new AiReporter({
+        write: (text) => {
+          output += text;
+        },
+        maxBytes: oversized ? 512 : 65536
+      });
+      reporter.report(event);
+      reporter.report({
+        ...event,
+        type: 'artifactAvailable',
+        payload: { role: 'log', path: '/protected/full.log', complete: true }
+      });
+      reporter.report({ ...event, type: 'commandResult', payload: { succeeded: false, exitCode: 1 } });
+      await reporter.closeAsync();
 
-    expect(output).not.toContain(PRIVATE_PRODUCER);
-    expect(output).not.toContain(PRIVATE_COMPONENT);
-    expect(Buffer.byteLength(output)).toBeLessThanOrEqual(oversized ? 512 : 65536);
-    expect(JSON.parse(output).log.path).toBe('/protected/full.log');
-    expect(JSON.stringify(event)).toBe(original);
-  });
+      expect(output).not.toContain(PRIVATE_PRODUCER);
+      expect(output).not.toContain(PRIVATE_COMPONENT);
+      expect(Buffer.byteLength(output)).toBeLessThanOrEqual(oversized ? 512 : 65536);
+      expect(JSON.parse(output).log.path).toBe('/protected/full.log');
+      expect(JSON.stringify(event)).toBe(original);
+    }
+  );
 
   it('preserves unrelated machine source and location fields', () => {
     const event: IReporterEventEnvelope<IRushDiagnostic> = {
@@ -100,7 +114,11 @@ describe('classified source aliases in machine reporters', () => {
       }
     };
     let output: string = '';
-    new JsonReporter({ write: (text) => { output += text; } }).report(event);
+    new JsonReporter({
+      write: (text) => {
+        output += text;
+      }
+    }).report(event);
     const projected = JSON.parse(output);
     expect(projected.source).toEqual(event.source);
     expect(projected.payload.source).toEqual(event.payload.source);
@@ -111,18 +129,31 @@ describe('classified source aliases in machine reporters', () => {
   it('redacts matching version, component, and file fields without stripping unrelated identity or tool data', () => {
     const event: IReporterEventEnvelope<IRushDiagnostic> = {
       ...diagnosticEvent(),
-      source: { packageName: '@public/tool', packageVersion: `version-${PRIVATE_PRODUCER}`, component: PRIVATE_PRODUCER },
+      source: {
+        packageName: '@public/tool',
+        packageVersion: `version-${PRIVATE_PRODUCER}`,
+        component: PRIVATE_PRODUCER
+      },
       payload: {
         ...diagnosticEvent().payload,
         source: { kind: 'file', file: `/repo/${PRIVATE_PRODUCER}/index.ts`, line: 3, toolName: 'typescript' }
       }
     };
     let output: string = '';
-    new JsonReporter({ write: (text) => { output += text; } }).report(event);
+    new JsonReporter({
+      write: (text) => {
+        output += text;
+      }
+    }).report(event);
     const projected = JSON.parse(output);
     expect(output).not.toContain(PRIVATE_PRODUCER);
     expect(projected.source).toEqual({ packageName: '@public/tool', packageVersion: '[private-version]' });
-    expect(projected.payload.source).toEqual({ kind: 'file', file: '[secret]', line: 3, toolName: 'typescript' });
+    expect(projected.payload.source).toEqual({
+      kind: 'file',
+      file: '[secret]',
+      line: 3,
+      toolName: 'typescript'
+    });
   });
 
   it('does not classify every source field as secret for an empty secret value', () => {
@@ -131,7 +162,11 @@ describe('classified source aliases in machine reporters', () => {
       payload: { ...diagnosticEvent().payload, parameters: { empty: { value: '', privacy: 'secret' } } }
     };
     let output: string = '';
-    new JsonReporter({ write: (text) => { output += text; } }).report(event);
+    new JsonReporter({
+      write: (text) => {
+        output += text;
+      }
+    }).report(event);
     const projected = JSON.parse(output);
     expect(projected.source).toEqual(event.source);
     expect(projected.payload.source).toEqual(event.payload.source);
@@ -149,7 +184,12 @@ describe('classified source aliases in machine reporters', () => {
       expect(artifact.available).toBe(true);
       expect(artifact.complete).toBe(true);
       const content: string = fs.readFileSync(artifact.path!, 'utf8');
-      const metadata = JSON.parse(content.split('\n').find((line) => line.startsWith('# {'))!.slice(2));
+      const metadata = JSON.parse(
+        content
+          .split('\n')
+          .find((line) => line.startsWith('# {'))!
+          .slice(2)
+      );
       expect(metadata.source).toEqual(event.source);
       expect(metadata.payload.source).toEqual(event.payload.source);
       expect(metadata.payload.parameters.pluginName.value).toBe('[secret]');

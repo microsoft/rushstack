@@ -7,6 +7,7 @@ import {
   type IOperationGraph,
   type Operation
 } from '@microsoft/rush-lib';
+import { Sort } from '@rushstack/node-core-library';
 import type {
   IDaemonGraphInvalidations,
   IDaemonGraphOperation,
@@ -77,7 +78,7 @@ export class DaemonGraphObserver {
       enabled: operation.enabled,
       status: this.#getOperationStatus(graph, operation),
       dependencyIds: Array.from(operation.dependencies, (dependency) => dependency.name).sort()
-    })).sort((a, b) => a.operationId.localeCompare(b.operationId));
+    })).sort((a, b) => Sort.compareByValue(a.operationId, b.operationId));
   }
 
   #getOperationStatus(graph: IOperationGraph, operation: Operation): OperationStatus | null {

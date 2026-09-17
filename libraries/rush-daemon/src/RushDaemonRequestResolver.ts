@@ -21,13 +21,15 @@ export class RushDaemonRequestResolver implements IDaemonRequestResolver {
   public constructor(rushResolver: IDaemonRequestResolver) {
     this.#rushResolver = rushResolver;
     this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
-      rushResolver, (replacement) => new RushDaemonRequestResolver(replacement)
+      rushResolver,
+      (replacement) => new RushDaemonRequestResolver(replacement)
     );
   }
 
   public resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
-    return (options.envelope.invocationKind === 'rushx' ? this.#rushxResolver : this.#rushResolver)
-      .resolveRequestAsync(options);
+    return (
+      options.envelope.invocationKind === 'rushx' ? this.#rushxResolver : this.#rushResolver
+    ).resolveRequestAsync(options);
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {

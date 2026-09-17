@@ -48,21 +48,31 @@ describe('native Rushx through a real daemon', () => {
       const environment = fixture.environment({ CLIENT_MARKER: name, HOME: home, USERPROFILE: home });
       return { project, nested: path.join(project, 'subfolder'), environment };
     });
-    const native = await Promise.all(requests.map(({ nested, environment }) =>
-      fixture.invokeAsync(true, ['--quiet', 'build'], nested, environment)
-    ));
-    const daemon = await Promise.all(requests.map(({ nested, environment }) =>
-      fixture.runAsync(fixture.request(['--quiet', 'build'], nested, environment))
-    ));
+    const native = await Promise.all(
+      requests.map(({ nested, environment }) =>
+        fixture.invokeAsync(true, ['--quiet', 'build'], nested, environment)
+      )
+    );
+    const daemon = await Promise.all(
+      requests.map(({ nested, environment }) =>
+        fixture.runAsync(fixture.request(['--quiet', 'build'], nested, environment))
+      )
+    );
     daemon.forEach((result, index) => {
-      expect({ stdout: result.stdout, stderr: result.stderr, exitCode: result.exitCode }).toEqual(native[index]);
+      expect({ stdout: result.stdout, stderr: result.stderr, exitCode: result.exitCode }).toEqual(
+        native[index]
+      );
       expect(JSON.parse(result.stdout.toString())).toMatchObject({
-        cwd: requests[index].project, invoked: requests[index].nested,
+        cwd: requests[index].project,
+        invoked: requests[index].nested,
         init: path.join(fixture.folder, 'common/temp'),
         bin: path.join(requests[index].project, 'node_modules/.bin'),
-        marker: index === 0 ? 'a' : 'b', repo: 'from-repo',
+        marker: index === 0 ? 'a' : 'b',
+        repo: 'from-repo',
         user: index === 0 ? 'from-user' : 'second-user',
-        order: 'from-repo', client: 'from-client', recursive: '1'
+        order: 'from-repo',
+        client: 'from-client',
+        recursive: '1'
       });
       expect(JSON.parse(result.stdout.toString())).not.toHaveProperty('npmConfig');
       expect(JSON.parse(result.stdout.toString())).not.toHaveProperty('absent');
@@ -71,17 +81,32 @@ describe('native Rushx through a real daemon', () => {
 
   it('uses native parsing and escaping for arbitrary arguments, flags after the command and --', async () => {
     const args: string[] = [
-      '-q', '--debug', 'args', '--help', '--quiet', '--reporter=json',
-      'two words', 'single\' quote', '"double quote"', '; echo bad', 'a & b', 'a\\ b',
-      '--', '--no-daemon', '--no-wait', '--wait-timeout', 'bogus'
+      '-q',
+      '--debug',
+      'args',
+      '--help',
+      '--quiet',
+      '--reporter=json',
+      'two words',
+      "single' quote",
+      '"double quote"',
+      '; echo bad',
+      'a & b',
+      'a\\ b',
+      '--',
+      '--no-daemon',
+      '--no-wait',
+      '--wait-timeout',
+      'bogus'
     ];
     const native: IScriptResult = await fixture.invokeAsync(true, args, cwd);
     expect(await fixture.invokeAsync(false, args, cwd)).toEqual(native);
     expect(JSON.parse(native.stdout.toString())).toEqual(args.slice(3));
   });
 
-  it.each(['', 'single\'quote', '"double"', '$(printf native)', 'a\\b'])(
-    'preserves native escaping semantics even for shell-sensitive argument %s', async (arg) => {
+  it.each(['', "single'quote", '"double"', '$(printf native)', 'a\\b'])(
+    'preserves native escaping semantics even for shell-sensitive argument %s',
+    async (arg) => {
       const argv: string[] = ['-q', 'args', arg];
       expect(await fixture.invokeAsync(false, argv, cwd)).toEqual(await fixture.invokeAsync(true, argv, cwd));
     }
@@ -106,7 +131,10 @@ describe('native Rushx through a real daemon', () => {
   });
 
   it('retains unregistered-project warnings and native missing-script errors without fallback', async () => {
-    for (const [project, script] of [['unregistered', 'args'], ['a', 'missing']]) {
+    for (const [project, script] of [
+      ['unregistered', 'args'],
+      ['a', 'missing']
+    ]) {
       const folder: string = path.join(fixture.folder, 'projects', project);
       const native: IScriptResult = await fixture.invokeAsync(true, [script], folder);
       expect(await fixture.invokeAsync(false, [script], folder)).toEqual(native);
@@ -141,9 +169,14 @@ describe('native Rushx through a real daemon', () => {
     const input: PassThrough = new PassThrough();
     input.end('untouched');
     const request = fixture.request(['pipe'], cwd);
-    const result: IRequestResult = await fixture.runAsync({
-      ...request, terminal: { ...request.terminal, terminalRequirement: 'controllingTerminal' }
-    }, undefined, { stdin: input });
+    const result: IRequestResult = await fixture.runAsync(
+      {
+        ...request,
+        terminal: { ...request.terminal, terminalRequirement: 'controllingTerminal' }
+      },
+      undefined,
+      { stdin: input }
+    );
     expect(result.outcome).toMatchObject({ kind: 'fallback', reason: 'controllingTerminalRequired' });
     expect(input.read().toString()).toBe('untouched');
   });

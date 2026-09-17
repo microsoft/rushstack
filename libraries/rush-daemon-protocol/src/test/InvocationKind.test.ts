@@ -9,8 +9,13 @@ function request(invocationKind: unknown): IDaemonRequestStartMessage {
   const message: unknown = {
     kind: 'requestStart',
     payload: {
-      argv: ['build'], commandName: 'build', commandOrigin: 'custom',
-      cwd: '/repo/project', environment: {}, invocationKind, requestId: 'rushx',
+      argv: ['build'],
+      commandName: 'build',
+      commandOrigin: 'custom',
+      cwd: '/repo/project',
+      environment: {},
+      invocationKind,
+      requestId: 'rushx',
       terminal: { isTTY: false, supportsColor: false }
     }
   };

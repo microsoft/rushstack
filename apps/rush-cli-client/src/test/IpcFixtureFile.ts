@@ -8,7 +8,8 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 export function writeIpcFixtureFile(filename: string, contents: string): void {
   const temporary: string = path.join(
-    path.dirname(filename), `.${path.basename(filename)}-${process.pid}-${randomUUID()}.tmp`
+    path.dirname(filename),
+    `.${path.basename(filename)}-${process.pid}-${randomUUID()}.tmp`
   );
   const descriptor: number = fs.openSync(temporary, 'wx', 0o600);
   try {
@@ -26,8 +27,11 @@ export function writeIpcFixtureFile(filename: string, contents: string): void {
 export function readIpcFixtureEvents<T>(filename: string): T[] {
   const contents: string = fs.readFileSync(filename, 'utf8');
   // A concurrent append is not published until its terminating newline is visible.
-  return contents.slice(0, contents.lastIndexOf('\n') + 1)
-    .split('\n').filter(Boolean).map((line) => JSON.parse(line));
+  return contents
+    .slice(0, contents.lastIndexOf('\n') + 1)
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
 }
 
 export async function readPressureGateAsync(
@@ -38,8 +42,9 @@ export async function readPressureGateAsync(
     if (performance.now() >= deadline) throw new Error('Pressure fixture gate was not released.');
     await delayAsync(10);
   }
-  const gate: { additionalMemoryBytes?: number; cancelled?: boolean } =
-    JSON.parse(fs.readFileSync(filename, 'utf8'));
+  const gate: { additionalMemoryBytes?: number; cancelled?: boolean } = JSON.parse(
+    fs.readFileSync(filename, 'utf8')
+  );
   if (gate.cancelled) throw new Error('Pressure fixture setup was cancelled.');
   return gate;
 }

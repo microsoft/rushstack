@@ -426,8 +426,9 @@ describe('native production daemon engine', () => {
         ...requestEnvironment(),
         _RUSH_LIB_PATH: path.join(fixture.repoRoot, 'foreign-client-engine.js')
       };
-      expect((await runAsync(fixture, 'foreign-sdk', ['build', '--only', 'a'], { environment })).terminal)
-        .toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
+      expect(
+        (await runAsync(fixture, 'foreign-sdk', ['build', '--only', 'a'], { environment })).terminal
+      ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
       expect(fixture.session.operationGraph).toBe(graph);
       expect(environment._RUSH_LIB_PATH).toBe(path.join(fixture.repoRoot, 'foreign-client-engine.js'));
       expect(runs(fixture)).toEqual(['a:one:']);
@@ -558,7 +559,9 @@ describe('native production daemon engine', () => {
       await second.sendControlAsync({
         kind: 'requestStart',
         payload: createWireEnvelope('queued-for-restart', 'build', fixture.repoRoot, {
-          argv: ['build', '--only', 'a'], commandOrigin: 'built-in', environment
+          argv: ['build', '--only', 'a'],
+          commandOrigin: 'built-in',
+          environment
         })
       });
       expect((await second.readControlAsync()).kind).toBe('queuePosition');
@@ -566,7 +569,8 @@ describe('native production daemon engine', () => {
       release.resolve();
       for (const result of await Promise.all([firstResult, secondResult])) {
         expect(result.terminal).toMatchObject({
-          kind: 'requestResult', payload: { exitCode: 1, retryAfterRestart: true }
+          kind: 'requestResult',
+          payload: { exitCode: 1, retryAfterRestart: true }
         });
         expect(result.frames.every((frame) => frame.kind === DaemonFrameType.controlJson)).toBe(true);
       }

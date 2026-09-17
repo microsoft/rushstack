@@ -58,7 +58,8 @@ export async function getDaemonConnectionOptionsAsync(
   );
   if (!autoStart) return { paths: options.paths };
   // The bundled runtime is already loaded here; its bootstrap re-attests before binding.
-  if (rushVersion === Rush.version) return getDaemonConnectionOptions(repoRoot, rushVersion, environment, true);
+  if (rushVersion === Rush.version)
+    return getDaemonConnectionOptions(repoRoot, rushVersion, environment, true);
   const launch: IVersionSelectedDaemonLaunch = await selectDaemonLauncherAsync({
     repoRoot: fs.realpathSync.native(repoRoot),
     rushVersion,

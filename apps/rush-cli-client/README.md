@@ -3,6 +3,35 @@
 Separate `rush-client` and `rushx-client` binaries, opt-in until cutover. Existing
 `rush`, `rushx`, and their reporter entrypoints are unchanged.
 
+## Native frontend dependency
+
+The dependency on `@microsoft/rush` is intentional: it is the version-selecting
+frontend, whereas `@microsoft/rush-lib` is the execution engine. Native routing
+and safe daemon fallback in `src/launchClient.ts` restore the `rush` or `rushx`
+executable name and load the frontend's exported `lib/start` entrypoint. They
+must not call the client's bundled `Rush.launch()` or `Rush.launchRushX()`
+directly: the workspace or `RUSH_PREVIEW_VERSION` can select a different engine.
+The client also reuses the frontend's `MinimalRushConfiguration` for native
+Rushx discovery output instead of maintaining a second implementation.
+
+The startup sequence in `apps/rush/src/start.ts` and `RushFrontend.ts` selects
+and initializes the reporter before `RushVersionSelector` installs or loads
+the selected engine. `RushCommandSelector` then handles engine capabilities
+and old-engine output compatibility. Selection supports releases predating
+`rush-lib` (before Rush 4), and cannot depend on a new API being present in the
+selected engine. Calling a selector alone would also bypass reporter startup,
+preview-version validation, and native launch options.
+
+The runtime dependency direction is client → frontend → engine; `rush-lib`
+does not depend on this client or on the frontend. Re-exporting the existing
+frontend selector from `rush-lib` would introduce an engine → frontend → engine
+cycle. A future standalone bootstrap package would need to own the complete
+startup/reporting contract, not just engine installation. Until that separation
+is warranted, reusing the existing frontend preserves version selection and
+reporter behavior without duplicating or relocating bootstrap code.
+
+## Routing
+
 Routing precedence:
 
 1. `--no-daemon` before `--`, help, never-daemonize commands, and Rushx with any TTY stdio stay in-process.
