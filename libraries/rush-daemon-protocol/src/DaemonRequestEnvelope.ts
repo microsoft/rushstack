@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { DaemonInvocationKind } from './DaemonInvocationKind';
 import type { IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 import type { DaemonRushCommandOrigin } from './DaemonRushCommand';
 import type { DaemonTerminalRequirement } from './DaemonTerminalPolicy';
@@ -33,6 +34,8 @@ export interface IDaemonRequestTerminal {
  * @beta
  */
 export interface IDaemonRequestEnvelope {
+  /** Required by graph mutations to reject stale client-held operation references (protocol 0.9). */
+  readonly expectedWorkspaceGeneration?: string;
   /** Queue-and-wait behavior requested by the client integration. */
   readonly admission?: IDaemonRequestAdmissionOptions;
   /** The original command arguments, excluding the Rush executable. */
@@ -45,6 +48,8 @@ export interface IDaemonRequestEnvelope {
   readonly cwd: string;
   /** A complete request-local environment snapshot. */
   readonly environment: Readonly<Record<string, string>>;
+  /** Native parser selection (protocol 0.8). Omission means Rush, never an inferred package script. */
+  readonly invocationKind?: DaemonInvocationKind;
   /** A client-generated identifier unique within this connection. */
   readonly requestId: string;
   /** Request-local terminal capabilities. */

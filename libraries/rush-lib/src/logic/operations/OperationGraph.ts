@@ -52,6 +52,8 @@ export interface IOperationGraphOptions {
    * Consumers (e.g. ProjectWatcher) can subscribe to this to perform cleanup.
    */
   abortController: AbortController;
+  /** Hosts with awaited lifetime cleanup can disable the legacy fire-and-forget abort cleanup. */
+  closeRunnersOnAbort?: boolean;
 
   isWatch?: boolean;
   pauseNextIteration?: boolean;
@@ -245,7 +247,9 @@ export class OperationGraph implements IOperationGraph {
         if (this.#idleTimeout) {
           clearTimeout(this.#idleTimeout);
         }
-        void this.closeRunnersAsync();
+        if (options.closeRunnersOnAbort !== false) {
+          void this.closeRunnersAsync();
+        }
       },
       { once: true }
     );
@@ -487,6 +491,31 @@ export class OperationGraph implements IOperationGraph {
     }
   }
 
+  public deleteResults(operations: Iterable<Operation>): void {
+    if (this.#currentIteration || this.#scheduledIteration) {
+      throw new Error('Cannot delete results of an executing or prepared graph.');
+    }
+    const selected: Set<Operation> = new Set(operations);
+    for (const operation of selected) {
+      if (!this.operations.has(operation)) {
+        throw new Error(`Cannot delete results for an operation outside this graph: ${operation.name}`);
+      }
+      if (operation.runner?.isActive) {
+        throw new Error(`Cannot delete results of an active runner: ${operation.name}`);
+      }
+    }
+    // Each completed record originally owns a context and edges referencing the whole iteration.
+    // Detach survivors too; deleting only the selected map keys would retain the cold records.
+    this.hooks.beforeDeleteResults.call(selected);
+    for (const record of this.resultByOperation.values()) {
+      record.detachExecutionContext();
+    }
+    for (const operation of selected) {
+      this.resultByOperation.delete(operation);
+    }
+    this.#scheduleManagerStateChanged();
+  }
+
   /**
    * Shorthand for scheduling an iteration then executing it.
    * Call `abortCurrentIterationAsync()` to cancel the execution of any operations that have not yet begun execution.
@@ -520,9 +549,36 @@ export class OperationGraph implements IOperationGraph {
   }
 
   /**
-   * Executes all operations which have been registered, returning a promise which is resolved when all operations have been processed to a final state.
-   * Aborts the current iteration first, if any.
+   * Discards unstarted records without executing scripts, changing completed results, or closing retained runners.
    */
+  public discardScheduledIteration(): boolean {
+    if (this.#currentIteration) {
+      throw new Error('Cannot discard prepared work while an iteration is executing.');
+    }
+    const iteration: IExecutionIterationContext | undefined = this.#scheduledIteration;
+    if (!iteration) return false;
+    this.#setScheduledIteration(undefined);
+    const errors: unknown[] = [];
+    for (const record of iteration.records.values()) {
+      record.status = OperationStatus.Aborted;
+      for (const close of [
+        () => record.finalizeOperation(),
+        () => record.stdioSummarizer.close(),
+        () => record.problemCollector.close()
+      ]) {
+        try {
+          close();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+    }
+    this.hooks.onExecutionStatesUpdated.call(new Set(iteration.records.values()));
+    if (errors.length) throw new AggregateError(errors, 'Failed to discard prepared operation records.');
+    return true;
+  }
+
+  /** Executes the prepared iteration, after awaiting cancellation of any current iteration. */
   public async executeScheduledIterationAsync(): Promise<boolean> {
     await this.abortCurrentIterationAsync();
 
@@ -664,9 +720,7 @@ export class OperationGraph implements IOperationGraph {
       maxParallelism: this.#maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
-      invalidate: (operations: Iterable<Operation>, reason: string) => {
-        graph.invalidateOperations(operations, reason);
-      },
+      invalidate: graph.invalidateOperations.bind(graph),
       get debugMode(): boolean {
         return graph.debugMode;
       },
@@ -980,19 +1034,20 @@ export class OperationGraph implements IOperationGraph {
       }
       try {
         await graph.closeRunnersAsync(recordsToClose.map((record) => record.operation));
-      } catch (e) {
-        if (e instanceof AggregateError) {
-          for (const error of e.errors) {
-            if (error instanceof OperationRunnerCloseError) {
-              const record: OperationExecutionRecord | undefined = executionRecords.get(error.operation);
-              if (record) {
-                reportRunnerCleanupFailure(record, error.cause);
-              }
+      } catch (error) {
+        const failures: readonly unknown[] =
+          error instanceof AggregateError && error.errors.length > 0 ? error.errors : [error];
+        for (const failure of failures) {
+          if (failure instanceof OperationRunnerCloseError) {
+            const record: OperationExecutionRecord | undefined = executionRecords.get(failure.operation);
+            if (record) {
+              reportRunnerCleanupFailure(record, failure.cause);
+              continue;
             }
           }
-        } else {
+          const cleanupError: Error = failure instanceof Error ? failure : new Error(String(failure));
           for (const record of recordsToClose) {
-            reportRunnerCleanupFailure(record, e);
+            reportRunnerCleanupFailure(record, cleanupError);
           }
         }
       }

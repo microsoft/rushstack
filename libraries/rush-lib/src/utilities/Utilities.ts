@@ -13,6 +13,7 @@ import {
   FileConstants,
   type FileSystemStats,
   SubprocessTerminator,
+  EnvironmentMap,
   Executable,
   type IWaitForExitResult,
   Async,
@@ -75,9 +76,9 @@ export interface IInstallPackageInDirectoryOptions {
 
 export interface ILifecycleCommandOptions {
   /**
-   * The rush configuration, if the command is running in a rush repo.
+   * Rush configuration paths used to prepare the lifecycle environment, if running in a Rush repo.
    */
-  rushConfiguration: RushConfiguration | undefined;
+  rushConfiguration: Pick<RushConfiguration, 'rushJsonFolder' | 'commonTempFolder'> | undefined;
 
   /**
    * Working directory for running the command
@@ -127,6 +128,17 @@ export interface ILifecycleCommandOptions {
    * @internal
    */
   stdio?: child_process.StdioOptions;
+
+  /**
+   * Overrides child creation for asynchronous lifecycle commands so the caller can own child cleanup.
+   *
+   * @internal
+   */
+  spawn?: (
+    command: string,
+    args: ReadonlyArray<string>,
+    options: child_process.SpawnOptions
+  ) => child_process.ChildProcess;
 }
 
 export interface IEnvironmentPathOptions {
@@ -509,7 +521,7 @@ export class Utilities {
   ): child_process.ChildProcess {
     const child: child_process.ChildProcess = _executeLifecycleCommandInternal(
       command,
-      child_process.spawn,
+      options.spawn ?? child_process.spawn,
       options
     );
     if (options.connectSubprocessTerminator) {
@@ -638,16 +650,32 @@ export class Utilities {
   }
 
   /** @internal */
-  public static _convertCommandAndArgsToShell(command: string, isWindows?: boolean): ICommandAndArgs;
-  public static _convertCommandAndArgsToShell(options: ICommandAndArgs, isWindows?: boolean): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(
+    command: string,
+    isWindows?: boolean,
+    environment?: IEnvironment
+  ): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(
+    options: ICommandAndArgs,
+    isWindows?: boolean,
+    environment?: IEnvironment
+  ): ICommandAndArgs;
   public static _convertCommandAndArgsToShell(
     options: ICommandAndArgs | string,
-    isWindows: boolean = IS_WINDOWS
+    isWindows: boolean = IS_WINDOWS,
+    environment: IEnvironment = process.env
   ): ICommandAndArgs {
     let shellCommand: string;
     let commandFlags: string[];
     if (isWindows) {
-      shellCommand = process.env.comspec || 'cmd';
+      const environmentMap: EnvironmentMap = new EnvironmentMap();
+      for (const [name, value] of Object.entries(environment)) {
+        if (value !== undefined) {
+          // isWindows can be supplied independently of the current platform.
+          environmentMap.set(name.toUpperCase(), value);
+        }
+      }
+      shellCommand = environmentMap.get('COMSPEC') || 'cmd.exe';
       commandFlags = ['/d', '/s', '/c'];
     } else {
       shellCommand = 'sh';
@@ -727,11 +755,18 @@ function _executeLifecycleCommandInternal<TCommandResult>(
     Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
   }
 
-  const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
+  const { command, args } = Utilities._convertCommandAndArgsToShell(
+    commandAndArgs,
+    IS_WINDOWS,
+    initialEnvironment ? environment : undefined
+  );
 
   if (IS_WINDOWS) {
-    const shellCommand: string = [command, ...args].join(' ');
-    return spawnFunction(shellCommand, [], { ...spawnOptions, shell: true });
+    const shellCommand: string = [escapeArgumentIfNeeded(command, true), ...args].join(' ');
+    return spawnFunction(shellCommand, [], {
+      ...spawnOptions,
+      shell: initialEnvironment ? command : true
+    });
   } else {
     return spawnFunction(command, args, spawnOptions);
   }

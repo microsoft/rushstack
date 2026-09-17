@@ -27,6 +27,16 @@ describe(EnvironmentConfiguration.name, () => {
       expect(EnvironmentConfiguration.validate).not.toThrow();
     });
 
+    it.each([
+      { RUSH_REPORTER: 'legacy', RUSH_LOG_LEVEL: 'debug' },
+      { RUSH_REPORTER: 'json', RUSH_LOG_LEVEL: 'frontend-owned-value' }
+    ])('recognizes frontend-owned reporter controls without interpreting them: %p', (env) => {
+      Object.assign(process.env, env);
+      expect(EnvironmentConfiguration.validate).not.toThrow();
+      expect(process.env.RUSH_REPORTER).toBe(env.RUSH_REPORTER);
+      expect(process.env.RUSH_LOG_LEVEL).toBe(env.RUSH_LOG_LEVEL);
+    });
+
     it('does not allow unknown environment variables', () => {
       process.env['rush_foobar'] = 'asdf'; // eslint-disable-line dot-notation
       expect(EnvironmentConfiguration.validate).toThrow();

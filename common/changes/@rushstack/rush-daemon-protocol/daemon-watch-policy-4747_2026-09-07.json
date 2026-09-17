@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Report and validate the effective watch setting in warm status configuration while accepting its omission by older peers.",
+      "type": "patch"
+    }
+  ]
+}

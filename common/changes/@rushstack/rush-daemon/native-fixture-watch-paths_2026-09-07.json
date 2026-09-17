@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Use native physical paths for standalone lifecycle fixture watchers so Windows short-name TEMP aliases do not trigger libuv path assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Close non-persistent operation runners before dependents execute, including skipped and cached operations, and wait for IPC child streams to close. Preserve the default persistent behavior and existing per-iteration configuration hook.",
+      "type": "patch"
+    }
+  ]
+}

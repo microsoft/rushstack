@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Close a newly bound endpoint if publishing daemon ownership fails, avoiding an orphaned listener after failed startup.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

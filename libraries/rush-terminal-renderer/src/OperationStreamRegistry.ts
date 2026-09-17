@@ -6,10 +6,11 @@ import type { IDaemonOperationHeaderPayload } from '@rushstack/rush-daemon-proto
 import { CollatedTerminal, StreamCollator } from '@rushstack/stream-collator';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import { TextRewriterTransform } from '@rushstack/terminal';
-import type { ITerminalChunk, TerminalWritable } from '@rushstack/terminal';
+import type { ITerminalChunk, TerminalChunkKind, TerminalWritable } from '@rushstack/terminal';
 
 import { OperationHeaderTracker } from './OperationHeaderTracker';
-import { formatDaemonOperationHeader } from './RendererHeader';
+import { writeOperationStreamHeader } from './OperationStreamHeader';
+import { OperationTextDecoder } from './OperationTextDecoder';
 
 /** Options for {@link OperationStreamRegistry}. @beta */
 export interface IOperationStreamRegistryOptions {
@@ -33,10 +34,9 @@ export class OperationStreamRegistry {
   readonly #collatedTerminal: CollatedTerminal;
   readonly #headers: OperationHeaderTracker = new OperationHeaderTracker();
   readonly #writers: Map<string, CollatedWriter> = new Map();
-  readonly #quiet: boolean;
+  readonly #decoder: OperationTextDecoder = new OperationTextDecoder();
 
   public constructor(options: IOperationStreamRegistryOptions) {
-    this.#quiet = options.quiet;
     const transform: TextRewriterTransform = new TextRewriterTransform({
       destination: options.destination,
       normalizeNewlines: NewlineKind.OsDefault,
@@ -45,7 +45,8 @@ export class OperationStreamRegistry {
     this.#collatedTerminal = new CollatedTerminal(transform);
     this.#collator = new StreamCollator({
       destination: transform,
-      onWriterActive: (writer: CollatedWriter | undefined) => this.#onWriterActive(writer)
+      onWriterActive: (writer: CollatedWriter | undefined) =>
+        writeOperationStreamHeader(writer, this.#headers, this.#collatedTerminal, options.quiet)
     });
   }
 
@@ -57,6 +58,11 @@ export class OperationStreamRegistry {
   /** Records engine-authoritative counters before an operation's stream activates. */
   public setOperationHeader(header: IDaemonOperationHeaderPayload): void {
     this.#headers.setOperationHeader(header);
+  }
+
+  /** Decodes an operation's byte stream without corrupting split UTF-8 characters. */
+  public writeBytes(operationId: string, kind: TerminalChunkKind, bytes: Uint8Array): void {
+    this.writeChunk(operationId, this.#decoder.decode(operationId, kind, bytes));
   }
 
   /** Writes one raw chunk to the operation's collated stream. */
@@ -71,27 +77,10 @@ export class OperationStreamRegistry {
 
   /** Closes the operation's stream, flushing its collated output. */
   public closeOperation(operationId: string): void {
+    this.#decoder.flush(operationId, (chunk) => this.writeChunk(operationId, chunk));
     const writer: CollatedWriter | undefined = this.#writers.get(operationId);
     if (writer !== undefined && writer.isOpen) {
       writer.close();
-    }
-  }
-
-  #onWriterActive(writer: CollatedWriter | undefined): void {
-    if (writer === undefined) {
-      return;
-    }
-    const counters: IDaemonOperationHeaderPayload = this.#headers.takeOperationHeader(
-      writer.taskName
-    );
-    const header: string = formatDaemonOperationHeader(
-      writer.taskName,
-      counters.completedOperations,
-      counters.totalOperations
-    );
-    this.#collatedTerminal.writeStdoutLine(`\n${header}`);
-    if (!this.#quiet) {
-      this.#collatedTerminal.writeStdoutLine('');
     }
   }
 }

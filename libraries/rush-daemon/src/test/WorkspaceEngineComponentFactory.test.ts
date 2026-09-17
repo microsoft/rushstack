@@ -11,12 +11,7 @@ import type {
   Parallelism,
   RushConfigurationProject
 } from '@microsoft/rush-lib';
-import {
-  Operation,
-  OperationGraphHooks,
-  OperationStatus,
-  RushSession
-} from '@microsoft/rush-lib';
+import { Operation, OperationGraphHooks, OperationStatus, RushSession } from '@microsoft/rush-lib';
 
 import {
   WorkspaceEngineComponentFactory,
@@ -30,10 +25,7 @@ import type {
   IWorkspaceEngineShape
 } from '../WorkspaceEngineComponentFactory';
 import { WorkspaceSession } from '../WorkspaceSession';
-import type {
-  IWorkspaceInvalidationWatcher,
-  IWorkspaceSessionComponents
-} from '../WorkspaceSession';
+import type { IWorkspaceInvalidationWatcher, IWorkspaceSessionComponents } from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
 import { TEST_RUSH_CONFIGURATION, TEST_REPO_ROOT } from './TestWorkspaceSession';
 
@@ -94,6 +86,12 @@ class TestOperationGraph implements IOperationGraph {
 
   public executeScheduledIterationAsync(): Promise<boolean> {
     return Promise.resolve(false);
+  }
+
+  public discardScheduledIteration(): boolean {
+    const hadScheduled: boolean = this.hasScheduledIteration;
+    this.hasScheduledIteration = false;
+    return hadScheduled;
   }
 
   public invalidateOperations(): void {}
@@ -223,8 +221,7 @@ describe(WorkspaceEngineComponentFactory.name, () => {
     };
     const session: WorkspaceSession = await WorkspaceSession.createAsync({
       createComponentsAsync: async (createOptions) => {
-        const engineComponents: IWorkspaceSessionComponents =
-          await factory.createAsync(createOptions);
+        const engineComponents: IWorkspaceSessionComponents = await factory.createAsync(createOptions);
         return {
           ...engineComponents,
           projectWatcher: watcher,
@@ -441,13 +438,8 @@ describe(WorkspaceEngineComponentFactory.name, () => {
 
   it('retains graph-defining invalidations and requires session recreation', async () => {
     const getInputsSnapshotAsync: jest.Mock = jest.fn(async () => createInputsSnapshot('next'));
-    const engine: ITestEngine = createTestEngine(
-      TEST_RUSH_CONFIGURATION.projects,
-      getInputsSnapshotAsync
-    );
-    const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => [
-      engine.operations[0]
-    ]);
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, getInputsSnapshotAsync);
+    const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => [engine.operations[0]]);
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync: async () => engine.components,
       mapInvalidationsToOperationsAsync,
@@ -457,10 +449,7 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       }
     });
     const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
-    const changedPath: string = path.join(
-      TEST_RUSH_CONFIGURATION.projects[0].projectFolder,
-      'package.json'
-    );
+    const changedPath: string = path.join(TEST_RUSH_CONFIGURATION.projects[0].projectFolder, 'package.json');
     invalidations.invalidate(changedPath);
     const components: IWorkspaceSessionComponents = await factory.createAsync({
       invalidations,
@@ -520,10 +509,7 @@ describe(WorkspaceEngineComponentFactory.name, () => {
 
   it('requires recreation for unknown changes after the startup baseline', async () => {
     const getInputsSnapshotAsync: jest.Mock = jest.fn(async () => createInputsSnapshot('next'));
-    const engine: ITestEngine = createTestEngine(
-      TEST_RUSH_CONFIGURATION.projects,
-      getInputsSnapshotAsync
-    );
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, getInputsSnapshotAsync);
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync: async () => engine.components,
       mapInvalidationsToOperationsAsync: async () => [],
@@ -559,9 +545,7 @@ describe(WorkspaceEngineComponentFactory.name, () => {
     const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
       Promise.resolve(createInputsSnapshot('next'))
     );
-    const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => [
-      engine.operations[0]
-    ]);
+    const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => [engine.operations[0]]);
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync: async () => engine.components,
       mapInvalidationsToOperationsAsync,
@@ -596,9 +580,8 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   });
 
   it('retains invalidations when a mapper returns an operation outside the graph', async () => {
-    const engine: ITestEngine = createTestEngine(
-      TEST_RUSH_CONFIGURATION.projects,
-      () => Promise.resolve(createInputsSnapshot('next'))
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+      Promise.resolve(createInputsSnapshot('next'))
     );
     const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
     invalidations.invalidate('libraries/a/src/index.ts');
@@ -620,9 +603,7 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       rushConfiguration: TEST_RUSH_CONFIGURATION
     });
 
-    await expect(getReconcileAsync(components)()).rejects.toThrow(
-      'operation outside the graph'
-    );
+    await expect(getReconcileAsync(components)()).rejects.toThrow('operation outside the graph');
     expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
     expect(invalidations.getSnapshot().changedPaths).toEqual(['libraries/a/src/index.ts']);
     await disposeComponentsAsync(components);
@@ -647,11 +628,9 @@ describe(WorkspaceEngineComponentFactory.name, () => {
         throw new Error('component cleanup failed');
       }
     );
-    engine.graph.abortController.signal.addEventListener(
-      'abort',
-      () => events.push('session-abort'),
-      { once: true }
-    );
+    engine.graph.abortController.signal.addEventListener('abort', () => events.push('session-abort'), {
+      once: true
+    });
     jest.spyOn(engine.graph, 'abortCurrentIterationAsync').mockImplementation(async () => {
       events.push('iteration-abort');
       throw new Error('graph abort failed');
@@ -706,9 +685,8 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   });
 
   it('rejects a graph that does not represent every configured project', async () => {
-    const engine: ITestEngine = createTestEngine(
-      TEST_RUSH_CONFIGURATION.projects,
-      () => Promise.resolve(createInputsSnapshot('next'))
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+      Promise.resolve(createInputsSnapshot('next'))
     );
     const shape: IWorkspaceEngineShape = {
       phaseNames: [PHASE_NAME],
@@ -733,9 +711,8 @@ describe(WorkspaceEngineComponentFactory.name, () => {
   });
 
   it('rejects a graph containing an undeclared plugin phase', async () => {
-    const engine: ITestEngine = createTestEngine(
-      TEST_RUSH_CONFIGURATION.projects,
-      () => Promise.resolve(createInputsSnapshot('next'))
+    const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+      Promise.resolve(createInputsSnapshot('next'))
     );
     const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
       createEngineComponentsAsync: async () => engine.components,

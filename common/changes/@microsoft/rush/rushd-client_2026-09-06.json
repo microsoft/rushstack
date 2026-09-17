@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Publish validated opt-in daemon configuration and environment overrides. Watch and warm-set settings remain explicitly documented integration seams.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

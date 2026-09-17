@@ -1,5 +1,8 @@
 # Experimental Rush reporters
 
+For the daemon and reporter environment-variable reference, see
+[Experimental daemon and reporter environment variables](environment-variables.md).
+
 Rush 5 keeps its existing terminal output by default. The reporter system is a
 pre-major, explicit opt-in that can render the same command as an interactive
 display, append-only text, machine-readable events, an AI-oriented summary, or
@@ -155,6 +158,11 @@ Every enabled reporter invocation attempts to create:
 The Rush temp folder is normally `<repo>/common/temp`. If `RUSH_TEMP_FOLDER` is
 set, Rush applies its normal path resolution and uses that same folder for
 reporter logs and purge behavior.
+
+This automatic invocation log always retains `debug` detail, including in
+`--reporter=file` mode. Selecting a quieter primary `--log-level` does not
+reduce the full-log artifact. For an additional filtered file, use a destination
+such as `--output=file://./summary.jsonl?logLevel=normal`.
 
 `<rush-temp-folder>/rush-logs/latest.log` points to, or copies, the current or
 latest successfully opened invocation log. It can be incomplete while Rush is

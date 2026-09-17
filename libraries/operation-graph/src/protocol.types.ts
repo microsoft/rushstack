@@ -28,6 +28,8 @@ export interface IRequestRunEventMessage {
 export interface IAfterExecuteEventMessage {
   event: 'after-execute';
   status: OperationStatus;
+  /** The child's measured process RSS at completion, in bytes. Absent for older producers. */
+  residentMemoryBytes?: number;
 }
 
 /**

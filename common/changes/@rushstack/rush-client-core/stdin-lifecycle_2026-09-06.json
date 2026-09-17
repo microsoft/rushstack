@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Stream bounded stdin chunks only after admission and write credits, deliver ordered EOF, and preserve input for fallback to older peers.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

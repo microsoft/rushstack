@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Enable negotiated piped stdin and EOF while preserving native fallback input and treating pipe Ctrl+C bytes as data.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

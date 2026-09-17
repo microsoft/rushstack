@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Replace a mismatched daemon implementation under the startup mutex using an explicit launcher and verified ownership, before submitting any request.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

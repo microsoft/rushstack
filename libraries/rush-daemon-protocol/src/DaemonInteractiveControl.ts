@@ -3,6 +3,18 @@
 
 import type { IDaemonTerminalPolicyResult } from './DaemonTerminalPolicy';
 
+/** Admits one stdin chunk, initially on attachment and again after the preceding write drains. @beta */
+export interface IDaemonStdinReadyMessage {
+  readonly kind: 'stdinReady';
+  readonly payload: { readonly requestId: string };
+}
+
+/** Ends one request's stdin after all preceding stdin frames. @beta */
+export interface IDaemonStdinEndMessage {
+  readonly kind: 'stdinEnd';
+  readonly payload: { readonly requestId: string };
+}
+
 /** Asks the thin client to change raw mode for one active request. @beta */
 export interface IDaemonSetRawModeMessage {
   readonly kind: 'setRawMode';
