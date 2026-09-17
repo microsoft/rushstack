@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Avoid acquiring the global package manager install lock when the requested package manager is already installed and no install lock file exists.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "EscapeB@users.noreply.github.com"
+}
