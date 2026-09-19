@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2026 00:16:06 GMT and should not be manually modified.
+
+## 4.7.1
+Sat, 19 Sep 2026 00:16:06 GMT
+
+### Patches
+
+- Update the `eslint-plugin-tsdoc` dependency to `~0.5.3`.
 
 ## 4.7.0
 Mon, 14 Sep 2026 22:42:32 GMT
