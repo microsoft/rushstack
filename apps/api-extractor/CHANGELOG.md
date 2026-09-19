@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2026 00:16:05 GMT and should not be manually modified.
+
+## 7.59.2
+Sat, 19 Sep 2026 00:16:05 GMT
+
+### Patches
+
+- Update the `@microsoft/tsdoc` dependency to `~0.17.0` and the `@microsoft/tsdoc-config` dependency to `~0.18.2`.
 
 ## 7.59.1
 Sat, 05 Sep 2026 00:15:08 GMT
