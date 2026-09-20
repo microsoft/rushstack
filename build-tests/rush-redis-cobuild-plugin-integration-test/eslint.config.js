@@ -5,6 +5,11 @@ const nodeProfile = require('local-node-rig/profiles/default/includes/eslint/fla
 
 module.exports = [
   ...nodeProfile,
+  // The sandbox contains checked-in fixture repositories (including bootstrap scripts) that are not source
+  // code for this project and should not be linted.
+  {
+    ignores: ['sandbox/**']
+  },
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {

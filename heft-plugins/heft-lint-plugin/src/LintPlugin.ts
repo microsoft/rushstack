@@ -43,11 +43,6 @@ interface ILintOptions {
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
   includeAdditionalFiles: boolean;
-  /**
-   * The absolute paths of the folders that TypeScript emits output to, ignored when enumerating additional
-   * files so that generated output is not linted.
-   */
-  emitFolderPaths: ReadonlySet<string>;
 }
 
 function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
@@ -111,9 +106,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
     // Use the changed files hook to collect the files and programs from TypeScript
     let typescriptChangedFiles: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>][] = [];
-    // The absolute paths of the folders that TypeScript emits output to, aggregated across all programs. These
-    // are ignored when enumerating the additional files to lint so that generated output is not linted.
-    const emitFolderPaths: Set<string> = new Set();
     taskSession.requestAccessToPluginByName(
       TYPESCRIPT_PLUGIN_PACKAGE_NAME,
       TYPESCRIPT_PLUGIN_NAME,
@@ -127,9 +119,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             changedFilesHookOptions.program as IExtendedProgram,
             changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
           ]);
-          for (const emitFolderPath of changedFilesHookOptions.emitFolderPaths) {
-            emitFolderPaths.add(emitFolderPath);
-          }
         });
       }
     );
@@ -143,16 +132,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
           taskSession
         );
         typescriptChangedFiles.push([tsProgram, new Set(tsProgram.getSourceFiles())]);
-        // In standalone mode there is no TypeScript plugin to report emit folders, so derive them from the
-        // program's compiler options. (additionalModuleKindsToEmit output folders are not available here.)
-        const { outDir, declarationDir } = tsProgram.getCompilerOptions();
-        if (outDir) {
-          emitFolderPaths.add(path.resolve(heftConfiguration.buildFolderPath, outDir));
-        }
-
-        if (declarationDir) {
-          emitFolderPaths.add(path.resolve(heftConfiguration.buildFolderPath, declarationDir));
-        }
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
@@ -166,8 +145,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             changedFiles,
             fix,
             sarifLogPath,
-            includeAdditionalFiles,
-            emitFolderPaths
+            includeAdditionalFiles
           });
         } catch (error) {
           if (!(error instanceof AlreadyReportedError)) {
@@ -256,8 +234,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       changedFiles,
       fix,
       sarifLogPath,
-      includeAdditionalFiles,
-      emitFolderPaths
+      includeAdditionalFiles
     } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
@@ -270,7 +247,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         tsProgram,
         fix,
         sarifLogPath,
-        emitFolderPaths,
         scopedLogger: taskSession.logger,
         linterToolPath: this.#eslintToolPath,
         linterConfigFilePath: this.#eslintConfigFilePath,

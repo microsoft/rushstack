@@ -24,11 +24,6 @@ interface IEslintInitializeOptions extends ILinterBaseOptions {
    * more than once when there are multiple TypeScript programs).
    */
   includeAdditionalFiles?: boolean;
-  /**
-   * The absolute paths of the folders that TypeScript emits output to. These are ignored when enumerating the
-   * additional files to lint so that generated output is not linted.
-   */
-  emitFolderPaths?: ReadonlySet<string>;
 }
 
 interface IEslintOptions extends IEslintInitializeOptions {
@@ -126,8 +121,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       eslintTimings,
       fix,
       sarifLogPath,
-      includeAdditionalFiles,
-      emitFolderPaths
+      includeAdditionalFiles
     } = options;
     this.#eslintPackage = eslintPackage;
     this.#includeAdditionalFiles = includeAdditionalFiles ?? false;
@@ -164,17 +158,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         // filePath is already an absolute path under buildFolderPath, so strip the prefix (plus the separator)
         // instead of recomputing the relative path.
         typeScriptFilePatterns.push(Path.convertToSlashes(filePath.slice(buildFolderPath.length + 1)));
-      }
-    }
-
-    // Ignore the folders that TypeScript emits output to so that generated output is not enumerated as an
-    // additional file to lint. Only folders under the project folder can be expressed as ESLint patterns.
-    const emitFolderIgnorePatterns: string[] = [];
-    for (const emitFolderPath of emitFolderPaths ?? []) {
-      if (Path.isUnder(emitFolderPath, buildFolderPath)) {
-        emitFolderIgnorePatterns.push(
-          `${Path.convertToSlashes(emitFolderPath.slice(buildFolderPath.length + 1))}/**`
-        );
       }
     }
 
@@ -259,11 +242,10 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         overrideConfigFile: linterConfigFilePath,
         overrideConfig: {
           // This is the label for the flat-config object (used in ESLint debug output/config inspection); it is
-          // not a plugin reference. It ignores the TypeScript program files and the TypeScript output folders so
-          // that enumeration returns only the files that are not part of the program and are not generated
-          // output.
+          // not a plugin reference. It ignores the TypeScript program files so enumeration returns only the
+          // files that are not part of the program.
           name: `${pluginName}/ignore-typescript-program-files`,
-          ignores: [...typeScriptFilePatterns, ...emitFolderIgnorePatterns]
+          ignores: typeScriptFilePatterns
         },
         ruleFilter: () => false
       });
@@ -338,8 +320,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
     // ESLint reports absolute file paths, so they can be compared directly against the TypeScript program's
     // (already resolved) file paths. Files that are part of the program are excluded; everything else the
-    // ESLint configuration selects (and that is not ignored, including the TypeScript output folders) is linted
-    // as an additional file.
+    // ESLint configuration selects (and that it does not ignore) is linted as an additional file. Generated
+    // output is excluded by the ESLint configuration's own `ignores` (the shared config ignores build-output
+    // folders such as `lib`, `lib-*`, `dist`, `temp`, and `coverage`).
     const additionalFilePaths: string[] = [];
     for (const { filePath } of lintResults) {
       if (!typeScriptFilenames.has(filePath)) {

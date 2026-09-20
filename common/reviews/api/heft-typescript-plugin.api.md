@@ -29,7 +29,6 @@ export interface _IBaseTypeScriptTool<TSystem extends _TTypeScript.System = _TTy
 export interface IChangedFilesHookOptions {
     // (undocumented)
     changedFiles?: ReadonlySet<_TTypeScript.SourceFile>;
-    emitFolderPaths: ReadonlySet<string>;
     // (undocumented)
     program: _TTypeScript.Program;
 }
