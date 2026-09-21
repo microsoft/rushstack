@@ -94,6 +94,32 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
 // lint that are not part of the TypeScript program.
 const MAX_ADDITIONAL_FILE_READ_CONCURRENCY: number = 10;
 
+// ESLint interprets `files`/`ignores` entries as glob patterns (matched with minimatch), so characters that are
+// significant to the matcher must be escaped when an exact file path is used as a pattern. Otherwise a file name
+// such as `src/[id].ts` would be treated as a character class rather than a literal path.
+const GLOB_METACHARACTER_REGEXP: RegExp = /[\\*?[\]{}()!+@|]/g;
+
+function escapeGlobPattern(filePath: string): string {
+  return filePath.replace(GLOB_METACHARACTER_REGEXP, '\\$&');
+}
+
+// Convert forward-slash absolute file paths into project-relative, glob-escaped patterns. Only files under the
+// project folder can be expressed as ESLint configuration patterns.
+function toProjectRelativeGlobPatterns(
+  filePaths: Iterable<string>,
+  normalizedBuildFolderPath: string
+): string[] {
+  const patterns: string[] = [];
+  for (const filePath of filePaths) {
+    if (Path.isUnder(filePath, normalizedBuildFolderPath)) {
+      // filePath is already a forward-slash absolute path under the project folder, so strip the prefix (plus
+      // the separator) instead of recomputing the relative path.
+      patterns.push(escapeGlobPattern(filePath.slice(normalizedBuildFolderPath.length + 1)));
+    }
+  }
+  return patterns;
+}
+
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult> {
   readonly #eslintPackage: typeof TEslint | typeof TEslintLegacy;
   readonly #eslintPackageVersion: semver.SemVer;
@@ -153,18 +179,13 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         .getRootFileNames()
         .map((filePath: string) => Path.convertToSlashes(path.resolve(buildFolderPath, filePath)))
     );
-    // ESLint configuration paths are relative to the project folder. Compute the project-relative paths of the
-    // files in the TypeScript program so that the injected program can be scoped to just those files, and so
-    // that those files can be excluded when enumerating the additional files to lint. Only files under the
-    // project folder can be expressed as ESLint configuration patterns.
-    const typeScriptFilePatterns: string[] = [];
-    for (const filePath of this.#typeScriptFilenames) {
-      if (Path.isUnder(filePath, normalizedBuildFolderPath)) {
-        // filePath is already a forward-slash absolute path under the project folder, so strip the prefix (plus
-        // the separator) instead of recomputing the relative path.
-        typeScriptFilePatterns.push(filePath.slice(normalizedBuildFolderPath.length + 1));
-      }
-    }
+    // ESLint configuration paths are relative to the project folder. Compute the project-relative patterns of
+    // the files in the TypeScript program so that the injected program can be scoped to just those files, and so
+    // that those files can be excluded when enumerating the additional files to lint.
+    const typeScriptFilePatterns: string[] = toProjectRelativeGlobPatterns(
+      this.#typeScriptFilenames,
+      normalizedBuildFolderPath
+    );
 
     let overrideConfig: TEslint.Linter.Config | TEslintLegacy.Linter.Config | undefined;
     let fixFn: Exclude<TEslint.ESLint.Options['fix'] | TEslintLegacy.ESLint.Options['fix'], boolean>;
@@ -313,7 +334,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   protected override async getExtraSourceFilesToLintAsync(
-    typeScriptFilenames: ReadonlySet<string>
+    programFilenames: ReadonlySet<string>
   ): Promise<Iterable<ISourceFileToLint>> {
     if (!this.#includeAdditionalFiles || !this.#fileEnumerator) {
       return [];
@@ -324,15 +345,16 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     const lintResults: TEslint.ESLint.LintResult[] = await this.#fileEnumerator.lintFiles(['.']);
 
     // ESLint reports absolute file paths (with the platform-native separator), so normalize them to forward
-    // slashes to compare against the TypeScript program's (already normalized) file paths. Files that are part
-    // of the program are excluded; everything else the ESLint configuration selects (and that it does not
-    // ignore) is linted as an additional file. Generated output is excluded by the ESLint configuration's own
-    // `ignores` (the shared config ignores build-output folders such as `lib`, `lib-*`, `dist`, `temp`, and
-    // `coverage`).
+    // slashes to compare against the TypeScript programs' (already normalized) file paths. Files that are part
+    // of any TypeScript program are excluded (so they are not linted both as program files and as additional
+    // files, which matters when there are multiple programs); everything else the ESLint configuration selects
+    // (and that it does not ignore) is linted as an additional file. Generated output is excluded by the ESLint
+    // configuration's own `ignores` (the shared config ignores build-output folders such as `lib`, `lib-*`,
+    // `dist`, `temp`, and `coverage`).
     const additionalFilePaths: string[] = [];
     for (const { filePath } of lintResults) {
       const normalizedFilePath: string = Path.convertToSlashes(filePath);
-      if (!typeScriptFilenames.has(normalizedFilePath)) {
+      if (!programFilenames.has(normalizedFilePath)) {
         additionalFilePaths.push(normalizedFilePath);
       }
     }

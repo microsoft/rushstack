@@ -43,6 +43,11 @@ interface ILintOptions {
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
   includeAdditionalFiles: boolean;
+  /**
+   * The normalized (forward-slash absolute) root file names of every TypeScript program being linted in this
+   * run. Used to exclude program files from the enumerated additional files.
+   */
+  allProgramFilenames: ReadonlySet<string>;
 }
 
 function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
@@ -135,6 +140,17 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
+      // Compute the union of every program's root file names so that files linted as program files (by any
+      // program) are not also linted as enumerated additional files. This matters for project-reference /
+      // composite builds, where the lint hook receives more than one program.
+      const { buildFolderPath } = heftConfiguration;
+      const allProgramFilenames: Set<string> = new Set();
+      for (const [tsProgram] of typescriptChangedFiles) {
+        for (const rootFileName of tsProgram.getRootFileNames()) {
+          allProgramFilenames.add(Path.convertToSlashes(path.resolve(buildFolderPath, rootFileName)));
+        }
+      }
+
       let includeAdditionalFiles: boolean = true;
       for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
         try {
@@ -145,7 +161,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             changedFiles,
             fix,
             sarifLogPath,
-            includeAdditionalFiles
+            includeAdditionalFiles,
+            allProgramFilenames
           });
         } catch (error) {
           if (!(error instanceof AlreadyReportedError)) {
@@ -234,7 +251,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       changedFiles,
       fix,
       sarifLogPath,
-      includeAdditionalFiles
+      includeAdditionalFiles,
+      allProgramFilenames
     } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
@@ -255,7 +273,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         includeAdditionalFiles
       });
       lintOperations.push(() =>
-        this.#runLinterAsync(eslintLinter, heftConfiguration, tsProgram, changedFiles)
+        this.#runLinterAsync(eslintLinter, heftConfiguration, tsProgram, changedFiles, allProgramFilenames)
       );
     }
 
@@ -270,7 +288,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         buildMetadataFolderPath: taskSession.tempFolderPath
       });
       lintOperations.push(() =>
-        this.#runLinterAsync(tslintLinter, heftConfiguration, tsProgram, changedFiles)
+        this.#runLinterAsync(tslintLinter, heftConfiguration, tsProgram, changedFiles, allProgramFilenames)
       );
     }
 
@@ -282,7 +300,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     linter: LinterBase<unknown>,
     heftConfiguration: HeftConfiguration,
     tsProgram: IExtendedProgram,
-    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
+    changedFiles: ReadonlySet<IExtendedSourceFile> | undefined,
+    allProgramFilenames: ReadonlySet<string>
   ): Promise<void> {
     linter.printVersionHeader();
 
@@ -299,6 +318,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     await linter.performLintingAsync({
       tsProgram,
       typeScriptFilenames,
+      allProgramFilenames,
       changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
     });
   }
