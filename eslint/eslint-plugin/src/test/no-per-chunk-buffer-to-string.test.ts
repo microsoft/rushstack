@@ -36,6 +36,10 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
     {
+      code: "chunks.reduce((text, chunk) => text + chunk.toString(), '')",
+      errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
+    },
+    {
       code: "chunks.map((chunk) => chunk['toString']())",
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
@@ -73,6 +77,14 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
         '  console.log(chunk.toString());',
         '}'
       ].join('\n')
+    },
+    {
+      code: [
+        'const chunk = {',
+        '  toString: () => "text"',
+        '};',
+        'const text = chunk.toString();'
+      ].join('\n')
     }
   ]
 });
@@ -81,10 +93,7 @@ typedRuleTester.run('no-per-chunk-buffer-to-string typed', noPerChunkBufferToStr
   invalid: [
     {
       code: [
-        'interface Buffer {',
-        '  toString(encoding?: string): string;',
-        '}',
-        'declare const buffers: Buffer[];',
+        'declare const buffers: Uint8Array[];',
         'buffers.map((data) => data.toString());'
       ].join('\n'),
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]

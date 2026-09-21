@@ -95,7 +95,9 @@ function isDeclaredByContainingForOf(identifier: TSESTree.Identifier): boolean {
     }
 
     if (current.type === AST_NODE_TYPES.ForOfStatement) {
-      return isIdentifierDeclaredByForOf(identifier, current);
+      if (isIdentifierDeclaredByForOf(identifier, current)) {
+        return true;
+      }
     }
 
     current = current.parent;
@@ -138,7 +140,30 @@ function isBufferType(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
     return type.types.some((unionType: ts.Type) => isBufferType(unionType, typeChecker));
   }
 
-  return (type.aliasSymbol ?? type.getSymbol())?.getName() === 'Buffer';
+  const symbol: ts.Symbol | undefined = type.aliasSymbol ?? type.getSymbol();
+  switch (symbol?.getName()) {
+    case 'Buffer':
+      return isNodeBufferSymbol(symbol);
+
+    case 'Uint8Array':
+      return isTypeScriptLibSymbol(symbol);
+
+    default:
+      return false;
+  }
+}
+
+function isNodeBufferSymbol(symbol: ts.Symbol): boolean {
+  return (symbol.getDeclarations() ?? []).some((declaration: ts.Declaration) => {
+    const sourceFileName: string = declaration.getSourceFile().fileName.replace(/\\/g, '/');
+    return sourceFileName.includes('/@types/node/') && sourceFileName.endsWith('/buffer.buffer.d.ts');
+  });
+}
+
+function isTypeScriptLibSymbol(symbol: ts.Symbol): boolean {
+  return (symbol.getDeclarations() ?? []).some((declaration: ts.Declaration) =>
+    declaration.getSourceFile().fileName.replace(/\\/g, '/').includes('/typescript/lib/lib.')
+  );
 }
 
 const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
@@ -147,7 +172,8 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
     type: 'problem',
     messages: {
       'error-per-chunk-buffer-to-string':
-        'Do not call toString() on each Buffer chunk from a stream or iterable; use TextDecoder instead.'
+        'Do not call toString() on each Buffer chunk from a stream or iterable. Multi-byte characters ' +
+        'split across chunks can be corrupted; use TextDecoder.decode(chunk, { stream: true }) instead.'
     },
     schema: [],
     docs: {
