@@ -3,10 +3,11 @@
 
 import type { RuleTester } from '@typescript-eslint/rule-tester';
 
-import { getRuleTesterWithoutProject } from './ruleTester';
+import { getRuleTesterWithProject, getRuleTesterWithoutProject } from './ruleTester';
 import { noPerChunkBufferToStringRule } from '../no-per-chunk-buffer-to-string';
 
 const ruleTester: RuleTester = getRuleTesterWithoutProject();
+const typedRuleTester: RuleTester = getRuleTesterWithProject();
 
 ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
   invalid: [
@@ -27,17 +28,25 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
     {
-      code: [
-        'async function readAsync() {',
-        '  for await (const chunk of stream) {',
-        '  output += chunk.toString();',
-        '  }',
-        '}'
-      ].join('\n'),
+      code: ['for (const chunk of chunks) {', '  output += chunk.toString();', '}'].join('\n'),
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
     {
       code: 'chunks.map((chunk) => chunk.toString())',
+      errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
+    },
+    {
+      code: "chunks.map((chunk) => chunk['toString']())",
+      errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
+    },
+    {
+      code: [
+        'async function readAsync() {',
+        '  for await (const chunk of stream) {',
+        '    output += chunk.toString();',
+        '  }',
+        '}'
+      ].join('\n'),
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     }
   ],
@@ -64,6 +73,26 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
         '  console.log(chunk.toString());',
         '}'
       ].join('\n')
+    }
+  ]
+});
+
+typedRuleTester.run('no-per-chunk-buffer-to-string typed', noPerChunkBufferToStringRule, {
+  invalid: [
+    {
+      code: [
+        'interface Buffer {',
+        '  toString(encoding?: string): string;',
+        '}',
+        'declare const buffers: Buffer[];',
+        'buffers.map((data) => data.toString());'
+      ].join('\n'),
+      errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
+    }
+  ],
+  valid: [
+    {
+      code: ['declare const items: string[];', 'items.map((chunk) => chunk.toString());'].join('\n')
     }
   ]
 });

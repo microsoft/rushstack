@@ -23,7 +23,7 @@ const ITERATIVE_CALLBACK_METHOD_NAMES: Set<string> = new Set([
   'some'
 ]);
 
-const STREAM_DATA_METHOD_NAMES: Set<string> = new Set(['addListener', 'on', 'once', 'prependListener']);
+const STREAM_DATA_METHOD_NAMES: Set<string> = new Set(['addListener', 'on', 'prependListener']);
 
 function getStaticPropertyName(node: TSESTree.MemberExpression): string | undefined {
   if (node.property.type === AST_NODE_TYPES.Identifier && !node.computed) {
@@ -138,8 +138,7 @@ function isBufferType(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
     return type.types.some((unionType: ts.Type) => isBufferType(unionType, typeChecker));
   }
 
-  const symbolName: string | undefined = (type.aliasSymbol ?? type.getSymbol())?.getName();
-  return symbolName === 'Buffer' || typeChecker.typeToString(type).startsWith('Buffer<');
+  return (type.aliasSymbol ?? type.getSymbol())?.getName() === 'Buffer';
 }
 
 const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
@@ -163,14 +162,15 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
     const parserServices: Partial<ParserServices> | undefined =
       context.sourceCode?.parserServices ?? context.parserServices;
     const typeChecker: ts.TypeChecker | undefined = parserServices?.program?.getTypeChecker();
+    const hasTypeInformation: boolean = !!typeChecker && !!parserServices?.esTreeNodeToTSNodeMap;
 
     function isTypedBuffer(node: TSESTree.Node): boolean {
-      if (!typeChecker || !parserServices?.esTreeNodeToTSNodeMap) {
+      if (!hasTypeInformation) {
         return false;
       }
 
-      const tsNode: ts.Node | undefined = parserServices.esTreeNodeToTSNodeMap.get(node);
-      return !!tsNode && isBufferType(typeChecker.getTypeAtLocation(tsNode), typeChecker);
+      const tsNode: ts.Node | undefined = parserServices!.esTreeNodeToTSNodeMap!.get(node);
+      return !!tsNode && isBufferType(typeChecker!.getTypeAtLocation(tsNode), typeChecker!);
     }
 
     return {
@@ -186,7 +186,9 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
         }
 
         if (
-          (isProbablyChunk(object) || isTypedBuffer(object)) &&
+          (isTypedBuffer(object) ||
+            // Fall back to the conventional "chunk" name when parserOptions.project is not configured.
+            (!hasTypeInformation && isProbablyChunk(object))) &&
           (isCallbackParameter(object) || isDeclaredByContainingForOf(object))
         ) {
           context.report({ node, messageId: 'error-per-chunk-buffer-to-string' });
