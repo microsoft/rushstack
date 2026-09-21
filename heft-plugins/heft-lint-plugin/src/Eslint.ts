@@ -94,13 +94,22 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
 // lint that are not part of the TypeScript program.
 const MAX_ADDITIONAL_FILE_READ_CONCURRENCY: number = 10;
 
-// ESLint interprets `files`/`ignores` entries as glob patterns (matched with minimatch), so characters that are
-// significant to the matcher must be escaped when an exact file path is used as a pattern. Otherwise a file name
-// such as `src/[id].ts` would be treated as a character class rather than a literal path.
-const GLOB_METACHARACTER_REGEXP: RegExp = /[\\*?[\]{}()!+@|]/g;
+// ESLint interprets `files`/`ignores` entries as glob patterns (matched with minimatch using
+// `{ dot: true, allowWindowsEscape: true }`), so characters that are significant to the matcher must be escaped
+// when an exact file path is used as a pattern. Otherwise a file name such as `src/[id].ts` would be treated as
+// a character class rather than a literal path. Escaping the parentheses also neutralizes the extglob prefixes
+// (`@(`, `+(`, `!(`, `?(`, `*(`), so those prefix characters do not need to be escaped -- and escaping `@`/`+`
+// would actually break matching under the minimatch version ESLint uses.
+const GLOB_METACHARACTER_REGEXP: RegExp = /[\\*?[\]{}()]/g;
 
 function escapeGlobPattern(filePath: string): string {
-  return filePath.replace(GLOB_METACHARACTER_REGEXP, '\\$&');
+  const escaped: string = filePath.replace(GLOB_METACHARACTER_REGEXP, '\\$&');
+  // A pattern beginning with `#` is treated as a comment, and one beginning with `!` as a negation, so escape a
+  // leading occurrence of either.
+  if (escaped.startsWith('#') || escaped.startsWith('!')) {
+    return `\\${escaped}`;
+  }
+  return escaped;
 }
 
 // Convert forward-slash absolute file paths into project-relative, glob-escaped patterns. Only files under the
