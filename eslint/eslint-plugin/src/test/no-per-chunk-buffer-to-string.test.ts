@@ -131,6 +131,15 @@ typedRuleTester.run('no-per-chunk-buffer-to-string typed', noPerChunkBufferToStr
   valid: [
     {
       code: ['declare const items: string[];', 'items.map((chunk) => chunk.toString());'].join('\n')
+    },
+    {
+      code: [
+        'interface Buffer {',
+        '  toString(encoding?: string): string;',
+        '}',
+        'declare const buffers: Buffer[];',
+        'buffers.map((data) => data.toString());'
+      ].join('\n')
     }
   ]
 });

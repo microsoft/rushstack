@@ -12,6 +12,8 @@ interface IOptions {
 
 type Options = [IOptions?];
 
+const DEFAULT_CHUNK_VARIABLE_NAMES: string[] = ['chunk'];
+
 interface IESLintVariable {
   name: string;
 }
@@ -160,32 +162,19 @@ function isConfiguredChunkName(identifier: TSESTree.Identifier, chunkVariableNam
   return chunkVariableNames.has(identifier.name.toLowerCase());
 }
 
-function isBufferType(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
+function isBinaryChunkType(type: ts.Type, typeChecker: ts.TypeChecker, location: ts.Node): boolean {
   if (type.isUnion()) {
-    return type.types.some((unionType: ts.Type) => isBufferType(unionType, typeChecker));
+    return type.types.some((unionType: ts.Type) => isBinaryChunkType(unionType, typeChecker, location));
   }
 
   const symbol: ts.Symbol | undefined = type.aliasSymbol ?? type.getSymbol();
-  switch (symbol?.getName()) {
-    case 'Buffer':
-      return isNodeBufferSymbol(symbol);
-
-    case 'Uint8Array':
-      return isTypeScriptLibSymbol(symbol);
-
-    default:
-      return false;
+  if (symbol?.getName() === 'Uint8Array' && isTypeScriptLibSymbol(symbol)) {
+    return true;
   }
-}
 
-function isNodeBufferSymbol(symbol: ts.Symbol): boolean {
-  return (symbol.getDeclarations() ?? []).some((declaration: ts.Declaration) => {
-    const sourceFileName: string = declaration.getSourceFile().fileName.replace(/\\/g, '/');
-    return (
-      sourceFileName.includes('/@types/node/') &&
-      (sourceFileName.endsWith('/buffer.d.ts') || sourceFileName.endsWith('/buffer.buffer.d.ts'))
-    );
-  });
+  return ((type as ts.InterfaceType).getBaseTypes?.() ?? []).some((baseType: ts.BaseType) =>
+    isBinaryChunkType(baseType, typeChecker, location)
+  );
 }
 
 function isTypeScriptLibSymbol(symbol: ts.Symbol): boolean {
@@ -195,12 +184,12 @@ function isTypeScriptLibSymbol(symbol: ts.Symbol): boolean {
 }
 
 const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
-  defaultOptions: [{ chunkVariableNames: ['chunk'] }],
+  defaultOptions: [{ chunkVariableNames: DEFAULT_CHUNK_VARIABLE_NAMES }],
   meta: {
     type: 'problem',
     messages: {
       'error-per-chunk-buffer-to-string':
-        'Do not call toString() on each Buffer chunk from a stream or iterable. Multi-byte characters ' +
+        'Do not call toString() on each Buffer or Uint8Array chunk from a stream or iterable. Multi-byte characters ' +
         'split across chunks can be corrupted; use TextDecoder.decode(chunk, { stream: true }) instead.'
     },
     schema: [
@@ -232,7 +221,9 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
     const typeChecker: ts.TypeChecker | undefined = parserServices?.program?.getTypeChecker();
     const hasTypeInformation: boolean = !!typeChecker && !!parserServices?.esTreeNodeToTSNodeMap;
     const chunkVariableNames: Set<string> = new Set(
-      (context.options[0]?.chunkVariableNames ?? ['chunk']).map((name: string) => name.toLowerCase())
+      (context.options[0]?.chunkVariableNames ?? DEFAULT_CHUNK_VARIABLE_NAMES).map((name: string) =>
+        name.toLowerCase()
+      )
     );
 
     function getVariable(identifier: TSESTree.Identifier): IESLintVariable | undefined {
@@ -267,7 +258,7 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
       }
 
       const tsNode: ts.Node | undefined = parserServices!.esTreeNodeToTSNodeMap!.get(node);
-      return !!tsNode && isBufferType(typeChecker!.getTypeAtLocation(tsNode), typeChecker!);
+      return !!tsNode && isBinaryChunkType(typeChecker!.getTypeAtLocation(tsNode), typeChecker!, tsNode);
     }
 
     return {
