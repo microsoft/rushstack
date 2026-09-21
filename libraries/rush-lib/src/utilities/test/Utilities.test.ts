@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'node:fs';
-import * as os from 'node:os';
+import * as path from 'node:path';
+
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { type IDisposable, Utilities } from '../Utilities';
 import { getNpmrcEnvironmentVariables, syncNpmrc } from '../npmrcUtilities';
 import { IS_WINDOWS } from '../executionUtilities';
+
+const PACKAGE_ROOT: string = path.resolve(__dirname, '../../..');
+const TEST_TEMP_FOLDER: string = `${PACKAGE_ROOT}/temp/utilities-credential-environment-test`;
 
 function withComSpec<T>(value: string | undefined, callback: () => T): T {
   const originalValue: string | undefined = process.env.comspec;
@@ -31,20 +35,17 @@ describe(Utilities.name, () => {
   describe('package manager credential environment', () => {
     const credentialKey: string = 'npm_config_//registry.example.test/npm/:_authToken';
     const credentialValue: string = 'non-secret-test-token';
-    let directory: string;
-    let scriptPath: string;
+    const scriptPath: string = `${TEST_TEMP_FOLDER}/check credentials.cjs`;
     let environment: NodeJS.ProcessEnv;
 
     beforeAll(async () => {
-      directory = await fs.promises.mkdtemp(`${os.tmpdir()}/rush credentials `);
-      scriptPath = `${directory}/check credentials.cjs`;
-      const sourceFolder: string = `${directory}/source`;
-      const targetFolder: string = `${directory}/target`;
-      await fs.promises.mkdir(sourceFolder);
-      await fs.promises.mkdir(targetFolder);
-      await fs.promises.writeFile(
+      await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+      const sourceFolder: string = `${TEST_TEMP_FOLDER}/source`;
+      const targetFolder: string = `${TEST_TEMP_FOLDER}/target`;
+      await FileSystem.writeFileAsync(
         `${sourceFolder}/.npmrc`,
-        '//registry.example.test/npm/:_authToken=${RUSH_TEST_TOKEN}\n'
+        '//registry.example.test/npm/:_authToken=${RUSH_TEST_TOKEN}\n',
+        { ensureFolderExists: true }
       );
       const sourceEnvironment: NodeJS.ProcessEnv = { RUSH_TEST_TOKEN: credentialValue };
       syncNpmrc({
@@ -62,29 +63,28 @@ describe(Utilities.name, () => {
           env: sourceEnvironment
         })
       };
-      await fs.promises.writeFile(
+      await FileSystem.writeFileAsync(
         scriptPath,
         [
           `if (process.env[${JSON.stringify(credentialKey)}] !== ${JSON.stringify(credentialValue)}) {`,
           '  process.exit(42);',
           '}',
           'process.stdout.write(JSON.stringify(process.argv.slice(2)));'
-        ].join('\n')
+        ].join('\n'),
+        { ensureFolderExists: true }
       );
-      expect(await fs.promises.readFile(`${targetFolder}/.npmrc`, 'utf8')).not.toContain(credentialValue);
+      expect(await FileSystem.readFileAsync(`${targetFolder}/.npmrc`)).not.toContain(credentialValue);
     });
 
     afterAll(async () => {
-      if (directory) {
-        await fs.promises.rm(directory, { recursive: true, force: true });
-      }
+      await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
     });
 
     it('preserves generated credentials through the captured subprocess path', async () => {
       const output: string = await Utilities.executeCommandAndCaptureOutputAsync({
         command: process.execPath,
         args: [scriptPath, 'space argument'],
-        workingDirectory: directory,
+        workingDirectory: TEST_TEMP_FOLDER,
         environment,
         keepEnvironment: true,
         useShell: false
@@ -97,7 +97,7 @@ describe(Utilities.name, () => {
         {
           command: process.execPath,
           args: [scriptPath],
-          workingDirectory: directory,
+          workingDirectory: TEST_TEMP_FOLDER,
           environment,
           keepEnvironment: true,
           useShell: false,
@@ -122,7 +122,7 @@ describe(Utilities.name, () => {
         const output: string = await Utilities.executeCommandAndCaptureOutputAsync({
           command: process.execPath,
           args: [scriptPath, ...args],
-          workingDirectory: directory,
+          workingDirectory: TEST_TEMP_FOLDER,
           environment,
           keepEnvironment: true,
           useShell: false
@@ -135,7 +135,7 @@ describe(Utilities.name, () => {
       const { exitCode } = await Utilities.executeCommandAsync({
         command: process.execPath,
         args: [scriptPath],
-        workingDirectory: directory,
+        workingDirectory: TEST_TEMP_FOLDER,
         environment: { ...environment, [credentialKey]: 'wrong-test-token' },
         keepEnvironment: true,
         useShell: false,
@@ -150,7 +150,7 @@ describe(Utilities.name, () => {
         Utilities.executeCommandAsync({
           command: process.execPath,
           args: [scriptPath],
-          workingDirectory: directory,
+          workingDirectory: TEST_TEMP_FOLDER,
           environment: { ...environment, [credentialKey]: 'wrong-test-token' },
           keepEnvironment: true,
           useShell: false,
@@ -163,7 +163,7 @@ describe(Utilities.name, () => {
       const output: string = await Utilities.executeCommandAndCaptureOutputAsync({
         command: 'echo',
         args: ['first', '&&', 'echo', 'second'],
-        workingDirectory: directory
+        workingDirectory: TEST_TEMP_FOLDER
       });
       expect(
         output
