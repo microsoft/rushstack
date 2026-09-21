@@ -149,6 +149,47 @@ import(
 
 Explicit chunk naming improves cache hit rates, observability, and maintainability. Enforcing the practice via an ESLint rule prevents missing or duplicate declarations that could lead to unpredictable bundle naming.
 
+## `@rushstack/no-per-chunk-buffer-to-string`
+
+Prevent decoding each Buffer chunk from a stream or iterable with `chunk.toString()`.
+
+#### Rule Details
+
+Calling `toString()` separately for each Buffer chunk can corrupt multi-byte characters that are split across chunk boundaries. Use `TextDecoder` instead so decoding state is preserved between chunks.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/no-per-chunk-buffer-to-string` is enabled:
+
+```ts
+stream.on('data', (chunk) => {
+  output += chunk.toString(); // error
+});
+```
+
+```ts
+for await (const chunk of stream) {
+  output += chunk.toString('utf8'); // error
+}
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+const decoder = new TextDecoder();
+stream.on('data', (chunk) => {
+  output += decoder.decode(chunk, { stream: true });
+});
+```
+
+```ts
+const text = Buffer.from('abc').toString();
+```
+
+#### Rationale
+
+UTF-8 and other variable-width encodings can split a single character across multiple Buffer chunks. `TextDecoder` can preserve the decoding state across chunk boundaries and avoid replacement characters in the output.
+
 ## `@rushstack/no-backslash-imports`
 
 Prevent import and export specifiers from using Windows-style backslashes in module paths.

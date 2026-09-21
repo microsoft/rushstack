@@ -47,7 +47,7 @@ function isIterativeCallback(functionNode: TSESTree.FunctionExpression | TSESTre
     return false;
   }
 
-  if (!callExpression.arguments.includes(functionNode)) {
+  if (!callExpression.arguments.some((argument: TSESTree.CallExpressionArgument) => argument === functionNode)) {
     return false;
   }
 
@@ -180,7 +180,7 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
           return;
         }
 
-        const object: TSESTree.Expression = callee.object;
+        const { object } = callee;
         if (object.type !== AST_NODE_TYPES.Identifier) {
           return;
         }

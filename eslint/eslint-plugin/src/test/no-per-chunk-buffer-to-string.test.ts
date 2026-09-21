@@ -13,7 +13,7 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
     {
       code: [
         "stream.on('data', (chunk) => {",
-        '  output += chunk.toString();',
+        '    output += chunk.toString();',
         '});'
       ].join('\n'),
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
@@ -28,8 +28,10 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
     },
     {
       code: [
-        'for await (const chunk of stream) {',
+        'async function readAsync() {',
+        '  for await (const chunk of stream) {',
         '  output += chunk.toString();',
+        '  }',
         '}'
       ].join('\n'),
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
