@@ -145,8 +145,13 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
     this.#sarifLogPath = sarifLogPath;
 
+    // Normalize to forward slashes so that path comparisons work on Windows: TypeScript reports file names with
+    // forward slashes on every platform, whereas `path.resolve` produces backslashes on Windows.
+    const normalizedBuildFolderPath: string = Path.convertToSlashes(buildFolderPath);
     this.#typeScriptFilenames = new Set(
-      tsProgram.getRootFileNames().map((filePath: string) => path.resolve(buildFolderPath, filePath))
+      tsProgram
+        .getRootFileNames()
+        .map((filePath: string) => Path.convertToSlashes(path.resolve(buildFolderPath, filePath)))
     );
     // ESLint configuration paths are relative to the project folder. Compute the project-relative paths of the
     // files in the TypeScript program so that the injected program can be scoped to just those files, and so
@@ -154,10 +159,10 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     // project folder can be expressed as ESLint configuration patterns.
     const typeScriptFilePatterns: string[] = [];
     for (const filePath of this.#typeScriptFilenames) {
-      if (Path.isUnder(filePath, buildFolderPath)) {
-        // filePath is already an absolute path under buildFolderPath, so strip the prefix (plus the separator)
-        // instead of recomputing the relative path.
-        typeScriptFilePatterns.push(Path.convertToSlashes(filePath.slice(buildFolderPath.length + 1)));
+      if (Path.isUnder(filePath, normalizedBuildFolderPath)) {
+        // filePath is already a forward-slash absolute path under the project folder, so strip the prefix (plus
+        // the separator) instead of recomputing the relative path.
+        typeScriptFilePatterns.push(filePath.slice(normalizedBuildFolderPath.length + 1));
       }
     }
 
@@ -318,15 +323,17 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     // against the project folder (not the process working directory).
     const lintResults: TEslint.ESLint.LintResult[] = await this.#fileEnumerator.lintFiles(['.']);
 
-    // ESLint reports absolute file paths, so they can be compared directly against the TypeScript program's
-    // (already resolved) file paths. Files that are part of the program are excluded; everything else the
-    // ESLint configuration selects (and that it does not ignore) is linted as an additional file. Generated
-    // output is excluded by the ESLint configuration's own `ignores` (the shared config ignores build-output
-    // folders such as `lib`, `lib-*`, `dist`, `temp`, and `coverage`).
+    // ESLint reports absolute file paths (with the platform-native separator), so normalize them to forward
+    // slashes to compare against the TypeScript program's (already normalized) file paths. Files that are part
+    // of the program are excluded; everything else the ESLint configuration selects (and that it does not
+    // ignore) is linted as an additional file. Generated output is excluded by the ESLint configuration's own
+    // `ignores` (the shared config ignores build-output folders such as `lib`, `lib-*`, `dist`, `temp`, and
+    // `coverage`).
     const additionalFilePaths: string[] = [];
     for (const { filePath } of lintResults) {
-      if (!typeScriptFilenames.has(filePath)) {
-        additionalFilePaths.push(filePath);
+      const normalizedFilePath: string = Path.convertToSlashes(filePath);
+      if (!typeScriptFilenames.has(normalizedFilePath)) {
+        additionalFilePaths.push(normalizedFilePath);
       }
     }
     // Sort for a stable ordering across runs. ESLint reports absolute paths, so a default lexicographic sort
@@ -520,7 +527,7 @@ function getAdditionalFileTypeInformationError(
   // TypeScript program or project. Files that are selected by the ESLint configuration but excluded from the
   // TypeScript program hit this case, so surface actionable guidance instead of the raw parser error. Files
   // that are part of the program (or non-fatal messages) are reported normally.
-  if (!lintMessage.fatal || typeScriptFilenames.has(lintResult.filePath)) {
+  if (!lintMessage.fatal || typeScriptFilenames.has(Path.convertToSlashes(lintResult.filePath))) {
     return undefined;
   }
 

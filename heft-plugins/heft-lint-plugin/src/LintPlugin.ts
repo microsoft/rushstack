@@ -17,7 +17,7 @@ import type {
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
@@ -287,10 +287,14 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     linter.printVersionHeader();
 
     // Resolve the program's root file names against the project folder so that they can be compared against the
-    // absolute paths that ESLint reports for the files it selects.
+    // absolute paths that ESLint reports for the files it selects. Normalize to forward slashes so that the
+    // comparison works on Windows: TypeScript reports `SourceFile.fileName` with forward slashes on every
+    // platform, whereas `path.resolve` produces backslashes on Windows.
     const { buildFolderPath } = heftConfiguration;
     const typeScriptFilenames: Set<string> = new Set(
-      tsProgram.getRootFileNames().map((filePath: string) => path.resolve(buildFolderPath, filePath))
+      tsProgram
+        .getRootFileNames()
+        .map((filePath: string) => Path.convertToSlashes(path.resolve(buildFolderPath, filePath)))
     );
     await linter.performLintingAsync({
       tsProgram,
