@@ -162,24 +162,24 @@ function isConfiguredChunkName(identifier: TSESTree.Identifier, chunkVariableNam
   return chunkVariableNames.has(identifier.name.toLowerCase());
 }
 
-function isBinaryChunkType(type: ts.Type, typeChecker: ts.TypeChecker, location: ts.Node): boolean {
+function isBinaryChunkType(type: ts.Type, program: ts.Program): boolean {
   if (type.isUnion()) {
-    return type.types.some((unionType: ts.Type) => isBinaryChunkType(unionType, typeChecker, location));
+    return type.types.some((unionType: ts.Type) => isBinaryChunkType(unionType, program));
   }
 
   const symbol: ts.Symbol | undefined = type.aliasSymbol ?? type.getSymbol();
-  if (symbol?.getName() === 'Uint8Array' && isTypeScriptLibSymbol(symbol)) {
+  if (symbol?.getName() === 'Uint8Array' && isTypeScriptLibSymbol(symbol, program)) {
     return true;
   }
 
   return ((type as ts.InterfaceType).getBaseTypes?.() ?? []).some((baseType: ts.BaseType) =>
-    isBinaryChunkType(baseType, typeChecker, location)
+    isBinaryChunkType(baseType, program)
   );
 }
 
-function isTypeScriptLibSymbol(symbol: ts.Symbol): boolean {
+function isTypeScriptLibSymbol(symbol: ts.Symbol, program: ts.Program): boolean {
   return (symbol.getDeclarations() ?? []).some((declaration: ts.Declaration) =>
-    declaration.getSourceFile().fileName.replace(/\\/g, '/').includes('/typescript/lib/lib.')
+    program.isSourceFileDefaultLibrary(declaration.getSourceFile())
   );
 }
 
@@ -218,18 +218,19 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     const parserServices: Partial<ParserServices> | undefined =
       context.sourceCode?.parserServices ?? context.parserServices;
-    const typeChecker: ts.TypeChecker | undefined = parserServices?.program?.getTypeChecker();
-    const hasTypeInformation: boolean = !!typeChecker && !!parserServices?.esTreeNodeToTSNodeMap;
+    const program: ts.Program | undefined = parserServices?.program ?? undefined;
+    const typeChecker: ts.TypeChecker | undefined = program?.getTypeChecker();
+    const hasTypeInformation: boolean = !!program && !!typeChecker && !!parserServices?.esTreeNodeToTSNodeMap;
     const chunkVariableNames: Set<string> = new Set(
       (context.options[0]?.chunkVariableNames ?? DEFAULT_CHUNK_VARIABLE_NAMES).map((name: string) =>
         name.toLowerCase()
       )
     );
+    const getScope: ((node: TSESTree.Node) => unknown) | undefined = context.sourceCode.getScope?.bind(
+      context.sourceCode
+    );
 
     function getVariable(identifier: TSESTree.Identifier): IESLintVariable | undefined {
-      const getScope: ((node: TSESTree.Node) => unknown) | undefined = context.sourceCode.getScope?.bind(
-        context.sourceCode
-      );
       let scope: IESLintScope | null = (getScope ? getScope(identifier) : context.getScope()) as IESLintScope;
       while (scope) {
         const variable: IESLintVariable | undefined = scope.variables.find(
@@ -246,10 +247,10 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
     }
 
     function isSameVariable(
-      referenceIdentifier: TSESTree.Identifier,
+      referenceVariable: IESLintVariable | undefined,
       declarationIdentifier: TSESTree.Identifier | undefined
     ): boolean {
-      return !!declarationIdentifier && getVariable(referenceIdentifier) === getVariable(declarationIdentifier);
+      return !!referenceVariable && !!declarationIdentifier && referenceVariable === getVariable(declarationIdentifier);
     }
 
     function isTypedBuffer(node: TSESTree.Node): boolean {
@@ -258,7 +259,7 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
       }
 
       const tsNode: ts.Node | undefined = parserServices!.esTreeNodeToTSNodeMap!.get(node);
-      return !!tsNode && isBinaryChunkType(typeChecker!.getTypeAtLocation(tsNode), typeChecker!, tsNode);
+      return !!tsNode && isBinaryChunkType(typeChecker!.getTypeAtLocation(tsNode), program!);
     }
 
     return {
@@ -273,12 +274,13 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
           return;
         }
 
+        const objectVariable: IESLintVariable | undefined = getVariable(object);
         if (
           (isTypedBuffer(object) ||
             // Fall back to configured conventional chunk names when parserOptions.project is not configured.
             (!hasTypeInformation && isConfiguredChunkName(object, chunkVariableNames))) &&
-          (isSameVariable(object, getCallbackParameterIdentifier(object)) ||
-            isSameVariable(object, getContainingForOfIdentifier(object)))
+          (isSameVariable(objectVariable, getCallbackParameterIdentifier(object)) ||
+            isSameVariable(objectVariable, getContainingForOfIdentifier(object)))
         ) {
           context.report({ node, messageId: 'error-per-chunk-buffer-to-string' });
         }
