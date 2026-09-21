@@ -6,7 +6,20 @@ import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 import type * as ts from 'typescript';
 
 type MessageIds = 'error-per-chunk-buffer-to-string';
-type Options = [];
+interface IOptions {
+  chunkVariableNames?: string[];
+}
+
+type Options = [IOptions?];
+
+interface IESLintVariable {
+  name: string;
+}
+
+interface IESLintScope {
+  variables: IESLintVariable[];
+  upper: IESLintScope | null;
+}
 
 const ITERATIVE_CALLBACK_METHOD_NAMES: Set<string> = new Set([
   'every',
@@ -68,22 +81,26 @@ function isIterativeCallback(functionNode: TSESTree.FunctionExpression | TSESTre
   return STREAM_DATA_METHOD_NAMES.has(methodName) && isDataEventArgument(callExpression.arguments[0]);
 }
 
-function isIdentifierDeclaredByForOf(identifier: TSESTree.Identifier, forOfStatement: TSESTree.ForOfStatement): boolean {
+function getIdentifierDeclaredByForOf(
+  identifier: TSESTree.Identifier,
+  forOfStatement: TSESTree.ForOfStatement
+): TSESTree.Identifier | undefined {
   const { left } = forOfStatement;
-  if (left.type === AST_NODE_TYPES.Identifier) {
-    return left.name === identifier.name;
+  if (left.type === AST_NODE_TYPES.Identifier && left.name === identifier.name) {
+    return left;
   }
 
-  return (
-    left.type === AST_NODE_TYPES.VariableDeclaration &&
-    left.declarations.some(
+  if (left.type === AST_NODE_TYPES.VariableDeclaration) {
+    return left.declarations.find(
       (declaration: TSESTree.VariableDeclarator) =>
         declaration.id.type === AST_NODE_TYPES.Identifier && declaration.id.name === identifier.name
-    )
-  );
+    )?.id as TSESTree.Identifier | undefined;
+  }
+
+  return undefined;
 }
 
-function isDeclaredByContainingForOf(identifier: TSESTree.Identifier): boolean {
+function getContainingForOfIdentifier(identifier: TSESTree.Identifier): TSESTree.Identifier | undefined {
   let current: TSESTree.Node | undefined = identifier.parent;
   while (current) {
     if (
@@ -91,22 +108,26 @@ function isDeclaredByContainingForOf(identifier: TSESTree.Identifier): boolean {
       current.type === AST_NODE_TYPES.FunctionExpression ||
       current.type === AST_NODE_TYPES.ArrowFunctionExpression
     ) {
-      return false;
+      return undefined;
     }
 
     if (current.type === AST_NODE_TYPES.ForOfStatement) {
-      if (isIdentifierDeclaredByForOf(identifier, current)) {
-        return true;
+      const declarationIdentifier: TSESTree.Identifier | undefined = getIdentifierDeclaredByForOf(
+        identifier,
+        current
+      );
+      if (declarationIdentifier) {
+        return declarationIdentifier;
       }
     }
 
     current = current.parent;
   }
 
-  return false;
+  return undefined;
 }
 
-function isCallbackParameter(identifier: TSESTree.Identifier): boolean {
+function getCallbackParameterIdentifier(identifier: TSESTree.Identifier): TSESTree.Identifier | undefined {
   let current: TSESTree.Node | undefined = identifier.parent;
   while (current) {
     if (
@@ -114,25 +135,29 @@ function isCallbackParameter(identifier: TSESTree.Identifier): boolean {
       current.type === AST_NODE_TYPES.FunctionExpression ||
       current.type === AST_NODE_TYPES.ArrowFunctionExpression
     ) {
-      return (
-        (current.type === AST_NODE_TYPES.FunctionExpression ||
-          current.type === AST_NODE_TYPES.ArrowFunctionExpression) &&
-        isIterativeCallback(current) &&
-        current.params.some(
-          (parameter: TSESTree.Parameter) =>
-            parameter.type === AST_NODE_TYPES.Identifier && parameter.name === identifier.name
-        )
-      );
+      if (
+        current.type === AST_NODE_TYPES.FunctionExpression ||
+        current.type === AST_NODE_TYPES.ArrowFunctionExpression
+      ) {
+        if (isIterativeCallback(current)) {
+          return current.params.find(
+            (parameter: TSESTree.Parameter) =>
+              parameter.type === AST_NODE_TYPES.Identifier && parameter.name === identifier.name
+          ) as TSESTree.Identifier | undefined;
+        }
+      }
+
+      return undefined;
     }
 
     current = current.parent;
   }
 
-  return false;
+  return undefined;
 }
 
-function isProbablyChunk(identifier: TSESTree.Identifier): boolean {
-  return identifier.name.toLowerCase().includes('chunk');
+function isConfiguredChunkName(identifier: TSESTree.Identifier, chunkVariableNames: Set<string>): boolean {
+  return chunkVariableNames.has(identifier.name.toLowerCase());
 }
 
 function isBufferType(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
@@ -156,7 +181,10 @@ function isBufferType(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
 function isNodeBufferSymbol(symbol: ts.Symbol): boolean {
   return (symbol.getDeclarations() ?? []).some((declaration: ts.Declaration) => {
     const sourceFileName: string = declaration.getSourceFile().fileName.replace(/\\/g, '/');
-    return sourceFileName.includes('/@types/node/') && sourceFileName.endsWith('/buffer.buffer.d.ts');
+    return (
+      sourceFileName.includes('/@types/node/') &&
+      (sourceFileName.endsWith('/buffer.d.ts') || sourceFileName.endsWith('/buffer.buffer.d.ts'))
+    );
   });
 }
 
@@ -167,7 +195,7 @@ function isTypeScriptLibSymbol(symbol: ts.Symbol): boolean {
 }
 
 const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
-  defaultOptions: [],
+  defaultOptions: [{ chunkVariableNames: ['chunk'] }],
   meta: {
     type: 'problem',
     messages: {
@@ -175,7 +203,21 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
         'Do not call toString() on each Buffer chunk from a stream or iterable. Multi-byte characters ' +
         'split across chunks can be corrupted; use TextDecoder.decode(chunk, { stream: true }) instead.'
     },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          chunkVariableNames: {
+            type: 'array',
+            items: {
+              type: 'string'
+            },
+            uniqueItems: true
+          }
+        }
+      }
+    ],
     docs: {
       description:
         'Prevent decoding Buffer chunks one at a time with toString(), which can corrupt multi-byte ' +
@@ -189,6 +231,35 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
       context.sourceCode?.parserServices ?? context.parserServices;
     const typeChecker: ts.TypeChecker | undefined = parserServices?.program?.getTypeChecker();
     const hasTypeInformation: boolean = !!typeChecker && !!parserServices?.esTreeNodeToTSNodeMap;
+    const chunkVariableNames: Set<string> = new Set(
+      (context.options[0]?.chunkVariableNames ?? ['chunk']).map((name: string) => name.toLowerCase())
+    );
+
+    function getVariable(identifier: TSESTree.Identifier): IESLintVariable | undefined {
+      const getScope: ((node: TSESTree.Node) => unknown) | undefined = context.sourceCode.getScope?.bind(
+        context.sourceCode
+      );
+      let scope: IESLintScope | null = (getScope ? getScope(identifier) : context.getScope()) as IESLintScope;
+      while (scope) {
+        const variable: IESLintVariable | undefined = scope.variables.find(
+          (scopeVariable: IESLintVariable) => scopeVariable.name === identifier.name
+        );
+        if (variable) {
+          return variable;
+        }
+
+        scope = scope.upper;
+      }
+
+      return undefined;
+    }
+
+    function isSameVariable(
+      referenceIdentifier: TSESTree.Identifier,
+      declarationIdentifier: TSESTree.Identifier | undefined
+    ): boolean {
+      return !!declarationIdentifier && getVariable(referenceIdentifier) === getVariable(declarationIdentifier);
+    }
 
     function isTypedBuffer(node: TSESTree.Node): boolean {
       if (!hasTypeInformation) {
@@ -213,9 +284,10 @@ const noPerChunkBufferToStringRule: TSESLint.RuleModule<MessageIds, Options> = {
 
         if (
           (isTypedBuffer(object) ||
-            // Fall back to the conventional "chunk" name when parserOptions.project is not configured.
-            (!hasTypeInformation && isProbablyChunk(object))) &&
-          (isCallbackParameter(object) || isDeclaredByContainingForOf(object))
+            // Fall back to configured conventional chunk names when parserOptions.project is not configured.
+            (!hasTypeInformation && isConfiguredChunkName(object, chunkVariableNames))) &&
+          (isSameVariable(object, getCallbackParameterIdentifier(object)) ||
+            isSameVariable(object, getContainingForOfIdentifier(object)))
         ) {
           context.report({ node, messageId: 'error-per-chunk-buffer-to-string' });
         }

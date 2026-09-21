@@ -157,7 +157,7 @@ Prevent decoding each Buffer chunk from a stream or iterable with `chunk.toStrin
 
 Calling `toString()` separately for each Buffer chunk can corrupt multi-byte characters that are split across chunk boundaries. Use `TextDecoder` instead so decoding state is preserved between chunks.
 
-When type information is available, this rule checks for Node.js `Buffer` and `Uint8Array` chunk values. Without type information, it falls back to the conventional chunk variable name in stream and iterable callbacks.
+When type information is available, this rule checks for Node.js `Buffer` and `Uint8Array` chunk values. Without type information, it falls back to configured conventional chunk variable names in stream and iterable callbacks. The default fallback name is `chunk`; use the `chunkVariableNames` option to add project-specific alternatives such as `data` or `buf`.
 
 #### Examples
 

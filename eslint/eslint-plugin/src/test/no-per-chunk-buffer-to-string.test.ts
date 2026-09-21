@@ -28,6 +28,14 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
     {
+      code: [
+        "stream.prependListener('data', (chunk) => {",
+        '  output += chunk.toString();',
+        '});'
+      ].join('\n'),
+      errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
+    },
+    {
       code: ['for (const chunk of chunks) {', '  output += chunk.toString();', '}'].join('\n'),
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
@@ -41,6 +49,15 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
     },
     {
       code: "chunks.map((chunk) => chunk['toString']())",
+      errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
+    },
+    {
+      code: [
+        "stream.on('data', (data) => {",
+        '  output += data.toString();',
+        '});'
+      ].join('\n'),
+      options: [{ chunkVariableNames: ['data'] }],
       errors: [{ messageId: 'error-per-chunk-buffer-to-string' }]
     },
     {
@@ -84,6 +101,18 @@ ruleTester.run('no-per-chunk-buffer-to-string', noPerChunkBufferToStringRule, {
         '  toString: () => "text"',
         '};',
         'const text = chunk.toString();'
+      ].join('\n')
+    },
+    {
+      code: [
+        "stream.on('data', (chunk) => {",
+        '  {',
+        '    const chunk = {',
+        '      toString: () => "text"',
+        '    };',
+        '    output += chunk.toString();',
+        '  }',
+        '});'
       ].join('\n')
     }
   ]
