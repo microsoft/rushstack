@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Preserve both resolved reporter-control stripping lists when bootstrap compatibility falls back to legacy output.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "TheLarkInn@users.noreply.github.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Preserve both resolved reporter-control stripping lists when bootstrap compatibility falls back to legacy output.","type":"patch"}],"packageName":"@microsoft/rush","email":"TheLarkInn@users.noreply.github.com"}

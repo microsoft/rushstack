@@ -20,6 +20,7 @@ resources:
     - pipeline: esrpPublishRushstack
       source: 'rushstack-esrp-publish'
       project: GitHubProjectsPublish
+      branch: refs/heads/main
       trigger:
         enabled: true
         branches:
@@ -28,6 +29,7 @@ resources:
     - pipeline: esrpPublishRush
       source: 'rushstack-esrp-publish-rush'
       project: GitHubProjectsPublish
+      branch: refs/heads/main
       trigger:
         enabled: true
         branches:
@@ -115,6 +117,8 @@ extends:
                     --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
+              # Resource-triggered runs check out the publishing pipeline's commit, so local package
+              # versions match the versions that were just published without waiting for feed propagation.
               - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
                 parameters:
                   Arguments: 'bump-decoupled-local-dependencies'

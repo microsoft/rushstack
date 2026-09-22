@@ -2,6 +2,26 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.9.29",
+      "tag": "@rushstack/module-minifier_v0.9.29",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.28",
       "tag": "@rushstack/module-minifier_v0.9.28",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",

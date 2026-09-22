@@ -1,6 +1,17 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+
+## 4.7.0
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Minor changes
+
+- Group the profile's type-aware rules into an exported `typeAwareRules` set and add a `flat/without-type-information` helper for linting files that are not part of the TypeScript program with only the non-type-aware rules.
+
+### Patches
+
+- Author the package in TypeScript (built to CommonJS via Heft). The existing subpath entry points are preserved via a `package.json` `"exports"` map and the compiled configuration is runtime-identical to the previous JavaScript.
 
 ## 4.6.6
 Sat, 05 Sep 2026 00:15:08 GMT

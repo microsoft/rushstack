@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Expose an optional scoped reporter producer API to Rush actions and plugins while preserving legacy terminal output.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "TheLarkInn@users.noreply.github.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Expose an optional scoped reporter producer API to Rush actions and plugins while preserving legacy terminal output.","type":"patch"}],"packageName":"@microsoft/rush","email":"TheLarkInn@users.noreply.github.com"}

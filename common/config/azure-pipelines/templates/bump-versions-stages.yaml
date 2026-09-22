@@ -108,7 +108,7 @@ stages:
 
           - bash: |
               git add -u -- common/changes
-              git add -- '**/CHANGELOG.*' '**/package.json'
+              git add -- '**/CHANGELOG.*' '**/package.json' 'common/config/rush/version-policies.json'
 
               if [ -n "$(git diff --cached --numstat)" ]; then
                 git commit -m "Applying package version bumps
