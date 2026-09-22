@@ -26,6 +26,7 @@ import type {
 import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import type { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
 import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
@@ -71,9 +72,13 @@ export function initializeHeft(
 ): void {
   // Ensure that verbose is enabled on the terminal if requested. terminalProvider.verboseEnabled
   // should already be `true` if the `--debug` flag was provided. This is set in HeftCommandLineParser
-  if (heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
-    heftConfiguration.terminalProvider.verboseEnabled =
-      heftConfiguration.terminalProvider.verboseEnabled || isVerbose;
+  if (
+    heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider ||
+    'verboseEnabled' in heftConfiguration.terminalProvider
+  ) {
+    const terminalProvider: ConsoleTerminalProvider | HeftChildReporter =
+      heftConfiguration.terminalProvider as ConsoleTerminalProvider | HeftChildReporter;
+    terminalProvider.verboseEnabled = terminalProvider.verboseEnabled || isVerbose;
   }
 
   // Log some information about the execution

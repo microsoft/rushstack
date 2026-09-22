@@ -4,6 +4,11 @@
 
 The CLI client's **presentation layer** for the Rush daemon (`rushd`):
 
+Operation text decoding preserves UTF-8 fragments independently for each operation
+and stdout/stderr stream. Closing an operation flushes any incomplete final text.
+Global activity preserves its stderr designation and normalizes existing newlines
+without adding an extra blank line.
+
 - **Reporter host** — drives event renderers from the daemon's `0x05` event stream; the host
   interface mirrors `@rushstack/reporter`'s `IReporter` so its `default`/`ai`/`plaintext`
   reporters drop in unchanged.

@@ -5,9 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { EnvironmentMap } from '@rushstack/node-core-library';
-import {
-  validateDaemonRequestAdmissionOptions
-} from '@rushstack/rush-daemon-protocol';
+import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonRushCommandOrigin,
   DaemonTerminalRequirement,
@@ -36,7 +34,6 @@ export interface IGlobalCommandTerminalProperties {
  */
 export interface IGlobalCommandEnvironment {
   get(name: string): string | undefined;
-  getNames(): ReadonlyArray<string>;
   toObject(): NodeJS.ProcessEnv;
 }
 
@@ -74,22 +71,14 @@ const REQUEST_SESSION_BY_REQUEST: WeakMap<IResolvedGlobalCommandRequest, IWorksp
 
 class GlobalCommandEnvironment implements IGlobalCommandEnvironment {
   readonly #environmentMap: EnvironmentMap;
-  readonly #names: ReadonlyArray<string>;
 
   public constructor(environment: Readonly<NodeJS.ProcessEnv>) {
     this.#environmentMap = createEnvironmentMap(environment);
-    this.#names = Object.freeze(
-      Array.from(this.#environmentMap.entries(), ({ name }) => name).sort(compareEnvironmentNames)
-    );
     Object.freeze(this);
   }
 
   public get(name: string): string | undefined {
     return this.#environmentMap.get(name);
-  }
-
-  public getNames(): ReadonlyArray<string> {
-    return this.#names;
   }
 
   public toObject(): NodeJS.ProcessEnv {
@@ -105,9 +94,7 @@ export function resolveGlobalCommandRequest(
   validateNonemptyName(options.commandName, 'command name');
   validateCommandOrigin(options.commandOrigin);
   validateDaemonRequestAdmissionOptions(options.admission);
-  const repoRoot: string = getCanonicalDirectory(workspaceSession.metadata.repoRoot, 'workspace root');
-  const cwd: string = getCanonicalDirectory(options.cwd, 'working directory');
-  validatePathWithinWorkspace(cwd, repoRoot);
+  const cwd: string = resolveGlobalCommandWorkingDirectory(options.cwd, workspaceSession);
   const request: IResolvedGlobalCommandRequest = Object.freeze({
     admission: options.admission ? Object.freeze({ ...options.admission }) : undefined,
     commandName: options.commandName,
@@ -119,6 +106,23 @@ export function resolveGlobalCommandRequest(
   });
   REQUEST_SESSION_BY_REQUEST.set(request, workspaceSession);
   return request;
+}
+
+export function resolveGlobalCommandWorkingDirectory(
+  folder: string,
+  workspaceSession: IWorkspaceSession
+): string {
+  if (!path.isAbsolute(folder)) {
+    throw new Error('The global command working directory must be absolute.');
+  }
+  const repoRoot: string = getCanonicalDirectory(workspaceSession.metadata.repoRoot, 'workspace root');
+  const cwd: string = getCanonicalDirectory(folder, 'working directory');
+  validatePathWithinWorkspace(cwd, repoRoot);
+  return cwd;
+}
+
+export function resolveGlobalCommandEnvironment(environment: Readonly<NodeJS.ProcessEnv>): NodeJS.ProcessEnv {
+  return createEnvironmentMap(environment).toObject();
 }
 
 function validateCommandOrigin(value: DaemonRushCommandOrigin): void {
@@ -185,10 +189,7 @@ function validateEnvironmentValue(name: string, value: unknown): asserts value i
 function resolveTerminalProperties(
   terminal: IGlobalCommandTerminalProperties
 ): IGlobalCommandTerminalProperties {
-  if (
-    terminal.columns !== undefined &&
-    (!Number.isSafeInteger(terminal.columns) || terminal.columns <= 0)
-  ) {
+  if (terminal.columns !== undefined && (!Number.isSafeInteger(terminal.columns) || terminal.columns <= 0)) {
     throw new Error('Global command terminal columns must be a positive safe integer.');
   }
   if (typeof terminal.isTTY !== 'boolean' || typeof terminal.supportsColor !== 'boolean') {
@@ -243,8 +244,4 @@ function validateNonemptyName(value: string, kind: string): void {
   if (value.length === 0 || value.trim() !== value) {
     throw new Error(`Invalid global command ${kind}: "${value}".`);
   }
-}
-
-function compareEnvironmentNames(left: string, right: string): number {
-  return left.localeCompare(right);
 }

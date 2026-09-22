@@ -13,6 +13,7 @@ import {
   FileConstants,
   type FileSystemStats,
   SubprocessTerminator,
+  EnvironmentMap,
   Executable,
   type IWaitForExitResult,
   Async,
@@ -48,6 +49,11 @@ export interface IExecuteCommandOptions {
   suppressOutput?: boolean;
   keepEnvironment?: boolean;
   /**
+   * Whether to use a shell on POSIX. Defaults to true.
+   * Windows always uses a shell to support package manager .cmd shims.
+   */
+  useShell?: boolean;
+  /**
    * Note that this takes precedence over {@link IExecuteCommandOptions.suppressOutput}
    */
   onStdoutStreamChunk?: (chunk: string) => string | void;
@@ -75,9 +81,9 @@ export interface IInstallPackageInDirectoryOptions {
 
 export interface ILifecycleCommandOptions {
   /**
-   * The rush configuration, if the command is running in a rush repo.
+   * Rush configuration paths used to prepare the lifecycle environment, if running in a Rush repo.
    */
-  rushConfiguration: RushConfiguration | undefined;
+  rushConfiguration: Pick<RushConfiguration, 'rushJsonFolder' | 'commonTempFolder'> | undefined;
 
   /**
    * Working directory for running the command
@@ -113,6 +119,31 @@ export interface ILifecycleCommandOptions {
    * If true, wire up SubprocessTerminator to the child process.
    */
   connectSubprocessTerminator?: boolean;
+
+  /**
+   * Additional private environment variables for inherited child channels.
+   *
+   * @internal
+   */
+  additionalEnvironment?: IEnvironment;
+
+  /**
+   * An explicit stdio plan for private inherited child channels.
+   *
+   * @internal
+   */
+  stdio?: child_process.StdioOptions;
+
+  /**
+   * Overrides child creation for asynchronous lifecycle commands so the caller can own child cleanup.
+   *
+   * @internal
+   */
+  spawn?: (
+    command: string,
+    args: ReadonlyArray<string>,
+    options: child_process.SpawnOptions
+  ) => child_process.ChildProcess;
 }
 
 export interface IEnvironmentPathOptions {
@@ -355,6 +386,7 @@ export class Utilities {
       onStdoutStreamChunk,
       environment,
       keepEnvironment,
+      useShell,
       captureExitCodeAndSignal
     } = options;
     const { exitCode, signal } = await _executeCommandInternalAsync({
@@ -375,6 +407,7 @@ export class Utilities {
             ['inherit', 'inherit', 'inherit'],
       environment,
       keepEnvironment,
+      useShell,
       onStdoutStreamChunk,
       captureOutput: false,
       captureExitCodeAndSignal
@@ -495,7 +528,7 @@ export class Utilities {
   ): child_process.ChildProcess {
     const child: child_process.ChildProcess = _executeLifecycleCommandInternal(
       command,
-      child_process.spawn,
+      options.spawn ?? child_process.spawn,
       options
     );
     if (options.connectSubprocessTerminator) {
@@ -624,16 +657,32 @@ export class Utilities {
   }
 
   /** @internal */
-  public static _convertCommandAndArgsToShell(command: string, isWindows?: boolean): ICommandAndArgs;
-  public static _convertCommandAndArgsToShell(options: ICommandAndArgs, isWindows?: boolean): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(
+    command: string,
+    isWindows?: boolean,
+    environment?: IEnvironment
+  ): ICommandAndArgs;
+  public static _convertCommandAndArgsToShell(
+    options: ICommandAndArgs,
+    isWindows?: boolean,
+    environment?: IEnvironment
+  ): ICommandAndArgs;
   public static _convertCommandAndArgsToShell(
     options: ICommandAndArgs | string,
-    isWindows: boolean = IS_WINDOWS
+    isWindows: boolean = IS_WINDOWS,
+    environment: IEnvironment = process.env
   ): ICommandAndArgs {
     let shellCommand: string;
     let commandFlags: string[];
     if (isWindows) {
-      shellCommand = process.env.comspec || 'cmd';
+      const environmentMap: EnvironmentMap = new EnvironmentMap();
+      for (const [name, value] of Object.entries(environment)) {
+        if (value !== undefined) {
+          // isWindows can be supplied independently of the current platform.
+          environmentMap.set(name.toUpperCase(), value);
+        }
+      }
+      shellCommand = environmentMap.get('COMSPEC') || 'cmd.exe';
       commandFlags = ['/d', '/s', '/c'];
     } else {
       shellCommand = 'sh';
@@ -678,7 +727,9 @@ function _executeLifecycleCommandInternal<TCommandResult>(
     workingDirectory,
     handleOutput,
     ipc,
-    connectSubprocessTerminator
+    connectSubprocessTerminator,
+    additionalEnvironment,
+    stdio: explicitStdio
   } = options;
   const environment: IEnvironment = _createEnvironmentForRushCommand({
     initCwd,
@@ -691,10 +742,15 @@ function _executeLifecycleCommandInternal<TCommandResult>(
     }
   });
 
-  const stdio: child_process.StdioOptions = handleOutput ? ['ignore', 'pipe', 'pipe'] : [0, 1, 2];
+  let stdio: child_process.StdioOptions =
+    explicitStdio ?? (handleOutput ? ['ignore', 'pipe', 'pipe'] : [0, 1, 2]);
   if (ipc) {
-    stdio.push('ipc');
+    if (!Array.isArray(stdio)) {
+      throw new Error('An IPC lifecycle command requires an array stdio configuration.');
+    }
+    stdio = [...stdio, 'ipc'];
   }
+  Object.assign(environment, additionalEnvironment);
 
   const spawnOptions: child_process.SpawnOptions = {
     cwd: workingDirectory,
@@ -706,11 +762,18 @@ function _executeLifecycleCommandInternal<TCommandResult>(
     Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
   }
 
-  const { command, args } = Utilities._convertCommandAndArgsToShell(commandAndArgs);
+  const { command, args } = Utilities._convertCommandAndArgsToShell(
+    commandAndArgs,
+    IS_WINDOWS,
+    initialEnvironment ? environment : undefined
+  );
 
   if (IS_WINDOWS) {
-    const shellCommand: string = [command, ...args].join(' ');
-    return spawnFunction(shellCommand, [], { ...spawnOptions, shell: true });
+    const shellCommand: string = [escapeArgumentIfNeeded(command, true), ...args].join(' ');
+    return spawnFunction(shellCommand, [], {
+      ...spawnOptions,
+      shell: initialEnvironment ? command : true
+    });
   } else {
     return spawnFunction(command, args, spawnOptions);
   }
@@ -830,13 +893,14 @@ async function _executeCommandInternalAsync({
   stdio,
   environment,
   keepEnvironment,
+  useShell = true,
   onStdoutStreamChunk,
   captureOutput,
   captureExitCodeAndSignal
 }: IExecuteCommandInternalOptions): Promise<IWaitForExitResult<string> | IWaitForExitResultWithoutOutput> {
   const spawnOptions: child_process.SpawnSyncOptions = {
     cwd: workingDirectory,
-    shell: true,
+    shell: IS_WINDOWS || useShell,
     stdio: stdio,
     env: keepEnvironment
       ? environment
@@ -844,25 +908,31 @@ async function _executeCommandInternalAsync({
     maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
   };
 
-  // This is needed since we specify shell=true below.
-  // NOTE: On Windows if we escape "NPM", the spawnSync() function runs something like this:
-  //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""NPM" "install""' ]
-  //
-  // Due to a bug with Windows cmd.exe, the npm.cmd batch file's "%~dp0" variable will
-  // return the current working directory instead of the batch file's directory.
-  // The workaround is to not escape, npm, i.e. do this instead:
-  //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '"npm "install""' ]
-  //
-  // We will come up with a better solution for this when we promote executeCommand()
-  // into node-core-library, but for now this hack will unblock people:
+  let childProcess: child_process.ChildProcess;
+  if (!spawnOptions.shell) {
+    // POSIX shells can discard URL-scoped npm_config_* credential variables.
+    childProcess = child_process.spawn(command, args, spawnOptions);
+  } else {
+    // This is needed since we specify shell=true below.
+    // NOTE: On Windows if we escape "NPM", the spawnSync() function runs something like this:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""NPM" "install""' ]
+    //
+    // Due to a bug with Windows cmd.exe, the npm.cmd batch file's "%~dp0" variable will
+    // return the current working directory instead of the batch file's directory.
+    // The workaround is to not escape, npm, i.e. do this instead:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '"npm "install""' ]
+    //
+    // We will come up with a better solution for this when we promote executeCommand()
+    // into node-core-library, but for now this hack will unblock people:
 
-  // Only escape the command if it actually contains spaces:
-  const escapedCommand: string = escapeArgumentIfNeeded(command);
+    // Only escape the command if it actually contains spaces:
+    const escapedCommand: string = escapeArgumentIfNeeded(command);
 
-  const escapedArgs: string[] = args.map((x) => escapeArgumentIfNeeded(x));
-  const shellCommand: string = [escapedCommand, ...escapedArgs].join(' ');
+    const escapedArgs: string[] = args.map((x) => escapeArgumentIfNeeded(x));
+    const shellCommand: string = [escapedCommand, ...escapedArgs].join(' ');
 
-  const childProcess: child_process.ChildProcess = child_process.spawn(shellCommand, spawnOptions);
+    childProcess = child_process.spawn(shellCommand, spawnOptions);
+  }
 
   if (onStdoutStreamChunk) {
     const inspectStream: Transform = new Transform({

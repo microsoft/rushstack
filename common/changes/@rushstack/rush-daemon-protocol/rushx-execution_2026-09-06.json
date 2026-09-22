@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add the validated optional Rush/Rushx invocation kind in protocol 0.8 without changing legacy request routing.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

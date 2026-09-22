@@ -161,7 +161,7 @@ export class Telemetry {
   #dataFolder: string;
   #rushConfiguration: RushConfiguration;
   #rushSession: RushSession;
-  private readonly _flushAsyncTasks: Set<Promise<void>> = new Set();
+  readonly #flushAsyncTasks: Set<Promise<void>> = new Set();
   #telemetryStartTime: number = 0;
 
   public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
@@ -234,13 +234,13 @@ export class Telemetry {
        * and store the promise into a list so that we can await it later.
        */
       const asyncTaskPromise: Promise<void> = this.#rushSession.hooks.flushTelemetry.promise(this.#store);
-      this._flushAsyncTasks.add(asyncTaskPromise);
+      this.#flushAsyncTasks.add(asyncTaskPromise);
       asyncTaskPromise.then(
         () => {
-          this._flushAsyncTasks.delete(asyncTaskPromise);
+          this.#flushAsyncTasks.delete(asyncTaskPromise);
         },
         () => {
-          this._flushAsyncTasks.delete(asyncTaskPromise);
+          this.#flushAsyncTasks.delete(asyncTaskPromise);
         }
       );
     }
@@ -253,7 +253,7 @@ export class Telemetry {
    * There are some async tasks that are not finished when the process is exiting.
    */
   public async ensureFlushedAsync(): Promise<void> {
-    await Promise.all(this._flushAsyncTasks);
+    await Promise.all(this.#flushAsyncTasks);
   }
 
   public get store(): ITelemetryData[] {

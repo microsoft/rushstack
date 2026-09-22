@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Give the wrong-version launcher rejection integration test a 15-second budget for its two isolated Node processes, without changing production deadlines.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

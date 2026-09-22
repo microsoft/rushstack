@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Publish the pre-bind test PID marker atomically so a starter cannot read an empty newly-created file as PID zero; retain single-daemon and ownership assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

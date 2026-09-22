@@ -20,7 +20,7 @@ import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rus
 
 import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import type { IOperationChildProcessReporter, IOperationGraphEventSink } from './OperationEventSink';
 import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
@@ -45,7 +45,7 @@ import {
  */
 export interface IOperationExecutionRecordContext {
   iterationId: number;
-  streamCollator: StreamCollator;
+  streamCollator: StreamCollator | undefined;
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
@@ -168,7 +168,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public logFilePaths: ILogFilePaths | undefined;
 
-  readonly #context: IOperationExecutionRecordContext;
+  #context: IOperationExecutionRecordContext;
 
   #collatedWriter: CollatedWriter | undefined = undefined;
   #status: OperationStatus;
@@ -223,6 +223,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
     if (!this.#collatedWriter) {
+      if (!this.#context.streamCollator) {
+        throw new InternalError('Cannot reopen the output of a detached execution record.');
+      }
       this.#collatedWriter = this.#context.streamCollator.registerTask(this.name);
     }
     return this.#collatedWriter;
@@ -286,6 +289,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this.#context.eventSink;
   }
 
+  /**
+   * {@inheritdoc IOperationRunnerContext.createChildProcessReporter}
+   */
+  public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
+    return this.#context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
+  }
+
   public get silent(): boolean {
     return !this.enabled || this.runner.silent;
   }
@@ -322,6 +332,31 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    */
   public get isOperationCompleted(): boolean {
     return this.#operationCompleted;
+  }
+
+  /**
+   * Releases iteration-wide references after the host has drained all output.
+   * Retained hashes, warnings, timing and results remain usable for incremental decisions.
+   */
+  public detachExecutionContext(): void {
+    if (!this.#operationCompleted) {
+      throw new InternalError('Cannot detach an unfinished execution record.');
+    }
+    if (this.#context.inputsSnapshot) {
+      this.getStateHash();
+    }
+    const { iterationId, maxParallelism, debugMode, quietMode } = this.#context;
+    this.#context = {
+      iterationId,
+      maxParallelism,
+      debugMode,
+      quietMode,
+      inputsSnapshot: undefined,
+      streamCollator: undefined
+    };
+    this.#collatedWriter = undefined;
+    this.dependencies.clear();
+    this.consumers.clear();
   }
 
   /**
@@ -403,10 +438,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
   public async runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
-      logFileSuffix: string;
+      logFileSuffix?: string;
     }
   ): Promise<T> {
     const { associatedProject, stdioSummarizer, problemCollector } = this;
@@ -479,10 +518,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
+      const structuredChildOutputTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        new CollatedTerminal(normalizeNewlineTransform),
+        {
+          debugEnabled: this.debugMode
+        }
+      );
       const terminal: Terminal = new Terminal(terminalProvider);
       //#endregion
 
-      const result: T = await callback(terminal, terminalProvider);
+      const result: T = await callback(terminal, terminalProvider, structuredChildOutputTerminalProvider);
 
       normalizeNewlineTransform.close();
 

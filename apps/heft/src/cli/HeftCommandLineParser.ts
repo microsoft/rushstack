@@ -10,7 +10,12 @@ import {
   type CommandLineAction
 } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
+import {
+  Terminal,
+  ConsoleTerminalProvider,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -23,6 +28,7 @@ import type { IHeftActionOptions } from './actions/IHeftAction';
 import { AliasAction } from './actions/AliasAction';
 import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
 import { Constants } from '../utilities/Constants';
+import { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -41,7 +47,8 @@ export class HeftCommandLineParser extends CommandLineParser {
   readonly #debugFlag: CommandLineFlagParameter;
   readonly #unmanagedFlag: CommandLineFlagParameter;
   readonly #debug: boolean;
-  readonly #terminalProvider: ConsoleTerminalProvider;
+  readonly #terminalProvider: ITerminalProvider;
+  readonly #childReporter: HeftChildReporter | undefined;
   readonly #loggingManager: LoggingManager;
   readonly #metricsCollector: MetricsCollector;
   readonly #heftConfiguration: HeftConfiguration;
@@ -77,12 +84,22 @@ export class HeftCommandLineParser extends CommandLineParser {
     this.#debug = !!preInitializationArgumentValues.debug;
 
     // Enable debug and verbose logging if the "--debug" flag is set
-    this.#terminalProvider = new ConsoleTerminalProvider({
-      debugEnabled: this.#debug,
-      verboseEnabled: this.#debug
-    });
+    this.#childReporter = HeftChildReporter.tryInitialize();
+    this.#terminalProvider =
+      this.#childReporter ??
+      new ConsoleTerminalProvider({
+        debugEnabled: this.#debug,
+        verboseEnabled: this.#debug
+      });
+    if (this.#debug && this.#childReporter) {
+      this.#childReporter.debugEnabled = true;
+      this.#childReporter.verboseEnabled = true;
+    }
     this.globalTerminal = new Terminal(this.#terminalProvider);
-    this.#loggingManager = new LoggingManager({ terminalProvider: this.#terminalProvider });
+    this.#loggingManager = new LoggingManager({
+      terminalProvider: this.#terminalProvider,
+      childReporter: this.#childReporter
+    });
     if (this.#debug) {
       // Enable printing stacktraces if the "--debug" flag is set
       this.#loggingManager.enablePrintStacks();
@@ -197,6 +214,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         commandName,
         unaliasedCommandName
       };
+      this.#childReporter?.setCommandName(commandName);
       await super.onExecuteAsync();
     } catch (e) {
       await this.#reportErrorAndSetExitCodeAsync(e as Error);
@@ -224,7 +242,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     args: string[] = process.argv
   ): IPreInitializationArgumentValues {
     if (!this.#debugFlag) {
-      // The `this._debugFlag` parameter (the parameter itself, not its value)
+      // The `this.#debugFlag` parameter (the parameter itself, not its value)
       // has not yet been defined. Parameters need to be defined before we
       // try to evaluate any parameters. This is to ensure that the
       // `--debug` flag is defined correctly before we do this not-so-rigorous
@@ -241,7 +259,11 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   async #reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
-      this.globalTerminal.writeErrorLine(error.toString());
+      if (this.#childReporter) {
+        this.#childReporter.emitDiagnostic(Constants.heftPackageName, error, 'error');
+      } else {
+        this.globalTerminal.writeErrorLine(error.toString());
+      }
     }
 
     if (this.#debug) {

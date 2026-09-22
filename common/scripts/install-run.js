@@ -57,6 +57,7 @@ function escapeArgumentIfNeeded(command, isWindows = IS_WINDOWS) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getNpmrcEnvironmentVariables: () => (/* binding */ getNpmrcEnvironmentVariables),
 /* harmony export */   isVariableSetInNpmrcFile: () => (/* binding */ isVariableSetInNpmrcFile),
 /* harmony export */   syncNpmrc: () => (/* binding */ syncNpmrc),
 /* harmony export */   trimNpmrcFileLines: () => (/* binding */ trimNpmrcFileLines)
@@ -78,7 +79,7 @@ __webpack_require__.r(__webpack_exports__);
  * The text of the the .npmrc.
  */
 function _trimNpmrcFile(options) {
-    const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties, env = process.env } = options;
+    const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties, moveSensitiveSettingsToEnvironment, environmentVariableSettingNames, env = process.env } = options;
     let npmrcFileLines = [];
     if (linesToPrepend) {
         npmrcFileLines.push(...linesToPrepend);
@@ -90,7 +91,7 @@ function _trimNpmrcFile(options) {
         npmrcFileLines.push(...linesToAppend);
     }
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-    const resultLines = trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties);
+    const resultLines = trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties, moveSensitiveSettingsToEnvironment, environmentVariableSettingNames);
     const combinedNpmrc = resultLines.join('\n');
     return combinedNpmrc;
 }
@@ -135,19 +136,239 @@ const PROPERTY_NAME_REGEX = /^([^=\[\s]+)/;
  *   nameString:-fallbackString -> group 1: nameString,    group 2: fallbackString
  */
 const ENV_VAR_WITH_FALLBACK_REGEX = /^(?<name>[^:-]+)(?::?-(?<fallback>.+))?$/;
+// Matches an environment variable reference such as "${NPM_TOKEN}" anywhere in a setting.
+const ENVIRONMENT_VARIABLE_DETECTION_REGEX = /\$\{[^\}]+\}/;
+/**
+ * The comment marker that is written in place of an .npmrc setting whose value was moved into an
+ * `npm_config_*` environment variable. The remainder of the line is the original (unexpanded)
+ * setting, so that the secret itself never gets written to disk.
+ *
+ * @remarks
+ * See {@link getNpmrcEnvironmentVariables} for the code that reads these lines back.
+ */
+const PROVIDED_VIA_ENVIRONMENT_PREFIX = '; PROVIDED VIA ENVIRONMENT: ';
+/**
+ * The names of .npmrc settings that PNPM considers to be credentials. They may appear either
+ * as a bare setting name (`_authToken=...`) or scoped to a registry URI
+ * (`//registry.example.com/:_authToken=...`).
+ *
+ * @remarks
+ * This list mirrors PNPM's own list; PNPM 10.34.2 and newer refuse to expand `${VAR}` tokens in
+ * these settings when they come from a project or workspace .npmrc file.
+ */
+const AUTH_VALUE_SETTING_NAMES = new Set([
+    '_authToken',
+    '_auth',
+    '_password',
+    'username',
+    'tokenHelper',
+    'cert',
+    'key'
+]);
+/**
+ * The names of .npmrc settings that determine where PNPM sends a request. PNPM 10.34.2 and newer
+ * refuse to expand `${VAR}` tokens in these settings when they come from a project or workspace
+ * .npmrc file, because a compromised value could redirect a request (and its credentials) to an
+ * attacker-controlled server.
+ */
+const REQUEST_DESTINATION_SETTING_NAMES = new Set([
+    'registry',
+    'proxy',
+    'http-proxy',
+    'https-proxy'
+]);
+function _isRegistrySettingName(settingName) {
+    return settingName === 'registry' || (settingName.startsWith('@') && settingName.endsWith(':registry'));
+}
+/**
+ * Returns true if PNPM treats the setting's value as a credential.
+ */
+function _isAuthValueSettingName(settingName) {
+    if (AUTH_VALUE_SETTING_NAMES.has(settingName)) {
+        return true;
+    }
+    // Example: "//registry.example.com/:_authToken" --> "_authToken"
+    const lastColonIndex = settingName.lastIndexOf(':');
+    return lastColonIndex >= 0 && AUTH_VALUE_SETTING_NAMES.has(settingName.substring(lastColonIndex + 1));
+}
+/**
+ * Returns true if PNPM refuses to expand environment variables that appear in the setting's NAME.
+ */
+function _isRequestDestinationSettingName(settingName) {
+    return _isRegistrySettingName(settingName) || settingName.startsWith('//');
+}
+/**
+ * Returns true if PNPM refuses to expand environment variables that appear in the setting's VALUE.
+ */
+function _isRequestDestinationValueSettingName(settingName) {
+    return _isRegistrySettingName(settingName) || REQUEST_DESTINATION_SETTING_NAMES.has(settingName);
+}
+function _tryParseNpmrcSetting(line) {
+    const equalsIndex = line.indexOf('=');
+    if (equalsIndex < 0) {
+        return undefined;
+    }
+    return {
+        line,
+        name: line.substring(0, equalsIndex),
+        value: line.substring(equalsIndex + 1)
+    };
+}
+function _hasIgnoredEnvironmentVariable(setting) {
+    const { name, value } = setting;
+    return ((ENVIRONMENT_VARIABLE_DETECTION_REGEX.test(name) &&
+        (_isRequestDestinationSettingName(name) || _isAuthValueSettingName(name))) ||
+        (ENVIRONMENT_VARIABLE_DETECTION_REGEX.test(value) &&
+            (_isRequestDestinationValueSettingName(name) || _isAuthValueSettingName(name))));
+}
+/**
+ * Reproduces PNPM's `envKeyToSetting()`, which converts the portion of an `npm_config_*` environment
+ * variable name that follows the prefix back into an .npmrc setting name.
+ */
+function _environmentVariableSuffixToSettingName(suffix) {
+    const colonIndex = suffix.indexOf(':');
+    if (colonIndex === -1) {
+        return _normalizeSettingNamePart(suffix);
+    }
+    return `${suffix.substring(0, colonIndex)}:${_normalizeSettingNamePart(suffix.substring(colonIndex + 1))}`;
+}
+function _normalizeSettingNamePart(settingNamePart) {
+    const lowerCased = settingNamePart.toLowerCase();
+    if (lowerCased === '_authtoken') {
+        return '_authToken';
+    }
+    // Underscores become dashes, except for a leading underscore
+    return lowerCased.charAt(0) + lowerCased.substring(1).replace(/_/g, '-');
+}
+/**
+ * Returns true if the setting can be expressed as an `npm_config_*` environment variable without
+ * being mangled by PNPM's name normalization.
+ *
+ * @remarks
+ * For example, a registry URL that includes an explicit port such as
+ * `//registry.example.com:8080/:_authToken` cannot round-trip, because PNPM splits the name on its
+ * FIRST colon and then normalizes everything after it.
+ */
+function _canSettingRoundTripThroughEnvironmentVariable(settingName) {
+    return _environmentVariableSuffixToSettingName(settingName) === settingName;
+}
+// This finds environment variable tokens that look like "${VAR_NAME}"
+const ENVIRONMENT_VARIABLE_REGEX = /\$\{([^\}]+)\}/g;
+function _expandEnvironmentVariables(text, env, supportEnvVarFallbackSyntax) {
+    let hasVariable = false;
+    let hasUndefinedVariable = false;
+    const expandedText = text.replace(ENVIRONMENT_VARIABLE_REGEX, (token) => {
+        hasVariable = true;
+        /**
+         * Remove the leading "${" and the trailing "}" from the token
+         *
+         * ${nameString}                  -> nameString
+         * ${nameString-fallbackString}   -> nameString-fallbackString
+         * ${nameString:-fallbackString}  -> nameString:-fallbackString
+         */
+        const nameWithFallback = token.slice(2, -1);
+        let environmentVariableName;
+        let fallback;
+        if (supportEnvVarFallbackSyntax) {
+            /**
+             * Get the environment variable name and fallback value.
+             *
+             *                                name          fallback
+             * nameString                 ->  nameString    undefined
+             * nameString-fallbackString  ->  nameString    fallbackString
+             * nameString:-fallbackString ->  nameString    fallbackString
+             */
+            const matched = nameWithFallback.match(ENV_VAR_WITH_FALLBACK_REGEX);
+            environmentVariableName = matched?.groups?.name ?? nameWithFallback;
+            fallback = matched?.groups?.fallback;
+        }
+        else {
+            environmentVariableName = nameWithFallback;
+        }
+        const environmentVariableValue = env[environmentVariableName];
+        if (environmentVariableValue) {
+            return environmentVariableValue;
+        }
+        else if (fallback) {
+            return fallback;
+        }
+        else {
+            hasUndefinedVariable = true;
+            return token;
+        }
+    });
+    return {
+        expandedText: hasUndefinedVariable ? text : expandedText,
+        hasVariable,
+        hasUndefinedVariable
+    };
+}
+/**
+ * Determines how a .npmrc line whose environment variables are all defined must be transformed
+ * so that PNPM 10.34.2 and newer will honor it. Returns `undefined` if PNPM expands the line's
+ * environment variables itself, in which case the line is left alone.
+ */
+function _classifySensitiveNpmrcSetting(setting, env, supportEnvVarFallbackSyntax) {
+    const { name: settingName, value: settingValue } = setting;
+    const expandedName = _expandEnvironmentVariables(settingName, env, supportEnvVarFallbackSyntax);
+    const expandedValue = _expandEnvironmentVariables(settingValue, env, supportEnvVarFallbackSyntax);
+    if (expandedName.hasUndefinedVariable || expandedValue.hasUndefinedVariable) {
+        return undefined;
+    }
+    // Consider both spellings, because PNPM discards the setting if EITHER form is sensitive
+    const isAuthValue = _isAuthValueSettingName(expandedName.expandedText) || _isAuthValueSettingName(settingName);
+    if (isAuthValue) {
+        if (_canSettingRoundTripThroughEnvironmentVariable(expandedName.expandedText)) {
+            return {
+                kind: 'environment',
+                variableName: `npm_config_${expandedName.expandedText}`,
+                variableValue: expandedValue.expandedText
+            };
+        }
+        throw new Error(`The .npmrc credential setting "${expandedName.expandedText}" cannot be provided via an ` +
+            'environment variable because PNPM cannot round-trip this setting name.');
+    }
+    const isRequestDestination = (expandedName.hasVariable &&
+        (_isRequestDestinationSettingName(expandedName.expandedText) ||
+            _isRequestDestinationSettingName(settingName))) ||
+        (expandedValue.hasVariable && _isRequestDestinationValueSettingName(expandedName.expandedText));
+    if (isRequestDestination) {
+        return { kind: 'expand', expandedLine: `${expandedName.expandedText}=${expandedValue.expandedText}` };
+    }
+    return undefined;
+}
+/**
+ * Returns the replacement text for a .npmrc line that PNPM would otherwise discard, or `undefined`
+ * if the line does not need to be rewritten.
+ */
+function _rewriteSensitiveNpmrcLine(setting, env, supportEnvVarFallbackSyntax) {
+    const action = _classifySensitiveNpmrcSetting(setting, env, supportEnvVarFallbackSyntax);
+    switch (action?.kind) {
+        case 'environment':
+            // Example output:
+            // "; PROVIDED VIA ENVIRONMENT: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+            return PROVIDED_VIA_ENVIRONMENT_PREFIX + setting.line;
+        case 'expand':
+            return action.expandedLine;
+        default:
+            return undefined;
+    }
+}
 /**
  *
  * @param npmrcFileLines The npmrc file's lines
  * @param env The environment variables object
  * @param supportEnvVarFallbackSyntax Whether to support fallback values in the form of `${VAR_NAME:-fallback}`
  * @param filterNpmIncompatibleProperties Whether to filter out properties that npm doesn't understand
+ * @param moveSensitiveSettingsToEnvironment Whether to replace settings that PNPM refuses to expand
+ * environment variables in with a `; PROVIDED VIA ENVIRONMENT: ` comment. See
+ * {@link getNpmrcEnvironmentVariables}.
+ * @param environmentVariableSettingNames If provided, collects settings containing environment
+ * variable references that PNPM ignores in a project `.npmrc`.
  * @returns An array of processed npmrc file lines with undefined environment variables and npm-incompatible properties commented out
  */
-function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties = false) {
-    var _a, _b, _c;
+function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, filterNpmIncompatibleProperties = false, moveSensitiveSettingsToEnvironment = false, environmentVariableSettingNames) {
     const resultLines = [];
-    // This finds environment variable tokens that look like "${VAR_NAME}"
-    const expansionRegExp = /\$\{([^\}]+)\}/g;
     // Comment lines start with "#" or ";"
     const commentRegExp = /^\s*[#;]/;
     // Trim out lines that reference environment variables that aren't defined
@@ -161,6 +382,10 @@ function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, fi
             .join('=');
         // Ignore comment lines
         if (!commentRegExp.test(line)) {
+            const parsedSetting = _tryParseNpmrcSetting(line);
+            if (environmentVariableSettingNames && parsedSetting && _hasIgnoredEnvironmentVariable(parsedSetting)) {
+                environmentVariableSettingNames.add(parsedSetting.name);
+            }
             // Check if this is a property that npm doesn't understand
             if (filterNpmIncompatibleProperties) {
                 // Extract the property name (everything before the '=' or '[')
@@ -192,42 +417,16 @@ function trimNpmrcFileLines(npmrcFileLines, env, supportEnvVarFallbackSyntax, fi
             }
             // Check for undefined environment variables
             if (!lineShouldBeTrimmed) {
-                const environmentVariables = line.match(expansionRegExp);
-                if (environmentVariables) {
-                    for (const token of environmentVariables) {
-                        /**
-                         * Remove the leading "${" and the trailing "}" from the token
-                         *
-                         * ${nameString}                  -> nameString
-                         * ${nameString-fallbackString}   -> name-fallbackString
-                         * ${nameString:-fallbackString}  -> name:-fallbackString
-                         */
-                        const nameWithFallback = token.slice(2, -1);
-                        let environmentVariableName;
-                        let fallback;
-                        if (supportEnvVarFallbackSyntax) {
-                            /**
-                             * Get the environment variable name and fallback value.
-                             *
-                             *                                name          fallback
-                             * nameString                 ->  nameString    undefined
-                             * nameString-fallbackString  ->  nameString    fallbackString
-                             * nameString:-fallbackString ->  nameString    fallbackString
-                             */
-                            const matched = nameWithFallback.match(ENV_VAR_WITH_FALLBACK_REGEX);
-                            environmentVariableName = (_b = (_a = matched === null || matched === void 0 ? void 0 : matched.groups) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : nameWithFallback;
-                            fallback = (_c = matched === null || matched === void 0 ? void 0 : matched.groups) === null || _c === void 0 ? void 0 : _c.fallback;
-                        }
-                        else {
-                            environmentVariableName = nameWithFallback;
-                        }
-                        // Is the environment variable and fallback value defined.
-                        if (!env[environmentVariableName] && !fallback) {
-                            // No, so trim this line
-                            lineShouldBeTrimmed = true;
-                            trimReason = 'MISSING_ENVIRONMENT_VARIABLE';
-                            break;
-                        }
+                const { hasVariable, hasUndefinedVariable } = _expandEnvironmentVariables(line, env, supportEnvVarFallbackSyntax);
+                if (hasUndefinedVariable) {
+                    lineShouldBeTrimmed = true;
+                    trimReason = 'MISSING_ENVIRONMENT_VARIABLE';
+                }
+                else if (hasVariable && moveSensitiveSettingsToEnvironment && parsedSetting) {
+                    const rewrittenLine = _rewriteSensitiveNpmrcLine(parsedSetting, env, supportEnvVarFallbackSyntax);
+                    if (rewrittenLine !== undefined) {
+                        resultLines.push(rewrittenLine);
+                        continue;
                     }
                 }
             }
@@ -304,6 +503,45 @@ function isVariableSetInNpmrcFile(sourceNpmrcFolder, variableKey, supportEnvVarF
     });
     const variableKeyRegExp = new RegExp(`^${variableKey}=`, 'm');
     return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
+}
+/**
+ * Returns the `npm_config_*` environment variables that must be passed to the package manager to
+ * provide the credentials that {@link syncNpmrc} moved out of the generated .npmrc file when its
+ * `moveSensitiveSettingsToEnvironment` option was enabled. Returns `undefined` if there are none.
+ *
+ * @remarks
+ * PNPM only expands `${VAR}` tokens in credentials that come from a trusted source, and an
+ * environment variable is such a source. Recomputing the variables from the generated .npmrc file
+ * (instead of remembering them from the {@link syncNpmrc} call) allows commands such as
+ * `rush-pnpm` to authenticate without re-synchronizing the file.
+ */
+function getNpmrcEnvironmentVariables(options) {
+    const { npmrcFolder, supportEnvVarFallbackSyntax, env = process.env } = options;
+    let npmrcFileContent;
+    try {
+        npmrcFileContent = node_fs__WEBPACK_IMPORTED_MODULE_0__.readFileSync(node_path__WEBPACK_IMPORTED_MODULE_1__.join(npmrcFolder, '.npmrc')).toString();
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') {
+            return undefined;
+        }
+        throw e;
+    }
+    let environmentVariables;
+    for (const npmrcFileLine of npmrcFileContent.split('\n')) {
+        const trimmedLine = npmrcFileLine.trim();
+        if (!trimmedLine.startsWith(PROVIDED_VIA_ENVIRONMENT_PREFIX)) {
+            continue;
+        }
+        const originalLine = trimmedLine.substring(PROVIDED_VIA_ENVIRONMENT_PREFIX.length);
+        const parsedSetting = _tryParseNpmrcSetting(originalLine);
+        const action = parsedSetting && _classifySensitiveNpmrcSetting(parsedSetting, env, supportEnvVarFallbackSyntax);
+        if (action?.kind === 'environment') {
+            environmentVariables ??= {};
+            environmentVariables[action.variableName] = action.variableValue;
+        }
+    }
+    return environmentVariables;
 }
 //# sourceMappingURL=npmrcUtilities.js.map
 

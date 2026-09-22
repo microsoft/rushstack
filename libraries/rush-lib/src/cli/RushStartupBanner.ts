@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { RushConstants } from '../logic/RushConstants';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
@@ -20,12 +20,15 @@ export class RushStartupBanner {
     );
   }
 
-  public static logStreamlinedBanner(rushVersion: string, isManaged: boolean): void {
+  public static logStreamlinedBanner(rushVersion: string, isManaged: boolean, terminal?: ITerminal): void {
     const nodeVersion: string = _formatNodeVersion();
     const versionSuffix: string = rushVersion ? ' ' + _formatRushVersion(rushVersion, isManaged) : '';
 
+    const message: string =
+      Colorize.bold(`Rush Multi-Project Build Tool${versionSuffix}`) + ` - Node.js ${nodeVersion}`;
+    if (terminal) terminal.writeLine(message);
     // eslint-disable-next-line no-console
-    console.log(Colorize.bold(`Rush Multi-Project Build Tool${versionSuffix}`) + ` - Node.js ${nodeVersion}`);
+    else console.log(message);
   }
 }
 

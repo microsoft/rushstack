@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Apply request-local Rushx TTY color and width after native lifecycle environment preparation while preserving explicit non-TTY environments and native path spelling.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

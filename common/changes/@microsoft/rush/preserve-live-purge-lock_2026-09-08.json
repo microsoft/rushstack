@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve the active repository mutex and its Windows interrupted-owner marker when purging temporary files.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

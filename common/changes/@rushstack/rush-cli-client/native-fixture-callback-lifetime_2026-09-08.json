@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Bind native CLI test continuations to their own fixtures, join complete callbacks before cleanup, and separate initial daemon preparation from reload and restart assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

@@ -54,6 +54,7 @@ export interface IScopedLoggerOptions {
   getShouldPrintStacks: () => boolean;
   errorHasBeenEmittedCallback: () => void;
   warningHasBeenEmittedCallback: () => void;
+  structuredDiagnosticCallback?: (error: Error, severity: 'warning' | 'error') => void;
 }
 
 export class ScopedLogger implements IScopedLogger {
@@ -107,7 +108,11 @@ export class ScopedLogger implements IScopedLogger {
   public emitError(error: Error): void {
     this.#options.errorHasBeenEmittedCallback();
     this.#errors.push(error);
-    this.terminal.writeErrorLine(`Error: ${LoggingManager.getErrorMessage(error)}`);
+    if (this.#options.structuredDiagnosticCallback) {
+      this.#options.structuredDiagnosticCallback(error, 'error');
+    } else {
+      this.terminal.writeErrorLine(`Error: ${LoggingManager.getErrorMessage(error)}`);
+    }
     if (this.#shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
@@ -119,7 +124,11 @@ export class ScopedLogger implements IScopedLogger {
   public emitWarning(warning: Error): void {
     this.#options.warningHasBeenEmittedCallback();
     this.#warnings.push(warning);
-    this.terminal.writeWarningLine(`Warning: ${LoggingManager.getErrorMessage(warning)}`);
+    if (this.#options.structuredDiagnosticCallback) {
+      this.#options.structuredDiagnosticCallback(warning, 'warning');
+    } else {
+      this.terminal.writeWarningLine(`Warning: ${LoggingManager.getErrorMessage(warning)}`);
+    }
     if (this.#shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }

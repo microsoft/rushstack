@@ -116,6 +116,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     } = this.#options;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
+      graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, () => {
+        // Terminals and cobuild callbacks can retain the entire completed iteration, including other
+        // projects' records. All of this scratch state is rebuilt by beforeExecuteIterationAsync.
+        for (const cacheContext of this.#buildCacheContextByOperation.values()) {
+          cacheContext.periodicCallback.stop();
+          cacheContext.buildCacheTerminalWritable?.close();
+        }
+        this.#buildCacheContextByOperation.clear();
+      });
       graph.hooks.beforeExecuteIterationAsync.tap(
         PLUGIN_NAME,
         (
@@ -597,9 +606,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext;
   }
 
-  #tryGetOperationBuildCache(
-    options: ITryGetOperationBuildCacheOptions
-  ): OperationBuildCache | undefined {
+  #tryGetOperationBuildCache(options: ITryGetOperationBuildCacheOptions): OperationBuildCache | undefined {
     const {
       buildCacheConfiguration,
       buildCacheContext,

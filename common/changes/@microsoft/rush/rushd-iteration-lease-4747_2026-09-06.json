@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Release the native phased engine lock while idle and expose iteration-scoped execution leases. Support native rig/inherited project configuration with isolated loaders and request-time graph/cache validation, without modifying shared configuration caches.",
+      "type": "patch"
+    }
+  ]
+}

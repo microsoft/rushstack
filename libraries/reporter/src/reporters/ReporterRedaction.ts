@@ -77,9 +77,7 @@ export function redactReporterEvent(
         redactedDiagnostic.source = Object.fromEntries(
           Object.entries(diagnostic.source).map(([name, value]) => [
             name,
-            (name === 'file' || name === 'toolName') &&
-            typeof value === 'string' &&
-            containsSecret(value)
+            (name === 'file' || name === 'toolName') && typeof value === 'string' && containsSecret(value)
               ? '[secret]'
               : value
           ])

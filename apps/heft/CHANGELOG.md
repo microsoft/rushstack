@@ -1,6 +1,22 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+
+## 1.3.1
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 1.3.0
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Minor changes
+
+- Emit negotiated structured child output and diagnostics when Rush provides a reporter descriptor, while preserving standalone terminal behavior.
+
+### Patches
+
+- Recognize inherited reporter pipes on Windows while continuing to reject regular-file descriptors.
 
 ## 1.2.26
 Sat, 05 Sep 2026 00:15:08 GMT

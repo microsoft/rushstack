@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Join the PIDs reported by fixture daemon start/restart commands, then reuse bounded Windows sharing cleanup after launcher and host joins without weakening lifecycle assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

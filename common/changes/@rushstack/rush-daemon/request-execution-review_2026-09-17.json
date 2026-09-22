@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Use ordinal ordering for request and operation identities, remove unused environment-name enumeration, and document the same-user lifecycle execution boundary.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

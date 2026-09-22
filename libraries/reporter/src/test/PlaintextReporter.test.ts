@@ -150,6 +150,15 @@ describe('PlaintextReporter', () => {
     expect(capture.getOutput()).not.toContain('TOP_SECRET');
   });
 
+  it('does not replay old-engine output that was already rendered', () => {
+    const capture: ICapture = makeDetailed();
+    capture.reporter.report(
+      ev('externalOutput', { stream: 'stdout', text: 'already rendered\n', wasRendered: true })
+    );
+
+    expect(capture.getOutput()).toBe('');
+  });
+
   it('preserves partial-line chunks within grouped output', () => {
     const capture: ICapture = makeDetailed();
     capture.reporter.report(
@@ -380,5 +389,65 @@ describe('PlaintextReporter', () => {
     expect(reporter.emitHeartbeatIfDue()).toBe(false);
 
     expect(output).toContain('still running');
+  });
+
+  it.each(['normal', 'quiet'] as const)(
+    'schedules unrefed heartbeats at %s level and stops on close',
+    async (logLevel) => {
+      jest.useFakeTimers();
+      const intervalSpy = jest.spyOn(global, 'setInterval');
+      let output: string = '';
+      const reporter: PlaintextReporter = new PlaintextReporter({
+        write: (text: string) => {
+          output += text;
+        },
+        logLevel
+      });
+      try {
+        await reporter.initializeAsync();
+        if (logLevel === 'normal') {
+          expect(intervalSpy.mock.results[0].value.hasRef()).toBe(false);
+        } else {
+          expect(intervalSpy).not.toHaveBeenCalled();
+        }
+        reporter.report(ev('commandStarted', { commandName: 'build' }));
+        jest.advanceTimersByTime(29999);
+        expect(output).not.toContain('still running');
+        jest.advanceTimersByTime(1);
+        expect(output.includes('still running')).toBe(logLevel !== 'quiet');
+
+        await reporter.closeAsync();
+        const afterClose: string = output;
+        jest.advanceTimersByTime(60000);
+        expect(output).toBe(afterClose);
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        await reporter.closeAsync();
+        intervalSpy.mockRestore();
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it('stops automatic heartbeats when the command result arrives', async () => {
+    jest.useFakeTimers();
+    let output: string = '';
+    const reporter: PlaintextReporter = new PlaintextReporter({
+      write: (text: string) => {
+        output += text;
+      }
+    });
+    try {
+      await reporter.initializeAsync();
+      reporter.report(ev('commandStarted', { commandName: 'build' }));
+      reporter.report(ev('commandResult', { commandName: 'build', succeeded: true, exitCode: 0 }));
+      const finalOutput: string = output;
+      jest.advanceTimersByTime(60000);
+      expect(output).toBe(finalOutput);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      await reporter.closeAsync();
+      jest.useRealTimers();
+    }
   });
 });

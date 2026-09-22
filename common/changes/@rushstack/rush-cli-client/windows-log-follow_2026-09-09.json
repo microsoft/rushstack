@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Keep Windows daemon-log following cancellable behind unread stdout using bounded, acknowledged output and an explicitly joined output-only process; preserve snapshot, redirection and I/O-error behavior.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

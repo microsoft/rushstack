@@ -97,6 +97,11 @@ export interface IReporterEventEnvelope<TPayload = unknown> {
   readonly parentSessionId?: string;
 
   /**
+   * The identifier of the parent request that spawned this child session.
+   */
+  readonly parentRequestId?: string;
+
+  /**
    * The identifier of the parent operation that spawned the child session, when applicable.
    */
   readonly parentOperationId?: string;

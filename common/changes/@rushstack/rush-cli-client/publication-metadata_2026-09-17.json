@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Include the package MIT license and standard publication metadata, enable the pack phase, and document why native fallback reuses the version-selecting Rush frontend.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

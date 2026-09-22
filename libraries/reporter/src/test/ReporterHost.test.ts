@@ -188,6 +188,7 @@ describe('ReporterHost handoff replay', () => {
     await withTempDir(async (directory: string) => {
       const buffer: BootstrapEventBuffer = makeBuffer();
       buffer.emit({ type: 'sessionStarted', payload: {} });
+      buffer.addExternalOutput('stderr', 'legacy bootstrap output\n');
       const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
       const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
       await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
@@ -204,6 +205,37 @@ describe('ReporterHost handoff replay', () => {
       });
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
       expect(result.skipReason).toBe('incompatible-protocol');
+      expect(result.legacyFallbackOutput).toEqual([{ stream: 'stderr', text: 'legacy bootstrap output\n' }]);
+    });
+  });
+
+  it('does not duplicate already-rendered output during legacy fallback', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'live output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const contents: string = await fs.promises.readFile(handoffPath, 'utf8');
+      await fs.promises.writeFile(handoffPath, contents.replace('"major":1', '"major":2'));
+
+      const manager: ReporterManager = new ReporterManager();
+      await manager.initializeAsync();
+      const host: ReporterHost = new ReporterHost({
+        manager,
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+      const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
+
+      expect(result.skipReason).toBe('incompatible-protocol');
+      expect(result.legacyFallbackOutput).toBeUndefined();
+      expect(fs.existsSync(handoffPath)).toBe(false);
     });
   });
 
@@ -301,7 +333,45 @@ describe('ReporterHost handoff replay', () => {
       });
 
       const result: IBootstrapReplayResult = await host.replayBootstrapHandoffAsync();
-      expect(result).toMatchObject({ replayed: false, skipReason: 'invalid-event' });
+      expect(result).toMatchObject({ replayed: false, skipReason: 'unsupported-required-event' });
+    });
+  });
+});
+
+describe('ReporterHost handoff discard', () => {
+  it('deletes only the current authenticated handoff', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory
+      });
+
+      await host.discardBootstrapHandoffAsync();
+      expect(fs.existsSync(handoffPath)).toBe(false);
+    });
+  });
+
+  it('does not delete a handoff with a mismatched nonce', async () => {
+    await withTempDir(async (directory: string) => {
+      const buffer: BootstrapEventBuffer = makeBuffer();
+      buffer.emit({ type: 'sessionStarted', payload: {} });
+      const { handoffPath } = await writeBootstrapHandoffFileAsync(buffer, { directory });
+      const host: ReporterHost = new ReporterHost({
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: 'wrong-nonce'
+        },
+        handoffDirectory: directory
+      });
+
+      await host.discardBootstrapHandoffAsync();
+      expect(fs.existsSync(handoffPath)).toBe(true);
     });
   });
 });
@@ -331,10 +401,26 @@ describe('ReporterHost sink', () => {
 });
 
 describe('ReporterHost abandoned file cleanup', () => {
+  const deadPid: number = 99999999;
+
+  beforeEach(() => {
+    const userInfo: os.UserInfo<string> = os.userInfo();
+    jest
+      .spyOn(jest.requireActual<typeof os>('node:os'), 'userInfo')
+      .mockReturnValue({ ...userInfo, uid: fs.statSync(os.tmpdir()).uid });
+    jest.spyOn(process, 'kill').mockImplementation(() => {
+      throw Object.assign(new Error('No such process'), { code: 'ESRCH' });
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('deletes only stale handoff files and leaves other files untouched', async () => {
     await withTempDir(async (directory: string) => {
-      const oldFile: string = path.join(directory, 'rush-reporter-bootstrap-1-1000.ndjson');
-      const newFile: string = path.join(directory, 'rush-reporter-bootstrap-2-2000.ndjson');
+      const oldFile: string = path.join(directory, `rush-reporter-bootstrap-${deadPid}-1000.ndjson`);
+      const newFile: string = path.join(directory, `rush-reporter-bootstrap-${deadPid}-2000.ndjson`);
       const otherFile: string = path.join(directory, 'unrelated.txt');
       await fs.promises.writeFile(oldFile, '{}\n');
       await fs.promises.writeFile(newFile, '{}\n');
@@ -350,6 +436,81 @@ describe('ReporterHost abandoned file cleanup', () => {
       expect(fs.existsSync(oldFile)).toBe(false);
       expect(fs.existsSync(newFile)).toBe(true);
       expect(fs.existsSync(otherFile)).toBe(true);
+    });
+  });
+
+  it('retains 20 recent abandoned sessions with deterministic timestamp ties', async () => {
+    await withTempDir(async (directory: string) => {
+      const files: string[] = [];
+      const timestamp: Date = new Date('2026-09-01T00:00:00Z');
+      for (let index: number = 20; index >= 0; index--) {
+        const filePath: string = path.join(
+          directory,
+          `rush-reporter-bootstrap-${deadPid}-${String(index).padStart(3, '0')}.ndjson`
+        );
+        await fs.promises.writeFile(filePath, '{}\n', { mode: 0o600 });
+        await fs.promises.utimes(filePath, timestamp, timestamp);
+        files.push(filePath);
+      }
+      const host: ReporterHost = new ReporterHost({
+        env: {},
+        handoffDirectory: directory,
+        nowMs: () => Date.parse('2026-09-09T00:00:00Z')
+      });
+
+      expect(await host.cleanAbandonedHandoffFilesAsync()).toEqual([files[0]]);
+      expect((await fs.promises.readdir(directory)).length).toBe(20);
+      expect(await host.cleanAbandonedHandoffFilesAsync()).toEqual([]);
+    });
+  });
+
+  it('protects live, current, foreign-owned and non-file entries regardless of age', async () => {
+    await withTempDir(async (directory: string) => {
+      const livePid: number = 88888888;
+      const currentHandoff: string = path.join(
+        directory,
+        `rush-reporter-bootstrap-${deadPid}-current.ndjson`
+      );
+      const foreign: string = path.join(directory, `rush-reporter-bootstrap-${deadPid}-foreign.ndjson`);
+      const protectedPaths: string[] = [
+        currentHandoff,
+        foreign,
+        path.join(directory, `rush-reporter-bootstrap-${process.pid}-self.ndjson`),
+        path.join(directory, `rush-reporter-bootstrap-${livePid}-live.ndjson`)
+      ];
+      const old: Date = new Date('2000-01-01T00:00:00Z');
+      for (const filePath of protectedPaths) {
+        await fs.promises.writeFile(filePath, '{}\n');
+        await fs.promises.utimes(filePath, old, old);
+      }
+      const directoryEntry: string = path.join(
+        directory,
+        `rush-reporter-bootstrap-${deadPid}-directory.ndjson`
+      );
+      await fs.promises.mkdir(directoryEntry);
+      const originalLstat: typeof fs.promises.lstat = fs.promises.lstat;
+      jest.spyOn(fs.promises, 'lstat').mockImplementation(async (filePath) => {
+        const stats: fs.Stats = await originalLstat(filePath);
+        if (filePath === foreign) {
+          stats.uid++;
+        }
+        return stats;
+      });
+      jest.mocked(process.kill).mockImplementation((pid) => {
+        if (pid === livePid) {
+          throw Object.assign(new Error('Not permitted'), { code: 'EPERM' });
+        }
+        throw Object.assign(new Error('No such process'), { code: 'ESRCH' });
+      });
+      const host: ReporterHost = new ReporterHost({
+        env: { [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: currentHandoff },
+        handoffDirectory: directory
+      });
+
+      expect(await host.cleanAbandonedHandoffFilesAsync()).toEqual([]);
+      for (const filePath of [...protectedPaths, directoryEntry]) {
+        expect(fs.existsSync(filePath)).toBe(true);
+      }
     });
   });
 });

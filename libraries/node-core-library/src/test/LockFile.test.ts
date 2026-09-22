@@ -4,12 +4,14 @@
 import * as path from 'node:path';
 import {
   LockFile,
+  type ILockFileHandle,
   getProcessStartTime,
   getProcessStartTimeFromProcStat,
   _setLockFileGetProcessStartTime
 } from '../LockFile';
 import { FileSystem } from '../FileSystem';
 import { FileWriter } from '../FileWriter';
+import * as WindowsLockFile from '../WindowsLockFile';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
   _setLockFileGetProcessStartTime(fn);
@@ -54,6 +56,110 @@ describe(LockFile.name, () => {
       expect(() => {
         LockFile.getLockFilePath(process.cwd(), '');
       }).toThrow();
+    });
+  });
+
+  describe(LockFile.getLockFilePaths.name, () => {
+    it('returns all platform-specific backing paths using the requested PID', () => {
+      const filePath: string = LockFile.getLockFilePath(process.cwd(), 'resource', 99);
+      expect(LockFile.getLockFilePaths(process.cwd(), 'resource', 99)).toEqual(
+        process.platform === 'win32' ? [filePath, `${filePath}.dirty`] : [filePath]
+      );
+    });
+
+    it('validates resource names consistently', () => {
+      expect(() => LockFile.getLockFilePaths(process.cwd(), '../invalid')).toThrow();
+    });
+  });
+
+  describe('release failures', () => {
+    const platformDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+    let lock: LockFile;
+    let fileWriter: ILockFileHandle;
+
+    beforeEach(() => {
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      jest.spyOn(FileSystem, 'ensureFolder').mockImplementation(() => {});
+      jest.spyOn(FileSystem, 'deleteFile').mockImplementation(() => {});
+      fileWriter = { prepareForRelease: jest.fn(), close: jest.fn() };
+      jest.spyOn(WindowsLockFile, 'tryAcquireWindowsLockFile').mockImplementation((filePath) => ({
+        filePath,
+        fileWriter,
+        dirtyWhenAcquired: false
+      }));
+      lock = LockFile.tryAcquire(process.cwd(), 'release-test')!;
+    });
+
+    afterEach(() => {
+      // The outer afterEach restores mocks; remove the in-process entry first.
+      if (!lock.isReleased) {
+        fileWriter.prepareForRelease = undefined;
+        fileWriter.close = () => {};
+        lock.release(false);
+      }
+      Object.defineProperty(process, 'platform', platformDescriptor);
+    });
+
+    it('closes and clears ownership after preparation fails, retaining recovery files and the original error', () => {
+      const error: Error = new Error('prepare failure');
+      fileWriter.prepareForRelease = () => {
+        throw error;
+      };
+      expect(() => lock.release()).toThrow(error);
+      expect(fileWriter.close).toHaveBeenCalledTimes(1);
+      expect(lock.isReleased).toBe(true);
+      expect(FileSystem.deleteFile).not.toHaveBeenCalled();
+      fileWriter.prepareForRelease = undefined;
+      const recovered: LockFile = LockFile.tryAcquire(process.cwd(), 'release-test')!;
+      expect(recovered).toBeDefined();
+      recovered.release(false);
+    });
+
+    it('retains ownership and the in-process guard after close fails', () => {
+      const error: Error = new Error('close failure');
+      fileWriter.close = () => {
+        throw error;
+      };
+      expect(() => lock.release()).toThrow(error);
+      expect(lock.isReleased).toBe(false);
+      expect(LockFile.tryAcquire(process.cwd(), 'release-test')).toBeUndefined();
+      expect(FileSystem.deleteFile).not.toHaveBeenCalled();
+    });
+
+    it('preserves both preparation and close errors', () => {
+      const preparationError: Error = new Error('prepare failure');
+      const closeError: Error = new Error('close failure');
+      fileWriter.prepareForRelease = () => {
+        throw preparationError;
+      };
+      fileWriter.close = () => {
+        throw closeError;
+      };
+      expect(() => lock.release()).toThrow(
+        expect.objectContaining({ errors: [preparationError, closeError] })
+      );
+      expect(lock.isReleased).toBe(false);
+      expect(FileSystem.deleteFile).not.toHaveBeenCalled();
+    });
+
+    it.each(['EPERM', 'EACCES', 'EIO'])(
+      'surfaces unexpected deletion error %s after clearing ownership',
+      (code) => {
+        const error: NodeJS.ErrnoException = Object.assign(new Error('unlink failure'), { code });
+        jest.mocked(FileSystem.deleteFile).mockImplementation(() => {
+          throw error;
+        });
+        expect(() => lock.release()).toThrow(error);
+        expect(lock.isReleased).toBe(true);
+      }
+    );
+
+    it('tolerates only sharing-denied deletion after a successor acquires the lock', () => {
+      jest.mocked(FileSystem.deleteFile).mockImplementation(() => {
+        throw Object.assign(new Error('sharing violation'), { code: 'EBUSY' });
+      });
+      expect(() => lock.release()).not.toThrow();
+      expect(lock.isReleased).toBe(true);
     });
   });
 

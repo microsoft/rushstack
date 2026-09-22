@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Isolate selected-version metadata failure with native .npmrc configuration, allow its real subprocess startup budget, and join CLI child closure before fixture cleanup.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

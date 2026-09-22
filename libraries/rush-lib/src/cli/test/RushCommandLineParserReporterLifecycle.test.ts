@@ -7,7 +7,7 @@ import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { once } from 'node:events';
 
-import { JsonFile, LockFile } from '@rushstack/node-core-library';
+import { Async, JsonFile, LockFile } from '@rushstack/node-core-library';
 import type { IReporterEmitEventInput, IReporterEventSink, IRushDiagnostic } from '@rushstack/rush-reporter';
 
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
@@ -44,6 +44,23 @@ describe('RushCommandLineParser reporter lifecycle', () => {
   let stdoutSpy: jest.SpyInstance;
   let stderrSpy: jest.SpyInstance;
   let lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire>;
+  let watchTest: Promise<void> | undefined;
+  let cancelWatchTest: (() => void) | undefined;
+
+  function ownWatchTest(testAsync: (signal: AbortSignal) => Promise<void>): Promise<void> {
+    const controller: AbortController = new AbortController();
+    cancelWatchTest = () => controller.abort();
+    watchTest = testAsync(controller.signal);
+    return watchTest;
+  }
+
+  async function stopWatchTestAsync(): Promise<void> {
+    const pending: Promise<void> | undefined = watchTest;
+    cancelWatchTest?.();
+    watchTest = undefined;
+    cancelWatchTest = undefined;
+    await pending;
+  }
 
   async function copyRepositoryAsync(): Promise<string> {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-reporter-lifecycle-'));
@@ -65,21 +82,74 @@ describe('RushCommandLineParser reporter lifecycle', () => {
   });
 
   afterEach(async () => {
-    for (const result of lockSpy.mock.results) {
-      if (result.type === 'return' && result.value && !result.value.isReleased) {
-        result.value.release();
+    try {
+      // Jest timeouts do not cancel the test promise or run its finally block.
+      await stopWatchTestAsync();
+    } finally {
+      for (const result of lockSpy.mock.results) {
+        if (result.type === 'return' && result.value && !result.value.isReleased) {
+          result.value.release();
+        }
+      }
+      try {
+        await Promise.all(
+          temporaryFolders
+            .splice(0)
+            .map((directory) => fs.promises.rm(directory, { recursive: true, force: true }))
+        );
+      } finally {
+        process.exitCode = originalExitCode;
+        process.argv = originalArgv;
+        EnvironmentConfiguration.reset();
+        jest.restoreAllMocks();
       }
     }
-    await Promise.all(
-      temporaryFolders
-        .splice(0)
-        .map((directory) => fs.promises.rm(directory, { recursive: true, force: true }))
-    );
-    process.exitCode = originalExitCode;
-    process.argv = originalArgv;
-    EnvironmentConfiguration.reset();
-    jest.restoreAllMocks();
   });
+
+  it.each([false, true])(
+    'joins a cancelled watch test through setup and finalization (reject: %s)',
+    async (reject) => {
+      const [setup, releaseSetup] = Async.getSignal();
+      const [finalizing, markFinalizing] = Async.getSignal();
+      const [finalized, releaseFinalization] = Async.getSignal();
+      const failure: Error = new Error('watch test failed');
+      let signal: AbortSignal | undefined;
+      let joined: boolean = false;
+      const execution: Promise<void> = ownWatchTest(async (testSignal) => {
+        signal = testSignal;
+        await setup;
+        try {
+          if (reject) {
+            throw failure;
+          }
+        } finally {
+          markFinalizing();
+          await finalized;
+        }
+      });
+      const stopping: Promise<void> = stopWatchTestAsync().finally(() => {
+        joined = true;
+      });
+      const settled: Promise<PromiseSettledResult<void>[]> = Promise.allSettled([execution, stopping]);
+      try {
+        expect(signal?.aborted).toBe(true);
+        expect(joined).toBe(false);
+        releaseSetup();
+        await finalizing;
+        expect(joined).toBe(false);
+      } finally {
+        releaseSetup();
+        releaseFinalization();
+        await settled;
+      }
+      expect(joined).toBe(true);
+      expect(await settled).toEqual(
+        [0, 1].map(() =>
+          reject ? { status: 'rejected', reason: failure } : { status: 'fulfilled', value: undefined }
+        )
+      );
+    }
+  );
 
   it.each([
     { file: 'rush.json', withClose: false },
@@ -391,122 +461,137 @@ describe('RushCommandLineParser reporter lifecycle', () => {
     { reporting: true, useAlias: true }
   ])(
     'observes a real watch cancellation without changing legacy exit (shadow: $reporting, alias: $useAlias)',
-    async ({ reporting, useAlias }) => {
-      const repoPath: string = await copyRepositoryAsync();
-      JsonFile.save(
-        {
-          commands: [
-            {
-              commandKind: 'bulk',
-              name: 'watch-test',
-              summary: 'Watch cancellation fixture',
-              watchForChanges: true,
-              enableParallelism: false,
-              disableBuildCache: true,
-              safeForSimultaneousRushProcesses: true
-            }
-          ]
-        },
-        path.join(repoPath, 'common/config/rush/command-line.json')
-      );
-      JsonFile.save({}, path.join(repoPath, 'common/config/rush/npm-shrinkwrap.json'));
-      for (const name of ['a', 'b']) {
+    ({ reporting, useAlias }) =>
+      ownWatchTest(async (signal) => {
+        const repoPath: string = await copyRepositoryAsync();
         JsonFile.save(
-          { name, version: '1.0.0', scripts: { 'watch-test': 'node watch-test.js' } },
-          path.join(repoPath, name, 'package.json')
+          {
+            commands: [
+              {
+                commandKind: 'bulk',
+                name: 'watch-test',
+                summary: 'Watch cancellation fixture',
+                watchForChanges: true,
+                enableParallelism: false,
+                disableBuildCache: true,
+                safeForSimultaneousRushProcesses: true
+              }
+            ]
+          },
+          path.join(repoPath, 'common/config/rush/command-line.json')
         );
-        await fs.promises.writeFile(
-          path.join(repoPath, name, 'watch-test.js'),
-          'process.stdout.write("watch child output\\n");\n'
+        JsonFile.save({}, path.join(repoPath, 'common/config/rush/npm-shrinkwrap.json'));
+        for (const name of ['a', 'b']) {
+          JsonFile.save(
+            { name, version: '1.0.0', scripts: { 'watch-test': 'node watch-test.js' } },
+            path.join(repoPath, name, 'package.json')
+          );
+          await fs.promises.writeFile(
+            path.join(repoPath, name, 'watch-test.js'),
+            'process.stdout.write("watch child output\\n");\n'
+          );
+        }
+        // Capture successful fixture setup diagnostics; failed Git commands still throw with their stderr.
+        execFileSync('git', ['init', '--quiet'], { cwd: repoPath, stdio: 'pipe' });
+        execFileSync('git', ['add', '.'], { cwd: repoPath, stdio: 'pipe' });
+        execFileSync(
+          'git',
+          [
+            '-c',
+            'user.name=Rush test',
+            '-c',
+            'user.email=rush-test@example.com',
+            '-c',
+            'commit.gpgSign=false',
+            'commit',
+            '--quiet',
+            '-m',
+            'Initialize watch fixture'
+          ],
+          { cwd: repoPath, stdio: 'pipe' }
         );
-      }
-      // Capture successful fixture setup diagnostics; failed Git commands still throw with their stderr.
-      execFileSync('git', ['init', '--quiet'], { cwd: repoPath, stdio: 'pipe' });
-      execFileSync('git', ['add', '.'], { cwd: repoPath, stdio: 'pipe' });
-      execFileSync(
-        'git',
-        [
-          '-c',
-          'user.name=Rush test',
-          '-c',
-          'user.email=rush-test@example.com',
-          '-c',
-          'commit.gpgSign=false',
-          'commit',
-          '--quiet',
-          '-m',
-          'Initialize watch fixture'
-        ],
-        { cwd: repoPath, stdio: 'pipe' }
-      );
-      const sink: CapturingReporterSink = new CapturingReporterSink();
-      const exitSpy: jest.SpyInstance = jest
-        .spyOn(process, 'exit')
-        .mockImplementation(() => undefined as never);
-      const watchSpy: jest.SpyInstance = jest.spyOn(fs, 'watch');
-      const cwd: string = useAlias ? path.join(path.dirname(repoPath), 'repo-alias') : repoPath;
-      if (useAlias) {
-        await fs.promises.symlink(
-          await fs.promises.realpath(repoPath),
+        const sink: CapturingReporterSink = new CapturingReporterSink();
+        const exitSpy: jest.SpyInstance = jest
+          .spyOn(process, 'exit')
+          .mockImplementation(() => undefined as never);
+        const watchSpy: jest.SpyInstance = jest.spyOn(fs, 'watch');
+        const cwd: string = useAlias ? path.join(path.dirname(repoPath), 'repo-alias') : repoPath;
+        if (useAlias) {
+          await fs.promises.symlink(
+            await fs.promises.realpath(repoPath),
+            cwd,
+            process.platform === 'win32' ? 'junction' : 'dir'
+          );
+        }
+        signal.throwIfAborted();
+        const parser: RushCommandLineParser = new RushCommandLineParser({
           cwd,
-          process.platform === 'win32' ? 'junction' : 'dir'
-        );
-      }
-      const parser: RushCommandLineParser = new RushCommandLineParser({
-        cwd,
-        reporter: reporting ? { eventSink: sink, sessionId: 'real-watch-cancellation' } : undefined
-      });
-      await new FlagFile(
-        parser.rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
-        RushConstants.lastLinkFlagFilename,
-        {}
-      ).createAsync();
-      const action = parser.getAction('watch-test');
-      if (!(action instanceof PhasedScriptAction)) {
-        throw new Error('Expected the production phased watch action');
-      }
-      let reachedWatchIdle: boolean = false;
-      let closedWatchers: Promise<unknown>[] = [];
-      parser.rushSession.hooks.runPhasedCommand.for('watch-test').tap('CancelRealWatch', (command) => {
-        command.hooks.onGraphCreatedAsync.tap('CancelRealWatch', (graph) => {
-          graph.hooks.onIdle.tap({ name: 'CancelRealWatch', stage: Number.MAX_SAFE_INTEGER }, () => {
-            reachedWatchIdle = true;
-            closedWatchers = watchSpy.mock.results.map(({ value }) => once(value as fs.FSWatcher, 'close'));
-            action.sessionAbortController.abort();
+          reporter: reporting ? { eventSink: sink, sessionId: 'real-watch-cancellation' } : undefined
+        });
+        await new FlagFile(
+          parser.rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
+          RushConstants.lastLinkFlagFilename,
+          {}
+        ).createAsync();
+        const action = parser.getAction('watch-test');
+        if (!(action instanceof PhasedScriptAction)) {
+          throw new Error('Expected the production phased watch action');
+        }
+        let reachedWatchIdle: boolean = false;
+        let closedWatchers: Promise<unknown>[] = [];
+        const abort = (): void => action.sessionAbortController.abort();
+        parser.rushSession.hooks.runPhasedCommand.for('watch-test').tap('CancelRealWatch', (command) => {
+          command.hooks.onGraphCreatedAsync.tap('CancelRealWatch', (graph) => {
+            // Wait until the action and watcher have installed their abort listeners.
+            graph.hooks.beforeExecuteIterationAsync.tap('CancelRealWatch', () => {
+              signal.addEventListener('abort', abort, { once: true });
+              if (signal.aborted) {
+                abort();
+              }
+            });
+            graph.hooks.onIdle.tap({ name: 'CancelRealWatch', stage: Number.MAX_SAFE_INTEGER }, () => {
+              reachedWatchIdle = true;
+              closedWatchers = watchSpy.mock.results.map(({ value }) => once(value as fs.FSWatcher, 'close'));
+              action.sessionAbortController.abort();
+            });
           });
         });
-      });
-      const execution: Promise<boolean> = parser.executeAsync(['watch-test', '--verbose']);
-      try {
-        await expect(execution).resolves.toBe(true);
-        await Promise.all(closedWatchers);
-        expect(reachedWatchIdle).toBe(true);
-        expect(parser.cwd).toBe(await fs.promises.realpath(repoPath));
-        expect(watchSpy.mock.calls.length).toBeGreaterThan(0);
-        expect(action.sessionAbortController.signal.aborted).toBe(true);
-        expect(exitSpy).not.toHaveBeenCalled();
-        expect(process.exitCode).toBe(0);
-        expect(_getRushSessionDerivedExitStatus(parser.rushSession)).toEqual(
-          reporting ? { exitCode: 1, outcome: 'cancelled' } : undefined
-        );
-        if (reporting) {
-          expect(sink.events.filter(isCompletion).map(({ payload }) => payload)).toEqual([
-            expect.objectContaining({ succeeded: true, exitCode: 0 }),
-            expect.objectContaining({ exitCode: 0 }),
-            expect.objectContaining({ exitCode: 0 })
-          ]);
-          expect(_getRushSessionTelemetryAggregate(parser.rushSession)).toMatchObject({
-            result: 'succeeded',
-            exitCode: 0,
-            operationStatusCounts: { success: 2 }
-          });
-          expect(sink.events.filter(({ type }) => type === 'diagnosticEmitted')).toEqual([]);
+        signal.throwIfAborted();
+        const execution: Promise<boolean> = parser.executeAsync(['watch-test', '--verbose']);
+        try {
+          await expect(execution).resolves.toBe(true);
+          await Promise.all(closedWatchers);
+          expect(reachedWatchIdle).toBe(true);
+          expect(parser.cwd).toBe(await fs.promises.realpath(repoPath));
+          expect(watchSpy.mock.calls.length).toBeGreaterThan(0);
+          expect(action.sessionAbortController.signal.aborted).toBe(true);
+          expect(exitSpy).not.toHaveBeenCalled();
+          expect(process.exitCode).toBe(0);
+          expect(_getRushSessionDerivedExitStatus(parser.rushSession)).toEqual(
+            reporting ? { exitCode: 1, outcome: 'cancelled' } : undefined
+          );
+          if (reporting) {
+            expect(sink.events.filter(isCompletion).map(({ payload }) => payload)).toEqual([
+              expect.objectContaining({ succeeded: true, exitCode: 0 }),
+              expect.objectContaining({ exitCode: 0 }),
+              expect.objectContaining({ exitCode: 0 })
+            ]);
+            expect(_getRushSessionTelemetryAggregate(parser.rushSession)).toMatchObject({
+              result: 'succeeded',
+              exitCode: 0,
+              operationStatusCounts: { success: 2 }
+            });
+            expect(sink.events.filter(({ type }) => type === 'diagnosticEmitted')).toEqual([]);
+          }
+        } finally {
+          abort();
+          try {
+            await execution;
+            await Promise.all(closedWatchers);
+          } finally {
+            signal.removeEventListener('abort', abort);
+          }
         }
-      } finally {
-        action.sessionAbortController.abort();
-        await execution;
-        await Promise.all(closedWatchers);
-      }
-    }
+      })
   );
 });

@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 
 import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import { REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
 import '../utilities/SetRushLibPath';
@@ -173,6 +174,10 @@ export class Rush {
    * `Executable.spawn()` or rushell.
    */
 }
+
+Object.defineProperty(Rush, '_reporterProtocolMajor', {
+  value: REPORTER_PROTOCOL_VERSION.major
+});
 
 function _ensureOwnPackageJsonIsLoaded(): void {
   if (!_rushLibPackageJsonCache) {

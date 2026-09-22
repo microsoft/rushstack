@@ -1,9 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Use ECMAScript private syntax for internal class members.",
-      "type": "none"
-    }
-  ]
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Use ECMAScript private syntax for internal class members.","type":"none"}]}

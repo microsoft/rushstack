@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Reject in-process fallback after terminal control, even without a stdin source, while restoring raw mode and avoiding command replay.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

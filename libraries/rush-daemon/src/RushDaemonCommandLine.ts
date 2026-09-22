@@ -5,8 +5,12 @@ import * as path from 'node:path';
 
 import { FileSystem, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { IPackageJson } from '@rushstack/node-core-library';
+import { resolveDaemonConfiguration, type IDaemonConfigurationJson } from '@microsoft/rush-lib';
 
 import { serveRushDaemonAsync } from './serveRushDaemon';
+import type { IRushDaemonServeOptions } from './serveRushDaemon';
+import { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+import { RushDaemonRequestResolver } from './RushDaemonRequestResolver';
 
 const RUSH_JSON_FILENAME: string = 'rush.json';
 
@@ -29,20 +33,28 @@ export function resolveRushDaemonWorkspace(startingFolder: string): IRushDaemonW
 
 export async function launchRushDaemonAsync(startingFolder: string = process.cwd()): Promise<void> {
   const workspace: IRushDaemonWorkspace = resolveRushDaemonWorkspace(startingFolder);
-  const packageJson: IPackageJson | undefined =
-    PackageJsonLookup.instance.tryLoadPackageJsonFor(__dirname);
+  const rushJson: { daemon?: IDaemonConfigurationJson } = JsonFile.load(
+    path.join(workspace.repoRoot, RUSH_JSON_FILENAME)
+  );
+  const configuration: Readonly<Required<IDaemonConfigurationJson>> = resolveDaemonConfiguration(
+    rushJson.daemon
+  );
+  const packageJson: IPackageJson | undefined = PackageJsonLookup.instance.tryLoadPackageJsonFor(__dirname);
   if (!packageJson) {
     throw new Error('Unable to determine the @rushstack/rush-daemon package version.');
   }
-  await serveRushDaemonAsync({
+  const serveOptions: IRushDaemonServeOptions = {
     daemonVersion: packageJson.version,
     repoRoot: workspace.repoRoot,
     rushVersion: workspace.rushVersion,
+    requestResolver: new RushDaemonRequestResolver(new ProductionDaemonRequestResolver()),
+    idleTimeoutSeconds: configuration.idleTimeoutSeconds,
     onError: (error: Error) => process.stderr.write(`${error.stack ?? error.message}\n`),
     onReady: (host) => {
       process.stdout.write(`rushd ready at ${host.paths.socketPath}\n`);
     }
-  });
+  };
+  await serveRushDaemonAsync(serveOptions);
 }
 
 function findRushJsonPath(startingFolder: string): string {
