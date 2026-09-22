@@ -513,6 +513,7 @@ export class RushPnpmCommandLineParser {
         workingDirectory: process.cwd(),
         environment: pnpmEnvironmentMap.toObject(),
         keepEnvironment: true,
+        useShell: !InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(rushConfiguration),
         onStdoutStreamChunk,
         captureExitCodeAndSignal: true
       });
