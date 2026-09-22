@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add a generation-owned warm-set attachment with runtime idle, project-limit, sampled memory-budget and telemetry-ranking policies; exclusive scheduler/native leases, awaited runner and scoped watcher eviction, truthful pressure diagnostics, and real native graph integration coverage.",
+      "type": "patch"
+    }
+  ]
+}

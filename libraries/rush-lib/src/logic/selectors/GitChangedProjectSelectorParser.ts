@@ -18,6 +18,8 @@ export interface IGitSelectorParserOptions {
    * and exclude matched files from change detection.
    */
   enableFiltering: boolean;
+  /** Optional request-owned project configuration reader. */
+  getIncrementalBuildIgnoredGlobsAsync?: IGetChangedProjectsOptions['getIncrementalBuildIgnoredGlobsAsync'];
 }
 
 export class GitChangedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {

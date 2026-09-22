@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve unexpected aggregate cleanup errors in per-operation runner lifetime handling so dependents do not execute after a failed cleanup notification.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

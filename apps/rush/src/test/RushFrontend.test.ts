@@ -8,7 +8,6 @@ import * as path from 'node:path';
 import * as rushLib from '@microsoft/rush-lib';
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
-import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 import { Import, LockFile } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
@@ -44,9 +43,9 @@ async function createInitializedHostAsync(
   return {
     host,
     sink: host.getSink(),
+    logArtifact: undefined,
     bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
     abandonedHandoffFilesDeleted: [],
-    logArtifact: undefined,
     selection: {
       reporter: 'legacy',
       logLevel: 'normal',
@@ -75,9 +74,9 @@ async function createEnabledHostAsync(
   return {
     host,
     sink: host.getSink(),
+    logArtifact: undefined,
     bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
     abandonedHandoffFilesDeleted: [],
-    logArtifact: undefined,
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -115,9 +114,9 @@ async function createPhaseHangingHostAsync(
   return {
     host,
     sink: host.getSink(),
+    logArtifact: undefined,
     bootstrapReplay: { direct: true, replayed: false, eventCount: 0 },
     abandonedHandoffFilesDeleted: [],
-    logArtifact: undefined,
     selection: {
       reporter: 'json',
       logLevel: 'normal',
@@ -190,7 +189,104 @@ function emitCommandStarted(sink: IReporterEventSink): void {
   });
 }
 
+function releaseParserTestLocks(spy: jest.SpiedFunction<typeof LockFile.tryAcquire>): void {
+  try {
+    // Native parser locks live until process exit; these fixtures run the parser inside Jest instead.
+    for (const result of spy.mock.results) {
+      if (result.type === 'return' && result.value && !result.value.isReleased) result.value.release();
+    }
+  } finally {
+    spy.mockRestore();
+  }
+}
+
 describe(launchRushFrontendAsync.name, () => {
+  it.each([
+    { reporter: 'file', output: undefined, commandJson: false, machineStdout: false },
+    { reporter: 'json', output: undefined, commandJson: false, machineStdout: true },
+    { reporter: 'file', output: 'json://stdout', commandJson: false, machineStdout: true },
+    { reporter: 'file', output: 'file://stdout', commandJson: false, machineStdout: true },
+    { reporter: 'file', output: 'json://stderr', commandJson: false, machineStdout: false },
+    { reporter: 'file', output: 'json://./stdout', commandJson: false, machineStdout: false },
+    { reporter: 'file', output: 'json://stdout', commandJson: true, machineStdout: true }
+  ])('classifies $reporter / $output stdout ownership with command JSON $commandJson', async (testCase) => {
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'list', `--reporter=${testCase.reporter}`];
+    if (testCase.output) {
+      process.argv.push(`--output=${testCase.output}`);
+    }
+    if (testCase.commandJson) {
+      process.argv.push('--json');
+    }
+    let receivedOptions: IRushFrontendLaunchOptions | undefined;
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async (options) => ({
+          ...(await createEnabledHostAsync()),
+          selection: resolveRushReporterSelection({
+            ...options,
+            env: {},
+            stdout: { isTTY: false, write: () => undefined }
+          })
+        }),
+        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
+          void version;
+          void selectedRushLib;
+          receivedOptions = launchOptions;
+          return launchOptions.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+
+      expect(receivedOptions?.reporterEnabled).toBe(true);
+      expect(receivedOptions?.reporterSelectionReason).toBe('explicit --reporter');
+      expect(receivedOptions?.reporterStdoutIsMachineReadable).toBe(testCase.machineStdout);
+      expect(receivedOptions?.reporterStdoutIsReserved).toBe(true);
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
+  it.each([
+    ['file', false, true],
+    ['file', true, false],
+    ['json', false, true],
+    ['ai', false, true],
+    ['plaintext', false, false]
+  ] as const)('reserves stdout for %s with command JSON %s: %s', async (reporter, commandJson, reserved) => {
+    const initialized: IInitializedRushReporterHost = await createEnabledHostAsync();
+    const originalArgv: string[] = process.argv;
+    process.argv = ['node', 'rush', 'list'];
+    try {
+      await launchRushFrontendAsync({
+        currentPackageVersion: '5.178.1',
+        rushVersionToLoad: undefined,
+        configuration: undefined,
+        launchOptions: { isManaged: false },
+        currentRushLib: rushLib,
+        initializeReporterHostAsync: async () => ({
+          ...initialized,
+          selection: { ...initialized.selection, reporter, commandJson }
+        }),
+        executeCurrentRush: (version, selectedRushLib, options) => {
+          void version;
+          void selectedRushLib;
+          expect(options.reporterStdoutIsReserved).toBe(reserved);
+          return options.reporterCloseAsync();
+        },
+        processLifecycle: createTestProcessLifecycle()
+      });
+    } finally {
+      await initialized.closeAsync();
+      process.argv = originalArgv;
+    }
+  });
+
   it.each([true, false])(
     'keeps installed-path activity local-sensitive without changing plain status (reporter: %s)',
     async (reporterEnabled) => {
@@ -206,7 +302,10 @@ describe(launchRushFrontendAsync.name, () => {
       const installSpy = jest.spyOn(Utilities, 'installPackageInDirectoryAsync').mockResolvedValue(undefined);
       const stopBeforeLaunch: Error = new Error('stop before loading installed engine');
       const resolveSpy = jest.spyOn(Import, 'resolveModuleAsync').mockRejectedValue(stopBeforeLaunch);
-      const expectedPath: string = path.join(new rushLib._RushGlobalFolder().nodeSpecificPath, 'rush-5.177.0');
+      const expectedPath: string = path.join(
+        new rushLib._RushGlobalFolder().nodeSpecificPath,
+        'rush-5.177.0'
+      );
       const messages: string[] = [
         'Rush version 5.177.0 is not currently installed. Installing...',
         'Trying to acquire lock for rush-5.177.0',
@@ -282,52 +381,6 @@ describe(launchRushFrontendAsync.name, () => {
       markerSpy.mockRestore();
       lockSpy.mockRestore();
       await host.manager.closeAsync();
-    }
-  });
-
-  it.each([
-    { reporter: 'file', output: undefined, machineStdout: false },
-    { reporter: 'json', output: undefined, machineStdout: true },
-    { reporter: 'file', output: 'json://stdout', machineStdout: true },
-    { reporter: 'file', output: 'file://stdout', machineStdout: true },
-    { reporter: 'file', output: 'json://stderr', machineStdout: false },
-    { reporter: 'file', output: 'json://./stdout', machineStdout: false }
-  ])('preserves legacy-engine stdout ownership for $reporter / $output', async (testCase) => {
-    const originalArgv: string[] = process.argv;
-    process.argv = ['node', 'rush', 'build', `--reporter=${testCase.reporter}`];
-    if (testCase.output) {
-      process.argv.push(`--output=${testCase.output}`);
-    }
-    let receivedOptions: IRushFrontendLaunchOptions | undefined;
-    try {
-      await launchRushFrontendAsync({
-        currentPackageVersion: '5.178.1',
-        rushVersionToLoad: undefined,
-        configuration: undefined,
-        launchOptions: { isManaged: false },
-        currentRushLib: rushLib,
-        initializeReporterHostAsync: async (options) => ({
-          ...(await createEnabledHostAsync()),
-          selection: resolveRushReporterSelection({
-            ...options,
-            env: {},
-            stdout: { isTTY: false, write: () => undefined }
-          })
-        }),
-        executeCurrentRush: (version, selectedRushLib, launchOptions) => {
-          void version;
-          void selectedRushLib;
-          receivedOptions = launchOptions;
-          return launchOptions.reporterCloseAsync();
-        },
-        processLifecycle: createTestProcessLifecycle()
-      });
-
-      expect(receivedOptions?.reporterEnabled).toBe(true);
-      expect(receivedOptions?.reporterSelectionReason).toBe('explicit --reporter');
-      expect(receivedOptions?.reporterStdoutIsMachineReadable).toBe(testCase.machineStdout);
-    } finally {
-      process.argv = originalArgv;
     }
   });
 
@@ -492,7 +545,7 @@ describe(launchRushFrontendAsync.name, () => {
 
   it('keeps an implicit repository opt-in on the legacy path for an incompatible engine', async () => {
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    const versionSelector: RushVersionSelector = new RushVersionSelector('5.178.1');
+    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
     let receivedArgv: string[] | undefined;
     versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
       void version;
@@ -564,7 +617,7 @@ describe(launchRushFrontendAsync.name, () => {
     }
   ])('preserves the old-engine $name escape path', async ({ reporter, expectedArgv }) => {
     const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
-    const versionSelector: RushVersionSelector = new RushVersionSelector('5.178.1');
+    const versionSelector: RushVersionSelector = Object.create(RushVersionSelector.prototype);
     let receivedArgv: string[] | undefined;
     versionSelector.ensureRushVersionInstalledAsync = async (version, configuration, launchOptions) => {
       void version;
@@ -689,6 +742,7 @@ describe(launchRushFrontendAsync.name, () => {
     }
     process.argv.push('--verbose');
     let selection: IRushReporterSelection | undefined;
+    const lockSpy = jest.spyOn(LockFile, 'tryAcquire');
 
     try {
       EnvironmentConfiguration.reset();
@@ -726,10 +780,16 @@ describe(launchRushFrontendAsync.name, () => {
       expect(
         JSON.parse(await fs.promises.readFile(path.join(repoPath, 'custom-output-args.json'), 'utf8'))
       ).toEqual(testCase.expectedArguments);
+      expect(
+        lockSpy.mock.results.some(
+          (result) => result.type === 'return' && result.value && !result.value.isReleased
+        )
+      ).toBe(true);
     } finally {
       EnvironmentConfiguration.reset();
       process.argv = originalArgv;
       process.exitCode = originalExitCode;
+      releaseParserTestLocks(lockSpy);
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
@@ -779,6 +839,7 @@ describe(launchRushFrontendAsync.name, () => {
       process.argv = ['node', 'rush', 'custom-reporter-flag', '--reporter'];
       const processLifecycle: ITestProcessLifecycle = createTestProcessLifecycle();
       let selection: IRushReporterSelection | undefined;
+      const lockSpy = jest.spyOn(LockFile, 'tryAcquire');
 
       try {
         EnvironmentConfiguration.reset();
@@ -824,10 +885,16 @@ describe(launchRushFrontendAsync.name, () => {
         ).toEqual(['--reporter']);
         expect(processLifecycle.beforeExitListener).toBeUndefined();
         expect(processLifecycle.signalListeners.size).toBe(0);
+        expect(
+          lockSpy.mock.results.some(
+            (result) => result.type === 'return' && result.value && !result.value.isReleased
+          )
+        ).toBe(true);
       } finally {
         EnvironmentConfiguration.reset();
         process.argv = originalArgv;
         process.exitCode = originalExitCode;
+        releaseParserTestLocks(lockSpy);
         await fs.promises.rm(directory, { recursive: true, force: true });
       }
     }
@@ -906,23 +973,25 @@ describe(launchRushFrontendAsync.name, () => {
           void version;
           void selectedRushLib;
           emitCommandStarted(launchOptions.reporter.eventSink);
+          const parser: RushCommandLineParser = new RushCommandLineParser({
+            cwd: directory,
+            reporterCloseAsync: launchOptions.reporterCloseAsync
+          });
+          jest
+            .spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+            .mockRejectedValue(new Error('parser failed'));
           process.exitCode = 1;
 
-          return new Promise<void>((resolve: () => void) => {
+          const exited: Promise<void> = new Promise((resolve: () => void) => {
             jest.spyOn(process, 'exit').mockImplementation(() => {
               outputAtExit = fs.readFileSync(outputPath, 'utf8');
               resolve();
               return undefined as never;
             });
             jest.spyOn(console, 'error').mockImplementation(() => undefined);
-            jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
-              throw new Error('parser failed');
-            });
-            const parser: RushCommandLineParser = new RushCommandLineParser({
-              cwd: directory,
-              reporterCloseAsync: launchOptions.reporterCloseAsync
-            });
-            void parser.executeAsync();
+          });
+          return Promise.all([exited, parser.executeAsync(['build'])]).then(([, succeeded]) => {
+            expect(succeeded).toBe(false);
           });
         },
         processLifecycle: createTestProcessLifecycle()

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Route native build/rebuild requests to the production engine and render operation events with awaited output, retaining raw global streams and native reporter-control fallback.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

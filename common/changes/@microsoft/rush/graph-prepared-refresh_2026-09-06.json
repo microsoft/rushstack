@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow hosts to discard unstarted graph iterations without executing scripts or closing retained runners, preserving completed results for safe replanning.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

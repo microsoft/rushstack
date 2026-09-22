@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  IWorkspaceInvalidationWatcher,
-  IWorkspaceSessionComponents
-} from '../WorkspaceSession';
+import type { IWorkspaceInvalidationWatcher, IWorkspaceSessionComponents } from '../WorkspaceSession';
 import { WorkspaceSession } from '../WorkspaceSession';
 import type { IWorkspaceInvalidationSnapshot } from '../WorkspaceInvalidationTracker';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
@@ -216,11 +213,16 @@ describe(WorkspaceSession.name, () => {
 
   it('rejects reconciliation as soon as disposal starts', async () => {
     let finishWatcherDisposal: (() => void) | undefined;
+    let watcherDisposalStarted: () => void = () => undefined;
+    const watcherDisposal: Promise<void> = new Promise((resolve) => {
+      watcherDisposalStarted = resolve;
+    });
     const watcher: IWorkspaceInvalidationWatcher = {
       startAsync: () => Promise.resolve(),
       [Symbol.asyncDispose]: () =>
         new Promise<void>((resolve: () => void) => {
           finishWatcherDisposal = resolve;
+          watcherDisposalStarted();
         })
     };
     const reconcileInvalidationsAsync: jest.Mock = jest.fn(() =>
@@ -242,6 +244,7 @@ describe(WorkspaceSession.name, () => {
       'workspace session is being disposed'
     );
     expect(reconcileInvalidationsAsync).not.toHaveBeenCalled();
+    await watcherDisposal;
     finishWatcherDisposal?.();
     await disposalPromise;
   });

@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  validateDaemonRequestAdmissionOptions
-} from '@rushstack/rush-daemon-protocol';
+import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonRequestAdmissionErrorCode,
   IDaemonRequestAdmissionOptions,
@@ -12,12 +10,14 @@ import type {
 
 import {
   type IRequestLease,
+  type IRequestSchedulerAcquireOptions,
   type RequestExclusivityClass,
   RequestScheduler,
   RequestSchedulerError,
   RequestSchedulerErrorCode
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 
 export interface IRequestAdmissionClient {
   readonly abortSignal: AbortSignal;
@@ -33,20 +33,35 @@ export interface IRequestAdmissionControllerOptions {
 
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
 
+class WorkspaceRequestScheduler extends RequestScheduler {
+  readonly #session: IWorkspaceSession;
+
+  public constructor(session: IWorkspaceSession) {
+    super();
+    this.#session = session;
+  }
+
+  public override async acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
+    assertWorkspaceRequestResourcesHealthy(this.#session);
+    const lease: IRequestLease = await super.acquireAsync(options);
+    try {
+      assertWorkspaceRequestResourcesHealthy(this.#session);
+      return lease;
+    } catch (error) {
+      lease.release();
+      throw error;
+    }
+  }
+}
+
 class QueuePositionWriter {
   readonly #abortController: AbortController;
   readonly #requestId: string;
-  readonly #writeQueuePositionAsync: (
-    message: IDaemonRequestQueuePositionMessage
-  ) => Promise<void>;
+  readonly #writeQueuePositionAsync: (message: IDaemonRequestQueuePositionMessage) => Promise<void>;
   #failure: unknown;
   #tail: Promise<void> = Promise.resolve();
 
-  public constructor(
-    client: IRequestAdmissionClient,
-    requestId: string,
-    abortController: AbortController
-  ) {
+  public constructor(client: IRequestAdmissionClient, requestId: string, abortController: AbortController) {
     const writeQueuePositionAsync: IRequestAdmissionClient['writeQueuePositionAsync'] =
       client.writeQueuePositionAsync;
     if (!writeQueuePositionAsync) {
@@ -141,6 +156,13 @@ export class RequestAdmissionController {
     this.#client.abortSignal.removeEventListener('abort', this.#abortFromClient);
   }
 
+  /** Passes the remaining admission budget to another existing routing boundary. */
+  public get remainingAdmission(): IDaemonRequestAdmissionOptions | undefined {
+    return this.#admission
+      ? { ...this.#admission, waitTimeoutMs: this.#getRemainingWaitTimeoutMs() }
+      : undefined;
+  }
+
   #getRemainingWaitTimeoutMs(): number | undefined {
     return this.#deadlineMs === undefined ? undefined : Math.max(0, this.#deadlineMs - Date.now());
   }
@@ -161,9 +183,7 @@ export class RequestAdmissionController {
   }
 }
 
-export function getRequestAdmissionErrorCode(
-  error: RequestSchedulerError
-): DaemonRequestAdmissionErrorCode {
+export function getRequestAdmissionErrorCode(error: RequestSchedulerError): DaemonRequestAdmissionErrorCode {
   switch (error.code) {
     case RequestSchedulerErrorCode.Aborted:
       return 'aborted';
@@ -177,7 +197,7 @@ export function getRequestAdmissionErrorCode(
 export function getWorkspaceRequestScheduler(workspaceSession: IWorkspaceSession): RequestScheduler {
   let scheduler: RequestScheduler | undefined = REQUEST_SCHEDULER_BY_SESSION.get(workspaceSession);
   if (!scheduler) {
-    scheduler = new RequestScheduler();
+    scheduler = new WorkspaceRequestScheduler(workspaceSession);
     REQUEST_SCHEDULER_BY_SESSION.set(workspaceSession, scheduler);
   }
   return scheduler;

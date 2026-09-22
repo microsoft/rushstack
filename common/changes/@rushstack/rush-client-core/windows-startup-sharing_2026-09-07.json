@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Use an OS-owned Windows startup mutex and keep sharing-denied ownership reads unknown until the existing handoff deadline, preserving fail-closed startup and no-replay behavior.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

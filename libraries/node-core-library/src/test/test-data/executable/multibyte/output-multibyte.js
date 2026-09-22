@@ -1,7 +1,7 @@
 // This script writes multi-byte UTF-8 characters byte by byte to test proper decoding
 const { setTimeout } = require('node:timers/promises');
 
-const unicodeString = "Hello, 世界! 🎉"; // "Hello, World" in Chinese with emoji
+const unicodeString = 'Hello, 世界! 🎉'; // "Hello, World" in Chinese with emoji
 const encoded = Buffer.from(unicodeString, 'utf8');
 
 async function writeChars() {

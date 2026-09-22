@@ -61,6 +61,10 @@ export interface IGetChangedProjectsOptions {
    * and exclude matched files from change detection.
    */
   enableFiltering: boolean;
+  /** Optional request-owned configuration source, avoiding shared project/rig caches. */
+  getIncrementalBuildIgnoredGlobsAsync?: (
+    project: RushConfigurationProject
+  ) => Promise<ReadonlyArray<string> | undefined>;
 
   /**
    * If set to `true`, excludes projects where the only changes are:
@@ -137,7 +141,13 @@ export class ProjectChangeAnalyzer {
       changesByProject,
       async ([project, projectChanges]) => {
         const filteredChanges: Map<string, IFileDiffStatus> = enableFiltering
-          ? await this._filterProjectDataAsync(project, projectChanges, repoRoot, terminal)
+          ? await this._filterProjectDataAsync(
+              project,
+              projectChanges,
+              repoRoot,
+              terminal,
+              options.getIncrementalBuildIgnoredGlobsAsync
+            )
           : projectChanges;
 
         // Skip if no changes
@@ -483,9 +493,14 @@ export class ProjectChangeAnalyzer {
     project: RushConfigurationProject,
     unfilteredProjectData: Map<string, T>,
     rootDir: string,
-    terminal: ITerminal
+    terminal: ITerminal,
+    getIgnoreGlobsAsync?: IGetChangedProjectsOptions['getIncrementalBuildIgnoredGlobsAsync']
   ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this.#getIgnoreMatcherForProjectAsync(project, terminal);
+    const ignoreMatcher: Ignore | undefined = await this.#getIgnoreMatcherForProjectAsync(
+      project,
+      terminal,
+      getIgnoreGlobsAsync
+    );
     if (!ignoreMatcher) {
       return unfilteredProjectData;
     }
@@ -509,10 +524,12 @@ export class ProjectChangeAnalyzer {
 
   async #getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
-    terminal: ITerminal
+    terminal: ITerminal,
+    getIgnoreGlobsAsync?: IGetChangedProjectsOptions['getIncrementalBuildIgnoredGlobsAsync']
   ): Promise<Ignore | undefined> {
-    const incrementalBuildIgnoredGlobs: ReadonlyArray<string> | undefined =
-      await RushProjectConfiguration.tryLoadIgnoreGlobsForProjectAsync(project, terminal);
+    const incrementalBuildIgnoredGlobs: ReadonlyArray<string> | undefined = getIgnoreGlobsAsync
+      ? await getIgnoreGlobsAsync(project)
+      : await RushProjectConfiguration.tryLoadIgnoreGlobsForProjectAsync(project, terminal);
 
     if (incrementalBuildIgnoredGlobs && incrementalBuildIgnoredGlobs.length) {
       const ignoreMatcher: Ignore = ignore();
@@ -752,7 +769,10 @@ export function isPackageJsonVersionOnlyChange(
   newPackageJsonContent: string
 ): boolean {
   try {
-    return isPackageJsonVersionBumpChange(JSON.parse(oldPackageJsonContent), JSON.parse(newPackageJsonContent));
+    return isPackageJsonVersionBumpChange(
+      JSON.parse(oldPackageJsonContent),
+      JSON.parse(newPackageJsonContent)
+    );
   } catch (error) {
     // If we can't parse the JSON, assume it's not a version-only change
     return false;

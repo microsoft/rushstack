@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Acquire one native execution lease per coalesced batch, retain it through reconciliation and output/runner cleanup, and release it before results so native commands can run while the daemon is idle. Permit explicit retries after initialization contention and detect changed rig/inherited configuration before execution.",
+      "type": "patch"
+    }
+  ]
+}

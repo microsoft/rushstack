@@ -19,6 +19,18 @@ export interface IReporterContext {
    * The exclusive destination the reporter owns, when one was declared.
    */
   readonly destination?: string;
+
+  /**
+   * Cancels background work on failure or close. The reason is the runtime error
+   * on failure, or `null` on normal manager closure.
+   */
+  readonly abortSignal?: AbortSignal;
+
+  /**
+   * Runs synchronous background work inside the manager's reporter failure boundary.
+   * Work is ignored after the reporter has failed or the manager has started closing.
+   */
+  readonly runWithErrorHandling?: (action: () => void) => void;
 }
 
 /**

@@ -6,6 +6,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import {
+  OldEngineOutputAdapter,
   BootstrapEventBuffer,
   ReporterManager,
   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR,
@@ -13,7 +14,6 @@ import {
   writeBootstrapHandoffFileAsync,
   type IReporter,
   type IReporterContext,
-  OldEngineOutputAdapter,
   type IReporterEventEnvelope,
   type IReporterEventSink
 } from '@rushstack/rush-reporter';
@@ -22,6 +22,7 @@ import {
   initializeRushReporterHostAsync,
   resolveRushReporterSelection,
   stripReporterValueControls,
+  type IInitializedRushReporterHost,
   type IRushReporterOutputStream,
   type IRushReporterSelection
 } from '../RushReporterHost';
@@ -262,6 +263,22 @@ describe(resolveRushReporterSelection.name, () => {
     ).toEqual(['node', 'rush', 'custom', '--output', 'custom.zip', '--log-level', 'custom', '--verbose']);
   });
 
+  it('keeps help on the legacy parser-only path', () => {
+    expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
+      reporter: 'legacy',
+      enabled: false,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
+  it('ignores help controls after the pass-through separator', () => {
+    expect(resolve(['build', '--reporter=json', '--', '--help'])).toMatchObject({
+      reporter: 'json',
+      enabled: true,
+      reporterControlsOwnedByFrontend: true
+    });
+  });
+
   it.each([['--reporter=junit'], ['--reporter'], ['--reporter', '--verbose']])(
     'preserves custom reporter controls during repository rollback: %j',
     (...argv: string[]) => {
@@ -309,6 +326,19 @@ describe(resolveRushReporterSelection.name, () => {
       '--output=child-output'
     ]);
   });
+
+  it.each(['--reporter', '--output', '--log-level'])(
+    'does not consume legacy flags after a value-less %s during rollback',
+    (flag) => {
+      const argv: string[] = ['build', '--reporter=json', flag, '--quiet', '--debug'];
+      const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
+      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
+        'build',
+        '--quiet',
+        '--debug'
+      ]);
+    }
+  );
 
   it('keeps help on the legacy parser-only path', () => {
     expect(resolve(['build', '--help', '--reporter=json'], {}, false)).toMatchObject({
@@ -448,19 +478,6 @@ describe(resolveRushReporterSelection.name, () => {
       reporterControlsOwnedByFrontend: true
     });
   });
-
-  it.each(['--reporter', '--output', '--log-level'])(
-    'does not consume legacy flags after a value-less %s during rollback',
-    (flag) => {
-      const argv: string[] = ['build', '--reporter=json', flag, '--quiet', '--debug'];
-      const selection: IRushReporterSelection = resolve(argv, { RUSH_REPORTER: 'legacy' });
-      expect(stripReporterValueControls(argv, new Set(selection.reporterValueFlagsToStrip))).toEqual([
-        'build',
-        '--quiet',
-        '--debug'
-      ]);
-    }
-  );
 
   it('removes reporter-only value controls before invoking a legacy engine', () => {
     expect(
@@ -734,8 +751,68 @@ describe(resolveRushReporterSelection.name, () => {
 });
 
 describe(initializeRushReporterHostAsync.name, () => {
+  it.each(['json', 'plaintext'])(
+    'preserves unrendered unscoped and command-scoped output alongside native operations: %s',
+    async (reporter) => {
+      let output: string = '';
+      const initialized = await initializeRushReporterHostAsync({
+        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
+        env: { CI: 'true' },
+        stdout: { isTTY: false, write: (text: string) => (output += text) },
+        includeDefaultFileReporter: false
+      });
+      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+        sink: initialized.sink,
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
+      });
+      try {
+        emitCommandStarted(initialized.sink);
+        adapter.capture('stdout', 'bootstrap stdout\n', false);
+        emitOperationEvents(initialized.sink);
+        adapter.capture('stderr', 'bootstrap stderr\n', false);
+        initialized.sink.emit({
+          protocolVersion: { major: 1, minor: 1 },
+          sessionId: 'session',
+          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+          scope: { commandName: 'build' },
+          privacy: 'local-sensitive',
+          type: 'externalOutput',
+          payload: { stream: 'stdout', text: 'command output\n' }
+        });
+        await initialized.closeAsync();
+
+        if (reporter === 'json') {
+          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line));
+          expect(
+            events.filter((event) => event.type === 'externalOutput').map((event) => event.payload)
+          ).toEqual([
+            { stream: 'stdout', text: 'bootstrap stdout\n' },
+            { stream: 'stdout', text: 'raw operation output\n' },
+            { stream: 'stderr', text: 'bootstrap stderr\n' },
+            { stream: 'stdout', text: 'command output\n' }
+          ]);
+          expect(events.filter((event) => event.type === 'operationRegistered')).toHaveLength(1);
+          expect(events.filter((event) => event.type === 'operationCompleted')).toHaveLength(1);
+        } else {
+          const unscopedText: string[] = ['bootstrap stdout\n', 'bootstrap stderr\n', 'command output\n'];
+          for (const text of [...unscopedText, 'raw operation output\n']) {
+            expect(output.split(text)).toHaveLength(2);
+          }
+          expect(output.indexOf(unscopedText[0])).toBeLessThan(output.indexOf(unscopedText[1]));
+          expect(output.indexOf(unscopedText[1])).toBeLessThan(output.indexOf(unscopedText[2]));
+        }
+      } finally {
+        await initialized.closeAsync();
+      }
+    }
+  );
+
   it.each([false, true])(
-    'retains full log debug details independently of the selected level: %s',
+    'retains the automatic full-detail log independently of the selected display level: %s',
     async (normal) => {
       const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-file-level-'));
       const osModule: typeof os = jest.requireActual('node:os');
@@ -928,12 +1005,16 @@ describe(initializeRushReporterHostAsync.name, () => {
 
   it('preserves the initialization error after cleanup and emergency reporting fail', async () => {
     const originalError: Error = new Error('original initialization failure');
+    let context: IReporterContext | undefined;
+    let abortedWhenClosing: boolean | undefined;
     const close: jest.Mock = jest.fn(async () => {
+      abortedWhenClosing = context?.abortSignal?.aborted;
       throw new Error('cleanup failure');
     });
     const reporter: IReporter = {
       name: 'partially-initialized',
-      initializeAsync: async () => {
+      initializeAsync: async (reporterContext: IReporterContext) => {
+        context = reporterContext;
         throw originalError;
       },
       report: () => undefined,
@@ -962,6 +1043,8 @@ describe(initializeRushReporterHostAsync.name, () => {
         })
       ).rejects.toBe(originalError);
       expect(close).toHaveBeenCalledTimes(1);
+      expect(abortedWhenClosing).toBe(true);
+      expect(context?.abortSignal?.reason).toBe(originalError);
     } finally {
       initializeSpy.mockRestore();
     }
@@ -1211,7 +1294,63 @@ describe(initializeRushReporterHostAsync.name, () => {
     }
   });
 
-  it('publishes artifact completeness as a frozen boolean snapshot', async () => {
+  it('observes terminal resizing after binding the default stdout writer', async () => {
+    const originalColumns: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+      process.stdout,
+      'columns'
+    );
+    const originalIsTTY: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+      process.stdout,
+      'isTTY'
+    );
+    let output: string = '';
+    const writeSpy = jest.spyOn(process.stdout, 'write').mockImplementation((chunk: string | Uint8Array) => {
+      output += chunk.toString();
+      return true;
+    });
+    let initialized: IInitializedRushReporterHost | undefined;
+    try {
+      Object.defineProperty(process.stdout, 'columns', { configurable: true, writable: true, value: 80 });
+      Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
+      initialized = await initializeRushReporterHostAsync({
+        argv: ['build', '--reporter=default'],
+        env: { NO_COLOR: '' },
+        includeDefaultFileReporter: false
+      });
+      const activity: string = 'a'.repeat(60);
+      initialized.sink.emit({
+        protocolVersion: { major: 1, minor: 0 },
+        sessionId: 'session',
+        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
+        privacy: 'public',
+        type: 'activityChanged',
+        payload: { text: activity }
+      });
+      await initialized.host.manager.flushAsync();
+      expect(output).toContain(activity);
+
+      output = '';
+      process.stdout.columns = 20;
+      await initialized.host.manager.flushAsync();
+      expect(output).not.toContain(activity);
+      expect(output).toContain('a'.repeat(19));
+    } finally {
+      await initialized?.closeAsync();
+      writeSpy.mockRestore();
+      for (const [property, descriptor] of [
+        ['columns', originalColumns],
+        ['isTTY', originalIsTTY]
+      ] as const) {
+        if (descriptor) {
+          Object.defineProperty(process.stdout, property, descriptor);
+        } else {
+          Reflect.deleteProperty(process.stdout, property);
+        }
+      }
+    }
+  });
+
+  it('publishes a frozen complete artifact after archiving replayed bootstrap output', async () => {
     const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-artifact-snapshot-'));
     const reported: IReporterEventEnvelope<unknown>[] = [];
     const manager: ReporterManager = new ReporterManager();
@@ -1228,9 +1367,23 @@ describe(initializeRushReporterHostAsync.name, () => {
     };
     manager.addReporter(captureReporter);
     try {
+      const buffer: BootstrapEventBuffer = new BootstrapEventBuffer({
+        sessionId: 'bootstrap-session',
+        source: { packageName: 'install-run-rush', packageVersion: '5.178.1' }
+      });
+      buffer.emit({
+        type: 'externalOutput',
+        privacy: 'local-sensitive',
+        payload: { stream: 'stdout', text: 'bootstrap output\n', wasRendered: true }
+      });
+      const { handoffPath, nonce } = await writeBootstrapHandoffFileAsync(buffer, { directory });
       const initialized = await initializeRushReporterHostAsync({
         argv: ['build', '--reporter=json'],
-        env: {},
+        env: {
+          [RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR]: handoffPath,
+          [RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR]: nonce
+        },
+        handoffDirectory: directory,
         commonTempFolder: directory,
         actionName: 'build',
         stdout: { isTTY: false, write: () => undefined },
@@ -1259,6 +1412,11 @@ describe(initializeRushReporterHostAsync.name, () => {
       });
       await initialized.closeAsync();
 
+      expect(initialized.bootstrapReplay).toMatchObject({ replayed: true, eventCount: 1 });
+      expect(fs.existsSync(handoffPath)).toBe(false);
+      expect(await fs.promises.readFile(initialized.logArtifact!.path!, 'utf8')).toContain(
+        'bootstrap output\n'
+      );
       const finalArtifact: IReporterEventEnvelope<unknown> = reported
         .filter(({ type }) => type === 'artifactAvailable')
         .at(-1)!;
@@ -1625,80 +1783,4 @@ describe(initializeRushReporterHostAsync.name, () => {
       await fs.promises.rm(directory, { recursive: true, force: true });
     }
   });
-
-  it.each(['json', 'plaintext'])(
-    'preserves unscoped and command-scoped output alongside presented operations: %s',
-    async (reporter) => {
-      let output: string = '';
-      const initialized = await initializeRushReporterHostAsync({
-        argv: ['build', `--reporter=${reporter}`, '--log-level=debug'],
-        env: { CI: 'true' },
-        stdout: { isTTY: false, write: (text: string) => (output += text) },
-        includeDefaultFileReporter: false
-      });
-      const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
-        sink: initialized.sink,
-        sessionId: 'session',
-        source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' }
-      });
-      try {
-        emitCommandStarted(initialized.sink);
-        adapter.capture('stdout', 'bootstrap stdout\n', false);
-        emitOperationEvents(initialized.sink);
-        adapter.capture('stderr', 'bootstrap stderr\n', false);
-        initialized.sink.emit({
-          protocolVersion: { major: 1, minor: 1 },
-          sessionId: 'session',
-          source: { packageName: '@microsoft/rush-lib', packageVersion: '5.178.1' },
-          scope: { commandName: 'build' },
-          privacy: 'local-sensitive',
-          type: 'externalOutput',
-          payload: { stream: 'stdout', text: 'command output\n' }
-        });
-        await initialized.closeAsync();
-
-        if (reporter === 'json') {
-          const events: IReporterEventEnvelope<{ stream?: string; text?: string }>[] = output
-            .trim()
-            .split('\n')
-            .map((line) => JSON.parse(line));
-          expect(events.map((event) => event.type)).toEqual([
-            'commandStarted',
-            'externalOutput',
-            'operationRegistered',
-            'operationStatusChanged',
-            'externalOutput',
-            'operationStreamClosed',
-            'operationCompleted',
-            'externalOutput',
-            'externalOutput'
-          ]);
-          expect(
-            events.filter((event) => event.type === 'externalOutput').map((event) => event.payload)
-          ).toEqual([
-            { stream: 'stdout', text: 'bootstrap stdout\n' },
-            { stream: 'stdout', text: 'raw operation output\n' },
-            { stream: 'stderr', text: 'bootstrap stderr\n' },
-            { stream: 'stdout', text: 'command output\n' }
-          ]);
-        } else {
-          expect(output.startsWith('Starting "rush build"\n')).toBe(true);
-          let previousOffset: number = -1;
-          for (const text of [
-            'bootstrap stdout\n',
-            'raw operation output\n',
-            'bootstrap stderr\n',
-            'command output\n'
-          ]) {
-            expect(output.split(text)).toHaveLength(2);
-            const offset: number = output.indexOf(text);
-            expect(offset).toBeGreaterThan(previousOffset);
-            previousOffset = offset;
-          }
-        }
-      } finally {
-        await initialized.closeAsync();
-      }
-    }
-  );
 });

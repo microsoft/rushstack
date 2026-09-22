@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Expose the lifecycle-owned last reload tier through a shared live pong and host-status projection, without triggering initialization or deriving a tier from generation changes.",
+      "type": "patch"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support guarded idle result eviction with detached execution contexts, optional measured IPC runner RSS, and awaited IPC closure without treating an interrupted protocol result as success. Document generation-attached daemon warm policies without changing ordinary native runner persistence.",
+      "type": "patch"
+    }
+  ]
+}

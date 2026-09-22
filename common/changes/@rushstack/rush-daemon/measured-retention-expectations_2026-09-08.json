@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Derive the native warm-retention test's expected order from actual cold/reused timings, request frequency and IPC RSS instead of assuming a fixed project is faster on every CI host; preserve real eviction and contrasting LRU assertions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

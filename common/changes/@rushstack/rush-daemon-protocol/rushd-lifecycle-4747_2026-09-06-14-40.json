@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add protocol 0.6 acknowledged shutdown controls and optional process identity and resident-memory status fields.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

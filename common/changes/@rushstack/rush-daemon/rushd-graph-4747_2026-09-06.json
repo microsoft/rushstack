@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add gated native graph metadata, dependency-safe scope and invalidation controls, manual-mode pause/resume, and bounded lease-free observation using existing request and extension-event contracts.",
+      "type": "minor"
+    }
+  ]
+}

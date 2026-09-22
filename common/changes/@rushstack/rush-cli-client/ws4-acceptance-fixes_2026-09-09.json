@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Keep unknown interactive Rushx scripts in-process before consuming input, preserve one cancellable graph admission budget across generation preflight and mutation, and add bounded daemon logs --follow.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

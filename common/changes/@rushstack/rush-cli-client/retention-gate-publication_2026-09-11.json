@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Atomically publish IPC retention fixture gates and inputs, consume only complete event frames, and correlate pressure samples with their unique request.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

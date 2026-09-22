@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  DaemonVerbosity,
-  IDaemonEventEnvelope
-} from '@rushstack/rush-daemon-protocol';
+import type { DaemonVerbosity, IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import { TerminalChunkKind } from '@rushstack/terminal';
 
 import type { IDaemonRenderer } from './DaemonRenderer';
@@ -22,8 +19,6 @@ const QUIET_VERBOSITY: DaemonVerbosity = 'quiet';
 function toChunkKind(stream: 'stdout' | 'stderr'): TerminalChunkKind {
   return stream === 'stderr' ? TerminalChunkKind.Stderr : TerminalChunkKind.Stdout;
 }
-
-const CHUNK_DECODER: InstanceType<typeof TextDecoder> = new TextDecoder('utf8', { fatal: false });
 
 /**
  * The CLI client's presentation host: routes decoded daemon frames to the
@@ -69,10 +64,7 @@ export class DaemonRendererHost {
       // filtering, without mutating the shared stream.
       return;
     }
-    this.#streams.writeChunk(operationId, {
-      kind: toChunkKind(stream),
-      text: CHUNK_DECODER.decode(chunk)
-    });
+    this.#streams.writeBytes(operationId, toChunkKind(stream), chunk);
   }
 
   /** Flushes and closes the renderer. */

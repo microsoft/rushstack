@@ -526,6 +526,7 @@ function getImplicitHelpValueFlagsToStrip(
   actionName: string | undefined
 ): readonly string[] {
   if (actionName !== undefined && !ownership.known) {
+    // An unknown or plugin-owned command can declare options outside the repository configuration.
     return [];
   }
   const commandOwnedFlags: ReadonlySet<string> = ownership.parameters;
@@ -1104,7 +1105,7 @@ export async function initializeRushReporterHostAsync(
     };
   } catch (error) {
     const [disposal]: PromiseSettledResult<void>[] = await Promise.allSettled([
-      host.manager._disposeInitializedReportersAsync()
+      host.manager._disposeInitializedReportersAsync(error)
     ]);
     if (disposal.status === 'rejected') {
       // Even a failed emergency write must not replace the original startup failure.

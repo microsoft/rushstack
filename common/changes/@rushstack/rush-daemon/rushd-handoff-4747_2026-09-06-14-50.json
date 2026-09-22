@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Keep endpoint ownership until resolver and workspace cleanup succeed, preventing successor startup against still-resident engine state.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Assert IPC cleanup resolves after close without assuming an operating-system-specific delay between exit and close events.",
+      "type": "none"
+    }
+  ]
+}
