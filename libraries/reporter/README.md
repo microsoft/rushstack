@@ -51,8 +51,10 @@ these gates only produces a reusable qualification decision; it does not enable 
 reporter selection. That decision also requires the separate telemetry privacy prerequisite to be accepted.
 The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
 authoritative.
-The Jest setup hook has a bounded 15-second allowance for the three file-backed corpus passes, matching
-the integration test setup policy. This allowance does not change any quality gate or production deadline.
+Jest setup and mutation runs use owned workers with a 30-second work budget and a separate 2-second
+termination/cleanup budget. The setup hook allows 33 seconds; tests that await two corpus sessions allow
+66 seconds. Timed-out work is terminated and its temporary directory removed before the session settles.
+These test-only allowances do not change any quality gate or production deadline.
 
 AI output reserves final-record space, including its supplied log reference, before emitting progress.
 Progress is buffered within the invocation byte limit until the primary log reservation is known, or until

@@ -9,7 +9,6 @@ import {
   evaluateAiReporterQualification,
   formatAiReporterQualificationFailures,
   getQualifiedAiReporterDecision,
-  runAiReporterQualificationCorpusAsync,
   type IAiDiagnostic,
   type IAiReporterQualificationCaseResult,
   type IAiReporterQualificationGateResult,
@@ -22,6 +21,7 @@ import {
 import {
   AiQualificationTestSession,
   QUALIFICATION_CLEANUP_TIMEOUT_MS,
+  QUALIFICATION_SESSION_TIMEOUT_MS,
   QUALIFICATION_TEST_TIMEOUT_MS
 } from './helpers/AiQualificationTestSession';
 import type { AiQualificationMutation } from './helpers/AiQualificationWorker';
@@ -52,10 +52,10 @@ describe('AI reporter deterministic qualification corpus', () => {
     }
   }, QUALIFICATION_CLEANUP_TIMEOUT_MS + 1000);
 
-  // Three file-backed corpus passes can exceed Jest's default setup allowance on Windows CI.
+  // Own setup work as well as mutations so a timed-out hook cannot leave the corpus running.
   beforeAll(async () => {
-    qualification = await runAiReporterQualificationCorpusAsync();
-  }, 15000);
+    qualification = (await startSession('none').resultAsync()).qualification;
+  }, QUALIFICATION_SESSION_TIMEOUT_MS);
 
   it('passes every blocking gate with machine-readable safe results', () => {
     if (!qualification.passed) {
@@ -216,11 +216,16 @@ describe('AI reporter deterministic qualification corpus', () => {
     QUALIFICATION_TEST_TIMEOUT_MS
   );
 
-  it.each(['timeout', 'reject', 'cancel'] as const)(
-    'joins %s mutation work before the next negative corpus',
-    async (failure) => {
+  it.each([
+    { mutation: 'none', failure: 'timeout' },
+    { mutation: 'missing-log', failure: 'timeout' },
+    { mutation: 'missing-log', failure: 'reject' },
+    { mutation: 'missing-log', failure: 'cancel' }
+  ] as const)(
+    'joins $failure $mutation work before the next negative corpus',
+    async ({ mutation, failure }) => {
       const report: typeof AiReporter.prototype.report = AiReporter.prototype.report;
-      const interrupted: AiQualificationTestSession = startSession('missing-log', {
+      const interrupted: AiQualificationTestSession = startSession(mutation, {
         waitForRelease: true,
         timeoutAfterReadyMs: failure === 'timeout' ? 50 : undefined
       });
