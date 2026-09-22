@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.24.2",
+      "tag": "@rushstack/node-core-library_v5.24.2",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incorrect decoding of multi-byte UTF-8 characters in Executable.waitForExitAsync and getProcessInfoByIdAsync by explicitly setting stream encoding before attaching handlers"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.1",
       "tag": "@rushstack/node-core-library_v5.24.1",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",

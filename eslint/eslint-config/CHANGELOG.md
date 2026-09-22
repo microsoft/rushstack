@@ -1,6 +1,17 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+
+## 4.8.0
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Minor changes
+
+- Globally ignore build-output folders (`lib`, `lib-*`, `dist`, `temp`, `coverage`) so that generated output is not linted, which matters for tools that enumerate files from the ESLint configuration (ESLint's flat config does not respect `.gitignore`).
+
+### Patches
+
+- Update the `eslint-plugin-tsdoc` dependency to `~0.5.3`.
 
 ## 4.7.0
 Mon, 14 Sep 2026 22:42:32 GMT

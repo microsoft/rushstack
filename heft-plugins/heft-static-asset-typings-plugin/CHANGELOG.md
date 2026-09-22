@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-static-asset-typings-plugin
 
-This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+
+## 0.1.25
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
 
 ## 0.1.24
 Mon, 14 Sep 2026 22:42:32 GMT
