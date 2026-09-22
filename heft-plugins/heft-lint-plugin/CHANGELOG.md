@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+
+## 1.3.0
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Minor changes
+
+- Lint files selected by ESLint flat config even when they are not part of the TypeScript program.
 
 ## 1.2.27
 Mon, 14 Sep 2026 22:42:32 GMT
