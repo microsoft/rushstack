@@ -209,6 +209,11 @@
       "file": "src/utilities.ts",
       "scopeId": ".getWebSocketReadyStateString",
       "rule": "complexity"
+    },
+    {
+      "file": "tests/testFixture.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
     }
   ]
 }

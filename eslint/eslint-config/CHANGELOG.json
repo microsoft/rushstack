@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.8.0",
+      "tag": "@rushstack/eslint-config_v4.8.0",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Globally ignore build-output folders (`lib`, `lib-*`, `dist`, `temp`, `coverage`) so that generated output is not linted, which matters for tools that enumerate files from the ESLint configuration (ESLint's flat config does not respect `.gitignore`)."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update the `eslint-plugin-tsdoc` dependency to `~0.5.3`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.7.0",
       "tag": "@rushstack/eslint-config_v4.7.0",
       "date": "Mon, 14 Sep 2026 22:42:32 GMT",

@@ -10438,6 +10438,11 @@
     {
       "file": "src/utilities/test/Utilities.test.ts",
       "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/test/Utilities.test.ts",
+      "scopeId": ".",
       "rule": "max-lines"
     },
     {

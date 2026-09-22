@@ -32,7 +32,7 @@
    *  - [os]                      Example: "win32"
    *  - [arch]                    Example: "x64"
    */
-  "cacheEntryNamePattern": "[projectName:normalize]-[phaseName:normalize]-[hash]",
+  "cacheEntryNamePattern": "[projectName:normalize]-[phaseName:normalize]-[os]-[hash]",
 
   /**
    * (Optional) Salt to inject during calculation of the cache key. This can be used to invalidate the cache for all projects when the salt changes.

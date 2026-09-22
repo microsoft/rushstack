@@ -242,6 +242,13 @@ const commonConfig: Linter.Config[] = [
   // so we simply ignore them.
   globalIgnores(['**/*.d.ts']) as Linter.Config,
 
+  // Build output and other generated folders are not source code and should never be linted.  This is
+  // particularly important for tools that enumerate files from the ESLint configuration itself (rather than
+  // only linting a known set of source files), since ESLint's flat config does not respect ".gitignore".
+  // These patterns are anchored to the project root (they are evaluated relative to the cwd), so a source
+  // folder such as "src/lib" is not affected.
+  globalIgnores(['lib/**', 'lib-*/**', 'dist/**', 'temp/**', 'coverage/**']) as Linter.Config,
+
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {

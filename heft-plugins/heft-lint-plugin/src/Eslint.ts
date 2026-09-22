@@ -5,20 +5,28 @@ import path from 'node:path';
 import { createHash, type Hash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 
-import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint';
 import type * as TEslintLegacy from 'eslint-8';
 import * as semver from 'semver';
 import stableStringify from 'json-stable-stringify-without-jsonify';
 
-import { FileError, FileSystem } from '@rushstack/node-core-library';
+import { Async, FileError, FileSystem, Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 
-import { LinterBase, type ILinterBaseOptions } from './LinterBase';
+import { LinterBase, type ISourceFileToLint, type ILinterBaseOptions } from './LinterBase';
 import type { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 import { name as pluginName, version as pluginVersion } from '../package.json';
 
-interface IEslintOptions extends ILinterBaseOptions {
+interface IEslintInitializeOptions extends ILinterBaseOptions {
+  /**
+   * Whether this instance should enumerate and lint files selected by the ESLint configuration that are not
+   * part of the TypeScript program. Only one instance should do so per lint run (to avoid linting those files
+   * more than once when there are multiple TypeScript programs).
+   */
+  includeAdditionalFiles?: boolean;
+}
+
+interface IEslintOptions extends IEslintInitializeOptions {
   eslintPackage: typeof TEslint | typeof TEslintLegacy;
   eslintTimings: Map<string, number>;
 }
@@ -82,19 +90,60 @@ const ESLINT_LEGACY_CONFIG_FILENAMES: Set<string> = new Set([
   LEGACY_ESLINTRC_CJS_FILENAME
 ]);
 
+// Limits the number of additional files that are read from disk concurrently while enumerating the files to
+// lint that are not part of the TypeScript program.
+const MAX_ADDITIONAL_FILE_READ_CONCURRENCY: number = 10;
+
+// ESLint interprets `files`/`ignores` entries as glob patterns (matched with minimatch using
+// `{ dot: true, allowWindowsEscape: true }`), so characters that are significant to the matcher must be escaped
+// when an exact file path is used as a pattern. Otherwise a file name such as `src/[id].ts` would be treated as
+// a character class rather than a literal path. Escaping the parentheses also neutralizes the extglob prefixes
+// (`@(`, `+(`, `!(`, `?(`, `*(`), so those prefix characters do not need to be escaped -- and escaping `@`/`+`
+// would actually break matching under the minimatch version ESLint uses.
+const GLOB_METACHARACTER_REGEXP: RegExp = /[\\*?[\]{}()]/g;
+
+function escapeGlobPattern(filePath: string): string {
+  const escaped: string = filePath.replace(GLOB_METACHARACTER_REGEXP, '\\$&');
+  // A pattern beginning with `#` is treated as a comment, and one beginning with `!` as a negation, so escape a
+  // leading occurrence of either.
+  if (escaped.startsWith('#') || escaped.startsWith('!')) {
+    return `\\${escaped}`;
+  }
+  return escaped;
+}
+
+// Convert forward-slash absolute file paths into project-relative, glob-escaped patterns. Only files under the
+// project folder can be expressed as ESLint configuration patterns.
+function toProjectRelativeGlobPatterns(
+  filePaths: Iterable<string>,
+  normalizedBuildFolderPath: string
+): string[] {
+  const patterns: string[] = [];
+  for (const filePath of filePaths) {
+    if (Path.isUnder(filePath, normalizedBuildFolderPath)) {
+      // filePath is already a forward-slash absolute path under the project folder, so strip the prefix (plus
+      // the separator) instead of recomputing the relative path.
+      patterns.push(escapeGlobPattern(filePath.slice(normalizedBuildFolderPath.length + 1)));
+    }
+  }
+  return patterns;
+}
+
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult> {
   readonly #eslintPackage: typeof TEslint | typeof TEslintLegacy;
   readonly #eslintPackageVersion: semver.SemVer;
   readonly #linter: TEslint.ESLint | TEslintLegacy.ESLint;
   readonly #eslintTimings: Map<string, number> = new Map();
-  readonly #currentFixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
-    [];
+  readonly #currentFixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] = [];
   readonly #fixMessagesByResult: Map<
     TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
     (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[]
   > = new Map();
   readonly #sarifLogPath: string | undefined;
   readonly #configHashMap: WeakMap<object, string> = new WeakMap();
+  readonly #fileEnumerator: TEslint.ESLint | undefined;
+  readonly #typeScriptFilenames: ReadonlySet<string>;
+  readonly #includeAdditionalFiles: boolean;
 
   protected constructor(options: IEslintOptions) {
     super('eslint', options);
@@ -106,9 +155,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       tsProgram,
       eslintTimings,
       fix,
-      sarifLogPath
+      sarifLogPath,
+      includeAdditionalFiles
     } = options;
     this.#eslintPackage = eslintPackage;
+    this.#includeAdditionalFiles = includeAdditionalFiles ?? false;
     this.#eslintPackageVersion = new semver.SemVer(eslintPackage.ESLint.version);
     const linterConfigFileName: string = path.basename(linterConfigFilePath);
     if (this.#eslintPackageVersion.major < 9 && !ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)) {
@@ -129,10 +180,26 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
     this.#sarifLogPath = sarifLogPath;
 
+    // Normalize to forward slashes so that path comparisons work on Windows: TypeScript reports file names with
+    // forward slashes on every platform, whereas `path.resolve` produces backslashes on Windows.
+    const normalizedBuildFolderPath: string = Path.convertToSlashes(buildFolderPath);
+    this.#typeScriptFilenames = new Set(
+      tsProgram
+        .getRootFileNames()
+        .map((filePath: string) => Path.convertToSlashes(path.resolve(buildFolderPath, filePath)))
+    );
+    // ESLint configuration paths are relative to the project folder. Compute the project-relative patterns of
+    // the files in the TypeScript program so that the injected program can be scoped to just those files, and so
+    // that those files can be excluded when enumerating the additional files to lint.
+    const typeScriptFilePatterns: string[] = toProjectRelativeGlobPatterns(
+      this.#typeScriptFilenames,
+      normalizedBuildFolderPath
+    );
+
     let overrideConfig: TEslint.Linter.Config | TEslintLegacy.Linter.Config | undefined;
     let fixFn: Exclude<TEslint.ESLint.Options['fix'] | TEslintLegacy.ESLint.Options['fix'], boolean>;
     if (fix) {
-      // We do not recieve the messages for the issues that were fixed, so we need to track them ourselves
+      // We do not receive the messages for the issues that were fixed, so we need to track them ourselves
       // so that we can log them after the fix is applied. This array will be populated by the fix function,
       // and subsequently mapped to the results in the ESLint.lintFileAsync method below. After the messages
       // are mapped, the array will be cleared so that it is ready for the next fix operation.
@@ -178,7 +245,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // fix fully succeeds. This conflicts with providing an existing program as the code no longer maps to
       // the provided program, producing garbage fix output. To avoid this, only provide the existing program
       // if we're not fixing.
+      // Scope the injected TypeScript program to the files that the program actually contains. Files that are
+      // selected by the ESLint configuration but excluded from the program (for example config files or tests
+      // outside the tsconfig) will fall through to the ESLint configuration's own parser instead of failing to
+      // resolve against the program.
       const eslintOverrideConfig: TEslint.Linter.Config = {
+        files: typeScriptFilePatterns,
         languageOptions: {
           parserOptions: overrideParserOptions
         }
@@ -195,6 +267,25 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       fix: fixFn as any
     });
+    if (this.#eslintPackageVersion.major >= 9) {
+      const flatEslintPackage: typeof TEslint = eslintPackage as typeof TEslint;
+      // A separate instance is used purely to enumerate the files selected by the ESLint configuration that are
+      // not part of the TypeScript program. Rules are disabled so that this pass only resolves the file list.
+      this.#fileEnumerator = new flatEslintPackage.ESLint({
+        cwd: buildFolderPath,
+        errorOnUnmatchedPattern: false,
+        overrideConfigFile: linterConfigFilePath,
+        overrideConfig: {
+          // This is the label for the flat-config object (used in ESLint debug output/config inspection); it is
+          // not a plugin reference. It ignores the TypeScript program files so enumeration returns only the
+          // files that are not part of the program.
+          name: `${pluginName}/ignore-typescript-program-files`,
+          ignores: typeScriptFilePatterns
+        },
+        ruleFilter: () => false
+      });
+    }
+
     this.#eslintTimings = eslintTimings;
   }
 
@@ -221,8 +312,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     return foundConfigs[0];
   }
 
-  public static async initializeAsync(options: ILinterBaseOptions): Promise<Eslint> {
-    const { linterToolPath } = options;
+  public static async initializeAsync(options: IEslintInitializeOptions): Promise<Eslint> {
+    const { linterToolPath, includeAdditionalFiles } = options;
     const eslintTimings: Map<string, number> = new Map();
     // This must happen before the rest of the linter package is loaded
     await patchTimerAsync(linterToolPath, eslintTimings);
@@ -231,7 +322,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     return new Eslint({
       ...options,
       eslintPackage,
-      eslintTimings
+      eslintTimings,
+      includeAdditionalFiles
     });
   }
 
@@ -250,11 +342,59 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     }
   }
 
+  protected override async getExtraSourceFilesToLintAsync(
+    programFilenames: ReadonlySet<string>
+  ): Promise<Iterable<ISourceFileToLint>> {
+    if (!this.#includeAdditionalFiles || !this.#fileEnumerator) {
+      return [];
+    }
+
+    // The enumerator ESLint instance is constructed with `cwd: buildFolderPath`, so linting `'.'` resolves
+    // against the project folder (not the process working directory).
+    const lintResults: TEslint.ESLint.LintResult[] = await this.#fileEnumerator.lintFiles(['.']);
+
+    // ESLint reports absolute file paths (with the platform-native separator), so normalize them to forward
+    // slashes to compare against the TypeScript programs' (already normalized) file paths. Files that are part
+    // of any TypeScript program are excluded (so they are not linted both as program files and as additional
+    // files, which matters when there are multiple programs); everything else the ESLint configuration selects
+    // (and that it does not ignore) is linted as an additional file. Generated output is excluded by the ESLint
+    // configuration's own `ignores` (the shared config ignores build-output folders such as `lib`, `lib-*`,
+    // `dist`, `temp`, and `coverage`).
+    const additionalFilePaths: string[] = [];
+    for (const { filePath } of lintResults) {
+      const normalizedFilePath: string = Path.convertToSlashes(filePath);
+      if (!programFilenames.has(normalizedFilePath)) {
+        additionalFilePaths.push(normalizedFilePath);
+      }
+    }
+    // Sort for a stable ordering across runs. ESLint reports absolute paths, so a default lexicographic sort
+    // is sufficient.
+    additionalFilePaths.sort();
+
+    const additionalLintFiles: ISourceFileToLint[] = new Array(additionalFilePaths.length);
+    await Async.forEachAsync(
+      additionalFilePaths,
+      async (filePath: string, index: number) => {
+        additionalLintFiles[index] = {
+          fileName: filePath,
+          // `version` is intentionally omitted so that LinterBase computes it from the file contents. Unlike
+          // TypeScript source files, these files have no precomputed version from the incremental program.
+          text: await FileSystem.readFileAsync(filePath)
+        };
+      },
+      { concurrency: MAX_ADDITIONAL_FILE_READ_CONCURRENCY }
+    );
+
+    return additionalLintFiles;
+  }
+
   protected override async getCacheVersionAsync(): Promise<string> {
     return `${this.#eslintPackageVersion.version}_${process.version}`;
   }
 
-  protected override async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
+  protected override async getSourceFileHashAsync(
+    sourceFile: IExtendedSourceFile | ISourceFileToLint
+  ): Promise<string> {
     const sourceFileEslintConfiguration: TEslint.Linter.Config = await this.#linter.calculateConfigForFile(
       sourceFile.fileName
     );
@@ -272,7 +412,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   }
 
   protected override async lintFileAsync(
-    sourceFile: TTypescript.SourceFile
+    sourceFile: IExtendedSourceFile | ISourceFileToLint
   ): Promise<TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[]> {
     const lintResults: TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[] =
       await this.#linter.lintText(sourceFile.text, { filePath: sourceFile.fileName });
@@ -332,7 +472,17 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
 
       // Report linter errors and warnings to the logger
       for (const lintMessage of lintResult.messages) {
-        const errorObject: FileError = this.#getLintFileError(lintResult, lintMessage);
+        const additionalFileTypeInformationError: string | undefined = getAdditionalFileTypeInformationError(
+          this.#typeScriptFilenames,
+          this._buildFolderPath,
+          lintResult,
+          lintMessage
+        );
+        const errorObject: FileError = this.#getLintFileError(
+          lintResult,
+          lintMessage,
+          additionalFileTypeInformationError
+        );
         switch (lintMessage.severity) {
           case EslintMessageSeverity.error: {
             this._scopedLogger.emitError(errorObject);
@@ -396,4 +546,38 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       column: lintMessage.column
     });
   }
+}
+
+function getAdditionalFileTypeInformationError(
+  typeScriptFilenames: ReadonlySet<string>,
+  buildFolderPath: string,
+  lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
+  lintMessage: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage
+): string | undefined {
+  // ESLint reports a fatal parsing error when a type-aware rule is applied to a file that is not part of any
+  // TypeScript program or project. Files that are selected by the ESLint configuration but excluded from the
+  // TypeScript program hit this case, so surface actionable guidance instead of the raw parser error. Files
+  // that are part of the program (or non-fatal messages) are reported normally.
+  if (!lintMessage.fatal || typeScriptFilenames.has(Path.convertToSlashes(lintResult.filePath))) {
+    return undefined;
+  }
+
+  const { message } = lintMessage;
+  const indicatesMissingTypeInformation: boolean =
+    message.includes('parserOptions.project') ||
+    message.includes('projectService') ||
+    message.includes('program instance') ||
+    message.includes('does not include this file') ||
+    message.includes('not found by the project service');
+  if (!indicatesMissingTypeInformation) {
+    return undefined;
+  }
+
+  const relativePath: string = Path.convertToSlashes(path.relative(buildFolderPath, lintResult.filePath));
+  return (
+    `The ESLint configuration selected "${relativePath}", which is not part of the TypeScript program, so ` +
+    'type-aware rules cannot run on it. Either exclude this file from ESLint by adding it to the "ignores" ' +
+    'of your ESLint configuration, or lint it with a configuration that does not enable type-aware rules. ' +
+    `(ESLint reported: ${message})`
+  );
 }
