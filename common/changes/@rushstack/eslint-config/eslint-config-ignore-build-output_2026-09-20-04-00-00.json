@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Globally ignore build-output folders (`lib`, `lib-*`, `dist`, `temp`, `coverage`) so that generated output is not linted, which matters for tools that enumerate files from the ESLint configuration (ESLint's flat config does not respect `.gitignore`).",
+      "type": "minor"
+    }
+  ]
+}
