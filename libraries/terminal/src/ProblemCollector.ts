@@ -40,28 +40,28 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
  * @beta
  */
 export class ProblemCollector extends TerminalWritable implements IProblemCollector {
-  private readonly _matchers: IProblemMatcher[];
-  private readonly _problems: Set<IProblem> = new Set();
-  private readonly _onProblem: ((problem: IProblem) => void) | undefined;
+  readonly #matchers: IProblemMatcher[];
+  readonly #problems: Set<IProblem> = new Set();
+  readonly #onProblem: ((problem: IProblem) => void) | undefined;
 
   public constructor(options: IProblemCollectorOptions) {
     super(options);
 
     const { matchers = [], matcherJson = [], onProblem } = options;
     const fromJson: IProblemMatcher[] = matcherJson.length !== 0 ? parseProblemMatchersJson(matcherJson) : [];
-    this._matchers = [...matchers, ...fromJson];
-    if (this._matchers.length === 0) {
+    this.#matchers = [...matchers, ...fromJson];
+    if (this.#matchers.length === 0) {
       throw new Error('ProblemCollector requires at least one problem matcher.');
     }
 
-    this._onProblem = onProblem;
+    this.#onProblem = onProblem;
   }
 
   /**
    * {@inheritdoc IProblemCollector}
    */
   public get problems(): ReadonlySet<IProblem> {
-    return this._problems;
+    return this.#problems;
   }
 
   /**
@@ -77,15 +77,15 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
       );
     }
 
-    for (const matcher of this._matchers) {
+    for (const matcher of this.#matchers) {
       const problem: IProblem | false = matcher.exec(text);
       if (problem) {
         const finalized: IProblem = {
           ...problem,
           matcherName: matcher.name
         };
-        this._problems.add(finalized);
-        this._onProblem?.(finalized);
+        this.#problems.add(finalized);
+        this.#onProblem?.(finalized);
       }
     }
   }
@@ -94,7 +94,7 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
    * {@inheritdoc TerminalWritable}
    */
   protected onClose(): void {
-    for (const matcher of this._matchers) {
+    for (const matcher of this.#matchers) {
       if (matcher.flush) {
         const flushed: IProblem[] = matcher.flush();
         if (flushed && flushed.length > 0) {
@@ -103,8 +103,8 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
               ...problem,
               matcherName: matcher.name
             };
-            this._problems.add(finalized);
-            this._onProblem?.(finalized);
+            this.#problems.add(finalized);
+            this.#onProblem?.(finalized);
           }
         }
       }

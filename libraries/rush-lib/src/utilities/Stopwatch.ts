@@ -39,24 +39,24 @@ export interface IStopwatchResult {
  * of elapsed time in between two events.
  */
 export class Stopwatch implements IStopwatchResult {
-  private _startTime: number | undefined;
-  private _endTime: number | undefined;
-  private _state: StopwatchState;
+  #startTime: number | undefined;
+  #endTime: number | undefined;
+  #state: StopwatchState;
 
-  private _getTime: () => number;
+  #getTime: () => number;
 
   public constructor(getTime: () => number = Utilities.getTimeInMs) {
-    this._startTime = undefined;
-    this._endTime = undefined;
-    this._getTime = getTime;
-    this._state = StopwatchState.Stopped;
+    this.#startTime = undefined;
+    this.#endTime = undefined;
+    this.#getTime = getTime;
+    this.#state = StopwatchState.Stopped;
   }
 
   public static fromState({ startTime, endTime }: { startTime: number; endTime: number }): Stopwatch {
     const stopwatch: Stopwatch = new Stopwatch();
-    stopwatch._startTime = startTime;
-    stopwatch._endTime = endTime;
-    stopwatch._state = StopwatchState.Stopped;
+    stopwatch.#startTime = startTime;
+    stopwatch.#endTime = endTime;
+    stopwatch.#state = StopwatchState.Stopped;
     return stopwatch;
   }
 
@@ -68,7 +68,7 @@ export class Stopwatch implements IStopwatchResult {
   }
 
   public get state(): StopwatchState {
-    return this._state;
+    return this.#state;
   }
 
   /**
@@ -76,12 +76,12 @@ export class Stopwatch implements IStopwatchResult {
    * reset() should be called before calling start() again.
    */
   public start(startTimeOverride?: number): Stopwatch {
-    if (this._startTime !== undefined) {
+    if (this.#startTime !== undefined) {
       throw new Error('Call reset() before starting the Stopwatch');
     }
-    this._startTime = startTimeOverride ?? this._getTime();
-    this._endTime = undefined;
-    this._state = StopwatchState.Started;
+    this.#startTime = startTimeOverride ?? this.#getTime();
+    this.#endTime = undefined;
+    this.#state = StopwatchState.Started;
     return this;
   }
 
@@ -89,8 +89,8 @@ export class Stopwatch implements IStopwatchResult {
    * Stops executing the stopwatch and saves the current timestamp
    */
   public stop(): Stopwatch {
-    this._endTime = this._startTime !== undefined ? this._getTime() : undefined;
-    this._state = StopwatchState.Stopped;
+    this.#endTime = this.#startTime !== undefined ? this.#getTime() : undefined;
+    this.#state = StopwatchState.Stopped;
     return this;
   }
 
@@ -98,8 +98,8 @@ export class Stopwatch implements IStopwatchResult {
    * Resets all values of the stopwatch back to the original
    */
   public reset(): Stopwatch {
-    this._endTime = this._startTime = undefined;
-    this._state = StopwatchState.Stopped;
+    this.#endTime = this.#startTime = undefined;
+    this.#state = StopwatchState.Stopped;
     return this;
   }
 
@@ -107,7 +107,7 @@ export class Stopwatch implements IStopwatchResult {
    * Displays how long the stopwatch has been executing in a human readable format.
    */
   public toString(): string {
-    if (this._state === StopwatchState.Stopped && this._startTime === undefined) {
+    if (this.#state === StopwatchState.Stopped && this.#startTime === undefined) {
       return '0.00 seconds (stopped)';
     }
     const totalSeconds: number = this.duration;
@@ -126,25 +126,25 @@ export class Stopwatch implements IStopwatchResult {
    * Get the duration in seconds.
    */
   public get duration(): number {
-    if (this._startTime === undefined) {
+    if (this.#startTime === undefined) {
       return 0;
     }
-    const curTime: number = this._endTime !== undefined ? this._endTime : this._getTime();
+    const curTime: number = this.#endTime !== undefined ? this.#endTime : this.#getTime();
 
-    return (curTime - this._startTime) / 1000.0;
+    return (curTime - this.#startTime) / 1000.0;
   }
 
   /**
    * Return the start time of the most recent stopwatch run.
    */
   public get startTime(): number | undefined {
-    return this._startTime;
+    return this.#startTime;
   }
 
   /**
    * Return the end time of the most recent stopwatch run.
    */
   public get endTime(): number | undefined {
-    return this._endTime;
+    return this.#endTime;
   }
 }

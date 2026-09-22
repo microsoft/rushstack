@@ -51,8 +51,8 @@ function printUpdateNotification(
 export class ExplorerCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
 
-  private readonly _debugParameter: CommandLineFlagParameter;
-  private readonly _subspaceParameter: IRequiredCommandLineStringParameter;
+  readonly #debugParameter: CommandLineFlagParameter;
+  readonly #subspaceParameter: IRequiredCommandLineStringParameter;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -61,13 +61,13 @@ export class ExplorerCommandLineParser extends CommandLineParser {
         'Lockfile Explorer is a desktop app for investigating and solving version conflicts in a PNPM workspace.'
     });
 
-    this._debugParameter = this.defineFlagParameter({
+    this.#debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
     });
 
-    this._subspaceParameter = this.defineStringParameter({
+    this.#subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
       description: 'Specifies an individual Rush subspace to check.',
@@ -78,7 +78,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
   }
 
   public get isDebug(): boolean {
-    return this._debugParameter.value;
+    return this.#debugParameter.value;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
@@ -106,7 +106,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     const appState: IAppState = init({
       appVersion: LFX_VERSION,
       debugMode: this.isDebug,
-      subspaceName: this._subspaceParameter.value
+      subspaceName: this.#subspaceParameter.value
     });
 
     const lfxWorkspace: IJsonLfxWorkspace = appState.lfxWorkspace;

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`PlaintextReporter renders a stable concise plaintext transcript 1`] = `
+"Starting \\"rush build\\"
+project-a: success
+[warning] RUSH_INPUT_UNKNOWN_PROJECT
+project-b: failure
+rush build failed (1 failed)
+"
+`;
+
+exports[`PlaintextReporter renders a stable detailed transcript with StreamCollator-like grouping 1`] = `
+"Starting \\"rush build\\"
+
+==[ project-a (_phase:build) ]==
+Building project-a...
+project-a: success
+rush build succeeded (1/1 operations, 0 failed)
+"
+`;

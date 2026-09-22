@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/cpu-profile-summarizer",
-  "version": "0.2.25",
+  "version": "0.2.28",
   "description": "CLI tool for running analytics on multiple V8 .cpuprofile files",
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
     "start": "node lib/start",
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

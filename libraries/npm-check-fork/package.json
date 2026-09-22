@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/npm-check-fork",
-  "version": "0.2.25",
+  "version": "0.2.28",
   "description": "A fork of npm-check.",
   "repository": {
     "type": "git",
@@ -41,6 +41,7 @@
     "build": "heft build --clean",
     "test": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

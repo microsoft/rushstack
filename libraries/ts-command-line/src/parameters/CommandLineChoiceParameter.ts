@@ -24,7 +24,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: TChoice | undefined;
 
-  private _value: TChoice | undefined = undefined;
+  #value: TChoice | undefined = undefined;
 
   /** {@inheritDoc ICommandLineChoiceDefinition.completions} */
   public readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
@@ -66,7 +66,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
       if (typeof data !== 'string') {
         this.reportInvalidData(data);
       }
-      this._value = data as TChoice;
+      this.#value = data as TChoice;
       return;
     }
 
@@ -82,17 +82,17 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
           );
         }
 
-        this._value = environmentValue as TChoice;
+        this.#value = environmentValue as TChoice;
         return;
       }
     }
 
     if (this.defaultValue !== undefined) {
-      this._value = this.defaultValue;
+      this.#value = this.defaultValue;
       return;
     }
 
-    this._value = undefined;
+    this.#value = undefined;
   }
 
   /**
@@ -115,7 +115,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
    * or if the parameter was omitted and has no default value.
    */
   public get value(): TChoice | undefined {
-    return this._value;
+    return this.#value;
   }
 
   /** {@inheritDoc CommandLineParameterBase.appendToArgList} */

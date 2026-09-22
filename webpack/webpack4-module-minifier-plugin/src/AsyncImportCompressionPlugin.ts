@@ -102,10 +102,10 @@ function needChunkOnDemandLoadingCode(chunk: webpack.compilation.Chunk): boolean
  * Also ensures that the code seen by the minifier does not contain chunk ids, and is therefore portable across chunks/compilations.
  */
 export class AsyncImportCompressionPlugin implements Plugin {
-  private readonly _minifierHooks: IModuleMinifierPluginHooks;
+  readonly #minifierHooks: IModuleMinifierPluginHooks;
 
   public constructor(minifierHooks: IModuleMinifierPluginHooks) {
-    this._minifierHooks = minifierHooks;
+    this.#minifierHooks = minifierHooks;
   }
 
   public apply(compiler: Compiler): void {
@@ -113,7 +113,7 @@ export class AsyncImportCompressionPlugin implements Plugin {
     const asyncImportGroups: Map<string, IAsyncImportMetadata> = new Map();
     let rankedImportGroups: IAsyncImportMetadata[] | undefined;
 
-    this._minifierHooks.postProcessCodeFragment.tap(
+    this.#minifierHooks.postProcessCodeFragment.tap(
       {
         name: PLUGIN_NAME,
         stage: -1
@@ -157,7 +157,7 @@ export class AsyncImportCompressionPlugin implements Plugin {
 
           const chunkExpression: string = meta.index < 0 ? JSON.stringify(meta.chunkIds) : `${meta.index}`;
 
-          const mapped: string | number | undefined = this._minifierHooks.finalModuleId.call(
+          const mapped: string | number | undefined = this.#minifierHooks.finalModuleId.call(
             module.id!,
             context.compilation
           );

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-  "version": "5.178.1",
+  "version": "5.179.0",
   "description": "Rush plugin for Azure storage cloud build cache",
   "repository": {
     "type": "git",
@@ -43,6 +43,7 @@
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

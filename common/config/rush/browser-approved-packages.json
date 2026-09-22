@@ -55,6 +55,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/rush-reporter",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-serve-dashboard",
       "allowedCategories": [ "libraries" ]
     },

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-redis-cobuild-plugin",
-  "version": "5.178.1",
+  "version": "5.179.0",
   "description": "Rush plugin for Redis cobuild lock",
   "repository": {
     "type": "git",
@@ -44,6 +44,7 @@
     "start": "heft test-watch",
     "test": "heft test --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

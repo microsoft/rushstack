@@ -101,22 +101,22 @@ interface IQueuedRequest {
  * @public
  */
 export class RequestScheduler {
-  private readonly _queue: IQueuedRequest[] = [];
-  private _activeClass: RequestExclusivityClass | undefined;
-  private _activeRequestCount: number = 0;
+  readonly #queue: IQueuedRequest[] = [];
+  #activeClass: RequestExclusivityClass | undefined;
+  #activeRequestCount: number = 0;
 
   /**
    * The number of requests currently waiting for admission.
    */
   public get queuedRequestCount(): number {
-    return this._queue.length;
+    return this.#queue.length;
   }
 
   /**
    * The number of requests that currently hold a lease.
    */
   public get activeRequestCount(): number {
-    return this._activeRequestCount;
+    return this.#activeRequestCount;
   }
 
   /**
@@ -124,7 +124,7 @@ export class RequestScheduler {
    */
   public acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
     try {
-      this._validateOptions(options);
+      this.#validateOptions(options);
     } catch (error) {
       return Promise.reject(error);
     }
@@ -135,8 +135,8 @@ export class RequestScheduler {
       );
     }
 
-    if (this._queue.length === 0 && this._canAdmit(options.exclusivityClass)) {
-      return Promise.resolve(this._createLease(options.exclusivityClass));
+    if (this.#queue.length === 0 && this.#canAdmit(options.exclusivityClass)) {
+      return Promise.resolve(this.#createLease(options.exclusivityClass));
     }
 
     if (options.noWait) {
@@ -159,7 +159,7 @@ export class RequestScheduler {
 
       if (options.waitTimeoutMs !== undefined) {
         request.timeout = setTimeout(() => {
-          this._rejectQueuedRequest(
+          this.#rejectQueuedRequest(
             request,
             new RequestSchedulerError(
               RequestSchedulerErrorCode.WaitTimeout,
@@ -171,20 +171,20 @@ export class RequestScheduler {
 
       if (options.abortSignal) {
         request.abortListener = () => {
-          this._rejectQueuedRequest(
+          this.#rejectQueuedRequest(
             request,
             new RequestSchedulerError(RequestSchedulerErrorCode.Aborted, 'The request was aborted while waiting.')
           );
         };
         options.abortSignal.addEventListener('abort', request.abortListener, { once: true });
       }
-      this._queue.push(request);
-      this._notifyQueuePositions();
-      this._drainQueue();
+      this.#queue.push(request);
+      this.#notifyQueuePositions();
+      this.#drainQueue();
     });
   }
 
-  private _validateOptions(options: IRequestSchedulerAcquireOptions): void {
+  #validateOptions(options: IRequestSchedulerAcquireOptions): void {
     if (
       options.waitTimeoutMs !== undefined &&
       (!Number.isFinite(options.waitTimeoutMs) ||
@@ -195,19 +195,19 @@ export class RequestScheduler {
     }
   }
 
-  private _canAdmit(exclusivityClass: RequestExclusivityClass): boolean {
-    if (this._activeRequestCount === 0) {
+  #canAdmit(exclusivityClass: RequestExclusivityClass): boolean {
+    if (this.#activeRequestCount === 0) {
       return true;
     }
 
     return (
-      exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this._activeClass
+      exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this.#activeClass
     );
   }
 
-  private _createLease(exclusivityClass: RequestExclusivityClass): IRequestLease {
-    this._activeClass = exclusivityClass;
-    this._activeRequestCount++;
+  #createLease(exclusivityClass: RequestExclusivityClass): IRequestLease {
+    this.#activeClass = exclusivityClass;
+    this.#activeRequestCount++;
 
     let released: boolean = false;
     return {
@@ -218,48 +218,48 @@ export class RequestScheduler {
         }
 
         released = true;
-        this._activeRequestCount--;
-        if (this._activeRequestCount === 0) {
-          this._activeClass = undefined;
+        this.#activeRequestCount--;
+        if (this.#activeRequestCount === 0) {
+          this.#activeClass = undefined;
         }
-        this._drainQueue();
+        this.#drainQueue();
       }
     };
   }
 
-  private _drainQueue(): void {
+  #drainQueue(): void {
     let admittedRequest: boolean = false;
-    while (this._queue.length > 0) {
-      const request: IQueuedRequest = this._queue[0];
-      if (!this._canAdmit(request.options.exclusivityClass)) {
+    while (this.#queue.length > 0) {
+      const request: IQueuedRequest = this.#queue[0];
+      if (!this.#canAdmit(request.options.exclusivityClass)) {
         break;
       }
 
-      this._queue.shift();
-      this._cleanupQueuedRequest(request);
-      request.resolve(this._createLease(request.options.exclusivityClass));
+      this.#queue.shift();
+      this.#cleanupQueuedRequest(request);
+      request.resolve(this.#createLease(request.options.exclusivityClass));
       admittedRequest = true;
     }
 
     if (admittedRequest) {
-      this._notifyQueuePositions();
+      this.#notifyQueuePositions();
     }
   }
 
-  private _rejectQueuedRequest(request: IQueuedRequest, error: Error): void {
-    const index: number = this._queue.indexOf(request);
+  #rejectQueuedRequest(request: IQueuedRequest, error: Error): void {
+    const index: number = this.#queue.indexOf(request);
     if (index < 0) {
       return;
     }
 
-    this._queue.splice(index, 1);
-    this._cleanupQueuedRequest(request);
+    this.#queue.splice(index, 1);
+    this.#cleanupQueuedRequest(request);
     request.reject(error);
-    this._notifyQueuePositions();
-    this._drainQueue();
+    this.#notifyQueuePositions();
+    this.#drainQueue();
   }
 
-  private _cleanupQueuedRequest(request: IQueuedRequest): void {
+  #cleanupQueuedRequest(request: IQueuedRequest): void {
     if (request.timeout) {
       clearTimeout(request.timeout);
       request.timeout = undefined;
@@ -270,10 +270,10 @@ export class RequestScheduler {
     }
   }
 
-  private _notifyQueuePositions(): void {
-    for (let index: number = 0; index < this._queue.length; index++) {
+  #notifyQueuePositions(): void {
+    for (let index: number = 0; index < this.#queue.length; index++) {
       try {
-        this._queue[index].options.onQueuePositionChanged?.(index + 1);
+        this.#queue[index].options.onQueuePositionChanged?.(index + 1);
       } catch (error) {
         process.emitWarning(error instanceof Error ? error : String(error), {
           code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'

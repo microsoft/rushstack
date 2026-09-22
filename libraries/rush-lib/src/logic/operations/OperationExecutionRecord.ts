@@ -20,7 +20,7 @@ import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rus
 
 import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import type { IOperationChildProcessReporter, IOperationGraphEventSink } from './OperationEventSink';
 import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
@@ -44,6 +44,7 @@ import {
  * @internal
  */
 export interface IOperationExecutionRecordContext {
+  iterationId: number;
   streamCollator: StreamCollator;
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
@@ -167,12 +168,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public logFilePaths: ILogFilePaths | undefined;
 
-  private readonly _context: IOperationExecutionRecordContext;
+  readonly #context: IOperationExecutionRecordContext;
 
-  private _collatedWriter: CollatedWriter | undefined = undefined;
-  private _status: OperationStatus;
-  private _stateHash: string | undefined;
-  private _stateHashComponents: IOperationStateHashComponents | undefined;
+  #collatedWriter: CollatedWriter | undefined = undefined;
+  #status: OperationStatus;
+  #stateHash: string | undefined;
+  #stateHashComponents: IOperationStateHashComponents | undefined;
+  #operationStreamClosed: boolean = false;
+  #operationCompleted: boolean = false;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject, enabled } = operation;
@@ -195,30 +198,34 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       operation
     });
 
-    this._context = context;
-    this._status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
-    this._stateHash = undefined;
-    this._stateHashComponents = undefined;
+    this.#context = context;
+    this.#status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
+    this.#stateHash = undefined;
+    this.#stateHashComponents = undefined;
   }
 
   public get name(): string {
     return this.runner.name;
   }
 
+  public get iterationId(): number {
+    return this.#context.iterationId;
+  }
+
   public get debugMode(): boolean {
-    return this._context.debugMode;
+    return this.#context.debugMode;
   }
 
   public get quietMode(): boolean {
-    return this._context.quietMode;
+    return this.#context.quietMode;
   }
 
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
-    if (!this._collatedWriter) {
-      this._collatedWriter = this._context.streamCollator.registerTask(this.name);
+    if (!this.#collatedWriter) {
+      this.#collatedWriter = this.#context.streamCollator.registerTask(this.name);
     }
-    return this._collatedWriter;
+    return this.#collatedWriter;
   }
 
   public get nonCachedDurationMs(): number | undefined {
@@ -232,12 +239,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public get environment(): IEnvironment | undefined {
-    return this._context.createEnvironment?.(this);
+    return this.#context.createEnvironment?.(this);
   }
 
   public getInvalidateCallback(): (reason: string) => void {
     const invalidateFn: ((operations: Iterable<Operation>, reason: string) => void) | undefined =
-      this._context.invalidate;
+      this.#context.invalidate;
     const operations: [Operation] = [this.operation];
     return (reason: string) => {
       invalidateFn?.(operations, reason);
@@ -259,16 +266,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * 'failure'.
    */
   public get status(): OperationStatus {
-    return this._status;
+    return this.#status;
   }
   public set status(newStatus: OperationStatus) {
-    if (newStatus === this._status) {
+    if (newStatus === this.#status) {
       return;
     }
-    const previousStatus: OperationStatus = this._status;
-    this._status = newStatus;
-    this._context.eventSink?.onOperationStatusChanged?.(this, previousStatus);
-    this._context.onOperationStateChanged?.(this);
+    const previousStatus: OperationStatus = this.#status;
+    this.#status = newStatus;
+    this.#context.eventSink?.onOperationStatusChanged?.(this, previousStatus);
+    this.#context.onOperationStateChanged?.(this);
   }
 
   /**
@@ -276,15 +283,77 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * @internal
    */
   public get eventSink(): IOperationGraphEventSink | undefined {
-    return this._context.eventSink;
+    return this.#context.eventSink;
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.createChildProcessReporter}
+   */
+  public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
+    return this.#context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
   }
 
   public get silent(): boolean {
     return !this.enabled || this.runner.silent;
   }
 
+  /**
+   * Notifies observers that this iteration cannot emit more output for the operation.
+   *
+   * @internal
+   */
+  public closeOperationStream(): void {
+    if (!this.#operationStreamClosed) {
+      this.#operationStreamClosed = true;
+      this.#context.eventSink?.onOperationStreamClosed?.(this.name, this, this.iterationId);
+    }
+  }
+
+  /**
+   * Emits the ordered terminal stream events exactly once.
+   *
+   * @internal
+   */
+  public finalizeOperation(): void {
+    this.closeOperationStream();
+    if (!this.#operationCompleted) {
+      this.#operationCompleted = true;
+      this.#context.eventSink?.onOperationCompleted?.(this);
+    }
+  }
+
+  /**
+   * Whether this record has emitted its terminal completion event.
+   *
+   * @internal
+   */
+  public get isOperationCompleted(): boolean {
+    return this.#operationCompleted;
+  }
+
+  /**
+   * Adds the reporter's lossless operation-output tap ahead of any legacy presentation transforms.
+   *
+   * @internal
+   */
+  public addOperationChunkTap(destination: TerminalWritable): TerminalWritable {
+    const eventSink: IOperationGraphEventSink | undefined = this.#context.eventSink;
+    if (!eventSink?.onOperationChunk) {
+      return destination;
+    }
+
+    return new SplitterTransform({
+      destinations: [
+        destination,
+        new OperationChunkTap(this.name, (operationId, chunk) =>
+          eventSink.onOperationChunk?.(operationId, chunk, this, this.iterationId)
+        )
+      ]
+    });
+  }
+
   public getStateHash(): string {
-    if (this._stateHash === undefined) {
+    if (this.#stateHash === undefined) {
       const { dependencies, local, config } = this.getStateHashComponents();
 
       const hasher: crypto.Hash = crypto.createHash('sha1');
@@ -295,14 +364,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
 
       const hash: string = hasher.digest('hex');
-      this._stateHash = hash;
+      this.#stateHash = hash;
     }
-    return this._stateHash;
+    return this.#stateHash;
   }
 
   public getStateHashComponents(): IOperationStateHashComponents {
-    if (!this._stateHashComponents) {
-      const { inputsSnapshot } = this._context;
+    if (!this.#stateHashComponents) {
+      const { inputsSnapshot } = this.#context;
 
       if (!inputsSnapshot) {
         throw new Error(`Cannot calculate state hash without git.`);
@@ -332,19 +401,23 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // - CLI parameters (ShellOperationRunner)
       const config: string = this.runner.getConfigHash();
 
-      this._stateHashComponents = { dependencies, local, config };
+      this.#stateHashComponents = { dependencies, local, config };
     }
-    return this._stateHashComponents;
+    return this.#stateHashComponents;
   }
 
   /**
    * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
   public async runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
-      logFileSuffix: string;
+      logFileSuffix?: string;
     }
   ): Promise<T> {
     const { associatedProject, stdioSummarizer, problemCollector } = this;
@@ -366,7 +439,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     if (logFilePaths) {
       // Only assign if it won't clear an existing value; stopgap until we support multiple sets of log files per operation.
       this.logFilePaths = logFilePaths;
-      this._context.onOperationStateChanged?.(this);
+      this.#context.onOperationStateChanged?.(this);
     }
 
     try {
@@ -396,25 +469,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         newlineKind: NewlineKind.Lf // for StdioSummarizer
       });
 
-      const chunkTapDestinations: TerminalWritable[] = [];
-      const eventSink: IOperationGraphEventSink | undefined = this._context.eventSink;
-      if (eventSink?.onOperationChunk) {
-        // Tap the stream upstream of the quiet-mode discard so the sink observes
-        // the exact bytes the collated writer would receive, regardless of verbosity.
-        chunkTapDestinations.push(
-          new OperationChunkTap(this.name, (operationId, chunk) =>
-            eventSink.onOperationChunk?.(operationId, chunk)
-          )
-        );
-      }
-
       const splitterTransform1: SplitterTransform = new SplitterTransform({
         destinations: [
           this.quietMode
             ? new DiscardStdoutTransform({ destination: this.collatedWriter })
             : this.collatedWriter,
-          stderrLineTransform,
-          ...chunkTapDestinations
+          stderrLineTransform
         ]
       });
 
@@ -424,14 +484,22 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         ensureNewlineAtEnd: true
       });
 
-      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(
+        this.addOperationChunkTap(normalizeNewlineTransform)
+      );
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
+      const structuredChildOutputTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        new CollatedTerminal(normalizeNewlineTransform),
+        {
+          debugEnabled: this.debugMode
+        }
+      );
       const terminal: Terminal = new Terminal(terminalProvider);
       //#endregion
 
-      const result: T = await callback(terminal, terminalProvider);
+      const result: T = await callback(terminal, terminalProvider, structuredChildOutputTerminalProvider);
 
       normalizeNewlineTransform.close();
 
@@ -485,10 +553,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       await executeContext.onResultAsync(this);
     } finally {
       if (this.isTerminal) {
-        this._collatedWriter?.close();
-        if (this._collatedWriter) {
-          this._context.eventSink?.onOperationStreamClosed?.(this.name);
-        }
+        this.#collatedWriter?.close();
+        this.finalizeOperation();
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }

@@ -1,9 +1,6 @@
 parameters:
   - name: VersionPolicyName
     type: string
-  - name: BranchName
-    type: string
-    default: $(Build.SourceBranchName)
 
 steps:
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
@@ -12,5 +9,4 @@ steps:
         version
         --bump
         --version-policy ${{ parameters.VersionPolicyName }}
-        --target-branch ${{ parameters.BranchName }}
       DisplayName: 'Rush Version (Policy: ${{ parameters.VersionPolicyName }})'

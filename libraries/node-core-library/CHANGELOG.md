@@ -1,6 +1,20 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 20 Aug 2026 00:16:38 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+
+## 5.24.2
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Patches
+
+- Fix incorrect decoding of multi-byte UTF-8 characters in Executable.waitForExitAsync and getProcessInfoByIdAsync by explicitly setting stream encoding before attaching handlers
+
+## 5.24.1
+Sat, 05 Sep 2026 00:15:08 GMT
+
+### Patches
+
+- Prevent prototype pollution when Objects.mergeWith() processes attacker-controlled properties.
 
 ## 5.24.0
 Thu, 20 Aug 2026 00:16:38 GMT

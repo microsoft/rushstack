@@ -212,9 +212,9 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
  * @public
  */
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-  private readonly _json: JsonObject;
-  private readonly _commonTempFolder: string;
-  private _globalPatchedDependencies: Record<string, string> | undefined;
+  readonly #json: JsonObject;
+  readonly #commonTempFolder: string;
+  #globalPatchedDependencies: Record<string, string> | undefined;
 
   /**
    * The method used to resolve the store used by PNPM.
@@ -553,13 +553,13 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * PNPM documentation: https://pnpm.io/package_json#pnpmpatcheddependencies
    */
   public get globalPatchedDependencies(): Record<string, string> | undefined {
-    return this._globalPatchedDependencies;
+    return this.#globalPatchedDependencies;
   }
 
   private constructor(json: IPnpmOptionsJson, commonTempFolder: string, jsonFilename?: string) {
     super(json);
-    this._json = json;
-    this._commonTempFolder = commonTempFolder;
+    this.#json = json;
+    this.#commonTempFolder = commonTempFolder;
     this.jsonFilename = jsonFilename;
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
@@ -588,7 +588,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.globalIgnoredOptionalDependencies = json.globalIgnoredOptionalDependencies;
     this.globalAllowedDeprecatedVersions = json.globalAllowedDeprecatedVersions;
     this.unsupportedPackageJsonSettings = json.unsupportedPackageJsonSettings;
-    this._globalPatchedDependencies = json.globalPatchedDependencies;
+    this.#globalPatchedDependencies = json.globalPatchedDependencies;
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
 
@@ -638,7 +638,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     return new PnpmOptionsConfiguration(json, commonTempFolder);
   }
 
-  private _getJsonFilenameOrThrow(): string {
+  #getJsonFilenameOrThrow(): string {
     if (!this.jsonFilename) {
       throw new Error('Cannot save pnpm-config.json because no jsonFilename was provided.');
     }
@@ -660,16 +660,16 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       const normalized: Record<string, string> = {};
       for (const [dependency, patchPath] of Object.entries(patchedDependencies)) {
         normalized[dependency] =
-          path.isAbsolute(patchPath) && Path.isUnder(patchPath, this._commonTempFolder)
-            ? Path.convertToSlashes(path.relative(this._commonTempFolder, patchPath))
+          path.isAbsolute(patchPath) && Path.isUnder(patchPath, this.#commonTempFolder)
+            ? Path.convertToSlashes(path.relative(this.#commonTempFolder, patchPath))
             : patchPath;
       }
       patchedDependencies = normalized;
     }
 
-    this._globalPatchedDependencies = patchedDependencies;
-    this._json.globalPatchedDependencies = patchedDependencies;
-    JsonFile.save(this._json, this._getJsonFilenameOrThrow(), {
+    this.#globalPatchedDependencies = patchedDependencies;
+    this.#json.globalPatchedDependencies = patchedDependencies;
+    JsonFile.save(this.#json, this.#getJsonFilenameOrThrow(), {
       updateExistingFile: true,
       ignoreUndefinedValues: true
     });
@@ -681,9 +681,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * @deprecated Use {@link PnpmOptionsConfiguration.updateGlobalOnlyBuiltDependenciesAsync} instead.
    */
   public updateGlobalOnlyBuiltDependencies(onlyBuiltDependencies: string[] | undefined): void {
-    this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
+    this.#json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
     if (this.jsonFilename) {
-      JsonFile.save(this._json, this.jsonFilename, {
+      JsonFile.save(this.#json, this.jsonFilename, {
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });
@@ -696,8 +696,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public async updateGlobalOnlyBuiltDependenciesAsync(
     onlyBuiltDependencies: string[] | undefined
   ): Promise<void> {
-    this._json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
-    await JsonFile.saveAsync(this._json, this._getJsonFilenameOrThrow(), {
+    this.#json.globalOnlyBuiltDependencies = onlyBuiltDependencies;
+    await JsonFile.saveAsync(this.#json, this.#getJsonFilenameOrThrow(), {
       updateExistingFile: true,
       ignoreUndefinedValues: true
     });
@@ -709,8 +709,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public async updateGlobalCatalogsAsync(
     catalogs: Record<string, Record<string, string>> | undefined
   ): Promise<void> {
-    this._json.globalCatalogs = catalogs;
-    await JsonFile.saveAsync(this._json, this._getJsonFilenameOrThrow(), {
+    this.#json.globalCatalogs = catalogs;
+    await JsonFile.saveAsync(this.#json, this.#getJsonFilenameOrThrow(), {
       updateExistingFile: true,
       ignoreUndefinedValues: true
     });
@@ -720,9 +720,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * Updates globalAllowBuilds field of the PNPM options in the common/config/rush/pnpm-config.json file.
    */
   public updateGlobalAllowBuilds(allowBuilds: Record<string, boolean> | undefined): void {
-    this._json.globalAllowBuilds = allowBuilds;
+    this.#json.globalAllowBuilds = allowBuilds;
     if (this.jsonFilename) {
-      JsonFile.save(this._json, this.jsonFilename, { updateExistingFile: true });
+      JsonFile.save(this.#json, this.jsonFilename, { updateExistingFile: true });
     }
   }
 }

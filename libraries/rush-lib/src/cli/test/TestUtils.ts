@@ -4,6 +4,7 @@
 import { AlreadyExistsBehavior, FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
+import type { IRushSessionReporterOptions } from '../../pluginFramework/RushSession';
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
@@ -76,7 +77,8 @@ export const TEST_REPO_FOLDER_PATH: string = `${PROJECT_ROOT}/temp/test/unit-tes
  */
 export async function getCommandLineParserInstanceAsync(
   repoName: string,
-  taskName: string
+  taskName: string,
+  reporter?: IRushSessionReporterOptions
 ): Promise<IParserTestInstance> {
   // Copy the test repo to a sandbox folder
   const repoPath: string = `${TEST_REPO_FOLDER_PATH}/${repoName}-${performance.now()}`;
@@ -100,7 +102,7 @@ export async function getCommandLineParserInstanceAsync(
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
   // repo will fail due to contention over the same lock which is kept until the test runner process
   // ends.
-  const parser: RushCommandLineParserType = new RushCommandLineParser({ cwd: repoPath });
+  const parser: RushCommandLineParserType = new RushCommandLineParser({ cwd: repoPath, reporter });
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid

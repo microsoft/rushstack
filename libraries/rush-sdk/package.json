@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.178.1",
+  "version": "5.179.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -41,6 +41,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "license": "MIT",
@@ -50,6 +51,7 @@
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
+    "@rushstack/rush-reporter": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "tapable": "2.2.1"
   },

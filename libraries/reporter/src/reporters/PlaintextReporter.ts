@@ -1,0 +1,580 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
+
+import type { IReporterEventEnvelope } from '../events/IReporterEventEnvelope';
+import type { IReporter } from '../manager/IReporter';
+import { getHumanReadableMessageText } from './ReporterRedaction';
+import { formatHumanReadableDiagnostic } from './HumanReadableDiagnostic';
+import type { PlaintextVariant } from '../config/AutomaticReporterMatrix';
+import type { ReporterLogLevel } from '../config/ReporterNames';
+import { createColorizer, type IColorizer } from './InteractiveRendering';
+import { writeAllSync, WriteAllSyncError } from '../utilities/writeAllSync';
+
+const HEARTBEAT_INTERVAL_MS: number = 30000;
+const OWNER_ONLY_MODE: number = 0o600;
+const OWNER_ONLY_DIRECTORY_MODE: number = 0o700;
+const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
+  'success',
+  'successWithWarnings',
+  'failure',
+  'blocked',
+  'skipped',
+  'fromCache',
+  'noOp',
+  'aborted'
+]);
+
+interface IOperationRecord {
+  readonly projectName: string;
+  readonly phaseName?: string;
+  readonly silent: boolean;
+  spoolPath?: string;
+  spoolFileDescriptor?: number;
+  spoolFailed?: boolean;
+}
+
+interface IWatchCycleState {
+  readonly operations: Map<string, IOperationRecord>;
+  total: number;
+  completed: number;
+  failed: number;
+  watchCompleted: boolean;
+}
+
+function getIterationId(payload: { iterationId?: number }, fallback: number): number {
+  return payload.iterationId ?? fallback;
+}
+
+/**
+ * Options for {@link PlaintextReporter}.
+ *
+ * @beta
+ */
+export interface IPlaintextReporterOptions {
+  /**
+   * The append-only sink. Never receives cursor-movement codes.
+   */
+  readonly write: (text: string) => void;
+
+  /**
+   * The rendering variant. `detailed` retains StreamCollator-like operation
+   * grouping for CI; `concise` is minimal. Defaults to `concise`.
+   */
+  readonly variant?: PlaintextVariant;
+
+  /**
+   * Whether color is enabled. Defaults to `false`.
+   */
+  readonly color?: boolean;
+
+  /**
+   * Returns the current time in milliseconds. Injectable for testing.
+   */
+  readonly nowMs?: () => number;
+
+  /**
+   * The heartbeat interval in milliseconds. Defaults to 30000.
+   */
+  readonly heartbeatIntervalMs?: number;
+
+  /**
+   * The selected reporter log level. Defaults to `normal`.
+   */
+  readonly logLevel?: ReporterLogLevel;
+}
+
+/**
+ * An append-only reporter for non-TTY and CI environments.
+ *
+ * @remarks
+ * The reporter never moves the cursor and disables color by default. It emits
+ * the start line, meaningful state changes, diagnostics, and the final result.
+ * Long sessions can emit a compact heartbeat every 30 seconds. In the detailed
+ * CI variant it groups each operation's output under a header, retaining
+ * StreamCollator-like grouping.
+ *
+ * @beta
+ */
+export class PlaintextReporter implements IReporter {
+  public readonly name: string = 'plaintext';
+
+  private readonly _write: (text: string) => void;
+  private readonly _variant: PlaintextVariant;
+  private readonly _color: IColorizer;
+  private readonly _nowMs: () => number;
+  private readonly _heartbeatIntervalMs: number;
+  private readonly _logLevel: ReporterLogLevel;
+
+  private _commandName: string | undefined;
+  private _lastOutputMs: number;
+  private _atLineStart: boolean;
+  private _logPath: string | undefined;
+  private readonly _watchCycles: Map<number, IWatchCycleState>;
+  private _spoolDirectory: string | undefined;
+  private _nextSpoolId: number;
+  private _legacyIterationId: number;
+  private _latestIterationId: number;
+
+  public constructor(options: IPlaintextReporterOptions) {
+    this._write = options.write;
+    this._variant = options.variant ?? 'concise';
+    this._color = createColorizer(options.color ?? false);
+    this._nowMs = options.nowMs ?? (() => Date.now());
+    this._heartbeatIntervalMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
+    this._logLevel = options.logLevel ?? 'normal';
+
+    this._commandName = undefined;
+    this._lastOutputMs = 0;
+    this._atLineStart = true;
+    this._logPath = undefined;
+    this._watchCycles = new Map();
+    this._spoolDirectory = undefined;
+    this._nextSpoolId = 1;
+    this._legacyIterationId = 0;
+    this._latestIterationId = 0;
+  }
+
+  public async initializeAsync(): Promise<void> {
+    /* no-op */
+  }
+
+  public report(event: IReporterEventEnvelope<unknown>): void {
+    switch (event.type) {
+      case 'commandStarted': {
+        this._commandName = (event.payload as { commandName: string }).commandName;
+        this._writeLine(`Starting "rush ${this._commandName}"`);
+        break;
+      }
+      case 'operationRegistered': {
+        const payload: {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
+        } = event.payload as {
+          operationId: string;
+          projectName?: string;
+          phaseName?: string;
+          silent?: boolean;
+          iterationId?: number;
+        };
+        const iterationId: number = getIterationId(payload, this._legacyIterationId);
+        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const previousRecord: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
+        if (previousRecord) {
+          break;
+        }
+        cycle.operations.set(payload.operationId, {
+          projectName: payload.projectName ?? payload.operationId,
+          phaseName: payload.phaseName,
+          silent: payload.silent === true
+        });
+        if (!payload.silent) {
+          cycle.total++;
+        }
+        break;
+      }
+      case 'operationStatusChanged': {
+        break;
+      }
+      case 'operationCompleted': {
+        this._onOperationCompleted(event);
+        break;
+      }
+      case 'externalOutput': {
+        this._onExternalOutput(event);
+        break;
+      }
+      case 'diagnosticEmitted': {
+        const payload: { code?: string; severity?: string } = event.payload as {
+          code?: string;
+          severity?: string;
+        };
+        if (payload.severity === 'error' || payload.severity === 'warning') {
+          this._writeLine(this._formatDiagnostic(payload.severity, formatHumanReadableDiagnostic(event)));
+        }
+        break;
+      }
+      case 'artifactAvailable': {
+        const payload: { role?: string; path?: string } = event.payload as {
+          role?: string;
+          path?: string;
+        };
+        if (payload.role === 'log') {
+          this._logPath = payload.path;
+        }
+        break;
+      }
+      case 'messageEmitted': {
+        if (event.scope?.operationId === undefined) {
+          const payload: { severity?: string } = event.payload as {
+            severity?: string;
+          };
+          const text: string | undefined = getHumanReadableMessageText(event);
+          if (
+            text &&
+            (this._logLevel !== 'quiet' || payload.severity === 'warning' || payload.severity === 'error')
+          ) {
+            this._writeRaw(text.endsWith('\n') ? text : `${text}\n`);
+          }
+        }
+        break;
+      }
+      case 'watchCycleCompleted': {
+        const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
+          succeeded?: boolean;
+          iterationId?: number;
+        };
+        const iterationId: number = getIterationId(payload, this._legacyIterationId);
+        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const succeeded: boolean = payload.succeeded === true;
+        this._writeLine(
+          `Watch cycle ${succeeded ? 'succeeded' : 'failed'} ` +
+            `(${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
+        );
+        this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+        cycle.watchCompleted = true;
+        this._pruneCompletedWatchCycles();
+        if (payload.iterationId === undefined) {
+          this._legacyIterationId++;
+        }
+        break;
+      }
+      case 'commandResult': {
+        this._onResult(event.payload as { commandName: string; succeeded: boolean; exitCode: number });
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  public async flushAsync(): Promise<void> {
+    /* Append-only output is written eagerly. */
+  }
+
+  public async closeAsync(): Promise<void> {
+    for (const cycle of this._watchCycles.values()) {
+      for (const [operationId, record] of cycle.operations) {
+        if (!record.silent && this._variant === 'detailed') {
+          const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
+          this._writeLine('');
+          this._writeLine(`==[ ${record.projectName}${phase} ]==`);
+          this._writeSpooledOutput(record);
+          this._writeLine(this._formatStatus(record.projectName, 'aborted'));
+        } else {
+          this._deleteSpool(record);
+        }
+        cycle.operations.delete(operationId);
+      }
+    }
+    this._watchCycles.clear();
+    this._removeSpoolDirectory();
+  }
+
+  /**
+   * Emits a compact heartbeat if the heartbeat interval has elapsed since the
+   * last output. Returns whether a heartbeat was emitted.
+   */
+  public emitHeartbeatIfDue(): boolean {
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
+    if (this._nowMs() - this._lastOutputMs >= this._heartbeatIntervalMs) {
+      this._writeLine(
+        `... ${this._commandName ?? 'rush'} still running — ${cycle.completed}/${cycle.total} operations`
+      );
+      return true;
+    }
+    return false;
+  }
+
+  private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
+    const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
+      operationId: string;
+      status: string;
+      iterationId?: number;
+    };
+    const iterationId: number = getIterationId(payload, this._legacyIterationId);
+    const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+    const record: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
+    const projectName: string = record?.projectName ?? event.scope?.projectName ?? payload.operationId;
+
+    if (!TERMINAL_STATUSES.has(payload.status)) {
+      return;
+    }
+    if (record?.silent) {
+      this._deleteSpool(record);
+      cycle.operations.delete(payload.operationId);
+      return;
+    }
+
+    cycle.completed++;
+    if (payload.status === 'failure') {
+      cycle.failed++;
+    }
+
+    if (this._logLevel === 'quiet') {
+      if (record) {
+        this._deleteSpool(record);
+      }
+      cycle.operations.delete(payload.operationId);
+      return;
+    }
+
+    if (this._variant === 'detailed') {
+      const phase: string = record?.phaseName ? ` (${record.phaseName})` : '';
+      this._writeLine('');
+      this._writeLine(`==[ ${projectName}${phase} ]==`);
+      if (record) {
+        this._writeSpooledOutput(record);
+      }
+      this._writeLine(this._formatStatus(projectName, payload.status));
+    } else {
+      this._writeLine(this._formatStatus(projectName, payload.status));
+    }
+    cycle.operations.delete(payload.operationId);
+  }
+
+  private _onExternalOutput(event: IReporterEventEnvelope<unknown>): void {
+    if (this._variant !== 'detailed') {
+      return;
+    }
+    const operationId: string | undefined = event.scope?.operationId;
+    const payload: { text?: string; wasRendered?: boolean; iterationId?: number } = event.payload as {
+      text?: string;
+      wasRendered?: boolean;
+      iterationId?: number;
+    };
+    if (payload.wasRendered === true) {
+      return;
+    }
+    const text: string = payload.text ?? '';
+    const cycle: IWatchCycleState = this._getWatchCycle(getIterationId(payload, this._legacyIterationId));
+    const record: IOperationRecord | undefined =
+      operationId !== undefined ? cycle.operations.get(operationId) : undefined;
+    if (record) {
+      this._spoolOutput(record, text);
+    } else {
+      this._writeRaw(text);
+    }
+  }
+
+  private _spoolOutput(record: IOperationRecord, text: string): void {
+    if (record.spoolFailed) {
+      this._writeRaw(text);
+      return;
+    }
+
+    try {
+      if (!record.spoolPath) {
+        const spoolDirectory: string = this._ensureSpoolDirectory();
+        record.spoolPath = path.join(spoolDirectory, `${this._nextSpoolId++}.operation`);
+        record.spoolFileDescriptor = fs.openSync(record.spoolPath, 'wx', OWNER_ONLY_MODE);
+      }
+      if (record.spoolFileDescriptor === undefined) {
+        throw new Error('The grouped plaintext spool descriptor is not available.');
+      }
+      writeAllSync(record.spoolFileDescriptor, text);
+    } catch (error) {
+      this._closeSpool(record, false);
+      this._writeSpooledOutput(
+        record,
+        Buffer.from(text, 'utf8').subarray(error instanceof WriteAllSyncError ? error.bytesWritten : 0)
+      );
+      record.spoolFailed = true;
+      this._writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
+    }
+  }
+
+  private _writeSpooledOutput(record: IOperationRecord, remainingOutput?: Uint8Array): void {
+    if (!record.spoolPath) {
+      if (remainingOutput) {
+        this._writeRaw(Buffer.from(remainingOutput).toString('utf8'));
+      }
+      return;
+    }
+    const spoolCloseError: Error | undefined = this._closeSpool(record, true);
+    if (spoolCloseError) {
+      this._writeLine(`[reporter] Unable to close grouped plaintext output: ${spoolCloseError.message}`);
+    }
+    let fileDescriptor: number | undefined;
+    let readError: Error | undefined;
+    let readCloseError: Error | undefined;
+    const decoder: StringDecoder = new StringDecoder('utf8');
+    try {
+      fileDescriptor = fs.openSync(record.spoolPath, 'r');
+      const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
+      let bytesRead: number;
+      while ((bytesRead = fs.readSync(fileDescriptor, buffer, 0, buffer.length, null)) > 0) {
+        this._writeRaw(decoder.write(buffer.subarray(0, bytesRead)));
+      }
+    } catch (error) {
+      readError = error as Error;
+    } finally {
+      if (fileDescriptor !== undefined) {
+        try {
+          fs.closeSync(fileDescriptor);
+        } catch (error) {
+          readCloseError = error as Error;
+        }
+      }
+      this._deleteSpool(record);
+    }
+    if (remainingOutput) {
+      this._writeRaw(decoder.write(remainingOutput));
+    }
+    this._writeRaw(decoder.end());
+    if (readError) {
+      this._writeLine(
+        `[reporter] Unable to read grouped plaintext output; see the full log: ${readError.message}`
+      );
+    }
+    if (readCloseError) {
+      this._writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
+    }
+  }
+
+  private _ensureSpoolDirectory(): string {
+    if (!this._spoolDirectory) {
+      this._spoolDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-plaintext-reporter-'));
+      fs.chmodSync(this._spoolDirectory, OWNER_ONLY_DIRECTORY_MODE);
+    }
+    return this._spoolDirectory;
+  }
+
+  private _deleteSpool(record: IOperationRecord): void {
+    this._closeSpool(record, false);
+    if (!record.spoolPath) {
+      return;
+    }
+    try {
+      fs.rmSync(record.spoolPath, { force: true });
+    } catch {
+      /* Best-effort cleanup. */
+    }
+    record.spoolPath = undefined;
+  }
+
+  private _closeSpool(record: IOperationRecord, flush: boolean): Error | undefined {
+    const fileDescriptor: number | undefined = record.spoolFileDescriptor;
+    if (fileDescriptor === undefined) {
+      return undefined;
+    }
+    record.spoolFileDescriptor = undefined;
+    let closeError: Error | undefined;
+    if (flush) {
+      try {
+        fs.fsyncSync(fileDescriptor);
+      } catch (error) {
+        closeError = error as Error;
+      }
+    }
+    try {
+      fs.closeSync(fileDescriptor);
+    } catch (error) {
+      closeError ??= error as Error;
+    }
+    return closeError;
+  }
+
+  private _removeSpoolDirectory(): void {
+    if (!this._spoolDirectory) {
+      return;
+    }
+    try {
+      fs.rmdirSync(this._spoolDirectory);
+    } catch {
+      /* Best-effort cleanup. */
+    }
+    this._spoolDirectory = undefined;
+  }
+
+  private _getWatchCycle(iterationId: number): IWatchCycleState {
+    let cycle: IWatchCycleState | undefined = this._watchCycles.get(iterationId);
+    if (!cycle) {
+      cycle = {
+        operations: new Map(),
+        total: 0,
+        completed: 0,
+        failed: 0,
+        watchCompleted: false
+      };
+      this._watchCycles.set(iterationId, cycle);
+    }
+    this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+    this._pruneCompletedWatchCycles();
+    return cycle;
+  }
+
+  private _getLatestWatchCycle(): IWatchCycleState {
+    return this._getWatchCycle(this._latestIterationId);
+  }
+
+  private _pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this._watchCycles) {
+      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+        for (const record of cycle.operations.values()) {
+          this._deleteSpool(record);
+        }
+        this._watchCycles.delete(iterationId);
+      }
+    }
+  }
+
+  private _onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {
+    const commandName: string = payload.commandName ?? this._commandName ?? 'rush';
+    const cycle: IWatchCycleState = this._getLatestWatchCycle();
+    if (payload.succeeded) {
+      this._writeLine(
+        this._color.green(
+          `rush ${commandName} succeeded (${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
+        )
+      );
+    } else {
+      this._writeLine(this._color.red(`rush ${commandName} failed (${cycle.failed} failed)`));
+    }
+    if (this._logPath) {
+      this._writeLine(`Full log: ${this._logPath}`);
+    }
+  }
+
+  private _formatStatus(projectName: string, status: string): string {
+    const line: string = `${projectName}: ${status}`;
+    if (status === 'failure') {
+      return this._color.red(line);
+    }
+    return line;
+  }
+
+  private _formatDiagnostic(severity: string, line: string): string {
+    if (severity === 'error') {
+      return this._color.red(line);
+    }
+    if (severity === 'warning') {
+      return this._color.yellow(line);
+    }
+    return line;
+  }
+
+  private _writeLine(text: string): void {
+    if (!this._atLineStart) {
+      this._write('\n');
+    }
+    this._write(`${text}\n`);
+    this._atLineStart = true;
+    this._lastOutputMs = this._nowMs();
+  }
+
+  private _writeRaw(text: string): void {
+    this._write(text);
+    if (text.length > 0) {
+      this._atLineStart = text.endsWith('\n');
+    }
+    this._lastOutputMs = this._nowMs();
+  }
+}

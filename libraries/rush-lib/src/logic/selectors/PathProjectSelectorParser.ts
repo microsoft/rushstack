@@ -12,12 +12,12 @@ import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParse
 import { RushConstants } from '../RushConstants';
 
 export class PathProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _workingDirectory: string;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #workingDirectory: string;
 
   public constructor(rushConfiguration: RushConfiguration, workingDirectory: string) {
-    this._rushConfiguration = rushConfiguration;
-    this._workingDirectory = workingDirectory;
+    this.#rushConfiguration = rushConfiguration;
+    this.#workingDirectory = workingDirectory;
   }
 
   public async evaluateSelectorAsync({
@@ -26,17 +26,17 @@ export class PathProjectSelectorParser implements ISelectorParser<RushConfigurat
     parameterName
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     // Resolve the input path against the working directory
-    const absolutePath: string = nodePath.resolve(this._workingDirectory, unscopedSelector);
+    const absolutePath: string = nodePath.resolve(this.#workingDirectory, unscopedSelector);
 
     // Relativize it to the rushJsonFolder
-    const relativePath: string = nodePath.relative(this._rushConfiguration.rushJsonFolder, absolutePath);
+    const relativePath: string = nodePath.relative(this.#rushConfiguration.rushJsonFolder, absolutePath);
 
     // Normalize path separators to forward slashes for LookupByPath
     const normalizedPath: string = Path.convertToSlashes(relativePath);
 
     // Get the LookupByPath instance for the Rush root
     const lookupByPath: LookupByPath<RushConfigurationProject> =
-      this._rushConfiguration.getProjectLookupForRoot(this._rushConfiguration.rushJsonFolder);
+      this.#rushConfiguration.getProjectLookupForRoot(this.#rushConfiguration.rushJsonFolder);
 
     // Check if this path is within a project or matches a project exactly
     const containingProject: RushConfigurationProject | undefined =

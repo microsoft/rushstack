@@ -44,21 +44,21 @@ interface IPackageJsonLite extends Omit<IPackageJson, 'version'> {}
  */
 export class Subspace {
   public readonly subspaceName: string;
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _projects: RushConfigurationProject[] = [];
-  private readonly _splitWorkspaceCompatibility: boolean;
-  private _commonVersionsConfiguration: CommonVersionsConfiguration | undefined = undefined;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #projects: RushConfigurationProject[] = [];
+  readonly #splitWorkspaceCompatibility: boolean;
+  #commonVersionsConfiguration: CommonVersionsConfiguration | undefined = undefined;
 
-  private _detail: ISubspaceDetail | undefined;
+  #detail: ISubspaceDetail | undefined;
 
-  private _cachedPnpmOptions: PnpmOptionsConfiguration | undefined = undefined;
+  #cachedPnpmOptions: PnpmOptionsConfiguration | undefined = undefined;
   // If true, then _cachedPnpmOptions has been initialized.
-  private _cachedPnpmOptionsInitialized: boolean = false;
+  #cachedPnpmOptionsInitialized: boolean = false;
 
   public constructor(options: ISubspaceOptions) {
     this.subspaceName = options.subspaceName;
-    this._rushConfiguration = options.rushConfiguration;
-    this._splitWorkspaceCompatibility = options.splitWorkspaceCompatibility;
+    this.#rushConfiguration = options.rushConfiguration;
+    this.#splitWorkspaceCompatibility = options.splitWorkspaceCompatibility;
   }
 
   /**
@@ -66,7 +66,7 @@ export class Subspace {
    * @beta
    */
   public getProjects(): RushConfigurationProject[] {
-    return this._projects;
+    return this.#projects;
   }
 
   /**
@@ -74,19 +74,19 @@ export class Subspace {
    * @beta
    */
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
-    if (!this._cachedPnpmOptionsInitialized) {
+    if (!this.#cachedPnpmOptionsInitialized) {
       // Calculate these outside the try/catch block since their error messages shouldn't be annotated:
       const subspaceTempFolder: string = this.getSubspaceTempFolderPath();
       try {
-        this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        this.#cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           this.getPnpmConfigFilePath(),
           subspaceTempFolder
         );
-        this._cachedPnpmOptionsInitialized = true;
+        this.#cachedPnpmOptionsInitialized = true;
       } catch (e) {
         if (FileSystem.isNotExistError(e as Error)) {
-          this._cachedPnpmOptions = undefined;
-          this._cachedPnpmOptionsInitialized = true;
+          this.#cachedPnpmOptions = undefined;
+          this.#cachedPnpmOptionsInitialized = true;
         } else {
           throw new Error(
             `The subspace "${this.subspaceName}" has an invalid pnpm-config.json file:\n` + e.message
@@ -94,12 +94,12 @@ export class Subspace {
         }
       }
     }
-    return this._cachedPnpmOptions;
+    return this.#cachedPnpmOptions;
   }
 
-  private _ensureDetail(): ISubspaceDetail {
-    if (!this._detail) {
-      const rushConfiguration: RushConfiguration = this._rushConfiguration;
+  #ensureDetail(): ISubspaceDetail {
+    if (!this.#detail) {
+      const rushConfiguration: RushConfiguration = this.#rushConfiguration;
       let subspaceConfigFolderPath: string;
       let subspacePnpmPatchesFolderPath: string;
 
@@ -118,7 +118,7 @@ export class Subspace {
 
         subspaceConfigFolderPath = standardSubspaceConfigFolder;
 
-        if (this._splitWorkspaceCompatibility && this.subspaceName.startsWith('split_')) {
+        if (this.#splitWorkspaceCompatibility && this.subspaceName.startsWith('split_')) {
           if (FileSystem.exists(standardSubspaceConfigFolder + '/pnpm-lock.yaml')) {
             throw new Error(
               `The split workspace subspace "${this.subspaceName}" cannot use a common/config folder: ` +
@@ -126,13 +126,13 @@ export class Subspace {
             );
           }
 
-          if (this._projects.length !== 1) {
+          if (this.#projects.length !== 1) {
             throw new Error(
-              `The split workspace subspace "${this.subspaceName}" contains ${this._projects.length}` +
+              `The split workspace subspace "${this.subspaceName}" contains ${this.#projects.length}` +
                 ` projects; there must be exactly one project.`
             );
           }
-          const project: RushConfigurationProject = this._projects[0];
+          const project: RushConfigurationProject = this.#projects[0];
 
           subspaceConfigFolderPath = `${project.projectFolder}/subspace/${this.subspaceName}`;
 
@@ -184,7 +184,7 @@ export class Subspace {
       const parsedPath: path.ParsedPath = path.parse(tempShrinkwrapFilePath);
       const tempShrinkwrapPreinstallFilePath: string = `${parsedPath.dir}/${parsedPath.name}-preinstall${parsedPath.ext}`;
 
-      this._detail = {
+      this.#detail = {
         subspaceConfigFolderPath,
         subspacePnpmPatchesFolderPath,
         subspaceTempFolderPath,
@@ -192,7 +192,7 @@ export class Subspace {
         tempShrinkwrapPreinstallFilePath
       };
     }
-    return this._detail;
+    return this.#detail;
   }
 
   /**
@@ -228,7 +228,7 @@ export class Subspace {
    * @beta
    */
   public getSubspaceConfigFolderPath(): string {
-    return this._ensureDetail().subspaceConfigFolderPath;
+    return this.#ensureDetail().subspaceConfigFolderPath;
   }
 
   /**
@@ -239,7 +239,7 @@ export class Subspace {
    * @beta
    */
   public getSubspacePnpmPatchesFolderPath(): string {
-    return this._ensureDetail().subspacePnpmPatchesFolderPath;
+    return this.#ensureDetail().subspacePnpmPatchesFolderPath;
   }
 
   /**
@@ -250,7 +250,7 @@ export class Subspace {
    * @beta
    */
   public getSubspaceTempFolderPath(): string {
-    return this._ensureDetail().subspaceTempFolderPath;
+    return this.#ensureDetail().subspaceTempFolderPath;
   }
 
   /**
@@ -265,7 +265,7 @@ export class Subspace {
    * @beta
    */
   public getTempShrinkwrapFilename(): string {
-    return this._ensureDetail().tempShrinkwrapFilePath;
+    return this.#ensureDetail().tempShrinkwrapFilePath;
   }
 
   /**
@@ -286,7 +286,7 @@ export class Subspace {
    * @beta
    */
   public getTempShrinkwrapPreinstallFilePath(): string {
-    return this._ensureDetail().tempShrinkwrapPreinstallFilePath;
+    return this.#ensureDetail().tempShrinkwrapPreinstallFilePath;
   }
 
   /**
@@ -319,14 +319,14 @@ export class Subspace {
    */
   public getCommonVersions(variant?: string): CommonVersionsConfiguration {
     const commonVersionsFilePath: string = this.getCommonVersionsFilePath(variant);
-    if (!this._commonVersionsConfiguration) {
-      this._commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
+    if (!this.#commonVersionsConfiguration) {
+      this.#commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
         commonVersionsFilePath,
-        this._rushConfiguration
+        this.#rushConfiguration
       );
     }
 
-    return this._commonVersionsConfiguration;
+    return this.#commonVersionsConfiguration;
   }
 
   /**
@@ -343,7 +343,7 @@ export class Subspace {
 
     // Fallback to ensureConsistentVersions in rush.json if the setting is not defined in
     // the common-versions.json file
-    return this._rushConfiguration.ensureConsistentVersions;
+    return this.#rushConfiguration.ensureConsistentVersions;
   }
 
   /**
@@ -378,7 +378,7 @@ export class Subspace {
    */
   public getCommittedShrinkwrapFilePath(variant?: string): string {
     const subspaceConfigFolderPath: string = this.getVariantDependentSubspaceConfigFolderPath(variant);
-    return `${subspaceConfigFolderPath}/${this._rushConfiguration.shrinkwrapFilename}`;
+    return `${subspaceConfigFolderPath}/${this.#rushConfiguration.shrinkwrapFilename}`;
   }
 
   /**
@@ -391,7 +391,7 @@ export class Subspace {
   public getPnpmfilePath(variant?: string): string {
     const subspaceConfigFolderPath: string = this.getVariantDependentSubspaceConfigFolderPath(variant);
 
-    const pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
+    const pnpmFilename: string = (this.#rushConfiguration.packageManagerWrapper as PnpmPackageManager)
       .pnpmfileFilename;
 
     return `${subspaceConfigFolderPath}/${pnpmFilename}`;
@@ -407,7 +407,7 @@ export class Subspace {
 
   /** @internal */
   public _addProject(project: RushConfigurationProject): void {
-    this._projects.push(project);
+    this.#projects.push(project);
   }
 
   /**
@@ -444,7 +444,7 @@ export class Subspace {
 
     const relatedProjects: RushConfigurationProject[] = [];
     const subspacePnpmfileShimSettings: ISubspacePnpmfileShimSettings =
-      SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(this._rushConfiguration, this, variant);
+      SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(this.#rushConfiguration, this, variant);
 
     for (const rushProject of this.getProjects()) {
       const injectedDependencies: Array<string> =
@@ -468,7 +468,7 @@ export class Subspace {
     }
 
     const allWorkspaceProjectSet: Set<string> = new Set(
-      this._rushConfiguration.projects.map((rushProject) => rushProject.packageName)
+      this.#rushConfiguration.projects.map((rushProject) => rushProject.packageName)
     );
 
     // get all related package.json

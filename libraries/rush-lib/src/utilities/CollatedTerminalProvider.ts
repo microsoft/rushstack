@@ -9,28 +9,28 @@ export interface ICollatedTerminalProviderOptions {
 }
 
 export class CollatedTerminalProvider implements ITerminalProvider {
-  private readonly _collatedTerminal: CollatedTerminal;
-  private _hasErrors: boolean = false;
-  private _hasWarnings: boolean = false;
-  private _debugEnabled: boolean = false;
+  readonly #collatedTerminal: CollatedTerminal;
+  #hasErrors: boolean = false;
+  #hasWarnings: boolean = false;
+  #debugEnabled: boolean = false;
 
   public readonly supportsColor: boolean = true;
   public readonly eolCharacter: string = '\n';
 
   public get hasErrors(): boolean {
-    return this._hasErrors;
+    return this.#hasErrors;
   }
 
   public get hasWarnings(): boolean {
-    return this._hasWarnings;
+    return this.#hasWarnings;
   }
 
   public constructor(
     collatedTerminal: CollatedTerminal,
     options?: Partial<ICollatedTerminalProviderOptions>
   ) {
-    this._collatedTerminal = collatedTerminal;
-    this._debugEnabled = !!options?.debugEnabled;
+    this.#collatedTerminal = collatedTerminal;
+    this.#debugEnabled = !!options?.debugEnabled;
   }
 
   public write(data: string, severity: TerminalProviderSeverity): void {
@@ -40,28 +40,28 @@ export class CollatedTerminalProvider implements ITerminalProvider {
         // Unlike the basic ConsoleTerminalProvider, verbose messages are always passed
         // to stdout -- by convention the user-controlled build script output is sent
         // to verbose, and will be routed to a variety of other providers in the ProjectBuilder.
-        this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stdout });
+        this.#collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stdout });
         break;
       }
 
       case TerminalProviderSeverity.debug: {
         // Similar to the basic ConsoleTerminalProvider, debug messages are discarded
         // unless they are explicitly enabled.
-        if (this._debugEnabled) {
-          this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stdout });
+        if (this.#debugEnabled) {
+          this.#collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stdout });
         }
         break;
       }
 
       case TerminalProviderSeverity.error: {
-        this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stderr });
-        this._hasErrors = true;
+        this.#collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stderr });
+        this.#hasErrors = true;
         break;
       }
 
       case TerminalProviderSeverity.warning: {
-        this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stderr });
-        this._hasWarnings = true;
+        this.#collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stderr });
+        this.#hasWarnings = true;
         break;
       }
 

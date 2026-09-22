@@ -2,6 +2,57 @@
   "name": "@rushstack/rush-mcp-docs-plugin",
   "entries": [
     {
+      "version": "0.3.28",
+      "tag": "@rushstack/rush-mcp-docs-plugin_v0.3.28",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/mcp-server\" to `0.4.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.27",
+      "tag": "@rushstack/rush-mcp-docs-plugin_v0.3.27",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/mcp-server\" to `0.4.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.26",
+      "tag": "@rushstack/rush-mcp-docs-plugin_v0.3.26",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/mcp-server\" to `0.4.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.25",
       "tag": "@rushstack/rush-mcp-docs-plugin_v0.3.25",
       "date": "Fri, 21 Aug 2026 15:16:34 GMT",

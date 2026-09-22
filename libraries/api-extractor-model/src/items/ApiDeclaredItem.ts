@@ -41,23 +41,23 @@ export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
  * @public
  */
 export class ApiDeclaredItem extends ApiDocumentedItem {
-  private _excerptTokens: ExcerptToken[];
-  private _excerpt: Excerpt;
-  private _fileUrlPath?: string;
-  private _sourceLocation?: SourceLocation;
+  #excerptTokens: ExcerptToken[];
+  #excerpt: Excerpt;
+  #fileUrlPath?: string;
+  #sourceLocation?: SourceLocation;
 
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
 
-    this._excerptTokens = options.excerptTokens.map((token) => {
+    this.#excerptTokens = options.excerptTokens.map((token) => {
       const canonicalReference: DeclarationReference | undefined =
         token.canonicalReference === undefined
           ? undefined
           : DeclarationReference.parse(token.canonicalReference);
       return new ExcerptToken(token.kind, token.text, canonicalReference);
     });
-    this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
-    this._fileUrlPath = options.fileUrlPath;
+    this.#excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
+    this.#fileUrlPath = options.fileUrlPath;
   }
 
   public static override onDeserializeInto(
@@ -75,14 +75,14 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
    * The source code excerpt where the API item is declared.
    */
   public get excerpt(): Excerpt {
-    return this._excerpt;
+    return this.#excerpt;
   }
 
   /**
    * The individual source code tokens that comprise the main excerpt.
    */
   public get excerptTokens(): ReadonlyArray<ExcerptToken> {
-    return this._excerptTokens;
+    return this.#excerptTokens;
   }
 
   /**
@@ -91,17 +91,17 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
    * the same as the parent API item's.
    */
   public get fileUrlPath(): string | undefined {
-    return this._fileUrlPath;
+    return this.#fileUrlPath;
   }
 
   /**
    * Returns the source location where the API item is declared.
    */
   public get sourceLocation(): SourceLocation {
-    if (!this._sourceLocation) {
-      this._sourceLocation = this._buildSourceLocation();
+    if (!this.#sourceLocation) {
+      this.#sourceLocation = this.#buildSourceLocation();
     }
-    return this._sourceLocation;
+    return this.#sourceLocation;
   }
 
   /**
@@ -163,7 +163,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   /**
    * Builds the cached object used by the `sourceLocation` property.
    */
-  private _buildSourceLocation(): SourceLocation {
+  #buildSourceLocation(): SourceLocation {
     const projectFolderUrl: string | undefined = this.getAssociatedPackage()?.projectFolderUrl;
 
     let fileUrlPath: string | undefined;

@@ -103,7 +103,7 @@ export class BasePackage {
    * The child packages are not necessarily dependencies of this package.
    */
   public children: BasePackage[];
-  private _childrenByName: Map<string, BasePackage>;
+  #childrenByName: Map<string, BasePackage>;
 
   protected constructor(
     name: string,
@@ -128,7 +128,7 @@ export class BasePackage {
     }
 
     this.children = [];
-    this._childrenByName = new Map<string, BasePackage>();
+    this.#childrenByName = new Map<string, BasePackage>();
   }
 
   /**
@@ -186,16 +186,16 @@ export class BasePackage {
     if (child.parent) {
       throw new Error('Child already has a parent');
     }
-    if (this._childrenByName.has(child.installedName)) {
+    if (this.#childrenByName.has(child.installedName)) {
       throw new Error(`Child already exists: ${child.installedName}`);
     }
     child.parent = this;
     this.children.push(child);
-    this._childrenByName.set(child.installedName, child);
+    this.#childrenByName.set(child.installedName, child);
   }
 
   public getChildByName(childPackageName: string): BasePackage | undefined {
-    return this._childrenByName.get(childPackageName);
+    return this.#childrenByName.get(childPackageName);
   }
 
   public printTree(indent?: string): void {

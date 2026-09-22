@@ -1,18 +1,24 @@
+parameters:
+  - name: VersionPolicyName
+    type: string
+  - name: PackageCohort
+    type: string
+
 steps:
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
     parameters:
       Arguments: '--help'
       DisplayName: 'Install Rush'
 
-  - bash: 'rm -f "$HOME/.npmrc"'
-    displayName: 'Clear user npmrc for publish'
-
   - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
     parameters:
       Arguments: >
-        publish
-        --publish
-        --pack
-        --include-all
-        --release-folder $(Build.ArtifactStagingDirectory)/packages
-      DisplayName: 'Rush Pack'
+        pack
+        --pack-destination $(Build.ArtifactStagingDirectory)/packages
+      DisplayName: 'Rush Pack (Policy: ${{ parameters.VersionPolicyName }})'
+
+  - script: >
+      node common/scripts/publish-cohort.js filter-packages
+      --cohort ${{ parameters.PackageCohort }}
+      --packages-path $(Build.ArtifactStagingDirectory)/packages
+    displayName: 'Filter unpublished ${{ parameters.PackageCohort }} packages'

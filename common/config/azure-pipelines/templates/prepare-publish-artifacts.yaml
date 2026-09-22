@@ -1,0 +1,18 @@
+steps:
+  - pwsh: |
+      $metadataFile = "$(Build.ArtifactStagingDirectory)/artifact-metadata.json"
+
+      $metadata = @{
+        pipelineRunId = "$(Build.BuildId)"
+        pipelineRunNumber = "$(Build.BuildNumber)"
+        commitHash = "$(Build.SourceVersion)"
+        commitBranch = "$(Build.SourceBranch)"
+        timestamp = (Get-Date -AsUTC -Format "yyyy-MM-ddTHH:mm:ssZ")
+        pipelineUrl = "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+      }
+
+      $metadata | ConvertTo-Json | Set-Content -Path $metadataFile
+
+      Write-Host "Created artifact metadata file:"
+      Get-Content $metadataFile
+    displayName: 'Generate Artifact Metadata'

@@ -74,12 +74,12 @@ export interface ITerminalWritableOptions {
  * @public
  */
 export abstract class TerminalWritable {
-  private _isOpen: boolean;
+  #isOpen: boolean;
 
   public readonly preventAutoclose: boolean;
 
   public constructor(options?: ITerminalWritableOptions) {
-    this._isOpen = true;
+    this.#isOpen = true;
 
     if (!options) {
       options = {};
@@ -94,7 +94,7 @@ export abstract class TerminalWritable {
    * @sealed
    */
   public get isOpen(): boolean {
-    return this._isOpen;
+    return this.#isOpen;
   }
 
   /**
@@ -111,7 +111,7 @@ export abstract class TerminalWritable {
    * @sealed
    */
   public writeChunk(chunk: ITerminalChunk): void {
-    if (!this._isOpen) {
+    if (!this.#isOpen) {
       throw new Error('Writer was already closed');
     }
     this.onWriteChunk(chunk);
@@ -136,9 +136,9 @@ export abstract class TerminalWritable {
    * @sealed
    */
   public close(): void {
-    if (this._isOpen) {
+    if (this.#isOpen) {
       this.onClose();
-      this._isOpen = false;
+      this.#isOpen = false;
     }
   }
 

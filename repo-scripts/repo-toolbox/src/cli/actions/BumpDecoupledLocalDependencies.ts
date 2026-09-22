@@ -1,33 +1,72 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
 import type { ChildProcess } from 'node:child_process';
 
 import { Async, Executable, FileSystem, type FolderItem, JsonFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { DependencyType, PackageJsonEditor, RushConfiguration, type Subspace } from '@microsoft/rush-lib';
+import {
+  DependencyType,
+  PackageJsonEditor,
+  RushConfiguration,
+  type RushConfigurationProject,
+  type Subspace
+} from '@microsoft/rush-lib';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
-import { CommandLineAction } from '@rushstack/ts-command-line';
+import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-async function _getLatestPublishedVersionAsync(terminal: ITerminal, packageName: string): Promise<string> {
-  return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-    const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version'], {
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-    const stdoutBuffer: string[] = [];
-    childProcess.stdout!.on('data', (chunk) => stdoutBuffer.push(chunk));
-    childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
-      if (exitCode) {
-        reject(new Error(`Exited with ${exitCode}`));
-      } else if (signal) {
-        reject(new Error(`Terminated by ${signal}`));
-      } else {
-        const version: string = stdoutBuffer.join('').trim();
-        terminal.writeLine(`Found version "${version}" for "${packageName}"`);
-        resolve(version);
-      }
-    });
+function _getLocalPublishedVersions(projects: Iterable<RushConfigurationProject>): Record<string, string> {
+  const localPublishedVersions: Record<string, string> = {};
+  for (const {
+    shouldPublish,
+    packageName,
+    packageJson: { version }
+  } of projects) {
+    if (shouldPublish) {
+      localPublishedVersions[packageName] = version;
+    }
+  }
+
+  return localPublishedVersions;
+}
+
+async function _getLatestPublishedVersionAsync(
+  terminal: ITerminal,
+  packageName: string,
+  publishedVersions: Record<string, string>,
+  feedUrl: string | undefined
+): Promise<string> {
+  const recordedVersion: string | undefined = publishedVersions[packageName];
+  if (recordedVersion) {
+    terminal.writeLine(`Found version "${recordedVersion}" for "${packageName}"`);
+    return recordedVersion;
+  }
+
+  const npmArgs: string[] = ['view', packageName, 'version'];
+  if (feedUrl) {
+    npmArgs.push('--registry', feedUrl);
+  }
+
+  const childProcess: ChildProcess = Executable.spawn('npm', npmArgs, {
+    stdio: ['ignore', 'pipe', 'pipe']
   });
+  const {
+    stdout: version,
+    exitCode,
+    signal,
+    stderr
+  } = await Executable.waitForExitAsync(childProcess, {
+    encoding: 'utf-8'
+  });
+  if (exitCode !== 0 || signal) {
+    throw new Error(
+      `Failed to get latest published version for "${packageName}". Exit code: ${exitCode}, Signal: ${signal}, Stderr: ${stderr}`
+    );
+  }
+
+  terminal.writeLine(`Found version "${version}" for "${packageName}"`);
+  return version;
 }
 
 interface IProjectLike {
@@ -38,7 +77,9 @@ interface IProjectLike {
 }
 
 export class BumpDecoupledLocalDependencies extends CommandLineAction {
-  private readonly _terminal: ITerminal;
+  readonly #feedUrlParameter: CommandLineStringParameter;
+  readonly #publishedVersionsPathParameter: CommandLineStringParameter;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -47,15 +88,37 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
       documentation: ''
     });
 
-    this._terminal = terminal;
+    this.#terminal = terminal;
+
+    this.#feedUrlParameter = this.defineStringParameter({
+      parameterLongName: '--feed-url',
+      description: 'The package feed URL to query for published versions not found in the input file.',
+      argumentName: 'FEED_URL'
+    });
+
+    this.#publishedVersionsPathParameter = this.defineStringParameter({
+      parameterLongName: '--published-versions-path',
+      description: 'The path to the published-versions.json file.',
+      argumentName: 'PATH'
+    });
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
+    const feedUrl: string | undefined = this.#feedUrlParameter.value;
+    const publishedVersionsPath: string | undefined = this.#publishedVersionsPathParameter.value;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()
     });
     const { projects, rushJsonFile, commonAutoinstallersFolder } = rushConfiguration;
+    const localPublishedVersions: Record<string, string> = _getLocalPublishedVersions(projects);
+    const publishedVersionsOverride: Record<string, string> | undefined = publishedVersionsPath
+      ? await JsonFile.loadAsync(path.resolve(publishedVersionsPath))
+      : undefined;
+    const publishedVersions: Record<string, string> = {
+      ...localPublishedVersions,
+      ...publishedVersionsOverride
+    };
 
     const projectsToUpdate: IProjectLike[] = [];
 
@@ -125,7 +188,12 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     await Async.forEachAsync(
       allDecoupledLocalDependencyNames,
       async (decoupledLocalDependencyName) => {
-        const version: string = await _getLatestPublishedVersionAsync(terminal, decoupledLocalDependencyName);
+        const version: string = await _getLatestPublishedVersionAsync(
+          terminal,
+          decoupledLocalDependencyName,
+          publishedVersions,
+          feedUrl
+        );
         decoupledLocalDependencyVersionsByName.set(decoupledLocalDependencyName, version);
       },
       {
@@ -178,7 +246,12 @@ export class BumpDecoupledLocalDependencies extends CommandLineAction {
     terminal.writeLine();
 
     // Update the Rush version in rush.json
-    const latestRushVersion: string = await _getLatestPublishedVersionAsync(terminal, '@microsoft/rush');
+    const latestRushVersion: string = await _getLatestPublishedVersionAsync(
+      terminal,
+      '@microsoft/rush',
+      publishedVersions,
+      feedUrl
+    );
     const rushJson: IRushConfigurationJson = await JsonFile.loadAsync(rushJsonFile);
     const existingRushVersion: string = rushJson.rushVersion;
     const rushWasUpdated: boolean = existingRushVersion !== latestRushVersion;

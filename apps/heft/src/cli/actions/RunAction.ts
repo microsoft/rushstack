@@ -101,13 +101,13 @@ export function definePhaseScopingParameters(action: IHeftAction): IScopingParam
 export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   public readonly watch: boolean;
 
-  private readonly _internalHeftSession: InternalHeftSession;
-  private readonly _terminal: ITerminal;
-  private readonly _actionRunner: HeftActionRunner;
-  private readonly _toParameter: CommandLineStringListParameter;
-  private readonly _toExceptParameter: CommandLineStringListParameter;
-  private readonly _onlyParameter: CommandLineStringListParameter;
-  private _selectedPhases: Set<HeftPhase> | undefined;
+  readonly #internalHeftSession: InternalHeftSession;
+  readonly #terminal: ITerminal;
+  readonly #actionRunner: HeftActionRunner;
+  readonly #toParameter: CommandLineStringListParameter;
+  readonly #toExceptParameter: CommandLineStringListParameter;
+  readonly #onlyParameter: CommandLineStringListParameter;
+  #selectedPhases: Set<HeftPhase> | undefined;
 
   public constructor(options: IHeftActionOptions) {
     super({
@@ -117,35 +117,35 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     });
 
     this.watch = options.watch ?? false;
-    this._terminal = options.terminal;
-    this._internalHeftSession = options.internalHeftSession;
+    this.#terminal = options.terminal;
+    this.#internalHeftSession = options.internalHeftSession;
 
     const { toParameter, toExceptParameter, onlyParameter } = definePhaseScopingParameters(this);
-    this._toParameter = toParameter;
-    this._toExceptParameter = toExceptParameter;
-    this._onlyParameter = onlyParameter;
+    this.#toParameter = toParameter;
+    this.#toExceptParameter = toExceptParameter;
+    this.#onlyParameter = onlyParameter;
 
-    this._actionRunner = new HeftActionRunner({ action: this, ...options });
+    this.#actionRunner = new HeftActionRunner({ action: this, ...options });
   }
 
   public get selectedPhases(): ReadonlySet<HeftPhase> {
-    if (!this._selectedPhases) {
-      this._selectedPhases = expandPhases(
-        this._onlyParameter,
-        this._toParameter,
-        this._toExceptParameter,
-        this._internalHeftSession,
-        this._terminal
+    if (!this.#selectedPhases) {
+      this.#selectedPhases = expandPhases(
+        this.#onlyParameter,
+        this.#toParameter,
+        this.#toExceptParameter,
+        this.#internalHeftSession,
+        this.#terminal
       );
     }
-    return this._selectedPhases;
+    return this.#selectedPhases;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    this._actionRunner.defineParameters(scopedParameterProvider);
+    this.#actionRunner.defineParameters(scopedParameterProvider);
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    await this._actionRunner.executeAsync();
+    await this.#actionRunner.executeAsync();
   }
 }

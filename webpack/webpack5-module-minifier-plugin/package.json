@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack5-module-minifier-plugin",
-  "version": "5.8.27",
+  "version": "5.8.30",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -39,6 +39,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {

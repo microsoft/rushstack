@@ -10,9 +10,9 @@ import type * as InteractiveUpgraderType from '../../logic/InteractiveUpgrader';
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class UpgradeInteractiveAction extends BaseRushAction {
-  private _makeConsistentFlag: CommandLineFlagParameter;
-  private _skipUpdateFlag: CommandLineFlagParameter;
-  private readonly _variantParameter: CommandLineStringParameter;
+  #makeConsistentFlag: CommandLineFlagParameter;
+  #skipUpdateFlag: CommandLineFlagParameter;
+  readonly #variantParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -32,20 +32,20 @@ export class UpgradeInteractiveAction extends BaseRushAction {
       parser
     });
 
-    this._makeConsistentFlag = this.defineFlagParameter({
+    this.#makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
       description:
         'When upgrading dependencies from a single project, also upgrade dependencies from other projects.'
     });
 
-    this._skipUpdateFlag = this.defineFlagParameter({
+    this.#skipUpdateFlag = this.defineFlagParameter({
       parameterLongName: '--skip-update',
       parameterShortName: '-s',
       description:
         'If specified, the "rush update" command will not be run after updating the package.json files.'
     });
 
-    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
+    this.#variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   public async runAsync(): Promise<void> {
@@ -64,13 +64,13 @@ export class UpgradeInteractiveAction extends BaseRushAction {
     );
 
     const variant: string | undefined = await getVariantAsync(
-      this._variantParameter,
+      this.#variantParameter,
       this.rushConfiguration,
       true
     );
     const shouldMakeConsistent: boolean =
       this.rushConfiguration.defaultSubspace.shouldEnsureConsistentVersions(variant) ||
-      this._makeConsistentFlag.value;
+      this.#makeConsistentFlag.value;
 
     const { projects, depsToUpgrade } = await interactiveUpgrader.upgradeAsync();
 
@@ -78,7 +78,7 @@ export class UpgradeInteractiveAction extends BaseRushAction {
       projects,
       packagesToAdd: depsToUpgrade.packages,
       updateOtherPackages: shouldMakeConsistent,
-      skipUpdate: this._skipUpdateFlag.value,
+      skipUpdate: this.#skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
       variant
     });

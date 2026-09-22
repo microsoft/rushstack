@@ -28,10 +28,10 @@ export interface IBaseToolOptions<Args extends ZodRawShape = ZodRawShape> {
 }
 
 export abstract class BaseTool<Args extends ZodRawShape = ZodRawShape> {
-  private _options: IBaseToolOptions<Args>;
+  #options: IBaseToolOptions<Args>;
 
   protected constructor(options: IBaseToolOptions<Args>) {
-    this._options = options;
+    this.#options = options;
   }
 
   protected abstract executeAsync(...args: Parameters<ToolCallback<Args>>): ReturnType<ToolCallback<Args>>;
@@ -39,7 +39,7 @@ export abstract class BaseTool<Args extends ZodRawShape = ZodRawShape> {
   public register(server: McpServer): void {
     // TODO: remove ts-ignore
     // @ts-ignore
-    server.tool(this._options.name, this._options.description, this._options.schema, async (...args) => {
+    server.tool(this.#options.name, this.#options.description, this.#options.schema, async (...args) => {
       try {
         const result: CallToolResult = await this.executeAsync(...(args as Parameters<ToolCallback<Args>>));
         return result;

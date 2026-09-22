@@ -8,7 +8,7 @@ import { RunAction } from './RunAction';
 import { BusinessLogic } from './BusinessLogic';
 
 export class WidgetCommandLine extends CommandLineParser {
-  private readonly _verbose: CommandLineFlagParameter;
+  readonly #verbose: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -19,7 +19,7 @@ export class WidgetCommandLine extends CommandLineParser {
     this.addAction(new PushAction());
     this.addAction(new RunAction());
 
-    this._verbose = this.defineFlagParameter({
+    this.#verbose = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Show extra logging detail'
@@ -27,7 +27,7 @@ export class WidgetCommandLine extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    BusinessLogic.configureLogger(this._verbose.value);
+    BusinessLogic.configureLogger(this.#verbose.value);
     return await super.onExecuteAsync();
   }
 }

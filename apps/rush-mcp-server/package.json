@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/mcp-server",
-  "version": "0.4.25",
+  "version": "0.4.28",
   "description": "A Model Context Protocol server implementation for Rush",
   "keywords": [
     "rush",
@@ -47,7 +47,8 @@
   "homepage": "https://rushstack.io",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "bin": {
     "mcp-server": "./bin/mcp-server"

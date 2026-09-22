@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "5.3.27",
+  "version": "5.3.30",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -38,7 +38,8 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "peerDependencies": {
     "webpack": "^5.68.0",

@@ -2,6 +2,74 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.8.30",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.8.30",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.9.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.9.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.29",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.8.29",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.9.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.9.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.28",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.8.28",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.9.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.9.28`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.8.27",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.8.27",
       "date": "Fri, 21 Aug 2026 15:16:34 GMT",

@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminalChunk } from '@rushstack/terminal';
+import type * as child_process from 'node:child_process';
+
+import type { ITerminalChunk, ITerminalProvider } from '@rushstack/terminal';
 
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationStatus } from './OperationStatus';
@@ -23,6 +25,21 @@ export interface IOperationActivityOptions {
 }
 
 /**
+ * A negotiated reporter channel allocated for one operation child process.
+ *
+ * @internal
+ */
+export interface IOperationChildProcessReporter {
+  readonly environment: Readonly<Record<string, string>>;
+  readonly hasWarningOrError: boolean;
+  readonly stdio: child_process.StdioOptions;
+  attachAsync(
+    child: child_process.ChildProcess,
+    structuredOutputTerminalProvider: ITerminalProvider
+  ): Promise<void>;
+}
+
+/**
  * A structured, presentation-free event sink for the operation graph.
  *
  * @remarks
@@ -40,16 +57,18 @@ export interface IOperationGraphEventSink {
   /**
    * Invoked when an operation is prepared for an iteration.
    */
-  onOperationRegistered?(operationId: string, silent: boolean): void;
+  onOperationRegistered?(
+    operationId: string,
+    silent: boolean,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void;
 
   /**
    * Invoked synchronously on every operation status transition. The result's
    * `status`, `error`, and `stopwatch` reflect the new state.
    */
-  onOperationStatusChanged?(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void;
+  onOperationStatusChanged?(result: IOperationExecutionResult, previousStatus: OperationStatus): void;
 
   /**
    * Invoked when an operation's collated output is about to be displayed,
@@ -60,21 +79,42 @@ export interface IOperationGraphEventSink {
 
   /**
    * Invoked for each chunk of an operation's raw output, upstream of any
-   * quiet-mode filtering. Concatenated chunks for one operation exactly match
-   * what the collated sink receives for that operation.
+   * newline normalization or quiet-mode filtering.
    */
-  onOperationChunk?(operationId: string, chunk: ITerminalChunk): void;
+  onOperationChunk?(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void;
 
   /**
    * Invoked when an operation's collated output stream is closed at the end of
    * its execution, after all status lines and output have been written. This
    * is the authoritative "no more output for this operation" signal.
    */
-  onOperationStreamClosed?(operationId: string): void;
+  onOperationStreamClosed?(
+    operationId: string,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void;
+
+  /**
+   * Invoked after the operation stream is closed and the final outcome is authoritative.
+   */
+  onOperationCompleted?(result: IOperationExecutionResult): void;
 
   /**
    * Invoked for each human-oriented status line written to the terminal,
    * carrying the plain (pre-colorization) text.
    */
   onActivity?(text: string, options?: IOperationActivityOptions): void;
+
+  /**
+   * Allocates a reporter channel for a child spawned by the specified operation.
+   */
+  createChildProcessReporter?(
+    operationId: string,
+    iterationId: number
+  ): IOperationChildProcessReporter | undefined;
 }

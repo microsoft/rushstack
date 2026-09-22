@@ -31,7 +31,7 @@ export interface IVScodeOutputChannelTerminalProviderOptions {
  * @beta
  */
 export class VScodeOutputChannelTerminalProvider implements ITerminalProvider {
-  private readonly _outputChannel: vscode.OutputChannel;
+  readonly #outputChannel: vscode.OutputChannel;
   public static readonly supportsColor: boolean = false;
 
   /**
@@ -55,14 +55,14 @@ export class VScodeOutputChannelTerminalProvider implements ITerminalProvider {
   ) {
     this.verboseEnabled = !!options.verboseEnabled;
     this.debugEnabled = !!options.debugEnabled;
-    this._outputChannel = outputChannel;
+    this.#outputChannel = outputChannel;
   }
 
   /**
    * {@inheritDoc ITerminalProvider.write}
    */
   public write(data: string, severity: TerminalProviderSeverity): void {
-    const outputChannel: vscode.OutputChannel = this._outputChannel;
+    const outputChannel: vscode.OutputChannel = this.#outputChannel;
     for (const line of Text.readLinesFromIterable(data)) {
       outputChannel.appendLine(line);
     }

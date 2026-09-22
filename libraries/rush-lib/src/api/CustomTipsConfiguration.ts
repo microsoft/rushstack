@@ -311,7 +311,7 @@ export class CustomTipsConfiguration {
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
-    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
+    this.#writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
   }
 
   /**
@@ -322,7 +322,7 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
+    this.#writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
   /**
@@ -333,7 +333,7 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
+    this.#writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
 
   /**
@@ -344,10 +344,10 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
+    this.#writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
 
-  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
+  #writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
     if (customTipJsonItem) {
       let writeFunction:

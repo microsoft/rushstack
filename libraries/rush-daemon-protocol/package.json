@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-daemon-protocol",
-  "version": "0.3.1",
+  "version": "0.4.2",
   "description": "Wire protocol for the Rush daemon (rushd): frame taxonomy, length-prefixed binary codec, and version negotiation. (public beta)",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -47,6 +47,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {

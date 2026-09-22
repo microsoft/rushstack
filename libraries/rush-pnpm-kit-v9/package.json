@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-pnpm-kit-v9",
-  "version": "0.2.26",
+  "version": "0.2.29",
   "description": "rush pnpm kit v9",
   "engines": {
     "node": ">=20.9.0"
@@ -33,6 +33,7 @@
   },
   "scripts": {
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean",
     "build": "heft build --clean",
     "test": "heft test --clean"

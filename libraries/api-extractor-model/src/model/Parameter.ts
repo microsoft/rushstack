@@ -51,22 +51,22 @@ export class Parameter {
    */
   public isOptional: boolean;
 
-  private _parent: ApiParameterListMixin;
+  #parent: ApiParameterListMixin;
 
   public constructor(options: IParameterOptions) {
     this.name = options.name;
     this.parameterTypeExcerpt = options.parameterTypeExcerpt;
     this.isOptional = options.isOptional;
-    this._parent = options.parent;
+    this.#parent = options.parent;
   }
 
   /**
    * Returns the `@param` documentation for this parameter, if present.
    */
   public get tsdocParamBlock(): tsdoc.DocParamBlock | undefined {
-    if (this._parent instanceof ApiDocumentedItem) {
-      if (this._parent.tsdocComment) {
-        return this._parent.tsdocComment.params.tryGetBlockByName(this.name);
+    if (this.#parent instanceof ApiDocumentedItem) {
+      if (this.#parent.tsdocComment) {
+        return this.#parent.tsdocComment.params.tryGetBlockByName(this.name);
       }
     }
   }

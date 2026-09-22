@@ -22,11 +22,11 @@ const EXACT_FLAG_NAME: '--exact' = '--exact';
 const CARET_FLAG_NAME: '--caret' = '--caret';
 
 export class AddAction extends BaseAddAndRemoveAction {
-  private readonly _exactFlag: CommandLineFlagParameter;
-  private readonly _caretFlag: CommandLineFlagParameter;
-  private readonly _devDependencyFlag: CommandLineFlagParameter;
-  private readonly _peerDependencyFlag: CommandLineFlagParameter;
-  private readonly _makeConsistentFlag: CommandLineFlagParameter;
+  readonly #exactFlag: CommandLineFlagParameter;
+  readonly #caretFlag: CommandLineFlagParameter;
+  readonly #devDependencyFlag: CommandLineFlagParameter;
+  readonly #peerDependencyFlag: CommandLineFlagParameter;
+  readonly #makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -52,29 +52,29 @@ export class AddAction extends BaseAddAndRemoveAction {
         ` To add multiple packages, write "rush add ${PACKAGE_PARAMETER_NAME} foo ${PACKAGE_PARAMETER_NAME} bar".`
     });
 
-    this._exactFlag = this.defineFlagParameter({
+    this.#exactFlag = this.defineFlagParameter({
       parameterLongName: EXACT_FLAG_NAME,
       description:
         'If specified, the SemVer specifier added to the' +
         ' package.json will be an exact version (e.g. without tilde or caret).'
     });
-    this._caretFlag = this.defineFlagParameter({
+    this.#caretFlag = this.defineFlagParameter({
       parameterLongName: CARET_FLAG_NAME,
       description:
         'If specified, the SemVer specifier added to the' +
         ' package.json will be a prepended with a "caret" specifier ("^").'
     });
-    this._devDependencyFlag = this.defineFlagParameter({
+    this.#devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
       description:
         'If specified, the package will be added to the "devDependencies" section of the package.json'
     });
-    this._peerDependencyFlag = this.defineFlagParameter({
+    this.#peerDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--peer',
       description:
         'If specified, the package will be added to the "peerDependencies" section of the package.json'
     });
-    this._makeConsistentFlag = this.defineFlagParameter({
+    this.#makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: MAKE_CONSISTENT_FLAG_NAME,
       parameterShortName: '-m',
       description:
@@ -86,9 +86,9 @@ export class AddAction extends BaseAddAndRemoveAction {
   public async getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushAddOptions> {
     const projects: RushConfigurationProject[] = super.getProjects();
 
-    if (this._caretFlag.value && this._exactFlag.value) {
+    if (this.#caretFlag.value && this.#exactFlag.value) {
       throw new Error(
-        `Only one of "${this._caretFlag.longName}" and "${this._exactFlag.longName}" should be specified`
+        `Only one of "${this.#caretFlag.longName}" and "${this.#exactFlag.longName}" should be specified`
       );
     }
 
@@ -127,18 +127,18 @@ export class AddAction extends BaseAddAndRemoveAction {
        */
       let rangeStyle: SemVerStyle;
       if (version && version !== 'latest') {
-        if (this._exactFlag.value || this._caretFlag.value) {
+        if (this.#exactFlag.value || this.#caretFlag.value) {
           throw new Error(
-            `The "${this._caretFlag.longName}" and "${this._exactFlag.longName}" flags may not be specified if a ` +
+            `The "${this.#caretFlag.longName}" and "${this.#exactFlag.longName}" flags may not be specified if a ` +
               `version is provided in the ${this._packageNameListParameter.longName} specifier. In this case "${version}" was provided.`
           );
         }
 
         rangeStyle = SemVerStyle.Passthrough;
       } else {
-        rangeStyle = this._caretFlag.value
+        rangeStyle = this.#caretFlag.value
           ? SemVerStyle.Caret
-          : this._exactFlag.value
+          : this.#exactFlag.value
             ? SemVerStyle.Exact
             : SemVerStyle.Tilde;
       }
@@ -155,9 +155,9 @@ export class AddAction extends BaseAddAndRemoveAction {
     return {
       projects,
       packagesToUpdate: packagesToAdd,
-      devDependency: this._devDependencyFlag.value,
-      peerDependency: this._peerDependencyFlag.value,
-      updateOtherPackages: this._makeConsistentFlag.value,
+      devDependency: this.#devDependencyFlag.value,
+      peerDependency: this.#peerDependencyFlag.value,
+      updateOtherPackages: this.#makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
       actionName: this.actionName,

@@ -25,12 +25,12 @@ export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
 }
 
 export class CustomMarkdownEmitter extends MarkdownEmitter {
-  private _apiModel: ApiModel;
+  #apiModel: ApiModel;
 
   public constructor(apiModel: ApiModel) {
     super();
 
-    this._apiModel = apiModel;
+    this.#apiModel = apiModel;
   }
 
   public override emit(
@@ -165,7 +165,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
   ): void {
     const options: ICustomMarkdownEmitterOptions = context.options;
 
-    const result: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+    const result: IResolveDeclarationReferenceResult = this.#apiModel.resolveDeclarationReference(
       docLinkTag.codeDestination!,
       options.contextApiItem
     );

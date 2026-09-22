@@ -9,10 +9,10 @@ import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParse
 import { RushConstants } from '../RushConstants';
 
 export class TagProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
-  private readonly _rushConfiguration: RushConfiguration;
+  readonly #rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public async evaluateSelectorAsync({
@@ -21,7 +21,7 @@ export class TagProjectSelectorParser implements ISelectorParser<RushConfigurati
     parameterName
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const selection: ReadonlySet<RushConfigurationProject> | undefined =
-      this._rushConfiguration.projectsByTag.get(unscopedSelector);
+      this.#rushConfiguration.projectsByTag.get(unscopedSelector);
     if (!selection) {
       terminal.writeErrorLine(
         `The tag "${unscopedSelector}" passed to "${parameterName}" is not specified for any projects in ` +
@@ -33,6 +33,6 @@ export class TagProjectSelectorParser implements ISelectorParser<RushConfigurati
   }
 
   public getCompletions(): Iterable<string> {
-    return this._rushConfiguration.projectsByTag.keys();
+    return this.#rushConfiguration.projectsByTag.keys();
   }
 }

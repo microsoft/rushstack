@@ -12,6 +12,10 @@ import type {
 
 import { WorkspaceInvalidationTracker } from './WorkspaceInvalidationTracker';
 import { WorkspaceSessionFileWatcher } from './WorkspaceSessionFileWatcher';
+import type {
+  IWorkspaceEngineShape,
+  IWorkspaceInvalidationReconciliation
+} from './WorkspaceEngineComponentFactory';
 
 /**
  * Stable identity loaded once for a warm workspace session.
@@ -45,6 +49,7 @@ export interface IWorkspaceInvalidationWatcher extends AsyncDisposable {
  * @beta
  */
 export interface IWorkspaceSessionComponents extends AsyncDisposable {
+  readonly engineShape?: IWorkspaceEngineShape;
   readonly inputsSnapshot?: IInputsSnapshot;
   readonly operationGraph?: IOperationGraph;
   /**
@@ -55,6 +60,7 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
    * `WorkspaceSession` directly disposes only the default watcher that it creates itself.
    */
   readonly projectWatcher?: IWorkspaceInvalidationWatcher;
+  readonly reconcileInvalidationsAsync?: () => Promise<IWorkspaceInvalidationReconciliation>;
   readonly rushSession?: RushSession;
 }
 
@@ -96,12 +102,14 @@ export interface IWorkspaceSessionOptions {
  * @beta
  */
 export interface IWorkspaceSession extends AsyncDisposable {
+  readonly engineShape: IWorkspaceEngineShape | undefined;
   readonly inputsSnapshot: IInputsSnapshot | undefined;
   readonly invalidations: WorkspaceInvalidationTracker;
   readonly metadata: IWorkspaceSessionMetadata;
   readonly operationGraph: IOperationGraph | undefined;
   readonly rushConfiguration: RushConfiguration;
   readonly rushSession: RushSession | undefined;
+  reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
 }
 
 /**
@@ -124,8 +132,9 @@ export class WorkspaceSession implements IWorkspaceSession {
   readonly #components: IWorkspaceSessionComponents;
   readonly #sessionOwnedProjectWatcher: IWorkspaceInvalidationWatcher | undefined;
   #disposePromise: Promise<void> | undefined;
+  #inputsSnapshot: IInputsSnapshot | undefined;
+  #isDisposing: boolean = false;
 
-  public readonly inputsSnapshot: IInputsSnapshot | undefined;
   public readonly invalidations: WorkspaceInvalidationTracker;
   public readonly metadata: IWorkspaceSessionMetadata;
   public readonly operationGraph: IOperationGraph | undefined;
@@ -144,9 +153,17 @@ export class WorkspaceSession implements IWorkspaceSession {
     this.invalidations = invalidations;
     this.#components = components;
     this.#sessionOwnedProjectWatcher = sessionOwnedProjectWatcher;
-    this.inputsSnapshot = components.inputsSnapshot;
+    this.#inputsSnapshot = components.inputsSnapshot;
     this.operationGraph = components.operationGraph;
     this.rushSession = components.rushSession;
+  }
+
+  public get engineShape(): IWorkspaceEngineShape | undefined {
+    return this.#components.engineShape;
+  }
+
+  public get inputsSnapshot(): IInputsSnapshot | undefined {
+    return this.#inputsSnapshot;
   }
 
   /** Loads workspace identity, creates reusable components, and starts headless invalidation tracking. */
@@ -194,7 +211,7 @@ export class WorkspaceSession implements IWorkspaceSession {
         invalidations.invalidate(changedPath)
       );
       // Changes before the watcher registered its callbacks cannot be observed path-by-path.
-      invalidations.invalidate();
+      invalidations.invalidateForInitialization();
       return session;
     } catch (error) {
       const cleanupErrors: unknown[] = [];
@@ -220,8 +237,23 @@ export class WorkspaceSession implements IWorkspaceSession {
 
   /** Stops invalidation tracking and disposes injected engine resources. */
   public [Symbol.asyncDispose](): Promise<void> {
+    this.#isDisposing = true;
     this.#disposePromise ??= this.#disposeOnceAsync();
     return this.#disposePromise;
+  }
+
+  /** Reconciles retained watcher changes with injected reusable engine state, when configured. */
+  public async reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined> {
+    if (this.#isDisposing) {
+      throw new Error('The workspace session is being disposed.');
+    }
+    if (!this.#components.reconcileInvalidationsAsync) {
+      return undefined;
+    }
+    const result: IWorkspaceInvalidationReconciliation =
+      await this.#components.reconcileInvalidationsAsync();
+    this.#inputsSnapshot = result.inputsSnapshot;
+    return result;
   }
 
   async #disposeOnceAsync(): Promise<void> {

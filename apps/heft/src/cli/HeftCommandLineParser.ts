@@ -10,7 +10,12 @@ import {
   type CommandLineAction
 } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
+import {
+  Terminal,
+  ConsoleTerminalProvider,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -23,6 +28,7 @@ import type { IHeftActionOptions } from './actions/IHeftAction';
 import { AliasAction } from './actions/AliasAction';
 import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
 import { Constants } from '../utilities/Constants';
+import { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -38,14 +44,15 @@ const HEFT_TOOL_FILENAME: 'heft' = 'heft';
 export class HeftCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
 
-  private readonly _debugFlag: CommandLineFlagParameter;
-  private readonly _unmanagedFlag: CommandLineFlagParameter;
-  private readonly _debug: boolean;
-  private readonly _terminalProvider: ConsoleTerminalProvider;
-  private readonly _loggingManager: LoggingManager;
-  private readonly _metricsCollector: MetricsCollector;
-  private readonly _heftConfiguration: HeftConfiguration;
-  private _internalHeftSession: InternalHeftSession | undefined;
+  readonly #debugFlag: CommandLineFlagParameter;
+  readonly #unmanagedFlag: CommandLineFlagParameter;
+  readonly #debug: boolean;
+  readonly #terminalProvider: ITerminalProvider;
+  readonly #childReporter: HeftChildReporter | undefined;
+  readonly #loggingManager: LoggingManager;
+  readonly #metricsCollector: MetricsCollector;
+  readonly #heftConfiguration: HeftConfiguration;
+  #internalHeftSession: InternalHeftSession | undefined;
 
   public constructor() {
     super({
@@ -54,7 +61,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     });
 
     // Initialize the debug flag as a parameter on the tool itself
-    this._debugFlag = this.defineFlagParameter({
+    this.#debugFlag = this.defineFlagParameter({
       parameterLongName: Constants.debugParameterLongName,
       description: 'Show the full call stack if an error occurs while executing the tool'
     });
@@ -62,7 +69,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     // Initialize the unmanaged flag as a parameter on the tool itself. While this parameter
     // is only used during version selection, we need to support parsing it here so that we
     // don't throw due to an unrecognized parameter.
-    this._unmanagedFlag = this.defineFlagParameter({
+    this.#unmanagedFlag = this.defineFlagParameter({
       parameterLongName: Constants.unmanagedParameterLongName,
       description:
         'Disables the Heft version selector: When Heft is invoked via the shell path, normally it' +
@@ -73,30 +80,40 @@ export class HeftCommandLineParser extends CommandLineParser {
 
     // Pre-initialize with known argument values to determine state of "--debug"
     const preInitializationArgumentValues: IPreInitializationArgumentValues =
-      this._getPreInitializationArgumentValues();
-    this._debug = !!preInitializationArgumentValues.debug;
+      this.#getPreInitializationArgumentValues();
+    this.#debug = !!preInitializationArgumentValues.debug;
 
     // Enable debug and verbose logging if the "--debug" flag is set
-    this._terminalProvider = new ConsoleTerminalProvider({
-      debugEnabled: this._debug,
-      verboseEnabled: this._debug
+    this.#childReporter = HeftChildReporter.tryInitialize();
+    this.#terminalProvider =
+      this.#childReporter ??
+      new ConsoleTerminalProvider({
+        debugEnabled: this.#debug,
+        verboseEnabled: this.#debug
+      });
+    if (this.#debug && this.#childReporter) {
+      this.#childReporter.debugEnabled = true;
+      this.#childReporter.verboseEnabled = true;
+    }
+    this.globalTerminal = new Terminal(this.#terminalProvider);
+    this.#loggingManager = new LoggingManager({
+      terminalProvider: this.#terminalProvider,
+      childReporter: this.#childReporter
     });
-    this.globalTerminal = new Terminal(this._terminalProvider);
-    this._loggingManager = new LoggingManager({ terminalProvider: this._terminalProvider });
-    if (this._debug) {
+    if (this.#debug) {
       // Enable printing stacktraces if the "--debug" flag is set
-      this._loggingManager.enablePrintStacks();
+      this.#loggingManager.enablePrintStacks();
       InternalError.breakInDebugger = true;
     }
 
     const numberOfCores: number = os.availableParallelism?.() ?? os.cpus().length;
-    this._heftConfiguration = HeftConfiguration.initialize({
+    this.#heftConfiguration = HeftConfiguration.initialize({
       cwd: process.cwd(),
-      terminalProvider: this._terminalProvider,
+      terminalProvider: this.#terminalProvider,
       numberOfCores
     });
 
-    this._metricsCollector = new MetricsCollector();
+    this.#metricsCollector = new MetricsCollector();
   }
 
   public async executeAsync(args?: string[]): Promise<boolean> {
@@ -105,22 +122,22 @@ export class HeftCommandLineParser extends CommandLineParser {
     process.exitCode = 1;
 
     try {
-      this._normalizeCwd();
+      this.#normalizeCwd();
 
       const internalHeftSession: InternalHeftSession = await InternalHeftSession.initializeAsync({
-        debug: this._debug,
-        heftConfiguration: this._heftConfiguration,
-        loggingManager: this._loggingManager,
-        metricsCollector: this._metricsCollector
+        debug: this.#debug,
+        heftConfiguration: this.#heftConfiguration,
+        loggingManager: this.#loggingManager,
+        metricsCollector: this.#metricsCollector
       });
-      this._internalHeftSession = internalHeftSession;
+      this.#internalHeftSession = internalHeftSession;
 
       const actionOptions: IHeftActionOptions = {
         internalHeftSession: internalHeftSession,
         terminal: this.globalTerminal,
-        loggingManager: this._loggingManager,
-        metricsCollector: this._metricsCollector,
-        heftConfiguration: this._heftConfiguration
+        loggingManager: this.#loggingManager,
+        metricsCollector: this.#metricsCollector,
+        heftConfiguration: this.#heftConfiguration
       };
 
       // Add the clean action, the run action, and the individual phase actions
@@ -172,7 +189,7 @@ export class HeftCommandLineParser extends CommandLineParser {
 
       return await super.executeAsync(args);
     } catch (e) {
-      await this._reportErrorAndSetExitCodeAsync(e as Error);
+      await this.#reportErrorAndSetExitCodeAsync(e as Error);
       return false;
     }
   }
@@ -193,21 +210,22 @@ export class HeftCommandLineParser extends CommandLineParser {
         }
       }
 
-      this._internalHeftSession!.parsedCommandLine = {
+      this.#internalHeftSession!.parsedCommandLine = {
         commandName,
         unaliasedCommandName
       };
+      this.#childReporter?.setCommandName(commandName);
       await super.onExecuteAsync();
     } catch (e) {
-      await this._reportErrorAndSetExitCodeAsync(e as Error);
+      await this.#reportErrorAndSetExitCodeAsync(e as Error);
     }
 
     // If we make it here, things are fine and reset the exit code back to 0
     process.exitCode = 0;
   }
 
-  private _normalizeCwd(): void {
-    const buildFolder: string = this._heftConfiguration.buildFolderPath;
+  #normalizeCwd(): void {
+    const buildFolder: string = this.#heftConfiguration.buildFolderPath;
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
@@ -220,11 +238,11 @@ export class HeftCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _getPreInitializationArgumentValues(
+  #getPreInitializationArgumentValues(
     args: string[] = process.argv
   ): IPreInitializationArgumentValues {
-    if (!this._debugFlag) {
-      // The `this._debugFlag` parameter (the parameter itself, not its value)
+    if (!this.#debugFlag) {
+      // The `this.#debugFlag` parameter (the parameter itself, not its value)
       // has not yet been defined. Parameters need to be defined before we
       // try to evaluate any parameters. This is to ensure that the
       // `--debug` flag is defined correctly before we do this not-so-rigorous
@@ -234,17 +252,21 @@ export class HeftCommandLineParser extends CommandLineParser {
 
     const toolParameters: Set<string> = getToolParameterNamesFromArgs(args);
     return {
-      debug: toolParameters.has(this._debugFlag.longName),
-      unmanaged: toolParameters.has(this._unmanagedFlag.longName)
+      debug: toolParameters.has(this.#debugFlag.longName),
+      unmanaged: toolParameters.has(this.#unmanagedFlag.longName)
     };
   }
 
-  private async _reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
+  async #reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
-      this.globalTerminal.writeErrorLine(error.toString());
+      if (this.#childReporter) {
+        this.#childReporter.emitDiagnostic(Constants.heftPackageName, error, 'error');
+      } else {
+        this.globalTerminal.writeErrorLine(error.toString());
+      }
     }
 
-    if (this._debug) {
+    if (this.#debug) {
       this.globalTerminal.writeLine();
       this.globalTerminal.writeErrorLine(error.stack!);
     }

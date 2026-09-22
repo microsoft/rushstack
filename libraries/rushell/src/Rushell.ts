@@ -31,37 +31,37 @@ export class Rushell {
     const parser: Parser = new Parser(tokenizer);
     const astScript: AstScript = parser.parse();
 
-    return this._evaluateNode(astScript);
+    return this.#evaluateNode(astScript);
   }
 
-  private _evaluateNode(astNode: AstNode): IRushellExecuteResult {
+  #evaluateNode(astNode: AstNode): IRushellExecuteResult {
     switch (astNode.kind) {
       case AstKind.CompoundWord:
-        return { value: astNode.parts.map((x) => this._evaluateNode(x).value).join('') };
+        return { value: astNode.parts.map((x) => this.#evaluateNode(x).value).join('') };
       case AstKind.Text:
         return { value: astNode.token!.range.toString() };
       case AstKind.Script:
         if (astNode.body) {
-          return this._evaluateNode(astNode.body);
+          return this.#evaluateNode(astNode.body);
         }
         break;
       case AstKind.Command:
-        return this._evaluateCommand(astNode);
+        return this.#evaluateCommand(astNode);
       default:
         throw new ParseError('Unsupported operation type: ' + astNode.kind, astNode.getFullRange());
     }
     return { value: '' };
   }
 
-  private _evaluateCommand(astCommand: AstCommand): IRushellExecuteResult {
+  #evaluateCommand(astCommand: AstCommand): IRushellExecuteResult {
     if (!astCommand.commandPath) {
       throw new ParseError('Missing command path', astCommand.getFullRange());
     }
 
-    const commandPathResult: IRushellExecuteResult = this._evaluateNode(astCommand.commandPath);
+    const commandPathResult: IRushellExecuteResult = this.#evaluateNode(astCommand.commandPath);
     const commandArgResults: IRushellExecuteResult[] = [];
     for (let i: number = 0; i < astCommand.arguments.length; ++i) {
-      commandArgResults.push(this._evaluateNode(astCommand.arguments[i]));
+      commandArgResults.push(this.#evaluateNode(astCommand.arguments[i]));
     }
 
     const commandPath: string = commandPathResult.value;

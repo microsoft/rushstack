@@ -11,9 +11,9 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 
 export class UpdateCloudCredentialsAction extends BaseRushAction {
-  private readonly _interactiveModeFlag: CommandLineFlagParameter;
-  private readonly _credentialParameter: CommandLineStringParameter;
-  private readonly _deleteFlag: CommandLineFlagParameter;
+  readonly #interactiveModeFlag: CommandLineFlagParameter;
+  readonly #credentialParameter: CommandLineStringParameter;
+  readonly #deleteFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -26,17 +26,17 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
       parser
     });
 
-    this._interactiveModeFlag = this.defineFlagParameter({
+    this.#interactiveModeFlag = this.defineFlagParameter({
       parameterLongName: '--interactive',
       parameterShortName: '-i',
       description: 'Run the credential update operation in interactive mode, if supported by the provider.'
     });
-    this._credentialParameter = this.defineStringParameter({
+    this.#credentialParameter = this.defineStringParameter({
       parameterLongName: '--credential',
       argumentName: 'CREDENTIAL_STRING',
       description: 'A static credential, to be cached.'
     });
-    this._deleteFlag = this.defineFlagParameter({
+    this.#deleteFlag = this.defineFlagParameter({
       parameterLongName: '--delete',
       parameterShortName: '-d',
       description: 'If specified, delete stored credentials.'
@@ -53,10 +53,10 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
         this.rushSession
       );
 
-    if (this._deleteFlag.value) {
-      if (this._interactiveModeFlag.value || this._credentialParameter.value !== undefined) {
+    if (this.#deleteFlag.value) {
+      if (this.#interactiveModeFlag.value || this.#credentialParameter.value !== undefined) {
         terminal.writeErrorLine(
-          `If the ${this._deleteFlag.longName} is provided, no other parameters may be provided.`
+          `If the ${this.#deleteFlag.longName} is provided, no other parameters may be provided.`
         );
         throw new AlreadyReportedError();
       } else if (buildCacheConfiguration.cloudCacheProvider) {
@@ -64,24 +64,24 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
       } else {
         terminal.writeLine('A cloud build cache is not configured; there is nothing to delete.');
       }
-    } else if (this._interactiveModeFlag.value && this._credentialParameter.value !== undefined) {
+    } else if (this.#interactiveModeFlag.value && this.#credentialParameter.value !== undefined) {
       terminal.writeErrorLine(
-        `Both the ${this._interactiveModeFlag.longName} and the ` +
-          `${this._credentialParameter.longName} parameters were provided. Only one ` +
+        `Both the ${this.#interactiveModeFlag.longName} and the ` +
+          `${this.#credentialParameter.longName} parameters were provided. Only one ` +
           'or the other may be used at a time.'
       );
       throw new AlreadyReportedError();
-    } else if (this._interactiveModeFlag.value) {
+    } else if (this.#interactiveModeFlag.value) {
       if (buildCacheConfiguration.cloudCacheProvider) {
         await buildCacheConfiguration.cloudCacheProvider.updateCachedCredentialInteractiveAsync(terminal);
       } else {
         terminal.writeLine('A cloud build cache is not configured. Credentials are not required.');
       }
-    } else if (this._credentialParameter.value !== undefined) {
+    } else if (this.#credentialParameter.value !== undefined) {
       if (buildCacheConfiguration.cloudCacheProvider) {
         await buildCacheConfiguration.cloudCacheProvider.updateCachedCredentialAsync(
           terminal,
-          this._credentialParameter.value
+          this.#credentialParameter.value
         );
       } else {
         terminal.writeErrorLine('A cloud build cache is not configured. Credentials are not supported.');
@@ -89,9 +89,9 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
       }
     } else {
       terminal.writeErrorLine(
-        `One of the ${this._interactiveModeFlag.longName} parameter, the ` +
-          `${this._credentialParameter.longName} parameter, or the ` +
-          `${this._deleteFlag.longName} parameter must be provided.`
+        `One of the ${this.#interactiveModeFlag.longName} parameter, the ` +
+          `${this.#credentialParameter.longName} parameter, or the ` +
+          `${this.#deleteFlag.longName} parameter must be provided.`
       );
       throw new AlreadyReportedError();
     }

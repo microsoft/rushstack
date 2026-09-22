@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
-  "version": "0.12.26",
+  "version": "0.12.29",
   "description": "This plugin tells webpack to leave dynamic calls to \"require\" as-is instead of trying to bundle them.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -39,6 +39,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {

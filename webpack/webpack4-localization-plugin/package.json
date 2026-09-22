@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-localization-plugin",
-  "version": "0.20.26",
+  "version": "0.20.29",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -38,7 +38,8 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack"
   },
   "peerDependencies": {
     "@rushstack/set-webpack-public-path-plugin": "^4.1.16",

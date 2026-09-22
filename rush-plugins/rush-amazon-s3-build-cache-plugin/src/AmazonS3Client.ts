@@ -100,13 +100,13 @@ async function _hashFileAsync(filePath: string): Promise<string> {
  * @public
  */
 export class AmazonS3Client {
-  private readonly _credentials: IAmazonS3Credentials | undefined;
-  private readonly _s3Endpoint: string;
-  private readonly _s3Region: string;
+  readonly #credentials: IAmazonS3Credentials | undefined;
+  readonly #s3Endpoint: string;
+  readonly #s3Region: string;
 
-  private readonly _webClient: WebClient;
+  readonly #webClient: WebClient;
 
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(
     credentials: IAmazonS3Credentials | undefined,
@@ -114,15 +114,15 @@ export class AmazonS3Client {
     webClient: WebClient,
     terminal: ITerminal
   ) {
-    this._credentials = credentials;
-    this._terminal = terminal;
+    this.#credentials = credentials;
+    this.#terminal = terminal;
 
-    this._validateEndpoint(options.s3Endpoint);
+    this.#validateEndpoint(options.s3Endpoint);
 
-    this._s3Endpoint = options.s3Endpoint;
-    this._s3Region = options.s3Region;
+    this.#s3Endpoint = options.s3Endpoint;
+    this.#s3Region = options.s3Region;
 
-    this._webClient = webClient;
+    this.#webClient = webClient;
   }
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html#create-signature-presign-entire-payload
@@ -151,20 +151,20 @@ export class AmazonS3Client {
   }
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
-    this._writeDebugLine('Reading object from S3');
-    return await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientResponse = await this._makeSignedRequestAsync('GET', objectName);
-      return this._handleGetResponseAsync(response, async () => await response.getBufferAsync());
+    this.#writeDebugLine('Reading object from S3');
+    return await this.#sendCacheRequestWithRetriesAsync(async () => {
+      const response: IWebClientResponse = await this.#makeSignedRequestAsync('GET', objectName);
+      return this.#handleGetResponseAsync(response, async () => await response.getBufferAsync());
     });
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
-    if (!this._credentials) {
+    if (!this.#credentials) {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientResponse = await this._makeSignedRequestAsync(
+    await this.#sendCacheRequestWithRetriesAsync(async () => {
+      const response: IWebClientResponse = await this.#makeSignedRequestAsync(
         'PUT',
         objectName,
         objectBuffer
@@ -172,7 +172,7 @@ export class AmazonS3Client {
       if (!response.ok) {
         return {
           hasNetworkError: true,
-          error: await this._getS3ErrorAsync(response)
+          error: await this.#getS3ErrorAsync(response)
         };
       }
       return {
@@ -189,15 +189,15 @@ export class AmazonS3Client {
    * @returns `true` if the object was found and written to the file, `false` if not found.
    */
   public async downloadObjectToFileAsync(objectName: string, localFilePath: string): Promise<boolean> {
-    this._writeDebugLine('Downloading object from S3 to file');
-    const result: boolean | undefined = await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
+    this.#writeDebugLine('Downloading object from S3 to file');
+    const result: boolean | undefined = await this.#sendCacheRequestWithRetriesAsync(async () => {
+      const response: IWebClientStreamResponse = await this.#makeSignedRequestAsync(
         'GET',
         objectName,
         undefined,
         true
       );
-      return this._handleGetResponseAsync<boolean>(
+      return this.#handleGetResponseAsync<boolean>(
         response,
         async () => {
           const writeStream: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(localFilePath, {
@@ -219,7 +219,7 @@ export class AmazonS3Client {
    * because the stream is consumed after the first attempt.
    */
   public async uploadObjectFromFileAsync(objectName: string, localFilePath: string): Promise<void> {
-    if (!this._credentials) {
+    if (!this.#credentials) {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
@@ -229,7 +229,7 @@ export class AmazonS3Client {
     const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
 
     // Streaming uploads cannot be retried because the stream is consumed after the first attempt.
-    const response: IWebClientStreamResponse = await this._makeSignedRequestAsync(
+    const response: IWebClientStreamResponse = await this.#makeSignedRequestAsync(
       'PUT',
       objectName,
       entryStream as Readable,
@@ -243,10 +243,10 @@ export class AmazonS3Client {
     }
   }
 
-  private _writeDebugLine(...messageParts: string[]): void {
+  #writeDebugLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a debug message
     try {
-      this._terminal.writeDebugLine(...messageParts);
+      this.#terminal.writeDebugLine(...messageParts);
     } catch (err) {
       // ignore error
     }
@@ -255,7 +255,7 @@ export class AmazonS3Client {
   private _writeWarningLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a warning message
     try {
-      this._terminal.writeWarningLine(...messageParts);
+      this.#terminal.writeWarningLine(...messageParts);
     } catch (err) {
       // ignore error
     }
@@ -266,7 +266,7 @@ export class AmazonS3Client {
    * The `getSuccessResult` callback extracts the response payload (Buffer or stream-to-file result).
    * The optional `cleanup` callback drains stream responses on non-success paths.
    */
-  private async _handleGetResponseAsync<T>(
+  async #handleGetResponseAsync<T>(
     response: IWebClientResponseBase,
     getSuccessResult: () => T | Promise<T>,
     cleanup?: () => void
@@ -283,7 +283,7 @@ export class AmazonS3Client {
         hasNetworkError: false,
         response: undefined
       };
-    } else if ((status === 400 || status === 401 || status === 403) && !this._credentials) {
+    } else if ((status === 400 || status === 401 || status === 403) && !this.#credentials) {
       cleanup?.();
       // unauthorized due to not providing credentials,
       // silence error for better DX when e.g. running locally without credentials
@@ -299,31 +299,31 @@ export class AmazonS3Client {
       };
     } else if (status === 400 || status === 401 || status === 403) {
       cleanup?.();
-      throw await this._getGetResponseErrorAsync(response);
+      throw await this.#getGetResponseErrorAsync(response);
     } else {
       cleanup?.();
       return {
         hasNetworkError: true,
-        error: await this._getGetResponseErrorAsync(response)
+        error: await this.#getGetResponseErrorAsync(response)
       };
     }
   }
 
-  private async _getGetResponseErrorAsync(response: IWebClientResponseBase): Promise<Error> {
+  async #getGetResponseErrorAsync(response: IWebClientResponseBase): Promise<Error> {
     if (_isWebClientResponse(response)) {
-      return await this._getS3ErrorAsync(response);
+      return await this.#getS3ErrorAsync(response);
     }
 
     const { status, statusText } = response;
     return new Error(`Amazon S3 responded with status code ${status} (${statusText})`);
   }
 
-  private async _makeSignedRequestAsync(
+  async #makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer
   ): Promise<IWebClientResponse>;
-  private async _makeSignedRequestAsync(
+  async #makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body: Readable | undefined,
@@ -331,7 +331,7 @@ export class AmazonS3Client {
     contentHash?: string,
     contentLength?: number
   ): Promise<IWebClientStreamResponse>;
-  private async _makeSignedRequestAsync(
+  async #makeSignedRequestAsync(
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer | Readable,
@@ -341,8 +341,8 @@ export class AmazonS3Client {
   ): Promise<IWebClientResponse | IWebClientStreamResponse> {
     // Use the provided content hash if available (e.g. pre-computed from a file on disk),
     // otherwise compute from the buffer body, or use the empty hash for GET requests.
-    const bodyHash: string = contentHash ?? this._getBufferSha256(Buffer.isBuffer(body) ? body : undefined);
-    const { url, headers } = this._buildSignedRequest(verb, objectName, bodyHash, contentLength);
+    const bodyHash: string = contentHash ?? this.#getBufferSha256(Buffer.isBuffer(body) ? body : undefined);
+    const { url, headers } = this.#buildSignedRequest(verb, objectName, bodyHash, contentLength);
 
     const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody =
       verb === 'GET'
@@ -357,22 +357,22 @@ export class AmazonS3Client {
           };
 
     if (stream) {
-      return await this._webClient.fetchStreamAsync(url, webFetchOptions);
+      return await this.#webClient.fetchStreamAsync(url, webFetchOptions);
     } else {
-      return await this._webClient.fetchAsync(url, webFetchOptions);
+      return await this.#webClient.fetchAsync(url, webFetchOptions);
     }
   }
 
   /**
    * Builds an AWS Signature V4 signed request, returning the URL and signed headers.
    */
-  private _buildSignedRequest(
+  #buildSignedRequest(
     verb: 'GET' | 'PUT',
     objectName: string,
     bodyHash: string,
     contentLength?: number
   ): { url: string; headers: Record<string, string> } {
-    const isoDateString: IIsoDateString = this._getIsoDateString();
+    const isoDateString: IIsoDateString = this.#getIsoDateString();
     const headers: Record<string, string> = {};
     headers[DATE_HEADER_NAME] = isoDateString.dateTime;
     headers[CONTENT_HASH_HEADER_NAME] = bodyHash;
@@ -381,11 +381,11 @@ export class AmazonS3Client {
     }
 
     // the host can be e.g. https://s3.aws.com or http://localhost:9000
-    const host: string = this._s3Endpoint.replace(protocolRegex, '');
+    const host: string = this.#s3Endpoint.replace(protocolRegex, '');
     const canonicalUri: string = AmazonS3Client.UriEncode(`/${objectName}`);
-    this._writeDebugLine(Colorize.bold('Canonical URI: '), canonicalUri);
+    this.#writeDebugLine(Colorize.bold('Canonical URI: '), canonicalUri);
 
-    if (this._credentials) {
+    if (this.#credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
       const canonicalHeaders: string[] = [
         `${HOST_HEADER_NAME}:${host}`,
@@ -394,8 +394,8 @@ export class AmazonS3Client {
       ];
 
       // Handle signing with temporary credentials (via sts:assume-role)
-      if (this._credentials.sessionToken) {
-        canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this._credentials.sessionToken}`);
+      if (this.#credentials.sessionToken) {
+        canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this.#credentials.sessionToken}`);
       }
 
       // the canonical headers must be sorted by header name
@@ -439,9 +439,9 @@ export class AmazonS3Client {
         signedHeaderNamesString,
         bodyHash
       ].join('\n');
-      const canonicalRequestHash: string = this._getBufferSha256(canonicalRequest);
+      const canonicalRequestHash: string = this.#getBufferSha256(canonicalRequest);
 
-      const scope: string = `${isoDateString.date}/${this._s3Region}/s3/aws4_request`;
+      const scope: string = `${isoDateString.date}/${this.#s3Region}/s3/aws4_request`;
       // The string to sign looks like this:
       // AWS4-HMAC-SHA256
       // 20130524T423589Z
@@ -455,30 +455,30 @@ export class AmazonS3Client {
       ].join('\n');
 
       const dateKey: Buffer = this._getSha256Hmac(
-        `AWS4${this._credentials.secretAccessKey}`,
+        `AWS4${this.#credentials.secretAccessKey}`,
         isoDateString.date
       );
-      const dateRegionKey: Buffer = this._getSha256Hmac(dateKey, this._s3Region);
+      const dateRegionKey: Buffer = this._getSha256Hmac(dateKey, this.#s3Region);
       const dateRegionServiceKey: Buffer = this._getSha256Hmac(dateRegionKey, 's3');
       const signingKey: Buffer = this._getSha256Hmac(dateRegionServiceKey, 'aws4_request');
       const signature: string = this._getSha256Hmac(signingKey, stringToSign, 'hex');
 
-      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNamesString},Signature=${signature}`;
+      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this.#credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNamesString},Signature=${signature}`;
 
       headers[AUTHORIZATION_HEADER_NAME] = authorizationHeader;
-      if (this._credentials.sessionToken) {
+      if (this.#credentials.sessionToken) {
         // Handle signing with temporary credentials (via sts:assume-role)
-        headers['X-Amz-Security-Token'] = this._credentials.sessionToken;
+        headers['X-Amz-Security-Token'] = this.#credentials.sessionToken;
       }
     }
 
-    const url: string = `${this._s3Endpoint}${canonicalUri}`;
+    const url: string = `${this.#s3Endpoint}${canonicalUri}`;
 
-    this._writeDebugLine(Colorize.bold(Colorize.underline('Sending request to S3')));
-    this._writeDebugLine(Colorize.bold('HOST: '), url);
-    this._writeDebugLine(Colorize.bold('Headers: '));
+    this.#writeDebugLine(Colorize.bold(Colorize.underline('Sending request to S3')));
+    this.#writeDebugLine(Colorize.bold('HOST: '), url);
+    this.#writeDebugLine(Colorize.bold('Headers: '));
     for (const [name, value] of Object.entries(headers)) {
-      this._writeDebugLine(Colorize.cyan(`\t${name}: ${value}`));
+      this.#writeDebugLine(Colorize.cyan(`\t${name}: ${value}`));
     }
 
     return { url, headers };
@@ -496,7 +496,7 @@ export class AmazonS3Client {
     }
   }
 
-  private _getBufferSha256(data?: string | Buffer): string {
+  #getBufferSha256(data?: string | Buffer): string {
     if (data) {
       const hash: crypto.Hash = crypto.createHash(HASH_ALGORITHM);
       hash.update(data);
@@ -507,7 +507,7 @@ export class AmazonS3Client {
     }
   }
 
-  private _getIsoDateString(date: Date = new Date()): IIsoDateString {
+  #getIsoDateString(date: Date = new Date()): IIsoDateString {
     let dateString: string = date.toISOString();
     dateString = dateString.replace(/[-:]/g, ''); // Remove separator characters
     dateString = dateString.substring(0, 15); // Drop milliseconds
@@ -520,7 +520,7 @@ export class AmazonS3Client {
     };
   }
 
-  private async _safeReadResponseTextAsync(response: IWebClientResponse): Promise<string | undefined> {
+  async #safeReadResponseTextAsync(response: IWebClientResponse): Promise<string | undefined> {
     try {
       return await response.getTextAsync();
     } catch (err) {
@@ -529,8 +529,8 @@ export class AmazonS3Client {
     return undefined;
   }
 
-  private async _getS3ErrorAsync(response: IWebClientResponse): Promise<Error> {
-    const text: string | undefined = await this._safeReadResponseTextAsync(response);
+  async #getS3ErrorAsync(response: IWebClientResponse): Promise<Error> {
+    const text: string | undefined = await this.#safeReadResponseTextAsync(response);
     return new Error(
       `Amazon S3 responded with status code ${response.status} (${response.statusText})${
         text ? `\n${text}` : ''
@@ -542,7 +542,7 @@ export class AmazonS3Client {
    * Validates a S3 endpoint which is http(s):// + hostname + port. Hostname validated according to RFC 1123
    * {@link https://docs.aws.amazon.com/general/latest/gr/s3.html}
    */
-  private _validateEndpoint(s3Endpoint: string): void {
+  #validateEndpoint(s3Endpoint: string): void {
     let host: string = s3Endpoint;
 
     if (!s3Endpoint) {
@@ -597,12 +597,12 @@ export class AmazonS3Client {
     }
   }
 
-  private async _sendCacheRequestWithRetriesAsync<T>(
+  async #sendCacheRequestWithRetriesAsync<T>(
     sendRequest: () => Promise<RetryableRequestResponse<T>>
   ): Promise<T> {
     const response: RetryableRequestResponse<T> = await sendRequest();
 
-    const log: (...messageParts: string[]) => void = this._writeDebugLine.bind(this);
+    const log: (...messageParts: string[]) => void = this.#writeDebugLine.bind(this);
 
     if (response.hasNetworkError) {
       if (storageRetryOptions && storageRetryOptions.maxTries > 1) {

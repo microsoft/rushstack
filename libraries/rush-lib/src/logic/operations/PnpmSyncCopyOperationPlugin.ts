@@ -16,10 +16,10 @@ import { RushConstants } from '../RushConstants';
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
 export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
   public apply(hooks: PhasedCommandHooks): void {
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
@@ -53,7 +53,7 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
               forEachAsyncWithConcurrency: Async.forEachAsync,
               getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
               logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-                PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
+                PnpmSyncUtilities.processLogMessage(logMessageOptions, this.#terminal)
             });
           }
         }

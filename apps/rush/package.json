@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.178.1",
+  "version": "5.179.0",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -27,6 +27,7 @@
     "build": "heft build --clean",
     "start": "node lib/start-dev-docs.js",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "bin": {
@@ -38,6 +39,7 @@
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-reporter": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "semver": "~7.7.4"
   },

@@ -1,6 +1,21 @@
 # Change Log - @rushstack/webpack-embedded-dependencies-plugin
 
-This log was last generated on Fri, 21 Aug 2026 15:16:35 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+
+## 0.4.30
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 0.4.29
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
+
+## 0.4.28
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
 
 ## 0.4.27
 Fri, 21 Aug 2026 15:16:35 GMT

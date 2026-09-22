@@ -46,15 +46,15 @@ export class AzureStorageBuildCacheProvider
   extends AzureStorageAuthentication
   implements ICloudBuildCacheProvider
 {
-  private readonly _blobPrefix: string | undefined;
-  private readonly _environmentCredential: string | undefined;
-  private readonly _readRequiresAuthentication: boolean;
+  readonly #blobPrefix: string | undefined;
+  readonly #environmentCredential: string | undefined;
+  readonly #readRequiresAuthentication: boolean;
 
   public get isCacheWriteAllowed(): boolean {
     return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
   }
 
-  private _containerClient: ContainerClient | undefined;
+  #containerClient: ContainerClient | undefined;
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
     super({
@@ -62,9 +62,9 @@ export class AzureStorageBuildCacheProvider
       ...options
     });
 
-    this._blobPrefix = options.blobPrefix;
-    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
-    this._readRequiresAuthentication = !!options.readRequiresAuthentication;
+    this.#blobPrefix = options.blobPrefix;
+    this.#environmentCredential = EnvironmentConfiguration.buildCacheCredential;
+    this.#readRequiresAuthentication = !!options.readRequiresAuthentication;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -78,7 +78,7 @@ export class AzureStorageBuildCacheProvider
     terminal: ITerminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
-    return await this._tryGetBlobDataAsync(terminal, cacheId, async (blobClient: BlobClient) => {
+    return await this.#tryGetBlobDataAsync(terminal, cacheId, async (blobClient: BlobClient) => {
       return await blobClient.downloadToBuffer();
     });
   }
@@ -88,7 +88,7 @@ export class AzureStorageBuildCacheProvider
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<boolean> {
-    return await this._trySetBlobDataAsync(terminal, cacheId, async (blockBlobClient: BlockBlobClient) => {
+    return await this.#trySetBlobDataAsync(terminal, cacheId, async (blockBlobClient: BlockBlobClient) => {
       await blockBlobClient.upload(entryBuffer, entryBuffer.length);
     });
   }
@@ -98,7 +98,7 @@ export class AzureStorageBuildCacheProvider
     cacheId: string,
     localFilePath: string
   ): Promise<boolean> {
-    const result: boolean | undefined = await this._tryGetBlobDataAsync(
+    const result: boolean | undefined = await this.#tryGetBlobDataAsync(
       terminal,
       cacheId,
       async (blobClient: BlobClient) => {
@@ -117,7 +117,7 @@ export class AzureStorageBuildCacheProvider
     cacheId: string,
     localFilePath: string
   ): Promise<boolean> {
-    return await this._trySetBlobDataAsync(terminal, cacheId, async (blockBlobClient: BlockBlobClient) => {
+    return await this.#trySetBlobDataAsync(terminal, cacheId, async (blockBlobClient: BlockBlobClient) => {
       await blockBlobClient.uploadFile(localFilePath);
     });
   }
@@ -126,12 +126,12 @@ export class AzureStorageBuildCacheProvider
    * Shared logic for both buffer-based and file-based GET operations.
    * Checks if the blob exists, retrieves data via the provided callback, and handles errors.
    */
-  private async _tryGetBlobDataAsync<T>(
+  async #tryGetBlobDataAsync<T>(
     terminal: ITerminal,
     cacheId: string,
     getBlobDataAsync: (blobClient: BlobClient) => Promise<T>
   ): Promise<T | undefined> {
-    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId, terminal);
+    const blobClient: BlobClient = await this.#getBlobClientForCacheIdAsync(cacheId, terminal);
 
     try {
       const blobExists: boolean = await blobClient.exists();
@@ -141,7 +141,7 @@ export class AzureStorageBuildCacheProvider
         return undefined;
       }
     } catch (err) {
-      this._logBlobError(terminal, err, 'Error getting cache entry from Azure Storage: ');
+      this.#logBlobError(terminal, err, 'Error getting cache entry from Azure Storage: ');
       return undefined;
     }
   }
@@ -151,7 +151,7 @@ export class AzureStorageBuildCacheProvider
    * Checks write permission, whether the blob already exists, uploads via the provided callback,
    * and handles 409 conflict errors.
    */
-  private async _trySetBlobDataAsync(
+  async #trySetBlobDataAsync(
     terminal: ITerminal,
     cacheId: string,
     uploadAsync: (blockBlobClient: BlockBlobClient) => Promise<void>
@@ -163,7 +163,7 @@ export class AzureStorageBuildCacheProvider
       return false;
     }
 
-    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId, terminal);
+    const blobClient: BlobClient = await this.#getBlobClientForCacheIdAsync(cacheId, terminal);
     const blockBlobClient: BlockBlobClient = blobClient.getBlockBlobClient();
     let blobAlreadyExists: boolean = false;
 
@@ -210,13 +210,13 @@ export class AzureStorageBuildCacheProvider
     }
   }
 
-  private async _getBlobClientForCacheIdAsync(cacheId: string, terminal: ITerminal): Promise<BlobClient> {
-    const client: ContainerClient = await this._getContainerClientAsync(terminal);
-    const blobName: string = this._blobPrefix ? `${this._blobPrefix}/${cacheId}` : cacheId;
+  async #getBlobClientForCacheIdAsync(cacheId: string, terminal: ITerminal): Promise<BlobClient> {
+    const client: ContainerClient = await this.#getContainerClientAsync(terminal);
+    const blobName: string = this.#blobPrefix ? `${this.#blobPrefix}/${cacheId}` : cacheId;
     return client.getBlobClient(blobName);
   }
 
-  private _logBlobError(terminal: ITerminal, err: unknown, prefix: string): void {
+  #logBlobError(terminal: ITerminal, err: unknown, prefix: string): void {
     const e: IBlobError = err as IBlobError;
     const errorMessage: string =
       prefix +
@@ -252,9 +252,9 @@ export class AzureStorageBuildCacheProvider
     }
   }
 
-  private async _getContainerClientAsync(terminal: ITerminal): Promise<ContainerClient> {
-    if (!this._containerClient) {
-      let sasString: string | undefined = this._environmentCredential;
+  async #getContainerClientAsync(terminal: ITerminal): Promise<ContainerClient> {
+    if (!this.#containerClient) {
+      let sasString: string | undefined = this.#environmentCredential;
       if (!sasString) {
         const credentialEntry: ICredentialCacheEntry | undefined = await this.tryGetCachedCredentialAsync({
           expiredCredentialBehavior: 'logWarning',
@@ -266,9 +266,9 @@ export class AzureStorageBuildCacheProvider
 
       let blobServiceClient: BlobServiceClient;
       if (sasString) {
-        const connectionString: string = this._getConnectionString(sasString);
+        const connectionString: string = this.#getConnectionString(sasString);
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-      } else if (!this._readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
+      } else if (!this.#readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
         // If we don't have a credential and read doesn't require authentication, we can still read from the cache.
         blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
       } else {
@@ -280,13 +280,13 @@ export class AzureStorageBuildCacheProvider
         );
       }
 
-      this._containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
+      this.#containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
     }
 
-    return this._containerClient;
+    return this.#containerClient;
   }
 
-  private _getConnectionString(sasString: string | undefined): string {
+  #getConnectionString(sasString: string | undefined): string {
     const blobEndpoint: string = `BlobEndpoint=${this._storageAccountUrl}`;
     if (sasString) {
       const connectionString: string = `${blobEndpoint};SharedAccessSignature=${sasString}`;

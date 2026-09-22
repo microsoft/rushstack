@@ -123,11 +123,11 @@ export class SetPublicPathPlugin extends SetPublicPathPluginBase {
 
   protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void {
     class SetPublicPathRuntimeModule extends thisWebpack.RuntimeModule {
-      private readonly _pluginOptions: ISetWebpackPublicPathPluginOptions;
+      readonly #pluginOptions: ISetWebpackPublicPathPluginOptions;
 
       public constructor(pluginOptions: ISetWebpackPublicPathPluginOptions) {
         super('publicPath', thisWebpack.RuntimeModule.STAGE_BASIC);
-        this._pluginOptions = pluginOptions;
+        this.#pluginOptions = pluginOptions;
       }
 
       public override generate(): string {
@@ -135,7 +135,7 @@ export class SetPublicPathPlugin extends SetPublicPathPluginBase {
           name: regexpName,
           isTokenized: regexpIsTokenized,
           useAssetName
-        } = this._pluginOptions.scriptName as IScriptNameInternalOptions;
+        } = this.#pluginOptions.scriptName as IScriptNameInternalOptions;
 
         const { chunk } = this;
         if (!chunk) {
@@ -161,7 +161,7 @@ export class SetPublicPathPlugin extends SetPublicPathPluginBase {
         const moduleOptions: IInternalOptions = {
           webpackPublicPathVariable: thisWebpack.RuntimeGlobals.publicPath,
           regexName,
-          ...this._pluginOptions
+          ...this.#pluginOptions
         };
 
         return getSetPublicPathCode(moduleOptions);

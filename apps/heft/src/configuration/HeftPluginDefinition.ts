@@ -193,15 +193,15 @@ export interface IHeftPluginDefinitionOptions {
 }
 
 export abstract class HeftPluginDefinitionBase {
-  private _heftPluginDefinitionJson: IHeftPluginDefinitionJson;
-  private _pluginPackageName: string;
-  private _resolvedEntryPoint: string;
-  private _optionsSchema: JsonSchema | undefined;
+  #heftPluginDefinitionJson: IHeftPluginDefinitionJson;
+  #pluginPackageName: string;
+  #resolvedEntryPoint: string;
+  #optionsSchema: JsonSchema | undefined;
 
   protected constructor(options: IHeftPluginDefinitionOptions) {
-    this._heftPluginDefinitionJson = options.heftPluginDefinitionJson;
-    this._pluginPackageName = options.packageName;
-    this._resolvedEntryPoint = path.resolve(options.packageRoot, this._heftPluginDefinitionJson.entryPoint);
+    this.#heftPluginDefinitionJson = options.heftPluginDefinitionJson;
+    this.#pluginPackageName = options.packageName;
+    this.#resolvedEntryPoint = path.resolve(options.packageRoot, this.#heftPluginDefinitionJson.entryPoint);
 
     // Ensure that the plugin parameters are unique
     const seenParameters: Set<string> = new Set();
@@ -222,7 +222,7 @@ export abstract class HeftPluginDefinitionBase {
         options.packageRoot,
         options.heftPluginDefinitionJson.optionsSchema
       );
-      this._optionsSchema = JsonSchema.fromFile(resolvedSchemaPath);
+      this.#optionsSchema = JsonSchema.fromFile(resolvedSchemaPath);
     }
   }
 
@@ -230,21 +230,21 @@ export abstract class HeftPluginDefinitionBase {
    * The package name containing the target plugin.
    */
   public get pluginPackageName(): string {
-    return this._pluginPackageName;
+    return this.#pluginPackageName;
   }
 
   /**
    * The name of the target plugin.
    */
   public get pluginName(): string {
-    return this._heftPluginDefinitionJson.pluginName;
+    return this.#heftPluginDefinitionJson.pluginName;
   }
 
   /**
    * The resolved entry point to the plugin.
    */
   public get entryPoint(): string {
-    return this._resolvedEntryPoint;
+    return this.#resolvedEntryPoint;
   }
 
   /**
@@ -254,14 +254,14 @@ export abstract class HeftPluginDefinitionBase {
     // Default to the plugin name for the parameter scope. Plugin names should be unique within any run
     // of Heft. Additionally, plugin names have the same naming restrictions as parameter scopes so can
     // be used without modification.
-    return this._heftPluginDefinitionJson.parameterScope || this.pluginName;
+    return this.#heftPluginDefinitionJson.parameterScope || this.pluginName;
   }
 
   /**
    * The parameters that are defined for this plugin.
    */
   public get pluginParameters(): ReadonlyArray<IParameterJson> {
-    return this._heftPluginDefinitionJson.parameters || [];
+    return this.#heftPluginDefinitionJson.parameters || [];
   }
 
   /**
@@ -314,9 +314,9 @@ export abstract class HeftPluginDefinitionBase {
    * Validate the provided plugin options against the plugin's options schema, if one is provided.
    */
   public validateOptions(options: unknown): void {
-    if (this._optionsSchema) {
+    if (this.#optionsSchema) {
       try {
-        this._optionsSchema.validateObject(options || {}, '');
+        this.#optionsSchema.validateObject(options || {}, '');
       } catch (error) {
         throw new Error(
           `Provided options for plugin ${JSON.stringify(this.pluginName)} did not match the provided ` +

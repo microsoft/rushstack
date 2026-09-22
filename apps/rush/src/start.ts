@@ -29,9 +29,9 @@ import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import type { ILaunchOptions } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
-import { RushCommandSelector } from './RushCommandSelector';
-import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import { launchRushFrontendAsync } from './RushFrontend';
+import { getRushPreviewVersion } from './RushPreviewVersion';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined =
@@ -41,7 +41,7 @@ const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dir
 
 let rushVersionToLoad: string | undefined = undefined;
 
-const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
+const previewVersion: string | undefined = getRushPreviewVersion();
 
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
@@ -90,16 +90,13 @@ const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider();
 
 const launchOptions: ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError, terminalProvider };
 
-// If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
-// install it
-if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
-  const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
-  versionSelector
-    .ensureRushVersionInstalledAsync(rushVersionToLoad, configuration, launchOptions)
-    .catch((error: Error) => {
-      console.log(Colorize.red('Error: ' + error.message));
-    });
-} else {
-  // Otherwise invoke the rush-lib that came with this rush package
-  RushCommandSelector.execute(currentPackageVersion, rushLib, launchOptions);
-}
+launchRushFrontendAsync({
+  currentPackageVersion,
+  rushVersionToLoad,
+  configuration,
+  launchOptions,
+  currentRushLib: rushLib
+}).catch((error: Error) => {
+  process.exitCode = 1;
+  console.error(Colorize.red(`Error: ${error.message}`));
+});

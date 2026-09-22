@@ -66,10 +66,10 @@ function countSlashes(str: string): number {
  * @public
  */
 export class DeepImportsPlugin extends DllPlugin {
-  private readonly _inFolderName: string;
-  private readonly _outFolderName: string;
-  private readonly _pathsToIgnoreWithoutExtensions: Set<string>;
-  private readonly _dTsFilesInputFolderName: string | undefined;
+  readonly #inFolderName: string;
+  readonly #outFolderName: string;
+  readonly #pathsToIgnoreWithoutExtensions: Set<string>;
+  readonly #dTsFilesInputFolderName: string | undefined;
 
   public constructor(options: IDeepImportsPluginOptions) {
     const superOptions: DllPluginOptions = {
@@ -114,10 +114,10 @@ export class DeepImportsPlugin extends DllPlugin {
       pathsToIgnoreWithoutExtensions.add(normalizedPathToIgnore);
     }
 
-    this._inFolderName = options.inFolderName;
-    this._outFolderName = options.outFolderName;
-    this._pathsToIgnoreWithoutExtensions = pathsToIgnoreWithoutExtensions;
-    this._dTsFilesInputFolderName = dTsFilesInputFolderName;
+    this.#inFolderName = options.inFolderName;
+    this.#outFolderName = options.outFolderName;
+    this.#pathsToIgnoreWithoutExtensions = pathsToIgnoreWithoutExtensions;
+    this.#dTsFilesInputFolderName = dTsFilesInputFolderName;
   }
 
   public override apply(compiler: Compiler): void {
@@ -153,8 +153,8 @@ export class DeepImportsPlugin extends DllPlugin {
           exportsInfo: IExportsInfo;
         }
 
-        const pathsToIgnoreWithoutExtension: Set<string> = this._pathsToIgnoreWithoutExtensions;
-        const resolvedLibInFolder: string = path.join(compiler.context, this._inFolderName);
+        const pathsToIgnoreWithoutExtension: Set<string> = this.#pathsToIgnoreWithoutExtensions;
+        const resolvedLibInFolder: string = path.join(compiler.context, this.#inFolderName);
         const libModulesByChunk: Map<Chunk, ILibModuleDescriptor[]> = new Map();
         const encounteredLibPaths: Set<string> = new Set();
         for (const runtimeChunk of runtimeChunks) {
@@ -199,13 +199,13 @@ export class DeepImportsPlugin extends DllPlugin {
           libModulesByChunk.set(runtimeChunk, libModules);
         }
 
-        const resolvedLibOutFolder: string = path.join(compiler.context, this._outFolderName);
+        const resolvedLibOutFolder: string = path.join(compiler.context, this.#outFolderName);
         const outputPathRelativeLibOutFolder: string = Path.convertToSlashes(
           path.relative(outputPath, resolvedLibOutFolder)
         );
 
-        const resolvedDtsFilesInputFolderName: string | undefined = this._dTsFilesInputFolderName
-          ? path.join(compiler.context, this._dTsFilesInputFolderName)
+        const resolvedDtsFilesInputFolderName: string | undefined = this.#dTsFilesInputFolderName
+          ? path.join(compiler.context, this.#dTsFilesInputFolderName)
           : undefined;
 
         for (const [chunk, libModules] of libModulesByChunk) {

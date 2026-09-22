@@ -18,11 +18,11 @@ export interface IMarkdownDocumenterAccessorImplementation {
  * @public
  */
 export class MarkdownDocumenterAccessor {
-  private _implementation: IMarkdownDocumenterAccessorImplementation;
+  #implementation: IMarkdownDocumenterAccessorImplementation;
 
   /** @internal */
   public constructor(implementation: IMarkdownDocumenterAccessorImplementation) {
-    this._implementation = implementation;
+    this.#implementation = implementation;
   }
 
   /**
@@ -31,6 +31,6 @@ export class MarkdownDocumenterAccessor {
    * @returns The hyperlink, or `undefined` if the `ApiItem` object does not have a hyperlink.
    */
   public getLinkForApiItem(apiItem: ApiItem): string | undefined {
-    return this._implementation.getLinkForApiItem(apiItem);
+    return this.#implementation.getLinkForApiItem(apiItem);
   }
 }

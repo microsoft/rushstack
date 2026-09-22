@@ -45,16 +45,16 @@ export interface IFinalizeOptions {
 }
 
 export class AssetHandler {
-  private readonly _terminal: ITerminal;
-  private readonly _sourceRootFolder: string;
-  private readonly _targetRootFolder: string;
-  private readonly _createArchiveOnly: boolean;
-  private readonly _symlinkAnalyzer: SymlinkAnalyzer;
-  private readonly _archiveManager: ArchiveManager | undefined;
-  private readonly _archiveFilePath: string | undefined;
-  private readonly _linkCreationMode: LinkCreationMode;
-  private readonly _includedAssetPaths: Set<string> = new Set<string>();
-  private _isFinalized: boolean = false;
+  readonly #terminal: ITerminal;
+  readonly #sourceRootFolder: string;
+  readonly #targetRootFolder: string;
+  readonly #createArchiveOnly: boolean;
+  readonly #symlinkAnalyzer: SymlinkAnalyzer;
+  readonly #archiveManager: ArchiveManager | undefined;
+  readonly #archiveFilePath: string | undefined;
+  readonly #linkCreationMode: LinkCreationMode;
+  readonly #includedAssetPaths: Set<string> = new Set<string>();
+  #isFinalized: boolean = false;
 
   public constructor(options: IAssetHandlerOptions) {
     const {
@@ -66,22 +66,22 @@ export class AssetHandler {
       createArchiveFilePath,
       createArchiveOnly = false
     } = options;
-    this._terminal = terminal;
-    this._sourceRootFolder = sourceRootFolder;
-    this._targetRootFolder = targetRootFolder;
-    this._symlinkAnalyzer = symlinkAnalyzer;
+    this.#terminal = terminal;
+    this.#sourceRootFolder = sourceRootFolder;
+    this.#targetRootFolder = targetRootFolder;
+    this.#symlinkAnalyzer = symlinkAnalyzer;
     if (createArchiveFilePath) {
       if (path.extname(createArchiveFilePath) !== '.zip') {
         throw new Error('Only archives with the .zip file extension are currently supported.');
       }
-      this._archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
-      this._archiveManager = new ArchiveManager();
+      this.#archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
+      this.#archiveManager = new ArchiveManager();
     }
-    if (createArchiveOnly && !this._archiveManager) {
+    if (createArchiveOnly && !this.#archiveManager) {
       throw new Error('createArchiveOnly cannot be true if createArchiveFilePath is not provided');
     }
-    this._createArchiveOnly = createArchiveOnly;
-    this._linkCreationMode = linkCreation || 'default';
+    this.#createArchiveOnly = createArchiveOnly;
+    this.#linkCreationMode = linkCreation || 'default';
   }
 
   public async includeAssetAsync(options: IIncludeAssetPathOptions): Promise<void>;
@@ -91,11 +91,11 @@ export class AssetHandler {
     const { sourceFileContent, targetFilePath, ignoreIfExisting = false } = options;
     let { sourceFilePath } = options;
 
-    if (this._isFinalized) {
+    if (this.#isFinalized) {
       throw new Error('includeAssetAsync() cannot be called after finalizeAsync()');
     }
     if (!sourceFilePath && !sourceFileContent) {
-      if (!Path.isUnder(targetFilePath, this._targetRootFolder)) {
+      if (!Path.isUnder(targetFilePath, this.#targetRootFolder)) {
         throw new Error('The existing asset path must be under the target root folder');
       }
       sourceFilePath = targetFilePath;
@@ -103,14 +103,14 @@ export class AssetHandler {
     if (sourceFilePath && sourceFileContent) {
       throw new Error('Either sourceFilePath or sourceFileContent must be provided, but not both');
     }
-    if (this._includedAssetPaths.has(targetFilePath)) {
+    if (this.#includedAssetPaths.has(targetFilePath)) {
       if (ignoreIfExisting) {
         return;
       }
       throw new Error(`The asset at path "${targetFilePath}" has already been included`);
     }
 
-    if (!this._createArchiveOnly) {
+    if (!this.#createArchiveOnly) {
       // Ignore when the source file is the same as the target file, as it's a no-op
       if (sourceFilePath && sourceFilePath !== targetFilePath) {
         // Use the fs.copyFile API instead of FileSystem.copyFileAsync() since copyFileAsync performs
@@ -132,67 +132,67 @@ export class AssetHandler {
       }
     }
 
-    if (this._archiveManager) {
-      const targetRelativeFilePath: string = path.relative(this._targetRootFolder, targetFilePath);
+    if (this.#archiveManager) {
+      const targetRelativeFilePath: string = path.relative(this.#targetRootFolder, targetFilePath);
       if (sourceFilePath) {
-        await this._archiveManager.addToArchiveAsync({
+        await this.#archiveManager.addToArchiveAsync({
           filePath: sourceFilePath,
           archivePath: targetRelativeFilePath
         });
       } else if (sourceFileContent) {
-        await this._archiveManager.addToArchiveAsync({
+        await this.#archiveManager.addToArchiveAsync({
           fileData: sourceFileContent,
           archivePath: targetRelativeFilePath
         });
       }
     }
 
-    this._includedAssetPaths.add(targetFilePath);
+    this.#includedAssetPaths.add(targetFilePath);
   }
 
   public get assetPaths(): string[] {
-    return [...this._includedAssetPaths];
+    return [...this.#includedAssetPaths];
   }
 
   public async finalizeAsync(options?: IFinalizeOptions): Promise<void> {
     const { onAfterExtractSymlinksAsync } = options ?? {};
 
-    if (this._isFinalized) {
+    if (this.#isFinalized) {
       throw new Error('finalizeAsync() has already been called');
     }
 
-    if (this._linkCreationMode === 'default') {
-      this._terminal.writeLine('Creating symlinks');
-      const linksToCopy: ILinkInfo[] = this._symlinkAnalyzer.reportSymlinks();
+    if (this.#linkCreationMode === 'default') {
+      this.#terminal.writeLine('Creating symlinks');
+      const linksToCopy: ILinkInfo[] = this.#symlinkAnalyzer.reportSymlinks();
       await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
-        await this._extractSymlinkAsync(linkToCopy);
+        await this.#extractSymlinkAsync(linkToCopy);
       });
     }
 
     await onAfterExtractSymlinksAsync?.();
 
-    if (this._archiveManager && this._archiveFilePath) {
-      this._terminal.writeLine(`Creating archive at "${this._archiveFilePath}"`);
-      await this._archiveManager.createArchiveAsync(this._archiveFilePath);
+    if (this.#archiveManager && this.#archiveFilePath) {
+      this.#terminal.writeLine(`Creating archive at "${this.#archiveFilePath}"`);
+      await this.#archiveManager.createArchiveAsync(this.#archiveFilePath);
     }
 
-    this._isFinalized = true;
+    this.#isFinalized = true;
   }
 
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private async _extractSymlinkAsync(linkInfo: ILinkInfo): Promise<void> {
+  async #extractSymlinkAsync(linkInfo: ILinkInfo): Promise<void> {
     const { kind, linkPath, targetPath } = {
       ...linkInfo,
       linkPath: remapSourcePathForTargetFolder({
-        sourceRootFolder: this._sourceRootFolder,
-        targetRootFolder: this._targetRootFolder,
+        sourceRootFolder: this.#sourceRootFolder,
+        targetRootFolder: this.#targetRootFolder,
         sourcePath: linkInfo.linkPath
       }),
       targetPath: remapSourcePathForTargetFolder({
-        sourceRootFolder: this._sourceRootFolder,
-        targetRootFolder: this._targetRootFolder,
+        sourceRootFolder: this.#sourceRootFolder,
+        targetRootFolder: this.#targetRootFolder,
         sourcePath: linkInfo.targetPath
       })
     };

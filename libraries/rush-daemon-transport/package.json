@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-daemon-transport",
-  "version": "0.2.2",
+  "version": "0.3.2",
   "description": "Workspace-keyed socket/pipe transport for the Rush daemon (rushd): path derivation, net listener/connector, and PID/lockfile handling. (public beta)",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -47,6 +47,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

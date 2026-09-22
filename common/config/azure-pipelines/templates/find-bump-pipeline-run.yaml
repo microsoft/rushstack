@@ -1,0 +1,95 @@
+parameters:
+  - name: PipelineId
+    type: number
+  - name: CommitSha
+    type: string
+  - name: TeamProject
+    type: string
+  - name: Name
+    type: string
+  - name: WorkingDirectory
+    type: string
+
+steps:
+  - bash: |
+      set -euo pipefail
+
+      set_output_variable() {
+        local name="$1"
+        local value="$2"
+        echo "##vso[task.setvariable variable=${name};isOutput=true]${value}"
+      }
+
+      set_output_variable IsVersionBumpMerge false
+
+      REPO_SLUG=$(git remote get-url origin | sed -E 's#.*github\.com[:/](.+/[^.]+)(\.git)?$#\1#')
+      echo "Repository: ${REPO_SLUG}"
+
+      AUTH_HEADER=$(git config --get-regexp 'http\..*\.extraheader' | head -1 | sed 's/^[^ ]* //')
+      if [ -z "$AUTH_HEADER" ]; then
+        echo "##[error]Could not extract authorization header from git config. Ensure persistCredentials is enabled on the checkout step."
+        exit 1
+      fi
+
+      CURL_CONFIG=$(mktemp)
+      trap 'rm -f "$CURL_CONFIG"' EXIT
+      echo "-H \"${AUTH_HEADER}\"" > "$CURL_CONFIG"
+      echo '-H "Accept: application/vnd.github+json"' >> "$CURL_CONFIG"
+
+      github_api() {
+        local response http_code body
+        response=$(curl -s -w "\n%{http_code}" -K "$CURL_CONFIG" "$@")
+        http_code=$(echo "$response" | tail -n1)
+        body=$(echo "$response" | sed '$d')
+
+        if [[ "$http_code" -ge 200 && "$http_code" -lt 300 ]]; then
+          echo "$body"
+        else
+          echo "##[error]GitHub API returned HTTP ${http_code}:" >&2
+          echo "$body" >&2
+          return 1
+        fi
+      }
+
+      url_encode() {
+        node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$1"
+      }
+
+      PIPELINE_ID="${{ parameters.PipelineId }}"
+
+      set_output_variable BumpPipelineDefinitionId "$PIPELINE_ID"
+
+      echo "Looking up merged PR for commit ${{ parameters.CommitSha }}"
+      PR_JSON=$(github_api "https://api.github.com/repos/${REPO_SLUG}/commits/${{ parameters.CommitSha }}/pulls")
+      PR_NUMBER=$(echo "$PR_JSON" | jq 'map(select(.merged_at != null))[0].number // empty')
+      HEAD_SHA=$(echo "$PR_JSON" | jq -r 'map(select(.merged_at != null))[0].head.sha // empty')
+
+      if [ -z "$PR_NUMBER" ] || [ -z "$HEAD_SHA" ]; then
+        echo "No merged PR with a head SHA was found for this commit. Skipping publish."
+        exit 0
+      fi
+
+      echo "Found merged PR #${PR_NUMBER}; head SHA: ${HEAD_SHA}"
+
+      BUMP_TAG="bump-versions|${HEAD_SHA}"
+      ENCODED_TAG=$(url_encode "$BUMP_TAG")
+      BUILDS_URL="${SYSTEM_COLLECTIONURI}${{ parameters.TeamProject }}/_apis/build/builds?definitions=${PIPELINE_ID}&tagFilters=${ENCODED_TAG}&queryOrder=finishTimeDescending&\$top=1&api-version=7.1"
+
+      echo "Searching for bump pipeline build tagged ${BUMP_TAG}"
+      BUILD_RESPONSE=$(curl -sS -u ":${SYSTEM_ACCESSTOKEN}" "$BUILDS_URL")
+      BUILD_ID=$(echo "$BUILD_RESPONSE" | jq -r '.value[0].id // empty')
+
+      if [ -z "$BUILD_ID" ]; then
+        echo "No bump pipeline build found for tag ${BUMP_TAG}. Skipping publish."
+        exit 0
+      fi
+
+      echo "Found bump pipeline run: ${BUILD_ID}"
+      set_output_variable IsVersionBumpMerge true
+      set_output_variable BumpPipelineRunId "$BUILD_ID"
+      set_output_variable BumpCommitSha "$HEAD_SHA"
+    name: ${{ parameters.Name }}
+    displayName: 'Find Bump Pipeline Run'
+    workingDirectory: ${{ parameters.WorkingDirectory }}
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)

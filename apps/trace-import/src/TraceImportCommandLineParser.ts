@@ -14,10 +14,10 @@ import { Colorize } from '@rushstack/terminal';
 import { type ResolutionType, traceImport } from './traceImport';
 
 export class TraceImportCommandLineParser extends CommandLineParser {
-  private readonly _debugParameter: CommandLineFlagParameter;
-  private readonly _pathParameter: IRequiredCommandLineStringParameter;
-  private readonly _baseFolderParameter: CommandLineStringParameter;
-  private readonly _resolutionTypeParameter: IRequiredCommandLineChoiceParameter<ResolutionType>;
+  readonly #debugParameter: CommandLineFlagParameter;
+  readonly #pathParameter: IRequiredCommandLineStringParameter;
+  readonly #baseFolderParameter: CommandLineStringParameter;
+  readonly #resolutionTypeParameter: IRequiredCommandLineChoiceParameter<ResolutionType>;
 
   public constructor() {
     super({
@@ -30,13 +30,13 @@ export class TraceImportCommandLineParser extends CommandLineParser {
         'print the .d.ts file path that would be resolved by a TypeScript import statement.'
     });
 
-    this._debugParameter = this.defineFlagParameter({
+    this.#debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
     });
 
-    this._pathParameter = this.defineStringParameter({
+    this.#pathParameter = this.defineStringParameter({
       parameterLongName: '--path',
       parameterShortName: '-p',
       description:
@@ -46,7 +46,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._baseFolderParameter = this.defineStringParameter({
+    this.#baseFolderParameter = this.defineStringParameter({
       parameterLongName: '--base-folder',
       parameterShortName: '-b',
       description:
@@ -55,7 +55,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
       argumentName: 'FOLDER_PATH'
     });
 
-    this._resolutionTypeParameter = this.defineChoiceParameter<ResolutionType>({
+    this.#resolutionTypeParameter = this.defineChoiceParameter<ResolutionType>({
       parameterLongName: '--resolution-type',
       parameterShortName: '-t',
       description:
@@ -67,17 +67,17 @@ export class TraceImportCommandLineParser extends CommandLineParser {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    if (this._debugParameter.value) {
+    if (this.#debugParameter.value) {
       InternalError.breakInDebugger = true;
     }
     try {
       traceImport({
-        importPath: this._pathParameter.value,
-        baseFolder: this._baseFolderParameter.value,
-        resolutionType: this._resolutionTypeParameter.value
+        importPath: this.#pathParameter.value,
+        baseFolder: this.#baseFolderParameter.value,
+        resolutionType: this.#resolutionTypeParameter.value
       });
     } catch (error) {
-      if (this._debugParameter.value) {
+      if (this.#debugParameter.value) {
         console.error('\n' + error.stack);
       } else {
         console.error('\n' + Colorize.red('ERROR: ' + error.message.trim()));

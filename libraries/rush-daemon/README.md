@@ -12,7 +12,91 @@ The host loads `RushConfiguration` once before signaling readiness and keeps a h
 active for the daemon lifetime. Its invalidation tracker retains changes while no clients are
 connected so a later request can reconcile them. The tracker starts with a conservative unknown
 invalidation covering session startup, and excessive distinct paths are compacted into the same
-full-workspace signal. Reusable operation graph, plugin, and input snapshot state can be supplied
-through the session component factory; the default session does not construct those command-specific
-resources while the reusable runner lifetime tracked by
-[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remains incomplete.
+full-workspace signal.
+
+`WorkspaceEngineComponentFactory` provides the opt-in seam for a command integration to supply a real
+all-project operation graph, its `RushSession`, and a refreshable inputs snapshot. The integration must
+declare the complete phase and plugin shape because Rush plugins can currently vary that shape by command.
+The factory validates graph ownership, serializes retained invalidation reconciliation, and maps path-specific
+changes through the integration. The engine owner must supply one deterministic async disposer because
+`IOperationGraph` does not yet expose an operation that both stops the lifetime and awaits runner cleanup.
+After the initial conservative startup reconciliation, changes to Rush configuration, project package manifests,
+or integration-classified plugin graph inputs fail closed with `WorkspaceEngineRecreationRequiredError` before
+the input baseline advances or the invalidation is acknowledged. The startup watcher-registration boundary has
+no paths to classify and therefore remains a full invalidation. The routing layer must replace the complete
+workspace session rather than run a stale graph.
+The default daemon executable does not construct or route this graph while the command-independent plugin shape and per-iteration runner
+lifetime tracked by [rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) remain incomplete.
+
+`PhasedRequestRouter` is the opt-in execution boundary once an integration has supplied that real warm graph. The
+integration parses the command and supplies its built-in/custom origin, an explicit phase/plugin shape, and operation enabled-state selection;
+the router validates both, reconciles retained invalidations, applies the selection with `IOperationGraph.setEnabledStates`,
+and runs at most one scheduled iteration. A workspace-wide `RequestScheduler` admits phased and global routes using
+the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE`); custom-origin commands and unknown
+built-in names fail closed to `EXCLUSIVE`, including plugin replacements of built-in names. Queued clients receive
+ordered, one-based position controls and can request fail-fast or bounded waiting. One absolute deadline and progress
+channel cover both workspace admission and the temporary phased graph-execution gate. Cancellation, disconnect, or
+queue-output failure removes queued work before it can execute.
+A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
+backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output
+drains. The result translates only that client's operation subset to Rush's success, warning, failure, or abort exit
+semantics. Warning-only builds honor the operation's configured `allowWarningsInSuccessfulBuild` state plus the
+request's immutable `RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment override without mutating `process.env`.
+Compatible phased `SHARED-BUILD` requests admitted before the next graph iteration starts are coalesced at a
+deterministic event-loop-turn boundary. The router reconciles retained invalidations once, unions the clients' enabled
+dependency closures, and schedules one iteration. Shared operations execute once, while each client subscribes only
+to its own closure and derives its final result only from that subset. Requests admitted after scheduling starts form
+a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
+clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
+
+This layer deliberately does not reconstruct `PhasedScriptAction` command/plugin initialization. The typed phased
+request contract begins after an integration has produced a validated selection for the exact warm engine shape;
+full command parsing remains blocked by
+[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895).
+
+`GlobalCommandRequestRouter` is the corresponding opt-in boundary for caller-resolved global command logic. It
+canonicalizes and confines the request working directory to the workspace, snapshots its environment, creates a
+request-scoped terminal with explicit columns/color/TTY properties, and tracks child processes and async resources
+through cancellation or disconnect. Concurrent requests never change `process.cwd()`, `process.env`, or daemon
+stdin/stdout/stderr; child commands receive cwd, environment, cancellation, and output routing through the injected
+execution context.
+Executors must cooperatively observe the context abort signal and settle before cancellation completes, ensuring no
+caller-owned logic can outlive its request resources. Executors return their command exit code; the router preserves
+that code, translates thrown or cleanup failures to Rush's failure exit code, drains terminal output, and delivers one
+final result.
+
+`RushDaemonHost` now owns one `DaemonRequestDispatcher` for the complete warm workspace lifecycle and passes it
+to every `DaemonControlSession`. After hello and capability subscription, each connection validates unique request
+identifiers, accepts presentation-free request envelopes, routes request-tagged stdin and cancellation, and serializes
+queue progress, raw-mode controls, binary output, structured events, and the terminal result through one backpressured
+wire queue. A connection runs at most one request at a time so binary operation output remains unambiguous; concurrent
+requests use separate connections. Each connection accepts at most 256 distinct request identifiers before the client
+must reconnect, allowing the lifecycle and stdin routers to retain every identifier for deterministic duplicate and
+late-frame handling without unbounded growth. Disconnect and host shutdown abort every connection-owned active or
+queued request before the resolver and warm workspace are disposed. Separate connections still share the workspace
+scheduler and phased batch coordinator, so compatible selections can execute in one iteration.
+
+The dispatcher accepts an integration-owned `IDaemonRequestResolver` that maps the validated envelope to the existing
+typed phased request or isolated global executor contracts. Resolvers receive the request abort signal and must settle
+when cancellation, disconnect, or host shutdown aborts it. Without that resolver, the standalone executable continues
+to start, answer ping, and reject request execution with the typed `unsupported` outcome; it never constructs an empty
+graph or reports a false success. A retained invalidation that throws `WorkspaceEngineRecreationRequiredError` is
+reported as `workspaceRecreationRequired` before scheduling. Replacing the warm session is intentionally deferred to
+WS3.
+
+The existing `RushCommandLineParser`, `BaseRushAction`, and some built-in/global action helpers still consult or mutate
+process-global state. This layer therefore does not pretend that arbitrary existing actions are daemon-safe: the
+integration must supply already resolved command logic that consumes `IGlobalCommandExecutionContext`, including
+`spawnChild()` for command-local subprocesses. Adapting the complete action surface remains bounded by the open
+[rushstack#5895](https://github.com/microsoft/rushstack/issues/5895) engine/action prerequisite work. `InteractiveRequestInputRouter` supplies the opt-in WS2.7 boundary for connection-scoped input. The WS1 stdin
+frame carries a request identifier plus untouched raw bytes; frames are serialized per request through an injected
+sink while separate requests remain isolated. Global command integrations can bind that sink directly to a spawned
+child process. Both global and phased routes stop accepting input on abort/disconnect and await input drain plus an
+acknowledged cooked-mode restoration before publishing the exact-once command result. The daemon never reads or
+mutates its own stdin or raw-mode state.
+
+Terminal width remains the immutable request-start value established by WS2.5. The thin client owns resize and
+rendering, so this layer does not forward `SIGWINCH`. Commands declaring a real controlling-terminal requirement
+receive a typed `requiresInProcess` policy result and are not executed by rushd; no pseudo-terminal is allocated or
+emulated. The future WS4 client will perform the actual in-process fallback and parse `--no-wait` /
+`--wait-timeout`.

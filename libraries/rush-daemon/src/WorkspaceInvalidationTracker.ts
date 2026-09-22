@@ -9,7 +9,7 @@
 export interface IWorkspaceInvalidationSnapshot {
   /** Paths reported by the watcher, sorted for deterministic consumption. */
   readonly changedPaths: ReadonlyArray<string>;
-  /** True when the watcher reported a change without a path or encountered a watcher error. */
+  /** True at initialization, or when the watcher reported a change without a path or encountered an error. */
   readonly hasUnknownChanges: boolean;
   /** False after a watcher error makes subsequent change detection unreliable. */
   readonly isWatcherHealthy: boolean;
@@ -26,6 +26,7 @@ const MAX_TRACKED_CHANGED_PATHS: number = 10_000;
  */
 export class WorkspaceInvalidationTracker {
   readonly #sequenceByPath: Map<string, number> = new Map();
+  #initializationSequence: number | undefined;
   #latestSequence: number = 0;
   #unknownChangeSequence: number | undefined;
   #watcherHealthy: boolean = true;
@@ -50,6 +51,16 @@ export class WorkspaceInvalidationTracker {
     this.#sequenceByPath.set(changedPath, sequence);
   }
 
+  /** @internal */
+  public invalidateForInitialization(): void {
+    this.#initializationSequence = ++this.#latestSequence;
+  }
+
+  /** @internal */
+  public get hasUnattributedUnknownChanges(): boolean {
+    return this.#unknownChangeSequence !== undefined;
+  }
+
   /**
    * Permanently marks the current watcher as unhealthy.
    *
@@ -66,7 +77,8 @@ export class WorkspaceInvalidationTracker {
   public getSnapshot(): IWorkspaceInvalidationSnapshot {
     return {
       changedPaths: Array.from(this.#sequenceByPath.keys()).sort(),
-      hasUnknownChanges: this.#unknownChangeSequence !== undefined,
+      hasUnknownChanges:
+        this.#initializationSequence !== undefined || this.#unknownChangeSequence !== undefined,
       isWatcherHealthy: this.#watcherHealthy,
       sequence: this.#latestSequence
     };
@@ -93,6 +105,9 @@ export class WorkspaceInvalidationTracker {
       this.#unknownChangeSequence <= sequence
     ) {
       this.#unknownChangeSequence = undefined;
+    }
+    if (this.#initializationSequence !== undefined && this.#initializationSequence <= sequence) {
+      this.#initializationSequence = undefined;
     }
   }
 }

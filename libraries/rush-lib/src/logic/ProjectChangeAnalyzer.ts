@@ -6,7 +6,16 @@ import * as path from 'node:path';
 import ignore, { type Ignore } from 'ignore';
 
 import type { IReadonlyLookupByPath, LookupByPath, IPrefixMatch } from '@rushstack/lookup-by-path';
-import { Path, FileSystem, Async, AlreadyReportedError, Sort, JsonFile } from '@rushstack/node-core-library';
+import {
+  Path,
+  FileSystem,
+  Async,
+  AlreadyReportedError,
+  Sort,
+  JsonFile,
+  Objects,
+  type IPackageJson
+} from '@rushstack/node-core-library';
 import {
   getRepoChanges,
   getRepoRoot,
@@ -55,7 +64,7 @@ export interface IGetChangedProjectsOptions {
 
   /**
    * If set to `true`, excludes projects where the only changes are:
-   * - A version-only change to `package.json` (only the "version" field differs)
+   * - A version change to `package.json`, optionally accompanied by changes to `peerDependencies`
    * - Changes to `CHANGELOG.md` and/or `CHANGELOG.json` files
    *
    * This prevents `rush version --bump` from triggering `rush change --verify` to request change files
@@ -77,12 +86,12 @@ export interface IRawRepoState {
  * @beta
  */
 export class ProjectChangeAnalyzer {
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _git: Git;
+  readonly #rushConfiguration: RushConfiguration;
+  readonly #git: Git;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._git = new Git(this._rushConfiguration);
+    this.#rushConfiguration = rushConfiguration;
+    this.#git = new Git(this.#rushConfiguration);
   }
 
   /**
@@ -93,7 +102,7 @@ export class ProjectChangeAnalyzer {
   public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
-    const { _rushConfiguration: rushConfiguration } = this;
+    const rushConfiguration: RushConfiguration = this.#rushConfiguration;
 
     const {
       targetBranchName,
@@ -105,14 +114,14 @@ export class ProjectChangeAnalyzer {
       excludeVersionOnlyChanges
     } = options;
 
-    const gitPath: string = this._git.getGitPathOrThrow();
+    const gitPath: string = this.#git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
 
     // if the given targetBranchName is a commit, we assume it is the merge base
-    const isTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
+    const isTargetBranchACommit: boolean = await this.#git.determineIfRefIsACommitAsync(targetBranchName);
     const mergeCommit: string = isTargetBranchACommit
       ? targetBranchName
-      : await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
+      : await this.#git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
 
     const changedFiles: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
     const lookup: LookupByPath<RushConfigurationProject> =
@@ -142,7 +151,7 @@ export class ProjectChangeAnalyzer {
           return;
         }
 
-        // Filter out package.json with version-only changes, CHANGELOG.md, and CHANGELOG.json
+        // Filter out version bumps, peer dependency updates accompanying a version bump, and changelogs.
         for (const [filePath, diffStatus] of filteredChanges) {
           // Use lookup to find the project-relative path
           const match: IPrefixMatch<RushConfigurationProject> | undefined =
@@ -160,15 +169,15 @@ export class ProjectChangeAnalyzer {
             continue;
           }
 
-          // Check if this is package.json at project root with version-only changes
+          // Check if this is package.json at project root with only an allowed version bump change.
           if (projectRelativePath === '/package.json') {
-            const isVersionOnlyChange: boolean = await isVersionOnlyChangeAsync(
+            const isVersionBumpChange: boolean = await isVersionBumpChangeAsync(
               diffStatus,
               repoRoot,
-              this._git
+              this.#git
             );
-            if (isVersionOnlyChange) {
-              continue; // Skip version-only package.json changes
+            if (isVersionBumpChange) {
+              continue;
             }
           }
 
@@ -186,7 +195,7 @@ export class ProjectChangeAnalyzer {
       : [rushConfiguration.defaultSubspace];
 
     const variantToUse: string | undefined = includeExternalDependencies
-      ? (variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync()))
+      ? (variant ?? (await this.#rushConfiguration.getCurrentlyInstalledVariantAsync()))
       : undefined;
 
     await Async.forEachAsync(subspaces, async (subspace: Subspace) => {
@@ -194,7 +203,7 @@ export class ProjectChangeAnalyzer {
 
       // Detect changes to pnpm catalog entries in pnpm-config.json
       if (rushConfiguration.isPnpm) {
-        await this._detectCatalogChangesAsync(
+        await this.#detectCatalogChangesAsync(
           subspace,
           rushConfiguration,
           changedFiles,
@@ -245,7 +254,7 @@ export class ProjectChangeAnalyzer {
               throw new Error(`Unable to obtain current shrinkwrap file.`);
             }
 
-            const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
+            const oldShrinkwrapText: string = await this.#git.getBlobContentAsync({
               // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
               blobSpec: `${mergeCommit}:${relativeShrinkwrapFilePath}`,
               repositoryRoot: repoRoot
@@ -305,9 +314,9 @@ export class ProjectChangeAnalyzer {
     projectSelection?: ReadonlySet<RushConfigurationProject>
   ): Promise<GetInputsSnapshotAsyncFn | undefined> {
     try {
-      const gitPath: string = this._git.getGitPathOrThrow();
+      const gitPath: string = this.#git.getGitPathOrThrow();
 
-      if (!this._git.isPathUnderGitWorkingTree()) {
+      if (!this.#git.isPathUnderGitWorkingTree()) {
         terminal.writeLine(
           `The Rush monorepo is not in a Git repository. Rush will proceed without incremental build support.`
         );
@@ -315,7 +324,7 @@ export class ProjectChangeAnalyzer {
         return;
       }
 
-      const rushConfiguration: RushConfiguration = this._rushConfiguration;
+      const rushConfiguration: RushConfiguration = this.#rushConfiguration;
 
       // Do not use getGitInfo().root; it is the root of the *primary* worktree, not the *current* one.
       const rootDirectory: string = getRepoRoot(rushConfiguration.rushJsonFolder, gitPath);
@@ -379,7 +388,7 @@ export class ProjectChangeAnalyzer {
       } else {
         // Add the shrinkwrap file to every project's dependencies
         const currentVariant: string | undefined =
-          await this._rushConfiguration.getCurrentlyInstalledVariantAsync();
+          await this.#rushConfiguration.getCurrentlyInstalledVariantAsync();
 
         const shrinkwrapFile: string = Path.convertToSlashes(
           path.relative(
@@ -392,14 +401,14 @@ export class ProjectChangeAnalyzer {
       }
 
       const lookupByPath: IReadonlyLookupByPath<RushConfigurationProject> =
-        this._rushConfiguration.getProjectLookupForRoot(rootDirectory);
+        this.#rushConfiguration.getProjectLookupForRoot(rootDirectory);
 
       let filterPath: string[] = [];
 
       if (
         projectSelection &&
         projectSelection.size > 0 &&
-        this._rushConfiguration.experimentsConfiguration.configuration.enableSubpathScan
+        this.#rushConfiguration.experimentsConfiguration.configuration.enableSubpathScan
       ) {
         filterPath = Array.from(projectSelection, ({ projectFolder }) => projectFolder);
       }
@@ -476,7 +485,7 @@ export class ProjectChangeAnalyzer {
     rootDir: string,
     terminal: ITerminal
   ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    const ignoreMatcher: Ignore | undefined = await this.#getIgnoreMatcherForProjectAsync(project, terminal);
     if (!ignoreMatcher) {
       return unfilteredProjectData;
     }
@@ -498,7 +507,7 @@ export class ProjectChangeAnalyzer {
     return filteredProjectData;
   }
 
-  private async _getIgnoreMatcherForProjectAsync(
+  async #getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<Ignore | undefined> {
@@ -516,7 +525,7 @@ export class ProjectChangeAnalyzer {
    * Detects changes to pnpm catalog entries in a subspace's pnpm-config.json and marks
    * affected projects as changed.
    */
-  private async _detectCatalogChangesAsync(
+  async #detectCatalogChangesAsync(
     subspace: Subspace,
     rushConfiguration: RushConfiguration,
     changedFiles: Map<string, IFileDiffStatus>,
@@ -541,7 +550,7 @@ export class ProjectChangeAnalyzer {
     // Maps catalogNamespace (e.g. "default", "react17") → Set of changed package names
     let oldCatalogs: Record<string, Record<string, string>> | undefined;
     try {
-      const oldPnpmConfigText: string = await this._git.getBlobContentAsync({
+      const oldPnpmConfigText: string = await this.#git.getBlobContentAsync({
         blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
         repositoryRoot: repoRoot
       });
@@ -632,22 +641,17 @@ export class ProjectChangeAnalyzer {
   }
 }
 
-/**
- * Checks if a diff represents a version-only change to package.json.
- */
-async function isVersionOnlyChangeAsync(
+async function isVersionBumpChangeAsync(
   diffStatus: IFileDiffStatus,
   repoRoot: string,
   git: Git
 ): Promise<boolean> {
-  try {
-    // Only check modified files, not additions or deletions
-    if (diffStatus.status !== 'M') {
-      return false;
-    }
+  if (diffStatus.status !== 'M') {
+    return false;
+  }
 
-    // Get both versions of package.json from Git in parallel
-    const [oldPackageJsonContent, currentPackageJsonContent] = await Promise.all([
+  try {
+    const [oldPackageJsonContent, newPackageJsonContent] = await Promise.all([
       git.getBlobContentAsync({
         blobSpec: diffStatus.oldhash,
         repositoryRoot: repoRoot
@@ -657,10 +661,8 @@ async function isVersionOnlyChangeAsync(
         repositoryRoot: repoRoot
       })
     ]);
-
-    return isPackageJsonVersionOnlyChange(oldPackageJsonContent, currentPackageJsonContent);
+    return isPackageJsonVersionOnlyChange(oldPackageJsonContent, newPackageJsonContent);
   } catch (error) {
-    // If we can't read the file or parse it, assume it's not a version-only change
     return false;
   }
 }
@@ -739,33 +741,46 @@ async function getAdditionalFilesFromRushProjectConfigurationAsync(
 }
 
 /**
- * Compares two package.json file contents and determines if the only difference is the "version" field.
+ * Compares two package.json file contents and determines whether the package's version changed and
+ * all other changes are limited to peerDependencies.
  * @param oldPackageJsonContent - The old package.json content as a string
  * @param newPackageJsonContent - The new package.json content as a string
- * @returns true if the only difference is the version field, false otherwise
+ * @returns true if the package version changed and every other field except peerDependencies is unchanged
  */
 export function isPackageJsonVersionOnlyChange(
   oldPackageJsonContent: string,
   newPackageJsonContent: string
 ): boolean {
   try {
-    // Parse both versions - use specific type since we only care about version field
-    const oldPackageJson: { version?: string } = JSON.parse(oldPackageJsonContent);
-    const newPackageJson: { version?: string } = JSON.parse(newPackageJsonContent);
-
-    // Ensure both have a version field
-    if (!oldPackageJson.version || !newPackageJson.version) {
-      return false;
-    }
-
-    // Remove the version field from both (no need to clone, these are fresh objects from JSON.parse)
-    oldPackageJson.version = undefined;
-    newPackageJson.version = undefined;
-
-    // Compare the objects without the version field
-    return JSON.stringify(oldPackageJson) === JSON.stringify(newPackageJson);
+    return isPackageJsonVersionBumpChange(JSON.parse(oldPackageJsonContent), JSON.parse(newPackageJsonContent));
   } catch (error) {
     // If we can't parse the JSON, assume it's not a version-only change
     return false;
   }
+}
+
+/**
+ * Determines whether a package.json differs only by its version and peerDependencies.
+ */
+export function isPackageJsonVersionBumpChange(
+  oldPackageJson: IPackageJson,
+  newPackageJson: IPackageJson
+): boolean {
+  if (
+    typeof oldPackageJson.version !== 'string' ||
+    typeof newPackageJson.version !== 'string' ||
+    oldPackageJson.version === newPackageJson.version ||
+    oldPackageJson.name !== newPackageJson.name
+  ) {
+    return false;
+  }
+
+  const oldPackageJsonWithoutBumpFields: Partial<IPackageJson> = { ...oldPackageJson };
+  const newPackageJsonWithoutBumpFields: Partial<IPackageJson> = { ...newPackageJson };
+  oldPackageJsonWithoutBumpFields.version = undefined;
+  newPackageJsonWithoutBumpFields.version = undefined;
+  oldPackageJsonWithoutBumpFields.peerDependencies = undefined;
+  newPackageJsonWithoutBumpFields.peerDependencies = undefined;
+
+  return Objects.areDeepEqual(oldPackageJsonWithoutBumpFields, newPackageJsonWithoutBumpFields);
 }

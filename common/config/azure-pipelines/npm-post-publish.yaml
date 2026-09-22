@@ -10,22 +10,26 @@ variables:
   - name: FORCE_COLOR
     value: 1
 
-# This pipeline is triggered only by pipeline resources (npm publish pipelines),
+# This pipeline is triggered only by pipeline resources (esrp publish pipelines),
 # not by CI pushes or PR builds.
 trigger: none
 pr: none
 
 resources:
   pipelines:
-    - pipeline: npmPublish
-      source: 'rushstack NPM Publish'
+    - pipeline: esrpPublishRushstack
+      source: 'rushstack-esrp-publish'
+      project: GitHubProjectsPublish
+      branch: refs/heads/main
       trigger:
         enabled: true
         branches:
           include:
             - refs/heads/main
-    - pipeline: npmPublishRush
-      source: 'rushstack NPM Publish (rush)'
+    - pipeline: esrpPublishRush
+      source: 'rushstack-esrp-publish-rush'
+      project: GitHubProjectsPublish
+      branch: refs/heads/main
       trigger:
         enabled: true
         branches:
@@ -45,6 +49,8 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
   parameters:
+    settings:
+      networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3,DefaultDeny
     sdl:
       sourceRepositoriesToScan:
         exclude:
@@ -111,6 +117,8 @@ extends:
                     --verbose
                   DisplayName: 'Rush Build (repo-toolbox)'
 
+              # Resource-triggered runs check out the publishing pipeline's commit, so local package
+              # versions match the versions that were just published without waiting for feed propagation.
               - template: /common/config/azure-pipelines/templates/run-repo-toolbox.yaml@self
                 parameters:
                   Arguments: 'bump-decoupled-local-dependencies'
@@ -222,8 +230,8 @@ extends:
                 displayName: 'Download API review files'
                 inputs:
                   source: specific
-                  project: GitHubProjects
-                  pipeline: 'rushstack NPM Publish'
+                  project: GitHubProjectsPublish
+                  pipeline: 'rushstack-esrp-publish'
                   preferTriggeringPipeline: true
                   runVersion: latest
                   artifact: api

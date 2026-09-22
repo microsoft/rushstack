@@ -43,17 +43,17 @@ export enum Event {
  * @beta
  */
 export class EventHooks {
-  private _hooks: Map<Event, string[]>;
+  #hooks: Map<Event, string[]>;
 
   /**
    * @internal
    */
   public constructor(eventHooksJson: IEventHooksJson) {
-    this._hooks = new Map<Event, string[]>();
+    this.#hooks = new Map<Event, string[]>();
     for (const [name, eventHooks] of Object.entries(eventHooksJson)) {
       const eventName: Event | undefined = Enum.tryGetValueByKey(Event, name);
       if (eventName) {
-        this._hooks.set(eventName, [...eventHooks]);
+        this.#hooks.set(eventName, [...eventHooks]);
       }
     }
   }
@@ -63,6 +63,6 @@ export class EventHooks {
    * @param event - Rush event
    */
   public get(event: Event): string[] {
-    return this._hooks.get(event) || [];
+    return this.#hooks.get(event) || [];
   }
 }

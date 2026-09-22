@@ -59,7 +59,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   /** {@inheritDoc ICommandLineActionOptions.documentation} */
   public readonly documentation: string;
 
-  private _argumentParser: argparse.ArgumentParser | undefined;
+  #argumentParser: argparse.ArgumentParser | undefined;
 
   public constructor(options: ICommandLineActionOptions) {
     super();
@@ -76,7 +76,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     this.summary = summary;
     this.documentation = documentation;
 
-    this._argumentParser = undefined;
+    this.#argumentParser = undefined;
   }
 
   /**
@@ -84,19 +84,19 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _buildParser(actionsSubParser: argparse.SubParser): void {
-    this._argumentParser = actionsSubParser.addParser(this.actionName, {
+    this.#argumentParser = actionsSubParser.addParser(this.actionName, {
       help: escapeSprintf(this.summary),
       description: escapeSprintf(this.documentation)
     });
 
     // Monkey-patch the error handling for the action parser
-    this._argumentParser.exit = (status: number, message: string) => {
+    this.#argumentParser.exit = (status: number, message: string) => {
       throw new CommandLineParserExitError(status, message);
     };
-    const originalArgumentParserErrorFn: (err: Error | string) => void = this._argumentParser.error.bind(
-      this._argumentParser
+    const originalArgumentParserErrorFn: (err: Error | string) => void = this.#argumentParser.error.bind(
+      this.#argumentParser
     );
-    this._argumentParser.error = (err: Error | string) => {
+    this.#argumentParser.error = (err: Error | string) => {
       // Ensure the ParserExitError bubbles up to the top without any special processing
       if (err instanceof CommandLineParserExitError) {
         throw err;
@@ -118,12 +118,12 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public override _getArgumentParser(): argparse.ArgumentParser {
-    if (!this._argumentParser) {
+    if (!this.#argumentParser) {
       // We will improve this in the future
       throw new Error('The CommandLineAction must be added to a CommandLineParser before it can be used');
     }
 
-    return this._argumentParser;
+    return this.#argumentParser;
   }
 
   /**
