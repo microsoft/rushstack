@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -96,6 +100,73 @@ function validateConfigurationWithParameters(
 }
 
 describe(RushProjectConfiguration.name, () => {
+  describe(RushProjectConfiguration._tryLoadForProjectsUncachedAsync.name, () => {
+    let folder: string;
+    const write = (relativePath: string, json: object): void => {
+      const filename: string = path.join(folder, relativePath);
+      fs.mkdirSync(path.dirname(filename), { recursive: true });
+      fs.writeFileSync(filename, JSON.stringify(json));
+    };
+    const project = (name: string): RushConfigurationProject =>
+      ({
+        packageName: name,
+        projectFolder: path.join(folder, name),
+        projectRelativeFolder: name
+      }) as RushConfigurationProject;
+    const loadAsync = (
+      ...projects: RushConfigurationProject[]
+    ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> =>
+      RushProjectConfiguration._tryLoadForProjectsUncachedAsync(
+        projects,
+        new Terminal(new StringBufferTerminalProvider())
+      );
+    const getOutputFolderNames = (
+      configuration: RushProjectConfiguration | undefined
+    ): string[] | undefined => {
+      const outputFolderNames: ReadonlyArray<string> | undefined =
+        configuration?.operationSettingsByOperationName.get('_phase:build')?.outputFolderNames;
+      return outputFolderNames && [...outputFolderNames];
+    };
+
+    beforeEach(() => {
+      folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-project-rigs-'));
+      for (const name of ['rigged', 'missing-profile', 'own-file']) {
+        write(`${name}/package.json`, { name, version: '1.0.0' });
+      }
+      write('rigged/node_modules/example-rig/package.json', { name: 'example-rig', version: '1.0.0' });
+      write('rigged/node_modules/example-rig/profiles/default/config/rush-project.json', {
+        operationSettings: [{ operationName: '_phase:build', outputFolderNames: ['from-rig'] }]
+      });
+      write('rigged/config/rig.json', { rigPackageName: 'example-rig' });
+      for (const name of ['missing-profile', 'own-file']) {
+        write(`${name}/node_modules/example-rig/package.json`, { name: 'example-rig', version: '1.0.0' });
+        write(`${name}/config/rig.json`, { rigPackageName: 'example-rig', rigProfile: 'missing' });
+      }
+      write('own-file/config/rush-project.json', {
+        operationSettings: [{ operationName: '_phase:build', outputFolderNames: ['from-project'] }]
+      });
+    });
+
+    afterEach(() => {
+      fs.rmSync(folder, { recursive: true, force: true });
+    });
+
+    it('loads configuration from a rig profile', async () => {
+      const rigged: RushConfigurationProject = project('rigged');
+      const configurations = await loadAsync(rigged);
+      expect(getOutputFolderNames(configurations.get(rigged))).toEqual(['from-rig']);
+    });
+
+    it('reports a missing rig profile only when the rig provides the configuration', async () => {
+      await expect(loadAsync(project('missing-profile'))).rejects.toThrow(
+        'The rig profile "missing" is not defined by the rig package "example-rig"'
+      );
+      const ownFile: RushConfigurationProject = project('own-file');
+      const configurations = await loadAsync(ownFile);
+      expect(getOutputFolderNames(configurations.get(ownFile))).toEqual(['from-project']);
+    });
+  });
+
   describe('operationSettingsByOperationName', () => {
     it('loads a rush-project.json config that extends another config file', async () => {
       const rushProjectConfiguration: RushProjectConfiguration | undefined =

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Include the bundled implementation in the daemon's runtime fingerprint and avoid resolving every file's real path on each request.",
+      "comment": "Speed up daemon requests: include the bundled implementation in the runtime fingerprint without resolving every file's real path on each request, and resolve rig profiles asynchronously when the daemon reloads project configuration.",
       "type": "patch"
     }
   ],
