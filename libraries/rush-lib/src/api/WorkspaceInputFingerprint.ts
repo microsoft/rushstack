@@ -13,6 +13,7 @@ import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushProjectConfiguration } from './RushProjectConfiguration';
 import { getDaemonIpcImplementationIdentityAsync } from '../logic/operations/DaemonIpcConfiguration';
+import { AutoinstallerPluginLoader } from '../pluginFramework/PluginLoader/AutoinstallerPluginLoader';
 
 /** Stable inputs which distinguish reusable, reloadable, and process-bound workspace state. @alpha */
 export interface IWorkspaceInputFingerprint {
@@ -151,6 +152,15 @@ export async function captureWorkspaceInputFingerprintAsync(
   const configurationFiles: string[] = await listFilesAsync(path.join(root, 'common', 'config'), false);
   for (const filename of configurationFiles) {
     (isProcessBoundConfiguration(filename) ? installation : definitions).add(filename);
+  }
+  // Configured plugins shape the command-line parser even when they are never loaded for a command.
+  for (const pluginConfiguration of rushConfiguration._rushPluginsConfiguration.configuration.plugins) {
+    for (const filename of AutoinstallerPluginLoader.getPluginShapeFilePaths(
+      rushConfiguration,
+      pluginConfiguration
+    )) {
+      definitions.add(filename);
+    }
   }
   for (const project of rushJson.projects) {
     const projectFolder: string = path.resolve(root, project.projectFolder);

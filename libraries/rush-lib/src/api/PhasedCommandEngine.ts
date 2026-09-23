@@ -49,8 +49,10 @@ export interface IParsePhasedCommandOptions {
  *
  * @remarks
  * The initial engine surface deliberately rejects watch/install, event-hook scripts, .env files, and
- * externally supplied plugins. Those require request-scoped initialization and asynchronous disposal
- * contracts before they can safely run in a shared process. Native graph/cache plugins are not replaced.
+ * external plugins that Rush would initialize for the command or whose command-line.json shapes it.
+ * Those require request-scoped initialization and asynchronous disposal contracts before they can
+ * safely run in a shared process. Plugins associated only with other commands are inert and permitted.
+ * Native graph/cache plugins are not replaced.
  * @alpha
  */
 export class PhasedCommandEngine {
@@ -74,9 +76,6 @@ export class PhasedCommandEngine {
     if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
       throw new Error('Command help must be handled by the native CLI, not by an engine request.');
     }
-    if (rushConfiguration._rushPluginsConfiguration.configuration.plugins.length > 0) {
-      throw new Error('Daemon engine execution does not yet support external Rush plugins. Use --no-daemon.');
-    }
     for (const folder of [rushConfiguration.rushJsonFolder, RushUserConfiguration.getRushUserFolderPath()]) {
       if (FileSystem.exists(path.join(folder, '.env'))) {
         throw new Error('Daemon engine execution does not yet support .env initialization. Use --no-daemon.');
@@ -90,6 +89,18 @@ export class PhasedCommandEngine {
     const action: CommandLineAction | undefined = parser.selectedAction;
     if (!(action instanceof PhasedScriptAction) || !['build', 'rebuild'].includes(action.actionName)) {
       throw new Error('The production daemon engine currently supports native build and rebuild only.');
+    }
+    // Plugins which the command would never initialize, and whose command-line.json does not shape
+    // this command, cannot affect a shared engine. Every other external plugin still requires native Rush.
+    const participatingPlugins: ReadonlyArray<string> = parser.pluginManager.getPluginsParticipatingInCommand(
+      action.actionName,
+      action.schedulablePhaseNames
+    );
+    if (participatingPlugins.length > 0) {
+      throw new Error(
+        `Daemon engine execution does not yet support Rush plugins that participate in "${action.actionName}": ` +
+          `${participatingPlugins.join('; ')}. Use --no-daemon.`
+      );
     }
     action.validateEngineCommand();
     return new PhasedCommandEngine(parser, action);

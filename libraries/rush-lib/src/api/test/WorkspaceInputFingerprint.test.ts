@@ -41,6 +41,52 @@ describe('workspace input fingerprints', () => {
     }
   });
 
+  it('reloads when a configured plugin shape outside common/config changes', async () => {
+    const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
+    try {
+      const write = (relativePath: string, content: string): void => {
+        const filename: string = path.join(folder, relativePath);
+        fs.mkdirSync(path.dirname(filename), { recursive: true });
+        fs.writeFileSync(filename, content);
+      };
+      write('rush.json', JSON.stringify({ rushVersion: '5.179.0', pnpmVersion: '10.27.0', projects: [] }));
+      write(
+        'common/config/rush/rush-plugins.json',
+        JSON.stringify({
+          plugins: [{ packageName: '@example/plugin', pluginName: 'example', autoinstallerName: 'plugins' }]
+        })
+      );
+      const store: string = 'common/autoinstallers/plugins/rush-plugins/@example/plugin';
+      write('common/autoinstallers/plugins/package.json', '{"name":"plugins","version":"1.0.0"}');
+      write(`${store}/rush-plugin-manifest.json`, '{"plugins":[]}');
+      write(`${store}/example/command-line.json`, '{"commands":[]}');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        path.join(folder, 'rush.json')
+      );
+      const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+      const captureAsync = (): Promise<IWorkspaceInputFingerprint> =>
+        captureWorkspaceInputFingerprintAsync({ rushConfiguration, runtimeCache, environment: {} });
+
+      let previous: IWorkspaceInputFingerprint = await captureAsync();
+      for (const [relativePath, content] of [
+        [`${store}/example/command-line.json`, '{"commands":[],"parameters":[]}'],
+        [`${store}/rush-plugin-manifest.json`, '{"plugins":[{}]}'],
+        ['common/autoinstallers/plugins/package.json', '{"name":"plugins","version":"1.0.1"}']
+      ]) {
+        write(relativePath, content);
+        const next: IWorkspaceInputFingerprint = await captureAsync();
+        expect(classifyWorkspaceInputChange(previous, next)).toBe(WorkspaceInputChangeTier.Reload);
+        previous = next;
+      }
+      fs.rmSync(path.join(folder, `${store}/example/command-line.json`));
+      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(
+        WorkspaceInputChangeTier.Reload
+      );
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+
   it('classifies content, configuration and process-bound identities', () => {
     const current: IWorkspaceInputFingerprint = {
       configurationHash: 'configuration',

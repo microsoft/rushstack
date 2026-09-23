@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 
 import {
+  FileConstants,
   FileSystem,
   JsonFile,
   NewlineKind,
@@ -13,6 +14,7 @@ import {
 } from '@rushstack/node-core-library';
 
 import type { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { RushConstants } from '../../logic/RushConstants';
 import {
@@ -53,7 +55,29 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
    * Example: `C:\MyRepo\common\autoinstallers\<autoinstaller_name>\rush-plugins`
    */
   public static getPluginAutoinstallerStorePath(autoinstaller: Autoinstaller): string {
-    return path.join(autoinstaller.folderFullPath, 'rush-plugins');
+    return getStorePath(autoinstaller.folderFullPath);
+  }
+
+  /**
+   * Files outside `common/config` from which Rush reads a configured plugin's manifest and command-line
+   * shape without loading the plugin: the autoinstaller package.json, and the cached manifest and
+   * command-line.json that `rush update` copies into the autoinstaller's store.
+   */
+  public static getPluginShapeFilePaths(
+    rushConfiguration: RushConfiguration,
+    pluginConfiguration: IRushPluginConfiguration
+  ): string[] {
+    const { autoinstallerName, packageName, pluginName } = pluginConfiguration;
+    const autoinstallerFolder: string = path.join(
+      rushConfiguration.commonAutoinstallersFolder,
+      autoinstallerName
+    );
+    const storePath: string = getStorePath(autoinstallerFolder);
+    return [
+      path.join(autoinstallerFolder, FileConstants.PackageJson),
+      getCachedManifestPath(storePath, packageName),
+      getCachedCommandLineJsonFilePath(storePath, packageName, pluginName)
+    ];
   }
 
   public update(): void {
@@ -155,19 +179,33 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
   }
 
   protected override _getManifestPath(): string {
-    return path.join(
+    return getCachedManifestPath(
       AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this.autoinstaller),
-      this.packageName,
-      RushConstants.rushPluginManifestFilename
+      this.packageName
     );
   }
 
   protected override _getCommandLineJsonFilePath(): string {
-    return path.join(
+    return getCachedCommandLineJsonFilePath(
       AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this.autoinstaller),
       this.packageName,
-      this.pluginName,
-      RushConstants.commandLineFilename
+      this.pluginName
     );
   }
+}
+
+function getStorePath(autoinstallerFolder: string): string {
+  return path.join(autoinstallerFolder, 'rush-plugins');
+}
+
+function getCachedManifestPath(storePath: string, packageName: string): string {
+  return path.join(storePath, packageName, RushConstants.rushPluginManifestFilename);
+}
+
+function getCachedCommandLineJsonFilePath(
+  storePath: string,
+  packageName: string,
+  pluginName: string
+): string {
+  return path.join(storePath, packageName, pluginName, RushConstants.commandLineFilename);
 }

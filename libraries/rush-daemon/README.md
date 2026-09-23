@@ -108,9 +108,14 @@ the graph/cache settings with the construction snapshot. Changed inherited or ri
 generation reload before execution, even outside watcher roots or in ignored `node_modules` files.
 The retained graph and its cache policy are never patched in place.
 
-External Rush plugins, `.env` initialization, watch/install/variant
+External Rush plugins that Rush would initialize for the requested command (plugins without `associatedCommands`,
+or associated with that command) or whose cached command-line.json defines that command, one of its phases, or a
+parameter associated with either are rejected, as are `.env` initialization, watch/install/variant
 and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global
-commands are rejected by the phased path, not silently bypassed. Native Rushx is handled separately below.
+commands; they are rejected by the phased path, not silently bypassed. Configured plugins that are scoped only to
+other commands are inert for the build and are permitted; their autoinstaller `package.json` and cached manifest and
+command-line files are workspace definitions, so changing them reloads the generation. An unreadable manifest or
+command-line file is rejected. Native Rushx is handled separately below.
 For phased commands, a changed request environment requires a new process, including Rush/cache
 policy variables. These restrictions remain until the corresponding initialization,
 environment, and resource-lifetime contracts are request-scoped.

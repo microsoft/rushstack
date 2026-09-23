@@ -50,6 +50,11 @@ Environment-only opt-in avoids adding a `daemon` block that an older Rush schema
 `RUSH_PREVIEW_VERSION` continues to select the requested Rush engine; a matching daemon must
 actually be available. A client never relabels its bundled engine to satisfy a different version.
 
+Releases that predate these variables reject unknown `RUSH_` names. While a repository's `rushVersion`
+selects such a release, set `RUSH_DAEMON` only for `rush-client` invocations rather than exporting it
+to a shell that also runs ordinary `rush`. The [contributor dogfooding guide](./dogfooding-rush-daemon.md)
+shows this for the rushstack repository.
+
 See the [client configuration and management reference](../../apps/rush-cli-client/README.md)
 for launcher selection, lifecycle commands, persistent-worker restrictions and status fields.
 

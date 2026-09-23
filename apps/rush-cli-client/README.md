@@ -3,6 +3,9 @@
 Separate `rush-client` and `rushx-client` binaries, opt-in until cutover. Existing
 `rush`, `rushx`, and their reporter entrypoints are unchanged.
 
+To try the daemon on the rushstack repository itself before a release contains it, follow the
+[contributor dogfooding guide](../../docs/rush/dogfooding-rush-daemon.md).
+
 ## Native frontend dependency
 
 The dependency on `@microsoft/rush` is intentional: it is the version-selecting
@@ -116,9 +119,11 @@ changed configuration or command shape replaces the session and graph in the sam
 process. Environment, installed dependencies, implementation content, or selected
 Rush version changes require a process restart rather than patching the existing
 engine. Direct, inherited, and rig-based project configuration uses private native
-loaders and is rechecked before execution. External plugins, `.env`, phased
+loaders and is rechecked before execution. External plugins that participate in the
+requested command (unassociated plugins, plugins associated with it, or plugin command-line
+files that define it, its phases or parameters for either), `.env`, phased
 watch/install options, and unsupported event-hook scripts still use typed
-pre-execution fallback; this does not exclude the built-in `install` and `update`
+pre-execution fallback; plugins scoped only to other commands are permitted. This does not exclude the built-in `install` and `update`
 commands described above. The native Rush lock is held for preparation and each
 coalesced iteration, not while idle; native commands and `--no-daemon` can run
 after a completed request without stopping the daemon.
