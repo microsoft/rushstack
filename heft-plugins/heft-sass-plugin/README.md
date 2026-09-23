@@ -162,6 +162,7 @@ All options are set in `config/sass.json`. Every option is optional.
 | `fileExtensions` | `[".sass", ".scss", ".css"]` | File extensions to treat as CSS modules |
 | `nonModuleFileExtensions` | `[".global.sass", ".global.scss", ".global.css"]` | File extensions to treat as global (non-module) stylesheets |
 | `excludeFiles` | `[]` | Paths relative to `srcFolder` to skip entirely |
+| `loadPaths` | `[]` | Folders, relative to the project folder, to search when a bare specifier such as `@use "theme/colors"` cannot be resolved relative to the importing file. Analogous to the Sass compiler's `loadPaths` option. Searched before `node_modules`. |
 | `doNotTrimOriginalFileExtension` | `false` | When `true`, preserves the original extension in the CSS output filename. E.g. `styles.scss` → `styles.scss.css` instead of `styles.css`. Useful when downstream tooling needs to distinguish the source format. |
 | `preserveIcssExports` | `false` | When `true`, keeps the `:export { }` block in the emitted CSS. This is needed when a webpack loader (e.g. `css-loader`'s `icssParser`) must extract `:export` values at bundle time. Has no effect on the generated `.d.ts`. |
 | `silenceDeprecations` | `[]` | List of Sass deprecation codes to suppress (e.g. `"mixed-decls"`, `"import"`, `"global-builtin"`, `"color-functions"`) |
@@ -203,6 +204,12 @@ require("./global.global.css");
 
 ## Sass import resolution
 
+A load specifier is resolved in this order:
+
+1. Relative to the importing file.
+2. Each folder in the `loadPaths` option, in order (bare specifiers only).
+3. `node_modules`, resolved using Node module resolution (bare specifiers only).
+
 The plugin supports the modern `pkg:` protocol for importing from npm packages:
 
 ```scss
@@ -216,6 +223,24 @@ The legacy `~` prefix is automatically converted to `pkg:` for compatibility wit
 @use "~@fluentui/react/dist/sass/variables";
 @use "pkg:@fluentui/react/dist/sass/variables";
 ```
+
+This also applies to specifiers that are not part of an `@use`/`@import`/`@forward` rule, such as
+`@include meta.load-css("~@fluentui/react/dist/sass/variables")`.
+
+### Bare specifiers
+
+A "bare" specifier is one that does not start with `.`, `/`, or a URL scheme. When it cannot be
+resolved relative to the importing file, it is resolved from `loadPaths` and then from `node_modules`:
+
+```scss
+// Resolves to node_modules/@fluentui/react/dist/sass/variables.scss
+@use "@fluentui/react/dist/sass/variables";
+```
+
+`pkg:` is preferred for stylesheets you own, because it is unambiguous. Bare specifiers are supported
+because they are the portable form understood by every other Sass toolchain (the Dart Sass CLI's
+`--load-path`, `sass-loader`, Vite, the Angular CLI, and so on), so third-party packages that ship
+Sass sources commonly use them internally, where a consuming project cannot rewrite them.
 
 ## Incremental builds
 
