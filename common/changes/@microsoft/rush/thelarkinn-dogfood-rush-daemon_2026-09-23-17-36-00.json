@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow daemon build and rebuild requests in repositories whose external Rush plugins are associated only with other commands, and reload the daemon generation when a configured plugin's autoinstaller package.json, cached manifest, or command-line.json changes.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
