@@ -109,8 +109,9 @@ in-process Rush. Check all of the following:
    daemon-served build, `node common/scripts/install-run-rush.js rebuild --only @rushstack/tree-pattern`
    leaves the files in `lib-commonjs`, `lib-dts`, `lib-esm`, and `dist` unchanged.
 
-A warm request whose selected operations are all up to date can finish without printing anything, and exits
-with code `0`.
+A warm request whose selected operations are all up to date finishes **without printing anything**, and exits
+with code `0`. Unlike ordinary Rush, the daemon client does not yet print a summary, so "no output" after a
+build that already ran means everything was up to date; `rush-client daemon status` confirms that it was served.
 
 For example, in one Bash terminal after steps 1–3:
 
@@ -188,6 +189,9 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   captured workspace snapshots under Jest. Direct fixtures did not reproduce it, and it did not occur while
   this workflow was validated on native Windows. The cause is unresolved, so treat it as an open risk: if a
   daemon-served build fails this way, retry it with `--no-daemon` and report the failure.
+  The daemon runs without a console, so it starts its tools (Git, tar and operation shells) with hidden
+  windows. Daemons started from a snapshot older than that change open a visible terminal window for each
+  tool; if you see that, [refresh the snapshot](#refresh-the-snapshot).
 - **CI** stays in-process unless `RUSH_DAEMON=1` is set; do not set it in CI workflows.
 
 ## Version skew and `RUSH_PREVIEW_VERSION`

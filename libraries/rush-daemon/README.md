@@ -142,6 +142,11 @@ an installation using native Rush package-install APIs; the host does not instal
 packages during restart. Selection probes foreign runtimes in isolation, and launch
 rechecks the actual engine version and protocol before binding. An unavailable or
 incompatible installation is never impersonated by the bundled engine.
+
+On Windows the standalone launcher starts the daemon detached, without a console. Before serving, the launched
+daemon therefore makes `windowsHide: true` the default for every `node:child_process` call that does not choose a
+value, so Git, tar, operation shells and plugin tools do not each open a visible console window. Their descendants
+inherit the resulting windowless console. Embedded hosts, which own their process, are not changed.
 Embedded `RushDaemonHost` users can provide `getSuccessorLaunchAsync`, returning the existing core
 `IDaemonStartCommand` plus the expected daemon implementation version. Selection is validated before shutdown;
 an unavailable selected Rush version fails explicitly and is never run by the current engine under a false version.
