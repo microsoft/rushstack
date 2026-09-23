@@ -3,17 +3,17 @@
 
 import * as fs from 'node:fs';
 
-import { Rush } from '@microsoft/rush-lib';
 import { JsonFile } from '@rushstack/node-core-library';
 import type { IConnectOrStartDaemonOptions } from '@rushstack/rush-client-core';
 import { computeDaemonWorkspaceKey, resolveDaemonPathsFromProcess } from '@rushstack/rush-daemon-transport';
 import { readDaemonInstallationMetadata } from '@rushstack/rush-daemon/lib/DaemonInstallation';
 import {
   DaemonLauncherUnavailableError,
-  getSelectedDaemonStartCommand,
-  selectDaemonLauncherAsync,
-  type IVersionSelectedDaemonLaunch
-} from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
+  getSelectedDaemonStartCommand
+} from '@rushstack/rush-daemon/lib/DaemonLaunchCommand';
+import type { IVersionSelectedDaemonLaunch } from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
+
+import { BUNDLED_RUSH_VERSION } from './bundledRushVersion';
 
 export function getDaemonConnectionOptions(
   repoRoot: string,
@@ -57,9 +57,13 @@ export async function getDaemonConnectionOptionsAsync(
     false
   );
   if (!autoStart) return { paths: options.paths };
-  // The bundled runtime is already loaded here; its bootstrap re-attests before binding.
-  if (rushVersion === Rush.version)
+  // The bundled runtime needs no selection; its bootstrap re-attests before binding.
+  if (rushVersion === BUNDLED_RUSH_VERSION)
     return getDaemonConnectionOptions(repoRoot, rushVersion, environment, true);
+  // Selecting another installation uses the engine's installer APIs, so it is loaded only when needed.
+  const { selectDaemonLauncherAsync } = await import(
+    '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher'
+  );
   const launch: IVersionSelectedDaemonLaunch = await selectDaemonLauncherAsync({
     repoRoot: fs.realpathSync.native(repoRoot),
     rushVersion,

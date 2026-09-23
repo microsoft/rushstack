@@ -47,6 +47,7 @@ import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 import { SubspacesConfiguration } from './SubspacesConfiguration';
 import { Subspace } from './Subspace';
 import { resolveDaemonConfiguration, type IDaemonConfigurationJson } from './DaemonConfiguration';
+import { tryFindRushJsonLocation } from './RushJsonLocation';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -1100,37 +1101,11 @@ export class RushConfiguration {
    * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
    *
    * @privateRemarks
-   * Keep this in sync with `findRushJsonLocation` in `rush-sdk/src/index.ts`.
+   * Keep this in sync with `findRushJsonLocation` in `rush-sdk/src/index.ts`. The implementation lives in
+   * `RushJsonLocation.ts` so that callers can find rush.json without loading the rest of the engine.
    */
   public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
-    const optionsIn: ITryFindRushJsonLocationOptions = options || {};
-    const verbose: boolean = optionsIn.showVerbose || false;
-    let currentFolder: string = optionsIn.startingFolder || process.cwd();
-    let parentFolder: string = path.dirname(currentFolder);
-
-    // look upwards at parent folders until we find a folder containing rush.json,
-    // or we reach the root directory without finding a rush.json file
-    while (parentFolder && parentFolder !== currentFolder) {
-      const rushJsonFilename: string = path.join(currentFolder, RushConstants.rushJsonFilename);
-      if (FileSystem.exists(rushJsonFilename)) {
-        if (currentFolder !== optionsIn.startingFolder && verbose) {
-          // eslint-disable-next-line no-console
-          console.log('Found configuration in ' + rushJsonFilename);
-        }
-
-        if (verbose) {
-          // eslint-disable-next-line no-console
-          console.log('');
-        }
-
-        return rushJsonFilename;
-      }
-      currentFolder = parentFolder;
-      parentFolder = path.dirname(currentFolder);
-    }
-
-    // no match
-    return undefined;
+    return tryFindRushJsonLocation(options);
   }
 
   /**

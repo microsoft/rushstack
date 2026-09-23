@@ -37,39 +37,12 @@ import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 import { initializeDotEnv, loadDotEnvForEnvironment } from '../logic/dotenv';
 import { escapeArgumentIfNeeded } from '../utilities/executionUtilities';
+import {
+  parseRushXCommandLineArguments as _parseCommandLineArguments,
+  type IRushXCommandLineArguments
+} from './RushXCommandLineArguments';
 
-/** Native Rushx arguments. Options after the command belong to the script. @beta */
-export interface IRushXCommandLineArguments {
-  /**
-   * Flag indicating whether to suppress any rushx startup information.
-   */
-  quiet: boolean;
-
-  /**
-   * Flag indicating whether the user has asked for help.
-   */
-  help: boolean;
-
-  /**
-   * Flag indicating whether the user has requested debug mode.
-   */
-  isDebug: boolean;
-
-  /**
-   * Flag indicating whether the user wants to not call hooks.
-   */
-  ignoreHooks: boolean;
-
-  /**
-   * The command to run (i.e., the target "script" in package.json.)
-   */
-  commandName: string;
-
-  /**
-   * Any additional arguments/parameters passed after the command name.
-   */
-  commandArgs: string[];
-}
+export type { IRushXCommandLineArguments } from './RushXCommandLineArguments';
 
 /** Explicit process state and an optional owned asynchronous spawn seam for native Rushx. @beta */
 export interface IRushXCommandOptions {
@@ -403,70 +376,6 @@ function _getLifecycleConfiguration(
       EnvironmentConfiguration._getRushTempFolderOverride({
         [EnvironmentVariableNames.RUSH_TEMP_FOLDER]: tempOverride
       }) || path.join(rushJsonFolder, RushConstants.commonFolderName, RushConstants.rushTempFolderName)
-  };
-}
-
-function _parseCommandLineArguments(
-  args: ReadonlyArray<string>,
-  environment: Readonly<NodeJS.ProcessEnv>,
-  reportUnknownArguments?: (message: string) => void
-): IRushXCommandLineArguments {
-  const unknownArgs: string[] = [];
-
-  let help: boolean = false;
-  let quiet: boolean = false;
-  let commandName: string = '';
-  let isDebug: boolean = false;
-  let ignoreHooks: boolean = false;
-  const commandArgs: string[] = [];
-
-  for (let index: number = 0; index < args.length; index++) {
-    const argValue: string = args[index];
-
-    if (!commandName) {
-      if (argValue === '-q' || argValue === '--quiet') {
-        quiet = true;
-      } else if (argValue === '-h' || argValue === '--help') {
-        help = true;
-      } else if (argValue === '-d' || argValue === '--debug') {
-        isDebug = true;
-      } else if (argValue === '--ignore-hooks') {
-        ignoreHooks = true;
-      } else if (argValue.startsWith('-')) {
-        unknownArgs.push(args[index]);
-      } else {
-        commandName = args[index];
-      }
-    } else {
-      commandArgs.push(args[index]);
-    }
-  }
-
-  const quietModeValue: string | undefined = environment[EnvironmentVariableNames.RUSH_QUIET_MODE];
-  if (quietModeValue === '1' || quietModeValue === 'true') {
-    quiet = true;
-  }
-
-  if (!commandName) {
-    help = true;
-  }
-
-  if (unknownArgs.length > 0) {
-    // Future TODO: Instead of just displaying usage info, we could display a
-    // specific error about the unknown flag the user tried to pass to rushx.
-    reportUnknownArguments?.(
-      Colorize.red(`Unknown arguments: ${unknownArgs.map((x) => JSON.stringify(x)).join(', ')}`)
-    );
-    help = true;
-  }
-
-  return {
-    help,
-    quiet,
-    isDebug,
-    ignoreHooks,
-    commandName,
-    commandArgs
   };
 }
 

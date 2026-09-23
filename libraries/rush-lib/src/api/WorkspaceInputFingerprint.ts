@@ -68,16 +68,17 @@ export class WorkspaceRuntimeFingerprintCache {
     const entries: ReadonlyArray<string>[] = [];
     for (const filename of Array.from(filenames).sort()) {
       try {
+        // statSync follows links, so dev and ino identify the file that is loaded. Its resolved path is
+        // recomputed whenever that identity changes, which avoids a costly realpath for every unchanged file.
         const stat: fsSync.BigIntStats = fsSync.statSync(filename, { bigint: true });
-        const realPath: string = fsSync.realpathSync(filename);
-        const stamp: string = `${realPath}:${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
+        const stamp: string = `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
         let cached: { stamp: string; entry: ReadonlyArray<string> } | undefined = this._files.get(filename);
         if (cached?.stamp !== stamp) {
           cached = {
             stamp,
             entry: [
               filename,
-              realPath,
+              fsSync.realpathSync(filename),
               createHash('sha256').update(fsSync.readFileSync(filename)).digest('hex')
             ]
           };
@@ -183,6 +184,8 @@ export async function captureWorkspaceInputFingerprintAsync(
   const runtimePaths: string[] = [
     path.join(packageFolder, 'package.json'),
     path.join(packageFolder, 'lib-commonjs'),
+    // In a bundled Rush, lib-commonjs only forwards to the bundle chunks, which contain the implementation.
+    path.join(packageFolder, 'dist'),
     ...(options.runtimePaths ?? [])
   ];
   const runtimeHash: string = (options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache())._hashPaths(

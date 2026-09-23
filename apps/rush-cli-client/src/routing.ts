@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
-import { RushXCommand, type IRushXCommandLineArguments } from '@microsoft/rush-lib';
+import {
+  parseRushXCommandLineArguments,
+  type IRushXCommandLineArguments
+} from '@microsoft/rush-lib/lib/cli/RushXCommandLineArguments';
 
 import { parseClientAdmissionControls, type IClientAdmissionControls } from './ClientAdmissionControls';
 
@@ -53,7 +56,7 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     ...(separator < 0 ? [] : controls.argv.slice(separator))
   ];
   const rushxArguments: IRushXCommandLineArguments | undefined = options.rushx
-    ? RushXCommand.parseArguments(argv, options.environment)
+    ? parseRushXCommandLineArguments(argv, options.environment)
     : undefined;
   const commandName: string | undefined = rushxArguments ? rushxArguments.commandName || undefined : argv[0];
   const reporterControls: boolean =
