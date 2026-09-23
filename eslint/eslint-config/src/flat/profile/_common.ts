@@ -21,7 +21,6 @@
 // - An obsolete language feature that nobody should be using for any good reason
 
 import type { ESLint, Linter } from 'eslint';
-import { globalIgnores } from 'eslint/config';
 import promiseEslintPlugin from 'eslint-plugin-promise';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 // `@typescript-eslint/parser` marks its CommonJS export with `__esModule` but exposes the parser API
@@ -240,14 +239,14 @@ const commonConfig: Linter.Config[] = [
   // Manually authored .d.ts files are generally used to describe external APIs that are  not expected
   // to follow our coding conventions.  Linting those files tends to produce a lot of spurious suppressions,
   // so we simply ignore them.
-  globalIgnores(['**/*.d.ts']) as Linter.Config,
+  { name: 'ignore-d-ts', ignores: ['**/*.d.ts'] },
 
   // Build output and other generated folders are not source code and should never be linted.  This is
   // particularly important for tools that enumerate files from the ESLint configuration itself (rather than
   // only linting a known set of source files), since ESLint's flat config does not respect ".gitignore".
   // These patterns are anchored to the project root (they are evaluated relative to the cwd), so a source
   // folder such as "src/lib" is not affected.
-  globalIgnores(['lib/**', 'lib-*/**', 'dist/**', 'temp/**', 'coverage/**']) as Linter.Config,
+  { name: 'ignore-build-output', ignores: ['lib/**', 'lib-*/**', 'dist/**', 'temp/**', 'coverage/**'] },
 
   {
     files: ['**/*.ts', '**/*.tsx'],
