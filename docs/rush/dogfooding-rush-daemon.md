@@ -103,7 +103,8 @@ in-process Rush. Check all of the following:
    `true`.
 3. **The same process.** `pid` and `workspace.generationToken` stay the same across requests from the same
    terminal. `workspace.lastReloadTier` is `0` when the request reused the existing graph, and `1` after an
-   in-process reload (for example, the first request, or a configuration change).
+   in-process reload (for example, the first request, or a configuration change). The command line of that
+   `pid` runs `SelectedDaemonBootstrap.js` from `common/temp/rush-daemon-dogfood`, not from the workspace.
 4. **Parity.** For the same selection, ordinary Rush produces the same outputs. For example, after a
    daemon-served build, `node common/scripts/install-run-rush.js rebuild --only @rushstack/tree-pattern`
    leaves the files in `lib-commonjs`, `lib-dts`, `lib-esm`, and `dist` unchanged.
@@ -184,8 +185,9 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   the command, one of its phases, or a parameter for either would make those builds fall back to native Rush.
 - **Windows.** Native Windows validation of the daemon code saw unresolved, intermittent failures in which
   Git `hash-object --stdin-paths` exited with `0xC0000142` (DLL initialization failed) while the daemon
-  captured workspace snapshots under Jest. Direct fixtures did not reproduce it. If a daemon-served build
-  fails this way, retry it with `--no-daemon` and report the failure.
+  captured workspace snapshots under Jest. Direct fixtures did not reproduce it, and it did not occur while
+  this workflow was validated on native Windows. The cause is unresolved, so treat it as an open risk: if a
+  daemon-served build fails this way, retry it with `--no-daemon` and report the failure.
 - **CI** stays in-process unless `RUSH_DAEMON=1` is set; do not set it in CI workflows.
 
 ## Version skew and `RUSH_PREVIEW_VERSION`
