@@ -46,7 +46,10 @@ file sharing on Windows. The winning client rechecks readiness,
 reclaims only an absent/dead owner, and reserves `<lockfilePath>.starting` before
 handing the explicit command to a detached startup helper. The helper spawns without
 a shell and retains that reservation until the daemon completes hello/ping readiness,
-independently of whether the requesting client survives. Clients still await
+independently of whether the requesting client survives. It waits for a live launcher for
+at least 120 seconds, even when the requesting client's own deadline is shorter, so a slow
+first start (for example while Windows scans newly installed files) is still handed off to
+later clients instead of leaving an abandoned reservation. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed; a live (possibly reused) PID with an unreachable socket fails closed.
 The helper uses a stable tool cwd, and the starting client awaits its exit after

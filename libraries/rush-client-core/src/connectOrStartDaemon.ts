@@ -34,6 +34,13 @@ interface IStartupHelper {
   readonly closed: Promise<void>;
 }
 
+/**
+ * The minimum time the detached helper waits for a live launcher to become ready. It is independent of the
+ * requesting client's deadline: a slow first start (for example while Windows scans newly installed files)
+ * would otherwise leave a retained reservation that keeps every later client from using the ready daemon.
+ */
+const STARTUP_HELPER_READINESS_TIMEOUT_MS: number = 120_000;
+
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
 export interface IDaemonStartCommand {
   readonly command: string;
@@ -477,7 +484,7 @@ async function spawnDetachedAsync(
       paths: options.paths,
       startCommand: start,
       token,
-      timeoutMs: Math.max(1, deadline - Date.now())
+      timeoutMs: Math.max(STARTUP_HELPER_READINESS_TIMEOUT_MS, deadline - Date.now())
     };
     let delivered: boolean = false;
     try {

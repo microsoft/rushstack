@@ -147,6 +147,25 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
   }, 15000);
 
+  it('lets the detached helper finish a startup that outlasts the requesting client', async () => {
+    fs.writeFileSync(path.join(folder, 'hold-prebind'), '');
+    const first = startClient({ ...options, startupTimeoutMs: 1000 });
+    const barrier: string = path.join(folder, 'prebind');
+    const deadline: number = Date.now() + 5000;
+    while (!fs.existsSync(barrier) && Date.now() < deadline) await delayAsync(20);
+    const daemonPid: number = Number(fs.readFileSync(barrier, 'utf8'));
+    expect((await first.result).code).not.toBe(0);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(true);
+
+    // The launcher becomes ready only after the first client has given up.
+    fs.unlinkSync(path.join(folder, 'hold-prebind'));
+    const client = await connectOrStartDaemonAsync(options);
+    expect((await client.status).pid).toBe(daemonPid);
+    await client.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+  }, 15000);
+
   it('preserves an unresolved startup reservation rather than trusting or reclaiming its contents', async () => {
     const startupPath: string = getDaemonStartupFilePath(paths);
     const contents: string = JSON.stringify({ pid: process.pid, startedAt: 'not an ownership contract' });
