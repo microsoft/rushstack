@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/eslint-plugin-security"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-security",
+  "email": "rushbot@users.noreply.github.com"
+}
