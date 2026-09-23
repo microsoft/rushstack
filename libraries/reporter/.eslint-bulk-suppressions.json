@@ -306,6 +306,16 @@
       "rule": "complexity"
     },
     {
+      "file": "src/diagnostics/DiagnosticSecretValues.ts",
+      "scopeId": ".createSecretValueMatcher",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/diagnostics/DiagnosticSecretValues.ts",
+      "scopeId": ".createSecretValueMatcher",
+      "rule": "complexity"
+    },
+    {
       "file": "src/diagnostics/IRushDiagnostic.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -827,13 +837,23 @@
     },
     {
       "file": "src/manager/ReporterManager.ts",
-      "scopeId": ".ReporterManager._disposeInitializedReportersAsync",
+      "scopeId": ".ReporterManager._disposeEntriesAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/manager/ReporterManager.ts",
-      "scopeId": ".ReporterManager._disposeInitializedReportersAsync",
+      "scopeId": ".ReporterManager._disposeEntriesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._disposeEntriesAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager._disposeInitializedReportersAsync",
+      "rule": "complexity"
     },
     {
       "file": "src/manager/ReporterManager.ts",
@@ -893,6 +913,11 @@
     {
       "file": "src/manager/ReporterManager.ts",
       "scopeId": ".ReporterManager.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/manager/ReporterManager.ts",
+      "scopeId": ".ReporterManager.initializeAsync.context.runWithErrorHandling",
       "rule": "complexity"
     },
     {
@@ -1141,6 +1166,211 @@
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".AI_REPORTER_QUALIFICATION_THRESHOLDS",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".createPerCaseRatioGate",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".createPerCaseRatioGate",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".evaluateAiReporterQualification",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".evaluateAiReporterQualification",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".evaluateAiReporterQualification",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".formatAiReporterQualificationFailures",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".getHighestRatioCaseNames",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".getQualifiedAiReporterDecision",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".percent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualification.ts",
+      "scopeId": ".ratioPercent",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createEvents",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createEvents",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createEvents",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createEvents.add",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createExternalOutput",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createSecretProjectionProbeEvents",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createSecretProjectionProbeEvents",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createSecretProjectionProbeEvents.createProbe",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createSecretProjectionProbeEvents.createProbe",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".createSecretProjectionProbeEvents.createProbe",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".hasExpectedAiQualificationDiagnostic",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".hasExpectedAiQualificationDiagnostic",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".normalizeAiReporterQualificationOutput.replacePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".parseAiOutput",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runAiReporterQualificationCorpusAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runAiReporterQualificationCorpusAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runAiReporterQualificationCorpusAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runCaseAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runCaseAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runCaseAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runInvocationBudgetGateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runInvocationBudgetGateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/qualification/AiReporterQualificationCorpus.ts",
+      "scopeId": ".runInvocationBudgetGateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
       "file": "src/reporters/AiReporter.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -1149,6 +1379,11 @@
       "file": "src/reporters/AiReporter.ts",
       "scopeId": ".",
       "rule": "max-lines"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/reporters/AiReporter.ts",
@@ -1184,6 +1419,51 @@
       "file": "src/reporters/AiReporter.ts",
       "scopeId": ".AiReporter._emitFinal.record",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._emitFinal.serializedBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._flushPendingProgress",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._flushPendingProgress",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._getFinalReserveBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._orderDiagnostics",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._orderDiagnostics",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._orderDiagnostics.visit",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._projectDiagnosticContext",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/AiReporter.ts",
+      "scopeId": ".AiReporter._projectDiagnosticContext",
+      "rule": "complexity"
     },
     {
       "file": "src/reporters/AiReporter.ts",
@@ -1312,7 +1592,17 @@
     },
     {
       "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter.closeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
       "scopeId": ".DefaultInteractiveReporter.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/DefaultInteractiveReporter.ts",
+      "scopeId": ".DefaultInteractiveReporter.initializeAsync",
       "rule": "complexity"
     },
     {
@@ -1479,11 +1769,6 @@
       "file": "src/reporters/HumanReadableDiagnostic.ts",
       "scopeId": ".",
       "rule": "import/order"
-    },
-    {
-      "file": "src/reporters/HumanReadableDiagnostic.ts",
-      "scopeId": ".formatHumanReadableDiagnostic",
-      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/reporters/HumanReadableDiagnostic.ts",
@@ -1772,6 +2057,16 @@
     },
     {
       "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter.initializeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
+      "scopeId": ".PlaintextReporter.initializeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/reporters/PlaintextReporter.ts",
       "scopeId": ".PlaintextReporter.report",
       "rule": "complexity"
     },
@@ -1779,6 +2074,11 @@
       "file": "src/reporters/PlaintextReporter.ts",
       "scopeId": ".PlaintextReporter.report",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/reporters/ReporterRedaction.ts",
+      "scopeId": ".",
+      "rule": "import/order"
     },
     {
       "file": "src/reporters/ReporterRedaction.ts",
@@ -2009,6 +2309,41 @@
       "file": "src/telemetry/TelemetrySubscriber.ts",
       "scopeId": ".recordBoundedPrioritizedValue",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".expected",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AiReporterQualification.test.ts",
+      "scopeId": ".startSession",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/AutomaticReporterMatrix.test.ts",
@@ -2289,6 +2624,16 @@
       "file": "src/test/JsonAiReporter.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".parameters.detail",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/JsonAiReporter.test.ts",
+      "scopeId": ".parameters.message",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/JsonAiReporter.test.ts",
@@ -2656,6 +3001,31 @@
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
+      "file": "src/test/ReporterRedaction.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ReporterRedaction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ReporterRedaction.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ReporterRedaction.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ReporterRedaction.test.ts",
+      "scopeId": ".diagnosticEvent.payload.parameters.detail",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/ReporterSelection.test.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -2771,6 +3141,41 @@
       "rule": "sort-imports"
     },
     {
+      "file": "src/test/helpers/AiQualificationTestSession.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/helpers/AiQualificationTestSession.ts",
+      "scopeId": ".AiQualificationTestSession.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/helpers/AiQualificationWorker.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/helpers/AiQualificationWorker.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/helpers/AiQualificationWorker.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/helpers/AiQualificationWorker.ts",
+      "scopeId": ".TempDirectoryOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/helpers/AiQualificationWorker.ts",
+      "scopeId": ".useOwnedTempRoot",
+      "rule": "complexity"
+    },
+    {
       "file": "src/utilities/chunkUtf8Text.ts",
       "scopeId": ".chunkUtf8Text",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -2779,6 +3184,16 @@
       "file": "src/utilities/chunkUtf8Text.ts",
       "scopeId": ".chunkUtf8Text",
       "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/startReporterTimer.ts",
+      "scopeId": ".startReporterTimer",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/startReporterTimer.ts",
+      "scopeId": ".startReporterTimer",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/utilities/writeAllSync.ts",

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Keep control validators within strict module size limits after applying the repository formatter without changing wire validation.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

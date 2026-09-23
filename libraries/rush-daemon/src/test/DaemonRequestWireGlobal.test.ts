@@ -6,15 +6,9 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { DaemonFrameType, decodeDaemonLogChunk } from '@rushstack/rush-daemon-protocol';
-import type {
-  DaemonControlMessage,
-  IDaemonRequestEnvelope
-} from '@rushstack/rush-daemon-protocol';
+import type { DaemonControlMessage, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
-import type {
-  GlobalCommandExecutor,
-  IDaemonRequestResolver
-} from '../index';
+import type { GlobalCommandExecutor, IDaemonRequestResolver } from '../index';
 import { MAX_REQUESTS_PER_CONNECTION } from '../DaemonConnectionLimits';
 import { RushDaemonHost } from '../RushDaemonHost';
 import type { IRushDaemonHostOptions } from '../RushDaemonHost';
@@ -25,10 +19,7 @@ import {
   createDeferred,
   createWireEnvelope
 } from './DaemonRequestWireTestUtilities';
-import type {
-  IDeferred,
-  ITerminalExchange
-} from './DaemonRequestWireTestUtilities';
+import type { IDeferred, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 
 const DAEMON_VERSION: string = 'wire-test';
 const RUSH_VERSION: string = '5.178.1';
@@ -54,8 +45,7 @@ function createHostOptions(
   onDispose?: () => unknown
 ): IRushDaemonHostOptions {
   return {
-    createWorkspaceSessionAsync: () =>
-      Promise.resolve(new TestWorkspaceSession(repoRoot, onDispose)),
+    createWorkspaceSessionAsync: () => Promise.resolve(new TestWorkspaceSession(repoRoot, onDispose)),
     daemonVersion: DAEMON_VERSION,
     repoRoot,
     requestResolver: resolver,
@@ -64,9 +54,7 @@ function createHostOptions(
 }
 
 async function connectAsync(host: RushDaemonHost): Promise<DaemonRequestWireClient> {
-  const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(
-    host.paths.socketPath
-  );
+  const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
   await client.handshakeAsync();
   return client;
 }
@@ -99,21 +87,48 @@ describe('daemon global request wire integration', () => {
     }
   });
 
+  it('does not intercept custom commands named daemon when graph features are enabled', async () => {
+    const repoRoot: string = createRepoRoot();
+    const executorAsync: GlobalCommandExecutor = async (context) => {
+      context.terminal.write('custom daemon');
+      return { exitCode: 0 };
+    };
+    const resolver = new CallbackDaemonRequestResolver(async () => ({
+      kind: 'global',
+      executor: executorAsync
+    }));
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot, resolver));
+    const client: DaemonRequestWireClient = await connectAsync(host);
+    try {
+      const exchange: ITerminalExchange = await startAsync(
+        client,
+        createWireEnvelope('custom-daemon', 'daemon', repoRoot, {
+          argv: ['daemon', 'graph'],
+          commandOrigin: 'custom',
+          environment: { RUSH_DAEMON_EXPERIMENTAL: '1' }
+        })
+      );
+      expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(readLogText(exchange)).toBe('custom daemon');
+    } finally {
+      await client.closeAsync();
+      await host.closeAsync();
+    }
+  });
+
   it('isolates global cwd and environment while preserving raw ordered output and exit codes', async () => {
     const repoRoot: string = createRepoRoot();
     const firstCwd: string = fs.mkdtempSync(path.join(repoRoot, 'first-'));
     const secondCwd: string = fs.mkdtempSync(path.join(repoRoot, 'second-'));
     const observed: string[] = [];
-    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(
-      async ({ envelope }) => {
-        const executorAsync: GlobalCommandExecutor = async (context) => {
-          observed.push(`${envelope.requestId}:${context.cwd}:${context.environment.get('WIRE_VALUE')}`);
-          context.terminal.write(`${envelope.requestId}-output`);
-          return { exitCode: envelope.requestId === 'failure' ? FAILURE_EXIT_CODE : 0 };
-        };
-        return { executor: executorAsync, kind: 'global' };
-      }
-    );
+    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(async ({ envelope }) => {
+      const executorAsync: GlobalCommandExecutor = async (context) => {
+        observed.push(`${envelope.requestId}:${context.cwd}:${context.environment.get('WIRE_VALUE')}`);
+        context.terminal.write(`${envelope.requestId}-output`);
+        return { exitCode: envelope.requestId === 'failure' ? FAILURE_EXIT_CODE : 0 };
+      };
+      return { executor: executorAsync, kind: 'global' };
+    });
     const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot, resolver));
     const clients: ReadonlyArray<DaemonRequestWireClient> = [
       await connectAsync(host),
@@ -222,18 +237,16 @@ describe('daemon global request wire integration', () => {
     const repoRoot: string = createRepoRoot();
     const holderStarted: IDeferred<void> = createDeferred<void>();
     const releaseHolder: IDeferred<void> = createDeferred<void>();
-    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(
-      async ({ envelope }) => {
-        const executorAsync: GlobalCommandExecutor = async () => {
-          if (envelope.requestId === 'holder') {
-            holderStarted.resolve();
-            await releaseHolder.promise;
-          }
-          return { exitCode: 0 };
-        };
-        return { executor: executorAsync, kind: 'global' };
-      }
-    );
+    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(async ({ envelope }) => {
+      const executorAsync: GlobalCommandExecutor = async () => {
+        if (envelope.requestId === 'holder') {
+          holderStarted.resolve();
+          await releaseHolder.promise;
+        }
+        return { exitCode: 0 };
+      };
+      return { executor: executorAsync, kind: 'global' };
+    });
     const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot, resolver));
     const clients: DaemonRequestWireClient[] = await Promise.all(
       Array.from({ length: 4 }, () => connectAsync(host))
@@ -345,12 +358,7 @@ describe('daemon global request wire integration', () => {
     try {
       for (let index: number = 0; index < MAX_REQUESTS_PER_CONNECTION; index++) {
         expect(
-          (
-            await startAsync(
-              client,
-              createWireEnvelope(`bounded-${index}`, 'custom', repoRoot)
-            )
-          ).terminal
+          (await startAsync(client, createWireEnvelope(`bounded-${index}`, 'custom', repoRoot))).terminal
         ).toMatchObject({
           kind: 'requestResult',
           payload: { outcome: 'success', requestId: `bounded-${index}` }
@@ -418,10 +426,7 @@ describe('daemon global request wire integration', () => {
 
 function readLogText(exchange: ITerminalExchange): string {
   return exchange.frames
-    .filter(
-      (frame) =>
-        frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr
-    )
+    .filter((frame) => frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr)
     .map((frame) => new TextDecoder().decode(decodeDaemonLogChunk(frame.payload).chunk))
     .join('');
 }

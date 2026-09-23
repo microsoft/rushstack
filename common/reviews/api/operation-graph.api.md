@@ -18,6 +18,7 @@ export type EventMessageFromClient = IRequestRunEventMessage | IAfterExecuteEven
 export interface IAfterExecuteEventMessage {
     // (undocumented)
     event: 'after-execute';
+    residentMemoryBytes?: number;
     // (undocumented)
     status: OperationStatus;
 }

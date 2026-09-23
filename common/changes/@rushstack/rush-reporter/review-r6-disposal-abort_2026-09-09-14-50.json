@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Abort all attempted reporter initializations synchronously before serialized disposal, preserving the startup failure reason and once-only cleanup.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

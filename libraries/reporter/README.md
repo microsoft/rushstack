@@ -4,16 +4,6 @@ Canonical event protocol, reporter manager, and built-in reporters for Rush.
 
 This package is released as a public beta. Exported contracts may change before the stable release.
 
-Bootstrap initialization failures close every destination whose initialization was attempted, including
-partially initialized reporters, before propagating the original failure. Abandoned handoff cleanup applies
-the 14-day retention window and a 20-session cap to files verifiably owned by the current user whose producer
-process has exited. Live/current handoffs, foreign files, and entries without verifiable ownership are not
-removed; timestamp ties are resolved by filename.
-
-Bootstrap replay shares the frontend's canonical full-detail invocation log. That log remains
-unfiltered at debug level even with `--reporter=file --log-level=normal`; selected levels filter
-the visible reporter and explicit output destinations, not the canonical log.
-
 An owned additional `--output=json://stdout` or `--output=file://stdout` also reserves stdout during
 bootstrap installation. Repository-implicit selection respects declared command-owned output controls.
 Old-engine capture forwards reentrant reporter writes without recapturing them, and version-selection
@@ -23,14 +13,75 @@ Rush 5 keeps legacy terminal output by default. See the
 [experimental Rush reporter guide](../../docs/rush/reporter.md) for opt-in controls, reporter behavior,
 privacy boundaries, full-detail logs, bootstrap compatibility, and the reproducible repository demo.
 
-## Full-detail log completion
+Bootstrap initialization failures close every destination whose initialization was attempted, including
+partially initialized reporters, before propagating the original failure. Abandoned handoff cleanup applies
+the 14-day retention window and a 20-session cap to files verifiably owned by the current user whose producer
+process has exited. Live/current handoffs, foreign files, and entries without verifiable ownership are not
+removed; timestamp ties are resolved by filename.
+Each registration shares a cached manager-owned close operation across normal shutdown and initialization
+disposal, including rejected closes. The frontend's eager full-log close for artifact publication remains
+unchanged.
+Failed initialization aborts every attempted reporter synchronously before waiting for its lifecycle lane.
+Abort signals retain the startup failure as their reason; non-Error failures are retained as the cause of an
+Error used for cancellation, while the frontend rethrows the original failure unchanged.
 
-The frontend reports an invocation log as complete only after its accepted events and grouped
-output have been persisted and the file has closed successfully. Its final `artifactAvailable`
-notification is delivered to the remaining reporters after that close; it is not appended to the
-same closed log. The log retains command results and session completion, including failed commands.
-Flush or close failures leave the artifact incomplete or unavailable and produce an emergency warning
-without replacing the command's native exit result.
+## AI reporter qualification
+
+The network-free qualification corpus runs representative bootstrap/version, configuration, input,
+dependency-tool, operation, cache, network/auth, plugin, cancellation, and internal failures plus
+successful and warning-only controls through the AI, detailed plaintext, legacy, and full-log reporters.
+Scenario-specific external output is included only where the real failure or control would produce it.
+
+| Gate | Blocking threshold |
+| --- | --- |
+| Failure/control coverage | At least 10 failure cases and 2 successful controls |
+| Actionability | 100% of failures retain stable code, category, context, and remediation |
+| Output size | At most 64 KiB per case; compact cases at most 2 KiB; AI no larger than comparable per-case baselines; aggregate AI bytes at most 50% of legacy and plaintext |
+| Determinism | Byte-identical normalized AI output across 3 runs |
+| Privacy | 100% secret redaction and no private producer identity leakage |
+| Full log | 100% absolute, existing, owner-only where supported, complete, and failure-correlated |
+| Stdout/warnings | 100% payload-only NDJSON and warning suppression/detail compliance |
+
+Run `rushx build && node scripts/runAiReporterQualification.js` from this project to print the
+machine-readable result. Byte gates measure the actual emitted UTF-8 strings, including absolute paths and
+NDJSON delimiters. Paths are normalized only for deterministic comparison/hashing and are not stored.
+Separate near-limit and sustained-watch probes enforce the invocation budget without adding artificial
+baseline volume to the comparison corpus. Passing
+these gates only produces a reusable qualification decision; it does not enable environment-based automatic
+reporter selection. That decision also requires the separate telemetry privacy prerequisite to be accepted.
+The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
+authoritative.
+The Jest setup hook has a bounded 15-second allowance for the three file-backed corpus passes, matching
+the integration test setup policy. This allowance does not change any quality gate or production deadline.
+
+AI output reserves final-record space, including its supplied log reference, before emitting progress.
+Progress is buffered within the invocation byte limit until the primary log reservation is known, or until
+close if no log is supplied. Excess progress/details set `truncated`; the final result remains valid JSON.
+An unrendered start acknowledgement is coalesced into a known final result. Ongoing commands still expose
+buffered status at the next non-terminal event or explicit flush; watch history and every final field,
+including the supplied log reference, are retained. No path shortening or measurement normalization is used.
+The final scope carries the command name, and standard `diagnostic.<code>.summary` keys are implicit rather
+than repeated alongside the same code. Custom summary keys are preserved.
+
+AI fallback message text is emitted only for public envelopes. Its context retains the known command, and
+the usage-review action invokes that command's help (or `rush --help` when the command is unavailable).
+Qualification checks exact expected context, remediation commands/URLs, descriptions, and execution safety;
+summary-only failures and unrelated actions do not qualify. Non-public fallback errors remain countable
+and refer to the protected full-detail log. JSON oversized-record markers preserve the original privacy
+classification and omit non-public source and scope metadata.
+
+Secret envelopes retain only protocol, event identity, ordering, timing, type, privacy, and fully redacted
+source and payload fields. Contextual parent, command, operation, project, phase, and scope metadata is
+removed.
+Human diagnostic source labels that duplicate an explicitly secret parameter are also redacted. Unrelated
+local-sensitive tool names and locations remain available in local human output.
+
+Machine JSON also applies the existing nonempty secret-value alias classifier to diagnostic sources.
+A producer package name that repeats a secret value hides the associated producer identity; otherwise
+only matching version/component or diagnostic file/tool fields are redacted. Unrelated source context
+remains available. Owner-only full-detail files retain their existing local-sensitive source context
+while redacting the classified parameter itself. Qualification checks both AI and JSON output for the
+private producer and component, independently of the full-log preservation check.
 
 ## Shadow lifecycle compatibility
 
@@ -52,6 +103,20 @@ The recorded cancellation state is reset when a new command starts.
 
 Operation output parity tests compare raw terminal chunks, including stream identity and unnormalized ANSI
 text, as well as the actual bytes on each stdout/stderr stream.
+
+## Full-detail log completion
+
+Bootstrap replay shares the frontend's canonical full-detail invocation log.
+The automatic invocation log retains debug detail regardless of the primary log level, including
+in `--reporter=file` mode. An additional `--output=file://...` destination can independently select
+its level with `?logLevel=...`; it does not replace or reduce the canonical full-detail artifact.
+
+The frontend reports an invocation log as complete only after its accepted events and grouped
+output have been persisted and the file has closed successfully. Its final `artifactAvailable`
+notification is delivered to the remaining reporters after that close; it is not appended to the
+same closed log. The log retains command results and session completion, including failed commands.
+Flush or close failures leave the artifact incomplete or unavailable and produce an emergency warning
+without replacing the command's native exit result.
 
 ## Links
 

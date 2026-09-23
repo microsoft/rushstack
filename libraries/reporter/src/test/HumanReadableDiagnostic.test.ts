@@ -129,6 +129,30 @@ describe(formatHumanReadableDiagnostic.name, () => {
     expect(output).toContain('^5.100.0');
   });
 
+  it('retains unrelated local-sensitive source details even when another parameter is secret', () => {
+    const event: IReporterEventEnvelope<Partial<IRushDiagnostic>> = {
+      ...createEvent(),
+      payload: {
+        code: 'RUSH_EXTERNAL_TOOL_PROBLEM',
+        severity: 'error',
+        parameters: { token: { value: 'classified-token', privacy: 'secret' } },
+        source: {
+          kind: 'file',
+          file: '/private/project/input.ts',
+          line: 5,
+          column: 2,
+          toolName: 'private-compiler'
+        }
+      }
+    };
+    const original: string = JSON.stringify(event);
+    const output: string = formatHumanReadableDiagnostic(event);
+
+    expect(output).toContain('[private-compiler] /private/project/input.ts:5:2');
+    expect(output).not.toContain('classified-token');
+    expect(JSON.stringify(event)).toBe(original);
+  });
+
   it('does not treat an empty secret parameter as an alias of every source string', () => {
     const output: string = formatHumanReadableDiagnostic(
       createEvent({

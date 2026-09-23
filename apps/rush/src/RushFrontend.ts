@@ -189,6 +189,9 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
       }
     });
   }
+  const hasReporterStdoutOutput: boolean = reporterHost.selection.outputs.some(
+    (output) => output.target === 'stdout'
+  );
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
     ...launchOptions,
     reporter: {
@@ -216,7 +219,13 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     reporterStdoutIsMachineReadable:
       reporterHost.selection.reporter === 'ai' ||
       reporterHost.selection.reporter === 'json' ||
-      reporterHost.selection.outputs.some((output) => output.target === 'stdout'),
+      hasReporterStdoutOutput,
+    reporterStdoutIsReserved:
+      hasReporterStdoutOutput ||
+      (!reporterHost.selection.commandJson &&
+        (reporterHost.selection.reporter === 'ai' ||
+          reporterHost.selection.reporter === 'json' ||
+          reporterHost.selection.reporter === 'file')),
     reporterSelectionReason: reporterHost.selection.reason
   };
 

@@ -14,6 +14,10 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
   with backpressure-aware writes and serialized async frame handlers for inbound flow control.
 - **PID/lockfile handling** — stale sockets and dead PIDs are detected (two-factor: PID liveness
   plus a connect probe) and reclaimed without manual cleanup.
+- **Two-phase shutdown** — `stopAcceptingAsync()` stops admission and waits for connections while
+  retaining ownership. Hosts release the endpoint with `closeAsync()` after their resources have
+  finished disposing. A live owner prevents rebinding even when its socket has already closed;
+  repeated closes cannot remove a successor's endpoint.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

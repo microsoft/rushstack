@@ -758,7 +758,17 @@
     {
       "file": "src/LockFile.ts",
       "scopeId": ".LockFile.release",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".LockFile.release",
       "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".LockFile.release",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/LockFile.ts",
@@ -783,16 +793,6 @@
     {
       "file": "src/LockFile.ts",
       "scopeId": "._tryAcquireMacOrLinux",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/LockFile.ts",
-      "scopeId": "._tryAcquireWindows",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/LockFile.ts",
-      "scopeId": "._tryAcquireWindows",
       "rule": "max-lines-per-function"
     },
     {
@@ -1221,6 +1221,56 @@
       "rule": "complexity"
     },
     {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".hasCleanMarker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".hasCode",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".hasExclusiveSharing",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".tryAcquireWindowsLockFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".tryAcquireWindowsLockFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".tryAcquireWindowsLockFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".tryAcquireWindowsLockFile.fileWriter.close",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".tryAcquireWindowsLockFile.fileWriter.prepareForRelease",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WindowsLockFile.ts",
+      "scopeId": ".tryAcquireWindowsLockFile.fileWriter.prepareForRelease",
+      "rule": "complexity"
+    },
+    {
       "file": "src/index.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -1604,6 +1654,26 @@
       "file": "src/test/TypeUuid.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WindowsLockFile.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WindowsLockFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WindowsLockFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WindowsLockFile.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
     },
     {
       "file": "src/test/writeBuffersToFile.test.ts",

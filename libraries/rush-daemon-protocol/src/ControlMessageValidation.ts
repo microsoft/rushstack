@@ -3,16 +3,17 @@
 
 import { isDaemonControlRecord } from './ControlRecord';
 import { isDaemonControlMessageKind } from './DaemonControlKinds';
+import { validateDaemonPong } from './DaemonPongValidation';
 import { DaemonProtocolError } from './DaemonProtocolError';
-import { isDaemonVerbosity } from './DaemonVerbosity';
+import { validateRawModeControl, validateTerminalPolicyControl } from './InteractiveControlValidation';
+import { validateRequestQueuePositionControl } from './RequestAdmissionControlValidation';
 import {
-  validateInteractiveCapability,
-  validateRawModeControl,
-  validateTerminalPolicyControl
-} from './InteractiveControlValidation';
-import { validateRequestAdmissionCapability, validateRequestQueuePositionControl } from './RequestAdmissionControlValidation';
-import { validateRequestCancelControl, validateRequestRejectedControl, validateRequestResultControl, validateRequestStartControl } from './RequestControlValidation';
-import { validateRequestLifecycleCapability } from './RequestLifecycleCapabilityValidation';
+  validateRequestCancelControl,
+  validateRequestRejectedControl,
+  validateRequestResultControl,
+  validateRequestStartControl
+} from './RequestControlValidation';
+import { validateSubscribeControl } from './SubscribeControlValidation';
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);
 }
@@ -42,25 +43,6 @@ function validateHelloAck(payload: Record<string, unknown>): void {
   requireVersion(payload);
   requireStringField(payload, 'sessionId');
 }
-function validatePong(payload: Record<string, unknown>): void {
-  if (payload.daemonVersion !== undefined) requireStringField(payload, 'daemonVersion');
-  if (payload.protocolVersion !== undefined) requireVersion(payload);
-  requireNumberField(payload, 'uptimeMs');
-}
-function validateSubscribe(payload: Record<string, unknown>): void {
-  if (typeof payload.isTTY !== 'boolean') {
-    fail('Subscribe message payload.isTTY must be a boolean.');
-  }
-  validateInteractiveCapability(payload);
-  validateRequestAdmissionCapability(payload);
-  validateRequestLifecycleCapability(payload);
-  requireSubscribeVerbosity(payload);
-}
-function requireSubscribeVerbosity(payload: Record<string, unknown>): void {
-  if (payload.verbosity !== undefined && !isDaemonVerbosity(payload.verbosity)) {
-    fail('Subscribe message payload.verbosity is not a known verbosity level.');
-  }
-}
 function validateError(payload: Record<string, unknown>): void {
   requireStringField(payload, 'code');
   requireStringField(payload, 'message');
@@ -71,10 +53,10 @@ const noopValidator: ControlValidator = () => undefined;
 const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   hello: requireVersion,
   helloAck: validateHelloAck,
-  subscribe: validateSubscribe,
+  subscribe: validateSubscribeControl,
   unsubscribe: noopValidator,
   ping: noopValidator,
-  pong: validatePong,
+  pong: validateDaemonPong,
   error: validateError,
   setRawMode: validateRawModeControl,
   rawModeChanged: validateRawModeControl,
@@ -83,7 +65,11 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   requestStart: validateRequestStartControl,
   requestCancel: validateRequestCancelControl,
   requestRejected: validateRequestRejectedControl,
-  requestResult: validateRequestResultControl
+  requestResult: validateRequestResultControl,
+  shutdown: noopValidator,
+  shutdownAck: noopValidator,
+  stdinReady: validateRequestCancelControl,
+  stdinEnd: validateRequestCancelControl
 };
 
 /** Structurally validates a parsed control message. @beta */

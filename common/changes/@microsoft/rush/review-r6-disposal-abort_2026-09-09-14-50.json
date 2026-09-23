@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Forward startup failures into reporter cancellation before awaiting initialization cleanup.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

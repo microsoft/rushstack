@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Use an explicit 15-second integration budget for real native graph hosts and Git/build subprocesses after repeated Windows setup timeouts; retain every generation assertion, cleanup limit and production deadline.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

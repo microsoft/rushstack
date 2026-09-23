@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Fence graph mutations against stale workspace generations and support explicit snapshot tokens.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

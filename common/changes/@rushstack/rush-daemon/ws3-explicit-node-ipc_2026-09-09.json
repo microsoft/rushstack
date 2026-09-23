@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Make measured telemetry retention reachable through explicit production Node IPC operations. Report raw ranking inputs and exclude only proven native resource-free NoOp nodes from child-memory scoring.",
+      "type": "minor"
+    }
+  ]
+}

@@ -51,22 +51,24 @@ describe('FileReporter', () => {
       const originalWrite: typeof fs.writeSync = fsModule.writeSync;
       const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
       await reporter.initializeAsync();
-      const writeSpy = jest.spyOn(fsModule, 'writeSync').mockImplementation(
-        (
-          fd: number,
-          data: string | NodeJS.ArrayBufferView,
-          offset?: number | null,
-          length?: number | BufferEncoding | null
-        ): number => {
-          const buffer: Buffer =
-            typeof data === 'string'
-              ? Buffer.from(data, 'utf8')
-              : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-          const start: number = typeof data === 'string' ? 0 : (offset ?? 0);
-          const count: number = typeof length === 'number' ? length : buffer.length - start;
-          return originalWrite(fd, buffer, start, Math.min(3, count));
-        }
-      );
+      const writeSpy = jest
+        .spyOn(fsModule, 'writeSync')
+        .mockImplementation(
+          (
+            fd: number,
+            data: string | NodeJS.ArrayBufferView,
+            offset?: number | null,
+            length?: number | BufferEncoding | null
+          ): number => {
+            const buffer: Buffer =
+              typeof data === 'string'
+                ? Buffer.from(data, 'utf8')
+                : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+            const start: number = typeof data === 'string' ? 0 : (offset ?? 0);
+            const count: number = typeof length === 'number' ? length : buffer.length - start;
+            return originalWrite(fd, buffer, start, Math.min(3, count));
+          }
+        );
       const text: string = 'OUTPUT-BEGIN \u{1f680} \u4e2d OUTPUT-END\n';
       try {
         reporter.report(ev('operationRegistered', { operationId: 'op', projectName: 'project' }));
@@ -487,6 +489,37 @@ describe('FileReporter', () => {
       expect(content).not.toContain('TOP_SECRET_OUTPUT');
       expect(content).not.toContain('unfinished-secret');
       expect(content).not.toContain('@secret/unfinished');
+    });
+  });
+
+  it('retains local-sensitive producer identity but redacts secret producer identity', async () => {
+    await withTempDir(async (base: string) => {
+      const reporter: FileReporter = new FileReporter({ commonTempFolder: base, nowMs: () => FIXED_NOW });
+      reporter.report({
+        ...ev('extension', { name: 'local.plugin.event' }, 'local-sensitive'),
+        source: {
+          packageName: '@private/example-rush-plugin',
+          packageVersion: '1.0.0',
+          component: 'PrivatePluginImplementation'
+        }
+      });
+      reporter.report({
+        ...ev('extension', { name: 'secret.plugin.event' }, 'secret'),
+        source: {
+          packageName: '@secret/example-rush-plugin',
+          packageVersion: '2.0.0',
+          component: 'SecretPluginImplementation'
+        }
+      });
+      await reporter.closeAsync();
+
+      const content: string = await fs.promises.readFile(reporter.getArtifact().path!, 'utf8');
+      expect(content).toContain('@private/example-rush-plugin');
+      expect(content).toContain('PrivatePluginImplementation');
+      expect(content).not.toContain('@secret/example-rush-plugin');
+      expect(content).not.toContain('SecretPluginImplementation');
+      expect(content).toContain('[private-producer]');
+      expect(content).toContain('[private-version]');
     });
   });
 
