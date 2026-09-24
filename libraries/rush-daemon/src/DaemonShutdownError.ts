@@ -61,3 +61,13 @@ function describeInitiator(options: IDaemonShutdownErrorOptions): string {
 export function getDaemonShutdownReason(signal: AbortSignal): DaemonShutdownError | undefined {
   return signal.aborted && signal.reason instanceof DaemonShutdownError ? signal.reason : undefined;
 }
+
+/**
+ * Returns the cleanup error unless it repeats a shutdown reason that is already the primary error, for example when
+ * restoring raw mode fails because shutdown closed the connection.
+ */
+export function withoutRepeatedShutdownReason(primary: unknown, cleanupError: unknown): unknown {
+  return primary instanceof DaemonShutdownError && cleanupError instanceof DaemonShutdownError
+    ? undefined
+    : cleanupError;
+}
