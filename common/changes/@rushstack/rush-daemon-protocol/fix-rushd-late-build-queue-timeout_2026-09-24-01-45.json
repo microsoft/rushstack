@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add the optional `waitTimeoutIsDefault` admission option so a daemon can distinguish a client-default queue timeout from an explicit one.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

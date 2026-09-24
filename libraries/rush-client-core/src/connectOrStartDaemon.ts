@@ -23,6 +23,15 @@ import { DaemonClientError } from './DaemonClientError';
 import { formatDaemonLogTail, getDaemonLogFilePath } from './DaemonLogFile';
 import { describeExit, type IDaemonStartupOptions } from './DaemonStartup';
 import {
+  DAEMON_RESET_HINT,
+  hasErrorCode,
+  isDaemonOwnership,
+  isOwnerProcessAlive,
+  readDaemonOwnership,
+  reclaimAbandonedOwnershipAsync,
+  type DaemonOwnership
+} from './DaemonOwnership';
+import {
   describeDaemonStartupReservation,
   getDaemonStartupFilePath,
   isDaemonStartupOwnerGone,
@@ -54,8 +63,13 @@ export interface IDaemonStartCommand {
 /** Detached startup options. @beta */
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
   readonly paths: IDaemonPaths;
-  /** Omit to connect without auto-start. */
+  /** Omit (together with resolveStartCommandAsync) to connect without auto-start. */
   readonly startCommand?: IDaemonStartCommand;
+  /**
+   * Resolves the start command only when a daemon must be started or replaced, so a warm connect never
+   * loads launcher code. Ignored when startCommand is provided.
+   */
+  readonly resolveStartCommandAsync?: () => Promise<IDaemonStartCommand>;
   /**
    * Ownership captured before acknowledged shutdown. Wait for this record to disappear, change owner,
    * or have a demonstrably dead owner before connecting or starting. A live/reused owner times out safely.
@@ -85,7 +99,9 @@ export async function connectOrStartDaemonAsync(
   await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline, options.abortSignal);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
-  if (!options.startCommand) {
+  const startCommand: IDaemonStartCommand | undefined =
+    options.startCommand ?? (await options.resolveStartCommandAsync?.());
+  if (!startCommand) {
     if (options.previousDaemon) {
       while (Date.now() < deadline) {
         await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
@@ -100,6 +116,13 @@ export async function connectOrStartDaemonAsync(
       `No ready daemon at ${options.paths.socketPath}; auto-start is disabled.`
     );
   }
+  return await startDaemonAsync({ ...options, startCommand, resolveStartCommandAsync: undefined }, deadline);
+}
+
+async function startDaemonAsync(
+  options: IConnectOrStartDaemonOptions & { readonly startCommand: IDaemonStartCommand },
+  deadline: number
+): Promise<DaemonClient> {
   ensureDaemonRuntimeDir(options.paths);
   let lock: IStartupLock | undefined;
   let backoffMs: number = 50;
@@ -126,7 +149,7 @@ export async function connectOrStartDaemonAsync(
           options,
           `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)} ` +
             `(${describeDaemonStartupReservation(options.paths)}); refusing another launch until it ` +
-            `becomes ready or stale`,
+            `becomes ready or stale. ${DAEMON_RESET_HINT}`,
           formatDaemonLogTail(options.paths)
         );
       }
@@ -141,7 +164,7 @@ export async function connectOrStartDaemonAsync(
     const handoff: DaemonClient | undefined = await waitForHandoffAsync(options, deadline);
     if (handoff) return handoff;
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
-    assertNoLiveOwner(options.paths);
+    await reclaimAbandonedOwnershipAsync(options.paths);
     await reclaimStaleDaemonAsync(options.paths);
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();
@@ -280,7 +303,7 @@ async function tryConnectAsync(
     if (
       error instanceof DaemonClientError &&
       error.code === 'versionMismatch' &&
-      options.startCommand &&
+      (options.startCommand || options.resolveStartCommandAsync) &&
       options.expectedDaemonVersion !== undefined
     ) {
       return undefined;
@@ -309,8 +332,13 @@ async function waitForHandoffAsync(
   let backoffMs: number = 50;
   while (Date.now() < deadline) {
     const owner: IDaemonLockfile | undefined = readDaemonLockfile(options.paths.lockfilePath);
-    // Only wait on a fully published endpoint; malformed or ambiguous ownership still fails closed.
-    if (!owner || owner.socketPath !== options.paths.socketPath || !isProcessAlive(owner.pid))
+    // Only wait on a fully published endpoint; malformed or ambiguous ownership is resolved by reclaim.
+    if (
+      !owner ||
+      !isDaemonOwnership(owner) ||
+      owner.socketPath !== options.paths.socketPath ||
+      !isOwnerProcessAlive(owner)
+    )
       return undefined;
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
       signal: options.abortSignal
@@ -324,57 +352,11 @@ async function waitForHandoffAsync(
 }
 
 function assertNoLiveOwner(paths: IDaemonPaths): void {
-  const owner: Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined = readDaemonOwnership(
-    paths.lockfilePath
-  );
-  if (!owner) {
-    if (process.platform !== 'win32' && fs.existsSync(paths.socketPath)) {
-      throw new DaemonClientError(
-        'startupFailed',
-        `Socket ${paths.socketPath} has no ownership record; refusing automatic reclaim.`
-      );
-    }
-    return;
-  }
-  if (!isProcessAlive(owner.pid)) return;
+  const owner: DaemonOwnership | undefined = readDaemonOwnership(paths.lockfilePath);
+  if (!owner || !isOwnerProcessAlive(owner)) return;
   throw new DaemonClientError(
     'startupFailed',
-    `PID ${owner.pid} still exists but the daemon is not ready. It may be a reused PID; refusing to kill it or remove ${paths.lockfilePath}.`
-  );
-}
-
-function readDaemonOwnership(lockfilePath: string): Pick<IDaemonLockfile, 'pid' | 'startedAt'> | undefined {
-  let record: unknown;
-  try {
-    record = JSON.parse(fs.readFileSync(lockfilePath, 'utf8'));
-  } catch (error) {
-    if (hasErrorCode(error, 'ENOENT')) return undefined;
-    throw new DaemonClientError(
-      'startupFailed',
-      `Cannot safely read ${lockfilePath}; refusing automatic reclaim.`,
-      { cause: error }
-    );
-  }
-  if (!isDaemonOwnership(record)) {
-    throw new DaemonClientError(
-      'startupFailed',
-      `Invalid daemon ownership record in ${lockfilePath}; refusing automatic reclaim.`
-    );
-  }
-  return { pid: record.pid, startedAt: record.startedAt };
-}
-
-function isDaemonOwnership(record: unknown): record is Pick<IDaemonLockfile, 'pid' | 'startedAt'> {
-  return (
-    typeof record === 'object' &&
-    record !== null &&
-    'pid' in record &&
-    typeof record.pid === 'number' &&
-    Number.isSafeInteger(record.pid) &&
-    record.pid > 0 &&
-    'startedAt' in record &&
-    typeof record.startedAt === 'string' &&
-    Number.isFinite(Date.parse(record.startedAt))
+    `PID ${owner.pid} still exists but the daemon is not ready. It may be a daemon that is still shutting down, or a reused PID; refusing to kill it or remove ${paths.lockfilePath}. ${DAEMON_RESET_HINT}`
   );
 }
 
@@ -427,7 +409,7 @@ async function waitForPreviousDaemonAsync(
       deadline,
       abortSignal
     );
-    if (!owner || owner.pid !== pid || owner.startedAt !== startedAt || !isProcessAlive(owner.pid)) return;
+    if (!owner || owner.pid !== pid || owner.startedAt !== startedAt || !isOwnerProcessAlive(owner)) return;
     if (Date.now() >= deadline) {
       throw new DaemonClientError(
         'timeout',
@@ -438,16 +420,6 @@ async function waitForPreviousDaemonAsync(
       signal: abortSignal
     });
     backoffMs = Math.min(500, backoffMs * 2);
-  }
-}
-
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    if (hasErrorCode(error, 'ESRCH')) return false;
-    throw error;
   }
 }
 
@@ -569,8 +541,4 @@ function startupError(
     'startupFailed',
     `Daemon startup ${reason}. Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.${logTail}`
   );
-}
-
-function hasErrorCode(error: unknown, code: string): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === code;
 }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow operations to write build cache entries when their dependencies were not re-run because a previous iteration of a long-lived graph (such as the Rush daemon) produced a trusted result at the same state hash. Dependencies skipped by the user (e.g. `--only`) still block cache writes.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

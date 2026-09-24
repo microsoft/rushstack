@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Reclaim provably stale daemon artifacts (a socket without an ownership record, a corrupt record, or a Linux PID reused since the record was written) instead of permanently disabling the daemon, and add resetDaemonArtifactsAsync() as the explicit recovery path referenced by fail-closed messages.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}
