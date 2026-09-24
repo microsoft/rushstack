@@ -68,6 +68,18 @@ export class DaemonRequiresInProcessError extends Error {
 }
 
 // @beta
+export class DaemonShutdownError extends Error {
+    constructor(options: IDaemonShutdownErrorOptions);
+    // (undocumented)
+    readonly initiator: DaemonShutdownInitiator;
+    // (undocumented)
+    readonly signal: string | undefined;
+}
+
+// @beta
+export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host';
+
+// @beta
 export type DispatchWorkspaceRequestAsync = (options: IDispatchWorkspaceRequestOptions) => Promise<IDaemonCommandResult | undefined>;
 
 // @beta
@@ -176,6 +188,13 @@ export interface IDaemonRequestResolver {
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
     // (undocumented)
     readonly workspaceLifecycle?: IWorkspaceResolverLifecycle;
+}
+
+// @beta
+export interface IDaemonShutdownErrorOptions {
+    // (undocumented)
+    readonly initiator: DaemonShutdownInitiator;
+    readonly signal?: string;
 }
 
 // @beta
@@ -725,7 +744,7 @@ export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaem
 
 // @beta
 export class RushDaemonHost {
-    closeAsync(): Promise<void>;
+    closeAsync(reason?: DaemonShutdownError): Promise<void>;
     readonly closed: Promise<void>;
     getWorkspaceSessionAsync(): Promise<IWorkspaceSession>;
     // (undocumented)

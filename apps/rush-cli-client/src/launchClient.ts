@@ -27,6 +27,7 @@ import { formatAdmissionFailure, getConfiguredAdmission } from './ClientAdmissio
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { selectClientRoute, type IClientRoute } from './routing';
+import { getResultDiagnostic } from './resultDiagnostics';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
   getBundledRushVersion,
@@ -206,7 +207,10 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   }
   if (outcome.kind === 'result') {
     process.exitCode = outcome.result.exitCode;
-    if (outcome.result.admissionErrorCode) {
+    const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
+    if (diagnostic) {
+      await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
+    } else if (outcome.result.admissionErrorCode) {
       await writeStreamAsync(
         process.stderr,
         Buffer.from(formatAdmissionFailure(outcome.result.admissionErrorCode, request.admission))

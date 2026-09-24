@@ -22,6 +22,7 @@ import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+import { DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import {
@@ -641,7 +642,10 @@ class PhasedRequestBatchCoordinator {
       : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
       aborted,
-      error: combineErrors(executionError, cleanupErrors),
+      error: combineErrors(
+        executionError ?? getDaemonShutdownReason(entry.client.abortSignal),
+        cleanupErrors
+      ),
       graphStatus: getClientGraphStatus(aborted, operationOutcomes),
       operationOutcomes,
       requestId: entry.request.requestId,
@@ -1029,7 +1033,7 @@ async function writeAbortedResultAsync(
   const result: IDaemonPhasedRequestResult = {
     ...createPhasedCommandResult({
       aborted: true,
-      error: combineErrors(undefined, cleanupErrors),
+      error: combineErrors(getDaemonShutdownReason(client.abortSignal), cleanupErrors),
       graphStatus: OperationStatus.Aborted,
       operationOutcomes: [],
       requestId,
@@ -1131,7 +1135,13 @@ async function finishAfterAdmissionErrorAsync(
   return result;
 }
 
-function combineErrors(executionError: unknown, cleanupErrors: unknown[]): unknown {
+function combineErrors(executionError: unknown, allCleanupErrors: unknown[]): unknown {
+  // Cleanup that fails with the same daemon shutdown reason (for example, restoring raw mode after the
+  // interactive connection closed) must not hide that reason from the client.
+  const cleanupErrors: unknown[] =
+    executionError instanceof DaemonShutdownError
+      ? allCleanupErrors.filter((error: unknown) => !(error instanceof DaemonShutdownError))
+      : allCleanupErrors;
   if (executionError !== undefined && cleanupErrors.length > 0) {
     return new AggregateError(
       [executionError, ...cleanupErrors],

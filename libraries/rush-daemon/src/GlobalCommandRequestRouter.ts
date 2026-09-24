@@ -24,6 +24,7 @@ import {
 import { type IRequestLease, RequestSchedulerError, RequestSchedulerErrorCode } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
+import { getDaemonShutdownReason, withoutRepeatedShutdownReason } from './DaemonShutdownError';
 
 /**
  * Executes caller-resolved global command logic.
@@ -179,7 +180,12 @@ async function executeAdmittedAsync(
     cleanupError = combineExecutionAndCleanupErrors(cleanupError, error);
   }
   aborted ||= context.requestAborted;
-  const combinedError: unknown = combineExecutionAndCleanupErrors(executionError, cleanupError);
+  const primaryError: unknown =
+    executionError ?? (aborted ? getDaemonShutdownReason(client.abortSignal) : undefined);
+  const combinedError: unknown = combineExecutionAndCleanupErrors(
+    primaryError,
+    withoutRepeatedShutdownReason(primaryError, cleanupError)
+  );
   let result: IDaemonCommandResult;
   try {
     result = createGlobalCommandResult({
@@ -259,8 +265,12 @@ async function finishAfterAdmissionErrorAsync(
     throw combineExecutionAndCleanupErrors(admissionError, cleanupError);
   }
   const aborted: boolean = admissionError.code === RequestSchedulerErrorCode.Aborted;
+  const shutdownReason: unknown = aborted ? getDaemonShutdownReason(client.abortSignal) : undefined;
   const error: unknown = aborted
-    ? cleanupError
+    ? combineExecutionAndCleanupErrors(
+        shutdownReason,
+        withoutRepeatedShutdownReason(shutdownReason, cleanupError)
+      )
     : combineExecutionAndCleanupErrors(admissionError, cleanupError);
   const result: IDaemonCommandResult = {
     ...createGlobalCommandResult({

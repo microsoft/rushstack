@@ -119,7 +119,17 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   }
   try {
     if (command === 'stop') {
-      await client.shutdownAsync();
+      const { activeRequests } = await client.shutdownAsync();
+      if (activeRequests) {
+        await writeStreamAsync(
+          process.stderr,
+          Buffer.from(
+            `rush-client: the daemon was running ${activeRequests} request(s); they were cancelled.\n`
+          )
+        );
+      }
+      const cancelled: { cancelledRequests?: number } =
+        activeRequests === undefined ? {} : { cancelledRequests: activeRequests };
       if (options.argv[1] === '--force') {
         // Wait for the acknowledged daemon to release its listener and record, then clear leftovers
         // such as an abandoned startup reservation in the same invocation.
@@ -129,13 +139,15 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
         await writeStatusAsync({
           state: 'shutdownAccepted',
           socketPath: connectionOptions.paths.socketPath,
+          ...cancelled,
           removedPaths
         });
         return;
       }
       await writeStatusAsync({
         state: 'shutdownAccepted',
-        socketPath: connectionOptions.paths.socketPath
+        socketPath: connectionOptions.paths.socketPath,
+        ...cancelled
       });
       return;
     }
