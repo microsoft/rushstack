@@ -206,6 +206,68 @@ describe(LinuxTreeWatcher.name, () => {
     expect(harness.watcher.watchedFolderPaths.size).toBe(0);
   });
 
+  it('forwards an unknown (null) filename unchanged so the consumer invalidates fully', async () => {
+    const root: string = makeTree(['src/a.ts']);
+    const harness: IHarness = createHarness(root);
+    await harness.watcher.initialWalk;
+    harness.fakes.get(path.join(root, 'src'))!.listener('change', null);
+    expect(harness.events).toEqual(['change:null']);
+    harness.watcher.close();
+  });
+
+  it('does not register a folder that becomes excluded after exclusions finish loading', async () => {
+    const root: string = makeTree(['src/a.ts', 'lib/a.js']);
+    let resolveExclusions!: (folders: ReadonlySet<string>) => void;
+    const exclusions: Promise<ReadonlySet<string>> = new Promise((resolve) => (resolveExclusions = resolve));
+    const harness: IHarness = createHarness(root, { getExcludedFolderPathsAsync: () => exclusions });
+    harness.fire('', 'rename', 'lib');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    resolveExclusions(new Set([path.join(root, 'lib')]));
+    await harness.watcher.initialWalk;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(relativeWatched(harness)).toEqual(['', 'src']);
+    harness.watcher.close();
+  });
+
+  it('re-registers a directory that was replaced in place', async () => {
+    const root: string = makeTree(['src/nested/a.ts']);
+    const harness: IHarness = createHarness(root);
+    await harness.watcher.initialWalk;
+    const oldSrc: FakeDirectoryWatcher = harness.fakes.get(path.join(root, 'src'))!;
+    const oldNested: FakeDirectoryWatcher = harness.fakes.get(path.join(root, 'src', 'nested'))!;
+    fs.rmSync(path.join(root, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'src', 'nested'), { recursive: true });
+    harness.fire('', 'rename', 'src');
+    await waitForAsync(() => harness.fakes.get(path.join(root, 'src', 'nested')) !== oldNested);
+    expect(oldSrc.closed).toBe(true);
+    expect(oldNested.closed).toBe(true);
+    expect(harness.fakes.get(path.join(root, 'src'))).not.toBe(oldSrc);
+    expect(relativeWatched(harness)).toEqual(['', 'src', path.join('src', 'nested')]);
+    expect(harness.errors).toEqual([]);
+    harness.watcher.close();
+  });
+
+  it('reports non-transient walk failures instead of treating them as a vanished directory', async () => {
+    const root: string = makeTree(['a/x.ts']);
+    const opendir: typeof fs.promises.opendir = fs.promises.opendir;
+    const spy: jest.SpyInstance = jest
+      .spyOn(fs.promises, 'opendir')
+      .mockImplementation(async (folder: fs.PathLike, options?: fs.OpenDirOptions) => {
+        if (path.basename(String(folder)) === 'a') {
+          throw Object.assign(new Error('EMFILE: too many open files'), { code: 'EMFILE' });
+        }
+        return await opendir(folder, options);
+      });
+    try {
+      const harness: IHarness = createHarness(root);
+      await harness.watcher.initialWalk;
+      expect(harness.errors.map((error) => (error as NodeJS.ErrnoException).code)).toEqual(['EMFILE']);
+      harness.watcher.close();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it('leaves non-ENOSPC errors unchanged', () => {
     const error: Error = Object.assign(new Error('EMFILE'), { code: 'EMFILE' });
     expect(toWatchError(error, '/x')).toBe(error);

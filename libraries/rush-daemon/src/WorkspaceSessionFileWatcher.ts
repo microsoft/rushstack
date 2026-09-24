@@ -241,8 +241,13 @@ export async function getProjectExcludedFolderPathsAsync(
 ): Promise<ReadonlySet<string>> {
   const excluded: Set<string> = new Set([path.resolve(project.projectRushTempFolder)]);
   const terminal: Terminal = new Terminal(new NoOpTerminalProvider());
-  const configuration: RushProjectConfiguration | undefined =
-    await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+  let configuration: RushProjectConfiguration | undefined;
+  try {
+    configuration = await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+  } catch {
+    // Output-folder pruning is an optimization; an unreadable configuration only loses that part.
+    return excluded;
+  }
   const projectFolder: string = path.resolve(project.projectFolder);
   for (const settings of configuration?.operationSettingsByOperationName.values() ?? []) {
     for (const outputFolderName of settings.outputFolderNames ?? []) {

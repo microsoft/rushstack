@@ -128,7 +128,8 @@ export class LinuxTreeWatcher extends EventEmitter {
   #onDirectoryEvent(folderPath: string, eventType: fs.WatchEventType, filename: string | null): void {
     if (this.#closed) return;
     if (!filename) {
-      this.#listener(eventType, path.relative(this.#root, folderPath));
+      // An unknown entry must stay unknown so the consumer performs a full invalidation.
+      this.#listener(eventType, null);
       return;
     }
     const changedPath: string = path.join(folderPath, filename);
@@ -149,15 +150,19 @@ export class LinuxTreeWatcher extends EventEmitter {
   }
 
   async #reconcileEntryAsync(changedPath: string): Promise<void> {
+    // Exclusions may still be loading when the first events arrive; never register an excluded folder.
+    this.#resolvedExcludedFolderPaths = await this.#excludedFolderPaths;
+    if (this.#closed || this.#failed || this.#isPruned(changedPath)) return;
     let isDirectory: boolean;
     try {
       isDirectory = (await fs.promises.lstat(changedPath)).isDirectory();
     } catch {
       isDirectory = false;
     }
-    if (!isDirectory) {
-      this.#removeDirectory(changedPath);
-    } else if (!this.#watchers.has(changedPath) && this.#addDirectory(changedPath)) {
+    // A `rename` for a directory that still exists may be a delete-and-recreate or an atomic replacement.
+    // inotify stays attached to the old inode, so always drop existing watches and register the current one.
+    this.#removeDirectory(changedPath);
+    if (isDirectory && this.#addDirectory(changedPath)) {
       await this.#walkAsync(changedPath);
       // Files written into the new directory before its watch existed were not reported.
       this.#reportCoverage(changedPath);
@@ -183,9 +188,8 @@ export class LinuxTreeWatcher extends EventEmitter {
     let directory: fs.Dir;
     try {
       directory = await fs.promises.opendir(folderPath);
-    } catch {
-      // Removed or replaced while walking; the parent's `rename` event already reported the change.
-      this.#removeDirectory(folderPath);
+    } catch (error) {
+      this.#onWalkError(folderPath, error);
       return;
     }
     const children: string[] = [];
@@ -197,13 +201,23 @@ export class LinuxTreeWatcher extends EventEmitter {
           children.push(childPath);
         }
       }
-    } catch {
-      // The directory disappeared mid-read; any registered children are cleaned up by their own events.
+    } catch (error) {
+      this.#onWalkError(folderPath, error);
     }
     for (const childPath of children) {
       if (this.#closed || this.#failed) return;
       await this.#walkAsync(childPath);
     }
+  }
+
+  #onWalkError(folderPath: string, error: unknown): void {
+    if (folderPath !== this.#root && TRANSIENT_ERROR_CODES.has(getErrorCode(error))) {
+      // Removed or replaced while walking; the parent's `rename` event already reported the change.
+      this.#removeDirectory(folderPath);
+      return;
+    }
+    // Any other failure (for example EMFILE or EIO) leaves part of the tree unobserved.
+    this.#fail(error, folderPath);
   }
 
   #fail(error: unknown, folderPath: string): void {
