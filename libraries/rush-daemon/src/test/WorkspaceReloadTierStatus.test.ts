@@ -66,23 +66,29 @@ it('reuses the warm generation when only volatile per-shell environment variable
   });
   try {
     expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect(fixture.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reuse);
     const before = await pongAsync(fixture);
     const generation: number = fixture.host.workspaceGeneration;
     const graph = fixture.session.operationGraph;
-    for (const environment of [
-      {
+    for (const [label, environment] of Object.entries({
+      same: fixture.environment,
+      shell: {
         ...fixture.environment,
         OLDPWD: '/elsewhere',
         PWD: `${fixture.folder}/b`,
         SHLVL: '7',
         _: '/usr/bin/env'
       },
-      { ...fixture.environment, TERM: 'dumb', COLUMNS: '91', WSL_INTEROP: '/run/WSL/1_interop' },
-      { ...fixture.environment, RUSH_DAEMON: '1', RUSH_DAEMON_EXPERIMENTAL: '1' }
-    ]) {
-      const result = await fixture.runAsync(['build'], { environment });
+      terminal: { ...fixture.environment, TERM: 'dumb', COLUMNS: '91', WSL_INTEROP: '/run/WSL/1_interop' },
+      routing: { ...fixture.environment, RUSH_DAEMON: '1', RUSH_DAEMON_EXPERIMENTAL: '1' }
+    })) {
+      const result = await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], { environment });
       expect(result.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
-      expect(fixture.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reuse);
+      expect({ label, tier: fixture.host.workspaceStatus.lastReloadTier }).toEqual({
+        label,
+        tier: WorkspaceInputChangeTier.Reuse
+      });
     }
     expect(fixture.host.workspaceGeneration).toBe(generation);
     expect(fixture.session.operationGraph).toBe(graph);
