@@ -116,12 +116,17 @@ export async function connectOrStartDaemonAsync(
       `No ready daemon at ${options.paths.socketPath}; auto-start is disabled.`
     );
   }
-  return await startDaemonAsync({ ...options, startCommand, resolveStartCommandAsync: undefined }, deadline);
+  return await startDaemonAsync(
+    { ...options, startCommand, resolveStartCommandAsync: undefined },
+    deadline,
+    timeoutMs
+  );
 }
 
 async function startDaemonAsync(
   options: IConnectOrStartDaemonOptions & { readonly startCommand: IDaemonStartCommand },
-  deadline: number
+  deadline: number,
+  timeoutMs: number
 ): Promise<DaemonClient> {
   ensureDaemonRuntimeDir(options.paths);
   let lock: IStartupLock | undefined;
