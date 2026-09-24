@@ -31,6 +31,7 @@ import {
 } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession, IWorkspaceSessionComponents } from './WorkspaceSession';
 import { EngineTerminalProvider } from './EngineTerminalProvider';
+import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 
 /**
@@ -170,7 +171,8 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     if (abortSignal.aborted)
       throw new DaemonRequestDispatchError(
         'routingFailed',
-        'The request was cancelled before engine initialization.'
+        getDaemonShutdownReason(abortSignal)?.message ??
+          'The request was cancelled before engine initialization.'
       );
     return command;
   }
