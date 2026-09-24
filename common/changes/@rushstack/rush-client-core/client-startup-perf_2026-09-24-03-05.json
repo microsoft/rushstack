@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add IConnectOrStartDaemonOptions.resolveStartCommandAsync so a start command is resolved only when a daemon must be started or replaced.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

@@ -7,15 +7,22 @@ import {
   DaemonClient,
   connectOrStartDaemonAsync,
   requestDaemonShutdownAsync,
+  resetDaemonArtifactsAsync,
   type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
-import type { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import {
+  DaemonTransportError,
+  DaemonTransportErrorCode,
+  type IDaemonLockfile
+} from '@rushstack/rush-daemon-transport';
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
 import { executeDaemonGraphCommandAsync } from './daemonGraph';
 import { writeStreamAsync } from './writeStreamAsync';
+
+const FORCE_STOP_WAIT_MS: number = 15000;
 
 export interface IDaemonCommandOptions {
   readonly argv: ReadonlyArray<string>;
@@ -38,14 +45,18 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   }
   if (
     (options.argv.length !== 1 &&
-      !(command === 'logs' && options.argv.length === 2 && options.argv[1] === '--follow')) ||
+      !(
+        options.argv.length === 2 &&
+        ((command === 'logs' && options.argv[1] === '--follow') ||
+          (command === 'stop' && options.argv[1] === '--force'))
+      )) ||
     (command !== 'start' &&
       command !== 'status' &&
       command !== 'stop' &&
       command !== 'restart' &&
       command !== 'logs')
   ) {
-    throw new Error('Usage: rush-client daemon start|status|stop|restart|logs [--follow]');
+    throw new Error('Usage: rush-client daemon start|status|stop [--force]|restart|logs [--follow]');
   }
   if (!options.rushJsonPath) throw new Error('Daemon management requires a repository containing rush.json.');
   const mayStart: boolean = command === 'start' || command === 'restart';
@@ -76,10 +87,36 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   }
   // Status observes the selected endpoint, including a compatible daemon from a different client version.
   // It never starts a process or trusts a PID file as evidence of readiness.
-  const client: DaemonClient =
+  const client: DaemonClient | undefined =
     command === 'start'
       ? await connectOrStartDaemonAsync(connectionOptions)
-      : await DaemonClient.connectAsync({ socketPath: connectionOptions.paths.socketPath });
+      : await connectExistingAsync(connectionOptions, command !== 'status');
+  if (!client) {
+    if (command === 'restart') {
+      // Nothing to shut down: restart behaves like start.
+      const started: DaemonClient = await connectOrStartDaemonAsync(connectionOptions);
+      try {
+        await writeStatusAsync({
+          state: 'ready',
+          socketPath: connectionOptions.paths.socketPath,
+          ...(await started.status)
+        });
+      } finally {
+        await started.closeAsync();
+      }
+      return;
+    }
+    const { removedPaths } =
+      options.argv[1] === '--force'
+        ? await resetDaemonArtifactsAsync(connectionOptions.paths)
+        : { removedPaths: [] };
+    await writeStatusAsync({
+      state: removedPaths.length > 0 ? 'reset' : 'notRunning',
+      socketPath: connectionOptions.paths.socketPath,
+      ...(options.argv[1] === '--force' ? { removedPaths } : {})
+    });
+    return;
+  }
   try {
     if (command === 'stop') {
       const { activeRequests } = await client.shutdownAsync();
@@ -91,10 +128,26 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
           )
         );
       }
+      const cancelled: { cancelledRequests?: number } =
+        activeRequests === undefined ? {} : { cancelledRequests: activeRequests };
+      if (options.argv[1] === '--force') {
+        // Wait for the acknowledged daemon to release its listener and record, then clear leftovers
+        // such as an abandoned startup reservation in the same invocation.
+        const { removedPaths } = await resetDaemonArtifactsAsync(connectionOptions.paths, {
+          waitTimeoutMs: FORCE_STOP_WAIT_MS
+        });
+        await writeStatusAsync({
+          state: 'shutdownAccepted',
+          socketPath: connectionOptions.paths.socketPath,
+          ...cancelled,
+          removedPaths
+        });
+        return;
+      }
       await writeStatusAsync({
         state: 'shutdownAccepted',
         socketPath: connectionOptions.paths.socketPath,
-        ...(activeRequests === undefined ? {} : { cancelledRequests: activeRequests })
+        ...cancelled
       });
       return;
     }
@@ -111,6 +164,25 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
     }
   } finally {
     await client.closeAsync();
+  }
+}
+
+/** Returns undefined when nothing listens at the endpoint and `allowAbsent` is set; other failures propagate. */
+async function connectExistingAsync(
+  options: IConnectOrStartDaemonOptions,
+  allowAbsent: boolean
+): Promise<DaemonClient | undefined> {
+  try {
+    return await DaemonClient.connectAsync({ socketPath: options.paths.socketPath });
+  } catch (error) {
+    if (
+      allowAbsent &&
+      error instanceof DaemonTransportError &&
+      error.code === DaemonTransportErrorCode.connectionRefused
+    ) {
+      return undefined;
+    }
+    throw error;
   }
 }
 
