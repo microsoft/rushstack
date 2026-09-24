@@ -247,7 +247,7 @@ class PhasedRequestBatchCoordinator {
         request.exclusivityClass === RequestExclusivityClass.SharedBuild
           ? RequestExclusivityClass.SharedBuild
           : RequestExclusivityClass.Exclusive;
-      const graphWaitLease: IRequestLease = await admissionController.acquireAsync(
+      const graphWaitLease: IRequestLease = await admissionController.acquireGraphExecutionAsync(
         this.#graphExecutionScheduler,
         graphExclusivityClass
       );

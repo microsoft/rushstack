@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Stop restarting the daemon when a request differs only in volatile per-shell environment variables such as PWD, OLDPWD, SHLVL, TERM or WSL_INTEROP; the restart fingerprint and the production resolver's environment check now share rush-lib's normalization.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

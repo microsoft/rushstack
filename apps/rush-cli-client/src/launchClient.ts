@@ -26,6 +26,7 @@ import { MinimalRushConfiguration } from '@microsoft/rush/lib/MinimalRushConfigu
 import { DaemonLauncherUnavailableError } from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
+import { formatAdmissionFailure, getConfiguredAdmission } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { selectClientRoute, type IClientRoute } from './routing';
@@ -92,7 +93,14 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       columns: process.stdout.columns,
       acceptsStdin: true
     },
-    admission: route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) }
+    admission:
+      route.admission ??
+      getConfiguredAdmission({
+        queueTimeoutSeconds: config.queueTimeoutSeconds,
+        explicit:
+          workspace?.daemon?.queueTimeoutSeconds !== undefined ||
+          environment[daemonEnvironmentVariables.queueTimeoutSeconds] !== undefined
+      })
   });
   let connection: IConnectOrStartDaemonOptions;
   let client: DaemonClient;
@@ -188,8 +196,15 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   }
   if (outcome.kind === 'result') {
     process.exitCode = outcome.result.exitCode;
-    const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
-    if (diagnostic) await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
+    if (outcome.result.admissionErrorCode) {
+      await writeStreamAsync(
+        process.stderr,
+        Buffer.from(formatAdmissionFailure(outcome.result.admissionErrorCode, request.admission))
+      );
+    } else {
+      const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
+      if (diagnostic) await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
+    }
   } else if (outcome.kind === 'rejected') {
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
   } else if (abort.signal.aborted) {
