@@ -24,19 +24,22 @@ or admitting stdin: that is a protocol error, not permission to replay the comma
 Abort signals send `requestCancel`, then wait for the result; cancellation has a
 bounded grace period. Disconnects, protocol errors and sink failures are errors,
 never reasons to replay possibly executed work. Only pre-execution `unsupported`,
-`controllingTerminalRequired`, and `stdinEndUnsupported` outcomes permit fallback. Raw-mode changes are
+`controllingTerminalRequired`, `stdinEndUnsupported`, and `restartRetriesExhausted` outcomes permit fallback. Raw-mode changes are
 acknowledged only after applying them. Input listeners and raw state are restored
 on success, cancellation, disconnect and failure. No resize messages are sent.
 
 `executeWithDaemonRestartAsync(readyClient, connectionOptions, executionOptions)`
-adds one bounded retry for an explicit `retryAfterRestart: true` result. It captures
-the endpoint's PID/start identity before sending, requires protocol 0.10, waits for
-that ownership to be released, and reconnects through the same startup mutex.
+retries an explicit `retryAfterRestart: true` result a bounded number of times. Before
+each hand-off it captures the endpoint's PID/start identity, requires protocol 0.10,
+waits for that ownership to be released, and reconnects through the same startup mutex.
+Retries after the first use jittered backoff, and the backoff, the successor hand-off
+and the resubmitted request all share the request's admission deadline.
 The original immutable request and unread input are preserved. Output, events,
 terminal control, or stdin admission forbid retry, as do connection loss and plain
-error messages. A second restart result fails explicitly. Cancellation stops waiting
-without killing a daemon. Disabling auto-start still permits waiting for a
-host-started successor, but never lets the client spawn one.
+error messages. When the retry bound or the admission deadline is exhausted, it
+returns a `restartRetriesExhausted` fallback outcome so the caller can run in-process.
+Cancellation stops waiting without killing a daemon. Disabling auto-start still
+permits waiting for a host-started successor, but never lets the client spawn one.
 
 `connectOrStartDaemonAsync()` accepts an **explicit, version-selected** executable,
 arguments, environment and cwd. It does not discover or install a Rush version.

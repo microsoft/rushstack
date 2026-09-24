@@ -49,7 +49,7 @@ export type DaemonClientOutcome = {
     readonly result: IDaemonCommandResult;
 } | {
     readonly kind: 'fallback';
-    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported';
+    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported' | 'restartRetriesExhausted';
     readonly message?: string;
 } | {
     readonly kind: 'rejected';
