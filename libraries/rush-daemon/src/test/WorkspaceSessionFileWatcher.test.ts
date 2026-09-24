@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type * as fs from 'node:fs';
+import * as path from 'node:path';
 import { EventEmitter } from 'node:events';
 
-import { WorkspaceSessionFileWatcher } from '../WorkspaceSessionFileWatcher';
+import { getProjectExcludedFolderPathsAsync, WorkspaceSessionFileWatcher } from '../WorkspaceSessionFileWatcher';
 import { TEST_RUSH_CONFIGURATION } from './TestWorkspaceSession';
 
 class TestFsWatcher extends EventEmitter {
@@ -22,6 +23,13 @@ class TestFsWatcher extends EventEmitter {
 }
 
 describe(WorkspaceSessionFileWatcher.name, () => {
+  it('excludes the project .rush/temp folder from Linux tree observation', async () => {
+    const project = TEST_RUSH_CONFIGURATION.projects[0];
+    const excluded: ReadonlySet<string> = await getProjectExcludedFolderPathsAsync(project);
+    expect(excluded.has(path.resolve(project.projectRushTempFolder))).toBe(true);
+    expect(excluded.has(path.resolve(project.projectFolder))).toBe(false);
+  });
+
   it('watches every configured subspace config folder', async () => {
     const watchedPaths: string[] = [];
     const watcher: WorkspaceSessionFileWatcher = new WorkspaceSessionFileWatcher({

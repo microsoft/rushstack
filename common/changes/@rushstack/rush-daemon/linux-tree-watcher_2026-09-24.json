@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "On Linux, observe watched projects with one non-recursive watch per directory created by an asynchronous walk instead of Node's recursive fs.watch emulation (one inotify watch per file, synchronous tree walk). Skip node_modules, .git, .rush/temp and declared output folders, follow directories created or removed later, tolerate directories that vanish during registration, and report inotify watch-limit exhaustion (ENOSPC) explicitly.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}
