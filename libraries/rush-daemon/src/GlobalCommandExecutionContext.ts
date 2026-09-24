@@ -360,12 +360,16 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
     this.abortSignal.addEventListener('abort', terminateChild, { once: true });
     let childError: Error | undefined;
     try {
-      // Complete on 'exit' rather than 'close': a background descendant may inherit and hold the output pipes open.
+      // On POSIX, complete on 'exit' rather than 'close': a background descendant may inherit and hold the output
+      // pipes open, and the child's process group is killed below. Windows cannot recover descendants after the child
+      // exits, so the pipes closing remains the only signal that the child's descendants have exited.
       await new Promise<void>((resolve) => {
         child.once('error', (error: Error) => {
           childError = error;
         });
-        child.once('exit', () => resolve());
+        if (process.platform !== 'win32') {
+          child.once('exit', () => resolve());
+        }
         child.once('close', () => resolve());
       });
       terminateExitedChildProcessGroup(child);
