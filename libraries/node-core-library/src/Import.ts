@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import nodeModule = require('module');
 
 import importLazy = require('import-lazy');
-import * as Resolve from 'resolve';
+import type * as Resolve from 'resolve';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';
@@ -13,6 +13,20 @@ import type { IPackageJson } from './IPackageJson';
 import { PackageName } from './PackageName';
 
 type RealpathFnType = Parameters<typeof Resolve.default>[1]['realpath'];
+
+type ResolveFunction = typeof import('resolve');
+
+let _resolveFunction: ResolveFunction | undefined;
+
+/**
+ * The "resolve" package is only needed by some of the Import APIs, so it is loaded on first use.
+ */
+function _getResolveFunction(): ResolveFunction {
+  if (!_resolveFunction) {
+    _resolveFunction = require('resolve') as ResolveFunction;
+  }
+  return _resolveFunction;
+}
 
 /**
  * Common options shared by {@link IImportResolveModuleOptions} and {@link IImportResolvePackageOptions}
@@ -297,7 +311,7 @@ export class Import {
     }
 
     try {
-      return Resolve.sync(modulePath, {
+      return _getResolveFunction().sync(modulePath, {
         basedir: normalizedRootPath,
         preserveSymlinks: false,
         realpathSync: getRealPath
@@ -373,7 +387,7 @@ export class Import {
                 }
               : undefined;
 
-          Resolve.default(
+          _getResolveFunction()(
             modulePath,
             {
               basedir: normalizedRootPath,
@@ -450,7 +464,7 @@ export class Import {
           })
         : // Append `/package.json` to ensure `resolve.sync` doesn't attempt to return a system package, and to avoid
           // having to mess with the `packageFilter` option.
-          Resolve.sync(`${packageName}/package.json`, {
+          _getResolveFunction().sync(`${packageName}/package.json`, {
             basedir: normalizedRootPath,
             preserveSymlinks: false,
             realpathSync: getRealPath
@@ -514,7 +528,7 @@ export class Import {
                 }
               : undefined;
 
-          Resolve.default(
+          _getResolveFunction()(
             // Append `/package.json` to ensure `resolve` doesn't attempt to return a system package, and to avoid
             // having to mess with the `packageFilter` option.
             `${packageName}/package.json`,

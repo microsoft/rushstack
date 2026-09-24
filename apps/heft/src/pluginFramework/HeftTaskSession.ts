@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// This is intentionally not an `import type`: it is only used as types (so it is elided from the emitted
+// JavaScript and tapable is loaded lazily), but the emitted declarations and the API report must keep the
+// original `import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable'` form.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { InternalError } from '@rushstack/node-core-library';
@@ -15,6 +19,7 @@ import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
+import { createAsyncParallelHook, createAsyncSeriesWaterfallHook } from './TapableHooks';
 
 /**
  * The type of {@link IHeftTaskSession.parsedCommandLine}, which exposes details about the
@@ -282,9 +287,9 @@ export class HeftTaskSession implements IHeftTaskSession {
     this.metricsCollector = metricsCollector;
     this.taskName = task.taskName;
     this.hooks = {
-      run: new AsyncParallelHook(['runHookOptions']),
-      runIncremental: new AsyncParallelHook(['runIncrementalHookOptions']),
-      registerFileOperations: new AsyncSeriesWaterfallHook(['fileOperations'])
+      run: createAsyncParallelHook(['runHookOptions']),
+      runIncremental: createAsyncParallelHook(['runIncrementalHookOptions']),
+      registerFileOperations: createAsyncSeriesWaterfallHook(['fileOperations'])
     };
 
     // Guaranteed to be unique since phases are uniquely named, tasks are uniquely named within

@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// Only used as a type (see loadTypeScriptToolAsync), so this import is elided from the emitted JavaScript.
+// It is not written as "import type" because that would change the published API report.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import semver from 'semver';
 
 import type { HeftConfiguration } from '@rushstack/heft';
@@ -70,7 +73,9 @@ export async function loadTypeScriptToolAsync(
   const compilerPackageJsonFilename: string = `${typeScriptToolPath}/package.json`;
   const packageJson: IPackageJson = await JsonFile.loadAsync(compilerPackageJsonFilename);
   const typescriptVersion: string = packageJson.version;
-  const typescriptParsedVersion: semver.SemVer | null = semver.parse(typescriptVersion);
+  // Deep import: the 'semver' package index loads ~45 modules. The SemVer class is the same object.
+  const parseSemVer: typeof semver.parse = require('semver/functions/parse');
+  const typescriptParsedVersion: semver.SemVer | null = parseSemVer(typescriptVersion);
   if (!typescriptParsedVersion) {
     throw new Error(
       `Unable to parse version "${typescriptVersion}" for TypeScript compiler package in: ` +

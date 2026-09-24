@@ -5,7 +5,7 @@ import { Async, InternalError } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
 import { HeftLifecycle } from './HeftLifecycle';
-import { HeftPhaseSession } from './HeftPhaseSession';
+import type { HeftPhaseSession } from './HeftPhaseSession';
 import { HeftPhase } from './HeftPhase';
 import {
   CoreConfigFiles,
@@ -14,7 +14,7 @@ import {
 } from '../utilities/CoreConfigFiles';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { LoggingManager } from './logging/LoggingManager';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { type HeftConfiguration, getRigConfigForConfigLoading } from '../configuration/HeftConfiguration';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftTask } from './HeftTask';
 import type { HeftParameterManager } from './HeftParameterManager';
@@ -69,7 +69,8 @@ export class InternalHeftSession {
       await CoreConfigFiles.loadHeftConfigurationFileForProjectAsync(
         options.heftConfiguration.globalTerminal,
         options.heftConfiguration.buildFolderPath,
-        options.heftConfiguration.rigConfig
+        // Same data as heftConfiguration.rigConfig, without loading @rushstack/rig-package unless needed
+        getRigConfigForConfigLoading(options.heftConfiguration)
       );
 
     const internalHeftSession: InternalHeftSession = new InternalHeftSession(heftConfigurationJson, options);
@@ -157,7 +158,11 @@ export class InternalHeftSession {
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
     let phaseSession: HeftPhaseSession | undefined = this.#phaseSessionsByPhase.get(phase);
     if (!phaseSession) {
-      phaseSession = new HeftPhaseSession({ internalHeftSession: this, phase });
+      // The phase and task session implementations are only loaded once a phase actually runs
+      const { HeftPhaseSession: HeftPhaseSessionClass } = require('./HeftPhaseSession') as {
+        HeftPhaseSession: typeof HeftPhaseSession;
+      };
+      phaseSession = new HeftPhaseSessionClass({ internalHeftSession: this, phase });
       this.#phaseSessionsByPhase.set(phase, phaseSession);
     }
     return phaseSession;

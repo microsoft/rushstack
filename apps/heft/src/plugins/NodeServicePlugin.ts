@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'node:child_process';
+import type * as child_process from 'node:child_process';
 import * as process from 'node:process';
 
 import { InternalError, SubprocessTerminator } from '@rushstack/node-core-library';
@@ -289,7 +289,9 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     this.#clearTimeout();
     this.#logger.terminal.writeLine(`Invoking command: "${this.#shellCommand!}"`);
 
-    const childProcess: child_process.ChildProcess = child_process.spawn(this.#shellCommand!, {
+    // node:child_process is only loaded once the service actually needs to be launched.
+    const { spawn }: typeof child_process = require('node:child_process');
+    const childProcess: child_process.ChildProcess = spawn(this.#shellCommand!, {
       shell: true,
       ...SubprocessTerminator.RECOMMENDED_OPTIONS
     });

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as semver from 'semver';
+import type * as semver from 'semver';
 
 import type { IScopedLogger } from '@rushstack/heft';
 import { FileError, InternalError } from '@rushstack/node-core-library';
@@ -65,7 +65,9 @@ export async function invokeApiExtractorAsync(
 
   terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
 
-  const apiExtractorVersion: semver.SemVer | null = semver.parse(apiExtractor.Extractor.version);
+  // Deep import: the 'semver' package index loads ~45 modules. The SemVer class is the same object.
+  const parseSemVer: typeof semver.parse = require('semver/functions/parse');
+  const apiExtractorVersion: semver.SemVer | null = parseSemVer(apiExtractor.Extractor.version);
   if (
     !apiExtractorVersion ||
     apiExtractorVersion.major < MIN_SUPPORTED_MAJOR_VERSION ||

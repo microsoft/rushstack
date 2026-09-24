@@ -1,25 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash, type Hash } from 'node:crypto';
+import type { Hash } from 'node:crypto';
 
-import { glob } from 'fast-glob';
-
-import {
-  type IOperationRunner,
-  type IOperationRunnerContext,
-  OperationStatus
-} from '@rushstack/operation-graph';
+import type { IOperationRunner, IOperationRunnerContext } from '@rushstack/operation-graph';
+import { OperationStatus } from '@rushstack/operation-graph/lib/OperationStatus';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
 import type { HeftTask } from '../../pluginFramework/HeftTask';
-import {
-  copyFilesAsync,
-  type ICopyOperation,
-  asAbsoluteCopyOperation,
-  asRelativeCopyOperation
-} from '../../plugins/CopyFilesPlugin';
-import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
+import type { ICopyOperation } from '../../plugins/CopyFilesPlugin';
 import type {
   HeftTaskSession,
   IHeftTaskFileOperations,
@@ -28,12 +17,50 @@ import type {
 } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
-import {
-  type IWatchedFileState,
-  type IWatchFileSystem,
+import type { GlobFn, IGlobOptions } from '../../plugins/FileGlobSpecifier';
+import type {
+  IWatchedFileState,
+  IWatchFileSystem,
   WatchFileSystemAdapter
 } from '../../utilities/WatchFileSystemAdapter';
+
+// The modules below are only needed for specific features (file operations, watch mode, globbing), so they
+// are loaded on first use to keep them out of the startup path.
+type CopyFilesPluginModule = typeof import('../../plugins/CopyFilesPlugin');
+type DeleteFilesPluginModule = typeof import('../../plugins/DeleteFilesPlugin');
+type FileGlobSpecifierModule = typeof import('../../plugins/FileGlobSpecifier');
+type WatchFileSystemAdapterModule = typeof import('../../utilities/WatchFileSystemAdapter');
+
+let _copyFilesPluginModulePromise: Promise<CopyFilesPluginModule> | undefined;
+let _deleteFilesPluginModulePromise: Promise<DeleteFilesPluginModule> | undefined;
+let _watchModulesPromise: Promise<[WatchFileSystemAdapterModule, FileGlobSpecifierModule]> | undefined;
+let _fastGlobPromise: Promise<GlobFn> | undefined;
+
+function loadCopyFilesPluginModuleAsync(): Promise<CopyFilesPluginModule> {
+  return (_copyFilesPluginModulePromise ??= import('../../plugins/CopyFilesPlugin'));
+}
+
+function loadDeleteFilesPluginModuleAsync(): Promise<DeleteFilesPluginModule> {
+  return (_deleteFilesPluginModulePromise ??= import('../../plugins/DeleteFilesPlugin'));
+}
+
+function loadWatchModulesAsync(): Promise<[WatchFileSystemAdapterModule, FileGlobSpecifierModule]> {
+  return (_watchModulesPromise ??= Promise.all([
+    import('../../utilities/WatchFileSystemAdapter'),
+    import('../../plugins/FileGlobSpecifier')
+  ]));
+}
+
+/**
+ * Loads "fast-glob" the first time a plugin globs, and then forwards to it.
+ */
+const globAsync: GlobFn = async (
+  pattern: string | string[],
+  options?: IGlobOptions | undefined
+): Promise<string[]> => {
+  const glob: GlobFn = await (_fastGlobPromise ??= import('fast-glob').then((fastGlob) => fastGlob.glob));
+  return await glob(pattern, options);
+};
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -106,6 +133,11 @@ export class TaskOperationRunner implements IOperationRunner {
       return OperationStatus.Aborted;
     }
 
+    // These modules are only used in watch mode, where they are accessed synchronously below.
+    const watchModules: [WatchFileSystemAdapterModule, FileGlobSpecifierModule] | undefined = isWatchMode
+      ? await loadWatchModulesAsync()
+      : undefined;
+
     if (!this.#fileOperations && hooks.registerFileOperations.isUsed()) {
       const fileOperations: IHeftTaskFileOperations = await hooks.registerFileOperations.promise({
         copyOperations: new Set(),
@@ -115,6 +147,10 @@ export class TaskOperationRunner implements IOperationRunner {
       let copyConfigHash: string | undefined;
       const { copyOperations } = fileOperations;
       if (copyOperations.size > 0) {
+        const [{ asAbsoluteCopyOperation, asRelativeCopyOperation }, { createHash }] = await Promise.all([
+          loadCopyFilesPluginModuleAsync(),
+          import('node:crypto')
+        ]);
         // Do this here so that we only need to do it once for each Heft invocation
         const hasher: Hash | undefined = createHash('sha256');
         const absolutePathCopyOperations: Set<ICopyOperation> = new Set();
@@ -143,7 +179,10 @@ export class TaskOperationRunner implements IOperationRunner {
     let watchFileSystemAdapter: WatchFileSystemAdapter | undefined;
     const getWatchFileSystemAdapter = (): WatchFileSystemAdapter => {
       if (!watchFileSystemAdapter) {
-        watchFileSystemAdapter = this.#watchFileSystemAdapter ||= new WatchFileSystemAdapter();
+        if (!watchModules) {
+          throw new InternalError(`The WatchFileSystemAdapter is only available in watch mode.`);
+        }
+        watchFileSystemAdapter = this.#watchFileSystemAdapter ||= new watchModules[0].WatchFileSystemAdapter();
         watchFileSystemAdapter.setBaseline();
       }
       return watchFileSystemAdapter;
@@ -161,7 +200,7 @@ export class TaskOperationRunner implements IOperationRunner {
             // Create the options and provide a utility method to obtain paths to copy
             const runHookOptions: IHeftTaskRunHookOptions = {
               abortSignal,
-              globAsync: glob
+              globAsync
             };
 
             // Run the plugin run hook
@@ -173,7 +212,7 @@ export class TaskOperationRunner implements IOperationRunner {
                     pattern: string | string[],
                     options: IGlobOptions = {}
                   ): Promise<Map<string, IWatchedFileState>> => {
-                    return watchGlobAsync(pattern, {
+                    return watchModules![1].watchGlobAsync(pattern, {
                       ...options,
                       fs: getWatchFileSystemAdapter()
                     });
@@ -215,9 +254,15 @@ export class TaskOperationRunner implements IOperationRunner {
       const { copyOperations, deleteOperations } = this.#fileOperations;
       const copyConfigHash: string | undefined = this.#copyConfigHash;
 
+      const shouldDelete: boolean = deleteOperations.size > 0;
+      const [copyFilesPluginModule, deleteFilesPluginModule] = await Promise.all([
+        copyConfigHash ? loadCopyFilesPluginModuleAsync() : undefined,
+        shouldDelete ? loadDeleteFilesPluginModuleAsync() : undefined
+      ]);
+
       await Promise.all([
         copyConfigHash
-          ? copyFilesAsync(
+          ? copyFilesPluginModule!.copyFilesAsync(
               copyOperations,
               logger.terminal,
               `${taskSession.tempFolderPath}/file-copy.json`,
@@ -225,8 +270,8 @@ export class TaskOperationRunner implements IOperationRunner {
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),
-        deleteOperations.size > 0
-          ? deleteFilesAsync(rootFolderPath, deleteOperations, logger.terminal)
+        shouldDelete
+          ? deleteFilesPluginModule!.deleteFilesAsync(rootFolderPath, deleteOperations, logger.terminal)
           : Promise.resolve()
       ]);
     }

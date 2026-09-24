@@ -7,14 +7,23 @@ import { FileSystem, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { Constants } from '../utilities/Constants';
-import {
+import type {
   getFileSelectionSpecifierPathsAsync,
   asAbsoluteFileSelectionSpecifier,
-  type IFileSelectionSpecifier
+  IFileSelectionSpecifier
 } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
+
+// The globbing helpers are only needed once files are actually deleted, so they are not loaded when the
+// plugin is loaded and applied.
+function getFileGlobSpecifierModule(): {
+  asAbsoluteFileSelectionSpecifier: typeof asAbsoluteFileSelectionSpecifier;
+  getFileSelectionSpecifierPathsAsync: typeof getFileSelectionSpecifierPathsAsync;
+} {
+  return require('./FileGlobSpecifier');
+}
 
 /**
  * Used to specify a selection of source files to delete from the specified source folder.
@@ -40,17 +49,18 @@ async function _getPathsToDeleteAsync(
     filesToDelete: new Set<string>(),
     foldersToDelete: new Set<string>()
   };
+  const {
+    asAbsoluteFileSelectionSpecifier: asAbsoluteSpecifier,
+    getFileSelectionSpecifierPathsAsync: getSpecifierPathsAsync
+  } = getFileGlobSpecifierModule();
 
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
-      const absoluteSpecifier: IDeleteOperation = asAbsoluteFileSelectionSpecifier(
-        rootFolderPath,
-        deleteOperation
-      );
+      const absoluteSpecifier: IDeleteOperation = asAbsoluteSpecifier(rootFolderPath, deleteOperation);
 
       // Glob the files under the source path and add them to the set of files to delete
-      const sourcePaths: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
+      const sourcePaths: Map<string, fs.Dirent> = await getSpecifierPathsAsync({
         fileGlobSpecifier: absoluteSpecifier,
         includeFolders: true
       });
