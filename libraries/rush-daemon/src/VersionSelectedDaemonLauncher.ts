@@ -22,22 +22,27 @@ import {
   type IDaemonInstallationMetadata,
   type IInstalledDaemonLauncher
 } from './DaemonInstallation';
-import {
-  DaemonLauncherUnavailableError,
-  getSelectedDaemonStartCommand,
-  type IDaemonLauncherContext
-} from './DaemonLaunchCommand';
-
-export {
-  DaemonLauncherUnavailableError,
-  getSelectedDaemonStartCommand,
-  type IDaemonLauncherContext
-} from './DaemonLaunchCommand';
 
 const DAEMON_PACKAGE: string = '@rushstack/rush-daemon';
 
+export interface IDaemonLauncherContext {
+  readonly repoRoot: string;
+  readonly rushVersion: string;
+  readonly environment: Readonly<NodeJS.ProcessEnv>;
+}
+
 export interface IVersionSelectedDaemonLaunch extends IInstalledDaemonLauncher {
   readonly startCommand: IDaemonStartCommand;
+}
+
+export class DaemonLauncherUnavailableError extends Error {
+  public readonly installation: IInstalledDaemonLauncher | undefined;
+
+  public constructor(rushVersion: string, reason: string, installation?: IInstalledDaemonLauncher) {
+    super(`Cannot launch selected Rush ${rushVersion}: ${reason} Use native Rush instead.`);
+    this.name = 'DaemonLauncherUnavailableError';
+    this.installation = installation;
+  }
 }
 
 /** Native-style, node-specific cache, resolved against the captured environment without mutating process.env. */
@@ -56,6 +61,30 @@ export function assertExactDaemonVersion(version: string): void {
   ) {
     throw new Error(`Daemon selection requires an exact version, not "${version}".`);
   }
+}
+
+export function getSelectedDaemonStartCommand(
+  daemonPackageJsonPath: string,
+  context: IDaemonLauncherContext
+): IDaemonStartCommand {
+  return {
+    command: process.execPath,
+    args: [
+      require.resolve('./SelectedDaemonBootstrap'),
+      '--launch',
+      daemonPackageJsonPath,
+      context.rushVersion,
+      context.repoRoot
+    ],
+    cwd: context.repoRoot,
+    environment: Object.freeze(
+      Object.fromEntries(
+        Object.entries(context.environment).filter(
+          (entry): entry is [string, string] => entry[1] !== undefined
+        )
+      )
+    )
+  };
 }
 
 /** Probes in a fresh process so loading a foreign Rush engine cannot alter the caller's SDK/global state. */

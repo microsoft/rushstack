@@ -69,9 +69,7 @@ describe(getConfiguredAdmission.name, () => {
   });
 
   it('keeps an explicitly configured timeout as one absolute deadline', () => {
-    expect(getConfiguredAdmission({ queueTimeoutSeconds: 1.5, explicit: true })).toEqual({
-      waitTimeoutMs: 1500
-    });
+    expect(getConfiguredAdmission({ queueTimeoutSeconds: 1.5, explicit: true })).toEqual({ waitTimeoutMs: 1500 });
   });
 });
 

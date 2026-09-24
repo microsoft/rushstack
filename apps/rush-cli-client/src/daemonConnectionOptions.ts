@@ -7,13 +7,9 @@ import { JsonFile } from '@rushstack/node-core-library';
 import type { IConnectOrStartDaemonOptions } from '@rushstack/rush-client-core';
 import { computeDaemonWorkspaceKey, resolveDaemonPathsFromProcess } from '@rushstack/rush-daemon-transport';
 import { readDaemonInstallationMetadata } from '@rushstack/rush-daemon/lib/DaemonInstallation';
-import {
-  DaemonLauncherUnavailableError,
-  getSelectedDaemonStartCommand
-} from '@rushstack/rush-daemon/lib/DaemonLaunchCommand';
-import type { IVersionSelectedDaemonLaunch } from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
+import type * as VersionSelectedDaemonLauncherModule from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
 
-import { BUNDLED_RUSH_VERSION } from './bundledRushVersion';
+import { getBundledRushVersion, loadVersionSelectedDaemonLauncher } from './lazyRushModules';
 
 export function getDaemonConnectionOptions(
   repoRoot: string,
@@ -25,7 +21,7 @@ export function getDaemonConnectionOptions(
   const daemonPackagePath: string = require.resolve('@rushstack/rush-daemon/package.json');
   const daemonPackage: { version: string; bin: { rushd: string } } = JsonFile.load(daemonPackagePath);
   if (autoStart && readDaemonInstallationMetadata(daemonPackagePath).rushVersion !== rushVersion) {
-    throw new DaemonLauncherUnavailableError(
+    throw new (loadVersionSelectedDaemonLauncher().DaemonLauncherUnavailableError)(
       rushVersion,
       'The synchronous launcher only supports its installed engine; use asynchronous version selection.'
     );
@@ -34,7 +30,7 @@ export function getDaemonConnectionOptions(
     paths: resolveDaemonPathsFromProcess(computeDaemonWorkspaceKey({ canonicalRepoRoot, rushVersion })),
     expectedDaemonVersion: daemonPackage.version,
     startCommand: autoStart
-      ? getSelectedDaemonStartCommand(daemonPackagePath, {
+      ? loadVersionSelectedDaemonLauncher().getSelectedDaemonStartCommand(daemonPackagePath, {
           repoRoot: canonicalRepoRoot,
           rushVersion,
           environment
@@ -57,17 +53,25 @@ export async function getDaemonConnectionOptionsAsync(
     false
   );
   if (!autoStart) return { paths: options.paths };
-  // The bundled runtime needs no selection; its bootstrap re-attests before binding.
-  if (rushVersion === BUNDLED_RUSH_VERSION)
-    return getDaemonConnectionOptions(repoRoot, rushVersion, environment, true);
-  // Selecting another installation uses the engine's installer APIs, so it is loaded only when needed.
-  const { selectDaemonLauncherAsync } = await import(
-    '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher'
-  );
-  const launch: IVersionSelectedDaemonLaunch = await selectDaemonLauncherAsync({
-    repoRoot: fs.realpathSync.native(repoRoot),
-    rushVersion,
-    environment
-  });
+  if (rushVersion === getBundledRushVersion()) {
+    const daemonPackagePath: string = require.resolve('@rushstack/rush-daemon/package.json');
+    if (readDaemonInstallationMetadata(daemonPackagePath).rushVersion !== rushVersion) {
+      // Preserve the eager synchronous launcher error.
+      return getDaemonConnectionOptions(repoRoot, rushVersion, environment, true);
+    }
+    // The bundled runtime's bootstrap re-attests before binding. Resolve it only if a start is needed.
+    return {
+      ...options,
+      resolveStartCommandAsync: async () =>
+        getDaemonConnectionOptions(repoRoot, rushVersion, environment, true).startCommand!
+    };
+  }
+  const { selectDaemonLauncherAsync } = loadVersionSelectedDaemonLauncher();
+  const launch: VersionSelectedDaemonLauncherModule.IVersionSelectedDaemonLaunch =
+    await selectDaemonLauncherAsync({
+      repoRoot: fs.realpathSync.native(repoRoot),
+      rushVersion,
+      environment
+    });
   return { ...options, expectedDaemonVersion: launch.daemonVersion, startCommand: launch.startCommand };
 }

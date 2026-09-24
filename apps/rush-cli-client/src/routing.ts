@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
-import {
-  parseRushXCommandLineArguments,
-  type IRushXCommandLineArguments
-} from '@microsoft/rush-lib/lib/cli/RushXCommandLineArguments';
+import type { IRushXCommandLineArguments } from '@microsoft/rush-lib';
 
+import { loadRushLib } from './lazyRushModules';
 import { parseClientAdmissionControls, type IClientAdmissionControls } from './ClientAdmissionControls';
 
 const neverDaemonize: ReadonlySet<string> = new Set([
@@ -56,7 +54,7 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
     ...(separator < 0 ? [] : controls.argv.slice(separator))
   ];
   const rushxArguments: IRushXCommandLineArguments | undefined = options.rushx
-    ? parseRushXCommandLineArguments(argv, options.environment)
+    ? loadRushLib().RushXCommand.parseArguments(argv, options.environment)
     : undefined;
   const commandName: string | undefined = rushxArguments ? rushxArguments.commandName || undefined : argv[0];
   const reporterControls: boolean =

@@ -25,8 +25,13 @@ describe(validateDaemonRequestAdmissionOptions.name, () => {
     [{ waitTimeoutIsDefault: 'yes' }, 'waitTimeoutIsDefault'],
     [{ waitTimeoutMs: -1 }, 'waitTimeoutMs'],
     [{ waitTimeoutMs: 1.5 }, 'waitTimeoutMs'],
-    [{ waitTimeoutMs: MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS + OUT_OF_RANGE_INCREMENT }, 'waitTimeoutMs']
+    [
+      { waitTimeoutMs: MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS + OUT_OF_RANGE_INCREMENT },
+      'waitTimeoutMs'
+    ]
   ])('rejects invalid options %#', (options: object, expectedMessage: string) => {
-    expect(() => validateDaemonRequestAdmissionOptions(options as never)).toThrow(expectedMessage);
+    expect(() =>
+      validateDaemonRequestAdmissionOptions(options as never)
+    ).toThrow(expectedMessage);
   });
 });

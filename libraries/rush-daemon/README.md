@@ -132,8 +132,10 @@ The native Rush lock is held only during graph preparation and each coalesced it
 is idle. `acquireExecutionLeaseAsync` is an optional engine/session hook invoked once by the batch coordinator,
 before input reconciliation. Compatible clients share that lease rather than contending independently. It remains
 held through operation execution, runner cleanup, and every participant's output/input cleanup; the batch barrier
-releases it before any final command result is published. Thus ordinary native actions and permanent `--no-daemon`
-fallback can run immediately after a completed warm request without stopping the daemon.
+releases it before the final command result of the batch's last participant is published. A coalesced participant
+whose own operations all completed earlier may receive its result while the iteration still runs for the others (see
+below); it must not assume the lock is already released. Thus ordinary native actions and permanent `--no-daemon`
+fallback can run immediately after a completed single-client warm request without stopping the daemon.
 
 A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
 automatic retry. A later explicit request can retry after contention ends, including contention during the first
@@ -463,8 +465,13 @@ request's immutable `RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment overri
 Compatible phased `SHARED-BUILD` requests admitted before the next graph iteration starts are coalesced at a
 deterministic event-loop-turn boundary. The router reconciles retained invalidations once, unions the clients' enabled
 dependency closures, and schedules one iteration. Shared operations execute once, while each client subscribes only
-to its own closure and derives its final result only from that subset. Requests admitted after scheduling starts form
-a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
+to its own closure and derives its final result only from that subset. A client does not wait for the other clients'
+larger selections: once every operation of its own closure that the iteration scheduled has completed and its output
+has drained, its result is published while the iteration, graph lease, and native execution lease continue for the
+remaining clients. The last client that still needs the iteration receives its result after iteration end and lease
+release, as for a single client. An early result is not published when any of the client's operations was aborted;
+iteration-wide failures that occur after an early result are reported only to the remaining clients. Requests
+admitted after scheduling starts form a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
 clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
 
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
