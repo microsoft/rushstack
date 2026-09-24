@@ -81,6 +81,11 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
 }
 
 // @beta
+export interface IDaemonArtifactResetOptions {
+    readonly waitTimeoutMs?: number;
+}
+
+// @beta
 export interface IDaemonArtifactResetResult {
     readonly removedPaths: ReadonlyArray<string>;
 }
@@ -136,6 +141,6 @@ export interface IDaemonStartCommand {
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
 
 // @beta
-export function resetDaemonArtifactsAsync(paths: IDaemonPaths): Promise<IDaemonArtifactResetResult>;
+export function resetDaemonArtifactsAsync(paths: IDaemonPaths, options?: IDaemonArtifactResetOptions): Promise<IDaemonArtifactResetResult>;
 
 ```
