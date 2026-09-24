@@ -127,6 +127,35 @@ describe('phased request summary', () => {
     }
   });
 
+  it('honors the request warnings policy in the summary verdict', async () => {
+    for (const [allowWarnings, expectedVerdict] of [
+      ['0', 'Operations succeeded with warnings.'],
+      ['1', '']
+    ] as const) {
+      const fixture: ITestRoutingFixture = createFixture(OperationStatus.SuccessWithWarning);
+      try {
+        const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+        await new PhasedRequestRouter(fixture.session).executeAsync(
+          {
+            ...createRequest('warning', OPERATION_A),
+            environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: allowWarnings }
+          },
+          client
+        );
+        expect(getActivity(client, 'stdout')).toContain('==[ SUCCESS WITH WARNINGS: 1 operation ]==');
+        expect(getActivity(client, 'stdout')).toMatch(DURATION_LINE);
+        const stderr: string = getActivity(client, 'stderr');
+        if (expectedVerdict) {
+          expect(stderr).toContain(expectedVerdict);
+        } else {
+          expect(stderr).not.toContain('Operations succeeded with warnings.');
+        }
+      } finally {
+        await fixture.session[Symbol.asyncDispose]();
+      }
+    }
+  });
+
   it('gives each coalesced request a summary of only its own selection', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     try {

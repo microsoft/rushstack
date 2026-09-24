@@ -36,6 +36,8 @@ export interface IWritePhasedRequestSummaryOptions {
   readonly executionError: unknown;
   readonly graph: IOperationGraph;
   readonly sink: IPhasedRequestSummarySink;
+  /** Whether the request environment allows warnings in a successful build (`RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD`). */
+  readonly warningsAllowedByEnvironment: boolean;
 }
 
 /**
@@ -90,7 +92,10 @@ export function writePhasedRequestSummary(options: IWritePhasedRequestSummaryOpt
   if (executionError === undefined) {
     const operationResults: ReadonlyMap<Operation, IOperationExecutionResult> =
       collectSummaryResults(options);
-    _printOperationStatus(terminal, { operationResults, status: getSummaryStatus(operationResults) });
+    _printOperationStatus(terminal, {
+      operationResults,
+      status: getSummaryStatus(operationResults, options.warningsAllowedByEnvironment)
+    });
     terminal.writeLine(`rush ${commandName} (${duration})`);
   } else {
     terminal.writeErrorLine(`rush ${commandName} - Errors! (${duration})`);
@@ -138,7 +143,10 @@ function createUpToDateResult(previous: IOperationExecutionResult): IOperationEx
   return upToDate as IOperationExecutionResult;
 }
 
-function getSummaryStatus(results: ReadonlyMap<Operation, IOperationExecutionResult>): OperationStatus {
+function getSummaryStatus(
+  results: ReadonlyMap<Operation, IOperationExecutionResult>,
+  warningsAllowedByEnvironment: boolean
+): OperationStatus {
   let status: OperationStatus = OperationStatus.Success;
   for (const [operation, result] of results) {
     switch (result.status) {
@@ -149,7 +157,11 @@ function getSummaryStatus(results: ReadonlyMap<Operation, IOperationExecutionRes
         status = OperationStatus.Aborted;
         break;
       case OperationStatus.SuccessWithWarning:
-        if (status === OperationStatus.Success && !operation.runner?.warningsAreAllowed) {
+        if (
+          status === OperationStatus.Success &&
+          !warningsAllowedByEnvironment &&
+          !operation.runner?.warningsAreAllowed
+        ) {
           status = OperationStatus.SuccessWithWarning;
         }
         break;

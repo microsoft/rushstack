@@ -552,7 +552,8 @@ class PhasedRequestBatchCoordinator {
           elapsedMs: performance.now() - entry.startTimeMs,
           executionError,
           graph: this.#graph,
-          sink: entry.requestSink
+          sink: entry.requestSink,
+          warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
         });
       }
       try {
