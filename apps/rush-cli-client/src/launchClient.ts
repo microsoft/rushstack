@@ -214,10 +214,10 @@ export async function launchClientAsync(
       );
     }
   } else if (outcome.kind === 'rejected') {
-    agentRenderer?.dispose();
+    agentRenderer?.finish({ exitCode: 1, errorMessage: `daemon rejected the request (${outcome.rejection.code})` });
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
   } else if (abort.signal.aborted) {
-    agentRenderer?.dispose('cancelled');
+    agentRenderer?.finish({ exitCode: 130, errorMessage: 'cancelled' });
     process.exitCode = 130;
   } else {
     agentRenderer?.dispose();

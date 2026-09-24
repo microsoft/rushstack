@@ -14,7 +14,8 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'FROM CACHE',
   'FAILURE',
   'BLOCKED',
-  'NO OP'
+  'NO OP',
+  'ABORTED'
 ]);
 const MAX_ERROR_LINES: number = 10;
 const PIPE_MIN_INTERVAL_MS: number = 2000;
@@ -49,8 +50,7 @@ export class AgentProgressRenderer {
   readonly #running: Set<string> = new Set();
   readonly #counts: Map<string, number> = new Map();
   readonly #failed: string[] = [];
-  readonly #errorLines: string[] = [];
-  readonly #stderrOperations: Set<string> = new Set();
+  readonly #stderrTails: Map<string, string[]> = new Map();
   readonly #stdoutTails: Map<string, string[]> = new Map();
   #total: number = 0;
   #done: number = 0;
@@ -61,6 +61,7 @@ export class AgentProgressRenderer {
   #lastLineKey: string = '';
   #lastLineAtMs: number = -Infinity;
   #timer: ReturnType<typeof setInterval> | undefined;
+  #stopped: boolean = false;
 
   public constructor(options: IAgentProgressRendererOptions) {
     this.#options = options;
@@ -79,6 +80,9 @@ export class AgentProgressRenderer {
   }
 
   public setPhase(phase: string): void {
+    if (phase === this.#phase) {
+      return;
+    }
     this.#phase = phase;
     this.#render(true);
   }
@@ -116,6 +120,7 @@ export class AgentProgressRenderer {
             this.#failed.push(operationId);
           } else {
             this.#stdoutTails.delete(operationId);
+            this.#stderrTails.delete(operationId);
           }
         }
         break;
@@ -143,56 +148,42 @@ export class AgentProgressRenderer {
   }
 
   /**
-   * Keeps a bounded stderr tail, plus a small per-operation stdout tail that is only
-   * printed for failed operations whose diagnostics went to stdout (tsc, eslint, jest).
+   * Keeps bounded per-operation stderr and stdout tails (the last lines of each). They are only
+   * printed for failed operations; stdout is used when an operation reported its diagnostics
+   * there (tsc, eslint, jest) and wrote nothing to stderr.
    */
   public onLog(bytes: Uint8Array, operationId: string, stream: 'stdout' | 'stderr'): void {
+    const status: string | undefined = this.#statuses.get(operationId);
+    if (status !== undefined && TERMINAL_STATUSES.has(status) && status !== 'FAILURE') {
+      return;
+    }
+    const tails: Map<string, string[]> = stream === 'stderr' ? this.#stderrTails : this.#stdoutTails;
     for (const line of Buffer.from(bytes).toString('utf8').split('\n')) {
       if (!line.trim()) {
         continue;
       }
-      if (stream === 'stderr') {
-        this.#stderrOperations.add(operationId);
-        if (this.#errorLines.length < MAX_ERROR_LINES) {
-          this.#errorLines.push(`${operationId}: ${line.trim()}`);
-        }
-      } else {
-        const status: string | undefined = this.#statuses.get(operationId);
-        if (status !== undefined && status !== 'EXECUTING' && status !== 'FAILURE') {
-          continue;
-        }
-        let tail: string[] | undefined = this.#stdoutTails.get(operationId);
-        if (!tail) {
-          tail = [];
-          this.#stdoutTails.set(operationId, tail);
-        }
-        tail.push(line.trim());
-        if (tail.length > MAX_ERROR_LINES) {
-          tail.shift();
-        }
+      let tail: string[] | undefined = tails.get(operationId);
+      if (!tail) {
+        tail = [];
+        tails.set(operationId, tail);
+      }
+      tail.push(line.trim());
+      if (tail.length > MAX_ERROR_LINES) {
+        tail.shift();
       }
     }
   }
 
   /** Stops rendering without a summary (e.g. the request is handed to in-process Rush). */
-  public dispose(finalNote?: string): void {
-    if (this.#timer) {
-      clearInterval(this.#timer);
-      this.#timer = undefined;
-    }
-    this.#clear();
-    if (finalNote) {
-      this.#options.write(`rush ${this.#options.commandName}: ${finalNote}\n`);
-    }
+  public dispose(): void {
+    this.#stop();
   }
 
-  /** Stops the live region and writes the final summary line. */
+  /** Stops the live region and writes the final summary line, at most once. */
   public finish(result: IAgentFinalResult | undefined): void {
-    if (this.#timer) {
-      clearInterval(this.#timer);
-      this.#timer = undefined;
+    if (!this.#stop()) {
+      return;
     }
-    this.#clear();
     const succeeded: boolean = result !== undefined && result.exitCode === 0;
     const total: number = this.#getTotal();
     const parts: string[] = [...this.#counts].map(([status, count]) => `${count} ${status.toLowerCase()}`);
@@ -209,18 +200,37 @@ export class AgentProgressRenderer {
     }
     this.#options.write(`${line}\n`);
     if (!succeeded) {
-      const lines: string[] = [...this.#errorLines];
-      for (const operationId of this.#failed) {
-        if (!this.#stderrOperations.has(operationId)) {
-          for (const stdoutLine of this.#stdoutTails.get(operationId) ?? []) {
-            lines.push(`${operationId}: ${stdoutLine}`);
-          }
-        }
-      }
-      for (const errorLine of lines.slice(0, MAX_ERROR_LINES)) {
+      for (const errorLine of this.#getFailureLines().slice(0, MAX_ERROR_LINES)) {
         this.#options.write(`  ${errorLine}\n`);
       }
     }
+  }
+
+  /** Failed operations' tails, or every operation's stderr tail when no operation failed. */
+  #getFailureLines(): string[] {
+    const operationIds: Iterable<string> = this.#failed.length ? this.#failed : this.#stderrTails.keys();
+    const lines: string[] = [];
+    for (const operationId of operationIds) {
+      const tail: string[] = this.#stderrTails.get(operationId) ?? this.#stdoutTails.get(operationId) ?? [];
+      for (const line of tail) {
+        lines.push(`${operationId}: ${line}`);
+      }
+    }
+    return lines;
+  }
+
+  /** Returns false if rendering had already stopped; after stopping, nothing more is written. */
+  #stop(): boolean {
+    if (this.#stopped) {
+      return false;
+    }
+    this.#stopped = true;
+    if (this.#timer) {
+      clearInterval(this.#timer);
+      this.#timer = undefined;
+    }
+    this.#clear();
+    return true;
   }
 
   #getTotal(): number {
@@ -245,6 +255,9 @@ export class AgentProgressRenderer {
   }
 
   #render(force: boolean): void {
+    if (this.#stopped) {
+      return;
+    }
     const rows: [string, string, string] = this.#rows();
     if (this.#options.isTTY) {
       const width: number = Math.max(20, this.#options.columns || 80) - 1;

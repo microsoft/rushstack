@@ -24,6 +24,44 @@ function isActive(value: string | undefined): boolean {
 }
 
 /**
+ * Returns true when `RUSH_REPORTER` requests a native reporter, i.e. it is set to anything other than
+ * the `legacy` escape hatch. Normalized like `isLegacyEmergencyFallbackRequested()` in `@rushstack/reporter`.
+ */
+export function isNativeReporterEnvironmentRequested(value: string | undefined): boolean {
+  return value !== undefined && value.trim().toLowerCase() !== 'legacy';
+}
+
+/**
+ * Returns the command name for early agent output, or undefined when the invocation has no plain
+ * command (a leading option, `--help`/`-h`, or `daemon`). Daemon admission controls (`--no-wait`,
+ * `--wait-timeout SECONDS`) are skipped like `parseClientAdmissionControls()`, which is not imported
+ * here to avoid loading `@rushstack/rush-daemon-protocol` before the first line; invalid controls
+ * are reported later by the full parser.
+ */
+export function getAgentCommandName(argv: ReadonlyArray<string>): string | undefined {
+  const remaining: string[] = [];
+  for (let index: number = 0; index < argv.length && argv[index] !== '--'; index++) {
+    const arg: string = argv[index];
+    if (arg === '--wait-timeout') {
+      index++;
+    } else if (arg !== '--no-wait' && !arg.startsWith('--wait-timeout=')) {
+      remaining.push(arg);
+    }
+  }
+  const commandName: string | undefined = remaining[0];
+  if (
+    commandName === undefined ||
+    commandName.startsWith('-') ||
+    commandName === 'daemon' ||
+    remaining.includes('--help') ||
+    remaining.includes('-h')
+  ) {
+    return undefined;
+  }
+  return commandName;
+}
+
+/**
  * Returns true when the invocation explicitly selects a reporter, output or log level
  * (`--reporter`, `--output`, `--log-level` before `--`, `RUSH_REPORTER` other than `legacy`,
  * or `RUSH_LOG_LEVEL`). Such requests always use the native reporter path.
@@ -35,7 +73,7 @@ export function hasExplicitReporterControls(
   if (environment.RUSH_LOG_LEVEL !== undefined) {
     return true;
   }
-  if (environment.RUSH_REPORTER !== undefined && environment.RUSH_REPORTER !== 'legacy') {
+  if (isNativeReporterEnvironmentRequested(environment.RUSH_REPORTER)) {
     return true;
   }
   const separator: number = argv.indexOf('--');

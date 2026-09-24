@@ -5,6 +5,7 @@ import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-prot
 import { RushXCommand, type IRushXCommandLineArguments } from '@microsoft/rush-lib';
 
 import { parseClientAdmissionControls, type IClientAdmissionControls } from './ClientAdmissionControls';
+import { isNativeReporterEnvironmentRequested } from './outputSelection';
 
 const neverDaemonize: ReadonlySet<string> = new Set([
   'add',
@@ -60,7 +61,7 @@ export function selectClientRoute(options: IClientRouteOptions): IClientRoute {
   const commandName: string | undefined = rushxArguments ? rushxArguments.commandName || undefined : argv[0];
   const reporterControls: boolean =
     options.environment.RUSH_LOG_LEVEL !== undefined ||
-    (options.environment.RUSH_REPORTER !== undefined && options.environment.RUSH_REPORTER !== 'legacy') ||
+    isNativeReporterEnvironmentRequested(options.environment.RUSH_REPORTER) ||
     (!options.rushx &&
       prefix.some((arg) =>
         ['--reporter', '--output', '--log-level'].some((name) => arg === name || arg.startsWith(`${name}=`))

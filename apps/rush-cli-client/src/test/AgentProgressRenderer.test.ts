@@ -84,8 +84,54 @@ describe(AgentProgressRenderer.name, () => {
     renderer.finish({ exitCode: 1 });
     const text: string = output.join('');
     expect(text).toContain('rush build: FAILURE 2/2 operations (1 failure, 1 blocked) in 0.0s · failed: p05 (build)\n');
-    expect(text).toContain('  p05 (build): error 0\n');
-    expect(text).not.toContain('error 10');
+    expect(text).toContain('  p05 (build): error 10\n');
+    expect(text).toContain('  p05 (build): error 19\n');
+    expect(text).not.toContain('error 9\n');
+  });
+
+  it('keeps failure diagnostics when successful operations wrote stderr first', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onEvent(status('noisy (build)', 'EXECUTING'));
+    for (let i = 0; i < 20; i++) {
+      renderer.onLog(Buffer.from(`warning ${i}\n`), 'noisy (build)', 'stderr');
+    }
+    renderer.onEvent(status('noisy (build)', 'SUCCESS WITH WARNINGS'));
+    renderer.onEvent(status('broken (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('the real error\n'), 'broken (build)', 'stderr');
+    renderer.onEvent(status('broken (build)', 'FAILURE'));
+    renderer.finish({ exitCode: 1 });
+    const text: string = output.join('');
+    expect(text).toContain('  broken (build): the real error\n');
+    expect(text).not.toContain('noisy (build): warning');
+  });
+
+  it('counts ABORTED operations as finished', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onEvent(event('operationRegistered', { operationId: 'a (build)', silent: false }));
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onEvent(status('a (build)', 'ABORTED'));
+    renderer.finish({ exitCode: 1 });
+    expect(output[output.length - 1]).toBe('rush build: FAILURE 1/1 operations (1 aborted) in 0.0s\n');
+  });
+
+  it('writes the final line at most once and nothing after it', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.finish({ exitCode: 1, errorMessage: 'daemon rejected the request (x)' });
+    renderer.finish({ exitCode: 1, errorMessage: 'again' });
+    renderer.onQueuePosition(3);
+    renderer.dispose();
+    expect(output).toEqual(['rush build: FAILURE 0/0 operations in 0.0s · daemon rejected the request (x)\n']);
+  });
+
+  it('does not repeat an unchanged queue position', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onQueuePosition(2);
+    renderer.onQueuePosition(2);
+    renderer.onQueuePosition(2);
+    expect(output).toHaveLength(1);
+    renderer.onQueuePosition(1);
+    expect(output).toHaveLength(2);
+    renderer.dispose();
   });
 
   it('shows the stdout tail of a failed operation that reported errors on stdout', () => {

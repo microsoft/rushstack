@@ -16,6 +16,7 @@ describe('opt-in routing', () => {
     { argv: ['build', '--log-level=debug'], enabled: true, environment: {}, daemon: false },
     { argv: ['build'], enabled: true, environment: { RUSH_REPORTER: 'json' }, daemon: false },
     { argv: ['build'], enabled: true, environment: { RUSH_REPORTER: 'legacy' }, daemon: true },
+    { argv: ['build'], enabled: true, environment: { RUSH_REPORTER: ' LEGACY ' }, daemon: true },
     { argv: ['install'], enabled: true, environment: { RUSH_DAEMON: '1' }, daemon: true },
     { argv: ['update'], enabled: true, environment: { RUSH_DAEMON: '1' }, daemon: true },
     { argv: ['install', '--no-daemon'], enabled: true, environment: { RUSH_DAEMON: '1' }, daemon: false },
