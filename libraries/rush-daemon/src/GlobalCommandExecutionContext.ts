@@ -27,6 +27,11 @@ import { waitForLinuxProcessGroupExitAsync } from './LinuxProcessGroupExit';
 import { recordWorkspaceRequestCleanupFailure } from './WorkspaceRequestResources';
 
 const MAX_PENDING_TERMINAL_BYTES: number = 1024 * 1024;
+/**
+ * How long an exited child's output pipes may stay idle before they are destroyed. A pipe that is still held open by
+ * a descendant must not keep the request (and its client) waiting indefinitely.
+ */
+const CHILD_OUTPUT_DRAIN_IDLE_TIMEOUT_MS: number = 250;
 
 /**
  * Options for a request-scoped child process.
@@ -87,6 +92,10 @@ class OrderedTerminalWriter {
   public constructor(client: IGlobalCommandRequestClient, onFailure: (error: Error) => void) {
     this.#client = client;
     this.#onFailure = onFailure;
+  }
+
+  public get hasPendingWrites(): boolean {
+    return this.#pendingByteCount > 0;
   }
 
   public write(stream: 'stdout' | 'stderr', chunk: Uint8Array): void {
@@ -172,6 +181,7 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
   readonly #writer: OrderedTerminalWriter;
   #disposePromise: Promise<void> | undefined;
   #closed: boolean = false;
+  #outputProgress: number = 0;
   #requestAborted: boolean = false;
 
   public readonly terminal: ITerminal;
@@ -260,16 +270,19 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
       windowsHide: options.windowsHide
     });
     SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
-    const completion: Promise<void> = this.#trackChildAsync(child).catch((error: unknown) => {
-      this.#childCompletionErrors.push(error);
-    });
+    const outputForwarded: boolean = options.forwardOutput !== false;
+    const completion: Promise<void> = this.#trackChildAsync(child, outputForwarded).catch(
+      (error: unknown) => {
+        this.#childCompletionErrors.push(error);
+      }
+    );
     const trackedChild: ITrackedChild = { completion };
     this.#trackedChildren.add(trackedChild);
     void completion.then(() => this.#trackedChildren.delete(trackedChild));
     if (options.forwardInput === true) {
       this.#attachChildInput(child);
     }
-    if (options.forwardOutput !== false) {
+    if (outputForwarded) {
       this.#forwardChildOutput(child.stdout, 'stdout');
       this.#forwardChildOutput(child.stderr, 'stderr');
     }
@@ -339,33 +352,30 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
     this.#abortController.abort(reason);
   }
 
-  async #trackChildAsync(child: childProcess.ChildProcessWithoutNullStreams): Promise<void> {
-    const terminateChild = (): void => {
-      try {
-        SubprocessTerminator.killProcessTree(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
-      } catch (error) {
-        this.#childTerminationErrors.push(this.#recordResourceCleanupFailure(error));
-        try {
-          child.kill('SIGKILL');
-        } catch (fallbackError) {
-          this.#childTerminationErrors.push(this.#recordResourceCleanupFailure(fallbackError));
-        }
-      }
-    };
+  async #trackChildAsync(
+    child: childProcess.ChildProcessWithoutNullStreams,
+    outputForwarded: boolean
+  ): Promise<void> {
+    const terminateChild = (): void => this.#terminateChild(child);
     this.abortSignal.addEventListener('abort', terminateChild, { once: true });
     let childError: Error | undefined;
     try {
+      // Complete on 'exit' rather than 'close': a background descendant may inherit and hold the output pipes open.
       await new Promise<void>((resolve) => {
         child.once('error', (error: Error) => {
           childError = error;
         });
+        child.once('exit', () => resolve());
         child.once('close', () => resolve());
       });
+      terminateExitedChildProcessGroup(child);
+      await this.#drainChildOutputAsync(child, outputForwarded);
+    } catch (error) {
+      throw this.#recordResourceCleanupFailure(error);
     } finally {
       this.abortSignal.removeEventListener('abort', terminateChild);
     }
     try {
-      terminateExitedChildProcessGroup(child);
       if (process.platform === 'linux' && child.pid !== undefined) {
         await waitForLinuxProcessGroupExitAsync(child.pid);
       }
@@ -373,6 +383,75 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
       throw this.#recordResourceCleanupFailure(error);
     }
     if (childError) throw childError;
+  }
+
+  /**
+   * Terminates the child's whole process tree.
+   *
+   * @remarks
+   * `SubprocessTerminator.killProcessTree` is a no-op once the direct child has exited, which would leave its
+   * surviving process group running, so an exited child's group is signalled directly.
+   */
+  #terminateChild(child: childProcess.ChildProcessWithoutNullStreams): void {
+    try {
+      if (hasChildExited(child)) {
+        terminateExitedChildProcessGroup(child);
+      } else {
+        SubprocessTerminator.killProcessTree(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
+      }
+    } catch (error) {
+      this.#childTerminationErrors.push(this.#recordResourceCleanupFailure(error));
+      try {
+        child.kill('SIGKILL');
+      } catch (fallbackError) {
+        this.#childTerminationErrors.push(this.#recordResourceCleanupFailure(fallbackError));
+      }
+    }
+  }
+
+  /**
+   * Waits for output that the exited child left in its pipes.
+   *
+   * @remarks
+   * Forwarded output is drained until its pipes close or stay idle for a bounded time; the deadline is extended while
+   * output is still being forwarded, so a slow client does not truncate output. An idle pipe, for example one held by a
+   * descendant outside the child's process group, is then destroyed. Output that the caller consumes itself is not
+   * forwarded, so its progress cannot be observed; those pipes are awaited until they close or the request aborts.
+   */
+  async #drainChildOutputAsync(
+    child: childProcess.ChildProcessWithoutNullStreams,
+    outputForwarded: boolean
+  ): Promise<void> {
+    if (child.stdout.closed && child.stderr.closed) {
+      return;
+    }
+    let lastProgress: number = this.#outputProgress;
+    await new Promise<void>((resolve) => {
+      let timer: NodeJS.Timeout | undefined;
+      const finish = (): void => {
+        clearTimeout(timer);
+        this.abortSignal.removeEventListener('abort', finish);
+        resolve();
+      };
+      const check = (): void => {
+        const progressed: boolean = this.#outputProgress !== lastProgress || this.#writer.hasPendingWrites;
+        if (!progressed || this.abortSignal.aborted) {
+          finish();
+        } else {
+          lastProgress = this.#outputProgress;
+          timer = setTimeout(check, CHILD_OUTPUT_DRAIN_IDLE_TIMEOUT_MS);
+        }
+      };
+      child.once('close', finish);
+      this.abortSignal.addEventListener('abort', finish, { once: true });
+      if (this.abortSignal.aborted) {
+        finish();
+      } else if (outputForwarded) {
+        timer = setTimeout(check, CHILD_OUTPUT_DRAIN_IDLE_TIMEOUT_MS);
+      }
+    });
+    child.stdout.destroy();
+    child.stderr.destroy();
   }
 
   #recordResourceCleanupFailure(error: unknown): Error {
@@ -386,7 +465,9 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
     source.on('data', (chunk: Buffer | string) => {
       source.pause();
       const bytes: Uint8Array = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+      this.#outputProgress++;
       void this.#writer.writeAsync(stream, bytes).then(() => {
+        this.#outputProgress++;
         if (!this.abortSignal.aborted) {
           source.resume();
         }
@@ -400,6 +481,10 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
       throw new Error('The global command execution context is closed.');
     }
   }
+}
+
+function hasChildExited(child: childProcess.ChildProcess): boolean {
+  return child.exitCode !== null || child.signalCode !== null;
 }
 
 function terminateExitedChildProcessGroup(child: childProcess.ChildProcessWithoutNullStreams): void {

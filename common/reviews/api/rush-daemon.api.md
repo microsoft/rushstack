@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import * as childProcess from 'node:child_process';
+import type { DaemonInvocationKind } from '@rushstack/rush-daemon-protocol';
 import type { DaemonRushCommandOrigin } from '@rushstack/rush-daemon-protocol';
 import type { DaemonTerminalRequirement } from '@rushstack/rush-daemon-protocol';
 import * as fs from 'node:fs';
@@ -414,6 +415,8 @@ export interface IResolvedGlobalCommandRequest {
     // (undocumented)
     readonly environment: IGlobalCommandEnvironment;
     // (undocumented)
+    readonly invocationKind?: DaemonInvocationKind;
+    // (undocumented)
     readonly requestId: string;
     // (undocumented)
     readonly terminal: IGlobalCommandTerminalProperties;
@@ -431,6 +434,7 @@ export interface IResolveGlobalCommandRequestOptions {
     readonly cwd: string;
     // (undocumented)
     readonly environment: Readonly<NodeJS.ProcessEnv>;
+    readonly invocationKind?: DaemonInvocationKind;
     // (undocumented)
     readonly requestId: string;
     // (undocumented)

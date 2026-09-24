@@ -197,6 +197,7 @@ async function dispatchWorkspaceRequestAsync(
     commandOrigin: isRushxInvocation(envelope) ? 'custom' : envelope.commandOrigin,
     cwd: envelope.cwd,
     environment: envelope.environment,
+    invocationKind: isRushxInvocation(envelope) ? 'rushx' : 'rush',
     requestId: envelope.requestId,
     terminal: {
       ...envelope.terminal,
