@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.25.0",
+      "tag": "@rushstack/node-core-library_v5.25.0",
+      "date": "Thu, 24 Sep 2026 18:16:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fail Windows lock acquisition safely when exclusive sharing is unsupported, clean up failed releases while preserving dirty recovery and errors, and expose all backing paths through LockFile.getLockFilePaths()."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Use native Windows exclusive sharing for file mutexes and preserve dirty-owner state across close/delete handoffs."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.2",
       "tag": "@rushstack/node-core-library_v5.24.2",
       "date": "Tue, 22 Sep 2026 17:35:41 GMT",

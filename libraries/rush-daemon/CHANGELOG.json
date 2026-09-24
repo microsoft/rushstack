@@ -2,6 +2,162 @@
   "name": "@rushstack/rush-daemon",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/rush-daemon_v0.6.0",
+      "date": "Thu, 24 Sep 2026 18:16:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use the physical graph fixture root so warm-policy and watcher expectations agree with canonical workspace paths, including Windows short-name aliases."
+          },
+          {
+            "comment": "Own and join graph test fixture initialization during timed-out setup without changing hook deadlines or production behavior."
+          },
+          {
+            "comment": "Configure generated Git fixtures locally to preserve LF files without Windows autocrlf warnings; leave user settings and CI warning policy unchanged."
+          },
+          {
+            "comment": "Separate real initial graph preparation from soft-reload reference assertions and join timed-out fixture work before cleanup/replacement. Preserve default assertion budgets and all generation-fencing behavior."
+          },
+          {
+            "comment": "Remove graph fixtures only after successful host closure, using the existing bounded Windows sharing cleanup after owned successor exit."
+          },
+          {
+            "comment": "Share measured telemetry expectations across explicit and automatic warm-set fixtures, and give the real selection-revalidation subprocess test its scoped integration budget."
+          },
+          {
+            "comment": "Derive the native warm-retention test's expected order from actual cold/reused timings, request frequency and IPC RSS instead of assuming a fixed project is faster on every CI host; preserve real eviction and contrasting LRU assertions."
+          },
+          {
+            "comment": "Use native event-hook command conventions in partial-mutation fixtures and bounded Windows sharing cleanup after selected-launcher process joins."
+          },
+          {
+            "comment": "Use native physical paths for standalone lifecycle fixture watchers so Windows short-name TEMP aliases do not trigger libuv path assertions."
+          },
+          {
+            "comment": "Use an explicit 15-second integration budget for real native graph hosts and Git/build subprocesses after repeated Windows setup timeouts; retain every generation assertion, cleanup limit and production deadline."
+          },
+          {
+            "comment": "Isolate native retention fixtures from the surrounding Jest worker's RSS, following the graph-fixture pattern; leave production memory defaults and dedicated pressure tests unchanged."
+          },
+          {
+            "comment": "Give the wrong-version launcher rejection integration test a 15-second budget for its two isolated Node processes, without changing production deadlines."
+          },
+          {
+            "comment": "Join owned successor processes before fixture teardown and bound Windows sharing retries without deleting fixtures after failed resource disposal."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Expose composable workspace lifecycle capabilities, preserve resolver decorators across generation reloads, dispose generation-owned resolvers, and pass explicit rushx invocations through without phased or graph interception."
+          },
+          {
+            "comment": "Apply daemon.watch to persistent project file observation with safe idle teardown/re-attachment, preserved runners/results and truthful cleanup accounting. Keep root/config guards and explicit request reconciliation active; never schedule autonomous scripts."
+          },
+          {
+            "comment": "Refresh prepared graph work under the native execution lease before resuming, preventing stale snapshots and native-command overlap."
+          },
+          {
+            "comment": "Wait for selected installer closure and strengthen launcher and native-mutation fixture teardown, retaining startup diagnostics and keeping fixture socket paths short."
+          },
+          {
+            "comment": "Await bounded Linux child-group quiescence after termination and stream closure before completing global requests, preserving immediate descendant-stop assertions and surfacing cleanup inspection failures."
+          },
+          {
+            "comment": "Load workspace sessions and selected installations using native canonical paths, including Windows short-name aliases."
+          },
+          {
+            "comment": "Expose the lifecycle-owned last reload tier through a shared live pong and host-status projection, without triggering initialization or deriving a tier from generation changes."
+          },
+          {
+            "comment": "Use ordinal ordering for request and operation identities, remove unused environment-name enumeration, and document the same-user lifecycle execution boundary."
+          },
+          {
+            "comment": "Keep endpoint ownership until resolver and workspace cleanup succeed, preventing successor startup against still-resident engine state."
+          },
+          {
+            "comment": "Acquire one native execution lease per coalesced batch, retain it through reconciliation and output/runner cleanup, and release it before results so native commands can run while the daemon is idle. Permit explicit retries after initialization contention and detect changed rig/inherited configuration before execution."
+          },
+          {
+            "comment": "Add a generation-owned warm-set attachment with runtime idle, project-limit, sampled memory-budget and telemetry-ranking policies; exclusive scheduler/native leases, awaited runner and scoped watcher eviction, truthful pressure diagnostics, and real native graph integration coverage."
+          },
+          {
+            "comment": "Preserve Windows Rushx cwd, lifecycle environment and pnpm-sync path spelling while retaining physical workspace identity, confinement and admission-time alias checks."
+          },
+          {
+            "comment": "Complete automatic warm-controller generation ownership, fencing cold/late attachment and awaiting pending initialization and maintenance before reload locks. Preserve ownership failures, start cold sessions with scoped watchers, expose non-initializing generation and truthful warm accounting in pong/status, and stop certifying evicted graph results from historical observer state."
+          },
+          {
+            "comment": "Exercise real warm Node IPC children directly on Windows, canonicalize fixture workspace paths for watcher expectations, preserve native active/protected lifetime coverage without timeout increases, and surface complete operation failures in test diagnostics."
+          },
+          {
+            "comment": "Retain failed request-resource ownership across result delivery, queued work, reload, shutdown and mutation restart. Keep the failed listener alive to prevent competing startup over unjoined children, while preserving ordinary failed-command restarts and successfully cleaned output failures."
+          },
+          {
+            "comment": "Apply request-local Rushx TTY color and width after native lifecycle environment preparation while preserving explicit non-TTY environments and native path spelling."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Drain explicit pre-execution restart results for accepted requests before closing a retiring host."
+          },
+          {
+            "comment": "Validate daemon startup configuration and forward idleTimeoutSeconds for the WS3 host lifecycle integration."
+          },
+          {
+            "comment": "Add gated native graph metadata, dependency-safe scope and invalidation controls, manual-mode pause/resume, and bounded lease-free observation using existing request and extension-event contracts."
+          },
+          {
+            "comment": "Add opt-in idle shutdown that protects pending requests through output drain and cleanup."
+          },
+          {
+            "comment": "Support protocol-negotiated acknowledged shutdown and report live process identity and resident memory in status probes."
+          },
+          {
+            "comment": "Bind positively identified native build/rebuild requests to a production all-project warm engine, preserve exact native selections and cache behavior, refresh inputs between requests, and reject incompatible command shapes or environments before execution."
+          },
+          {
+            "comment": "Add an explicitly tagged native Rushx resolver and injectable composite resolver with request-owned lifecycle children, canonical cwd/environment overrides, raw output, stdin EOF, and early pipe-close handling."
+          },
+          {
+            "comment": "Admit request input when its sink attaches, acknowledge drained writes, and forward EOF to owned child stdin without blocking cancellation."
+          },
+          {
+            "comment": "Select verified bundled or cached daemon installations and prepare exact-engine published releases with native installation APIs. Attest the actual engine and protocol in isolation before launching selected default daemon APIs."
+          },
+          {
+            "comment": "Make measured telemetry retention reachable through explicit production Node IPC operations. Report raw ranking inputs and exclude only proven native resource-free NoOp nodes from child-memory scoring."
+          },
+          {
+            "comment": "Reuse unchanged engines, reload changed configuration or command shape in-process under generation admission, and restart process-bound state through existing core ownership/startup contracts. Add isolated native install/update workers with result-before-restart ordering and no post-execution replay."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-client-core\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-transport\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-terminal-renderer\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.2",
       "tag": "@rushstack/rush-daemon_v0.5.2",
       "date": "Tue, 22 Sep 2026 17:35:41 GMT",

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.24.5",
+  "version": "0.24.6",
   "description": "User interface primitives for console applications",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

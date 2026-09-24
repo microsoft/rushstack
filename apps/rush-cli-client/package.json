@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-cli-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Opt-in Rush and rushx daemon clients",
   "bin": {
     "rush-client": "./bin/rush-client",
