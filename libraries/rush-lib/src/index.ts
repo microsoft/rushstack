@@ -185,6 +185,8 @@ export {
   captureWorkspaceInputFingerprintAsync,
   captureProjectConfigurationFingerprintAsync,
   classifyWorkspaceInputChange,
+  getWorkspaceFingerprintEnvironmentEntries,
+  workspaceFingerprintIgnoredEnvironmentVariables,
   WorkspaceInputChangeTier,
   WorkspaceRuntimeFingerprintCache,
   type IWorkspaceInputFingerprint,

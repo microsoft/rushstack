@@ -353,10 +353,7 @@ describe('shared phased request batching', () => {
       new TestPhasedRequestClient('one')
     );
     await operationStarted.promise;
-    const late = router.executeAsync(
-      createRequest('late', OPERATION_C),
-      new TestPhasedRequestClient('two')
-    );
+    const late = router.executeAsync(createRequest('late', OPERATION_C), new TestPhasedRequestClient('two'));
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(0);
     releaseOperation.resolve();
 
@@ -364,6 +361,70 @@ describe('shared phased request batching', () => {
     expect(scheduleSpy).toHaveBeenCalledTimes(2);
     expect(fixture.session.onReconcileAsync).toHaveBeenCalledTimes(2);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
+  });
+
+  it('lets a late shared build wait past a default timeout while a compatible batch executes', async () => {
+    const operationStarted: IDeferred = createDeferred();
+    const releaseOperation: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: async (): Promise<void> => {
+        operationStarted.resolve();
+        await releaseOperation.promise;
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await operationStarted.promise;
+    let lateSettled: boolean = false;
+    const late = router
+      .executeAsync(
+        {
+          ...createRequest('late', OPERATION_C),
+          admission: { waitTimeoutIsDefault: true, waitTimeoutMs: 20 }
+        },
+        new TestPhasedRequestClient('two')
+      )
+      .finally(() => {
+        lateSettled = true;
+      });
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    expect(lateSettled).toBe(false);
+    releaseOperation.resolve();
+
+    const [firstResult, lateResult] = await Promise.all([first, late]);
+    expect(firstResult.outcome).toBe('success');
+    expect(lateResult.outcome).toBe('success');
+    expect(lateResult.admissionErrorCode).toBeUndefined();
+    expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
+  });
+
+  it('enforces an explicit timeout while a late shared build waits for a compatible batch', async () => {
+    const operationStarted: IDeferred = createDeferred();
+    const releaseOperation: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: async (): Promise<void> => {
+        operationStarted.resolve();
+        await releaseOperation.promise;
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await operationStarted.promise;
+
+    const lateResult: IDaemonPhasedRequestResult = await router.executeAsync(
+      { ...createRequest('late', OPERATION_C), admission: { waitTimeoutMs: 20 } },
+      new TestPhasedRequestClient('two')
+    );
+    expect(lateResult).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
+    releaseOperation.resolve();
+    expect((await first).outcome).toBe('success');
+    expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(0);
   });
 
   it('serializes concurrent shared-read requests instead of merging or deadlocking them', async () => {
@@ -440,9 +501,7 @@ describe('shared phased request batching', () => {
       router.executeAsync(
         {
           ...createRequest('ignore-dependency', OPERATION_A),
-          operationSelection: [
-            { enabledState: 'ignore-dependency-changes', operationId: OPERATION_A }
-          ]
+          operationSelection: [{ enabledState: 'ignore-dependency-changes', operationId: OPERATION_A }]
         },
         new TestPhasedRequestClient('one')
       ),
@@ -471,10 +530,7 @@ describe('shared phased request batching', () => {
     clients.forEach((client: TestPhasedRequestClient, index: number) => {
       client.onWriteAsync = async (): Promise<void> => {
         concurrentWrites[index]++;
-        maximumConcurrentWrites[index] = Math.max(
-          maximumConcurrentWrites[index],
-          concurrentWrites[index]
-        );
+        maximumConcurrentWrites[index] = Math.max(maximumConcurrentWrites[index], concurrentWrites[index]);
         await new Promise<void>((resolve) => setImmediate(resolve));
         concurrentWrites[index]--;
       };

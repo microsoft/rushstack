@@ -11,7 +11,7 @@ import type {
 import {
   type IRequestLease,
   type IRequestSchedulerAcquireOptions,
-  type RequestExclusivityClass,
+  RequestExclusivityClass,
   RequestScheduler,
   RequestSchedulerError,
   RequestSchedulerErrorCode
@@ -123,9 +123,48 @@ export class RequestAdmissionController {
     }
   }
 
+  /** Waits for workspace admission, bounded by the request's absolute admission deadline. */
   public async acquireAsync(
     scheduler: RequestScheduler,
     exclusivityClass: RequestExclusivityClass
+  ): Promise<IRequestLease> {
+    return await this.#acquireAsync(
+      scheduler,
+      exclusivityClass,
+      this.#getRemainingWaitTimeoutMs(),
+      'workspace admission'
+    );
+  }
+
+  /**
+   * Waits for the per-graph execution gate after workspace admission.
+   *
+   * @remarks
+   * A shared-build request that reaches this gate is only waiting behind running compatible shared builds, which is
+   * progress rather than contention. A client-default timeout therefore does not apply to that wait; an explicit
+   * `noWait` or `waitTimeoutMs` still applies, using the same absolute deadline as workspace admission.
+   */
+  public async acquireGraphExecutionAsync(
+    scheduler: RequestScheduler,
+    exclusivityClass: RequestExclusivityClass
+  ): Promise<IRequestLease> {
+    const waitTimeoutMs: number | undefined =
+      exclusivityClass === RequestExclusivityClass.SharedBuild && this.#admission?.waitTimeoutIsDefault
+        ? undefined
+        : this.#getRemainingWaitTimeoutMs();
+    return await this.#acquireAsync(
+      scheduler,
+      exclusivityClass,
+      waitTimeoutMs,
+      'the running build of the workspace operation graph'
+    );
+  }
+
+  async #acquireAsync(
+    scheduler: RequestScheduler,
+    exclusivityClass: RequestExclusivityClass,
+    waitTimeoutMs: number | undefined,
+    waitingFor: string
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     let lease: IRequestLease | undefined;
@@ -135,7 +174,7 @@ export class RequestAdmissionController {
         exclusivityClass,
         noWait: this.#admission?.noWait,
         onQueuePositionChanged: writer ? (position: number) => writer.enqueue(position) : undefined,
-        waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
+        waitTimeoutMs
       });
       await writer?.flushAsync();
       if (this.#abortController.signal.aborted) {
@@ -148,7 +187,7 @@ export class RequestAdmissionController {
     } catch (error) {
       lease?.release();
       await writer?.flushAsync();
-      throw this.#getReportedError(error);
+      throw this.#getReportedError(error, waitingFor);
     }
   }
 
@@ -167,7 +206,7 @@ export class RequestAdmissionController {
     return this.#deadlineMs === undefined ? undefined : Math.max(0, this.#deadlineMs - Date.now());
   }
 
-  #getReportedError(error: unknown): unknown {
+  #getReportedError(error: unknown, waitingFor: string): unknown {
     const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutMs;
     if (
       waitTimeoutMs !== undefined &&
@@ -176,7 +215,8 @@ export class RequestAdmissionController {
     ) {
       return new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,
-        `The request was not admitted within ${waitTimeoutMs}ms.`
+        `The request was not admitted within ${waitTimeoutMs}ms while waiting for ${waitingFor}. ` +
+          'Use --wait-timeout <seconds> or RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS to wait longer.'
       );
     }
     return error;

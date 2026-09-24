@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { parseClientAdmissionControls } from '../ClientAdmissionControls';
+import {
+  formatAdmissionFailure,
+  getConfiguredAdmission,
+  parseClientAdmissionControls
+} from '../ClientAdmissionControls';
 import { selectClientRoute } from '../routing';
 
 describe(parseClientAdmissionControls.name, () => {
@@ -53,5 +57,33 @@ describe(parseClientAdmissionControls.name, () => {
       daemon: false,
       admission: { noWait: true }
     });
+  });
+});
+
+describe(getConfiguredAdmission.name, () => {
+  it('marks the built-in default so it does not bound waiting behind a compatible build', () => {
+    expect(getConfiguredAdmission({ queueTimeoutSeconds: 30, explicit: false })).toEqual({
+      waitTimeoutMs: 30000,
+      waitTimeoutIsDefault: true
+    });
+  });
+
+  it('keeps an explicitly configured timeout as one absolute deadline', () => {
+    expect(getConfiguredAdmission({ queueTimeoutSeconds: 1.5, explicit: true })).toEqual({
+      waitTimeoutMs: 1500
+    });
+  });
+});
+
+describe(formatAdmissionFailure.name, () => {
+  it('explains a wait timeout and how to wait longer', () => {
+    const message: string = formatAdmissionFailure('wait-timeout', { waitTimeoutMs: 5000 });
+    expect(message).toContain('daemon admission failed (wait-timeout): timed out after 5s waiting for');
+    expect(message).toContain('--wait-timeout <seconds>');
+    expect(message).toContain('RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS');
+  });
+
+  it('explains a no-wait failure', () => {
+    expect(formatAdmissionFailure('no-wait', { noWait: true })).toContain('--no-wait was specified');
   });
 });

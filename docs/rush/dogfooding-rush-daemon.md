@@ -173,11 +173,12 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
 
 ## Known limits
 
-- **Environment identity.** The complete request environment is a daemon input. A request whose
-  environment differs from the daemon's, such as one from another terminal (with a different `WT_SESSION`,
-  `WSL_INTEROP`, `TERM_SESSION_ID`, or `VSCODE_*` value) or after changing `PATH`, restarts the daemon before
-  anything runs and is then served by the new process. This is not a fallback, but it costs a cold start and
-  changes `pid`. Run related requests from the same terminal.
+- **Environment identity.** The request environment is a daemon input, apart from per-shell bookkeeping
+  (such as `PWD`, `SHLVL`, `TERM`, `TERM_SESSION_ID`, `WSL_INTEROP`, and SSH or tmux session handles) and the
+  client's own `RUSH_DAEMON` routing variables. Any other difference, such as a different `WT_SESSION` or
+  `VSCODE_*` value from another terminal window, or a changed `PATH`, restarts the daemon before anything runs,
+  and the new process then serves the request. This is not a fallback, but it costs a cold start and changes
+  `pid`. Run related requests from the same terminal.
 - **Only phased `build` and `rebuild` use the warm engine.** `rush start` (which always watches),
   `--watch`, `--install`, `--variant`, and `--node-diagnostic-dir` stay native, as do build event-hook
   scripts and reporter controls such as `--output`. Keep using ordinary Rush for `install`, `update`, and

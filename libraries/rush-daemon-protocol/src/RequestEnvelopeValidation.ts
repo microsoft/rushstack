@@ -23,6 +23,7 @@ export function validateRequestAdmission(value: unknown): void {
   if (value === undefined) return;
   const admission: Record<string, unknown> = requireRecord(value, 'requestStart payload.admission');
   validateOptionalBoolean(admission.noWait, 'Request admission noWait');
+  validateOptionalBoolean(admission.waitTimeoutIsDefault, 'Request admission waitTimeoutIsDefault');
   validateWaitTimeout(admission.waitTimeoutMs);
 }
 
@@ -39,11 +40,7 @@ function isPositiveSafeInteger(value: unknown): boolean {
 
 function validateTerminalRequirement(value: unknown): void {
   if (value === undefined) return;
-  const requirements: ReadonlySet<unknown> = new Set([
-    'none',
-    'interactiveInput',
-    'controllingTerminal'
-  ]);
+  const requirements: ReadonlySet<unknown> = new Set(['none', 'interactiveInput', 'controllingTerminal']);
   if (!requirements.has(value)) fail('Request terminal requirement is not recognized.');
 }
 

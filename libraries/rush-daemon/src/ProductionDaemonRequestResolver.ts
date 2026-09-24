@@ -3,8 +3,9 @@
 
 import * as path from 'node:path';
 
-import { Sort, type LockFile } from '@rushstack/node-core-library';
+import type { LockFile } from '@rushstack/node-core-library';
 import {
+  getWorkspaceFingerprintEnvironmentEntries,
   PhasedCommandEngine,
   PhasedCommandEngineBusyError,
   PhasedCommandEngineConfigurationChangedError,
@@ -242,11 +243,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
 }
 
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {
-  return JSON.stringify(
-    Object.entries(environment)
-      .filter(([, value]) => value !== undefined)
-      .sort(([a], [b]) => Sort.compareByValue(a, b))
-  );
+  return JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment));
 }
 
 function getChangedOperations(options: IMapWorkspaceInvalidationsOptions): Iterable<Operation> {

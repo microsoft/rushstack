@@ -25,6 +25,7 @@ import { DaemonLauncherUnavailableError } from '@rushstack/rush-daemon/lib/Daemo
 
 import { BUNDLED_RUSH_VERSION } from './bundledRushVersion';
 import { executeDaemonCommandAsync } from './daemonCommands';
+import { formatAdmissionFailure, getConfiguredAdmission } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { selectClientRoute, type IClientRoute } from './routing';
@@ -91,7 +92,14 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       columns: process.stdout.columns,
       acceptsStdin: true
     },
-    admission: route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) }
+    admission:
+      route.admission ??
+      getConfiguredAdmission({
+        queueTimeoutSeconds: config.queueTimeoutSeconds,
+        explicit:
+          workspace?.daemon?.queueTimeoutSeconds !== undefined ||
+          environment[daemonEnvironmentVariables.queueTimeoutSeconds] !== undefined
+      })
   });
   let connection: IConnectOrStartDaemonOptions;
   let client: DaemonClient;
@@ -194,7 +202,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     if (outcome.result.admissionErrorCode) {
       await writeStreamAsync(
         process.stderr,
-        Buffer.from(`rush-client: daemon admission failed (${outcome.result.admissionErrorCode}).\n`)
+        Buffer.from(formatAdmissionFailure(outcome.result.admissionErrorCode, request.admission))
       );
     }
   } else if (outcome.kind === 'rejected') {
