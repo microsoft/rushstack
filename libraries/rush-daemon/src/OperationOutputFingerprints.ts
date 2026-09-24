@@ -61,6 +61,7 @@ export class OperationOutputFingerprints {
         this.#fingerprints.delete(operation);
       } else if (getOutputFingerprint(operation) !== fingerprint) {
         this.#fingerprints.delete(operation);
+        forgetLegacySkipState(operation);
         changed.push(operation);
       }
     }
@@ -85,6 +86,21 @@ export class OperationOutputFingerprints {
   #isRetained(operation: Operation, record: IOperationExecutionResult): boolean {
     return this.#graph.resultByOperation.get(operation) === record && TRACKED_STATUSES.has(record.status);
   }
+}
+
+/**
+ * Without a build cache, Rush's legacy skip detection reports an operation as skipped when its recorded
+ * input state is unchanged, even though its outputs are gone. Remove that record (as the legacy skip logic
+ * does itself before executing) so the invalidated operation is executed instead.
+ */
+function forgetLegacySkipState(operation: Operation): void {
+  fs.rmSync(
+    path.join(
+      operation.associatedProject.projectRushTempFolder,
+      `package-deps_${operation.logFilenameIdentifier}.json`
+    ),
+    { force: true }
+  );
 }
 
 function getOutputFingerprint(operation: Operation): string | undefined {
