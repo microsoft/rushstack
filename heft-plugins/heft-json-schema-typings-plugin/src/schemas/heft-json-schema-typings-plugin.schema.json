@@ -23,6 +23,11 @@
     "formatWithPrettier": {
       "type": "boolean",
       "description": "If true, format generated typings with prettier. Defaults to false."
+    },
+
+    "includeSchemaMetadata": {
+      "type": "boolean",
+      "description": "If true, include the $schema property in the generated typings. Defaults to false."
     }
   }
 }
