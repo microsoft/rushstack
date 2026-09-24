@@ -80,6 +80,9 @@ export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
 export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number;
 
 // @beta

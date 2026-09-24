@@ -90,7 +90,9 @@ export class DaemonGraphRequestRouter {
     const shutdownReason: DaemonShutdownError | undefined = result.aborted
       ? getDaemonShutdownReason(client.abortSignal)
       : undefined;
-    await client.writeResultAsync(shutdownReason ? { ...result, errorMessage: shutdownReason.message } : result);
+    await client.writeResultAsync(
+      shutdownReason ? { ...result, errorMessage: shutdownReason.message } : result
+    );
   }
 
   private async _mutateAsync(

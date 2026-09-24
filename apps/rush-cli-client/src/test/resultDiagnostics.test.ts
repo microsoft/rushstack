@@ -23,7 +23,9 @@ describe(getResultDiagnostic.name, () => {
     expect(
       getResultDiagnostic({ exitCode: 1, admissionErrorCode: 'wait-timeout', errorMessage: 'x' })
     ).toBeUndefined();
-    expect(getResultDiagnostic({ exitCode: 1, admissionErrorCode: 'no-wait', errorMessage: 'x' })).toBeUndefined();
+    expect(
+      getResultDiagnostic({ exitCode: 1, admissionErrorCode: 'no-wait', errorMessage: 'x' })
+    ).toBeUndefined();
     expect(getResultDiagnostic({ exitCode: 1, admissionErrorCode: 'aborted' })).toBeUndefined();
   });
 

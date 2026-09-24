@@ -222,9 +222,10 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         return {
           ...components,
           reconcileInvalidationsAsync: async () => {
-            const result: IWorkspaceInvalidationReconciliation = await terminal.reconcileWithRequestDiagnosticsAsync(
-              () => components.reconcileInvalidationsAsync!()
-            );
+            const result: IWorkspaceInvalidationReconciliation =
+              await terminal.reconcileWithRequestDiagnosticsAsync(() =>
+                components.reconcileInvalidationsAsync!()
+              );
             if (!engine.isIncremental) engine.operationGraph.invalidateOperations(undefined, 'rebuild');
             return result;
           }

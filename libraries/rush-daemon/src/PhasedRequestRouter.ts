@@ -564,7 +564,10 @@ class PhasedRequestBatchCoordinator {
       : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
       aborted,
-      error: combineErrors(executionError ?? getDaemonShutdownReason(entry.client.abortSignal), cleanupErrors),
+      error: combineErrors(
+        executionError ?? getDaemonShutdownReason(entry.client.abortSignal),
+        cleanupErrors
+      ),
       graphStatus: getClientGraphStatus(aborted, operationOutcomes),
       operationOutcomes,
       requestId: entry.request.requestId,
