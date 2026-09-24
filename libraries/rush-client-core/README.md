@@ -48,7 +48,13 @@ handing the explicit command to a detached startup helper. The helper spawns wit
 a shell and retains that reservation until the daemon completes hello/ping readiness,
 independently of whether the requesting client survives. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
-is killed; a live (possibly reused) PID with an unreachable socket fails closed.
+is killed. While holding the mutex with no startup reservation, stale leftovers are
+reclaimed only when provably safe: a socket without an ownership record, or a corrupt
+record, once a connection attempt is refused (no listener exists); and, on Linux, a
+record whose PID now belongs to a process that started after the record's `startedAt`
+(PID reuse, detected from `/proc`). Any other live PID with an unreachable socket fails
+closed, pointing to `resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`),
+which removes the record, socket and reservation after the same no-listener/no-live-owner checks.
 The helper uses a stable tool cwd, and the starting client awaits its exit after
 readiness. The explicit launcher's cwd is unchanged.
 
@@ -90,7 +96,8 @@ identifies the original ownership record by its `pid` and `startedAt`, captured
 before sending shutdown. Startup waits until that record disappears, another
 owner replaces it, or its owner is demonstrably dead. A new owner is checked by
 hello/ping; it is never blindly reclaimed. Signal 0 is only a liveness probe; no
-process is killed. A live/reused owner times out conservatively, while corrupt or
+process is killed. A live owner times out conservatively (a Linux PID provably reused
+since `startedAt` counts as dead), while corrupt or
 unreadable metadata fails closed.
 During a captured predecessor handoff, transient Windows sharing-denied reads stay
 unknown and are retried only within the existing startup deadline. They never
