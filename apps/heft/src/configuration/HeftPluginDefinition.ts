@@ -10,7 +10,7 @@ import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
 import type { HeftTaskSession } from '../pluginFramework/HeftTaskSession';
-import { tryValidateSchemaFile } from './lean/SchemaFastPath';
+import type { tryValidateSchemaFile } from './lean/SchemaFastPath';
 
 /**
  * "baseParameter" from heft-plugin.schema.json
@@ -335,7 +335,10 @@ export abstract class HeftPluginDefinitionBase {
   public validateOptions(options: unknown): void {
     const optionsSchemaPath: string | undefined = this.#optionsSchemaPath;
     if (optionsSchemaPath) {
-      if (tryValidateSchemaFile(optionsSchemaPath, options || {})) {
+      const { tryValidateSchemaFile: tryValidateSchemaFileFunction } = require('./lean/SchemaFastPath') as {
+        tryValidateSchemaFile: typeof tryValidateSchemaFile;
+      };
+      if (tryValidateSchemaFileFunction(optionsSchemaPath, options || {})) {
         // Guaranteed to produce the same outcome as the ajv-based validation below
         return;
       }

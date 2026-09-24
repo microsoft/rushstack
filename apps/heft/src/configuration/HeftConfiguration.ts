@@ -18,7 +18,7 @@ import { type IRigConfig, type RigConfig } from '@rushstack/rig-package';
 import { Constants } from '../utilities/Constants';
 import type { RigPackageResolver, IRigPackageResolver } from './RigPackageResolver';
 import { getSharedLeanPackageJsonLookup, LeanBailError } from './lean/LeanResolution';
-import { tryLoadProjectConfigurationFileLean } from './lean/LeanConfigurationFileSpecification';
+import type { tryLoadProjectConfigurationFileLean } from './lean/LeanConfigurationFileSpecification';
 import type { ILeanLoadResult } from './lean/LeanProjectConfigurationFile';
 import { LeanRigConfig, tryLoadRigConfigDataLean, type ILeanRigConfigData } from './lean/LeanRigConfig';
 
@@ -59,16 +59,25 @@ function getRigPackageResolverClass(): typeof RigPackageResolver {
  * Equivalent to `PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(folderPath)`, without loading
  * `@rushstack/node-core-library` in the common case.
  */
-function tryGetPackageJsonFilePathFor(folderPath: string): { packageJsonPath: string | undefined; lean: boolean } {
+function tryGetPackageJsonFilePathFor(folderPath: string): {
+  packageJsonPath: string | undefined;
+  lean: boolean;
+} {
   let packageFolder: string | undefined;
   try {
     packageFolder = getSharedLeanPackageJsonLookup().tryGetPackageFolderFor(folderPath);
   } catch {
     // The lean lookup can't guarantee an identical result; use the original implementation
-    return { packageJsonPath: getPackageJsonLookupInstance().tryGetPackageJsonFilePathFor(folderPath), lean: false };
+    return {
+      packageJsonPath: getPackageJsonLookupInstance().tryGetPackageJsonFilePathFor(folderPath),
+      lean: false
+    };
   }
 
-  return { packageJsonPath: packageFolder ? path.join(packageFolder, 'package.json') : undefined, lean: true };
+  return {
+    packageJsonPath: packageFolder ? path.join(packageFolder, 'package.json') : undefined,
+    lean: true
+  };
 }
 
 /**
@@ -250,7 +259,9 @@ export class HeftConfiguration {
    */
   public async _checkForRigAsync(): Promise<void> {
     if (!this.#rigConfig && !this.#leanRigConfig) {
-      const leanRigConfigData: ILeanRigConfigData | undefined = tryLoadRigConfigDataLean(this.buildFolderPath);
+      const leanRigConfigData: ILeanRigConfigData | undefined = tryLoadRigConfigDataLean(
+        this.buildFolderPath
+      );
       if (leanRigConfigData) {
         this.#leanRigConfig = new LeanRigConfig(leanRigConfigData, () => this.rigConfig);
         return;
@@ -365,13 +376,18 @@ export class HeftConfiguration {
 
     const leanRigConfig: LeanRigConfig | undefined = this.#leanRigConfig;
     const rigConfig: IRigConfig | undefined = leanRigConfig ?? this.#rigConfig;
-    const leanResult: ILeanLoadResult<TConfigFile | undefined> | undefined = tryLoadProjectConfigurationFileLean(
-      options,
-      this.buildFolderPath,
-      rigConfig,
-      // The profile folder of a LeanRigConfig can be resolved without side effects
-      rigConfig === leanRigConfig
-    );
+    const { tryLoadProjectConfigurationFileLean: tryLoadProjectConfigurationFileLeanFunction } =
+      require('./lean/LeanConfigurationFileSpecification') as {
+        tryLoadProjectConfigurationFileLean: typeof tryLoadProjectConfigurationFileLean;
+      };
+    const leanResult: ILeanLoadResult<TConfigFile | undefined> | undefined =
+      tryLoadProjectConfigurationFileLeanFunction(
+        options,
+        this.buildFolderPath,
+        rigConfig,
+        // The profile folder of a LeanRigConfig can be resolved without side effects
+        rigConfig === leanRigConfig
+      );
     if (leanResult) {
       for (const message of leanResult.debugMessages) {
         terminal.writeDebugLine(message);

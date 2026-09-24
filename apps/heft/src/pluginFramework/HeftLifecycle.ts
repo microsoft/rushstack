@@ -162,7 +162,7 @@ export class HeftLifecycle extends HeftPluginHost {
     }
   }
 
-  public async ensureInitializedAsync(): Promise<void> {
+  public async ensureInitializedAsync(pluginOptionsAreValidated: boolean = false): Promise<void> {
     if (!this.#isInitialized) {
       this.#isInitialized = true;
 
@@ -204,7 +204,9 @@ export class HeftLifecycle extends HeftPluginHost {
 
         // Validate the plugin options
         const pluginOptions: object | undefined = pluginSpecifier.options;
-        pluginDefinition.validateOptions(pluginOptions);
+        if (!pluginOptionsAreValidated) {
+          pluginDefinition.validateOptions(pluginOptions);
+        }
 
         // Partially populate the context. The session will be populated while applying the plugins.
         const lifecycleContext: IHeftLifecycleContext = { pluginOptions };

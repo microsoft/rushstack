@@ -14,5 +14,11 @@ module.exports = [
         tsconfigRootDir: __dirname
       }
     }
+  },
+  {
+    files: ['src/host/**/*.ts'],
+    rules: {
+      'headers/header-format': 'off'
+    }
   }
 ];
