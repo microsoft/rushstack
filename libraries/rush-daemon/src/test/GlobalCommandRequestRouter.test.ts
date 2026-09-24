@@ -538,6 +538,7 @@ describe(GlobalCommandRequestRouter.name, () => {
       const output: string = client.chunks.map(({ text }) => text).join('');
       const grandchildPid: number = Number(/grandchild=(\d+)/.exec(output)?.[1]);
       try {
+        expect(grandchildPid).toBeGreaterThan(0);
         expect(result).toMatchObject({ exitCode: 0, outcome: 'success' });
         expect(Date.now() - startTime).toBeLessThan(30000);
       } finally {
@@ -546,6 +547,52 @@ describe(GlobalCommandRequestRouter.name, () => {
         }
       }
     }
+  );
+
+  (process.platform === 'win32' ? it.skip : it)(
+    "does not extend an exited child's drain with another child's output",
+    async () => {
+      const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+      const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+      const heldScript: string = [
+        "const { spawn } = require('node:child_process');",
+        "const grandchild = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'],",
+        "  { detached: true, stdio: 'inherit' });",
+        'grandchild.unref();',
+        "process.stdout.write('grandchild=' + grandchild.pid + '\\n');"
+      ].join('\n');
+      let heldCloseMs: number | undefined;
+      const result: IGlobalCommandRequestResult = await router.executeAsync(
+        router.resolveRequest(createRequestOptions('unrelated-output', FIRST_CWD, {}, 80)),
+        async (context) => {
+          const chatty = context.spawnChild(process.execPath, [
+            '-e',
+            "setInterval(() => process.stdout.write('.'), 20)"
+          ]);
+          const startTime: number = Date.now();
+          const held = context.spawnChild(process.execPath, ['-e', heldScript]);
+          await new Promise<void>((resolve) => held.once('close', () => resolve()));
+          heldCloseMs = Date.now() - startTime;
+          chatty.kill('SIGKILL');
+          await new Promise<void>((resolve) => chatty.once('close', () => resolve()));
+          return { exitCode: 0 };
+        },
+        client
+      );
+      const output: string = client.chunks.map(({ text }) => text).join('');
+      const grandchildPid: number = Number(/grandchild=(\d+)/.exec(output)?.[1]);
+      try {
+        expect(grandchildPid).toBeGreaterThan(0);
+        expect(result).toMatchObject({ outcome: 'success' });
+        expect(heldCloseMs).toBeLessThan(10000);
+      } finally {
+        if (grandchildPid > 0) {
+          process.kill(grandchildPid, 'SIGKILL');
+        }
+      }
+    },
+    30000
   );
 
   (process.platform === 'win32' ? it.skip : it)(

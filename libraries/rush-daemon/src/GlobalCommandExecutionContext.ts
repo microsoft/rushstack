@@ -94,10 +94,6 @@ class OrderedTerminalWriter {
     this.#onFailure = onFailure;
   }
 
-  public get hasPendingWrites(): boolean {
-    return this.#pendingByteCount > 0;
-  }
-
   public write(stream: 'stdout' | 'stderr', chunk: Uint8Array): void {
     void this.writeAsync(stream, chunk);
   }
@@ -169,6 +165,12 @@ interface ITrackedChild {
   readonly completion: Promise<void>;
 }
 
+/** Forwarding activity for one child's output, used to bound its post-exit drain. */
+interface IChildOutputProgress {
+  events: number;
+  pendingWrites: number;
+}
+
 export class GlobalCommandExecutionContext implements IGlobalCommandExecutionContext, AsyncDisposable {
   readonly #abortController: AbortController = new AbortController();
   readonly #client: IGlobalCommandRequestClient;
@@ -181,7 +183,6 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
   readonly #writer: OrderedTerminalWriter;
   #disposePromise: Promise<void> | undefined;
   #closed: boolean = false;
-  #outputProgress: number = 0;
   #requestAborted: boolean = false;
 
   public readonly terminal: ITerminal;
@@ -270,8 +271,9 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
       windowsHide: options.windowsHide
     });
     SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
-    const outputForwarded: boolean = options.forwardOutput !== false;
-    const completion: Promise<void> = this.#trackChildAsync(child, outputForwarded).catch(
+    const outputProgress: IChildOutputProgress | undefined =
+      options.forwardOutput !== false ? { events: 0, pendingWrites: 0 } : undefined;
+    const completion: Promise<void> = this.#trackChildAsync(child, outputProgress).catch(
       (error: unknown) => {
         this.#childCompletionErrors.push(error);
       }
@@ -282,9 +284,9 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
     if (options.forwardInput === true) {
       this.#attachChildInput(child);
     }
-    if (outputForwarded) {
-      this.#forwardChildOutput(child.stdout, 'stdout');
-      this.#forwardChildOutput(child.stderr, 'stderr');
+    if (outputProgress) {
+      this.#forwardChildOutput(child.stdout, 'stdout', outputProgress);
+      this.#forwardChildOutput(child.stderr, 'stderr', outputProgress);
     }
     return child;
   }
@@ -354,7 +356,7 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
 
   async #trackChildAsync(
     child: childProcess.ChildProcessWithoutNullStreams,
-    outputForwarded: boolean
+    outputProgress: IChildOutputProgress | undefined
   ): Promise<void> {
     const terminateChild = (): void => this.#terminateChild(child);
     this.abortSignal.addEventListener('abort', terminateChild, { once: true });
@@ -373,7 +375,7 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
         child.once('close', () => resolve());
       });
       terminateExitedChildProcessGroup(child);
-      await this.#drainChildOutputAsync(child, outputForwarded);
+      await this.#drainChildOutputAsync(child, outputProgress);
     } catch (error) {
       throw this.#recordResourceCleanupFailure(error);
     } finally {
@@ -417,19 +419,20 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
    * Waits for output that the exited child left in its pipes.
    *
    * @remarks
-   * Forwarded output is drained until its pipes close or stay idle for a bounded time; the deadline is extended while
-   * output is still being forwarded, so a slow client does not truncate output. An idle pipe, for example one held by a
-   * descendant outside the child's process group, is then destroyed. Output that the caller consumes itself is not
-   * forwarded, so its progress cannot be observed; those pipes are awaited until they close or the request aborts.
+   * Forwarded output is drained until its pipes close or stay idle for a bounded time; the deadline is extended only
+   * while this child's own output is still being forwarded, so a slow client does not truncate it and unrelated output
+   * cannot keep the drain open. An idle pipe, for example one held by a descendant outside the child's process group,
+   * is then destroyed. Output that the caller consumes itself is not forwarded, so its progress cannot be observed;
+   * those pipes are awaited until they close or the request aborts.
    */
   async #drainChildOutputAsync(
     child: childProcess.ChildProcessWithoutNullStreams,
-    outputForwarded: boolean
+    progress: IChildOutputProgress | undefined
   ): Promise<void> {
     if (child.stdout.closed && child.stderr.closed) {
       return;
     }
-    let lastProgress: number = this.#outputProgress;
+    let lastEvents: number | undefined = progress?.events;
     await new Promise<void>((resolve) => {
       let timer: NodeJS.Timeout | undefined;
       const finish = (): void => {
@@ -438,11 +441,12 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
         resolve();
       };
       const check = (): void => {
-        const progressed: boolean = this.#outputProgress !== lastProgress || this.#writer.hasPendingWrites;
+        const events: number | undefined = progress?.events;
+        const progressed: boolean = events !== lastEvents || (progress?.pendingWrites ?? 0) > 0;
         if (!progressed || this.abortSignal.aborted) {
           finish();
         } else {
-          lastProgress = this.#outputProgress;
+          lastEvents = events;
           timer = setTimeout(check, CHILD_OUTPUT_DRAIN_IDLE_TIMEOUT_MS);
         }
       };
@@ -450,7 +454,7 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
       this.abortSignal.addEventListener('abort', finish, { once: true });
       if (this.abortSignal.aborted) {
         finish();
-      } else if (outputForwarded) {
+      } else if (progress) {
         timer = setTimeout(check, CHILD_OUTPUT_DRAIN_IDLE_TIMEOUT_MS);
       }
     });
@@ -464,14 +468,17 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
 
   #forwardChildOutput(
     source: NodeJS.ReadableStream & { pause(): unknown; resume(): unknown },
-    stream: 'stdout' | 'stderr'
+    stream: 'stdout' | 'stderr',
+    progress: IChildOutputProgress
   ): void {
     source.on('data', (chunk: Buffer | string) => {
       source.pause();
       const bytes: Uint8Array = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
-      this.#outputProgress++;
+      progress.events++;
+      progress.pendingWrites++;
       void this.#writer.writeAsync(stream, bytes).then(() => {
-        this.#outputProgress++;
+        progress.events++;
+        progress.pendingWrites--;
         if (!this.abortSignal.aborted) {
           source.resume();
         }
