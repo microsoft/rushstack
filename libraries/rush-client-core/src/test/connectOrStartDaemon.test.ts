@@ -175,6 +175,7 @@ describe('detached daemon startup', () => {
       code: 1,
       stderr: expect.stringContaining('unresolved startup handoff')
     });
+    expect((await result).stderr).toContain('daemon stop --force');
     expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
@@ -597,6 +598,40 @@ describe('detached daemon startup', () => {
       expect(fs.readFileSync(target, 'utf8')).toBe('unchanged');
       expect(FileSystem.formatPosixModeBits(FileSystem.getPosixModeBits(target))).toBe('-rw-r--r--');
       expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    }
+  );
+
+  it('reclaims a parseable record with an invalid timestamp without waiting out the deadline', async () => {
+    const record: string = JSON.stringify({
+      pid: process.pid,
+      protocolVersion: { major: 0, minor: 6 },
+      startedAt: 'invalid',
+      socketPath: paths.socketPath
+    });
+    fs.writeFileSync(paths.lockfilePath, record);
+    const started: number = Date.now();
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs! - 2000);
+    expect(readDaemonLockfile(paths.lockfilePath)?.pid).not.toBe(process.pid);
+  });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'force reset waits for a listener to release the endpoint',
+    async () => {
+      fs.writeFileSync(getDaemonStartupFilePath(paths), 'abandoned');
+      const listener: net.Server = net.createServer((socket) => socket.destroy());
+      await new Promise<void>((resolve) => listener.listen(paths.socketPath, resolve));
+      await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow('still listening');
+      const closing: NodeJS.Timeout = setTimeout(() => listener.close(), 300);
+      try {
+        expect(await resetDaemonArtifactsAsync(paths, { waitTimeoutMs: 5000 })).toEqual({
+          removedPaths: [getDaemonStartupFilePath(paths)]
+        });
+      } finally {
+        clearTimeout(closing);
+        listener.close();
+      }
     }
   );
 

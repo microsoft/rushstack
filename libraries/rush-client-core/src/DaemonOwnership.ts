@@ -4,6 +4,7 @@
 import * as fs from 'node:fs';
 import * as net from 'node:net';
 import * as path from 'node:path';
+import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import type { IDaemonLockfile, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
@@ -13,6 +14,7 @@ import { isProcessStartedAfter } from './ProcessStartTime';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 const PROBE_TIMEOUT_MS: number = 1000;
+const RESET_RETRY_MS: number = 100;
 
 /** Printed wherever automatic recovery fails closed. */
 export const DAEMON_RESET_HINT: string =
@@ -24,6 +26,12 @@ type OwnershipState =
   | { readonly kind: 'absent' }
   | { readonly kind: 'corrupt'; readonly raw: string }
   | { readonly kind: 'owned'; readonly raw: string; readonly owner: DaemonOwnership };
+
+/** Options for {@link resetDaemonArtifactsAsync}. @beta */
+export interface IDaemonArtifactResetOptions {
+  /** How long to keep re-checking a bound listener, live owner, or held start mutex. Defaults to 0. */
+  readonly waitTimeoutMs?: number;
+}
 
 /** The result of {@link resetDaemonArtifactsAsync}. @beta */
 export interface IDaemonArtifactResetResult {
@@ -113,28 +121,46 @@ export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promi
 /**
  * Removes this workspace's leftover daemon files (ownership record, socket, and startup reservation)
  * after verifying that no listener is bound and that the recorded owner, if any, is gone.
- * @remarks Never kills a process. Fails when another client holds the start mutex.
+ * @remarks Never kills a process. Fails when another client holds the start mutex, a listener is bound,
+ * or the recorded owner is alive; with `waitTimeoutMs`, those conditions are re-checked until the deadline
+ * (for example, while a daemon that just acknowledged shutdown finishes its cleanup).
  * @beta
  */
-export async function resetDaemonArtifactsAsync(paths: IDaemonPaths): Promise<IDaemonArtifactResetResult> {
+export async function resetDaemonArtifactsAsync(
+  paths: IDaemonPaths,
+  options?: IDaemonArtifactResetOptions
+): Promise<IDaemonArtifactResetResult> {
+  const deadline: number = Date.now() + (options?.waitTimeoutMs ?? 0);
+  while (true) {
+    const outcome: IDaemonArtifactResetResult | DaemonClientError = await tryResetDaemonArtifactsAsync(paths);
+    if (!(outcome instanceof DaemonClientError)) return outcome;
+    if (Date.now() >= deadline) throw outcome;
+    await delayAsync(Math.min(RESET_RETRY_MS, Math.max(1, deadline - Date.now())));
+  }
+}
+
+/** Returns a (not thrown) error for conditions that may clear on their own. */
+async function tryResetDaemonArtifactsAsync(
+  paths: IDaemonPaths
+): Promise<IDaemonArtifactResetResult | DaemonClientError> {
   if (!fs.existsSync(path.dirname(paths.lockfilePath))) return { removedPaths: [] };
   const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
   if (!lock) {
-    throw new DaemonClientError(
+    return new DaemonClientError(
       'startupFailed',
       `Another client is starting the daemon for ${paths.lockfilePath}; retry after it finishes.`
     );
   }
   try {
     if (!(await isEndpointUnboundAsync(paths.socketPath))) {
-      throw new DaemonClientError(
+      return new DaemonClientError(
         'startupFailed',
         `A process is still listening at ${paths.socketPath}; use "rush-client daemon stop" to stop it.`
       );
     }
     const state: OwnershipState = inspectOwnership(paths.lockfilePath);
     if (state.kind === 'owned' && isOwnerProcessAlive(state.owner)) {
-      throw new DaemonClientError(
+      return new DaemonClientError(
         'startupFailed',
         `PID ${state.owner.pid} still owns ${paths.lockfilePath}; it may be a daemon that is shutting down. Wait for it to exit (or stop that process yourself), then retry. No process was killed.`
       );
@@ -181,7 +207,7 @@ function inspectOwnership(lockfilePath: string): OwnershipState {
     if (hasErrorCode(error, 'ENOENT')) return { kind: 'absent' };
     throw new DaemonClientError(
       'startupFailed',
-      `Cannot safely read ${lockfilePath}; refusing automatic reclaim.`,
+      `Cannot safely read ${lockfilePath}; refusing automatic reclaim. ${DAEMON_RESET_HINT}`,
       { cause: error }
     );
   }

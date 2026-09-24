@@ -22,6 +22,8 @@ import { printDaemonLogAsync } from './daemonLogs';
 import { executeDaemonGraphCommandAsync } from './daemonGraph';
 import { writeStreamAsync } from './writeStreamAsync';
 
+const FORCE_STOP_WAIT_MS: number = 15000;
+
 export interface IDaemonCommandOptions {
   readonly argv: ReadonlyArray<string>;
   readonly environment: Readonly<NodeJS.ProcessEnv>;
@@ -118,6 +120,19 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   try {
     if (command === 'stop') {
       await client.shutdownAsync();
+      if (options.argv[1] === '--force') {
+        // Wait for the acknowledged daemon to release its listener and record, then clear leftovers
+        // such as an abandoned startup reservation in the same invocation.
+        const { removedPaths } = await resetDaemonArtifactsAsync(connectionOptions.paths, {
+          waitTimeoutMs: FORCE_STOP_WAIT_MS
+        });
+        await writeStatusAsync({
+          state: 'shutdownAccepted',
+          socketPath: connectionOptions.paths.socketPath,
+          removedPaths
+        });
+        return;
+      }
       await writeStatusAsync({
         state: 'shutdownAccepted',
         socketPath: connectionOptions.paths.socketPath

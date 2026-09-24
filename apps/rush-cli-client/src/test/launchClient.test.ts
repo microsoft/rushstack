@@ -277,6 +277,27 @@ describe('standalone rushx fallback', () => {
     }
   }, 30000);
 
+  it('stop --force clears an abandoned startup reservation next to a running daemon', async () => {
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    const reservation: string = `${paths.lockfilePath}.starting`;
+    try {
+      expect((await invokeAsync(true, false, false, ['daemon', 'start'])).code).toBe(0);
+      fs.writeFileSync(reservation, 'abandoned');
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
+      expect(result).toMatchObject({ code: 0, stderr: '' });
+      expect(JSON.parse(result.stdout)).toEqual({
+        state: 'shutdownAccepted',
+        socketPath: paths.socketPath,
+        removedPaths: [reservation]
+      });
+      expect(fs.existsSync(reservation)).toBe(false);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+    }
+  }, 30000);
+
   (process.platform === 'win32' ? it.skip : it)(
     'stop --force removes stale artifacts left by a killed daemon',
     async () => {

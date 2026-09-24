@@ -252,8 +252,10 @@ listens at the endpoint it reports `state: "notRunning"` with exit code 0. An
 unsupported protocol, missing acknowledgement, handshake failure, or timeout
 returns exit code 1. It does not auto-start anything.
 
-`rush-client daemon stop --force` stops a running daemon the same way. When none
-is listening, it also removes this workspace's leftover ownership record
+`rush-client daemon stop --force` stops a running daemon the same way, then waits
+(up to 15 seconds) for it to release its listener and ownership record and removes
+any remaining artifacts, such as an abandoned startup reservation, reporting them in
+`removedPaths`. When none is listening, it removes this workspace's leftover ownership record
 (`<key>.pid.json`), socket, and startup reservation (`.starting`), then reports
 `state: "reset"` and the `removedPaths` (or `state: "notRunning"` if nothing was
 left behind). It holds the start mutex, proves that no listener is bound, and

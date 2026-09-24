@@ -122,7 +122,7 @@ export async function connectOrStartDaemonAsync(
       if (Date.now() >= deadline) {
         throw startupError(
           options,
-          `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)}; refusing another launch`
+          `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)}; refusing another launch. ${DAEMON_RESET_HINT}`
         );
       }
       await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
@@ -286,7 +286,12 @@ async function waitForHandoffAsync(
   while (Date.now() < deadline) {
     const owner: IDaemonLockfile | undefined = readDaemonLockfile(options.paths.lockfilePath);
     // Only wait on a fully published endpoint; malformed or ambiguous ownership is resolved by reclaim.
-    if (!owner || owner.socketPath !== options.paths.socketPath || !isOwnerProcessAlive(owner))
+    if (
+      !owner ||
+      !isDaemonOwnership(owner) ||
+      owner.socketPath !== options.paths.socketPath ||
+      !isOwnerProcessAlive(owner)
+    )
       return undefined;
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
       signal: options.abortSignal

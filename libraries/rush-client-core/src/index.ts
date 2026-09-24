@@ -15,7 +15,11 @@ export {
 } from './DaemonClient';
 export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientError';
 export { getDaemonLogFilePath } from './DaemonLogFile';
-export { resetDaemonArtifactsAsync, type IDaemonArtifactResetResult } from './DaemonOwnership';
+export {
+  resetDaemonArtifactsAsync,
+  type IDaemonArtifactResetOptions,
+  type IDaemonArtifactResetResult
+} from './DaemonOwnership';
 export { executeWithDaemonRestartAsync } from './executeWithDaemonRestart';
 export {
   connectOrStartDaemonAsync,
