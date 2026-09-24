@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IConfigurableOperation, Operation } from '@microsoft/rush-lib';
 import { OperationStatus } from '@microsoft/rush-lib';
 import type { IDaemonPhasedOperationSelection, IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
 
@@ -90,14 +89,11 @@ describe('phased request summary', () => {
       const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
       await router.executeAsync(createRequest('cold', OPERATION_B), new TestPhasedRequestClient());
       // Simulate the incremental plugin disabling every operation whose inputs did not change.
-      fixture.graph.hooks.configureIteration.tap(
-        'test',
-        (records: ReadonlyMap<Operation, IConfigurableOperation>) => {
-          for (const record of records.values()) {
-            record.enabled = false;
-          }
+      fixture.graph.hooks.configureIteration.tap('test', (records) => {
+        for (const record of records.values()) {
+          record.enabled = false;
         }
-      );
+      });
       const client: TestPhasedRequestClient = new TestPhasedRequestClient();
       const result = await router.executeAsync(createRequest('warm', OPERATION_B), client);
       expect(result.scheduled).toBe(false);
