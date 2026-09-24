@@ -4,6 +4,7 @@
 import type {
   IOperationExecutionResult,
   IOperationGraph,
+  IPhasedCommandEngineRequestSettings,
   Operation,
   _IOperationGraphEventSink
 } from '@microsoft/rush-lib';
@@ -65,6 +66,9 @@ interface IPreparedPhasedRequest {
   readonly exclusivityClass: RequestExclusivityClass;
   readonly interactiveSession: IInteractiveRequestSession | undefined;
   readonly request: IDaemonPhasedRequest;
+  /** Only requests with the same settings share one graph iteration. */
+  readonly requestSettings: IPhasedCommandEngineRequestSettings | undefined;
+  readonly requestSettingsKey: string;
   readonly selection: IResolvedSelection;
   readonly warningsAllowedByEnvironment: boolean;
 }
@@ -116,7 +120,8 @@ export class PhasedRequestRouter {
     request: IDaemonPhasedRequest,
     client: IPhasedRequestClient,
     exactSelection: boolean = false,
-    onExecutionStarting?: () => void
+    onExecutionStarting?: () => void,
+    requestSettings?: IPhasedCommandEngineRequestSettings
   ): Promise<IDaemonPhasedRequestResult> {
     validateRequestIdentity(request);
     const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
@@ -194,6 +199,8 @@ export class PhasedRequestRouter {
               exclusivityClass,
               interactiveSession,
               request,
+              requestSettings,
+              requestSettingsKey: JSON.stringify(requestSettings ?? null),
               selection,
               warningsAllowedByEnvironment,
               onExecutionStarting
@@ -342,14 +349,19 @@ class PhasedRequestBatchCoordinator {
     }
     return (
       this.#acceptingCurrentBatch &&
-      this.#currentBatch?.[0]?.exclusivityClass === RequestExclusivityClass.SharedBuild
+      this.#currentBatch?.[0]?.exclusivityClass === RequestExclusivityClass.SharedBuild &&
+      this.#currentBatch[0].requestSettingsKey === request.requestSettingsKey
     );
   }
 
   #takeCompatiblePending(batch: IBatchEntry[]): void {
+    const { requestSettingsKey } = batch[0];
     for (let index: number = 0; index < this.#pending.length; ) {
       const entry: IBatchEntry = this.#pending[index];
-      if (entry.exclusivityClass === RequestExclusivityClass.SharedBuild) {
+      if (
+        entry.exclusivityClass === RequestExclusivityClass.SharedBuild &&
+        entry.requestSettingsKey === requestSettingsKey
+      ) {
         this.#pending.splice(index, 1);
         entry.executionStarted = true;
         batch.push(entry);
@@ -399,6 +411,7 @@ class PhasedRequestBatchCoordinator {
         return;
       }
 
+      applyRequestSettings(this.#graph, participants[0].requestSettings);
       applySelections(
         this.#graph,
         participants.map((entry: IBatchEntry) => entry.selection)
@@ -883,6 +896,17 @@ function collectSelectionClosure(
     }
   }
   return Array.from(activeOperations);
+}
+
+/** Presentation/scheduling settings are request-scoped, so they are applied per iteration, not per graph. */
+function applyRequestSettings(
+  graph: IOperationGraph,
+  settings: IPhasedCommandEngineRequestSettings | undefined
+): void {
+  if (settings) {
+    graph.quietMode = settings.quietMode;
+    graph.parallelism = settings.parallelism;
+  }
 }
 
 function applySelections(graph: IOperationGraph, selections: ReadonlyArray<IResolvedSelection>): void {

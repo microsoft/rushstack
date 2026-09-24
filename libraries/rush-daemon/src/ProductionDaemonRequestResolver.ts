@@ -38,7 +38,9 @@ import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
  * Binds the standalone host to a real native build/rebuild graph on its first request.
  *
  * @remarks
- * A host is pinned to its first command and non-selection parameters. Incompatible parameters,
+ * A host is pinned to its first command and graph-affecting, non-selection parameters. Presentation and
+ * scheduling parameters (`--verbose`, `--parallelism`, `--timeline`) are applied per request instead.
+ * Incompatible parameters,
  * environments, or graph inputs are rejected before scheduling; no request is retried automatically.
  * The initial supported surface excludes external plugins, .env initialization, install/watch,
  * event-hook scripts, and rushx/global commands. Use the unchanged native CLI for those surfaces.
@@ -118,6 +120,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     return {
       kind: 'phased',
       exactSelection: true,
+      requestSettings: command.requestSettings,
       request: {
         admission: envelope.admission,
         commandName: envelope.commandName,

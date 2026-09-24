@@ -954,6 +954,14 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
 }
 
 // @alpha
+export interface IPhasedCommandEngineRequestSettings {
+    // (undocumented)
+    readonly parallelism: Parallelism;
+    // (undocumented)
+    readonly quietMode: boolean;
+}
+
+// @alpha
 export interface IPhasedCommandPlugin {
     apply(hooks: PhasedCommandHooks): void;
 }
@@ -1512,6 +1520,7 @@ export class PhasedCommandEngine {
     readonly parameterIdentity: string;
     // (undocumented)
     static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
+    get requestSettings(): IPhasedCommandEngineRequestSettings;
     selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
 }
 
