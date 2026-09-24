@@ -12,13 +12,13 @@ export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-time
 export interface IDaemonRequestAdmissionOptions {
   /** Fail immediately when the request cannot be admitted. */
   readonly noWait?: boolean;
-  /** Maximum queue wait in milliseconds. Omission means no timeout. */
-  readonly waitTimeoutMs?: number;
   /**
    * True when `waitTimeoutMs` is a client default rather than an explicit user choice. A default timeout bounds
    * workspace admission only, not waiting behind running compatible shared builds.
    */
   readonly waitTimeoutIsDefault?: boolean;
+  /** Maximum queue wait in milliseconds. Omission means no timeout. */
+  readonly waitTimeoutMs?: number;
 }
 
 /** Reports a request's current one-based scheduler queue position. @beta */
