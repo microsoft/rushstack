@@ -76,6 +76,7 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
     // (undocumented)
     readonly paths: IDaemonPaths;
     readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
+    readonly resolveStartCommandAsync?: () => Promise<IDaemonStartCommand>;
     readonly startCommand?: IDaemonStartCommand;
     readonly startupTimeoutMs?: number;
 }

@@ -45,8 +45,13 @@ export interface IDaemonStartCommand {
 /** Detached startup options. @beta */
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
   readonly paths: IDaemonPaths;
-  /** Omit to connect without auto-start. */
+  /** Omit (together with resolveStartCommandAsync) to connect without auto-start. */
   readonly startCommand?: IDaemonStartCommand;
+  /**
+   * Resolves the start command only when a daemon must be started or replaced, so a warm connect never
+   * loads launcher code. Ignored when startCommand is provided.
+   */
+  readonly resolveStartCommandAsync?: () => Promise<IDaemonStartCommand>;
   /**
    * Ownership captured before acknowledged shutdown. Wait for this record to disappear, change owner,
    * or have a demonstrably dead owner before connecting or starting. A live/reused owner times out safely.
@@ -76,7 +81,9 @@ export async function connectOrStartDaemonAsync(
   await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline, options.abortSignal);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
-  if (!options.startCommand) {
+  const startCommand: IDaemonStartCommand | undefined =
+    options.startCommand ?? (await options.resolveStartCommandAsync?.());
+  if (!startCommand) {
     if (options.previousDaemon) {
       while (Date.now() < deadline) {
         await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
@@ -91,6 +98,13 @@ export async function connectOrStartDaemonAsync(
       `No ready daemon at ${options.paths.socketPath}; auto-start is disabled.`
     );
   }
+  return await startDaemonAsync({ ...options, startCommand, resolveStartCommandAsync: undefined }, deadline);
+}
+
+async function startDaemonAsync(
+  options: IConnectOrStartDaemonOptions & { readonly startCommand: IDaemonStartCommand },
+  deadline: number
+): Promise<DaemonClient> {
   ensureDaemonRuntimeDir(options.paths);
   let lock: IStartupLock | undefined;
   let backoffMs: number = 50;
@@ -260,7 +274,7 @@ async function tryConnectAsync(
     if (
       error instanceof DaemonClientError &&
       error.code === 'versionMismatch' &&
-      options.startCommand &&
+      (options.startCommand || options.resolveStartCommandAsync) &&
       options.expectedDaemonVersion !== undefined
     ) {
       return undefined;

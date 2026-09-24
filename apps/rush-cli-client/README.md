@@ -46,6 +46,16 @@ rounded down to milliseconds. These controls are mutually exclusive and are
 consumed before forwarding, never appended to a project script. Arguments after
 `--` remain literal script arguments.
 
+The queue timeout is measured from when the daemon receives the request. An
+explicit `--no-wait`, `--wait-timeout`, `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, or
+`daemon.queueTimeoutSeconds` in `rush.json` bounds the entire wait: waiting for
+workspace admission and waiting for a running build that the request could not
+join. The built-in 30-second default bounds only workspace admission (for example,
+waiting for a command that needs exclusive access). With the default, a build that
+arrives while a compatible build is already running waits for it to finish and then
+runs, instead of failing after 30 seconds. On a timeout, the client exits with
+code 1 and says how to wait longer.
+
 Admission controls also apply to experimental graph requests, but not
 `start|stop|restart|status|logs`. They affect daemon admission only; native fallback
 retains native command behavior. Waiting positions are shown on interactive stderr,
@@ -169,7 +179,7 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `enabled` | `RUSH_DAEMON` | false | Client routing |
 | `autoStart` | `RUSH_DAEMON_AUTO_START` | true | Only after opt-in |
 | `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Host idle shutdown after request/output/cleanup drain |
-| `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Sent through existing admission contract |
+| `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Admission wait limit. The default does not bound waiting behind a running compatible build; an explicit value does |
 | `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
 | `usePersistentIpcRunners` | `RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS` | false | Enables explicit per-operation `daemonIpc` Node launchers for unsharded incremental daemon builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |

@@ -358,6 +358,28 @@ describe('detached daemon startup', () => {
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
   });
 
+  it('resolves a lazy start command only when no compatible daemon is ready', async () => {
+    const { startCommand, ...connectOnly } = options;
+    const resolveStartCommandAsync = jest.fn(async () => startCommand!);
+    const started = await connectOrStartDaemonAsync({ ...connectOnly, resolveStartCommandAsync });
+    await started.closeAsync();
+    expect(resolveStartCommandAsync).toHaveBeenCalledTimes(1);
+    const warm = await connectOrStartDaemonAsync({ ...connectOnly, resolveStartCommandAsync });
+    await warm.closeAsync();
+    expect(resolveStartCommandAsync).toHaveBeenCalledTimes(1);
+    const replaced = await connectOrStartDaemonAsync({
+      ...connectOnly,
+      expectedDaemonVersion: 'replacement',
+      resolveStartCommandAsync: async () => ({
+        ...startCommand!,
+        args: [...startCommand!.args, 'replacement']
+      })
+    });
+    expect((await replaced.status).daemonVersion).toBe('replacement');
+    await replaced.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+  });
+
   it.each(['restart-once', 'restart-twice', 'restart-always', 'restart-held'])(
     'retries only the typed pre-execution result for %s after ownership release',
     async (mode) => {
