@@ -61,9 +61,37 @@ Admission controls also apply to experimental graph requests, but not
 retains native command behavior. Waiting positions are shown on interactive stderr,
 and admission failures report their typed reason and a nonzero exit code.
 
-Explicit reporter/output/log-level controls retain the native frontend reporter path.
-The current daemon client renders the legacy operation stream; it does not silently
-reinterpret requests for JSON, AI, file, or other reporter formats.
+Explicit reporter/output/log-level controls (`--reporter`, `--output`, `--log-level`,
+`RUSH_REPORTER` other than `legacy`, or `RUSH_LOG_LEVEL`) retain the native frontend
+reporter path, with or without `--no-daemon`, including `--reporter=ai`. The daemon client
+does not silently reinterpret requests for JSON, AI, file, or other reporter formats.
+
+A repository that opts into the native reporter with `"useRushReporter": true` in
+`common/config/rush/experiments.json` also stays on the native (in-process) path, so
+that its reporter output is honored rather than silently replaced by the daemon
+stream. Native reporter rendering over the daemon protocol is a follow-up.
+
+### Output modes
+
+The `rush-client` daemon path has two output modes (`rushx-client` always uses `legacy`).
+Requests that use the native reporter path (see above) always get native output, and
+agent mode writes nothing ahead of it. Otherwise, selection precedence is:
+
+1. `RUSHD_OUTPUT=agent` or `RUSHD_OUTPUT=legacy`.
+2. An active `COPILOT_CLI` agent marker selects `agent`, matching `detectAgent()` in
+   `@rushstack/reporter` (a value is inactive when empty, `0`, `false`, `no` or `off`).
+   Other agents can opt in with `RUSHD_OUTPUT=agent`.
+3. Otherwise `legacy`: the unchanged collated operation stream.
+
+Agent mode is plain text for humans and agents, not the AI reporter's JSON record format;
+use `--reporter=ai` for machine-parsed records. It writes a first status line before
+`@microsoft/rush-lib` is loaded, then at most three live rows on a TTY (append-only lines
+throttled to one per 2 seconds on a pipe), the queue position when waiting for admission,
+and always one final summary line (`rush build: SUCCESS 12/12 operations (...) in 3.1s`, or
+`up to date (no operations needed)`). On failure, it lists failed operations and a
+bounded tail (10 lines) of their stderr, or of their stdout when they wrote no stderr.
+Operation logs are otherwise not printed; use `RUSHD_OUTPUT=legacy` for full logs. When
+a request falls back to in-process Rush, agent mode stops and native output follows.
 
 Positively identified built-in `install` and `update` follow the same opt-in routing
 precedence as workspace builds and require protocol **0.10**
@@ -183,8 +211,8 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
 | `usePersistentIpcRunners` | `RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS` | false | Enables explicit per-operation `daemonIpc` Node launchers for unsharded incremental daemon builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |
-| `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling |
-| `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort retained-project limit; never trims requested execution |
+| `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling. Compared against whole-daemon RSS plus measured child RSS, so keep it above the daemon baseline (~130-190 MiB) |
+| `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort limit on projects holding warm resources (active runners, watchers); retained results of resource-free projects do not count. Never trims requested execution |
 | `autoWarmByTelemetry` | `RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY` | false | Measured retention ranking with conservative LRU fallback; no speculative scripts |
 
 For genuine persistent Node execution, enable `usePersistentIpcRunners` and add

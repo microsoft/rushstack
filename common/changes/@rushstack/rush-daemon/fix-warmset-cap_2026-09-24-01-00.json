@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Fix warmSetMaxProjects evicting the retained results of resource-free projects, which made every no-op build of a workspace with more than 20 projects re-restore the excess projects from the build cache. The cap now only counts and releases projects that hold a live runner or watcher, and ties keep the explicitly requested target over its dependencies.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

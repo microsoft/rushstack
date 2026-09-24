@@ -57,6 +57,11 @@ export {
   type IGlobalCommandRequestResult
 } from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export {
+  DaemonShutdownError,
+  type DaemonShutdownInitiator,
+  type IDaemonShutdownErrorOptions
+} from './DaemonShutdownError';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
   WorkspaceEngineComponentFactory,
