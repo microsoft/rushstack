@@ -15,8 +15,10 @@ import {
 
 class FakeDirectoryWatcher extends EventEmitter {
   public closed: boolean = false;
-  public constructor(public readonly listener: fs.WatchListener<string>) {
+  public readonly listener: fs.WatchListener<string>;
+  public constructor(listener: fs.WatchListener<string>) {
     super();
+    this.listener = listener;
   }
   public close(): void {
     this.closed = true;
@@ -212,7 +214,7 @@ describe(LinuxTreeWatcher.name, () => {
   (process.platform === 'linux' ? it : it.skip)('observes real inotify events in new directories', async () => {
     const root: string = makeTree(['src/a.ts', 'lib/a.js']);
     const events: string[] = [];
-    const watcher: LinuxTreeWatcher = new LinuxTreeWatcher(root, (_, filename) => events.push(filename!), {
+    const watcher: LinuxTreeWatcher = new LinuxTreeWatcher(root, (...args) => events.push(args[1]!), {
       getExcludedFolderPathsAsync: async () => new Set([path.join(root, 'lib')])
     });
     try {
