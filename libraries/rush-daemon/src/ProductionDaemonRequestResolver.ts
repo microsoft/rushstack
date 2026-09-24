@@ -31,6 +31,7 @@ import {
 } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession, IWorkspaceSessionComponents } from './WorkspaceSession';
 import { EngineTerminalProvider } from './EngineTerminalProvider';
+import { OperationOutputFingerprints } from './OperationOutputFingerprints';
 import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 
 /**
@@ -191,6 +192,9 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       }
       try {
         terminal.attach(engine.operationGraph);
+        const outputFingerprints: OperationOutputFingerprints = new OperationOutputFingerprints(
+          engine.operationGraph
+        );
         const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
           createEngineComponentsAsync: async () => ({
             ...engine,
@@ -212,8 +216,11 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           shape: engine,
           refreshInputsOnEveryRequest: true,
           validateGraphInputsAsync: this.#validateGraphInputsAsync,
-          mapInvalidationsToOperationsAsync: async (invalidationOptions) =>
-            getChangedOperations(invalidationOptions)
+          mapInvalidationsToOperationsAsync: async (invalidationOptions) => [
+            ...getChangedOperations(invalidationOptions),
+            // Outputs are git-ignored and absent from state hashes, so check them separately.
+            ...outputFingerprints.getOperationsWithChangedOutputs()
+          ]
         });
         const components: IWorkspaceSessionComponents = await factory.createAsync(options);
         return {

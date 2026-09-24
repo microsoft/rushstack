@@ -1329,6 +1329,66 @@ process.exit(23);
     }
   });
 
+  it('re-runs only the operation whose declared outputs were deleted after a warm build', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build']);
+      expect(runs(fixture)).toEqual(expect.arrayContaining(['a:one:', 'b:one:', 'c:one:']));
+      expect((await runAsync(fixture, 'warm', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/a/lib'), { recursive: true });
+      expect((await runAsync(fixture, 'unrelated', ['build', '--only', 'c'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect((await runAsync(fixture, 'deleted', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(3)).toEqual(['a:one:']);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/c/lib/extra.txt'), 'stray');
+      expect((await runAsync(fixture, 'changed', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(4)).toEqual(['c:one:']);
+      expect((await runAsync(fixture, 'unchanged', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(runs(fixture)).toHaveLength(5);
+      expect(fixture.session.operationGraph).toBe(graph);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('restores deleted outputs of a warm operation from the native build cache', async () => {
+    const fixture: IFixture = await createFixtureAsync(true);
+    try {
+      await runAsync(fixture, 'initial', ['build', '--to', 'b']);
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/a/lib'), { recursive: true });
+      const deleted: ITerminalExchange = await runAsync(fixture, 'deleted', ['build', '--to', 'b']);
+      expect(deleted.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      const { operationResults } = (deleted.terminal as { payload: IDaemonPhasedRequestResult }).payload;
+      expect(operationResults.filter((result) => result.status !== 'SKIPPED')).toEqual([
+        expect.objectContaining({ operationId: 'a (compile)', status: 'FROM CACHE' })
+      ]);
+      expect(runs(fixture)).toEqual(['a:one:', 'b:one:']);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+      expect((await runAsync(fixture, 'restored', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('reconciles changes made without a connected client and preserves an empty native selection', async () => {
     const fixture: IFixture = await createFixtureAsync();
     let reconnected: DaemonRequestWireClient | undefined;
