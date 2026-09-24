@@ -521,21 +521,22 @@ describe('DaemonClient', () => {
     });
     onRequest = async (message) => {
       if (message.kind === 'shutdown') {
-        await sendAsync({ kind: 'shutdownAck', payload: {} });
+        await sendAsync({ kind: 'shutdownAck', payload: { activeRequests: 2 } });
         acknowledged();
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
     expect(client.protocolVersion.minor).toBeGreaterThanOrEqual(6);
     let completed: boolean = false;
-    const shutdown: Promise<void> = client.shutdownAsync().then(() => {
+    const shutdown: Promise<unknown> = client.shutdownAsync().then((payload) => {
       completed = true;
+      return payload;
     });
     await ack;
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(completed).toBe(false);
     await connection!.closeAsync();
-    await shutdown;
+    await expect(shutdown).resolves.toEqual({ activeRequests: 2 });
     expect(completed).toBe(true);
     expect(controls.filter((message) => message.kind === 'shutdown')).toHaveLength(1);
   });

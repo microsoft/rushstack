@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Add an opt-in agent output mode on the daemon path (RUSHD_OUTPUT=agent or COPILOT_CLI) with an immediate first line, bounded live progress, and a guaranteed final summary; keep repositories that opt into useRushReporter on the native reporter path.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

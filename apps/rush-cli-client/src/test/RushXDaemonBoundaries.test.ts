@@ -156,7 +156,7 @@ describe('native Rushx execution boundaries', () => {
     }
   );
 
-  it('fails visibly without running or reading when hooks change during queue admission', async () => {
+  it('runs a script without queueing behind an exclusive workspace request', async () => {
     const cwd: string = await startAsync();
     let release: () => void = () => {};
     let started: () => void = () => {};
@@ -177,25 +177,14 @@ describe('native Rushx execution boundaries', () => {
     });
     const holder = fixture.runAsync({ ...fixture.request(['hold'], cwd), invocationKind: 'rush' });
     await holding;
-    const stdin: PassThrough = new PassThrough();
-    stdin.end('not-consumed');
+    const onQueuePositionAsync = jest.fn(async () => undefined);
     try {
-      const result = await fixture.runAsync(fixture.request(['build'], cwd), undefined, {
-        stdin,
-        onQueuePositionAsync: async () => {
-          const file: string = path.join(fixture.folder, 'rush.json');
-          const config = JSON.parse(fs.readFileSync(file, 'utf8'));
-          fixture.write(
-            'rush.json',
-            JSON.stringify({ ...config, eventHooks: { preRushx: ['node hook.cjs'] } })
-          );
-          release();
-        }
+      const result = await fixture.runAsync(fixture.request(['-q', 'build'], cwd), undefined, {
+        onQueuePositionAsync
       });
-      expect(result.outcome).toMatchObject({ kind: 'result', result: { exitCode: 1, outcome: 'failure' } });
-      expect(result.stderr.toString()).toContain('Rush configuration changed');
-      expect(stdin.read().toString()).toBe('not-consumed');
-      expect(fs.existsSync(path.join(cwd, 'runs.txt'))).toBe(false);
+      expect(result.outcome).toMatchObject({ kind: 'result', result: { exitCode: 0, outcome: 'success' } });
+      expect(onQueuePositionAsync).not.toHaveBeenCalled();
+      expect(fs.readFileSync(path.join(cwd, 'runs.txt'), 'utf8')).toBe('ran\n');
     } finally {
       release();
       await holder;

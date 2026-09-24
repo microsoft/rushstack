@@ -40,6 +40,7 @@ import {
   getWorkspaceRequestScheduler
 } from './WorkspaceRequestAdmission';
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
+import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
@@ -49,6 +50,7 @@ import type {
   IWorkspaceProcessRestartPlan,
   IWorkspaceSuccessorLaunch
 } from './WorkspaceProcessRestart';
+import { WorkspaceRestartArbiter, type IWorkspaceRestartTicket } from './WorkspaceRestartArbiter';
 
 interface IExecutionState {
   began: boolean;
@@ -106,6 +108,7 @@ class RestartPendingBeforeExecution extends Error {
 export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #options: IWorkspaceRequestLifecycleOptions;
   readonly #gate: RequestScheduler = new RequestScheduler();
+  readonly #restartArbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   readonly #abortController: AbortController = new AbortController();
   readonly #observers: Set<AbortController> = new Set();
   readonly #terminal: Terminal = new Terminal(new NoOpTerminalProvider());
@@ -195,11 +198,13 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       client,
       requestId: envelope.requestId
     });
+    // Long-lived observers are cancelled by a transition, so they never delay a restart.
+    const ticket: IWorkspaceRestartTicket | undefined = observer ? undefined : this.#restartArbiter.enter();
     let generation: IPreparedGeneration | undefined;
     try {
       for (let attempt: number = 0; ; attempt++) {
         try {
-          generation = await this.#prepareAsync(envelope, client, admission);
+          generation = await this.#prepareAsync(envelope, client, admission, ticket);
           const requestEnvelope: IDaemonRequestEnvelope = {
             ...envelope,
             admission: admission.remainingAdmission
@@ -259,7 +264,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           if (error instanceof RequestSchedulerError && !state.began && !state.terminalAttempted) {
             await client.interactiveSession.finishAsync();
             await client.writeResultAsync({
-              ...preExecutionFailure(envelope.requestId, error),
+              ...preExecutionFailure(
+                envelope.requestId,
+                getDaemonShutdownReason(client.abortSignal) ?? error
+              ),
               aborted: client.abortSignal.aborted,
               admissionErrorCode: getRequestAdmissionErrorCode(error)
             });
@@ -272,6 +280,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         }
       }
     } finally {
+      if (ticket) this.#restartArbiter.leave(ticket);
       admission.dispose();
       if (observer) this.#observers.delete(observer);
     }
@@ -281,6 +290,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     envelope: IDaemonRequestEnvelope,
     client: IDaemonRequestDispatchClient,
     admission: RequestAdmissionController,
+    ticket: IWorkspaceRestartTicket | undefined,
     admittedLease?: IRequestLease
   ): Promise<IPreparedGeneration> {
     let lease: IRequestLease =
@@ -316,6 +326,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           const currentTier: WorkspaceInputChangeTier = this.#classify(current, false);
           if (currentTier === WorkspaceInputChangeTier.Restart) {
             lease.release();
+            if (ticket) {
+              // Like build requests, a graph-control restart must not preempt requests this process can serve.
+              await admission.waitForRestartDrainAsync(this.#restartArbiter, ticket);
+              if (this.#restartPending) throw new RestartPendingBeforeExecution();
+            }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
             session = await this.#options.provider.getSessionAsync();
@@ -408,12 +423,17 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       }
 
       lease.release();
+      if (tier === WorkspaceInputChangeTier.Restart && ticket) {
+        // Serve every queued or in-flight request that matches this process before restarting for another one.
+        await admission.waitForRestartDrainAsync(this.#restartArbiter, ticket);
+        if (this.#restartPending) throw new RestartPendingBeforeExecution();
+      }
       if (this.#transitioning) {
         const shared: IRequestLease = await admission.acquireAsync(
           this.#gate,
           RequestExclusivityClass.SharedBuild
         );
-        return await this.#prepareAsync(envelope, client, admission, shared);
+        return await this.#prepareAsync(envelope, client, admission, ticket, shared);
       }
       this.#transitioning = ownsTransition = true;
       this.#cancelObservers();

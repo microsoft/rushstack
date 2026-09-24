@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'node:crypto';
+import * as path from 'node:path';
 
-import { InternalError, NewlineKind, Sort } from '@rushstack/node-core-library';
+import { InternalError, NewlineKind, Sort, Executable } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import {
   DiscardStdoutTransform,
@@ -28,6 +29,13 @@ import {
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import { PeriodicCallback } from './PeriodicCallback';
+import {
+  captureInputFilesState,
+  haveInputFilesChanged,
+  hasUntrackedGitFiles,
+  type IInputFilesState
+} from './InputFilesStatSignature';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { NullTerminalProvider } from '../../utilities/NullTerminalProvider';
 import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
@@ -70,6 +78,11 @@ export interface IOperationBuildCacheContext {
   periodicCallback: PeriodicCallback;
   cacheRestored: boolean;
   isCacheReadAttempted: boolean;
+
+  // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
+  // the iteration's inputs snapshot. Used to refuse cache writes if the inputs changed while the operation
+  // was executing.
+  inputFilesState?: IInputFilesState;
 }
 
 export interface ICacheableOperationPluginOptions {
@@ -102,8 +115,31 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
   readonly #options: ICacheableOperationPluginOptions;
 
+  #gitPathResolved: boolean = false;
+  #gitPath: string | undefined;
+
   public constructor(options: ICacheableOperationPluginOptions) {
     this.#options = options;
+  }
+
+  #isNewInput(
+    newEntryPaths: ReadonlyArray<string>,
+    rootDirectory: string,
+    projectFolder: string,
+    outputFolderNames: ReadonlyArray<string>
+  ): boolean {
+    if (!this.#gitPathResolved) {
+      this.#gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
+      this.#gitPathResolved = true;
+    }
+    if (!this.#gitPath) {
+      // Without Git we cannot tell whether the new entries are ignored, so assume they are inputs.
+      return true;
+    }
+    const outputFolderPaths: string[] = outputFolderNames.map((folderName: string) =>
+      path.resolve(projectFolder, folderName)
+    );
+    return hasUntrackedGitFiles(this.#gitPath, rootDirectory, newEntryPaths, outputFolderPaths);
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -184,6 +220,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             disjointSet?.add(operation);
 
+            const inputFilesState: IInputFilesState | undefined =
+              cacheWriteEnabled && !cacheDisabledReason && record.enabled
+                ? captureInputFilesState(inputsSnapshot.rootDirectory, fileHashes.keys())
+                : undefined;
+
             const buildCacheContext: IOperationBuildCacheContext = {
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
@@ -200,7 +241,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
               }),
               cacheRestored: false,
-              isCacheReadAttempted: false
+              isCacheReadAttempted: false,
+              inputFilesState
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this.#buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -544,6 +586,29 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // write a new cache entry.
             if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
               setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
+            }
+            const { inputFilesState } = buildCacheContext;
+            if (
+              !cacheRestored &&
+              isCacheWriteAllowed &&
+              inputFilesState &&
+              haveInputFilesChanged(inputFilesState, (newEntryPaths: ReadonlyArray<string>) =>
+                this.#isNewInput(
+                  newEntryPaths,
+                  inputFilesState.rootDirectory,
+                  project.projectFolder,
+                  buildCacheContext.outputFolderNames
+                )
+              )
+            ) {
+              // The cache key was derived from the iteration's inputs snapshot. Storing outputs produced from
+              // edited inputs under that key would poison the cache for every consumer of the entry.
+              // Consumers' cache keys also embed this operation's pre-edit state, so block their writes too.
+              buildCacheTerminal.writeLine(
+                'Input files changed while this operation was executing; not writing a build cache entry.'
+              );
+              buildCacheContext.isCacheWriteAllowed = false;
+              setCacheEntryPromise = undefined;
             }
             if (!cacheRestored) {
               const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise?.();

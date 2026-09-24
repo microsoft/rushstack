@@ -32,7 +32,10 @@ import type {
   IOperationGraph,
   IOperationGraphIterationOptions
 } from '../../logic/operations/IOperationGraph';
-import type { IPhasedCommandEngine } from '../../api/PhasedCommandEngine';
+import type {
+  IPhasedCommandEngine,
+  IPhasedCommandEngineRequestSettings
+} from '../../api/PhasedCommandEngine';
 import { PhasedCommandEngineConfigurationChangedError } from '../../api/PhasedCommandEngineConfigurationChangedError';
 import { getDaemonIpcImplementationIdentityAsync } from '../../logic/operations/DaemonIpcConfiguration';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -81,6 +84,17 @@ import { attachReporterOperationEventSink } from '../../logic/operations/Reporte
 import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
+
+/**
+ * Parameters that change neither the operation graph nor any operation hash. A long-lived engine applies
+ * them per request (see `getEngineRequestSettings`), so they are excluded from the engine parameter identity.
+ * `--timeline` only adds a presentation plugin whose output is discarded by engine hosts.
+ */
+const ENGINE_REQUEST_SCOPED_PARAMETER_NAMES: ReadonlySet<string> = new Set([
+  '--verbose',
+  '--parallelism',
+  '--timeline'
+]);
 
 /**
  * The set of overall execution statuses that mean the command did what was asked of it and should
@@ -370,8 +384,21 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return JSON.stringify([
       this.actionName,
       this.parser.getParameterStringMap(),
-      Object.entries(this.getParameterStringMap()).filter(([name]) => !selectionNames.has(name))
+      Object.entries(this.getParameterStringMap()).filter(
+        ([name]) => !selectionNames.has(name) && !ENGINE_REQUEST_SCOPED_PARAMETER_NAMES.has(name)
+      )
     ]);
+  }
+
+  /**
+   * Output verbosity and scheduling settings for one engine request. These are excluded from
+   * `getEngineParameterIdentity` and must be applied to the shared graph before each iteration.
+   */
+  public getEngineRequestSettings(): IPhasedCommandEngineRequestSettings {
+    return {
+      quietMode: !this.#verboseParameter.value,
+      parallelism: this.#enableParallelism ? parseParallelism(this.#parallelismParameter?.value) : 1
+    };
   }
 
   public async selectEngineOperationsAsync(

@@ -14,12 +14,22 @@ const FRACTION: number = 1.5;
 const MESSAGES: readonly DaemonControlMessage[] = [
   { kind: 'shutdown', payload: {} },
   { kind: 'shutdownAck', payload: {} },
+  { kind: 'shutdownAck', payload: { activeRequests: ZERO } },
+  { kind: 'shutdownAck', payload: { activeRequests: PID } },
   { kind: 'pong', payload: { pid: PID, residentMemoryBytes: MEMORY_BYTES, uptimeMs: UPTIME_MS } }
 ];
 
 it.each(MESSAGES)('round-trips lifecycle message $kind', (message: DaemonControlMessage) => {
   expect(decodeDaemonControlMessage(encodeDaemonControlMessage(message))).toEqual(message);
 });
+
+it.each([NEGATIVE, FRACTION, '1'])(
+  'rejects an invalid shutdown active request count %s',
+  (value: unknown) => {
+    const json: string = JSON.stringify({ kind: 'shutdownAck', payload: { activeRequests: value } });
+    expect(() => decodeDaemonControlMessage(new TextEncoder().encode(json))).toThrow('activeRequests');
+  }
+);
 
 it.each([ZERO, NEGATIVE, FRACTION, '42'])('rejects an invalid daemon PID %s', (pid: unknown) => {
   const json: string = JSON.stringify({ kind: 'pong', payload: { pid, uptimeMs: UPTIME_MS } });

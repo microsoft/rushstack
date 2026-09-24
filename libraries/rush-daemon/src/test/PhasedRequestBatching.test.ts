@@ -10,6 +10,7 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
@@ -140,6 +141,45 @@ function eventOperationId(event: IDaemonEventEnvelope): string | undefined {
 }
 
 describe('shared phased request batching', () => {
+  it('schedules separate iterations for overlapping requests with different request settings', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const graph: ITestRoutingFixture['graph'] = fixture.graph;
+    const scheduledSettings: IPhasedCommandEngineRequestSettings[] = [];
+    const originalScheduleAsync: typeof graph.scheduleIterationAsync =
+      graph.scheduleIterationAsync.bind(graph);
+    const scheduleSpy: jest.SpyInstance = jest
+      .spyOn(graph, 'scheduleIterationAsync')
+      .mockImplementation((...args: Parameters<typeof graph.scheduleIterationAsync>) => {
+        scheduledSettings.push({ parallelism: graph.parallelism, quietMode: graph.quietMode });
+        return originalScheduleAsync(...args);
+      });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const defaultSettings: IPhasedCommandEngineRequestSettings = { parallelism: 4, quietMode: true };
+    const verboseSerialSettings: IPhasedCommandEngineRequestSettings = { parallelism: 1, quietMode: false };
+
+    const [first, second] = await Promise.all([
+      router.executeAsync(
+        createRequest('default', OPERATION_A),
+        new TestPhasedRequestClient('one'),
+        false,
+        undefined,
+        defaultSettings
+      ),
+      router.executeAsync(
+        createRequest('verbose-serial', OPERATION_B),
+        new TestPhasedRequestClient('two'),
+        false,
+        undefined,
+        verboseSerialSettings
+      )
+    ]);
+
+    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+    expect(scheduledSettings).toEqual([defaultSettings, verboseSerialSettings]);
+    expect(first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(second).toMatchObject({ exitCode: 0, outcome: 'success' });
+  });
+
   it('merges overlapping selections into one real graph iteration and executes shared operations once', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');

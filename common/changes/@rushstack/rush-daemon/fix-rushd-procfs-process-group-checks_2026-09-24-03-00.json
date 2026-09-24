@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "On Linux, verify that a rushx or global command's process group has exited by reading /proc instead of running `ps --sid`, so cleanup no longer fails (and retires the workspace session) on images without procps `ps` or with busybox `ps`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

@@ -16,6 +16,8 @@ import { createDeferred } from './DaemonRequestWireTestUtilities';
 import { createNativeScriptGateAsync, runNativeCommandAsync } from './NativeEngineTestCommands';
 import {
   captureWarmRankingDurations,
+  GENEROUS_WARM_CONFIGURATION,
+  getExtraProjectNames,
   getMeasuredFixtureRetentionOrder,
   WarmSetTestFixture,
   type IWarmFixtureOptions
@@ -91,6 +93,91 @@ describe('warm policies attached to native graphs and real filesystem watchers',
       payload: { exitCode: 0 }
     });
     expect(fixture.runs()).toEqual(runs);
+  });
+
+  it('keeps the explicitly requested target over its same-request dependencies at the project cap', async () => {
+    const { warm, graph } = await startAsync();
+    test!.update({ warmSetMaxProjects: 1 });
+    expect((await warm.maintainAsync()).retainedProjectNames).toEqual(['b']);
+    expect(graph.resultByOperation.has(test!.operation('a'))).toBe(false);
+  });
+
+  it('does not count or evict resource-free retained results for the project cap, but still evicts resource holders', async () => {
+    test = await WarmSetTestFixture.createAsync({ extraProjectCount: 40 });
+    test.configuration = { ...GENEROUS_WARM_CONFIGURATION, watch: false, warmSetMaxProjects: 20 };
+    const { fixture } = test;
+    const build = async (): Promise<void> => {
+      const exchange = await fixture.runAsync(['build', '--parallelism', '8']);
+      expect(exchange.terminal).toMatchObject({ payload: { exitCode: 0 } });
+    };
+    await build();
+    const { warm, graph, watcher } = test;
+    const projectCount: number = 43;
+    const built = await warm.maintainAsync();
+    expect(built.overProjectLimit).toBe(false);
+    expect(built.retainedProjectNames).toHaveLength(projectCount);
+    expect(graph.resultByOperation.size).toBe(projectCount);
+    expect(watcher.watchedProjectNames.size).toBe(0);
+    const runs: string[] = fixture.runs();
+    expect(runs).toHaveLength(projectCount);
+
+    // A repeated no-op build skips every retained project instead of re-running or restoring it.
+    await build();
+    expect((await warm.maintainAsync()).retainedProjectNames).toHaveLength(projectCount);
+    expect(fixture.runs()).toEqual(runs);
+    expect(graph.resultByOperation.size).toBe(projectCount);
+
+    // 21 real resource holders exceed the cap of 20: exactly the lowest-ranked holder is released.
+    const closed: string[] = [];
+    for (const name of getExtraProjectNames(21)) {
+      let active: boolean = true;
+      test.operation(name).runner = {
+        name: `resident-${name}`,
+        isNoOp: false,
+        cacheable: false,
+        reportTiming: false,
+        silent: false,
+        warningsAreAllowed: false,
+        get isActive() {
+          return active;
+        },
+        residentMemoryBytes: 1024,
+        getConfigHash: () => '',
+        executeAsync: async () => OperationStatus.Success,
+        closeAsync: async () => {
+          active = false;
+          closed.push(name);
+        }
+      };
+    }
+    expect(warm.getStatus().overProjectLimit).toBe(true);
+    const capped = await warm.maintainAsync();
+    expect(closed).toEqual(['p21']);
+    expect(graph.resultByOperation.has(test.operation('p21'))).toBe(false);
+    expect(graph.resultByOperation.size).toBe(projectCount - 1);
+    expect(capped.overProjectLimit).toBe(false);
+    expect(capped.measuredRunnerMemoryBytes).toBe(20 * 1024);
+
+    // A closable legacy runner that omits the optional isActive flag is conservatively a resource holder.
+    const legacyClosed: string[] = [];
+    test.operation('p22').runner = {
+      name: 'legacy-p22',
+      isNoOp: false,
+      cacheable: false,
+      reportTiming: false,
+      silent: false,
+      warningsAreAllowed: false,
+      getConfigHash: () => '',
+      executeAsync: async () => OperationStatus.Success,
+      closeAsync: async () => {
+        legacyClosed.push('p22');
+      }
+    };
+    expect(warm.getStatus().overProjectLimit).toBe(true);
+    expect((await warm.maintainAsync()).overProjectLimit).toBe(false);
+    expect(legacyClosed).toEqual(['p22']);
+    expect(graph.resultByOperation.has(test.operation('p22'))).toBe(false);
+    expect(graph.resultByOperation.size).toBe(projectCount - 2);
   });
 
   it('lets autoWarmByTelemetry change actual retention using real cold/reused durations and IPC RSS', async () => {

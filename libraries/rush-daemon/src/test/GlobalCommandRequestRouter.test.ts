@@ -466,6 +466,183 @@ describe(GlobalCommandRequestRouter.name, () => {
     }
   );
 
+  it('does not hold workspace admission for Rushx package scripts', async () => {
+    const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+    const exclusiveLease = await getWorkspaceRequestScheduler(session).acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive,
+      noWait: true
+    });
+    const bothStarted = createDeferred<void>();
+    let startedCount: number = 0;
+    const runScriptAsync = (requestId: string): Promise<IGlobalCommandRequestResult> =>
+      router.executeAsync(
+        router.resolveRequest({
+          ...createRequestOptions(requestId, FIRST_CWD, {}, 80),
+          invocationKind: 'rushx'
+        }),
+        async () => {
+          if (++startedCount === 2) bothStarted.resolve();
+          await bothStarted.promise;
+          return { exitCode: 0 };
+        },
+        new TestGlobalCommandClient()
+      );
+    try {
+      const results: IGlobalCommandRequestResult[] = await Promise.all([
+        runScriptAsync('script-1'),
+        runScriptAsync('script-2')
+      ]);
+      expect(results.map(({ outcome }) => outcome)).toEqual(['success', 'success']);
+      await expect(
+        router.executeAsync(
+          router.resolveRequest({
+            ...createRequestOptions('rush-custom', FIRST_CWD, {}, 80),
+            admission: { noWait: true }
+          }),
+          async () => ({ exitCode: 0 }),
+          new TestGlobalCommandClient()
+        )
+      ).resolves.toMatchObject({ outcome: 'failure' });
+    } finally {
+      exclusiveLease.release();
+    }
+  });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'completes on child exit when a background descendant holds the output pipes',
+    async () => {
+      const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+      const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+      // The detached grandchild leaves the child's process group, so only the bounded pipe drain can release it.
+      const script: string = [
+        "const { spawn } = require('node:child_process');",
+        "const grandchild = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'],",
+        "  { detached: true, stdio: 'inherit' });",
+        'grandchild.unref();',
+        "process.stdout.write('grandchild=' + grandchild.pid + '\\n');"
+      ].join('\n');
+      const startTime: number = Date.now();
+      const result: IGlobalCommandRequestResult = await router.executeAsync(
+        router.resolveRequest(createRequestOptions('background-descendant', FIRST_CWD, {}, 80)),
+        async (context) => {
+          const child = context.spawnChild(process.execPath, ['-e', script]);
+          const exitCode: number | null = await new Promise((resolve) =>
+            child.once('close', (code: number | null) => resolve(code))
+          );
+          return { exitCode: exitCode ?? 1 };
+        },
+        client
+      );
+      const output: string = client.chunks.map(({ text }) => text).join('');
+      const grandchildPid: number = Number(/grandchild=(\d+)/.exec(output)?.[1]);
+      try {
+        expect(grandchildPid).toBeGreaterThan(0);
+        expect(result).toMatchObject({ exitCode: 0, outcome: 'success' });
+        expect(Date.now() - startTime).toBeLessThan(30000);
+      } finally {
+        if (grandchildPid > 0) {
+          process.kill(grandchildPid, 'SIGKILL');
+        }
+      }
+    }
+  );
+
+  (process.platform === 'win32' ? it.skip : it)(
+    "does not extend an exited child's drain with another child's output",
+    async () => {
+      const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+      const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+      const heldScript: string = [
+        "const { spawn } = require('node:child_process');",
+        "const grandchild = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'],",
+        "  { detached: true, stdio: 'inherit' });",
+        'grandchild.unref();',
+        "process.stdout.write('grandchild=' + grandchild.pid + '\\n');"
+      ].join('\n');
+      let heldCloseMs: number | undefined;
+      const result: IGlobalCommandRequestResult = await router.executeAsync(
+        router.resolveRequest(createRequestOptions('unrelated-output', FIRST_CWD, {}, 80)),
+        async (context) => {
+          const chatty = context.spawnChild(process.execPath, [
+            '-e',
+            "setInterval(() => process.stdout.write('.'), 20)"
+          ]);
+          const startTime: number = Date.now();
+          const held = context.spawnChild(process.execPath, ['-e', heldScript]);
+          await new Promise<void>((resolve) => held.once('close', () => resolve()));
+          heldCloseMs = Date.now() - startTime;
+          chatty.kill('SIGKILL');
+          await new Promise<void>((resolve) => chatty.once('close', () => resolve()));
+          return { exitCode: 0 };
+        },
+        client
+      );
+      const output: string = client.chunks.map(({ text }) => text).join('');
+      const grandchildPid: number = Number(/grandchild=(\d+)/.exec(output)?.[1]);
+      try {
+        expect(grandchildPid).toBeGreaterThan(0);
+        expect(result).toMatchObject({ outcome: 'success' });
+        expect(heldCloseMs).toBeLessThan(10000);
+      } finally {
+        if (grandchildPid > 0) {
+          process.kill(grandchildPid, 'SIGKILL');
+        }
+      }
+    },
+    30000
+  );
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'terminates the process group on cancellation after the direct child exited',
+    async () => {
+      const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);
+      const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+      const killProcessTreeSpy: jest.SpyInstance = jest.spyOn(SubprocessTerminator, 'killProcessTree');
+      const processKillSpy: jest.SpyInstance = jest.spyOn(process, 'kill');
+      const script: string = [
+        "const { spawn } = require('node:child_process');",
+        "const grandchild = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'],",
+        "  { detached: true, stdio: 'inherit' });",
+        'grandchild.unref();',
+        "process.stdout.write('grandchild=' + grandchild.pid + '\\n');"
+      ].join('\n');
+      let childPid: number | undefined;
+      let output: string = '';
+      try {
+        const result: IGlobalCommandRequestResult = await router.executeAsync(
+          router.resolveRequest(createRequestOptions('cancel-after-exit', FIRST_CWD, {}, 80)),
+          async (context) => {
+            const child = context.spawnChild(process.execPath, ['-e', script], { forwardOutput: false });
+            childPid = child.pid;
+            child.stdout.on('data', (chunk: Buffer) => {
+              output += chunk.toString();
+            });
+            await new Promise<void>((resolve) => child.once('exit', () => resolve()));
+            processKillSpy.mockClear();
+            client.abortController.abort(new Error('client cancelled'));
+            await new Promise<void>((resolve) => child.once('close', () => resolve()));
+            return { exitCode: 0 };
+          },
+          client
+        );
+        expect(result).toMatchObject({ aborted: true, outcome: 'aborted' });
+        expect(killProcessTreeSpy).not.toHaveBeenCalled();
+        expect(processKillSpy).toHaveBeenCalledWith(-(childPid ?? 0), 'SIGKILL');
+      } finally {
+        killProcessTreeSpy.mockRestore();
+        processKillSpy.mockRestore();
+        const grandchildPid: number = Number(/grandchild=(\d+)/.exec(output)?.[1]);
+        if (grandchildPid > 0) {
+          process.kill(grandchildPid, 'SIGKILL');
+        }
+      }
+    }
+  );
+
   it('reports child spawn failures during request cleanup', async () => {
     const session: TestWorkspaceSession = new TestWorkspaceSession(TEST_REPO_ROOT);
     const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(session);

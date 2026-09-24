@@ -68,9 +68,13 @@ async function mainAsync(): Promise<void> {
           if (message.payload.admission?.waitTimeoutMs !== undefined) {
             fs.appendFileSync(path.join(folder, 'waits'), `${message.payload.admission.waitTimeoutMs}\n`);
           }
+          const restartCount: number = fs.existsSync(path.join(folder, 'restarted'))
+            ? fs.readFileSync(path.join(folder, 'restarted'), 'utf8').length
+            : 0;
           const restart: boolean =
             restartMode !== undefined &&
-            (restartMode !== 'restart-once' || !fs.existsSync(path.join(folder, 'restarted')));
+            (restartMode !== 'restart-once' || restartCount < 1) &&
+            (restartMode !== 'restart-twice' || restartCount < 2);
           await connection.sendFrameAsync({
             kind: DaemonFrameType.controlJson,
             payload: encodeDaemonControlMessage({
@@ -85,7 +89,7 @@ async function mainAsync(): Promise<void> {
             })
           });
           if (restart && restartMode !== 'restart-held') {
-            fs.writeFileSync(path.join(folder, 'restarted'), '');
+            fs.appendFileSync(path.join(folder, 'restarted'), 'r');
             await stopAsync();
           }
         } else if (message.kind === 'shutdown') {
