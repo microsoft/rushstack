@@ -172,6 +172,79 @@ describe('Linux subprocess group completion (procfs)', () => {
     expect(execFileMock).not.toHaveBeenCalled();
   });
 
+  it.each(['EACCES', 'EIO'])(
+    'does not trust a zombie when another entry is unreadable (%s); falls back to ps',
+    async (code) => {
+      table = new Map([['10', procStat(10, 'Z', GROUP_ID)]]);
+      const unreadableProcfs: ILinuxProcfsReader = {
+        listEntriesAsync: async () => ['10', '11'],
+        readStatAsync: async (pid: string) => {
+          if (pid === '11') throw Object.assign(new Error('unreadable'), { code });
+          return fakeProcfs.readStatAsync(pid);
+        }
+      };
+      let queries: number = 0;
+      execFileMock.mockImplementation((...args) => reportPs(args, ++queries === 1 ? 'S\nZ\n' : 'Z\nZ\n'));
+      await waitForLinuxProcessGroupExitAsync(GROUP_ID, undefined, unreadableProcfs);
+      expect(queries).toBe(2);
+    }
+  );
+
+  it('surfaces the ps failure when an unreadable entry forces the fallback and ps is missing', async () => {
+    const unreadableProcfs: ILinuxProcfsReader = {
+      listEntriesAsync: async () => ['10', '11'],
+      readStatAsync: async (pid: string) => {
+        if (pid === '11') throw Object.assign(new Error('unreadable'), { code: 'EACCES' });
+        return procStat(10, 'Z', GROUP_ID);
+      }
+    };
+    const failure = Object.assign(new Error('spawn ps ENOENT'), { code: 'ENOENT' });
+    execFileMock.mockImplementation((...args) => reportPs(args, '', failure));
+    await expect(waitForLinuxProcessGroupExitAsync(GROUP_ID, undefined, unreadableProcfs)).rejects.toBe(
+      failure
+    );
+  });
+
+  it('treats ESRCH from a stat read as a vanished process', async () => {
+    const racingProcfs: ILinuxProcfsReader = {
+      listEntriesAsync: async () => ['10', '11'],
+      readStatAsync: async (pid: string) => {
+        if (pid === '11') throw Object.assign(new Error('gone'), { code: 'ESRCH' });
+        return procStat(10, 'Z', GROUP_ID);
+      }
+    };
+    await waitForLinuxProcessGroupExitAsync(GROUP_ID, undefined, racingProcfs);
+    expect(execFileMock).not.toHaveBeenCalled();
+  });
+
+  it('bounds concurrent stat reads and stops scanning after a live member', async () => {
+    const pids: string[] = Array.from({ length: 200 }, (unused, index) => String(index + 1));
+    let inFlight: number = 0;
+    let maxInFlight: number = 0;
+    let reads: number = 0;
+    let live: boolean = true;
+    const largeProcfs: ILinuxProcfsReader = {
+      listEntriesAsync: async () => pids,
+      readStatAsync: async (pid: string) => {
+        reads++;
+        maxInFlight = Math.max(maxInFlight, ++inFlight);
+        await new Promise((resolve) => setImmediate(resolve));
+        inFlight--;
+        return pid === '1' ? procStat(1, live ? 'R' : 'Z', GROUP_ID) : procStat(Number(pid), 'S', 42);
+      }
+    };
+    setTimeout(() => {
+      live = false;
+    }, 30);
+    await waitForLinuxProcessGroupExitAsync(GROUP_ID, undefined, largeProcfs);
+    expect(maxInFlight).toBeLessThanOrEqual(32);
+    const scans: number = jest.mocked(process.kill).mock.calls.length;
+    // Each scan while the member is live stops after the first batch; only the final scan reads everything.
+    expect(scans).toBeGreaterThan(1);
+    expect(reads).toBeLessThanOrEqual((scans - 1) * 32 + pids.length);
+    expect(execFileMock).not.toHaveBeenCalled();
+  });
+
   it('does not depend on ps being installed while procfs is readable', async () => {
     execFileMock.mockImplementation((...args) =>
       reportPs(args, '', Object.assign(new Error('spawn ps ENOENT'), { code: 'ENOENT' }))

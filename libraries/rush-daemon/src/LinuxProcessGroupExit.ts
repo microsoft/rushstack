@@ -10,6 +10,9 @@ const PID_ENTRY_REGEXP: RegExp = /^\d+$/;
 // Indices into the fields that follow "(comm) " in /proc/<pid>/stat.
 const PROC_STAT_STATE_INDEX: number = 0;
 const PROC_STAT_SESSION_INDEX: number = 3;
+const PROC_STAT_READ_CONCURRENCY: number = 32;
+// Sentinel (never a real one-letter state) for a procfs entry that exists but cannot be read.
+const UNREADABLE_STATE: string = '<unreadable>';
 const DEFAULT_EXIT_TIMEOUT_MS: number = 5_000;
 const EXIT_POLL_INTERVAL_MS: number = 10;
 const MAX_TIMEOUT_MS: number = 0x7fffffff;
@@ -78,7 +81,8 @@ async function readSessionStatesAsync(
 
 /**
  * Reads member states from procfs, which every Linux system has; `ps` is missing from slim/distroless images
- * and busybox `ps` does not support `--sid`. Returns `undefined` only when procfs itself is unavailable.
+ * and busybox `ps` does not support `--sid`. Returns `undefined` when procfs is unavailable or an entry cannot
+ * be read, so the caller falls back to `ps`.
  */
 async function tryReadSessionStatesFromProcAsync(
   groupId: number,
@@ -90,23 +94,54 @@ async function tryReadSessionStatesFromProcAsync(
   } catch {
     return undefined;
   }
+  const pids: string[] = entries.filter((entry: string) => PID_ENTRY_REGEXP.test(entry));
   const states: string[] = [];
-  await Promise.all(
-    entries.map(async (entry: string) => {
-      if (!PID_ENTRY_REGEXP.test(entry)) return;
-      let stat: string;
-      try {
-        stat = await procfs.readStatAsync(entry);
-      } catch {
-        // The process exited between readdir and read.
-        return;
-      }
-      // Format: "pid (comm) state ppid pgrp session ..."; comm may contain spaces and parentheses.
-      const fields: string[] = stat.slice(stat.lastIndexOf(')') + 2).split(' ');
-      if (Number(fields[PROC_STAT_SESSION_INDEX]) === groupId) states.push(fields[PROC_STAT_STATE_INDEX]);
-    })
-  );
+  // Bound concurrent reads so a large process table cannot flood the shared libuv thread pool.
+  for (let start: number = 0; start < pids.length; start += PROC_STAT_READ_CONCURRENCY) {
+    const batch: (string | undefined)[] = await Promise.all(
+      pids
+        .slice(start, start + PROC_STAT_READ_CONCURRENCY)
+        .map((pid: string) => readSessionMemberStateAsync(pid, groupId, procfs))
+    );
+    for (const state of batch) {
+      if (state === undefined) continue;
+      // An unreadable entry could hide a live member, so procfs cannot prove the group exited.
+      if (state === UNREADABLE_STATE) return undefined;
+      // One live member already means "not exited"; only a zombies-only result needs a full scan.
+      if (!state.startsWith('Z')) return [state];
+      states.push(state);
+    }
+  }
   return states;
+}
+
+/**
+ * Returns the member's state, `undefined` for a vanished PID or another session, or `UNREADABLE_STATE`
+ * when the entry cannot be read (for example `hidepid` or `EIO`) and so might hide a live member.
+ */
+async function readSessionMemberStateAsync(
+  pid: string,
+  groupId: number,
+  procfs: ILinuxProcfsReader
+): Promise<string | undefined> {
+  let stat: string;
+  try {
+    stat = await procfs.readStatAsync(pid);
+  } catch (error) {
+    return isProcessGoneError(error) ? undefined : UNREADABLE_STATE;
+  }
+  // Format: "pid (comm) state ppid pgrp session ..."; comm may contain spaces and parentheses.
+  const fields: string[] = stat.slice(stat.lastIndexOf(')') + 2).split(' ');
+  return Number(fields[PROC_STAT_SESSION_INDEX]) === groupId ? fields[PROC_STAT_STATE_INDEX] : undefined;
+}
+
+function isProcessGoneError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error.code === 'ENOENT' || error.code === 'ESRCH')
+  );
 }
 
 function readSessionStatesFromPsAsync(groupId: number, timeoutMs: number): Promise<string[]> {
