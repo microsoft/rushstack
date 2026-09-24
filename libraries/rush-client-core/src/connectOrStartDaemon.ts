@@ -21,7 +21,7 @@ import {
 import { DaemonClient, type IDaemonClientConnectOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
 import { formatDaemonLogTail, getDaemonLogFilePath } from './DaemonLogFile';
-import type { IDaemonStartupOptions } from './DaemonStartup';
+import { describeExit, type IDaemonStartupOptions } from './DaemonStartup';
 import {
   describeDaemonStartupReservation,
   getDaemonStartupFilePath,
@@ -168,7 +168,7 @@ export async function connectOrStartDaemonAsync(
         await waitForHelperExitAsync(helper, options, deadline);
         throw startupError(
           options,
-          `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`,
+          `failed: Unable to start ${options.startCommand.command}; startup helper ${describeExit(child)} before readiness`,
           formatDaemonLogTail(options.paths, helper.logOffset)
         );
       }

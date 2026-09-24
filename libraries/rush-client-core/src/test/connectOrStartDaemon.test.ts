@@ -144,6 +144,11 @@ describe('detached daemon startup', () => {
     });
     expect((await client.status).pid).toBe(daemonPid);
     await client.closeAsync();
+    // Successors accept the ready daemon at once; the live helper then releases its own reservation.
+    const releaseDeadline: number = Date.now() + 5000;
+    while (fs.existsSync(getDaemonStartupFilePath(paths)) && Date.now() < releaseDeadline) {
+      await delayAsync(20);
+    }
     expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
   }, 15000);
 

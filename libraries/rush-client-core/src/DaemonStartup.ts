@@ -101,7 +101,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
       releaseDaemonStartup(paths, token);
       throw new DaemonClientError(
         'startupFailed',
-        `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation released.`
+        `Daemon launcher ${describeExit(child)} before protocol readiness; startup reservation released.`
       );
     }
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
@@ -112,4 +112,8 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
     `Timed out awaiting daemon readiness; the startup reservation at ${getDaemonStartupFilePath(paths)} ` +
       `is kept while launcher PID ${child.pid} is alive and becomes stale when it exits.`
   );
+}
+
+export function describeExit(child: ChildProcess): string {
+  return child.signalCode ? `was terminated (${child.signalCode})` : `exited (${child.exitCode})`;
 }
