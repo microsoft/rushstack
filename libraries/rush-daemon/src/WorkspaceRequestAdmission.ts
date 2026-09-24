@@ -158,15 +158,12 @@ export class RequestAdmissionController {
     arbiter: WorkspaceRestartArbiter,
     ticket: IWorkspaceRestartTicket
   ): Promise<void> {
-    try {
-      await arbiter.waitForDrainAsync(ticket, {
-        abortSignal: this.#abortController.signal,
-        noWait: this.#admission?.noWait,
-        waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
-      });
-    } catch (error) {
-      throw this.#getReportedError(error);
-    }
+    // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
+    await arbiter.waitForDrainAsync(ticket, {
+      abortSignal: this.#abortController.signal,
+      noWait: this.#admission?.noWait,
+      waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
+    });
   }
 
   public dispose(): void {
