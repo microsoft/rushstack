@@ -29,23 +29,13 @@ import { executeDaemonCommandAsync } from './daemonCommands';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import type { AgentProgressRenderer } from './AgentProgressRenderer';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
+import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { writeStreamAsync } from './writeStreamAsync';
 
 interface IWorkspaceJson {
   readonly rushVersion: string;
   readonly daemon?: IDaemonConfigurationJson;
-}
-
-/** Reads the repository's experiments.json `useRushReporter` opt-in. */
-function readUseRushReporter(rushJsonPath: string): boolean {
-  const experimentsPath: string = path.join(path.dirname(rushJsonPath), 'common', 'config', 'rush', 'experiments.json');
-  try {
-    return (JsonFile.load(experimentsPath) as { useRushReporter?: unknown }).useRushReporter === true;
-  } catch {
-    // A missing or unreadable file means the opt-in is absent; in-process Rush reports invalid files.
-    return false;
-  }
 }
 
 export async function launchClientAsync(
@@ -87,7 +77,7 @@ export async function launchClientAsync(
     return;
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
-    agentRenderer?.dispose('not routed to rushd; running in-process Rush');
+    agentRenderer?.dispose();
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
   }

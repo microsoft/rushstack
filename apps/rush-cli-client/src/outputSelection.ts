@@ -3,6 +3,9 @@
 
 // Keep this module free of heavy imports: start.ts loads it before @microsoft/rush-lib.
 
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 /** Environment variable that selects the rush-client output mode: `agent` or `legacy`. */
 export const RUSHD_OUTPUT_ENV_VAR: 'RUSHD_OUTPUT' = 'RUSHD_OUTPUT';
 
@@ -12,7 +15,7 @@ export const RUSHD_OUTPUT_ENV_VAR: 'RUSHD_OUTPUT' = 'RUSHD_OUTPUT';
  */
 const AGENT_MARKERS: readonly string[] = ['COPILOT_CLI'];
 const INACTIVE_VALUES: ReadonlySet<string> = new Set(['', '0', 'false', 'no', 'off']);
-const AI_REPORTER: 'ai' = 'ai';
+const NATIVE_REPORTER_FLAGS: readonly string[] = ['--reporter', '--output', '--log-level'];
 
 export type ClientOutputMode = 'agent' | 'legacy';
 
@@ -21,56 +24,82 @@ function isActive(value: string | undefined): boolean {
 }
 
 /**
- * Returns the value of the first `--reporter` flag before any `--` separator, if present.
+ * Returns true when the invocation explicitly selects a reporter, output or log level
+ * (`--reporter`, `--output`, `--log-level` before `--`, `RUSH_REPORTER` other than `legacy`,
+ * or `RUSH_LOG_LEVEL`). Such requests always use the native reporter path.
  */
-export function readReporterFlag(argv: ReadonlyArray<string>): string | undefined {
-  for (let i: number = 0; i < argv.length; i++) {
-    const arg: string = argv[i];
-    if (arg === '--') {
-      return undefined;
-    }
-    if (arg === '--reporter') {
-      return argv[i + 1];
-    }
-    if (arg.startsWith('--reporter=')) {
-      return arg.slice('--reporter='.length);
-    }
-  }
-  return undefined;
-}
-
-/**
- * Returns true when the AI reporter was explicitly requested with `--reporter=ai` or `RUSH_REPORTER=ai`.
- * On the daemon path this selects the agent output instead of forcing in-process Rush.
- */
-export function isAiReporterRequested(
+export function hasExplicitReporterControls(
   argv: ReadonlyArray<string>,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {
-  const flag: string | undefined = readReporterFlag(argv);
-  if (flag !== undefined) {
-    return flag.trim().toLowerCase() === AI_REPORTER;
+  if (environment.RUSH_LOG_LEVEL !== undefined) {
+    return true;
   }
-  return environment.RUSH_REPORTER?.trim().toLowerCase() === AI_REPORTER;
+  if (environment.RUSH_REPORTER !== undefined && environment.RUSH_REPORTER !== 'legacy') {
+    return true;
+  }
+  const separator: number = argv.indexOf('--');
+  const prefix: ReadonlyArray<string> = separator < 0 ? argv : argv.slice(0, separator);
+  return prefix.some((arg) => NATIVE_REPORTER_FLAGS.some((name) => arg === name || arg.startsWith(`${name}=`)));
 }
 
 /**
- * Selects the rush-client output mode. Precedence:
- * 1. `RUSHD_OUTPUT=agent|legacy`
- * 2. `--reporter=ai` (or `RUSH_REPORTER=ai`) selects `agent`
- * 3. an active agent marker (`COPILOT_CLI`) selects `agent`
- * 4. otherwise `legacy` (the unchanged default output)
+ * Reads the `useRushReporter` opt-in from `common/config/rush/experiments.json` next to `rush.json`.
+ * A missing or unreadable file means the opt-in is absent; in-process Rush reports invalid files.
  */
-export function selectClientOutputMode(
-  argv: ReadonlyArray<string>,
-  environment: Readonly<Record<string, string | undefined>>
-): ClientOutputMode {
+export function readUseRushReporter(rushJsonPath: string): boolean {
+  const experimentsPath: string = path.join(path.dirname(rushJsonPath), 'common', 'config', 'rush', 'experiments.json');
+  let contents: string;
+  try {
+    contents = fs.readFileSync(experimentsPath, 'utf8');
+  } catch {
+    return false;
+  }
+  const uncommented: string = contents.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  return /"useRushReporter"\s*:\s*true\b/.test(uncommented);
+}
+
+/** Finds `rush.json` in `startingFolder` or an ancestor without loading `@microsoft/rush-lib`. */
+export function findRushJsonPath(startingFolder: string): string | undefined {
+  let folder: string = path.resolve(startingFolder);
+  for (;;) {
+    const candidate: string = path.join(folder, 'rush.json');
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+    const parent: string = path.dirname(folder);
+    if (parent === folder) {
+      return undefined;
+    }
+    folder = parent;
+  }
+}
+
+export interface IClientOutputModeOptions {
+  readonly argv: ReadonlyArray<string>;
+  readonly environment: Readonly<Record<string, string | undefined>>;
+  /** Whether the repository opted into the native reporter (experiments.json `useRushReporter`). */
+  readonly useRushReporter?: boolean;
+}
+
+/**
+ * Selects the rush-client output mode. Requests that will use the native reporter path
+ * (explicit reporter controls, `--no-daemon`, or a `useRushReporter` repository) always use `legacy`,
+ * so that nothing is written ahead of native reporter output. Otherwise:
+ * 1. `RUSHD_OUTPUT=agent|legacy`
+ * 2. an active agent marker (`COPILOT_CLI`) selects `agent`
+ * 3. otherwise `legacy` (the unchanged default output)
+ */
+export function selectClientOutputMode(options: IClientOutputModeOptions): ClientOutputMode {
+  const { argv, environment } = options;
+  const separator: number = argv.indexOf('--');
+  const prefix: ReadonlyArray<string> = separator < 0 ? argv : argv.slice(0, separator);
+  if (options.useRushReporter || prefix.includes('--no-daemon') || hasExplicitReporterControls(argv, environment)) {
+    return 'legacy';
+  }
   const explicit: string | undefined = environment[RUSHD_OUTPUT_ENV_VAR]?.trim().toLowerCase();
   if (explicit === 'agent' || explicit === 'legacy') {
     return explicit;
-  }
-  if (isAiReporterRequested(argv, environment)) {
-    return 'agent';
   }
   return AGENT_MARKERS.some((name) => isActive(environment[name])) ? 'agent' : 'legacy';
 }

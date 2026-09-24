@@ -2,14 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import { AgentProgressRenderer } from './AgentProgressRenderer';
-import { selectClientOutputMode } from './outputSelection';
+import { findRushJsonPath, readUseRushReporter, selectClientOutputMode } from './outputSelection';
 
 const startTimeMs: number = Date.now();
 const argv: string[] = process.argv.slice(2);
 const commandName: string | undefined = argv[0];
+const rushJsonPath: string | undefined = findRushJsonPath(process.cwd());
 // Write the agent status line before loading @microsoft/rush-lib (hundreds of milliseconds).
 const agentRenderer: AgentProgressRenderer | undefined =
-  selectClientOutputMode(argv, process.env) === 'agent' &&
+  selectClientOutputMode({
+    argv,
+    environment: process.env,
+    useRushReporter: !!rushJsonPath && readUseRushReporter(rushJsonPath)
+  }) === 'agent' &&
   commandName !== undefined &&
   !commandName.startsWith('-') &&
   commandName !== 'daemon' &&
