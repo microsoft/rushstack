@@ -428,7 +428,10 @@ describe('detached daemon startup', () => {
         const starts: number = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n').length;
         expect(starts).toBeGreaterThanOrEqual(2);
         expect(starts).toBeLessThanOrEqual(7);
-        expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(starts);
+        // The deadline may expire after the last successor started but before the request was resubmitted.
+        const requests: number = fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n').length;
+        expect(requests).toBeGreaterThanOrEqual(starts - 1);
+        expect(requests).toBeLessThanOrEqual(starts);
       } else {
         await expect(pending).rejects.toThrow('previous daemon still owns');
         expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
