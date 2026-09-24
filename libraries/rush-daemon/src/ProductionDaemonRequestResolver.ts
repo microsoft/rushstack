@@ -218,20 +218,12 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
             getChangedOperations(invalidationOptions)
         });
         const components: IWorkspaceSessionComponents = await factory.createAsync(options);
-        let hasReconciled: boolean = false;
         return {
           ...components,
           reconcileInvalidationsAsync: async () => {
-            // The graph keeps the binding request's terminal. Diagnostics buffered before a later request
-            // starts belong to an earlier request; the binding request's own diagnostics are kept.
-            if (hasReconciled) terminal.discardBufferedMessages();
-            hasReconciled = true;
-            let result: IWorkspaceInvalidationReconciliation;
-            try {
-              result = await components.reconcileInvalidationsAsync!();
-            } catch (error) {
-              throw attachBufferedDiagnostics(terminal, error);
-            }
+            const result: IWorkspaceInvalidationReconciliation = await terminal.reconcileWithRequestDiagnosticsAsync(
+              () => components.reconcileInvalidationsAsync!()
+            );
             if (!engine.isIncremental) engine.operationGraph.invalidateOperations(undefined, 'rebuild');
             return result;
           }
@@ -249,19 +241,6 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       }
     });
   }
-}
-
-function attachBufferedDiagnostics(terminal: EngineTerminalProvider, error: unknown): unknown {
-  if (error instanceof WorkspaceEngineRecreationRequiredError) {
-    // The replacement engine gets a fresh terminal; the stale diagnostics must not reach a later request.
-    terminal.discardBufferedMessages();
-    return error;
-  }
-  if (!terminal.hasBufferedMessages) return error;
-  if (!(error instanceof Error)) return new Error(terminal.describeError(error), { cause: error });
-  // Keep the error's identity and type, which callers use for classification.
-  error.message = terminal.describeError(error);
-  return error;
 }
 
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {

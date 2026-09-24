@@ -4,12 +4,15 @@
 import type { IOperationGraph, _IOperationGraphEventSink } from '@microsoft/rush-lib';
 import { TerminalProviderSeverity, type ITerminalProvider } from '@rushstack/terminal';
 
+import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
+
 export class EngineTerminalProvider implements ITerminalProvider {
   public readonly supportsColor: boolean = false;
   public readonly eolCharacter: string = '\n';
   readonly #messages: Array<{ text: string; severity: TerminalProviderSeverity }> = [];
   #graph: (IOperationGraph & { eventSink?: _IOperationGraphEventSink }) | undefined;
   #executing: boolean = false;
+  #hasReconciled: boolean = false;
 
   public write(text: string, severity: TerminalProviderSeverity): void {
     if (this.#executing) this.#emit(text, severity);
@@ -34,6 +37,34 @@ export class EngineTerminalProvider implements ITerminalProvider {
   /** Discards diagnostics buffered by an earlier request before a new request starts using this terminal. */
   public discardBufferedMessages(): void {
     this.#messages.length = 0;
+  }
+
+  /**
+   * Runs a warm reconcile with request-scoped diagnostics. The graph keeps the binding request's terminal, so
+   * diagnostics buffered before a later request's reconcile belong to an earlier request and are discarded; the
+   * binding request's own diagnostics are kept. A failure carries the diagnostics buffered while reconciling.
+   */
+  public async reconcileWithRequestDiagnosticsAsync<T>(reconcileAsync: () => Promise<T>): Promise<T> {
+    if (this.#hasReconciled) this.discardBufferedMessages();
+    this.#hasReconciled = true;
+    try {
+      return await reconcileAsync();
+    } catch (error) {
+      throw this.#attachBufferedDiagnostics(error);
+    }
+  }
+
+  #attachBufferedDiagnostics(error: unknown): unknown {
+    if (error instanceof WorkspaceEngineRecreationRequiredError) {
+      // The replacement engine gets a fresh terminal; the stale diagnostics must not reach a later request.
+      this.discardBufferedMessages();
+      return error;
+    }
+    if (!this.hasBufferedMessages) return error;
+    if (!(error instanceof Error)) return new Error(this.describeError(error), { cause: error });
+    // Keep the error's identity and type, which callers use for classification.
+    error.message = this.describeError(error);
+    return error;
   }
 
   public attach(graph: IOperationGraph): void {
