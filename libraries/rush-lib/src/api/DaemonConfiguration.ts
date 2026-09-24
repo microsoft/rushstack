@@ -19,7 +19,10 @@ export interface IDaemonConfigurationJson {
   readonly warmIdleTimeoutSeconds?: number;
   /** Best-effort sampled RSS budget for an attached warm set, not a hard ceiling. Defaults to 512 MiB. */
   readonly warmMemoryBudgetMB?: number;
-  /** Best-effort retained project limit; active/protected work is exempt. Defaults to 20 projects. */
+  /**
+   * Best-effort limit on projects holding warm resources (active runners or file watchers); active/protected work
+   * is exempt, and retained results of resource-free projects do not count. Defaults to 20 projects.
+   */
   readonly warmSetMaxProjects?: number;
   /** Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts scripts. Defaults to false. */
   readonly autoWarmByTelemetry?: boolean;

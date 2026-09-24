@@ -8,6 +8,8 @@ export interface IWarmSetRank {
   readonly frequency: number;
   readonly timeSavedMs: number | undefined;
   readonly residentMemoryBytes: number | undefined;
+  /** The project owned a selection root (an enabled operation with no enabled consumer) when last requested. */
+  readonly requestedTarget?: boolean;
 }
 
 export function getWarmSetScore(entry: IWarmSetRank): number | undefined {
@@ -38,5 +40,7 @@ export function compareWarmSetRanks(a: IWarmSetRank, b: IWarmSetRank, telemetry:
     if (aScore !== undefined && bScore !== undefined && aScore !== bScore) return bScore - aScore;
   }
   if (a.lastUsed !== b.lastUsed) return b.lastUsed - a.lastUsed;
+  // A request stamps its whole closure with one timestamp; keep the explicit target over its dependencies.
+  if (!a.requestedTarget !== !b.requestedTarget) return a.requestedTarget ? -1 : 1;
   return a.key === b.key ? 0 : a.key < b.key ? -1 : 1;
 }
