@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Make the daemon startup reservation bounded and verifiable: record owner and launcher PIDs, release it when the launcher exits before readiness, accept a ready daemon despite a reservation, reclaim stale reservations without waiting for the deadline, and include the launcher log's last error lines in startup failures.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

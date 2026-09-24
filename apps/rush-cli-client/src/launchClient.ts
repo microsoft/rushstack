@@ -137,7 +137,8 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     writeAsync: (bytes, stream) =>
       writeStreamAsync(stream === 'stderr' ? process.stderr : process.stdout, bytes)
   });
-  let outcome: DaemonClientOutcome;
+  let outcome: DaemonClientOutcome | undefined;
+  let restartFailure: DaemonClientError | undefined;
   const discoveryLines: string[] = [];
   const writeDiscoveryAsync = async (): Promise<void> => {
     if (discoveryLines.length > 0) {
@@ -147,35 +148,41 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   try {
     if (rushx) MinimalRushConfiguration.loadFromDefaultLocation((line) => discoveryLines.push(line));
     await renderer.initializeAsync();
-    outcome = await executeWithDaemonRestartAsync(client, connection, {
-      request,
-      abortSignal: abort.signal,
-      onStdoutAsync: async (bytes, operationId) => {
-        await writeDiscoveryAsync();
-        await renderer.writeLogAsync(bytes, operationId, 'stdout');
-      },
-      onStderrAsync: async (bytes, operationId) => {
-        await writeDiscoveryAsync();
-        await renderer.writeLogAsync(bytes, operationId, 'stderr');
-      },
-      onEventAsync: (event) => renderer.writeEventAsync(event),
-      onQueuePositionAsync: process.stderr.isTTY
-        ? (position) =>
-            writeStreamAsync(
-              process.stderr,
-              Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
-            )
-        : undefined,
-      stdin: process.stdin,
-      requiresStdinEnd: !process.stdin.isTTY,
-      cancelOnCtrlC: !!process.stdin.isTTY,
-      initialRawMode: !!process.stdin.isRaw,
-      setRawMode: process.stdin.isTTY
-        ? (enabled) => {
-            process.stdin.setRawMode(enabled);
-          }
-        : undefined
-    });
+    try {
+      outcome = await executeWithDaemonRestartAsync(client, connection, {
+        request,
+        abortSignal: abort.signal,
+        onStdoutAsync: async (bytes, operationId) => {
+          await writeDiscoveryAsync();
+          await renderer.writeLogAsync(bytes, operationId, 'stdout');
+        },
+        onStderrAsync: async (bytes, operationId) => {
+          await writeDiscoveryAsync();
+          await renderer.writeLogAsync(bytes, operationId, 'stderr');
+        },
+        onEventAsync: (event) => renderer.writeEventAsync(event),
+        onQueuePositionAsync: process.stderr.isTTY
+          ? (position) =>
+              writeStreamAsync(
+                process.stderr,
+                Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
+              )
+          : undefined,
+        stdin: process.stdin,
+        requiresStdinEnd: !process.stdin.isTTY,
+        cancelOnCtrlC: !!process.stdin.isTTY,
+        initialRawMode: !!process.stdin.isRaw,
+        setRawMode: process.stdin.isTTY
+          ? (enabled) => {
+              process.stdin.setRawMode(enabled);
+            }
+          : undefined
+      });
+    } catch (error) {
+      // A restart handoff fails only before the request executes, so in-process fallback cannot replay work.
+      if (!(error instanceof DaemonClientError) || error.code !== 'startupFailed') throw error;
+      restartFailure = error;
+    }
   } finally {
     process.removeListener('SIGINT', onSignal);
     process.removeListener('SIGTERM', onSignal);
@@ -185,8 +192,16 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       await client.closeAsync();
     }
   }
+  if (restartFailure || !outcome) {
+    process.stderr.write(`rush-client: ${restartFailure?.message} Using in-process Rush.\n`);
+    launchInProcess(route.argv, rushx, selectedVersion);
+    return;
+  }
   if (outcome.kind === 'result') {
     process.exitCode = outcome.result.exitCode;
+    if (outcome.result.exitCode !== 0 && outcome.result.errorMessage) {
+      await writeStreamAsync(process.stderr, Buffer.from(`ERROR: ${outcome.result.errorMessage}\n`));
+    }
     if (outcome.result.admissionErrorCode) {
       await writeStreamAsync(
         process.stderr,

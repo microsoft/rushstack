@@ -160,19 +160,94 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
 
-  it('does not infer safe retry from a launcher exiting before ownership publication', async () => {
+  it('releases the reservation and reports the launcher error when it exits before readiness', async () => {
     const startupPath: string = getDaemonStartupFilePath(paths);
     const failing: IConnectOrStartDaemonOptions = {
       ...options,
       startCommand: { ...options.startCommand!, args: [path.join(folder, 'missing-entry.js')] }
     };
-    await expect(connectOrStartDaemonAsync(failing)).rejects.toThrow('Unable to start');
-    const contents: string = fs.readFileSync(startupPath, 'utf8');
-    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 100 })).rejects.toThrow(
+    const started: number = Date.now();
+    await expect(connectOrStartDaemonAsync(failing)).rejects.toThrow(
+      /helper exited \(1\) before readiness[\s\S]*Last launcher log lines:[\s\S]*startup reservation released/
+    );
+    expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs!);
+    expect(fs.existsSync(startupPath)).toBe(false);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  async function getExitedPidAsync(): Promise<number> {
+    const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
+    await once(exited, 'exit');
+    return exited.pid!;
+  }
+
+  function writeReservation(ownerPid: number, launcherPid?: number): string {
+    const contents: string = JSON.stringify({
+      token: 'fixture',
+      createdAt: new Date().toISOString(),
+      timeoutMs: 1000,
+      ownerPid,
+      ownerStartedAt: new Date().toISOString(),
+      launcherPid
+    });
+    fs.writeFileSync(getDaemonStartupFilePath(paths), contents);
+    return contents;
+  }
+
+  it('reclaims a stale reservation whose owner and launcher are dead and starts at once', async () => {
+    writeReservation(await getExitedPidAsync(), await getExitedPidAsync());
+    const started: number = Date.now();
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs!);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  it('reclaims an unrecognized reservation only after the bounded age', async () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    fs.writeFileSync(startupPath, 'legacy-token');
+    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 200 })).rejects.toThrow(
       'unresolved startup handoff'
     );
-    expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
+    const old: Date = new Date(Date.now() - 10 * 60 * 1000);
+    fs.utimesSync(startupPath, old, old);
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(fs.existsSync(startupPath)).toBe(false);
+  });
+
+  it('keeps waiting on a reservation whose launcher is still alive', async () => {
+    const contents: string = writeReservation(await getExitedPidAsync(), process.pid);
+    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 200 })).rejects.toThrow(
+      /unresolved startup handoff .*launcher PID \d+ alive/
+    );
+    expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it.each([
+    ['cleans up after a dead owner', false],
+    ['leaves a live owner to release', true]
+  ])('accepts a ready daemon despite a reservation and %s', async (_, liveOwner) => {
+    const first = await connectOrStartDaemonAsync(options);
+    const { pid } = await first.status;
+    await first.closeAsync();
+    const contents: string = writeReservation(liveOwner ? process.pid : await getExitedPidAsync());
+    const started: number = Date.now();
+    const client = await connectOrStartDaemonAsync({ ...options, startCommand: undefined });
+    expect((await client.status).pid).toBe(pid);
+    await client.closeAsync();
+    expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs!);
+    if (liveOwner) {
+      expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
+    } else {
+      expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    }
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
   });
 
   it.each([false, true])(

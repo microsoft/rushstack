@@ -92,3 +92,32 @@ it('retains the requested restart tier on the old host while a real successor st
     }
   }
 });
+
+it('fails an invalid request-scoped Rush environment before planning a restart and stays usable', async () => {
+  const getSuccessorLaunchAsync = jest.fn(getInstalledWorkspaceSuccessorLaunchAsync);
+  const fixture = await DaemonGraphTestFixture.createAsync((created) => {
+    setDaemonPolicy(created, {});
+    created.getSuccessorLaunchAsync = getSuccessorLaunchAsync;
+  });
+  try {
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    const before = await pongAsync(fixture);
+    const result = await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], {
+      environment: { ...fixture.environment, RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'yes' }
+    });
+    expect(result.terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: {
+        exitCode: 1,
+        errorMessage:
+          'Invalid value "yes" for the environment variable RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD. Valid choices are 0 or 1.'
+      }
+    });
+    expect(result.terminal).not.toHaveProperty('payload.retryAfterRestart');
+    expect(getSuccessorLaunchAsync).not.toHaveBeenCalled();
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect((await pongAsync(fixture)).pid).toBe(before.pid);
+  } finally {
+    await fixture[Symbol.asyncDispose]();
+  }
+});

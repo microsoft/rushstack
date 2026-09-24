@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { spawn, type ChildProcess } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
-import * as fs from 'node:fs';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import {
@@ -16,6 +14,18 @@ import {
 import type { IDaemonStartCommand } from './connectOrStartDaemon';
 import { DaemonClient } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
+import {
+  assertDaemonStartupReservation,
+  getDaemonStartupFilePath,
+  releaseDaemonStartup,
+  updateDaemonStartupReservation
+} from './DaemonStartupReservation';
+
+export {
+  getDaemonStartupFilePath,
+  releaseDaemonStartup,
+  reserveDaemonStartup
+} from './DaemonStartupReservation';
 
 export interface IDaemonStartupOptions {
   readonly paths: IDaemonPaths;
@@ -24,35 +34,16 @@ export interface IDaemonStartupOptions {
   readonly timeoutMs: number;
 }
 
-export function getDaemonStartupFilePath(paths: IDaemonPaths): string {
-  return `${paths.lockfilePath}.starting`;
-}
-
-export function reserveDaemonStartup(paths: IDaemonPaths): string {
-  const token: string = randomUUID();
-  fs.writeFileSync(getDaemonStartupFilePath(paths), token, { flag: 'wx', mode: 0o600 });
-  return token;
-}
-
-function assertReservation(paths: IDaemonPaths, token: string): void {
-  if (fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8') !== token) {
-    throw new DaemonClientError('startupFailed', 'The daemon startup reservation changed ownership.');
-  }
-}
-
-export function releaseDaemonStartup(paths: IDaemonPaths, token: string): void {
-  assertReservation(paths, token);
-  fs.unlinkSync(getDaemonStartupFilePath(paths));
-}
-
 /**
- * Runs independently of the requesting client. Once spawn succeeds, only protocol readiness releases
- * the reservation: an arbitrary launcher may outlive its parent or spawn descendants.
- * Failure before readiness deliberately leaves a durable reservation instead of guessing that a PID is safe.
+ * Runs independently of the requesting client. The reservation records this helper and its launcher PID,
+ * so later starters can verify whether the startup can still make progress. Protocol readiness releases
+ * the reservation; so does a launcher that exits without publishing an endpoint. A deadline miss while the
+ * launcher is still alive keeps the reservation, which later becomes stale when both processes are gone or
+ * the bounded grace period elapses.
  */
 export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Promise<void> {
   const { paths, startCommand: start, token, timeoutMs } = options;
-  assertReservation(paths, token);
+  assertDaemonStartupReservation(paths, token);
   let child: ChildProcess;
   let closed: Promise<void> | undefined;
   try {
@@ -72,6 +63,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
     throw error;
   }
   child.unref();
+  if (child.pid !== undefined) updateDaemonStartupReservation(paths, token, { launcherPid: child.pid });
 
   const deadline: number = Date.now() + timeoutMs;
   let backoffMs: number = 50;
@@ -104,9 +96,12 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
     }
     if (child.exitCode !== null || child.signalCode !== null) {
       await closed;
+      // The launcher this helper started is gone without publishing an endpoint. If it left a descendant
+      // that binds later, the transport's bind-time ownership check still rejects a second daemon.
+      releaseDaemonStartup(paths, token);
       throw new DaemonClientError(
         'startupFailed',
-        `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation retained.`
+        `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation released.`
       );
     }
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
@@ -114,6 +109,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
   }
   throw new DaemonClientError(
     'startupFailed',
-    `Timed out awaiting daemon readiness; startup reservation retained at ${getDaemonStartupFilePath(paths)}.`
+    `Timed out awaiting daemon readiness; the startup reservation at ${getDaemonStartupFilePath(paths)} ` +
+      `is kept while launcher PID ${child.pid} is alive and becomes stale when it exits.`
   );
 }

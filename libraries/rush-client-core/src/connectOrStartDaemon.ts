@@ -20,18 +20,27 @@ import {
 
 import { DaemonClient, type IDaemonClientConnectOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
-import { getDaemonLogFilePath } from './DaemonLogFile';
+import { formatDaemonLogTail, getDaemonLogFilePath } from './DaemonLogFile';
+import type { IDaemonStartupOptions } from './DaemonStartup';
 import {
+  describeDaemonStartupReservation,
   getDaemonStartupFilePath,
-  reserveDaemonStartup,
+  isDaemonStartupOwnerGone,
+  isDaemonStartupReservationStale,
+  readDaemonStartupReservation,
   releaseDaemonStartup,
-  type IDaemonStartupOptions
-} from './DaemonStartup';
+  removeDaemonStartupReservation,
+  reserveDaemonStartup,
+  updateDaemonStartupReservation,
+  type IDaemonStartupReservation
+} from './DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 interface IStartupHelper {
   readonly child: ChildProcess;
   readonly closed: Promise<void>;
+  /** Launcher log size before this startup, so failures report only this attempt's output. */
+  readonly logOffset: number;
 }
 
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
@@ -110,10 +119,18 @@ export async function connectOrStartDaemonAsync(
     while (fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false })) {
       const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
       if (ready) return ready;
+      // Holding the start lock, a verifiably abandoned reservation can be reclaimed without waiting.
+      if (isDaemonStartupReservationStale(options.paths, timeoutMs)) {
+        removeDaemonStartupReservation(options.paths, readDaemonStartupReservation(options.paths) ?? null);
+        continue;
+      }
       if (Date.now() >= deadline) {
         throw startupError(
           options,
-          `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)}; refusing another launch`
+          `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)} ` +
+            `(${describeDaemonStartupReservation(options.paths)}); refusing another launch until it ` +
+            `becomes ready or stale`,
+          formatDaemonLogTail(options.paths)
         );
       }
       await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
@@ -151,7 +168,8 @@ export async function connectOrStartDaemonAsync(
         await waitForHelperExitAsync(helper, options, deadline);
         throw startupError(
           options,
-          `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`
+          `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`,
+          formatDaemonLogTail(options.paths, helper.logOffset)
         );
       }
       await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
@@ -159,7 +177,11 @@ export async function connectOrStartDaemonAsync(
       });
       backoffMs = Math.min(500, backoffMs * 2);
     }
-    throw startupError(options, 'timed out awaiting hello/ping readiness');
+    throw startupError(
+      options,
+      'timed out awaiting hello/ping readiness',
+      formatDaemonLogTail(options.paths, helper.logOffset)
+    );
   } finally {
     await lock.releaseAsync();
   }
@@ -233,15 +255,16 @@ async function tryConnectAsync(
       socketPath: options.paths.socketPath,
       timeoutMs: Math.min(options.timeoutMs ?? 1000, Math.max(1, deadline - Date.now()))
     });
-    // Do not expose a just-started daemon to shutdown/restart until the helper finishes the handoff.
-    let pendingStartup: boolean = true;
+    // A reservation normally means the helper has not finished the handoff. An endpoint that answers
+    // hello/ping and matches the published ownership record is nevertheless ready, so accept it.
+    let accepted: boolean = false;
     try {
       options.abortSignal?.throwIfAborted();
-      pendingStartup = !!fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false });
+      accepted = await isReadyDespiteReservationAsync(client, options.paths);
     } finally {
-      if (pendingStartup) await client.closeAsync();
+      if (!accepted) await client.closeAsync();
     }
-    return pendingStartup ? undefined : client;
+    return accepted ? client : undefined;
   } catch (error) {
     options.abortSignal?.throwIfAborted();
     if (
@@ -267,6 +290,19 @@ async function tryConnectAsync(
     }
     throw error;
   }
+}
+
+async function isReadyDespiteReservationAsync(client: DaemonClient, paths: IDaemonPaths): Promise<boolean> {
+  const reservation: IDaemonStartupReservation | undefined | null = readDaemonStartupReservation(paths);
+  if (reservation === undefined) return true;
+  const { pid } = await client.status;
+  const owner: IDaemonLockfile | undefined = readDaemonLockfile(paths.lockfilePath);
+  if (!isDaemonOwnership(owner) || owner.pid !== pid || owner.socketPath !== paths.socketPath) return false;
+  // A live helper releases its own reservation; clean up only after an owner that can no longer do so.
+  if (reservation === null || isDaemonStartupOwnerGone(reservation)) {
+    removeDaemonStartupReservation(paths, reservation);
+  }
+  return true;
 }
 
 async function waitForHandoffAsync(
@@ -448,7 +484,8 @@ async function spawnDetachedAsync(
       }
       fs.fchmodSync(logFd, 0o600);
     }
-    const token: string = reserveDaemonStartup(options.paths);
+    const logOffset: number = stats.size;
+    const token: string = reserveDaemonStartup(options.paths, Math.max(1, deadline - Date.now()));
     let helper: IStartupHelper | undefined;
     try {
       const child: ChildProcess = spawn(process.execPath, [path.join(__dirname, 'runDaemonStartup.js')], {
@@ -459,7 +496,8 @@ async function spawnDetachedAsync(
       });
       helper = {
         child,
-        closed: new Promise<void>((resolve) => child.once('close', () => resolve()))
+        closed: new Promise<void>((resolve) => child.once('close', () => resolve())),
+        logOffset
       };
       await once(child, 'spawn');
     } catch (error) {
@@ -481,6 +519,11 @@ async function spawnDetachedAsync(
     };
     let delivered: boolean = false;
     try {
+      // Record the helper before handing off, so the reservation stays live exactly as long as the helper.
+      updateDaemonStartupReservation(options.paths, token, {
+        ownerPid: child.pid!,
+        ownerStartedAt: new Date().toISOString()
+      });
       await new Promise<void>((resolve, reject) => {
         child.send(startup, (error) => (error ? reject(error) : resolve()));
       });
@@ -520,10 +563,14 @@ async function waitForHelperExitAsync(
   }
 }
 
-function startupError(options: IConnectOrStartDaemonOptions, reason: string): DaemonClientError {
+function startupError(
+  options: IConnectOrStartDaemonOptions,
+  reason: string,
+  logTail: string = ''
+): DaemonClientError {
   return new DaemonClientError(
     'startupFailed',
-    `Daemon startup ${reason}. Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.`
+    `Daemon startup ${reason}. Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.${logTail}`
   );
 }
 
