@@ -418,7 +418,8 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         residentMemoryBytes,
         timeSavedMs,
         protected: history.operations.some((operation) => protectedOperations?.has(operation)),
-        holdsResources: watched.has(key) || resident.some((operation) => !!operation.runner?.isActive)
+        holdsResources:
+          watched.has(key) || resident.some((operation) => mayHoldRunnerResources(operation.runner))
       });
     }
     return projects.sort((a, b) => compareWarmSetRanks(a, b, this.#configuration.autoWarmByTelemetry));
@@ -506,6 +507,15 @@ export class WorkspaceWarmSet implements AsyncDisposable {
 
 function isMeasuredMemory(bytes: number | undefined): bytes is number {
   return bytes !== undefined && Number.isSafeInteger(bytes) && bytes > 0;
+}
+
+/**
+ * `isActive` is optional for backward compatibility; a retained runner that leaves it undefined but can be closed
+ * may own background resources, matching the conservative accounting in `getStatus()`.
+ */
+function mayHoldRunnerResources(runner: IOperationRunner | undefined): boolean {
+  if (!runner) return false;
+  return runner.isActive === undefined ? !!runner.closeAsync : runner.isActive;
 }
 
 function hasEnabledConsumer(operation: Operation): boolean {

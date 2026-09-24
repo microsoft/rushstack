@@ -157,6 +157,27 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(graph.resultByOperation.size).toBe(projectCount - 1);
     expect(capped.overProjectLimit).toBe(false);
     expect(capped.measuredRunnerMemoryBytes).toBe(20 * 1024);
+
+    // A closable legacy runner that omits the optional isActive flag is conservatively a resource holder.
+    const legacyClosed: string[] = [];
+    test.operation('p22').runner = {
+      name: 'legacy-p22',
+      isNoOp: false,
+      cacheable: false,
+      reportTiming: false,
+      silent: false,
+      warningsAreAllowed: false,
+      getConfigHash: () => '',
+      executeAsync: async () => OperationStatus.Success,
+      closeAsync: async () => {
+        legacyClosed.push('p22');
+      }
+    };
+    expect(warm.getStatus().overProjectLimit).toBe(true);
+    expect((await warm.maintainAsync()).overProjectLimit).toBe(false);
+    expect(legacyClosed).toEqual(['p22']);
+    expect(graph.resultByOperation.has(test.operation('p22'))).toBe(false);
+    expect(graph.resultByOperation.size).toBe(projectCount - 2);
   });
 
   it('lets autoWarmByTelemetry change actual retention using real cold/reused durations and IPC RSS', async () => {
