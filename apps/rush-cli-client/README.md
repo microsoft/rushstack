@@ -247,19 +247,37 @@ attests a restart request, not completion of successor startup or success of a c
 
 `rush-client daemon stop` requires protocol >= 0.6 and waits for `shutdownAck`
 followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this
-does not assert successful workspace disposal. An absent/unreachable daemon,
-unsupported protocol, missing acknowledgement, or timeout returns exit code 1.
-It does not auto-start anything.
+does not assert successful workspace disposal. Stop is idempotent: when nothing
+listens at the endpoint it reports `state: "notRunning"` with exit code 0. An
+unsupported protocol, missing acknowledgement, handshake failure, or timeout
+returns exit code 1. It does not auto-start anything.
+
+`rush-client daemon stop --force` stops a running daemon the same way. When none
+is listening, it also removes this workspace's leftover ownership record
+(`<key>.pid.json`), socket, and startup reservation (`.starting`), then reports
+`state: "reset"` and the `removedPaths` (or `state: "notRunning"` if nothing was
+left behind). It holds the start mutex, proves that no listener is bound, and
+refuses (exit 1) while the recorded owner PID still exists and cannot be shown to
+be a reused PID. It never kills a process. Automatic startup already reclaims
+the common leftovers on its own (see below); this is the documented escape hatch
+that every fail-closed startup message points to.
 
 `rush-client daemon restart` first verifies that the selected Rush version has a
 launcher and captures the original lock's PID/start timestamp, checking that it
 matches pong's positive PID and the selected endpoint, then performs acknowledged
 shutdown. It waits for original ownership release or a demonstrably dead owner
-before calling the existing locked starter. A live/reused owner fails closed at
+before calling the existing locked starter. A live owner fails closed at
 the startup deadline; no PID is killed and no live ownership record is deleted.
 A newly
 started/reused successor must pass hello/ping before reporting `state: "ready"`.
-An absent daemon must be started explicitly with `daemon start`.
+When nothing listens at the endpoint, restart starts a daemon exactly like `daemon start`.
+
+Automatic and explicit startup reclaim stale artifacts only when that is provably
+safe: while holding the start mutex with no `.starting` reservation, a socket
+without an ownership record, or an unreadable/corrupt record, is removed only after
+a connection attempt is refused (so no listener exists). On Linux, a record whose
+PID now belongs to a process that started after the record's `startedAt` (PID reuse)
+is treated as dead; other platforms fail closed and point to `daemon stop --force`.
 
 Restart is explicit even when automatic startup or CI execution routing is
 disabled, but conflicts with `--no-daemon`. The two-phase host retains ownership
