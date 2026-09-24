@@ -173,8 +173,8 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
 | `usePersistentIpcRunners` | `RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS` | false | Enables explicit per-operation `daemonIpc` Node launchers for unsharded incremental daemon builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |
-| `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling |
-| `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort retained-project limit; never trims requested execution |
+| `warmMemoryBudgetMB` | `RUSH_DAEMON_WARM_MEMORY_BUDGET_MB` | 512 | Best-effort sampled RSS budget in MiB, not a hard ceiling. Compared against whole-daemon RSS plus measured child RSS, so keep it above the daemon baseline (~130-190 MiB) |
+| `warmSetMaxProjects` | `RUSH_DAEMON_WARM_SET_MAX_PROJECTS` | 20 | Best-effort limit on projects holding warm resources (active runners, watchers); retained results of resource-free projects do not count. Never trims requested execution |
 | `autoWarmByTelemetry` | `RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY` | false | Measured retention ranking with conservative LRU fallback; no speculative scripts |
 
 For genuine persistent Node execution, enable `usePersistentIpcRunners` and add
