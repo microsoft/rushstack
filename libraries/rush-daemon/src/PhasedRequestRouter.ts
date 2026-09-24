@@ -20,6 +20,7 @@ import type {
 
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
+import { writePhasedRequestSummary } from './PhasedRequestSummary';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 import { DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutdownError';
@@ -71,6 +72,8 @@ interface IPreparedPhasedRequest {
   readonly requestSettings: IPhasedCommandEngineRequestSettings | undefined;
   readonly requestSettingsKey: string;
   readonly selection: IResolvedSelection;
+  /** The `performance.now()` timestamp at which the router received the request. */
+  readonly startTimeMs: number;
   readonly warningsAllowedByEnvironment: boolean;
 }
 
@@ -124,6 +127,7 @@ export class PhasedRequestRouter {
     onExecutionStarting?: () => void,
     requestSettings?: IPhasedCommandEngineRequestSettings
   ): Promise<IDaemonPhasedRequestResult> {
+    const startTimeMs: number = performance.now();
     validateRequestIdentity(request);
     const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
       request,
@@ -203,6 +207,7 @@ export class PhasedRequestRouter {
               requestSettings,
               requestSettingsKey: JSON.stringify(requestSettings ?? null),
               selection,
+              startTimeMs,
               warningsAllowedByEnvironment,
               onExecutionStarting
             },
@@ -618,6 +623,17 @@ class PhasedRequestBatchCoordinator {
     }
     const cleanupErrors: unknown[] = [...batchCleanupErrors];
     if (entry.requestSink) {
+      if (entry.participated && this.#isEntryLive(entry)) {
+        writePhasedRequestSummary({
+          activeOperations: entry.selection.activeOperations,
+          commandName: entry.request.commandName,
+          elapsedMs: performance.now() - entry.startTimeMs,
+          executionError,
+          graph: this.#graph,
+          sink: entry.requestSink,
+          warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
+        });
+      }
       try {
         await entry.requestSink.flushAsync();
       } catch (error) {
