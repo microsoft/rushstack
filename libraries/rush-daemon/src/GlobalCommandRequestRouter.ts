@@ -97,20 +97,25 @@ export class GlobalCommandRequestRouter {
       throw new DaemonRequiresInProcessError(policy);
     }
     let admissionController: RequestAdmissionController | undefined;
-    let lease: IRequestLease;
+    let lease: IRequestLease | undefined;
     try {
-      admissionController = new RequestAdmissionController({
-        admission: request.admission,
-        client,
-        requestId: request.requestId
-      });
-      lease = await admissionController.acquireAsync(
-        getWorkspaceRequestScheduler(this.#workspaceSession),
-        classifyRushCommand({
-          commandName: request.commandName,
-          commandOrigin: request.commandOrigin
-        })
-      );
+      // Rushx package scripts do not read or mutate daemon-owned workspace state after resolution, so they bypass
+      // workspace admission. Native rushx takes no workspace lock either, and holding a scheduler lease for the
+      // script's whole lifetime would serialize concurrent scripts and block unrelated builds (issue #6085).
+      if (request.invocationKind !== 'rushx') {
+        admissionController = new RequestAdmissionController({
+          admission: request.admission,
+          client,
+          requestId: request.requestId
+        });
+        lease = await admissionController.acquireAsync(
+          getWorkspaceRequestScheduler(this.#workspaceSession),
+          classifyRushCommand({
+            commandName: request.commandName,
+            commandOrigin: request.commandOrigin
+          })
+        );
+      }
     } catch (error) {
       admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request.requestId, client, interactiveSession, error);
@@ -126,10 +131,10 @@ export class GlobalCommandRequestRouter {
           this.#workspaceSession
         );
       } finally {
-        lease.release();
+        lease?.release();
       }
     } finally {
-      admissionController.dispose();
+      admissionController?.dispose();
     }
   }
 }

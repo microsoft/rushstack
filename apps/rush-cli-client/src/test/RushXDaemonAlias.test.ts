@@ -128,7 +128,7 @@ console.log(JSON.stringify({
     expect(result.stdout.length).toBe(0);
   });
 
-  it('pins physical request identity when an alias changes while waiting for admission', async () => {
+  it('runs through an alias without waiting for admission behind an exclusive request', async () => {
     fixture.write(
       'retargeted/projects/a/package.json',
       JSON.stringify({
@@ -163,33 +163,16 @@ console.log(JSON.stringify({
       invocationKind: 'rush'
     });
     await holding;
-    const input: PassThrough = new PassThrough();
-    input.end('not consumed before execution');
+    const onQueuePositionAsync = jest.fn(async () => undefined);
     try {
       const result = await fixture.runAsync(
         fixture.request(['-q', 'build'], path.join(aliasRoot, 'projects/a')),
         undefined,
-        {
-          stdin: input,
-          onQueuePositionAsync: async () => {
-            fs.unlinkSync(aliasRoot);
-            fs.symlinkSync(
-              path.join(physicalRoot, 'retargeted'),
-              aliasRoot,
-              process.platform === 'win32' ? 'junction' : 'dir'
-            );
-            release();
-          }
-        }
+        { onQueuePositionAsync }
       );
-      if (process.platform === 'win32') {
-        expect(result.outcome).toMatchObject({
-          kind: 'result',
-          result: { exitCode: 1, errorMessage: expect.stringContaining('invocation directory changed') }
-        });
-        expect(input.read().toString()).toBe('not consumed before execution');
-      } else {
-        expect(result.exitCode).toBe(0);
+      expect(result.exitCode).toBe(0);
+      expect(onQueuePositionAsync).not.toHaveBeenCalled();
+      if (process.platform !== 'win32') {
         expect(JSON.parse(result.stdout.toString()).cwd).toBe(path.join(physicalRoot, 'projects/a'));
       }
       expect(fs.existsSync(path.join(physicalRoot, 'retargeted/projects/a/executed'))).toBe(false);
