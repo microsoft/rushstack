@@ -81,6 +81,11 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
 }
 
 // @beta
+export interface IDaemonArtifactResetResult {
+    readonly removedPaths: ReadonlyArray<string>;
+}
+
+// @beta
 export interface IDaemonClientConnectOptions {
     // (undocumented)
     readonly capabilities?: IDaemonClientCaps;
@@ -129,5 +134,8 @@ export interface IDaemonStartCommand {
 
 // @beta
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
+
+// @beta
+export function resetDaemonArtifactsAsync(paths: IDaemonPaths): Promise<IDaemonArtifactResetResult>;
 
 ```

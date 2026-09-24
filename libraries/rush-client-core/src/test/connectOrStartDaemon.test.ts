@@ -603,7 +603,7 @@ describe('detached daemon startup', () => {
   it('never reclaims a live PID that may still own the record', async () => {
     const record: string = JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() });
     fs.writeFileSync(paths.lockfilePath, record);
-    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('may be a reused PID');
+    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('or a reused PID');
     await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('daemon stop --force');
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
     await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow(`PID ${process.pid} still owns`);
