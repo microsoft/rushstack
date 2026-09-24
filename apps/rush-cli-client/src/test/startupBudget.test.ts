@@ -20,7 +20,7 @@ const DEFERRED_MODULES: ReadonlyArray<RegExp> = [
   /[\\/]rush-daemon[\\/]lib-commonjs[\\/](index|VersionSelectedDaemonLauncher)\.js$/
 ];
 
-// A warm connect loaded ~1260 modules before #6054 and ~BASELINE after it; leave headroom for growth.
+// A warm build loaded ~1360 modules before #6054 and ~310 after it (Linux); leave headroom for growth.
 const WARM_CONNECT_MODULE_BUDGET: number = 600;
 
 interface IStartupModules {
