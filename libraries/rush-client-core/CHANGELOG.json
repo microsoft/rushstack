@@ -1,0 +1,74 @@
+{
+  "name": "@rushstack/rush-client-core",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/rush-client-core_v0.2.0",
+      "date": "Thu, 24 Sep 2026 18:16:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Publish the pre-bind test PID marker atomically so a starter cannot read an empty newly-created file as PID zero; retain single-daemon and ownership assertions."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Join detached startup helper closure without prematurely disconnecting IPC, keep its cwd outside the launched workspace, and drain failed launcher processes before reporting startup failure."
+          },
+          {
+            "comment": "Reject in-process fallback after terminal control, even without a stdin source, while restoring raw mode and avoiding command replay."
+          },
+          {
+            "comment": "Hand detached daemon startup to an independent helper with a durable pre-bind reservation. Prevent duplicate launches after the starting client dies, preserve explicit launch commands and ownership-based restart, and fail closed on ambiguous launcher failures."
+          },
+          {
+            "comment": "Include the package MIT license and standard publication metadata, and enable the pack phase."
+          },
+          {
+            "comment": "Reuse the validated native Windows LockFile exclusion for startup instead of maintaining a separate pipe mutex, preserving durable crash reservations and fail-closed handoff behavior."
+          },
+          {
+            "comment": "Honor cancellation during daemon hello/pong readiness, close newly ready clients when cancellation wins, and preserve abort reasons instead of treating handshake failures as retryable."
+          },
+          {
+            "comment": "Use an OS-owned Windows startup mutex and keep sharing-denied ownership reads unknown until the existing handoff deadline, preserving fail-closed startup and no-replay behavior."
+          },
+          {
+            "comment": "Retry pre-request handshake resets within the startup deadline while a closing daemon retains resource ownership. Preserve fail-closed ownership checks and prohibit replay after execution begins."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Support one ownership-attested pre-execution restart retry, cancellation during handoff, and native mutation protocol admission."
+          },
+          {
+            "comment": "Introduce the opt-in daemon client with immutable requests, backpressured output, cancellation, raw input cleanup, private append-only launcher logs, serialized detached startup, and protocol-gated shutdown with bounded ownership-release coordination."
+          },
+          {
+            "comment": "Capture the native invocation kind, reject Rushx peers older than protocol 0.8 before request submission, and prevent fallback after output or stdin admission."
+          },
+          {
+            "comment": "Stream bounded stdin chunks only after admission and write credits, deliver ordered EOF, and preserve input for fallback to older peers."
+          },
+          {
+            "comment": "Replace a mismatched daemon implementation under the startup mutex using an explicit launcher and verified ownership, before submitting any request."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-transport\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,6 +1,17 @@
 # Change Log - @rushstack/rush-daemon-transport
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Sep 2026 18:16:59 GMT and should not be manually modified.
+
+## 0.4.0
+Thu, 24 Sep 2026 18:16:59 GMT
+
+### Minor changes
+
+- Retain daemon ownership while connections stop, refuse a still-live owner, and make endpoint release idempotent across successor startup.
+
+### Patches
+
+- Close a newly bound endpoint if publishing daemon ownership fails, avoiding an orphaned listener after failed startup.
 
 ## 0.3.2
 Tue, 22 Sep 2026 17:35:41 GMT

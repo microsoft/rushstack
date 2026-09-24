@@ -1,6 +1,76 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Sep 2026 18:17:01 GMT and should not be manually modified.
+
+## 5.180.0
+Thu, 24 Sep 2026 18:17:01 GMT
+
+### Minor changes
+
+- Allow hosts to discard unstarted graph iterations without executing scripts or closing retained runners, preserving completed results for safe replanning.
+- Publish validated opt-in daemon configuration and environment overrides. Watch and warm-set settings remain explicitly documented integration seams.
+- Expose a bounded native phased-command engine factory that reuses Rush command parsing and the all-project operation graph pipeline without CLI process-state mutation, with explicit lifetime cleanup and native lock ownership.
+- Expose native Rushx parsing and request-local lifecycle execution with owned asynchronous spawning, isolated dotenv preparation, native diagnostics and injected-dependency synchronization.
+- Add false-default persistent daemon Node runners selected by explicit per-operation daemonIpc descriptors, including the SDK declaration proxy. Preserve raw custom arguments, canonical hashes, native/rebuild/NoOp/shard behavior, and bounded implementation-tree reloads. Keep watch-only IPC unchanged and decode IPC stdout/stderr incrementally.
+- Expose stable workspace/runtime input fingerprints and safe borrowing of an already-held native preparation lock for generation-scoped engine reload.
+
+### Patches
+
+- Document the experimental reporter opt-in, rollback, output contracts, compatibility boundary, and reproducible demo.
+- Add repository configuration for opting into and configuring the experimental Rush reporter.
+- Add pre-major frontend reporter controls with legacy command compatibility, selected-engine gating, and deterministic reporter finalization.
+- Expose an optional scoped reporter producer API to Rush actions and plugins while preserving legacy terminal output.
+- Emit shadow Rush lifecycle, phase-aware operation, diagnostic, telemetry, and command-result events without changing legacy terminal output.
+- Complete shadow reporter parity coverage for event identity, telemetry privacy, exit status, repeated operation phases, and unchanged legacy output.
+- Emit feature-flagged phase-aware operation registration, status, raw output, stream-close, and completion events while preserving the legacy StreamCollator output path.
+- Add the opt-in direct build reporter demo path with reporter-owned output, a complete full-detail log, and an immediate legacy rollback.
+- Add a bounded nonce-protected install-run-rush handoff, replay it before version selection, and bridge cross-version reporter compatibility.
+- Relay compatible Heft child events through the selected Rush reporter with ordered raw fallback and problem matcher diagnostics.
+- Preserve immutable errors, diagnose pre-execution parser failures once, and register shadow operations after final watch iteration configuration.
+- Connect real watch cancellation to the persistent shadow exit-status observer without changing legacy process status, and verify raw stdout/stderr chunk parity.
+- Document daemon.watch as persistent host observation of warm projects, defaulting to root/config guards only without enabling automatic builds.
+- Preserve the inherited Windows Path when preparing native daemon operation environments.
+- Fix pnpm registry credentials being dropped by POSIX shells when `provideNpmrcCredentialsViaEnvironment` is enabled.
+- Preserve the original native Rushx registration path unless an explicit invocation namespace is supplied, and release fixture-owned native parser locks after frontend tests.
+- Preserve the active repository mutex and its Windows interrupted-owner marker when purging temporary files.
+- Preserve unexpected aggregate cleanup errors in per-operation runner lifetime handling so dependents do not execute after a failed cleanup notification.
+- Use LockFile's backing-file path contract to preserve active repository locks and their recovery companions during purge.
+- Consume reporter verbose and repository opt-in value controls only when command ownership is known, preserving native aliases and declared custom parameters.
+- Preserve custom bootstrap controls and legacy environment overrides, keep direct command output within reporter-owned destinations, and suppress duplicate watch presentation.
+- Recognize frontend-owned reporter environment controls when native engines or rushx execute without frontend environment scrubbing.
+- Preserve custom reporter controls during emergency legacy rollback and honor reserved stdout/stderr output destinations.
+- Report early initialization failures and defer successful reporter completion until telemetry finalization preserves the command's native outcome.
+- Fail corrupted negotiated Heft reporter streams while preserving genuine raw fallback, and validate the demo's intentional Windows fallback.
+- Correct local reporter demo examples to select the built Rush engine instead of an older repository-pinned version, and explain restoration of normal version selection.
+- Preserve legacy flags after valueless reporter rollback controls and default an unqualified primary file reporter to debug detail.
+- Preserve machine-readable stdout ownership for additional reporter outputs during engine compatibility handoff.
+- Resolve the command working directory to its physical path so watch input snapshots work with Windows short names and directory aliases. Preserve real watch cancellation and watcher cleanup coverage for both legacy and shadow reporting.
+- Resolve Windows lifecycle shells consistently from the request environment, retain asynchronous child ownership through named options, and isolate concurrent Git-selector configuration.
+- Preserve both resolved reporter-control stripping lists when bootstrap compatibility falls back to legacy output.
+- Close initialized reporter destinations when bootstrap host creation fails without replacing the original startup error.
+- Forward startup failures into reporter cancellation before awaiting initialization cleanup.
+- Preserve reentrant machine reporter output from old engines, reserve bootstrap stdout for owned additional output destinations without claiming custom controls, and classify installation paths as local-sensitive.
+- Close non-persistent operation runners before dependents execute, including skipped and cached operations, and wait for IPC child streams to close. Preserve the default persistent behavior and existing per-iteration configuration hook.
+- Release the native phased engine lock while idle and expose iteration-scoped execution leases. Support native rig/inherited project configuration with isolated loaders and request-time graph/cache validation, without modifying shared configuration caches.
+- Resolve native daemon command working directories physically before enforcing workspace confinement and native project selection, accepting Windows short paths and workspace aliases while rejecting symlink escapes.
+- Support guarded idle result eviction with detached execution contexts, optional measured IPC runner RSS, and awaited IPC closure without treating an interrupted protocol result as success. Document generation-attached daemon warm policies without changing ordinary native runner persistence.
+- Allow the standalone Rushx frontend to capture and replay native configuration-discovery lines without changing legacy startup output.
+- Preserve native Rushx invocation/configuration path namespaces for isolated lifecycle execution, including Windows aliases and registration diagnostics.
+- Update js-yaml dependency to ~4.3.2 to address security advisories for CPU consumption with certain inputs.
+- Allow an explicit IPC process factory to reuse native lifecycle environment, stdio and process-tree ownership without passing Node's IPC channel through an intermediate shell. Existing default runner behavior is unchanged.
+
+### Updates
+
+- Use ECMAScript private syntax for internal class members.
+- Use ECMAScript private syntax for internal class members.
+- Preserve command-declared output and log-level parameters on repository-opted-in help, even when their values resemble valid reporter controls.
+- Remove reporter-owned output and log-level controls from legacy help while preserving custom command options and emergency rollback behavior.
+- Preserve legacy configuration discovery output when rush.json cannot be loaded, without contaminating explicitly selected reporter output.
+- Clarify that the frontend reporter handoff contains both the typed event sink and the frontend-assigned session identity.
+- Preserve unscoped and command-scoped external output in the primary reporter while operation output remains owned by the legacy collator.
+- Capture successful Git setup output in the real watch regression fixture so Windows line-ending notices do not mark the surrounding test operation as warned. Preserve nonzero Git failures and all native watch assertions.
+- Document experimental daemon and reporter environment controls and numeric configuration limits, expose the runtime fingerprint cache's cross-package diagnostics, and use ordinal fingerprint ordering.
+- Assert IPC cleanup resolves after close without assuming an operating-system-specific delay between exit and close events.
 
 ## 5.179.0
 Sat, 05 Sep 2026 00:15:08 GMT
