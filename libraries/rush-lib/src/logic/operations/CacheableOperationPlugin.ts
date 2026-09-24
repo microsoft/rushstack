@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'node:crypto';
+import * as path from 'node:path';
 
 import { InternalError, NewlineKind, Sort } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
@@ -28,6 +29,7 @@ import {
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import { PeriodicCallback } from './PeriodicCallback';
+import { getInputFilesStatSignature, haveInputFilesChanged } from './InputFilesStatSignature';
 import { NullTerminalProvider } from '../../utilities/NullTerminalProvider';
 import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
@@ -70,6 +72,12 @@ export interface IOperationBuildCacheContext {
   periodicCallback: PeriodicCallback;
   cacheRestored: boolean;
   isCacheReadAttempted: boolean;
+
+  // Absolute paths of the tracked input files whose hashes produced the cache key, and a signature of their
+  // on-disk identity taken right after the iteration's inputs snapshot. Used to refuse cache writes if the
+  // inputs changed while the operation was executing.
+  inputFilePaths?: ReadonlyArray<string>;
+  inputFilesStatSignature?: string;
 }
 
 export interface ICacheableOperationPluginOptions {
@@ -177,6 +185,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             disjointSet?.add(operation);
 
+            const inputFilePaths: string[] | undefined =
+              cacheWriteEnabled && !cacheDisabledReason && record.enabled
+                ? Array.from(fileHashes.keys(), (filePath: string) =>
+                    path.join(inputsSnapshot.rootDirectory, filePath)
+                  )
+                : undefined;
+
             const buildCacheContext: IOperationBuildCacheContext = {
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
@@ -193,7 +208,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
               }),
               cacheRestored: false,
-              isCacheReadAttempted: false
+              isCacheReadAttempted: false,
+              inputFilePaths,
+              inputFilesStatSignature: inputFilePaths ? getInputFilesStatSignature(inputFilePaths) : undefined
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this.#buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -537,6 +554,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // write a new cache entry.
             if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
               setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
+            }
+            if (setCacheEntryPromise && !cacheRestored && haveInputFilesChanged(buildCacheContext)) {
+              // The cache key was derived from the iteration's inputs snapshot. Storing outputs produced from
+              // edited inputs under that key would poison the cache for every consumer of the entry.
+              buildCacheTerminal.writeLine(
+                'Input files changed while this operation was executing; not writing a build cache entry.'
+              );
+              setCacheEntryPromise = undefined;
             }
             if (!cacheRestored) {
               const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise?.();
