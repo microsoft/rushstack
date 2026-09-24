@@ -23,9 +23,27 @@ describe('opt-in routing', () => {
     { argv: ['publish'], enabled: true, environment: { RUSH_DAEMON: '1' }, daemon: false },
     { argv: ['daemon', 'status'], enabled: true, environment: {}, daemon: false },
     { argv: ['--help'], enabled: true, environment: {}, daemon: false },
-    { argv: ['build', '--help'], enabled: true, environment: {}, daemon: false }
+    { argv: ['build', '--help'], enabled: true, environment: {}, daemon: false },
+    { argv: ['build', '--reporter=ai'], enabled: true, environment: {}, daemon: true },
+    { argv: ['build', '--reporter', 'ai'], enabled: true, environment: {}, daemon: true },
+    { argv: ['build'], enabled: true, environment: { RUSH_REPORTER: 'ai' }, daemon: true },
+    { argv: ['build', '--reporter=json'], enabled: true, environment: { RUSH_REPORTER: 'ai' }, daemon: false },
+    { argv: ['build', '--reporter=ai', '--output', 'x'], enabled: true, environment: {}, daemon: false },
+    { argv: ['build'], enabled: true, environment: {}, useRushReporter: true, daemon: false },
+    { argv: ['build', '--reporter=ai'], enabled: true, environment: {}, useRushReporter: true, daemon: true }
   ])('selects $daemon for $argv', ({ daemon, ...options }) => {
     expect(selectClientRoute({ ...options, rushx: false }).daemon).toBe(daemon);
+  });
+
+  it('strips an explicit AI reporter flag from the daemon request', () => {
+    expect(
+      selectClientRoute({ argv: ['build', '--reporter', 'ai', '-t', 'a'], enabled: true, environment: {}, rushx: false })
+        .argv
+    ).toEqual(['build', '-t', 'a']);
+    expect(
+      selectClientRoute({ argv: ['build', '--', '--reporter=ai'], enabled: true, environment: {}, rushx: false })
+        .argv
+    ).toEqual(['build', '--', '--reporter=ai']);
   });
 
   it('preserves script arguments after -- and permits scripts named like built-ins', () => {
