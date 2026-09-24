@@ -15,7 +15,7 @@ import {
 } from '@rushstack/terminal';
 
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { OperationBuildCache } from '../buildCache/OperationBuildCache';
 import { RushConstants } from '../RushConstants';
@@ -116,7 +116,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     } = this.#options;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
-      graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, () => {
+      // The state hash at which each operation last completed successfully in an iteration of this graph
+      // in which cache writes were allowed for it (i.e. no dependency had an unknown state).
+      const trustedStateHashByOperation: Map<Operation, string> = new Map();
+
+      graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations: ReadonlySet<Operation>) => {
+        for (const operation of operations) {
+          trustedStateHashByOperation.delete(operation);
+        }
         // Terminals and cobuild callbacks can retain the entire completed iteration, including other
         // projects' records. All of this scratch state is rebuilt by beforeExecuteIterationAsync.
         for (const cacheContext of this.#buildCacheContextByOperation.values()) {
@@ -564,8 +571,31 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           switch (record.status) {
             case OperationStatus.Skipped: {
-              // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
-              blockCacheWrite = true;
+              // Skipping generally means we cannot guarantee integrity, so prevent cache writes in dependents.
+              // The exception is an operation that was not re-run because a previous iteration of this graph
+              // produced a trusted result at exactly the same state hash (e.g. a result retained by a
+              // long-lived graph such as the Rush daemon). Since the state hash of an operation covers the
+              // state hashes of all of its dependencies, a consumer's cache key fully describes this input.
+              if (
+                blockCacheWrite ||
+                record.operation.enabled === false ||
+                trustedStateHashByOperation.get(operation) !== record.getStateHash()
+              ) {
+                blockCacheWrite = true;
+                trustedStateHashByOperation.delete(operation);
+              }
+              break;
+            }
+
+            default: {
+              if (!blockCacheWrite && buildCacheContext && SUCCESS_STATUSES.has(record.status)) {
+                // The outputs of this operation were produced (or restored) in an iteration where cache
+                // writes were allowed, so they can be trusted by consumers in later iterations as long as
+                // the state hash is unchanged.
+                trustedStateHashByOperation.set(operation, record.getStateHash());
+              } else {
+                trustedStateHashByOperation.delete(operation);
+              }
               break;
             }
           }
