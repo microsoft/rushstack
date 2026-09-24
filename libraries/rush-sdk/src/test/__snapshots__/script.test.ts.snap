@@ -69,6 +69,7 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   '_OperationStateFile',
   '_RushGlobalFolder',
   '_RushInternals',
+  '_printOperationStatus',
   '_rushSdk_loadInternalModule',
   'captureProjectConfigurationFingerprintAsync',
   'captureWorkspaceInputFingerprintAsync',
