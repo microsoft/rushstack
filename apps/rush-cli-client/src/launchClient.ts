@@ -25,7 +25,9 @@ import { ConsoleTerminalProvider } from '@rushstack/terminal';
 import { executeDaemonCommandAsync } from './daemonCommands';
 import { formatAdmissionFailure, getConfiguredAdmission } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
+import type { AgentProgressRenderer } from './AgentProgressRenderer';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
+import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultDiagnostic } from './resultDiagnostics';
 import { writeStreamAsync } from './writeStreamAsync';
@@ -41,7 +43,10 @@ interface IWorkspaceJson {
   readonly daemon?: IDaemonConfigurationJson;
 }
 
-export async function launchClientAsync(rushx: boolean): Promise<void> {
+export async function launchClientAsync(
+  rushx: boolean,
+  agentRenderer?: AgentProgressRenderer
+): Promise<void> {
   const cwd: string = process.cwd();
   const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({ ...process.env });
   const rushJsonPath: string | undefined = tryFindRushJsonLocation(cwd);
@@ -55,11 +60,13 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     environment,
     enabled: config.enabled,
     rushx,
-    hasTerminal: !!(process.stdin.isTTY || process.stdout.isTTY || process.stderr.isTTY)
+    hasTerminal: !!(process.stdin.isTTY || process.stdout.isTTY || process.stderr.isTTY),
+    useRushReporter: !rushx && !!rushJsonPath && readUseRushReporter(rushJsonPath)
   });
   const selectedVersion: string =
     environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? getBundledRushVersion();
   if (!rushx && route.commandName === 'daemon') {
+    agentRenderer?.dispose();
     if ((route.argv[1] === 'start' || route.argv[1] === 'restart') && process.argv.includes('--no-daemon')) {
       throw new Error(`--no-daemon cannot be combined with daemon ${route.argv[1]}.`);
     }
@@ -76,12 +83,17 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     return;
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
+    agentRenderer?.dispose();
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
   }
   const terminal: ConsoleTerminalProvider = new ConsoleTerminalProvider();
   const verbosity: DaemonVerbosity =
-    route.argv.includes('--verbose') || route.argv.includes('-v') ? 'verbose' : 'quiet';
+    route.argv.includes('--verbose') || route.argv.includes('-v')
+      ? 'verbose'
+      : agentRenderer
+        ? 'normal'
+        : 'quiet';
   const request: IDaemonRequestEnvelope = captureDaemonRequest({
     argv: route.argv,
     commandName: route.commandName,
@@ -130,6 +142,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       !(error instanceof loadVersionSelectedDaemonLauncher().DaemonLauncherUnavailableError)
     )
       throw error;
+    agentRenderer?.dispose();
     process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
@@ -167,19 +180,25 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       );
     }
     await renderer.initializeAsync();
+    agentRenderer?.setPhase('request submitted; preparing the workspace graph');
     outcome = await executeWithDaemonRestartAsync(client, connection, {
       request,
       abortSignal: abort.signal,
       onStdoutAsync: async (bytes, operationId) => {
+        if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stdout');
         await writeDiscoveryAsync();
         await renderer.writeLogAsync(bytes, operationId, 'stdout');
       },
       onStderrAsync: async (bytes, operationId) => {
+        if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stderr');
         await writeDiscoveryAsync();
         await renderer.writeLogAsync(bytes, operationId, 'stderr');
       },
-      onEventAsync: (event) => renderer.writeEventAsync(event),
-      onQueuePositionAsync: process.stderr.isTTY
+      onEventAsync: async (event) =>
+        agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event),
+      onQueuePositionAsync: agentRenderer
+        ? async (position) => agentRenderer.onQueuePosition(position)
+        : process.stderr.isTTY
         ? (position) =>
             writeStreamAsync(
               process.stderr,
@@ -206,6 +225,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     }
   }
   if (outcome.kind === 'result') {
+    agentRenderer?.finish(outcome.result);
     process.exitCode = outcome.result.exitCode;
     const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
     if (diagnostic) {
@@ -217,10 +237,13 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
       );
     }
   } else if (outcome.kind === 'rejected') {
+    agentRenderer?.finish({ exitCode: 1, errorMessage: `daemon rejected the request (${outcome.rejection.code})` });
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
   } else if (abort.signal.aborted) {
+    agentRenderer?.finish({ exitCode: 130, errorMessage: 'cancelled' });
     process.exitCode = 130;
   } else {
+    agentRenderer?.dispose();
     process.stderr.write(`rush-client: ${outcome.message ?? outcome.reason}; using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
   }
