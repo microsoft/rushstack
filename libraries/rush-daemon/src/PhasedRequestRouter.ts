@@ -74,6 +74,7 @@ interface IBatchEntry extends IPreparedPhasedRequest {
   abortRequested: boolean;
   completed: boolean;
   executionStarted: boolean;
+  finishStarted: boolean;
   outputError: unknown;
   participated: boolean;
   reject: (error: unknown) => void;
@@ -87,6 +88,12 @@ const OBSERVED_STATUS_OVERRIDES_RETAINED: ReadonlySet<OperationStatus> = new Set
   OperationStatus.Aborted,
   OperationStatus.Blocked,
   OperationStatus.Skipped
+]);
+const IN_PROGRESS_STATUSES: ReadonlySet<string> = new Set<string>([
+  OperationStatus.Waiting,
+  OperationStatus.Ready,
+  OperationStatus.Queued,
+  OperationStatus.Executing
 ]);
 
 /**
@@ -259,6 +266,7 @@ class PhasedRequestBatchCoordinator {
         abortRequested: false,
         completed: false,
         executionStarted: false,
+        finishStarted: false,
         outputError: undefined,
         participated: false,
         reject,
@@ -507,6 +515,16 @@ class PhasedRequestBatchCoordinator {
 
     if (
       entry.executionStarted &&
+      this.#currentBatch?.includes(entry) &&
+      this.#currentBatch.some((candidate: IBatchEntry) => this.#isEntryLive(candidate))
+    ) {
+      // Other live participants still need the shared work: detach this client and answer it now.
+      this.#finishDetachedEntry(entry);
+      return;
+    }
+
+    if (
+      entry.executionStarted &&
       this.#currentBatch &&
       (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) &&
       !this.#currentBatch.some((candidate: IBatchEntry) => this.#isEntryLive(candidate))
@@ -515,12 +533,22 @@ class PhasedRequestBatchCoordinator {
     }
   }
 
+  #finishDetachedEntry(entry: IBatchEntry): void {
+    void this.#finishEntryAsync(entry, entry.participated, undefined, [], undefined, true).catch(
+      (error: unknown) => {
+        this.#completeEntry(entry);
+        entry.reject(error);
+      }
+    );
+  }
+
   #isEntryLive(entry: IBatchEntry): boolean {
     return !entry.abortRequested && !entry.client.abortSignal.aborted && entry.outputError === undefined;
   }
 
   #requestIterationAbort(): void {
-    const abortPromise: Promise<void> = this.#graph.abortCurrentIterationAsync();
+    // Nobody needs the running work any more, so terminate in-flight operations instead of awaiting them.
+    const abortPromise: Promise<void> = this.#graph.abortCurrentIterationAsync({ terminateRunning: true });
     this.#abortTail = Promise.all([this.#abortTail, abortPromise])
       .then(() => undefined)
       .catch((error: unknown) => {
@@ -533,11 +561,13 @@ class PhasedRequestBatchCoordinator {
     batchScheduled: boolean,
     executionError: unknown,
     batchCleanupErrors: ReadonlyArray<unknown> = [],
-    beforeResultAsync?: () => Promise<void>
+    beforeResultAsync?: () => Promise<void>,
+    detachedDuringIteration: boolean = false
   ): Promise<void> {
-    if (entry.completed) {
+    if (entry.completed || entry.finishStarted) {
       return;
     }
+    entry.finishStarted = true;
     const cleanupErrors: unknown[] = [...batchCleanupErrors];
     if (entry.requestSink) {
       try {
@@ -558,7 +588,8 @@ class PhasedRequestBatchCoordinator {
           entry.selection.activeOperations,
           this.#graph,
           entry.requestSink,
-          aborted && entry.participated
+          aborted && entry.participated,
+          detachedDuringIteration
         )
       : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
@@ -611,7 +642,7 @@ function createBatchReleaseBarrier(
   batch: ReadonlyArray<IBatchEntry>,
   releaseAsync: () => Promise<void>
 ): () => Promise<void> {
-  let remaining: number = batch.filter((entry) => !entry.completed).length;
+  let remaining: number = batch.filter((entry) => !entry.completed && !entry.finishStarted).length;
   if (remaining === 0) return releaseAsync;
   let arrive: () => void = () => undefined;
   const allDrained: Promise<void> = new Promise<void>((resolve) => {
@@ -851,7 +882,8 @@ function collectOperationOutcomes(
   activeOperations: ReadonlyArray<Operation>,
   graph: IOperationGraph,
   requestSink: PhasedRequestEventSink,
-  fillMissingAsAborted: boolean = false
+  fillMissingAsAborted: boolean = false,
+  inProgress: boolean = false
 ): ReadonlyArray<IPhasedOperationOutcome> {
   const outcomes: IPhasedOperationOutcome[] = [];
   for (const operation of [...activeOperations].sort(compareOperations)) {
@@ -860,7 +892,11 @@ function collectOperationOutcomes(
     const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
     let status: string | undefined;
     let errorMessage: string | undefined;
-    if (
+    if (inProgress && observed !== undefined) {
+      // The iteration is still running; retained results may be stale, and unfinished work was abandoned.
+      status = IN_PROGRESS_STATUSES.has(observed.status) ? OperationStatus.Aborted : observed.status;
+      errorMessage = observed.executionResult.error?.message;
+    } else if (
       observed !== undefined &&
       (retained === undefined || OBSERVED_STATUS_OVERRIDES_RETAINED.has(observed.status))
     ) {
@@ -871,6 +907,10 @@ function collectOperationOutcomes(
       errorMessage = retained?.error?.message ?? observed?.executionResult.error?.message;
     }
     status ??= fillMissingAsAborted ? OperationStatus.Aborted : undefined;
+    if (fillMissingAsAborted && status !== undefined && IN_PROGRESS_STATUSES.has(status)) {
+      // The client stopped observing before this operation finished, e.g. because it was terminated.
+      status = OperationStatus.Aborted;
+    }
     if (status === undefined) {
       continue;
     }

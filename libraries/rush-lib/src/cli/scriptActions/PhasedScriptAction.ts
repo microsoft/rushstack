@@ -788,6 +788,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
         abortController: this.sessionAbortController,
         closeRunnersOnAbort: !onEngine,
+        supportsTerminateRunning: !!onEngine,
         telemetry: executionTelemetryHandler
       };
 
@@ -1039,7 +1040,7 @@ async function disposeEngineGraphAsync(
   graph.abortController.abort();
   const errors: unknown[] = [];
   for (const cleanupAsync of [
-    () => graph.abortCurrentIterationAsync(),
+    () => graph.abortCurrentIterationAsync({ terminateRunning: true }),
     () => graph.closeRunnersAsync(),
     async () => {
       await cobuildConfiguration?.destroyLockProviderAsync();

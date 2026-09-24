@@ -106,8 +106,11 @@ export interface IOperationGraph {
   /**
    * Abort the current execution iteration, if any. Operations that have already started
    * will run to completion; only operations that have not yet begun will be aborted.
+   *
+   * If `options.terminateRunning` is true and the graph supports it, operations that are already running are also
+   * signaled to terminate (via `IOperationRunnerContext.abortSignal`) and are reported as `Aborted`.
    */
-  abortCurrentIterationAsync(): Promise<void>;
+  abortCurrentIterationAsync(options?: { terminateRunning?: boolean }): Promise<void>;
 
   /**
    * Cleans up any resources used by the operation runners, if applicable.

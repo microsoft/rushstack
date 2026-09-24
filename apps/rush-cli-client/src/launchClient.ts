@@ -27,6 +27,12 @@ import { DaemonLauncherUnavailableError } from '@rushstack/rush-daemon/lib/Versi
 
 import { executeDaemonCommandAsync } from './daemonCommands';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
+import {
+  CANCELLATION_SIGNALS,
+  formatCancellationMessage,
+  getSignalExitCode,
+  isCancelledOutcome
+} from './clientCancellation';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { writeStreamAsync } from './writeStreamAsync';
@@ -119,9 +125,13 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     return;
   }
   const abort: AbortController = new AbortController();
-  const onSignal = (): void => abort.abort();
-  process.on('SIGINT', onSignal);
-  process.on('SIGTERM', onSignal);
+  let cancellationSignal: NodeJS.Signals | undefined;
+  // Windows test harnesses emit signals without a name; treat those as Ctrl+C.
+  const onSignal = (signal?: NodeJS.Signals): void => {
+    cancellationSignal ??= signal ?? 'SIGINT';
+    abort.abort();
+  };
+  for (const signal of CANCELLATION_SIGNALS) process.on(signal, onSignal);
   const renderer: ClientOperationRenderer = new ClientOperationRenderer({
     requestId: request.requestId,
     colorLevel: terminal.supportsColor ? 1 : 0,
@@ -137,7 +147,7 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     writeAsync: (bytes, stream) =>
       writeStreamAsync(stream === 'stderr' ? process.stderr : process.stdout, bytes)
   });
-  let outcome: DaemonClientOutcome;
+  let outcome: DaemonClientOutcome | undefined;
   const discoveryLines: string[] = [];
   const writeDiscoveryAsync = async (): Promise<void> => {
     if (discoveryLines.length > 0) {
@@ -176,16 +186,25 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
           }
         : undefined
     });
+  } catch (error) {
+    // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
+    if (!abort.signal.aborted || !(error instanceof DaemonClientError)) throw error;
+    outcome = undefined;
   } finally {
-    process.removeListener('SIGINT', onSignal);
-    process.removeListener('SIGTERM', onSignal);
+    for (const signal of CANCELLATION_SIGNALS) process.removeListener(signal, onSignal);
     try {
       await renderer.closeAsync();
     } finally {
       await client.closeAsync();
     }
   }
-  if (outcome.kind === 'result') {
+  if (outcome === undefined || isCancelledOutcome(outcome, abort.signal.aborted)) {
+    process.exitCode = getSignalExitCode(cancellationSignal ?? 'SIGINT');
+    // After SIGHUP the terminal may be gone; the exit code is what matters.
+    await writeStreamAsync(process.stderr, Buffer.from(formatCancellationMessage(route.commandName))).catch(
+      () => undefined
+    );
+  } else if (outcome.kind === 'result') {
     process.exitCode = outcome.result.exitCode;
     if (outcome.result.admissionErrorCode) {
       await writeStreamAsync(
@@ -195,8 +214,6 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     }
   } else if (outcome.kind === 'rejected') {
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
-  } else if (abort.signal.aborted) {
-    process.exitCode = 130;
   } else {
     process.stderr.write(`rush-client: ${outcome.message ?? outcome.reason}; using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
