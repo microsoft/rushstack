@@ -33,6 +33,9 @@ jest.mock('../OperationMetadataManager', () => {
     public async tryRestoreAsync(): Promise<void> {
       /* noop */
     }
+    public tryRestoreStopwatch<T>(originalStopwatch: T): T {
+      return originalStopwatch;
+    }
   }
   return { OperationMetadataManager: MockOperationMetadataManager };
 });
@@ -74,14 +77,16 @@ class CacheableMockRunner implements IOperationRunner {
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean = false;
   public readonly isNoOp: boolean = false;
+  public readonly name: string;
+  readonly #executions: string[];
 
-  public constructor(
-    public readonly name: string,
-    private readonly _executions: string[]
-  ) {}
+  public constructor(name: string, executions: string[]) {
+    this.name = name;
+    this.#executions = executions;
+  }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    this._executions.push(this.name);
+    this.#executions.push(this.name);
     return OperationStatus.Success;
   }
 
