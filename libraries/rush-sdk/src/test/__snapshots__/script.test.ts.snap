@@ -75,8 +75,10 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'classifyWorkspaceInputChange',
   'createRushDiagnostic',
   'daemonEnvironmentVariables',
+  'getWorkspaceFingerprintEnvironmentEntries',
   'parseReporterExtensionEventName',
-  'resolveDaemonConfiguration'
+  'resolveDaemonConfiguration',
+  'workspaceFingerprintIgnoredEnvironmentVariables'
 ]"
 `;
 

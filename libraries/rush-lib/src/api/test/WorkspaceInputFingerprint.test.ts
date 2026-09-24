@@ -81,7 +81,7 @@ describe('workspace input fingerprints', () => {
         { RUSH_BUILD_CACHE_WRITE_ALLOWED: '0' },
         { RUSH_DAEMON_WATCH: '1' },
         { NODE_OPTIONS: '--max-old-space-size=8192' },
-        { npm_config_registry: 'https://example.invalid/' },
+        { 'npm_config_registry': 'https://example.invalid/' },
         { PATH: '/usr/bin:/usr/local/bin' },
         { HOME: '/home/other' }
       ]) {

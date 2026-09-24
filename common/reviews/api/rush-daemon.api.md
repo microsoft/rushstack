@@ -28,7 +28,7 @@ import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import { IOperationGraph } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
-import { LockFile } from '@rushstack/node-core-library';
+import type { LockFile } from '@rushstack/node-core-library';
 import { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
