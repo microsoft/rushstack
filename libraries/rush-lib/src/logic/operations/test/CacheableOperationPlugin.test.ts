@@ -137,7 +137,7 @@ async function createTestGraphAsync(names: string[]): Promise<ITestGraph> {
       ({
         tryRestoreFromCacheAsync: async () => false,
         trySetCacheEntryAsync: async () => {
-          cacheWrites.push(record.name);
+          cacheWrites.push(record.operation.associatedProject.packageName);
           return true;
         }
       }) as unknown as OperationBuildCache
