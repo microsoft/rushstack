@@ -591,7 +591,9 @@ export interface IDaemonShutdownAckMessage {
     // (undocumented)
     readonly kind: 'shutdownAck';
     // (undocumented)
-    readonly payload: Record<string, never>;
+    readonly payload: {
+        readonly activeRequests?: number;
+    };
 }
 
 // @beta
