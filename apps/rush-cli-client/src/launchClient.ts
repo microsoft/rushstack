@@ -196,14 +196,14 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
   }
   if (outcome.kind === 'result') {
     process.exitCode = outcome.result.exitCode;
-    if (outcome.result.admissionErrorCode) {
+    const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
+    if (diagnostic) {
+      await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
+    } else if (outcome.result.admissionErrorCode) {
       await writeStreamAsync(
         process.stderr,
         Buffer.from(formatAdmissionFailure(outcome.result.admissionErrorCode, request.admission))
       );
-    } else {
-      const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
-      if (diagnostic) await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
     }
   } else if (outcome.kind === 'rejected') {
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);

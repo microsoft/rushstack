@@ -87,8 +87,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
         await writeStreamAsync(
           process.stderr,
           Buffer.from(
-            `rush-client: the daemon was running ${activeRequests} request(s); ` +
-              'they were cancelled and their clients were told to re-run the command.\n'
+            `rush-client: the daemon was running ${activeRequests} request(s); they were cancelled.\n`
           )
         );
       }

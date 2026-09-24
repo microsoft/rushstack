@@ -40,6 +40,7 @@ import {
   getWorkspaceRequestScheduler
 } from './WorkspaceRequestAdmission';
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
+import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
@@ -259,7 +260,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           if (error instanceof RequestSchedulerError && !state.began && !state.terminalAttempted) {
             await client.interactiveSession.finishAsync();
             await client.writeResultAsync({
-              ...preExecutionFailure(envelope.requestId, error),
+              ...preExecutionFailure(envelope.requestId, getDaemonShutdownReason(client.abortSignal) ?? error),
               aborted: client.abortSignal.aborted,
               admissionErrorCode: getRequestAdmissionErrorCode(error)
             });

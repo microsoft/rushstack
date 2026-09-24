@@ -11,7 +11,10 @@ export interface IDaemonShutdownMessage {
 export interface IDaemonShutdownAckMessage {
   readonly kind: 'shutdownAck';
   readonly payload: {
-    /** Requests that were still running and will be aborted by this shutdown. Older daemons omit it. */
+    /**
+     * Requests that were still running and will be aborted by this shutdown. Daemons older than
+     * `DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR` omit it.
+     */
     readonly activeRequests?: number;
   };
 }

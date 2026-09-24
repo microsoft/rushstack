@@ -248,11 +248,14 @@ export class DaemonControlSession {
       );
     }
     const activeRequests: number | undefined = this.#options.getActiveRequestCount?.();
-    await this.#enqueueControlAsync({
+    // Queue the acknowledgement, then begin shutdown synchronously so the reported count is the set that
+    // shutdown aborts; closing drains the send queue, so the acknowledgement is still delivered first.
+    const ackPromise: Promise<void> = this.#enqueueControlAsync({
       kind: 'shutdownAck',
       payload: activeRequests === undefined ? {} : { activeRequests }
     });
     this.#options.onShutdownRequested();
+    await ackPromise;
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
