@@ -13,6 +13,7 @@ import {
   validateRequestResultControl,
   validateRequestStartControl
 } from './RequestControlValidation';
+import { validateShutdownAck } from './ShutdownAckValidation';
 import { validateSubscribeControl } from './SubscribeControlValidation';
 function fail(reason: string): never {
   throw new DaemonProtocolError('malformedControlMessage', reason);
@@ -67,7 +68,7 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   requestRejected: validateRequestRejectedControl,
   requestResult: validateRequestResultControl,
   shutdown: noopValidator,
-  shutdownAck: noopValidator,
+  shutdownAck: validateShutdownAck,
   stdinReady: validateRequestCancelControl,
   stdinEnd: validateRequestCancelControl
 };

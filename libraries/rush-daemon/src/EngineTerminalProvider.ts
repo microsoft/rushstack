@@ -16,11 +16,24 @@ export class EngineTerminalProvider implements ITerminalProvider {
     else this.#messages.push({ text, severity });
   }
 
+  /**
+   * Drains buffered diagnostics into the failure description, so that they belong to the failing request
+   * and are never replayed into a later request.
+   */
   public describeError(error: unknown): string {
     return [
-      ...this.#messages.map(({ text }) => text),
+      ...this.#messages.splice(0).map(({ text }) => text),
       error instanceof Error ? error.message : String(error)
     ].join('\n');
+  }
+
+  public get hasBufferedMessages(): boolean {
+    return this.#messages.length > 0;
+  }
+
+  /** Discards diagnostics buffered by an earlier request before a new request starts using this terminal. */
+  public discardBufferedMessages(): void {
+    this.#messages.length = 0;
   }
 
   public attach(graph: IOperationGraph): void {

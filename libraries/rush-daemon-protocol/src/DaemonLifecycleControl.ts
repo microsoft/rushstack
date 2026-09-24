@@ -10,5 +10,8 @@ export interface IDaemonShutdownMessage {
 /** Acknowledges shutdown before the host closes connections and releases its endpoint. @beta */
 export interface IDaemonShutdownAckMessage {
   readonly kind: 'shutdownAck';
-  readonly payload: Record<string, never>;
+  readonly payload: {
+    /** Requests that were still running and will be aborted by this shutdown. Older daemons omit it. */
+    readonly activeRequests?: number;
+  };
 }

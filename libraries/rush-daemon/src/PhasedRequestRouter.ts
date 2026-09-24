@@ -21,6 +21,7 @@ import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import {
@@ -563,7 +564,7 @@ class PhasedRequestBatchCoordinator {
       : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
       aborted,
-      error: combineErrors(executionError, cleanupErrors),
+      error: combineErrors(executionError ?? getDaemonShutdownReason(entry.client.abortSignal), cleanupErrors),
       graphStatus: getClientGraphStatus(aborted, operationOutcomes),
       operationOutcomes,
       requestId: entry.request.requestId,
@@ -928,7 +929,7 @@ async function writeAbortedResultAsync(
   const result: IDaemonPhasedRequestResult = {
     ...createPhasedCommandResult({
       aborted: true,
-      error: combineErrors(undefined, cleanupErrors),
+      error: combineErrors(getDaemonShutdownReason(client.abortSignal), cleanupErrors),
       graphStatus: OperationStatus.Aborted,
       operationOutcomes: [],
       requestId,

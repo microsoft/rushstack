@@ -82,10 +82,20 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       : await DaemonClient.connectAsync({ socketPath: connectionOptions.paths.socketPath });
   try {
     if (command === 'stop') {
-      await client.shutdownAsync();
+      const { activeRequests } = await client.shutdownAsync();
+      if (activeRequests) {
+        await writeStreamAsync(
+          process.stderr,
+          Buffer.from(
+            `rush-client: the daemon was running ${activeRequests} request(s); ` +
+              'they were cancelled and their clients were told to re-run the command.\n'
+          )
+        );
+      }
       await writeStatusAsync({
         state: 'shutdownAccepted',
-        socketPath: connectionOptions.paths.socketPath
+        socketPath: connectionOptions.paths.socketPath,
+        ...(activeRequests === undefined ? {} : { cancelledRequests: activeRequests })
       });
       return;
     }

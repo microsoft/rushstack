@@ -25,7 +25,8 @@ import {
   type IDaemonPongMessage,
   type IDaemonProtocolVersion,
   type IDaemonRequestEnvelope,
-  type IDaemonRequestRejectedMessage
+  type IDaemonRequestRejectedMessage,
+  type IDaemonShutdownAckMessage
 } from '@rushstack/rush-daemon-protocol';
 import { connectDaemonAsync, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
@@ -102,6 +103,7 @@ export class DaemonClient {
   #result: IDeferred<DaemonClientOutcome> | undefined;
   #shutdown: IDeferred<void> | undefined;
   #shutdownAcknowledged: boolean = false;
+  #shutdownAck: IDaemonShutdownAckMessage['payload'] = {};
   #execution: IDaemonClientExecuteOptions | undefined;
   #finished: boolean = false;
   #inputStarted: boolean = false;
@@ -186,8 +188,10 @@ export class DaemonClient {
    * Requests shutdown on a fresh connection and waits for acknowledgement followed by EOF.
    * @remarks This confirms acceptance and connection closure, not successful workspace cleanup.
    * Requires protocol 0.6. The timeout defaults to 15000 milliseconds.
+   * @returns The acknowledgement, including the number of running requests the shutdown aborts when the
+   * daemon reports it.
    */
-  public async shutdownAsync(timeoutMs: number = 15000): Promise<void> {
+  public async shutdownAsync(timeoutMs: number = 15000): Promise<IDaemonShutdownAckMessage['payload']> {
     if (this.#used) throw new Error('Create a fresh DaemonClient for shutdown.');
     this.#used = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -206,6 +210,7 @@ export class DaemonClient {
         );
       }, timeoutMs);
       await Promise.all([this.#shutdown.promise, this.#sendControlAsync({ kind: 'shutdown', payload: {} })]);
+      return this.#shutdownAck;
     } finally {
       clearTimeout(timer);
       await this.closeAsync();
@@ -375,6 +380,7 @@ export class DaemonClient {
         throw new DaemonProtocolError('malformedControlMessage', 'Unexpected shutdown acknowledgement.');
       }
       this.#shutdownAcknowledged = true;
+      this.#shutdownAck = message.payload;
       return;
     }
     const execution: IDaemonClientExecuteOptions = this.#requireExecution();
