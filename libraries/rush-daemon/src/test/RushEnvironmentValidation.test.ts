@@ -32,6 +32,13 @@ describe(validateRequestRushEnvironment.name, () => {
     );
   });
 
+  it('rejects invalid daemon settings before a restart is planned', () => {
+    expect(() => validateRequestRushEnvironment({ RUSH_DAEMON_AUTO_START: 'yes' })).toThrow(
+      'RUSH_DAEMON_AUTO_START must be 0 or 1.'
+    );
+    expect(() => validateRequestRushEnvironment({ RUSH_DAEMON_AUTO_START: '1' })).not.toThrow();
+  });
+
   it('rejects mutually exclusive build cache overrides', () => {
     expect(() =>
       validateRequestRushEnvironment({

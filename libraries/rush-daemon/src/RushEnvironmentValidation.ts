@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '@microsoft/rush-lib';
+import {
+  EnvironmentConfiguration,
+  EnvironmentVariableNames,
+  resolveDaemonConfiguration
+} from '@microsoft/rush-lib';
 
 const BOOLEAN_VARIABLES: ReadonlySet<string> = new Set([
   EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS,
@@ -32,6 +36,8 @@ const KNOWN_VARIABLES: ReadonlySet<string> = new Set(Object.values(EnvironmentVa
  * @throws An error with the same message as native Rush for the first invalid value.
  */
 export function validateRequestRushEnvironment(environment: Readonly<Record<string, string | undefined>>): void {
+  // Native validation resolves the RUSH_DAEMON_* settings first.
+  resolveDaemonConfiguration({}, environment);
   const unknown: string[] = [];
   const present: Set<string> = new Set();
   for (const [name, value] of Object.entries(environment)) {

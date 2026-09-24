@@ -26,8 +26,8 @@ import {
   describeDaemonStartupReservation,
   getDaemonStartupFilePath,
   isDaemonStartupOwnerGone,
-  isDaemonStartupReservationStale,
   readDaemonStartupReservation,
+  reclaimStaleDaemonStartupReservation,
   releaseDaemonStartup,
   removeDaemonStartupReservation,
   reserveDaemonStartup,
@@ -120,10 +120,7 @@ export async function connectOrStartDaemonAsync(
       const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
       if (ready) return ready;
       // Holding the start lock, a verifiably abandoned reservation can be reclaimed without waiting.
-      if (isDaemonStartupReservationStale(options.paths, timeoutMs)) {
-        removeDaemonStartupReservation(options.paths, readDaemonStartupReservation(options.paths));
-        continue;
-      }
+      if (reclaimStaleDaemonStartupReservation(options.paths, timeoutMs)) continue;
       if (Date.now() >= deadline) {
         throw startupError(
           options,

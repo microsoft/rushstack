@@ -70,6 +70,10 @@ launcher PID once spawned. The reservation is released when:
   as token-only reservations from older clients, have no verifiable owner and become
   stale by file age. A stale reservation is reclaimed without waiting for the deadline.
 
+Every check-then-write of the reservation (owner/launcher updates, release, stale
+reclaim, and cleanup after a dead owner) holds a short `<lockfile>-reservation` lock,
+so a resumed stale owner can never overwrite or remove a replacement reservation.
+
 Otherwise, a live reservation makes later starts wait for readiness, then fail with the
 reservation's owner/launcher state instead of launching a second daemon. A launcher that
 misses the deadline but later binds is still accepted. If a stale reservation is

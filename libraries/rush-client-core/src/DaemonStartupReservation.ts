@@ -7,6 +7,7 @@ import * as fs from 'node:fs';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClientError } from './DaemonClientError';
+import { withStartupReservationLock } from './StartupLock';
 
 /**
  * How long a reservation may outlive its own startup deadline while a recorded process is still alive.
@@ -86,11 +87,23 @@ export function assertDaemonStartupReservation(paths: IDaemonPaths, token: strin
   assertOwnedReservation(paths, token);
 }
 
-/** Atomically records a new owner or launcher PID, but only while the token still owns the reservation. */
+/**
+ * Atomically records a new owner or launcher PID, but only while the token still owns the reservation.
+ * All reservation mutations hold the reservation lock, so a resumed stale owner can never overwrite or
+ * remove a replacement reservation between its ownership check and its write.
+ */
 export function updateDaemonStartupReservation(
   paths: IDaemonPaths,
   token: string,
   update: Partial<Pick<IDaemonStartupReservation, 'ownerPid' | 'ownerStartedAt' | 'launcherPid'>>
+): void {
+  withStartupReservationLock(paths, () => replaceOwnedReservation(paths, token, update));
+}
+
+function replaceOwnedReservation(
+  paths: IDaemonPaths,
+  token: string,
+  update: Partial<IDaemonStartupReservation>
 ): void {
   const reservation: IDaemonStartupReservation = assertOwnedReservation(paths, token);
   const filePath: string = getDaemonStartupFilePath(paths);
@@ -108,8 +121,10 @@ export function updateDaemonStartupReservation(
 }
 
 export function releaseDaemonStartup(paths: IDaemonPaths, token: string): void {
-  assertOwnedReservation(paths, token);
-  fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
+  withStartupReservationLock(paths, () => {
+    assertOwnedReservation(paths, token);
+    fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
+  });
 }
 
 /** True if the process responsible for releasing the reservation is gone. */
@@ -122,7 +137,7 @@ export function isDaemonStartupOwnerGone(reservation: IDaemonStartupReservation)
  * startup deadline by the grace period. Unrecognized (for example legacy token-only) records have no
  * verifiable owner, so only their age counts.
  */
-export function isDaemonStartupReservationStale(paths: IDaemonPaths, timeoutMs: number): boolean {
+function isDaemonStartupReservationStale(paths: IDaemonPaths, timeoutMs: number): boolean {
   const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
   if (reservation === undefined) return false;
   if (reservation === UNRECOGNIZED_DAEMON_STARTUP_RESERVATION) {
@@ -138,6 +153,15 @@ export function isDaemonStartupReservationStale(paths: IDaemonPaths, timeoutMs: 
   return (isDaemonStartupOwnerGone(reservation) && launcherGone) || Date.now() > expiresAt;
 }
 
+/** Removes the reservation if it is stale, atomically with respect to other reservation mutations. */
+export function reclaimStaleDaemonStartupReservation(paths: IDaemonPaths, timeoutMs: number): boolean {
+  return withStartupReservationLock(paths, () => {
+    if (!isDaemonStartupReservationStale(paths, timeoutMs)) return false;
+    fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
+    return true;
+  });
+}
+
 /**
  * Removes the reservation file only if it still matches the observed record, so a concurrent new
  * reservation is never removed.
@@ -146,6 +170,10 @@ export function removeDaemonStartupReservation(
   paths: IDaemonPaths,
   observed: DaemonStartupReservationRecord
 ): void {
+  withStartupReservationLock(paths, () => removeMatchingReservation(paths, observed));
+}
+
+function removeMatchingReservation(paths: IDaemonPaths, observed: DaemonStartupReservationRecord): void {
   const current: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
   if (current === undefined || observed === undefined) return;
   const matches: boolean =
