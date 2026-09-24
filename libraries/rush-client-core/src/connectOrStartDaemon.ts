@@ -32,7 +32,7 @@ import {
   removeDaemonStartupReservation,
   reserveDaemonStartup,
   updateDaemonStartupReservation,
-  type IDaemonStartupReservation
+  type DaemonStartupReservationRecord
 } from './DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
@@ -121,7 +121,7 @@ export async function connectOrStartDaemonAsync(
       if (ready) return ready;
       // Holding the start lock, a verifiably abandoned reservation can be reclaimed without waiting.
       if (isDaemonStartupReservationStale(options.paths, timeoutMs)) {
-        removeDaemonStartupReservation(options.paths, readDaemonStartupReservation(options.paths) ?? null);
+        removeDaemonStartupReservation(options.paths, readDaemonStartupReservation(options.paths));
         continue;
       }
       if (Date.now() >= deadline) {
@@ -293,13 +293,13 @@ async function tryConnectAsync(
 }
 
 async function isReadyDespiteReservationAsync(client: DaemonClient, paths: IDaemonPaths): Promise<boolean> {
-  const reservation: IDaemonStartupReservation | undefined | null = readDaemonStartupReservation(paths);
+  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
   if (reservation === undefined) return true;
   const { pid } = await client.status;
   const owner: IDaemonLockfile | undefined = readDaemonLockfile(paths.lockfilePath);
   if (!isDaemonOwnership(owner) || owner.pid !== pid || owner.socketPath !== paths.socketPath) return false;
   // A live helper releases its own reservation; clean up only after an owner that can no longer do so.
-  if (reservation === null || isDaemonStartupOwnerGone(reservation)) {
+  if (typeof reservation !== 'object' || isDaemonStartupOwnerGone(reservation)) {
     removeDaemonStartupReservation(paths, reservation);
   }
   return true;

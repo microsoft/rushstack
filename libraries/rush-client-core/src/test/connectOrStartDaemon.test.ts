@@ -230,9 +230,9 @@ describe('detached daemon startup', () => {
   });
 
   it.each([
-    ['cleans up after a dead owner', false],
-    ['leaves a live owner to release', true]
-  ])('accepts a ready daemon despite a reservation and %s', async (_, liveOwner) => {
+    { behavior: 'cleans up after a dead owner', liveOwner: false },
+    { behavior: 'leaves a live owner to release', liveOwner: true }
+  ])('accepts a ready daemon despite a reservation and $behavior', async ({ liveOwner }) => {
     const first = await connectOrStartDaemonAsync(options);
     const { pid } = await first.status;
     await first.closeAsync();

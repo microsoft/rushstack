@@ -47,10 +47,18 @@ export function reserveDaemonStartup(paths: IDaemonPaths, timeoutMs: number): st
   return reservation.token;
 }
 
-/** Returns the parsed reservation, `undefined` if absent, or `null` if present but not a recognized record. */
+/** Marks a reservation file that is present but is not a recognized record. */
+export const UNRECOGNIZED_DAEMON_STARTUP_RESERVATION: 'unrecognized' = 'unrecognized';
+
+export type DaemonStartupReservationRecord =
+  | IDaemonStartupReservation
+  | typeof UNRECOGNIZED_DAEMON_STARTUP_RESERVATION
+  | undefined;
+
+/** Returns the parsed reservation, `undefined` if absent, or `UNRECOGNIZED_DAEMON_STARTUP_RESERVATION`. */
 export function readDaemonStartupReservation(
   paths: IDaemonPaths
-): IDaemonStartupReservation | undefined | null {
+): DaemonStartupReservationRecord {
   let text: string;
   try {
     text = fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8');
@@ -60,15 +68,15 @@ export function readDaemonStartupReservation(
   }
   try {
     const record: unknown = JSON.parse(text);
-    return isReservation(record) ? record : null;
+    return isReservation(record) ? record : UNRECOGNIZED_DAEMON_STARTUP_RESERVATION;
   } catch {
-    return null;
+    return UNRECOGNIZED_DAEMON_STARTUP_RESERVATION;
   }
 }
 
 function assertOwnedReservation(paths: IDaemonPaths, token: string): IDaemonStartupReservation {
-  const reservation: IDaemonStartupReservation | undefined | null = readDaemonStartupReservation(paths);
-  if (!reservation || reservation.token !== token) {
+  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
+  if (typeof reservation !== 'object' || reservation.token !== token) {
     throw new DaemonClientError('startupFailed', 'The daemon startup reservation changed ownership.');
   }
   return reservation;
@@ -115,9 +123,9 @@ export function isDaemonStartupOwnerGone(reservation: IDaemonStartupReservation)
  * verifiable owner, so only their age counts.
  */
 export function isDaemonStartupReservationStale(paths: IDaemonPaths, timeoutMs: number): boolean {
-  const reservation: IDaemonStartupReservation | undefined | null = readDaemonStartupReservation(paths);
+  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
   if (reservation === undefined) return false;
-  if (reservation === null) {
+  if (reservation === UNRECOGNIZED_DAEMON_STARTUP_RESERVATION) {
     const stats: fs.Stats | undefined = fs.statSync(getDaemonStartupFilePath(paths), {
       throwIfNoEntry: false
     });
@@ -136,17 +144,21 @@ export function isDaemonStartupReservationStale(paths: IDaemonPaths, timeoutMs: 
  */
 export function removeDaemonStartupReservation(
   paths: IDaemonPaths,
-  observed: IDaemonStartupReservation | null
+  observed: DaemonStartupReservationRecord
 ): void {
-  const current: IDaemonStartupReservation | undefined | null = readDaemonStartupReservation(paths);
-  if (current === undefined) return;
-  if (observed === null ? current !== null : current?.token !== observed.token) return;
+  const current: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
+  if (current === undefined || observed === undefined) return;
+  const matches: boolean =
+    typeof observed === 'object'
+      ? typeof current === 'object' && current.token === observed.token
+      : current === observed;
+  if (!matches) return;
   fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
 }
 
 export function describeDaemonStartupReservation(paths: IDaemonPaths): string {
-  const reservation: IDaemonStartupReservation | undefined | null = readDaemonStartupReservation(paths);
-  if (!reservation) return 'unrecognized reservation record';
+  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
+  if (typeof reservation !== 'object') return 'unrecognized reservation record';
   const ageSeconds: number = Math.max(0, Math.round((Date.now() - Date.parse(reservation.createdAt)) / 1000));
   const launcher: string =
     reservation.launcherPid === undefined
