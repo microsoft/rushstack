@@ -322,6 +322,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           const currentTier: WorkspaceInputChangeTier = this.#classify(current, false);
           if (currentTier === WorkspaceInputChangeTier.Restart) {
             lease.release();
+            if (ticket) {
+              // Like build requests, a graph-control restart must not preempt requests this process can serve.
+              await admission.waitForRestartDrainAsync(this.#restartArbiter, ticket);
+              if (this.#restartPending) throw new RestartPendingBeforeExecution();
+            }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
             session = await this.#options.provider.getSessionAsync();

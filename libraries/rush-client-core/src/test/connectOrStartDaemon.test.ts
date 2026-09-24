@@ -452,6 +452,35 @@ describe('detached daemon startup', () => {
     }
   );
 
+  it('bounds the successor hand-off by the admission deadline instead of a fresh startup timeout', async () => {
+    const connection: IConnectOrStartDaemonOptions = {
+      ...options,
+      startupTimeoutMs: 7000,
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'fixture', 'restart-held']
+      }
+    };
+    const client = await connectOrStartDaemonAsync(connection);
+    const request = captureDaemonRequest({
+      argv: ['test'],
+      commandName: 'test',
+      commandOrigin: 'custom',
+      cwd: folder,
+      environment: {},
+      terminal: { isTTY: false, supportsColor: false },
+      admission: { waitTimeoutMs: 500 }
+    });
+    const startedAt: number = Date.now();
+    expect(await executeWithDaemonRestartAsync(client, connection, { request })).toMatchObject({
+      kind: 'fallback',
+      reason: 'restartRetriesExhausted'
+    });
+    expect(Date.now() - startedAt).toBeLessThan(5000);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
   it('refuses restart retry if ownership was not attested before submitting', async () => {
     const connection: IConnectOrStartDaemonOptions = {
       ...options,

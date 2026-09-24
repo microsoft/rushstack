@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Document that clients may retry `retryAfterRestart` a bounded number of times within the admission deadline.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

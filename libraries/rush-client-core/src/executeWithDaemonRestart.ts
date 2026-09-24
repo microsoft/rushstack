@@ -18,6 +18,8 @@ import { DaemonClientError } from './DaemonClientError';
 const MAX_RESTART_RETRIES: number = 6;
 const RETRY_JITTER_BASE_MS: number = 50;
 const RETRY_JITTER_MAX_MS: number = 1000;
+/** Matches the default of {@link IConnectOrStartDaemonOptions.startupTimeoutMs}. */
+const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
 
 /**
  * Executes on a ready client, retrying only for a typed pre-execution restart.
@@ -41,62 +43,81 @@ export async function executeWithDaemonRestartAsync(
   let owner: IDaemonLockfile | undefined = await attestOwnerAsync(client, connection);
   let outcome: DaemonClientOutcome = await client.executeAsync({ ...execution, abortSignal });
   let previous: DaemonClient | undefined;
-  for (let retry: number = 1; outcome.kind === 'result' && outcome.result.retryAfterRestart; retry++) {
-    if (!owner) {
-      throw new DaemonClientError(
-        'startupFailed',
-        'Cannot attest the restarting daemon ownership; the request was not retried.'
-      );
-    }
-    if (abortSignal?.aborted) return abortedOutcome(execution);
-    const remainingMs: number | undefined =
-      waitTimeoutMs === undefined ? undefined : waitTimeoutMs - (Date.now() - startedAt);
-    if (retry > MAX_RESTART_RETRIES || (remainingMs !== undefined && remainingMs <= 0)) {
-      return restartExhaustedOutcome(retry - 1);
-    }
-    let successor: DaemonClient;
-    try {
-      // The first retry follows the planned successor immediately; later ones back off with jitter so
-      // clients whose environments differ do not reach each new successor in lockstep.
-      if (retry > 1) await delayAsync(getRetryDelayMs(retry, remainingMs), undefined, { signal: abortSignal });
-      successor = await connectOrStartDaemonAsync({
-        ...connection,
-        previousDaemon: { pid: owner.pid, startedAt: owner.startedAt },
-        abortSignal
-      });
-    } catch (error) {
-      if (
-        abortSignal?.aborted &&
-        (error === abortSignal.reason ||
-          (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ABORT_ERR'))
-      ) {
-        return abortedOutcome(execution);
+  try {
+    for (let retry: number = 1; outcome.kind === 'result' && outcome.result.retryAfterRestart; retry++) {
+      if (!owner) {
+        throw new DaemonClientError(
+          'startupFailed',
+          'Cannot attest the restarting daemon ownership; the request was not retried.'
+        );
       }
-      throw error;
-    } finally {
-      await previous?.closeAsync().catch(() => undefined);
-      previous = undefined;
+      if (abortSignal?.aborted) return abortedOutcome(execution);
+      const getRemainingMs = (): number | undefined =>
+        waitTimeoutMs === undefined ? undefined : waitTimeoutMs - (Date.now() - startedAt);
+      if (retry > MAX_RESTART_RETRIES || isExpired(getRemainingMs())) {
+        return restartExhaustedOutcome(retry - 1);
+      }
+      let successor: DaemonClient;
+      let boundedByAdmission: boolean = false;
+      try {
+        // The first retry follows the planned successor immediately; later ones back off with jitter so
+        // clients whose environments differ do not reach each new successor in lockstep.
+        if (retry > 1) {
+          await delayAsync(getRetryDelayMs(retry, getRemainingMs()), undefined, { signal: abortSignal });
+        }
+        const remainingMs: number | undefined = getRemainingMs();
+        if (isExpired(remainingMs)) return restartExhaustedOutcome(retry - 1);
+        const startupTimeoutMs: number = connection.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS;
+        // The successor handoff shares the request's admission deadline rather than starting a fresh one.
+        boundedByAdmission = remainingMs !== undefined && remainingMs < startupTimeoutMs;
+        successor = await connectOrStartDaemonAsync({
+          ...connection,
+          startupTimeoutMs: boundedByAdmission ? Math.max(1, Math.ceil(remainingMs!)) : startupTimeoutMs,
+          previousDaemon: { pid: owner.pid, startedAt: owner.startedAt },
+          abortSignal
+        });
+      } catch (error) {
+        if (
+          abortSignal?.aborted &&
+          (error === abortSignal.reason ||
+            (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ABORT_ERR'))
+        ) {
+          return abortedOutcome(execution);
+        }
+        // A startup error after the admission deadline expired is the deadline, not a new failure mode.
+        if (boundedByAdmission && error instanceof DaemonClientError && isExpired(getRemainingMs())) {
+          return restartExhaustedOutcome(retry);
+        }
+        throw error;
+      } finally {
+        await previous?.closeAsync().catch(() => undefined);
+        previous = undefined;
+      }
+      previous = successor;
+      const remainingMs: number | undefined = getRemainingMs();
+      if (isExpired(remainingMs)) return restartExhaustedOutcome(retry);
+      owner = await attestOwnerAsync(successor, connection);
+      outcome = await successor.executeAsync({
+        ...execution,
+        abortSignal,
+        request:
+          remainingMs === undefined
+            ? execution.request
+            : captureDaemonRequest({
+                ...execution.request,
+                admission: { ...execution.request.admission, waitTimeoutMs: Math.floor(remainingMs) }
+              })
+      });
     }
-    owner = await attestOwnerAsync(successor, connection);
-    outcome = await successor.executeAsync({
-      ...execution,
-      abortSignal,
-      request:
-        waitTimeoutMs === undefined
-          ? execution.request
-          : captureDaemonRequest({
-              ...execution.request,
-              admission: {
-                ...execution.request.admission,
-                waitTimeoutMs: Math.max(0, waitTimeoutMs - (Date.now() - startedAt))
-              }
-            })
-    });
-    previous = successor;
+    return outcome;
+  } finally {
+    await previous?.closeAsync().catch(() => undefined);
   }
-  return outcome;
 }
 
+function isExpired(remainingMs: number | undefined): boolean {
+  return remainingMs !== undefined && remainingMs <= 0;
+}
 /** Returns the published ownership record only when it names the connected, restart-capable process. */
 async function attestOwnerAsync(
   client: DaemonClient,
