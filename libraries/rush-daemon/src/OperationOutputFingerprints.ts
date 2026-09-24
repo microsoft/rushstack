@@ -53,6 +53,10 @@ export class OperationOutputFingerprints {
 
   /**
    * Returns retained successful operations whose output folders no longer match the recorded fingerprint.
+   *
+   * @remarks
+   * Fingerprints of changed operations are forgotten only after all cleanup succeeded, so a failed
+   * reconciliation retries the output check on the next request instead of trusting the stale result.
    */
   public getOperationsWithChangedOutputs(): Operation[] {
     const changed: Operation[] = [];
@@ -60,10 +64,14 @@ export class OperationOutputFingerprints {
       if (!this.#isRetained(operation, record)) {
         this.#fingerprints.delete(operation);
       } else if (getOutputFingerprint(operation) !== fingerprint) {
-        this.#fingerprints.delete(operation);
-        forgetLegacySkipState(operation);
         changed.push(operation);
       }
+    }
+    for (const operation of changed) {
+      forgetLegacySkipState(operation);
+    }
+    for (const operation of changed) {
+      this.#fingerprints.delete(operation);
     }
     return changed;
   }
