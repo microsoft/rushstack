@@ -27,6 +27,7 @@ import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import { IOperationGraph } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
 import { LockFile } from '@rushstack/node-core-library';
 import { Operation } from '@microsoft/rush-lib';
@@ -399,6 +400,7 @@ export interface IResolvedDaemonPhasedRequest {
     readonly kind: 'phased';
     // (undocumented)
     readonly request: IDaemonPhasedRequest;
+    readonly requestSettings?: IPhasedCommandEngineRequestSettings;
 }
 
 // @beta
@@ -666,7 +668,7 @@ export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspace
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings): Promise<IDaemonPhasedRequestResult>;
 }
 
 // @beta
