@@ -38,7 +38,8 @@ describe('version-selected daemon connection options', () => {
     const asynchronous = await getDaemonConnectionOptionsAsync(repoRoot, Rush.version, process.env, true);
     expect(asynchronous.paths).toEqual(synchronous.paths);
     expect(asynchronous.expectedDaemonVersion).toBe(synchronous.expectedDaemonVersion);
-    expect(asynchronous.startCommand?.args).toEqual(synchronous.startCommand?.args);
+    expect(asynchronous.startCommand).toBeUndefined();
+    expect((await asynchronous.resolveStartCommandAsync?.())?.args).toEqual(synchronous.startCommand?.args);
   });
 
   it('does not claim a different requested engine in the synchronous default launcher', () => {

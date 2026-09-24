@@ -3,13 +3,12 @@
 
 import * as path from 'node:path';
 
+import type { IDaemonConfigurationJson } from '@microsoft/rush-lib';
+// A deep import keeps the warm connect path from evaluating the @microsoft/rush-lib entry point.
 import {
-  Rush,
-  RushConfiguration,
   daemonEnvironmentVariables,
-  resolveDaemonConfiguration,
-  type IDaemonConfigurationJson
-} from '@microsoft/rush-lib';
+  resolveDaemonConfiguration
+} from '@microsoft/rush-lib/lib/api/DaemonConfiguration';
 import { JsonFile } from '@rushstack/node-core-library';
 import {
   DaemonClientError,
@@ -22,14 +21,18 @@ import {
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
-import { MinimalRushConfiguration } from '@microsoft/rush/lib/MinimalRushConfiguration';
-import { DaemonLauncherUnavailableError } from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { writeStreamAsync } from './writeStreamAsync';
+import {
+  getBundledRushVersion,
+  loadMinimalRushConfiguration,
+  loadVersionSelectedDaemonLauncher,
+  tryFindRushJsonLocation
+} from './lazyRushModules';
 
 interface IWorkspaceJson {
   readonly rushVersion: string;
@@ -39,7 +42,7 @@ interface IWorkspaceJson {
 export async function launchClientAsync(rushx: boolean): Promise<void> {
   const cwd: string = process.cwd();
   const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({ ...process.env });
-  const rushJsonPath: string | undefined = RushConfiguration.tryFindRushJsonLocation({ startingFolder: cwd });
+  const rushJsonPath: string | undefined = tryFindRushJsonLocation(cwd);
   const workspace: IWorkspaceJson | undefined = rushJsonPath ? JsonFile.load(rushJsonPath) : undefined;
   const config: Readonly<Required<IDaemonConfigurationJson>> = resolveDaemonConfiguration(
     workspace?.daemon,
@@ -52,7 +55,8 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     rushx,
     hasTerminal: !!(process.stdin.isTTY || process.stdout.isTTY || process.stderr.isTTY)
   });
-  const selectedVersion: string = environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? Rush.version;
+  const selectedVersion: string =
+    environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? getBundledRushVersion();
   if (!rushx && route.commandName === 'daemon') {
     if ((route.argv[1] === 'start' || route.argv[1] === 'restart') && process.argv.includes('--no-daemon')) {
       throw new Error(`--no-daemon cannot be combined with daemon ${route.argv[1]}.`);
@@ -112,7 +116,10 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     };
     client = await connectOrStartDaemonAsync(connection);
   } catch (error) {
-    if (!(error instanceof DaemonClientError) && !(error instanceof DaemonLauncherUnavailableError))
+    if (
+      !(error instanceof DaemonClientError) &&
+      !(error instanceof loadVersionSelectedDaemonLauncher().DaemonLauncherUnavailableError)
+    )
       throw error;
     process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
@@ -145,7 +152,11 @@ export async function launchClientAsync(rushx: boolean): Promise<void> {
     }
   };
   try {
-    if (rushx) MinimalRushConfiguration.loadFromDefaultLocation((line) => discoveryLines.push(line));
+    if (rushx) {
+      loadMinimalRushConfiguration().MinimalRushConfiguration.loadFromDefaultLocation((line) =>
+        discoveryLines.push(line)
+      );
+    }
     await renderer.initializeAsync();
     outcome = await executeWithDaemonRestartAsync(client, connection, {
       request,
@@ -207,7 +218,7 @@ function launchInProcess(argv: ReadonlyArray<string>, rushx: boolean, selectedVe
   const executable: string = rushx ? 'rushx' : 'rush';
   const rushFolder: string = path.dirname(require.resolve('@microsoft/rush/package.json'));
   process.argv = [process.execPath, path.join(rushFolder, 'bin', executable), ...argv];
-  if (selectedVersion !== Rush.version) {
+  if (selectedVersion !== getBundledRushVersion()) {
     // Old Rush releases reject new RUSH_* names. Only strip this launcher's own inputs;
     // the request snapshot was captured earlier and is never mutated.
     for (const name of [...Object.values(daemonEnvironmentVariables), 'RUSH_DAEMON_EXPERIMENTAL']) {

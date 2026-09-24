@@ -27,7 +27,11 @@ export interface INativeBuildTestFixture {
   readonly folder: string;
   readonly environment: NodeJS.ProcessEnv;
   readonly paths: IDaemonPaths;
-  invokeAsync(argv: ReadonlyArray<string>, rushx?: boolean): Promise<INativeBuildResult>;
+  invokeAsync(
+    argv: ReadonlyArray<string>,
+    rushx?: boolean,
+    nodeArgs?: ReadonlyArray<string>
+  ): Promise<INativeBuildResult>;
   snapshotAsync(...args: string[]): Promise<IDaemonGraphSnapshotPayload['snapshot']>;
   runAsync(work: (fixture: INativeBuildTestFixture) => Promise<void>): Promise<void>;
   trackWatch(child: ChildProcess, closed: Promise<unknown[]>): void;
@@ -125,17 +129,22 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     })
   );
 
-  function invokeAsync(argv: ReadonlyArray<string>, rushx: boolean = false): Promise<INativeBuildResult> {
+  function invokeAsync(
+    argv: ReadonlyArray<string>,
+    rushx: boolean = false,
+    nodeArgs: ReadonlyArray<string> = []
+  ): Promise<INativeBuildResult> {
     if (!acceptingInvocations) throw new Error('The native build fixture is already closing.');
-    return spawnClientAsync(argv, rushx);
+    return spawnClientAsync(argv, rushx, nodeArgs);
   }
 
   async function spawnClientAsync(
     argv: ReadonlyArray<string>,
-    rushx: boolean = false
+    rushx: boolean = false,
+    nodeArgs: ReadonlyArray<string> = []
   ): Promise<INativeBuildResult> {
     const entry: string = path.resolve(__dirname, rushx ? '../../bin/rushx-client' : '../../bin/rush-client');
-    const child = spawn(process.execPath, [entry, ...argv], {
+    const child = spawn(process.execPath, [...nodeArgs, entry, ...argv], {
       cwd: rushx ? path.join(folder, 'b') : folder,
       env: environment,
       stdio: ['ignore', 'pipe', 'pipe']
