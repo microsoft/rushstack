@@ -7,6 +7,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { isDaemonProcessAlive } from './DaemonLockfile';
 
 const NO_SIGNAL: number = 0;
+const NO_SUCH_PROCESS: string = 'ESRCH';
 const PROC_SELF_STAT: string = '/proc/self/stat';
 const UTF8: BufferEncoding = 'utf8';
 const COMM_END: string = ')';
@@ -26,11 +27,17 @@ export interface IDaemonProcessGroupOps {
   readonly log: (message: string) => void;
 }
 
+// Only ESRCH proves the group is gone; EPERM and other failures propagate so reclaim fails closed.
+function rethrowUnlessNoSuchProcess(error: unknown): void {
+  if ((error as NodeJS.ErrnoException | undefined)?.code !== NO_SUCH_PROCESS) throw error;
+}
+
 function groupExists(groupId: number): boolean {
   try {
     process.kill(-groupId, NO_SIGNAL);
     return true;
-  } catch {
+  } catch (error) {
+    rethrowUnlessNoSuchProcess(error);
     return false;
   }
 }
@@ -38,8 +45,8 @@ function groupExists(groupId: number): boolean {
 function signalGroup(groupId: number, signal: NodeJS.Signals): void {
   try {
     process.kill(-groupId, signal);
-  } catch {
-    // The group emptied concurrently.
+  } catch (error) {
+    rethrowUnlessNoSuchProcess(error);
   }
 }
 

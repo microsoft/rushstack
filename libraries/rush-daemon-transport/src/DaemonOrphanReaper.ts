@@ -19,7 +19,7 @@ export interface IDaemonOrphanReaperOptions {
   readonly ops?: IDaemonProcessGroupOps;
   readonly platform?: NodeJS.Platform;
   readonly selfPid?: number;
-  /** How long SIGTERM'd processes get to exit before SIGKILL. */
+  /** How long SIGTERM'd (and then SIGKILL'd) processes get to exit. */
   readonly graceMs?: number;
 }
 
@@ -28,14 +28,19 @@ interface IReapContext {
   readonly deadPid: number;
   readonly graceMs: number;
 }
-
 type OrphanCheck = (pid: number) => boolean;
+
+function isNeitherSelfNorOwnGroup(pid: number, selfPid: number, ops: IDaemonProcessGroupOps): boolean {
+  // Fail closed: an unknown own group might be `pid` (e.g. rush-client run by an operation).
+  const ownGroupId: number | undefined = ops.ownGroupId();
+  return pid !== selfPid && ownGroupId !== undefined && pid !== ownGroupId;
+}
 
 function orphanChecks(options: IDaemonOrphanReaperOptions, ops: IDaemonProcessGroupOps): OrphanCheck[] {
   return [
     () => (options.platform ?? process.platform) !== WINDOWS_PLATFORM,
     (pid: number) => Number.isSafeInteger(pid) && pid >= FIRST_USER_PID,
-    (pid: number) => pid !== (options.selfPid ?? process.pid) && pid !== ops.ownGroupId(),
+    (pid: number) => isNeitherSelfNorOwnGroup(pid, options.selfPid ?? process.pid, ops),
     (pid: number) => !ops.isProcessAlive(pid),
     (pid: number) => ops.groupExists(pid)
   ];
@@ -54,20 +59,21 @@ async function terminateGroupAsync(context: IReapContext): Promise<DaemonOrphanR
   context.ops.signalGroup(context.deadPid, 'SIGTERM');
   if (await waitForGroupExitAsync(context)) return 'terminated';
   context.ops.signalGroup(context.deadPid, 'SIGKILL');
-  return 'killed';
+  if (await waitForGroupExitAsync(context)) return 'killed';
+  throw new Error(`Processes of dead daemon ${context.deadPid} survived SIGKILL; not reclaiming its socket.`);
 }
 
 /**
  * Terminates operation processes left behind by a daemon that died without joining them (SIGKILL, OOM).
  *
  * @remarks
- * The daemon is spawned detached (`setsid`), so its pid is also its session and process group id, and its
- * operation children inherit that group. Sends SIGTERM to the group, then SIGKILL after `graceMs`.
- *
- * PID-reuse guard: only group id `deadPid` is ever signaled, and only once `deadPid` is proven dead while
- * that group still exists. POSIX never hands out a pid that is still in use as a process group id, so no
- * unrelated process can have taken `deadPid` and every remaining member belongs to the dead daemon. The
- * caller's own pid and group are never signaled. Call only under the reclaim mutex.
+ * The daemon is spawned detached, so its pid is its process group id, and phased operation children inherit
+ * that group (children spawned with their own detached group are out of scope). Sends SIGTERM, then SIGKILL
+ * after `graceMs`, and throws if the group still has not exited after a further `graceMs`.
+ * PID-reuse guard: only group `deadPid` is signaled, and only once `deadPid` is proven dead while the group
+ * still exists; POSIX never reuses a pid still in use as a process group id, so every remaining member
+ * belongs to the dead daemon. Never signals the caller's pid or group, and does nothing when the caller's
+ * group is unknown (no `/proc`). Call only under the reclaim mutex.
  */
 export async function reapDeadDaemonProcessGroupAsync(
   deadPid: number,

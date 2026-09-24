@@ -19,7 +19,8 @@ const posixIt: jest.It = process.platform === 'win32' ? it.skip : it;
 const FIRST_ATTEMPT: number = 0;
 const POLL_ATTEMPTS: number = 100;
 const POLL_INTERVAL_MS: number = 20;
-// A stand-in daemon: spawns one operation child (inheriting its process group) and prints the child pid.
+// A stand-in daemon: spawns one operation child and prints the child pid. Like a phased operation (spawned
+// without `detached`), the child inherits the daemon's process group.
 const FAKE_DAEMON_SCRIPT: string =
   "const c=require('node:child_process').spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});" +
   "process.stdout.write(String(c.pid)+'\\n');setInterval(()=>{},1000);";
