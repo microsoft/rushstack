@@ -146,4 +146,44 @@ describe('phased request client cancellation', () => {
     expect(await continuing).toMatchObject({ aborted: false, exitCode: 0, outcome: 'success' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
   });
+
+  it('answers a cancelling client at once when an accepted pending client will join the batch', async () => {
+    const { hanging, actionAsync } = createHangingOperation();
+    const fixture: ITestRoutingFixture = createFixture(actionAsync);
+    const abortSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'abortCurrentIterationAsync');
+    let onReconciling: () => void = () => undefined;
+    const reconciling: Promise<void> = new Promise<void>((resolve) => (onReconciling = resolve));
+    let releaseReconcile: () => void = () => undefined;
+    const reconcileReleased: Promise<void> = new Promise<void>((resolve) => (releaseReconcile = resolve));
+    fixture.session.onReconcileAsync = async () => {
+      onReconciling();
+      await reconcileReleased;
+    };
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    const cancelled: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('cancelled', OPERATION_A),
+      cancelledClient
+    );
+    await reconciling;
+    // Accepted while the batch is still being prepared, so it joins once preparation finishes.
+    const continuing: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('continuing', OPERATION_A),
+      new TestPhasedRequestClient('two')
+    );
+    // Let the continuing request finish preparation and enter the pending queue.
+    for (let tick: number = 0; tick < 20; tick++) {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
+
+    cancelledClient.abortController.abort();
+    expect(await cancelled).toMatchObject({ aborted: true, outcome: 'aborted' });
+
+    releaseReconcile();
+    await hanging.started;
+    expect(hanging.signals.map((signal: AbortSignal) => signal.aborted)).toEqual([false]);
+    expect(abortSpy).not.toHaveBeenCalledWith({ terminateRunning: true });
+    hanging.release();
+    expect(await continuing).toMatchObject({ aborted: false, exitCode: 0, outcome: 'success' });
+  });
 });

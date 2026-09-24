@@ -31,6 +31,12 @@ const NEVER_ENDING_TREE_SCRIPT: string = `
   setInterval(() => {}, 1000);
 `;
 
+// Spawns a grandchild that inherits stdout and never exits, reports its PID, then exits itself.
+const EXITED_PARENT_TREE_SCRIPT: string = `
+  const grandchild = require('node:child_process').spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: ['ignore', 'inherit', 'ignore'] });
+  process.stdout.write('grandchild=' + grandchild.pid + '\\n', () => process.exit(0));
+`;
+
 function isAlive(pid: number): boolean {
   try {
     process.kill(pid, 0);
@@ -54,7 +60,10 @@ describe('ShellOperationRunner hard abort', () => {
   let grandchildPid: number | undefined;
   let spawnOptions: ILifecycleCommandOptions | undefined;
 
-  function createGraph(supportsTerminateRunning: boolean): {
+  function createGraph(
+    supportsTerminateRunning: boolean,
+    script: string = NEVER_ENDING_TREE_SCRIPT
+  ): {
     graph: OperationGraph;
     grandchildStarted: Promise<number>;
   } {
@@ -62,7 +71,7 @@ describe('ShellOperationRunner hard abort', () => {
     const grandchildStarted: Promise<number> = new Promise((resolve) => (onGrandchild = resolve));
     jest.spyOn(Utilities, 'executeLifecycleCommandAsync').mockImplementation((command, options) => {
       spawnOptions = options;
-      child = spawn(process.execPath, ['-e', NEVER_ENDING_TREE_SCRIPT], {
+      child = spawn(process.execPath, ['-e', script], {
         stdio: ['ignore', 'pipe', 'pipe'],
         detached: !!options.connectSubprocessTerminator && SubprocessTerminator.RECOMMENDED_OPTIONS.detached
       });
@@ -148,6 +157,28 @@ describe('ShellOperationRunner hard abort', () => {
     // Aborted operations are not retained as the last execution result.
     expect(graph.resultByOperation.size).toBe(0);
   }, 20000);
+
+  // Process groups are POSIX-only; Windows terminates the tree via TaskKill while the parent is alive.
+  (process.platform === 'win32' ? it.skip : it)(
+    'kills descendants that keep the output open after the shell itself has exited',
+    async () => {
+      const { graph, grandchildStarted } = createGraph(true, EXITED_PARENT_TREE_SCRIPT);
+      const execution: Promise<IExecutionResult> = graph.executeAsync({});
+      const pid: number = await grandchildStarted;
+      const parent: ChildProcess = child!;
+      if (parent.exitCode === null) {
+        await once(parent, 'exit');
+      }
+      expect(isAlive(pid)).toBe(true);
+
+      await graph.abortCurrentIterationAsync({ terminateRunning: true });
+      const result: IExecutionResult = await execution;
+
+      expect(result.status).toBe(OperationStatus.Aborted);
+      expect(await waitForExitAsync(pid, 5000)).toBe(true);
+    },
+    20000
+  );
 
   it('does not isolate or terminate processes when the graph does not support it', async () => {
     const { graph, grandchildStarted } = createGraph(false);

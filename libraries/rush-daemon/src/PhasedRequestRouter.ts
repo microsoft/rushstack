@@ -405,6 +405,12 @@ class PhasedRequestBatchCoordinator {
         this.#graph,
         participants.map((entry: IBatchEntry) => entry.selection)
       );
+      for (const entry of batch) {
+        if (!participants.includes(entry)) {
+          // Clients that cancelled before execution must not wait for the participants' work.
+          this.#finishDetachedEntry(entry);
+        }
+      }
       for (const entry of participants) {
         entry.participated = true;
         const activeOperationIds: ReadonlySet<string> = new Set(
@@ -516,7 +522,7 @@ class PhasedRequestBatchCoordinator {
     if (
       entry.executionStarted &&
       this.#currentBatch?.includes(entry) &&
-      this.#currentBatch.some((candidate: IBatchEntry) => this.#isEntryLive(candidate))
+      this.#hasLiveBatchParticipant()
     ) {
       // Other live participants still need the shared work: detach this client and answer it now.
       this.#finishDetachedEntry(entry);
@@ -544,6 +550,24 @@ class PhasedRequestBatchCoordinator {
 
   #isEntryLive(entry: IBatchEntry): boolean {
     return !entry.abortRequested && !entry.client.abortSignal.aborted && entry.outputError === undefined;
+  }
+
+  /**
+   * Whether a live client still needs the current batch, including compatible requests that were accepted into
+   * the pending queue and will join the batch once the execution lease is acquired.
+   */
+  #hasLiveBatchParticipant(): boolean {
+    const isLive: (candidate: IBatchEntry) => boolean = (candidate: IBatchEntry) => this.#isEntryLive(candidate);
+    if (this.#currentBatch?.some(isLive)) {
+      return true;
+    }
+    return (
+      this.#acceptingCurrentBatch &&
+      this.#pending.some(
+        (candidate: IBatchEntry) =>
+          candidate.exclusivityClass === RequestExclusivityClass.SharedBuild && isLive(candidate)
+      )
+    );
   }
 
   #requestIterationAbort(): void {

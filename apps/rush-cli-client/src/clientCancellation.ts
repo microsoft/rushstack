@@ -24,13 +24,14 @@ export function formatCancellationMessage(commandName: string): string {
 }
 
 /**
- * Returns whether a daemon outcome represents a cancelled command. A completed (non-aborted) result wins over a
- * late signal, and a rejection is never reported as a cancellation.
+ * Returns whether a daemon outcome represents a cancelled command. A result is cancelled when the daemon reports it
+ * as aborted, even if an operation failure determines its semantic outcome. A completed (non-aborted) result wins
+ * over a late signal, and a rejection is never reported as a cancellation.
  */
 export function isCancelledOutcome(outcome: DaemonClientOutcome, signalled: boolean): boolean {
   switch (outcome.kind) {
     case 'result':
-      return outcome.result.outcome === 'aborted';
+      return outcome.result.aborted;
     case 'rejected':
       return false;
     default:

@@ -123,7 +123,13 @@ export class ShellOperationRunner implements IOperationRunner {
         });
         const terminateProcessTree: () => void = () => {
           try {
-            SubprocessTerminator.killProcessTree(subProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+            if (!IS_WINDOWS && subProcess.pid !== undefined && typeof subProcess.exitCode === 'number') {
+              // The shell already exited, but descendants in its process group may still hold its stdio open.
+              // killProcessTree() is a no-op in that state, so signal the process group directly.
+              killExitedProcessGroup(subProcess.pid);
+            } else {
+              SubprocessTerminator.killProcessTree(subProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+            }
           } catch (error) {
             terminal.writeErrorLine(`Failed to terminate the operation process tree: ${error}`);
           }
@@ -211,6 +217,17 @@ export class ShellOperationRunner implements IOperationRunner {
 
   public getConfigHash(): string {
     return this.#commandForHash;
+  }
+}
+
+function killExitedProcessGroup(pid: number): void {
+  try {
+    // The process group ID cannot be reused while any member of the group is still alive.
+    process.kill(-pid, 'SIGKILL');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
+      throw error;
+    }
   }
 }
 

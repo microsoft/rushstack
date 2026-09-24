@@ -451,6 +451,14 @@ describe('daemon client cancellation exit codes', () => {
     expect(formatCancellationMessage('build')).toBe('rush-client: build cancelled.\n');
   });
 
+  it('treats a cancelled result as cancelled even when a failure outcome takes precedence', () => {
+    const cancelledWithFailure: DaemonClientOutcome = {
+      kind: 'result',
+      result: { requestId: 'r', outcome: 'failure', exitCode: 1, aborted: true }
+    };
+    expect(isCancelledOutcome(cancelledWithFailure, true)).toBe(true);
+  });
+
   it('keeps completed results and rejections when a signal arrives late', () => {
     const succeeded: DaemonClientOutcome = {
       kind: 'result',
