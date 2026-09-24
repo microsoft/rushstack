@@ -1587,6 +1587,9 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 // @public
 export type PnpmTrustPolicy = 'no-downgrade' | 'off';
 
+// @internal
+export function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): void;
+
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);

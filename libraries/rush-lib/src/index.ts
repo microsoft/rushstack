@@ -174,6 +174,7 @@ export type {
 export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
 export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export { _printOperationStatus } from './logic/operations/OperationResultSummarizerPlugin';
 export {
   PhasedCommandEngine,
   type IPhasedCommandEngine,

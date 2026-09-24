@@ -19,6 +19,7 @@ import type {
 
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
+import { writePhasedRequestSummary } from './PhasedRequestSummary';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
@@ -66,6 +67,8 @@ interface IPreparedPhasedRequest {
   readonly interactiveSession: IInteractiveRequestSession | undefined;
   readonly request: IDaemonPhasedRequest;
   readonly selection: IResolvedSelection;
+  /** The `performance.now()` timestamp at which the router received the request. */
+  readonly startTimeMs: number;
   readonly warningsAllowedByEnvironment: boolean;
 }
 
@@ -113,6 +116,7 @@ export class PhasedRequestRouter {
     exactSelection: boolean = false,
     onExecutionStarting?: () => void
   ): Promise<IDaemonPhasedRequestResult> {
+    const startTimeMs: number = performance.now();
     validateRequestIdentity(request);
     const interactiveSession: IInteractiveRequestSession | undefined = validateInteractiveSession(
       request,
@@ -190,6 +194,7 @@ export class PhasedRequestRouter {
               interactiveSession,
               request,
               selection,
+              startTimeMs,
               warningsAllowedByEnvironment,
               onExecutionStarting
             },
@@ -540,6 +545,16 @@ class PhasedRequestBatchCoordinator {
     }
     const cleanupErrors: unknown[] = [...batchCleanupErrors];
     if (entry.requestSink) {
+      if (entry.participated && this.#isEntryLive(entry)) {
+        writePhasedRequestSummary({
+          activeOperations: entry.selection.activeOperations,
+          commandName: entry.request.commandName,
+          elapsedMs: performance.now() - entry.startTimeMs,
+          executionError,
+          graph: this.#graph,
+          sink: entry.requestSink
+        });
+      }
       try {
         await entry.requestSink.flushAsync();
       } catch (error) {
