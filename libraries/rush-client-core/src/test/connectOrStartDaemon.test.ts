@@ -358,9 +358,11 @@ describe('detached daemon startup', () => {
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
   });
 
-  it.each(['restart-once', 'restart-always', 'restart-held'])(
+  it.each(['restart-once', 'restart-twice', 'restart-always', 'restart-held'])(
     'retries only the typed pre-execution result for %s after ownership release',
     async (mode) => {
+      // restart-always exhausts the deadline; the others need room for loaded CI machines.
+      const waitTimeoutMs: number = mode === 'restart-always' ? 1000 : 10000;
       const connection: IConnectOrStartDaemonOptions = {
         ...options,
         startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
@@ -373,7 +375,7 @@ describe('detached daemon startup', () => {
         cwd: folder,
         environment: {},
         terminal: { isTTY: false, supportsColor: false },
-        admission: { waitTimeoutMs: 1000 }
+        admission: { waitTimeoutMs }
       });
       const pending = executeWithDaemonRestartAsync(
         client,
@@ -383,24 +385,33 @@ describe('detached daemon startup', () => {
         },
         { request }
       );
-      if (mode === 'restart-once') {
+      if (mode === 'restart-once' || mode === 'restart-twice') {
+        const restarts: number = mode === 'restart-once' ? 1 : 2;
         expect(await pending).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
         const waits = fs.readFileSync(path.join(folder, 'waits'), 'utf8').trim().split('\n').map(Number);
-        expect(waits[0]).toBe(1000);
-        expect(waits[1]).toBeLessThan(1000);
-        expect(waits[1]).toBeGreaterThanOrEqual(0);
-        expect(request.admission?.waitTimeoutMs).toBe(1000);
-      } else {
-        await expect(pending).rejects.toThrow(
-          mode === 'restart-held' ? 'previous daemon still owns' : 'single safe retry was exhausted'
+        expect(waits).toHaveLength(restarts + 1);
+        expect(waits[0]).toBe(waitTimeoutMs);
+        for (let index: number = 1; index <= restarts; index++) {
+          expect(waits[index]).toBeLessThanOrEqual(waits[index - 1]);
+          expect(waits[index]).toBeLessThan(waitTimeoutMs);
+          expect(waits[index]).toBeGreaterThanOrEqual(0);
+        }
+        expect(request.admission?.waitTimeoutMs).toBe(waitTimeoutMs);
+        expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(
+          restarts + 1
         );
+      } else if (mode === 'restart-always') {
+        // Every successor asks again: bounded retries inside the admission deadline, then a fallback.
+        expect(await pending).toMatchObject({ kind: 'fallback', reason: 'restartRetriesExhausted' });
+        const starts: number = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n').length;
+        expect(starts).toBeGreaterThanOrEqual(2);
+        expect(starts).toBeLessThanOrEqual(7);
+        expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(starts);
+      } else {
+        await expect(pending).rejects.toThrow('previous daemon still owns');
+        expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+        expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
       }
-      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(
-        mode === 'restart-held' ? 1 : 2
-      );
-      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(
-        mode === 'restart-held' ? 1 : 2
-      );
     },
     15000
   );

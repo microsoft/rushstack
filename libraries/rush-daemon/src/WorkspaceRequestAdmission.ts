@@ -18,6 +18,7 @@ import {
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
+import type { IWorkspaceRestartTicket, WorkspaceRestartArbiter } from './WorkspaceRestartArbiter';
 
 export interface IRequestAdmissionClient {
   readonly abortSignal: AbortSignal;
@@ -148,6 +149,22 @@ export class RequestAdmissionController {
     } catch (error) {
       lease?.release();
       await writer?.flushAsync();
+      throw this.#getReportedError(error);
+    }
+  }
+
+  /** Waits, within the same admission budget, until a restart would not preempt another request. */
+  public async waitForRestartDrainAsync(
+    arbiter: WorkspaceRestartArbiter,
+    ticket: IWorkspaceRestartTicket
+  ): Promise<void> {
+    try {
+      await arbiter.waitForDrainAsync(ticket, {
+        abortSignal: this.#abortController.signal,
+        noWait: this.#admission?.noWait,
+        waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
+      });
+    } catch (error) {
       throw this.#getReportedError(error);
     }
   }
