@@ -86,8 +86,16 @@ The host uses stable fingerprints to classify native requests:
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
 Native dispatch first copies the envelope and normalizes only engine-owned `_RUSH_LIB_PATH` to this daemon's
-real engine, preventing false restarts or wrong SDK selection from a foreign client path. All other environment
-inputs remain unchanged and are checked normally.
+real engine, preventing false restarts or wrong SDK selection from a foreign client path. Environment
+comparisons (the tier-2 fingerprint and the production resolver's startup-environment check) both use rush-lib's
+`getWorkspaceFingerprintEnvironmentEntries()`, which omits `workspaceFingerprintIgnoredEnvironmentVariables`:
+volatile per-shell, terminal, session and client-routing variables such as `PWD`, `OLDPWD`, `SHLVL`, `_`,
+`TERM`, `COLUMNS`, `WSL_INTEROP`, `SSH_*`, `INIT_CWD`, `RUSH_DAEMON`, `RUSH_DAEMON_AUTO_START` and
+`RUSH_DAEMON_EXPERIMENTAL`. Rush does not read these to configure the engine, build the graph or hash operations,
+so running a command from a project subfolder or another shell reuses the warm workspace. All other environment
+inputs, including every other `RUSH_*` variable, `NODE_*`, npm/pnpm configuration, `PATH` and `HOME`, remain
+unchanged and are checked normally. Phased operation processes inherit the daemon's own environment, so they
+see the daemon's startup values for the ignored variables rather than the submitting shell's values.
 Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
 still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
 
@@ -112,15 +120,17 @@ External Rush plugins, `.env` initialization, watch/install/variant
 and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global
 commands are rejected by the phased path, not silently bypassed. Native Rushx is handled separately below.
 For phased commands, a changed request environment requires a new process, including Rush/cache
-policy variables. These restrictions remain until the corresponding initialization,
+policy variables (the volatile variables listed above excepted). These restrictions remain until the corresponding initialization,
 environment, and resource-lifetime contracts are request-scoped.
 
 The native Rush lock is held only during graph preparation and each coalesced iteration, not while the warm daemon
 is idle. `acquireExecutionLeaseAsync` is an optional engine/session hook invoked once by the batch coordinator,
 before input reconciliation. Compatible clients share that lease rather than contending independently. It remains
 held through operation execution, runner cleanup, and every participant's output/input cleanup; the batch barrier
-releases it before any final command result is published. Thus ordinary native actions and permanent `--no-daemon`
-fallback can run immediately after a completed warm request without stopping the daemon.
+releases it before the final command result of the batch's last participant is published. A coalesced participant
+whose own operations all completed earlier may receive its result while the iteration still runs for the others (see
+below); it must not assume the lock is already released. Thus ordinary native actions and permanent `--no-daemon`
+fallback can run immediately after a completed single-client warm request without stopping the daemon.
 
 A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
 automatic retry. A later explicit request can retry after contention ends, including contention during the first
@@ -294,13 +304,15 @@ preserves its records and diagnostics without failing an otherwise successful bu
 | --- | --- |
 | `watch` | Retains host observation of requested warm projects between requests when true. False (the default) keeps root/config guards only. Never schedules builds. |
 | `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
-| `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
-| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
+| `warmSetMaxProjects` | Limits the projects that hold warm **resources** (an active runner such as a persistent IPC child, or a `watch: true` file watcher). The lowest-ranked holders are released (runners closed, watchers removed, records deleted); executing/prepared and explicitly protected work is exempt. Projects whose only retained state is operation results from resource-free (shell/null) runners neither count toward nor are evicted for this limit, so no-op re-requests of large workspaces stay skipped. |
+| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. The comparison uses the **whole daemon process RSS** (graph, Node heap and retained records, typically 130-190 MiB) plus measured child RSS, so a budget below the daemon's baseline evicts every idle project on each pass and disables warm skipping. Never treats cache files as memory or claims a hard RSS ceiling. |
 | `autoWarmByTelemetry` | Promotes already-requested high-value work instead of pure LRU. Never schedules or executes speculative scripts. |
 
 One deterministic best-first comparator is shared by retention and reverse-order eviction. With complete
-measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then ordinal project
-name. Measured entries precede the missing-data bucket; that bucket uses LRU and the same name tie-break.
+measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then whether the
+project owned an explicitly requested target (an enabled operation with no enabled consumer, so `--to x` keeps
+`x` over its same-request dependencies), then ordinal project name. Measured entries precede the missing-data
+bucket; that bucket uses LRU and the same tie-breaks.
 Without telemetry mode the entire order is LRU. Savings compare actual cold and reused execution stopwatches
 (or native non-cached duration versus cache-restoration duration); no startup cost or RSS is invented.
 `operation-graph`'s existing `WatchLoop` now reports its own measured RSS in an optional IPC completion field.
@@ -435,9 +447,12 @@ the router validates both, reconciles retained invalidations, applies the select
 and runs at most one scheduled iteration. A workspace-wide `RequestScheduler` admits phased and global routes using
 the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE`); custom-origin commands and unknown
 built-in names fail closed to `EXCLUSIVE`, including plugin replacements of built-in names. Queued clients receive
-ordered, one-based position controls and can request fail-fast or bounded waiting. One absolute deadline and progress
-channel cover both workspace admission and the temporary phased graph-execution gate. Cancellation, disconnect, or
-queue-output failure removes queued work before it can execute.
+ordered, one-based position controls and can request fail-fast or bounded waiting. One progress channel covers both
+workspace admission and the temporary phased graph-execution gate. An explicit `noWait` or `waitTimeoutMs` is one
+absolute deadline for both waits. When the client marks `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), the
+deadline bounds workspace admission only: a `SHARED-BUILD` request that arrives after the current batch has closed waits
+on the graph-execution gate without a deadline, because it is queued only behind running compatible shared builds, and
+then runs in the next batch. Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
 A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
 backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output
 drains. The result translates only that client's operation subset to Rush's success, warning, failure, or abort exit
@@ -446,8 +461,13 @@ request's immutable `RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment overri
 Compatible phased `SHARED-BUILD` requests admitted before the next graph iteration starts are coalesced at a
 deterministic event-loop-turn boundary. The router reconciles retained invalidations once, unions the clients' enabled
 dependency closures, and schedules one iteration. Shared operations execute once, while each client subscribes only
-to its own closure and derives its final result only from that subset. Requests admitted after scheduling starts form
-a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
+to its own closure and derives its final result only from that subset. A client does not wait for the other clients'
+larger selections: once every operation of its own closure that the iteration scheduled has completed and its output
+has drained, its result is published while the iteration, graph lease, and native execution lease continue for the
+remaining clients. The last client that still needs the iteration receives its result after iteration end and lease
+release, as for a single client. An early result is not published when any of the client's operations was aborted;
+iteration-wide failures that occur after an early result are reported only to the remaining clients. Requests
+admitted after scheduling starts form a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
 clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
 
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies

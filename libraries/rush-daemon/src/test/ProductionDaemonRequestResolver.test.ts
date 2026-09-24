@@ -34,6 +34,7 @@ import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 import { removeTestFolderAsync } from './TestProcessExit';
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
+import { DaemonShutdownError } from '../DaemonShutdownError';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import type {
   GetWorkspaceSuccessorLaunchAsync,
@@ -1493,6 +1494,69 @@ process.exit(23);
       expect(events).toContain('snapshot-diagnostic');
       expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  const canRevokeReadAccess: boolean = process.platform !== 'win32' && process.getuid?.() !== 0;
+  (canRevokeReadAccess ? it : it.skip)(
+    'reports a warm snapshot failure to the failing request and never replays it into the next request',
+    async () => {
+      const fixture: IFixture = await createFixtureAsync();
+      const inputPath: string = path.join(fixture.repoRoot, 'projects/a/input.txt');
+      try {
+        await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+        fs.writeFileSync(inputPath, 'unreadable');
+        fs.chmodSync(inputPath, 0);
+        const failed: ITerminalExchange = await runAsync(fixture, 'unreadable', ['build', '--only', 'a']);
+        expect(failed.terminal).toMatchObject({
+          kind: 'requestRejected',
+          payload: {
+            message: expect.stringMatching(
+              /Permission denied[\s\S]*Rush could not capture the next workspace inputs snapshot\./
+            )
+          }
+        });
+        fs.chmodSync(inputPath, 0o644);
+        const recovered: ITerminalExchange = await runAsync(fixture, 'recovered', ['build', '--only', 'a']);
+        expect(recovered.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+        const output: string = [
+          logText(recovered),
+          ...recovered.frames
+            .filter((frame) => frame.kind === DaemonFrameType.event)
+            .map((frame) => JSON.stringify(decodeDaemonEventFrame(frame.payload)))
+        ].join('\n');
+        expect(output).not.toContain('Permission denied');
+        expect(output).not.toContain('state of the repo');
+      } finally {
+        if (fs.existsSync(inputPath)) fs.chmodSync(inputPath, 0o644);
+        await fixture[Symbol.asyncDispose]();
+      }
+    }
+  );
+
+  it('aborts an in-flight build with the typed daemon shutdown reason', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const gate: INativeScriptGate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
+    try {
+      const victim: Promise<ITerminalExchange> = runAsync(fixture, 'victim', ['build', '--only', 'a']);
+      await gate.entered;
+      const closing: Promise<void> = fixture.host.closeAsync(
+        new DaemonShutdownError({ initiator: 'signal', signal: 'SIGTERM' })
+      );
+      await gate.releaseAsync();
+      expect((await victim).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          aborted: true,
+          errorMessage: expect.stringMatching(
+            /^The Rush daemon was shut down \(the daemon process received SIGTERM\) while this request was running; re-run the command\.$/
+          )
+        }
+      });
+      await closing;
+    } finally {
+      await gate.releaseAsync();
       await fixture[Symbol.asyncDispose]();
     }
   });

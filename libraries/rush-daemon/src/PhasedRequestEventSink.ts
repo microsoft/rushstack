@@ -6,10 +6,10 @@ import { randomUUID } from 'node:crypto';
 import type {
   IOperationExecutionResult,
   Operation,
-  OperationStatus,
   _IOperationActivityOptions,
   _IOperationGraphEventSink
 } from '@microsoft/rush-lib';
+import { OperationStatus } from '@microsoft/rush-lib';
 import {
   DAEMON_PROTOCOL_VERSION,
   RUSHD_OPERATION_HEADER,
@@ -28,6 +28,17 @@ import type { IPhasedRequestClient } from './PhasedRequestClient';
 const EVENT_SOURCE_PACKAGE: string = '@microsoft/rush-lib';
 const EVENT_SOURCE_COMPONENT: string = 'OperationGraph';
 const TEXT_ENCODER: InstanceType<typeof TextEncoder> = new TextEncoder();
+// Mirrors rush-lib's TERMINAL_STATUSES, which is not part of its public API.
+const TERMINAL_OPERATION_STATUSES: ReadonlySet<OperationStatus> = new Set([
+  OperationStatus.Success,
+  OperationStatus.SuccessWithWarning,
+  OperationStatus.Skipped,
+  OperationStatus.Blocked,
+  OperationStatus.FromCache,
+  OperationStatus.Failure,
+  OperationStatus.NoOp,
+  OperationStatus.Aborted
+]);
 
 interface IObservedOperationResult {
   readonly executionResult: IOperationExecutionResult;
@@ -91,7 +102,10 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   readonly #observedResults: Map<Operation, IObservedOperationResult> = new Map();
   readonly #rushVersion: string;
   readonly #writer: OrderedClientWriter;
+  readonly #onActiveOperationsSettled: (() => void) | undefined;
+  readonly #pendingOperationIds: Set<string> = new Set();
   #completedOperations: number = 0;
+  #settled: boolean = false;
   #totalOperations: number = 0;
 
   public constructor(options: {
@@ -100,10 +114,17 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     getNextSequence: () => number;
     onWriteFailure: (error: Error) => void;
     rushVersion: string;
+    /**
+     * Called at most once per iteration, when every operation of this client's selection that the iteration
+     * scheduled has emitted its terminal completion event. All of those operations' events and log chunks are
+     * enqueued on this sink's writer before the callback runs.
+     */
+    onActiveOperationsSettled?: () => void;
   }) {
     this.#activeOperationIds = options.activeOperationIds;
     this.#client = options.client;
     this.#getNextSequence = options.getNextSequence;
+    this.#onActiveOperationsSettled = options.onActiveOperationsSettled;
     this.#rushVersion = options.rushVersion;
     this.#writer = new OrderedClientWriter(options.client, options.onWriteFailure);
   }
@@ -125,10 +146,34 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   public onIterationScheduled(records: Iterable<IOperationExecutionResult>): void {
     this.#completedOperations = 0;
     this.#totalOperations = 0;
+    this.#pendingOperationIds.clear();
+    this.#settled = false;
     for (const record of records) {
-      if (this.#activeOperationIds.has(record.operation.name) && !record.silent) {
+      const operationId: string = record.operation.name;
+      if (!this.#activeOperationIds.has(operationId)) {
+        continue;
+      }
+      if (!record.silent) {
         this.#totalOperations++;
       }
+      if (!TERMINAL_OPERATION_STATUSES.has(record.status)) {
+        this.#pendingOperationIds.add(operationId);
+      }
+    }
+  }
+
+  public onOperationCompleted(result: IOperationExecutionResult): void {
+    if (!this.#pendingOperationIds.delete(result.operation.name) || this.#settled) {
+      return;
+    }
+    if (result.status === OperationStatus.Aborted) {
+      // The iteration is being aborted or failed to start; leave this client's result to the batch.
+      this.#settled = true;
+      return;
+    }
+    if (this.#pendingOperationIds.size === 0) {
+      this.#settled = true;
+      this.#onActiveOperationsSettled?.();
     }
   }
 

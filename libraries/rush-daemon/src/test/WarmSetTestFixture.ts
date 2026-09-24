@@ -32,6 +32,8 @@ export interface IWarmFixtureOptions {
   readonly ipc?: boolean;
   readonly cache?: boolean;
   readonly configurationKind?: 'direct' | 'rig' | 'inherited';
+  /** Adds independent shell-runner projects p01..pNN beside a, b and c. */
+  readonly extraProjectCount?: number;
 }
 
 export const GENEROUS_WARM_CONFIGURATION: WorkspaceWarmSetConfiguration = {
@@ -139,6 +141,7 @@ export class WarmSetTestFixture implements AsyncDisposable {
           );
           fixture.write('a/config/rush-project.json', '{"extends":"../../common/temp/inherited.json"}');
         }
+        if (options.extraProjectCount) addExtraProjects(fixture, options.extraProjectCount);
       }, false);
     });
     result._attachOnInitialization();
@@ -220,6 +223,27 @@ export class WarmSetTestFixture implements AsyncDisposable {
         return components;
       })
     );
+  }
+}
+
+export function getExtraProjectNames(count: number): string[] {
+  return Array.from({ length: count }, (unused, index) => `p${String(index + 1).padStart(2, '0')}`);
+}
+
+function addExtraProjects(fixture: DaemonGraphTestFixture, count: number): void {
+  const names: string[] = getExtraProjectNames(count);
+  const rushJson: { projects: object[] } = JSON.parse(
+    fs.readFileSync(path.join(fixture.folder, 'rush.json'), 'utf8')
+  );
+  rushJson.projects.push(...names.map((name) => ({ packageName: name, projectFolder: name })));
+  fixture.write('rush.json', JSON.stringify(rushJson));
+  for (const name of names) {
+    fixture.write(
+      `${name}/package.json`,
+      JSON.stringify({ name, version: '1.0.0', scripts: { '_phase:compile': 'node build.cjs' } })
+    );
+    fixture.write(`${name}/input.txt`, 'one');
+    fixture.write(`${name}/build.cjs`, `require('node:fs').appendFileSync('../runs.txt', '${name}\\n');`);
   }
 }
 

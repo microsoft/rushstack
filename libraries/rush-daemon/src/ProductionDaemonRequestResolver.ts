@@ -3,8 +3,9 @@
 
 import * as path from 'node:path';
 
-import { Sort, type LockFile } from '@rushstack/node-core-library';
+import type { LockFile } from '@rushstack/node-core-library';
 import {
+  getWorkspaceFingerprintEnvironmentEntries,
   PhasedCommandEngine,
   PhasedCommandEngineBusyError,
   PhasedCommandEngineConfigurationChangedError,
@@ -32,13 +33,16 @@ import {
 import type { IWorkspaceSession, IWorkspaceSessionComponents } from './WorkspaceSession';
 import { EngineTerminalProvider } from './EngineTerminalProvider';
 import { OperationOutputFingerprints } from './OperationOutputFingerprints';
+import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 
 /**
  * Binds the standalone host to a real native build/rebuild graph on its first request.
  *
  * @remarks
- * A host is pinned to its first command and non-selection parameters. Incompatible parameters,
+ * A host is pinned to its first command and graph-affecting, non-selection parameters. Presentation and
+ * scheduling parameters (`--verbose`, `--parallelism`, `--timeline`) are applied per request instead.
+ * Incompatible parameters,
  * environments, or graph inputs are rejected before scheduling; no request is retried automatically.
  * The initial supported surface excludes external plugins, .env initialization, install/watch,
  * event-hook scripts, and rushx/global commands. Use the unchanged native CLI for those surfaces.
@@ -118,6 +122,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     return {
       kind: 'phased',
       exactSelection: true,
+      requestSettings: command.requestSettings,
       request: {
         admission: envelope.admission,
         commandName: envelope.commandName,
@@ -171,7 +176,8 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     if (abortSignal.aborted)
       throw new DaemonRequestDispatchError(
         'routingFailed',
-        'The request was cancelled before engine initialization.'
+        getDaemonShutdownReason(abortSignal)?.message ??
+          'The request was cancelled before engine initialization.'
       );
     return command;
   }
@@ -227,7 +233,9 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           ...components,
           reconcileInvalidationsAsync: async () => {
             const result: IWorkspaceInvalidationReconciliation =
-              await components.reconcileInvalidationsAsync!();
+              await terminal.reconcileWithRequestDiagnosticsAsync(() =>
+                components.reconcileInvalidationsAsync!()
+              );
             if (!engine.isIncremental) engine.operationGraph.invalidateOperations(undefined, 'rebuild');
             return result;
           }
@@ -248,11 +256,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
 }
 
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {
-  return JSON.stringify(
-    Object.entries(environment)
-      .filter(([, value]) => value !== undefined)
-      .sort(([a], [b]) => Sort.compareByValue(a, b))
-  );
+  return JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment));
 }
 
 function getChangedOperations(options: IMapWorkspaceInvalidationsOptions): Iterable<Operation> {

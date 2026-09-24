@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DaemonShutdownError } from './DaemonShutdownError';
 import { RushDaemonHost } from './RushDaemonHost';
 import type { IRushDaemonHostOptions } from './RushDaemonHost';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from './WorkspaceProcessRestart';
@@ -41,12 +42,19 @@ export async function serveRushDaemonAsync(options: IRushDaemonServeOptions): Pr
     });
     await options.onReady?.(host);
     await waitForShutdownAsync(host, signalRegistration.signal);
-    await host.closeAsync();
+    await host.closeAsync(getShutdownReason(signalRegistration.signal));
     await host.restartCompleted;
   } finally {
     signalRegistration.dispose();
     await host?.closeAsync();
   }
+}
+
+function getShutdownReason(signal: AbortSignal): DaemonShutdownError | undefined {
+  if (!signal.aborted) return undefined;
+  return signal.reason instanceof DaemonShutdownError
+    ? signal.reason
+    : new DaemonShutdownError({ initiator: 'host' });
 }
 
 interface IShutdownSignalRegistration {
@@ -56,7 +64,8 @@ interface IShutdownSignalRegistration {
 
 function createProcessShutdownSignal(): IShutdownSignalRegistration {
   const controller: AbortController = new AbortController();
-  const onSignal: () => void = () => controller.abort();
+  const onSignal: (signal: NodeJS.Signals) => void = (signal: NodeJS.Signals) =>
+    controller.abort(new DaemonShutdownError({ initiator: 'signal', signal }));
   process.once('SIGINT', onSignal);
   process.once('SIGTERM', onSignal);
   return {

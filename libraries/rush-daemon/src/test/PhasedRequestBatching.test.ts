@@ -8,8 +8,9 @@ import type {
   IDaemonPhasedRequest,
   IDaemonPhasedRequestResult
 } from '@rushstack/rush-daemon-protocol';
-import { RUSHD_OPERATION_HEADER } from '@rushstack/rush-daemon-protocol';
+import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
@@ -18,7 +19,7 @@ import {
   TestPhasedRequestClient,
   createRoutingFixture
 } from './PhasedRequestRouterTestUtilities';
-import type { ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
+import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
@@ -57,6 +58,7 @@ function createRequest(
 
 function createFixture(options?: {
   readonly actionAAsync?: (terminal: ITerminal) => Promise<void>;
+  readonly actionBAsync?: (terminal: ITerminal) => Promise<void>;
   readonly actionCAsync?: (terminal: ITerminal) => Promise<void>;
   readonly statusA?: OperationStatus;
 }): ITestRoutingFixture {
@@ -70,7 +72,7 @@ function createFixture(options?: {
           options?.actionAAsync
         )
       ],
-      [OPERATION_B, new TestOperationRunner(OPERATION_B)],
+      [OPERATION_B, new TestOperationRunner(OPERATION_B, OperationStatus.Success, options?.actionBAsync)],
       [OPERATION_C, new TestOperationRunner(OPERATION_C, OperationStatus.Success, options?.actionCAsync)]
     ]),
     [[OPERATION_B, OPERATION_A]]
@@ -79,6 +81,45 @@ function createFixture(options?: {
 
 function getResultOperationIds(result: IDaemonPhasedRequestResult): ReadonlyArray<string> {
   return result.operationResults.map(({ operationId }) => operationId);
+}
+
+interface IExecutionLeaseTracker {
+  readonly events: string[];
+}
+
+function trackExecutionLease(fixture: ITestRoutingFixture): IExecutionLeaseTracker {
+  const events: string[] = [];
+  fixture.session.acquireExecutionLeaseAsync = async (): Promise<AsyncDisposable> => {
+    events.push('acquired');
+    return {
+      [Symbol.asyncDispose]: async (): Promise<void> => {
+        events.push('released');
+      }
+    };
+  };
+  return { events };
+}
+
+function trackResult(
+  resultPromise: Promise<IDaemonPhasedRequestResult>,
+  label: string,
+  events: string[]
+): Promise<IDaemonPhasedRequestResult> {
+  return resultPromise.then((result: IDaemonPhasedRequestResult) => {
+    events.push(`result:${label}`);
+    return result;
+  });
+}
+
+function isStreamClosedEvent(write: ITestClientWrite, operationId: string): boolean {
+  const payload: unknown = write.event?.payload;
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    (payload as { name?: unknown }).name === RUSHD_OPERATION_STREAM_CLOSED &&
+    write.event !== undefined &&
+    eventOperationId(write.event) === operationId
+  );
 }
 
 function eventOperationId(event: IDaemonEventEnvelope): string | undefined {
@@ -100,6 +141,45 @@ function eventOperationId(event: IDaemonEventEnvelope): string | undefined {
 }
 
 describe('shared phased request batching', () => {
+  it('schedules separate iterations for overlapping requests with different request settings', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const graph: ITestRoutingFixture['graph'] = fixture.graph;
+    const scheduledSettings: IPhasedCommandEngineRequestSettings[] = [];
+    const originalScheduleAsync: typeof graph.scheduleIterationAsync =
+      graph.scheduleIterationAsync.bind(graph);
+    const scheduleSpy: jest.SpyInstance = jest
+      .spyOn(graph, 'scheduleIterationAsync')
+      .mockImplementation((...args: Parameters<typeof graph.scheduleIterationAsync>) => {
+        scheduledSettings.push({ parallelism: graph.parallelism, quietMode: graph.quietMode });
+        return originalScheduleAsync(...args);
+      });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const defaultSettings: IPhasedCommandEngineRequestSettings = { parallelism: 4, quietMode: true };
+    const verboseSerialSettings: IPhasedCommandEngineRequestSettings = { parallelism: 1, quietMode: false };
+
+    const [first, second] = await Promise.all([
+      router.executeAsync(
+        createRequest('default', OPERATION_A),
+        new TestPhasedRequestClient('one'),
+        false,
+        undefined,
+        defaultSettings
+      ),
+      router.executeAsync(
+        createRequest('verbose-serial', OPERATION_B),
+        new TestPhasedRequestClient('two'),
+        false,
+        undefined,
+        verboseSerialSettings
+      )
+    ]);
+
+    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+    expect(scheduledSettings).toEqual([defaultSettings, verboseSerialSettings]);
+    expect(first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(second).toMatchObject({ exitCode: 0, outcome: 'success' });
+  });
+
   it('merges overlapping selections into one real graph iteration and executes shared operations once', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
@@ -143,6 +223,131 @@ describe('shared phased request batching', () => {
     expect(getHeaderData(clientC)).toEqual([
       { completedOperations: 1, operationId: OPERATION_C, totalOperations: 1 }
     ]);
+  });
+
+  it('publishes a coalesced client result as soon as its own closure settles', async () => {
+    const releaseB: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: async (terminal: ITerminal): Promise<void> => terminal.writeLine('from-a'),
+      actionBAsync: async (): Promise<void> => releaseB.promise
+    });
+    const lease: IExecutionLeaseTracker = trackExecutionLease(fixture);
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const clientA: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    const clientB: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+    // A slow reader must still receive all of its operation output before its early result.
+    clientA.onWriteAsync = async (): Promise<void> => {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    };
+
+    const resultAPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
+      router.executeAsync(createRequest('a', OPERATION_A), clientA),
+      'a',
+      lease.events
+    );
+    const resultBPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
+      router.executeAsync(createRequest('b', OPERATION_B), clientB),
+      'b',
+      lease.events
+    );
+
+    const resultA: IDaemonPhasedRequestResult = await resultAPromise;
+    expect(lease.events).toEqual(['acquired', 'result:a']);
+    expect(fixture.graph.status).toBe(OperationStatus.Executing);
+    expect(resultA).toMatchObject({ exitCode: 0, outcome: 'success', scheduled: true });
+    expect(resultA.operationResults).toEqual([
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success })
+    ]);
+    expect(getWrittenOperationIds(clientA)).toEqual(new Set([OPERATION_A]));
+    expect(clientA.writes.some((write: ITestClientWrite) => write.text?.includes('from-a'))).toBe(true);
+    expect(clientA.writes.findIndex((write) => isStreamClosedEvent(write, OPERATION_A))).toBeGreaterThan(-1);
+    expect(clientA.writes[clientA.writes.length - 1]?.result).toBe(resultA);
+    expect(getHeaderData(clientA)).toEqual([
+      { completedOperations: 1, operationId: OPERATION_A, totalOperations: 1 }
+    ]);
+    const clientAWriteCount: number = clientA.writes.length;
+
+    releaseB.resolve();
+    const resultB: IDaemonPhasedRequestResult = await resultBPromise;
+    // The last participant keeps the ordinary contract: its result follows execution lease release.
+    expect(lease.events).toEqual(['acquired', 'result:a', 'released', 'result:b']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+    expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
+    expect(resultB).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(getResultOperationIds(resultB)).toEqual([OPERATION_A, OPERATION_B]);
+    expect(clientA.writes).toHaveLength(clientAWriteCount);
+  });
+
+  it('publishes an early failure result while the batch continues for other clients', async () => {
+    const releaseC: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => releaseC.promise,
+      statusA: OperationStatus.Failure
+    });
+    fixture.graph.parallelism = 2;
+    const lease: IExecutionLeaseTracker = trackExecutionLease(fixture);
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+    const failedPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
+      router.executeAsync(createRequest('failed', OPERATION_A), new TestPhasedRequestClient('one')),
+      'failed',
+      lease.events
+    );
+    const continuingPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
+      router.executeAsync(createRequest('continuing', OPERATION_C), new TestPhasedRequestClient('two')),
+      'continuing',
+      lease.events
+    );
+
+    const failed: IDaemonPhasedRequestResult = await failedPromise;
+    expect(lease.events).toEqual(['acquired', 'result:failed']);
+    expect(failed).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
+    expect(failed.operationResults).toEqual([
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Failure })
+    ]);
+
+    releaseC.resolve();
+    const continuing: IDaemonPhasedRequestResult = await continuingPromise;
+    expect(lease.events).toEqual(['acquired', 'result:failed', 'released', 'result:continuing']);
+    expect(continuing).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(getResultOperationIds(continuing)).toEqual([OPERATION_C]);
+  });
+
+  it('aborts the iteration when the only client still needing it cancels after an early result', async () => {
+    const operationCStarted: IDeferred = createDeferred();
+    const releaseC: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        operationCStarted.resolve();
+        await releaseC.promise;
+      }
+    });
+    fixture.graph.parallelism = 2;
+    const abortSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'abortCurrentIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+
+    const finishedPromise: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('finished', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    const cancelledPromise: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('cancelled', OPERATION_C),
+      cancelledClient
+    );
+    const finished: IDaemonPhasedRequestResult = await finishedPromise;
+    await operationCStarted.promise;
+    expect(finished).toMatchObject({ exitCode: 0, outcome: 'success' });
+    const abortCallCountBeforeCancellation: number = abortSpy.mock.calls.length;
+
+    cancelledClient.abortController.abort();
+    expect(abortSpy.mock.calls.length).toBeGreaterThan(abortCallCountBeforeCancellation);
+    releaseC.resolve();
+    const cancelled: IDaemonPhasedRequestResult = await cancelledPromise;
+
+    expect(cancelled).toMatchObject({ aborted: true, outcome: 'aborted' });
   });
 
   it('derives shared and disjoint failure results from each client subset', async () => {
@@ -193,20 +398,27 @@ describe('shared phased request batching', () => {
 
   it('unsubscribes one mid-run cancellation without aborting work required by another client', async () => {
     const operationStarted: IDeferred = createDeferred();
+    const operationCStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
       actionAAsync: async (): Promise<void> => {
         operationStarted.resolve();
         await releaseOperation.promise;
+      },
+      // Keep the continuing client's work outstanding until after the cancellation.
+      actionCAsync: async (): Promise<void> => {
+        operationCStarted.resolve();
+        await releaseOperation.promise;
       }
     });
+    fixture.graph.parallelism = 2;
     const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
     const continuingClient: TestPhasedRequestClient = new TestPhasedRequestClient('two');
     const abortSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'abortCurrentIterationAsync');
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
     const cancelled = router.executeAsync(createRequest('cancelled', OPERATION_A), cancelledClient);
     const continuing = router.executeAsync(createRequest('continuing', OPERATION_C), continuingClient);
-    await operationStarted.promise;
+    await Promise.all([operationStarted.promise, operationCStarted.promise]);
     const abortCallCountBeforeCancellation: number = abortSpy.mock.calls.length;
 
     cancelledClient.abortController.abort();
@@ -364,6 +576,67 @@ describe('shared phased request batching', () => {
     expect(scheduleSpy).toHaveBeenCalledTimes(2);
     expect(fixture.session.onReconcileAsync).toHaveBeenCalledTimes(2);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
+  });
+
+  it('lets a late shared build wait past a default timeout while a compatible batch executes', async () => {
+    const operationStarted: IDeferred = createDeferred();
+    const releaseOperation: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: async (): Promise<void> => {
+        operationStarted.resolve();
+        await releaseOperation.promise;
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await operationStarted.promise;
+    let lateSettled: boolean = false;
+    const late = router
+      .executeAsync(
+        { ...createRequest('late', OPERATION_C), admission: { waitTimeoutIsDefault: true, waitTimeoutMs: 20 } },
+        new TestPhasedRequestClient('two')
+      )
+      .finally(() => {
+        lateSettled = true;
+      });
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    expect(lateSettled).toBe(false);
+    releaseOperation.resolve();
+
+    const [firstResult, lateResult] = await Promise.all([first, late]);
+    expect(firstResult.outcome).toBe('success');
+    expect(lateResult.outcome).toBe('success');
+    expect(lateResult.admissionErrorCode).toBeUndefined();
+    expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
+  });
+
+  it('enforces an explicit timeout while a late shared build waits for a compatible batch', async () => {
+    const operationStarted: IDeferred = createDeferred();
+    const releaseOperation: IDeferred = createDeferred();
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: async (): Promise<void> => {
+        operationStarted.resolve();
+        await releaseOperation.promise;
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await operationStarted.promise;
+
+    const lateResult: IDaemonPhasedRequestResult = await router.executeAsync(
+      { ...createRequest('late', OPERATION_C), admission: { waitTimeoutMs: 20 } },
+      new TestPhasedRequestClient('two')
+    );
+    expect(lateResult).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
+    releaseOperation.resolve();
+    expect((await first).outcome).toBe('success');
+    expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(0);
   });
 
   it('serializes concurrent shared-read requests instead of merging or deadlocking them', async () => {
