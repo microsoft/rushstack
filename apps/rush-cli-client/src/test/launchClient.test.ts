@@ -288,6 +288,7 @@ describe('standalone rushx fallback', () => {
       expect(JSON.parse(result.stdout)).toEqual({
         state: 'shutdownAccepted',
         socketPath: paths.socketPath,
+        cancelledRequests: 0,
         removedPaths: [reservation]
       });
       expect(fs.existsSync(reservation)).toBe(false);
