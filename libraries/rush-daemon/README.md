@@ -86,8 +86,16 @@ The host uses stable fingerprints to classify native requests:
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
 Native dispatch first copies the envelope and normalizes only engine-owned `_RUSH_LIB_PATH` to this daemon's
-real engine, preventing false restarts or wrong SDK selection from a foreign client path. All other environment
-inputs remain unchanged and are checked normally.
+real engine, preventing false restarts or wrong SDK selection from a foreign client path. Environment
+comparisons (the tier-2 fingerprint and the production resolver's startup-environment check) both use rush-lib's
+`getWorkspaceFingerprintEnvironmentEntries()`, which omits `workspaceFingerprintIgnoredEnvironmentVariables`:
+volatile per-shell, terminal, session and client-routing variables such as `PWD`, `OLDPWD`, `SHLVL`, `_`,
+`TERM`, `COLUMNS`, `WSL_INTEROP`, `SSH_*`, `INIT_CWD`, `RUSH_DAEMON`, `RUSH_DAEMON_AUTO_START` and
+`RUSH_DAEMON_EXPERIMENTAL`. Rush does not read these to configure the engine, build the graph or hash operations,
+so running a command from a project subfolder or another shell reuses the warm workspace. All other environment
+inputs, including every other `RUSH_*` variable, `NODE_*`, npm/pnpm configuration, `PATH` and `HOME`, remain
+unchanged and are checked normally. Phased operation processes inherit the daemon's own environment, so they
+see the daemon's startup values for the ignored variables rather than the submitting shell's values.
 Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
 still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
 
@@ -112,7 +120,7 @@ External Rush plugins, `.env` initialization, watch/install/variant
 and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global
 commands are rejected by the phased path, not silently bypassed. Native Rushx is handled separately below.
 For phased commands, a changed request environment requires a new process, including Rush/cache
-policy variables. These restrictions remain until the corresponding initialization,
+policy variables (the volatile variables listed above excepted). These restrictions remain until the corresponding initialization,
 environment, and resource-lifetime contracts are request-scoped.
 
 The native Rush lock is held only during graph preparation and each coalesced iteration, not while the warm daemon
