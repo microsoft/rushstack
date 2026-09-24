@@ -500,6 +500,7 @@ export interface IDaemonRawModeChangedMessage {
 // @beta
 export interface IDaemonRequestAdmissionOptions {
     readonly noWait?: boolean;
+    readonly waitTimeoutIsDefault?: boolean;
     readonly waitTimeoutMs?: number;
 }
 

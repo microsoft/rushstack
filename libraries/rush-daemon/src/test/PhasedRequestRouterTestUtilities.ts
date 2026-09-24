@@ -196,6 +196,7 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
   public readonly rushSession: RushSession | undefined = undefined;
   public readonly operationGraph: IOperationGraph;
   public onReconcileAsync: (() => Promise<void>) | undefined;
+  public acquireExecutionLeaseAsync: (() => Promise<AsyncDisposable | undefined>) | undefined;
 
   public constructor(operationGraph: IOperationGraph) {
     this.operationGraph = operationGraph;

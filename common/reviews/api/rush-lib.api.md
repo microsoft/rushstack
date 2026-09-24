@@ -381,6 +381,9 @@ export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) =>
 // @beta
 export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined>;
 
+// @alpha
+export function getWorkspaceFingerprintEnvironmentEntries(environment: Readonly<Record<string, string | undefined>>): [string, string][];
+
 // @alpha (undocumented)
 export interface IBaseOperationExecutionResult {
     getStateHash(): string;
@@ -2096,6 +2099,9 @@ export enum VersionPolicyDefinitionName {
     // (undocumented)
     'lockStepVersion' = 0
 }
+
+// @alpha
+export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string>;
 
 // @alpha
 export enum WorkspaceInputChangeTier {
