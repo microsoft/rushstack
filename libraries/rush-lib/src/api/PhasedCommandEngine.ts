@@ -12,6 +12,7 @@ import { PhasedScriptAction } from '../cli/scriptActions/PhasedScriptAction';
 import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
 import type { IOperationGraph } from '../logic/operations/IOperationGraph';
 import type { Operation, OperationEnabledState } from '../logic/operations/Operation';
+import type { Parallelism } from '../logic/operations/ParseParallelism';
 import { PhasedCommandEngineExecution } from '../logic/operations/PhasedCommandEngineExecution';
 import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
@@ -42,6 +43,17 @@ export interface IParsePhasedCommandOptions {
   readonly cwd: string;
   readonly rushConfiguration: RushConfiguration;
   readonly terminalProvider: ITerminalProvider;
+}
+
+/**
+ * Presentation and scheduling settings of one parsed command. They do not affect the operation graph or any
+ * operation hash, so they are not part of `PhasedCommandEngine.parameterIdentity`; hosts apply them to the
+ * shared graph (`IOperationGraph.quietMode` / `IOperationGraph.parallelism`) before each iteration.
+ * @alpha
+ */
+export interface IPhasedCommandEngineRequestSettings {
+  readonly quietMode: boolean;
+  readonly parallelism: Parallelism;
 }
 
 /**
@@ -163,5 +175,10 @@ export class PhasedCommandEngine {
     graph: IOperationGraph
   ): Promise<ReadonlyMap<Operation, OperationEnabledState>> {
     return await this._action.selectEngineOperationsAsync(graph);
+  }
+
+  /** Presentation and scheduling settings requested by this command; not part of `parameterIdentity`. */
+  public get requestSettings(): IPhasedCommandEngineRequestSettings {
+    return this._action.getEngineRequestSettings();
   }
 }
