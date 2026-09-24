@@ -358,20 +358,27 @@ describe('shared phased request batching', () => {
 
   it('unsubscribes one mid-run cancellation without aborting work required by another client', async () => {
     const operationStarted: IDeferred = createDeferred();
+    const operationCStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
       actionAAsync: async (): Promise<void> => {
         operationStarted.resolve();
         await releaseOperation.promise;
+      },
+      // Keep the continuing client's work outstanding until after the cancellation.
+      actionCAsync: async (): Promise<void> => {
+        operationCStarted.resolve();
+        await releaseOperation.promise;
       }
     });
+    fixture.graph.parallelism = 2;
     const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
     const continuingClient: TestPhasedRequestClient = new TestPhasedRequestClient('two');
     const abortSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'abortCurrentIterationAsync');
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
     const cancelled = router.executeAsync(createRequest('cancelled', OPERATION_A), cancelledClient);
     const continuing = router.executeAsync(createRequest('continuing', OPERATION_C), continuingClient);
-    await operationStarted.promise;
+    await Promise.all([operationStarted.promise, operationCStarted.promise]);
     const abortCallCountBeforeCancellation: number = abortSpy.mock.calls.length;
 
     cancelledClient.abortController.abort();
