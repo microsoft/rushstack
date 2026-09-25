@@ -115,10 +115,12 @@ export class HeftTask implements IHeftTask {
     this.#validate();
   }
 
-  public async ensureInitializedAsync(): Promise<void> {
+  public async ensureInitializedAsync(pluginOptionsAreValidated: boolean = false): Promise<void> {
     if (!this.#taskPluginDefinition) {
       this.#taskPluginDefinition = await this.#loadTaskPluginDefinitionAsync();
-      this.pluginDefinition.validateOptions(this.pluginOptions);
+      if (!pluginOptionsAreValidated) {
+        this.pluginDefinition.validateOptions(this.pluginOptions);
+      }
     }
   }
 

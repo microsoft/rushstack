@@ -7,10 +7,10 @@ import { Constants } from '../utilities/Constants';
 import { HeftLifecycle } from './HeftLifecycle';
 import type { HeftPhaseSession } from './HeftPhaseSession';
 import { HeftPhase } from './HeftPhase';
-import {
+import type {
   CoreConfigFiles,
-  type IHeftConfigurationJson,
-  type IHeftConfigurationJsonActionReference
+  IHeftConfigurationJson,
+  IHeftConfigurationJsonActionReference
 } from '../utilities/CoreConfigFiles';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { LoggingManager } from './logging/LoggingManager';
@@ -20,12 +20,41 @@ import type { HeftTask } from './HeftTask';
 import type { HeftParameterManager } from './HeftParameterManager';
 import type { IHeftParsedCommandLine } from './HeftTaskSession';
 
+export interface IInternalHeftSessionPlanSeed {
+  readonly heftConfigurationJson: IHeftConfigurationJson;
+  readonly debugMessages: ReadonlyArray<string>;
+  readonly pluginOptionsAreValidated: boolean;
+}
+
 export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
 
   debug: boolean;
+
+  planSeed?: IInternalHeftSessionPlanSeed;
+}
+
+async function loadHeftConfigurationJsonAsync(
+  options: IInternalHeftSessionOptions
+): Promise<IHeftConfigurationJson> {
+  const { heftConfiguration, planSeed } = options;
+  if (planSeed) {
+    for (const debugMessage of planSeed.debugMessages) {
+      heftConfiguration.globalTerminal.writeDebugLine(debugMessage);
+    }
+    return planSeed.heftConfigurationJson;
+  }
+  const { CoreConfigFiles: CoreConfigFilesClass } = require('../utilities/CoreConfigFiles') as {
+    CoreConfigFiles: typeof CoreConfigFiles;
+  };
+  return await CoreConfigFilesClass.loadHeftConfigurationFileForProjectAsync(
+    heftConfiguration.globalTerminal,
+    heftConfiguration.buildFolderPath,
+    // Same data as heftConfiguration.rigConfig, without loading @rushstack/rig-package unless needed
+    getRigConfigForConfigLoading(heftConfiguration)
+  );
 }
 
 function* getAllTasks(phases: Iterable<HeftPhase>): IterableIterator<HeftTask> {
@@ -65,25 +94,20 @@ export class InternalHeftSession {
     // Initialize the rig. Must be done before the HeftConfiguration.rigConfig is used.
     await options.heftConfiguration._checkForRigAsync();
 
-    const heftConfigurationJson: IHeftConfigurationJson =
-      await CoreConfigFiles.loadHeftConfigurationFileForProjectAsync(
-        options.heftConfiguration.globalTerminal,
-        options.heftConfiguration.buildFolderPath,
-        // Same data as heftConfiguration.rigConfig, without loading @rushstack/rig-package unless needed
-        getRigConfigForConfigLoading(options.heftConfiguration)
-      );
+    const heftConfigurationJson: IHeftConfigurationJson = await loadHeftConfigurationJsonAsync(options);
+    const pluginOptionsAreValidated: boolean = options.planSeed?.pluginOptionsAreValidated ?? false;
 
     const internalHeftSession: InternalHeftSession = new InternalHeftSession(heftConfigurationJson, options);
 
     // Initialize the lifecycle and the tasks. This will ensure that we throw an error if a plugin is improperly
     // specified, or if the options provided to a plugin are invalid. We will avoid loading the actual plugins
     // until they are needed.
-    await internalHeftSession.lifecycle.ensureInitializedAsync();
+    await internalHeftSession.lifecycle.ensureInitializedAsync(pluginOptionsAreValidated);
     const tasks: Iterable<HeftTask> = getAllTasks(internalHeftSession.phases);
     await Async.forEachAsync(
       tasks,
       async (task: HeftTask) => {
-        await task.ensureInitializedAsync();
+        await task.ensureInitializedAsync(pluginOptionsAreValidated);
       },
       { concurrency: Constants.maxParallelism }
     );

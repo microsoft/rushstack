@@ -13,9 +13,8 @@ import {
   type IHeftTaskPluginDefinitionJson
 } from './HeftPluginDefinition';
 import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
-import heftPluginSchema from '../schemas/heft-plugin.schema.json';
-import { tryParseJsonLean } from './lean/LeanJson';
-import { tryValidateSchemaObject } from './lean/SchemaFastPath';
+import type { tryParseJsonLean } from './lean/LeanJson';
+import type { tryValidateSchemaObject } from './lean/SchemaFastPath';
 
 export interface IHeftPluginConfigurationJson {
   lifecyclePlugins?: IHeftLifecyclePluginDefinitionJson[];
@@ -25,7 +24,13 @@ export interface IHeftPluginConfigurationJson {
 const HEFT_PLUGIN_CONFIGURATION_FILENAME: 'heft-plugin.json' = 'heft-plugin.json';
 
 let _jsonSchema: JsonSchema | undefined;
+
+function getHeftPluginSchema(): object {
+  return require('../schemas/heft-plugin.schema.json');
+}
+
 const _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
+const _seededHeftPluginConfigurationJsonByPackageRoot: Map<string, IHeftPluginConfigurationJson> = new Map();
 
 /**
  * Loads and validates the heft-plugin.json file without loading ajv, if the result is guaranteed to be identical
@@ -39,14 +44,23 @@ function _tryLoadHeftPluginConfigurationJsonLean(filePath: string): IHeftPluginC
     return undefined;
   }
 
-  const parsed: { value: unknown } | undefined = tryParseJsonLean(fileText);
-  if (parsed && tryValidateSchemaObject(heftPluginSchema, parsed.value)) {
+  const { tryParseJsonLean: tryParseJsonLeanFunction } = require('./lean/LeanJson') as {
+    tryParseJsonLean: typeof tryParseJsonLean;
+  };
+  const parsed: { value: unknown } | undefined = tryParseJsonLeanFunction(fileText);
+  const { tryValidateSchemaObject: tryValidateSchemaObjectFunction } = require('./lean/SchemaFastPath') as {
+    tryValidateSchemaObject: typeof tryValidateSchemaObject;
+  };
+  if (parsed && tryValidateSchemaObjectFunction(getHeftPluginSchema(), parsed.value)) {
     return parsed.value as IHeftPluginConfigurationJson;
   }
 }
 
-async function _loadHeftPluginConfigurationJsonAsync(filePath: string): Promise<IHeftPluginConfigurationJson> {
-  const leanResult: IHeftPluginConfigurationJson | undefined = _tryLoadHeftPluginConfigurationJsonLean(filePath);
+async function _loadHeftPluginConfigurationJsonAsync(
+  filePath: string
+): Promise<IHeftPluginConfigurationJson> {
+  const leanResult: IHeftPluginConfigurationJson | undefined =
+    _tryLoadHeftPluginConfigurationJsonLean(filePath);
   if (leanResult) {
     return leanResult;
   }
@@ -54,7 +68,7 @@ async function _loadHeftPluginConfigurationJsonAsync(filePath: string): Promise<
   // Use the original implementation, which produces the canonical errors
   const { JsonFile, JsonSchema: JsonSchemaClass } = await import('@rushstack/node-core-library');
   if (!_jsonSchema) {
-    _jsonSchema = JsonSchemaClass.fromLoadedObject(heftPluginSchema);
+    _jsonSchema = JsonSchemaClass.fromLoadedObject(getHeftPluginSchema());
   }
 
   return await JsonFile.loadAndValidateAsync(filePath, _jsonSchema);
@@ -104,13 +118,21 @@ export class HeftPluginConfiguration {
     if (!heftPluginConfigurationPromise) {
       heftPluginConfigurationPromise = (async () => {
         const heftPluginConfigurationJson: IHeftPluginConfigurationJson =
-          await _loadHeftPluginConfigurationJsonAsync(resolvedHeftPluginConfigurationJsonFilename);
+          _seededHeftPluginConfigurationJsonByPackageRoot.get(packageRoot) ??
+          (await _loadHeftPluginConfigurationJsonAsync(resolvedHeftPluginConfigurationJsonFilename));
         return new HeftPluginConfiguration(heftPluginConfigurationJson, packageRoot, packageName);
       })();
       _pluginConfigurationPromises.set(packageRoot, heftPluginConfigurationPromise);
     }
 
     return await heftPluginConfigurationPromise;
+  }
+
+  public static _seedHeftPluginConfigurationJson(
+    packageRoot: string,
+    heftPluginConfigurationJson: IHeftPluginConfigurationJson
+  ): void {
+    _seededHeftPluginConfigurationJsonByPackageRoot.set(packageRoot, heftPluginConfigurationJson);
   }
 
   /**
