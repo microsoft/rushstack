@@ -431,7 +431,7 @@ describe('shared phased request batching', () => {
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
   });
 
-  it('reports authoritative retained status when a client cancels during a shared operation', async () => {
+  it('answers a client that cancels during a shared operation immediately, without waiting for the batch', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -448,12 +448,14 @@ describe('shared phased request batching', () => {
     await operationStarted.promise;
 
     cancelledClient.abortController.abort();
+    // The shared operation is still running for the other client.
+    const cancelledResult: IDaemonPhasedRequestResult = await cancelled;
     releaseOperation.resolve();
-    const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
+    const continuingResult: IDaemonPhasedRequestResult = await continuing;
 
     expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
     expect(cancelledResult.operationResults).toEqual([
-      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success })
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Aborted })
     ]);
     expect(continuingResult).toMatchObject({ exitCode: 0, outcome: 'success' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
@@ -486,7 +488,7 @@ describe('shared phased request batching', () => {
     ]);
   });
 
-  it('preserves failure precedence when a client cancels during a failing shared operation', async () => {
+  it('keeps failure for the continuing client when another client cancels during a failing shared operation', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -506,14 +508,16 @@ describe('shared phased request batching', () => {
     await operationStarted.promise;
 
     cancelledClient.abortController.abort();
+    const cancelledResult: IDaemonPhasedRequestResult = await cancelled;
     releaseOperation.resolve();
-    const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
+    const continuingResult: IDaemonPhasedRequestResult = await continuing;
 
-    expect(cancelledResult).toMatchObject({ aborted: true, exitCode: 1, outcome: 'failure' });
-    expect(cancelledResult.operationResults).toEqual([
+    // The cancelled client detached before the shared operation failed.
+    expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(continuingResult).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
+    expect(continuingResult.operationResults).toEqual([
       expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Failure })
     ]);
-    expect(continuingResult).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
   });
 

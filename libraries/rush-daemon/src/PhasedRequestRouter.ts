@@ -101,6 +101,12 @@ const OBSERVED_STATUS_OVERRIDES_RETAINED: ReadonlySet<OperationStatus> = new Set
   OperationStatus.Blocked,
   OperationStatus.Skipped
 ]);
+const IN_PROGRESS_STATUSES: ReadonlySet<string> = new Set<string>([
+  OperationStatus.Waiting,
+  OperationStatus.Ready,
+  OperationStatus.Queued,
+  OperationStatus.Executing
+]);
 
 /**
  * Routes one caller-resolved phased request through a real warm workspace operation graph.
@@ -422,6 +428,12 @@ class PhasedRequestBatchCoordinator {
         this.#graph,
         participants.map((entry: IBatchEntry) => entry.selection)
       );
+      for (const entry of batch) {
+        if (!participants.includes(entry)) {
+          // Clients that cancelled before execution must not wait for the participants' work.
+          this.#finishDetachedEntry(entry);
+        }
+      }
       for (const entry of participants) {
         entry.participated = true;
         const activeOperationIds: ReadonlySet<string> = new Set(
@@ -533,6 +545,16 @@ class PhasedRequestBatchCoordinator {
 
     if (
       entry.executionStarted &&
+      this.#currentBatch?.includes(entry) &&
+      this.#hasLiveBatchParticipant()
+    ) {
+      // Other live participants still need the shared work: detach this client and answer it now.
+      this.#finishDetachedEntry(entry);
+      return;
+    }
+
+    if (
+      entry.executionStarted &&
       this.#currentBatch &&
       (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) &&
       !this.#currentBatch.some((candidate: IBatchEntry) => this.#needsIteration(candidate))
@@ -541,8 +563,41 @@ class PhasedRequestBatchCoordinator {
     }
   }
 
+  #finishDetachedEntry(entry: IBatchEntry): void {
+    entry.finishPromise ??= this.#produceResultAsync(
+      entry,
+      entry.participated,
+      undefined,
+      [],
+      undefined,
+      true
+    ).catch((error: unknown) => {
+      if (!entry.completed) {
+        this.#completeEntry(entry);
+        entry.reject(error);
+      }
+    });
+  }
+
   #isEntryLive(entry: IBatchEntry): boolean {
     return !entry.abortRequested && !entry.client.abortSignal.aborted && entry.outputError === undefined;
+  }
+
+  /**
+   * Whether a live client still needs the current batch's iteration, including compatible requests that were
+   * accepted into the pending queue and will join the batch once the execution lease is acquired.
+   */
+  #hasLiveBatchParticipant(): boolean {
+    if (this.#currentBatch?.some((candidate: IBatchEntry) => this.#needsIteration(candidate))) {
+      return true;
+    }
+    return (
+      this.#acceptingCurrentBatch &&
+      this.#pending.some(
+        (candidate: IBatchEntry) =>
+          candidate.exclusivityClass === RequestExclusivityClass.SharedBuild && this.#isEntryLive(candidate)
+      )
+    );
   }
 
   /** Whether a live participant still waits for the running iteration to produce its result. */
@@ -590,7 +645,8 @@ class PhasedRequestBatchCoordinator {
   }
 
   #requestIterationAbort(): void {
-    const abortPromise: Promise<void> = this.#graph.abortCurrentIterationAsync();
+    // Nobody needs the running work any more, so terminate in-flight operations instead of awaiting them.
+    const abortPromise: Promise<void> = this.#graph.abortCurrentIterationAsync({ terminateRunning: true });
     this.#abortTail = Promise.all([this.#abortTail, abortPromise])
       .then(() => undefined)
       .catch((error: unknown) => {
@@ -984,12 +1040,14 @@ function collectOperationOutcomes(
     const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
     let status: string | undefined;
     let errorMessage: string | undefined;
-    if (
+    if (iterationInProgress && observed !== undefined) {
+      // While the iteration still runs, retained results may predate this iteration, and work this client
+      // stopped observing before it finished (a detached cancellation) was abandoned.
+      status = IN_PROGRESS_STATUSES.has(observed.status) ? OperationStatus.Aborted : observed.status;
+      errorMessage = observed.executionResult.error?.message;
+    } else if (
       observed !== undefined &&
-      // While the iteration still runs, retained results may predate this iteration.
-      (iterationInProgress ||
-        retained === undefined ||
-        OBSERVED_STATUS_OVERRIDES_RETAINED.has(observed.status))
+      (retained === undefined || OBSERVED_STATUS_OVERRIDES_RETAINED.has(observed.status))
     ) {
       status = observed.status;
       errorMessage = observed.executionResult.error?.message;
@@ -998,6 +1056,10 @@ function collectOperationOutcomes(
       errorMessage = retained?.error?.message ?? observed?.executionResult.error?.message;
     }
     status ??= fillMissingAsAborted ? OperationStatus.Aborted : undefined;
+    if (fillMissingAsAborted && status !== undefined && IN_PROGRESS_STATUSES.has(status)) {
+      // The client stopped observing before this operation finished, e.g. because it was terminated.
+      status = OperationStatus.Aborted;
+    }
     if (status === undefined) {
       continue;
     }
