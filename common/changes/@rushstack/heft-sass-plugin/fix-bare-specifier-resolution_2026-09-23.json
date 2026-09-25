@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Fix a regression where a bare specifier such as `@use '@scope/pkg/theme'` could not be resolved. Bare specifiers now fall back to the new `loadPaths` option and then to `node_modules` when they do not resolve relative to the importing file. Also apply the legacy `~` rewrite in constructs other than `@use`/`@import`/`@forward`, such as `meta.load-css()`.",
+      "type": "patch"
+    }
+  ]
+}

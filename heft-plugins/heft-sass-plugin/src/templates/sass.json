@@ -80,6 +80,16 @@
   // "excludeFiles": [],
 
   /**
+   * Folders, relative to the project folder, to search when resolving a bare specifier such as
+   * `@use 'theme/colors'`. Analogous to the Sass compiler's "loadPaths" option. These are consulted
+   * only after resolution relative to the importing file fails, and before resolution from
+   * "node_modules".
+   *
+   * Default value: undefined
+   */
+  // "loadPaths": ["src/styles"],
+
+  /**
    * If true, the original file extension will not be trimmed when generating the output CSS filename.
    * For example, "styles.scss" will generate "styles.scss.css" instead of "styles.css".
    *

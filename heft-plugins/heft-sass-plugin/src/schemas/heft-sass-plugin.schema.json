@@ -95,6 +95,15 @@
       }
     },
 
+    "loadPaths": {
+      "type": "array",
+      "description": "Folders, relative to the project folder, to search when resolving a bare specifier such as `@use 'theme/colors'`. Analogous to the Sass compiler's `loadPaths` option. Load paths are consulted only after resolution relative to the importing file fails, and before resolution from `node_modules`.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
     "ignoreDeprecationsInDependencies": {
       "type": "boolean",
       "description": "If set, deprecation warnings from dependencies will be suppressed."
