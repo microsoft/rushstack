@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/TrustDevCertificatePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/UntrustDevCertificatePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

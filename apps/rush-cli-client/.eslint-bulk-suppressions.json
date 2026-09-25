@@ -1,0 +1,1179 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ClientAdmissionControls.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ClientAdmissionControls.ts",
+      "scopeId": ".parseClientAdmissionControls",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ClientAdmissionControls.ts",
+      "scopeId": ".parseClientAdmissionControls",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ClientAdmissionControls.ts",
+      "scopeId": ".parseClientAdmissionControls",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ClientOperationRenderer.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.closeOnceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.fail",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.onAbort",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.onMessage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.startAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.startAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.startAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DaemonLogOutput.ts",
+      "scopeId": ".DaemonLogOutput.writeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutputProtocol.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonLogOutputWorker.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonLogOutputWorker.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DaemonLogOutputWorker.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DaemonLogOutputWorker.ts",
+      "scopeId": ".writeAllAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".parseGraphGenerationControls",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".parseGraphGenerationControls",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".readGraphGenerationAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".readGraphGenerationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".readGraphGenerationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".readGraphGenerationAsync.onEventAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphGenerationControls.ts",
+      "scopeId": ".readGraphGenerationAsync.onEventAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GraphRequestContext.ts",
+      "scopeId": ".GraphRequestContext.connectAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GraphRequestContext.ts",
+      "scopeId": ".GraphRequestContext.connectAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GraphRequestContext.ts",
+      "scopeId": ".GraphRequestContext.remainingTimeoutMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/daemonCommands.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/daemonCommands.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/daemonCommands.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/daemonCommands.ts",
+      "scopeId": ".executeDaemonCommandAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/daemonCommands.ts",
+      "scopeId": ".executeDaemonCommandAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonCommands.ts",
+      "scopeId": ".executeDaemonCommandAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/daemonConnectionOptions.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/daemonConnectionOptions.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/daemonConnectionOptions.ts",
+      "scopeId": ".getDaemonConnectionOptions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".executeDaemonGraphCommandAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".executeDaemonGraphCommandAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".executeGraphRequestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".executeGraphRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".executeGraphRequestAsync.onEventAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".runGraphAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonGraph.ts",
+      "scopeId": ".runGraphAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".printDaemonLogAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".printDaemonLogAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".printDaemonLogAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".printDaemonLogAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".waitForAppendAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/daemonLogs.ts",
+      "scopeId": ".writeLogChunkAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchClientAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchClientAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchClientAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchClientAsync.capabilities",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchClientAsync.terminal.columns",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchClientAsync.writeDiscoveryAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/launchClient.ts",
+      "scopeId": ".launchInProcess",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/routing.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/routing.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/routing.ts",
+      "scopeId": ".selectClientRoute",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/routing.ts",
+      "scopeId": ".selectClientRoute",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/routing.ts",
+      "scopeId": ".selectClientRoute",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/CliSignalTestProcess.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ClientAdmissionControls.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ClientOperationRenderer.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ClientOperationRenderer.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ClientOperationRenderer.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonLogOutput.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonLogOutput.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonLogOutput.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonLogOutput.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonLogOutputTestProcess.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonLogSignalTestProcess.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphGenerationControls.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection.respondAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection.respondAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection.respondAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GraphGenerationWire.test.ts",
+      "scopeId": ".onConnection.respondAsync.payload",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphRequestContext.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GraphRequestContext.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.ts",
+      "scopeId": ".readIpcFixtureEvents",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.ts",
+      "scopeId": ".readPressureGateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.ts",
+      "scopeId": ".readPressureGateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/IpcFixtureFile.ts",
+      "scopeId": ".writeIpcFixtureFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture.fixture.closeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture.fixture.closeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture.fixture.trackWatch",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture.snapshotAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeBuildTestFixture.ts",
+      "scopeId": ".createNativeBuildTestFixture.spawnClientAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PersistentIpcPressure.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PersistentIpcPressure.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PersistentIpcPressure.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PersistentIpcPressure.test.ts",
+      "scopeId": ".original",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PersistentIpcPressure.ts",
+      "scopeId": ".getPressureAllocationBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PersistentIpcPressure.ts",
+      "scopeId": ".getPressureAllocationBytes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".createIpcToolSource",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".createPersistentIpcTestFixture",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".createPersistentIpcTestFixture",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".createPersistentIpcTestFixture",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".createPersistentIpcTestFixture.buildAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PersistentIpcTestFixture.ts",
+      "scopeId": ".createPersistentIpcTestFixture.statusAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PtyTestProcess.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PtyTestProcess.ts",
+      "scopeId": ".invokeRushxPtyAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemon.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemon.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RushXDaemon.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushXDaemon.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RushXDaemonAlias.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemonAlias.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RushXDaemonAlias.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushXDaemonAlias.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".assertChildrenStopped",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemonBoundaries.test.ts",
+      "scopeId": ".assertChildrenStopped",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.invokeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.invokeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.invokeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.invokeAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.runAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXDaemonTestFixture.ts",
+      "scopeId": ".RushXDaemonTestFixture.runAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RushXTerminal.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushXTerminal.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RushXTerminal.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/daemonConnectionSelection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".onConnection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/daemonGraph.test.ts",
+      "scopeId": ".onConnection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".waitUntilAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/daemonLogs.test.ts",
+      "scopeId": ".write",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".invokeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".invokeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".invokeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/launchClient.test.ts",
+      "scopeId": ".invokeAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/nativeBuild.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/nativeBuild.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/nativeBuild.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/nativeBuild.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/nativeBuild.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/nativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/nativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/nativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/nativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/persistentIpc.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpc.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/persistentIpc.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/persistentIpc.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/persistentIpc.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/persistentIpc.test.ts",
+      "scopeId": ".withFixtureAsync.options",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/persistentIpcBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/persistentIpcBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/persistentIpcBoundaries.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/persistentIpcBoundaries.test.ts",
+      "scopeId": ".withFixtureAsync.options",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/persistentIpcCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/persistentIpcCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".MEMORY_BYTES",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".measuredRank",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".waitForPressureSampleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/persistentIpcRetention.test.ts",
+      "scopeId": ".waitForPressureSampleAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".executorAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".invokeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/pipedInput.test.ts",
+      "scopeId": ".invokeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/routing.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/versionSelectionFallback.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/versionSelectionFallback.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}
