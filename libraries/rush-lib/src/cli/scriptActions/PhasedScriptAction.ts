@@ -359,6 +359,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     await this.#runAsync();
   }
 
+  /** The names of every phase this command can schedule, including dependency and watch phases. */
+  public get schedulablePhaseNames(): ReadonlySet<string> {
+    const phaseNames: Set<string> = new Set();
+    for (const phases of [this.#originalPhases, this.#initialPhases, this.#watchPhases]) {
+      for (const phase of phases) {
+        phaseNames.add(phase.name);
+      }
+    }
+    return phaseNames;
+  }
+
   public validateEngineCommand(): void {
     if (
       this.#alwaysWatch ||

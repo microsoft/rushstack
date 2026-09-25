@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Keep waiting for a slow detached daemon start after the requesting client gives up, so later clients can use the daemon instead of finding an abandoned startup reservation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

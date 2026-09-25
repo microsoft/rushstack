@@ -1,0 +1,15 @@
+/**
+ * This configuration file defines a deployment scenario for use with the "rush deploy" command.
+ * For full documentation, please see https://rushjs.io
+ *
+ * The "rush-daemon-dogfood" scenario extracts a stable, self-contained copy of the source-built
+ * "rush-client" and "rushx-client" binaries, including the daemon and the Rush engine they bundle.
+ * Contributors use it to try the opt-in Rush daemon on this repository before a release contains it:
+ * a daemon started from the copy keeps working while the workspace rebuilds its own Rush projects.
+ * See docs/rush/dogfooding-rush-daemon.md.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
+
+  "deploymentProjectNames": ["@rushstack/rush-cli-client"]
+}

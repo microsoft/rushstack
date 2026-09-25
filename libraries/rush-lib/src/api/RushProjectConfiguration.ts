@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import { AlreadyReportedError, Async, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { RigConfig, type IRigConfigJson } from '@rushstack/rig-package';
+import { RigConfig, type IRigConfigJson, type ILoadForProjectFolderOptions } from '@rushstack/rig-package';
 
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
@@ -712,10 +712,22 @@ async function loadIsolatedRigConfigAsync(projectFolder: string): Promise<RigCon
   }
   // bypassCache still writes the shared rig cache. An explicit JSON override uses the
   // native schema/resolution path without either reading or populating that cache.
-  return await RigConfig.loadForProjectFolderAsync({
+  const options: ILoadForProjectFolderOptions = {
     projectFolderPath: projectFolder,
     overrideRigJsonObject: rigJson
-  });
+  };
+  const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync(options);
+  if (rigConfig.rigFound) {
+    try {
+      // The configuration file loader resolves the rig profile synchronously, which serializes these
+      // concurrent project loads. Resolving it asynchronously first caches the same result on this instance.
+      await rigConfig.getResolvedProfileFolderAsync();
+    } catch {
+      // A fresh instance reports the failure exactly as the native loader does, if and when the rig is used.
+      return await RigConfig.loadForProjectFolderAsync(options);
+    }
+  }
+  return rigConfig;
 }
 
 /**

@@ -200,6 +200,70 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
+  /**
+   * Explains why configured autoinstaller plugins could participate in the specified phased command.
+   *
+   * @remarks
+   * A plugin is inert for the command only if Rush will neither initialize it (it is associated with
+   * specific commands, none of which is this command) nor use its command-line.json to define the
+   * command, a phase of the command, or a parameter associated with either. A manifest or command-line
+   * file that cannot be read is reported rather than assumed to be inert.
+   *
+   * @returns An empty array if every configured autoinstaller plugin is inert for the command.
+   */
+  public getPluginsParticipatingInCommand(
+    commandName: string,
+    phaseNames: ReadonlySet<string>
+  ): ReadonlyArray<string> {
+    const reasons: string[] = [];
+    for (const pluginLoader of this.#autoinstallerPluginLoaders) {
+      const pluginLabel: string = `"${pluginLoader.pluginName}" (${pluginLoader.packageName})`;
+      let associatedCommands: ReadonlyArray<string> | undefined;
+      try {
+        associatedCommands = pluginLoader.pluginManifest.associatedCommands;
+      } catch (error) {
+        reasons.push(`${pluginLabel}: its manifest could not be read: ${(error as Error).message}`);
+        continue;
+      }
+      if (!associatedCommands) {
+        reasons.push(`${pluginLabel} is initialized for every command`);
+      } else if (associatedCommands.includes(commandName)) {
+        reasons.push(`${pluginLabel} is associated with "${commandName}"`);
+      }
+
+      let commandLineConfiguration: CommandLineConfiguration | undefined;
+      try {
+        commandLineConfiguration = pluginLoader.getCommandLineConfiguration();
+      } catch (error) {
+        reasons.push(`${pluginLabel}: its command-line.json could not be read: ${(error as Error).message}`);
+        continue;
+      }
+      if (!commandLineConfiguration) {
+        continue;
+      }
+      if (commandLineConfiguration.commands.has(commandName)) {
+        reasons.push(`${pluginLabel} defines the "${commandName}" command`);
+      }
+      for (const phaseName of commandLineConfiguration.phases.keys()) {
+        if (phaseNames.has(phaseName)) {
+          reasons.push(`${pluginLabel} defines the "${phaseName}" phase`);
+        }
+      }
+      for (const parameter of commandLineConfiguration.parameters) {
+        const { longName, associatedPhases } = parameter;
+        if (parameter.associatedCommands?.includes(commandName)) {
+          reasons.push(`${pluginLabel} associates "${longName}" with "${commandName}"`);
+        }
+        for (const phaseName of associatedPhases ?? []) {
+          if (phaseNames.has(phaseName)) {
+            reasons.push(`${pluginLabel} associates "${longName}" with the "${phaseName}" phase`);
+          }
+        }
+      }
+    }
+    return reasons;
+  }
+
   #initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;

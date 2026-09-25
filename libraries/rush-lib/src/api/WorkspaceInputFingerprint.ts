@@ -13,6 +13,7 @@ import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushProjectConfiguration } from './RushProjectConfiguration';
 import { getDaemonIpcImplementationIdentityAsync } from '../logic/operations/DaemonIpcConfiguration';
+import { AutoinstallerPluginLoader } from '../pluginFramework/PluginLoader/AutoinstallerPluginLoader';
 
 /** Stable inputs which distinguish reusable, reloadable, and process-bound workspace state. @alpha */
 export interface IWorkspaceInputFingerprint {
@@ -153,16 +154,17 @@ export class WorkspaceRuntimeFingerprintCache {
     const entries: ReadonlyArray<string>[] = [];
     for (const filename of Array.from(filenames).sort()) {
       try {
+        // statSync follows links, so dev and ino identify the file that is loaded. Its resolved path is
+        // recomputed whenever that identity changes, which avoids a costly realpath for every unchanged file.
         const stat: fsSync.BigIntStats = fsSync.statSync(filename, { bigint: true });
-        const realPath: string = fsSync.realpathSync(filename);
-        const stamp: string = `${realPath}:${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
+        const stamp: string = `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
         let cached: { stamp: string; entry: ReadonlyArray<string> } | undefined = this._files.get(filename);
         if (cached?.stamp !== stamp) {
           cached = {
             stamp,
             entry: [
               filename,
-              realPath,
+              fsSync.realpathSync(filename),
               createHash('sha256').update(fsSync.readFileSync(filename)).digest('hex')
             ]
           };
@@ -238,6 +240,15 @@ export async function captureWorkspaceInputFingerprintAsync(
   for (const filename of configurationFiles) {
     (isProcessBoundConfiguration(filename) ? installation : definitions).add(filename);
   }
+  // Configured plugins shape the command-line parser even when they are never loaded for a command.
+  for (const pluginConfiguration of rushConfiguration._rushPluginsConfiguration.configuration.plugins) {
+    for (const filename of AutoinstallerPluginLoader.getPluginShapeFilePaths(
+      rushConfiguration,
+      pluginConfiguration
+    )) {
+      definitions.add(filename);
+    }
+  }
   for (const project of rushJson.projects) {
     const projectFolder: string = path.resolve(root, project.projectFolder);
     if (!Path.isUnderOrEqual(projectFolder, root)) {
@@ -259,6 +270,8 @@ export async function captureWorkspaceInputFingerprintAsync(
   const runtimePaths: string[] = [
     path.join(packageFolder, 'package.json'),
     path.join(packageFolder, 'lib-commonjs'),
+    // In a bundled Rush, lib-commonjs only forwards to the bundle chunks, which contain the implementation.
+    path.join(packageFolder, 'dist'),
     ...(options.runtimePaths ?? [])
   ];
   const runtimeHash: string = (options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache())._hashPaths(

@@ -43,8 +43,9 @@ import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
  * scheduling parameters (`--verbose`, `--parallelism`, `--timeline`) are applied per request instead.
  * Incompatible parameters,
  * environments, or graph inputs are rejected before scheduling; no request is retried automatically.
- * The initial supported surface excludes external plugins, .env initialization, install/watch,
- * event-hook scripts, and rushx/global commands. Use the unchanged native CLI for those surfaces.
+ * The initial supported surface excludes external plugins that participate in the requested command,
+ * .env initialization, install/watch, event-hook scripts, and rushx/global commands. Use the unchanged
+ * native CLI for those surfaces.
  * @beta
  */
 export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {

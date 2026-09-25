@@ -13,6 +13,7 @@ import {
   type IDaemonInstallationMetadata,
   type IInstalledDaemonLauncher
 } from './DaemonInstallation';
+import { installWindowsHideDefault } from './WindowsSubprocessConsoles';
 
 async function mainAsync(): Promise<void> {
   const [mode, packageJsonPath, expectedVersion, repoRoot] = process.argv.slice(2);
@@ -95,6 +96,10 @@ async function mainAsync(): Promise<void> {
     configured.daemon,
     process.env
   );
+  if (process.platform === 'win32') {
+    // This process was started detached, without a console; keep its tools from opening console windows.
+    installWindowsHideDefault();
+  }
   await serveRushDaemonAsync({
     repoRoot,
     rushVersion: installation.rushVersion,
