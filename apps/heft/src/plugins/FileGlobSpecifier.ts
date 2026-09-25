@@ -4,11 +4,43 @@
 import type * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import glob, { type FileSystemAdapter, type Entry } from 'fast-glob';
+import type { default as FastGlob, FileSystemAdapter, Entry } from 'fast-glob';
 
 import { Async } from '@rushstack/node-core-library';
 
 import type { IWatchFileSystemAdapter, IWatchedFileState } from '../utilities/WatchFileSystemAdapter';
+import { trySimpleGlobAsync } from './SimpleGlob';
+
+let _fastGlob: typeof FastGlob | undefined;
+
+/**
+ * fast-glob is expensive to load (~70 modules), so it is only loaded when a glob is actually evaluated.
+ * This returns the same function object that `import glob from 'fast-glob'` would provide.
+ */
+export function getFastGlob(): typeof FastGlob {
+  if (!_fastGlob) {
+    _fastGlob = require('fast-glob') as typeof FastGlob;
+  }
+  return _fastGlob;
+}
+
+/**
+ * Returns the `glob` function exported by fast-glob.
+ */
+export function getGlobFn(): GlobFn {
+  return getFastGlob().glob;
+}
+
+// Characters that fast-glob's escapePath() may rewrite on any platform. A string that contains none of
+// these characters is returned unchanged by escapePath(), so fast-glob does not need to be loaded.
+const POSSIBLE_GLOB_SYMBOLS_REGEXP: RegExp = /[()*?[\]{|}!+@\\]/;
+
+function escapePath(pattern: string): string {
+  if (typeof pattern === 'string' && pattern.length > 0 && !POSSIBLE_GLOB_SYMBOLS_REGEXP.test(pattern)) {
+    return pattern;
+  }
+  return getFastGlob().escapePath(pattern);
+}
 
 /**
  * Used to specify a selection of one or more files.
@@ -118,7 +150,7 @@ export async function watchGlobAsync(
     throw new Error(`"cwd" must be set in the options passed to "watchGlobAsync"`);
   }
 
-  const rawFiles: string[] = await glob(pattern, options);
+  const rawFiles: string[] = await getFastGlob()(pattern, options);
 
   const results: Map<string, IWatchedFileState> = new Map();
   await Async.forEachAsync(
@@ -141,7 +173,23 @@ export async function getFileSelectionSpecifierPathsAsync(
   options: IGetFileSelectionSpecifierPathsOptions
 ): Promise<Map<string, fs.Dirent>> {
   const { fileGlobSpecifier, includeFolders, fileSystemAdapter } = options;
-  const rawEntries: Entry[] = await glob(fileGlobSpecifier.includeGlobs!, {
+  const { excludeGlobs } = fileGlobSpecifier;
+  if (
+    !fileSystemAdapter &&
+    (excludeGlobs === undefined || (Array.isArray(excludeGlobs) && !excludeGlobs.length))
+  ) {
+    // Common patterns can be evaluated with identical results without loading fast-glob
+    const simpleGlobResults: Map<string, fs.Dirent> | undefined = await trySimpleGlobAsync(
+      fileGlobSpecifier.includeGlobs,
+      fileGlobSpecifier.sourcePath,
+      !includeFolders
+    );
+    if (simpleGlobResults) {
+      return simpleGlobResults;
+    }
+  }
+
+  const rawEntries: Entry[] = await getFastGlob()(fileGlobSpecifier.includeGlobs!, {
     fs: fileSystemAdapter,
     cwd: fileGlobSpecifier.sourcePath,
     ignore: fileGlobSpecifier.excludeGlobs,
@@ -205,7 +253,7 @@ function getIncludedGlobPatterns(fileGlobSpecifier: IFileSelectionSpecifier): st
       escapedFileExtension = fileExtension;
     }
 
-    escapedFileExtension = glob.escapePath(escapedFileExtension);
+    escapedFileExtension = escapePath(escapedFileExtension);
     escapedFileExtensions.add(escapedFileExtension);
   }
 

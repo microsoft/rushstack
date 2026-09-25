@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import { createHash } from 'node:crypto';
 
-import { default as JestResolver } from 'jest-resolve';
+import type * as JestResolveModule from 'jest-resolve';
 import type { TransformOptions } from '@jest/transform';
 
 import { FileSystem } from '@rushstack/node-core-library';
@@ -46,6 +46,9 @@ export const jestResolve = (
   // eslint-disable-next-line @rushstack/no-new-null
 ): string | null => {
   const { key, filePath, rootDir, optional } = options;
+  // Loaded on first use: "jest-resolve" and its dependencies are only needed when a Jest configuration is processed.
+  const JestResolver: typeof JestResolveModule.default = (require('jest-resolve') as typeof JestResolveModule)
+    .default;
   const module: string | null = JestResolver.findNodeModule(replaceRootDirInPath(rootDir, filePath), {
     basedir: rootDir,
     resolver: resolver || undefined

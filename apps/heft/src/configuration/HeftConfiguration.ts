@@ -3,16 +3,73 @@
 
 import * as path from 'node:path';
 
-import { type IPackageJson, PackageJsonLookup, InternalError, Path } from '@rushstack/node-core-library';
+// Inline type specifiers keep the API report identical; TypeScript elides these imports at runtime
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type IPackageJson, type PackageJsonLookup, type InternalError } from '@rushstack/node-core-library';
 import { Terminal, type ITerminalProvider, type ITerminal } from '@rushstack/terminal';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
 import {
   type IProjectConfigurationFileSpecification,
-  ProjectConfigurationFile
+  type ProjectConfigurationFile
 } from '@rushstack/heft-config-file';
-import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type IRigConfig, type RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
-import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver';
+import type { RigPackageResolver, IRigPackageResolver } from './RigPackageResolver';
+import { getSharedLeanPackageJsonLookup, LeanBailError } from './lean/LeanResolution';
+import { tryLoadProjectConfigurationFileLean } from './lean/LeanConfigurationFileSpecification';
+import type { ILeanLoadResult } from './lean/LeanProjectConfigurationFile';
+import { LeanRigConfig, tryLoadRigConfigDataLean, type ILeanRigConfigData } from './lean/LeanRigConfig';
+
+// These are loaded lazily, since they are not needed on Heft's startup path
+function getPackageJsonLookupInstance(): PackageJsonLookup {
+  const { PackageJsonLookup: PackageJsonLookupClass } = require('@rushstack/node-core-library');
+  return (PackageJsonLookupClass as typeof PackageJsonLookup).instance;
+}
+
+function getInternalErrorClass(): typeof InternalError {
+  return require('@rushstack/node-core-library').InternalError;
+}
+
+function getProjectConfigurationFileClass(): typeof ProjectConfigurationFile {
+  return require('@rushstack/heft-config-file').ProjectConfigurationFile;
+}
+
+// Not a member of HeftConfiguration, to keep the public API unchanged
+const _rigConfigsForConfigLoading: WeakMap<HeftConfiguration, () => IRigConfig> = new WeakMap();
+
+/**
+ * Returns a rig config for Heft's own configuration loading. It has the same data as
+ * `HeftConfiguration.rigConfig`, but it only loads `@rushstack/rig-package` if one of its methods is called.
+ */
+export function getRigConfigForConfigLoading(heftConfiguration: HeftConfiguration): IRigConfig {
+  return _rigConfigsForConfigLoading.get(heftConfiguration)!();
+}
+
+function getRigConfigClass(): typeof RigConfig {
+  return require('@rushstack/rig-package').RigConfig;
+}
+
+function getRigPackageResolverClass(): typeof RigPackageResolver {
+  return require('./RigPackageResolver').RigPackageResolver;
+}
+
+/**
+ * Equivalent to `PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(folderPath)`, without loading
+ * `@rushstack/node-core-library` in the common case.
+ */
+function tryGetPackageJsonFilePathFor(folderPath: string): { packageJsonPath: string | undefined; lean: boolean } {
+  let packageFolder: string | undefined;
+  try {
+    packageFolder = getSharedLeanPackageJsonLookup().tryGetPackageFolderFor(folderPath);
+  } catch {
+    // The lean lookup can't guarantee an identical result; use the original implementation
+    return { packageJsonPath: getPackageJsonLookupInstance().tryGetPackageJsonFilePathFor(folderPath), lean: false };
+  }
+
+  return { packageJsonPath: packageFolder ? path.join(packageFolder, 'package.json') : undefined, lean: true };
+}
 
 /**
  * @internal
@@ -50,7 +107,12 @@ export class HeftConfiguration {
   #slashNormalizedBuildFolderPath: string | undefined;
   #projectConfigFolderPath: string | undefined;
   #tempFolderPath: string | undefined;
+  // Whether initialize() found the project's package.json with the shared lean lookup
+  #projectPackageJsonFromLeanLookup: boolean = false;
+  // The genuine RigConfig object. If #leanRigConfig is set, it is only created when it is needed.
   #rigConfig: IRigConfig | undefined;
+  // The rig data read without loading @rushstack/rig-package; its methods delegate to #rigConfig
+  #leanRigConfig: LeanRigConfig | undefined;
   #rigPackageResolver: RigPackageResolver | undefined;
 
   readonly #knownConfigurationFiles: Map<string, IProjectConfigurationFileEntry<unknown>> = new Map();
@@ -65,7 +127,8 @@ export class HeftConfiguration {
    */
   public get slashNormalizedBuildFolderPath(): string {
     if (!this.#slashNormalizedBuildFolderPath) {
-      this.#slashNormalizedBuildFolderPath = Path.convertToSlashes(this.buildFolderPath);
+      // Equivalent to Path.convertToSlashes() from @rushstack/node-core-library
+      this.#slashNormalizedBuildFolderPath = this.buildFolderPath.split('\\').join('/');
     }
 
     return this.#slashNormalizedBuildFolderPath;
@@ -101,8 +164,15 @@ export class HeftConfiguration {
    * The rig.json configuration for this project, if present.
    */
   public get rigConfig(): IRigConfig {
+    if (!this.#rigConfig && this.#leanRigConfig) {
+      // Returns the same object as RigConfig.loadForProjectFolder() calls by other code (like before)
+      this.#rigConfig = getRigConfigClass().loadForProjectFolder({
+        projectFolderPath: this.buildFolderPath
+      });
+    }
+
     if (!this.#rigConfig) {
-      throw new InternalError(
+      throw new (getInternalErrorClass())(
         'The rigConfig cannot be accessed until HeftConfiguration.checkForRigAsync() has been called'
       );
     }
@@ -114,7 +184,7 @@ export class HeftConfiguration {
    */
   public get rigPackageResolver(): IRigPackageResolver {
     if (!this.#rigPackageResolver) {
-      this.#rigPackageResolver = new RigPackageResolver({
+      this.#rigPackageResolver = new (getRigPackageResolverClass())({
         buildFolder: this.buildFolderPath,
         projectPackageJson: this.projectPackageJson,
         rigConfig: this.rigConfig
@@ -138,14 +208,26 @@ export class HeftConfiguration {
    * The Heft tool's package.json
    */
   public get heftPackageJson(): IPackageJson {
-    return PackageJsonLookup.instance.tryLoadPackageJsonFor(__dirname)!;
+    return getPackageJsonLookupInstance().tryLoadPackageJsonFor(__dirname)!;
   }
 
   /**
    * The package.json of the project being built
    */
   public get projectPackageJson(): IPackageJson {
-    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolderPath)!;
+    if (this.#projectPackageJsonFromLeanLookup) {
+      // Like the original implementation (where initialize() cached the package.json in PackageJsonLookup.instance),
+      // this returns the contents read at startup, without loading @rushstack/node-core-library.
+      try {
+        return getSharedLeanPackageJsonLookup().tryLoadPackageJsonFor(this.buildFolderPath)! as IPackageJson;
+      } catch (e) {
+        if (!(e instanceof LeanBailError)) {
+          throw e;
+        }
+      }
+    }
+
+    return getPackageJsonLookupInstance().tryLoadPackageJsonFor(this.buildFolderPath)!;
   }
 
   /**
@@ -159,6 +241,7 @@ export class HeftConfiguration {
     this.terminalProvider = terminalProvider;
     this.numberOfCores = numberOfCores;
     this.globalTerminal = new Terminal(terminalProvider);
+    _rigConfigsForConfigLoading.set(this, () => this.#leanRigConfig ?? this.rigConfig);
   }
 
   /**
@@ -166,11 +249,25 @@ export class HeftConfiguration {
    * @internal
    */
   public async _checkForRigAsync(): Promise<void> {
-    if (!this.#rigConfig) {
-      this.#rigConfig = await RigConfig.loadForProjectFolderAsync({
+    if (!this.#rigConfig && !this.#leanRigConfig) {
+      const leanRigConfigData: ILeanRigConfigData | undefined = tryLoadRigConfigDataLean(this.buildFolderPath);
+      if (leanRigConfigData) {
+        this.#leanRigConfig = new LeanRigConfig(leanRigConfigData, () => this.rigConfig);
+        return;
+      }
+
+      // Use the original implementation, which reports errors in rig.json
+      this.#rigConfig = await getRigConfigClass().loadForProjectFolderAsync({
         projectFolderPath: this.buildFolderPath
       });
     }
+  }
+
+  /**
+   * The value that the original implementation passed to the configuration file loaders.
+   */
+  #getRigConfigForOriginalLoader(): IRigConfig | undefined {
+    return this.#leanRigConfig ? this.rigConfig : this.#rigConfig;
   }
 
   /**
@@ -183,8 +280,18 @@ export class HeftConfiguration {
     options: IProjectConfigurationFileSpecification<TConfigFile>,
     terminal: ITerminal
   ): TConfigFile | undefined {
+    const leanResult: ILeanLoadResult<TConfigFile | undefined> | undefined =
+      this.#tryLoadProjectConfigurationFileLean(options, terminal);
+    if (leanResult) {
+      return leanResult.configurationFile;
+    }
+
     const loader: ProjectConfigurationFile<TConfigFile> = this.#getConfigFileLoader(options);
-    return loader.tryLoadConfigurationFileForProject(terminal, this.buildFolderPath, this.#rigConfig);
+    return loader.tryLoadConfigurationFileForProject(
+      terminal,
+      this.buildFolderPath,
+      this.#getRigConfigForOriginalLoader()
+    );
   }
 
   /**
@@ -197,17 +304,25 @@ export class HeftConfiguration {
     options: IProjectConfigurationFileSpecification<TConfigFile>,
     terminal: ITerminal
   ): Promise<TConfigFile | undefined> {
+    const leanResult: ILeanLoadResult<TConfigFile | undefined> | undefined =
+      this.#tryLoadProjectConfigurationFileLean(options, terminal);
+    if (leanResult) {
+      return leanResult.configurationFile;
+    }
+
     const loader: ProjectConfigurationFile<TConfigFile> = this.#getConfigFileLoader(options);
-    return loader.tryLoadConfigurationFileForProjectAsync(terminal, this.buildFolderPath, this.#rigConfig);
+    return loader.tryLoadConfigurationFileForProjectAsync(
+      terminal,
+      this.buildFolderPath,
+      this.#getRigConfigForOriginalLoader()
+    );
   }
 
   /**
    * @internal
    */
   public static initialize(options: IHeftConfigurationInitializationOptions): HeftConfiguration {
-    const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
-      options.cwd
-    );
+    const { packageJsonPath, lean } = tryGetPackageJsonFilePathFor(options.cwd);
     let buildFolderPath: string;
     if (packageJsonPath) {
       buildFolderPath = path.dirname(packageJsonPath);
@@ -225,7 +340,45 @@ export class HeftConfiguration {
       ...options,
       buildFolderPath
     });
+    configuration.#projectPackageJsonFromLeanLookup = lean;
     return configuration;
+  }
+
+  /**
+   * Loads the configuration file without `@rushstack/heft-config-file` (and without compiling its schema), if the
+   * result is guaranteed to be identical. Returns `undefined` otherwise.
+   */
+  #tryLoadProjectConfigurationFileLean<TConfigFile>(
+    options: IProjectConfigurationFileSpecification<TConfigFile>,
+    terminal: ITerminal
+  ): ILeanLoadResult<TConfigFile | undefined> | undefined {
+    // Same checks and side effects on the options object as #getConfigFileLoader()
+    const entry: IProjectConfigurationFileEntry<TConfigFile> | undefined = this.#knownConfigurationFiles.get(
+      options.projectRelativeFilePath
+    ) as IProjectConfigurationFileEntry<TConfigFile> | undefined;
+    if (entry) {
+      // Let #getConfigFileLoader() handle this
+      return undefined;
+    }
+
+    Object.freeze(options);
+
+    const leanRigConfig: LeanRigConfig | undefined = this.#leanRigConfig;
+    const rigConfig: IRigConfig | undefined = leanRigConfig ?? this.#rigConfig;
+    const leanResult: ILeanLoadResult<TConfigFile | undefined> | undefined = tryLoadProjectConfigurationFileLean(
+      options,
+      this.buildFolderPath,
+      rigConfig,
+      // The profile folder of a LeanRigConfig can be resolved without side effects
+      rigConfig === leanRigConfig
+    );
+    if (leanResult) {
+      for (const message of leanResult.debugMessages) {
+        terminal.writeDebugLine(message);
+      }
+    }
+
+    return leanResult;
   }
 
   #getConfigFileLoader<TConfigFile>(
@@ -238,7 +391,7 @@ export class HeftConfiguration {
     if (!entry) {
       entry = {
         options: Object.freeze(options),
-        loader: new ProjectConfigurationFile<TConfigFile>(options)
+        loader: new (getProjectConfigurationFileClass())<TConfigFile>(options)
       };
     } else if (options !== entry.options) {
       throw new Error(

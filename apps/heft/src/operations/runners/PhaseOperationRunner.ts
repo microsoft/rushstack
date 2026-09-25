@@ -1,13 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  type IOperationRunner,
-  type IOperationRunnerContext,
-  OperationStatus
-} from '@rushstack/operation-graph';
+import type { IOperationRunner, IOperationRunnerContext } from '@rushstack/operation-graph';
+import { OperationStatus } from '@rushstack/operation-graph/lib/OperationStatus';
 
-import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
+import type { IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
@@ -64,6 +61,7 @@ export class PhaseOperationRunner implements IOperationRunner {
     // Delete the files if any were specified
     if (deleteOperations.length) {
       const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
+      const { deleteFilesAsync } = await import('../../plugins/DeleteFilesPlugin');
       await deleteFilesAsync(rootFolderPath, deleteOperations, cleanLogger.terminal);
     }
 

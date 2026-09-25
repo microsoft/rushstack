@@ -7,7 +7,7 @@ import { performance } from 'node:perf_hooks';
 
 import type * as TEslint from 'eslint';
 import type * as TEslintLegacy from 'eslint-8';
-import * as semver from 'semver';
+import type * as semver from 'semver';
 import stableStringify from 'json-stable-stringify-without-jsonify';
 
 import { Async, FileError, FileSystem, Path } from '@rushstack/node-core-library';
@@ -160,7 +160,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     } = options;
     this.#eslintPackage = eslintPackage;
     this.#includeAdditionalFiles = includeAdditionalFiles ?? false;
-    this.#eslintPackageVersion = new semver.SemVer(eslintPackage.ESLint.version);
+    // Deep import: the 'semver' package index loads ~45 modules. The SemVer class is the same object.
+    const SemVer: typeof semver.SemVer = require('semver/classes/semver');
+    this.#eslintPackageVersion = new SemVer(eslintPackage.ESLint.version);
     const linterConfigFileName: string = path.basename(linterConfigFilePath);
     if (this.#eslintPackageVersion.major < 9 && !ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)) {
       throw new Error(

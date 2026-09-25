@@ -11,7 +11,7 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
-import { invokeApiExtractorAsync } from './ApiExtractorRunner';
+import type { invokeApiExtractorAsync as InvokeApiExtractorAsync } from './ApiExtractorRunner';
 import apiExtractorConfigSchema from './schemas/api-extractor-task.schema.json';
 
 // eslint-disable-next-line @rushstack/no-new-null
@@ -204,6 +204,9 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       printApiReportDiffOption === 'always' || (printApiReportDiffOption === 'production' && production);
 
     // Run API Extractor
+    // The runner is only loaded when the task runs.
+    const { invokeApiExtractorAsync }: { invokeApiExtractorAsync: typeof InvokeApiExtractorAsync } =
+      require('./ApiExtractorRunner');
     await invokeApiExtractorAsync({
       apiExtractor,
       apiExtractorConfiguration,

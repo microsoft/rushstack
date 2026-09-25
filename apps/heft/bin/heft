@@ -1,2 +1,11 @@
 #!/usr/bin/env node
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+// Enable the V8 compile cache before anything else is loaded (Node.js >= 22.8). It honors the
+// NODE_COMPILE_CACHE and NODE_DISABLE_COMPILE_CACHE environment variables and fails silently.
+try {
+  require('../lib-commonjs/bootstrap/CompileCache.js').tryEnableCompileCache();
+} catch {}
+
 require('../lib-commonjs/startWithVersionSelector.js');

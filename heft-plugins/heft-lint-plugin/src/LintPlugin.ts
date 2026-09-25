@@ -20,9 +20,18 @@ import type {
 import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import type { LinterBase } from './LinterBase';
-import { Eslint } from './Eslint';
-import { Tslint } from './Tslint';
+import type { Eslint } from './Eslint';
+import type { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+
+// The linter implementations (and their dependencies) are only loaded when the lint task runs.
+function getEslintClass(): typeof Eslint {
+  return (require('./Eslint') as typeof import('./Eslint')).Eslint;
+}
+
+function getTslintClass(): typeof Tslint {
+  return (require('./Tslint') as typeof import('./Tslint')).Tslint;
+}
 
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
 const TYPESCRIPT_PLUGIN_PACKAGE_NAME: '@rushstack/heft-typescript-plugin' =
@@ -222,7 +231,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
   async #initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
     // Locate the tslint linter if enabled
-    this.#tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
+    this.#tslintConfigFilePath = await getTslintClass().resolveTslintConfigFilePathAsync(heftConfiguration);
     if (this.#tslintConfigFilePath) {
       this.#tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'tslint',
@@ -231,7 +240,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     }
 
     // Locate the eslint linter if enabled
-    this.#eslintConfigFilePath = await Eslint.resolveEslintConfigFilePathAsync(heftConfiguration);
+    this.#eslintConfigFilePath = await getEslintClass().resolveEslintConfigFilePathAsync(heftConfiguration);
     if (this.#eslintConfigFilePath) {
       logger.terminal.writeVerboseLine(`ESLint config file path: ${this.#eslintConfigFilePath}`);
       this.#eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
@@ -261,7 +270,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
     const lintOperations: (() => Promise<void>)[] = [];
     if (this.#eslintConfigFilePath && this.#eslintToolPath) {
-      const eslintLinter: Eslint = await Eslint.initializeAsync({
+      const eslintLinter: Eslint = await getEslintClass().initializeAsync({
         tsProgram,
         fix,
         sarifLogPath,
@@ -278,7 +287,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     }
 
     if (this.#tslintConfigFilePath && this.#tslintToolPath) {
-      const tslintLinter: Tslint = await Tslint.initializeAsync({
+      const tslintLinter: Tslint = await getTslintClass().initializeAsync({
         tsProgram,
         fix,
         scopedLogger: taskSession.logger,

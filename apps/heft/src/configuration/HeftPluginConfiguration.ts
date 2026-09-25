@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import * as fs from 'node:fs';
+
+import type { JsonSchema } from '@rushstack/node-core-library';
 
 import {
   HeftLifecyclePluginDefinition,
@@ -12,6 +14,8 @@ import {
 } from './HeftPluginDefinition';
 import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
 import heftPluginSchema from '../schemas/heft-plugin.schema.json';
+import { tryParseJsonLean } from './lean/LeanJson';
+import { tryValidateSchemaObject } from './lean/SchemaFastPath';
 
 export interface IHeftPluginConfigurationJson {
   lifecyclePlugins?: IHeftLifecyclePluginDefinitionJson[];
@@ -20,8 +24,41 @@ export interface IHeftPluginConfigurationJson {
 
 const HEFT_PLUGIN_CONFIGURATION_FILENAME: 'heft-plugin.json' = 'heft-plugin.json';
 
-const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(heftPluginSchema);
+let _jsonSchema: JsonSchema | undefined;
 const _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
+
+/**
+ * Loads and validates the heft-plugin.json file without loading ajv, if the result is guaranteed to be identical
+ * to `JsonFile.loadAndValidateAsync()`. Returns `undefined` otherwise (including for all error conditions).
+ */
+function _tryLoadHeftPluginConfigurationJsonLean(filePath: string): IHeftPluginConfigurationJson | undefined {
+  let fileText: string;
+  try {
+    fileText = fs.readFileSync(filePath, 'utf8');
+  } catch {
+    return undefined;
+  }
+
+  const parsed: { value: unknown } | undefined = tryParseJsonLean(fileText);
+  if (parsed && tryValidateSchemaObject(heftPluginSchema, parsed.value)) {
+    return parsed.value as IHeftPluginConfigurationJson;
+  }
+}
+
+async function _loadHeftPluginConfigurationJsonAsync(filePath: string): Promise<IHeftPluginConfigurationJson> {
+  const leanResult: IHeftPluginConfigurationJson | undefined = _tryLoadHeftPluginConfigurationJsonLean(filePath);
+  if (leanResult) {
+    return leanResult;
+  }
+
+  // Use the original implementation, which produces the canonical errors
+  const { JsonFile, JsonSchema: JsonSchemaClass } = await import('@rushstack/node-core-library');
+  if (!_jsonSchema) {
+    _jsonSchema = JsonSchemaClass.fromLoadedObject(heftPluginSchema);
+  }
+
+  return await JsonFile.loadAndValidateAsync(filePath, _jsonSchema);
+}
 
 /**
  * Loads and validates the heft-plugin.json file.
@@ -66,10 +103,8 @@ export class HeftPluginConfiguration {
       _pluginConfigurationPromises.get(packageRoot);
     if (!heftPluginConfigurationPromise) {
       heftPluginConfigurationPromise = (async () => {
-        const heftPluginConfigurationJson: IHeftPluginConfigurationJson = await JsonFile.loadAndValidateAsync(
-          resolvedHeftPluginConfigurationJsonFilename,
-          _jsonSchema
-        );
+        const heftPluginConfigurationJson: IHeftPluginConfigurationJson =
+          await _loadHeftPluginConfigurationJsonAsync(resolvedHeftPluginConfigurationJsonFilename);
         return new HeftPluginConfiguration(heftPluginConfigurationJson, packageRoot, packageName);
       })();
       _pluginConfigurationPromises.set(packageRoot, heftPluginConfigurationPromise);

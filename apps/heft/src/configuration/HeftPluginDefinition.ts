@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { InternalError, JsonSchema } from '@rushstack/node-core-library';
+import type { JsonSchema, InternalError as InternalErrorType } from '@rushstack/node-core-library';
 
 import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
 import type { HeftTaskSession } from '../pluginFramework/HeftTaskSession';
+import { tryValidateSchemaFile } from './lean/SchemaFastPath';
 
 /**
  * "baseParameter" from heft-plugin.schema.json
@@ -186,6 +188,15 @@ export interface IHeftLifecyclePluginDefinitionJson extends IHeftPluginDefinitio
 
 export interface IHeftTaskPluginDefinitionJson extends IHeftPluginDefinitionJson {}
 
+function getJsonSchemaClass(): typeof JsonSchema {
+  return require('@rushstack/node-core-library').JsonSchema;
+}
+
+function getInternalErrorClass(): typeof InternalErrorType {
+  // Loaded lazily, since it is only needed for error reporting
+  return require('@rushstack/node-core-library').InternalError;
+}
+
 export interface IHeftPluginDefinitionOptions {
   heftPluginDefinitionJson: IHeftPluginDefinitionJson;
   packageName: string;
@@ -196,6 +207,7 @@ export abstract class HeftPluginDefinitionBase {
   #heftPluginDefinitionJson: IHeftPluginDefinitionJson;
   #pluginPackageName: string;
   #resolvedEntryPoint: string;
+  #optionsSchemaPath: string | undefined;
   #optionsSchema: JsonSchema | undefined;
 
   protected constructor(options: IHeftPluginDefinitionOptions) {
@@ -222,7 +234,14 @@ export abstract class HeftPluginDefinitionBase {
         options.packageRoot,
         options.heftPluginDefinitionJson.optionsSchema
       );
-      this.#optionsSchema = JsonSchema.fromFile(resolvedSchemaPath);
+      // JsonSchema.fromFile() only checks that the file exists; the schema itself is loaded when the options are
+      // validated. Only construct the JsonSchema (which loads @rushstack/node-core-library) when it is needed.
+      if (!fs.existsSync(resolvedSchemaPath)) {
+        // Throws the canonical "Schema file not found" error
+        this.#optionsSchema = getJsonSchemaClass().fromFile(resolvedSchemaPath);
+      }
+
+      this.#optionsSchemaPath = resolvedSchemaPath;
     }
   }
 
@@ -288,12 +307,12 @@ export abstract class HeftPluginDefinitionBase {
             'export a plugin class with a parameterless constructor.'
         );
       } else {
-        throw new InternalError(`Could not load plugin from "${entryPointPath}": ${error}`);
+        throw new (getInternalErrorClass())(`Could not load plugin from "${entryPointPath}": ${error}`);
       }
     }
 
     if (!heftPlugin) {
-      throw new InternalError(
+      throw new (getInternalErrorClass())(
         `Plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" is null or undefined.`
       );
     }
@@ -301,7 +320,7 @@ export abstract class HeftPluginDefinitionBase {
     logger.terminal.writeVerboseLine(`Loaded plugin from "${entryPointPath}"`);
 
     if (typeof heftPlugin.apply !== 'function') {
-      throw new InternalError(
+      throw new (getInternalErrorClass())(
         `The plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" ` +
           'doesn\'t define an "apply" function.'
       );
@@ -314,8 +333,18 @@ export abstract class HeftPluginDefinitionBase {
    * Validate the provided plugin options against the plugin's options schema, if one is provided.
    */
   public validateOptions(options: unknown): void {
-    if (this.#optionsSchema) {
+    const optionsSchemaPath: string | undefined = this.#optionsSchemaPath;
+    if (optionsSchemaPath) {
+      if (tryValidateSchemaFile(optionsSchemaPath, options || {})) {
+        // Guaranteed to produce the same outcome as the ajv-based validation below
+        return;
+      }
+
       try {
+        if (!this.#optionsSchema) {
+          this.#optionsSchema = getJsonSchemaClass().fromFile(optionsSchemaPath);
+        }
+
         this.#optionsSchema.validateObject(options || {}, '');
       } catch (error) {
         throw new Error(
