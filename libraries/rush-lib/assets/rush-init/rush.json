@@ -390,6 +390,13 @@
       "projectFolder": "apps/my-app",
 
       /**
+       * An optional human-readable description of the project, for example a one-line
+       * summary of its purpose.  Rush does not interpret this value, but it is available
+       * to tools and plugins via the Rush API.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "description": "The main web application for the example repo",
+
+      /**
        * This field is only used if "subspacesEnabled" is true in subspaces.json.
        * It specifies the subspace that this project belongs to.  If omitted, then the
        * project belongs to the "default" subspace.
