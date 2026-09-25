@@ -156,6 +156,57 @@ describe('phased request summary', () => {
     }
   });
 
+  it('writes the failure summary before an early result while the coalesced batch continues', async () => {
+    let releaseC: () => void = () => undefined;
+    const cHeld: Promise<void> = new Promise<void>((resolve) => {
+      releaseC = resolve;
+    });
+    const fixture: ITestRoutingFixture = createRoutingFixture(
+      new Map([
+        [
+          OPERATION_A,
+          new TestOperationRunner(OPERATION_A, OperationStatus.Failure, async (terminal) =>
+            terminal.writeErrorLine('a-failure-detail')
+          )
+        ],
+        [OPERATION_B, new TestOperationRunner(OPERATION_B)],
+        [OPERATION_C, new TestOperationRunner(OPERATION_C, OperationStatus.Success, () => cHeld)]
+      ]),
+      [[OPERATION_B, OPERATION_A]]
+    );
+    fixture.graph.parallelism = 2;
+    try {
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+      const clientA: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientC: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const resultAPromise = router.executeAsync(createRequest('a', OPERATION_A), clientA);
+      const resultCPromise = router.executeAsync(createRequest('c', OPERATION_C), clientC);
+
+      const resultA = await resultAPromise;
+      // The early result is published while the shared iteration still runs the other client's selection.
+      expect(fixture.graph.status).toBe(OperationStatus.Executing);
+      expect(resultA).toMatchObject({ exitCode: 1, outcome: 'failure' });
+      const stdoutA: string = getActivity(clientA, 'stdout');
+      const summaryA: string = getSummary(stdoutA);
+      expect(summaryA).toContain('==[ FAILURE: 1 operation ]==');
+      expect(summaryA).toContain(`--[ FAILURE: ${OPERATION_A} ]--`);
+      expect(summaryA).toContain('a-failure-detail');
+      expect(summaryA).not.toContain(OPERATION_C);
+      expect(stdoutA).toMatch(DURATION_LINE);
+      expect(getActivity(clientA, 'stderr')).toContain('Operations failed.');
+      expect(clientA.writes[clientA.writes.length - 1].result).toBe(resultA);
+
+      releaseC();
+      const resultC = await resultCPromise;
+      expect(resultC).toMatchObject({ exitCode: 0, outcome: 'success' });
+      const summaryC: string = getSummary(getActivity(clientC, 'stdout'));
+      expect(summaryC).toContain('==[ SUCCESS: 1 operation ]==');
+      expect(summaryC).not.toContain(OPERATION_A);
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+
   it('gives each coalesced request a summary of only its own selection', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     try {

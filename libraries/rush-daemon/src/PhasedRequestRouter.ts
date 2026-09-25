@@ -627,15 +627,21 @@ class PhasedRequestBatchCoordinator {
     }
     entry.unsubscribe?.();
     entry.unsubscribe = undefined;
-    entry.finishPromise = this.#produceResultAsync(entry, true, undefined, [], undefined, true).catch(
-      (error: unknown) => {
-        // Unlike a batch-wide failure, an early result's failure concerns only this client.
-        if (!entry.completed) {
-          this.#completeEntry(entry);
-          entry.reject(error);
-        }
+    entry.finishPromise = this.#produceEarlyResultAsync(entry).catch((error: unknown) => {
+      // Unlike a batch-wide failure, an early result's failure concerns only this client.
+      if (!entry.completed) {
+        this.#completeEntry(entry);
+        entry.reject(error);
       }
-    );
+    });
+  }
+
+  async #produceEarlyResultAsync(entry: IBatchEntry): Promise<void> {
+    // The sink is notified from the record's `finalizeOperation()`, which synchronously precedes the close of
+    // the record's StdioSummarizer and ProblemCollector. The summary reads the failure tail from the closed
+    // summarizer, so yield once to let the notifying record finish closing before the summary is written.
+    await Promise.resolve();
+    await this.#produceResultAsync(entry, true, undefined, [], undefined, true);
   }
 
   #requestIterationAbort(): void {
