@@ -1799,6 +1799,8 @@ export class RushConfigurationProject {
     get cyclicDependencyProjects(): Set<string>;
     readonly decoupledLocalDependencies: Set<string>;
     get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
+    // @beta
+    readonly description: string | undefined;
     // @deprecated
     get downstreamDependencyProjects(): string[];
     // @beta

@@ -356,6 +356,10 @@
             "description": "The path to the project folder relative to the Rush config file.",
             "type": "string"
           },
+          "description": {
+            "description": "An optional human-readable description of the project, for example a one-line summary of its purpose. Rush does not interpret this value, but it is available to tools and plugins via the Rush API.",
+            "type": "string"
+          },
           "reviewCategory": {
             "description": "An optional category for usage in the \"browser-approved-packages.json\" and \"nonbrowser-approved-packages.json\" files.  Only strings from reviewCategories are allowed here.",
             "type": "string"
