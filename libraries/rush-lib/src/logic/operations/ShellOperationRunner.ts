@@ -4,7 +4,7 @@
 import type * as child_process from 'node:child_process';
 import * as path from 'node:path';
 
-import { Path } from '@rushstack/node-core-library';
+import { Path, SubprocessTerminator } from '@rushstack/node-core-library';
 import { type ITerminal, type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
@@ -103,7 +103,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
         const { rushConfiguration, projectFolder } = this.#rushProject;
 
-        const { environment: initialEnvironment } = context;
+        const { environment: initialEnvironment, abortSignal } = context;
         const childProcessReporter: IOperationChildProcessReporter | undefined =
           !IS_WINDOWS && isHeftCommand(commandToRun) ? context.createChildProcessReporter() : undefined;
 
@@ -117,8 +117,28 @@ export class ShellOperationRunner implements IOperationRunner {
           },
           initialEnvironment,
           additionalEnvironment: childProcessReporter?.environment,
-          stdio: childProcessReporter?.stdio
+          stdio: childProcessReporter?.stdio,
+          // Isolate the process tree so that a hard abort can terminate it.
+          connectSubprocessTerminator: abortSignal !== undefined
         });
+        const terminateProcessTree: () => void = () => {
+          try {
+            if (!IS_WINDOWS && subProcess.pid !== undefined && typeof subProcess.exitCode === 'number') {
+              // The shell already exited, but descendants in its process group may still hold its stdio open.
+              // killProcessTree() is a no-op in that state, so signal the process group directly.
+              killExitedProcessGroup(subProcess.pid);
+            } else {
+              SubprocessTerminator.killProcessTree(subProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+            }
+          } catch (error) {
+            terminal.writeErrorLine(`Failed to terminate the operation process tree: ${error}`);
+          }
+        };
+        if (abortSignal?.aborted) {
+          terminateProcessTree();
+        } else {
+          abortSignal?.addEventListener('abort', terminateProcessTree, { once: true });
+        }
         let reporterError: Error | undefined;
         const reporterDrainPromise: Promise<void> = childProcessReporter
           ? childProcessReporter
@@ -164,9 +184,14 @@ export class ShellOperationRunner implements IOperationRunner {
         const [{ exitCode, signal }]: [
           { readonly exitCode: number | null; readonly signal: NodeJS.Signals | null },
           void
-        ] = await Promise.all([closePromise, reporterDrainPromise]);
+        ] = await Promise.all([closePromise, reporterDrainPromise]).finally(() => {
+          abortSignal?.removeEventListener('abort', terminateProcessTree);
+        });
 
-        if (signal) {
+        if (abortSignal?.aborted) {
+          terminal.writeLine('Terminated because the operation was aborted.');
+          return OperationStatus.Aborted;
+        } else if (signal) {
           // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
           context.error = new OperationError('error', `Terminated by signal: ${signal}`);
           return OperationStatus.Failure;
@@ -192,6 +217,17 @@ export class ShellOperationRunner implements IOperationRunner {
 
   public getConfigHash(): string {
     return this.#commandForHash;
+  }
+}
+
+function killExitedProcessGroup(pid: number): void {
+  try {
+    // The process group ID cannot be reused while any member of the group is still alive.
+    process.kill(-pid, 'SIGKILL');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
+      throw error;
+    }
   }
 }
 

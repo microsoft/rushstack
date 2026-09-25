@@ -26,6 +26,12 @@ import { executeDaemonCommandAsync } from './daemonCommands';
 import { formatAdmissionFailure, getConfiguredAdmission } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import type { AgentProgressRenderer } from './AgentProgressRenderer';
+import {
+  CANCELLATION_SIGNALS,
+  formatCancellationMessage,
+  getSignalExitCode,
+  isCancelledOutcome
+} from './clientCancellation';
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
@@ -148,9 +154,13 @@ export async function launchClientAsync(
     return;
   }
   const abort: AbortController = new AbortController();
-  const onSignal = (): void => abort.abort();
-  process.on('SIGINT', onSignal);
-  process.on('SIGTERM', onSignal);
+  let cancellationSignal: NodeJS.Signals | undefined;
+  // Windows test harnesses emit signals without a name; treat those as Ctrl+C.
+  const onSignal = (signal?: NodeJS.Signals): void => {
+    cancellationSignal ??= signal ?? 'SIGINT';
+    abort.abort();
+  };
+  for (const signal of CANCELLATION_SIGNALS) process.on(signal, onSignal);
   const renderer: ClientOperationRenderer = new ClientOperationRenderer({
     requestId: request.requestId,
     colorLevel: terminal.supportsColor ? 1 : 0,
@@ -182,62 +192,72 @@ export async function launchClientAsync(
     }
     await renderer.initializeAsync();
     agentRenderer?.setPhase('request submitted; preparing the workspace graph');
-    try {
-      outcome = await executeWithDaemonRestartAsync(client, connection, {
-        request,
-        abortSignal: abort.signal,
-        onStdoutAsync: async (bytes, operationId) => {
-          if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stdout');
-          await writeDiscoveryAsync();
-          await renderer.writeLogAsync(bytes, operationId, 'stdout');
-        },
-        onStderrAsync: async (bytes, operationId) => {
-          if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stderr');
-          await writeDiscoveryAsync();
-          await renderer.writeLogAsync(bytes, operationId, 'stderr');
-        },
-        onEventAsync: async (event) =>
-          agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event),
-        onQueuePositionAsync: agentRenderer
-          ? async (position) => agentRenderer.onQueuePosition(position)
-          : process.stderr.isTTY
-          ? (position) =>
-              writeStreamAsync(
-                process.stderr,
-                Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
-              )
-          : undefined,
-        stdin: process.stdin,
-        requiresStdinEnd: !process.stdin.isTTY,
-        cancelOnCtrlC: !!process.stdin.isTTY,
-        initialRawMode: !!process.stdin.isRaw,
-        setRawMode: process.stdin.isTTY
-          ? (enabled) => {
-              process.stdin.setRawMode(enabled);
-            }
-          : undefined
-      });
-    } catch (error) {
+    outcome = await executeWithDaemonRestartAsync(client, connection, {
+      request,
+      abortSignal: abort.signal,
+      onStdoutAsync: async (bytes, operationId) => {
+        if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stdout');
+        await writeDiscoveryAsync();
+        await renderer.writeLogAsync(bytes, operationId, 'stdout');
+      },
+      onStderrAsync: async (bytes, operationId) => {
+        if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stderr');
+        await writeDiscoveryAsync();
+        await renderer.writeLogAsync(bytes, operationId, 'stderr');
+      },
+      onEventAsync: async (event) =>
+        agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event),
+      onQueuePositionAsync: agentRenderer
+        ? async (position) => agentRenderer.onQueuePosition(position)
+        : process.stderr.isTTY
+        ? (position) =>
+            writeStreamAsync(
+              process.stderr,
+              Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
+            )
+        : undefined,
+      stdin: process.stdin,
+      requiresStdinEnd: !process.stdin.isTTY,
+      cancelOnCtrlC: !!process.stdin.isTTY,
+      initialRawMode: !!process.stdin.isRaw,
+      setRawMode: process.stdin.isTTY
+        ? (enabled) => {
+            process.stdin.setRawMode(enabled);
+          }
+        : undefined
+    });
+  } catch (error) {
+    if (!(error instanceof DaemonClientError)) throw error;
+    if (!abort.signal.aborted) {
       // A restart handoff fails only before the request executes, so in-process fallback cannot replay work.
-      if (!(error instanceof DaemonClientError) || error.code !== 'startupFailed') throw error;
+      if (error.code !== 'startupFailed') throw error;
       restartFailure = error;
     }
+    // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
+    outcome = undefined;
   } finally {
-    process.removeListener('SIGINT', onSignal);
-    process.removeListener('SIGTERM', onSignal);
+    for (const signal of CANCELLATION_SIGNALS) process.removeListener(signal, onSignal);
     try {
       await renderer.closeAsync();
     } finally {
       await client.closeAsync();
     }
   }
-  if (restartFailure || !outcome) {
+  if (restartFailure) {
     agentRenderer?.dispose();
-    process.stderr.write(`rush-client: ${restartFailure?.message} Using in-process Rush.\n`);
+    process.stderr.write(`rush-client: ${restartFailure.message} Using in-process Rush.\n`);
     launchInProcess(route.argv, rushx, selectedVersion);
     return;
   }
-  if (outcome.kind === 'result') {
+  if (outcome === undefined || isCancelledOutcome(outcome, abort.signal.aborted)) {
+    const exitCode: number = getSignalExitCode(cancellationSignal ?? 'SIGINT');
+    agentRenderer?.finish({ exitCode, errorMessage: 'cancelled' });
+    process.exitCode = exitCode;
+    // After SIGHUP the terminal may be gone; the exit code is what matters.
+    await writeStreamAsync(process.stderr, Buffer.from(formatCancellationMessage(route.commandName))).catch(
+      () => undefined
+    );
+  } else if (outcome.kind === 'result') {
     agentRenderer?.finish(outcome.result);
     process.exitCode = outcome.result.exitCode;
     const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
@@ -252,9 +272,6 @@ export async function launchClientAsync(
   } else if (outcome.kind === 'rejected') {
     agentRenderer?.finish({ exitCode: 1, errorMessage: `daemon rejected the request (${outcome.rejection.code})` });
     throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
-  } else if (abort.signal.aborted) {
-    agentRenderer?.finish({ exitCode: 130, errorMessage: 'cancelled' });
-    process.exitCode = 130;
   } else {
     agentRenderer?.dispose();
     process.stderr.write(`rush-client: ${outcome.message ?? outcome.reason}; using in-process Rush.\n`);
