@@ -11,6 +11,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient, connectOrStartDaemonAsync, getDaemonLogFilePath } from '@rushstack/rush-client-core';
+import type { DaemonClientOutcome } from '@rushstack/rush-client-core';
 import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
 import {
   removeTestFolderAsync,
@@ -20,6 +21,12 @@ import { captureTestDaemonListenerAsync } from '@rushstack/rush-daemon/lib/test/
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+import {
+  CANCELLATION_SIGNALS,
+  formatCancellationMessage,
+  getSignalExitCode,
+  isCancelledOutcome
+} from '../clientCancellation';
 
 interface IInvocationResult {
   readonly code: number | undefined;
@@ -491,5 +498,49 @@ describe('standalone rushx fallback', () => {
     ]);
     expect(result.code).toBe(1);
     expect(result.stderr).toContain('--no-daemon cannot be combined with daemon start');
+  });
+});
+
+describe('daemon client cancellation exit codes', () => {
+  const abortedResult: DaemonClientOutcome = {
+    kind: 'result',
+    result: { requestId: 'r', outcome: 'aborted', exitCode: 1, aborted: true }
+  };
+
+  it('maps cancellation signals to 128 + signal number', () => {
+    expect(getSignalExitCode('SIGINT')).toBe(130);
+    expect(getSignalExitCode('SIGTERM')).toBe(143);
+    expect(getSignalExitCode('SIGHUP')).toBe(129);
+    expect(CANCELLATION_SIGNALS).toEqual(['SIGINT', 'SIGTERM', 'SIGHUP']);
+  });
+
+  it('treats an aborted daemon result as cancelled instead of copying its exit code', () => {
+    expect(isCancelledOutcome(abortedResult, true)).toBe(true);
+    // Ctrl+C read from a raw-mode TTY cancels without a process signal.
+    expect(isCancelledOutcome(abortedResult, false)).toBe(true);
+    expect(formatCancellationMessage('build')).toBe('rush-client: build cancelled.\n');
+  });
+
+  it('treats a cancelled result as cancelled even when a failure outcome takes precedence', () => {
+    const cancelledWithFailure: DaemonClientOutcome = {
+      kind: 'result',
+      result: { requestId: 'r', outcome: 'failure', exitCode: 1, aborted: true }
+    };
+    expect(isCancelledOutcome(cancelledWithFailure, true)).toBe(true);
+  });
+
+  it('keeps completed results and rejections when a signal arrives late', () => {
+    const succeeded: DaemonClientOutcome = {
+      kind: 'result',
+      result: { requestId: 'r', outcome: 'success', exitCode: 0, aborted: false }
+    };
+    const rejected: DaemonClientOutcome = {
+      kind: 'rejected',
+      rejection: { requestId: 'r', code: 'unsupportedProtocolVersion', message: 'no' }
+    } as unknown as DaemonClientOutcome;
+    expect(isCancelledOutcome(succeeded, true)).toBe(false);
+    expect(isCancelledOutcome(rejected, true)).toBe(false);
+    expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, true)).toBe(true);
+    expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, false)).toBe(false);
   });
 });

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Fix an early coalesced phased result writing its summary before the failed operation's output summarizer was closed.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

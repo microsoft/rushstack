@@ -721,7 +721,9 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
 // @alpha
 export interface IOperationGraph {
     readonly abortController: AbortController;
-    abortCurrentIterationAsync(): Promise<void>;
+    abortCurrentIterationAsync(options?: {
+        terminateRunning?: boolean;
+    }): Promise<void>;
     addTerminalDestination(destination: TerminalWritable): void;
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
@@ -823,6 +825,7 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
+    readonly abortSignal?: AbortSignal;
     collatedWriter: CollatedWriter;
     // @internal
     createChildProcessReporter(): _IOperationChildProcessReporter | undefined;
@@ -1598,6 +1601,9 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 
 // @public
 export type PnpmTrustPolicy = 'no-downgrade' | 'off';
+
+// @internal
+export function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): void;
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {

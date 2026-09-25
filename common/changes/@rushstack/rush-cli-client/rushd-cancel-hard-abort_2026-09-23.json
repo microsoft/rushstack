@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Exit with 128+signal (130/143/129) and print a cancellation notice when a daemon-routed command is cancelled; handle SIGHUP like SIGTERM.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}
