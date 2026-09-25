@@ -4,6 +4,7 @@
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { testNpmModeAsync } from './testNpmMode';
+import { testPnpmGlobalVirtualStoreAsync } from './testPnpmGlobalVirtualStore';
 import { testYarnModeAsync } from './testYarnMode';
 import { testLinkIdentityAsync } from './testLinkIdentity';
 
@@ -18,7 +19,7 @@ async function runTestsAsync(): Promise<void> {
   terminal.writeLine('==========================================');
   terminal.writeLine('');
   terminal.writeLine('These tests verify that the tar 7.x upgrade works correctly');
-  terminal.writeLine('with different Rush package managers (npm, yarn).');
+  terminal.writeLine('with different Rush package managers (npm, pnpm, yarn).');
   terminal.writeLine('');
   terminal.writeLine('Tests will:');
   terminal.writeLine('  1. Create Rush repos using locally-built Rush');
@@ -53,6 +54,20 @@ async function runTestsAsync(): Promise<void> {
     testsFailed++;
     failedTests.push('NPM mode');
     terminal.writeErrorLine('⚠️  NPM mode test FAILED');
+    terminal.writeErrorLine(String(error));
+  }
+
+  // Run pnpm global virtual store test
+  terminal.writeLine('==========================================');
+  terminal.writeLine('Running PNPM global virtual store test...');
+  terminal.writeLine('==========================================');
+  try {
+    await testPnpmGlobalVirtualStoreAsync(terminal);
+    testsPassed++;
+  } catch (error) {
+    testsFailed++;
+    failedTests.push('PNPM global virtual store');
+    terminal.writeErrorLine('⚠️  PNPM global virtual store test FAILED');
     terminal.writeErrorLine(String(error));
   }
 
@@ -92,6 +107,7 @@ async function runTestsAsync(): Promise<void> {
     terminal.writeLine('');
     terminal.writeLine('The tar 7.x upgrade is working correctly with:');
     terminal.writeLine('  - NPM package manager');
+    terminal.writeLine('  - PNPM global virtual store');
     terminal.writeLine('  - Yarn package manager');
     terminal.writeLine('');
     process.exit(0);
