@@ -32,6 +32,7 @@ import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import type { IApiModelGenerationOptions } from '../generators/ApiModelGenerator';
 import apiExtractorSchema from '../schemas/api-extractor.schema.json';
+import apiExtractorDefaults from '../schemas/api-extractor-defaults.json';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -227,9 +228,9 @@ interface IExtractorConfigParameters {
   enumMemberOrder: EnumMemberOrder;
 }
 
-const _defaultConfig: Partial<IConfigFile> = JsonFile.load(
-  path.join(__dirname, '../schemas/api-extractor-defaults.json')
-);
+// The defaults file deliberately omits fields that are required once a section is used
+// (for example "apiReport.enabled"), so it does not structurally match IConfigFile.
+const _defaultConfig: Partial<IConfigFile> = apiExtractorDefaults as unknown as Partial<IConfigFile>;
 
 /**
  * Match all three flavors for type declaration files (.d.ts, .d.mts, .d.cts)
