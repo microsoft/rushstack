@@ -1,6 +1,18 @@
 # Change Log - @rushstack/rush-daemon-transport
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Sat, 26 Sep 2026 00:17:28 GMT and should not be manually modified.
+
+## 0.4.0
+Sat, 26 Sep 2026 00:17:28 GMT
+
+### Minor changes
+
+- Retain daemon ownership while connections stop, refuse a still-live owner, and make endpoint release idempotent across successor startup.
+
+### Patches
+
+- When reclaiming the socket of a daemon that died uncleanly (SIGKILL/OOM), terminate the operation processes still running in its process group (SIGTERM, then SIGKILL after a grace period) so a successor daemon does not re-run them concurrently.
+- Close a newly bound endpoint if publishing daemon ownership fails, avoiding an orphaned listener after failed startup.
 
 ## 0.3.2
 Tue, 22 Sep 2026 17:35:41 GMT

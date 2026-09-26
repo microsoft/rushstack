@@ -2,6 +2,26 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.7.4",
+      "tag": "@rushstack/operation-graph_v0.7.4",
+      "date": "Sat, 26 Sep 2026 00:17:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include an optional measured process RSS sample in WatchLoop IPC completion messages for compatible hosts' best-effort warm resource accounting."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.3",
       "tag": "@rushstack/operation-graph_v0.7.3",
       "date": "Tue, 22 Sep 2026 17:35:41 GMT",

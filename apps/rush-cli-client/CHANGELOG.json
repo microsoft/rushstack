@@ -1,0 +1,143 @@
+{
+  "name": "@rushstack/rush-cli-client",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/rush-cli-client_v0.2.0",
+      "date": "Sat, 26 Sep 2026 00:17:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Parse --no-wait and --wait-timeout into daemon admission options, preserve script arguments, and report queue failures without leaking controls to scripts."
+          },
+          {
+            "comment": "Fence graph mutations against stale workspace generations and support explicit snapshot tokens."
+          },
+          {
+            "comment": "Route native build/rebuild requests to the production engine and render operation events with awaited output, retaining raw global streams and native reporter-control fallback."
+          },
+          {
+            "comment": "Retry guaranteed pre-execution hard-restart outcomes once and forward opt-in native install/update requests."
+          },
+          {
+            "comment": "Add separate opt-in rush-client and rushx-client bins with safe in-process fallback, protocol-based daemon start/status/stop/restart, and local launcher-log reading; document host integration blockers without replacing rush/rushx."
+          },
+          {
+            "comment": "Implement RUSH_DAEMON_EXPERIMENTAL-gated daemon graph show/status/scope-in/scope-out/invalidate/watch/pause/resume as a public wire/core NDJSON client with no native fallback."
+          },
+          {
+            "comment": "Tag Rushx requests explicitly, reuse native argument boundaries and frontend discovery output, and validate real daemon script parity with native Rushx."
+          },
+          {
+            "comment": "Enable negotiated piped stdin and EOF while preserving native fallback input and treating pipe Ctrl+C bytes as data."
+          },
+          {
+            "comment": "Add asynchronous version-selected daemon connection preparation and prevent the synchronous launcher from impersonating a different Rush engine."
+          },
+          {
+            "comment": "Document the explicit Node-only persistent daemon path and cover production launch, measured retention, raw Unicode output, cancellation, NoOp/shards, and descriptor/implementation reload through the public client."
+          },
+          {
+            "comment": "Keep unknown interactive Rushx scripts in-process before consuming input, preserve one cancellable graph admission budget across generation preflight and mutation, and add bounded daemon logs --follow."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add an opt-in agent output mode on the daemon path (RUSHD_OUTPUT=agent or COPILOT_CLI) with an immediate first line, bounded live progress, and a guaranteed final summary; keep repositories that opt into useRushReporter on the native reporter path."
+          },
+          {
+            "comment": "Connect to a warm daemon without loading the @microsoft/rush-lib bundle; heavy modules are now loaded only for in-process fallback, rushx discovery, daemon startup, and version selection. The bin scripts also enable the Node.js compile cache when available."
+          },
+          {
+            "comment": "Make `rush-client daemon stop` idempotent (state notRunning, exit 0), make `daemon restart` start a daemon when none is running, and add `daemon stop --force` to remove stale workspace daemon artifacts."
+          },
+          {
+            "comment": "Print the error message of a failed daemon result (for example, a daemon shutdown that cancelled the build), and report cancelled requests from \"rush-client daemon stop\"."
+          },
+          {
+            "comment": "Wait for a running compatible build instead of failing after the default 30-second queue timeout, and explain admission failures with how to wait longer."
+          },
+          {
+            "comment": "Document the warmSetMaxProjects and warmMemoryBudgetMB daemon policy semantics."
+          },
+          {
+            "comment": "Use native filesystem canonicalization so Windows short-path aliases address the same daemon as the host."
+          },
+          {
+            "comment": "Include the package MIT license and standard publication metadata, enable the pack phase, and document why native fallback reuses the version-selecting Rush frontend."
+          },
+          {
+            "comment": "Exit with 128+signal (130/143/129) and print a cancellation notice when a daemon-routed command is cancelled; handle SIGHUP like SIGTERM."
+          },
+          {
+            "comment": "Add exact native Rushx alias parity regressions for lifecycle paths, project registration, pnpm-sync diagnostics and safe pre-execution rejection."
+          },
+          {
+            "comment": "Reuse ownership-checked shutdown for explicit restart and automatically recover implementation-version skew when the selected launcher is available."
+          },
+          {
+            "comment": "Keep Windows daemon-log following cancellable behind unread stdout using bounded, acknowledged output and an explicitly joined output-only process; preserve snapshot, redirection and I/O-error behavior."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Configure generated Git fixtures locally to preserve LF files without Windows autocrlf warnings; leave user settings and CI warning policy unchanged."
+          },
+          {
+            "comment": "Use Rush's native pre-LTS warning control in the Rushx parity fixture so raw binary stream assertions remain runtime-independent."
+          },
+          {
+            "comment": "Join the PIDs reported by fixture daemon start/restart commands, then reuse bounded Windows sharing cleanup after launcher and host joins without weakening lifecycle assertions."
+          },
+          {
+            "comment": "Accept Windows EOF alongside EPIPE when a test script exits without reading stdin, preserving its authoritative exit status and byte-for-byte native parity assertions."
+          },
+          {
+            "comment": "Bind native CLI test continuations to their own fixtures, join complete callbacks before cleanup, and separate initial daemon preparation from reload and restart assertions."
+          },
+          {
+            "comment": "Split real graph CLI scenarios, exercise graceful Windows signal cancellation, and join fixture invocations before cleanup."
+          },
+          {
+            "comment": "Separate initial native daemon preparation from warm-reuse and Rushx parity assertions while preserving execution deadlines and all assertions."
+          },
+          {
+            "comment": "Isolate selected-version metadata failure with native .npmrc configuration, allow its real subprocess startup budget, and join CLI child closure before fixture cleanup."
+          },
+          {
+            "comment": "Atomically publish IPC retention fixture gates and inputs, consume only complete event frames, and correlate pressure samples with their unique request."
+          },
+          {
+            "comment": "Confirm real IPC retention-test memory pressure after allocation and one measured adjustment before releasing admission, preserving retention policies, budgets, and deadlines."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-client-core\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon\" to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-transport\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-terminal-renderer\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    }
+  ]
+}
