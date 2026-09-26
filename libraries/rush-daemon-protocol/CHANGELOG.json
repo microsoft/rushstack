@@ -2,6 +2,66 @@
   "name": "@rushstack/rush-daemon-protocol",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/rush-daemon-protocol_v0.5.0",
+      "date": "Sat, 26 Sep 2026 00:17:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Report and validate the effective watch setting in warm status configuration while accepting its omission by older peers."
+          },
+          {
+            "comment": "Add an optional \"activeRequests\" count to the shutdownAck control message; advertised as protocol minor 11 (`DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR`); older peers omit or ignore it."
+          },
+          {
+            "comment": "Add the optional `waitTimeoutIsDefault` admission option so a daemon can distinguish a client-default queue timeout from an explicit one."
+          },
+          {
+            "comment": "Add optional validated lastReloadTier workspace status metadata for initial/reuse, successful reload, and requested restart; accept omission by older peers."
+          },
+          {
+            "comment": "Add optional validated workspace generation and warm-resource accounting to pong without changing request/rejection types or the protocol 0.9 generation-fencing contract."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Document that clients may retry `retryAfterRestart` a bounded number of times within the admission deadline."
+          },
+          {
+            "comment": "Keep control validators within strict module size limits after applying the repository formatter without changing wire validation."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add generation-fenced experimental graph mutations in protocol 0.9."
+          },
+          {
+            "comment": "Add protocol 0.10 native mutation and guaranteed pre-execution restart results."
+          },
+          {
+            "comment": "Define JSON-safe experimental graph snapshot DTOs and the rushd.graph-snapshot extension name without changing transport contracts or runtime dependencies."
+          },
+          {
+            "comment": "Add protocol 0.6 acknowledged shutdown controls and optional process identity and resident-memory status fields."
+          },
+          {
+            "comment": "Add the validated optional Rush/Rushx invocation kind in protocol 0.8 without changing legacy request routing."
+          },
+          {
+            "comment": "Add protocol 0.7 stdin admission/write-credit and EOF controls with explicit capability negotiation."
+          },
+          {
+            "comment": "Add optional validated raw warm-project ranking inputs to workspace status while preserving unknown measurements and older-peer compatibility."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.2",
       "tag": "@rushstack/rush-daemon-protocol_v0.4.2",
       "date": "Tue, 22 Sep 2026 17:35:41 GMT",

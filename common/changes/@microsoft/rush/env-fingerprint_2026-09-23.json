@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Exclude volatile per-shell, terminal, session and daemon-routing environment variables (such as PWD, OLDPWD, SHLVL, TERM and WSL_INTEROP) from workspace input environment fingerprints, via the new `workspaceFingerprintIgnoredEnvironmentVariables` and `getWorkspaceFingerprintEnvironmentEntries` APIs.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "selarkin@microsoft.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Exclude volatile per-shell, terminal, session and daemon-routing environment variables (such as PWD, OLDPWD, SHLVL, TERM and WSL_INTEROP) from workspace input environment fingerprints, via the new `workspaceFingerprintIgnoredEnvironmentVariables` and `getWorkspaceFingerprintEnvironmentEntries` APIs.","type":"patch"}],"packageName":"@microsoft/rush","email":"selarkin@microsoft.com"}

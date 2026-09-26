@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Preserve machine-readable stdout ownership for additional reporter outputs during engine compatibility handoff.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "TheLarkInn@users.noreply.github.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Preserve machine-readable stdout ownership for additional reporter outputs during engine compatibility handoff.","type":"patch"}],"packageName":"@microsoft/rush","email":"TheLarkInn@users.noreply.github.com"}

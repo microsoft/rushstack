@@ -2,6 +2,32 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "2.2.30",
+      "tag": "@rushstack/lockfile-explorer_v2.2.30",
+      "date": "Sat, 26 Sep 2026 00:17:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update js-yaml dependency to ~4.3.2 to address security advisories for CPU consumption with certain inputs."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.29",
       "tag": "@rushstack/lockfile-explorer_v2.2.29",
       "date": "Tue, 22 Sep 2026 17:35:41 GMT",

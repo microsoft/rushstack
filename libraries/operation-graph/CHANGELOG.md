@@ -1,6 +1,13 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Sat, 26 Sep 2026 00:17:28 GMT and should not be manually modified.
+
+## 0.7.4
+Sat, 26 Sep 2026 00:17:28 GMT
+
+### Patches
+
+- Include an optional measured process RSS sample in WatchLoop IPC completion messages for compatible hosts' best-effort warm resource accounting.
 
 ## 0.7.3
 Tue, 22 Sep 2026 17:35:41 GMT

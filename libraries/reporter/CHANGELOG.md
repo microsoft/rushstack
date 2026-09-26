@@ -1,6 +1,25 @@
 # Change Log - @rushstack/rush-reporter
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Sat, 26 Sep 2026 00:17:28 GMT and should not be manually modified.
+
+## 0.4.0
+Sat, 26 Sep 2026 00:17:28 GMT
+
+### Minor changes
+
+- Add adversarial deterministic AI reporter qualification gates and privacy-safe actionable context.
+
+### Patches
+
+- Prevent non-public reporter events from contributing unvalidated or unbounded values to telemetry aggregates, protect parent-owned producer and protocol metadata, and preserve the original five-field performance budget contract.
+- Redact classified secret source aliases in machine JSON without losing owner-only file context, and qualify every machine output for producer privacy.
+- Coalesce buffered start acknowledgements superseded by final results without dropping final context or log references, keeping native Windows AI output within the unchanged raw-byte qualification budget.
+- Refresh quiet interactive operations and emit plaintext heartbeats using unrefed timers that stop when reporters close.
+- Run background renderer timers through the manager's failure boundary and cancel them on reporter failure or close without changing successful command outcomes.
+- Prevent human diagnostic source metadata from revealing aliases of explicitly secret parameters while retaining unrelated local-sensitive details.
+- Bound individual telemetry diagnostic codes without truncation and exclude secret diagnostic codes and categories from aggregates.
+- Abort all attempted reporter initializations synchronously before serialized disposal, preserving the startup failure reason and once-only cleanup.
+- Measure actual AI output bytes, enforce the invocation-wide NDJSON budget, and qualify retained fallback context and exact remediation without inflating baselines.
 
 ## 0.3.1
 Tue, 22 Sep 2026 17:35:41 GMT

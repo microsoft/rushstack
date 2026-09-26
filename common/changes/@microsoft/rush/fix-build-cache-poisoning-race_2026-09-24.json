@@ -1,9 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Fix a build cache poisoning race: skip writing a build cache entry when an operation's tracked input files changed while it was executing.",
-      "type": "patch"
-    }
-  ]
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Fix a build cache poisoning race: skip writing a build cache entry when an operation's tracked input files changed while it was executing.","type":"patch"}]}

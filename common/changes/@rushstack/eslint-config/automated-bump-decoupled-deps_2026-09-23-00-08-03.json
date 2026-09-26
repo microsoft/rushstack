@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "comment": "",
-      "type": "none",
-      "packageName": "@rushstack/eslint-config"
-    }
-  ],
-  "packageName": "@rushstack/eslint-config",
-  "email": "rushbot@users.noreply.github.com"
-}
+{"changes":[{"comment":"","type":"none","packageName":"@rushstack/eslint-config"}],"packageName":"@rushstack/eslint-config","email":"rushbot@users.noreply.github.com"}
