@@ -135,7 +135,11 @@ fallback can run immediately after a completed single-client warm request withou
 A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
 automatic retry. A later explicit request can retry after contention ends, including contention during the first
 engine initialization. A dirty native lock left by another command invalidates retained successes so the native
-incremental/cache pipeline can reconcile possibly changed ignored outputs. Installation validity is also checked on
+incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also
+fingerprinted (one `stat` per folder: existence, identity and modification time) when an operation succeeds or is
+restored from cache; a request whose reconciliation finds a missing or changed output folder (for example after
+`rm -rf lib`, `git clean -xdf` or `heft clean`) invalidates only that operation, so it is re-executed or restored from
+the build cache. In-place edits of nested output files are not detected. Installation validity is also checked on
 every snapshot refresh. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
 runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 
