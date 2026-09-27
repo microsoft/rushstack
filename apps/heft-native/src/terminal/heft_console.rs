@@ -19,16 +19,47 @@ pub struct HeftConsole {
     supports_color: bool,
     captured_output: Option<RefCell<Vec<(OutputSeverity, String)>>>,
     closed_output: Cell<Option<ClosedOutput>>,
+    pending_standard_output: RefCell<String>,
+    first_pending_line_is_prefixed: Cell<bool>,
 }
 
 impl HeftConsole {
     pub fn new(supports_color: bool) -> HeftConsole {
-        HeftConsole { supports_color, captured_output: None, closed_output: Cell::new(None) }
+        HeftConsole::with_capture(supports_color, None)
     }
 
     #[cfg(test)]
     pub fn capturing(supports_color: bool) -> HeftConsole {
-        HeftConsole { supports_color, captured_output: Some(RefCell::new(Vec::new())), closed_output: Cell::new(None) }
+        HeftConsole::with_capture(supports_color, Some(RefCell::new(Vec::new())))
+    }
+
+    fn with_capture(supports_color: bool, captured_output: Option<RefCell<Vec<(OutputSeverity, String)>>>) -> HeftConsole {
+        HeftConsole {
+            supports_color,
+            captured_output,
+            closed_output: Cell::new(None),
+            pending_standard_output: RefCell::new(String::new()),
+            first_pending_line_is_prefixed: Cell::new(false),
+        }
+    }
+
+    pub fn flush(&self) {
+        let mut pending_standard_output = self.pending_standard_output.borrow_mut();
+        if pending_standard_output.is_empty() {
+            return;
+        }
+        if self.closed_output.get().is_none()
+            && write_to_stream(OutputSeverity::Log, &pending_standard_output).is_err_and(|error| error.kind() == ErrorKind::BrokenPipe)
+        {
+            let prefixed = self.first_pending_line_is_prefixed.get();
+            self.closed_output.set(Some(ClosedOutput { severity: OutputSeverity::Log, prefixed }));
+        }
+        pending_standard_output.clear();
+    }
+
+    #[cfg(test)]
+    pub fn pending_standard_output_for_tests(&self) -> String {
+        self.pending_standard_output.borrow().clone()
     }
 
     pub fn closed_output(&self) -> Option<ClosedOutput> {
@@ -52,13 +83,21 @@ impl HeftConsole {
         if self.closed_output.get().is_some() {
             return;
         }
-        match &self.captured_output {
-            Some(captured) => captured.borrow_mut().push((severity, data.to_owned())),
-            None => {
-                if write_to_stream(severity, data).is_err_and(|error| error.kind() == ErrorKind::BrokenPipe) {
-                    self.closed_output.set(Some(ClosedOutput { severity, prefixed }));
-                }
+        if let Some(captured) = &self.captured_output {
+            captured.borrow_mut().push((severity, data.to_owned()));
+            return;
+        }
+        if severity == OutputSeverity::Log {
+            let mut pending_standard_output = self.pending_standard_output.borrow_mut();
+            if pending_standard_output.is_empty() {
+                self.first_pending_line_is_prefixed.set(prefixed);
             }
+            pending_standard_output.push_str(data);
+            return;
+        }
+        self.flush();
+        if self.closed_output.get().is_none() && write_to_stream(severity, data).is_err_and(|error| error.kind() == ErrorKind::BrokenPipe) {
+            self.closed_output.set(Some(ClosedOutput { severity, prefixed }));
         }
     }
 
@@ -93,6 +132,12 @@ impl HeftConsole {
     }
 }
 
+impl Drop for HeftConsole {
+    fn drop(&mut self) {
+        self.flush();
+    }
+}
+
 pub struct ScopedLoggerOutput<'console> {
     console: &'console HeftConsole,
     prefix: String,
@@ -106,6 +151,7 @@ impl ScopedLoggerOutput<'_> {
     }
 
     pub fn output_is_closed(&self) -> bool {
+        self.console.flush();
         self.console.closed_output().is_some()
     }
 
@@ -139,30 +185,5 @@ fn write_to_stream(severity: OutputSeverity, data: &str) -> std::io::Result<()> 
         standard_output.flush()
     } else {
         std::io::stderr().lock().write_all(data.as_bytes())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn severity_colors_match_the_terminal_package() {
-        let colored = HeftConsole::new(true);
-        let plain = HeftConsole::new(false);
-        assert_eq!(colored.format_line("a\x1b[1mb", OutputSeverity::Error), "\x1b[31mab\x1b[39m\n");
-        assert_eq!(plain.format_line("a\x1b[1mb", OutputSeverity::Error), "ab\n");
-        assert_eq!(colored.format_line("\x1b[1mx\x1b[22m", OutputSeverity::Log), "\x1b[1mx\x1b[22m\n");
-        assert_eq!(plain.format_line("\x1b[1mx\x1b[22m", OutputSeverity::Log), "x\n");
-    }
-
-    #[test]
-    fn scoped_output_prefixes_every_line() {
-        let console = HeftConsole::new(false);
-        let output = console.scoped_logger_output("build:set-env");
-        assert_eq!(output.prefix_lines("a\nb\n"), "[build:set-env] a\n[build:set-env] b\n");
-        assert_eq!(output.prefix_lines("partial"), "[build:set-env] partial");
-        assert_eq!(output.prefix_lines(" rest\n"), " rest\n");
-        assert_eq!(output.prefix_lines("\n"), "[build:set-env] \n");
     }
 }

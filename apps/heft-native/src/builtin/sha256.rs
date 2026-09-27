@@ -40,16 +40,14 @@ impl Sha256 {
             self.block_buffer_len += copied_len;
             data = &data[copied_len..];
             if self.block_buffer_len == 64 {
-                let full_block = self.block_buffer;
-                self.process_block(&full_block);
+                compress_blocks(&mut self.state, &self.block_buffer);
                 self.block_buffer_len = 0;
             }
         }
-        while data.len() >= 64 {
-            let mut full_block = [0u8; 64];
-            full_block.copy_from_slice(&data[..64]);
-            self.process_block(&full_block);
-            data = &data[64..];
+        let whole_blocks_length = data.len() / 64 * 64;
+        if whole_blocks_length > 0 {
+            compress_blocks(&mut self.state, &data[..whole_blocks_length]);
+            data = &data[whole_blocks_length..];
         }
         if !data.is_empty() {
             self.block_buffer[..data.len()].copy_from_slice(data);
@@ -65,8 +63,7 @@ impl Sha256 {
             for byte in &mut self.block_buffer[self.block_buffer_len..] {
                 *byte = 0;
             }
-            let full_block = self.block_buffer;
-            self.process_block(&full_block);
+            compress_blocks(&mut self.state, &self.block_buffer);
             self.block_buffer = [0; 64];
             self.block_buffer_len = 0;
         }
@@ -74,75 +71,87 @@ impl Sha256 {
             *byte = 0;
         }
         self.block_buffer[56..64].copy_from_slice(&length_bits.to_be_bytes());
-        let final_block = self.block_buffer;
-        self.process_block(&final_block);
+        compress_blocks(&mut self.state, &self.block_buffer);
         let mut digest = [0u8; 32];
         for (word_index, state_word) in self.state.iter().enumerate() {
             digest[word_index * 4..word_index * 4 + 4].copy_from_slice(&state_word.to_be_bytes());
         }
         digest
     }
+}
 
-    fn process_block(&mut self, block: &[u8; 64]) {
-        let mut message_schedule = [0u32; 64];
-        for (word_index, message_word) in message_schedule.iter_mut().enumerate().take(16) {
-            let byte_index = word_index * 4;
-            *message_word = u32::from_be_bytes([
-                block[byte_index],
-                block[byte_index + 1],
-                block[byte_index + 2],
-                block[byte_index + 3],
-            ]);
-        }
-        for word_index in 16..64 {
-            let small_sigma_zero = message_schedule[word_index - 15].rotate_right(7)
-                ^ message_schedule[word_index - 15].rotate_right(18)
-                ^ (message_schedule[word_index - 15] >> 3);
-            let small_sigma_one = message_schedule[word_index - 2].rotate_right(17)
-                ^ message_schedule[word_index - 2].rotate_right(19)
-                ^ (message_schedule[word_index - 2] >> 10);
-            message_schedule[word_index] = message_schedule[word_index - 16]
-                .wrapping_add(small_sigma_zero)
-                .wrapping_add(message_schedule[word_index - 7])
-                .wrapping_add(small_sigma_one);
-        }
-        let mut a = self.state[0];
-        let mut b = self.state[1];
-        let mut c = self.state[2];
-        let mut d = self.state[3];
-        let mut e = self.state[4];
-        let mut f = self.state[5];
-        let mut g = self.state[6];
-        let mut h = self.state[7];
-        for round_index in 0..64 {
-            let big_sigma_one = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
-            let choice = (e & f) ^ (!e & g);
-            let temporary_one = h
-                .wrapping_add(big_sigma_one)
-                .wrapping_add(choice)
-                .wrapping_add(ROUND_CONSTANTS[round_index])
-                .wrapping_add(message_schedule[round_index]);
-            let big_sigma_zero = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
-            let majority = (a & b) ^ (a & c) ^ (b & c);
-            let temporary_two = big_sigma_zero.wrapping_add(majority);
-            h = g;
-            g = f;
-            f = e;
-            e = d.wrapping_add(temporary_one);
-            d = c;
-            c = b;
-            b = a;
-            a = temporary_one.wrapping_add(temporary_two);
-        }
-        self.state[0] = self.state[0].wrapping_add(a);
-        self.state[1] = self.state[1].wrapping_add(b);
-        self.state[2] = self.state[2].wrapping_add(c);
-        self.state[3] = self.state[3].wrapping_add(d);
-        self.state[4] = self.state[4].wrapping_add(e);
-        self.state[5] = self.state[5].wrapping_add(f);
-        self.state[6] = self.state[6].wrapping_add(g);
-        self.state[7] = self.state[7].wrapping_add(h);
+fn compress_blocks(state: &mut [u32; 8], blocks: &[u8]) {
+    if !crate::simd::compress_sha256_blocks_if_the_cpu_can(state, blocks) {
+        compress_blocks_without_simd(state, blocks);
     }
+}
+
+pub fn compress_blocks_without_simd(state: &mut [u32; 8], blocks: &[u8]) {
+    let (whole_blocks, _) = blocks.as_chunks::<64>();
+    for block in whole_blocks {
+        compress_block_without_simd(state, block);
+    }
+}
+
+fn compress_block_without_simd(state: &mut [u32; 8], block: &[u8; 64]) {
+    let mut message_schedule = [0u32; 64];
+    for (word_index, message_word) in message_schedule.iter_mut().enumerate().take(16) {
+        let byte_index = word_index * 4;
+        *message_word = u32::from_be_bytes([
+            block[byte_index],
+            block[byte_index + 1],
+            block[byte_index + 2],
+            block[byte_index + 3],
+        ]);
+    }
+    for word_index in 16..64 {
+        let small_sigma_zero = message_schedule[word_index - 15].rotate_right(7)
+            ^ message_schedule[word_index - 15].rotate_right(18)
+            ^ (message_schedule[word_index - 15] >> 3);
+        let small_sigma_one = message_schedule[word_index - 2].rotate_right(17)
+            ^ message_schedule[word_index - 2].rotate_right(19)
+            ^ (message_schedule[word_index - 2] >> 10);
+        message_schedule[word_index] = message_schedule[word_index - 16]
+            .wrapping_add(small_sigma_zero)
+            .wrapping_add(message_schedule[word_index - 7])
+            .wrapping_add(small_sigma_one);
+    }
+    let mut a = state[0];
+    let mut b = state[1];
+    let mut c = state[2];
+    let mut d = state[3];
+    let mut e = state[4];
+    let mut f = state[5];
+    let mut g = state[6];
+    let mut h = state[7];
+    for round_index in 0..64 {
+        let big_sigma_one = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
+        let choice = (e & f) ^ (!e & g);
+        let temporary_one = h
+            .wrapping_add(big_sigma_one)
+            .wrapping_add(choice)
+            .wrapping_add(ROUND_CONSTANTS[round_index])
+            .wrapping_add(message_schedule[round_index]);
+        let big_sigma_zero = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
+        let majority = (a & b) ^ (a & c) ^ (b & c);
+        let temporary_two = big_sigma_zero.wrapping_add(majority);
+        h = g;
+        g = f;
+        f = e;
+        e = d.wrapping_add(temporary_one);
+        d = c;
+        c = b;
+        b = a;
+        a = temporary_one.wrapping_add(temporary_two);
+    }
+    state[0] = state[0].wrapping_add(a);
+    state[1] = state[1].wrapping_add(b);
+    state[2] = state[2].wrapping_add(c);
+    state[3] = state[3].wrapping_add(d);
+    state[4] = state[4].wrapping_add(e);
+    state[5] = state[5].wrapping_add(f);
+    state[6] = state[6].wrapping_add(g);
+    state[7] = state[7].wrapping_add(h);
 }
 
 impl Default for Sha256 {

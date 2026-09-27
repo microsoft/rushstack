@@ -14,6 +14,28 @@ cargo build --release
 The binary is written to `apps/heft-native/target/release/heft` (`target/` is ignored by Git). The crate has
 no dependencies; `Cargo.lock` only lists `heft-native` itself.
 
+On x86_64 Linux the release binary is linked statically against glibc (`.cargo/config.toml` adds
+`-C target-feature=+crt-static`), as a position-independent executable whose relative relocations are packed
+(`-z pack-relative-relocs`, added by `build.rs` only when the build machine has glibc 2.36 or newer, whose static
+startup code applies them). A static binary starts without the dynamic loader, so it starts faster and uses less
+memory. The binary provides its own C `main` (`src/sys/process_entry.rs`) instead of the Rust runtime's, which
+skips work the binary does not need at startup, such as reading `/proc/self/maps` to locate the main thread's
+stack.
+
+To build a dynamically linked binary instead, override the flags:
+
+```bash
+RUSTFLAGS="-C target-feature=-crt-static" cargo build --release
+```
+
+### Profile-guided build (optional)
+
+`bash pgo-release-build.sh` builds an instrumented binary, runs it on a generated project that only uses Heft's
+built-in tasks and on the `--help` pages of the build tests, merges the profile with `llvm-profdata` (from
+`rustup component add llvm-tools`) and rebuilds `target/release/heft` with it. The profile is regenerated from the
+current code on every run, so it never goes stale. The result is a few percent faster on native runs but about
+60 KB larger, so it is not the default build.
+
 ## Using it
 
 Run the binary instead of `heft` from a project folder:
@@ -84,13 +106,6 @@ file descriptors) makes the host refuse and the binary run cold. When no host ac
 cold as usual and starts a host (`lib-commonjs/host/WarmHostEntry.js`) in the background for the next run, unless
 four hosts are already running for the user.
 
-## Static build (optional)
-
-`cargo build --release --target x86_64-unknown-linux-musl` (after `rustup target add x86_64-unknown-linux-musl`)
-produces a statically linked binary in `target/x86_64-unknown-linux-musl/release/heft`. It is about as fast as the
-default build and uses less memory (about 1 MB instead of 2.8 MB peak for a native build), but it is about 90 KB
-larger.
-
 ## Layout
 
 Each folder under `src/` is a module with a single owner:
@@ -101,8 +116,15 @@ Each folder under `src/` is a module with a single owner:
 | `cli` | command line model, parsing, help and error rendering |
 | `config` | `heft.json`, rigs, `heft-plugin.json`, plugin options, package resolution |
 | `graph`, `run`, `builtin`, `terminal` | phase and task graph, execution, native built-in plugins, terminal output |
-| `sys` | the only place with `unsafe` code (minimal operating system calls) |
+| `simd` | SSE2/AVX2 byte scans used by the JSON lexer and writer, each with a scalar twin that gives identical results |
+| `sys` | minimal operating system calls; with `simd` the only places with `unsafe` code |
 | `process`, `version`, `host_link` | running Node.js, selecting the Heft version, the connection to the JavaScript plugin host |
 
-The code follows these rules: only the Rust standard library, `#![deny(unsafe_code)]` outside `src/sys`, no
-comments in the code, source files of at most 200 lines, and a stripped release binary of at most 1 MB.
+The code follows these rules: only the Rust standard library, `#![deny(unsafe_code)]` outside `src/sys` and
+`src/simd`, no comments in the code, source files of at most 200 lines, and a stripped release binary of at most
+1 MB.
+
+SIMD code runs only on x86_64. AVX2 is used after `is_x86_feature_detected!("avx2")` confirms it, and SSE2
+otherwise; every other architecture uses the scalar twins. Setting `HEFT_NATIVE_NO_SIMD=1` (any non-empty value
+except `0`, or `HEFT_NATIVE_SIMD=0`) makes the whole process use the scalar twins, which is how the SIMD paths are
+checked against them.

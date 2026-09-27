@@ -1,3 +1,4 @@
+use super::actions::ActionTable;
 use super::defined_parameter::DefinedParameter;
 use super::help_format::{format_help, format_usage_only};
 use super::help_model::HelpParser;
@@ -18,9 +19,11 @@ pub fn usage_error_output(parser: &HelpParser<'_>, width: Option<f64>, message: 
     Some(PrintedOutput { stdout, stderr, exit_code: 1 })
 }
 
-pub fn invalid_command_message<'x>(value: &str, command_names: impl Iterator<Item = &'x str>) -> String {
-    let choices: Vec<&str> = command_names.collect();
-    format!("argument \"<command>\": Invalid choice: {} (choose from [{}])", value, choices.join(", "))
+pub fn invalid_command_message(value: &str, table: &ActionTable<'_>) -> String {
+    let mut message: String = format!("argument \"<command>\": Invalid choice: {value} (choose from [");
+    table.push_command_names(&mut message);
+    message.push_str("])");
+    message
 }
 
 pub fn argument_error_message(error: &ArgumentError<'_>, registration: &Registration, parameters: &[DefinedParameter<'_>]) -> Option<String> {

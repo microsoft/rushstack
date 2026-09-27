@@ -11,7 +11,7 @@ mod tests_tier_zero;
 
 use std::ffi::OsString;
 
-use crate::builtin::{selections_are_deletable_without_permission_errors, AbsoluteFileSelection};
+use crate::builtin::{preflight_deletions, DeletionPlan};
 use crate::cli::outcome::{CliOutcome, ParsedCommand, PrintedOutput};
 use crate::config::cli_model_builder::build_cli_model;
 use crate::config::loader::{load_heft_configuration_and_then, HeftConfigurationRequest, LoadedHeftConfiguration};
@@ -19,7 +19,7 @@ use crate::config::model::{build_heft_configuration_model, HeftConfigurationMode
 use crate::config::package_json::PackageJsonLookup;
 use crate::host_link::NodeHostPlan;
 use crate::terminal::{console_supports_color_for_this_process, HeftConsole};
-use crate::version::NativeHeftContext;
+use crate::version::{write_version_selector_banner, NativeHeftContext, VersionSelectorBanner};
 
 use tier_zero_execution::TierZeroExit;
 use tier_zero_plan::TierZeroPlan;
@@ -34,7 +34,7 @@ pub enum NativeHeftRun {
     PrintCliOutput(PrintedOutput),
     BuildWithBuiltinTasks { plan: Box<TierZeroPlan>, console: NativeConsoleSettings },
     CleanProject {
-        selections: Vec<AbsoluteFileSelection>,
+        deletion_plan: DeletionPlan,
         alias_expansion_message: Option<String>,
         console: NativeConsoleSettings,
     },
@@ -64,11 +64,11 @@ fn decide_with_project(command_line_arguments: &[OsString], native_heft_context:
         return None;
     }
     let arguments: Vec<&str> = crate::cli::entry::command_line_strings(command_line_arguments)?;
-    let heft_package_folder = native_heft_context.companion_heft_package_folder.as_ref()?;
-    let heft_package_folder = std::fs::canonicalize(heft_package_folder).ok()?.to_str()?.to_owned();
-    let heft_module_folder = format!("{heft_package_folder}/lib-commonjs/utilities");
     let current_folder = std::env::current_dir().ok()?.to_str()?.to_owned();
-    let mut lookup = PackageJsonLookup::default();
+    let mut lookup = PackageJsonLookup::for_physical_current_folder(&current_folder);
+    let heft_package_folder = native_heft_context.companion_heft_package_folder.as_ref()?.to_str()?;
+    let heft_package_folder = lookup.file_system.real_path(heft_package_folder).ok()?;
+    let heft_module_folder = format!("{heft_package_folder}/lib-commonjs/utilities");
     let build_folder_path = lookup.try_get_package_folder_for(&current_folder).ok()??;
     lookup.load_identity_for_folder(&build_folder_path).ok()?;
     let request = HeftConfigurationRequest {
@@ -111,10 +111,12 @@ fn native_build_run(
 ) -> Option<NativeHeftRun> {
     if let Some(clean_options) = command_options::tier_zero_clean_options(command) {
         let selections = configured_project::native_clean_selections(model, &clean_options.selected_phase_indices)?;
-        let passes_preflight = process_environment::standard_input_is_the_null_device()
-            && selections_are_deletable_without_permission_errors(&selections);
-        return passes_preflight.then(|| NativeHeftRun::CleanProject {
-            selections,
+        if !process_environment::standard_input_is_the_null_device() {
+            return None;
+        }
+        let preflight_entries = Some(preflight_deletions(&selections)?);
+        return Some(NativeHeftRun::CleanProject {
+            deletion_plan: DeletionPlan { selections, preflight_entries },
             alias_expansion_message: clean_options.alias_expansion_message,
             console: console_settings_for(invocation),
         });
@@ -143,21 +145,22 @@ fn console_settings_for(invocation: &HeftInvocation<'_>) -> NativeConsoleSetting
     }
 }
 
-pub fn run_heft_natively(native_heft_run: NativeHeftRun) -> i32 {
+pub fn run_heft_natively(native_heft_run: NativeHeftRun, version_selector_banner: VersionSelectorBanner) -> i32 {
+    let banner_text: &str = version_selector_banner.text_printed_by_javascript_version_selector();
     match native_heft_run {
-        NativeHeftRun::PrintCliOutput(printed_output) => crate::cli::entry::write_printed_output(&printed_output),
-        NativeHeftRun::BuildWithBuiltinTasks { plan, console } => exit_code_of(
-            tier_zero_execution::execute_tier_zero_plan(*plan, &HeftConsole::new(console.supports_color)),
-            &console,
-        ),
-        NativeHeftRun::CleanProject { selections, alias_expansion_message, console } => exit_code_of(
-            tier_zero_execution::execute_tier_zero_clean(
-                &selections,
-                alias_expansion_message.as_deref(),
-                &HeftConsole::new(console.supports_color),
-            ),
-            &console,
-        ),
+        NativeHeftRun::PrintCliOutput(printed_output) => crate::cli::entry::write_printed_output_after(banner_text, &printed_output),
+        NativeHeftRun::BuildWithBuiltinTasks { plan, console } => {
+            write_version_selector_banner(version_selector_banner);
+            exit_code_of(tier_zero_execution::execute_tier_zero_plan(*plan, &HeftConsole::new(console.supports_color)), &console)
+        }
+        NativeHeftRun::CleanProject { deletion_plan, alias_expansion_message, console } => {
+            write_version_selector_banner(version_selector_banner);
+            let console_output: HeftConsole = HeftConsole::new(console.supports_color);
+            exit_code_of(
+                tier_zero_execution::execute_tier_zero_clean(deletion_plan, alias_expansion_message.as_deref(), &console_output),
+                &console,
+            )
+        }
     }
 }
 

@@ -3,16 +3,19 @@ use std::io::ErrorKind;
 use std::path::Path;
 
 use super::node_file_system_error::{is_node_not_exist_error, NodeFileSystemError};
-use super::node_rimraf::remove_like_node_rimraf;
+use super::node_rimraf::{remove_entry_like_node_rimraf, RimrafEntryKind};
 use super::posix_path::directory_name;
 
 const EEXIST: i32 = 17;
 
-pub fn copy_file_overwriting(
-    source_path: &str,
-    destination_path: &str,
-    last_existing_folder: &mut Option<String>,
-) -> Result<(), NodeFileSystemError> {
+pub fn copy_file_overwriting(source_path: &str, destination_path: &str) -> Result<(), NodeFileSystemError> {
+    match super::open_file_copy::copy_through_open_source_file(source_path, destination_path) {
+        Some(result) => result,
+        None => copy_file_overwriting_step_by_step(source_path, destination_path),
+    }
+}
+
+fn copy_file_overwriting_step_by_step(source_path: &str, destination_path: &str) -> Result<(), NodeFileSystemError> {
     let source_metadata =
         fs::symlink_metadata(source_path).map_err(|error| NodeFileSystemError::new(error, "lstat", source_path, None))?;
     let destination_metadata = match fs::symlink_metadata(destination_path) {
@@ -20,28 +23,34 @@ pub fn copy_file_overwriting(
         Err(error) if error.kind() == ErrorKind::NotFound => None,
         Err(error) => return Err(NodeFileSystemError::new(error, "lstat", destination_path, None)),
     };
-    if let Some(destination_metadata) = &destination_metadata {
-        if are_the_same_file(&source_metadata, destination_metadata) {
-            return Err(NodeFileSystemError::from_message("Source and destination must not be the same."));
+    match &destination_metadata {
+        Some(destination_metadata) => {
+            check_destination_can_be_replaced(source_path, &source_metadata, destination_path, destination_metadata)?;
+            fs::remove_file(destination_path)
+                .map_err(|error| NodeFileSystemError::new(error, "unlink", destination_path, None))?;
         }
-        if !source_metadata.is_dir() && destination_metadata.is_dir() {
-            return Err(NodeFileSystemError::from_message(&format!(
-                "Cannot overwrite directory '{destination_path}' with non-directory '{source_path}'."
-            )));
-        }
-    }
-    let destination_folder = directory_name(destination_path);
-    if destination_metadata.is_none() && last_existing_folder.as_deref() != Some(destination_folder) {
-        ensure_folder_exists(destination_folder)?;
-        *last_existing_folder = Some(destination_folder.to_owned());
-    }
-    if destination_metadata.is_some() {
-        fs::remove_file(destination_path)
-            .map_err(|error| NodeFileSystemError::new(error, "unlink", destination_path, None))?;
+        None => ensure_folder_exists(directory_name(destination_path))?,
     }
     fs::copy(source_path, destination_path)
         .map(|_| ())
         .map_err(|error| NodeFileSystemError::new(error, "copyfile", source_path, Some(destination_path)))
+}
+
+pub fn check_destination_can_be_replaced(
+    source_path: &str,
+    source_metadata: &fs::Metadata,
+    destination_path: &str,
+    destination_metadata: &fs::Metadata,
+) -> Result<(), NodeFileSystemError> {
+    if are_the_same_file(source_metadata, destination_metadata) {
+        return Err(NodeFileSystemError::from_message("Source and destination must not be the same."));
+    }
+    if !source_metadata.is_dir() && destination_metadata.is_dir() {
+        return Err(NodeFileSystemError::from_message(&format!(
+            "Cannot overwrite directory '{destination_path}' with non-directory '{source_path}'."
+        )));
+    }
+    Ok(())
 }
 
 pub fn hard_link_overwriting(link_target_path: &str, new_link_path: &str) -> Result<(), NodeFileSystemError> {
@@ -72,13 +81,21 @@ pub fn delete_file_if_it_exists(file_path: &str) -> Result<bool, NodeFileSystemE
 }
 
 pub fn delete_folder_recursively(folder_path: &str) -> Result<bool, NodeFileSystemError> {
-    match fs::symlink_metadata(folder_path) {
+    let is_directory = match fs::symlink_metadata(folder_path) {
         Err(error) if error.kind() == ErrorKind::NotFound => return Ok(true),
         Err(error) if is_node_not_exist_error(&error) => return Ok(false),
         Err(error) => return Err(NodeFileSystemError::new(error, "lstat", folder_path, None)),
-        Ok(_) => {}
-    }
-    match remove_like_node_rimraf(Path::new(folder_path)) {
+        Ok(metadata) => metadata.is_dir(),
+    };
+    remove_folder_like_file_system_extra(folder_path, if is_directory { RimrafEntryKind::Folder } else { RimrafEntryKind::Other })
+}
+
+pub fn delete_folder_found_by_preflight(folder_path: &str) -> Result<bool, NodeFileSystemError> {
+    remove_folder_like_file_system_extra(folder_path, RimrafEntryKind::Folder)
+}
+
+fn remove_folder_like_file_system_extra(folder_path: &str, entry_kind: RimrafEntryKind) -> Result<bool, NodeFileSystemError> {
+    match remove_entry_like_node_rimraf(Path::new(folder_path), entry_kind, true) {
         Ok(()) => Ok(true),
         Err(failure) if is_node_not_exist_error(&failure.error) => Ok(false),
         Err(failure) => Err(NodeFileSystemError::new(failure.error, failure.syscall, &failure.path, None)),
@@ -99,7 +116,7 @@ fn are_the_same_file(_source_metadata: &fs::Metadata, _destination_metadata: &fs
     false
 }
 
-fn ensure_folder_exists(folder_path: &str) -> Result<(), NodeFileSystemError> {
+pub fn ensure_folder_exists(folder_path: &str) -> Result<(), NodeFileSystemError> {
     if Path::new(folder_path).exists() {
         return Ok(());
     }

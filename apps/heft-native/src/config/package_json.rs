@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-
 use super::fallback::{fallback, ConfigResult};
-use super::fs_probe::{read_text_or_missing, FileSystemProbeCache};
+use super::fs_probe::FileSystemProbeCache;
 use super::node_path::{dirname, join, resolve_absolute};
+use super::path_probes::PathKeyedMap;
 use crate::json::{parse_json_with_comments_exactly_like_jju, JsonValue};
 
 #[derive(Clone)]
@@ -13,8 +12,8 @@ pub struct PackageJsonIdentity {
 
 #[derive(Default)]
 pub struct PackageJsonLookup {
-    package_folder_by_path: HashMap<String, Option<String>>,
-    identity_by_real_path: HashMap<String, PackageJsonIdentity>,
+    package_folder_by_path: PathKeyedMap<Option<String>>,
+    identity_by_real_path: PathKeyedMap<PackageJsonIdentity>,
     pub file_system: FileSystemProbeCache,
 }
 
@@ -29,6 +28,14 @@ fn optional_string_field(value: &JsonValue, key: &str) -> ConfigResult<Option<St
 }
 
 impl PackageJsonLookup {
+    pub fn for_physical_current_folder(current_folder: &str) -> PackageJsonLookup {
+        let mut lookup: PackageJsonLookup = PackageJsonLookup::default();
+        lookup
+            .file_system
+            .remember_physical_directory_path(current_folder);
+        lookup
+    }
+
     fn try_load_identity(
         &mut self,
         package_json_path: &str,
@@ -40,7 +47,7 @@ impl PackageJsonLookup {
         if let Some(identity) = self.identity_by_real_path.get(&real_path) {
             return Ok(Some(identity.clone()));
         }
-        let text: String = match read_text_or_missing(&real_path)? {
+        let text: String = match self.file_system.read_text_or_missing(&real_path)? {
             Some(text) => text,
             None => return fallback("a package.json disappeared while it was read"),
         };

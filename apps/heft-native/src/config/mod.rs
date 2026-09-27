@@ -16,6 +16,8 @@ pub mod node_path;
 pub mod node_resolve;
 pub mod normalize;
 pub mod package_json;
+pub mod path_component_cache;
+pub mod path_probes;
 pub mod plan_graph_numbering;
 pub mod plan_graph_writer;
 pub mod plan_members;
@@ -23,10 +25,13 @@ pub mod plugin_manifest;
 pub mod plugin_options;
 pub mod plugin_references;
 pub mod plugin_selection;
-pub mod real_path_resolver;
 pub mod rig;
 #[cfg(test)]
+mod tests_embedded_schemas;
+#[cfg(test)]
 mod tests_merge_semantics;
+#[cfg(test)]
+mod tests_node_path_scan;
 #[cfg(test)]
 mod tests_node_paths;
 #[cfg(all(test, unix))]

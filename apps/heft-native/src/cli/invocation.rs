@@ -1,13 +1,12 @@
 use std::borrow::Cow;
 
-use super::action_invocation::{invoke_action, phase_action_parameters, ActionRequest};
+use super::action_invocation::{invoke_action, ActionRequest};
 use super::action_text::{action_summary, alias_summary};
 use super::actions::{build_action_table, ActionTable, AliasEntry};
 use super::help_builders::root_help_parser;
 use super::model::CliModel;
 use super::outcome::CliOutcome;
-use super::parameters::ROOT_PARAMETER_NAMES;
-use super::registration::try_register_parameters;
+use super::phase_action_check::PhaseActionCheck;
 use super::render::{help_output, invalid_command_message, usage_error_output};
 use super::validate::is_valid_long_name;
 
@@ -48,7 +47,7 @@ fn is_debug_enabled(args: &[&str]) -> bool {
 fn root_summaries<'x>(model: &'x CliModel<'x>, table: &'x ActionTable<'x>) -> Vec<(Cow<'x, str>, Cow<'x, str>)> {
     let mut summaries: Vec<(Cow<'x, str>, Cow<'x, str>)> = Vec::with_capacity(table.actions.len() + table.aliases.len());
     for action in &table.actions {
-        summaries.push((Cow::Borrowed(action.name.as_ref()), action_summary(model, action)));
+        summaries.push((action.name(), action_summary(model, action)));
     }
     for alias in &table.aliases {
         summaries.push((Cow::Borrowed(alias.name), Cow::Owned(alias_summary(table, alias))));
@@ -72,9 +71,8 @@ fn is_unknown_tool_option(arg: &str) -> bool {
 
 fn interpret<'a>(args: &'a [&'a str], model: &'a CliModel<'a>, width: Option<f64>, supports_color: Option<&dyn Fn() -> bool>) -> Option<CliOutcome<'a>> {
     let table: ActionTable<'a> = build_action_table(model)?;
-    for phase_index in 0..model.phases.len() {
-        let parameters = phase_action_parameters(model, &table, phase_index, false)?;
-        try_register_parameters(&parameters, &ROOT_PARAMETER_NAMES)?;
+    if !PhaseActionCheck::can_define_every_phase_action(model, &table) {
+        return None;
     }
     let action_position: Option<usize> = args.iter().position(|arg| !arg.starts_with('-'));
     let mut has_unknown_tool_option: bool = false;
@@ -82,7 +80,7 @@ fn interpret<'a>(args: &'a [&'a str], model: &'a CliModel<'a>, width: Option<f64
         match *arg {
             "-h" | "--help" => return print_root_help(model, &table, width),
             "--debug" | "--unmanaged" => {}
-            "--" => return root_usage_error(&invalid_command_message("--", table.command_names()), width),
+            "--" => return root_usage_error(&invalid_command_message("--", &table), width),
             _ if is_unknown_tool_option(arg) => has_unknown_tool_option = true,
             _ => return None,
         }
@@ -97,7 +95,7 @@ fn interpret<'a>(args: &'a [&'a str], model: &'a CliModel<'a>, width: Option<f64
     let alias: Option<&AliasEntry<'a>> = table.find_alias(command_name);
     let action_index: usize = match alias.map(|alias| alias.target_index).or_else(|| table.find_action(command_name)) {
         Some(action_index) => action_index,
-        None => return root_usage_error(&invalid_command_message(command_name, table.command_names()), width),
+        None => return root_usage_error(&invalid_command_message(command_name, &table), width),
     };
     invoke_action(ActionRequest {
         model,

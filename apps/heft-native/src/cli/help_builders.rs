@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use super::defined_parameter::DefinedParameter;
-use super::help_model::{bold, HelpAction, HelpGroup, HelpNargs, HelpParser, HelpText};
+use super::help_model::{bold, HelpAction, HelpGroup, HelpNargs, HelpParser, HelpText, DEBUG_OPTION_STRINGS, UNMANAGED_OPTION_STRINGS};
 use super::model::ParameterKind;
 use super::registration::{Registration, RegistrationStep};
 
@@ -14,7 +14,7 @@ pub fn root_help_parser<'a>(summaries: Vec<(Cow<'a, str>, Cow<'a, str>)>) -> Hel
     let subactions: Vec<HelpAction<'a>> = summaries
         .into_iter()
         .map(|(name, summary)| HelpAction {
-            option_strings: Vec::new(),
+            option_strings: &[],
             dest: name,
             nargs: HelpNargs::Single,
             metavar: None,
@@ -25,7 +25,7 @@ pub fn root_help_parser<'a>(summaries: Vec<(Cow<'a, str>, Cow<'a, str>)>) -> Hel
         })
         .collect();
     let subparsers: HelpAction<'a> = HelpAction {
-        option_strings: Vec::new(),
+        option_strings: &[],
         dest: Cow::Borrowed("action"),
         nargs: HelpNargs::Parser,
         metavar: Some("<command>"),
@@ -41,8 +41,8 @@ pub fn root_help_parser<'a>(summaries: Vec<(Cow<'a, str>, Cow<'a, str>)>) -> Hel
         actions: vec![
             HelpAction::help_option(),
             subparsers,
-            HelpAction::flag_option("--debug", DEBUG_DESCRIPTION),
-            HelpAction::flag_option("--unmanaged", UNMANAGED_DESCRIPTION),
+            HelpAction::flag_option(&DEBUG_OPTION_STRINGS, DEBUG_DESCRIPTION),
+            HelpAction::flag_option(&UNMANAGED_OPTION_STRINGS, UNMANAGED_DESCRIPTION),
         ],
         groups: vec![
             HelpGroup { title: Cow::Borrowed("Positional arguments"), action_indices: vec![1] },
@@ -51,15 +51,15 @@ pub fn root_help_parser<'a>(summaries: Vec<(Cow<'a, str>, Cow<'a, str>)>) -> Hel
     }
 }
 
-fn parameter_action<'a>(parameter: &'a DefinedParameter<'a>, option_strings: &[Cow<'a, str>]) -> Option<HelpAction<'a>> {
+fn parameter_action<'a>(parameter: &'a DefinedParameter<'a>, option_strings: &'a [Cow<'a, str>]) -> Option<HelpAction<'a>> {
     let help_text: Cow<'a, str> = parameter.help_text()?;
     Some(HelpAction {
-        option_strings: option_strings.to_vec(),
+        option_strings,
         dest: Cow::Borrowed(parameter.long_name),
         nargs: if parameter.kind == ParameterKind::Flag { HelpNargs::Zero } else { HelpNargs::Single },
         metavar: parameter.argument_name,
         help: HelpText::Text(help_text),
-        choices: if parameter.kind.has_alternatives() { Some(parameter.alternatives.clone()) } else { None },
+        choices: if parameter.kind.has_alternatives() { Some(&parameter.alternatives) } else { None },
         required: parameter.required,
         subactions: Vec::new(),
     })
@@ -72,7 +72,7 @@ pub struct ActionHelpText<'a> {
 }
 
 pub fn action_help_parser<'a>(
-    registration: &Registration<'a>,
+    registration: &'a Registration<'a>,
     parameters: &'a [DefinedParameter<'a>],
     text: ActionHelpText<'a>,
     has_remainder: bool,
@@ -85,7 +85,7 @@ pub fn action_help_parser<'a>(
         let action_index: usize = actions.len();
         match step {
             RegistrationStep::Ambiguous(name) => {
-                actions.push(HelpAction::hidden_option(name.clone()));
+                actions.push(HelpAction::hidden_option(std::slice::from_ref(name)));
                 optionals.push(action_index);
             }
             RegistrationStep::Parameter { parameter_index, option_strings } => {
@@ -98,7 +98,7 @@ pub fn action_help_parser<'a>(
     if has_remainder {
         positionals.push(actions.len());
         actions.push(HelpAction {
-            option_strings: Vec::new(),
+            option_strings: &[],
             dest: Cow::Borrowed("..."),
             nargs: HelpNargs::Remainder,
             metavar: Some("\"...\""),

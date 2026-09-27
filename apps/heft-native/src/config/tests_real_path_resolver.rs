@@ -2,7 +2,8 @@ use std::fs;
 use std::os::unix::fs::symlink;
 use std::path::PathBuf;
 
-use super::real_path_resolver::RealPathResolver;
+use super::path_component_cache::PathComponentCache;
+use super::path_probes::EntryKind;
 
 fn canonicalize_or_missing(path: &str) -> Option<String> {
     fs::canonicalize(path)
@@ -36,7 +37,7 @@ fn real_paths_match_the_operating_system_realpath() {
         .to_str()
         .unwrap()
         .to_string();
-    let mut resolver: RealPathResolver = RealPathResolver::default();
+    let mut resolver: PathComponentCache = PathComponentCache::default();
     for relative_path in [
         "project/node_modules/@scope/pkg/package.json",
         "project/node_modules/@scope/pkg",
@@ -49,24 +50,26 @@ fn real_paths_match_the_operating_system_realpath() {
         "",
     ] {
         let path: String = format!("{root}/{relative_path}");
-        assert_eq!(
-            resolver.resolve_real_path(&path).unwrap(),
-            canonicalize_or_missing(&path),
-            "{path}"
-        );
-        assert_eq!(
-            resolver.resolve_real_path(&path).unwrap(),
-            canonicalize_or_missing(&path),
-            "{path}"
-        );
+        for _ in 0..2 {
+            let resolved = resolver.resolve(&path).unwrap();
+            let real_path = resolved.as_ref().map(|entry| entry.real_path.clone());
+            assert_eq!(real_path, canonicalize_or_missing(&path), "{path}");
+            if let (Some(entry), Ok(metadata)) = (&resolved, fs::metadata(&path)) {
+                let expected_kind = if metadata.is_dir() {
+                    EntryKind::Directory
+                } else {
+                    EntryKind::File
+                };
+                assert_eq!(entry.kind, expected_kind, "{path}");
+                if metadata.is_file() {
+                    assert_eq!(entry.size, metadata.len(), "{path}");
+                }
+            }
+        }
     }
-    assert!(resolver
-        .resolve_real_path(&format!("{root}/loop-a/x"))
-        .is_err());
-    assert!(resolver.resolve_real_path("relative/path").is_err());
-    assert_eq!(
-        resolver.resolve_real_path("/").unwrap().as_deref(),
-        Some("/")
-    );
+    assert!(resolver.resolve(&format!("{root}/loop-a/x")).is_err());
+    assert!(resolver.resolve("relative/path").is_err());
+    let root_entry = resolver.resolve("/").unwrap().map(|entry| entry.real_path);
+    assert_eq!(root_entry.as_deref(), Some("/"));
     let _ = fs::remove_dir_all(&root);
 }

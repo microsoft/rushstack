@@ -26,10 +26,17 @@ pub fn interpret_command_line_with_color<'a>(
     interpret_with_output(args, model, read_help_width(), Some(supports_color))
 }
 
-pub fn write_printed_output(output: &PrintedOutput) -> i32 {
-    if !output.stdout.is_empty() {
+pub fn write_printed_output_after(standard_output_prefix: &str, output: &PrintedOutput) -> i32 {
+    let joined: String;
+    let standard_output: &str = if standard_output_prefix.is_empty() {
+        &output.stdout
+    } else {
+        joined = [standard_output_prefix, output.stdout.as_str()].concat();
+        &joined
+    };
+    if !standard_output.is_empty() {
         let mut stdout = std::io::stdout().lock();
-        let _ = stdout.write_all(output.stdout.as_bytes());
+        let _ = stdout.write_all(standard_output.as_bytes());
         let _ = stdout.flush();
     }
     if !output.stderr.is_empty() {

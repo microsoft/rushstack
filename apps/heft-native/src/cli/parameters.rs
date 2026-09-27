@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use super::defined_parameter::DefinedParameter;
+use super::defined_parameter::{ChoiceAlternatives, DefinedParameter};
 use super::model::{CliModel, ParameterKind, PluginParameterDefinition};
 use super::validate::is_valid_definition;
 
@@ -41,14 +41,18 @@ fn push_unique(indices: &mut Vec<usize>, index: usize) {
     }
 }
 
-fn unique_alternatives<'a>(alternatives: &[&'a str]) -> Vec<&'a str> {
+fn unique_alternatives<'a>(alternatives: &'a [&'a str]) -> ChoiceAlternatives<'a> {
+    let has_duplicates: bool = alternatives.iter().enumerate().any(|(index, alternative)| alternatives[..index].contains(alternative));
+    if !has_duplicates {
+        return ChoiceAlternatives::Declared(alternatives);
+    }
     let mut unique: Vec<&'a str> = Vec::with_capacity(alternatives.len());
     for alternative in alternatives {
         if !unique.contains(alternative) {
             unique.push(alternative);
         }
     }
-    unique
+    ChoiceAlternatives::Deduplicated(unique)
 }
 
 fn define_plugin_parameter<'a>(definition: &'a PluginParameterDefinition<'a>, scope: &'a str) -> DefinedParameter<'a> {
@@ -63,7 +67,7 @@ fn define_plugin_parameter<'a>(definition: &'a PluginParameterDefinition<'a>, sc
         scoping_group: false,
         required: definition.required,
         argument_name: if takes_argument_name { definition.argument_name } else { None },
-        alternatives: if kind.has_alternatives() { unique_alternatives(&definition.alternatives) } else { Vec::new() },
+        alternatives: if kind.has_alternatives() { unique_alternatives(&definition.alternatives) } else { ChoiceAlternatives::Declared(&[]) },
         default_value: if takes_default { definition.default_value } else { None },
         description: Cow::Borrowed(definition.description),
     }
@@ -74,17 +78,27 @@ pub fn push_plugin_parameters<'a>(
     model: &'a CliModel<'a>,
     selected_phases: &[usize],
 ) -> Option<()> {
-    let mut plugin_indices: Vec<usize> = Vec::new();
+    collect_plugin_parameters(parameters, model, selected_phases, &mut Vec::new(), &mut Vec::new())
+}
+
+pub fn collect_plugin_parameters<'a>(
+    parameters: &mut Vec<DefinedParameter<'a>>,
+    model: &'a CliModel<'a>,
+    selected_phases: &[usize],
+    plugin_indices: &mut Vec<usize>,
+    plugins_by_scope: &mut Vec<(&'a str, usize)>,
+) -> Option<()> {
+    plugin_indices.clear();
+    plugins_by_scope.clear();
     for plugin_index in &model.lifecycle_plugin_indices {
-        push_unique(&mut plugin_indices, *plugin_index);
+        push_unique(plugin_indices, *plugin_index);
     }
     for phase_index in selected_phases {
         for plugin_index in &model.phases[*phase_index].task_plugin_indices {
-            push_unique(&mut plugin_indices, *plugin_index);
+            push_unique(plugin_indices, *plugin_index);
         }
     }
-    let mut plugins_by_scope: Vec<(&str, usize)> = Vec::with_capacity(plugin_indices.len());
-    for plugin_index in plugin_indices {
+    for plugin_index in plugin_indices.iter().copied() {
         let plugin = model.plugins.get(plugin_index)?;
         match plugins_by_scope.iter().find(|(scope, _)| *scope == plugin.parameter_scope) {
             Some((_, existing_index)) if *existing_index != plugin_index => return None,

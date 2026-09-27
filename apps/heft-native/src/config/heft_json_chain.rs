@@ -1,5 +1,5 @@
 use super::fallback::{fallback, ConfigResult};
-use super::fs_probe::{read_text_or_missing, FileSystemProbeCache};
+use super::fs_probe::FileSystemProbeCache;
 use super::node_path::{dirname, resolve};
 use super::node_resolve::resolve_module;
 use super::package_json::PackageJsonLookup;
@@ -79,7 +79,7 @@ impl HeftJsonChain {
             return fallback("a loop in the extends chain");
         }
         visited.push(path.to_string());
-        let text: String = match read_text_or_missing(path)? {
+        let text: String = match file_system.read_text_or_missing(path)? {
             Some(text) => text,
             None => return Ok(None),
         };

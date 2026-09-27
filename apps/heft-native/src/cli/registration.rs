@@ -88,13 +88,6 @@ fn count_long_name(parameters: &[DefinedParameter<'_>], long_name: &str) -> usiz
     parameters.iter().filter(|parameter| parameter.long_name == long_name).count()
 }
 
-fn long_name_order<'p>(parameters: &'p [DefinedParameter<'_>]) -> impl Iterator<Item = usize> + 'p {
-    let first_index_of = |long_name: &str| parameters.iter().position(|parameter| parameter.long_name == long_name);
-    (0..parameters.len())
-        .filter(move |index| first_index_of(parameters[*index].long_name) == Some(*index))
-        .flat_map(move |first| (first..parameters.len()).filter(move |index| parameters[*index].long_name == parameters[first].long_name))
-}
-
 pub fn try_register_parameters<'a>(parameters: &[DefinedParameter<'a>], parent_names: &[Cow<'a, str>]) -> Option<Registration<'a>> {
     let mut registration: Registration<'a> = Registration::default();
     let mut ambiguous_names: Vec<Cow<'a, str>> = Vec::new();
@@ -103,7 +96,9 @@ pub fn try_register_parameters<'a>(parameters: &[DefinedParameter<'a>], parent_n
             push_unique(&mut ambiguous_names, Cow::Borrowed(short_name));
         }
     }
-    for parameter_index in long_name_order(parameters) {
+    let groups = (0..parameters.len()).filter(|first| parameters.iter().position(|other| other.long_name == parameters[*first].long_name) == Some(*first));
+    let long_name_order = groups.flat_map(|first| (first..parameters.len()).filter(move |index| parameters[*index].long_name == parameters[first].long_name));
+    for parameter_index in long_name_order {
         let parameter: &DefinedParameter<'a> = &parameters[parameter_index];
         let use_scoped_long_name: bool = count_long_name(parameters, parameter.long_name) > 1;
         if use_scoped_long_name {
@@ -138,4 +133,23 @@ pub fn try_register_parameters<'a>(parameters: &[DefinedParameter<'a>], parent_n
         }
     }
     Some(registration)
+}
+
+pub fn is_registration_possible(parameters: &[DefinedParameter<'_>], parent_names: &[Cow<'_, str>]) -> bool {
+    let is_help_option = |name: &str| HELP_OPTION_STRINGS.contains(&name);
+    for (index, parameter) in parameters.iter().enumerate() {
+        if parameter.scope.is_none() && count_long_name(parameters, parameter.long_name) > 1 {
+            return false;
+        }
+        if parameter.short_name.is_some_and(is_help_option) || is_help_option(parameter.long_name) {
+            return false;
+        }
+        if let Some(scope) = parameter.scope {
+            let earlier = &parameters[..index];
+            if earlier.iter().any(|other| other.scope == Some(scope) && other.long_name == parameter.long_name) {
+                return false;
+            }
+        }
+    }
+    !parent_names.iter().any(|name| is_help_option(name))
 }

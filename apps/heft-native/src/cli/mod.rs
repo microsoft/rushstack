@@ -15,6 +15,7 @@ pub mod outcome;
 mod parameters;
 mod plan_command;
 pub mod parse;
+mod phase_action_check;
 mod phase_selection;
 mod registration;
 mod render;
@@ -30,5 +31,7 @@ pub use self::{actions::ActionKind, defined_parameter::DefinedParameter, parse::
 mod test_harness;
 #[cfg(test)]
 mod tests_cli;
+#[cfg(test)]
+mod tests_registration;
 #[cfg(test)]
 mod test_model;

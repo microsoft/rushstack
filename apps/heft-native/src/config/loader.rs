@@ -2,6 +2,7 @@ use super::embedded_schemas::{
     parse_embedded_schema, HEFT_JSON_SCHEMA_TEXT, HEFT_PLUGIN_JSON_SCHEMA_TEXT,
 };
 use super::fallback::{fallback, ConfigResult};
+use super::fs_probe::FileSystemProbeCache;
 use super::heft_json_chain::{discover_heft_json_chain, HeftJsonChain};
 use super::heft_json_merge::{merge_heft_json_chain, PluginPackageResolver};
 use super::normalize::normalize_heft_configuration;
@@ -57,6 +58,7 @@ fn validate_merged_heft_json(tree: &ConfigTree, merged: NodeId) -> ConfigResult<
 }
 
 fn read_plugin_package_manifests(
+    file_system: &mut FileSystemProbeCache,
     references: &PluginReferences,
 ) -> ConfigResult<Vec<PluginPackageManifest>> {
     let mut manifests: Vec<PluginPackageManifest> = Vec::new();
@@ -66,6 +68,7 @@ fn read_plugin_package_manifests(
             .any(|manifest| manifest.package_root == reference.package_root)
         {
             manifests.push(read_plugin_package_manifest(
+                file_system,
                 reference.package_root,
                 reference.package_name,
             )?);
@@ -93,12 +96,13 @@ pub fn load_heft_configuration_and_then<Output>(
     if cfg!(not(unix)) {
         return fallback("native configuration loading implements POSIX paths only");
     }
-    let rig: RigConfigData = load_rig_config_data(request.build_folder_path)?;
+    let rig: RigConfigData =
+        load_rig_config_data(&mut lookup.file_system, request.build_folder_path)?;
     let heft_json_chain: HeftJsonChain =
         discover_heft_json_chain(lookup, request.build_folder_path, &rig)?;
     let mut tree: ConfigTree = ConfigTree::default();
     let mut resolver: PluginPackageResolver = PluginPackageResolver {
-        lookup,
+        lookup: &mut *lookup,
         heft_module_folder: request.heft_module_folder,
         heft_package_folder: None,
     };
@@ -112,11 +116,18 @@ pub fn load_heft_configuration_and_then<Output>(
     let heft_json: NodeId = normalize_heft_configuration(&mut tree, merged)?;
     let tree: ConfigTree = tree;
     let references: PluginReferences = collect_plugin_references(&tree, heft_json)?;
-    let manifests: Vec<PluginPackageManifest> = read_plugin_package_manifests(&references)?;
+    let manifests: Vec<PluginPackageManifest> =
+        read_plugin_package_manifests(&mut lookup.file_system, &references)?;
     let parsed_manifests: Vec<JsonValue> = parse_plugin_package_manifests(&manifests)?;
     let mut definitions: Vec<PluginDefinition> = Vec::new();
     for (package, (manifest, parsed)) in manifests.iter().zip(&parsed_manifests).enumerate() {
-        load_plugin_definitions(package, manifest, parsed, &mut definitions)?;
+        load_plugin_definitions(
+            &mut lookup.file_system,
+            package,
+            manifest,
+            parsed,
+            &mut definitions,
+        )?;
     }
     let package_roots: Vec<&str> = manifests
         .iter()
@@ -124,7 +135,13 @@ pub fn load_heft_configuration_and_then<Output>(
         .collect();
     let selected_definitions: Vec<usize> =
         select_plugin_definitions(&references, &package_roots, &definitions)?;
-    validate_plugin_options(&tree, &references, &selected_definitions, &definitions)?;
+    validate_plugin_options(
+        &mut lookup.file_system,
+        &tree,
+        &references,
+        &selected_definitions,
+        &definitions,
+    )?;
     Ok(consume(&LoadedHeftConfiguration {
         build_folder_path: request.build_folder_path,
         rig: &rig,

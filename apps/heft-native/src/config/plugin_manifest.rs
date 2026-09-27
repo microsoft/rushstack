@@ -1,5 +1,5 @@
 use super::fallback::{fallback, ConfigResult};
-use super::fs_probe::{exists_like_exists_sync, read_text_or_missing};
+use super::fs_probe::FileSystemProbeCache;
 use super::node_path::resolve;
 use crate::json::{parse_json_with_comments_exactly_like_jju, JsonValue};
 use crate::schema::CompiledJsonSchema;
@@ -28,13 +28,14 @@ pub struct PluginDefinition<'manifest> {
 }
 
 pub fn read_plugin_package_manifest(
+    file_system: &mut FileSystemProbeCache,
     package_root: &str,
     package_name: &str,
 ) -> ConfigResult<PluginPackageManifest> {
     let mut manifest_file_path: String = String::with_capacity(package_root.len() + 17);
     manifest_file_path.push_str(package_root);
     manifest_file_path.push_str("/heft-plugin.json");
-    match read_text_or_missing(&manifest_file_path)? {
+    match file_system.read_text_or_missing(&manifest_file_path)? {
         Some(text) => Ok(PluginPackageManifest {
             package_root: package_root.to_string(),
             package_name: package_name.to_string(),
@@ -79,6 +80,7 @@ fn truthy_string<'manifest>(
 }
 
 fn load_plugin_definition<'manifest>(
+    file_system: &mut FileSystemProbeCache,
     kind: PluginKind,
     package: usize,
     manifest: &PluginPackageManifest,
@@ -105,7 +107,7 @@ fn load_plugin_definition<'manifest>(
     let options_schema_path: Option<String> = match truthy_string(definition, "optionsSchema")? {
         Some(options_schema) => {
             let resolved_schema_path: String = resolve(&manifest.package_root, options_schema);
-            if !exists_like_exists_sync(&resolved_schema_path) {
+            if !file_system.exists_like_exists_sync(&resolved_schema_path)? {
                 return fallback("a plugin options schema file does not exist");
             }
             Some(resolved_schema_path)
@@ -124,6 +126,7 @@ fn load_plugin_definition<'manifest>(
 }
 
 pub fn load_plugin_definitions<'manifest>(
+    file_system: &mut FileSystemProbeCache,
     package: usize,
     manifest: &PluginPackageManifest,
     parsed: &'manifest JsonValue<'manifest>,
@@ -141,7 +144,7 @@ pub fn load_plugin_definitions<'manifest>(
     ] {
         for definition in list {
             let loaded: PluginDefinition =
-                load_plugin_definition(kind, package, manifest, definition)?;
+                load_plugin_definition(file_system, kind, package, manifest, definition)?;
             if definitions[first_definition..]
                 .iter()
                 .any(|other| other.plugin_name == loaded.plugin_name)

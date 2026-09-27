@@ -1,7 +1,6 @@
 use crate::builtin::{
-    builtin_task_passes_preflight, builtin_task_touches_files, plan_builtin_task, plan_phase_clean,
-    selections_are_deletable_without_permission_errors, AbsoluteFileSelection, BuiltinTaskOptions, FileSelectionSpecifier,
-    PlannedBuiltinTask,
+    builtin_task_passes_preflight, plan_builtin_task, plan_phase_clean, plan_phase_clean_deletion, BuiltinTaskOptions,
+    DeletionPlan, FileSelectionSpecifier, ModifiedPaths, PlannedBuiltinTask,
 };
 use crate::graph::{plan_sequential_operations, HeftOperation, PhaseShape};
 
@@ -27,7 +26,7 @@ pub struct NativeBuildRequest {
 }
 
 pub enum TierZeroStep {
-    StartPhase { phase_name: String, clean_selections: Option<Vec<AbsoluteFileSelection>> },
+    StartPhase { phase_name: String, clean: Option<DeletionPlan> },
     RunTask { logger_name: String, planned_task: PlannedBuiltinTask },
 }
 
@@ -72,33 +71,30 @@ pub fn plan_tier_zero_build(request: &NativeBuildRequest) -> Option<TierZeroPlan
     let sequential_plan = plan_sequential_operations(&phase_shapes, &request.selected_phase_indices)?;
     let temp_folder_path = format!("{}/temp", request.build_folder_path);
     let mut steps: Vec<(usize, TierZeroStep)> = Vec::new();
-    let mut files_may_have_changed = false;
+    let mut modified_paths = ModifiedPaths::default();
     for operation in &sequential_plan.operations_in_execution_order {
         match *operation {
             HeftOperation::Phase { phase_index } => {
                 let phase = &request.phases[phase_index];
-                let clean_selections = if request.clean {
+                let clean = if request.clean {
                     let selections = plan_phase_clean(
                         &phase.clean_files,
                         &request.build_folder_path,
                         &temp_folder_path,
                         &phase.phase_name,
                     )?;
-                    selections_are_deletable_without_permission_errors(&selections).then_some(())?;
-                    files_may_have_changed = true;
-                    Some(selections)
+                    Some(plan_phase_clean_deletion(selections, &mut modified_paths)?)
                 } else {
                     None
                 };
-                steps.push((phase_index, TierZeroStep::StartPhase { phase_name: phase.phase_name.clone(), clean_selections }));
+                steps.push((phase_index, TierZeroStep::StartPhase { phase_name: phase.phase_name.clone(), clean }));
             }
             HeftOperation::Task { phase_index, task_index } => {
                 let phase = &request.phases[phase_index];
                 let task = &phase.tasks[task_index];
                 let task_temp_folder_path = format!("{temp_folder_path}/{}/{}", phase.phase_name, task.task_name);
                 let mut planned_task = plan_builtin_task(&task.options, &request.build_folder_path, &task_temp_folder_path)?;
-                builtin_task_passes_preflight(&mut planned_task, &temp_folder_path, !files_may_have_changed).then_some(())?;
-                files_may_have_changed |= builtin_task_touches_files(&planned_task);
+                builtin_task_passes_preflight(&mut planned_task, &temp_folder_path, &mut modified_paths).then_some(())?;
                 let logger_name = format!("{}:{}", phase.phase_name, task.task_name);
                 steps.push((phase_index, TierZeroStep::RunTask { logger_name, planned_task }));
             }

@@ -10,11 +10,46 @@ pub enum ActionKind {
     Phase(usize),
 }
 
+const WATCH_SUFFIX: &str = "-watch";
+
 #[derive(Debug)]
 pub struct ActionEntry<'a> {
-    pub name: Cow<'a, str>,
+    pub base_name: &'a str,
     pub kind: ActionKind,
     pub watch: bool,
+}
+
+impl<'a> ActionEntry<'a> {
+    pub fn name(&self) -> Cow<'a, str> {
+        if self.watch {
+            Cow::Owned(format!("{}{WATCH_SUFFIX}", self.base_name))
+        } else {
+            Cow::Borrowed(self.base_name)
+        }
+    }
+
+    pub fn has_name(&self, text: &str) -> bool {
+        if self.watch {
+            text.strip_suffix(WATCH_SUFFIX) == Some(self.base_name)
+        } else {
+            text == self.base_name
+        }
+    }
+
+    pub fn push_name(&self, output: &mut String) {
+        output.push_str(self.base_name);
+        if self.watch {
+            output.push_str(WATCH_SUFFIX);
+        }
+    }
+
+    fn has_same_name_as(&self, other: &ActionEntry<'_>) -> bool {
+        match (self.watch, other.watch) {
+            (true, false) => self.has_name(other.base_name),
+            (false, true) => other.has_name(self.base_name),
+            _ => self.base_name == other.base_name,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -33,22 +68,32 @@ pub struct ActionTable<'a> {
 
 impl<'a> ActionTable<'a> {
     pub fn find_action(&self, name: &str) -> Option<usize> {
-        self.actions.iter().position(|action| action.name == name)
+        self.actions.iter().position(|action| action.has_name(name))
     }
 
     pub fn find_alias(&self, name: &str) -> Option<&AliasEntry<'a>> {
         self.aliases.iter().find(|alias| alias.name == name)
     }
 
-    pub fn command_names(&self) -> impl Iterator<Item = &str> {
-        self.actions.iter().map(|action| action.name.as_ref()).chain(self.aliases.iter().map(|alias| alias.name))
+    pub fn push_command_names(&self, output: &mut String) {
+        for (index, action) in self.actions.iter().enumerate() {
+            if index > 0 {
+                output.push_str(", ");
+            }
+            action.push_name(output);
+        }
+        for alias in &self.aliases {
+            output.push_str(", ");
+            output.push_str(alias.name);
+        }
     }
 
-    fn try_add(&mut self, name: Cow<'a, str>, kind: ActionKind, watch: bool) -> bool {
-        if !is_valid_action_name(&name) || self.find_action(&name).is_some() {
+    fn try_add(&mut self, base_name: &'a str, kind: ActionKind, watch: bool) -> bool {
+        let entry: ActionEntry<'a> = ActionEntry { base_name, kind, watch };
+        if !is_valid_action_name(base_name) || self.actions.iter().any(|existing| existing.has_same_name_as(&entry)) {
             return false;
         }
-        self.actions.push(ActionEntry { name, kind, watch });
+        self.actions.push(entry);
         true
     }
 }
@@ -74,18 +119,18 @@ pub fn build_action_table<'a>(model: &'a CliModel<'a>) -> Option<ActionTable<'a>
         aliases: Vec::with_capacity(model.aliases.len()),
         phase_dependencies: resolve_phase_dependencies(model)?,
     };
-    table.try_add(Cow::Borrowed("clean"), ActionKind::Clean, false);
-    table.try_add(Cow::Borrowed("run"), ActionKind::Run, false);
+    table.try_add("clean", ActionKind::Clean, false);
+    table.try_add("run", ActionKind::Run, false);
     for (phase_index, phase) in model.phases.iter().enumerate() {
-        if !table.try_add(Cow::Borrowed(phase.name), ActionKind::Phase(phase_index), false) {
+        if !table.try_add(phase.name, ActionKind::Phase(phase_index), false) {
             return None;
         }
     }
-    if !table.try_add(Cow::Borrowed("run-watch"), ActionKind::Run, true) {
+    if !table.try_add("run", ActionKind::Run, true) {
         return None;
     }
     for (phase_index, phase) in model.phases.iter().enumerate() {
-        if !table.try_add(Cow::Owned(format!("{}-watch", phase.name)), ActionKind::Phase(phase_index), true) {
+        if !table.try_add(phase.name, ActionKind::Phase(phase_index), true) {
             return None;
         }
     }
@@ -102,6 +147,12 @@ pub fn build_action_table<'a>(model: &'a CliModel<'a>) -> Option<ActionTable<'a>
 
 pub fn selected_phases_from(table: &ActionTable<'_>, seeds: impl IntoIterator<Item = usize>) -> Vec<usize> {
     let mut selected: Vec<usize> = Vec::new();
+    select_phases_into(table, seeds, &mut selected);
+    selected
+}
+
+pub fn select_phases_into(table: &ActionTable<'_>, seeds: impl IntoIterator<Item = usize>, selected: &mut Vec<usize>) {
+    selected.clear();
     for seed in seeds {
         if !selected.contains(&seed) {
             selected.push(seed);
@@ -116,5 +167,4 @@ pub fn selected_phases_from(table: &ActionTable<'_>, seeds: impl IntoIterator<It
         }
         cursor += 1;
     }
-    selected
 }

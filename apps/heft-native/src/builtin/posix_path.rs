@@ -30,6 +30,27 @@ pub fn normalize_absolute_path(path: &str) -> String {
     normalized
 }
 
+pub fn is_normalized_absolute_folder_path(path: &str) -> bool {
+    path.strip_prefix('/').is_some_and(|rest| rest.split('/').all(|segment| !matches!(segment, "" | "." | "..")))
+}
+
+pub fn resolve_relative_path_against_normalized_folder(normalized_folder_path: &str, relative_path: &str) -> Option<String> {
+    let mut folder_path = normalized_folder_path;
+    let mut remaining_path = relative_path;
+    while let Some(rest) = remaining_path.strip_prefix("../") {
+        folder_path = &folder_path[..folder_path.rfind('/').filter(|separator_index| *separator_index > 0)?];
+        remaining_path = rest;
+    }
+    if remaining_path.split('/').any(|segment| matches!(segment, "" | "." | "..")) {
+        return None;
+    }
+    let mut resolved_path = String::with_capacity(folder_path.len() + 1 + remaining_path.len());
+    resolved_path.push_str(folder_path);
+    resolved_path.push('/');
+    resolved_path.push_str(remaining_path);
+    Some(resolved_path)
+}
+
 pub fn relative_path(from_folder: &str, to_path: &str) -> String {
     let from_segments: Vec<&str> = from_folder.split('/').filter(|s| !s.is_empty()).collect();
     let to_segments: Vec<&str> = to_path.split('/').filter(|s| !s.is_empty()).collect();
@@ -62,6 +83,12 @@ pub fn base_name(path: &str) -> &str {
     }
 }
 
+pub fn path_contains(outer_path: &str, inner_path: &str) -> bool {
+    outer_path == "/"
+        || inner_path == outer_path
+        || (inner_path.starts_with(outer_path) && inner_path.as_bytes().get(outer_path.len()) == Some(&b'/'))
+}
+
 pub fn directory_name(path: &str) -> &str {
     match path.rfind('/') {
         Some(0) => "/",
@@ -73,6 +100,27 @@ pub fn directory_name(path: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_relative_path_fast_path_agrees_with_resolve_path() {
+        let folders = ["/p/temp/build/copy-assets", "/p", "/a/b", "/p/x y/z"];
+        let relatives = [
+            "../../../src/a.txt", "src/a.txt", "a", "../a", "../../a", "../../../../../../a", "./a", "a/./b", "a//b", "a/",
+            "..", "../", "a/../b", "../..", "", ".", "../src/../a", "d000/file-000.txt",
+        ];
+        for folder in folders {
+            assert!(is_normalized_absolute_folder_path(folder));
+            for relative in relatives {
+                if let Some(resolved) = resolve_relative_path_against_normalized_folder(folder, relative) {
+                    assert_eq!(resolved, resolve_path(folder, relative), "{folder} + {relative}");
+                }
+            }
+        }
+        assert_eq!(resolve_relative_path_against_normalized_folder("/p/t/b", "../../s/a.txt").as_deref(), Some("/p/s/a.txt"));
+        for not_normalized in ["/", "p", "/p/", "/p//q", "/p/./q", "/p/../q", ""] {
+            assert!(!is_normalized_absolute_folder_path(not_normalized), "{not_normalized}");
+        }
+    }
 
     #[test]
     fn paths_resolve_and_relativize_like_node_posix_path() {
@@ -89,5 +137,7 @@ mod tests {
         assert_eq!(relative_path("/foo/bar", "/"), "../..");
         assert_eq!(base_name("/p/src/x.txt"), "x.txt");
         assert_eq!(directory_name("/p/temp/file-copy.json"), "/p/temp");
+        assert!(path_contains("/p/lib", "/p/lib") && path_contains("/p/lib", "/p/lib/a") && path_contains("/", "/p"));
+        assert!(!path_contains("/p/lib", "/p/lib2") && !path_contains("/p/lib/a", "/p/lib"));
     }
 }

@@ -42,7 +42,8 @@ pub fn action_documentation<'x>(model: &'x CliModel<'x>, action: &ActionEntry<'_
 }
 
 pub fn alias_expanded_command(table: &ActionTable<'_>, alias: &AliasEntry<'_>) -> String {
-    let mut expanded: String = format!("heft {}", table.actions[alias.target_index].name);
+    let mut expanded: String = String::from("heft ");
+    table.actions[alias.target_index].push_name(&mut expanded);
     let defaults: String = alias.default_parameters.join(" ");
     if !defaults.is_empty() {
         expanded.push(' ');
@@ -59,7 +60,7 @@ pub fn alias_documentation(table: &ActionTable<'_>, alias: &AliasEntry<'_>) -> S
     format!(
         "{} For more information on the aliased command, use \"heft {} --help\".",
         alias_summary(table, alias),
-        table.actions[alias.target_index].name
+        table.actions[alias.target_index].name()
     )
 }
 

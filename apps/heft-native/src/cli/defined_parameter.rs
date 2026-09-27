@@ -4,6 +4,23 @@ use super::model::{DefaultValue, ParameterKind};
 use super::text::{format_javascript_integer, is_javascript_whitespace, push_json_string};
 
 #[derive(Clone, Debug)]
+pub enum ChoiceAlternatives<'a> {
+    Declared(&'a [&'a str]),
+    Deduplicated(Vec<&'a str>),
+}
+
+impl<'a> std::ops::Deref for ChoiceAlternatives<'a> {
+    type Target = [&'a str];
+
+    fn deref(&self) -> &[&'a str] {
+        match self {
+            ChoiceAlternatives::Declared(alternatives) => alternatives,
+            ChoiceAlternatives::Deduplicated(alternatives) => alternatives,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct DefinedParameter<'a> {
     pub kind: ParameterKind,
     pub long_name: &'a str,
@@ -12,7 +29,7 @@ pub struct DefinedParameter<'a> {
     pub scoping_group: bool,
     pub required: bool,
     pub argument_name: Option<&'a str>,
-    pub alternatives: Vec<&'a str>,
+    pub alternatives: ChoiceAlternatives<'a>,
     pub default_value: Option<DefaultValue<'a>>,
     pub description: Cow<'a, str>,
 }
@@ -27,7 +44,7 @@ impl<'a> DefinedParameter<'a> {
             scoping_group: false,
             required: false,
             argument_name: None,
-            alternatives: Vec::new(),
+            alternatives: ChoiceAlternatives::Declared(&[]),
             default_value: None,
             description,
         }
