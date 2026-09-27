@@ -64,7 +64,7 @@ fn collect_wrapped_lines(parts: &[&str], indent: &str, prefix: Option<&str>, tex
     lines
 }
 
-pub fn format_usage(prog: &str, actions: &[HelpAction<'_>], width: f64) -> Option<String> {
+pub fn push_usage(output: &mut String, prog: &str, actions: &[HelpAction<'_>], width: f64) -> Option<()> {
     let prefix: &str = "usage: ";
     let optionals: Vec<&HelpAction<'_>> = actions.iter().filter(|action| action.is_optional()).collect();
     let positionals: Vec<&HelpAction<'_>> = actions.iter().filter(|action| !action.is_optional()).collect();
@@ -106,5 +106,8 @@ pub fn format_usage(prog: &str, actions: &[HelpAction<'_>], width: f64) -> Optio
         };
         usage = lines.join("\n");
     }
-    Some(format!("{}{}\n\n", prefix, usage))
+    output.push_str(prefix);
+    output.push_str(&usage);
+    output.push_str("\n\n");
+    Some(())
 }

@@ -31,19 +31,16 @@ pub fn is_definitely_valid_package_name(package_name: &str) -> bool {
     unscoped_name.chars().all(is_name_char) && unscoped_name != "." && unscoped_name != ".."
 }
 
-pub fn node_modules_folders(start: &str) -> Vec<String> {
-    let absolute_start: String = resolve_absolute(start);
-    let mut folders: Vec<String> = Vec::with_capacity(16);
-    let mut current: String = absolute_start;
-    loop {
-        folders.push(resolve(&current, "node_modules"));
-        let parent: &str = dirname(&current);
-        if parent == current {
-            break;
+pub fn node_modules_folders(start: &str) -> impl Iterator<Item = String> {
+    let mut next_folder: Option<String> = Some(resolve_absolute(start));
+    std::iter::from_fn(move || {
+        let folder: String = next_folder.take()?;
+        let parent: &str = dirname(&folder);
+        if parent != folder {
+            next_folder = Some(parent.to_string());
         }
-        current = parent.to_string();
-    }
-    folders
+        Some(resolve(&folder, "node_modules"))
+    })
 }
 
 fn realpath_like_resolve(

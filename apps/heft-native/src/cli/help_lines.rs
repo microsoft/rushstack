@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use super::text::{is_javascript_whitespace, javascript_substring};
 
 fn is_wrap_delimiter(byte: u8) -> bool {
@@ -29,11 +31,30 @@ fn normalize_help_whitespace(text: &str) -> String {
     normalized
 }
 
+fn is_normalized_help_text(text: &str) -> bool {
+    let bytes: &[u8] = text.as_bytes();
+    if bytes.first() == Some(&b' ') || bytes.last() == Some(&b' ') {
+        return false;
+    }
+    let mut previous_was_space: bool = false;
+    for byte in bytes {
+        match *byte {
+            b' ' if previous_was_space => return false,
+            b' ' => previous_was_space = true,
+            b'|' => return false,
+            other if is_javascript_whitespace(other) => return false,
+            _ => previous_was_space = false,
+        }
+    }
+    true
+}
+
 pub fn for_each_help_line(text: &str, width: f64, mut emit: impl FnMut(usize, &str)) {
-    let line: String = normalize_help_whitespace(text);
+    let normalized: Cow<'_, str> = if is_normalized_help_text(text) { Cow::Borrowed(text) } else { Cow::Owned(normalize_help_whitespace(text)) };
+    let line: &str = &normalized;
     let length: f64 = line.len() as f64;
     if width >= length {
-        emit(0, &line);
+        emit(0, line);
         return;
     }
     let mut line_index: usize = 0;
@@ -41,16 +62,16 @@ pub fn for_each_help_line(text: &str, width: f64, mut emit: impl FnMut(usize, &s
     let mut wrap_end: f64 = width;
     while wrap_end <= length {
         if wrap_end != length {
-            let segment: &str = javascript_substring(&line, wrap_start, wrap_end);
+            let segment: &str = javascript_substring(line, wrap_start, wrap_end);
             wrap_end = wrap_start + find_last_delimiter_index(segment) + 1.0;
         }
-        emit(line_index, javascript_substring(&line, wrap_start, wrap_end));
+        emit(line_index, javascript_substring(line, wrap_start, wrap_end));
         line_index += 1;
         wrap_start = wrap_end;
         wrap_end += width;
     }
     if wrap_start < length {
-        emit(line_index, javascript_substring(&line, wrap_start, wrap_end));
+        emit(line_index, javascript_substring(line, wrap_start, wrap_end));
     }
 }
 

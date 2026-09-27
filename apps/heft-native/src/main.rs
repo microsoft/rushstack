@@ -1,4 +1,5 @@
 #![deny(unsafe_code)]
+#![cfg_attr(not(test), no_main)]
 
 mod builtin;
 mod cli;
@@ -10,6 +11,7 @@ mod process;
 mod regex;
 mod run;
 mod schema;
+mod simd;
 mod sys;
 mod terminal;
 mod version;
@@ -19,7 +21,8 @@ use std::ffi::OsString;
 use run::HeftRunDecision;
 use version::HeftImplementationSelection;
 
-fn main() {
+#[cfg_attr(test, allow(dead_code))]
+pub fn run_heft_command_line() -> ! {
     #[cfg(unix)]
     sys::reset_inherited_ignored_signals_like_node();
     let command_line_arguments: Vec<OsString> = std::env::args_os().skip(1).collect();
@@ -34,8 +37,7 @@ fn main() {
             process::exec_javascript_heft(&command_line_arguments)
         }
         HeftRunDecision::RunNatively(native_heft_run) => {
-            version::write_version_selector_banner(native_heft_context.version_selector_banner);
-            std::process::exit(run::run_heft_natively(native_heft_run))
+            std::process::exit(run::run_heft_natively(native_heft_run, native_heft_context.version_selector_banner))
         }
         HeftRunDecision::RunInNodeHost(node_host_plan) => host_link::run_in_node_host(
             &native_heft_context,

@@ -72,7 +72,7 @@ pub fn print_error<'a>(request: &ActionRequest<'a, '_>, registration: &Registrat
     let mut text: ActionHelpText<'a> = help_text(request, None);
     let error_prog: String = text.prog.to_string();
     if matches!(error, ArgumentError::Ambiguous(_)) {
-        text.prog = Cow::Owned(format!("heft {}", request.table.actions[request.action_index].name));
+        text.prog = Cow::Owned(format!("heft {}", request.table.actions[request.action_index].name()));
     }
     let parser = action_help_parser(registration, parameters, text, has_remainder)?;
     let output = match error {
@@ -92,7 +92,7 @@ pub fn execute<'a>(request: &ActionRequest<'a, '_>, selected_phases: Vec<usize>,
     let uses_explicit_values: bool = defaults.iter().chain(request.rest).any(|arg| arg.starts_with('-') && arg.contains('='));
     Some(CliOutcome::Execute(Box::new(ParsedCommand {
         command_name: request.command_name,
-        unaliased_command_name: action.name.to_string(),
+        unaliased_command_name: action.name().into_owned(),
         action_kind: action.kind,
         watch: action.watch,
         debug: request.tool_args.contains(&"--debug"),

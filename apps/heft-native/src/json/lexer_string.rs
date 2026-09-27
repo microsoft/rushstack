@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use super::cursor::{JsonCursor, JsonScanResult, JsonTextNeedsJavaScriptParser};
+use crate::simd::position_of_json_string_special_byte;
 
 const FIRST_HIGH_SURROGATE: u32 = 0xd800;
 const FIRST_LOW_SURROGATE: u32 = 0xdc00;
@@ -11,6 +12,7 @@ impl<'text> JsonCursor<'text> {
         self.position += 1;
         let content_start = self.position;
         loop {
+            self.position = position_of_json_string_special_byte(self.bytes, self.position);
             match self.next_byte_or_refuse()? {
                 b'"' => {
                     let content = &self.text[content_start..self.position];
@@ -55,13 +57,7 @@ impl<'text> JsonCursor<'text> {
 
     fn copy_run_of_ordinary_string_bytes_into(&mut self, decoded: &mut String) {
         let run_start = self.position;
-        self.position += 1;
-        while let Some(byte) = self.peek_byte() {
-            if byte == b'"' || byte == b'\\' || byte < 0x20 || byte == 0xe2 {
-                break;
-            }
-            self.position += 1;
-        }
+        self.position = position_of_json_string_special_byte(self.bytes, self.position + 1);
         decoded.push_str(&self.text[run_start..self.position]);
     }
 

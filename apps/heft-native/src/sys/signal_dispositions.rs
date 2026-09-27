@@ -13,10 +13,7 @@ extern "C" {
 
 pub fn reset_inherited_ignored_signals_like_node() {
     for signal_number in 1..=HIGHEST_STANDARD_SIGNAL {
-        if signal_number == SIGNAL_BROKEN_PIPE {
-            continue;
-        }
-        if signal_number == SIGNAL_FILE_SIZE_LIMIT_EXCEEDED {
+        if signal_number == SIGNAL_BROKEN_PIPE || signal_number == SIGNAL_FILE_SIZE_LIMIT_EXCEEDED {
             unsafe { signal(signal_number, IGNORED_SIGNAL_DISPOSITION) };
             continue;
         }

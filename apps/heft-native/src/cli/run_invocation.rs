@@ -15,7 +15,7 @@ use super::render::{argument_error_message, help_output, remainder_error_output,
 pub fn invoke_run<'a>(request: &ActionRequest<'a, '_>, action_args: &[&'a str]) -> Option<CliOutcome<'a>> {
     let action = &request.table.actions[request.action_index];
     let mut definitions: Vec<DefinedParameter<'a>> = Vec::new();
-    push_scoping_parameters(&mut definitions, &action.name);
+    push_scoping_parameters(&mut definitions, &action.name());
     let registration: Registration = try_register_parameters(&definitions, &ROOT_PARAMETER_NAMES)?;
     let (values, remainder_start) = match parse_arguments(&registration, &definitions, action_args, true) {
         ParseOutcome::Help => return print_help(request, &registration, &definitions, true),
@@ -41,7 +41,7 @@ pub fn invoke_run<'a>(request: &ActionRequest<'a, '_>, action_args: &[&'a str]) 
         }
         let supports_color: bool = (request.supports_color?)();
         let parser = action_help_parser(&registration, &definitions, help_text(request, None), true)?;
-        let output = remainder_error_output(&parser, request.width, &action.name, action_args[start], supports_color)?;
+        let output = remainder_error_output(&parser, request.width, &action.name(), action_args[start], supports_color)?;
         return Some(CliOutcome::Print(output));
     }
     let mut scoped: Vec<DefinedParameter<'a>> = Vec::new();
@@ -90,7 +90,7 @@ fn scoped_help_text<'a>(request: &ActionRequest<'a, '_>, definitions: &[DefinedP
             scope.push(name);
         }
     }
-    let epilog: String = bold(&format!("For more information on available unscoped parameters, use \"heft {} --help\"", action.name));
+    let epilog: String = bold(&format!("For more information on available unscoped parameters, use \"heft {} --help\"", action.name()));
     let (prog, description, banner) = match request.alias {
         Some(alias) => (
             format!("heft {}", request.command_name),

@@ -5,6 +5,8 @@ mod color_support_tests;
 mod force_color;
 mod has_flag;
 mod heft_console;
+#[cfg(test)]
+mod heft_console_tests;
 mod javascript_number_format;
 mod parse_int;
 mod term_patterns;

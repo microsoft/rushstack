@@ -1,57 +1,61 @@
 use super::help_model::{HelpAction, HelpNargs};
 
-pub fn build_metavar(action: &HelpAction<'_>, default_metavar: &str) -> String {
+fn push_metavar(output: &mut String, action: &HelpAction<'_>, uppercase_default: bool) {
     if let Some(metavar) = action.metavar {
-        return metavar.to_string();
+        output.push_str(metavar);
+        return;
     }
-    if let Some(choices) = &action.choices {
-        let mut result: String = String::from("{");
+    if let Some(choices) = action.choices {
+        output.push('{');
         for (choice_index, choice) in choices.iter().enumerate() {
             if choice_index > 0 {
-                result.push(',');
+                output.push(',');
             }
-            result.push_str(choice);
+            output.push_str(choice);
         }
-        result.push('}');
-        return result;
+        output.push('}');
+        return;
     }
-    default_metavar.to_string()
+    if uppercase_default {
+        output.extend(action.dest.chars().map(|character| character.to_ascii_uppercase()));
+    } else {
+        output.push_str(&action.dest);
+    }
 }
 
-pub fn format_args(action: &HelpAction<'_>, default_metavar: &str) -> String {
-    let metavar: String = build_metavar(action, default_metavar);
+fn push_args(output: &mut String, action: &HelpAction<'_>, uppercase_default: bool) {
     match action.nargs {
-        HelpNargs::Single | HelpNargs::Zero => metavar,
-        HelpNargs::ZeroOrMore => format!("[{} [{} ...]]", metavar, metavar),
-        HelpNargs::Remainder => String::from("..."),
-        HelpNargs::Parser => format!("{} ...", metavar),
+        HelpNargs::Single | HelpNargs::Zero => push_metavar(output, action, uppercase_default),
+        HelpNargs::ZeroOrMore => {
+            output.push('[');
+            push_metavar(output, action, uppercase_default);
+            output.push_str(" [");
+            push_metavar(output, action, uppercase_default);
+            output.push_str(" ...]]");
+        }
+        HelpNargs::Remainder => output.push_str("..."),
+        HelpNargs::Parser => {
+            push_metavar(output, action, uppercase_default);
+            output.push_str(" ...");
+        }
     }
 }
 
-pub fn format_action_invocation(action: &HelpAction<'_>) -> String {
+pub fn push_action_invocation(output: &mut String, action: &HelpAction<'_>) {
     if !action.is_optional() {
-        return build_metavar(action, &action.dest);
+        push_metavar(output, action, false);
+        return;
     }
-    let mut result: String = String::new();
-    if action.nargs == HelpNargs::Zero {
-        for (index, option_string) in action.option_strings.iter().enumerate() {
-            if index > 0 {
-                result.push_str(", ");
-            }
-            result.push_str(option_string);
-        }
-        return result;
-    }
-    let args_string: String = format_args(action, &action.dest.to_ascii_uppercase());
     for (index, option_string) in action.option_strings.iter().enumerate() {
         if index > 0 {
-            result.push_str(", ");
+            output.push_str(", ");
         }
-        result.push_str(option_string);
-        result.push(' ');
-        result.push_str(&args_string);
+        output.push_str(option_string);
+        if action.nargs != HelpNargs::Zero {
+            output.push(' ');
+            push_args(output, action, true);
+        }
     }
-    result
 }
 
 pub fn format_actions_usage(actions: &[&HelpAction<'_>]) -> String {
@@ -60,33 +64,41 @@ pub fn format_actions_usage(actions: &[&HelpAction<'_>]) -> String {
         if action.help.is_suppressed() {
             continue;
         }
-        let part: String = if !action.is_optional() {
-            format_args(action, &action.dest)
-        } else {
-            let option_string: &str = &action.option_strings[0];
-            let unbracketed: String = if action.nargs == HelpNargs::Zero {
-                option_string.to_string()
-            } else {
-                format!("{} {}", option_string, format_args(action, &action.dest.to_ascii_uppercase()))
-            };
-            if action.required {
-                unbracketed
-            } else {
-                format!("[{}]", unbracketed)
-            }
-        };
-        if part.is_empty() {
-            continue;
-        }
+        let separator_start: usize = text.len();
         if !text.is_empty() {
             text.push(' ');
         }
-        text.push_str(&part);
+        let part_start: usize = text.len();
+        if !action.is_optional() {
+            push_args(&mut text, action, false);
+        } else {
+            if !action.required {
+                text.push('[');
+            }
+            text.push_str(&action.option_strings[0]);
+            if action.nargs != HelpNargs::Zero {
+                text.push(' ');
+                push_args(&mut text, action, true);
+            }
+            if !action.required {
+                text.push(']');
+            }
+        }
+        if text.len() == part_start {
+            text.truncate(separator_start);
+        }
     }
     clean_usage_separators(&text)
 }
 
-fn clean_usage_separators(text: &str) -> String {
+pub fn clean_usage_separators(text: &str) -> String {
+    if !["(", "[ ", " ]", " )", "[]"].iter().any(|pattern| text.contains(pattern)) {
+        return super::text::trim_javascript_whitespace(text).to_string();
+    }
+    clean_usage_separators_in_every_pass(text)
+}
+
+pub fn clean_usage_separators_in_every_pass(text: &str) -> String {
     let without_space_after_open: String = remove_space_after_open_bracket(text);
     let without_space_before_close: String = remove_space_before_close_bracket(&without_space_after_open);
     let without_empty_brackets: String = remove_empty_pair(&without_space_before_close, b'[', b']');

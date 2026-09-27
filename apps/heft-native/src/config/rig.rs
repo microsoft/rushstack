@@ -1,5 +1,5 @@
 use super::fallback::{fallback, ConfigResult};
-use super::fs_probe::{exists_like_exists_sync, read_text_or_missing, FileSystemProbeCache};
+use super::fs_probe::FileSystemProbeCache;
 use super::node_path::{dirname, join, resolve_absolute};
 use super::node_resolve::resolve_node_modules_file;
 use crate::json::{parse_json_with_comments_exactly_like_jju, JsonObject, JsonValue};
@@ -40,7 +40,10 @@ fn is_rig_profile_name(profile: &str) -> bool {
             .all(|word| !word.is_empty() && word.chars().all(is_word_char))
 }
 
-pub fn load_rig_config_data(project_folder_path: &str) -> ConfigResult<RigConfigData> {
+pub fn load_rig_config_data(
+    file_system: &mut FileSystemProbeCache,
+    project_folder_path: &str,
+) -> ConfigResult<RigConfigData> {
     let rig_config_file_path: String = join(project_folder_path, "config/rig.json");
     let not_found: RigConfigData = RigConfigData {
         project_folder_original_path: project_folder_path.to_string(),
@@ -51,7 +54,7 @@ pub fn load_rig_config_data(project_folder_path: &str) -> ConfigResult<RigConfig
         rig_profile: String::new(),
         relative_profile_folder_path: String::new(),
     };
-    let text: String = match read_text_or_missing(&rig_config_file_path)? {
+    let text: String = match file_system.read_text_or_missing(&rig_config_file_path)? {
         Some(text) => text,
         None => return Ok(not_found),
     };
@@ -107,7 +110,7 @@ pub fn resolve_rig_profile_folder(
         dirname(&rig_package_json_path),
         &rig.relative_profile_folder_path,
     );
-    if !exists_like_exists_sync(&profile_folder) {
+    if !file_system.exists_like_exists_sync(&profile_folder)? {
         return fallback("the rig profile folder does not exist");
     }
     Ok(profile_folder)

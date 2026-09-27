@@ -1,9 +1,11 @@
-pub struct BuildInfoJson {
+use std::borrow::Cow;
+
+pub struct BuildInfoJson<'text> {
     pub configuration_hash: String,
-    pub input_file_versions: Vec<(String, String)>,
+    pub input_file_versions: Vec<(Cow<'text, str>, String)>,
 }
 
-pub fn parse_build_info_json(text: &str) -> Option<BuildInfoJson> {
+pub fn parse_build_info_json(text: &str) -> Option<BuildInfoJson<'_>> {
     let mut reader = StrictJsonReader { bytes: text.as_bytes(), position: 0 };
     let mut configuration_hash = None;
     let mut input_file_versions = None;
@@ -11,8 +13,8 @@ pub fn parse_build_info_json(text: &str) -> Option<BuildInfoJson> {
     loop {
         let key = reader.read_string()?;
         reader.expect_byte(b':')?;
-        match key.as_str() {
-            "configHash" if configuration_hash.is_none() => configuration_hash = Some(reader.read_string()?),
+        match &*key {
+            "configHash" if configuration_hash.is_none() => configuration_hash = Some(reader.read_string()?.into_owned()),
             "inputFileVersions" if input_file_versions.is_none() => input_file_versions = Some(reader.read_string_map()?),
             _ => return None,
         }
@@ -42,7 +44,7 @@ struct StrictJsonReader<'text> {
     position: usize,
 }
 
-impl StrictJsonReader<'_> {
+impl<'text> StrictJsonReader<'text> {
     fn skip_whitespace(&mut self) {
         while let Some(b' ' | b'\t' | b'\n' | b'\r') = self.bytes.get(self.position) {
             self.position += 1;
@@ -65,10 +67,9 @@ impl StrictJsonReader<'_> {
         }
     }
 
-    fn read_string_map(&mut self) -> Option<Vec<(String, String)>> {
+    fn read_string_map(&mut self) -> Option<Vec<(Cow<'text, str>, String)>> {
         self.expect_byte(b'{')?;
-        let mut entries: Vec<(String, String)> = Vec::new();
-        let mut seen_keys: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut entries: Vec<(Cow<'text, str>, String)> = Vec::new();
         self.skip_whitespace();
         if self.bytes.get(self.position) == Some(&b'}') {
             self.position += 1;
@@ -77,8 +78,8 @@ impl StrictJsonReader<'_> {
         loop {
             let key = self.read_string()?;
             self.expect_byte(b':')?;
-            let value = self.read_string()?;
-            if is_array_index_key(&key) || !seen_keys.insert(key.clone()) {
+            let value = self.read_string()?.into_owned();
+            if is_array_index_key(&key) {
                 return None;
             }
             entries.push((key, value));
@@ -88,23 +89,32 @@ impl StrictJsonReader<'_> {
         }
     }
 
-    fn read_string(&mut self) -> Option<String> {
+    fn read_string(&mut self) -> Option<Cow<'text, str>> {
         self.expect_byte(b'"')?;
-        let mut value = String::new();
+        let bytes: &'text [u8] = self.bytes;
+        let mut value: Option<String> = None;
         loop {
             let start = self.position;
-            while let Some(&byte) = self.bytes.get(self.position) {
+            while let Some(&byte) = bytes.get(self.position) {
                 if byte == b'"' || byte == b'\\' || byte < 0x20 {
                     break;
                 }
                 self.position += 1;
             }
-            value.push_str(std::str::from_utf8(&self.bytes[start..self.position]).ok()?);
-            let byte = *self.bytes.get(self.position)?;
+            let unescaped_run = std::str::from_utf8(&bytes[start..self.position]).ok()?;
+            let byte = *bytes.get(self.position)?;
             self.position += 1;
-            match byte {
-                b'"' => return Some(value),
-                b'\\' => value.push(self.read_escape()?),
+            match (byte, value.as_mut()) {
+                (b'"', None) => return Some(Cow::Borrowed(unescaped_run)),
+                (b'"', Some(escaped_value)) => {
+                    escaped_value.push_str(unescaped_run);
+                    return value.map(Cow::Owned);
+                }
+                (b'\\', _) => {
+                    let escaped_value = value.get_or_insert_with(String::new);
+                    escaped_value.push_str(unescaped_run);
+                    escaped_value.push(self.read_escape()?);
+                }
                 _ => return None,
             }
         }

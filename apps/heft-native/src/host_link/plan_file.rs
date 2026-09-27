@@ -34,11 +34,16 @@ fn write_plan_to_anonymous_file_in_folder(
 ) -> Option<InheritablePlanFile> {
     use std::io::{Seek, SeekFrom, Write};
     use std::os::unix::fs::OpenOptionsExt;
-    const OPEN_UNNAMED_TEMPORARY_FILE: i32 = 0o20200000;
+    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+    const OPEN_UNNAMED_TEMPORARY_FILE: Option<i32> = Some(0o20200000);
+    #[cfg(target_arch = "aarch64")]
+    const OPEN_UNNAMED_TEMPORARY_FILE: Option<i32> = Some(0o20040000);
+    #[cfg(not(any(target_arch = "x86_64", target_arch = "x86", target_arch = "aarch64")))]
+    const OPEN_UNNAMED_TEMPORARY_FILE: Option<i32> = None;
     let mut file = std::fs::OpenOptions::new()
         .read(true)
         .write(true)
-        .custom_flags(OPEN_UNNAMED_TEMPORARY_FILE)
+        .custom_flags(OPEN_UNNAMED_TEMPORARY_FILE?)
         .mode(0o600)
         .open(folder)
         .ok()?;

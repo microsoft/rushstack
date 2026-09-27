@@ -1,90 +1,65 @@
-use std::collections::HashMap;
-use std::fs;
-use std::io;
+use std::fs::File;
+use std::io::{self, Read};
 
 use super::fallback::{fallback, ConfigResult};
-use super::real_path_resolver::RealPathResolver;
+use super::path_component_cache::PathComponentCache;
+use super::path_probes::is_missing_entry_error;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum EntryKind {
-    File,
-    Directory,
-    Other,
-}
+pub use super::path_probes::{EntryKind, ResolvedEntry, StatEntry};
 
-fn is_missing_entry_error(error: &io::Error) -> bool {
-    matches!(
-        error.kind(),
-        io::ErrorKind::NotFound | io::ErrorKind::NotADirectory
-    ) || matches!(error.raw_os_error(), Some(2) | Some(20))
-}
-
-pub fn stat_entry_kind(path: &str) -> ConfigResult<Option<EntryKind>> {
-    match fs::metadata(path) {
-        Ok(metadata) => {
-            let file_type: fs::FileType = metadata.file_type();
-            if file_type.is_dir() {
-                Ok(Some(EntryKind::Directory))
-            } else if file_type.is_file() || is_fifo(&file_type) {
-                Ok(Some(EntryKind::File))
-            } else {
-                Ok(Some(EntryKind::Other))
-            }
-        }
-        Err(error) if is_missing_entry_error(&error) => Ok(None),
-        Err(_) => fallback("stat failed with an unexpected error"),
-    }
-}
-
-#[cfg(unix)]
-fn is_fifo(file_type: &fs::FileType) -> bool {
-    use std::os::unix::fs::FileTypeExt;
-    file_type.is_fifo()
-}
-
-#[cfg(not(unix))]
-fn is_fifo(_file_type: &fs::FileType) -> bool {
-    false
-}
-
-pub fn is_file_like_resolve(path: &str) -> ConfigResult<bool> {
-    Ok(stat_entry_kind(path)? == Some(EntryKind::File))
-}
-
-pub fn is_directory_like_resolve(path: &str) -> ConfigResult<bool> {
-    Ok(stat_entry_kind(path)? == Some(EntryKind::Directory))
-}
-
-pub fn exists_like_exists_sync(path: &str) -> bool {
-    fs::metadata(path).is_ok()
-}
-
-pub fn read_text_or_missing(path: &str) -> ConfigResult<Option<String>> {
-    match fs::read(path) {
-        Ok(bytes) => match String::from_utf8(bytes) {
-            Ok(text) => Ok(Some(text)),
-            Err(_) => fallback("a file is not valid UTF-8"),
-        },
-        Err(error) if is_missing_entry_error(&error) => Ok(None),
-        Err(_) => fallback("reading a file failed with an unexpected error"),
-    }
-}
+const LARGEST_SIZE_HINT_TRUSTED_FOR_ONE_READ: u64 = 1 << 26;
+const INITIAL_BUFFER_LENGTH_FOR_UNKNOWN_SIZES: usize = 4096;
 
 #[derive(Default)]
 pub struct FileSystemProbeCache {
-    real_paths: HashMap<String, Option<String>>,
-    entry_kinds: HashMap<String, Option<EntryKind>>,
-    resolver: RealPathResolver,
+    paths: PathComponentCache,
+}
+
+fn length_to_expect(size: u64) -> usize {
+    if size > LARGEST_SIZE_HINT_TRUSTED_FOR_ONE_READ {
+        0
+    } else {
+        size as usize
+    }
+}
+
+fn read_all_bytes_expecting_length(file: &mut File, expected_length: usize) -> io::Result<Vec<u8>> {
+    let initial_length: usize = if expected_length == 0 {
+        INITIAL_BUFFER_LENGTH_FOR_UNKNOWN_SIZES
+    } else {
+        expected_length + 1
+    };
+    let mut buffer: Vec<u8> = vec![0; initial_length];
+    let mut filled: usize = 0;
+    loop {
+        if filled == buffer.len() {
+            buffer.resize(buffer.len() * 2, 0);
+        }
+        let read: usize = match file.read(&mut buffer[filled..]) {
+            Ok(read) => read,
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(error),
+        };
+        filled += read;
+        if read == 0 || (filled == expected_length && expected_length > 0) {
+            break;
+        }
+    }
+    buffer.truncate(filled);
+    Ok(buffer)
 }
 
 impl FileSystemProbeCache {
+    pub fn remember_physical_directory_path(&mut self, directory_path: &str) {
+        self.paths.remember_physical_directory_path(directory_path);
+    }
+
+    pub fn resolve(&mut self, path: &str) -> ConfigResult<Option<ResolvedEntry>> {
+        self.paths.resolve(path)
+    }
+
     pub fn real_path_or_missing(&mut self, path: &str) -> ConfigResult<Option<String>> {
-        if let Some(cached) = self.real_paths.get(path) {
-            return Ok(cached.clone());
-        }
-        let real_path: Option<String> = self.resolver.resolve_real_path(path)?;
-        self.real_paths.insert(path.to_string(), real_path.clone());
-        Ok(real_path)
+        Ok(self.resolve(path)?.map(|entry| entry.real_path))
     }
 
     pub fn real_path(&mut self, path: &str) -> ConfigResult<String> {
@@ -95,12 +70,7 @@ impl FileSystemProbeCache {
     }
 
     fn entry_kind(&mut self, path: &str) -> ConfigResult<Option<EntryKind>> {
-        if let Some(cached) = self.entry_kinds.get(path) {
-            return Ok(*cached);
-        }
-        let entry_kind: Option<EntryKind> = stat_entry_kind(path)?;
-        self.entry_kinds.insert(path.to_string(), entry_kind);
-        Ok(entry_kind)
+        Ok(self.resolve(path)?.map(|entry| entry.kind))
     }
 
     pub fn is_file_like_resolve(&mut self, path: &str) -> ConfigResult<bool> {
@@ -109,5 +79,41 @@ impl FileSystemProbeCache {
 
     pub fn is_directory_like_resolve(&mut self, path: &str) -> ConfigResult<bool> {
         Ok(self.entry_kind(path)? == Some(EntryKind::Directory))
+    }
+
+    pub fn exists_like_exists_sync(&mut self, path: &str) -> ConfigResult<bool> {
+        Ok(self.paths.stat(path)?.is_some())
+    }
+
+    pub fn read_text_or_missing(&mut self, path: &str) -> ConfigResult<Option<String>> {
+        let known_length: Option<usize> = match self.paths.cached_stat(path) {
+            Some(None) => return Ok(None),
+            Some(Some(entry)) if entry.kind != EntryKind::File => {
+                return fallback("a configuration path is not a file")
+            }
+            Some(Some(entry)) => Some(length_to_expect(entry.size)),
+            None => None,
+        };
+        let mut file: File = match File::open(path) {
+            Ok(file) => file,
+            Err(error) if is_missing_entry_error(&error) => return Ok(None),
+            Err(_) => return fallback("opening a file failed with an unexpected error"),
+        };
+        let expected_length: usize = match known_length {
+            Some(expected_length) => expected_length,
+            None => match file.metadata() {
+                Ok(metadata) if metadata.is_file() => length_to_expect(metadata.len()),
+                Ok(_) => return fallback("a configuration path is not a regular file"),
+                Err(_) => return fallback("fstat failed with an unexpected error"),
+            },
+        };
+        let bytes: Vec<u8> = match read_all_bytes_expecting_length(&mut file, expected_length) {
+            Ok(bytes) => bytes,
+            Err(_) => return fallback("reading a file failed with an unexpected error"),
+        };
+        match String::from_utf8(bytes) {
+            Ok(text) => Ok(Some(text)),
+            Err(_) => fallback("a file is not valid UTF-8"),
+        }
     }
 }

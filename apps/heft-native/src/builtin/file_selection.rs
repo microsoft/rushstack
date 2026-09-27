@@ -1,5 +1,7 @@
 use super::posix_path::resolve_path;
-use super::simple_glob::{patterns_are_simple, try_simple_glob, GlobbedEntry};
+use super::simple_glob::{
+    patterns_are_simple, patterns_only_read_inside, patterns_select_each_path_once, try_simple_glob, GlobbedEntry,
+};
 use super::simple_glob_pattern::is_extension;
 
 #[derive(Clone, Debug, Default)]
@@ -67,6 +69,14 @@ impl FileSelectionSpecifier {
 impl AbsoluteFileSelection {
     pub fn select(&self, include_folders: bool) -> Option<Vec<GlobbedEntry>> {
         try_simple_glob(&self.include_globs, &self.source_folder_path, !include_folders)
+    }
+
+    pub fn selects_each_path_once_inside_its_folder(&self) -> bool {
+        patterns_select_each_path_once(&self.include_globs)
+    }
+
+    pub fn only_reads_inside_its_folder(&self) -> bool {
+        patterns_only_read_inside(&self.include_globs, &self.source_folder_path)
     }
 }
 

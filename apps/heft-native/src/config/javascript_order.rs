@@ -33,14 +33,24 @@ pub fn array_index_of_key(key: &str) -> Option<u32> {
     }
 }
 
-pub fn order_entries_like_javascript<T>(entries: &mut [(Cow<'_, str>, T)]) {
-    if entries
+pub fn order_entries_like_javascript<T>(entries: &mut Vec<(Cow<'_, str>, T)>) {
+    if !entries
         .iter()
         .any(|(key, _)| array_index_of_key(key).is_some())
     {
-        entries.sort_by_key(|(key, _)| match array_index_of_key(key) {
-            Some(index) => (0u8, index),
-            None => (1u8, 0),
-        });
+        return;
     }
+    let mut index_entries: Vec<(u32, (Cow<'_, str>, T))> = Vec::new();
+    let mut named_entries: Vec<(Cow<'_, str>, T)> = Vec::with_capacity(entries.len());
+    for entry in entries.drain(..) {
+        match array_index_of_key(&entry.0) {
+            Some(index) => {
+                let position: usize = index_entries.partition_point(|(other, _)| *other <= index);
+                index_entries.insert(position, (index, entry));
+            }
+            None => named_entries.push(entry),
+        }
+    }
+    entries.extend(index_entries.into_iter().map(|(_, entry)| entry));
+    entries.extend(named_entries);
 }

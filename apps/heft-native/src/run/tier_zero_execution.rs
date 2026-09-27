@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use super::tier_zero_plan::{TierZeroPlan, TierZeroStep};
-use crate::builtin::{run_delete_operations, run_planned_builtin_task, AbsoluteFileSelection};
+use crate::builtin::{builtin_task_does_file_system_work, run_deletion_plan, run_planned_builtin_task, DeletionPlan};
 use crate::terminal::{
     bold, format_rounded_milliseconds_as_seconds, format_seconds_with_three_fraction_digits, green, red,
     ClosedOutput, HeftConsole,
@@ -23,18 +23,19 @@ fn stop_if_output_closed(console: &HeftConsole) -> Result<(), TierZeroExit> {
 }
 
 pub fn execute_tier_zero_clean(
-    selections: &[AbsoluteFileSelection],
+    deletion_plan: DeletionPlan,
     alias_expansion_message: Option<&str>,
     console: &HeftConsole,
 ) -> TierZeroExit {
     if let Some(alias_expansion_message) = alias_expansion_message {
         console.write_line(alias_expansion_message);
-        if let Err(closed) = stop_if_output_closed(console) {
-            return closed;
-        }
+    }
+    console.flush();
+    if let Err(closed) = stop_if_output_closed(console) {
+        return closed;
     }
     let run_started_at = Instant::now();
-    let result = run_delete_operations(selections, &console.unprefixed_output());
+    let result = run_deletion_plan(deletion_plan, &console.unprefixed_output());
     if let Err(closed) = stop_if_output_closed(console) {
         return closed;
     }
@@ -46,6 +47,7 @@ pub fn execute_tier_zero_clean(
             1
         }
     };
+    console.flush();
     stop_if_output_closed(console).map_or_else(|closed| closed, |()| TierZeroExit::Code(exit_code))
 }
 
@@ -69,18 +71,24 @@ fn execute_steps(plan: TierZeroPlan, console: &HeftConsole) -> Result<i32, TierZ
     let mut encountered_error = false;
     for planned_step in plan.steps {
         let step_result = match planned_step.step {
-            TierZeroStep::StartPhase { phase_name, clean_selections } => {
+            TierZeroStep::StartPhase { phase_name, clean } => {
                 phase_started_at = Instant::now();
                 console.write_line(&format!(" ---- {phase_name} started ---- "));
                 stop_if_output_closed(console)?;
-                match clean_selections {
-                    Some(selections) => {
-                        run_delete_operations(&selections, &console.scoped_logger_output(&format!("{phase_name}:clean")))
+                match clean {
+                    Some(deletion_plan) => {
+                        if deletion_plan.does_file_system_work() {
+                            flush_before_file_system_work(console)?;
+                        }
+                        run_deletion_plan(deletion_plan, &console.scoped_logger_output(&format!("{phase_name}:clean")))
                     }
                     None => Ok(()),
                 }
             }
             TierZeroStep::RunTask { logger_name, planned_task } => {
+                if builtin_task_does_file_system_work(&planned_task) {
+                    flush_before_file_system_work(console)?;
+                }
                 run_planned_builtin_task(planned_task, &console.scoped_logger_output(&logger_name))
             }
         };
@@ -106,8 +114,14 @@ fn execute_steps(plan: TierZeroPlan, console: &HeftConsole) -> Result<i32, TierZ
         }
     }
     write_summary(console, run_started_at, encountered_error);
+    console.flush();
     stop_if_output_closed(console)?;
     Ok(if encountered_error { 1 } else { 0 })
+}
+
+fn flush_before_file_system_work(console: &HeftConsole) -> Result<(), TierZeroExit> {
+    console.flush();
+    stop_if_output_closed(console)
 }
 
 fn write_summary(console: &HeftConsole, run_started_at: Instant, encountered_error: bool) {

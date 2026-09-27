@@ -1,5 +1,7 @@
 use std::io;
 
+use super::worker_transfer::{append_text, take_array, take_text};
+
 const LIBUV_ERROR_NAMES_AND_DESCRIPTIONS: &[(i32, &str, &str)] = &[
     (1, "EPERM", "operation not permitted"),
     (2, "ENOENT", "no such file or directory"),
@@ -69,6 +71,21 @@ impl NodeFileSystemError {
             self.message.insert_str(0, prefix);
         }
         self
+    }
+}
+
+impl super::parallel_items::WorkerTransfer for NodeFileSystemError {
+    fn append_to(&self, bytes: &mut Vec<u8>) {
+        append_text(&self.message, bytes);
+        bytes.push(u8::from(self.node_core_library_prefix.is_some()));
+        append_text(self.node_core_library_prefix.as_deref().unwrap_or_default(), bytes);
+    }
+
+    fn take_from(bytes: &mut &[u8]) -> Option<NodeFileSystemError> {
+        let message = take_text(bytes)?;
+        let [has_prefix] = take_array::<1>(bytes)?;
+        let prefix = take_text(bytes)?;
+        Some(NodeFileSystemError { message, node_core_library_prefix: (has_prefix != 0).then_some(prefix) })
     }
 }
 

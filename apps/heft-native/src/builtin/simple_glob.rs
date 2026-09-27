@@ -1,8 +1,8 @@
-use std::collections::HashSet;
 use std::fs;
 use std::io::ErrorKind;
 
-use super::posix_path::resolve_path;
+use super::path_hash::path_hash_set_with_capacity;
+use super::posix_path::{path_contains, resolve_path};
 use super::simple_glob_pattern::{parse_simple_glob_pattern, SimpleGlobPattern};
 
 pub struct GlobbedEntry {
@@ -26,6 +26,17 @@ struct PatternSummary {
 
 pub fn patterns_are_simple(patterns: &[String]) -> bool {
     summarize_patterns(patterns).is_some()
+}
+
+pub fn patterns_select_each_path_once(patterns: &[String]) -> bool {
+    summarize_patterns(patterns).is_some_and(|summary| summary.literal_paths.is_empty())
+}
+
+pub fn patterns_only_read_inside(patterns: &[String], cwd: &str) -> bool {
+    summarize_patterns(patterns).is_some_and(|summary| {
+        let folder_path = resolve_path(cwd, "");
+        summary.literal_paths.iter().all(|literal_path| path_contains(&folder_path, &resolve_path(cwd, literal_path)))
+    })
 }
 
 fn summarize_patterns(patterns: &[String]) -> Option<PatternSummary> {
@@ -55,7 +66,7 @@ pub fn try_simple_glob(patterns: &[String], cwd: &str, only_files: bool) -> Opti
     let is_recursive = summary.match_any_recursive || !summary.suffixes.is_empty();
     let has_dynamic_patterns = is_recursive || summary.match_any_top_level || !summary.prefixes.is_empty();
     let mut entries: Vec<GlobbedEntry> = Vec::new();
-    let mut literal_relative_paths: HashSet<&str> = HashSet::new();
+    let mut literal_relative_paths = path_hash_set_with_capacity::<&str>(summary.literal_paths.len());
     for literal_path in &summary.literal_paths {
         let absolute_path = resolve_path(cwd, literal_path);
         match fs::symlink_metadata(&absolute_path) {
@@ -144,7 +155,7 @@ fn read_sorted_folder(folder_path: &str) -> FolderReadResult {
         }
         children.push((name, file_type.is_dir(), file_type.is_file()));
     }
-    children.sort_by(|left, right| left.0.as_bytes().cmp(right.0.as_bytes()));
+    children.sort_unstable_by(|left, right| left.0.as_bytes().cmp(right.0.as_bytes()));
     FolderReadResult::Entries(children)
 }
 

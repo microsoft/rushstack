@@ -29,14 +29,18 @@ impl<'a> HelpText<'a> {
     }
 }
 
+const HELP_OPTION_STRINGS: [Cow<'static, str>; 2] = [Cow::Borrowed("-h"), Cow::Borrowed("--help")];
+pub const DEBUG_OPTION_STRINGS: [Cow<'static, str>; 1] = [Cow::Borrowed("--debug")];
+pub const UNMANAGED_OPTION_STRINGS: [Cow<'static, str>; 1] = [Cow::Borrowed("--unmanaged")];
+
 #[derive(Clone, Debug)]
 pub struct HelpAction<'a> {
-    pub option_strings: Vec<Cow<'a, str>>,
+    pub option_strings: &'a [Cow<'a, str>],
     pub dest: Cow<'a, str>,
     pub nargs: HelpNargs,
     pub metavar: Option<&'a str>,
     pub help: HelpText<'a>,
-    pub choices: Option<Vec<&'a str>>,
+    pub choices: Option<&'a [&'a str]>,
     pub required: bool,
     pub subactions: Vec<HelpAction<'a>>,
 }
@@ -48,7 +52,7 @@ impl<'a> HelpAction<'a> {
 
     pub fn help_option() -> HelpAction<'static> {
         HelpAction {
-            option_strings: vec![Cow::Borrowed("-h"), Cow::Borrowed("--help")],
+            option_strings: &HELP_OPTION_STRINGS,
             dest: Cow::Borrowed("==SUPPRESS=="),
             nargs: HelpNargs::Zero,
             metavar: None,
@@ -59,10 +63,10 @@ impl<'a> HelpAction<'a> {
         }
     }
 
-    pub fn flag_option(option_string: &'a str, help: &'a str) -> HelpAction<'a> {
+    pub fn flag_option(option_strings: &'a [Cow<'a, str>], help: &'a str) -> HelpAction<'a> {
         HelpAction {
-            option_strings: vec![Cow::Borrowed(option_string)],
-            dest: Cow::Borrowed(option_string),
+            option_strings,
+            dest: Cow::Borrowed(option_strings[0].as_ref()),
             nargs: HelpNargs::Zero,
             metavar: None,
             help: HelpText::Text(Cow::Borrowed(help)),
@@ -72,10 +76,10 @@ impl<'a> HelpAction<'a> {
         }
     }
 
-    pub fn hidden_option(option_string: Cow<'a, str>) -> HelpAction<'a> {
+    pub fn hidden_option(option_strings: &'a [Cow<'a, str>]) -> HelpAction<'a> {
         HelpAction {
-            dest: option_string.clone(),
-            option_strings: vec![option_string],
+            dest: Cow::Borrowed(option_strings[0].as_ref()),
+            option_strings,
             nargs: HelpNargs::ZeroOrMore,
             metavar: None,
             help: HelpText::Suppressed,

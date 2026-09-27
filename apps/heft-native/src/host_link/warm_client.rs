@@ -2,7 +2,7 @@ use std::ffi::OsString;
 use std::io::{IsTerminal, Write};
 use std::os::unix::net::UnixStream;
 use std::os::unix::process::CommandExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::Duration;
 
@@ -65,8 +65,10 @@ fn locate_warm_host_target(native_heft_context: &NativeHeftContext) -> Option<Wa
         return None;
     }
     let companion_folder = native_heft_context.companion_heft_package_folder.as_ref()?;
-    let heft_package_folder = std::fs::canonicalize(companion_folder).ok()?;
-    let node_executable = std::fs::canonicalize(locate_node_executable_on_path()?).ok()?;
+    let heft_package_folder = companion_folder.clone();
+    let node_executable = locate_node_executable_on_path()?;
+    let heft_package_identity = file_identity(&heft_package_folder)?;
+    let node_executable_identity = file_identity(&node_executable)?;
     let mut build_folder = find_package_json_path_governing_folder(&std::env::current_dir().ok()?)?;
     build_folder.pop();
     let socket_folder = warm_host_socket_folder();
@@ -75,8 +77,8 @@ fn locate_warm_host_target(native_heft_context: &NativeHeftContext) -> Option<Wa
     }
     let identity_parts = [
         build_folder.to_str()?,
-        heft_package_folder.to_str()?,
-        node_executable.to_str()?,
+        heft_package_identity.as_str(),
+        node_executable_identity.as_str(),
     ];
     let socket_path = warm_host_socket_path(&socket_folder, &identity_parts);
     Some(WarmHostTarget {
@@ -84,6 +86,12 @@ fn locate_warm_host_target(native_heft_context: &NativeHeftContext) -> Option<Wa
         node_executable,
         socket_path,
     })
+}
+
+fn file_identity(path: &Path) -> Option<String> {
+    use std::os::unix::fs::MetadataExt;
+    let file_metadata = std::fs::metadata(path).ok()?;
+    Some(format!("{}:{}", file_metadata.dev(), file_metadata.ino()))
 }
 
 fn connect_and_wait_for_acceptance(
