@@ -468,6 +468,13 @@ describe(RushProjectConfiguration.name, () => {
         expect(await loadTwiceAsync()).toBeGreaterThan(0);
         fs.utimesSync(rigFilePath, 1_000_000, 1_000_000);
         expect(await loadTwiceAsync()).toBe(0);
+
+        // The same holds when rig.json is the only file that may still be changing.
+        const rigJsonPath: string = path.join(folder, 'rigged/config/rig.json');
+        fs.utimesSync(rigJsonPath, future, future);
+        expect(await loadTwiceAsync()).toBeGreaterThan(0);
+        fs.utimesSync(rigJsonPath, 1_000_000, 1_000_000);
+        expect(await loadTwiceAsync()).toBe(0);
       });
 
       it('reports errors and warnings on every call', async () => {
