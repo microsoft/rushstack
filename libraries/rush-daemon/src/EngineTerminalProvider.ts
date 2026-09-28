@@ -4,6 +4,7 @@
 import type { IOperationGraph, _IOperationGraphEventSink } from '@microsoft/rush-lib';
 import { TerminalProviderSeverity, type ITerminalProvider } from '@rushstack/terminal';
 
+import { getEngineActivityOptions } from './EngineActivityOptions';
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
 
 export class EngineTerminalProvider implements ITerminalProvider {
@@ -95,8 +96,6 @@ export class EngineTerminalProvider implements ITerminalProvider {
     ) {
       return;
     }
-    this.#graph?.eventSink?.onActivity?.(text, {
-      stderr: severity === TerminalProviderSeverity.error || severity === TerminalProviderSeverity.warning
-    });
+    this.#graph?.eventSink?.onActivity?.(text, getEngineActivityOptions(severity));
   }
 }

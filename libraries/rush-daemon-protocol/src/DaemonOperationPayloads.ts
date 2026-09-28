@@ -44,4 +44,10 @@ export interface IDaemonActivityPayload {
   readonly text: string;
   /** The stream the line was written to. Defaults to `stdout`. */
   readonly stream?: 'stdout' | 'stderr';
+  /**
+   * Set when Rush or a Rush plugin wrote the text as a warning or an error while the engine loaded or ran,
+   * which native Rush prints in yellow or red. Absent on other activity, including the end-of-run summary.
+   * Clients that print only a summary can still show these lines.
+   */
+  readonly severity?: 'warning' | 'error';
 }

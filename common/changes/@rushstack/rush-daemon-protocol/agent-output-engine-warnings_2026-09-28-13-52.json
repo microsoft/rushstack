@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add an optional `severity` to `activityChanged` payloads, set on the warnings and errors that Rush or a Rush plugin wrote while the engine loaded or ran.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol"
+}

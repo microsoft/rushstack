@@ -363,7 +363,9 @@ async function spawnGitAsync(
   if (status !== 0) {
     ensureGitMinimumVersion(gitPath);
 
-    throw new Error(`git ${args[0]} exited with code ${status}:\n${stderr}`);
+    // Name the git command itself, not the first of the STANDARD_GIT_OPTIONS in front of it
+    const command: string | undefined = args.find((arg: string) => !STANDARD_GIT_OPTIONS.includes(arg));
+    throw new Error(`git ${command} exited with code ${status}:\n${stderr}`);
   }
 
   return stdout;
@@ -554,13 +556,16 @@ export async function getDetailedRepoStateAsync(
     gitPath
   );
 
-  const [{ files, symlinks, submodules }, locallyModifiedFiles] = await Promise.all([
+  // Await all three at once. `git hash-object` can fail before the other two finish, for example on an additional
+  // path that does not exist. Its rejection needs a handler right away, or Node reports it as unhandled and exits.
+  const [{ files, symlinks, submodules }, locallyModifiedFiles, hashObjectResult] = await Promise.all([
     statePromise,
-    locallyModifiedPromise
+    locallyModifiedPromise,
+    hashObjectPromise
   ]);
 
   // The result of "git hash-object" will be a list of file hashes delimited by newlines
-  for (const [filePath, hash] of await hashObjectPromise) {
+  for (const [filePath, hash] of hashObjectResult) {
     files.set(filePath, hash);
   }
 

@@ -216,6 +216,7 @@ export const FRAME_HEADER_BYTES: number;
 
 // @beta
 export interface IDaemonActivityPayload {
+    readonly severity?: 'warning' | 'error';
     readonly stream?: 'stdout' | 'stderr';
     readonly text: string;
 }

@@ -98,7 +98,9 @@ use `--reporter=ai` for machine-parsed records. It writes a first status line be
 `@microsoft/rush-lib` is loaded, then at most three live rows on a TTY (append-only lines
 throttled to one per 2 seconds on a pipe), the queue position when waiting for admission,
 and always one final summary line (`rush build: SUCCESS 12/12 operations (...) in 3.1s`, or
-`up to date (no operations needed)`). On failure, it lists failed operations and a
+`up to date (no operations needed)`). Warnings and errors that Rush or a Rush plugin writes
+outside any operation (for example a plugin that continues without the cloud build cache)
+precede the summary line, at most three lines of them. On failure, it lists failed operations and a
 bounded tail (10 lines) of their stderr, or of their stdout when they wrote no stderr.
 Operation logs are otherwise not printed; use `RUSHD_OUTPUT=legacy` for full logs. When
 a request falls back to in-process Rush, agent mode stops and native output follows.

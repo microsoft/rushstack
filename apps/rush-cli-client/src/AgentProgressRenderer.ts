@@ -6,6 +6,8 @@
 
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 
+import { AgentNotices } from './AgentNotices';
+
 const SPINNER_FRAMES: readonly string[] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'SUCCESS',
@@ -52,6 +54,7 @@ export class AgentProgressRenderer {
   readonly #failed: string[] = [];
   readonly #stderrTails: Map<string, string[]> = new Map();
   readonly #stdoutTails: Map<string, string[]> = new Map();
+  readonly #notices: AgentNotices = new AgentNotices();
   #total: number = 0;
   #done: number = 0;
   #lastActivity: string = '';
@@ -135,6 +138,7 @@ export class AgentProgressRenderer {
         break;
       }
       case 'activityChanged': {
+        this.#notices.add(payload, event.scope?.operationId);
         if (typeof payload.text === 'string' && payload.text.trim()) {
           this.#lastActivity = payload.text.trim().split('\n')[0];
           if (this.#phase !== 'running') {
@@ -179,10 +183,16 @@ export class AgentProgressRenderer {
     this.#stop();
   }
 
-  /** Stops the live region and writes the final summary line, at most once. */
+  /**
+   * Stops the live region and writes the final summary line, at most once. Warnings and errors that Rush or a
+   * plugin wrote outside any operation precede it.
+   */
   public finish(result: IAgentFinalResult | undefined): void {
     if (!this.#stop()) {
       return;
+    }
+    for (const notice of this.#notices.getLines()) {
+      this.#options.write(`${notice}\n`);
     }
     const succeeded: boolean = result !== undefined && result.exitCode === 0;
     const total: number = this.#getTotal();

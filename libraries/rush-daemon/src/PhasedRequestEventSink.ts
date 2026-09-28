@@ -3,12 +3,7 @@
 
 import { randomUUID } from 'node:crypto';
 
-import type {
-  IOperationExecutionResult,
-  Operation,
-  _IOperationActivityOptions,
-  _IOperationGraphEventSink
-} from '@microsoft/rush-lib';
+import type { IOperationExecutionResult, Operation, _IOperationGraphEventSink } from '@microsoft/rush-lib';
 import { OperationStatus } from '@microsoft/rush-lib';
 import {
   DAEMON_PROTOCOL_VERSION,
@@ -17,12 +12,14 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonEventType,
+  IDaemonActivityPayload,
   IDaemonEventEnvelope,
   IDaemonEventScope
 } from '@rushstack/rush-daemon-protocol';
 import { TerminalChunkKind } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
 
+import type { IEngineActivityOptions } from './EngineActivityOptions';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 
 const EVENT_SOURCE_PACKAGE: string = '@microsoft/rush-lib';
@@ -236,16 +233,20 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     }
   }
 
-  public onActivity(text: string, options?: _IOperationActivityOptions): void {
+  public onActivity(text: string, options?: IEngineActivityOptions): void {
     const operationId: string | undefined = options?.operationId;
     if (operationId !== undefined && !this.#activeOperationIds.has(operationId)) {
       return;
     }
-    this.#emitEvent(
-      'activityChanged',
-      { stream: options?.stderr === true ? 'stderr' : 'stdout', text },
-      { required: true, scope: operationId === undefined ? undefined : { operationId } }
-    );
+    const payload: IDaemonActivityPayload = {
+      stream: options?.stderr === true ? 'stderr' : 'stdout',
+      text,
+      ...(options?.severity === undefined ? undefined : { severity: options.severity })
+    };
+    this.#emitEvent('activityChanged', payload, {
+      required: true,
+      scope: operationId === undefined ? undefined : { operationId }
+    });
   }
 
   #emitEvent(type: DaemonEventType, payload: unknown, options?: IEventOptions): void {
