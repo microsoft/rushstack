@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { createHash, type Hash } from 'node:crypto';
-import type * as fs from 'node:fs';
-import { lstat, readdir } from 'node:fs/promises';
+import * as fs from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import * as path from 'node:path';
 
 /**
@@ -11,9 +11,10 @@ import * as path from 'node:path';
  */
 export interface IOperationOutputManifest {
   /**
-   * Covers the path of every file and folder in the output folders, and the identity, modification time and status
-   * change time of every folder. It changes if an output is added, deleted or renamed, if a file is replaced by a
-   * rename (as atomic writes do), or if a folder is recreated. It does not change if a file is rewritten in place.
+   * Covers the path of every file and folder in the output folders, the identity, size and modification time of
+   * every file, and the identity, modification time and status change time of every folder. It changes if an output
+   * is added, deleted, renamed or rewritten, including in place, or if a folder is recreated. It does not change if
+   * a hard link to a file is created or removed elsewhere.
    */
   readonly signature: string;
   /**
@@ -55,27 +56,21 @@ export async function readOperationOutputManifestAsync(
 
   const readFolderAsync = async (relativeFolder: string, stats: fs.Stats): Promise<void> => {
     entries.push(`${relativeFolder}/ ${stats.ino} ${stats.mtimeMs} ${stats.ctimeMs}`);
-    const children: fs.Dirent[] = await limitAsync(() =>
-      tryReaddirAsync(path.resolve(projectFolder, relativeFolder))
-    );
+    const folderPath: string = path.resolve(projectFolder, relativeFolder);
+    const children: fs.Dirent[] = await limitAsync(() => tryReaddirAsync(folderPath));
     const subfolderPromises: Promise<void>[] = [];
     for (const child of children) {
       const relativePath: string = `${relativeFolder}/${child.name}`;
+      const childStats: fs.Stats | undefined = lstatIfExists(`${folderPath}${path.sep}${child.name}`);
       if (child.isDirectory()) {
-        subfolderPromises.push(
-          limitAsync(() => tryLstatAsync(path.resolve(projectFolder, relativePath))).then(
-            async (childStats: fs.Stats | undefined) => {
-              if (childStats?.isDirectory()) {
-                await readFolderAsync(relativePath, childStats);
-              } else {
-                // It was deleted or replaced after its parent was read.
-                entries.push(`${relativePath}/ replaced`);
-              }
-            }
-          )
-        );
+        if (childStats?.isDirectory()) {
+          subfolderPromises.push(readFolderAsync(relativePath, childStats));
+        } else {
+          // It was deleted or replaced after its parent was read.
+          entries.push(`${relativePath}/ replaced`);
+        }
       } else {
-        entries.push(relativePath);
+        entries.push(getFileEntry(relativePath, childStats));
         files.add(relativePath);
       }
     }
@@ -85,15 +80,13 @@ export async function readOperationOutputManifestAsync(
   await Promise.all(
     outputFolderNames.map(async (folderName: string) => {
       const relativePath: string = folderName.replace(/\\/g, '/').replace(/\/+$/, '');
-      const stats: fs.Stats | undefined = await limitAsync(() =>
-        tryLstatAsync(path.resolve(projectFolder, relativePath))
-      );
+      const stats: fs.Stats | undefined = lstatIfExists(path.resolve(projectFolder, relativePath));
       if (!stats) {
         entries.push(`missing ${relativePath}`);
       } else if (stats.isDirectory()) {
         await readFolderAsync(relativePath, stats);
       } else {
-        entries.push(`${relativePath} ${stats.ino} ${stats.mtimeMs} ${stats.ctimeMs} ${stats.size}`);
+        entries.push(getFileEntry(relativePath, stats));
         files.add(relativePath);
       }
     })
@@ -170,6 +163,12 @@ export function describeOutputFileChanges(
     .join(', ');
 }
 
+// The status change time of a file is left out, because it also changes when a hard link to the file is created or
+// removed elsewhere, e.g. by a tool that links outputs into another folder.
+function getFileEntry(relativePath: string, stats: fs.Stats | undefined): string {
+  return stats ? `${relativePath} ${stats.ino} ${stats.size} ${stats.mtimeMs}` : `${relativePath} deleted`;
+}
+
 function createConcurrencyLimiter(maxConcurrency: number): <T>(fn: () => Promise<T>) => Promise<T> {
   let active: number = 0;
   const waiting: (() => void)[] = [];
@@ -193,15 +192,10 @@ function createConcurrencyLimiter(maxConcurrency: number): <T>(fn: () => Promise
   };
 }
 
-async function tryLstatAsync(filePath: string): Promise<fs.Stats | undefined> {
-  try {
-    return await lstat(filePath);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return undefined;
-    }
-    throw error;
-  }
+// Synchronous, because every output file is stat'ed and an lstat call takes a few microseconds, far less than a
+// round trip through the thread pool. The event loop still runs between folders, which are read asynchronously.
+function lstatIfExists(filePath: string): fs.Stats | undefined {
+  return fs.lstatSync(filePath, { throwIfNoEntry: false });
 }
 
 async function tryReaddirAsync(folderPath: string): Promise<fs.Dirent[]> {

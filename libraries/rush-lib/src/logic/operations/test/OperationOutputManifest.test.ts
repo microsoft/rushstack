@@ -87,9 +87,28 @@ describe(readOperationOutputManifestAsync.name, () => {
     expect((await readAsync()).signature).toBe(manifest.signature);
   });
 
-  it('does not change if a file is rewritten in place', async () => {
+  it.each([
+    ['with the same size', (filePath: string) => fs.writeFileSync(filePath, 'utiL')],
+    ['by an append', (filePath: string) => fs.appendFileSync(filePath, ' 2')]
+  ])(
+    'changes if a file is rewritten in place %s',
+    async (description: string, rewrite: (filePath: string) => void) => {
+      const filePath: string = `${projectFolder}/lib/sub/util.js`;
+      const { ino } = fs.statSync(filePath);
+      const { signature } = await readAsync();
+      // File modification times can have a coarse resolution.
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      rewrite(filePath);
+      expect(fs.statSync(filePath).ino).toBe(ino);
+      expect((await readAsync()).signature).not.toBe(signature);
+    }
+  );
+
+  it('does not change if a hard link to a file is created elsewhere', async () => {
     const { signature } = await readAsync();
-    fs.writeFileSync(`${projectFolder}/lib/sub/util.js`, 'util 2');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    fs.linkSync(`${projectFolder}/lib/sub/util.js`, `${projectFolder}/util.js`);
+    fs.linkSync(`${projectFolder}/tsconfig.tsbuildinfo`, `${projectFolder}/tsbuildinfo.json`);
     expect((await readAsync()).signature).toBe(signature);
   });
 

@@ -567,6 +567,20 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     );
   });
 
+  it('runs the initial command if an output file was rewritten in place since the last run', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+    await workspace.executeAsync();
+
+    // E.g. a debugging edit through the symbolic link to the project in node_modules, which keeps the inode.
+    fs.appendFileSync(`${workspace.rootFolder}/a/lib/sub/two.js`, '\nconsole.log("debug");');
+    workspace.writeFile('a/src/one.ts', 'one 2');
+    const changed: ITestIteration = await workspace.executeAsync();
+    expect(changed.commands).toEqual(['a:initial']);
+    expect(changed.output).toContain(
+      'Not using the incremental command because its output folders changed since its last successful run.'
+    );
+  });
+
   it('always runs the initial command of an operation that builds a bundle', async () => {
     const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a', isBundle: true }]);
     await workspace.executeAsync();
