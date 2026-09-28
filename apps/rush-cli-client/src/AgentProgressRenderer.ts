@@ -15,17 +15,20 @@ import {
 import { clipLine } from './OperationOutputExcerpt';
 
 const SPINNER_FRAMES: readonly string[] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-/** On a pipe, the most milestone lines written before the summary, however long the request runs. */
-const MAX_PIPE_PROGRESS_LINES: number = 3;
-/** On a pipe, how long the first line waits for the connection, so that a fast connect costs one line, not two. */
-const PIPE_FIRST_LINE_DELAY_MS: number = 1000;
+/**
+ * On a pipe, the connecting line is written only when the connection takes longer than this. Like a status line,
+ * it is never written in the first 10 s, so a connection that is fast, or a daemon that starts within that time,
+ * costs no line.
+ */
+const PIPE_CONNECTING_LINE_DELAY_MS: number = 10_000;
 /**
  * On a pipe, a status line is written whenever nothing was written for this long, so that a reader can tell a slow
- * request from a hung one. Agent shells return partial output after 30 s. These lines are not milestones.
+ * request from a hung one. Agent shells return partial output after 30 s. A request that ends sooner writes none.
  */
 const PIPE_STATUS_INTERVAL_MS: number = 25_000;
 const SENT_PHASE: string = 'sent to rushd; preparing the workspace graph';
 const STARTING_PHASE: string = 'rushd is still starting; waiting for it';
+const FAILURE_STATUS: string = 'FAILURE';
 const TTY_INTERVAL_MS: number = 100;
 /** The most failed (or warning) operations whose output excerpt is printed. */
 const MAX_REPORTED_OPERATIONS: number = 3;
@@ -52,8 +55,13 @@ const STATUS_LABELS: ReadonlyMap<string, string> = new Map([
   ['NO OP', 'up to date']
 ]);
 
-type PipeMilestone = 'starting' | 'sent' | 'queued' | 'running' | 'failure';
 type Verdict = 'SUCCESS' | 'FAILURE' | 'CANCELLED';
+
+/** A queue position that the daemon reported, and when. */
+interface IQueuePosition {
+  readonly position: number;
+  readonly elapsed: string;
+}
 
 export interface IAgentProgressRendererOptions {
   readonly commandName: string;
@@ -93,36 +101,40 @@ function getErrorDetail(lines: ReadonlyArray<string>): string[] {
 }
 
 /**
- * Compact progress for agents on the daemon path: an immediate first line, at most three live rows (TTY) or
- * at most three progress lines in total (pipes), and a guaranteed one-line summary, even when no
- * operation ran. On failure, the summary is preceded by each failed operation's log file and a short
- * excerpt of its output.
+ * Compact progress for agents on the daemon path: at most three live rows (TTY) or one line when the request is
+ * sent (pipes), each failed operation's log file and a short excerpt of its output as soon as it fails, and a
+ * guaranteed one-line summary, even when no operation ran.
  *
  * @remarks
- * On a pipe, a line is written at a milestone: when the client waits for a daemon that is still starting, when the
- * request is sent to the daemon, the first time it waits for admission, the start of execution, and the first
- * failure; once three lines were written, later milestones are left to the summary. A connection that takes
- * longer than a second gets a line of its own first, unless a milestone came first. Whenever
- * nothing was written for 25 s, a status line with the counts and the running operations follows, so a reader
- * never sees more than 25 s of silence, and a request shorter than that costs no status lines at all.
+ * On a pipe, a request that takes less than 25 s writes the line that says it was sent, its failures and its
+ * summary line, and nothing else. Status lines keep a longer request from looking hung: whenever nothing was
+ * written for 25 s, a status line with the counts and the running operations follows, and a connection that
+ * takes longer than 10 s gets one. A wait for a daemon that is still starting also gets a line, once. Only the
+ * first three failed operations are reported. Whether warnings fail the request is only known at its end, so
+ * operations with warnings are reported before the summary line; so is a failed operation that wrote no output,
+ * whose error only the daemon's result carries.
  */
 export class AgentProgressRenderer {
   readonly #options: IAgentProgressRendererOptions;
   readonly #now: () => number;
   readonly #startTimeMs: number;
   readonly #tracker: AgentOperationTracker = new AgentOperationTracker();
-  readonly #milestones: Set<PipeMilestone> = new Set();
   readonly #notices: AgentNotices = new AgentNotices();
+  /** The operations whose log file and excerpt were written, in that order. */
+  readonly #reported: Set<string> = new Set();
   #lastActivity: string = '';
   #phase: string = 'connecting to rushd (auto-starts if needed)';
   #painted: number = 0;
   #frame: number = 0;
-  #pipeLines: number = 0;
+  #startingLineWritten: boolean = false;
+  #sentLineWritten: boolean = false;
   #timer: ReturnType<typeof setInterval> | undefined;
-  #firstLineTimer: ReturnType<typeof setTimeout> | undefined;
+  #connectingTimer: ReturnType<typeof setTimeout> | undefined;
   #statusTimer: ReturnType<typeof setTimeout> | undefined;
-  /** The last queue position and when it was reported, until operations start. */
-  #queued: { readonly position: number; readonly elapsed: string } | undefined;
+  /** The last queue position, until operations start. */
+  #queued: IQueuePosition | undefined;
+  /** The first queue position, for the summary line. */
+  #firstQueued: IQueuePosition | undefined;
   #stopped: boolean = false;
   /** The error message that the summary line contains in full, once written. */
   #reportedErrorMessage: string | undefined;
@@ -134,13 +146,16 @@ export class AgentProgressRenderer {
   }
 
   /**
-   * On a TTY, paints the first line and starts the spinner. On a pipe, writes the first line after a second
-   * unless another line came first, and starts the status lines.
+   * On a TTY, paints the first line and starts the spinner. On a pipe, starts the status lines, and writes the
+   * connecting line after 10 s unless the request was sent by then.
    */
   public start(): void {
     if (!this.#options.isTTY) {
-      this.#firstLineTimer = setTimeout(() => this.#writePipeLine(this.#rows()[0]), PIPE_FIRST_LINE_DELAY_MS);
-      this.#firstLineTimer.unref?.();
+      this.#connectingTimer = setTimeout(
+        () => this.#writePipeLine(this.#rows()[0]),
+        PIPE_CONNECTING_LINE_DELAY_MS
+      );
+      this.#connectingTimer.unref?.();
       this.#scheduleStatusLine();
       return;
     }
@@ -161,23 +176,34 @@ export class AgentProgressRenderer {
 
   /**
    * The daemon is not ready yet, but a live process can still make it ready, so the client waits up to `waitMs`
-   * more for it instead of running Rush in-process. On a pipe, says so once.
+   * more for it instead of running Rush in-process. On a pipe, says so once; the connecting line is then not due.
    */
   public onAwaitStartup(waitMs: number): void {
     this.setPhase(STARTING_PHASE);
-    this.#writeMilestone('starting', ` (up to ${Math.round(waitMs / 1000)}s more)`);
+    clearTimeout(this.#connectingTimer);
+    this.#connectingTimer = undefined;
+    if (!this.#options.isTTY && !this.#stopped && !this.#startingLineWritten) {
+      this.#startingLineWritten = true;
+      this.#writePipeLine(`${this.#rows()[0]} (up to ${Math.round(waitMs / 1000)}s more)`);
+    }
   }
 
-  /** The daemon has the request. On a pipe, says so, and that the next line can take a while. */
+  /** The daemon has the request. On a pipe, says so once, and that the next line can take a while. */
   public onRequestSent(): void {
     this.setPhase(SENT_PHASE);
-    this.#writeMilestone('sent', ` (status at least every ${PIPE_STATUS_INTERVAL_MS / 1000}s)`);
+    clearTimeout(this.#connectingTimer);
+    this.#connectingTimer = undefined;
+    if (!this.#options.isTTY && !this.#stopped && !this.#sentLineWritten) {
+      this.#sentLineWritten = true;
+      this.#writePipeLine(`${this.#rows()[0]} (status at least every ${PIPE_STATUS_INTERVAL_MS / 1000}s)`);
+    }
   }
 
+  /** The request waits for admission. The status lines and the summary line say so. */
   public onQueuePosition(position: number): void {
     this.#queued = { position, elapsed: this.#elapsed() };
+    this.#firstQueued ??= this.#queued;
     this.setPhase(`queued behind another request (position ${position})`);
-    this.#writeMilestone('queued');
   }
 
   public onEvent(event: IDaemonEventEnvelope): void {
@@ -259,6 +285,11 @@ export class AgentProgressRenderer {
     const emptySelection: boolean =
       verdict === 'SUCCESS' && result?.operationResults?.length === 0 && !this.#tracker.hasOperations;
     let summary: string = this.#getSummaryLine(verdict, emptySelection);
+    // An admission failure says that the request waited, and why it stopped waiting.
+    if (this.#firstQueued && !result?.admissionErrorCode) {
+      const { position, elapsed } = this.#firstQueued;
+      summary += ` · queued behind another request (position ${position} at ${elapsed})`;
+    }
     if (errorMessage) {
       const [firstLine, ...detail] = errorMessage.split('\n').filter((line) => line.trim());
       const admissionErrorCode: string | undefined =
@@ -289,16 +320,39 @@ export class AgentProgressRenderer {
     if (typeof operationId !== 'string' || typeof status !== 'string') {
       return;
     }
-    const firstFailure: boolean = this.#tracker.updateStatus({
+    this.#tracker.updateStatus({
       operationId,
       status,
       logFilePath: typeof logFilePath === 'string' ? logFilePath : undefined
     });
     this.#phase = 'running';
     this.#queued = undefined;
-    this.#writeMilestone('running');
-    if (firstFailure) {
-      this.#writeMilestone('failure', ` · first failure: ${operationId}`);
+    if (status === FAILURE_STATUS) {
+      this.#reportFailure(operationId);
+    }
+  }
+
+  /**
+   * Writes a failed operation's log file and output excerpt as soon as it fails, while the rest of the request
+   * runs on. The operation's output all arrived before its status. An operation that wrote nothing is left to
+   * the failure report, which has the error from the daemon's result.
+   */
+  #reportFailure(operationId: string): void {
+    if (this.#stopped || this.#reported.has(operationId) || this.#reported.size >= MAX_REPORTED_OPERATIONS) {
+      return;
+    }
+    const problem: IAgentProblemOperation = this.#tracker.getProblemOperation(operationId);
+    if (!problem.excerpt?.lineCount) {
+      return;
+    }
+    const lines: string[] = this.#getProblemLines('failed', problem);
+    const text: string = lines.map((line) => `${line}\n`).join('');
+    if (this.#options.isTTY) {
+      this.#clear();
+      this.#options.write(text);
+      this.#paint();
+    } else {
+      this.#writePipeText(text);
     }
   }
 
@@ -333,9 +387,10 @@ export class AgentProgressRenderer {
   }
 
   /**
-   * Each failed operation's log file and output excerpt. Without failed operations: operations with warnings
-   * (they fail a build unless the command allows warnings), or else output that belongs to no operation. A
-   * cancelled command reports only failed operations.
+   * The log file and output excerpt of each failed operation not yet reported. Without failed operations:
+   * operations with warnings (they fail a build unless the command allows warnings), or else output that belongs
+   * to no operation. A cancelled command reports only failed operations. At most three operations are reported
+   * in all, with the operations reported as they failed.
    */
   #getFailureReport(verdict: Verdict): string[] {
     const tracker: AgentOperationTracker = this.#tracker;
@@ -348,22 +403,42 @@ export class AgentProgressRenderer {
     }
     const label: string = tracker.failed.length ? 'failed' : 'warnings';
     const lines: string[] = [];
-    for (const [index, problem] of problems.slice(0, MAX_REPORTED_OPERATIONS).entries()) {
-      const logFile: string = problem.logFilePath ? ` · full log: ${problem.logFilePath}` : '';
-      lines.push(`${label}: ${problem.operationId}${logFile}`);
-      const maxLines: number = index === 0 ? FIRST_OPERATION_EXCERPT_LINES : OTHER_OPERATION_EXCERPT_LINES;
-      const excerpt: string[] = problem.excerpt?.getExcerpt(maxLines) ?? [];
-      if (!excerpt.length && problem.errorMessage) {
-        excerpt.push(clipLine(problem.errorMessage.trim().split('\n')[0], MAX_MESSAGE_LENGTH));
+    let hidden: number = 0;
+    for (const problem of problems) {
+      if (this.#reported.has(problem.operationId)) {
+        continue;
       }
-      lines.push(...(excerpt.length ? excerpt : ['(no output)']).map((line) => `  ${line}`));
+      if (this.#reported.size < MAX_REPORTED_OPERATIONS) {
+        lines.push(...this.#getProblemLines(label, problem));
+      } else {
+        hidden++;
+      }
     }
-    const hidden: number = problems.length - MAX_REPORTED_OPERATIONS;
     if (hidden > 0) {
       const what: string = label === 'failed' ? 'failed operations' : 'operations with warnings';
       lines.push(`+${hidden} more ${what}; their logs are in each project's rush-logs folder`);
     }
     return lines;
+  }
+
+  /**
+   * An operation's report: its log file, then its output excerpt, which is longer for the first reported
+   * operation (most often the root cause). Records that the operation was reported.
+   */
+  #getProblemLines(label: string, problem: IAgentProblemOperation): string[] {
+    const maxLines: number = this.#reported.size
+      ? OTHER_OPERATION_EXCERPT_LINES
+      : FIRST_OPERATION_EXCERPT_LINES;
+    this.#reported.add(problem.operationId);
+    const excerpt: string[] = problem.excerpt?.getExcerpt(maxLines) ?? [];
+    if (!excerpt.length && problem.errorMessage) {
+      excerpt.push(clipLine(problem.errorMessage.trim().split('\n')[0], MAX_MESSAGE_LENGTH));
+    }
+    const logFile: string = problem.logFilePath ? ` · full log: ${problem.logFilePath}` : '';
+    return [
+      `${label}: ${problem.operationId}${logFile}`,
+      ...(excerpt.length ? excerpt : ['(no output)']).map((line) => `  ${line}`)
+    ];
   }
 
   /** Returns false if rendering had already stopped; after stopping, nothing more is written. */
@@ -372,7 +447,7 @@ export class AgentProgressRenderer {
       return false;
     }
     this.#stopped = true;
-    for (const timer of [this.#firstLineTimer, this.#statusTimer]) {
+    for (const timer of [this.#connectingTimer, this.#statusTimer]) {
       clearTimeout(timer);
     }
     if (this.#timer) {
@@ -397,26 +472,15 @@ export class AgentProgressRenderer {
     ];
   }
 
-  #writeMilestone(milestone: PipeMilestone, suffix: string = ''): void {
-    if (this.#options.isTTY || this.#stopped || this.#milestones.has(milestone)) {
-      return;
-    }
-    this.#milestones.add(milestone);
-    this.#writePipeLine(`${this.#rows()[0]}${suffix}`);
-  }
-
   #writePipeLine(line: string): void {
-    if (this.#pipeLines < MAX_PIPE_PROGRESS_LINES) {
-      this.#pipeLines++;
-      this.#writeStatus(line);
+    if (!this.#stopped) {
+      this.#writePipeText(`${line}\n`);
     }
   }
 
-  /** Writes a line on a pipe; the first line and the next status line are then due later. */
-  #writeStatus(line: string): void {
-    clearTimeout(this.#firstLineTimer);
-    this.#firstLineTimer = undefined;
-    this.#options.write(`${line}\n`);
+  /** Writes to a pipe; the next status line is then due 25 s later. */
+  #writePipeText(text: string): void {
+    this.#options.write(text);
     if (this.#statusTimer) {
       this.#scheduleStatusLine();
     }
@@ -424,11 +488,7 @@ export class AgentProgressRenderer {
 
   #scheduleStatusLine(): void {
     clearTimeout(this.#statusTimer);
-    this.#statusTimer = setTimeout(() => {
-      if (!this.#stopped) {
-        this.#writeStatus(this.#getStatusLine());
-      }
-    }, PIPE_STATUS_INTERVAL_MS);
+    this.#statusTimer = setTimeout(() => this.#writePipeLine(this.#getStatusLine()), PIPE_STATUS_INTERVAL_MS);
     this.#statusTimer.unref?.();
   }
 

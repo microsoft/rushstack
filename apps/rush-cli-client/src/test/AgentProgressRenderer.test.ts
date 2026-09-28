@@ -34,13 +34,13 @@ interface ITestRenderer {
   lines(): string[];
 }
 
-function createRenderer(isTTY: boolean, commandName: string = 'build'): ITestRenderer {
+function createRenderer(isTTY: boolean, commandName: string = 'build', columns: number = 60): ITestRenderer {
   const output: string[] = [];
   const clock: { ms: number } = { ms: 0 };
   const renderer: AgentProgressRenderer = new AgentProgressRenderer({
     commandName,
     isTTY,
-    columns: 60,
+    columns,
     write: (text: string) => output.push(text),
     now: () => clock.ms,
     startTimeMs: 0
@@ -79,7 +79,7 @@ function fail(renderer: AgentProgressRenderer, operationId: string, errorLines: 
 }
 
 describe(AgentProgressRenderer.name, () => {
-  it('writes one line when the request is sent, then milestones and a summary for a successful build (pipe)', () => {
+  it('writes one line when the request is sent and a summary line for a successful build (pipe)', () => {
     const { renderer, output, clock, lines } = createRenderer(false);
     renderer.start();
     expect(output).toEqual([]);
@@ -101,7 +101,6 @@ describe(AgentProgressRenderer.name, () => {
     renderer.dispose();
     expect(lines()).toEqual([
       'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
-      'rush build 0/2 · 0.0s · running',
       'rush build: SUCCESS 2/2 operations (1 success, 1 up to date) in 3.0s'
     ]);
   });
@@ -133,18 +132,17 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('reports a failed operation with its log file and an excerpt, before the summary line', () => {
+  it('reports a failed operation with its log file and an excerpt as soon as it fails', () => {
     const { renderer, lines } = createRenderer(false);
     fail(
       renderer,
       'p05 (build)',
       Array.from({ length: 20 }, (unused, i) => `error ${i}`)
     );
+    expect(lines()).toHaveLength(9);
     renderer.onEvent(status('p06 (build)', 'BLOCKED'));
     renderer.finish({ exitCode: 1 });
     expect(lines()).toEqual([
-      'rush build 0/1 · 0.0s · running',
-      'rush build 1/1 · 0.0s · running · first failure: p05 (build)',
       'failed: p05 (build) · full log: /repo/p05/rush-logs/x.log',
       '  error 0',
       '  error 1',
@@ -209,10 +207,7 @@ describe(AgentProgressRenderer.name, () => {
         { operationId: 'b (build)', status: 'ABORTED' }
       ]
     });
-    expect(lines()).toEqual([
-      'rush build 0/2 · 0.0s · running',
-      'rush build: CANCELLED 2/2 operations (2 aborted) in 0.0s'
-    ]);
+    expect(lines()).toEqual(['rush build: CANCELLED 2/2 operations (2 aborted) in 0.0s']);
   });
 
   it('still reports the failures of a cancelled command', () => {
@@ -374,13 +369,30 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('writes the queue milestone once, however often the position changes', () => {
-    const { renderer, output } = createRenderer(false);
+  it('reports the queue in the summary line rather than in a line of its own (pipe)', () => {
+    const { renderer, output, clock } = createRenderer(false);
+    clock.ms = 100;
     renderer.onQueuePosition(2);
-    renderer.onQueuePosition(2);
+    clock.ms = 5000;
     renderer.onQueuePosition(1);
-    expect(output).toEqual(['rush build · 0.0s · queued behind another request (position 2)\n']);
-    renderer.dispose();
+    expect(output).toEqual([]);
+    clock.ms = 15_000;
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.finish({ exitCode: 0 });
+    expect(output).toEqual([
+      'rush build: SUCCESS 1/1 operations (1 success) in 15.0s · ' +
+        'queued behind another request (position 2 at 0.1s)\n'
+    ]);
+  });
+
+  it('leaves the queue to the message of a request that was not admitted', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onQueuePosition(1);
+    renderer.finish({ exitCode: 1, admissionErrorCode: 'no-wait', errorMessage: 'The workspace is busy.' });
+    expect(output).toEqual([
+      'rush build: FAILURE in 0.0s · daemon admission failed (no-wait): The workspace is busy.\n'
+    ]);
   });
 
   it('shows the excerpt of a failed operation that reported errors on stdout', () => {
@@ -408,10 +420,11 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('shows queue position immediately', () => {
-    const { renderer, output } = createRenderer(false);
+  it('shows the queue position immediately on a TTY', () => {
+    const { renderer, output } = createRenderer(true, 'build', 120);
     renderer.onQueuePosition(2);
     expect(output[0]).toContain('queued behind another request (position 2)');
+    renderer.dispose();
   });
 
   it('writes a final summary line after a queued request completes', () => {
@@ -420,10 +433,13 @@ describe(AgentProgressRenderer.name, () => {
     renderer.onQueuePosition(1);
     clock.ms = 4000;
     renderer.finish({ exitCode: 0 });
-    expect(output[output.length - 1]).toBe('rush build: SUCCESS up to date (no operations needed) in 4.0s\n');
+    expect(output[output.length - 1]).toBe(
+      'rush build: SUCCESS up to date (no operations needed) in 4.0s · ' +
+        'queued behind another request (position 1 at 0.0s)\n'
+    );
   });
 
-  it('writes at most three progress lines and one summary line on a pipe at odsp-web scale', () => {
+  it('writes one progress line and one summary line on a pipe at odsp-web scale', () => {
     const { renderer, clock, lines } = createRenderer(false);
     renderer.start();
     renderer.onRequestSent();
@@ -450,13 +466,12 @@ describe(AgentProgressRenderer.name, () => {
     renderer.finish({ exitCode: 0 });
     expect(lines()).toEqual([
       'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
-      'rush build · 0.0s · queued behind another request (position 1)',
-      'rush build 0/772 · 0.0s · running',
-      'rush build: SUCCESS 772/772 operations (386 success, 386 from cache) in 210.0s'
+      'rush build: SUCCESS 772/772 operations (386 success, 386 from cache) in 210.0s · ' +
+        'queued behind another request (position 1 at 0.0s)'
     ]);
   });
 
-  it('keeps a failure at odsp-web scale to the progress lines, the failure report and one summary line', () => {
+  it('keeps a failure at odsp-web scale to the sent line, the failure report and one summary line', () => {
     const { renderer, lines } = createRenderer(false);
     renderer.start();
     renderer.onRequestSent();
@@ -478,11 +493,8 @@ describe(AgentProgressRenderer.name, () => {
     renderer.finish({ exitCode: 1 });
     expect(lines()).toEqual([
       'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
-      'rush build 0/772 · 0.0s · running',
-      'rush build 701/772 · 0.0s · running · first failure: p700 (build)',
       'failed: p700 (build) · full log: /repo/p700/rush-logs/x.log',
       '  src/x.ts:1:1 - error TS2304: Cannot find name "y".',
-      '  Encountered 1 error',
       'rush build: FAILURE 772/772 operations (1 failure, 71 blocked, 700 success) in 0.0s · failed: p700 (build)'
     ]);
   });
@@ -509,10 +521,7 @@ describe(AgentProgressRenderer.name, () => {
     renderer.onEvent(header('a (build)', 1, 772));
     renderer.onEvent(status('a (build)', 'SUCCESS'));
     renderer.finish({ exitCode: 0 });
-    expect(lines()).toEqual([
-      'rush build 1/772 · 0.0s · running',
-      'rush build: SUCCESS 1/772 operations (1 success) in 0.0s'
-    ]);
+    expect(lines()).toEqual(['rush build: SUCCESS 1/772 operations (1 success) in 0.0s']);
   });
 
   it('counts an operation that runs again once', () => {
@@ -565,7 +574,7 @@ describe(AgentProgressRenderer.name, () => {
       );
     }
     renderer.finish({ exitCode: 1 });
-    const report: string[] = lines().slice(2);
+    const report: string[] = lines();
     expect(report.filter((line) => line.startsWith('failed: '))).toEqual([
       'failed: f0 (build) · full log: /repo/f0/rush-logs/x.log',
       'failed: f1 (build) · full log: /repo/f1/rush-logs/x.log',
@@ -579,6 +588,65 @@ describe(AgentProgressRenderer.name, () => {
       'rush build: FAILURE 8/8 operations (8 failure) in 0.0s · failed: f0 (build), f1 (build), f2 (build), ' +
         'f3 (build), f4 (build) +3 more'
     ]);
+  });
+
+  it('reports a failed operation that wrote no output with the error from the daemon result', () => {
+    const { renderer, lines } = createRenderer(false);
+    fail(renderer, 'a (build)', ['src/a.ts:1:1 - error TS2322: a']);
+    renderer.onEvent(status('quiet (build)', 'FAILURE'));
+    fail(renderer, 'b (build)', ['src/b.ts:1:1 - error TS2322: b']);
+    expect(lines()).toHaveLength(4);
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [
+        { operationId: 'a (build)', status: 'FAILURE' },
+        { operationId: 'quiet (build)', status: 'FAILURE', errorMessage: 'spawn heft ENOENT' },
+        { operationId: 'b (build)', status: 'FAILURE' }
+      ]
+    });
+    expect(lines()).toEqual([
+      'failed: a (build) · full log: /repo/a/rush-logs/x.log',
+      '  src/a.ts:1:1 - error TS2322: a',
+      'failed: b (build) · full log: /repo/b/rush-logs/x.log',
+      '  src/b.ts:1:1 - error TS2322: b',
+      'failed: quiet (build)',
+      '  spawn heft ENOENT',
+      'rush build: FAILURE 3/3 operations (3 failure) in 0.0s · failed: a (build), quiet (build), b (build)'
+    ]);
+  });
+
+  it('reports at most three operations in all, as they failed or before the summary line', () => {
+    const { renderer, lines } = createRenderer(false);
+    fail(renderer, 'a (build)', ['a error']);
+    for (const name of ['q1', 'q2', 'q3']) {
+      renderer.onEvent(status(`${name} (build)`, 'FAILURE'));
+    }
+    fail(renderer, 'b (build)', ['b error']);
+    renderer.finish({ exitCode: 1 });
+    expect(lines()).toEqual([
+      'failed: a (build) · full log: /repo/a/rush-logs/x.log',
+      '  a error',
+      'failed: b (build) · full log: /repo/b/rush-logs/x.log',
+      '  b error',
+      'failed: q1 (build)',
+      '  (no output)',
+      "+2 more failed operations; their logs are in each project's rush-logs folder",
+      'rush build: FAILURE 5/5 operations (5 failure) in 0.0s · ' +
+        'failed: a (build), q1 (build), q2 (build), q3 (build), b (build)'
+    ]);
+  });
+
+  it('writes a failure report above the live rows on a TTY when the operation fails', () => {
+    const { renderer, output } = createRenderer(true);
+    renderer.start();
+    fail(renderer, 'a (build)', ['src/a.ts:1:1 - error TS2322: a']);
+    renderer.dispose();
+    expect(output[1]).toBe('\x1b[3A\x1b[0J\x1b[?25h');
+    expect(output[2]).toBe(
+      'failed: a (build) · full log: /repo/a/rush-logs/x.log\n  src/a.ts:1:1 - error TS2322: a\n'
+    );
+    expect(output[3].replace(ANSI_ESCAPE, '').split('\n')[2]).toBe('failed: a (build)');
+    expect(output.slice(4)).toEqual(['\x1b[3A\x1b[0J\x1b[?25h']);
   });
 
   it('shows the output of a command that failed without running operations', () => {
@@ -612,44 +680,70 @@ describe(AgentProgressRenderer.name, () => {
       jest.advanceTimersByTime(ms);
     }
 
-    it('writes the connecting line only when the connection takes more than a second', () => {
+    it('writes the connecting line only when the connection takes more than 10 s', () => {
+      const fast: ITestRenderer = createRenderer(false);
+      fast.renderer.start();
+      advance(fast.clock, 3000);
+      fast.renderer.onRequestSent();
+      advance(fast.clock, 10_000);
+      fast.renderer.dispose();
+      expect(fast.lines()).toEqual([
+        'rush build · 3.0s · sent to rushd; preparing the workspace graph (status at least every 25s)'
+      ]);
+
       const { renderer, output, clock, lines } = createRenderer(false);
       renderer.start();
-      advance(clock, 999);
+      advance(clock, 9999);
       expect(output).toEqual([]);
       advance(clock, 1);
       renderer.onRequestSent();
       renderer.dispose();
       expect(lines()).toEqual([
-        'rush build · 1.0s · connecting to rushd (auto-starts if needed)',
-        'rush build · 1.0s · sent to rushd; preparing the workspace graph (status at least every 25s)'
+        'rush build · 10.0s · connecting to rushd (auto-starts if needed)',
+        'rush build · 10.0s · sent to rushd; preparing the workspace graph (status at least every 25s)'
       ]);
     });
 
     it('writes one line when the client waits for a daemon that is still starting (task 95)', () => {
-      const { renderer, output, clock, lines } = createRenderer(false);
-      renderer.start();
-      advance(clock, 300);
-      renderer.onAwaitStartup(15_000);
-      expect(lines()).toEqual([
+      const early: ITestRenderer = createRenderer(false);
+      early.renderer.start();
+      advance(early.clock, 300);
+      early.renderer.onAwaitStartup(15_000);
+      expect(early.lines()).toEqual([
         'rush build · 0.3s · rushd is still starting; waiting for it (up to 15s more)'
       ]);
-      advance(clock, 1_000);
-      renderer.onAwaitStartup(15_000);
-      expect(output).toHaveLength(1);
-      advance(clock, 11_000);
-      renderer.onRequestSent();
-      renderer.dispose();
-      expect(lines()).toEqual([
+      advance(early.clock, 1_000);
+      early.renderer.onAwaitStartup(15_000);
+      // The connecting line is not due after this line.
+      advance(early.clock, 11_000);
+      expect(early.output).toHaveLength(1);
+      early.renderer.onRequestSent();
+      early.renderer.dispose();
+      expect(early.lines()).toEqual([
         'rush build · 0.3s · rushd is still starting; waiting for it (up to 15s more)',
         'rush build · 12.3s · sent to rushd; preparing the workspace graph (status at least every 25s)'
       ]);
+
+      // As usual, the first startup deadline (15 s) comes after the connecting line.
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      advance(clock, 10_000);
+      advance(clock, 5_000);
+      renderer.onAwaitStartup(15_000);
+      advance(clock, 6_000);
+      renderer.onRequestSent();
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 10.0s · connecting to rushd (auto-starts if needed)',
+        'rush build · 15.0s · rushd is still starting; waiting for it (up to 15s more)',
+        'rush build · 21.0s · sent to rushd; preparing the workspace graph (status at least every 25s)'
+      ]);
     });
 
-    it('writes nothing for a request that is handed to in-process Rush within a second', () => {
+    it('writes nothing for a request that is handed to in-process Rush within 10 s', () => {
       const { renderer, output, clock } = createRenderer(false);
       renderer.start();
-      advance(clock, 500);
+      advance(clock, 9000);
       renderer.dispose();
       advance(clock, 60_000);
       expect(output).toEqual([]);
@@ -665,9 +759,11 @@ describe(AgentProgressRenderer.name, () => {
       advance(clock, 20_000);
       renderer.onEvent(status('a (build)', 'EXECUTING'));
       renderer.onEvent(status('b (build)', 'EXECUTING'));
-      advance(clock, 24_999);
-      expect(lines()).toHaveLength(2);
+      advance(clock, 4999);
+      expect(lines()).toHaveLength(1);
       advance(clock, 1);
+      expect(lines()).toHaveLength(2);
+      advance(clock, 20_000);
       renderer.onEvent(status('c (build)', 'EXECUTING'));
       renderer.onEvent(status('d (build)', 'EXECUTING'));
       renderer.onEvent(status('e (build)', 'EXECUTING'));
@@ -679,14 +775,12 @@ describe(AgentProgressRenderer.name, () => {
       renderer.finish({ exitCode: 1 });
       expect(lines()).toEqual([
         'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
-        'rush build 0/5 · 20.0s · running',
-        'rush build 0/5 · 45.0s · running: a (build), b (build)',
-        // The first failure is a milestone, so it is written although status lines were written before it.
-        'rush build 1/5 · 45.0s · running · first failure: a (build)',
-        'rush build 1/5 · 70.0s · running: b (build), c (build), d (build) +1 more · failed: a (build)',
-        'rush build 2/5 · 95.0s · running: c (build), d (build), e (build) · failed: a (build)',
+        'rush build 0/5 · 25.0s · running: a (build), b (build)',
+        // The failure report is written when the operation fails, and the next status line is due 25 s later.
         'failed: a (build) · full log: /repo/a/rush-logs/x.log',
         '  error TS2322',
+        'rush build 1/5 · 70.0s · running: b (build), c (build), d (build) +1 more · failed: a (build)',
+        'rush build 2/5 · 95.0s · running: c (build), d (build), e (build) · failed: a (build)',
         'rush build: FAILURE 2/5 operations (1 failure, 1 success) in 96.0s · failed: a (build)'
       ]);
     });
@@ -697,21 +791,19 @@ describe(AgentProgressRenderer.name, () => {
       renderer.onRequestSent();
       advance(clock, 2000);
       renderer.onQueuePosition(1);
-      advance(clock, 25_000);
+      advance(clock, 23_000);
       renderer.onEvent(registered('a (build)'));
       renderer.onEvent(status('a (build)', 'EXECUTING'));
       advance(clock, 25_000);
       renderer.dispose();
       expect(lines()).toEqual([
         'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
-        'rush build · 2.0s · queued behind another request (position 1)',
-        'rush build · 27.0s · waiting for admission or the workspace graph (queue position 1 at 2.0s)',
-        'rush build 0/1 · 27.0s · running',
-        'rush build 0/1 · 52.0s · running: a (build)'
+        'rush build · 25.0s · waiting for admission or the workspace graph (queue position 1 at 2.0s)',
+        'rush build 0/1 · 50.0s · running: a (build)'
       ]);
     });
 
-    it('writes status lines after the milestone lines ran out, and none after the summary', () => {
+    it('writes status lines after a failure report, and none after the summary', () => {
       const { renderer, output, clock, lines } = createRenderer(false);
       renderer.start();
       renderer.onRequestSent();

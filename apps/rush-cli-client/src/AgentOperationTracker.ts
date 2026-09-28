@@ -132,19 +132,18 @@ export class AgentOperationTracker {
     this.#headerTotal = Math.max(this.#headerTotal, total);
   }
 
-  /** Applies a status change. Returns true when it is the request's first failure. */
-  public updateStatus(update: IAgentOperationStatusUpdate): boolean {
+  /** Applies a status change. */
+  public updateStatus(update: IAgentOperationStatusUpdate): void {
     const { operationId, status } = update;
     if (this.#silent.has(operationId)) {
       if (status !== FAILURE) {
-        return false;
+        return;
       }
       // Failed operations are reported even if silent, as in the native summary.
       this.register(operationId, false);
     }
     // An operation that was never registered still counts, so `done` never exceeds `total`.
     this.#registered.add(operationId);
-    const firstFailure: boolean = status === FAILURE && this.#failed.size === 0;
     const previous: string | undefined = this.#statuses.get(operationId);
     this.#statuses.set(operationId, status);
     if (previous !== undefined && TERMINAL_STATUSES.has(previous)) {
@@ -161,7 +160,6 @@ export class AgentOperationTracker {
     if (TERMINAL_STATUSES.has(status)) {
       this.#onTerminalStatus(update);
     }
-    return firstFailure;
   }
 
   /**
@@ -216,12 +214,17 @@ export class AgentOperationTracker {
    */
   public getProblemOperations(): ReadonlyArray<IAgentProblemOperation> {
     const operationIds: ReadonlyArray<string> = this.#failed.size ? this.failed : this.warned;
-    return operationIds.map((operationId) => ({
+    return operationIds.map((operationId) => this.getProblemOperation(operationId));
+  }
+
+  /** An operation's log file, output excerpt and error, to report it. */
+  public getProblemOperation(operationId: string): IAgentProblemOperation {
+    return {
       operationId,
       logFilePath: this.#logFilePaths.get(operationId),
       excerpt: this.#excerpts.get(operationId),
       errorMessage: this.#errorMessages.get(operationId)
-    }));
+    };
   }
 
   #isProblemStatus(status: string): boolean {

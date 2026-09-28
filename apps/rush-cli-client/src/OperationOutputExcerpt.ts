@@ -35,6 +35,13 @@ const ERROR_PATTERN: RegExp =
 const NO_ERRORS_PATTERN: RegExp = /\b(?:0|no) errors?\b/i;
 /** Lines without any letter (bare exit codes, progress percentages, caret markers) explain nothing. */
 const LETTER_PATTERN: RegExp = /\p{L}/u;
+/** A severity word that some tools put before a diagnostic that they also print without it. */
+const SEVERITY_PREFIX_PATTERN: RegExp = /^(?:error|warning)\s*:\s*/i;
+const WHITESPACE_PATTERN: RegExp = /\s+/g;
+/** A tool's error count, such as Heft's `Encountered 2 errors` or tsc's `Found 1 error.` */
+const ERROR_COUNT_PATTERN: RegExp = /^(?:encountered|found) (\d+) errors?\b/i;
+/** A source location such as `src/x.ts:3:7` or `src/x.ts(3,7)`. */
+const SOURCE_LOCATION_PATTERN: RegExp = /[\w-]\.[A-Za-z]\w{0,5}(?::\d+|\(\d+,\d+\))/;
 
 /** Lines longer than this keep their start and end, joined by an ellipsis. */
 const MAX_LINE_LENGTH: number = 300;
@@ -55,6 +62,8 @@ interface IExcerptLine {
   /** The arrival order across both streams, used to print the excerpt in output order. */
   readonly index: number;
   readonly text: string;
+  /** Equal for lines that repeat one message; see {@link getRepeatKey}. */
+  readonly key: string;
 }
 
 interface IErrorLine extends IExcerptLine {
@@ -94,6 +103,40 @@ export function isErrorLine(line: string): boolean {
   return ERROR_PATTERN.test(line) && !NO_ERRORS_PATTERN.test(line);
 }
 
+/**
+ * A normalized line's message without its task prefix, a leading `Error:` or `Warning:`, case and repeated
+ * whitespace. Tools such as Heft print each diagnostic when it occurs and again in their final summary, once with
+ * and once without these, so lines with the same key repeat one message.
+ */
+function getRepeatKey(line: string): string {
+  const prefixMatch: RegExpMatchArray | null = TASK_PREFIX_PATTERN.exec(line);
+  const content: string = prefixMatch ? prefixMatch[2] : line;
+  return content.replace(SEVERITY_PREFIX_PATTERN, '').replace(WHITESPACE_PATTERN, ' ').toLowerCase();
+}
+
+/** The number of errors that a tool's error count line reports, or undefined if the line is no such count. */
+function getReportedErrorCount(line: IExcerptLine): number | undefined {
+  const match: RegExpMatchArray | null = ERROR_COUNT_PATTERN.exec(line.key);
+  return match ? Number(match[1]) : undefined;
+}
+
+/**
+ * Leaves out of chosen lines (in output order) the error counts that the chosen errors account for, and, when
+ * the first chosen error names a source location, the lines before it.
+ */
+function trimExcerpt(lines: ReadonlyArray<IExcerptLine>): IExcerptLine[] {
+  const errors: IExcerptLine[] = lines.filter(
+    (line) => getReportedErrorCount(line) === undefined && isErrorLine(line.text)
+  );
+  const kept: IExcerptLine[] = lines.filter((line) => {
+    const count: number | undefined = getReportedErrorCount(line);
+    return count === undefined || count === 0 || count > errors.length;
+  });
+  return errors.length && SOURCE_LOCATION_PATTERN.test(errors[0].text)
+    ? kept.slice(kept.indexOf(errors[0]))
+    : kept;
+}
+
 /** Shortens a line to at most `maxLength` characters, keeping its start and its end. */
 export function clipLine(line: string, maxLength: number): string {
   if (line.length <= maxLength) {
@@ -113,7 +156,9 @@ export function clipLine(line: string, maxLength: number): string {
  * beginning. Like the native `StdioSummarizer`, head and tail lines come from stderr when the operation wrote
  * any, otherwise from stdout; error lines come from both, because tools such as tsc and eslint report errors
  * on stdout. Stack frames, `Require stack:` paths and code frames are dropped, so they cannot crowd out the
- * cause.
+ * cause. A message that a tool repeats in its summary is shown once, and so is an error count that the shown
+ * errors already account for; when the first error shown names a source location, the lines before it (a
+ * tool's banner and progress) are left out.
  */
 export class OperationOutputExcerpt {
   readonly #streams: Record<OutputStream, IStreamLines> = {
@@ -121,7 +166,7 @@ export class OperationOutputExcerpt {
     stderr: { head: [], tail: [], partial: '' }
   };
   readonly #errors: IErrorLine[] = [];
-  readonly #errorTexts: Set<string> = new Set();
+  readonly #errorKeys: Set<string> = new Set();
   /**
    * Per stream, the error line whose context is the stream's next line. The streams are separate pipes, so the
    * next line of the other stream is unrelated to the error.
@@ -170,11 +215,11 @@ export class OperationOutputExcerpt {
       ? this.#streams.stderr
       : this.#streams.stdout;
     const chosen: Map<number, IExcerptLine> = new Map();
-    const texts: Set<string> = new Set();
+    const keys: Set<string> = new Set();
     const add = (line: IExcerptLine | undefined, limit: number): void => {
-      if (line && chosen.size < limit && !chosen.has(line.index) && !texts.has(line.text)) {
+      if (line && chosen.size < limit && !chosen.has(line.index) && !keys.has(line.key)) {
         chosen.set(line.index, line);
-        texts.add(line.text);
+        keys.add(line.key);
       }
     };
     const errorLimit: number = Math.max(1, maxLines - TAIL_RESERVE);
@@ -192,7 +237,7 @@ export class OperationOutputExcerpt {
     for (const line of preferred.head) {
       add(line, maxLines);
     }
-    return [...chosen.values()].sort((a, b) => a.index - b.index).map((line) => line.text);
+    return trimExcerpt([...chosen.values()].sort((a, b) => a.index - b.index)).map((line) => line.text);
   }
 
   #addLine(rawLine: string, stream: OutputStream): void {
@@ -200,7 +245,7 @@ export class OperationOutputExcerpt {
     if (text === undefined) {
       return;
     }
-    const line: IExcerptLine = { index: this.#lineCount++, text };
+    const line: IExcerptLine = { index: this.#lineCount++, text, key: getRepeatKey(text) };
     const lines: IStreamLines = this.#streams[stream];
     if (lines.head.length < HEAD_LINES) {
       lines.head.push(line);
@@ -214,10 +259,10 @@ export class OperationOutputExcerpt {
       pendingContext.context = line;
       this.#pendingContext[stream] = undefined;
     }
-    if (this.#errors.length < ERROR_LINES && !this.#errorTexts.has(text) && isErrorLine(text)) {
+    if (this.#errors.length < ERROR_LINES && !this.#errorKeys.has(line.key) && isErrorLine(text)) {
       const errorLine: IErrorLine = { ...line };
       this.#errors.push(errorLine);
-      this.#errorTexts.add(text);
+      this.#errorKeys.add(line.key);
       this.#pendingContext[stream] = errorLine;
     }
   }

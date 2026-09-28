@@ -157,13 +157,11 @@ describe(OperationOutputExcerpt.name, () => {
       '[test:jest] but they are not recognized by this version of Rush: RUSH_EXAMPLE',
       '[test:jest] ● test two',
       '[test:jest] ● test three',
-      '[test:jest] Error: 3 Jest tests failed',
-      'Encountered 1 error'
+      '[test:jest] Error: 3 Jest tests failed'
     ]);
     expect(excerpt.getExcerpt(3)).toEqual([
       '[test:jest] ● test one',
-      '[test:jest] Error: 3 Jest tests failed',
-      'Encountered 1 error'
+      '[test:jest] Error: 3 Jest tests failed'
     ]);
   });
 
@@ -173,8 +171,7 @@ describe(OperationOutputExcerpt.name, () => {
     excerpt.append('[build:typescript] src/x.ts:1:1 - error TS2304: Cannot find name "y".\n', 'stdout');
     excerpt.append('[build:typescript] Encountered 1 error\n', 'stderr');
     expect(excerpt.getExcerpt(8)).toEqual([
-      '[build:typescript] src/x.ts:1:1 - error TS2304: Cannot find name "y".',
-      '[build:typescript] Encountered 1 error'
+      '[build:typescript] src/x.ts:1:1 - error TS2304: Cannot find name "y".'
     ]);
   });
 
@@ -187,8 +184,7 @@ describe(OperationOutputExcerpt.name, () => {
     excerpt.append('[build:lint] Using ESLint version 9.37.0\n', 'stdout');
     excerpt.append('Error: Encountered 1 error\n', 'stderr');
     expect(excerpt.getExcerpt(3)).toEqual([
-      '[build:typescript] src/x.ts:1:1 - error TS2304: Cannot find name "y".',
-      'Error: Encountered 1 error'
+      '[build:typescript] src/x.ts:1:1 - error TS2304: Cannot find name "y".'
     ]);
   });
 
@@ -208,9 +204,42 @@ describe(OperationOutputExcerpt.name, () => {
       "src/x.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.",
       'The expected type comes from property "x".',
       "src/y.ts(1,1): error TS2304: Cannot find name 'z'.",
-      'Did you mean "y"?',
-      'Encountered 2 errors'
+      'Did you mean "y"?'
     ]);
+  });
+
+  it('shows a diagnostic that a tool repeats in its summary once, without the error count', () => {
+    const excerpt: OperationOutputExcerpt = new OperationOutputExcerpt();
+    const message: string = "src/index.ts:3:7 - (TS2322) Type 'string' is not assignable to type 'number'.";
+    excerpt.append(`[build:typescript] Error: ${message}\n`, 'stdout');
+    excerpt.append('Encountered 1 error\n', 'stderr');
+    excerpt.append(`  [build:typescript] ${message}\n`, 'stderr');
+    expect(excerpt.getExcerpt(8)).toEqual([`[build:typescript] Error: ${message}`]);
+  });
+
+  it('keeps an error count that reports more errors than the excerpt shows', () => {
+    const excerpt: OperationOutputExcerpt = new OperationOutputExcerpt();
+    for (let i: number = 0; i < 12; i++) {
+      excerpt.append(`src/x${i}.ts:1:1 - error TS2304: Cannot find name "y${i}".\n`, 'stdout');
+    }
+    excerpt.append('Encountered 12 errors\n', 'stderr');
+    expect(excerpt.getExcerpt(3)).toEqual([
+      'src/x0.ts:1:1 - error TS2304: Cannot find name "y0".',
+      'src/x1.ts:1:1 - error TS2304: Cannot find name "y1".',
+      'Encountered 12 errors'
+    ]);
+  });
+
+  it('leaves out the lines before an error that names a source location, but not before other errors', () => {
+    const located: OperationOutputExcerpt = new OperationOutputExcerpt();
+    located.append('[build] @x/a: start\n', 'stdout');
+    located.append("ERROR in src/index.ts:4:1: Unexpected token '}'\n", 'stdout');
+    expect(located.getExcerpt(8)).toEqual(["ERROR in src/index.ts:4:1: Unexpected token '}'"]);
+
+    const unlocated: OperationOutputExcerpt = new OperationOutputExcerpt();
+    unlocated.append('src/a.ts(1,1): something unexpected\n', 'stdout');
+    unlocated.append('Build failed\n', 'stdout');
+    expect(unlocated.getExcerpt(8)).toEqual(['src/a.ts(1,1): something unexpected', 'Build failed']);
   });
 
   it('always keeps the last line, which usually is the tool summary', () => {

@@ -114,13 +114,17 @@ agent mode writes nothing ahead of it. Otherwise, selection precedence is:
 3. Otherwise `legacy`: the unchanged collated operation stream.
 
 Agent mode is plain text for humans and agents, not the AI reporter's JSON record format;
-use `--reporter=ai` for machine-parsed records. It writes a first status line before
-`@microsoft/rush-lib` is loaded, then at most three live rows on a TTY. On a pipe it writes
-at most three progress lines in total, however many operations run and however long they
-take: a wait for a daemon that is still starting (`rushd is still starting; waiting for it (up to 15s more)`),
-the start, the first wait for admission (`queued behind another request (position N)`),
-the start of execution, and the first failure, in that order until three were written. It
-always ends with one summary line, for example
+use `--reporter=ai` for machine-parsed records. On a TTY it paints at most three live rows, the
+first before `@microsoft/rush-lib` is loaded. On a pipe it writes one progress line when the
+daemon has the request (`rush build · 0.1s · sent to rushd; preparing the workspace graph
+(status at least every 25s)`), however many operations run. A longer request also gets status
+lines, so that it does not look hung: one whenever nothing was written for 25 s, with the counts
+and the running operations, and one when connecting to the daemon takes more than 10 s. A
+wait for a daemon that is still starting gets a line of its own
+(`rushd is still starting; waiting for it (up to 15s more)`). A
+request that waited for admission says so at the end of its summary line
+(`· queued behind another request (position 1 at 0.2s)`). It always ends with one summary
+line, for example
 `rush build: SUCCESS 772/772 operations (12 success, 760 from cache) in 3.1s`, or
 `up to date (no operations needed)`, or, when the selection parameters matched no projects,
 `rush build: SUCCESS 0 operations in 0.5s · the selection parameters did not match any projects`.
@@ -133,16 +137,20 @@ daemon did not admit the request in time, or at once with `--no-wait`, the reaso
 line starts with `daemon admission failed (wait-timeout)` or `daemon admission failed (no-wait)`,
 as in legacy output, followed by the daemon's reason in full. Warnings and errors that Rush or a
 Rush plugin writes outside any operation (for example a plugin that continues without the cloud
-build cache) precede the summary line, and any failure report, at most three lines of them.
+build cache) are written at the end, at most three lines of them, before the summary line and any
+operations reported with it.
 
-When the request fails, a report comes before the summary line. It covers up to three failed
-operations, or, if none failed, the operations whose warnings failed the request. Each one gets a
-`failed: <operation> · full log: <path>` line (`warnings: …` for warnings) and a short excerpt
-of its output: error lines with the line that follows them first, then the last lines. Stack
-frames, `Require stack:` lists and progress noise are left out. The summary line names up to five
-failed (or warning) operations. Every operation's full output is in its project's `rush-logs/`
-folder, whether or not it was printed. When a request falls back to in-process Rush, agent mode
-stops and native output follows.
+A failed operation is reported as soon as it fails, while the rest of the request runs on: a
+`failed: <operation> · full log: <path>` line and a short excerpt of its output, error lines
+with the line that follows them first, then the last lines. Stack frames, `Require stack:` lists
+and progress noise are left out, and so are a message that a tool repeats in its summary, an
+error count that the shown errors account for, and, when the first error shown names a source
+location, the lines before it. Up to three operations are reported. Two kinds are reported just
+before the summary line instead: a failed operation that wrote no output, with the error from the
+daemon's result, and, when no operation failed, the operations whose warnings failed the request
+(`warnings: …`). The summary line names up to five failed (or warning) operations. Every
+operation's full output is in its project's `rush-logs/` folder, whether or not it was printed.
+When a request falls back to in-process Rush, agent mode stops and native output follows.
 
 Positively identified built-in `install` and `update` follow the same opt-in routing
 precedence as workspace builds and require protocol **0.10**
