@@ -77,6 +77,8 @@ interface IFixtureOptions {
   readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
   readonly onSessionCreated?: (session: WorkspaceSession) => void;
   readonly resolver?: IDaemonRequestResolver;
+  /** Adds the watch-only `_phase:compile:incremental` script, which passes `--incremental` to build.cjs. */
+  readonly incrementalScript?: boolean;
 }
 
 class DecoratedTestResolver implements IDaemonRequestResolver {
@@ -189,7 +191,12 @@ async function createFixtureAsync(
       JSON.stringify({
         name,
         version: '1.0.0',
-        scripts: { '_phase:compile': 'node build.cjs' },
+        scripts: {
+          '_phase:compile': 'node build.cjs',
+          ...(options.incrementalScript
+            ? { '_phase:compile:incremental': 'node build.cjs --incremental' }
+            : {})
+        },
         dependencies: name === 'b' ? { a: '1.0.0' } : {}
       })
     );
@@ -1398,6 +1405,30 @@ process.exit(23);
       });
       expect(runs(fixture)).toEqual(['a:one:', 'a:two:']);
       expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('runs the initial script for every warm build request, as native rush build does, not the watch-only one', async () => {
+    const fixture: IFixture = await createFixtureAsync(true, 'direct', { incrementalScript: true });
+    try {
+      for (const [requestId, input] of [
+        ['initial-script-1', 'one'],
+        ['initial-script-2', 'two'],
+        ['initial-script-3', 'three']
+      ]) {
+        fs.writeFileSync(path.join(fixture.repoRoot, 'projects/a/input.txt'), input);
+        const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'a']);
+        expect(exchange.terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0, operationResults: [{ operationId: 'a (compile)', status: 'SUCCESS' }] }
+        });
+        expect(logText(exchange)).toContain('Invoking (initial): node build.cjs');
+      }
+      // A watch-only incremental script can keep outputs of deleted inputs, and its output would be cached
+      // under the key of the initial script that native Rush runs.
+      expect(runs(fixture)).toEqual(['a:one:', 'a:two:', 'a:three:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }

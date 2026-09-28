@@ -1,9 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as childProcess from 'node:child_process';
+import { EventEmitter } from 'node:events';
 import path from 'node:path';
+import { PassThrough } from 'node:stream';
+
 import { JsonFile } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import {
+  ConsoleTerminalProvider,
+  StringBufferTerminalProvider,
+  Terminal,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 import { CommandLineAction, CommandLineParser, type CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
@@ -13,7 +23,11 @@ import {
   type IParameterJson,
   type IPhase
 } from '../../../api/CommandLineConfiguration';
-import type { Operation } from '../Operation';
+import { Operation } from '../Operation';
+import type { IOperationRunnerContext } from '../IOperationRunner';
+import { OperationStatus } from '../OperationStatus';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import { Utilities } from '../../../utilities/Utilities';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
@@ -259,4 +273,80 @@ describe(ShellOperationRunnerPlugin.name, () => {
     // All projects snapshot
     expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
   });
+
+  it.each([
+    [false, ['node build.js', 'node build.js']],
+    [true, ['node build.js', 'node build.js --incremental']]
+  ])(
+    'runs the :incremental script for a repeated operation only in watch mode (isWatch: %s)',
+    async (isWatch: boolean, expectedCommands: string[]) => {
+      const phase: IPhase = {
+        name: '_phase:build',
+        isSynthetic: false,
+        missingScriptBehavior: 'error',
+        allowWarningsOnSuccess: false,
+        associatedParameters: new Set()
+      } as unknown as IPhase;
+      const project: RushConfigurationProject = {
+        packageName: 'a',
+        projectFolder: process.cwd(),
+        packageJson: {
+          scripts: {
+            '_phase:build': 'node build.js',
+            '_phase:build:incremental': 'node build.js --incremental'
+          }
+        },
+        rushConfiguration: { commonTempFolder: process.cwd() }
+      } as unknown as RushConfigurationProject;
+      const operation: Operation = new Operation({ phase, project, logFilenameIdentifier: 'a' });
+      const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+      new ShellOperationRunnerPlugin().apply(hooks);
+      await hooks.createOperationsAsync.promise(new Set([operation]), {
+        isIncrementalBuildAllowed: true,
+        isWatch
+      } as unknown as ICreateOperationsContext);
+
+      const commands: string[] = [];
+      const executeSpy = jest
+        .spyOn(Utilities, 'executeLifecycleCommandAsync')
+        .mockImplementation((command) => {
+          commands.push(command.trim());
+          const stdout: PassThrough = new PassThrough();
+          const stderr: PassThrough = new PassThrough();
+          const child: childProcess.ChildProcess = Object.assign(new EventEmitter(), {
+            stdout,
+            stderr,
+            stdio: []
+          }) as unknown as childProcess.ChildProcess;
+          queueMicrotask(() => {
+            stdout.end();
+            stderr.end();
+            child.emit('close', 0, null);
+          });
+          return child;
+        });
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+      const context: IOperationRunnerContext = {
+        environment: undefined,
+        async runWithTerminalAsync<T>(
+          callback: (
+            terminal: ITerminal,
+            operationTerminalProvider: ITerminalProvider,
+            structuredChildOutputTerminalProvider: ITerminalProvider
+          ) => Promise<T>
+        ): Promise<T> {
+          return await callback(new Terminal(terminalProvider), terminalProvider, terminalProvider);
+        }
+      } as unknown as IOperationRunnerContext;
+      try {
+        await expect(operation.runner!.executeAsync(context)).resolves.toBe(OperationStatus.Success);
+        await expect(
+          operation.runner!.executeAsync(context, { status: OperationStatus.Success })
+        ).resolves.toBe(OperationStatus.Success);
+      } finally {
+        executeSpy.mockRestore();
+      }
+      expect(commands).toEqual(expectedCommands);
+    }
+  );
 });

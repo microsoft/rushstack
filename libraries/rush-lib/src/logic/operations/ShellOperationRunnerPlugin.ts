@@ -30,7 +30,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
         operations: Set<Operation>,
         context: ICreateOperationsContext
       ): Set<Operation> {
-        const { rushConfiguration, isIncrementalBuildAllowed } = context;
+        const { rushConfiguration, isIncrementalBuildAllowed, isWatch } = context;
 
         const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
           getCustomParameterValuesByOperation();
@@ -52,12 +52,16 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
             // This is the command that will be used to identify the cache entry for this operation
             const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
 
-            // For execution of non-initial iterations, prefer the `:incremental` script if it exists.
+            // For execution of non-initial watch iterations, prefer the `:incremental` script if it exists.
             // However, the `shellCommand` value still takes precedence per the spec for that feature.
+            // Outside watch mode, every command runs the initial script, as a single `rush build` does, even
+            // when a long-lived host (rushd) executes it on a graph that already ran the operation. The
+            // incremental script may keep outputs of deleted inputs, and only watch mode disables cache writes.
             const initialCommand: string | undefined = shellCommand ?? scripts?.[phaseName];
-            const incrementalCommand: string | undefined = isIncrementalBuildAllowed
-              ? (shellCommand ?? scripts?.[`${phaseName}:incremental`])
-              : undefined;
+            const incrementalCommand: string | undefined =
+              isIncrementalBuildAllowed && isWatch
+                ? (shellCommand ?? scripts?.[`${phaseName}:incremental`])
+                : undefined;
 
             operation.runner = initializeShellOperationRunner({
               phase,

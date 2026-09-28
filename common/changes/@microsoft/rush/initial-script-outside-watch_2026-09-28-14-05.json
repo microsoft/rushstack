@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Run a phase's `:incremental` script only for repeated watch-mode iterations. A long-lived host that runs separate commands on one operation graph now runs the initial script, as a single `rush build` does, so outputs of deleted inputs are not kept or written to the build cache.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
