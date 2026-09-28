@@ -525,6 +525,48 @@ describe('native production daemon engine', () => {
     }
   });
 
+  it('keeps its own linked spelling of the native SDK handoff', async () => {
+    // A deployed daemon spells rush-lib through its own node_modules link, so plugins can resolve it by name.
+    const originalRushLibPath: string | undefined = process.env._RUSH_LIB_PATH;
+    const linkRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-sdk-link-'));
+    const rushLibFolder: string = path.dirname(require.resolve('@microsoft/rush-lib/package.json'));
+    const rushLibLink: string = path.join(linkRoot, 'node_modules', '@microsoft', 'rush-lib');
+    fs.mkdirSync(path.dirname(rushLibLink), { recursive: true });
+    fs.symlinkSync(rushLibFolder, rushLibLink, 'junction');
+    const linkedEntryPoint: string = path.join(
+      rushLibLink,
+      path.relative(rushLibFolder, require.resolve('@microsoft/rush-lib'))
+    );
+    process.env._RUSH_LIB_PATH = linkedEntryPoint;
+    try {
+      const fixture: IFixture = await createFixtureAsync();
+      try {
+        expect((await runAsync(fixture, 'linked-sdk', ['build', '--only', 'a'])).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
+        });
+        const environment: Record<string, string> = {
+          ...requestEnvironment(),
+          _RUSH_LIB_PATH: path.join(fixture.repoRoot, 'foreign-client-engine.js')
+        };
+        expect(
+          (await runAsync(fixture, 'foreign-linked-sdk', ['build', '--only', 'a'], { environment })).terminal
+        ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
+        expect(process.env._RUSH_LIB_PATH).toBe(linkedEntryPoint);
+        expect(runs(fixture)).toEqual(['a:one:']);
+      } finally {
+        await fixture[Symbol.asyncDispose]();
+      }
+    } finally {
+      if (originalRushLibPath === undefined) {
+        delete process.env._RUSH_LIB_PATH;
+      } else {
+        process.env._RUSH_LIB_PATH = originalRushLibPath;
+      }
+      fs.rmSync(linkRoot, { recursive: true, force: true });
+    }
+  });
+
   it('replaces configuration and command shape in-process without using a disposed generation', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {

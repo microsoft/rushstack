@@ -14,7 +14,9 @@ export enum DaemonTransportErrorCode {
   /** The connection attempt exceeded the configured timeout. */
   connectionTimeout = 'connectionTimeout',
   /** The transport was closed while an operation was in flight. */
-  transportClosed = 'transportClosed'
+  transportClosed = 'transportClosed',
+  /** The per-user runtime directory is a symbolic link, is not a directory, or another user owns it. */
+  unsafeRuntimeDirectory = 'unsafeRuntimeDirectory'
 }
 
 /**

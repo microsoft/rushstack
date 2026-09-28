@@ -10,6 +10,7 @@ import { reapOrphansOfDeadOwnerAsync } from './DaemonOrphanReaper';
 import type { IDaemonPaths } from './DaemonPaths';
 import { tryAcquireReclaimLock } from './DaemonReclaimLock';
 import type { DaemonReclaimLockOutcome } from './DaemonReclaimLock';
+import { assertDaemonRuntimeDirIsPrivate } from './DaemonRuntimeDir';
 import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 
 /**
@@ -23,15 +24,18 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * unlink the socket path, so a concurrent starter cannot delete a socket that
  * another process just bound. Operation processes still running in the dead
  * daemon's process group, or in the operation process groups it recorded, are
- * terminated first (see `DaemonOrphanReaper`).
+ * terminated first (see `DaemonOrphanReaper`). Nothing is read, reaped or
+ * removed unless the runtime directory is a private directory of this user.
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a
  * live (or plausibly live) daemon owns the path, or when another starter holds
- * the reclaim lock.
+ * the reclaim lock, and with code `unsafeRuntimeDirectory` for an unsafe
+ * runtime directory.
  *
  * @beta
  */
 export async function reclaimStaleDaemonAsync(paths: IDaemonPaths): Promise<void> {
+  assertDaemonRuntimeDirIsPrivate(paths);
   // The mutex lives beside the lockfile (never the same file): the lockfile
   // records the *running* daemon's live PID, while the mutex only ever records
   // a reclaimer's pid. So a live daemon is "locked" (its PID alive), while a

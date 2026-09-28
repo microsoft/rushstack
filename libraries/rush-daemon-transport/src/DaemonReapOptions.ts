@@ -16,6 +16,8 @@ export interface IDaemonOrphanReaperOptions {
   readonly selfPid?: number;
   /** How long SIGTERM'd (and then SIGKILL'd) processes get to exit. */
   readonly graceMs?: number;
+  /** The caller's user id (`process.getuid()`); only records that this user owns are acted on. */
+  readonly uid?: number;
 }
 
 /** {@link IDaemonOrphanReaperOptions} with every default applied, for the dead daemon `deadPid`. */
@@ -25,10 +27,16 @@ export interface IReapContext {
   readonly selfPid: number;
   readonly deadPid: number;
   readonly graceMs: number;
+  readonly uid: number | undefined;
 }
 
 function resolveCaller(options: IDaemonOrphanReaperOptions): Pick<IReapContext, 'platform' | 'selfPid'> {
   return { platform: options.platform ?? process.platform, selfPid: options.selfPid ?? process.pid };
+}
+
+/** The user whose records may be acted on. */
+export function resolveCallerUid(options: IDaemonOrphanReaperOptions): number | undefined {
+  return options.uid ?? process.getuid?.();
 }
 
 /** Applies the defaults of {@link IDaemonOrphanReaperOptions}. */
@@ -37,7 +45,8 @@ export function createReapContext(deadPid: number, options: IDaemonOrphanReaperO
     ...resolveCaller(options),
     ops: options.ops ?? POSIX_PROCESS_GROUP_OPS,
     deadPid,
-    graceMs: options.graceMs ?? DEFAULT_GRACE_MS
+    graceMs: options.graceMs ?? DEFAULT_GRACE_MS,
+    uid: resolveCallerUid(options)
   };
 }
 

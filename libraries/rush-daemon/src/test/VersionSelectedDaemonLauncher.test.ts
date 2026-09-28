@@ -56,6 +56,7 @@ describe('version-selected daemon launcher', () => {
         RUSH_GLOBAL_FOLDER: path.join(repoRoot, 'global'),
         RUSH_PREVIEW_VERSION: undefined,
         NPM_CONFIG_CACHE: path.join(repoRoot, 'npm-cache'),
+        RUSHD_RUNTIME_DIR: path.join(repoRoot, 'runtime'),
         XDG_RUNTIME_DIR: path.join(repoRoot, 'runtime'),
         TMPDIR: path.join(repoRoot, 'runtime'),
         TMP: path.join(repoRoot, 'runtime'),
@@ -99,13 +100,20 @@ describe('version-selected daemon launcher', () => {
         COPILOT_AGENT_SESSION_ID: 'session-1',
         RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
         RUSHD_OUTPUT: 'agent',
+        // The first client's session folders may disappear while the daemon lives on.
+        TMPDIR: '/tmp/session-1',
+        XDG_RUNTIME_DIR: '/run/user/1000',
+        TEMP: '/tmp/temp-1',
+        RUSHD_RUNTIME_DIR: '/var/rushd',
         UNSET: undefined
       }
     });
     expect(command.environment).toEqual({
       HOME: '/home/user',
       RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
-      RUSHD_OUTPUT: 'agent'
+      RUSHD_OUTPUT: 'agent',
+      TEMP: '/tmp/temp-1',
+      RUSHD_RUNTIME_DIR: '/var/rushd'
     });
     expect(Object.isFrozen(command.environment)).toBe(true);
   });

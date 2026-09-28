@@ -86,7 +86,9 @@ The host uses stable fingerprints to classify native requests:
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
 Native dispatch first copies the envelope and normalizes only engine-owned `_RUSH_LIB_PATH` to this daemon's
-real engine, preventing false restarts or wrong SDK selection from a foreign client path. Environment
+own engine, preventing false restarts or wrong SDK selection from a foreign client path. The daemon keeps the
+spelling that its engine chose when it loaded: a source-built rush-lib, such as one in a `rush deploy` output,
+is spelled through the daemon's own `node_modules/@microsoft/rush-lib` link so plugins can resolve it by name. Environment
 comparisons (the tier-2 fingerprint and the production resolver's startup-environment check) both use rush-lib's
 `getWorkspaceFingerprintEnvironmentEntries()`, which omits `workspaceFingerprintIgnoredEnvironmentVariables`:
 volatile per-shell, terminal, session and client-routing variables such as `PWD`, `OLDPWD`, `SHLVL`, `_`,

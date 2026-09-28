@@ -66,6 +66,8 @@ export interface IWorkspaceInputFingerprintOptions {
  *   `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` is sent as each request's admission deadline, `RUSHD_OUTPUT` selects
  *   the client's output mode, and `RUSH_DAEMON_EXPERIMENTAL` is read from each request rather than from the process
  * - `RUSH_PARALLELISM`, which a long-lived host applies to each request as its `--parallelism` default
+ * - temporary and runtime folders, which are often set per session, job or sandbox: `TMPDIR`, `TMP`, `TEMP` and
+ *   `XDG_RUNTIME_DIR`, and `RUSHD_RUNTIME_DIR`, which only selects the folder where a client meets its daemon
  *
  * Every other variable remains a process-bound input, including the remaining `RUSH_*` settings (such as
  * `RUSH_BUILD_CACHE_*` and the daemon's own `RUSH_DAEMON_*` resource settings), `NODE_*`, npm/pnpm
@@ -142,7 +144,12 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
   'RUSHD_OUTPUT',
   'RUSH_DAEMON_EXPERIMENTAL',
-  'RUSH_PARALLELISM'
+  'RUSH_PARALLELISM',
+  'TMPDIR',
+  'TMP',
+  'TEMP',
+  'XDG_RUNTIME_DIR',
+  'RUSHD_RUNTIME_DIR'
 ]);
 
 /**
@@ -152,14 +159,18 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
  * A long-lived host must not inherit these variables from the client that started it: it applies
  * `RUSH_PARALLELISM` from each request's own environment, and code running inside the host that reads a session
  * identifier such as `COPILOT_AGENT_SESSION_ID` from `process.env` would otherwise attribute every later session's
- * work to the first one.
+ * work to the first one. Likewise, the first client's `TMPDIR` or `XDG_RUNTIME_DIR` may be removed when that
+ * client's session or job ends, while the host lives on. (`TMP` and `TEMP` stay, because Windows has no usable
+ * default for them.)
  * On Windows, names are matched case-insensitively.
  *
  * @alpha
  */
 export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string> = new Set([
   'RUSH_PARALLELISM',
-  'COPILOT_AGENT_SESSION_ID'
+  'COPILOT_AGENT_SESSION_ID',
+  'TMPDIR',
+  'XDG_RUNTIME_DIR'
 ]);
 
 /**

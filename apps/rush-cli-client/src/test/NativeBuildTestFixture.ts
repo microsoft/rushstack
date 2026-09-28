@@ -47,7 +47,7 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     CI: 'false',
     TF_BUILD: 'false',
     GITHUB_ACTIONS: 'false',
-    XDG_RUNTIME_DIR: folder
+    RUSHD_RUNTIME_DIR: folder
   };
   const invocationClosures: Promise<unknown[]>[] = [];
   const callbacks: Promise<void>[] = [];

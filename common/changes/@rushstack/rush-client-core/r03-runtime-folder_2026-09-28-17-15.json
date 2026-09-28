@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Pass the runtime folder to a daemon being started as `RUSHD_RUNTIME_DIR`, and report an unsafe runtime folder as `startupFailed` (`assertDaemonRuntimeFolderIsPrivate`).",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

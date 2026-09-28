@@ -11,5 +11,38 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
 
-  "deploymentProjectNames": ["@rushstack/rush-cli-client"]
+  "deploymentProjectNames": ["@rushstack/rush-cli-client"],
+
+  /**
+   * A published @microsoft/rush-lib depends on its built-in build cache plugins. The source-built copy lists them
+   * in "publishOnlyDependencies" instead, and loads them from next to the rush-lib link of the host script that
+   * loaded it: @microsoft/rush (the in-process fallback), rush-client (when it loads rush-lib before handing off
+   * to @microsoft/rush) and rush-daemon. Each of these hosts declares the plugins as devDependencies.
+   */
+  "projectSettings": [
+    {
+      "projectName": "@microsoft/rush",
+      "additionalDependenciesToInclude": [
+        "@rushstack/rush-amazon-s3-build-cache-plugin",
+        "@rushstack/rush-azure-storage-build-cache-plugin",
+        "@rushstack/rush-http-build-cache-plugin"
+      ]
+    },
+    {
+      "projectName": "@rushstack/rush-cli-client",
+      "additionalDependenciesToInclude": [
+        "@rushstack/rush-amazon-s3-build-cache-plugin",
+        "@rushstack/rush-azure-storage-build-cache-plugin",
+        "@rushstack/rush-http-build-cache-plugin"
+      ]
+    },
+    {
+      "projectName": "@rushstack/rush-daemon",
+      "additionalDependenciesToInclude": [
+        "@rushstack/rush-amazon-s3-build-cache-plugin",
+        "@rushstack/rush-azure-storage-build-cache-plugin",
+        "@rushstack/rush-http-build-cache-plugin"
+      ]
+    }
+  ]
 }

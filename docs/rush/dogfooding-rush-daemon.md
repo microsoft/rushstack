@@ -55,8 +55,11 @@ workspace, run the following from the repository root. It must print a path unde
 node -p "require('fs').realpathSync(require.resolve('@microsoft/rush-lib', { paths: [require('path').resolve('common/temp/rush-daemon-dogfood/apps/rush-cli-client')] }))"
 ```
 
-The built-in cloud build-cache plugins are not part of the snapshot. That is fine for this repository, whose
-build cache is `local-only`.
+The snapshot also contains Rush's built-in cloud build-cache plugins (`amazon-s3`, `azure-blob-storage` and
+`http`), next to the `@microsoft/rush-lib` links of `@microsoft/rush`, `rush-client` and the daemon. A source-built rush-lib loads them
+from there, and it points `_RUSH_LIB_PATH` at that same link. So plugins that resolve `@microsoft/rush-lib` by name
+from `_RUSH_LIB_PATH` work in both the daemon and the in-process fallback. This repository's own build cache is
+`local-only`, so it doesn't need them.
 
 ## 3. Opt in and build
 

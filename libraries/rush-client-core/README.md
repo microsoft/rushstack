@@ -41,13 +41,30 @@ returns a `restartRetriesExhausted` fallback outcome so the caller can run in-pr
 Cancellation stops waiting without killing a daemon. Disabling auto-start still
 permits waiting for a host-started successor, but never lets the client spawn one.
 
+A connection lost before the result stays a `disconnected` `DaemonClientError`. Its message
+starts with "Daemon disconnected before delivering a result; the command was not retried."
+and `executeWithDaemonRestartAsync()` appends what happened to the daemon that served the
+attempt, identified by its pong PID. If that process exited within about a second (on Linux,
+an exited process that is not reaped yet counts), the message names the PID, `rush-client
+daemon logs` and `--no-daemon` (`rushx-client` for Rushx requests), and adds a second line
+with the first fatal error that `<lockfilePath>.log` gained after the request was sent: a
+Node.js uncaught-exception report or a V8 `FATAL ERROR:` line, clipped to one printable line.
+If the process still runs, the message says that only the connection closed. After the abort
+signal fires, the error is unchanged, so the caller reports the cancellation.
+
 `connectOrStartDaemonAsync()` accepts an **explicit, version-selected** executable,
 arguments, environment and cwd. It does not discover or install a Rush version.
+It adds `RUSHD_RUNTIME_DIR`, set to the base of `paths.runtimeDir`, to that environment, so the
+daemon resolves the same paths as its clients whatever environment it inherits.
+A runtime folder that is a symbolic link, is not a directory or belongs to another user is
+refused as `startupFailed` before anything in it is trusted
+(`assertDaemonRuntimeFolderIsPrivate()`); one that others can open is made owner-only.
 It reuses transport paths/reclaim checks and node-core-library's process-identity
 aware `LockFile` for the first-start mutex, including kernel-enforced exclusive
 file sharing on Windows. The winning client rechecks readiness,
-reclaims only an absent/dead owner, and reserves `<lockfilePath>.starting` before
-handing the explicit command to a detached startup helper. The helper spawns without
+reclaims only an absent/dead owner, spawns a detached startup helper, and reserves
+`<lockfilePath>.starting` for it (recording the helper's PID and start time) before
+handing it the explicit command. The helper spawns the launcher without
 a shell and retains that reservation until the daemon completes hello/ping readiness,
 independently of whether the requesting client survives. It waits for a live launcher for
 at least 120 seconds, even when the requesting client's own deadline is shorter, so a slow
@@ -72,6 +89,23 @@ can spawn descendants, so its exit is not proof that another launch is safe.
 Recovery of an abandoned reservation requires operator confirmation that the original
 startup cannot still publish an endpoint; normal successful startup releases it
 automatically. Cancellation stops the client waiting, not the detached handoff.
+
+A client resolves a reservation on the same evidence the helper waits for, so a daemon
+that became ready after its helper stopped waiting (for example a first start slower than
+120 seconds) is still used: holding the start mutex, the client needs a daemon that
+completes hello/ping at the endpoint and whose pong PID is the live owner in the
+ownership record for that socket, and it removes the reservation only if it is unchanged.
+Reservations written by older clients, without a helper, are resolved the same way.
+The recorded helper decides how long a refused launch waits: while it is alive, a starting
+client waits for it until the client's own deadline; once it is provably gone (its PID
+no longer exists or was reused), nothing else can release the reservation, so clients
+refuse another launch at once. `inspectDaemonStartupReservation(paths)` reports the
+reservation and its helper's state without changing it (`rush-client daemon status`), and
+`requestDaemonShutdownAsync()` resolves a reservation for the attested daemon before it
+sends shutdown, so that its successor can start. `resolveDaemonStartupReservationAsync(client,
+paths)` does the same for a caller that stops the daemon without replacing it (`rush-client
+daemon stop`): it returns false and keeps the reservation when the daemon is not the attested
+owner, the reservation changed, or another client holds the start mutex past the timeout.
 
 If a wire-compatible daemon reports the wrong implementation version and an explicit
 replacement launcher is available, startup serializes replacement under that same mutex.

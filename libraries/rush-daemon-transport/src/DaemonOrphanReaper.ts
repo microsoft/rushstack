@@ -5,7 +5,8 @@ import { terminateProcessGroupsAsync } from './DaemonGroupTermination';
 import type { DaemonOrphanReapOutcome } from './DaemonGroupTermination';
 import type { IDaemonLockfile } from './DaemonLockfile';
 import { reapDeadDaemonOperationGroupsAsync } from './DaemonOperationGroupReaper';
-import { createReapContext, isSignalableGroup } from './DaemonReapOptions';
+import { isOwnedEntry } from './DaemonOwnedEntry';
+import { createReapContext, isSignalableGroup, resolveCallerUid } from './DaemonReapOptions';
 import type { IDaemonOrphanReaperOptions, IReapContext } from './DaemonReapOptions';
 
 function isOrphanedDaemonGroup(context: IReapContext): boolean {
@@ -36,13 +37,24 @@ export async function reapDeadDaemonProcessGroupAsync(
   return outcome;
 }
 
-/** Reaps the orphaned processes of a reclaimed daemon's recorded owner, if there is one. */
+function isOwnRecord(
+  lockfilePath: string,
+  owner: IDaemonLockfile | undefined,
+  options: IDaemonOrphanReaperOptions
+): owner is IDaemonLockfile {
+  return owner !== undefined && isOwnedEntry(lockfilePath, 'file', resolveCallerUid(options));
+}
+
+/**
+ * Reaps the orphaned processes of a reclaimed daemon's recorded owner, if there is one. A lockfile that is a
+ * symbolic link, or that another user owns, names no daemon of this user, so nothing is signaled.
+ */
 export async function reapOrphansOfDeadOwnerAsync(
   lockfilePath: string,
   owner: IDaemonLockfile | undefined,
   options: IDaemonOrphanReaperOptions = {}
 ): Promise<void> {
-  if (!owner) return;
+  if (!isOwnRecord(lockfilePath, owner, options)) return;
   await reapDeadDaemonProcessGroupAsync(owner.pid, options);
   await reapDeadDaemonOperationGroupsAsync(lockfilePath, owner.pid, options);
 }

@@ -221,7 +221,9 @@ describe('workspace input fingerprints', () => {
           WT_SESSION: 'w'
         },
         { PATH: `${base.PATH}${path.delimiter}${base.PATH}` },
-        { TERM: undefined, PWD: undefined }
+        { TERM: undefined, PWD: undefined },
+        { TMPDIR: '/scratch/job-1', XDG_RUNTIME_DIR: '/run/user/1000' },
+        { TMP: 'C:\\Temp\\2', TEMP: 'C:\\Temp\\2', RUSHD_RUNTIME_DIR: '/run/rush' }
       ]) {
         expect(await getHashAsync({ ...base, ...volatile })).toBe(baseHash);
       }
@@ -262,12 +264,18 @@ describe('workspace input fingerprints', () => {
       COPILOT_AGENT_SESSION_ID: 'session-1',
       RUSHD_OUTPUT: 'agent',
       RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
+      TMPDIR: '/scratch/job-1',
+      XDG_RUNTIME_DIR: '/run/user/1000',
+      TEMP: 'C:\\Temp',
+      RUSHD_RUNTIME_DIR: '/run/rush',
       UNSET: undefined
     };
     expect(getWorkspaceHostEnvironment(environment)).toEqual({
       HOME: '/home/user',
       RUSHD_OUTPUT: 'agent',
-      RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400'
+      RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
+      TEMP: 'C:\\Temp',
+      RUSHD_RUNTIME_DIR: '/run/rush'
     });
     for (const name of workspaceRequestScopedEnvironmentVariables) {
       expect(workspaceFingerprintIgnoredEnvironmentVariables.has(name)).toBe(true);

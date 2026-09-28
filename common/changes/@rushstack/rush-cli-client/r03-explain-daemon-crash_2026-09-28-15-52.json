@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "After a daemon crash, commands and `rush-client daemon status` say that rushd exited and point to `rush-client daemon logs` and `--no-daemon`, instead of only reporting a lost connection.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

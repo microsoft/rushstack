@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add `resolveDaemonStartupReservationAsync()`, which resolves a startup reservation that remains next to a connected, attested daemon before a caller stops that daemon.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

@@ -17,6 +17,9 @@ import { IDaemonShutdownAckMessage } from '@rushstack/rush-daemon-protocol';
 import type { Readable } from 'node:stream';
 
 // @beta
+export function assertDaemonRuntimeFolderIsPrivate(paths: IDaemonPaths): void;
+
+// @beta
 export function captureDaemonRequest(options: ICaptureDaemonRequestOptions): IDaemonRequestEnvelope;
 
 // @beta
@@ -56,6 +59,9 @@ export type DaemonClientOutcome = {
     readonly kind: 'rejected';
     readonly rejection: IDaemonRequestRejectedMessage['payload'];
 };
+
+// @beta
+export type DaemonStartupHelperState = 'running' | 'exited' | 'unknown';
 
 // @beta
 export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, execution: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
@@ -140,9 +146,22 @@ export interface IDaemonStartCommand {
 }
 
 // @beta
+export interface IDaemonStartupReservationInfo {
+    readonly helperPid?: number;
+    readonly helperState: DaemonStartupHelperState;
+    readonly path: string;
+}
+
+// @beta
+export function inspectDaemonStartupReservation(paths: IDaemonPaths): IDaemonStartupReservationInfo | undefined;
+
+// @beta
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
 
 // @beta
 export function resetDaemonArtifactsAsync(paths: IDaemonPaths, options?: IDaemonArtifactResetOptions): Promise<IDaemonArtifactResetResult>;
+
+// @beta
+export function resolveDaemonStartupReservationAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<boolean>;
 
 ```

@@ -9,10 +9,16 @@ import type { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 import type * as net from 'node:net';
 
 // @beta
+export function assertDaemonRuntimeDirIsPrivate(paths: IDaemonPaths): void;
+
+// @beta
 export function computeDaemonWorkspaceKey(input: IWorkspaceKeyInput): string;
 
 // @beta
 export function connectDaemonAsync(socketPath: string, options?: IDaemonConnectorOptions): Promise<DaemonFrameConnection>;
+
+// @beta
+export const DAEMON_RUNTIME_DIR_ENV_VAR: 'RUSHD_RUNTIME_DIR';
 
 // @beta
 export class DaemonFrameConnection {
@@ -53,7 +59,8 @@ export enum DaemonTransportErrorCode {
     connectionRefused = "connectionRefused",
     connectionTimeout = "connectionTimeout",
     daemonAlreadyRunning = "daemonAlreadyRunning",
-    transportClosed = "transportClosed"
+    transportClosed = "transportClosed",
+    unsafeRuntimeDirectory = "unsafeRuntimeDirectory"
 }
 
 // @beta

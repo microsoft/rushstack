@@ -7,8 +7,13 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
 - **Workspace keys** — `sha256(canonicalRepoRoot + rushVersion + startupOptions)`, so distinct
   workspaces, Rush versions, or startup options resolve to distinct daemon endpoints while the
   same workspace stays stable across runs.
-- **Per-user path derivation** — `$XDG_RUNTIME_DIR`-aware Unix domain sockets on POSIX and
-  `\\.\pipe\rushd-<key>` named pipes on Windows.
+- **Per-user path derivation** — Unix domain sockets in `/tmp/rushd-<uid>/` on POSIX, or in
+  `$RUSHD_RUNTIME_DIR/rushd-<uid>/` when that variable is an absolute path, and
+  `\\.\pipe\rushd-<key>` named pipes on Windows. `TMPDIR` and `XDG_RUNTIME_DIR` are not
+  consulted, because they differ between the shells, jobs and services of one user. A daemon
+  resolves its paths with the same rule, and a client that starts one passes the folder it
+  chose as `RUSHD_RUNTIME_DIR`. The folder must be a directory (not a symbolic link) that the
+  user owns; one that others can open is made owner-only (`0700`).
 - **`net` listener and connector** — framed with
   [`@rushstack/rush-daemon-protocol`](https://www.npmjs.com/package/@rushstack/rush-daemon-protocol),
   with backpressure-aware writes and serialized async frame handlers for inbound flow control.
@@ -18,6 +23,10 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
   retaining ownership. Hosts release the endpoint with `closeAsync()` after their resources have
   finished disposing. A live owner prevents rebinding even when its socket has already closed;
   repeated closes cannot remove a successor's endpoint.
+- **Owner-safe publication** — a listener binds a private name and hard-links it to the socket
+  path, so it never replaces a live peer's socket; the runtime folder's file system must support
+  hard links. On close it removes the socket and ownership record only while they are still the
+  files it created, so a predecessor that shuts down late never removes a successor's endpoint.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

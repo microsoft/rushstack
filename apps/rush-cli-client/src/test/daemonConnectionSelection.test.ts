@@ -6,6 +6,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
+import { DaemonClientError } from '@rushstack/rush-client-core';
 import { computeDaemonWorkspaceKey, resolveDaemonPathsFromProcess } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions, getDaemonConnectionOptionsAsync } from '../daemonConnectionOptions';
@@ -47,6 +48,29 @@ describe('version-selected daemon connection options', () => {
       'asynchronous version selection'
     );
   });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'refuses an unsafe runtime folder before any daemon command uses it',
+    () => {
+      const base: string = path.join(repoRoot, 'runtime');
+      fs.mkdirSync(base);
+      fs.symlinkSync(repoRoot, path.join(base, `rushd-${process.getuid?.()}`));
+      const previous: string | undefined = process.env.RUSHD_RUNTIME_DIR;
+      process.env.RUSHD_RUNTIME_DIR = base;
+      let error: unknown;
+      try {
+        getDaemonConnectionOptions(repoRoot, Rush.version, process.env, false);
+      } catch (thrown) {
+        error = thrown;
+      } finally {
+        if (previous === undefined) delete process.env.RUSHD_RUNTIME_DIR;
+        else process.env.RUSHD_RUNTIME_DIR = previous;
+      }
+      expect(error).toBeInstanceOf(DaemonClientError);
+      expect(error).toMatchObject({ code: 'startupFailed' });
+      expect((error as Error).message).toContain('is unsafe: it is a symbolic link');
+    }
+  );
 
   it('does not select or install a launcher for a connect-only invocation', async () => {
     const options = await getDaemonConnectionOptionsAsync(repoRoot, '5.178.1', {}, false);

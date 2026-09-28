@@ -4,8 +4,10 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { performance } from 'node:perf_hooks';
+import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import { isProcessStartedAfter, tryGetProcessStartTimeMs } from '../ProcessStartTime';
+import { isProcessDefunct, isProcessStartedAfter, tryGetProcessStartTimeMs } from '../ProcessStartTime';
+import { withUnreapedChildAsync } from './UnreapedChildProcess';
 
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
 
@@ -27,5 +29,15 @@ describe('process start time', () => {
     expect(tryGetProcessStartTimeMs(exited.pid!)).toBeUndefined();
     expect(isProcessStartedAfter(exited.pid!, new Date(0).toISOString())).toBe(false);
     expect(isProcessStartedAfter(process.pid, 'not a timestamp')).toBe(false);
+  });
+
+  linuxIt('detects an exited process that its parent has not reaped', async () => {
+    await withUnreapedChildAsync(async (child, parent) => {
+      const deadline: number = Date.now() + 5000;
+      while (!isProcessDefunct(child) && Date.now() < deadline) await delayAsync(20);
+      expect(isProcessDefunct(child)).toBe(true);
+      expect(isProcessDefunct(parent)).toBe(false);
+      expect(isProcessDefunct(process.pid)).toBe(false);
+    });
   });
 });

@@ -104,7 +104,7 @@ export class SuccessfulMutationFixture implements AsyncDisposable {
       ...process.env,
       HOME: home,
       USERPROFILE: home,
-      XDG_RUNTIME_DIR: path.join(this.folder, 'runtime'),
+      RUSHD_RUNTIME_DIR: path.join(this.folder, 'runtime'),
       RUSH_GLOBAL_FOLDER: path.join(this.folder, 'rush-global'),
       RUSH_PNPM_STORE_PATH: path.join(this.folder, 'store'),
       RUSH_TEMP_FOLDER: undefined,

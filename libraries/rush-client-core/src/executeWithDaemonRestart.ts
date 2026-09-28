@@ -10,6 +10,11 @@ import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from './
 import { captureDaemonRequest } from './captureDaemonRequest';
 import type { DaemonClient, DaemonClientOutcome, IDaemonClientExecuteOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
+import {
+  explainLostConnectionAsync,
+  observeServingDaemonAsync,
+  type IServingDaemon
+} from './DaemonDisconnect';
 
 /**
  * The maximum number of successors a single request follows. Each restart serves at least one other
@@ -27,6 +32,8 @@ const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
  * Restarts are retried with jittered backoff inside the request's admission deadline; once the
  * retries or the deadline are exhausted, a `fallback` outcome lets the caller run in-process instead.
  * The connection options must select the request's expected daemon and startup environment.
+ * A connection lost before the result is reported as a `disconnected` error that says whether the daemon
+ * process exited, what its launcher log recorded and how to recover, unless the request was aborted first.
  * @beta
  */
 export async function executeWithDaemonRestartAsync(
@@ -41,7 +48,10 @@ export async function executeWithDaemonRestartAsync(
       : (execution.abortSignal ?? connection.abortSignal);
   const waitTimeoutMs: number | undefined = execution.request.admission?.waitTimeoutMs;
   let owner: IDaemonLockfile | undefined = await attestOwnerAsync(client, connection);
-  let outcome: DaemonClientOutcome = await client.executeAsync({ ...execution, abortSignal });
+  let outcome: DaemonClientOutcome = await executeOnDaemonAsync(client, connection, {
+    ...execution,
+    abortSignal
+  });
   let previous: DaemonClient | undefined;
   try {
     for (let retry: number = 1; outcome.kind === 'result' && outcome.result.retryAfterRestart; retry++) {
@@ -97,7 +107,7 @@ export async function executeWithDaemonRestartAsync(
       const remainingMs: number | undefined = getRemainingMs();
       if (isExpired(remainingMs)) return restartExhaustedOutcome(retry);
       owner = await attestOwnerAsync(successor, connection);
-      outcome = await successor.executeAsync({
+      outcome = await executeOnDaemonAsync(successor, connection, {
         ...execution,
         abortSignal,
         request:
@@ -112,6 +122,22 @@ export async function executeWithDaemonRestartAsync(
     return outcome;
   } finally {
     await previous?.closeAsync().catch(() => undefined);
+  }
+}
+
+/** Executes one attempt; a lost connection is explained by what happened to the daemon that served it. */
+async function executeOnDaemonAsync(
+  client: DaemonClient,
+  connection: IConnectOrStartDaemonOptions,
+  execution: IDaemonClientExecuteOptions
+): Promise<DaemonClientOutcome> {
+  const daemon: IServingDaemon | undefined = await observeServingDaemonAsync(client, connection.paths);
+  try {
+    return await client.executeAsync(execution);
+  } catch (error) {
+    // After cancellation the caller reports the cancellation, whatever the connection did afterwards.
+    if (execution.abortSignal?.aborted) throw error;
+    throw await explainLostConnectionAsync(error, daemon, execution.request);
   }
 }
 

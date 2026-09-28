@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Clients and daemons find each other in `/tmp/rushd-<uid>` (or `$RUSHD_RUNTIME_DIR/rushd-<uid>`) whatever `TMPDIR` or `XDG_RUNTIME_DIR` says. A listener publishes its socket with a hard link and removes its socket and ownership record on close only while they are still its own. The runtime folder must be an owned directory, not a symbolic link, and reapers skip records they do not own.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

@@ -20,10 +20,17 @@ export {
   type IDaemonArtifactResetOptions,
   type IDaemonArtifactResetResult
 } from './DaemonOwnership';
+export { assertDaemonRuntimeFolderIsPrivate } from './DaemonRuntimeFolder';
+export {
+  inspectDaemonStartupReservation,
+  type DaemonStartupHelperState,
+  type IDaemonStartupReservationInfo
+} from './DaemonStartupReservation';
 export { executeWithDaemonRestartAsync } from './executeWithDaemonRestart';
 export {
   connectOrStartDaemonAsync,
   requestDaemonShutdownAsync,
+  resolveDaemonStartupReservationAsync,
   type IConnectOrStartDaemonOptions,
   type IDaemonStartCommand
 } from './connectOrStartDaemon';

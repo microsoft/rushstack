@@ -18,7 +18,6 @@ export { connectDaemonAsync, type IDaemonConnectorOptions } from './DaemonConnec
 export { DaemonFrameConnection } from './DaemonFrameConnection';
 export { DaemonFrameListener, type IDaemonListenerOptions } from './DaemonListener';
 export {
-  ensureDaemonRuntimeDir,
   isDaemonProcessAlive,
   readDaemonLockfile,
   removeDaemonArtifacts,
@@ -26,9 +25,15 @@ export {
   type IDaemonLockfile
 } from './DaemonLockfile';
 export { tryAcquireReclaimLock, type DaemonReclaimLockOutcome } from './DaemonReclaimLock';
-export { resolveDaemonPaths, type IDaemonPathEnvironment, type IDaemonPaths } from './DaemonPaths';
+export {
+  DAEMON_RUNTIME_DIR_ENV_VAR,
+  resolveDaemonPaths,
+  type IDaemonPathEnvironment,
+  type IDaemonPaths
+} from './DaemonPaths';
 export { resolveDaemonPathsFromProcess } from './DaemonPathsFromProcess';
 export { reclaimStaleDaemonAsync } from './DaemonReclaim';
+export { assertDaemonRuntimeDirIsPrivate, ensureDaemonRuntimeDir } from './DaemonRuntimeDir';
 export { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 export {
   computeDaemonWorkspaceKey,

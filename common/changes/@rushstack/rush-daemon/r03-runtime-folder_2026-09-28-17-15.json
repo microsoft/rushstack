@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Listen in `/tmp/rushd-<uid>` (or `$RUSHD_RUNTIME_DIR/rushd-<uid>`), where current clients look, instead of in `$XDG_RUNTIME_DIR` or the temporary folder.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

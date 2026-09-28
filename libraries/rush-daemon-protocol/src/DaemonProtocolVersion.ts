@@ -29,6 +29,13 @@ export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number = 10;
 export const DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR: number = 11;
 
 /**
+ * The first protocol minor whose clients and daemons meet in `/tmp/rushd-<uid>` (or in the folder that
+ * `RUSHD_RUNTIME_DIR` names) rather than in one chosen by `XDG_RUNTIME_DIR` or `TMPDIR`, and whose workspace
+ * identity ignores temporary and runtime folder variables. @beta
+ */
+export const DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR: number = 12;
+
+/**
  * A rushd wire protocol version.
  *
  * @remarks
@@ -61,7 +68,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR
+  minor: DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR
 };
 
 /**

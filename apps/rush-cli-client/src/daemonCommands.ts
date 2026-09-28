@@ -6,14 +6,20 @@ import * as path from 'node:path';
 import {
   DaemonClient,
   connectOrStartDaemonAsync,
+  inspectDaemonStartupReservation,
   requestDaemonShutdownAsync,
   resetDaemonArtifactsAsync,
-  type IConnectOrStartDaemonOptions
+  resolveDaemonStartupReservationAsync,
+  type IConnectOrStartDaemonOptions,
+  type IDaemonStartupReservationInfo
 } from '@rushstack/rush-client-core';
 import {
   DaemonTransportError,
   DaemonTransportErrorCode,
-  type IDaemonLockfile
+  isDaemonProcessAlive,
+  readDaemonLockfile,
+  type IDaemonLockfile,
+  type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
@@ -99,7 +105,8 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
         await writeStatusAsync({
           state: 'ready',
           socketPath: connectionOptions.paths.socketPath,
-          ...(await started.status)
+          ...(await started.status),
+          ...getStartupReservationStatus(connectionOptions.paths)
         });
       } finally {
         await started.closeAsync();
@@ -113,12 +120,18 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
     await writeStatusAsync({
       state: removedPaths.length > 0 ? 'reset' : 'notRunning',
       socketPath: connectionOptions.paths.socketPath,
-      ...(options.argv[1] === '--force' ? { removedPaths } : {})
+      ...(options.argv[1] === '--force' ? { removedPaths } : {}),
+      ...getStartupReservationStatus(connectionOptions.paths)
     });
     return;
   }
   try {
     if (command === 'stop') {
+      if (options.argv[1] !== '--force') {
+        // Once the daemon is gone, nothing proves a remaining reservation stale, so it would refuse every later
+        // automatic start. A reservation that cannot be resolved is still reported; --force removes it below.
+        await resolveDaemonStartupReservationAsync(client, connectionOptions.paths).catch(() => false);
+      }
       const { activeRequests } = await client.shutdownAsync();
       if (activeRequests) {
         await writeStreamAsync(
@@ -147,7 +160,8 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       await writeStatusAsync({
         state: 'shutdownAccepted',
         socketPath: connectionOptions.paths.socketPath,
-        ...cancelled
+        ...cancelled,
+        ...getStartupReservationStatus(connectionOptions.paths)
       });
       return;
     }
@@ -157,7 +171,8 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       await writeStatusAsync({
         state: 'ready',
         socketPath: connectionOptions.paths.socketPath,
-        ...(await readyClient.status)
+        ...(await readyClient.status),
+        ...getStartupReservationStatus(connectionOptions.paths)
       });
     } finally {
       if (readyClient !== client) await readyClient.closeAsync();
@@ -182,8 +197,63 @@ async function connectExistingAsync(
     ) {
       return undefined;
     }
-    throw error;
+    throw explainStartupReservation(explainExitedDaemon(error, options.paths), options.paths);
   }
+}
+
+/**
+ * Explains a refused connection whose ownership record names a daemon that no longer runs. An orderly
+ * shutdown removes the record, so that daemon exited without shutting down, for example after a crash.
+ */
+function explainExitedDaemon(error: unknown, paths: IDaemonPaths): unknown {
+  if (!(error instanceof DaemonTransportError) || error.code !== DaemonTransportErrorCode.connectionRefused) {
+    return error;
+  }
+  const owner: IDaemonLockfile | undefined = readDaemonLockfile(paths.lockfilePath);
+  if (
+    owner?.socketPath !== paths.socketPath ||
+    !Number.isSafeInteger(owner.pid) ||
+    owner.pid <= 0 ||
+    isDaemonProcessAlive(owner.pid)
+  ) {
+    return error;
+  }
+  return new DaemonTransportError(
+    error.code,
+    `${error.message} rushd (PID ${owner.pid}) exited without shutting down; "rush-client daemon logs" may show why.`
+  );
+}
+
+/**
+ * Reports a startup reservation, which refuses another daemon launch until it is resolved. Clients resolve it
+ * once the daemon it reserved is ready, so the next command that uses, stops or restarts a ready daemon resolves
+ * a remaining one; status only reports it.
+ */
+function getStartupReservationStatus(paths: IDaemonPaths): {
+  startupReservation?: IDaemonStartupReservationInfo;
+} {
+  const startupReservation: IDaemonStartupReservationInfo | undefined =
+    inspectDaemonStartupReservation(paths);
+  return startupReservation ? { startupReservation } : {};
+}
+
+/** Explains that a remaining startup reservation refuses another daemon launch, and what can resolve it. */
+function explainStartupReservation(error: unknown, paths: IDaemonPaths): unknown {
+  const reservation: IDaemonStartupReservationInfo | undefined = inspectDaemonStartupReservation(paths);
+  if (!reservation || !(error instanceof Error)) return error;
+  const helper: string = `its startup helper (PID ${reservation.helperPid})`;
+  let explanation: string;
+  switch (reservation.helperState) {
+    case 'running':
+      explanation = `A daemon is starting: ${helper} is still waiting for it to become ready; retry shortly.`;
+      break;
+    case 'exited':
+      explanation = `The startup reservation at ${reservation.path} remains, but ${helper} exited before the daemon became ready, so the reservation refuses every automatic start unless that daemon still becomes ready. Check "rush-client daemon logs"; if the daemon failed to start, run "rush-client daemon stop --force" to remove it.`;
+      break;
+    default:
+      explanation = `The startup reservation at ${reservation.path} refuses another daemon launch. Check "rush-client daemon logs"; if no daemon is starting, run "rush-client daemon stop --force" to remove it.`;
+  }
+  return new Error(`${error.message} ${explanation}`, { cause: error });
 }
 
 async function restartDaemonAsync(

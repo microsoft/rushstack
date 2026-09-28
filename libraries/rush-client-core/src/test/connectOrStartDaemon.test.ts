@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { spawn, type ChildProcess } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import * as fs from 'node:fs';
 import * as net from 'node:net';
@@ -10,19 +11,28 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { FileSystem } from '@rushstack/node-core-library';
+import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import {
   readDaemonLockfile,
   type IDaemonLockfile,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
-import { DaemonClient } from '../DaemonClient';
+import { DaemonClient, type DaemonClientOutcome } from '../DaemonClient';
+import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from '../DaemonClientError';
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { resetDaemonArtifactsAsync } from '../DaemonOwnership';
-import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
+import {
+  connectOrStartDaemonAsync,
+  requestDaemonShutdownAsync,
+  resolveDaemonStartupReservationAsync,
+  type IConnectOrStartDaemonOptions
+} from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
-import { getDaemonStartupFilePath } from '../DaemonStartup';
+import { getDaemonStartupFilePath, releaseDaemonStartup, reserveDaemonStartup } from '../DaemonStartup';
+import { inspectDaemonStartupReservation } from '../DaemonStartupReservation';
+import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('detached daemon startup', () => {
@@ -134,12 +144,36 @@ describe('detached daemon startup', () => {
     return daemonPid;
   }
 
+  async function getExitedPidAsync(): Promise<number> {
+    const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
+    await once(exited, 'close');
+    return exited.pid!;
+  }
+
+  function writeReservation(helperPid: number, helperStartedAt: string = new Date().toISOString()): string {
+    const contents: string = JSON.stringify({ token: randomUUID(), helperPid, helperStartedAt });
+    fs.writeFileSync(getDaemonStartupFilePath(paths), contents);
+    return contents;
+  }
+
+  async function startFixtureDaemonAsync(): Promise<number> {
+    const client: DaemonClient = await connectOrStartDaemonAsync(options);
+    const { pid } = await client.status;
+    await client.closeAsync();
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    return pid!;
+  }
+
   it('fails closed for successor starters while the original detached daemon remains pre-bind', async () => {
     const daemonPid: number = await killStarterBeforeBindAsync();
     const results = await Promise.all(
       Array.from({ length: 4 }, () => startClient({ ...options, startupTimeoutMs: 700 }).result)
     );
     expect(results.every(({ code }) => code !== 0)).toBe(true);
+    // The helper is alive, so the client that holds the start lock waits for it until its own deadline.
+    expect(
+      results.some(({ stderr }) => stderr.includes('is still waiting for the daemon to become ready'))
+    ).toBe(true);
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
     expect(fs.existsSync(paths.lockfilePath)).toBe(false);
 
@@ -212,6 +246,218 @@ describe('detached daemon startup', () => {
     );
     expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it('refuses another launch at once when the startup helper exited without releasing its reservation', async () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    const failing: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: { ...options.startCommand!, args: [path.join(folder, 'missing-entry.js')] }
+    };
+    await expect(connectOrStartDaemonAsync(failing)).rejects.toThrow('Unable to start');
+    const contents: string = fs.readFileSync(startupPath, 'utf8');
+    const { helperPid } = JSON.parse(contents);
+    expect(inspectDaemonStartupReservation(paths)).toEqual({
+      path: startupPath,
+      helperPid,
+      helperState: 'exited'
+    });
+    const started: number = Date.now();
+    const error: Error = await connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 20000 }).then(
+      () => new Error('Expected startup to be refused.'),
+      (refusal: Error) => refusal
+    );
+    expect(Date.now() - started).toBeLessThan(3000);
+    expect(error.message).toContain(
+      `unresolved startup handoff at ${startupPath}: its startup helper (PID ${helperPid}) exited before the daemon became ready; refusing another launch.`
+    );
+    expect(error.message).toContain('daemon stop --force');
+    expect(error.message).not.toContain('..');
+    expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it.each(['legacy', 'exited helper', 'no auto-start'])(
+    'uses and resolves a ready daemon next to a retained startup reservation (%s)',
+    async (kind) => {
+      const daemonPid: number = await startFixtureDaemonAsync();
+      if (kind === 'legacy') {
+        fs.writeFileSync(getDaemonStartupFilePath(paths), randomUUID());
+      } else {
+        writeReservation(await getExitedPidAsync());
+      }
+      const started: number = Date.now();
+      const client: DaemonClient = await connectOrStartDaemonAsync(
+        kind === 'no auto-start' ? { paths, expectedDaemonVersion: 'fixture' } : options
+      );
+      try {
+        expect((await client.status).pid).toBe(daemonPid);
+      } finally {
+        await client.closeAsync();
+      }
+      expect(Date.now() - started).toBeLessThan(3000);
+      expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    }
+  );
+
+  it('resolves a retained startup reservation before replacing a mismatched ready daemon', async () => {
+    const daemonPid: number = await startFixtureDaemonAsync();
+    fs.writeFileSync(getDaemonStartupFilePath(paths), randomUUID());
+    const replacement: DaemonClient = await connectOrStartDaemonAsync({
+      ...options,
+      expectedDaemonVersion: 'replacement',
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'replacement'] }
+    });
+    try {
+      const status = await replacement.status;
+      expect(status.daemonVersion).toBe('replacement');
+      expect(status.pid).not.toBe(daemonPid);
+    } finally {
+      await replacement.closeAsync();
+    }
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+  });
+
+  it('keeps a startup reservation next to a ready daemon that is not the attested owner', async () => {
+    await startFixtureDaemonAsync();
+    const owner: string = fs.readFileSync(paths.lockfilePath, 'utf8');
+    fs.writeFileSync(paths.lockfilePath, JSON.stringify({ ...JSON.parse(owner), pid: process.pid }));
+    const contents: string = writeReservation(await getExitedPidAsync());
+    try {
+      await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 2000 })).rejects.toThrow(
+        'unresolved startup handoff'
+      );
+      await expect(connectOrStartDaemonAsync({ paths, expectedDaemonVersion: 'fixture' })).rejects.toThrow(
+        'auto-start is disabled'
+      );
+      expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
+    } finally {
+      fs.writeFileSync(paths.lockfilePath, owner);
+    }
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  it('resolves a retained startup reservation before shutdown so that a successor can start', async () => {
+    const daemonPid: number = await startFixtureDaemonAsync();
+    writeReservation(await getExitedPidAsync());
+    const running: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
+    const previousDaemon = await requestDaemonShutdownAsync(running, paths).finally(() =>
+      running.closeAsync()
+    );
+    expect(previousDaemon.pid).toBe(daemonPid);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    const successor: DaemonClient = await connectOrStartDaemonAsync({ ...options, previousDaemon });
+    try {
+      expect((await successor.status).pid).not.toBe(daemonPid);
+    } finally {
+      await successor.closeAsync();
+    }
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+  });
+
+  it('does not request shutdown while the start lock keeps a startup reservation unresolved', async () => {
+    const daemonPid: number = await startFixtureDaemonAsync();
+    const contents: string = writeReservation(await getExitedPidAsync());
+    const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
+    expect(lock).toBeDefined();
+    const running: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
+    try {
+      await expect(requestDaemonShutdownAsync(running, paths, 300)).rejects.toThrow('shutdown was not sent');
+    } finally {
+      await running.closeAsync();
+      await lock!.releaseAsync();
+    }
+    expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
+    const client: DaemonClient = await connectOrStartDaemonAsync(options);
+    try {
+      expect((await client.status).pid).toBe(daemonPid);
+    } finally {
+      await client.closeAsync();
+    }
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+  });
+
+  it('resolves a startup reservation before a plain stop only for the attested ready daemon', async () => {
+    const daemonPid: number = await startFixtureDaemonAsync();
+    const running: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
+    try {
+      await expect(resolveDaemonStartupReservationAsync(running, paths)).resolves.toBe(true);
+      const contents: string = writeReservation(await getExitedPidAsync());
+      const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
+      expect(lock).toBeDefined();
+      try {
+        await expect(resolveDaemonStartupReservationAsync(running, paths, 300)).resolves.toBe(false);
+      } finally {
+        await lock!.releaseAsync();
+      }
+      const owner: string = fs.readFileSync(paths.lockfilePath, 'utf8');
+      fs.writeFileSync(paths.lockfilePath, JSON.stringify({ ...JSON.parse(owner), pid: process.pid }));
+      try {
+        await expect(resolveDaemonStartupReservationAsync(running, paths)).resolves.toBe(false);
+      } finally {
+        fs.writeFileSync(paths.lockfilePath, owner);
+      }
+      expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
+      await expect(resolveDaemonStartupReservationAsync(running, paths)).resolves.toBe(true);
+      expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+      await running.shutdownAsync();
+    } finally {
+      await running.closeAsync();
+    }
+    // With the reservation resolved, a later start launches a new daemon instead of being refused.
+    await waitForTestProcessExitAsync(daemonPid);
+    const successor: DaemonClient = await connectOrStartDaemonAsync(options);
+    try {
+      expect((await successor.status).pid).not.toBe(daemonPid);
+    } finally {
+      await successor.closeAsync();
+    }
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+  });
+
+  it('reports a startup reservation and whether its helper can still release it', async () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    expect(inspectDaemonStartupReservation(paths)).toBeUndefined();
+    fs.writeFileSync(startupPath, randomUUID());
+    expect(inspectDaemonStartupReservation(paths)).toEqual({ path: startupPath, helperState: 'unknown' });
+    writeReservation(process.pid);
+    expect(inspectDaemonStartupReservation(paths)).toEqual({
+      path: startupPath,
+      helperPid: process.pid,
+      helperState: 'running'
+    });
+    const exitedPid: number = await getExitedPidAsync();
+    writeReservation(exitedPid);
+    expect(inspectDaemonStartupReservation(paths)).toEqual({
+      path: startupPath,
+      helperPid: exitedPid,
+      helperState: 'exited'
+    });
+    if (process.platform === 'linux') {
+      // This process started after the recorded helper, so it merely reuses the PID.
+      writeReservation(process.pid, new Date(Date.now() - 3600000).toISOString());
+      expect(inspectDaemonStartupReservation(paths)).toMatchObject({ helperState: 'exited' });
+    }
+    fs.unlinkSync(startupPath);
+    fs.mkdirSync(startupPath);
+    expect(inspectDaemonStartupReservation(paths)).toEqual({ path: startupPath, helperState: 'unknown' });
+    fs.rmdirSync(startupPath);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it('lets a startup helper release only its own reservation, tolerating one already resolved', () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    const helper = { pid: process.pid, startedAt: new Date().toISOString() };
+    const token: string = reserveDaemonStartup(paths, helper);
+    expect(() => reserveDaemonStartup(paths, helper)).toThrow('EEXIST');
+    expect(() => releaseDaemonStartup(paths, randomUUID())).toThrow('changed ownership');
+    expect(fs.existsSync(startupPath)).toBe(true);
+    releaseDaemonStartup(paths, token);
+    expect(fs.existsSync(startupPath)).toBe(false);
+    releaseDaemonStartup(paths, token);
+    expect(fs.existsSync(startupPath)).toBe(false);
   });
 
   it.each([false, true])(
@@ -623,6 +869,122 @@ describe('detached daemon startup', () => {
     }
   });
 
+  describe('when the connection is lost before the result', () => {
+    const exitedMessage = (pid: number, logged: boolean, client: string = 'rush-client'): string =>
+      `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${pid}) exited while it ran the command; ` +
+      `"rush-client daemon logs" ${logged ? 'shows' : 'may show'} why. Run the command again; ` +
+      `if the daemon exits again, run the command with "${client} --no-daemon".`;
+
+    function withMode(mode: string): IConnectOrStartDaemonOptions {
+      return {
+        ...options,
+        startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
+      };
+    }
+
+    function captureRequest(invocationKind?: 'rushx'): IDaemonRequestEnvelope {
+      return captureDaemonRequest({
+        argv: ['test'],
+        commandName: 'test',
+        commandOrigin: 'custom',
+        cwd: folder,
+        environment: {},
+        terminal: { isTTY: false, supportsColor: false },
+        invocationKind
+      });
+    }
+
+    async function waitForRequestAsync(): Promise<void> {
+      const deadline: number = Date.now() + 5000;
+      while (!fs.existsSync(path.join(folder, 'requests')) && Date.now() < deadline) await delayAsync(20);
+      expect(fs.existsSync(path.join(folder, 'requests'))).toBe(true);
+    }
+
+    it('says that rushd exited and quotes the error it logged, without retrying', async () => {
+      const connection: IConnectOrStartDaemonOptions = withMode('crash-on-request');
+      const client: DaemonClient = await connectOrStartDaemonAsync(connection);
+      const { pid } = await client.status;
+      const error: unknown = await executeWithDaemonRestartAsync(client, connection, {
+        request: captureRequest()
+      }).catch((failure: unknown) => failure);
+      expect(error).toBeInstanceOf(DaemonClientError);
+      expect(error).toMatchObject({
+        code: 'disconnected',
+        message:
+          `${exitedMessage(pid!, true)}\n` +
+          'The daemon log reports: Error: fixture daemon crash while running the request'
+      });
+      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8')).toBe('fixture\n');
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${pid}\n`);
+    });
+
+    it('ignores log output from before the request and names the rushx client', async () => {
+      const earlierCrash: string = [
+        '/earlier/daemon.js:1',
+        "throw new Error('an earlier crash');",
+        '^',
+        '',
+        'Error: an earlier crash',
+        '    at /earlier/daemon.js:1:7',
+        '',
+        'Node.js v22.0.0',
+        ''
+      ].join('\n');
+      fs.writeFileSync(getDaemonLogFilePath(paths), earlierCrash);
+      const connection: IConnectOrStartDaemonOptions = withMode('kill-on-request');
+      const client: DaemonClient = await connectOrStartDaemonAsync(connection);
+      const { pid } = await client.status;
+      await expect(
+        executeWithDaemonRestartAsync(client, connection, { request: captureRequest('rushx') })
+      ).rejects.toMatchObject({ code: 'disconnected', message: exitedMessage(pid!, false, 'rushx-client') });
+      expect(fs.readFileSync(getDaemonLogFilePath(paths), 'utf8')).toContain(earlierCrash);
+    });
+
+    it('says the connection closed while rushd still runs', async () => {
+      const connection: IConnectOrStartDaemonOptions = withMode('close-on-request');
+      const client: DaemonClient = await connectOrStartDaemonAsync(connection);
+      const { pid } = await client.status;
+      await expect(
+        executeWithDaemonRestartAsync(client, connection, { request: captureRequest() })
+      ).rejects.toMatchObject({
+        code: 'disconnected',
+        message: `${DAEMON_DISCONNECTED_MESSAGE} The connection to rushd (PID ${pid}) closed, but the daemon is still running; run the command again.`
+      });
+      expect(fs.existsSync(path.join(folder, `stopped-${pid}`))).toBe(false);
+    });
+
+    it('keeps the plain text after the request was cancelled', async () => {
+      const connection: IConnectOrStartDaemonOptions = withMode('crash-on-cancel');
+      const client: DaemonClient = await connectOrStartDaemonAsync(connection);
+      const abort: AbortController = new AbortController();
+      const pending: Promise<DaemonClientOutcome> = executeWithDaemonRestartAsync(client, connection, {
+        request: captureRequest(),
+        abortSignal: abort.signal
+      });
+      await waitForRequestAsync();
+      abort.abort();
+      await expect(pending).rejects.toMatchObject({
+        code: 'disconnected',
+        message: DAEMON_DISCONNECTED_MESSAGE
+      });
+    });
+
+    it('keeps the aborted result that an orderly shutdown sends', async () => {
+      const connection: IConnectOrStartDaemonOptions = withMode('hold-until-shutdown');
+      const client: DaemonClient = await connectOrStartDaemonAsync(connection);
+      const pending: Promise<DaemonClientOutcome> = executeWithDaemonRestartAsync(client, connection, {
+        request: captureRequest()
+      });
+      await waitForRequestAsync();
+      const stopping: DaemonClient = await connectOrStartDaemonAsync(connection);
+      await stopping.shutdownAsync();
+      expect(await pending).toMatchObject({
+        kind: 'result',
+        result: { exitCode: 130, outcome: 'aborted', aborted: true }
+      });
+    });
+  });
+
   it('waits through published ownership handoff even without a captured predecessor', async () => {
     const running = await connectOrStartDaemonAsync({
       ...options,
@@ -716,6 +1078,38 @@ describe('detached daemon startup', () => {
     ).rejects.toThrow(logFilePath);
     expect(fs.readFileSync(logFilePath, 'utf8')).toContain('Cannot find module');
   });
+
+  it('tells the daemon it starts which runtime folder its clients look in', async () => {
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'runtime-base'), 'utf8')).toBe(path.dirname(folder));
+  });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'reports a linked runtime folder as a startup failure without starting a daemon',
+    async () => {
+      const link: string = `${folder}-link`;
+      fs.symlinkSync(folder, link);
+      try {
+        const failure: Promise<DaemonClient> = connectOrStartDaemonAsync({
+          ...options,
+          paths: {
+            runtimeDir: link,
+            socketPath: path.join(link, 'd.sock'),
+            lockfilePath: path.join(link, 'daemon.pid.json')
+          }
+        });
+        await expect(failure).rejects.toBeInstanceOf(DaemonClientError);
+        await expect(failure).rejects.toMatchObject({ code: 'startupFailed' });
+        await expect(failure).rejects.toThrow(
+          `The daemon runtime folder ${link} is unsafe: it is a symbolic link`
+        );
+        expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+      } finally {
+        fs.unlinkSync(link);
+      }
+    }
+  );
 
   (process.platform === 'win32' ? it.skip : it)(
     'refuses linked log destinations without changing their target',

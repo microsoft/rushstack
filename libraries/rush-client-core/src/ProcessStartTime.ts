@@ -6,6 +6,7 @@ import { performance } from 'node:perf_hooks';
 
 // USER_HZ is fixed at 100 on mainstream Linux ABIs; it is verified against this process before use.
 const USER_HZ: number = 100;
+const PROC_STAT_STATE_FIELD: number = 3;
 const PROC_STAT_START_TIME_FIELD: number = 22;
 const MAX_CALIBRATION_ERROR_MS: number = 1000;
 /** A process that began this long after a record was written cannot be the record's writer. */
@@ -48,7 +49,25 @@ function readUptimeSeconds(): number | undefined {
   }
 }
 
+/**
+ * True only on Linux when `pid` has exited but its parent has not reaped it yet. Such a zombie still accepts
+ * signal 0, but it can no longer run or hold connections.
+ */
+export function isProcessDefunct(pid: number): boolean {
+  if (process.platform !== 'linux') return false;
+  const state: string | undefined = readStatFields(pid)?.[PROC_STAT_STATE_FIELD - 3];
+  return state === 'Z' || state === 'X';
+}
+
 function readStartSeconds(pid: number | 'self'): number | undefined {
+  const fields: string[] | undefined = readStatFields(pid);
+  if (!fields) return undefined;
+  const jiffies: number = Number(fields[PROC_STAT_START_TIME_FIELD - 3]);
+  return Number.isSafeInteger(jiffies) && jiffies >= 0 ? jiffies / USER_HZ : undefined;
+}
+
+/** The fields of `/proc/<pid>/stat` from field 3 (the process state) on. */
+function readStatFields(pid: number | 'self'): string[] | undefined {
   let stat: string;
   try {
     stat = fs.readFileSync(`/proc/${pid}/stat`, 'utf8');
@@ -58,10 +77,8 @@ function readStartSeconds(pid: number | 'self'): number | undefined {
   // The command name (field 2) may contain spaces and parentheses; fields after it never do.
   const commandEnd: number = stat.lastIndexOf(')');
   if (commandEnd < 0) return undefined;
-  const fields: string[] = stat
+  return stat
     .slice(commandEnd + 1)
     .trim()
     .split(' ');
-  const jiffies: number = Number(fields[PROC_STAT_START_TIME_FIELD - 3]);
-  return Number.isSafeInteger(jiffies) && jiffies >= 0 ? jiffies / USER_HZ : undefined;
 }

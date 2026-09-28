@@ -45,6 +45,7 @@ import {
 } from './WorkspaceRequestAdmission';
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
+import { getRushLibPathHandoff } from './RushLibPathHandoff';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
@@ -184,7 +185,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       ...request,
       environment: {
         ...request.environment,
-        [EnvironmentVariableNames._RUSH_LIB_PATH]: require.resolve('@microsoft/rush-lib')
+        [EnvironmentVariableNames._RUSH_LIB_PATH]: getRushLibPathHandoff(
+          require.resolve('@microsoft/rush-lib'),
+          process.env[EnvironmentVariableNames._RUSH_LIB_PATH]
+        )
       }
     };
     if (this.#restartPending) {

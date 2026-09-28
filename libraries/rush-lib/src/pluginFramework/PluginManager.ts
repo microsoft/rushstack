@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Import, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, Import, InternalError, type IPackageJson } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { CommandLineConfiguration } from '../api/CommandLineConfiguration';
@@ -13,6 +13,8 @@ import { _createRushSessionForPlugin, type RushSession } from './RushSession';
 import type { PluginLoaderBase, IRushPluginManifest } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { findNodeModulesPackageFolder } from '../utilities/RushLibPathHandoff';
+import { rushLibPathHandoff } from '../utilities/SetRushLibPath';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -61,19 +63,38 @@ export class PluginManager {
     // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
     const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = options.builtInPluginConfigurations;
 
-    const ownPackageJsonDependencies: Record<string, string> = Rush._rushLibPackageJson.dependencies || {};
+    const ownPackageJson: IPackageJson & { publishOnlyDependencies?: Record<string, string> } =
+      Rush._rushLibPackageJson;
+    const ownPackageJsonDependencies: Record<string, string> = ownPackageJson.dependencies || {};
+    const publishOnlyDependencies: Record<string, string> = ownPackageJson.publishOnlyDependencies || {};
     function tryAddBuiltInPlugin(builtInPluginName: string, pluginPackageName?: string): void {
       if (!pluginPackageName) {
         pluginPackageName = `@rushstack/${builtInPluginName}`;
       }
+      if (
+        builtInPluginConfigurations.some(
+          ({ packageName, pluginName }) => packageName === pluginPackageName && pluginName === builtInPluginName
+        )
+      ) {
+        // The host already provides this plugin, as apps/rush/src/start-dev.ts does.
+        return;
+      }
+      let pluginPackageFolder: string | undefined;
       if (ownPackageJsonDependencies[pluginPackageName]) {
+        pluginPackageFolder = Import.resolvePackage({
+          packageName: pluginPackageName,
+          baseFolderPath: __dirname
+        });
+      } else if (publishOnlyDependencies[pluginPackageName] && rushLibPathHandoff) {
+        // An unpublished rush-lib, such as one in a "rush deploy" output, uses the plugins that its host
+        // installed next to the rush-lib link that _RUSH_LIB_PATH goes through.
+        pluginPackageFolder = findNodeModulesPackageFolder(rushLibPathHandoff.packageFolder, pluginPackageName);
+      }
+      if (pluginPackageFolder) {
         builtInPluginConfigurations.push({
           packageName: pluginPackageName,
           pluginName: builtInPluginName,
-          pluginPackageFolder: Import.resolvePackage({
-            packageName: pluginPackageName,
-            baseFolderPath: __dirname
-          })
+          pluginPackageFolder
         });
       }
     }

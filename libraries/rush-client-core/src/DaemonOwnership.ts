@@ -18,7 +18,7 @@ const RESET_RETRY_MS: number = 100;
 
 /** Printed wherever automatic recovery fails closed. */
 export const DAEMON_RESET_HINT: string =
-  'If no daemon is running for this workspace, run "rush-client daemon stop --force" to remove its stale files.';
+  'If "rush-client daemon status" cannot connect, run "rush-client daemon stop --force" to remove this workspace\'s stale daemon files.';
 
 export type DaemonOwnership = Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
 

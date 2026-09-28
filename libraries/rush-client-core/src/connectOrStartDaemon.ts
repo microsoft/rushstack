@@ -11,7 +11,6 @@ import { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol
 import {
   DaemonTransportError,
   DaemonTransportErrorCode,
-  ensureDaemonRuntimeDir,
   reclaimStaleDaemonAsync,
   readDaemonLockfile,
   type IDaemonLockfile,
@@ -31,11 +30,23 @@ import {
   type DaemonOwnership
 } from './DaemonOwnership';
 import {
+  assertDaemonRuntimeFolderIsPrivate,
+  ensureDaemonRuntimeFolder,
+  withDaemonRuntimeFolder
+} from './DaemonRuntimeFolder';
+import {
   getDaemonStartupFilePath,
+  readDaemonStartupReservation,
   reserveDaemonStartup,
-  releaseDaemonStartup,
-  type IDaemonStartupOptions
+  type IDaemonStartupOptions,
+  type IDaemonStartupReservation
 } from './DaemonStartup';
+import {
+  getStartupHelperState,
+  resolveStartupReservationForReadyDaemon,
+  tryResolveStartupReservationAsync,
+  type DaemonStartupHelperState
+} from './DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 interface IStartupHelper {
@@ -49,6 +60,9 @@ interface IStartupHelper {
  * would otherwise leave a retained reservation that keeps every later client from using the ready daemon.
  */
 const STARTUP_HELPER_READINESS_TIMEOUT_MS: number = 120_000;
+
+/** Matches the default of {@link DaemonClient.shutdownAsync}. */
+const DEFAULT_SHUTDOWN_TIMEOUT_MS: number = 15000;
 
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
 export interface IDaemonStartCommand {
@@ -94,6 +108,7 @@ export async function connectOrStartDaemonAsync(
   }
   const deadline: number = Date.now() + timeoutMs;
   options.abortSignal?.throwIfAborted();
+  assertDaemonRuntimeFolderIsPrivate(options.paths);
   await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline, options.abortSignal);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
@@ -121,7 +136,7 @@ async function startDaemonAsync(
   options: IConnectOrStartDaemonOptions & { readonly startCommand: IDaemonStartCommand },
   deadline: number
 ): Promise<DaemonClient> {
-  ensureDaemonRuntimeDir(options.paths);
+  ensureDaemonRuntimeFolder(options.paths);
   let lock: IStartupLock | undefined;
   let backoffMs: number = 50;
   while (Date.now() < deadline) {
@@ -137,19 +152,7 @@ async function startDaemonAsync(
   }
   if (!lock) throw startupError(options, 'timed out waiting for another starting client');
   try {
-    while (fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false })) {
-      const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
-      if (ready) return ready;
-      if (Date.now() >= deadline) {
-        throw startupError(
-          options,
-          `has an unresolved startup handoff at ${getDaemonStartupFilePath(options.paths)}; refusing another launch. ${DAEMON_RESET_HINT}`
-        );
-      }
-      await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
-        signal: options.abortSignal
-      });
-    }
+    await waitForStartupReservationAsync(options, deadline);
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
     const replacement: DaemonClient | undefined = await replaceMismatchedDaemonAsync(options, deadline);
@@ -196,6 +199,76 @@ async function startDaemonAsync(
 }
 
 /**
+ * Holding the start mutex, waits until no startup reservation remains. The helper releases its reservation once
+ * the daemon completes hello/ping, and this client resolves it on the same evidence, so a daemon that became
+ * ready after its helper stopped waiting is still used. Another launch is refused while the reservation remains:
+ * at once when its helper exited, since nothing else will release it, and otherwise at the deadline.
+ */
+async function waitForStartupReservationAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<void> {
+  while (true) {
+    options.abortSignal?.throwIfAborted();
+    const reservation: IDaemonStartupReservation | undefined = readDaemonStartupReservation(options.paths);
+    if (!reservation) return;
+    if (await tryResolveForReadyDaemonAsync(options, deadline)) continue;
+    const helperState: DaemonStartupHelperState = getStartupHelperState(reservation);
+    if (helperState === 'exited' || Date.now() >= deadline) {
+      // The helper may have released its reservation just before it exited.
+      const current: IDaemonStartupReservation | undefined = readDaemonStartupReservation(options.paths);
+      if (!current || current.contents !== reservation.contents) continue;
+      throw startupError(options, describeUnresolvedReservation(options.paths, reservation, helperState));
+    }
+    await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
+      signal: options.abortSignal
+    });
+  }
+}
+
+/**
+ * Resolves the startup reservation if a daemon of any version completes hello/ping at the endpoint, which is
+ * the readiness the helper waits for; the normal flow then replaces a mismatched daemon. The caller holds the
+ * start mutex.
+ */
+async function tryResolveForReadyDaemonAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<boolean> {
+  let client: DaemonClient | undefined;
+  try {
+    client = await tryConnectEndpointAsync({ ...options, expectedDaemonVersion: undefined }, deadline);
+  } catch (error) {
+    // Nor would the helper treat a daemon with an incompatible protocol as ready.
+    if (error instanceof DaemonClientError && error.code === 'versionMismatch') return false;
+    throw error;
+  }
+  if (!client) return false;
+  try {
+    return resolveStartupReservationForReadyDaemon(options.paths, (await client.status).pid);
+  } finally {
+    await client.closeAsync();
+  }
+}
+
+function describeUnresolvedReservation(
+  paths: IDaemonPaths,
+  reservation: IDaemonStartupReservation,
+  helperState: DaemonStartupHelperState
+): string {
+  const prefix: string = `has an unresolved startup handoff at ${getDaemonStartupFilePath(paths)}`;
+  const helperPid: number | undefined = reservation.helper?.pid;
+  switch (helperState) {
+    case 'exited':
+      return `${prefix}: its startup helper (PID ${helperPid}) exited before the daemon became ready; refusing another launch. ${DAEMON_RESET_HINT}`;
+    case 'running':
+      return `${prefix}: its startup helper (PID ${helperPid}) is still waiting for the daemon to become ready; refusing another launch`;
+    default:
+      return `${prefix}; refusing another launch. ${DAEMON_RESET_HINT}`;
+  }
+}
+
+/**
  * Captures attested ownership and requests shutdown without claiming that cleanup has finished.
  * Pass the returned identity as previousDaemon to connectOrStartDaemonAsync before replacement.
  * @beta
@@ -220,8 +293,77 @@ export async function requestDaemonShutdownAsync(
     pid: owner.pid,
     startedAt: owner.startedAt
   };
+  await resolveReservationBeforeShutdownAsync(paths, pid, timeoutMs ?? DEFAULT_SHUTDOWN_TIMEOUT_MS);
   await client.shutdownAsync(timeoutMs);
   return previousDaemon;
+}
+
+/**
+ * A retained startup reservation would refuse the successor's launch, so it is resolved first; `pid` answered
+ * hello/ping and is attested as the owner. Waits for the start mutex, since another client may be resolving it.
+ */
+async function resolveReservationBeforeShutdownAsync(
+  paths: IDaemonPaths,
+  pid: number,
+  timeoutMs: number
+): Promise<void> {
+  if (!readDaemonStartupReservation(paths)) return;
+  const lock: IStartupLock | undefined = await waitForStartupLockAsync(paths, timeoutMs);
+  if (!lock) {
+    throw new DaemonClientError(
+      'startupFailed',
+      `Another client is starting the daemon for ${paths.lockfilePath}; shutdown was not sent.`
+    );
+  }
+  try {
+    if (!resolveStartupReservationForReadyDaemon(paths, pid)) {
+      throw new DaemonClientError(
+        'startupFailed',
+        `The daemon startup reservation at ${getDaemonStartupFilePath(paths)} could not be resolved for PID ${pid}; shutdown was not sent.`
+      );
+    }
+  } finally {
+    await lock.releaseAsync();
+  }
+}
+
+/**
+ * Resolves a startup reservation that remains next to a connected, ready daemon before that daemon is stopped.
+ * Afterwards no ready daemon would prove the reservation stale, so it would refuse every automatic start. The
+ * daemon must be the live owner in the ownership record for the endpoint, and the reservation is removed only
+ * if unchanged. Waits for the start mutex for up to `timeoutMs` (15000 milliseconds by default), since another
+ * client may be resolving it.
+ * @returns true when no reservation remains; false when one is kept.
+ * @beta
+ */
+export async function resolveDaemonStartupReservationAsync(
+  client: DaemonClient,
+  paths: IDaemonPaths,
+  timeoutMs: number = DEFAULT_SHUTDOWN_TIMEOUT_MS
+): Promise<boolean> {
+  if (!readDaemonStartupReservation(paths)) return true;
+  const { pid } = await client.status;
+  const lock: IStartupLock | undefined = await waitForStartupLockAsync(paths, timeoutMs);
+  if (!lock) return false;
+  try {
+    return resolveStartupReservationForReadyDaemon(paths, pid);
+  } finally {
+    await lock.releaseAsync();
+  }
+}
+
+/** Returns undefined when another client still holds the start mutex after `timeoutMs`. */
+async function waitForStartupLockAsync(
+  paths: IDaemonPaths,
+  timeoutMs: number
+): Promise<IStartupLock | undefined> {
+  const deadline: number = Date.now() + timeoutMs;
+  let lock: IStartupLock | undefined;
+  while (!(lock = await tryAcquireStartupLockAsync(paths))) {
+    if (Date.now() >= deadline) return undefined;
+    await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())));
+  }
+  return lock;
 }
 
 async function replaceMismatchedDaemonAsync(
@@ -256,22 +398,35 @@ async function tryConnectAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
 ): Promise<DaemonClient | undefined> {
+  const client: DaemonClient | undefined = await tryConnectEndpointAsync(options, deadline);
+  if (!client) return undefined;
+  // Do not expose a just-started daemon to shutdown/restart until its startup reservation is resolved:
+  // by the helper, or here once the daemon is ready. This never waits for the start mutex, and a client
+  // holding it (including this process) resolves the reservation itself.
+  let usable: boolean = false;
+  try {
+    options.abortSignal?.throwIfAborted();
+    usable =
+      !readDaemonStartupReservation(options.paths) ||
+      (await tryResolveStartupReservationAsync(client, options.paths));
+  } finally {
+    if (!usable) await client.closeAsync();
+  }
+  return usable ? client : undefined;
+}
+
+/** Connects and completes hello/ping, whether or not a startup reservation remains. */
+async function tryConnectEndpointAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<DaemonClient | undefined> {
   options.abortSignal?.throwIfAborted();
   try {
-    const client: DaemonClient = await DaemonClient.connectAsync({
+    return await DaemonClient.connectAsync({
       ...options,
       socketPath: options.paths.socketPath,
       timeoutMs: Math.min(options.timeoutMs ?? 1000, Math.max(1, deadline - Date.now()))
     });
-    // Do not expose a just-started daemon to shutdown/restart until the helper finishes the handoff.
-    let pendingStartup: boolean = true;
-    try {
-      options.abortSignal?.throwIfAborted();
-      pendingStartup = !!fs.lstatSync(getDaemonStartupFilePath(options.paths), { throwIfNoEntry: false });
-    } finally {
-      if (pendingStartup) await client.closeAsync();
-    }
-    return pendingStartup ? undefined : client;
   } catch (error) {
     options.abortSignal?.throwIfAborted();
     if (
@@ -403,7 +558,8 @@ async function spawnDetachedAsync(
 ): Promise<IStartupHelper> {
   const start: IDaemonStartCommand = {
     ...options.startCommand!,
-    cwd: path.resolve(options.startCommand!.cwd)
+    cwd: path.resolve(options.startCommand!.cwd),
+    environment: withDaemonRuntimeFolder(options.startCommand!.environment, options.paths)
   };
   const logFilePath: string = getDaemonLogFilePath(options.paths);
   // These distinct native flags have non-overlapping values.
@@ -427,7 +583,6 @@ async function spawnDetachedAsync(
       }
       fs.fchmodSync(logFd, 0o600);
     }
-    const token: string = reserveDaemonStartup(options.paths);
     let helper: IStartupHelper | undefined;
     try {
       const child: ChildProcess = spawn(process.execPath, [path.join(__dirname, 'runDaemonStartup.js')], {
@@ -443,7 +598,6 @@ async function spawnDetachedAsync(
       await once(child, 'spawn');
     } catch (error) {
       if (helper) await helper.closed;
-      releaseDaemonStartup(options.paths, token);
       throw new DaemonClientError(
         'startupFailed',
         `Unable to start ${start.command}; inspect ${logFilePath}.`,
@@ -451,6 +605,17 @@ async function spawnDetachedAsync(
       );
     }
     const { child } = helper;
+    let token: string;
+    try {
+      // The helper launches nothing until it receives its options, so the reservation can name it first.
+      // Its start time is taken after the spawn, so the helper can never look like a later reuse of its PID.
+      token = reserveDaemonStartup(options.paths, { pid: child.pid!, startedAt: new Date().toISOString() });
+    } catch (error) {
+      // Disconnected without options, the helper exits without launching.
+      child.disconnect();
+      await helper.closed;
+      throw error;
+    }
     child.unref();
     const startup: IDaemonStartupOptions = {
       paths: options.paths,
@@ -500,8 +665,9 @@ async function waitForHelperExitAsync(
 }
 
 function startupError(options: IConnectOrStartDaemonOptions, reason: string): DaemonClientError {
+  const sentence: string = /[.!?]$/.test(reason) ? reason : `${reason}.`;
   return new DaemonClientError(
     'startupFailed',
-    `Daemon startup ${reason}. Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.`
+    `Daemon startup ${sentence} Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.`
   );
 }

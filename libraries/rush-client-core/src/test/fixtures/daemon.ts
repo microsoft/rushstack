@@ -20,11 +20,14 @@ async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
   const folder: string = path.dirname(paths.lockfilePath);
   const daemonVersion: string = process.argv[3] ?? 'fixture';
-  const restartMode: string | undefined = process.argv[4];
+  const mode: string | undefined = process.argv[4];
+  const restartMode: string | undefined = mode?.startsWith('restart-') ? mode : undefined;
   const connections: Set<DaemonFrameConnection> = new Set();
   let closing: Promise<void> | undefined;
+  let heldRequest: { connection: DaemonFrameConnection; requestId: string } | undefined;
   fs.appendFileSync(path.join(folder, 'starts'), `${process.pid}\n`);
   fs.appendFileSync(path.join(folder, 'parents'), `${process.ppid}\n`);
+  fs.writeFileSync(path.join(folder, 'runtime-base'), process.env.RUSHD_RUNTIME_DIR ?? '(unset)');
   process.stdout.write('launcher stdout\n');
   process.stderr.write('launcher stderr\n');
   if (fs.existsSync(path.join(folder, 'hold-prebind'))) {
@@ -65,6 +68,18 @@ async function mainAsync(): Promise<void> {
           });
         } else if (message.kind === 'requestStart') {
           fs.appendFileSync(path.join(folder, 'requests'), `${daemonVersion}\n`);
+          if (mode === 'crash-on-request' || mode === 'kill-on-request') {
+            exitAbruptly();
+            return;
+          }
+          if (mode === 'close-on-request') {
+            await connection.closeAsync();
+            return;
+          }
+          if (mode === 'hold-until-shutdown' || mode === 'crash-on-cancel') {
+            heldRequest = { connection, requestId: message.payload.requestId };
+            return;
+          }
           if (message.payload.admission?.waitTimeoutMs !== undefined) {
             fs.appendFileSync(path.join(folder, 'waits'), `${message.payload.admission.waitTimeoutMs}\n`);
           }
@@ -92,7 +107,24 @@ async function mainAsync(): Promise<void> {
             fs.appendFileSync(path.join(folder, 'restarted'), 'r');
             await stopAsync();
           }
+        } else if (message.kind === 'requestCancel' && mode === 'crash-on-cancel') {
+          exitAbruptly();
         } else if (message.kind === 'shutdown') {
+          if (heldRequest) {
+            // Like rushd, an orderly shutdown ends a running request with an aborted result first.
+            await heldRequest.connection.sendFrameAsync({
+              kind: DaemonFrameType.controlJson,
+              payload: encodeDaemonControlMessage({
+                kind: 'requestResult',
+                payload: {
+                  requestId: heldRequest.requestId,
+                  exitCode: 130,
+                  outcome: 'aborted',
+                  aborted: true
+                }
+              })
+            });
+          }
           await connection.sendFrameAsync({
             kind: DaemonFrameType.controlJson,
             payload: encodeDaemonControlMessage({ kind: 'shutdownAck', payload: {} })
@@ -114,6 +146,15 @@ async function mainAsync(): Promise<void> {
   function stopAsync(): Promise<void> {
     closing ??= closeOnceAsync();
     return closing;
+  }
+
+  /** Exits like a crashed daemon, without cleanup. The test expects this exit, so it also counts as stopped. */
+  function exitAbruptly(): void {
+    fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
+    if (mode === 'kill-on-request') process.kill(process.pid, 'SIGKILL');
+    setImmediate(() => {
+      throw new Error('fixture daemon crash\nwhile running the request');
+    });
   }
 
   async function closeOnceAsync(): Promise<void> {

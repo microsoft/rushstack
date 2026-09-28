@@ -176,9 +176,10 @@ coalesced iteration, not while idle; native commands and `--no-daemon` can run
 after a completed request without stopping the daemon.
 
 Native workspace dispatch copies the request envelope and normalizes only the
-engine-owned `_RUSH_LIB_PATH` to this daemon's real engine. Foreign client SDK
-paths therefore neither select the wrong SDK nor cause a false restart. All other
-environment inputs remain unchanged and participate in normal lifecycle checks.
+engine-owned `_RUSH_LIB_PATH` to this daemon's own engine, keeping the spelling
+that the engine chose when it loaded. Foreign client SDK paths therefore neither
+select the wrong SDK nor cause a false restart. All other environment inputs
+remain unchanged and participate in normal lifecycle checks.
 
 Protocol 0.10 permits a bounded retry only when a pre-execution command result
 explicitly carries `retryAfterRestart: true`. `executeWithDaemonRestartAsync`
@@ -189,6 +190,15 @@ A started `install` or `update` is never repeated, including after a nonzero exi
 only an unstarted request can receive
 the typed retry authorization. Accepted queued requests drain their typed restart
 results before the old connection closes.
+
+When the connection is lost before a command's result, the command fails with exit code 1
+and is not retried. The diagnostic keeps "Daemon disconnected before delivering a result; the
+command was not retried." and says what happened to rushd. If its process exited (a crash, an
+out-of-memory kill or a signal), it names the PID, points to `rush-client daemon logs` and, if
+the daemon exits again, to `--no-daemon` (`rushx-client --no-daemon` for Rushx), and quotes on a
+second line the fatal error that the launcher log recorded after the command was sent. If
+rushd still runs, it says that only the connection closed. Ctrl+C and an orderly `daemon stop`
+or `daemon restart` still end a command as cancelled (exit code 130).
 
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
 not read input until the command attaches an input destination, and sends bounded
@@ -268,13 +278,44 @@ It does not replace a peer lacking safe shutdown support. Foreign package instal
 is a client preparation step; host self-restart selects only bundled or already cached
 compatible installations, never installing while the old workspace is being cleaned up.
 
+Every client of a checkout finds its daemon in one per-user runtime folder: on Linux and
+macOS, `/tmp/rushd-<uid>/`, whatever `TMPDIR` or `XDG_RUNTIME_DIR` a shell, job, service or
+sandbox sets. It holds the socket (`<key>.sock`), the ownership record
+(`<key>.pid.json`) and the launcher log. To move it, set `RUSHD_RUNTIME_DIR` to an absolute
+path for every client of that checkout; the folder becomes `$RUSHD_RUNTIME_DIR/rushd-<uid>/`,
+and its file system must support hard links. A client passes the folder to the daemon it starts.
+Windows uses the named pipe `\\.\pipe\rushd-<key>` and is unchanged.
+The client refuses a runtime folder that is a symbolic link, is not a directory or belongs to
+another user: commands run in-process with that reason, and `daemon` commands exit 1. Remove
+the folder or set `RUSHD_RUNTIME_DIR`. A folder that others can open is made owner-only (`0700`).
+`TMPDIR`, `TMP`, `TEMP`, `XDG_RUNTIME_DIR` and `RUSHD_RUNTIME_DIR` never select a different
+daemon; each operation receives the requesting client's values.
+Clients and daemons before protocol 0.12 used `$XDG_RUNTIME_DIR/rushd-<uid>/` or the
+temporary folder instead. A daemon started there stays there, where current clients do not
+look, until it idles out or is stopped with that older client (`rush-client daemon stop`).
+An older client that starts a current engine while `XDG_RUNTIME_DIR` or `TMPDIR` is set does
+not find it and runs in-process, so upgrade `rush-cli-client` with the engine.
+
 `rush-client daemon status` only connects and checks hello/pong. It never starts
 a process, reclaims files, or treats a PID file as evidence of readiness. Both
 commands print one JSON object with `state: "ready"`, `socketPath`, and the actual
 pong fields (`uptimeMs`, available versions, optional `pid` and
 `residentMemoryBytes`, and an optional `workspace` snapshot). Exit code 0 means protocol
 readiness, not build support. An unreachable/incompatible endpoint, invalid
-arguments, or startup failure returns exit code 1 with a diagnostic.
+arguments, or startup failure returns exit code 1 with a diagnostic. When the endpoint
+refuses connections and its ownership record (`<key>.pid.json`) names a PID that no longer
+exists, the diagnostic adds that rushd exited without shutting down (an orderly shutdown
+removes the record) and that `daemon logs` may show why.
+
+A startup reservation (`<key>.pid.json.starting`) refuses another daemon launch until
+the daemon it reserved becomes ready. Status reports one that remains as
+`startupReservation` with its `path`, the startup helper's `helperPid` when recorded, and
+`helperState`: `running` (the helper still waits for readiness), `exited` (nothing else will
+release it), or `unknown` (written by an older client). Status never removes it. Next to a
+ready daemon, the next command that uses, stops or restarts that daemon removes it; when status
+cannot connect, its diagnostic explains the reservation. After an `exited` helper, every automatic start is
+refused at once unless that daemon still becomes ready: check `daemon logs`, and if the daemon
+failed to start, run `daemon stop --force`.
 
 The optional workspace snapshot reports the provider generation/token, graph existence,
 and available warm accounting without initializing a graph. Missing fields are unknown,
@@ -302,7 +343,11 @@ followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this
 does not assert successful workspace disposal. Stop is idempotent: when nothing
 listens at the endpoint it reports `state: "notRunning"` with exit code 0. An
 unsupported protocol, missing acknowledgement, handshake failure, or timeout
-returns exit code 1. It does not auto-start anything.
+returns exit code 1. It does not auto-start anything. Before shutdown, it removes a startup
+reservation that remains next to that daemon, as restart does, so that the reservation cannot
+refuse the next start once the daemon is gone. It does so only for the live owner in the
+ownership record, under the start mutex (waiting up to 15 seconds for it); a reservation that
+it cannot resolve stays in place and is reported as `startupReservation`.
 
 `rush-client daemon stop --force` stops a running daemon the same way, then waits
 (up to 15 seconds) for it to release its listener and ownership record and removes
@@ -319,7 +364,10 @@ that every fail-closed startup message points to.
 `rush-client daemon restart` first verifies that the selected Rush version has a
 launcher and captures the original lock's PID/start timestamp, checking that it
 matches pong's positive PID and the selected endpoint, then performs acknowledged
-shutdown. It waits for original ownership release or a demonstrably dead owner
+shutdown. Before shutdown, it removes a startup reservation that remains next to that
+daemon (under the start mutex), so that the reservation cannot refuse the successor; if
+another client holds the mutex for 15 seconds, restart fails without stopping the daemon.
+It waits for original ownership release or a demonstrably dead owner
 before calling the existing locked starter. A live owner fails closed at
 the startup deadline; no PID is killed and no live ownership record is deleted.
 A newly

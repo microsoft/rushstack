@@ -30,7 +30,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import { connectDaemonAsync, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
-import { DaemonClientError } from './DaemonClientError';
+import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from './DaemonClientError';
 
 const MAX_STDIN_CHUNK_BYTES: number = 64 * 1024;
 
@@ -138,7 +138,7 @@ export class DaemonClient {
             'disconnected',
             this.#shutdown
               ? 'Daemon disconnected before acknowledging shutdown.'
-              : 'Daemon disconnected before delivering a result; the command was not retried.'
+              : DAEMON_DISCONNECTED_MESSAGE
           )
       );
     });
