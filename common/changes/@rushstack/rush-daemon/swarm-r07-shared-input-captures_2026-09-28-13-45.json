@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Concurrent requests share workspace input and project configuration captures instead of each running its own. A request never receives a capture that started before it arrived, so a burst of N warm builds costs at most two captures instead of N.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

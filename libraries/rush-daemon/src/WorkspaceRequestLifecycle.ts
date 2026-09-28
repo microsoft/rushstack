@@ -8,11 +8,13 @@ import {
   captureWorkspaceInputFingerprintAsync,
   classifyWorkspaceInputChange,
   EnvironmentVariableNames,
+  getWorkspaceFingerprintEnvironmentEntries,
   PhasedCommandEngineBusyError,
   Rush,
   WorkspaceInputChangeTier,
   WorkspaceRuntimeFingerprintCache,
-  type IWorkspaceInputFingerprint
+  type IWorkspaceInputFingerprint,
+  type RushConfiguration
 } from '@microsoft/rush-lib';
 import { LockFile } from '@rushstack/node-core-library';
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
@@ -52,6 +54,7 @@ import type {
   IWorkspaceSuccessorLaunch
 } from './WorkspaceProcessRestart';
 import { WorkspaceRestartArbiter, type IWorkspaceRestartTicket } from './WorkspaceRestartArbiter';
+import { FreshCaptureCoalescer } from './FreshCaptureCoalescer';
 
 interface IExecutionState {
   began: boolean;
@@ -116,6 +119,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #runtimePaths: ReadonlyArray<string> = [__dirname, path.resolve(__dirname, '../package.json')];
   readonly #startupFingerprint: IWorkspaceInputFingerprint;
   readonly #runtimeCache: WorkspaceRuntimeFingerprintCache;
+  // Concurrent requests share captures; each capture still starts after the requests it serves arrived.
+  readonly #fingerprintCaptures: FreshCaptureCoalescer<RushConfiguration, IWorkspaceInputFingerprint> =
+    new FreshCaptureCoalescer();
+  readonly #projectFingerprintCaptures: FreshCaptureCoalescer<RushConfiguration, string> =
+    new FreshCaptureCoalescer();
   #fingerprint: IWorkspaceInputFingerprint;
   #projectFingerprint: string | undefined;
   #commandIdentity: string | undefined;
@@ -364,10 +372,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             currentTier !== WorkspaceInputChangeTier.Reuse ||
             (this.#boundSession &&
               this.#projectFingerprint !==
-                (await captureProjectConfigurationFingerprintAsync(
-                  session.rushConfiguration,
-                  this.#terminal
-                )))
+                (await this.#captureProjectFingerprintAsync(session)))
           ) {
             throw new Error(
               'Graph inputs changed. Load the new generation with a supported build request; no operation was scheduled or executed.'
@@ -405,10 +410,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           abortSignal: client.abortSignal
         });
         if (tier === WorkspaceInputChangeTier.Reuse) {
-          projectFingerprint = await captureProjectConfigurationFingerprintAsync(
-            session.rushConfiguration,
-            this.#terminal
-          );
+          projectFingerprint = await this.#captureProjectFingerprintAsync(session);
           if (
             this.#boundSession !== session ||
             this.#commandIdentity !== commandIdentity ||
@@ -502,10 +504,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         session.invalidations.getSnapshot().isWatcherHealthy &&
         !session.invalidations.hasUnattributedUnknownChanges
       ) {
-        projectFingerprint = await captureProjectConfigurationFingerprintAsync(
-          session.rushConfiguration,
-          this.#terminal
-        );
+        projectFingerprint = await this.#captureProjectFingerprintAsync(session);
         if (projectFingerprint === this.#projectFingerprint) {
           this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
           this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
@@ -587,10 +586,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         expectedFingerprint = after;
         this.#boundSession = session;
         this.#fingerprint = after;
-        this.#projectFingerprint = await captureProjectConfigurationFingerprintAsync(
-          session.rushConfiguration,
-          this.#terminal
-        );
+        this.#projectFingerprint = await this.#captureProjectFingerprintAsync(session);
         this.#commandIdentity = await getResolverLifecycle(resolver).getCommandParameterIdentityAsync({
           envelope,
           workspaceSession: session,
@@ -640,12 +636,28 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     session: IWorkspaceSession,
     envelope: IDaemonRequestEnvelope
   ): Promise<IWorkspaceInputFingerprint> {
-    return captureWorkspaceInputFingerprintAsync({
-      rushConfiguration: session.rushConfiguration,
-      environment: envelope.environment,
-      runtimePaths: this.#runtimePaths,
-      runtimeCache: this.#runtimeCache
-    });
+    const { rushConfiguration } = session;
+    const { environment } = envelope;
+    // The capture reads only these parts of an environment, normalized as every fingerprint comparison is.
+    const key: string = JSON.stringify([
+      environment.RUSH_PREVIEW_VERSION ?? null,
+      getWorkspaceFingerprintEnvironmentEntries(environment)
+    ]);
+    return this.#fingerprintCaptures.captureAsync(rushConfiguration, key, () =>
+      captureWorkspaceInputFingerprintAsync({
+        rushConfiguration,
+        environment,
+        runtimePaths: this.#runtimePaths,
+        runtimeCache: this.#runtimeCache
+      })
+    );
+  }
+
+  #captureProjectFingerprintAsync(session: IWorkspaceSession): Promise<string> {
+    const { rushConfiguration } = session;
+    return this.#projectFingerprintCaptures.captureAsync(rushConfiguration, '', () =>
+      captureProjectConfigurationFingerprintAsync(rushConfiguration, this.#terminal)
+    );
   }
 
   #classify(fingerprint: IWorkspaceInputFingerprint, mutation: boolean): WorkspaceInputChangeTier {
