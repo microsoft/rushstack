@@ -39,7 +39,7 @@ function expectWaitTimeout(exchange: ITerminalExchange): void {
 }
 
 describe('workspace admission behind a graph transition', () => {
-  it('admits builds that arrive while another build loads the graph without spending their default budget', async () => {
+  it('admits builds that arrive while another build loads the graph without spending their wait timeout', async () => {
     const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
     try {
       const loadStarted: IDeferred<void> = createDeferred<void>();
@@ -54,18 +54,56 @@ describe('workspace admission behind a graph transition', () => {
       const withDefaultBudget: Promise<ITerminalExchange> = fixture.runAsync(BUILD_B, {
         admission: DEFAULT_BUDGET
       });
-      const withExplicitBudget: ITerminalExchange = await fixture.runAsync(BUILD_B, {
+      // Raising the timeout must not make a build fail behind a load that the default timeout waits for.
+      const withExplicitBudget: Promise<ITerminalExchange> = fixture.runAsync(BUILD_B, {
         admission: { waitTimeoutMs: 300 }
       });
-      expectWaitTimeout(withExplicitBudget);
       await delayAsync(600);
 
       fixture.beforeCreateSessionAsync = undefined;
       releaseLoad.resolve();
       expectSuccess(await first);
       expectSuccess(await withDefaultBudget);
+      expectSuccess(await withExplicitBudget);
       expect(fixture.runs()).toEqual(['a', 'b']);
     } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('fails a build that has waited behind a graph load for ten times its wait timeout', async () => {
+    const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
+    const loadStarted: IDeferred<void> = createDeferred<void>();
+    const releaseLoad: IDeferred<void> = createDeferred<void>();
+    try {
+      fixture.beforeCreateSessionAsync = async () => {
+        loadStarted.resolve();
+        await releaseLoad.promise;
+      };
+      const first: Promise<ITerminalExchange> = fixture.runAsync(BUILD_B);
+      await loadStarted.promise;
+
+      const startedAt: number = Date.now();
+      const behindWedgedLoad: ITerminalExchange = await fixture.runAsync(BUILD_B, {
+        admission: { waitTimeoutMs: 100 }
+      });
+      expect(Date.now() - startedAt).toBeGreaterThanOrEqual(900);
+      expectWaitTimeout(behindWedgedLoad);
+      expect(behindWedgedLoad.terminal).toMatchObject({
+        payload: {
+          errorMessage: expect.stringContaining(
+            "within 10 times its 100ms wait timeout because another request's load or reload of the workspace " +
+              'graph was still running'
+          )
+        }
+      });
+
+      fixture.beforeCreateSessionAsync = undefined;
+      releaseLoad.resolve();
+      expectSuccess(await first);
+    } finally {
+      // A failed expectation must not leave the load held, which would keep the fixture from shutting down.
+      releaseLoad.resolve();
       await fixture[Symbol.asyncDispose]();
     }
   });
@@ -105,6 +143,8 @@ describe('workspace admission behind a graph transition', () => {
       // The waiter's batch finds the changed input and re-enters admission behind the reload.
       expectSuccess(await graphGateWaiter);
     } finally {
+      // A failed expectation must not leave the long build running, which would keep the fixture from shutting down.
+      fs.writeFileSync(releaseFile, '');
       await fixture[Symbol.asyncDispose]();
     }
   });

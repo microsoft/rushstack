@@ -49,15 +49,22 @@ rounded down to milliseconds. These controls are mutually exclusive and are
 consumed before forwarding, never appended to a project script. Arguments after
 `--` remain literal script arguments.
 
-The queue timeout is measured from when the daemon receives the request. An
-explicit `--no-wait`, `--wait-timeout`, `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, or
-`daemon.queueTimeoutSeconds` in `rush.json` bounds the entire wait: waiting for
-workspace admission and waiting for a running build that the request could not
-join. The built-in 30-second default bounds only workspace admission (for example,
-waiting for a command that needs exclusive access). With the default, a build that
-arrives while a compatible build is already running waits for it to finish and then
-runs, instead of failing after 30 seconds. On a timeout, the client exits with
-code 1 and says how to wait longer.
+The queue timeout is measured from when the daemon receives the request, and only
+time spent waiting for other requests counts against it, whether it comes from
+`--wait-timeout`, `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, `daemon.queueTimeoutSeconds`
+in `rush.json`, or the built-in 30-second default. Waiting while another request
+loads or reloads the workspace graph does not count, so every build that arrives
+while the first build after startup loads the graph runs once the load finishes.
+That wait fails after 10 times the timeout (5 minutes with the default), so a load
+that never finishes does not hold other requests forever. The request's own routing
+and execution do not count either. A configured or per-invocation timeout also
+limits waiting for a running build that the request could not join; the built-in
+default does not. With the default, a build that arrives while a compatible build is
+already running waits for it to finish and then runs, instead of failing after 30
+seconds. `--no-wait` fails wherever the request would wait. On a timeout, the client
+exits with code 1 and suggests `--wait-timeout`. It does not suggest exporting
+`RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, because Rush versions that do not recognize a
+`RUSH_` environment variable fail every command while it is set.
 
 Admission controls also apply to experimental graph requests, but not
 `start|stop|restart|status|logs`. They affect daemon admission only; native fallback
@@ -212,7 +219,7 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `enabled` | `RUSH_DAEMON` | false | Client routing |
 | `autoStart` | `RUSH_DAEMON_AUTO_START` | true | Only after opt-in |
 | `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Host idle shutdown after request/output/cleanup drain |
-| `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Admission wait limit. The default does not bound waiting behind a running compatible build; an explicit value does |
+| `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Admission wait limit. Time behind another request's graph load (up to 10 times the limit) and the request's own work do not count. The default does not limit waiting behind a running compatible build; an explicit value does |
 | `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
 | `usePersistentIpcRunners` | `RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS` | false | Enables explicit per-operation `daemonIpc` Node launchers for unsharded incremental daemon builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |

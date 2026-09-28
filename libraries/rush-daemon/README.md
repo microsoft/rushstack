@@ -457,17 +457,21 @@ the router validates both, reconciles retained invalidations, applies the select
 and runs at most one scheduled iteration. A workspace-wide `RequestScheduler` admits phased and global routes using
 the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE`); custom-origin commands and unknown
 built-in names fail closed to `EXCLUSIVE`, including plugin replacements of built-in names. Queued clients receive
-ordered, one-based position controls and can request fail-fast or bounded waiting. One progress channel covers both
-workspace admission and the temporary phased graph-execution gate. An explicit `noWait` or `waitTimeoutMs` is one
-absolute deadline for both waits. When the client marks `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), it is
-a budget that only contention spends: a `SHARED-BUILD` request that arrives after the current batch has closed waits
-on the graph-execution gate without a deadline, because it is queued only behind running compatible shared builds, and
-then runs in the next batch. A request queued behind another request that holds exclusive workspace admission to load
-or reload the graph does not spend the budget during that load, so every build that arrives while the first build
-after startup loads the graph is admitted when the load finishes. The budget does run while that other request still
-waits for exclusive admission, so requests behind a reload that cannot start, for example behind a long build, still
-time out. Routing and executing an admitted request do not spend the budget either: a request that re-enters
-workspace admission to reload the graph after its inputs changed keeps the budget it had when it was admitted.
+ordered, one-based position controls and can request fail-fast or time-limited waiting. One progress channel covers
+both workspace admission and the temporary phased graph-execution gate. `noWait` fails at once wherever the request
+would wait. A finite `waitTimeoutMs` is a budget that only contention spends, whether it is the client's default or an
+explicit value. A request queued behind another request that holds exclusive workspace admission to load or reload
+the graph does not spend its budget during that load, so every build that arrives while the first build after startup
+loads the graph is admitted when the load finishes. That wait is limited separately, to 10 times `waitTimeoutMs`, so
+a load that never finishes does not hold the requests behind it indefinitely. The budget does run while that other
+request still waits for exclusive admission, so requests behind a reload that cannot start, for example behind a long
+build, still time out. Routing and executing an admitted request do not spend the budget either. Routing boundaries
+such as the graph-execution gate apply the remaining budget they receive, and a request that re-enters workspace
+admission to reload the graph after its inputs changed starts again from the budget it had when it was admitted; time
+it spent at those boundaries is not charged again. The default and an explicit value differ only at the
+graph-execution gate. When the client marks `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), a `SHARED-BUILD`
+request that arrives after the current batch has closed waits there without a deadline, because it is queued only
+behind running compatible shared builds, and then runs in the next batch. An explicit value still limits that wait.
 Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
 A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
 backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output

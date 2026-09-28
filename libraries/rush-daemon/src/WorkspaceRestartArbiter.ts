@@ -114,7 +114,7 @@ export class WorkspaceRestartArbiter {
               new RequestSchedulerError(
                 RequestSchedulerErrorCode.WaitTimeout,
                 'The request was not admitted before the daemon could restart for its environment. ' +
-                  'Use --wait-timeout <seconds> or RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS to wait longer.'
+                  'Use --wait-timeout <seconds> to wait longer.'
               )
             ),
           Math.min(MAX_TIMER_DELAY_MS, Math.max(0, deadline - Date.now()))

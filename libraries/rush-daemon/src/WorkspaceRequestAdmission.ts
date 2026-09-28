@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+import {
+  MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS,
+  validateDaemonRequestAdmissionOptions
+} from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonRequestAdmissionErrorCode,
   IDaemonRequestAdmissionOptions,
@@ -33,6 +36,14 @@ export interface IRequestAdmissionControllerOptions {
 }
 
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
+/** A request waits for another request's graph load or reload for up to this many times its wait timeout. */
+const GRAPH_LOAD_WAIT_FACTOR: number = 10;
+// Only the per-invocation flag is offered: Rush versions that do not recognize the environment variable reject it.
+const WAIT_LONGER_HINT: string = 'Use --wait-timeout <seconds> to wait longer.';
+
+function formatSeconds(ms: number): string {
+  return `${Math.round(ms / 100) / 10}s`;
+}
 
 class WorkspaceRequestScheduler extends RequestScheduler {
   readonly #session: IWorkspaceSession;
@@ -120,45 +131,75 @@ export class AdmissionProgress {
   }
 }
 
-/** A wait budget that is spent only while `progress` is inactive. */
+/**
+ * A wait budget that is spent only while `progress` is inactive.
+ *
+ * @remarks
+ * Waiting while `progress` is active is limited separately, to `maxPausedMs` in total, so that a wedged transition
+ * does not hold the requests behind it indefinitely. `onExhausted` receives whether that limit, rather than the
+ * budget, ran out.
+ */
 class ProgressPausedBudget {
-  readonly #onExhausted: () => void;
+  readonly #maxPausedMs: number;
+  readonly #onExhausted: (pausedLimitReached: boolean) => void;
   readonly #progress: AdmissionProgress;
   readonly #unsubscribe: () => void;
+  #intervalStartMs: number = 0;
+  #paused: boolean = false;
+  #pausedMs: number = 0;
   #remainingMs: number;
-  #runningSinceMs: number | undefined;
   #timer: ReturnType<typeof setTimeout> | undefined;
 
-  public constructor(remainingMs: number, progress: AdmissionProgress, onExhausted: () => void) {
+  public constructor(
+    remainingMs: number,
+    maxPausedMs: number,
+    progress: AdmissionProgress,
+    onExhausted: (pausedLimitReached: boolean) => void
+  ) {
     this.#remainingMs = remainingMs;
+    this.#maxPausedMs = maxPausedMs;
     this.#progress = progress;
     this.#onExhausted = onExhausted;
-    this.#unsubscribe = progress.subscribe(() => this.#update());
-    this.#update();
+    this.#unsubscribe = progress.subscribe(() => {
+      this.#endInterval();
+      this.#startInterval();
+    });
+    this.#startInterval();
   }
 
-  /** Stops spending and returns the unspent budget. */
-  public stop(): number {
-    this.#unsubscribe();
-    this.#pause();
+  /** The time that was not spent from the budget because `progress` was active. */
+  public get pausedMs(): number {
+    return this.#pausedMs;
+  }
+
+  /** The unspent budget. */
+  public get remainingMs(): number {
     return this.#remainingMs;
   }
 
-  #update(): void {
-    if (this.#progress.active) {
-      this.#pause();
-    } else if (this.#runningSinceMs === undefined) {
-      this.#runningSinceMs = Date.now();
-      this.#timer = setTimeout(this.#onExhausted, this.#remainingMs);
-    }
+  /** Stops spending; `pausedMs` and `remainingMs` are final afterwards. Calling it again has no effect. */
+  public stop(): void {
+    this.#unsubscribe();
+    this.#endInterval();
   }
 
-  #pause(): void {
-    if (this.#runningSinceMs === undefined) return;
-    this.#remainingMs = Math.max(0, this.#remainingMs - (Date.now() - this.#runningSinceMs));
-    this.#runningSinceMs = undefined;
+  #startInterval(): void {
+    this.#paused = this.#progress.active;
+    this.#intervalStartMs = Date.now();
+    const delayMs: number = this.#paused ? this.#maxPausedMs - this.#pausedMs : this.#remainingMs;
+    this.#timer = setTimeout(() => this.#onExhausted(this.#paused), Math.max(0, delayMs));
+  }
+
+  #endInterval(): void {
+    if (this.#timer === undefined) return;
     clearTimeout(this.#timer);
     this.#timer = undefined;
+    const elapsedMs: number = Date.now() - this.#intervalStartMs;
+    if (this.#paused) {
+      this.#pausedMs += elapsedMs;
+    } else {
+      this.#remainingMs = Math.max(0, this.#remainingMs - elapsedMs);
+    }
   }
 }
 
@@ -209,7 +250,7 @@ export class RequestAdmissionController {
    * @remarks
    * A shared-build request that reaches this gate is only waiting behind running compatible shared builds, which is
    * progress rather than contention. A client-default timeout therefore does not apply to that wait; an explicit
-   * `noWait` or `waitTimeoutMs` still applies, using the same absolute deadline as workspace admission.
+   * `noWait` or `waitTimeoutMs` still applies, using the request's remaining admission budget.
    */
   public async acquireGraphExecutionAsync(
     scheduler: RequestScheduler,
@@ -232,10 +273,12 @@ export class RequestAdmissionController {
    *
    * @remarks
    * While `transition` reports progress, the other request holds the exclusive gate and is loading the graph that
-   * this request needs, so a client-default timeout is not spent: at a cold start every concurrent build waits for
-   * the first build's graph load. The default budget is still spent while the transition itself waits for another
-   * request, so a transition that cannot start does not hold its followers indefinitely. Unspent budget carries over
-   * to later waits of this request. An explicit `noWait` or `waitTimeoutMs` applies unchanged.
+   * this request needs, so the request's wait timeout is not spent: at a cold start every concurrent build waits for
+   * the first build's graph load, whether its timeout is the client default or explicit. That wait is limited
+   * separately, to `GRAPH_LOAD_WAIT_FACTOR` times the wait timeout, so a wedged load does not hold its followers
+   * indefinitely. The timeout is still spent while the transition itself waits for another request, so a transition
+   * that cannot start does not hold its followers either. Unspent time carries over to later waits of this request.
+   * `noWait` still fails at once.
    */
   public async acquireBehindTransitionAsync(
     scheduler: RequestScheduler,
@@ -243,12 +286,27 @@ export class RequestAdmissionController {
   ): Promise<IRequestLease> {
     const waitingFor: string = "another request's load or reload of the workspace graph";
     const remainingMs: number | undefined = this.#getRemainingWaitTimeoutMs();
-    if (!this.#admission?.waitTimeoutIsDefault || remainingMs === undefined) {
-      return await this.#acquireAsync(scheduler, RequestExclusivityClass.SharedBuild, remainingMs, waitingFor);
+    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutMs;
+    if (remainingMs === undefined || waitTimeoutMs === undefined) {
+      return await this.#acquireAsync(
+        scheduler,
+        RequestExclusivityClass.SharedBuild,
+        remainingMs,
+        waitingFor
+      );
     }
     const exhausted: AbortController = new AbortController();
-    const budget: ProgressPausedBudget = new ProgressPausedBudget(remainingMs, transition, () =>
-      exhausted.abort()
+    let pausedLimitReached: boolean = false;
+    const budget: ProgressPausedBudget = new ProgressPausedBudget(
+      remainingMs,
+      Math.min(GRAPH_LOAD_WAIT_FACTOR * waitTimeoutMs, MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS),
+      transition,
+      (reachedPausedLimit: boolean) => {
+        if (!exhausted.signal.aborted) {
+          pausedLimitReached = reachedPausedLimit;
+          exhausted.abort();
+        }
+      }
     );
     try {
       return await this.#acquireAsync(
@@ -259,30 +317,38 @@ export class RequestAdmissionController {
         AbortSignal.any([this.#abortController.signal, exhausted.signal])
       );
     } catch (error) {
+      budget.stop();
       if (!exhausted.signal.aborted || this.#abortController.signal.aborted) throw error;
-      throw this.#getReportedError(
-        new RequestSchedulerError(
-          RequestSchedulerErrorCode.WaitTimeout,
-          `The request was not admitted within ${this.#admission.waitTimeoutMs}ms.`
-        ),
-        waitingFor
+      const message: string = pausedLimitReached
+        ? `The request was not admitted within ${GRAPH_LOAD_WAIT_FACTOR} times its ${waitTimeoutMs}ms wait ` +
+          `timeout because ${waitingFor} was still running after ${formatSeconds(budget.pausedMs)}.`
+        : `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ` +
+          `${waitingFor}` +
+          (budget.pausedMs > 0
+            ? `; ${formatSeconds(budget.pausedMs)} spent while that request loaded the graph did not count.`
+            : '.');
+      throw new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `${message} ${WAIT_LONGER_HINT}`
       );
     } finally {
-      this.#deadlineMs = Date.now() + budget.stop();
+      budget.stop();
+      this.#deadlineMs = Date.now() + budget.remainingMs;
     }
   }
 
   /**
-   * Runs `action`, such as routing and executing an admitted request, without spending a client-default budget.
+   * Runs `action`, such as routing and executing an admitted request, without spending the request's wait timeout.
    *
    * @remarks
-   * Work after admission either runs or waits behind progress, such as the exempt graph-execution gate. A request that
-   * re-enters workspace admission afterwards, for example to reload the graph after its inputs changed, therefore
-   * keeps the budget it had before `action`. An explicit `noWait` or `waitTimeoutMs` keeps its absolute deadline.
+   * Work after admission either runs or waits at a routing boundary that applies the timeout it received, such as the
+   * graph-execution gate. A request that re-enters workspace admission afterwards, for example to reload the graph
+   * after its inputs changed, therefore keeps the unspent timeout it had before `action`, whether that timeout is the
+   * client default or explicit.
    */
-  public async runOutsideDefaultBudgetAsync<T>(action: () => Promise<T>): Promise<T> {
+  public async runOutsideWaitBudgetAsync<T>(action: () => Promise<T>): Promise<T> {
     const remainingMs: number | undefined = this.#getRemainingWaitTimeoutMs();
-    if (!this.#admission?.waitTimeoutIsDefault || remainingMs === undefined) {
+    if (remainingMs === undefined) {
       return await action();
     }
     try {
@@ -361,8 +427,8 @@ export class RequestAdmissionController {
     ) {
       return new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,
-        `The request was not admitted within ${waitTimeoutMs}ms while waiting for ${waitingFor}. ` +
-          'Use --wait-timeout <seconds> or RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS to wait longer.'
+        `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ${waitingFor}. ` +
+          WAIT_LONGER_HINT
       );
     }
     return error;

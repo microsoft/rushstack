@@ -222,7 +222,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             ...envelope,
             admission: admission.remainingAdmission
           };
-          await admission.runOutsideDefaultBudgetAsync(async () => {
+          await admission.runOutsideWaitBudgetAsync(async () => {
             if (isMutation(envelope)) {
               await this.#executeMutationAsync(prepared, requestEnvelope, client, state, dispatchAsync);
             } else {

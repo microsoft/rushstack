@@ -82,12 +82,15 @@ export function formatAdmissionFailure(
     return `${prefix}: another daemon request is using this workspace and --no-wait was specified.\n`;
   }
   if (code === 'wait-timeout') {
-    const seconds: string =
-      admission?.waitTimeoutMs === undefined ? '' : ` after ${admission.waitTimeoutMs / 1000}s`;
+    const timeout: string =
+      admission?.waitTimeoutMs === undefined
+        ? ''
+        : ` after its ${admission.waitTimeoutMs / 1000}s wait timeout`;
     return (
-      `${prefix}: timed out${seconds} waiting for another daemon request in this workspace to finish ` +
+      `${prefix}: timed out${timeout} waiting for another daemon request in this workspace to finish ` +
       '(a command that needs exclusive access, or a running build). ' +
-      'To wait longer, use --wait-timeout <seconds> or set RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS.\n'
+      // Only the per-invocation flag is offered: Rush versions that do not recognize the variable reject it.
+      'To wait longer, pass --wait-timeout <seconds>.\n'
     );
   }
   return `${prefix}.\n`;

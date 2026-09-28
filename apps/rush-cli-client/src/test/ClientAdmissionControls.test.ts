@@ -68,17 +68,20 @@ describe(getConfiguredAdmission.name, () => {
     });
   });
 
-  it('keeps an explicitly configured timeout as one absolute deadline', () => {
+  it('does not mark an explicitly configured timeout as the default', () => {
     expect(getConfiguredAdmission({ queueTimeoutSeconds: 1.5, explicit: true })).toEqual({ waitTimeoutMs: 1500 });
   });
 });
 
 describe(formatAdmissionFailure.name, () => {
-  it('explains a wait timeout and how to wait longer', () => {
+  it('explains a wait timeout and offers only the per-invocation way to wait longer', () => {
     const message: string = formatAdmissionFailure('wait-timeout', { waitTimeoutMs: 5000 });
-    expect(message).toContain('daemon admission failed (wait-timeout): timed out after 5s waiting for');
-    expect(message).toContain('--wait-timeout <seconds>');
-    expect(message).toContain('RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS');
+    expect(message).toContain(
+      'daemon admission failed (wait-timeout): timed out after its 5s wait timeout waiting for'
+    );
+    expect(message).toContain('pass --wait-timeout <seconds>');
+    // Exporting it would break later commands of Rush versions that reject unknown RUSH_ variables.
+    expect(message).not.toContain('RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS');
   });
 
   it('explains a no-wait failure', () => {
