@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 
 import { FileSystem, LockFile } from '@rushstack/node-core-library';
-import type { ITerminalProvider } from '@rushstack/terminal';
+import { Terminal, type ITerminalProvider } from '@rushstack/terminal';
 import type { CommandLineAction } from '@rushstack/ts-command-line';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
@@ -67,10 +67,13 @@ export interface IPhasedCommandEngineRequestSettings {
  *
  * @remarks
  * The initial engine surface deliberately rejects watch/install, event-hook scripts, .env files, and
- * external plugins that Rush would initialize for the command or whose command-line.json shapes it.
- * Those require request-scoped initialization and asynchronous disposal contracts before they can
- * safely run in a shared process. Plugins associated only with other commands are inert and permitted.
- * Native graph/cache plugins are not replaced.
+ * external plugins that Rush would initialize for the command or whose command-line.json shapes it, unless
+ * the plugin's manifest (`daemonCompatible`) or the repository (`daemon.compatiblePlugins`) declares that the
+ * plugin supports the engine lifecycle. An engine applies each plugin once and serves many requests: session
+ * hooks, `createOperationsAsync` (with every project and `isWatch` false) and `onGraphCreatedAsync` run once
+ * per engine, operation graph hooks run for each iteration (which can serve several coalesced requests), and
+ * disposal aborts `IOperationGraph.abortController` and then closes every operation runner. Plugins associated
+ * only with other commands are inert and permitted. Native graph/cache plugins are not replaced.
  * @alpha
  */
 export class PhasedCommandEngine {
@@ -80,12 +83,22 @@ export class PhasedCommandEngine {
 
   public readonly parameterIdentity: string;
   public readonly commandName: string;
+  /**
+   * Names listed by `daemon.compatiblePlugins` (or `RUSH_DAEMON_COMPATIBLE_PLUGINS`) that match no plugin
+   * configured in rush-plugins.json. They have no effect and are usually misspellings, so hosts should report them.
+   */
+  public readonly unmatchedCompatiblePluginNames: ReadonlyArray<string>;
 
-  private constructor(parser: RushCommandLineParser, action: PhasedScriptAction) {
+  private constructor(
+    parser: RushCommandLineParser,
+    action: PhasedScriptAction,
+    unmatchedCompatiblePluginNames: ReadonlyArray<string>
+  ) {
     this._parser = parser;
     this._action = action;
     this.commandName = action.actionName;
     this.parameterIdentity = action.getEngineParameterIdentity();
+    this.unmatchedCompatiblePluginNames = unmatchedCompatiblePluginNames;
   }
 
   public static async parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine> {
@@ -108,20 +121,38 @@ export class PhasedCommandEngine {
     if (!(action instanceof PhasedScriptAction) || !['build', 'rebuild'].includes(action.actionName)) {
       throw new Error('The production daemon engine currently supports native build and rebuild only.');
     }
-    // Plugins which the command would never initialize, and whose command-line.json does not shape
-    // this command, cannot affect a shared engine. Every other external plugin still requires native Rush.
-    const participatingPlugins: ReadonlyArray<string> = parser.pluginManager.getPluginsParticipatingInCommand(
-      action.actionName,
-      action.schedulablePhaseNames
+    const compatiblePluginNames: ReadonlySet<string> = new Set(rushConfiguration.daemon.compatiblePlugins);
+    const configuredPluginNames: ReadonlySet<string> = parser.pluginManager.configuredPluginNames;
+    const unmatchedCompatiblePluginNames: ReadonlyArray<string> = Array.from(compatiblePluginNames).filter(
+      (pluginName) => !configuredPluginNames.has(pluginName)
     );
-    if (participatingPlugins.length > 0) {
+    if (unmatchedCompatiblePluginNames.length > 0) {
+      new Terminal(terminalProvider).writeWarningLine(
+        `The daemon's compatible plugin list (rush.json "daemon.compatiblePlugins" or ` +
+          `RUSH_DAEMON_COMPATIBLE_PLUGINS) names plugins that are not configured in rush-plugins.json: ` +
+          `${unmatchedCompatiblePluginNames.map((pluginName) => `"${pluginName}"`).join(', ')}. ` +
+          `Check that each entry is the plugin's "pluginName".`
+      );
+    }
+    // Plugins which the command would never initialize, and whose command-line.json does not shape
+    // this command, cannot affect a shared engine. Every other external plugin must be declared compatible
+    // with the engine lifecycle; otherwise the command still requires native Rush.
+    const incompatiblePlugins: ReadonlyArray<string> = parser.pluginManager.getPluginsIncompatibleWithEngine(
+      action.actionName,
+      action.schedulablePhaseNames,
+      compatiblePluginNames
+    );
+    if (incompatiblePlugins.length > 0) {
       throw new Error(
-        `Daemon engine execution does not yet support Rush plugins that participate in "${action.actionName}": ` +
-          `${participatingPlugins.join('; ')}. Use --no-daemon.`
+        `Daemon engine execution does not support Rush plugins that participate in "${action.actionName}" ` +
+          `unless they are declared daemon-compatible: ${incompatiblePlugins.join('; ')}. A plugin declares this ` +
+          `with "daemonCompatible" in its rush-plugin-manifest.json; a repository can list plugins it has ` +
+          `verified in the rush.json "daemon.compatiblePlugins" setting or RUSH_DAEMON_COMPATIBLE_PLUGINS. ` +
+          `Use --no-daemon.`
       );
     }
     action.validateEngineCommand();
-    return new PhasedCommandEngine(parser, action);
+    return new PhasedCommandEngine(parser, action, unmatchedCompatiblePluginNames);
   }
 
   /**

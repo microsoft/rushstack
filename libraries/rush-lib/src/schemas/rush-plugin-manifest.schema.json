@@ -46,6 +46,10 @@
             "description": "Specifies the semver range of Rush versions supported by this plugin.",
             "type": "string",
             "minLength": 1
+          },
+          "daemonCompatible": {
+            "description": "If true, the plugin declares that it works in a long-lived Rush daemon engine, where one applied instance serves many requests: its session hooks and createOperationsAsync run once per engine (with isWatch false), and its operation graph hooks run for each iteration. Such a plugin does not change process globals (such as process.env, process.exitCode, the working directory or global timers), keeps no per-request state in the process, never prompts, reads the operation environment rather than the daemon's process.env, and releases its resources when the engine is disposed. Without it, the daemon runs commands that the plugin participates in with in-process Rush, unless the repository lists the plugin in the rush.json \"daemon.compatiblePlugins\" setting.",
+            "type": "boolean"
           }
         }
       }

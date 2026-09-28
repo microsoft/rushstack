@@ -92,6 +92,91 @@ describe('workspace input fingerprints', () => {
     }
   });
 
+  it('restarts when the implementation of a configured plugin changes, including through a link', async () => {
+    const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
+    try {
+      const write = (relativePath: string, content: string): void => {
+        const filename: string = path.join(folder, relativePath);
+        fs.mkdirSync(path.dirname(filename), { recursive: true });
+        fs.writeFileSync(filename, content);
+      };
+      write('rush.json', JSON.stringify({ rushVersion: '5.179.0', pnpmVersion: '10.27.0', projects: [] }));
+      write(
+        'common/config/rush/rush-plugins.json',
+        JSON.stringify({
+          plugins: [
+            { packageName: '@example/installed', pluginName: 'installed', autoinstallerName: 'plugins' },
+            { packageName: '@example/linked', pluginName: 'linked', autoinstallerName: 'plugins' }
+          ]
+        })
+      );
+      write('common/autoinstallers/plugins/package.json', '{"name":"plugins","version":"1.0.0"}');
+      write('common/autoinstallers/plugins/node_modules/@example/installed/lib/index.js', 'exports.v = 1;');
+      // Like a `link:` dependency, whose implementation is checked in outside node_modules.
+      write('common/autoinstallers/plugins/linked-plugin/release/index.js', 'exports.v = 1;');
+      fs.symlinkSync(
+        path.join(folder, 'common/autoinstallers/plugins/linked-plugin'),
+        path.join(folder, 'common/autoinstallers/plugins/node_modules/@example/linked'),
+        'junction'
+      );
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        path.join(folder, 'rush.json')
+      );
+      const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+      const captureAsync = (): Promise<IWorkspaceInputFingerprint> =>
+        captureWorkspaceInputFingerprintAsync({ rushConfiguration, runtimeCache, environment: {} });
+
+      let previous: IWorkspaceInputFingerprint = await captureAsync();
+      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(WorkspaceInputChangeTier.Reuse);
+      for (const [relativePath, content] of [
+        ['common/autoinstallers/plugins/node_modules/@example/installed/lib/index.js', 'exports.v = 2;'],
+        ['common/autoinstallers/plugins/linked-plugin/release/index.js', 'exports.v = 2;'],
+        ['common/autoinstallers/plugins/linked-plugin/release/worker.js', 'exports.w = 1;']
+      ]) {
+        write(relativePath, content);
+        const next: IWorkspaceInputFingerprint = await captureAsync();
+        expect(classifyWorkspaceInputChange(previous, next)).toBe(WorkspaceInputChangeTier.Restart);
+        expect(runtimeCache.changedPaths).toContain(
+          path.join(
+            folder,
+            relativePath.replace('plugins/linked-plugin/', 'plugins/node_modules/@example/linked/')
+          )
+        );
+        previous = next;
+      }
+      // Files that Node.js never loads as plugin code do not restart the host.
+      write('common/autoinstallers/plugins/linked-plugin/README.md', 'Documentation');
+      write('common/autoinstallers/plugins/linked-plugin/lib-esm/index.js', 'export const v = 2;');
+      write('common/autoinstallers/plugins/linked-plugin/lib-dts/tsdoc-metadata.json', '{}');
+      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(WorkspaceInputChangeTier.Reuse);
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+
+  it('reloads when rush.json declares daemon-compatible plugins', async () => {
+    const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
+    try {
+      const rushJsonPath: string = path.join(folder, 'rush.json');
+      const rushJson: object = { rushVersion: '5.179.0', pnpmVersion: '10.27.0', projects: [] };
+      fs.writeFileSync(rushJsonPath, JSON.stringify(rushJson));
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
+      const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+      const captureAsync = (): Promise<IWorkspaceInputFingerprint> =>
+        captureWorkspaceInputFingerprintAsync({ rushConfiguration, runtimeCache, environment: {} });
+      const previous: IWorkspaceInputFingerprint = await captureAsync();
+      fs.writeFileSync(
+        rushJsonPath,
+        JSON.stringify({ ...rushJson, daemon: { compatiblePlugins: ['rush-example-plugin'] } })
+      );
+      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(
+        WorkspaceInputChangeTier.Reload
+      );
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+
   it('ignores volatile per-shell variables but not engine, Node.js or tool resolution inputs', async () => {
     const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
     try {
@@ -142,6 +227,8 @@ describe('workspace input fingerprints', () => {
       }
       for (const relevant of [
         { FOO: '1' },
+        // Declaring a plugin daemon-compatible changes which plugins the engine applies.
+        { RUSH_DAEMON_COMPATIBLE_PLUGINS: 'rush-example-plugin' },
         { RUSH_BUILD_CACHE_ENABLED: '1' },
         { RUSH_BUILD_CACHE_WRITE_ALLOWED: '0' },
         { RUSH_DAEMON_WATCH: '1' },

@@ -337,6 +337,8 @@
    * Warm-set policies require the generation-owned WorkspaceWarmSet host attachment.
    * They retain requested work without starting scripts and impose no hard process-RSS ceiling.
    * The watch option retains host observation of warm project files between requests, without running builds.
+   * The daemon serves a command that a configured Rush plugin participates in only if the plugin's manifest
+   * declares "daemonCompatible", or if "compatiblePlugins" lists the plugin's name. Otherwise it runs in-process.
    */
   /*[LINE "HYPOTHETICAL"]*/ "daemon": {
     /*[LINE "HYPOTHETICAL"]*/ "enabled": false,
@@ -348,7 +350,8 @@
     /*[LINE "HYPOTHETICAL"]*/ "warmIdleTimeoutSeconds": 300,
     /*[LINE "HYPOTHETICAL"]*/ "warmMemoryBudgetMB": 512,
     /*[LINE "HYPOTHETICAL"]*/ "warmSetMaxProjects": 20,
-    /*[LINE "HYPOTHETICAL"]*/ "autoWarmByTelemetry": false
+    /*[LINE "HYPOTHETICAL"]*/ "autoWarmByTelemetry": false,
+    /*[LINE "HYPOTHETICAL"]*/ "compatiblePlugins": []
   /*[LINE "HYPOTHETICAL"]*/ },
 
   /**

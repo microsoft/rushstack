@@ -189,7 +189,9 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
 - **Plugins.** This repository's only configured plugin, `@rushstack/rush-published-versions-json-plugin`,
   is associated only with `record-published-versions` and is inert for builds. A plugin without
   `associatedCommands`, a plugin associated with `build` or `rebuild`, or a plugin command-line that defines
-  the command, one of its phases, or a parameter for either would make those builds fall back to native Rush.
+  the command, one of its phases, or a parameter for either would make those builds fall back to native Rush,
+  unless the plugin is declared daemon-compatible. See
+  [Rush plugins in daemon engines](#rush-plugins-in-daemon-engines).
 - **Windows.** Native Windows validation of the daemon code saw unresolved, intermittent failures in which
   Git `hash-object --stdin-paths` exited with `0xC0000142` (DLL initialization failed) while the daemon
   captured workspace snapshots under Jest. Direct fixtures did not reproduce it, and it did not occur while
@@ -199,6 +201,69 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   windows. Daemons started from a snapshot older than that change open a visible terminal window for each
   tool; if you see that, [refresh the snapshot](#refresh-the-snapshot).
 - **CI** stays in-process unless `RUSH_DAEMON=1` is set; do not set it in CI workflows.
+
+## Rush plugins in daemon engines
+
+A daemon engine applies each Rush plugin once and then serves many requests from one long-lived process.
+A plugin written for a single native command can therefore misbehave, so the daemon serves a `build` or
+`rebuild` that a configured plugin participates in only if the plugin is declared daemon-compatible. A plugin
+participates if it has no `associatedCommands` (Rush initializes it for every command), is associated with
+the command, or its command-line.json defines the command, one of its phases, or a parameter for either.
+Any other plugin is inert for the build and needs no declaration.
+
+Declare a plugin in one of these ways:
+
+- **The plugin author** sets `"daemonCompatible": true` on the plugin's entry in `rush-plugin-manifest.json`.
+  Releases whose schemas predate this setting reject such a manifest, and then every command fails, not only
+  builds. Set it only in plugin versions that are installed with a Rush release that accepts it, as with the
+  `@rushstack` plugins, which are versioned with Rush; otherwise leave the declaration to repositories.
+- **The repository** lists the plugin's `pluginName` from `rush-plugins.json` in the `rush.json` setting
+  `"daemon": { "compatiblePlugins": [...] }`, after verifying the plugin against the contract below.
+- **One shell** sets `RUSH_DAEMON_COMPATIBLE_PLUGINS` to a comma-separated list of plugin names, which
+  replaces the `rush.json` list; an empty value lists no plugins. Releases whose schemas predate these
+  settings reject the manifest and `rush.json` keys, so a repository that still selects such a release can
+  only use this variable, and only for `rush-client`. The value is part of the daemon's environment
+  identity, so changing it starts a new daemon.
+
+A listed name that matches no configured plugin has no effect; the request that creates the daemon's engine
+prints a warning, which the daemon's launcher log also keeps. An undeclared participating plugin makes the
+request fall back to native Rush, with a message that names the plugin and each reason.
+
+The engine lifecycle that a declared plugin must support:
+
+- **Once per engine:** the plugin's `apply()`, `runAnyPhasedCommand`, `runPhasedCommand.for(<command>)`,
+  `createOperationsAsync` and `onGraphCreatedAsync`. The engine builds the graph for every project, with
+  `isWatch` false; each request then selects operations from it. A request whose parameters differ from the
+  engine's (other than project selection, `--verbose`, `--parallelism` and `--timeline`) or a changed
+  configuration file replaces the engine, and the new engine applies the plugin again in the same process.
+  Module-level state therefore outlives an engine.
+- **Once per iteration:** the operation graph hooks, such as `configureIteration`,
+  `beforeExecuteIterationAsync`, `before`/`afterExecuteOperationAsync`, `createEnvironmentForOperation` and
+  `afterExecuteIterationAsync`. One iteration can serve several concurrent requests. If every operation that
+  a request selects is up to date, the daemon aborts the iteration before it runs anything, so
+  `beforeExecuteIterationAsync` and the operation hooks don't fire. Don't rely on iteration hooks for
+  per-request work.
+- **Disposal:** the engine aborts `IOperationGraph.abortController`, cancels the current iteration, and then
+  closes every operation runner. Release resources from the abort signal or the runner's `closeAsync()`.
+
+Rules for a daemon-compatible plugin:
+
+- Don't change process globals: no writes to `process.env`, `process.exitCode`, the current directory or
+  `process.argv`, and no patching or clearing of global functions such as `setTimeout`. They belong to the
+  daemon and to every other request.
+- Keep request-specific state per iteration, not per process or per engine (session IDs, start times,
+  performance marks).
+- Never prompt. The daemon has no terminal; fail fast with a message that the requesting client sees, and
+  continue without the feature where possible.
+- Read the operation's environment (from `createEnvironmentForOperation`), not the daemon's `process.env`.
+- Write output through the session's logger. Output written while an iteration runs reaches that iteration's
+  clients, and output written while the engine is created reaches the request that created it; the daemon
+  drops output written between iterations.
+
+Node.js loads a plugin's code only once, so the daemon treats the installed package folder of every configured
+plugin as part of its implementation: a change to a plugin's `.js` or `.json` files, including through a
+`link:` dependency, starts a new daemon for the next request. Declaration (`lib-dts`) and ES module (`lib-esm`)
+output folders are left out, because a plugin's CommonJS entry point doesn't load them.
 
 ## Version skew and `RUSH_PREVIEW_VERSION`
 

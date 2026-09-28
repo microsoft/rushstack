@@ -326,6 +326,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
     readonly RUSH_DAEMON_WARM_SET_MAX_PROJECTS: "RUSH_DAEMON_WARM_SET_MAX_PROJECTS";
     readonly RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: "RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY";
+    readonly RUSH_DAEMON_COMPATIBLE_PLUGINS: "RUSH_DAEMON_COMPATIBLE_PLUGINS";
     readonly RUSH_DAEMON_EXPERIMENTAL: "RUSH_DAEMON_EXPERIMENTAL";
 };
 
@@ -524,6 +525,7 @@ export interface ICustomTipsJson {
 export interface IDaemonConfigurationJson {
     readonly autoStart?: boolean;
     readonly autoWarmByTelemetry?: boolean;
+    readonly compatiblePlugins?: ReadonlyArray<string>;
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
     readonly queueTimeoutSeconds?: number;
@@ -1268,7 +1270,6 @@ export interface IWorkspaceInputFingerprint {
     readonly environmentHash: string;
     // (undocumented)
     readonly installationHash: string;
-    // (undocumented)
     readonly runtimeHash: string;
     // (undocumented)
     readonly selectedRushVersion: string;
@@ -1533,6 +1534,7 @@ export class PhasedCommandEngine {
     static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
     get requestSettings(): IPhasedCommandEngineRequestSettings;
     selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
+    readonly unmatchedCompatiblePluginNames: ReadonlyArray<string>;
 }
 
 // @alpha

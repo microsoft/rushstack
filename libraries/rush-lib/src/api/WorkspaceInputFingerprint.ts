@@ -20,6 +20,10 @@ export interface IWorkspaceInputFingerprint {
   readonly configurationHash: string;
   readonly environmentHash: string;
   readonly installationHash: string;
+  /**
+   * The Node.js executable and version, the running Rush package, the host's `runtimePaths`, and the installed
+   * package folder of every configured Rush plugin. A change requires a new process.
+   */
   readonly runtimeHash: string;
   readonly selectedRushVersion: string;
 }
@@ -264,7 +268,8 @@ export class WorkspaceRuntimeFingerprintCache {
   /** @internal */
   public _hashPaths(paths: ReadonlyArray<string>): string {
     const filenames: Set<string> = new Set();
-    for (const filename of paths) {
+    // Several configured plugins often come from one package, whose folder is walked only once.
+    for (const filename of new Set(paths)) {
       for (const file of listRuntimeFilesSync(filename)) filenames.add(file);
     }
     const entries: ReadonlyArray<string>[] = [];
@@ -399,6 +404,11 @@ export async function captureWorkspaceInputFingerprintAsync(
     path.join(packageFolder, 'dist'),
     ...(options.runtimePaths ?? [])
   ];
+  // A host loads plugins with require(), and Node.js never reloads a module, so a plugin's implementation is
+  // bound to the process that loaded it: an engine recreated in the same process would reuse the old code.
+  for (const pluginConfiguration of rushConfiguration._rushPluginsConfiguration.configuration.plugins) {
+    runtimePaths.push(AutoinstallerPluginLoader.getPluginPackageFolder(rushConfiguration, pluginConfiguration));
+  }
   const runtimeHash: string = (options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache())._hashPaths(
     runtimePaths
   );
@@ -521,12 +531,16 @@ function isProcessBoundConfiguration(filename: string): boolean {
   );
 }
 
+// Declaration and ES module output, which a plugin's CommonJS entry point doesn't load. Listing them would only
+// slow down the synchronous walk that every request runs.
+const NON_RUNTIME_FOLDER_NAMES: ReadonlySet<string> = new Set(['node_modules', 'test', 'lib-dts', 'lib-esm']);
+
 function listRuntimeFilesSync(folderOrFile: string): string[] {
   try {
     if (!fsSync.statSync(folderOrFile).isDirectory()) return [folderOrFile];
     const files: string[] = [];
     for (const entry of fsSync.readdirSync(folderOrFile, { withFileTypes: true })) {
-      if (entry.name === 'node_modules' || entry.name === 'test') continue;
+      if (NON_RUNTIME_FOLDER_NAMES.has(entry.name)) continue;
       const filename: string = path.join(folderOrFile, entry.name);
       if (entry.isDirectory()) files.push(...listRuntimeFilesSync(filename));
       else if (/\.(?:js|cjs|mjs|json)$/.test(entry.name) && !entry.name.endsWith('.test.js'))

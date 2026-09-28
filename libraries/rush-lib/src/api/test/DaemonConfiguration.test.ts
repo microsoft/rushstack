@@ -52,7 +52,12 @@ describe('daemon configuration', () => {
     { warmMemoryBudgetMB: 0 },
     { warmSetMaxProjects: 0.5 },
     { autoWarmByTelemetry: 1 },
-    { usePersistentIpcRunners: 'true' }
+    { usePersistentIpcRunners: 'true' },
+    { compatiblePlugins: 'rush-example-plugin' },
+    { compatiblePlugins: [''] },
+    { compatiblePlugins: [' rush-example-plugin'] },
+    { compatiblePlugins: ['rush-a-plugin,rush-b-plugin'] },
+    { compatiblePlugins: [1] }
   ])('publishes schema rejection for %j', (daemon) => {
     const schema = JsonSchema.fromLoadedObject(schemaJson);
     expect(() =>
@@ -63,6 +68,55 @@ describe('daemon configuration', () => {
     ).toThrow();
   });
 
+  it('resolves compatible plugin names from the environment, then configuration, then no plugins', () => {
+    expect(resolveDaemonConfiguration({}, {}).compatiblePlugins).toEqual([]);
+    const configured: string[] = ['rush-a-plugin', 'rush-b-plugin'];
+    expect(resolveDaemonConfiguration({ compatiblePlugins: configured }, {}).compatiblePlugins).toEqual(
+      configured
+    );
+    expect(
+      resolveDaemonConfiguration(
+        { compatiblePlugins: configured },
+        { RUSH_DAEMON_COMPATIBLE_PLUGINS: ' rush-c-plugin , rush-d-plugin' }
+      ).compatiblePlugins
+    ).toEqual(['rush-c-plugin', 'rush-d-plugin']);
+    // An empty value is an explicit override that declares no plugins.
+    for (const value of ['', ' ']) {
+      expect(
+        resolveDaemonConfiguration({ compatiblePlugins: configured }, { RUSH_DAEMON_COMPATIBLE_PLUGINS: value })
+          .compatiblePlugins
+      ).toEqual([]);
+    }
+    const resolved: readonly string[] = resolveDaemonConfiguration(
+      { compatiblePlugins: configured },
+      {}
+    ).compatiblePlugins;
+    expect(Object.isFrozen(resolved)).toBe(true);
+    expect(resolved).not.toBe(configured);
+  });
+
+  it.each([',', 'rush-a-plugin,', 'rush-a-plugin,,rush-b-plugin', ' , rush-a-plugin'])(
+    'rejects compatible plugin override %j with an empty entry',
+    (value) => {
+      expect(() => resolveDaemonConfiguration({}, { RUSH_DAEMON_COMPATIBLE_PLUGINS: value })).toThrow(
+        'RUSH_DAEMON_COMPATIBLE_PLUGINS must be a comma-separated list of plugin names.'
+      );
+    }
+  );
+
+  it.each([
+    'rush-example-plugin',
+    [''],
+    [' rush-example-plugin'],
+    ['rush-a-plugin,rush-b-plugin'],
+    [1],
+    [null]
+  ])('rejects configured compatible plugins %j', (compatiblePlugins) => {
+    expect(() =>
+      resolveDaemonConfiguration({ compatiblePlugins: compatiblePlugins as unknown as string[] }, {})
+    ).toThrow('daemon.compatiblePlugins must be an array of plugin names.');
+  });
+
   it('accepts all valid knobs in the published schema', () => {
     JsonSchema.fromLoadedObject(schemaJson).validateObject(
       {
@@ -70,6 +124,15 @@ describe('daemon configuration', () => {
         pnpmVersion: '10.27.0',
         projects: [],
         daemon: resolveDaemonConfiguration({ queueTimeoutSeconds: 0 }, {})
+      },
+      'rush.json'
+    );
+    JsonSchema.fromLoadedObject(schemaJson).validateObject(
+      {
+        rushVersion: '5.179.0',
+        pnpmVersion: '10.27.0',
+        projects: [],
+        daemon: resolveDaemonConfiguration({ compatiblePlugins: ['rush-example-plugin'] }, {})
       },
       'rush.json'
     );

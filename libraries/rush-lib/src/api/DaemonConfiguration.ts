@@ -32,6 +32,11 @@ export interface IDaemonConfigurationJson {
   readonly warmSetMaxProjects?: number;
   /** Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts scripts. Defaults to false. */
   readonly autoWarmByTelemetry?: boolean;
+  /**
+   * Names of configured Rush plugins (their `pluginName` in rush-plugins.json) that the repository has verified
+   * for long-lived daemon engines, in addition to plugins whose manifest sets `daemonCompatible`. Defaults to none.
+   */
+  readonly compatiblePlugins?: ReadonlyArray<string>;
 }
 
 const defaults: Required<IDaemonConfigurationJson> = {
@@ -44,7 +49,8 @@ const defaults: Required<IDaemonConfigurationJson> = {
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
   warmSetMaxProjects: 20,
-  autoWarmByTelemetry: false
+  autoWarmByTelemetry: false,
+  compatiblePlugins: Object.freeze([])
 };
 
 /** The exact recognized environment names. Unknown RUSH_DAEMON* names are rejected. @beta */
@@ -59,7 +65,8 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
     warmSetMaxProjects: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
-    autoWarmByTelemetry: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY'
+    autoWarmByTelemetry: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
+    compatiblePlugins: 'RUSH_DAEMON_COMPATIBLE_PLUGINS'
   });
 
 /**
@@ -101,8 +108,38 @@ export function resolveDaemonConfiguration(
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
     warmIdleTimeoutSeconds: numberOption('warmIdleTimeoutSeconds', json, environment),
     warmMemoryBudgetMB: numberOption('warmMemoryBudgetMB', json, environment),
-    warmSetMaxProjects: numberOption('warmSetMaxProjects', json, environment)
+    warmSetMaxProjects: numberOption('warmSetMaxProjects', json, environment),
+    compatiblePlugins: pluginNamesOption(json, environment)
   });
+}
+
+function pluginNamesOption(
+  json: IDaemonConfigurationJson,
+  environment: Readonly<Record<string, string | undefined>>
+): ReadonlyArray<string> {
+  const configured: unknown = json.compatiblePlugins;
+  if (
+    configured !== undefined &&
+    (!Array.isArray(configured) ||
+      configured.some((name: unknown) => typeof name !== 'string' || !isPluginName(name)))
+  ) {
+    throw new Error('daemon.compatiblePlugins must be an array of plugin names.');
+  }
+  const name: string = daemonEnvironmentVariables.compatiblePlugins;
+  const value: string | undefined = environment[name];
+  if (value === undefined) {
+    return configured ? Object.freeze([...(configured as string[])]) : defaults.compatiblePlugins;
+  }
+  // An empty value overrides rush.json with no plugins.
+  const names: string[] = value.trim() === '' ? [] : value.split(',').map((entry: string) => entry.trim());
+  if (!names.every(isPluginName)) {
+    throw new Error(`${name} must be a comma-separated list of plugin names.`);
+  }
+  return Object.freeze(names);
+}
+
+function isPluginName(name: string): boolean {
+  return name !== '' && name === name.trim() && !name.includes(',');
 }
 
 function booleanOption(

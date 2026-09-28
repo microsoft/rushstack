@@ -311,6 +311,15 @@
           "type": "boolean",
           "default": false,
           "description": "Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts unrequested scripts. RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY overrides."
+        },
+        "compatiblePlugins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[^\\s,](?:[^,]*[^\\s,])?$"
+          },
+          "default": [],
+          "description": "Names of configured Rush plugins (their pluginName in rush-plugins.json) that this repository has verified for long-lived daemon engines, in addition to plugins whose manifest sets daemonCompatible. A daemon request for a command that any other configured plugin participates in runs with in-process Rush. RUSH_DAEMON_COMPATIBLE_PLUGINS (a comma-separated list) overrides."
         }
       }
     },

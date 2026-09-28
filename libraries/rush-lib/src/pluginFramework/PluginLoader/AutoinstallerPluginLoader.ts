@@ -80,6 +80,18 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
     ];
   }
 
+  /**
+   * The installed package folder from which Rush loads a configured plugin's implementation
+   * (`common/autoinstallers/<name>/node_modules/<packageName>`). It may be a link to a folder elsewhere.
+   */
+  public static getPluginPackageFolder(
+    rushConfiguration: RushConfiguration,
+    pluginConfiguration: IRushPluginConfiguration
+  ): string {
+    const { autoinstallerName, packageName } = pluginConfiguration;
+    return path.join(rushConfiguration.commonAutoinstallersFolder, autoinstallerName, 'node_modules', packageName);
+  }
+
   public update(): void {
     const packageName: string = this.packageName;
     const pluginName: string = this.pluginName;

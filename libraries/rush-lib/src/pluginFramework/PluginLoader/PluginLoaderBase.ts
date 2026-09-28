@@ -30,6 +30,8 @@ export interface IRushPluginManifest {
   associatedCommands?: string[];
   commandLineJsonFilePath?: string;
   rushVersionRange?: string;
+  /** Declares that the plugin honors the long-lived daemon engine lifecycle. */
+  daemonCompatible?: boolean;
 }
 
 export interface IRushPluginManifestJson {

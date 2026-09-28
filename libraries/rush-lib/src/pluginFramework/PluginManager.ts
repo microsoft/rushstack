@@ -10,7 +10,7 @@ import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginL
 import type { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
 import { _createRushSessionForPlugin, type RushSession } from './RushSession';
-import type { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
+import type { PluginLoaderBase, IRushPluginManifest } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
@@ -123,6 +123,11 @@ export class PluginManager {
     return this.#loadedPluginNames;
   }
 
+  /** The `pluginName` of every plugin configured in rush-plugins.json, whether or not it has been loaded. */
+  public get configuredPluginNames(): ReadonlySet<string> {
+    return new Set(this.#autoinstallerPluginLoaders.map((pluginLoader) => pluginLoader.pluginName));
+  }
+
   public async updateAsync(): Promise<void> {
     await this._preparePluginAutoinstallersAsync(this.#autoinstallerPluginLoaders);
     const preparedAutoinstallerNames: Set<string> = new Set<string>();
@@ -201,34 +206,32 @@ export class PluginManager {
   }
 
   /**
-   * Explains why configured autoinstaller plugins could participate in the specified phased command.
+   * Explains why configured autoinstaller plugins prevent a long-lived engine from serving the specified
+   * phased command.
    *
    * @remarks
-   * A plugin is inert for the command only if Rush will neither initialize it (it is associated with
-   * specific commands, none of which is this command) nor use its command-line.json to define the
-   * command, a phase of the command, or a parameter associated with either. A manifest or command-line
-   * file that cannot be read is reported rather than assumed to be inert.
+   * A plugin is compatible with a long-lived engine if its manifest sets `daemonCompatible` or its name is in
+   * `compatiblePluginNames`. Any other plugin is inert for the command only if Rush will neither initialize it
+   * (it is associated with specific commands, none of which is this command) nor use its command-line.json to
+   * define the command, a phase of the command, or a parameter associated with either. A manifest or
+   * command-line file that cannot be read is reported rather than assumed to be compatible or inert.
    *
-   * @returns An empty array if every configured autoinstaller plugin is inert for the command.
+   * @returns An empty array if every configured autoinstaller plugin is compatible with, or inert for, the command.
    */
-  public getPluginsParticipatingInCommand(
+  public getPluginsIncompatibleWithEngine(
     commandName: string,
-    phaseNames: ReadonlySet<string>
+    phaseNames: ReadonlySet<string>,
+    compatiblePluginNames: ReadonlySet<string>
   ): ReadonlyArray<string> {
     const reasons: string[] = [];
     for (const pluginLoader of this.#autoinstallerPluginLoaders) {
       const pluginLabel: string = `"${pluginLoader.pluginName}" (${pluginLoader.packageName})`;
-      let associatedCommands: ReadonlyArray<string> | undefined;
+      let manifest: IRushPluginManifest;
       try {
-        associatedCommands = pluginLoader.pluginManifest.associatedCommands;
+        manifest = pluginLoader.pluginManifest;
       } catch (error) {
         reasons.push(`${pluginLabel}: its manifest could not be read: ${(error as Error).message}`);
         continue;
-      }
-      if (!associatedCommands) {
-        reasons.push(`${pluginLabel} is initialized for every command`);
-      } else if (associatedCommands.includes(commandName)) {
-        reasons.push(`${pluginLabel} is associated with "${commandName}"`);
       }
 
       let commandLineConfiguration: CommandLineConfiguration | undefined;
@@ -237,6 +240,16 @@ export class PluginManager {
       } catch (error) {
         reasons.push(`${pluginLabel}: its command-line.json could not be read: ${(error as Error).message}`);
         continue;
+      }
+      if (manifest.daemonCompatible || compatiblePluginNames.has(pluginLoader.pluginName)) {
+        continue;
+      }
+
+      const { associatedCommands } = manifest;
+      if (!associatedCommands) {
+        reasons.push(`${pluginLabel} is initialized for every command`);
+      } else if (associatedCommands.includes(commandName)) {
+        reasons.push(`${pluginLabel} is associated with "${commandName}"`);
       }
       if (!commandLineConfiguration) {
         continue;

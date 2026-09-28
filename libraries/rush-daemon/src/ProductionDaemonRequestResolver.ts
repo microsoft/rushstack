@@ -45,9 +45,9 @@ import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
  * scheduling parameters (`--verbose`, `--parallelism`, `--timeline`) are applied per request instead.
  * Incompatible parameters,
  * environments, or graph inputs are rejected before scheduling; no request is retried automatically.
- * The initial supported surface excludes external plugins that participate in the requested command,
- * .env initialization, install/watch, event-hook scripts, and rushx/global commands. Use the unchanged
- * native CLI for those surfaces.
+ * The initial supported surface excludes external plugins that participate in the requested command
+ * (unless their manifest or the repository declares them daemon-compatible), .env initialization,
+ * install/watch, event-hook scripts, and rushx/global commands. Use the unchanged native CLI for those surfaces.
  * @beta
  */
 export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
@@ -195,6 +195,13 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     session: IWorkspaceSession
   ): Promise<void> {
     if (!session.initializeEngineAsync) throw new Error('This session cannot bind a native engine.');
+    if (command.unmatchedCompatiblePluginNames.length > 0) {
+      // The binding request's output also carries this warning; the launcher log keeps it for daemon diagnostics.
+      process.stderr.write(
+        `Warning: the daemon's compatible plugin list names plugins that are not configured in ` +
+          `rush-plugins.json: ${command.unmatchedCompatiblePluginNames.join(', ')}\n`
+      );
+    }
     await session.initializeEngineAsync(async (options) => {
       let engine: IPhasedCommandEngine;
       try {
