@@ -14,6 +14,7 @@ import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushProjectConfiguration } from './RushProjectConfiguration';
 import { getDaemonIpcImplementationIdentityAsync } from '../logic/operations/DaemonIpcConfiguration';
 import { AutoinstallerPluginLoader } from '../pluginFramework/PluginLoader/AutoinstallerPluginLoader';
+import { getFileStamp, getSettledBeforeNs, isFileStatSettled } from '../utilities/FileContentStamp';
 
 /** Stable inputs which distinguish reusable, reloadable, and process-bound workspace state. @alpha */
 export interface IWorkspaceInputFingerprint {
@@ -34,7 +35,11 @@ export interface IWorkspaceInputFingerprintOptions {
   readonly environment: Readonly<Record<string, string | undefined>>;
   /** Additional implementation files/folders owned by the embedding host. */
   readonly runtimePaths?: ReadonlyArray<string>;
-  /** Invocation-owner cache for implementation files; workspace definitions are always read by content. */
+  /**
+   * Invocation-owner cache for file digests. Workspace definitions are always compared by content: a cached
+   * digest is reused only for a file that had stopped changing before it was read (see
+   * {@link WorkspaceRuntimeFingerprintCache}).
+   */
   readonly runtimeCache?: WorkspaceRuntimeFingerprintCache;
 }
 
@@ -251,6 +256,11 @@ function removeRepeatedPathEntries(value: string): string {
   return Array.from(new Set(value.split(path.delimiter))).join(path.delimiter);
 }
 
+interface IFileDigest {
+  readonly stamp: string;
+  readonly entry: ReadonlyArray<string>;
+}
+
 /**
  * Memoizes runtime content digests behind file identity, size, nanosecond mtime and ctime checks.
  * Changes to metadata alone still produce the same content fingerprint.
@@ -261,10 +271,22 @@ function removeRepeatedPathEntries(value: string): string {
  * updates the cache; hosts can inspect {@link WorkspaceRuntimeFingerprintCache.changedPaths}
  * when reporting why a process restart is required.
  *
+ * The cache also memoizes the digests of workspace definition and installation files, which users edit while
+ * a host is running. Such a digest is recorded only if the file's ctime and mtime were at least 3 seconds old
+ * when the file was examined, and it is reused only while the file's identity, size, mtime and ctime are
+ * unchanged. A file that changed more recently is read again by every capture. Every write updates a file's
+ * ctime, which userspace can't set, so a later write can't keep the recorded stamp even on a filesystem whose
+ * timestamps are coarse, provided that the filesystem's clock agrees with the host's to within that margin.
+ *
+ * Like the runtime digests, a memoized entry keeps the file's resolved path while the identity of the file it
+ * reaches is unchanged. A symbolic link that is retargeted to another hard link of the same file, or a parent
+ * folder that is moved without changing the file, keeps the previous resolved path.
+ *
  * @alpha
  */
 export class WorkspaceRuntimeFingerprintCache {
-  private readonly _files: Map<string, { stamp: string; entry: ReadonlyArray<string> }> = new Map();
+  private readonly _files: Map<string, IFileDigest> = new Map();
+  private readonly _inputFiles: Map<string, IFileDigest> = new Map();
   private _baseline: ReadonlyMap<string, string> | undefined;
   private _changedPaths: ReadonlyArray<string> = [];
 
@@ -289,8 +311,8 @@ export class WorkspaceRuntimeFingerprintCache {
         // statSync follows links, so dev and ino identify the file that is loaded. Its resolved path is
         // recomputed whenever that identity changes, which avoids a costly realpath for every unchanged file.
         const stat: fsSync.BigIntStats = fsSync.statSync(filename, { bigint: true });
-        const stamp: string = `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
-        let cached: { stamp: string; entry: ReadonlyArray<string> } | undefined = this._files.get(filename);
+        const stamp: string = getFileStamp(stat);
+        let cached: IFileDigest | undefined = this._files.get(filename);
         if (cached?.stamp !== stamp) {
           cached = {
             stamp,
@@ -315,6 +337,58 @@ export class WorkspaceRuntimeFingerprintCache {
     this._baseline ??= current;
     this._changedPaths = Array.from(new Set([...this._baseline.keys(), ...current.keys()])).filter(
       (filename) => this._baseline!.get(filename) !== current.get(filename)
+    );
+    return hashText(JSON.stringify(entries));
+  }
+
+  /**
+   * Hashes workspace definition or installation files by content, as `[filename, realpath, sha256]` entries or
+   * `[filename, 'missing']`. See the remarks of {@link WorkspaceRuntimeFingerprintCache} for when a digest is reused.
+   * @internal
+   */
+  public async _hashInputFilesAsync(filenames: Iterable<string>): Promise<string> {
+    const settledBeforeNs: bigint = getSettledBeforeNs();
+    const sortedFilenames: string[] = Array.from(filenames).sort();
+    const entries: ReadonlyArray<string>[] = new Array(sortedFilenames.length);
+    const misses: { index: number; stat: fsSync.BigIntStats | undefined }[] = [];
+    for (let index: number = 0; index < sortedFilenames.length; index++) {
+      const filename: string = sortedFilenames[index];
+      let stat: fsSync.BigIntStats | undefined;
+      try {
+        // statSync follows links, so dev and ino identify the file whose content is hashed.
+        stat = fsSync.statSync(filename, { bigint: true, throwIfNoEntry: false });
+      } catch {
+        // Hashing the file reports the error, or its absence, as an uncached capture does.
+        misses.push({ index, stat: undefined });
+        continue;
+      }
+      if (!stat) {
+        this._inputFiles.delete(filename);
+        entries[index] = [filename, 'missing'];
+      } else if (!stat.isFile()) {
+        misses.push({ index, stat: undefined });
+      } else {
+        const cached: IFileDigest | undefined = this._inputFiles.get(filename);
+        if (cached?.stamp === getFileStamp(stat)) {
+          entries[index] = cached.entry;
+        } else {
+          misses.push({ index, stat });
+        }
+      }
+    }
+    await Async.forEachAsync(
+      misses,
+      async ({ index, stat }) => {
+        const filename: string = sortedFilenames[index];
+        const entry: ReadonlyArray<string> = await hashFileAsync(filename);
+        entries[index] = entry;
+        if (stat && entry.length === 3 && isFileStatSettled(stat, settledBeforeNs)) {
+          this._inputFiles.set(filename, { stamp: getFileStamp(stat), entry });
+        } else {
+          this._inputFiles.delete(filename);
+        }
+      },
+      { concurrency: 3 }
     );
     return hashText(JSON.stringify(entries));
   }
@@ -420,13 +494,12 @@ export async function captureWorkspaceInputFingerprintAsync(
   for (const pluginConfiguration of rushConfiguration._rushPluginsConfiguration.configuration.plugins) {
     runtimePaths.push(AutoinstallerPluginLoader.getPluginPackageFolder(rushConfiguration, pluginConfiguration));
   }
-  const runtimeHash: string = (options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache())._hashPaths(
-    runtimePaths
-  );
+  const cache: WorkspaceRuntimeFingerprintCache = options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache();
+  const runtimeHash: string = cache._hashPaths(runtimePaths);
   return {
-    configurationHash: await hashFilesAsync(definitions),
+    configurationHash: await cache._hashInputFilesAsync(definitions),
     environmentHash: hashText(JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment))),
-    installationHash: await hashFilesAsync(installation),
+    installationHash: await cache._hashInputFilesAsync(installation),
     runtimeHash: hashText(JSON.stringify([process.execPath, process.version, runtimeHash])),
     selectedRushVersion: environment.RUSH_PREVIEW_VERSION ?? rushJson.rushVersion
   };
@@ -461,26 +534,19 @@ function hashText(text: string): string {
   return createHash('sha256').update(text).digest('hex');
 }
 
-async function hashFilesAsync(filenames: Iterable<string>): Promise<string> {
-  const entries: string[][] = await Async.mapAsync(
-    Array.from(filenames).sort(),
-    async (filename) => {
-      try {
-        return [
-          filename,
-          await fs.realpath(filename),
-          createHash('sha256')
-            .update(await fs.readFile(filename))
-            .digest('hex')
-        ];
-      } catch (error) {
-        if (!FileSystem.isNotExistError(error as Error)) throw error;
-        return [filename, 'missing'];
-      }
-    },
-    { concurrency: 3 }
-  );
-  return hashText(JSON.stringify(entries));
+async function hashFileAsync(filename: string): Promise<ReadonlyArray<string>> {
+  try {
+    return [
+      filename,
+      await fs.realpath(filename),
+      createHash('sha256')
+        .update(await fs.readFile(filename))
+        .digest('hex')
+    ];
+  } catch (error) {
+    if (!FileSystem.isNotExistError(error as Error)) throw error;
+    return [filename, 'missing'];
+  }
 }
 
 /**

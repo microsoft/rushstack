@@ -445,4 +445,90 @@ describe('workspace input fingerprints', () => {
       fs.rmSync(folder, { recursive: true, force: true });
     }
   });
+
+  it('reuses the digests of definition and installation files only once they have stopped changing', async () => {
+    const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
+    const realDateNow: () => number = Date.now;
+    const readFile: jest.SpyInstance = jest.spyOn(fs.promises, 'readFile');
+    try {
+      const write = (relativePath: string, content: string): void => {
+        const filename: string = path.join(folder, relativePath);
+        fs.mkdirSync(path.dirname(filename), { recursive: true });
+        fs.writeFileSync(filename, content);
+      };
+      write(
+        'rush.json',
+        JSON.stringify({
+          rushVersion: '5.179.0',
+          pnpmVersion: '10.27.0',
+          projects: [{ packageName: 'a', projectFolder: 'a' }]
+        })
+      );
+      write('a/package.json', '{"name":"a","version":"1.0.0"}');
+      write('common/config/rush/pnpm-lock.yaml', 'lockfileVersion: 1');
+      write('npmrc/a', 'registry=https://a.example/');
+      write('npmrc/b', 'registry=https://b.example/');
+      fs.symlinkSync(path.join(folder, 'npmrc/a'), path.join(folder, '.npmrc'));
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        path.join(folder, 'rush.json')
+      );
+      const packageJsonPath: string = path.join(rushConfiguration.rushJsonFolder, 'a', 'package.json');
+      const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+      /** Returns the fingerprint and the number of times that the capture read the project's package.json. */
+      const captureAsync = async (): Promise<[IWorkspaceInputFingerprint, number]> => {
+        readFile.mockClear();
+        const fingerprint: IWorkspaceInputFingerprint = await captureWorkspaceInputFingerprintAsync({
+          rushConfiguration,
+          runtimeCache,
+          environment: {}
+        });
+        return [fingerprint, readFile.mock.calls.filter(([filename]) => filename === packageJsonPath).length];
+      };
+
+      // Files that changed moments ago are read by every capture.
+      const dateNow: jest.SpyInstance = jest.spyOn(Date, 'now').mockReturnValue(realDateNow());
+      const [first, firstReadCount] = await captureAsync();
+      expect(firstReadCount).toBe(1);
+      expect(await captureAsync()).toEqual([first, 1]);
+      // Once they have been unchanged for a few seconds, a capture records digests that later captures reuse.
+      dateNow.mockImplementation(() => realDateNow() + 10_000);
+      expect(await captureAsync()).toEqual([first, 1]);
+      expect(await captureAsync()).toEqual([first, 0]);
+
+      // An edit that keeps the file's identity, size and modification time
+      fs.utimesSync(packageJsonPath, 1_000_000, 1_000_000);
+      expect(await captureAsync()).toEqual([first, 1]);
+      const { ctimeNs } = fs.statSync(packageJsonPath, { bigint: true });
+      const probePath: string = path.join(folder, 'probe');
+      do {
+        // A coarse clock can give a write the same ctime as the previous one.
+        fs.writeFileSync(probePath, '');
+      } while (fs.statSync(probePath, { bigint: true }).ctimeNs <= ctimeNs);
+      write('a/package.json', '{"name":"a","version":"1.0.1"}');
+      fs.utimesSync(packageJsonPath, 1_000_000, 1_000_000);
+      const [edited, editedReadCount] = await captureAsync();
+      expect(editedReadCount).toBe(1);
+      expect(classifyWorkspaceInputChange(first, edited)).toBe(WorkspaceInputChangeTier.Reload);
+      expect(await captureAsync()).toEqual([edited, 0]);
+
+      // A link that reaches another file
+      fs.rmSync(path.join(folder, '.npmrc'));
+      fs.symlinkSync(path.join(folder, 'npmrc/b'), path.join(folder, '.npmrc'));
+      const [retargeted] = await captureAsync();
+      expect(classifyWorkspaceInputChange(edited, retargeted)).toBe(WorkspaceInputChangeTier.Reload);
+      // A file that is removed, and then created again
+      fs.rmSync(packageJsonPath);
+      const [removed] = await captureAsync();
+      expect(classifyWorkspaceInputChange(retargeted, removed)).toBe(WorkspaceInputChangeTier.Reload);
+      write('a/package.json', '{"name":"a","version":"1.0.1"}');
+      expect(await captureAsync()).toEqual([retargeted, 1]);
+      // An installation file
+      write('common/config/rush/pnpm-lock.yaml', 'lockfileVersion: 10');
+      const [installed] = await captureAsync();
+      expect(classifyWorkspaceInputChange(retargeted, installed)).toBe(WorkspaceInputChangeTier.Restart);
+    } finally {
+      jest.restoreAllMocks();
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
 });
