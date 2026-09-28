@@ -162,7 +162,8 @@ All options are set in `config/sass.json`. Every option is optional.
 | `fileExtensions` | `[".sass", ".scss", ".css"]` | File extensions to treat as CSS modules |
 | `nonModuleFileExtensions` | `[".global.sass", ".global.scss", ".global.css"]` | File extensions to treat as global (non-module) stylesheets |
 | `excludeFiles` | `[]` | Paths relative to `srcFolder` to skip entirely |
-| `loadPaths` | `[]` | Folders, relative to the project folder, to search when a bare specifier such as `@use "theme/colors"` cannot be resolved relative to the importing file. Analogous to the Sass compiler's `loadPaths` option. Searched before `node_modules`. |
+| `loadPaths` | `[]` | Folders, relative to the project folder, to search when a bare specifier such as `@use "theme/colors"` cannot be resolved relative to the importing file. Analogous to the Sass compiler's `loadPaths` option. |
+| `resolveBareSpecifiersAsPackages` | `false` | When `true`, a bare specifier that resolves neither relative to the importing file nor from `loadPaths` is additionally resolved as a package via Node module resolution. See [Bare specifiers](#bare-specifiers). |
 | `doNotTrimOriginalFileExtension` | `false` | When `true`, preserves the original extension in the CSS output filename. E.g. `styles.scss` → `styles.scss.css` instead of `styles.css`. Useful when downstream tooling needs to distinguish the source format. |
 | `preserveIcssExports` | `false` | When `true`, keeps the `:export { }` block in the emitted CSS. This is needed when a webpack loader (e.g. `css-loader`'s `icssParser`) must extract `:export` values at bundle time. Has no effect on the generated `.d.ts`. |
 | `silenceDeprecations` | `[]` | List of Sass deprecation codes to suppress (e.g. `"mixed-decls"`, `"import"`, `"global-builtin"`, `"color-functions"`) |
@@ -208,7 +209,8 @@ A load specifier is resolved in this order:
 
 1. Relative to the importing file.
 2. Each folder in the `loadPaths` option, in order (bare specifiers only).
-3. `node_modules`, resolved using Node module resolution (bare specifiers only).
+3. As a package, via Node module resolution — only when `resolveBareSpecifiersAsPackages` is enabled
+   (bare specifiers only).
 
 The plugin supports the modern `pkg:` protocol for importing from npm packages:
 
@@ -229,18 +231,34 @@ This also applies to specifiers that are not part of an `@use`/`@import`/`@forwa
 
 ### Bare specifiers
 
-A "bare" specifier is one that does not start with `.`, `/`, or a URL scheme. When it cannot be
-resolved relative to the importing file, it is resolved from `loadPaths` and then from `node_modules`:
+A "bare" specifier is one that does not start with `.`, `/`, or a URL scheme, for example
+`@use "@fluentui/react/dist/sass/variables"`.
+
+Per the Sass specification the target of `@use`, `@import` and `@forward` is a **URL**, so a bare
+specifier is a *relative path*, not a reference to a package. That is how this plugin treats it by
+default, and `pkg:` is the supported way to reference a package:
 
 ```scss
-// Resolves to node_modules/@fluentui/react/dist/sass/variables.scss
-@use "@fluentui/react/dist/sass/variables";
+// Preferred: unambiguous, and always enabled
+@use "pkg:@fluentui/react/dist/sass/variables";
 ```
 
-`pkg:` is preferred for stylesheets you own, because it is unambiguous. Bare specifiers are supported
-because they are the portable form understood by every other Sass toolchain (the Dart Sass CLI's
-`--load-path`, `sass-loader`, Vite, the Angular CLI, and so on), so third-party packages that ship
-Sass sources commonly use them internally, where a consuming project cannot rewrite them.
+Some other Sass toolchains (the Dart Sass CLI's `--load-path`, `sass-loader`, Vite, the Angular CLI)
+instead resolve bare specifiers from `node_modules`. Stylesheets authored for those toolchains — most
+commonly inside third-party packages, where a consuming project cannot rewrite the import — depend on
+that behavior. Two opt-in options support them:
+
+```json
+{
+  "loadPaths": ["src/styles"],
+  "resolveBareSpecifiersAsPackages": true
+}
+```
+
+`loadPaths` resolves a bare specifier against a list of folders. `resolveBareSpecifiersAsPackages`
+additionally resolves it as a package using Node module resolution, which honors the package's
+`exports` field. Both apply only after relative resolution has failed, so enabling them cannot change
+the meaning of a specifier that already resolves.
 
 ## Incremental builds
 

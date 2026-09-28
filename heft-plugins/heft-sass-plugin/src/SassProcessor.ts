@@ -107,9 +107,23 @@ export interface ISassProcessorOptions {
   /**
    * Absolute paths of folders to search when resolving a bare specifier, e.g. `@use 'theme/colors'`.
    * These are analogous to the `loadPaths` option of the Sass compiler, and are consulted after
-   * resolution relative to the importing file fails, but before resolution from `node_modules`.
+   * resolution relative to the importing file fails.
    */
   loadPaths?: string[];
+
+  /**
+   * If true, a bare specifier that does not resolve relative to the importing file or from `loadPaths`
+   * will additionally be resolved as a package, using Node module resolution.
+   *
+   * This is off by default because the Sass specification defines the target of `@use`, `@import` and
+   * `@forward` to be a URL, so `@use '@scope/pkg/theme'` is a relative path rather than a reference to
+   * a package. Enabling this deviates from the specification, and should only be done when consuming
+   * stylesheets that rely on it, such as third-party packages authored for toolchains that resolve
+   * bare specifiers from `node_modules`.
+   *
+   * Prefer the unambiguous `pkg:` scheme in stylesheets that you control.
+   */
+  resolveBareSpecifiersAsPackages?: boolean;
 
   /**
    * If set, deprecation warnings from dependencies will be suppressed.
@@ -219,6 +233,7 @@ export class SassProcessor {
 
   readonly #isFileModule: (filePath: string) => boolean;
   readonly #loadPaths: readonly string[];
+  readonly #resolveBareSpecifiersAsPackages: boolean;
   readonly #options: ISassProcessorOptions;
   readonly #realpathSync: (path: string) => string;
   readonly #scssOptions: Options<'async'>;
@@ -274,6 +289,7 @@ export class SassProcessor {
     this.#fileInfo = new Map();
     this.#isFileModule = isFileModule;
     this.#loadPaths = options.loadPaths ?? [];
+    this.#resolveBareSpecifiersAsPackages = options.resolveBareSpecifiersAsPackages ?? false;
     this.#resolutions = new Map();
     this.#options = options;
     this.#realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
@@ -601,17 +617,17 @@ export class SassProcessor {
       return relativeResolution;
     }
 
-    // Resolution relative to the importing file failed and the specifier is bare, e.g.
-    // `@use '@fluentui/react/dist/sass/blah'`. Fall back to the configured load paths and then to
-    // `node_modules`, matching the behavior of the Sass `loadPaths` option and `NodePackageImporter`.
-    // This form is what non-Heft Sass toolchains emit, so stylesheets inside third-party packages
-    // frequently use it and cannot be rewritten by the consuming project.
+    // Per the Sass specification the target of `@use`/`@import`/`@forward` is a URL, so a bare
+    // specifier such as `@use '@scope/pkg/theme'` is a relative path and has already been handled
+    // above. The fallbacks below deviate from that, so each one happens only when the configuration
+    // explicitly asks for it.
     return await this.#canonicalizeBareSpecifierAsync(url, context);
   }
 
   /**
-   * Resolves a bare specifier, e.g. `theme/colors` or `@fluentui/react/dist/sass/blah`, by searching the
-   * configured load paths and then `node_modules`.
+   * Resolves a bare specifier, e.g. `theme/colors` or `@fluentui/react/dist/sass/blah`, against the
+   * opt-in `loadPaths` and `resolveBareSpecifiersAsPackages` options. Returns null when neither option
+   * is configured.
    * @param url - The bare specifier to canonicalize
    * @param context - The context in which the canonicalization is being performed
    * @returns The canonical URL of the target file, or null if it does not resolve
@@ -623,6 +639,10 @@ export class SassProcessor {
       if (result) {
         return result;
       }
+    }
+
+    if (!this.#resolveBareSpecifiersAsPackages) {
+      return null;
     }
 
     try {

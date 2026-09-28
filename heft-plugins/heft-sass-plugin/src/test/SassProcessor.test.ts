@@ -32,12 +32,17 @@ const BARE_SPECIFIER_FILES: Record<string, string> = {
   'node_modules/shared-styles/_index.scss':
     "@use 'fake-sass-package/lib/sass/colors';\n\n.shared {\n  color: colors.$fake-brand;\n}\n",
 
+  // A package with no bare specifiers of its own, so that the legacy `~` tests exercise only the
+  // tilde rewrite and not the opt-in bare specifier fallback.
+  'node_modules/plain-styles/package.json': '{ "name": "plain-styles", "version": "1.0.0" }',
+  'node_modules/plain-styles/_index.scss': '.plain {\n  color: #123456;\n}\n',
+
   'src/bare-import.module.scss':
     "@use 'fake-sass-package/lib/sass/colors';\n\n.root {\n  color: colors.$fake-brand;\n}\n",
   'src/dependency-bare-import.module.scss':
     "@use 'sass:meta';\n\n.root {\n  :global {\n    @include meta.load-css('pkg:shared-styles');\n  }\n}\n",
   'src/tilde-load-css.module.scss':
-    "@use 'sass:meta';\n\n.root {\n  :global {\n    @include meta.load-css('~shared-styles');\n  }\n}\n",
+    "@use 'sass:meta';\n\n.root {\n  :global {\n    @include meta.load-css('~plain-styles');\n  }\n}\n",
   'src/missing-bare-import.module.scss': "@use 'definitely-not-a-real-package/colors';\n",
 
   // A folder that shadows the package name, to verify that relative resolution takes precedence.
@@ -67,6 +72,7 @@ type ICreateProcessorOptions = Partial<
     | 'nonModuleFileExtensions'
     | 'postProcessCssAsync'
     | 'preserveIcssExports'
+    | 'resolveBareSpecifiersAsPackages'
     | 'silenceDeprecations'
     | 'sourceMap'
     | 'srcFolder'
@@ -807,8 +813,14 @@ describe(SassProcessor.name, () => {
       }
     });
 
-    function createBareSpecifierProcessor(): { processor: SassProcessor; logger: MockScopedLogger } {
-      return createProcessor(terminalProvider, { srcFolder: bareSpecifierSrcFolder });
+    function createBareSpecifierProcessor(options: ICreateProcessorOptions = {}): {
+      processor: SassProcessor;
+      logger: MockScopedLogger;
+    } {
+      return createProcessor(terminalProvider, {
+        srcFolder: bareSpecifierSrcFolder,
+        ...options
+      });
     }
 
     async function compileBareSpecifierFixtureAsync(
@@ -819,7 +831,9 @@ describe(SassProcessor.name, () => {
     }
 
     it('resolves a bare specifier from node_modules', async () => {
-      const { processor, logger } = createBareSpecifierProcessor();
+      const { processor, logger } = createBareSpecifierProcessor({
+        resolveBareSpecifiersAsPackages: true
+      });
       await compileBareSpecifierFixtureAsync(processor, 'bare-import.module.scss');
 
       expect(logger.errors).toHaveLength(0);
@@ -828,7 +842,9 @@ describe(SassProcessor.name, () => {
 
     it('resolves a bare specifier used inside a dependency stylesheet', async () => {
       // The failing import lives in node_modules/shared-styles, which the consuming project cannot edit.
-      const { processor, logger } = createBareSpecifierProcessor();
+      const { processor, logger } = createBareSpecifierProcessor({
+        resolveBareSpecifiersAsPackages: true
+      });
       await compileBareSpecifierFixtureAsync(processor, 'dependency-bare-import.module.scss');
 
       expect(logger.errors).toHaveLength(0);
@@ -839,15 +855,30 @@ describe(SassProcessor.name, () => {
 
     it('resolves a legacy tilde specifier inside meta.load-css()', async () => {
       // The `~` rewrite is applied by the resolver, not only by the @use/@import/@forward preprocessor.
+      // `~` is an explicit package reference, so it is not gated by resolveBareSpecifiersAsPackages;
+      // this processor deliberately leaves that option at its default.
       const { processor, logger } = createBareSpecifierProcessor();
       await compileBareSpecifierFixtureAsync(processor, 'tilde-load-css.module.scss');
 
       expect(logger.errors).toHaveLength(0);
-      expect(getCssOutput('tilde-load-css.module.scss')).toContain('.shared');
+      expect(getCssOutput('tilde-load-css.module.scss')).toContain('.plain');
+    });
+
+    it('does not resolve a bare specifier as a package by default', async () => {
+      // Per the Sass specification a bare specifier is a relative path, so package resolution must
+      // happen only when the configuration explicitly opts in. This processor does not pass the
+      // option at all, so it asserts the default value and not merely an explicit `false`.
+      const { processor, logger } = createBareSpecifierProcessor();
+      await compileBareSpecifierFixtureAsync(processor, 'bare-import.module.scss');
+
+      expect(logger.errors).toHaveLength(1);
+      expect(logger.errors[0].message).toContain("Can't find stylesheet to import");
     });
 
     it('prefers a file relative to the importer over a package of the same name', async () => {
-      const { processor, logger } = createBareSpecifierProcessor();
+      const { processor, logger } = createBareSpecifierProcessor({
+        resolveBareSpecifiersAsPackages: true
+      });
       await compileBareSpecifierFixtureAsync(processor, 'nested/relative-precedence.module.scss');
 
       expect(logger.errors).toHaveLength(0);
@@ -857,7 +888,9 @@ describe(SassProcessor.name, () => {
     });
 
     it('reports a normal Sass error when a bare specifier names no installed package', async () => {
-      const { processor, logger } = createBareSpecifierProcessor();
+      const { processor, logger } = createBareSpecifierProcessor({
+        resolveBareSpecifiersAsPackages: true
+      });
       await compileBareSpecifierFixtureAsync(processor, 'missing-bare-import.module.scss');
 
       expect(logger.errors).toHaveLength(1);

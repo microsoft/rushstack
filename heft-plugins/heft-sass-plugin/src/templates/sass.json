@@ -82,12 +82,24 @@
   /**
    * Folders, relative to the project folder, to search when resolving a bare specifier such as
    * `@use 'theme/colors'`. Analogous to the Sass compiler's "loadPaths" option. These are consulted
-   * only after resolution relative to the importing file fails, and before resolution from
-   * "node_modules".
+   * only after resolution relative to the importing file fails.
    *
    * Default value: undefined
    */
   // "loadPaths": ["src/styles"],
+
+  /**
+   * If true, a bare specifier that resolves neither relative to the importing file nor from
+   * "loadPaths" will additionally be resolved as a package, using Node module resolution.
+   *
+   * Per the Sass specification the target of `@use`, `@import` and `@forward` is a URL, so
+   * `@use '@scope/pkg/theme'` is a relative path rather than a package reference. Enable this only
+   * when consuming stylesheets that rely on bare specifiers resolving from "node_modules"; prefer the
+   * `pkg:` scheme in stylesheets that you control.
+   *
+   * Default value: false
+   */
+  // "resolveBareSpecifiersAsPackages": true,
 
   /**
    * If true, the original file extension will not be trimmed when generating the output CSS filename.
