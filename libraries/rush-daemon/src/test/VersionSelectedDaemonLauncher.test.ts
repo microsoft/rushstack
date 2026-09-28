@@ -90,6 +90,26 @@ describe('version-selected daemon launcher', () => {
     expect(process.env._RUSH_LIB_PATH).toBe(originalRushLibPath);
   });
 
+  it("starts the daemon without the starting client's request-scoped variables", () => {
+    const command = getSelectedDaemonStartCommand(path.join(repoRoot, 'package.json'), {
+      ...context,
+      environment: {
+        HOME: '/home/user',
+        RUSH_PARALLELISM: '48',
+        COPILOT_AGENT_SESSION_ID: 'session-1',
+        RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
+        RUSHD_OUTPUT: 'agent',
+        UNSET: undefined
+      }
+    });
+    expect(command.environment).toEqual({
+      HOME: '/home/user',
+      RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
+      RUSHD_OUTPUT: 'agent'
+    });
+    expect(Object.isFrozen(command.environment)).toBe(true);
+  });
+
   it('never relabels the bundled engine as a different requested version', async () => {
     fs.writeFileSync(path.join(repoRoot, 'rush.json'), JSON.stringify({ rushVersion: '5.178.1' }));
     await expect(

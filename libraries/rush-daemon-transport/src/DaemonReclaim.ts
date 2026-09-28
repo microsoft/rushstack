@@ -5,11 +5,7 @@ import * as fs from 'node:fs';
 
 import { connectDaemonAsync } from './DaemonConnector';
 import type { DaemonFrameConnection } from './DaemonFrameConnection';
-import {
-  isDaemonProcessAlive,
-  readDaemonLockfile,
-  removeDaemonArtifacts
-} from './DaemonLockfile';
+import { isDaemonProcessAlive, readDaemonLockfile, removeDaemonArtifacts } from './DaemonLockfile';
 import { reapOrphansOfDeadOwnerAsync } from './DaemonOrphanReaper';
 import type { IDaemonPaths } from './DaemonPaths';
 import { tryAcquireReclaimLock } from './DaemonReclaimLock';
@@ -26,7 +22,8 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * lockfile mutex ({@link tryAcquireReclaimLock}): only the mutex holder may
  * unlink the socket path, so a concurrent starter cannot delete a socket that
  * another process just bound. Operation processes still running in the dead
- * daemon's process group are terminated first (see `DaemonOrphanReaper`).
+ * daemon's process group, or in the operation process groups it recorded, are
+ * terminated first (see `DaemonOrphanReaper`).
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a
  * live (or plausibly live) daemon owns the path, or when another starter holds
@@ -68,7 +65,7 @@ async function reclaimUnderLockAsync(paths: IDaemonPaths): Promise<void> {
     throwAlreadyRunning(paths, 'it answers a connect probe');
   }
   // A daemon that died uncleanly leaves its operations running; stop them before a successor re-runs them.
-  await reapOrphansOfDeadOwnerAsync(owner);
+  await reapOrphansOfDeadOwnerAsync(paths.lockfilePath, owner);
   removeDaemonArtifacts(paths.lockfilePath, paths.socketPath);
 }
 

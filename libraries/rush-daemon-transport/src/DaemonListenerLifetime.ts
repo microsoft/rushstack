@@ -4,17 +4,28 @@
 import type * as net from 'node:net';
 
 import { removeDaemonArtifacts } from './DaemonLockfile';
+import type { StopOperationGroupRecording } from './DaemonOperationGroupRecorder';
 import type { IDaemonPaths } from './DaemonPaths';
+
+function keepNoRecords(): void {
+  // Nothing was recorded before the lockfile was written.
+}
 
 export class DaemonListenerLifetime {
   readonly #paths: IDaemonPaths;
   readonly #server: net.Server;
+  readonly #stopRecording: StopOperationGroupRecording;
   #closePromise: Promise<void> | undefined;
   #stopPromise: Promise<void> | undefined;
 
-  public constructor(server: net.Server, paths: IDaemonPaths) {
+  public constructor(
+    server: net.Server,
+    paths: IDaemonPaths,
+    stopRecording: StopOperationGroupRecording = keepNoRecords
+  ) {
     this.#server = server;
     this.#paths = paths;
+    this.#stopRecording = stopRecording;
   }
 
   public stopAcceptingAsync(): Promise<void> {
@@ -29,6 +40,7 @@ export class DaemonListenerLifetime {
 
   async #closeOnceAsync(): Promise<void> {
     await this.stopAcceptingAsync();
+    this.#stopRecording();
     removeDaemonArtifacts(this.#paths.lockfilePath, this.#paths.socketPath);
   }
 }

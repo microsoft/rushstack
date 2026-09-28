@@ -176,6 +176,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   readonly #alwaysInstall: boolean | undefined;
   readonly #includeAllProjectsInWatchGraph: boolean;
   readonly #terminal: ITerminal;
+  readonly #engineEnvironment: Readonly<Record<string, string | undefined>> | undefined;
 
   readonly #changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   readonly #selectionParameters: SelectionParameterSet;
@@ -225,13 +226,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     this.hooks = new PhasedCommandHooks();
 
     this.#terminal = new Terminal(this.rushSession.terminalProvider);
+    this.#engineEnvironment = options.parser.engineEnvironment;
 
     this.#parallelismParameter = this.#enableParallelism
       ? this.defineStringParameter({
           parameterLongName: '--parallelism',
           parameterShortName: '-p',
           argumentName: 'COUNT',
-          environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
+          // An engine host reads this default from the request's environment instead; see #getParallelism().
+          environmentVariable: this.#engineEnvironment ? undefined : EnvironmentVariableNames.RUSH_PARALLELISM,
           description:
             'Specifies the maximum number of concurrent processes to launch during a build.' +
             ' The COUNT should be a positive integer, a percentage value (eg. "50%") or the word "max"' +
@@ -408,8 +411,29 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public getEngineRequestSettings(): IPhasedCommandEngineRequestSettings {
     return {
       quietMode: !this.#verboseParameter.value,
-      parallelism: this.#enableParallelism ? parseParallelism(this.#parallelismParameter?.value) : 1
+      parallelism: this.#getParallelism()
     };
+  }
+
+  /**
+   * The `--parallelism` value, else the `RUSH_PARALLELISM` default, or 1 if the command does not run in parallel.
+   * An engine parser takes the default from the request's environment, because the host process belongs to no
+   * request; on Windows its name is matched case-insensitively, like `process.env`.
+   */
+  #getParallelism(): Parallelism {
+    if (!this.#enableParallelism) return 1;
+    const engineEnvironment: Readonly<Record<string, string | undefined>> | undefined =
+      this.#engineEnvironment;
+    let value: string | undefined = this.#parallelismParameter?.value;
+    if (value === undefined && engineEnvironment) {
+      const name: string = EnvironmentVariableNames.RUSH_PARALLELISM;
+      const key: string | undefined =
+        process.platform === 'win32'
+          ? Object.keys(engineEnvironment).find((candidate: string) => candidate.toUpperCase() === name)
+          : name;
+      value = key === undefined ? undefined : engineEnvironment[key];
+    }
+    return parseParallelism(value);
   }
 
   public async selectEngineOperationsAsync(
@@ -512,9 +536,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
     const maxParallelism: number = getNumberOfCores();
-    const parallelism: Parallelism = this.#enableParallelism
-      ? parseParallelism(this.#parallelismParameter?.value)
-      : 1;
+    const parallelism: Parallelism = this.#getParallelism();
 
     await measureAsyncFn(`${PERF_PREFIX}:applyStandardPlugins`, async () => {
       // Generates the default operation graph

@@ -98,6 +98,8 @@ export interface IRushCommandLineParserOptions {
   engine?: {
     rushConfiguration: RushConfiguration;
     terminalProvider: ITerminalProvider;
+    /** The environment of the request; see {@link RushCommandLineParser.engineEnvironment}. */
+    environment?: Readonly<Record<string, string | undefined>>;
   };
 }
 
@@ -201,6 +203,15 @@ export class RushCommandLineParser extends CommandLineParser {
    */
   public get cwd(): string {
     return this.#rushOptions.cwd;
+  }
+
+  /**
+   * For a parser that serves a long-lived engine host, the environment of the request being parsed. Actions read
+   * environment-backed parameter defaults from it instead of from `process.env`.
+   */
+  public get engineEnvironment(): Readonly<Record<string, string | undefined>> | undefined {
+    const engine: IRushCommandLineParserOptions['engine'] = this.#rushOptions.engine;
+    return engine ? (engine.environment ?? process.env) : undefined;
   }
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {

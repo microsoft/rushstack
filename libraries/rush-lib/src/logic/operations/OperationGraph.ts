@@ -691,9 +691,16 @@ export class OperationGraph implements IOperationGraph {
     const getInputsSnapshotAsync: (() => Promise<IInputsSnapshot | undefined>) | undefined =
       this.#getInputsSnapshotAsync;
 
-    const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } =
-      iterationOptions;
-    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = { startTime, inputsSnapshot };
+    const {
+      startTime = performance.now(),
+      inputsSnapshot = await getInputsSnapshotAsync?.(),
+      getOperationEnvironment
+    } = iterationOptions;
+    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
+      startTime,
+      inputsSnapshot,
+      getOperationEnvironment
+    };
 
     const { hooks } = this;
 
@@ -719,7 +726,9 @@ export class OperationGraph implements IOperationGraph {
     const graph: OperationGraph = this;
 
     function createEnvironmentForOperation(record: OperationExecutionRecord): IEnvironment {
-      return hooks.createEnvironmentForOperation.call({ ...process.env }, record);
+      const baseEnvironment: Readonly<Record<string, string | undefined>> =
+        getOperationEnvironment?.(record.operation) ?? process.env;
+      return hooks.createEnvironmentForOperation.call({ ...baseEnvironment }, record);
     }
 
     const terminateController: AbortController | undefined = this.#supportsTerminateRunning
@@ -739,6 +748,7 @@ export class OperationGraph implements IOperationGraph {
       maxParallelism: this.#maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
+      getOperationEnvironment,
       invalidate: graph.invalidateOperations.bind(graph),
       get debugMode(): boolean {
         return graph.debugMode;

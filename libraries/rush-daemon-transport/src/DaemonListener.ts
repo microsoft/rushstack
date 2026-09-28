@@ -9,6 +9,8 @@ import { DaemonFrameConnection } from './DaemonFrameConnection';
 import { listenWithReclaimAsync } from './DaemonListenerBinding';
 import { DaemonListenerLifetime } from './DaemonListenerLifetime';
 import { ensureDaemonRuntimeDir, writeDaemonLockfile } from './DaemonLockfile';
+import { startOperationGroupRecording } from './DaemonOperationGroupRecorder';
+import { getOperationGroupsFolder } from './DaemonOperationGroups';
 import { assertDaemonOwnershipAvailable } from './DaemonOwnership';
 import type { IDaemonPaths } from './DaemonPaths';
 
@@ -31,7 +33,10 @@ export interface IDaemonListenerOptions {
 export class DaemonFrameListener {
   readonly #lifetime: DaemonListenerLifetime;
   private constructor(server: net.Server, paths: IDaemonPaths) {
-    this.#lifetime = new DaemonListenerLifetime(server, paths);
+    // Record detached operation groups for as long as this process owns the lockfile, so a successor can
+    // reap them if this daemon dies uncleanly.
+    const folder: string = getOperationGroupsFolder(paths.lockfilePath, process.pid);
+    this.#lifetime = new DaemonListenerLifetime(server, paths, startOperationGroupRecording(folder));
   }
   /** Binds the socket/pipe path and writes the PID lockfile. */
   public static async listenAsync(

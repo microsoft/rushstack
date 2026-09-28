@@ -218,6 +218,11 @@ if (fs.existsSync(gateFile)) {
   });
 }
 fs.appendFileSync('../../runs.txt', name + ':' + input + ':' + process.argv.slice(2).join(' ') + '\\n');
+const environmentFile = path.resolve('../../common/temp/operation-environment.txt');
+if (fs.existsSync(environmentFile)) {
+  const { COPILOT_AGENT_SESSION_ID = null, RUSH_INVOKED_FOLDER = null } = process.env;
+  fs.appendFileSync(environmentFile, JSON.stringify([name, COPILOT_AGENT_SESSION_ID, RUSH_INVOKED_FOLDER]) + '\\n');
+}
 fs.mkdirSync('lib', { recursive: true });
 fs.writeFileSync('lib/output.txt', input);
 console.log('built-' + name + '-' + input);
@@ -349,6 +354,49 @@ function requestEnvironment(): Record<string, string> {
 }
 
 describe('native production daemon engine', () => {
+  it("runs each request's operations with its requester's session and invocation folder", async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const recordFile: string = path.join(fixture.repoRoot, 'common/temp/operation-environment.txt');
+    const projectFolder: string = path.join(fixture.repoRoot, 'projects/a');
+    const daemonSession: string | undefined = process.env.COPILOT_AGENT_SESSION_ID;
+    // This in-process host's own value stands in for the session that started the daemon.
+    process.env.COPILOT_AGENT_SESSION_ID = 'daemon-starter';
+    try {
+      fs.writeFileSync(recordFile, '');
+      const requests: ReadonlyArray<readonly [string, string | undefined, string]> = [
+        ['first-a', 'session-A', fixture.repoRoot],
+        ['then-b', 'session-B', projectFolder],
+        ['again-a', 'session-A', fixture.repoRoot],
+        ['unset', undefined, fixture.repoRoot]
+      ];
+      for (const [requestId, session, cwd] of requests) {
+        const environment: Record<string, string> = requestEnvironment();
+        delete environment.COPILOT_AGENT_SESSION_ID;
+        if (session !== undefined) environment.COPILOT_AGENT_SESSION_ID = session;
+        const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['rebuild', '--only', 'a'], {
+          cwd,
+          environment
+        });
+        expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      }
+      const records: unknown[] = fs
+        .readFileSync(recordFile, 'utf8')
+        .trim()
+        .split('\n')
+        .map((line: string) => JSON.parse(line));
+      expect(records).toEqual([
+        ['a', 'session-A', fixture.repoRoot],
+        ['a', 'session-B', projectFolder],
+        ['a', 'session-A', fixture.repoRoot],
+        ['a', null, fixture.repoRoot]
+      ]);
+    } finally {
+      if (daemonSession === undefined) delete process.env.COPILOT_AGENT_SESSION_ID;
+      else process.env.COPILOT_AGENT_SESSION_ID = daemonSession;
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('preserves resolver decoration and isolated invocation routing across native generation reloads', async () => {
     const events: string[] = [];
     const fixture: IFixture = await createFixtureAsync(false, 'direct', {
@@ -412,6 +460,31 @@ describe('native production daemon engine', () => {
       });
       expect(fixture.session).toBe(session);
       expect(fixture.session.operationGraph).toBe(graph);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('serves client output and request-scoped settings in the same generation instead of restarting', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial-settings', ['build', '--only', 'a']);
+      const session: WorkspaceSession = fixture.session;
+      const graph: IOperationGraph | undefined = session.operationGraph;
+      const environment: Record<string, string> = {
+        ...requestEnvironment(),
+        RUSH_PARALLELISM: process.env.RUSH_PARALLELISM === '1' ? '2' : '1',
+        RUSHD_OUTPUT: process.env.RUSHD_OUTPUT === 'legacy' ? 'agent' : 'legacy',
+        COPILOT_AGENT_SESSION_ID: 'another-agent-session'
+      };
+      expect(
+        (await runAsync(fixture, 'request-scoped-settings', ['build', '--only', 'a'], { environment }))
+          .terminal
+      ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
+      expect(fixture.session).toBe(session);
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
       expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
@@ -598,7 +671,7 @@ describe('native production daemon engine', () => {
       const oldGraph: IOperationGraph = fixture.session.operationGraph!;
       const environment: Record<string, string> = {
         ...requestEnvironment(),
-        RUSH_PARALLELISM: process.env.RUSH_PARALLELISM === '1' ? '2' : '1'
+        RUSHSTACK_DAEMON_TEST_HARD_INPUT: 'changed'
       };
       expect(
         (await runAsync(fixture, 'hard', ['build', '--only', 'a'], { environment })).terminal

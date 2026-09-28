@@ -10,7 +10,7 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
-import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
+import type { IOperationRunnerContext, IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
@@ -24,6 +24,9 @@ import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRoute
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
 const OPERATION_C: string = 'project-c (_phase:test)';
+const SESSION_VARIABLE: string = 'COPILOT_AGENT_SESSION_ID';
+
+type TestOperationAction = (terminal: ITerminal, context: IOperationRunnerContext) => Promise<void>;
 
 interface IDeferred {
   readonly promise: Promise<void>;
@@ -57,9 +60,9 @@ function createRequest(
 }
 
 function createFixture(options?: {
-  readonly actionAAsync?: (terminal: ITerminal) => Promise<void>;
-  readonly actionBAsync?: (terminal: ITerminal) => Promise<void>;
-  readonly actionCAsync?: (terminal: ITerminal) => Promise<void>;
+  readonly actionAAsync?: TestOperationAction;
+  readonly actionBAsync?: TestOperationAction;
+  readonly actionCAsync?: TestOperationAction;
   readonly statusA?: OperationStatus;
 }): ITestRoutingFixture {
   return createRoutingFixture(
@@ -195,6 +198,57 @@ describe('shared phased request batching', () => {
     expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
     expect(getResultOperationIds(dependency)).toEqual([OPERATION_A]);
     expect(getResultOperationIds(consumer)).toEqual([OPERATION_A, OPERATION_B]);
+  });
+
+  it('gives each operation of a shared iteration the environment of the first request that selected it', async () => {
+    const sessions: Map<string, string | undefined> = new Map();
+    const record =
+      (operationId: string): TestOperationAction =>
+      async (terminal: ITerminal, context: IOperationRunnerContext): Promise<void> => {
+        sessions.set(operationId, context.environment?.[SESSION_VARIABLE]);
+      };
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: record(OPERATION_A),
+      actionBAsync: record(OPERATION_B),
+      actionCAsync: record(OPERATION_C)
+    });
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const withSession = (request: IDaemonPhasedRequest, session?: string): IDaemonPhasedRequest => ({
+      ...request,
+      environment: session === undefined ? {} : { [SESSION_VARIABLE]: session }
+    });
+    const daemonSession: string | undefined = process.env[SESSION_VARIABLE];
+    process.env[SESSION_VARIABLE] = 'daemon';
+    try {
+      await Promise.all([
+        router.executeAsync(
+          withSession(createRequest('a', OPERATION_A), 'session-A'),
+          new TestPhasedRequestClient('one')
+        ),
+        // Project B depends on project A, which the first request already selected.
+        router.executeAsync(
+          withSession(createRequest('b', OPERATION_B), 'session-B'),
+          new TestPhasedRequestClient('two')
+        ),
+        router.executeAsync(
+          withSession(createRequest('c', OPERATION_C)),
+          new TestPhasedRequestClient('three')
+        )
+      ]);
+    } finally {
+      if (daemonSession === undefined) delete process.env[SESSION_VARIABLE];
+      else process.env[SESSION_VARIABLE] = daemonSession;
+    }
+
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(sessions).toEqual(
+      new Map([
+        [OPERATION_A, 'session-A'],
+        [OPERATION_B, 'session-B'],
+        [OPERATION_C, undefined]
+      ])
+    );
   });
 
   it('shares one iteration for disjoint selections while isolating streams, events, and results', async () => {

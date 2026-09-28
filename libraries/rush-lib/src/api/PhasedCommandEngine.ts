@@ -41,6 +41,12 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
 export interface IParsePhasedCommandOptions {
   readonly argv: ReadonlyArray<string>;
   readonly cwd: string;
+  /**
+   * The environment of the client that sent the command. It supplies the defaults of environment-backed
+   * parameters (`RUSH_PARALLELISM`), because a long-lived host's own environment belongs to no request.
+   * Defaults to `process.env`.
+   */
+  readonly environment?: Readonly<Record<string, string | undefined>>;
   readonly rushConfiguration: RushConfiguration;
   readonly terminalProvider: ITerminalProvider;
 }
@@ -83,7 +89,7 @@ export class PhasedCommandEngine {
   }
 
   public static async parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine> {
-    const { rushConfiguration, terminalProvider, cwd, argv } = options;
+    const { rushConfiguration, terminalProvider, cwd, argv, environment = process.env } = options;
     const resolvedCwd: string = await resolvePhasedCommandCwdAsync(cwd, rushConfiguration.rushJsonFolder);
     if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
       throw new Error('Command help must be handled by the native CLI, not by an engine request.');
@@ -95,7 +101,7 @@ export class PhasedCommandEngine {
     }
     const parser: RushCommandLineParser = new RushCommandLineParser({
       cwd: resolvedCwd,
-      engine: { rushConfiguration, terminalProvider }
+      engine: { rushConfiguration, terminalProvider, environment }
     });
     await parser.executeWithoutErrorHandlingAsync([...argv]);
     const action: CommandLineAction | undefined = parser.selectedAction;

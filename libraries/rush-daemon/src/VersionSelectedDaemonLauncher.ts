@@ -6,7 +6,7 @@ import { once } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { _FlagFile } from '@microsoft/rush-lib';
+import { _FlagFile, getWorkspaceHostEnvironment } from '@microsoft/rush-lib';
 import { EnvironmentConfiguration } from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import {
   DependencySpecifier,
@@ -77,13 +77,8 @@ export function getSelectedDaemonStartCommand(
       context.repoRoot
     ],
     cwd: context.repoRoot,
-    environment: Object.freeze(
-      Object.fromEntries(
-        Object.entries(context.environment).filter(
-          (entry): entry is [string, string] => entry[1] !== undefined
-        )
-      )
-    )
+    // The daemon outlives the client that starts it, so it keeps none of that client's request-scoped values.
+    environment: Object.freeze(getWorkspaceHostEnvironment(context.environment))
   };
 }
 

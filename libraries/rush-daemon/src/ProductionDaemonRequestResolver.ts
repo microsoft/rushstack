@@ -5,6 +5,7 @@ import * as path from 'node:path';
 
 import type { LockFile } from '@rushstack/node-core-library';
 import {
+  EnvironmentVariableNames,
   getWorkspaceFingerprintEnvironmentEntries,
   PhasedCommandEngine,
   PhasedCommandEngineBusyError,
@@ -129,7 +130,11 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         commandName: envelope.commandName,
         commandOrigin: envelope.commandOrigin,
         engineShape: shape,
-        environment: envelope.environment,
+        // Native Rush assigns the invocation's folder at CLI startup (Rush._assignRushInvokedFolder).
+        environment: {
+          ...envelope.environment,
+          [EnvironmentVariableNames.RUSH_INVOKED_FOLDER]: envelope.cwd
+        },
         operationSelection,
         requestId: envelope.requestId,
         terminalRequirement: envelope.terminal.terminalRequirement
@@ -162,6 +167,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       command = await PhasedCommandEngine.parseAsync({
         argv: envelope.argv,
         cwd: envelope.cwd,
+        environment: envelope.environment,
         rushConfiguration: workspaceSession.rushConfiguration,
         terminalProvider: terminal
       });

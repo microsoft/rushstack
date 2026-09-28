@@ -21,6 +21,18 @@ export interface IOperationGraphIterationOptions {
    * The time when the iteration was scheduled, if available, as returned by `performance.now()`.
    */
   startTime?: number;
+
+  /**
+   * Returns the environment that an operation of this iteration starts from, before any
+   * `createEnvironmentForOperation` tap. The operation's `dependsOnEnvVars` are hashed from the same environment.
+   * When omitted, every operation starts from `process.env` and hashes the environment of the inputs snapshot.
+   *
+   * @remarks
+   * A long-lived host serves requests from clients whose environments differ from its own, and one iteration can
+   * serve several requests. The host gives each operation the environment of a request that selected it
+   * (see `getWorkspaceRequestOperationEnvironment`).
+   */
+  getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
 }
 
 /**

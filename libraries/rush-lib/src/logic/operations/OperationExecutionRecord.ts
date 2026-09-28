@@ -48,6 +48,11 @@ export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator | undefined;
   onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
+  /**
+   * The environment that an operation starts from, before any `createEnvironmentForOperation` tap, when it is not
+   * the environment of the inputs snapshot. The operation's `dependsOnEnvVars` are hashed from it.
+   */
+  getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
   maxParallelism: number;
@@ -429,7 +434,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // - Git hashes of tracked files in the associated project
       // - Git hash of the shrinkwrap file for the project
       // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
-      const local: string = inputsSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name);
+      const local: string = inputsSnapshot.getOperationOwnStateHash(
+        associatedProject,
+        associatedPhase.name,
+        this.#context.getOperationEnvironment?.(this.operation)
+      );
 
       // Examples of data in the config hash:
       // - CLI parameters (ShellOperationRunner)

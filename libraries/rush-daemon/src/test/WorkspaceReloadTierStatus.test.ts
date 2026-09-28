@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
@@ -81,7 +83,24 @@ it('reuses the warm generation when only volatile per-shell environment variable
         _: '/usr/bin/env'
       },
       terminal: { ...fixture.environment, TERM: 'dumb', COLUMNS: '91', WSL_INTEROP: '/run/WSL/1_interop' },
-      routing: { ...fixture.environment, RUSH_DAEMON: '1', RUSH_DAEMON_EXPERIMENTAL: '1' }
+      routing: { ...fixture.environment, RUSH_DAEMON: '1', RUSH_DAEMON_EXPERIMENTAL: '1' },
+      client: {
+        ...fixture.environment,
+        RUSHD_OUTPUT: 'legacy',
+        RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: '600',
+        RUSH_PARALLELISM: '2'
+      },
+      session: {
+        ...fixture.environment,
+        INVOCATION_ID: 'b0f1',
+        COPILOT_CLI: '1',
+        COPILOT_AGENT_SESSION_ID: 'another-session',
+        VSCODE_IPC_HOOK_CLI: '/run/vscode-ipc.sock'
+      },
+      repeatedPath: {
+        ...fixture.environment,
+        PATH: [fixture.environment.PATH, fixture.environment.PATH].join(path.delimiter)
+      }
     })) {
       const result = await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], { environment });
       expect(result.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });

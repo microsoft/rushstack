@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonOrphanReaperOptions } from '../DaemonOrphanReaper';
 import type { IDaemonProcessGroupOps } from '../DaemonProcessGroup';
+import type { IProcessStat } from '../DaemonProcessStat';
+import type { IDaemonOrphanReaperOptions } from '../DaemonReapOptions';
 
 /** The pid of the fake dead daemon, which is also its process group id. */
 export const DEAD_PID: number = 4242;
@@ -14,6 +15,8 @@ const CLOCK_START: number = 0;
 /** A fake process table recording every signal sent and every message logged. */
 export interface IFakeGroup {
   readonly signals: NodeJS.Signals[];
+  /** The group id of every signal in {@link IFakeGroup.signals}, in the same order. */
+  readonly targets: number[];
   readonly logs: string[];
   readonly options: IDaemonOrphanReaperOptions;
 }
@@ -21,30 +24,74 @@ export interface IFakeGroup {
 /** Describes the fake process table. */
 export interface IFakeGroupSpec {
   readonly daemonAlive?: boolean;
-  /** The signal after which the group is gone; omitted means it never exits. */
+  /** The signal after which every group is gone; omitted means they never exit. */
   readonly exitsOn?: NodeJS.Signals;
   readonly ownGroupId?: number;
   readonly unknownOwnGroup?: boolean;
   readonly anyGroupExists?: boolean;
+  /** Processes outside the dead daemon's own group, such as detached operation trees. */
+  readonly processes?: readonly IProcessStat[];
 }
 
-/** Creates a fake process table with a virtual clock. */
-export function createFakeGroup(spec: IFakeGroupSpec): IFakeGroup {
-  const signals: NodeJS.Signals[] = [];
-  const logs: string[] = [];
+interface IFakeTable extends Omit<IFakeGroup, 'options'> {
+  readonly spec: IFakeGroupSpec;
+}
+
+function hasExited(table: IFakeTable): boolean {
+  return table.signals.some((signal: NodeJS.Signals) => signal === table.spec.exitsOn);
+}
+
+function liveProcesses(table: IFakeTable): readonly IProcessStat[] {
+  return hasExited(table) ? [] : (table.spec.processes ?? []);
+}
+
+function isKnownGroup(table: IFakeTable, groupId: number): boolean {
+  return table.spec.anyGroupExists === true || groupId === DEAD_PID;
+}
+
+function groupExists(table: IFakeTable, groupId: number): boolean {
+  const inTable: boolean = liveProcesses(table).some((stat: IProcessStat) => stat.groupId === groupId);
+  return !hasExited(table) && (isKnownGroup(table, groupId) || inTable);
+}
+
+function createProcessOps(
+  table: IFakeTable
+): Pick<IDaemonProcessGroupOps, 'readProcessStat' | 'listLiveGroupMembers'> {
+  return {
+    readProcessStat: (pid: number) => liveProcesses(table).find((stat: IProcessStat) => stat.pid === pid),
+    listLiveGroupMembers: (groupId: number) =>
+      liveProcesses(table).filter((stat: IProcessStat) => stat.groupId === groupId && !stat.exited)
+  };
+}
+
+function createGroupOps(table: IFakeTable): IDaemonProcessGroupOps {
+  const { spec } = table;
   let clock: number = CLOCK_START;
-  const ops: IDaemonProcessGroupOps = {
+  return {
     isProcessAlive: () => spec.daemonAlive === true,
-    groupExists: (groupId: number) =>
-      (spec.anyGroupExists === true || groupId === DEAD_PID) &&
-      !signals.some((signal: NodeJS.Signals) => signal === spec.exitsOn),
-    signalGroup: (groupId: number, signal: NodeJS.Signals) => signals.push(signal),
+    groupExists: (groupId: number) => groupExists(table, groupId),
+    signalGroup: (groupId: number, signal: NodeJS.Signals) => {
+      table.targets.push(groupId);
+      table.signals.push(signal);
+    },
     ownGroupId: () => (spec.unknownOwnGroup === true ? undefined : (spec.ownGroupId ?? SELF_PID)),
+    ...createProcessOps(table),
     delayAsync: async (ms: number) => {
       clock += ms;
     },
     now: () => clock,
-    log: (message: string) => logs.push(message)
+    log: (message: string) => table.logs.push(message)
   };
-  return { signals, logs, options: { ops, platform: 'linux', selfPid: SELF_PID, graceMs: GRACE_MS } };
+}
+
+/** Creates a fake process table with a virtual clock. */
+export function createFakeGroup(spec: IFakeGroupSpec): IFakeGroup {
+  const table: IFakeTable = { spec, signals: [], targets: [], logs: [] };
+  const options: IDaemonOrphanReaperOptions = {
+    ops: createGroupOps(table),
+    platform: 'linux',
+    selfPid: SELF_PID,
+    graceMs: GRACE_MS
+  };
+  return { signals: table.signals, targets: table.targets, logs: table.logs, options };
 }

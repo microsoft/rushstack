@@ -713,5 +713,41 @@ describe(InputsSnapshot.name, () => {
       expect(result2).not.toEqual(baseline);
       expect(result2).not.toEqual(result1);
     });
+
+    it("Hashes dependsOnEnvVars from an operation's own environment when one is supplied", () => {
+      const { project, options } = getTestConfig();
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          ['_phase:build', { operationName: '_phase:build', dependsOnEnvVars: ['ENV_VAR'] }]
+        ])
+      };
+      const createSnapshot = (environment: Record<string, string>): InputsSnapshot =>
+        new InputsSnapshot({
+          ...options,
+          projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
+          environment
+        });
+      const snapshotA: InputsSnapshot = createSnapshot({ ENV_VAR: 'a', OTHER: 'a' });
+      const snapshotB: InputsSnapshot = createSnapshot({ ENV_VAR: 'b' });
+      const hashA: string = createSnapshot({ ENV_VAR: 'a' }).getOperationOwnStateHash(
+        project,
+        '_phase:build'
+      );
+      const hashB: string = snapshotB.getOperationOwnStateHash(project, '_phase:build');
+      expect(hashB).not.toEqual(hashA);
+
+      // An operation that runs with another environment gets the hash of a snapshot of that environment,
+      // whether or not the snapshot's own hash was already computed.
+      expect(snapshotA.getOperationOwnStateHash(project, '_phase:build', { ENV_VAR: 'b' })).toEqual(hashB);
+      expect(snapshotA.getOperationOwnStateHash(project, '_phase:build')).toEqual(hashA);
+      expect(snapshotA.getOperationOwnStateHash(project, '_phase:build', { ENV_VAR: 'b' })).toEqual(hashB);
+      // Variables that the operation does not depend on never change its hash.
+      expect(
+        snapshotA.getOperationOwnStateHash(project, '_phase:build', { ENV_VAR: 'a', OTHER: 'b' })
+      ).toEqual(hashA);
+      expect(snapshotA.getOperationOwnStateHash(project, undefined, { ENV_VAR: 'b' })).toEqual(
+        snapshotB.getOperationOwnStateHash(project, undefined)
+      );
+    });
   });
 });

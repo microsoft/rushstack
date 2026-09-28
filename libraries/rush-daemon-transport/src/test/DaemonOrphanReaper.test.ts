@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { reapDeadDaemonProcessGroupAsync } from '../DaemonOrphanReaper';
-import type { IDaemonOrphanReaperOptions } from '../DaemonOrphanReaper';
+import type { IDaemonOrphanReaperOptions } from '../DaemonReapOptions';
 
 import { DEAD_PID, SELF_PID, createFakeGroup } from './OrphanReaperFixture';
 import type { IFakeGroup } from './OrphanReaperFixture';

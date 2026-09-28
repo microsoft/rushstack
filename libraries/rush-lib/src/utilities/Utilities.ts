@@ -820,6 +820,13 @@ function _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushComm
       continue;
     }
 
+    // RUSH_DAEMON* variables only route a client to the daemon and configure the daemon host. Project
+    // tooling never reads them, and a Rush release that predates the daemon rejects them as unknown
+    // RUSH_* variables, which breaks tools that start their own copy of Rush.
+    if (normalizedKey.startsWith('RUSH_DAEMON')) {
+      continue;
+    }
+
     // Use the uppercased environment variable name on Windows because environment variable names
     // are case-insensitive on Windows
     environment[normalizedKey] = options.initialEnvironment[key];

@@ -5,6 +5,8 @@ import * as fs from 'node:fs';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { isDaemonProcessAlive } from './DaemonLockfile';
+import { listLiveGroupMembers, readProcessStat } from './DaemonProcessStat';
+import type { IProcessStat } from './DaemonProcessStat';
 
 const NO_SIGNAL: number = 0;
 const NO_SUCH_PROCESS: string = 'ESRCH';
@@ -15,13 +17,17 @@ const FIELD_SEPARATOR: string = ' ';
 // After the ")" that ends the command name come: " <state> <ppid> <pgrp> ...".
 const PGRP_FIELD_INDEX: number = 3;
 
-/** Process probing/signaling used to reap a dead daemon's process group; injectable for tests. */
+/** Process probing/signaling used to reap a dead daemon's orphaned process groups; injectable for tests. */
 export interface IDaemonProcessGroupOps {
   readonly isProcessAlive: (pid: number) => boolean;
   readonly groupExists: (groupId: number) => boolean;
   readonly signalGroup: (groupId: number, signal: NodeJS.Signals) => void;
   /** The caller's own process group id, or `undefined` when the platform cannot report it. */
   readonly ownGroupId: () => number | undefined;
+  /** Reads a process's `/proc` identity, or `undefined` when it is gone (or there is no `/proc`). */
+  readonly readProcessStat: (pid: number) => IProcessStat | undefined;
+  /** The processes in a group that have not exited. */
+  readonly listLiveGroupMembers: (groupId: number) => IProcessStat[];
   readonly delayAsync: (ms: number) => Promise<void>;
   readonly now: () => number;
   readonly log: (message: string) => void;
@@ -70,6 +76,8 @@ export const POSIX_PROCESS_GROUP_OPS: IDaemonProcessGroupOps = {
   groupExists,
   signalGroup,
   ownGroupId,
+  readProcessStat,
+  listLiveGroupMembers,
   delayAsync: async (ms: number) => {
     await delayAsync(ms);
   },

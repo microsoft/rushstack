@@ -12,6 +12,7 @@ import {
   daemonEnvironmentVariables,
   RushConfiguration,
   RushXCommand,
+  workspaceRequestScopedEnvironmentVariables,
   type IRushXCommandLineArguments
 } from '@microsoft/rush-lib';
 import { EnvironmentMap, FileSystem, JsonFile } from '@rushstack/node-core-library';
@@ -40,6 +41,8 @@ export class RushXDaemonRequestResolver implements IDaemonRequestResolver {
   readonly #startupEnvironment: NodeJS.ProcessEnv = { ...process.env };
   readonly #requestLocalRushVariables: ReadonlySet<string> = new Set([
     ...Object.values(daemonEnvironmentVariables),
+    // A daemon host starts without these, so any request that sets one differs from the startup environment.
+    ...workspaceRequestScopedEnvironmentVariables,
     'RUSH_DAEMON_EXPERIMENTAL',
     'RUSH_INVOKED_FOLDER',
     'RUSH_QUIET_MODE'

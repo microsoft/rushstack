@@ -384,6 +384,12 @@ export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined
 // @alpha
 export function getWorkspaceFingerprintEnvironmentEntries(environment: Readonly<Record<string, string | undefined>>): [string, string][];
 
+// @alpha
+export function getWorkspaceHostEnvironment(environment: Readonly<Record<string, string | undefined>>): Record<string, string>;
+
+// @alpha
+export function getWorkspaceRequestOperationEnvironment(hostEnvironment: Readonly<Record<string, string | undefined>>, requestEnvironment: Readonly<Record<string, string | undefined>>): Record<string, string>;
+
 // @alpha (undocumented)
 export interface IBaseOperationExecutionResult {
     getStateHash(): string;
@@ -616,7 +622,7 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
 
 // @beta
 export interface IInputsSnapshot {
-    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
+    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string, environment?: Readonly<Record<string, string | undefined>>): string;
     getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
     readonly hashes: ReadonlyMap<string, string>;
     readonly hasUncommittedChanges: boolean;
@@ -766,6 +772,7 @@ export interface _IOperationGraphEventSink {
 
 // @alpha
 export interface IOperationGraphIterationOptions {
+    getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
     startTime?: number;
@@ -903,6 +910,7 @@ export interface IParsePhasedCommandOptions {
     readonly argv: ReadonlyArray<string>;
     // (undocumented)
     readonly cwd: string;
+    readonly environment?: Readonly<Record<string, string | undefined>>;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)
@@ -2124,6 +2132,9 @@ export enum WorkspaceInputChangeTier {
     // (undocumented)
     Reuse = 0
 }
+
+// @alpha
+export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string>;
 
 // @alpha
 export class WorkspaceRuntimeFingerprintCache {

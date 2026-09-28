@@ -156,6 +156,25 @@ describe('native Rushx execution boundaries', () => {
     }
   );
 
+  it("serves a request that sets a variable the daemon host starts without, with the request's value", async () => {
+    const parallelism: string | undefined = process.env.RUSH_PARALLELISM;
+    // A daemon host does not inherit the request-scoped variables of the client that started it.
+    delete process.env.RUSH_PARALLELISM;
+    let cwd: string;
+    try {
+      cwd = await startAsync();
+    } finally {
+      if (parallelism !== undefined) process.env.RUSH_PARALLELISM = parallelism;
+    }
+    fixture.write('projects/a/script.cjs', 'console.log(process.env.RUSH_PARALLELISM);');
+    const result: IRequestResult = await fixture.runAsync(
+      fixture.request(['-q', 'build'], cwd, fixture.environment({ RUSH_PARALLELISM: '2' }))
+    );
+    expect(result.outcome.kind).toBe('result');
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.toString()).toBe('2\n');
+  });
+
   it('runs a script without queueing behind an exclusive workspace request', async () => {
     const cwd: string = await startAsync();
     let release: () => void = () => {};

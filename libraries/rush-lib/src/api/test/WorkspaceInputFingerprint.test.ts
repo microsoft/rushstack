@@ -9,6 +9,10 @@ import {
   captureWorkspaceInputFingerprintAsync,
   classifyWorkspaceInputChange,
   getWorkspaceFingerprintEnvironmentEntries,
+  getWorkspaceHostEnvironment,
+  getWorkspaceRequestOperationEnvironment,
+  workspaceFingerprintIgnoredEnvironmentVariables,
+  workspaceRequestScopedEnvironmentVariables,
   WorkspaceInputChangeTier,
   WorkspaceRuntimeFingerprintCache,
   type IWorkspaceInputFingerprint
@@ -117,6 +121,21 @@ describe('workspace input fingerprints', () => {
         { SSH_CONNECTION: '10.0.0.1 1 10.0.0.2 22', SSH_AUTH_SOCK: '/tmp/agent', TMUX: '/tmp/tmux' },
         { INIT_CWD: '/repo/packages/p03' },
         { RUSH_DAEMON: '1', RUSH_DAEMON_AUTO_START: '0', RUSH_DAEMON_EXPERIMENTAL: '1' },
+        { RUSHD_OUTPUT: 'legacy', RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: '600' },
+        { RUSH_PARALLELISM: '48', RUSH_INVOKED_FOLDER: '/repo/packages/p03' },
+        { INVOCATION_ID: 'a1b2', JOURNAL_STREAM: '8:123', MANAGERPID: '1', SYSTEMD_EXEC_PID: '42' },
+        {
+          VSCODE_IPC_HOOK_CLI: '/run/vscode.sock',
+          VSCODE_GIT_IPC_HANDLE: '/run/git.sock',
+          GIT_ASKPASS: '/a'
+        },
+        {
+          COPILOT_CLI: '1',
+          COPILOT_AGENT_SESSION_ID: 'session-2',
+          COPILOT_LOADER_PID: '77',
+          WT_SESSION: 'w'
+        },
+        { PATH: `${base.PATH}${path.delimiter}${base.PATH}` },
         { TERM: undefined, PWD: undefined }
       ]) {
         expect(await getHashAsync({ ...base, ...volatile })).toBe(baseHash);
@@ -126,9 +145,12 @@ describe('workspace input fingerprints', () => {
         { RUSH_BUILD_CACHE_ENABLED: '1' },
         { RUSH_BUILD_CACHE_WRITE_ALLOWED: '0' },
         { RUSH_DAEMON_WATCH: '1' },
+        { RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400' },
         { NODE_OPTIONS: '--max-old-space-size=8192' },
         { NPM_CONFIG_REGISTRY: 'https://example.invalid/' },
+        { GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.fsmonitor', GIT_CONFIG_VALUE_0: 'false' },
         { PATH: '/usr/bin:/usr/local/bin' },
+        { PATH: ['/opt/node/bin', '/usr/local/bin', '/usr/bin'].join(path.delimiter) },
         { HOME: '/home/other' }
       ]) {
         expect(await getHashAsync({ ...base, ...relevant })).not.toBe(baseHash);
@@ -137,8 +159,83 @@ describe('workspace input fingerprints', () => {
         ['HOME', '/home/user'],
         ['PATH', '/usr/local/bin:/usr/bin']
       ]);
+      const repeatedPath: string = ['/a', '/b', '/a', '', '/c', '', '/b'].join(path.delimiter);
+      expect(getWorkspaceFingerprintEnvironmentEntries({ PATH: repeatedPath })).toEqual([
+        ['PATH', ['/a', '/b', '', '/c'].join(path.delimiter)]
+      ]);
     } finally {
       fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps request-scoped variables out of a host environment', () => {
+    const environment: Record<string, string | undefined> = {
+      HOME: '/home/user',
+      RUSH_PARALLELISM: '48',
+      COPILOT_AGENT_SESSION_ID: 'session-1',
+      RUSHD_OUTPUT: 'agent',
+      RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
+      UNSET: undefined
+    };
+    expect(getWorkspaceHostEnvironment(environment)).toEqual({
+      HOME: '/home/user',
+      RUSHD_OUTPUT: 'agent',
+      RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400'
+    });
+    for (const name of workspaceRequestScopedEnvironmentVariables) {
+      expect(workspaceFingerprintIgnoredEnvironmentVariables.has(name)).toBe(true);
+    }
+  });
+
+  it("gives operations the request's values of variables that are not host identity", () => {
+    const hostEnvironment: Record<string, string | undefined> = {
+      HOME: '/home/user',
+      PATH: '/usr/bin',
+      NODE_OPTIONS: '--max-old-space-size=8192',
+      COPILOT_AGENT_SESSION_ID: 'session-A',
+      COPILOT_CLI: '1',
+      GIT_ASKPASS: '/window-A/askpass.sh',
+      WT_SESSION: 'wt-A',
+      UNSET: undefined
+    };
+    const requestEnvironment: Record<string, string | undefined> = {
+      HOME: '/home/other',
+      PATH: '/other/bin',
+      COPILOT_AGENT_SESSION_ID: 'session-B',
+      RUSH_PARALLELISM: '2',
+      WT_SESSION: 'wt-B',
+      RUSH_INVOKED_FOLDER: '/repo/apps/b',
+      TERM: undefined
+    };
+    expect(getWorkspaceRequestOperationEnvironment(hostEnvironment, requestEnvironment)).toEqual({
+      HOME: '/home/user',
+      PATH: '/usr/bin',
+      NODE_OPTIONS: '--max-old-space-size=8192',
+      COPILOT_AGENT_SESSION_ID: 'session-B',
+      RUSH_PARALLELISM: '2',
+      WT_SESSION: 'wt-B',
+      RUSH_INVOKED_FOLDER: '/repo/apps/b'
+    });
+    expect(getWorkspaceRequestOperationEnvironment(hostEnvironment, {})).toEqual({
+      HOME: '/home/user',
+      PATH: '/usr/bin',
+      NODE_OPTIONS: '--max-old-space-size=8192'
+    });
+  });
+
+  it('matches request variable names case-insensitively on Windows', () => {
+    const platform: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+    const mixedCaseSessionVariable: string = 'Copilot_Agent_Session_Id';
+    Object.defineProperty(process, 'platform', { ...platform, value: 'win32' });
+    try {
+      expect(
+        getWorkspaceRequestOperationEnvironment(
+          { Path: 'C:\\bin', [mixedCaseSessionVariable]: 'session-A' },
+          { Path: 'D:\\bin', COPILOT_AGENT_SESSION_ID: 'session-B' }
+        )
+      ).toEqual({ Path: 'C:\\bin', COPILOT_AGENT_SESSION_ID: 'session-B' });
+    } finally {
+      Object.defineProperty(process, 'platform', platform);
     }
   });
 

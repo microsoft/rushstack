@@ -38,27 +38,42 @@ export interface IWorkspaceInputFingerprintOptions {
  * Environment variable names that are excluded from {@link IWorkspaceInputFingerprint.environmentHash}.
  *
  * @remarks
- * These variables are maintained per shell, terminal, remote session or client invocation. Rush never reads them
- * to configure the engine, construct the operation graph or compute operation hashes, so a difference must not
- * discard a warm workspace:
+ * These variables are maintained per shell, terminal, remote session, service unit, agent session or client
+ * invocation. Rush never reads them to configure the engine, construct the operation graph or compute operation
+ * hashes, so a difference must not discard a warm workspace:
  *
  * - shell bookkeeping: `_`, `PWD`, `OLDPWD`, `SHLVL`, `PS1`, `HISTFILE`, `HISTSIZE`
  *   (a child shell recomputes `PWD`/`SHLVL`/`_` for its own working directory)
  * - terminal presentation: `TERM`, `TERM_PROGRAM`, `TERM_PROGRAM_VERSION`, `TERM_SESSION_ID`, `COLORTERM`,
- *   `COLUMNS`, `LINES`, `LS_COLORS`, `WINDOWID`
+ *   `COLUMNS`, `LINES`, `LS_COLORS`, `WINDOWID`, and the per-window handles of terminal emulators:
+ *   `WT_SESSION`, `WT_PROFILE_ID`, `ITERM_SESSION_ID`
  * - session and multiplexer handles: `WSL_INTEROP`, `WSLENV`, `SSH_CLIENT`, `SSH_CONNECTION`, `SSH_TTY`,
  *   `SSH_AUTH_SOCK`, `TMUX`, `TMUX_PANE`, `STY`, `XDG_SESSION_ID`, `XDG_SESSION_TYPE`, `DBUS_SESSION_BUS_ADDRESS`
- * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed
- * - client routing: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon, and
- *   `RUSH_DAEMON_EXPERIMENTAL` is read from each request rather than from the process
+ * - service manager metadata that systemd assigns to every unit and scope: `INVOCATION_ID`, `JOURNAL_STREAM`,
+ *   `MANAGERPID`, `SYSTEMD_EXEC_PID`, `MEMORY_PRESSURE_WATCH`, `MEMORY_PRESSURE_WRITE`
+ * - editor and credential-prompt handles of an integrated terminal: `VSCODE_IPC_HOOK_CLI`,
+ *   `VSCODE_GIT_IPC_HANDLE`, `VSCODE_GIT_ASKPASS_MAIN`, `VSCODE_GIT_ASKPASS_NODE`,
+ *   `VSCODE_GIT_ASKPASS_EXTRA_ARGS`, `VSCODE_INJECTION`, `VSCODE_NONCE`, `GIT_ASKPASS`, `SSH_ASKPASS`
+ * - coding agent session markers: `COPILOT_CLI`, `COPILOT_AGENT_SESSION_ID`, `COPILOT_LOADER_PID`,
+ *   `COPILOT_CLI_BINARY_VERSION`, `COPILOT_CLI_RESOLVED_DIST_DIR`, `CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`
+ * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed,
+ *   and `RUSH_INVOKED_FOLDER`, which Rush assigns for each invocation
+ * - client routing and presentation: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon,
+ *   `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` is sent as each request's admission deadline, `RUSHD_OUTPUT` selects
+ *   the client's output mode, and `RUSH_DAEMON_EXPERIMENTAL` is read from each request rather than from the process
+ * - `RUSH_PARALLELISM`, which a long-lived host applies to each request as its `--parallelism` default
  *
  * Every other variable remains a process-bound input, including the remaining `RUSH_*` settings (such as
  * `RUSH_BUILD_CACHE_*` and the daemon's own `RUSH_DAEMON_*` resource settings), `NODE_*`, npm/pnpm
- * configuration, `PATH` and `HOME`. On Windows, names are matched case-insensitively.
+ * configuration, credentials, `PATH` and `HOME`. On Windows, names are matched case-insensitively.
+ * `PATH` is compared without repeated entries, because a later duplicate can never change which executable
+ * a lookup finds.
  *
- * A long-lived host that ignores these variables keeps the values from its own startup environment for the
- * processes it launches. Projects that need one of these values as an operation input should not rely on it
- * being request-specific in such a host.
+ * A long-lived host that ignores these variables must not give the processes it launches the values of the
+ * client that started it. Each operation instead takes every one of these variables from the request that it
+ * serves ({@link getWorkspaceRequestOperationEnvironment}), and does not receive the variable when that
+ * request does not define it. The host's own process also drops {@link workspaceRequestScopedEnvironmentVariables},
+ * because code running inside it reads them from `process.env`.
  *
  * @alpha
  */
@@ -79,6 +94,9 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'LINES',
   'LS_COLORS',
   'WINDOWID',
+  'WT_SESSION',
+  'WT_PROFILE_ID',
+  'ITERM_SESSION_ID',
   'WSL_INTEROP',
   'WSLENV',
   'SSH_CLIENT',
@@ -91,19 +109,62 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'XDG_SESSION_ID',
   'XDG_SESSION_TYPE',
   'DBUS_SESSION_BUS_ADDRESS',
+  'INVOCATION_ID',
+  'JOURNAL_STREAM',
+  'MANAGERPID',
+  'SYSTEMD_EXEC_PID',
+  'MEMORY_PRESSURE_WATCH',
+  'MEMORY_PRESSURE_WRITE',
+  'VSCODE_IPC_HOOK_CLI',
+  'VSCODE_GIT_IPC_HANDLE',
+  'VSCODE_GIT_ASKPASS_MAIN',
+  'VSCODE_GIT_ASKPASS_NODE',
+  'VSCODE_GIT_ASKPASS_EXTRA_ARGS',
+  'VSCODE_INJECTION',
+  'VSCODE_NONCE',
+  'GIT_ASKPASS',
+  'SSH_ASKPASS',
+  'COPILOT_CLI',
+  'COPILOT_AGENT_SESSION_ID',
+  'COPILOT_LOADER_PID',
+  'COPILOT_CLI_BINARY_VERSION',
+  'COPILOT_CLI_RESOLVED_DIST_DIR',
+  'CLAUDECODE',
+  'CLAUDE_CODE_ENTRYPOINT',
   'INIT_CWD',
+  'RUSH_INVOKED_FOLDER',
   'RUSH_DAEMON',
   'RUSH_DAEMON_AUTO_START',
-  'RUSH_DAEMON_EXPERIMENTAL'
+  'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
+  'RUSHD_OUTPUT',
+  'RUSH_DAEMON_EXPERIMENTAL',
+  'RUSH_PARALLELISM'
+]);
+
+/**
+ * The subset of {@link workspaceFingerprintIgnoredEnvironmentVariables} whose value belongs to one request.
+ *
+ * @remarks
+ * A long-lived host must not inherit these variables from the client that started it: it applies
+ * `RUSH_PARALLELISM` from each request's own environment, and code running inside the host that reads a session
+ * identifier such as `COPILOT_AGENT_SESSION_ID` from `process.env` would otherwise attribute every later session's
+ * work to the first one.
+ * On Windows, names are matched case-insensitively.
+ *
+ * @alpha
+ */
+export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string> = new Set([
+  'RUSH_PARALLELISM',
+  'COPILOT_AGENT_SESSION_ID'
 ]);
 
 /**
  * Returns the defined environment entries that participate in workspace fingerprints, sorted by name.
  *
  * @remarks
- * Omits undefined values and {@link workspaceFingerprintIgnoredEnvironmentVariables}. Hosts that compare
- * environments outside {@link captureWorkspaceInputFingerprintAsync} must use this function so that every
- * comparison applies the same normalization.
+ * Omits undefined values and {@link workspaceFingerprintIgnoredEnvironmentVariables}, and removes repeated
+ * `PATH` entries. Hosts that compare environments outside {@link captureWorkspaceInputFingerprintAsync} must use
+ * this function so that every comparison applies the same normalization.
  *
  * @alpha
  */
@@ -111,13 +172,68 @@ export function getWorkspaceFingerprintEnvironmentEntries(
   environment: Readonly<Record<string, string | undefined>>
 ): [string, string][] {
   const isWindows: boolean = process.platform === 'win32';
-  return Object.entries(environment)
-    .filter(
-      (entry): entry is [string, string] =>
-        entry[1] !== undefined &&
-        !workspaceFingerprintIgnoredEnvironmentVariables.has(isWindows ? entry[0].toUpperCase() : entry[0])
-    )
-    .sort(([left], [right]) => Sort.compareByValue(left, right));
+  const entries: [string, string][] = [];
+  for (const [name, value] of Object.entries(environment)) {
+    if (value === undefined) continue;
+    const normalizedName: string = isWindows ? name.toUpperCase() : name;
+    if (workspaceFingerprintIgnoredEnvironmentVariables.has(normalizedName)) continue;
+    entries.push([name, normalizedName === 'PATH' ? removeRepeatedPathEntries(value) : value]);
+  }
+  return entries.sort(([left], [right]) => Sort.compareByValue(left, right));
+}
+
+/**
+ * Returns a copy of a host startup environment without {@link workspaceRequestScopedEnvironmentVariables}.
+ *
+ * @alpha
+ */
+export function getWorkspaceHostEnvironment(
+  environment: Readonly<Record<string, string | undefined>>
+): Record<string, string> {
+  const isWindows: boolean = process.platform === 'win32';
+  const hostEnvironment: Record<string, string> = {};
+  for (const [name, value] of Object.entries(environment)) {
+    if (
+      value !== undefined &&
+      !workspaceRequestScopedEnvironmentVariables.has(isWindows ? name.toUpperCase() : name)
+    ) {
+      hostEnvironment[name] = value;
+    }
+  }
+  return hostEnvironment;
+}
+
+/**
+ * Returns the environment that an operation starts from when a long-lived host runs it for a request.
+ *
+ * @remarks
+ * Every variable in {@link workspaceFingerprintIgnoredEnvironmentVariables} takes the request's value, and is
+ * omitted when the request does not define it, so that the operation sees its own requester's session, terminal
+ * and credential-helper variables. Every other variable comes from the host, whose environment matches the
+ * request's for identity. A host returns the result from `IOperationGraphIterationOptions.getOperationEnvironment`.
+ * On Windows, names are matched case-insensitively.
+ *
+ * @alpha
+ */
+export function getWorkspaceRequestOperationEnvironment(
+  hostEnvironment: Readonly<Record<string, string | undefined>>,
+  requestEnvironment: Readonly<Record<string, string | undefined>>
+): Record<string, string> {
+  const isWindows: boolean = process.platform === 'win32';
+  const isRequestValue = (name: string): boolean =>
+    workspaceFingerprintIgnoredEnvironmentVariables.has(isWindows ? name.toUpperCase() : name);
+  const environment: Record<string, string> = {};
+  for (const [name, value] of Object.entries(hostEnvironment)) {
+    if (value !== undefined && !isRequestValue(name)) environment[name] = value;
+  }
+  for (const [name, value] of Object.entries(requestEnvironment)) {
+    if (value !== undefined && isRequestValue(name)) environment[name] = value;
+  }
+  return environment;
+}
+
+function removeRepeatedPathEntries(value: string): string {
+  return Array.from(new Set(value.split(path.delimiter))).join(path.delimiter);
 }
 
 /**

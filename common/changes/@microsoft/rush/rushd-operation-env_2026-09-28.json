@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Keep `RUSH_DAEMON*` variables out of lifecycle script environments, so that project tooling that starts an older Rush release, which rejects them as unknown `RUSH_*` variables, works when the command was routed through the Rush daemon.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

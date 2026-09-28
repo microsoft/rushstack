@@ -8,7 +8,7 @@ import type {
   Operation,
   _IOperationGraphEventSink
 } from '@microsoft/rush-lib';
-import { OperationStatus } from '@microsoft/rush-lib';
+import { getWorkspaceRequestOperationEnvironment, OperationStatus } from '@microsoft/rush-lib';
 import { Sort } from '@rushstack/node-core-library';
 import type {
   IDaemonPhasedEngineShape,
@@ -458,7 +458,8 @@ class PhasedRequestBatchCoordinator {
       try {
         for (const entry of participants) entry.onExecutionStarting?.();
         scheduled = await this.#graph.scheduleIterationAsync({
-          inputsSnapshot: this.#workspaceSession.inputsSnapshot
+          inputsSnapshot: this.#workspaceSession.inputsSnapshot,
+          getOperationEnvironment: createOperationEnvironmentLookup(participants)
         });
         if (scheduled) {
           await Promise.all(
@@ -873,6 +874,31 @@ function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   if (request.terminalRequirement === 'interactiveInput' && request.acceptsStdin !== true) {
     throw new Error('Phased request interactive input requires acceptsStdin to be true.');
   }
+}
+
+/**
+ * Gives each operation of an iteration the environment of the first participant that selected it, as a native
+ * command would run it in its invoker's environment. An operation that several participants share runs once, in
+ * the first participant's environment.
+ */
+function createOperationEnvironmentLookup(
+  participants: ReadonlyArray<IBatchEntry>
+): (operation: Operation) => Readonly<Record<string, string | undefined>> {
+  const environmentByOperation: Map<Operation, Readonly<Record<string, string>>> = new Map();
+  let firstEnvironment: Readonly<Record<string, string>> | undefined;
+  for (const entry of participants) {
+    const environment: Readonly<Record<string, string>> = getWorkspaceRequestOperationEnvironment(
+      process.env,
+      entry.request.environment
+    );
+    firstEnvironment ??= environment;
+    for (const operation of entry.selection.activeOperations) {
+      if (!environmentByOperation.has(operation)) {
+        environmentByOperation.set(operation, environment);
+      }
+    }
+  }
+  return (operation: Operation) => environmentByOperation.get(operation) ?? firstEnvironment ?? process.env;
 }
 
 function validateNonemptyName(value: string, kind: string): void {

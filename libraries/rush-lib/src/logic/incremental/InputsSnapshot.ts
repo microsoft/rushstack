@@ -167,9 +167,15 @@ export interface IInputsSnapshot {
    * the command being executed and the final hashes of the operation's dependencies to compute the final hash for the operation.
    * @param project - The Rush project to compute the state hash for
    * @param operationName - The name of the operation (phase) to get hashes for. If omitted, returns a generic hash for the whole project, as used for bulk commands.
+   * @param environment - The environment that the operation runs with, if it differs from the environment of the
+   * snapshot. The operation's `dependsOnEnvVars` are hashed from it.
    * @returns The local state hash for the project. This is a hash of the environment, the project's tracked files, and any additional files.
    */
-  getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
+  getOperationOwnStateHash(
+    project: IRushConfigurationProjectForSnapshot,
+    operationName?: string,
+    environment?: Readonly<Record<string, string | undefined>>
+  ): string;
 }
 
 /**
@@ -377,59 +383,80 @@ export class InputsSnapshot implements IInputsSnapshot {
    */
   public getOperationOwnStateHash(
     project: IRushConfigurationProjectForSnapshot,
-    operationName?: string
+    operationName?: string,
+    environment?: Readonly<Record<string, string | undefined>>
   ): string {
     const record: IInternalInputsSnapshotProjectMetadata | undefined = this.#projectMetadataMap.get(project);
     if (!record) {
       throw new Error(`No information available for project at ${project.projectFolder}`);
     }
 
+    const operationSettings: Readonly<IOperationSettings> | undefined = operationName
+      ? record.projectConfig?.operationSettingsByOperationName.get(operationName)
+      : undefined;
+    const snapshotEnvironment: Readonly<Record<string, string | undefined>> = this.#environment;
+    if (
+      environment &&
+      operationSettings?.dependsOnEnvVars?.some(
+        (envVar: string) => (environment[envVar] || '') !== (snapshotEnvironment[envVar] || '')
+      )
+    ) {
+      // The operation's environment differs from the snapshot's in a variable that it hashes, so don't memoize.
+      return this.#computeOperationOwnStateHash(project, operationName, operationSettings, environment);
+    }
+
     const { hashByOperationName } = record;
     let hash: string | undefined = hashByOperationName.get(operationName);
     if (!hash) {
-      const hashes: ReadonlyMap<string, string> = this.getTrackedFileHashesForOperation(
+      hash = this.#computeOperationOwnStateHash(
         project,
-        operationName
+        operationName,
+        operationSettings,
+        snapshotEnvironment
       );
-
-      const hasher: Hash = createHash('sha1');
-      // If this is for a specific operation, apply operation-specific options
-      if (operationName) {
-        const operationSettings: Readonly<IOperationSettings> | undefined =
-          record.projectConfig?.operationSettingsByOperationName.get(operationName);
-        if (operationSettings) {
-          const { dependsOnEnvVars, dependsOnNodeVersion, outputFolderNames } = operationSettings;
-          if (dependsOnEnvVars) {
-            // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
-            // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
-            for (const envVar of dependsOnEnvVars) {
-              hasher.update(`${hashDelimiter}$${envVar}=${this.#environment[envVar] || ''}`);
-            }
-          }
-
-          if (dependsOnNodeVersion) {
-            const granularity: NodeVersionGranularity =
-              dependsOnNodeVersion === true ? 'patch' : dependsOnNodeVersion;
-            hasher.update(`${hashDelimiter}nodeVersion=${this.#nodeVersionByGranularity[granularity]}`);
-          }
-
-          if (outputFolderNames) {
-            hasher.update(`${hashDelimiter}${JSON.stringify(outputFolderNames)}`);
-          }
-        }
-      }
-
-      // Hash the base project files
-      for (const [filePath, fileHash] of hashes) {
-        hasher.update(`${hashDelimiter}${filePath}${hashDelimiter}${fileHash}`);
-      }
-
-      hash = hasher.digest('hex');
-
       hashByOperationName.set(operationName, hash);
     }
 
     return hash;
+  }
+
+  #computeOperationOwnStateHash(
+    project: IRushConfigurationProjectForSnapshot,
+    operationName: string | undefined,
+    operationSettings: Readonly<IOperationSettings> | undefined,
+    environment: Readonly<Record<string, string | undefined>>
+  ): string {
+    const hashes: ReadonlyMap<string, string> = this.getTrackedFileHashesForOperation(project, operationName);
+
+    const hasher: Hash = createHash('sha1');
+    // If this is for a specific operation, apply operation-specific options
+    if (operationSettings) {
+      const { dependsOnEnvVars, dependsOnNodeVersion, outputFolderNames } = operationSettings;
+      if (dependsOnEnvVars) {
+        // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
+        // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
+        for (const envVar of dependsOnEnvVars) {
+          hasher.update(`${hashDelimiter}$${envVar}=${environment[envVar] || ''}`);
+        }
+      }
+
+      if (dependsOnNodeVersion) {
+        const granularity: NodeVersionGranularity =
+          dependsOnNodeVersion === true ? 'patch' : dependsOnNodeVersion;
+        hasher.update(`${hashDelimiter}nodeVersion=${this.#nodeVersionByGranularity[granularity]}`);
+      }
+
+      if (outputFolderNames) {
+        hasher.update(`${hashDelimiter}${JSON.stringify(outputFolderNames)}`);
+      }
+    }
+
+    // Hash the base project files
+    for (const [filePath, fileHash] of hashes) {
+      hasher.update(`${hashDelimiter}${filePath}${hashDelimiter}${fileHash}`);
+    }
+
+    return hasher.digest('hex');
   }
 
   *#resolveHashes(filePaths: Iterable<string>): Generator<[string, string]> {
