@@ -86,6 +86,30 @@ function getResultOperationIds(result: IDaemonPhasedRequestResult): ReadonlyArra
   return result.operationResults.map(({ operationId }) => operationId);
 }
 
+/** One input file of project-c: the version on disk, and the version that the latest reconcile read. */
+class TestWorkspaceInput {
+  #diskVersion: number = 0;
+  #snapshotVersion: number | undefined;
+
+  public edit(): void {
+    this.#diskVersion++;
+  }
+
+  public read(): void {
+    this.#snapshotVersion = this.#diskVersion;
+  }
+
+  public describe(): string {
+    return `snapshot=${this.#snapshotVersion} disk=${this.#diskVersion}`;
+  }
+}
+
+async function settleAsync(): Promise<void> {
+  for (let turn: number = 0; turn < 20; turn++) {
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
+}
+
 interface IExecutionLeaseTracker {
   readonly events: string[];
 }
@@ -636,6 +660,149 @@ describe('shared phased request batching', () => {
     expect(scheduleSpy).toHaveBeenCalledTimes(2);
     expect(fixture.session.onReconcileAsync).toHaveBeenCalledTimes(2);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
+  });
+
+  it('puts a compatible request received during the reconcile into a later batch that reconciles again', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    const inputRead: IDeferred = createDeferred();
+    const finishFirstReconcile: IDeferred = createDeferred();
+    let reconcileCount: number = 0;
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      reconcileCount++;
+      events.push('reconcile:start');
+      input.read();
+      if (reconcileCount === 1) {
+        inputRead.resolve();
+        // The reconcile has read project-c's input and is still reading the rest of the workspace.
+        await finishFirstReconcile.promise;
+      }
+      events.push('reconcile:end');
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await inputRead.promise;
+
+    // Another client changes project-c's input, then submits a compatible build that needs it.
+    input.edit();
+    events.push('edit');
+    const second = router.executeAsync(
+      createRequest('second', OPERATION_C),
+      new TestPhasedRequestClient('two')
+    );
+    await settleAsync();
+    finishFirstReconcile.resolve();
+
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    // Joining the first batch would run project-c on the inputs read before its change ("snapshot=0 disk=1").
+    expect(events).toEqual([
+      'reconcile:start',
+      'edit',
+      'reconcile:end',
+      'reconcile:start',
+      'reconcile:end',
+      'run:C snapshot=1 disk=1'
+    ]);
+    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('lets a compatible request that is pending before the reconcile join the batch and see its change', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    const leaseRequested: IDeferred = createDeferred();
+    const grantLease: IDeferred = createDeferred();
+    fixture.session.acquireExecutionLeaseAsync = async (): Promise<AsyncDisposable> => {
+      leaseRequested.resolve();
+      await grantLease.promise;
+      return { [Symbol.asyncDispose]: async (): Promise<void> => undefined };
+    };
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      events.push('reconcile');
+      input.read();
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await leaseRequested.promise;
+
+    input.edit();
+    events.push('edit');
+    const second = router.executeAsync(
+      createRequest('second', OPERATION_C),
+      new TestPhasedRequestClient('two')
+    );
+    await settleAsync();
+    grantLease.resolve();
+
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(events).toEqual(['edit', 'reconcile', 'run:C snapshot=1 disk=1']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a request received before the reconcile began join the batch when it reaches the router during it', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    const reconcileStarted: IDeferred = createDeferred();
+    const finishReconcile: IDeferred = createDeferred();
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      events.push('reconcile:start');
+      input.read();
+      reconcileStarted.resolve();
+      await finishReconcile.promise;
+      events.push('reconcile:end');
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+    // The second client changes project-c's input and the daemon receives its request, which then waits (for
+    // example behind a graph load) and reaches the router only while the first batch reconciles.
+    input.edit();
+    events.push('edit');
+    const secondReceivedTimeMs: number = performance.now();
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await reconcileStarted.promise;
+    const second = router.executeAsync(
+      createRequest('second', OPERATION_C),
+      new TestPhasedRequestClient('two'),
+      false,
+      undefined,
+      undefined,
+      secondReceivedTimeMs
+    );
+    await settleAsync();
+    finishReconcile.resolve();
+
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(events).toEqual(['edit', 'reconcile:start', 'reconcile:end', 'run:C snapshot=1 disk=1']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
   });
 
   it('lets a late shared build wait past a default timeout while a compatible batch executes', async () => {

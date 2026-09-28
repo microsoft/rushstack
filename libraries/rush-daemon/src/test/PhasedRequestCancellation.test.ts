@@ -20,7 +20,10 @@ const OPERATION_C: string = 'project-c (_phase:test)';
 const PROMPT_CANCELLATION_MS: number = 1000;
 const TIMED_OUT: 'timed out' = 'timed out';
 
-async function raceWithTimeoutAsync<T>(promise: Promise<T>, timeoutMs: number): Promise<T | typeof TIMED_OUT> {
+async function raceWithTimeoutAsync<T>(
+  promise: Promise<T>,
+  timeoutMs: number
+): Promise<T | typeof TIMED_OUT> {
   let timer: NodeJS.Timeout | undefined;
   try {
     return await Promise.race([
@@ -167,13 +170,14 @@ describe('phased request client cancellation', () => {
     const { hanging, actionAsync } = createHangingOperation();
     const fixture: ITestRoutingFixture = createFixture(actionAsync);
     const abortSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'abortCurrentIterationAsync');
-    let onReconciling: () => void = () => undefined;
-    const reconciling: Promise<void> = new Promise<void>((resolve) => (onReconciling = resolve));
-    let releaseReconcile: () => void = () => undefined;
-    const reconcileReleased: Promise<void> = new Promise<void>((resolve) => (releaseReconcile = resolve));
-    fixture.session.onReconcileAsync = async () => {
-      onReconciling();
-      await reconcileReleased;
+    let onLeaseRequested: () => void = () => undefined;
+    const leaseRequested: Promise<void> = new Promise<void>((resolve) => (onLeaseRequested = resolve));
+    let grantLease: () => void = () => undefined;
+    const leaseGranted: Promise<void> = new Promise<void>((resolve) => (grantLease = resolve));
+    fixture.session.acquireExecutionLeaseAsync = async (): Promise<AsyncDisposable> => {
+      onLeaseRequested();
+      await leaseGranted;
+      return { [Symbol.asyncDispose]: async (): Promise<void> => undefined };
     };
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
     const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
@@ -181,8 +185,8 @@ describe('phased request client cancellation', () => {
       createRequest('cancelled', OPERATION_A),
       cancelledClient
     );
-    await reconciling;
-    // Accepted while the batch is still being prepared, so it joins once preparation finishes.
+    await leaseRequested;
+    // Accepted while the batch waits for its execution lease, so it joins before the batch reconciles.
     const continuing: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
       createRequest('continuing', OPERATION_A),
       new TestPhasedRequestClient('two')
@@ -195,10 +199,54 @@ describe('phased request client cancellation', () => {
     cancelledClient.abortController.abort();
     expect(await cancelled).toMatchObject({ aborted: true, outcome: 'aborted' });
 
-    releaseReconcile();
+    grantLease();
     await hanging.started;
     expect(hanging.signals.map((signal: AbortSignal) => signal.aborted)).toEqual([false]);
     expect(abortSpy).not.toHaveBeenCalledWith({ terminateRunning: true });
+    hanging.release();
+    expect(await continuing).toMatchObject({ aborted: false, exitCode: 0, outcome: 'success' });
+  });
+
+  it('keeps a request received during the reconcile out of the batch when its only participant cancels', async () => {
+    const { hanging, actionAsync } = createHangingOperation();
+    const fixture: ITestRoutingFixture = createFixture(actionAsync);
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    let onReconciling: () => void = () => undefined;
+    const reconciling: Promise<void> = new Promise<void>((resolve) => (onReconciling = resolve));
+    let releaseReconcile: () => void = () => undefined;
+    const reconcileReleased: Promise<void> = new Promise<void>((resolve) => (releaseReconcile = resolve));
+    let reconciles: number = 0;
+    fixture.session.onReconcileAsync = async () => {
+      reconciles++;
+      onReconciling();
+      await reconcileReleased;
+    };
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    const cancelled: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('cancelled', OPERATION_A),
+      cancelledClient
+    );
+    await reconciling;
+    // Received after the reconcile started, so it waits for the next batch, which reconciles again.
+    const continuing: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('continuing', OPERATION_A),
+      new TestPhasedRequestClient('two')
+    );
+    for (let tick: number = 0; tick < 20; tick++) {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
+
+    cancelledClient.abortController.abort();
+    // The cancelled client is the batch's last participant, so its result still follows the batch's reconcile.
+    expect(await raceWithTimeoutAsync(cancelled, 100)).toBe(TIMED_OUT);
+    releaseReconcile();
+    expect(await cancelled).toMatchObject({ aborted: true, outcome: 'aborted' });
+
+    await hanging.started;
+    expect(reconciles).toBe(2);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(hanging.signals.map((signal: AbortSignal) => signal.aborted)).toEqual([false]);
     hanging.release();
     expect(await continuing).toMatchObject({ aborted: false, exitCode: 0, outcome: 'success' });
   });

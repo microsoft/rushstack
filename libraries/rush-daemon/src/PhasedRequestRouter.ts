@@ -73,6 +73,8 @@ interface IPreparedPhasedRequest {
   readonly requestSettings: IPhasedCommandEngineRequestSettings | undefined;
   readonly requestSettingsKey: string;
   readonly selection: IResolvedSelection;
+  /** The `performance.now()` timestamp at which the daemon received the request; see `#canJoinCurrentBatch`. */
+  readonly receivedTimeMs: number;
   /** The `performance.now()` timestamp at which the router received the request. */
   readonly startTimeMs: number;
   readonly warningsAllowedByEnvironment: boolean;
@@ -126,13 +128,20 @@ export class PhasedRequestRouter {
     this.#workspaceSession = workspaceSession;
   }
 
-  /** Validates and executes one resolved phased request against the warm graph. */
+  /**
+   * Validates and executes one resolved phased request against the warm graph.
+   *
+   * @remarks
+   * `receivedTimeMs` is the `performance.now()` timestamp at which the daemon received the request. The request can
+   * join a batch whose input reconcile started after this time. It defaults to the time of this call.
+   */
   public async executeAsync(
     request: IDaemonPhasedRequest,
     client: IPhasedRequestClient,
     exactSelection: boolean = false,
     onExecutionStarting?: () => void,
-    requestSettings?: IPhasedCommandEngineRequestSettings
+    requestSettings?: IPhasedCommandEngineRequestSettings,
+    receivedTimeMs?: number
   ): Promise<IDaemonPhasedRequestResult> {
     const startTimeMs: number = performance.now();
     validateRequestIdentity(request);
@@ -210,6 +219,7 @@ export class PhasedRequestRouter {
               client,
               exclusivityClass,
               interactiveSession,
+              receivedTimeMs: receivedTimeMs ?? startTimeMs,
               request,
               requestSettings,
               requestSettingsKey: JSON.stringify(requestSettings ?? null),
@@ -250,6 +260,8 @@ class PhasedRequestBatchCoordinator {
   #currentBatch: ReadonlyArray<IBatchEntry> | undefined;
   #drainScheduled: boolean = false;
   #nextGraphLeasePromise: Promise<IRequestLease> | undefined;
+  /** When the current batch's input reconcile started, or undefined before it starts. */
+  #reconcileStartTimeMs: number | undefined;
   #running: boolean = false;
 
   public constructor(
@@ -335,6 +347,7 @@ class PhasedRequestBatchCoordinator {
         }
         this.#currentBatch = batch;
         this.#acceptingCurrentBatch = first.exclusivityClass === RequestExclusivityClass.SharedBuild;
+        this.#reconcileStartTimeMs = undefined;
         for (const entry of batch) {
           entry.executionStarted = true;
         }
@@ -344,6 +357,7 @@ class PhasedRequestBatchCoordinator {
           await Promise.all(batch.map((entry: IBatchEntry) => this.#rejectEntryAsync(entry, error)));
         } finally {
           this.#acceptingCurrentBatch = false;
+          this.#reconcileStartTimeMs = undefined;
           this.#currentBatch = undefined;
         }
       }
@@ -364,6 +378,8 @@ class PhasedRequestBatchCoordinator {
     }
     return (
       this.#acceptingCurrentBatch &&
+      // A request received after the reconcile started may have changed an input that the reconcile already read.
+      (this.#reconcileStartTimeMs === undefined || request.receivedTimeMs < this.#reconcileStartTimeMs) &&
       this.#currentBatch?.[0]?.exclusivityClass === RequestExclusivityClass.SharedBuild &&
       this.#currentBatch[0].requestSettingsKey === request.requestSettingsKey
     );
@@ -407,12 +423,16 @@ class PhasedRequestBatchCoordinator {
         throw new Error('The warm workspace operation graph is not idle.');
       }
       executionLease = await this.#workspaceSession.acquireExecutionLeaseAsync?.();
+      // Requests received before this point made their changes before the reconcile reads the inputs, so they can
+      // still join while it runs. Requests received later wait for the next batch, which reconciles again.
+      this.#reconcileStartTimeMs = performance.now();
       await this.#workspaceSession.reconcileInvalidationsAsync();
 
       if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
         this.#takeCompatiblePending(batch);
       }
       this.#acceptingCurrentBatch = false;
+
       const participants: IBatchEntry[] = batch.filter((entry: IBatchEntry) => this.#isEntryLive(entry));
       if (participants.length === 0) {
         const beforeResultAsync: (() => Promise<void>) | undefined = executionLease

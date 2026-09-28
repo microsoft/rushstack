@@ -7,13 +7,11 @@ import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 import {
-  PhasedCommandEngine,
   Rush,
   RushProjectConfiguration,
   RushUserConfiguration,
   type IOperationGraph,
   type Operation,
-  type OperationEnabledState,
   type RushConfigurationProject
 } from '@microsoft/rush-lib';
 import {
@@ -48,6 +46,8 @@ import {
   type IWorkspaceResolverLifecycle
 } from '../WorkspaceResolverLifecycle';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
+import type { IRequestLease } from '../RequestScheduler';
+import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import { TestPhasedRequestClient } from './PhasedRequestRouterTestUtilities';
 import {
   createNativeScriptGateAsync,
@@ -909,9 +909,11 @@ process.exit(23);
 
   it('uses one native lease for a merged batch and excludes native actions throughout reconciliation and execution', async () => {
     const fixture: IFixture = await createFixtureAsync();
+    const leaseRequested: IDeferred<void> = createDeferred();
+    const grantLease: IDeferred<void> = createDeferred();
     const reconcileEntered: IDeferred<void> = createDeferred();
     const releaseReconciliation: IDeferred<void> = createDeferred();
-    const secondSelection: IDeferred<void> = createDeferred();
+    const secondAdmitted: IDeferred<void> = createDeferred();
     let secondClient: DaemonRequestWireClient | undefined;
     let gate: INativeScriptGate | undefined;
     let first: Promise<ITerminalExchange> | undefined;
@@ -922,7 +924,15 @@ process.exit(23);
       await fixture.session.quiesceWarmSetAsync();
       const graph: IOperationGraph = fixture.session.operationGraph!;
       const scheduleSpy: jest.SpyInstance = jest.spyOn(graph, 'scheduleIterationAsync');
-      const leaseSpy: jest.SpyInstance = jest.spyOn(fixture.session, 'acquireExecutionLeaseAsync');
+      const acquireExecutionLeaseAsync: WorkspaceSession['acquireExecutionLeaseAsync'] =
+        fixture.session.acquireExecutionLeaseAsync.bind(fixture.session);
+      const leaseSpy: jest.SpyInstance = jest
+        .spyOn(fixture.session, 'acquireExecutionLeaseAsync')
+        .mockImplementationOnce(async () => {
+          leaseRequested.resolve();
+          await grantLease.promise;
+          return await acquireExecutionLeaseAsync();
+        });
       const reconcileAsync: WorkspaceSession['reconcileInvalidationsAsync'] =
         fixture.session.reconcileInvalidationsAsync.bind(fixture.session);
       jest.spyOn(fixture.session, 'reconcileInvalidationsAsync').mockImplementationOnce(async () => {
@@ -930,28 +940,38 @@ process.exit(23);
         await releaseReconciliation.promise;
         return await reconcileAsync();
       });
-      const selectAsync: PhasedCommandEngine['selectOperationsAsync'] =
-        PhasedCommandEngine.prototype.selectOperationsAsync;
-      let selections: number = 0;
-      jest.spyOn(PhasedCommandEngine.prototype, 'selectOperationsAsync').mockImplementation(async function (
-        this: PhasedCommandEngine,
-        selectedGraph: IOperationGraph
+      const routeAsync: PhasedRequestRouter['executeAsync'] = PhasedRequestRouter.prototype.executeAsync;
+      let routedRequests: number = 0;
+      jest.spyOn(PhasedRequestRouter.prototype, 'executeAsync').mockImplementation(async function (
+        this: PhasedRequestRouter,
+        ...args: Parameters<PhasedRequestRouter['executeAsync']>
       ) {
-        const selection: ReadonlyMap<Operation, OperationEnabledState> = await selectAsync.call(
-          this,
-          selectedGraph
-        );
-        if (++selections === 2) secondSelection.resolve();
-        return selection;
+        routedRequests++;
+        return await routeAsync.apply(this, args);
+      });
+      const admitAsync: RequestAdmissionController['acquireAsync'] =
+        RequestAdmissionController.prototype.acquireAsync;
+      jest.spyOn(RequestAdmissionController.prototype, 'acquireAsync').mockImplementation(async function (
+        this: RequestAdmissionController,
+        ...args: Parameters<RequestAdmissionController['acquireAsync']>
+      ) {
+        const lease: IRequestLease = await admitAsync.apply(this, args);
+        // The router admits each request once, after the workspace lifecycle has, and then enqueues it.
+        if (routedRequests === 2) secondAdmitted.resolve();
+        return lease;
       });
       gate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
       secondClient = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
       await secondClient.handshakeAsync();
       first = runAsync(fixture, 'dependency', ['build', '--to', 'a']);
-      await reconcileEntered.promise;
+      await leaseRequested.promise;
+      // Accepted while the batch waits for its native lease, so it joins before the batch reconciles.
       second = runAsync({ ...fixture, client: secondClient }, 'consumer', ['build', '--to', 'b']);
-      await secondSelection.promise;
+      await secondAdmitted.promise;
+      // After admission, the router enqueues the request without awaiting.
       await new Promise<void>((resolve) => setImmediate(resolve));
+      grantLease.resolve();
+      await reconcileEntered.promise;
       expect(await runNativeCommandAsync(fixture.repoRoot, ['rebuild', '--only', 'c'])).toMatchObject({
         exitCode: 1,
         stdout: expect.stringContaining('Another Rush command')
@@ -980,6 +1000,7 @@ process.exit(23);
       expect(scheduleSpy).toHaveBeenCalledTimes(1);
       expect(runs(fixture)).toEqual(['c:one:', 'a:one:', 'b:one:']);
     } finally {
+      grantLease.resolve();
       releaseReconciliation.resolve();
       await gate?.releaseAsync();
       await first;

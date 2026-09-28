@@ -94,6 +94,11 @@ export interface IDispatchWorkspaceRequestOptions {
   readonly workspaceSession: IWorkspaceSession;
   readonly resolver: IDaemonRequestResolver | undefined;
   readonly onExecutionStarting?: () => void;
+  /**
+   * The `performance.now()` timestamp at which the daemon received the request. A phased request can join a batch
+   * whose input reconcile started after this time; see {@link PhasedRequestRouter.executeAsync}.
+   */
+  readonly receivedTimeMs?: number;
 }
 
 /** Executes an already admitted workspace generation without resolving against another session. @beta */
@@ -158,7 +163,7 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
 async function dispatchWorkspaceRequestAsync(
   options: IDispatchWorkspaceRequestOptions
 ): Promise<IDaemonCommandResult | undefined> {
-  const { envelope, client, workspaceSession, resolver, onExecutionStarting } = options;
+  const { envelope, client, workspaceSession, resolver, onExecutionStarting, receivedTimeMs } = options;
   workspaceSession.assertActive?.();
   if (
     !isRushxInvocation(envelope) &&
@@ -191,7 +196,8 @@ async function dispatchWorkspaceRequestAsync(
       createPhasedClient(client),
       resolved.exactSelection,
       onExecutionStarting,
-      resolved.requestSettings
+      resolved.requestSettings,
+      receivedTimeMs
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);

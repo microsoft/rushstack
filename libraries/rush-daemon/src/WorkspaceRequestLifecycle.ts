@@ -176,6 +176,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     destination: IDaemonRequestDispatchClient,
     dispatchAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
+    const receivedTimeMs: number = performance.now();
     // Native Rush owns its SDK handoff; a foreign client's bundled engine must not override this one.
     const envelope: IDaemonRequestEnvelope = {
       ...request,
@@ -230,6 +231,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
                 client,
                 workspaceSession: prepared.session,
                 resolver: prepared.resolver,
+                receivedTimeMs,
                 onExecutionStarting: () => {
                   this.#assertGeneration(prepared);
                   state.began = true;

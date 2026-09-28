@@ -206,6 +206,7 @@ export interface IDispatchWorkspaceRequestOptions {
     readonly envelope: IDaemonRequestEnvelope;
     // (undocumented)
     readonly onExecutionStarting?: () => void;
+    readonly receivedTimeMs?: number;
     // (undocumented)
     readonly resolver: IDaemonRequestResolver | undefined;
     // (undocumented)
@@ -691,7 +692,7 @@ export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspace
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings, receivedTimeMs?: number): Promise<IDaemonPhasedRequestResult>;
 }
 
 // @beta
