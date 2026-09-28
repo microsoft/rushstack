@@ -8,6 +8,18 @@ import * as path from 'node:path';
 import { Executable } from '@rushstack/node-core-library';
 
 /**
+ * How far outside of the snapshot window a file time may be and still count as a save during the window.
+ * File times can trail `Date.now()` by a clock tick (about 16 ms on Windows), or by up to 2 seconds on file systems
+ * with coarse time stamps (FAT). A file that is flagged by mistake only costs a `git hash-object` call.
+ */
+export const FILE_TIME_TOLERANCE_MS: number = 2000;
+const NANOSECONDS_PER_MILLISECOND: bigint = BigInt(1000000);
+
+function millisecondsToNanoseconds(timeMs: number): bigint {
+  return BigInt(Math.floor(timeMs)) * NANOSECONDS_PER_MILLISECOND;
+}
+
+/**
  * The on-disk state of an operation's tracked input files, captured right after the inputs snapshot
  * (from which the operation's build cache key is derived) was taken.
  */
@@ -29,6 +41,13 @@ export interface IInputFilesState {
    * Used to detect files (or folders) that were created after the snapshot was taken.
    */
   readonly folderEntries: ReadonlyMap<string, ReadonlySet<string>>;
+  /**
+   * The tracked input file paths, as passed to `captureInputFilesState`, whose modification or status change time
+   * falls between the time that the inputs snapshot began reading the working tree and the time that this state
+   * was captured. Git may have hashed such a file before it was saved, so its hash in the snapshot (from which the
+   * build cache key was derived) may be stale even though its stats do not change again.
+   */
+  readonly filesChangedDuringSnapshot: ReadonlyArray<string>;
 }
 
 /**
@@ -42,14 +61,24 @@ export type IsNewInputCallback = (newEntryPaths: ReadonlyArray<string>) => boole
  * Missing files are included in the signature, so deleting or creating a listed file also changes it.
  */
 export function getInputFilesStatSignature(filePaths: Iterable<string>): string {
+  return hashInputFilesStats(filePaths);
+}
+
+function hashInputFilesStats(
+  filePaths: Iterable<string>,
+  onStats?: (index: number, stats: fs.BigIntStats) => void
+): string {
   const hasher: crypto.Hash = crypto.createHash('sha1');
+  let index: number = 0;
   for (const filePath of filePaths) {
     const stats: fs.BigIntStats | undefined = fs.statSync(filePath, { bigint: true, throwIfNoEntry: false });
     if (stats) {
       hasher.update(`${filePath}\0${stats.size}\0${stats.mtimeNs}\0${stats.ino}\n`);
+      onStats?.(index, stats);
     } else {
       hasher.update(`${filePath}\0missing\n`);
     }
+    index++;
   }
   return hasher.digest('hex');
 }
@@ -69,15 +98,20 @@ function tryReadFolderEntries(folderPath: string): Set<string> | undefined {
  * @param inputFilePaths - The tracked input file paths. Relative paths are resolved against `rootDirectory`;
  *   absolute paths (e.g. `dependsOnAdditionalFiles` outside of the repository) are stat'ed but their folders
  *   are not watched for new entries.
+ * @param snapshotStartTimeMs - When the inputs snapshot began reading the working tree
+ *   (`IInputsSnapshot.workingTreeReadStartTimeMs`), if known. Used to compute `filesChangedDuringSnapshot`.
  */
 export function captureInputFilesState(
   rootDirectory: string,
-  inputFilePaths: Iterable<string>
+  inputFilePaths: Iterable<string>,
+  snapshotStartTimeMs?: number
 ): IInputFilesState {
+  const originalFilePaths: string[] = [];
   const filePaths: string[] = [];
   const folderEntries: Map<string, ReadonlySet<string>> = new Map();
   for (const inputFilePath of inputFilePaths) {
     const absolutePath: string = path.resolve(rootDirectory, inputFilePath);
+    originalFilePaths.push(inputFilePath);
     filePaths.push(absolutePath);
     if (!path.isAbsolute(inputFilePath)) {
       const folderPath: string = path.dirname(absolutePath);
@@ -86,7 +120,33 @@ export function captureInputFilesState(
       }
     }
   }
-  return { rootDirectory, filePaths, statSignature: getInputFilesStatSignature(filePaths), folderEntries };
+  const windowStartNs: bigint | undefined =
+    snapshotStartTimeMs === undefined
+      ? undefined
+      : millisecondsToNanoseconds(snapshotStartTimeMs - FILE_TIME_TOLERANCE_MS);
+  // For each file with a time at or after the start of the window, the earliest such time
+  const earliestTimeInWindowNsByIndex: Map<number, bigint> = new Map();
+  const statSignature: string = hashInputFilesStats(filePaths, (index: number, stats: fs.BigIntStats) => {
+    if (windowStartNs === undefined) {
+      return;
+    }
+    for (const timeNs of [stats.mtimeNs, stats.ctimeNs]) {
+      const earliestTimeNs: bigint | undefined = earliestTimeInWindowNsByIndex.get(index);
+      if (timeNs >= windowStartNs && (earliestTimeNs === undefined || timeNs < earliestTimeNs)) {
+        earliestTimeInWindowNsByIndex.set(index, timeNs);
+      }
+    }
+  });
+  // The window ends after the files were stat'ed, so that a save during the loop is inside it. A later file time
+  // (e.g. an mtime set in the future) is not a save during the window.
+  const windowEndNs: bigint = millisecondsToNanoseconds(Date.now() + FILE_TIME_TOLERANCE_MS);
+  const filesChangedDuringSnapshot: string[] = [];
+  for (const [index, timeNs] of earliestTimeInWindowNsByIndex) {
+    if (timeNs <= windowEndNs) {
+      filesChangedDuringSnapshot.push(originalFilePaths[index]);
+    }
+  }
+  return { rootDirectory, filePaths, statSignature, folderEntries, filesChangedDuringSnapshot };
 }
 
 /**

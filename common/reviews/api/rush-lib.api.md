@@ -629,6 +629,7 @@ export interface IInputsSnapshot {
     readonly hashes: ReadonlyMap<string, string>;
     readonly hasUncommittedChanges: boolean;
     readonly rootDirectory: string;
+    readonly workingTreeReadStartTimeMs?: number;
 }
 
 // @public

@@ -424,6 +424,8 @@ export class ProjectChangeAnalyzer {
       }
 
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
+        // Recorded before Git reads the working tree: a file saved after this may be newer than its hash.
+        const workingTreeReadStartTimeMs: number = Date.now();
         try {
           const [{ files: hashes, symlinks, hasUncommittedChanges }, additionalFiles] = await Promise.all([
             getDetailedRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
@@ -459,7 +461,8 @@ export class ProjectChangeAnalyzer {
             hasUncommittedChanges,
             lookupByPath,
             projectMap,
-            rootDir: rootDirectory
+            rootDir: rootDirectory,
+            workingTreeReadStartTimeMs
           });
         } catch (e) {
           // If getRepoState fails, don't fail the whole build. Treat this case as if we don't know anything about

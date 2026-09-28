@@ -26,6 +26,8 @@ describe(`${PhasedCommandEngine.name} parameter identity`, () => {
     return await PhasedCommandEngine.parseAsync({
       argv,
       cwd: folder,
+      // Otherwise environment-backed defaults such as RUSH_PARALLELISM come from the test host.
+      environment: {},
       rushConfiguration,
       terminalProvider: new NoOpTerminalProvider()
     });

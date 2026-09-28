@@ -25,6 +25,7 @@ const mockHashes: Map<string, string> = new Map([
 // Mock function for customizing repo changes in each test
 const mockGetRepoChanges: jest.MockedFunction<typeof import('@rushstack/package-deps-hash').getRepoChanges> =
   jest.fn();
+const mockOnGetDetailedRepoState: jest.Mock<void, []> = jest.fn();
 
 jest.mock(`@rushstack/package-deps-hash`, () => {
   return {
@@ -32,6 +33,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return dir;
     },
     getDetailedRepoStateAsync(): IDetailedRepoState {
+      mockOnGetDetailedRepoState();
       return {
         hasSubmodules: false,
         hasUncommittedChanges: false,
@@ -152,8 +154,17 @@ describe(ProjectChangeAnalyzer.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
       const mockSnapshotValue: {} = {};
       mockSnapshot.mockImplementation(() => mockSnapshotValue);
+      let repoStateReadTimeMs: number | undefined;
+      mockOnGetDetailedRepoState.mockImplementationOnce(() => {
+        repoStateReadTimeMs = Date.now();
+        // Make sure that a time recorded after the working tree was read is later than this one
+        while (Date.now() <= repoStateReadTimeMs + 1) {
+          // Busy wait
+        }
+      });
       const snapshotProvider: GetInputsSnapshotAsyncFn | undefined =
         await projectChangeAnalyzer._tryGetSnapshotProviderAsync(new Map(), terminal);
+      const beforeSnapshotTimeMs: number = Date.now();
       const snapshot: IInputsSnapshot | undefined = await snapshotProvider?.();
 
       expect(snapshot).toBe(mockSnapshotValue);
@@ -167,6 +178,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       expect(mockInput.hashes).toEqual(mockHashes);
       expect(mockInput.rootDir).toEqual(rootDir);
       expect(mockInput.additionalHashes).toEqual(new Map());
+      // The start time is recorded before Git reads the working tree
+      expect(mockInput.workingTreeReadStartTimeMs).toBeGreaterThanOrEqual(beforeSnapshotTimeMs);
+      expect(mockInput.workingTreeReadStartTimeMs).toBeLessThanOrEqual(repoStateReadTimeMs!);
     });
   });
 

@@ -123,6 +123,10 @@ export interface IInputsSnapshotParameters {
    * The directory that all relative paths are relative to.
    */
   rootDir: string;
+  /**
+   * {@inheritdoc IInputsSnapshot.workingTreeReadStartTimeMs}
+   */
+  workingTreeReadStartTimeMs?: number;
 }
 
 const { hashDelimiter } = RushConstants;
@@ -148,6 +152,16 @@ export interface IInputsSnapshot {
    * Whether or not the repository has uncommitted changes.
    */
   readonly hasUncommittedChanges: boolean;
+
+  /**
+   * The time, in milliseconds since the epoch, at which this snapshot began reading the state of the working tree,
+   * if known.
+   *
+   * @remarks
+   * A tracked file that was modified at or after this time may be newer than its hash in `hashes`, because Git
+   * may have read the file before it was saved.
+   */
+  readonly workingTreeReadStartTimeMs?: number;
 
   /**
    * Gets the map of file paths to Git hashes that will be used to compute the local state hash of the operation.
@@ -200,6 +214,10 @@ export class InputsSnapshot implements IInputsSnapshot {
    * {@inheritdoc IInputsSnapshot.rootDirectory}
    */
   public readonly rootDirectory: string;
+  /**
+   * {@inheritdoc IInputsSnapshot.workingTreeReadStartTimeMs}
+   */
+  public readonly workingTreeReadStartTimeMs: number | undefined;
 
   /**
    * The metadata for each project. This is a superset of the information in `projectMap` and includes caching of queries.
@@ -239,7 +257,8 @@ export class InputsSnapshot implements IInputsSnapshot {
       hasUncommittedChanges,
       lookupByPath,
       nodeVersion = process.version,
-      rootDir
+      rootDir,
+      workingTreeReadStartTimeMs
     } = params;
     const projectMetadataMap: Map<
       IRushConfigurationProjectForSnapshot,
@@ -299,6 +318,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     this.hashes = hashes;
     this.hasUncommittedChanges = hasUncommittedChanges;
     this.rootDirectory = rootDir;
+    this.workingTreeReadStartTimeMs = workingTreeReadStartTimeMs;
   }
 
   /**

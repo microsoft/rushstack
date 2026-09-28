@@ -8,6 +8,7 @@ import * as path from 'node:path';
 
 import {
   captureInputFilesState,
+  FILE_TIME_TOLERANCE_MS,
   getNewFolderEntries,
   hasUntrackedGitFiles,
   haveInputFilesChanged,
@@ -22,9 +23,14 @@ describe('InputFilesStatSignature', () => {
   let noNewInputs: jest.Mock<boolean, [ReadonlyArray<string>]>;
 
   function capture(...absolutePaths: string[]): IInputFilesState {
+    return captureAt(undefined, ...absolutePaths);
+  }
+
+  function captureAt(snapshotStartTimeMs: number | undefined, ...absolutePaths: string[]): IInputFilesState {
     return captureInputFilesState(
       tempFolder,
-      absolutePaths.map((filePath: string) => path.relative(tempFolder, filePath))
+      absolutePaths.map((filePath: string) => path.relative(tempFolder, filePath)),
+      snapshotStartTimeMs
     );
   }
 
@@ -102,6 +108,76 @@ describe('InputFilesStatSignature', () => {
       expect(state.folderEntries.size).toBe(0);
       fs.writeFileSync(fileA, 'export const a = 3; // edited during the build');
       expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
+    });
+  });
+
+  describe('filesChangedDuringSnapshot', () => {
+    const nanosecondsPerMillisecond: bigint = BigInt(1000000);
+
+    function getLatestFileTimeMs(filePath: string): number {
+      const { mtimeNs, ctimeNs } = fs.statSync(filePath, { bigint: true });
+      return Number((mtimeNs > ctimeNs ? mtimeNs : ctimeNs) / nanosecondsPerMillisecond);
+    }
+
+    function getStatusChangeTimeMs(filePath: string): number {
+      return Number(fs.statSync(filePath, { bigint: true }).ctimeNs / nanosecondsPerMillisecond);
+    }
+
+    it('is empty if the snapshot start time is unknown', () => {
+      expect(capture(fileA, fileB).filesChangedDuringSnapshot).toEqual([]);
+    });
+
+    it('lists a file modified at or after the snapshot start, within the tolerance', () => {
+      const fileTimeMs: number = getLatestFileTimeMs(fileA);
+      expect(captureAt(fileTimeMs + FILE_TIME_TOLERANCE_MS, fileA).filesChangedDuringSnapshot).toEqual([
+        path.relative(tempFolder, fileA)
+      ]);
+      expect(captureAt(fileTimeMs + FILE_TIME_TOLERANCE_MS + 1, fileA).filesChangedDuringSnapshot).toEqual(
+        []
+      );
+    });
+
+    it('lists only the files that changed after the snapshot start', () => {
+      const snapshotStartTimeMs: number = getLatestFileTimeMs(fileB) + FILE_TIME_TOLERANCE_MS + 1;
+      // Wait for the file system clock to pass the start of the window
+      const deadlineMs: number = Date.now() + 10000;
+      do {
+        fs.writeFileSync(fileB, `export const b = ${Date.now()}; // saved during the snapshot`);
+      } while (
+        getLatestFileTimeMs(fileB) < snapshotStartTimeMs - FILE_TIME_TOLERANCE_MS &&
+        Date.now() < deadlineMs
+      );
+
+      expect(captureAt(snapshotStartTimeMs, fileA, fileB).filesChangedDuringSnapshot).toEqual([
+        path.relative(tempFolder, fileB)
+      ]);
+    });
+
+    it('uses the status change time if the modification time was set back', () => {
+      const past: Date = new Date(Date.now() - 3600 * 1000);
+      fs.utimesSync(fileA, past, past);
+      const statusChangeTimeMs: number = getStatusChangeTimeMs(fileA);
+      expect(fs.statSync(fileA).mtimeMs).toBeLessThan(statusChangeTimeMs - FILE_TIME_TOLERANCE_MS);
+
+      expect(captureAt(statusChangeTimeMs, fileA).filesChangedDuringSnapshot).toEqual([
+        path.relative(tempFolder, fileA)
+      ]);
+    });
+
+    it('ignores file times after the end of the window', () => {
+      const future: Date = new Date(Date.now() + 3600 * 1000);
+      fs.utimesSync(fileA, future, future);
+      // Only the modification time, which is in the future, is at or after the start of the window
+      const snapshotStartTimeMs: number = getStatusChangeTimeMs(fileA) + FILE_TIME_TOLERANCE_MS + 1;
+
+      expect(captureAt(snapshotStartTimeMs, fileA).filesChangedDuringSnapshot).toEqual([]);
+    });
+
+    it('skips missing files', () => {
+      const missingFile: string = path.join(srcFolder, 'missing.ts');
+      expect(captureAt(0, missingFile, fileA).filesChangedDuringSnapshot).toEqual([
+        path.relative(tempFolder, fileA)
+      ]);
     });
   });
 

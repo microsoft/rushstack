@@ -49,6 +49,14 @@ describe(InputsSnapshot.name, () => {
     return { project, input };
   }
 
+  it('Exposes the time at which it began reading the working tree', () => {
+    const { options } = getTestConfig();
+    expect(new InputsSnapshot(options).workingTreeReadStartTimeMs).toBeUndefined();
+    expect(
+      new InputsSnapshot({ ...options, workingTreeReadStartTimeMs: 1234 }).workingTreeReadStartTimeMs
+    ).toBe(1234);
+  });
+
   describe(InputsSnapshot.prototype.getTrackedFileHashesForOperation.name, () => {
     it('Handles trivial input', () => {
       const { project, input } = getTrivialSnapshot();

@@ -5,6 +5,7 @@ import * as crypto from 'node:crypto';
 import * as path from 'node:path';
 
 import { InternalError, NewlineKind, Sort, Executable } from '@rushstack/node-core-library';
+import { hashFilesAsync } from '@rushstack/package-deps-hash';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import {
   DiscardStdoutTransform,
@@ -80,9 +81,11 @@ export interface IOperationBuildCacheContext {
   isCacheReadAttempted: boolean;
 
   // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
-  // the iteration's inputs snapshot. Used to refuse cache writes if the inputs changed while the operation
-  // was executing.
+  // the iteration's inputs snapshot. Used to refuse cache writes if the inputs changed while the snapshot was
+  // being taken or while the operation was executing.
   inputFilesState?: IInputFilesState;
+  // The hashes of the tracked input files in the iteration's inputs snapshot
+  inputFileHashes?: ReadonlyMap<string, string>;
 }
 
 export interface ICacheableOperationPluginOptions {
@@ -122,24 +125,54 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     this.#options = options;
   }
 
+  #getGitPath(): string | undefined {
+    if (!this.#gitPathResolved) {
+      this.#gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
+      this.#gitPathResolved = true;
+    }
+    return this.#gitPath;
+  }
+
   #isNewInput(
     newEntryPaths: ReadonlyArray<string>,
     rootDirectory: string,
     projectFolder: string,
     outputFolderNames: ReadonlyArray<string>
   ): boolean {
-    if (!this.#gitPathResolved) {
-      this.#gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
-      this.#gitPathResolved = true;
-    }
-    if (!this.#gitPath) {
+    const gitPath: string | undefined = this.#getGitPath();
+    if (!gitPath) {
       // Without Git we cannot tell whether the new entries are ignored, so assume they are inputs.
       return true;
     }
     const outputFolderPaths: string[] = outputFolderNames.map((folderName: string) =>
       path.resolve(projectFolder, folderName)
     );
-    return hasUntrackedGitFiles(this.#gitPath, rootDirectory, newEntryPaths, outputFolderPaths);
+    return hasUntrackedGitFiles(gitPath, rootDirectory, newEntryPaths, outputFolderPaths);
+  }
+
+  /**
+   * Returns true if the current Git hash of any of the specified files differs from its hash in the inputs
+   * snapshot. If the files cannot be hashed, conservatively returns true.
+   */
+  async #haveSnapshotHashesChangedAsync(
+    rootDirectory: string,
+    filePaths: ReadonlyArray<string>,
+    snapshotHashes: ReadonlyMap<string, string> | undefined
+  ): Promise<boolean> {
+    const gitPath: string | undefined = this.#getGitPath();
+    if (!gitPath || !snapshotHashes) {
+      return true;
+    }
+    try {
+      for (const [filePath, hash] of await hashFilesAsync(rootDirectory, filePaths, gitPath)) {
+        if (snapshotHashes.get(filePath) !== hash) {
+          return true;
+        }
+      }
+      return false;
+    } catch {
+      return true;
+    }
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -222,7 +255,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             const inputFilesState: IInputFilesState | undefined =
               cacheWriteEnabled && !cacheDisabledReason && record.enabled
-                ? captureInputFilesState(inputsSnapshot.rootDirectory, fileHashes.keys())
+                ? captureInputFilesState(
+                    inputsSnapshot.rootDirectory,
+                    fileHashes.keys(),
+                    inputsSnapshot.workingTreeReadStartTimeMs
+                  )
                 : undefined;
 
             const buildCacheContext: IOperationBuildCacheContext = {
@@ -242,7 +279,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }),
               cacheRestored: false,
               isCacheReadAttempted: false,
-              inputFilesState
+              inputFilesState,
+              inputFileHashes: inputFilesState ? fileHashes : undefined
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this.#buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -587,26 +625,41 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
               setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
             }
-            const { inputFilesState } = buildCacheContext;
-            if (
-              !cacheRestored &&
-              isCacheWriteAllowed &&
-              inputFilesState &&
-              haveInputFilesChanged(inputFilesState, (newEntryPaths: ReadonlyArray<string>) =>
-                this.#isNewInput(
-                  newEntryPaths,
+            const { inputFilesState, inputFileHashes } = buildCacheContext;
+            let inputFilesChangedMessage: string | undefined;
+            if (!cacheRestored && isCacheWriteAllowed && inputFilesState) {
+              // If Git hashed a file that was saved during the snapshot before it was saved, the outputs were
+              // built from newer content than the cache key describes.
+              const haveSnapshotHashesChanged: boolean =
+                inputFilesState.filesChangedDuringSnapshot.length > 0 &&
+                (await this.#haveSnapshotHashesChangedAsync(
                   inputFilesState.rootDirectory,
-                  project.projectFolder,
-                  buildCacheContext.outputFolderNames
+                  inputFilesState.filesChangedDuringSnapshot,
+                  inputFileHashes
+                ));
+              const { outputFolderNames } = buildCacheContext;
+              if (
+                haveInputFilesChanged(inputFilesState, (newEntryPaths: ReadonlyArray<string>) =>
+                  this.#isNewInput(
+                    newEntryPaths,
+                    inputFilesState.rootDirectory,
+                    project.projectFolder,
+                    outputFolderNames
+                  )
                 )
-              )
-            ) {
+              ) {
+                inputFilesChangedMessage =
+                  'Input files changed while this operation was executing; not writing a build cache entry.';
+              } else if (haveSnapshotHashesChanged) {
+                inputFilesChangedMessage =
+                  'Input files changed while the inputs snapshot was being taken; not writing a build cache entry.';
+              }
+            }
+            if (inputFilesChangedMessage) {
               // The cache key was derived from the iteration's inputs snapshot. Storing outputs produced from
               // edited inputs under that key would poison the cache for every consumer of the entry.
               // Consumers' cache keys also embed this operation's pre-edit state, so block their writes too.
-              buildCacheTerminal.writeLine(
-                'Input files changed while this operation was executing; not writing a build cache entry.'
-              );
+              buildCacheTerminal.writeLine(inputFilesChangedMessage);
               buildCacheContext.isCacheWriteAllowed = false;
               setCacheEntryPromise = undefined;
             }

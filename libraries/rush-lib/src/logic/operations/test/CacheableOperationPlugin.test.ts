@@ -42,7 +42,19 @@ jest.mock('../OperationMetadataManager', () => {
 jest.mock('../../buildCache/OperationBuildCache', () => ({
   OperationBuildCache: { forOperation: jest.fn() }
 }));
+jest.mock('@rushstack/package-deps-hash', () => {
+  const actual: typeof import('@rushstack/package-deps-hash') = jest.requireActual(
+    '@rushstack/package-deps-hash'
+  );
+  return { ...actual, hashFilesAsync: jest.fn(actual.hashFilesAsync) };
+});
 
+import * as crypto from 'node:crypto';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
+import { hashFilesAsync } from '@rushstack/package-deps-hash';
 import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
@@ -60,6 +72,7 @@ import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { IExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
+import { FILE_TIME_TOLERANCE_MS } from '../InputFilesStatSignature';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -99,18 +112,21 @@ interface ITestGraph {
   graph: OperationGraph;
   operations: Map<string, Operation>;
   localHashes: Map<string, string>;
+  // The tracked input file hashes of each operation in the inputs snapshot, by name
+  trackedFileHashes: Map<string, Map<string, string>>;
   executions: string[];
   cacheWrites: string[];
-  executeAsync(): Promise<IExecutionResult>;
+  executeAsync(workingTreeReadStartTimeMs?: number): Promise<IExecutionResult>;
 }
 
 /**
  * Creates a linear chain of cacheable operations: names[0] <- names[1] <- ... (each depends on the previous).
  */
-async function createTestGraphAsync(names: string[]): Promise<ITestGraph> {
+async function createTestGraphAsync(names: string[], rootDirectory: string = '/repo'): Promise<ITestGraph> {
   const executions: string[] = [];
   const cacheWrites: string[] = [];
   const localHashes: Map<string, string> = new Map();
+  const trackedFileHashes: Map<string, Map<string, string>> = new Map();
   const operations: Map<string, Operation> = new Map();
   const projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
 
@@ -118,7 +134,7 @@ async function createTestGraphAsync(names: string[]): Promise<ITestGraph> {
   for (const name of names) {
     const project: RushConfigurationProject = {
       packageName: name,
-      projectFolder: `/repo/${name}`
+      projectFolder: `${rootDirectory}/${name}`
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
       getCacheDisabledReason: () => undefined
@@ -176,26 +192,40 @@ async function createTestGraphAsync(names: string[]): Promise<ITestGraph> {
     projectConfigurations
   } as unknown as IOperationGraphContext);
 
-  const inputsSnapshot: IInputsSnapshot = {
-    hashes: new Map(),
-    rootDirectory: '/repo',
-    hasUncommittedChanges: false,
-    getTrackedFileHashesForOperation: () => new Map(),
-    getOperationOwnStateHash: (project: RushConfigurationProject) => localHashes.get(project.packageName)!
-  };
-
   return {
     graph,
     operations,
     localHashes,
+    trackedFileHashes,
     executions,
     cacheWrites,
-    executeAsync: async () => {
+    executeAsync: async (workingTreeReadStartTimeMs?: number) => {
       executions.length = 0;
       cacheWrites.length = 0;
+      const inputsSnapshot: IInputsSnapshot = {
+        hashes: new Map(),
+        rootDirectory,
+        hasUncommittedChanges: false,
+        workingTreeReadStartTimeMs,
+        getTrackedFileHashesForOperation: (project: RushConfigurationProject) =>
+          trackedFileHashes.get(project.packageName) ?? new Map(),
+        getOperationOwnStateHash: (project: RushConfigurationProject) => localHashes.get(project.packageName)!
+      };
       return await graph.executeAsync({ inputsSnapshot });
     }
   };
+}
+
+function getGitBlobHash(content: string): string {
+  return crypto
+    .createHash('sha1')
+    .update(`blob ${Buffer.byteLength(content)}\0${content}`)
+    .digest('hex');
+}
+
+function getLatestFileTimeMs(filePath: string): number {
+  const { mtimeNs, ctimeNs } = fs.statSync(filePath, { bigint: true });
+  return Number((mtimeNs > ctimeNs ? mtimeNs : ctimeNs) / BigInt(1000000));
 }
 
 function getStatus(testGraph: ITestGraph, result: IExecutionResult, name: string): OperationStatus {
@@ -203,6 +233,10 @@ function getStatus(testGraph: ITestGraph, result: IExecutionResult, name: string
 }
 
 describe(CacheableOperationPlugin.name, () => {
+  beforeEach(() => {
+    jest.mocked(hashFilesAsync).mockClear();
+  });
+
   it('writes cache entries for all operations in a cold iteration', async () => {
     const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
 
@@ -299,5 +333,66 @@ describe(CacheableOperationPlugin.name, () => {
     expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Skipped);
     expect(testGraph.executions).toEqual(['a', 'c']);
     expect(testGraph.cacheWrites).toEqual(['a']);
+  });
+
+  describe('input files saved while the inputs snapshot was being taken', () => {
+    const inputFile: string = 'a/src/index.ts';
+    let rootDirectory: string;
+
+    beforeEach(() => {
+      rootDirectory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'rush-cacheable-')));
+      fs.mkdirSync(path.join(rootDirectory, 'a', 'src'), { recursive: true });
+      fs.writeFileSync(path.join(rootDirectory, inputFile), 'export const a = 2;');
+    });
+
+    afterEach(() => {
+      fs.rmSync(rootDirectory, { recursive: true, force: true });
+    });
+
+    it('does not write cache entries if Git hashed the file before it was saved', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], rootDirectory);
+      testGraph.trackedFileHashes.set('a', new Map([[inputFile, getGitBlobHash('export const a = 1;')]]));
+
+      await testGraph.executeAsync(Date.now());
+
+      expect(testGraph.executions).toEqual(['a', 'b']);
+      // "b" consumed outputs of "a" that do not match the state hash of "a", so it must not write either.
+      expect(testGraph.cacheWrites).toEqual([]);
+      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(hashFilesAsync).mock.calls[0].slice(0, 2)).toEqual([rootDirectory, [inputFile]]);
+
+      // The next snapshot hashes the saved content, so the outputs are rebuilt and cached.
+      testGraph.trackedFileHashes.set('a', new Map([[inputFile, getGitBlobHash('export const a = 2;')]]));
+      testGraph.localHashes.set('a', 'a-v2');
+      await testGraph.executeAsync(
+        getLatestFileTimeMs(path.join(rootDirectory, inputFile)) + FILE_TIME_TOLERANCE_MS + 1
+      );
+
+      expect(testGraph.executions).toEqual(['a', 'b']);
+      expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+    });
+
+    it('writes cache entries if Git hashed the file after it was saved', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], rootDirectory);
+      testGraph.trackedFileHashes.set('a', new Map([[inputFile, getGitBlobHash('export const a = 2;')]]));
+
+      await testGraph.executeAsync(Date.now());
+
+      expect(testGraph.executions).toEqual(['a', 'b']);
+      expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not hash files that were saved before the snapshot started', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], rootDirectory);
+      testGraph.trackedFileHashes.set('a', new Map([[inputFile, getGitBlobHash('export const a = 2;')]]));
+
+      await testGraph.executeAsync(
+        getLatestFileTimeMs(path.join(rootDirectory, inputFile)) + FILE_TIME_TOLERANCE_MS + 1
+      );
+
+      expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+    });
   });
 });
