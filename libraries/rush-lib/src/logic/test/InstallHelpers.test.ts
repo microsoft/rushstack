@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
+import { FileSystem, type IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { TestUtilities } from '@rushstack/heft-config-file';
 
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { Utilities } from '../../utilities/Utilities';
 import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 
 describe(InstallHelpers.name, () => {
@@ -67,6 +73,66 @@ describe(InstallHelpers.name, () => {
       packageManagerEnvironment[environmentVariableName] = 'test value';
 
       expect(process.env[environmentVariableName]).toBe(originalValue);
+    });
+  });
+
+  describe(InstallHelpers.ensureLocalPackageManagerAsync.name, () => {
+    const packageManagerVersion: string = '8.14.0';
+    const lockResourceName: string = `pnpm-${packageManagerVersion}`;
+    let tempFolder: string;
+    let rushConfiguration: RushConfiguration;
+    let rushGlobalFolder: RushGlobalFolder;
+    let installPackageMock: jest.SpyInstance;
+
+    beforeEach(() => {
+      tempFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-ensure-local-package-manager-'));
+      rushConfiguration = {
+        packageManager: 'pnpm',
+        packageManagerToolVersion: packageManagerVersion,
+        commonRushConfigFolder: `${tempFolder}/repo/common/config/rush`,
+        commonTempFolder: `${tempFolder}/repo/common/temp`
+      } as unknown as RushConfiguration;
+      rushGlobalFolder = { nodeSpecificPath: `${tempFolder}/rush-home` } as unknown as RushGlobalFolder;
+      installPackageMock = jest
+        .spyOn(Utilities, 'installPackageInDirectoryAsync')
+        .mockRejectedValue(new Error('Unexpected package manager install'));
+    });
+
+    afterEach(() => {
+      installPackageMock.mockRestore();
+      fs.rmSync(tempFolder, { recursive: true, force: true });
+    });
+
+    it('releases the package manager lock when the install fails, so the same process can retry', async () => {
+      installPackageMock
+        .mockRejectedValueOnce(new Error('npm error code E401'))
+        .mockResolvedValueOnce(undefined);
+
+      await expect(
+        InstallHelpers.ensureLocalPackageManagerAsync(rushConfiguration, rushGlobalFolder, 1, true)
+      ).rejects.toThrow('npm error code E401');
+
+      // A Rush daemon calls this again in the same process. If the failed call still held the lock,
+      // tryAcquire would return undefined here and the retry below would wait forever.
+      const lockAfterFailure: LockFile | undefined = LockFile.tryAcquire(
+        rushGlobalFolder.nodeSpecificPath,
+        lockResourceName
+      );
+      expect(lockAfterFailure).toBeDefined();
+      lockAfterFailure?.release();
+
+      await InstallHelpers.ensureLocalPackageManagerAsync(rushConfiguration, rushGlobalFolder, 1, true);
+
+      expect(installPackageMock).toHaveBeenCalledTimes(2);
+      await expect(
+        FileSystem.getLinkStatisticsAsync(`${rushConfiguration.commonTempFolder}/pnpm-local`)
+      ).resolves.toBeDefined();
+      const lockAfterSuccess: LockFile | undefined = LockFile.tryAcquire(
+        rushGlobalFolder.nodeSpecificPath,
+        lockResourceName
+      );
+      expect(lockAfterSuccess).toBeDefined();
+      lockAfterSuccess?.release();
     });
   });
 
