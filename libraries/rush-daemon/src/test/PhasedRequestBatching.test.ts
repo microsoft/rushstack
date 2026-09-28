@@ -476,12 +476,14 @@ describe('shared phased request batching', () => {
     const abortCallCountBeforeCancellation: number = abortSpy.mock.calls.length;
 
     cancelledClient.abortController.abort();
+    // The continuing client still needs its running operation, so the cancellation itself aborts nothing. Once that
+    // operation finishes, work that only the cancelled client needed may be aborted (PhasedRequestCancellation.test).
+    expect(abortSpy).toHaveBeenCalledTimes(abortCallCountBeforeCancellation);
     releaseOperation.resolve();
     const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
 
     expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
     expect(continuingResult).toMatchObject({ exitCode: 0, outcome: 'success' });
-    expect(abortSpy).toHaveBeenCalledTimes(abortCallCountBeforeCancellation);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
   });
 

@@ -20,6 +20,7 @@ import type {
 
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
+import { PhasedIterationDemand } from './PhasedIterationDemand';
 import { writePhasedRequestSummary } from './PhasedRequestSummary';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
@@ -244,6 +245,8 @@ class PhasedRequestBatchCoordinator {
   readonly #abortErrors: unknown[] = [];
   #abortTail: Promise<void> = Promise.resolve();
   #acceptingCurrentBatch: boolean = false;
+  /** Set while the current batch's iteration may execute; see `#restrictBatchDemand`. */
+  #batchDemand: PhasedIterationDemand | undefined;
   #currentBatch: ReadonlyArray<IBatchEntry> | undefined;
   #drainScheduled: boolean = false;
   #nextGraphLeasePromise: Promise<IRequestLease> | undefined;
@@ -434,6 +437,9 @@ class PhasedRequestBatchCoordinator {
           this.#finishDetachedEntry(entry);
         }
       }
+      const demand: PhasedIterationDemand = new PhasedIterationDemand(() => this.#onBatchAbandoned(demand));
+      this.#batchDemand = demand;
+      const unsubscribeDemand: () => void = this.#multiplexer.subscribe(demand);
       for (const entry of participants) {
         entry.participated = true;
         const activeOperationIds: ReadonlySet<string> = new Set(
@@ -472,7 +478,7 @@ class PhasedRequestBatchCoordinator {
             })
           );
           const executionPromise: Promise<boolean> = this.#graph.executeScheduledIterationAsync();
-          if (!participants.some((entry: IBatchEntry) => this.#needsIteration(entry))) {
+          if (!participants.some((entry: IBatchEntry) => this.#needsIteration(entry)) || demand.abandoned) {
             // Let executeScheduledIterationAsync promote the scheduled iteration before aborting it.
             await Promise.resolve();
             this.#requestIterationAbort();
@@ -494,6 +500,8 @@ class PhasedRequestBatchCoordinator {
           }
         }
       } finally {
+        this.#batchDemand = undefined;
+        unsubscribeDemand();
         for (const entry of participants) {
           entry.unsubscribe?.();
           entry.unsubscribe = undefined;
@@ -551,6 +559,9 @@ class PhasedRequestBatchCoordinator {
     ) {
       // Other live participants still need the shared work: detach this client and answer it now.
       this.#finishDetachedEntry(entry);
+      if (entry.participated) {
+        this.#restrictBatchDemand();
+      }
       return;
     }
 
@@ -578,6 +589,30 @@ class PhasedRequestBatchCoordinator {
         entry.reject(error);
       }
     });
+  }
+
+  /**
+   * Narrows the running iteration to the remaining participants' selections after a participant left it.
+   *
+   * @remarks
+   * The departed client's selection stays merged into the iteration, so without this the last remaining
+   * participant would wait for, and queued requests would queue behind, work that only the departed client needed.
+   * Once every operation a remaining participant needs has finished, the iteration is aborted instead: operations
+   * that have not started are never started, and running ones are terminated, as when every client cancels.
+   */
+  #restrictBatchDemand(): void {
+    this.#batchDemand?.restrictTo(
+      (this.#currentBatch ?? []).flatMap((candidate: IBatchEntry) =>
+        this.#needsIteration(candidate) ? candidate.selection.activeOperations : []
+      )
+    );
+  }
+
+  #onBatchAbandoned(demand: PhasedIterationDemand): void {
+    // Before the iteration starts executing, `#executeBatchAsync` aborts it once it has been promoted.
+    if (this.#batchDemand === demand && this.#graph.status === OperationStatus.Executing) {
+      this.#requestIterationAbort();
+    }
   }
 
   #isEntryLive(entry: IBatchEntry): boolean {
@@ -614,7 +649,8 @@ class PhasedRequestBatchCoordinator {
    * The sink invokes this after the operations' final events and log chunks were enqueued, and `#finishEntryAsync`
    * drains them before writing the result. The iteration, graph lease and execution lease stay owned by the batch.
    * The last participant that needs the iteration keeps the ordinary contract: its result follows iteration end
-   * and execution lease release, so single-client requests and warm-state retention are unchanged.
+   * and execution lease release, so single-client requests and warm-state retention are unchanged. When other
+   * participants left the batch, `#restrictBatchDemand` makes that end prompt by aborting work only they needed.
    */
   #finishSettledEntry(entry: IBatchEntry): void {
     if (

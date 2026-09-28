@@ -29,7 +29,7 @@ const EVENT_SOURCE_PACKAGE: string = '@microsoft/rush-lib';
 const EVENT_SOURCE_COMPONENT: string = 'OperationGraph';
 const TEXT_ENCODER: InstanceType<typeof TextEncoder> = new TextEncoder();
 // Mirrors rush-lib's TERMINAL_STATUSES, which is not part of its public API.
-const TERMINAL_OPERATION_STATUSES: ReadonlySet<OperationStatus> = new Set([
+export const TERMINAL_OPERATION_STATUSES: ReadonlySet<OperationStatus> = new Set([
   OperationStatus.Success,
   OperationStatus.SuccessWithWarning,
   OperationStatus.Skipped,

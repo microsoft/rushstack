@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Cancellation: when a client leaves a shared iteration, the daemon aborts the iteration as soon as every operation a remaining client needs has finished, so work that only the departed client needed is never started (or is terminated) instead of delaying the remaining client's result and every later request.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

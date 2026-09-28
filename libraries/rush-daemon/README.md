@@ -484,7 +484,10 @@ remaining clients. The last client that still needs the iteration receives its r
 release, as for a single client. An early result is not published when any of the client's operations was aborted;
 iteration-wide failures that occur after an early result are reported only to the remaining clients. Requests
 admitted after scheduling starts form a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
-clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
+clients; the graph iteration is aborted once every client in that batch has stopped needing it, or once every
+operation that a remaining client needs has finished while work that only departed clients needed has not. In the
+latter case unstarted operations never start and running ones are terminated, so neither the remaining client's
+result nor later requests wait for work that nobody needs.
 
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
 validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure

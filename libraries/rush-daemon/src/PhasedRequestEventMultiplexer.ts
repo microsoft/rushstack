@@ -9,7 +9,7 @@ import type {
 } from '@microsoft/rush-lib';
 import type { ITerminalChunk } from '@rushstack/terminal';
 
-interface IRequestEventSink extends _IOperationGraphEventSink {
+export interface IRequestEventSink extends _IOperationGraphEventSink {
   onIterationScheduled(records: Iterable<IOperationExecutionResult>): void;
 }
 
