@@ -6,6 +6,8 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+import { DaemonFrameType, decodeDaemonControlMessage } from '@rushstack/rush-daemon-protocol';
+import type { DaemonControlMessage, IDaemonFrame } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
@@ -14,6 +16,15 @@ import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 
 jest.setTimeout(60_000);
+
+function getQueuePositions(exchange: ITerminalExchange): number[] {
+  return exchange.frames
+    .filter((frame: IDaemonFrame) => frame.kind === DaemonFrameType.controlJson)
+    .map((frame: IDaemonFrame) => decodeDaemonControlMessage(frame.payload))
+    .flatMap((message: DaemonControlMessage) =>
+      message.kind === 'queuePosition' ? [message.payload.position] : []
+    );
+}
 
 it('queues a mismatched-environment restart until matching queued and in-flight requests drain', async () => {
   const fixture = await DaemonGraphTestFixture.createAsync((created) => {
@@ -64,6 +75,10 @@ it('queues a mismatched-environment restart until matching queued and in-flight 
       payload: { exitCode: 1, retryAfterRestart: true }
     });
     expect(order[order.length - 1]).toBe('mismatched');
+    // The client is told how many requests the restart waits for: 2 while both matching requests are open, then 1.
+    const positions: number[] = getQueuePositions(restart);
+    expect(positions).toContain(2);
+    expect(positions[positions.length - 1]).toBe(1);
 
     const restarted = await fixture.host.restartCompleted;
     expect(restarted?.pid).not.toBe(before.pid);

@@ -13,8 +13,10 @@ export interface IDaemonRequestAdmissionOptions {
   /** Fail immediately when the request cannot be admitted. */
   readonly noWait?: boolean;
   /**
-   * True when `waitTimeoutMs` is a client default rather than an explicit user choice. A default timeout bounds
-   * workspace admission only, not waiting behind running compatible shared builds.
+   * True when `waitTimeoutMs` is a client default rather than an explicit user choice. A default timeout applies
+   * to each daemon's workspace admission only: not to waiting behind running compatible shared builds, nor, when
+   * the daemon restarts for the request's environment, to waiting for the requests that it was already serving
+   * while it serves no rushx script.
    */
   readonly waitTimeoutIsDefault?: boolean;
   /** Maximum queue wait in milliseconds. Omission means no timeout. */

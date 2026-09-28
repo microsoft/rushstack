@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Do not send a terminal width of 0 when stdout is a pseudo-terminal without a size; the daemon rejected every such request.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

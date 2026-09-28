@@ -15,6 +15,7 @@ import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
 import { printDaemonLogAsync } from '../daemonLogs';
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
 
 async function waitUntilAsync(predicate: () => boolean): Promise<void> {
   const deadline: number = Date.now() + 5000;
@@ -159,7 +160,7 @@ describe('daemon launcher log following', () => {
         ],
         {
           cwd: folder,
-          env: { ...process.env, RUSH_DAEMON: '1' },
+          env: { ...getTestProcessEnvironment(), RUSH_DAEMON: '1' },
           stdio: windowsSignal ? ['ignore', 'pipe', 'pipe', 'ipc'] : ['ignore', 'pipe', 'pipe']
         }
       );
@@ -213,7 +214,11 @@ describe('daemon launcher log following', () => {
     const child = spawn(
       process.execPath,
       [path.resolve(__dirname, '../../bin/rush-client'), 'daemon', 'logs', '--follow'],
-      { cwd: folder, env: { ...process.env, RUSH_DAEMON: '1' }, stdio: ['ignore', 'pipe', 'pipe'] }
+      {
+        cwd: folder,
+        env: { ...getTestProcessEnvironment(), RUSH_DAEMON: '1' },
+        stdio: ['ignore', 'pipe', 'pipe']
+      }
     );
     const closed = once(child, 'close');
     const readable = once(child.stdout, 'readable');
@@ -268,7 +273,7 @@ describe('daemon launcher log following', () => {
         ],
         {
           cwd: folder,
-          env: { ...process.env, RUSH_DAEMON: '1' },
+          env: { ...getTestProcessEnvironment(), RUSH_DAEMON: '1' },
           stdio: windowsSignal ? ['ignore', outputFd, 'pipe', 'ipc'] : ['ignore', outputFd, 'pipe']
         }
       );

@@ -460,6 +460,33 @@ describe('native production daemon engine', () => {
     expect(events.at(-1)).toBe('disposed:2');
   });
 
+  it('rejects an unknown project with only the error line and keeps the graph it loaded for later requests', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      const rejection: { kind: string; payload: { code: string; message: string } } = {
+        kind: 'requestRejected',
+        payload: {
+          code: 'invalidRequest',
+          message: 'The project name "nope" passed to "--to" does not exist in rush.json.'
+        }
+      };
+      expect((await runAsync(fixture, 'cold', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      const session: WorkspaceSession = fixture.session;
+      const graph: IOperationGraph | undefined = session.operationGraph;
+      expect(graph).toBeDefined();
+      expect((await runAsync(fixture, 'again', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      expect((await runAsync(fixture, 'valid', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(fixture.session).toBe(session);
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('keeps tier0 session and graph identity for unchanged content, including metadata touches', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {

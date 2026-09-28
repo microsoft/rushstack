@@ -36,6 +36,7 @@ import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultDiagnostic } from './resultDiagnostics';
+import { getTerminalColumns } from './terminalColumns';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
   getBundledRushVersion,
@@ -112,7 +113,7 @@ export async function launchClientAsync(
     terminal: {
       isTTY: !!process.stdout.isTTY,
       supportsColor: terminal.supportsColor,
-      columns: process.stdout.columns,
+      columns: getTerminalColumns(process.stdout),
       acceptsStdin: true
     },
     admission:
@@ -147,7 +148,7 @@ export async function launchClientAsync(
       ...connection,
       onAwaitStartup: (owner: string, waitMs: number): void => {
         if (agentRenderer) {
-          agentRenderer.setPhase('rushd is still starting; waiting for it');
+          agentRenderer.onAwaitStartup(waitMs);
           return;
         }
         const seconds: number = Math.round(waitMs / 1000);
@@ -182,7 +183,7 @@ export async function launchClientAsync(
     verbosity,
     terminal: {
       get columns() {
-        return process.stdout.columns ?? 80;
+        return getTerminalColumns(process.stdout) ?? 80;
       },
       get isTTY() {
         return !!process.stdout.isTTY;
@@ -205,7 +206,7 @@ export async function launchClientAsync(
       );
     }
     await renderer.initializeAsync();
-    agentRenderer?.setPhase('request submitted; preparing the workspace graph');
+    agentRenderer?.onRequestSent();
     outcome = await executeWithDaemonRestartAsync(client, connection, {
       request,
       abortSignal: abort.signal,
@@ -254,17 +255,24 @@ export async function launchClientAsync(
   }
   if (outcome === undefined || isCancelledOutcome(outcome, abort.signal.aborted)) {
     const exitCode: number = getSignalExitCode(cancellationSignal ?? 'SIGINT');
-    agentRenderer?.finish({ exitCode, errorMessage: 'cancelled' });
+    agentRenderer?.finish(
+      outcome?.kind === 'result'
+        ? { ...outcome.result, exitCode, cancelled: true }
+        : { exitCode, cancelled: true }
+    );
     process.exitCode = exitCode;
     // After SIGHUP the terminal may be gone; the exit code is what matters.
     await writeStreamAsync(process.stderr, Buffer.from(formatCancellationMessage(route.commandName))).catch(
       () => undefined
     );
   } else if (outcome.kind === 'result') {
-    agentRenderer?.finish(outcome.result);
+    // In agent mode the summary line may already carry the complete error message; do not repeat it.
+    const reportedByAgent: boolean = agentRenderer?.finish(outcome.result) ?? false;
     process.exitCode = outcome.result.exitCode;
     const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
-    if (diagnostic) {
+    if (reportedByAgent) {
+      // The summary line already explains the failure.
+    } else if (diagnostic) {
       await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
     } else if (outcome.result.admissionErrorCode) {
       await writeStreamAsync(
@@ -273,8 +281,9 @@ export async function launchClientAsync(
       );
     }
   } else if (outcome.kind === 'rejected') {
-    agentRenderer?.finish({ exitCode: 1, errorMessage: `daemon rejected the request (${outcome.rejection.code})` });
-    throw new Error(`Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`);
+    const message: string = `Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`;
+    agentRenderer?.finish({ exitCode: 1, errorMessage: message });
+    throw new Error(message);
   } else {
     agentRenderer?.dispose();
     process.stderr.write(`rush-client: ${outcome.message ?? outcome.reason}; using in-process Rush.\n`);

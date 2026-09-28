@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IOperationGraph, _IOperationGraphEventSink } from '@microsoft/rush-lib';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { TerminalProviderSeverity, type ITerminalProvider } from '@rushstack/terminal';
 
 import { getEngineActivityOptions } from './EngineActivityOptions';
@@ -22,13 +23,23 @@ export class EngineTerminalProvider implements ITerminalProvider {
 
   /**
    * Drains buffered diagnostics into the failure description, so that they belong to the failing request
-   * and are never replayed into a later request.
+   * and are never replayed into a later request. Like the request output, the description omits verbose and
+   * debug messages unless the graph runs in debug mode: loading a large workspace writes thousands of them.
    */
   public describeError(error: unknown): string {
-    return [
-      ...this.#messages.splice(0).map(({ text }) => text),
-      error instanceof Error ? error.message : String(error)
-    ].join('\n');
+    const lines: string[] = [];
+    let hasErrorLine: boolean = false;
+    for (const { text, severity } of this.#messages.splice(0)) {
+      const line: string = text.replace(/\r?\n$/, '');
+      if (this.#isHidden(severity) || !line.trim()) continue;
+      hasErrorLine ||= severity === TerminalProviderSeverity.error;
+      lines.push(line);
+    }
+    // An AlreadyReportedError only says "An error occurred."; the error lines written before it are the report.
+    if (!(hasErrorLine && error instanceof Error && error instanceof AlreadyReportedError)) {
+      lines.push(error instanceof Error ? error.message : String(error));
+    }
+    return lines.join('\n');
   }
 
   public get hasBufferedMessages(): boolean {
@@ -89,11 +100,15 @@ export class EngineTerminalProvider implements ITerminalProvider {
     );
   }
 
-  #emit(text: string, severity: TerminalProviderSeverity): void {
-    if (
+  #isHidden(severity: TerminalProviderSeverity): boolean {
+    return (
       !this.#graph?.debugMode &&
       (severity === TerminalProviderSeverity.verbose || severity === TerminalProviderSeverity.debug)
-    ) {
+    );
+  }
+
+  #emit(text: string, severity: TerminalProviderSeverity): void {
+    if (this.#isHidden(severity)) {
       return;
     }
     this.#graph?.eventSink?.onActivity?.(text, getEngineActivityOptions(severity));

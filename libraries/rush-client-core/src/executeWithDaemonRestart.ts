@@ -3,7 +3,10 @@
 
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import { DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR } from '@rushstack/rush-daemon-protocol';
+import {
+  DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
+  type IDaemonRequestAdmissionOptions
+} from '@rushstack/rush-daemon-protocol';
 import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from './connectOrStartDaemon';
@@ -29,8 +32,9 @@ const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
 /**
  * Executes on a ready client, retrying only for a typed pre-execution restart.
  * Preserves the original request, callbacks and unread input; never retries connection loss.
- * Restarts are retried with jittered backoff inside the request's admission deadline; once the
- * retries or the deadline are exhausted, a `fallback` outcome lets the caller run in-process instead.
+ * Restarts are retried with jittered backoff inside the request's explicit admission deadline, if any (a
+ * client-default timeout applies to each daemon separately); once the retries or the deadline are exhausted,
+ * a `fallback` outcome lets the caller run in-process instead.
  * The connection options must select the request's expected daemon and startup environment.
  * A connection lost before the result is reported as a `disconnected` error that says whether the daemon
  * process exited, what its launcher log recorded and how to recover, unless the request was aborted first.
@@ -46,7 +50,13 @@ export async function executeWithDaemonRestartAsync(
     execution.abortSignal && connection.abortSignal
       ? AbortSignal.any([execution.abortSignal, connection.abortSignal])
       : (execution.abortSignal ?? connection.abortSignal);
-  const waitTimeoutMs: number | undefined = execution.request.admission?.waitTimeoutMs;
+  const admission: IDaemonRequestAdmissionOptions | undefined = execution.request.admission;
+  // A client-default timeout applies to each daemon's own admission, not to following its restarts: a daemon
+  // restarts only after the requests it serves finish, which is progress, so each successor gets the original
+  // request. An explicit timeout is one deadline across restarts.
+  const waitTimeoutMs: number | undefined = admission?.waitTimeoutIsDefault
+    ? undefined
+    : admission?.waitTimeoutMs;
   let owner: IDaemonLockfile | undefined = await attestOwnerAsync(client, connection);
   let outcome: DaemonClientOutcome = await executeOnDaemonAsync(client, connection, {
     ...execution,

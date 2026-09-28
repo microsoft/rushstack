@@ -841,6 +841,44 @@ describe('detached daemon startup', () => {
     expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
   });
 
+  it.each([
+    ['a client-default timeout, which each successor applies afresh', true],
+    ['not an explicit timeout', false]
+  ])('follows a restart that takes longer than %s', async (name, isDefault) => {
+    // The first daemon answers only after the timeout, like one that restarts after a long build.
+    fs.writeFileSync(path.join(folder, 'drain-ms'), '800');
+    const connection: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'fixture', 'restart-once']
+      }
+    };
+    const client = await connectOrStartDaemonAsync(connection);
+    const request = captureDaemonRequest({
+      argv: ['build'],
+      commandName: 'build',
+      commandOrigin: 'built-in',
+      cwd: folder,
+      environment: {},
+      terminal: { isTTY: false, supportsColor: false },
+      admission: isDefault ? { waitTimeoutMs: 300, waitTimeoutIsDefault: true } : { waitTimeoutMs: 300 }
+    });
+    const outcome = await executeWithDaemonRestartAsync(client, connection, { request });
+    const starts: string[] = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n');
+    const waits: string[] = fs.readFileSync(path.join(folder, 'waits'), 'utf8').trim().split('\n');
+    if (isDefault) {
+      expect(outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(starts).toHaveLength(2);
+      expect(waits).toEqual(['300', '300']);
+      expect(fs.readFileSync(path.join(folder, 'default-waits'), 'utf8').trim().split('\n')).toHaveLength(2);
+    } else {
+      expect(outcome).toMatchObject({ kind: 'fallback', reason: 'restartRetriesExhausted' });
+      expect(starts).toHaveLength(1);
+      expect(waits).toEqual(['300']);
+    }
+  });
+
   it('refuses restart retry if ownership was not attested before submitting', async () => {
     const connection: IConnectOrStartDaemonOptions = {
       ...options,

@@ -9,6 +9,36 @@ import * as path from 'node:path';
 import { createNativeBuildTestFixture } from './NativeBuildTestFixture';
 
 describe('native build fixture lifetime', () => {
+  it('gives spawned clients the default output when the tests run in an agent shell', async () => {
+    const saved: Record<string, string | undefined> = {
+      COPILOT_CLI: process.env.COPILOT_CLI,
+      RUSHD_OUTPUT: process.env.RUSHD_OUTPUT
+    };
+    process.env.COPILOT_CLI = '1';
+    process.env.RUSHD_OUTPUT = 'agent';
+    const fixture = createNativeBuildTestFixture();
+    try {
+      expect(fixture.environment.COPILOT_CLI).toBeUndefined();
+      expect(fixture.environment.RUSHD_OUTPUT).toBeUndefined();
+      await fixture.runAsync(async ({ invokeAsync }) => {
+        const result = await invokeAsync(['build', '--to', 'a', '--verbose']);
+        expect(result.code).toBe(0);
+        expect(result.stderr).not.toMatch(/using in-process/i);
+        expect(result.stdout).toContain('built-a-one');
+        expect(result.stdout).not.toContain('connecting to rushd');
+      });
+    } finally {
+      for (const [name, value] of Object.entries(saved)) {
+        if (value === undefined) {
+          delete process.env[name];
+        } else {
+          process.env[name] = value;
+        }
+      }
+      await fixture.closeAsync();
+    }
+  }, 60000);
+
   it('joins the whole old callback without rebinding it to a later fixture', async () => {
     const old = createNativeBuildTestFixture();
     const next = createNativeBuildTestFixture();

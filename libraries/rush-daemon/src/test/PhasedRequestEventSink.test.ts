@@ -94,3 +94,43 @@ it('does not report settlement when an active operation was aborted', () => {
 
   expect(onSettled).not.toHaveBeenCalled();
 });
+it('points at the full log of failed operations and operations with warnings, and only those', async () => {
+  const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+  const sink: PhasedRequestEventSink = createSink(client);
+  const logFilePaths = { text: '/repo/project-a/rush-logs/project-a._phase_test.log' };
+  for (const status of [
+    OperationStatus.Executing,
+    OperationStatus.Failure,
+    OperationStatus.SuccessWithWarning,
+    OperationStatus.Success
+  ]) {
+    const record: IOperationExecutionResult = {
+      ...createRecord(ACTIVE_OPERATION, status),
+      logFilePaths
+    } as unknown as IOperationExecutionResult;
+    sink.onOperationStatusChanged(record, OperationStatus.Ready);
+  }
+
+  await sink.flushAsync();
+
+  const payloads: unknown[] = client.writes
+    .map(({ event }) => event)
+    .filter((event) => event?.type === 'operationStatusChanged')
+    .map((event) => event?.payload);
+  expect(payloads).toEqual([
+    { operationId: ACTIVE_OPERATION, previousStatus: 'READY', status: 'EXECUTING' },
+    {
+      operationId: ACTIVE_OPERATION,
+      previousStatus: 'READY',
+      status: 'FAILURE',
+      logFilePath: logFilePaths.text
+    },
+    {
+      operationId: ACTIVE_OPERATION,
+      previousStatus: 'READY',
+      status: 'SUCCESS WITH WARNINGS',
+      logFilePath: logFilePaths.text
+    },
+    { operationId: ACTIVE_OPERATION, previousStatus: 'READY', status: 'SUCCESS' }
+  ]);
+});

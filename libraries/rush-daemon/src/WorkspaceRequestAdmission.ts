@@ -390,17 +390,37 @@ export class RequestAdmissionController {
     }
   }
 
-  /** Waits, within the same admission budget, until a restart would not preempt another request. */
+  /**
+   * Waits until a restart would not preempt another request. The client is told how many requests it waits for,
+   * as a queue position, since a restart waits as long as their builds.
+   *
+   * @remarks
+   * Like the per-graph execution gate, waiting for the requests that this process was already serving when the wait
+   * began is progress rather than contention. A client-default timeout therefore does not apply while one of them is
+   * still being served and no rushx script is, and that time does not count against it. The default still limits
+   * the wait while a rushx script is served, since a script may not exit until it is stopped, and waiting for
+   * requests that arrived later, which could otherwise keep the request waiting for as long as they keep arriving.
+   * An explicit `noWait` or `waitTimeoutMs` applies to the whole wait, using the same absolute deadline as workspace
+   * admission.
+   */
   public async waitForRestartDrainAsync(
     arbiter: WorkspaceRestartArbiter,
     ticket: IWorkspaceRestartTicket
   ): Promise<void> {
-    // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
-    await arbiter.waitForDrainAsync(ticket, {
-      abortSignal: this.#abortController.signal,
-      noWait: this.#admission?.noWait,
-      waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
-    });
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    try {
+      // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
+      const waivedMs: number = await arbiter.waitForDrainAsync(ticket, {
+        abortSignal: this.#abortController.signal,
+        noWait: this.#admission?.noWait,
+        waitTimeoutMs: this.#getRemainingWaitTimeoutMs(),
+        waivesTimeoutForServedWork: this.#admission?.waitTimeoutIsDefault === true,
+        onServingCountChanged: writer ? (servingCount: number) => writer.enqueue(servingCount) : undefined
+      });
+      if (this.#deadlineMs !== undefined) this.#deadlineMs += waivedMs;
+    } finally {
+      await writer?.flushAsync();
+    }
   }
 
   public dispose(): void {

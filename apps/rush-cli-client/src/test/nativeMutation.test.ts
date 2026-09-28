@@ -11,6 +11,8 @@ import { Rush } from '@microsoft/rush-lib';
 import { SuccessfulMutationFixture } from '@rushstack/rush-daemon/lib/test/SuccessfulMutationFixture';
 import { computeDaemonWorkspaceKey, resolveDaemonPaths } from '@rushstack/rush-daemon-transport';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 interface IClientResult {
   readonly exitCode: number | undefined;
   readonly stdout: string;
@@ -23,7 +25,7 @@ async function invokeAsync(
 ): Promise<IClientResult> {
   const child = spawn(process.execPath, [path.resolve(__dirname, '../../bin/rush-client'), ...argv], {
     cwd: fixture.repoRoot,
-    env: { ...fixture.environment, RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy' },
+    env: { ...getTestProcessEnvironment(fixture.environment), RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy' },
     stdio: ['ignore', 'pipe', 'pipe']
   });
   let stdout: string = '';

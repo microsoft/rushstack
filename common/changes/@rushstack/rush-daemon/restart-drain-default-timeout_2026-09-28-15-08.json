@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Do not apply the client-default queue timeout while a request that waits for rushd to restart for its environment waits for requests that were already running while no rushx script is running, and do not count that wait against it; the default still limits the wait while a rushx script runs and waiting for later requests, and an explicit --wait-timeout or --no-wait applies to the whole wait. A restart wait that times out names the time that did not count, and suggests stopping a rushx script that it waits for.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

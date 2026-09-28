@@ -216,8 +216,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       client,
       requestId: envelope.requestId
     });
-    // Long-lived observers are cancelled by a transition, so they never delay a restart.
-    const ticket: IWorkspaceRestartTicket | undefined = observer ? undefined : this.#restartArbiter.enter();
+    // Long-lived observers are cancelled by a transition, so they never delay a restart. A rushx script does delay
+    // one until it exits, so a client-default timeout still limits waiting for it.
+    const ticket: IWorkspaceRestartTicket | undefined = observer
+      ? undefined
+      : this.#restartArbiter.enter({ runsScript: isRushxInvocation(envelope) });
     let generation: IPreparedGeneration | undefined;
     try {
       for (let attempt: number = 0; ; attempt++) {
@@ -548,6 +551,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         workspaceLease.release();
         throw new PhasedCommandEngineBusyError();
       }
+      let selectionRejection: DaemonRequestDispatchError | undefined;
       try {
         const before: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
         let expectedFingerprint: IWorkspaceInputFingerprint = before;
@@ -590,11 +594,18 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         const replacementSession: IWorkspaceSession = await this.#options.provider.reloadAsync();
         validationContext.session = replacementSession;
         session = replacementSession;
-        await resolver.resolveRequestAsync({
-          envelope,
-          workspaceSession: session,
-          abortSignal: client.abortSignal
-        });
+        try {
+          await resolver.resolveRequestAsync({
+            envelope,
+            workspaceSession: session,
+            abortSignal: client.abortSignal
+          });
+        } catch (error) {
+          // An invalid selection (such as an unknown project) fails after the new graph was bound. Keep that
+          // generation, so that the next request does not load the whole workspace again.
+          if (!isSelectionRejection(error, session)) throw error;
+          selectionRejection = error;
+        }
         const after: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
         if (classifyWorkspaceInputChange(before, after) !== WorkspaceInputChangeTier.Reuse) {
           this.#forceReload = true;
@@ -621,6 +632,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         nativeLock.release();
         workspaceLease.release();
       }
+      if (selectionRejection) throw selectionRejection;
       this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
       return {
         session,
@@ -881,6 +893,18 @@ function getResolverLifecycle(resolver: IDaemonRequestResolver): IWorkspaceResol
     throw new Error('A generation replacement lost its workspace resolver lifecycle capability.');
   }
   return resolver.workspaceLifecycle;
+}
+
+/** A request rejected as invalid after the resolver bound a graph to the session: its selection failed. */
+function isSelectionRejection(
+  error: unknown,
+  session: IWorkspaceSession
+): error is DaemonRequestDispatchError {
+  return (
+    error instanceof DaemonRequestDispatchError &&
+    error.code === 'invalidRequest' &&
+    session.operationGraph !== undefined
+  );
 }
 
 function isGraphWatch(envelope: IDaemonRequestEnvelope): boolean {

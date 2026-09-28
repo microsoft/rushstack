@@ -176,6 +176,17 @@ Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership
 resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
 `restartCompleted` reports completion or failure.
 
+A request whose environment needs another process does not restart the daemon while it serves other requests. It
+first waits for the requests that this process is serving to finish (the restart drain), and its queue position is the
+number of those requests. Like the graph-execution gate, waiting for the requests that were already being served when
+the drain began is progress rather than contention: while one of them is still being served and no rushx script is, a
+client-default `waitTimeoutMs` (`waitTimeoutIsDefault`) does not limit the drain and is not spent, and the client
+sends the request to the successor with its default again. The default still limits the drain while a rushx script is
+served, since a script may not exit until it is stopped, and while it waits for requests that arrived during the
+drain, which could otherwise keep it waiting for as long as they keep arriving. An explicit `noWait` or
+`waitTimeoutMs` limits the whole drain, and only its remaining time carries over to the successor. When a drain times
+out, its message names the time that did not count.
+
 Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
 Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted
 queued requests drain those typed results before disconnect rather than being reduced to ambiguous connection
@@ -475,9 +486,10 @@ build, still time out. Routing and executing an admitted request do not spend th
 such as the graph-execution gate apply the remaining budget they receive, and a request that re-enters workspace
 admission to reload the graph after its inputs changed starts again from the budget it had when it was admitted; time
 it spent at those boundaries is not charged again. The default and an explicit value differ only at the
-graph-execution gate. When the client marks `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), a `SHARED-BUILD`
-request that arrives after the current batch has closed waits there without a deadline, because it is queued only
-behind running compatible shared builds, and then runs in the next batch. An explicit value still limits that wait.
+graph-execution gate and at a restart drain (see "Process restart and isolated install/update"). When the client marks
+`waitTimeoutMs` as its default (`waitTimeoutIsDefault`), a `SHARED-BUILD` request that arrives after the current batch
+has closed waits at the graph-execution gate without a deadline, because it is queued only behind running compatible
+shared builds, and then runs in the next batch. An explicit value still limits that wait.
 Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
 A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
 backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output

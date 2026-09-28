@@ -52,7 +52,7 @@ already running in this repository." Instead, the client keeps trying for one mo
 (15 seconds, so about 30 seconds in all) and uses the daemon once it is ready. It says so when it starts
 waiting (`rush-client: The daemon is not ready yet. <live process>, so this command waits up to 15 s more
 for it instead of running Rush in-process.`; agent output shows "rushd is still starting; waiting for it"
-as the progress phase). If the daemon is still not ready, the command exits with code 1. The message
+as the progress phase, and on a pipe writes it as a progress line). If the daemon is still not ready, the command exits with code 1. The message
 gives the startup error with its `--no-daemon` hint, then the process that is still live, "so Rush was
 not run in-process", and a pointer to `rush-client daemon status`.
 
@@ -72,13 +72,19 @@ while the first build after startup loads the graph runs once the load finishes.
 That wait fails after 10 times the timeout (5 minutes with the default), so a load
 that never finishes does not hold other requests forever. The request's own routing
 and execution do not count either. A configured or per-invocation timeout also
-limits waiting for a running build that the request could not join; the built-in
-default does not. With the default, a build that arrives while a compatible build is
-already running waits for it to finish and then runs, instead of failing after 30
-seconds. `--no-wait` fails wherever the request would wait. On a timeout, the client
-exits with code 1 and suggests `--wait-timeout`. It does not suggest exporting
-`RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, because Rush versions that do not recognize a
-`RUSH_` environment variable fail every command while it is set.
+limits waiting for a running build that the request could not join, and waiting for
+the requests that the daemon is serving to finish before it restarts for the
+request's environment. The built-in default does not: with it, a build that arrives
+while a compatible build is already running waits for it to finish and then runs,
+instead of failing after 30 seconds, and a request that needs a restart waits for
+the requests that were running when it arrived to finish and then runs on the
+restarted daemon. The default still limits a restart wait while the daemon runs a
+`rushx` script, such as a dev server, which may not exit until it is stopped, and
+while it serves requests that arrived later. `--no-wait` fails wherever the request
+would wait. On a timeout, the client exits with code 1 and suggests
+`--wait-timeout`. It does not suggest exporting `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`,
+because Rush versions that do not recognize a `RUSH_` environment variable fail
+every command while it is set.
 
 Admission controls also apply to experimental graph requests, but not
 `start|stop|restart|status|logs`. They affect daemon admission only; native fallback
@@ -109,15 +115,34 @@ agent mode writes nothing ahead of it. Otherwise, selection precedence is:
 
 Agent mode is plain text for humans and agents, not the AI reporter's JSON record format;
 use `--reporter=ai` for machine-parsed records. It writes a first status line before
-`@microsoft/rush-lib` is loaded, then at most three live rows on a TTY (append-only lines
-throttled to one per 2 seconds on a pipe), the queue position when waiting for admission,
-and always one final summary line (`rush build: SUCCESS 12/12 operations (...) in 3.1s`, or
-`up to date (no operations needed)`). Warnings and errors that Rush or a Rush plugin writes
-outside any operation (for example a plugin that continues without the cloud build cache)
-precede the summary line, at most three lines of them. On failure, it lists failed operations and a
-bounded tail (10 lines) of their stderr, or of their stdout when they wrote no stderr.
-Operation logs are otherwise not printed; use `RUSHD_OUTPUT=legacy` for full logs. When
-a request falls back to in-process Rush, agent mode stops and native output follows.
+`@microsoft/rush-lib` is loaded, then at most three live rows on a TTY. On a pipe it writes
+at most three progress lines in total, however many operations run and however long they
+take: a wait for a daemon that is still starting (`rushd is still starting; waiting for it (up to 15s more)`),
+the start, the first wait for admission (`queued behind another request (position N)`),
+the start of execution, and the first failure, in that order until three were written. It
+always ends with one summary line, for example
+`rush build: SUCCESS 772/772 operations (12 success, 760 from cache) in 3.1s`, or
+`up to date (no operations needed)`, or, when the selection parameters matched no projects,
+`rush build: SUCCESS 0 operations in 0.5s · the selection parameters did not match any projects`.
+The counts follow the native summary: silent operations
+(such as phases a project does not define) are not counted unless they fail, and operations
+that did not need to run (`SKIPPED` or `NO OP` in native output) are counted as `up to date`. The verdict is
+`SUCCESS`, `FAILURE` or `CANCELLED` (Ctrl+C or a termination signal); a request that a daemon
+shutdown aborted is a `FAILURE` whose summary line gives the reason, with exit code 1. When the
+daemon did not admit the request in time, or at once with `--no-wait`, the reason on the summary
+line starts with `daemon admission failed (wait-timeout)` or `daemon admission failed (no-wait)`,
+as in legacy output, followed by the daemon's reason in full. Warnings and errors that Rush or a
+Rush plugin writes outside any operation (for example a plugin that continues without the cloud
+build cache) precede the summary line, and any failure report, at most three lines of them.
+
+When the request fails, a report comes before the summary line. It covers up to three failed
+operations, or, if none failed, the operations whose warnings failed the request. Each one gets a
+`failed: <operation> · full log: <path>` line (`warnings: …` for warnings) and a short excerpt
+of its output: error lines with the line that follows them first, then the last lines. Stack
+frames, `Require stack:` lists and progress noise are left out. The summary line names up to five
+failed (or warning) operations. Every operation's full output is in its project's `rush-logs/`
+folder, whether or not it was printed. When a request falls back to in-process Rush, agent mode
+stops and native output follows.
 
 Positively identified built-in `install` and `update` follow the same opt-in routing
 precedence as workspace builds and require protocol **0.10**
@@ -245,7 +270,7 @@ keys and unknown `RUSH_DAEMON*` variables fail validation.
 | `enabled` | `RUSH_DAEMON` | false | Client routing |
 | `autoStart` | `RUSH_DAEMON_AUTO_START` | true | Only after opt-in |
 | `idleTimeoutSeconds` | `RUSH_DAEMON_IDLE_TIMEOUT_SECONDS` | 900 | Host idle shutdown after request/output/cleanup drain |
-| `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Admission wait limit. Time behind another request's graph load (up to 10 times the limit) and the request's own work do not count. The default does not limit waiting behind a running compatible build; an explicit value does |
+| `queueTimeoutSeconds` | `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` | 30 | Admission wait limit. Time behind another request's graph load (up to 10 times the limit) and the request's own work do not count. The default does not limit waiting behind a running compatible build, or, for a daemon restart, behind requests that were already running (while no `rushx` script is running); an explicit value does |
 | `watch` | `RUSH_DAEMON_WATCH` | false | Persistent host observation of requested warm projects; false keeps root/config guards only. Never schedules builds |
 | `usePersistentIpcRunners` | `RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS` | false | Enables explicit per-operation `daemonIpc` Node launchers for unsharded incremental daemon builds |
 | `warmIdleTimeoutSeconds` | `RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS` | 300 | Idle runner, project-watcher and retained-result eviction |

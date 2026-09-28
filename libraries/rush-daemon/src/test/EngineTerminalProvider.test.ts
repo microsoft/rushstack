@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { TerminalProviderSeverity } from '@rushstack/terminal';
 
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
@@ -39,6 +40,39 @@ describe(EngineTerminalProvider.name, () => {
     terminal.write('stale', TerminalProviderSeverity.warning);
     await expect(terminal.reconcileWithRequestDiagnosticsAsync(async () => 'ok')).resolves.toBe('ok');
     expect(terminal.hasBufferedMessages).toBe(false);
+  });
+
+  it('describes a failure without the verbose and debug messages that loading a workspace writes', () => {
+    const terminal: EngineTerminalProvider = new EngineTerminalProvider();
+    terminal.write('Incremental strategy: cache restoration\n', TerminalProviderSeverity.verbose);
+    for (let index: number = 0; index < 1000; index++) {
+      terminal.write(
+        `Configuration file "p${index}/config/rush-project.json" not found.\n`,
+        TerminalProviderSeverity.debug
+      );
+    }
+    terminal.write('\n', TerminalProviderSeverity.log);
+    terminal.write('Project "a" has no "build" script.\n', TerminalProviderSeverity.warning);
+    expect(terminal.describeError(new Error('selection failed'))).toBe(
+      'Project "a" has no "build" script.\nselection failed'
+    );
+  });
+
+  it('describes an already reported error by the error lines written before it', () => {
+    const terminal: EngineTerminalProvider = new EngineTerminalProvider();
+    terminal.write('Incremental strategy: cache restoration\n', TerminalProviderSeverity.verbose);
+    terminal.write(
+      'The project name "@x/nope" passed to "--to" does not exist in rush.json.\n',
+      TerminalProviderSeverity.error
+    );
+    expect(terminal.describeError(new AlreadyReportedError())).toBe(
+      'The project name "@x/nope" passed to "--to" does not exist in rush.json.'
+    );
+
+    terminal.write('No error line was written.\n', TerminalProviderSeverity.warning);
+    expect(terminal.describeError(new AlreadyReportedError())).toBe(
+      'No error line was written.\nAn error occurred.'
+    );
   });
 
   it('drops diagnostics when the engine must be recreated', async () => {

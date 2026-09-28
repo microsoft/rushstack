@@ -26,45 +26,84 @@ function event(type: DaemonEventType, payload: unknown): IDaemonEventEnvelope {
 
 const ANSI_ESCAPE: RegExp = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, 'g');
 
-function createRenderer(isTTY: boolean): { renderer: AgentProgressRenderer; output: string[]; clock: { ms: number } } {
+interface ITestRenderer {
+  renderer: AgentProgressRenderer;
+  output: string[];
+  clock: { ms: number };
+  /** All output, split into lines. */
+  lines(): string[];
+}
+
+function createRenderer(isTTY: boolean, commandName: string = 'build'): ITestRenderer {
   const output: string[] = [];
   const clock: { ms: number } = { ms: 0 };
   const renderer: AgentProgressRenderer = new AgentProgressRenderer({
-    commandName: 'build',
+    commandName,
     isTTY,
     columns: 60,
     write: (text: string) => output.push(text),
     now: () => clock.ms,
     startTimeMs: 0
   });
-  return { renderer, output, clock };
+  return { renderer, output, clock, lines: () => output.join('').split('\n').slice(0, -1) };
 }
 
-function status(operationId: string, value: string): IDaemonEventEnvelope {
-  return event('operationStatusChanged', { operationId, previousStatus: 'READY', status: value });
+function registered(operationId: string, silent: boolean = false): IDaemonEventEnvelope {
+  return event('operationRegistered', { operationId, silent });
+}
+
+function status(operationId: string, value: string, logFilePath?: string): IDaemonEventEnvelope {
+  return event('operationStatusChanged', {
+    operationId,
+    previousStatus: 'READY',
+    status: value,
+    logFilePath
+  });
+}
+
+function header(
+  operationId: string,
+  completedOperations: number,
+  totalOperations: number
+): IDaemonEventEnvelope {
+  return event('extension', {
+    name: 'rushd.operation-header',
+    data: { operationId, completedOperations, totalOperations }
+  });
+}
+
+function fail(renderer: AgentProgressRenderer, operationId: string, errorLines: ReadonlyArray<string>): void {
+  renderer.onEvent(status(operationId, 'EXECUTING'));
+  renderer.onLog(Buffer.from(errorLines.map((line) => `${line}\n`).join('')), operationId, 'stderr');
+  renderer.onEvent(status(operationId, 'FAILURE', `/repo/${operationId.split(' ')[0]}/rush-logs/x.log`));
 }
 
 describe(AgentProgressRenderer.name, () => {
-  it('writes a first line immediately and a bounded summary for a successful build (pipe)', () => {
-    const { renderer, output, clock } = createRenderer(false);
+  it('writes one line when the request is sent, then milestones and a summary for a successful build (pipe)', () => {
+    const { renderer, output, clock, lines } = createRenderer(false);
     renderer.start();
-    expect(output).toEqual(['rush build · 0.0s · connecting to rushd (auto-starts if needed)\n']);
-    renderer.onEvent(event('operationRegistered', { operationId: 'a (build)', silent: false }));
-    renderer.onEvent(event('operationRegistered', { operationId: 'b (build)', silent: false }));
-    renderer.onEvent(event('operationRegistered', { operationId: 'hidden', silent: true }));
+    expect(output).toEqual([]);
+    renderer.onRequestSent();
+    expect(output).toEqual([
+      'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)\n'
+    ]);
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(registered('b (build)'));
+    renderer.onEvent(registered('hidden', true));
     renderer.onEvent(status('a (build)', 'EXECUTING'));
     renderer.onLog(Buffer.from('noise\n'), 'a (build)', 'stdout');
     clock.ms = 2500;
     renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.onEvent(status('hidden', 'SUCCESS'));
     renderer.onEvent(status('b (build)', 'SKIPPED'));
     clock.ms = 3000;
-    renderer.finish({ exitCode: 0 });
+    expect(renderer.finish({ exitCode: 0 })).toBe(false);
     renderer.dispose();
-    expect(output.join('')).not.toContain('noise');
-    expect(output[output.length - 1]).toBe(
-      'rush build: SUCCESS 2/2 operations (1 success, 1 skipped) in 3.0s\n'
-    );
-    expect(output.length).toBeLessThanOrEqual(4);
+    expect(lines()).toEqual([
+      'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+      'rush build 0/2 · 0.0s · running',
+      'rush build: SUCCESS 2/2 operations (1 success, 1 up to date) in 3.0s'
+    ]);
   });
 
   it('reports an up-to-date request instead of printing nothing', () => {
@@ -73,68 +112,278 @@ describe(AgentProgressRenderer.name, () => {
     expect(output).toEqual(['rush build: SUCCESS up to date (no operations needed) in 0.0s\n']);
   });
 
-  it('lists failed operations and a bounded stderr tail on failure', () => {
-    const { renderer, output } = createRenderer(false);
-    renderer.onEvent(status('p05 (build)', 'EXECUTING'));
-    for (let i = 0; i < 20; i++) {
-      renderer.onLog(Buffer.from(`error ${i}\n`), 'p05 (build)', 'stderr');
-    }
-    renderer.onEvent(status('p05 (build)', 'FAILURE'));
+  it('tells an empty selection apart from a request whose operations were all up to date (#634)', () => {
+    const hot: ITestRenderer = createRenderer(false);
+    // The daemon announces retained operations as silent and reports their retained results.
+    hot.renderer.onEvent(registered('a (build)', true));
+    hot.renderer.onEvent(registered('b (build)', true));
+    hot.renderer.finish({
+      exitCode: 0,
+      operationResults: [
+        { operationId: 'a (build)', status: 'SUCCESS' },
+        { operationId: 'b (build)', status: 'FROM CACHE' }
+      ]
+    });
+    expect(hot.output).toEqual(['rush build: SUCCESS up to date (no operations needed) in 0.0s\n']);
+
+    const empty: ITestRenderer = createRenderer(false);
+    empty.renderer.finish({ exitCode: 0, operationResults: [] });
+    expect(empty.output).toEqual([
+      'rush build: SUCCESS 0 operations in 0.0s · the selection parameters did not match any projects\n'
+    ]);
+  });
+
+  it('reports a failed operation with its log file and an excerpt, before the summary line', () => {
+    const { renderer, lines } = createRenderer(false);
+    fail(
+      renderer,
+      'p05 (build)',
+      Array.from({ length: 20 }, (unused, i) => `error ${i}`)
+    );
     renderer.onEvent(status('p06 (build)', 'BLOCKED'));
     renderer.finish({ exitCode: 1 });
-    const text: string = output.join('');
-    expect(text).toContain('rush build: FAILURE 2/2 operations (1 failure, 1 blocked) in 0.0s · failed: p05 (build)\n');
-    expect(text).toContain('  p05 (build): error 10\n');
-    expect(text).toContain('  p05 (build): error 19\n');
-    expect(text).not.toContain('error 9\n');
+    expect(lines()).toEqual([
+      'rush build 0/1 · 0.0s · running',
+      'rush build 1/1 · 0.0s · running · first failure: p05 (build)',
+      'failed: p05 (build) · full log: /repo/p05/rush-logs/x.log',
+      '  error 0',
+      '  error 1',
+      '  error 2',
+      '  error 3',
+      '  error 4',
+      '  error 5',
+      '  error 18',
+      '  error 19',
+      'rush build: FAILURE 2/2 operations (1 failure, 1 blocked) in 0.0s · failed: p05 (build)'
+    ]);
   });
 
   it('keeps failure diagnostics when successful operations wrote stderr first', () => {
     const { renderer, output } = createRenderer(false);
     renderer.onEvent(status('noisy (build)', 'EXECUTING'));
-    for (let i = 0; i < 20; i++) {
+    for (let i: number = 0; i < 20; i++) {
       renderer.onLog(Buffer.from(`warning ${i}\n`), 'noisy (build)', 'stderr');
     }
     renderer.onEvent(status('noisy (build)', 'SUCCESS WITH WARNINGS'));
-    renderer.onEvent(status('broken (build)', 'EXECUTING'));
-    renderer.onLog(Buffer.from('the real error\n'), 'broken (build)', 'stderr');
-    renderer.onEvent(status('broken (build)', 'FAILURE'));
+    fail(renderer, 'broken (build)', ['the real error']);
     renderer.finish({ exitCode: 1 });
     const text: string = output.join('');
-    expect(text).toContain('  broken (build): the real error\n');
-    expect(text).not.toContain('noisy (build): warning');
+    expect(text).toContain(
+      'failed: broken (build) · full log: /repo/broken/rush-logs/x.log\n  the real error\n'
+    );
+    expect(text).not.toContain('warning 1');
+    expect(text).toMatch(/· failed: broken \(build\)\n$/);
+  });
+
+  it('reports unchanged operations as up to date, whether the daemon says SKIPPED or NO OP', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onEvent(status('a (build)', 'NO OP'));
+    renderer.onEvent(status('b (build)', 'SKIPPED'));
+    renderer.onEvent(status('c (build)', 'FROM CACHE'));
+    renderer.finish({ exitCode: 0 });
+    expect(output[output.length - 1]).toBe(
+      'rush build: SUCCESS 3/3 operations (1 from cache, 2 up to date) in 0.0s\n'
+    );
   });
 
   it('counts ABORTED operations as finished', () => {
     const { renderer, output } = createRenderer(false);
-    renderer.onEvent(event('operationRegistered', { operationId: 'a (build)', silent: false }));
+    renderer.onEvent(registered('a (build)'));
     renderer.onEvent(status('a (build)', 'EXECUTING'));
     renderer.onEvent(status('a (build)', 'ABORTED'));
     renderer.finish({ exitCode: 1 });
     expect(output[output.length - 1]).toBe('rush build: FAILURE 1/1 operations (1 aborted) in 0.0s\n');
   });
 
+  it('reports a cancelled command as CANCELLED, without the output of the interrupted operations', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(registered('b (build)'));
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('error: interrupted by SIGINT\n'), 'a (build)', 'stderr');
+    renderer.finish({
+      exitCode: 130,
+      cancelled: true,
+      operationResults: [
+        { operationId: 'a (build)', status: 'ABORTED' },
+        { operationId: 'b (build)', status: 'ABORTED' }
+      ]
+    });
+    expect(lines()).toEqual([
+      'rush build 0/2 · 0.0s · running',
+      'rush build: CANCELLED 2/2 operations (2 aborted) in 0.0s'
+    ]);
+  });
+
+  it('still reports the failures of a cancelled command', () => {
+    const { renderer, lines } = createRenderer(false);
+    fail(renderer, 'a (build)', ['src/a.ts(1,1): error TS2322: bad']);
+    renderer.finish({ exitCode: 130, cancelled: true });
+    expect(lines().slice(-3)).toEqual([
+      'failed: a (build) · full log: /repo/a/rush-logs/x.log',
+      '  src/a.ts(1,1): error TS2322: bad',
+      'rush build: CANCELLED 1/1 operations (1 failure) in 0.0s · failed: a (build)'
+    ]);
+  });
+
+  it('applies final statuses from the daemon result that no event reported', () => {
+    const { renderer, lines } = createRenderer(false);
+    const reason: string =
+      'The Rush daemon was shut down (idle timeout) while this request was running; re-run the command.';
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(registered('b (build)'));
+    renderer.onEvent(registered('silent (build)', true));
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.onEvent(status('b (build)', 'EXECUTING'));
+    const reported: boolean = renderer.finish({
+      exitCode: 1,
+      errorMessage: reason,
+      operationResults: [
+        { operationId: 'a (build)', status: 'SUCCESS' },
+        { operationId: 'b (build)', status: 'ABORTED' },
+        { operationId: 'silent (build)', status: 'ABORTED' },
+        // The result lists silent operations too; one that no event announced is not counted.
+        { operationId: 'unannounced (build)', status: 'NO OP' }
+      ]
+    });
+    expect(reported).toBe(true);
+    expect(lines().slice(-1)).toEqual([
+      `rush build: FAILURE 2/2 operations (1 aborted, 1 success) in 0.0s · ${reason}`
+    ]);
+  });
+
+  it("prints a failed operation's error from the daemon result when the operation wrote no output", () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [{ operationId: 'a (build)', status: 'FAILURE', errorMessage: 'spawn heft ENOENT' }]
+    });
+    expect(lines().slice(-3)).toEqual([
+      'failed: a (build)',
+      '  spawn heft ENOENT',
+      'rush build: FAILURE 1/1 operations (1 failure) in 0.0s · failed: a (build)'
+    ]);
+  });
+
+  it('tells a repeated finish whether its error message was already reported in full', () => {
+    const { renderer, output } = createRenderer(false);
+    const message: string = 'Daemon rejected the request (routingFailed): Another Rush command is running.';
+    expect(renderer.finish({ exitCode: 1, errorMessage: message })).toBe(true);
+    expect(renderer.finish({ exitCode: 1, errorMessage: message })).toBe(true);
+    expect(renderer.finish({ exitCode: 1, errorMessage: 'another message' })).toBe(false);
+    expect(output).toEqual([`rush build: FAILURE in 0.0s · ${message}\n`]);
+  });
+
+  it('keeps the legacy "daemon admission failed (<code>)" string in the summary line (#785)', () => {
+    const timeout: ITestRenderer = createRenderer(false);
+    const message: string =
+      'The request was not admitted within 30000ms while waiting for workspace admission. ' +
+      'Use --wait-timeout <seconds> or RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS to wait longer.';
+    expect(
+      timeout.renderer.finish({ exitCode: 1, admissionErrorCode: 'wait-timeout', errorMessage: message })
+    ).toBe(true);
+    expect(timeout.output).toEqual([
+      `rush build: FAILURE in 0.0s · daemon admission failed (wait-timeout): ${message}\n`
+    ]);
+
+    const noWait: ITestRenderer = createRenderer(false);
+    noWait.renderer.finish({
+      exitCode: 1,
+      admissionErrorCode: 'no-wait',
+      errorMessage: 'The workspace is busy.'
+    });
+    expect(noWait.output).toEqual([
+      'rush build: FAILURE in 0.0s · daemon admission failed (no-wait): The workspace is busy.\n'
+    ]);
+
+    // A request aborted while it waited, for example by a daemon shutdown, is not a busy workspace.
+    const aborted: ITestRenderer = createRenderer(false);
+    aborted.renderer.finish({
+      exitCode: 1,
+      admissionErrorCode: 'aborted',
+      errorMessage: 'The Rush daemon was shut down.'
+    });
+    expect(aborted.output).toEqual(['rush build: FAILURE in 0.0s · The Rush daemon was shut down.\n']);
+  });
+
+  it('writes the reason for an admission failure in full however long it is, so the caller adds nothing', () => {
+    // A restart drain that timed out behind a rushx script after it waived time: 350 characters.
+    const message: string =
+      'The request was not admitted before the daemon could restart for its environment, which waits for the ' +
+      'requests that the daemon is serving to finish, including a rushx script that may not exit until it is ' +
+      'stopped; 61.8s spent waiting for requests that were already running did not count. Stop the script, ' +
+      'or use --wait-timeout <seconds> to wait longer.';
+    expect(message.length).toBeGreaterThan(300);
+    const { renderer, output } = createRenderer(false);
+    expect(renderer.finish({ exitCode: 1, admissionErrorCode: 'wait-timeout', errorMessage: message })).toBe(
+      true
+    );
+    expect(output).toEqual([
+      `rush build: FAILURE in 0.0s · daemon admission failed (wait-timeout): ${message}\n`
+    ]);
+  });
+
+  it('clips any other single-line error message that is too long, and leaves it to the caller', () => {
+    const message: string = `Rush failed: ${'x'.repeat(400)} (end)`;
+    const { renderer, output } = createRenderer(false);
+    expect(renderer.finish({ exitCode: 1, errorMessage: message })).toBe(false);
+    expect(output).toHaveLength(1);
+    expect(output[0]).toMatch(/^rush build: FAILURE in 0\.0s · Rush failed: x+…x+ \(end\)\n$/);
+    expect(output[0].length).toBeLessThan(message.length);
+  });
+
   it('writes the final line at most once and nothing after it', () => {
     const { renderer, output } = createRenderer(false);
-    renderer.finish({ exitCode: 1, errorMessage: 'daemon rejected the request (x)' });
-    renderer.finish({ exitCode: 1, errorMessage: 'again' });
+    expect(renderer.finish({ exitCode: 1, errorMessage: 'daemon rejected the request (x)' })).toBe(true);
+    expect(renderer.finish({ exitCode: 1, errorMessage: 'again' })).toBe(false);
     renderer.onQueuePosition(3);
+    renderer.onEvent(status('a (build)', 'FAILURE'));
     renderer.dispose();
-    expect(output).toEqual(['rush build: FAILURE 0/0 operations in 0.0s · daemon rejected the request (x)\n']);
+    expect(output).toEqual(['rush build: FAILURE in 0.0s · daemon rejected the request (x)\n']);
   });
 
-  it('does not repeat an unchanged queue position', () => {
+  it('writes the further lines of a multi-line error message before the summary line', () => {
+    const { renderer, output } = createRenderer(false);
+    expect(renderer.finish({ exitCode: 1, errorMessage: 'first line\n\nsecond line\n' })).toBe(true);
+    expect(output).toEqual(['  second line\nrush build: FAILURE in 0.0s · first line\n']);
+  });
+
+  it('elides the middle of an error message with thousands of lines and keeps its last lines', () => {
+    const { renderer, output } = createRenderer(false);
+    const diagnostics: string[] = Array.from({ length: 1745 }, (unused, index) => `debug line ${index}`);
+    const message: string = [
+      'Daemon rejected the request (invalidRequest): Incremental strategy: cache restoration',
+      ...diagnostics,
+      'The project name "@x/nope" passed to "--to" does not exist in rush.json.',
+      'An error occurred.'
+    ].join('\n');
+    expect(renderer.finish({ exitCode: 1, errorMessage: message })).toBe(true);
+    expect(output.join('').split('\n')).toEqual([
+      '  debug line 0',
+      '  debug line 1',
+      '  … 1740 more lines …',
+      '  debug line 1742',
+      '  debug line 1743',
+      '  debug line 1744',
+      '  The project name "@x/nope" passed to "--to" does not exist in rush.json.',
+      '  An error occurred.',
+      'rush build: FAILURE in 0.0s · Daemon rejected the request (invalidRequest): Incremental strategy: cache restoration',
+      ''
+    ]);
+  });
+
+  it('writes the queue milestone once, however often the position changes', () => {
     const { renderer, output } = createRenderer(false);
     renderer.onQueuePosition(2);
     renderer.onQueuePosition(2);
-    renderer.onQueuePosition(2);
-    expect(output).toHaveLength(1);
     renderer.onQueuePosition(1);
-    expect(output).toHaveLength(2);
+    expect(output).toEqual(['rush build · 0.0s · queued behind another request (position 2)\n']);
     renderer.dispose();
   });
 
-  it('shows the stdout tail of a failed operation that reported errors on stdout', () => {
+  it('shows the excerpt of a failed operation that reported errors on stdout', () => {
     const { renderer, output } = createRenderer(false);
     renderer.onEvent(status('ok (build)', 'EXECUTING'));
     renderer.onLog(Buffer.from('ok noise\n'), 'ok (build)', 'stdout');
@@ -144,8 +393,19 @@ describe(AgentProgressRenderer.name, () => {
     renderer.onEvent(status('tsc (build)', 'FAILURE'));
     renderer.finish({ exitCode: 1 });
     const text: string = output.join('');
-    expect(text).toContain('  tsc (build): src/x.ts(1,1): error TS1005: stdout-error\n');
+    expect(text).toContain('failed: tsc (build)\n  src/x.ts(1,1): error TS1005: stdout-error\n');
     expect(text).not.toContain('ok noise');
+  });
+
+  it('says so when a failed operation wrote no output', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(status('quiet (build)', 'FAILURE'));
+    renderer.finish({ exitCode: 1 });
+    expect(lines().slice(-3)).toEqual([
+      'failed: quiet (build)',
+      '  (no output)',
+      'rush build: FAILURE 1/1 operations (1 failure) in 0.0s · failed: quiet (build)'
+    ]);
   });
 
   it('shows queue position immediately', () => {
@@ -163,21 +423,310 @@ describe(AgentProgressRenderer.name, () => {
     expect(output[output.length - 1]).toBe('rush build: SUCCESS up to date (no operations needed) in 4.0s\n');
   });
 
-  it('throttles progress lines on a pipe', () => {
-    const { renderer, output, clock } = createRenderer(false);
+  it('writes at most three progress lines and one summary line on a pipe at odsp-web scale', () => {
+    const { renderer, clock, lines } = createRenderer(false);
     renderer.start();
-    for (let i = 0; i < 50; i++) {
-      clock.ms = i * 10;
-      renderer.onEvent(status(`p${i} (build)`, 'EXECUTING'));
+    renderer.onRequestSent();
+    renderer.onQueuePosition(1);
+    const operationIds: string[] = Array.from({ length: 772 }, (unused, i) => `p${i} (build)`);
+    for (const operationId of operationIds) {
+      renderer.onEvent(registered(operationId));
     }
-    expect(output).toHaveLength(1);
-    clock.ms = 2500;
-    renderer.onEvent(status('p0 (build)', 'SUCCESS'));
-    expect(output).toHaveLength(2);
-    clock.ms = 3000;
-    renderer.onEvent(status('p1 (build)', 'SUCCESS'));
-    expect(output).toHaveLength(2);
-    renderer.dispose();
+    for (let i: number = 0; i < 1200; i++) {
+      renderer.onEvent(registered(`p${i} (tool-build)`, true));
+    }
+    for (const [index, operationId] of operationIds.entries()) {
+      clock.ms = index * 270;
+      renderer.onEvent(status(operationId, 'EXECUTING'));
+      renderer.onLog(Buffer.from(`building ${operationId}\n`), operationId, 'stdout');
+      renderer.onEvent(status(operationId, index % 2 ? 'FROM CACHE' : 'SUCCESS'));
+      renderer.onEvent(header(operationId, index + 1, 772));
+      renderer.onEvent(event('activityChanged', { text: `${index + 1} of 772 operations complete` }));
+    }
+    for (let i: number = 0; i < 1200; i++) {
+      renderer.onEvent(status(`p${i} (tool-build)`, 'NO OP'));
+    }
+    clock.ms = 210_000;
+    renderer.finish({ exitCode: 0 });
+    expect(lines()).toEqual([
+      'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+      'rush build · 0.0s · queued behind another request (position 1)',
+      'rush build 0/772 · 0.0s · running',
+      'rush build: SUCCESS 772/772 operations (386 success, 386 from cache) in 210.0s'
+    ]);
+  });
+
+  it('keeps a failure at odsp-web scale to the progress lines, the failure report and one summary line', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.start();
+    renderer.onRequestSent();
+    for (let i: number = 0; i < 772; i++) {
+      renderer.onEvent(registered(`p${i} (build)`));
+    }
+    for (let i: number = 0; i < 700; i++) {
+      renderer.onEvent(status(`p${i} (build)`, 'EXECUTING'));
+      renderer.onLog(Buffer.from(`${'noise '.repeat(20)}\n`.repeat(50)), `p${i} (build)`, 'stdout');
+      renderer.onEvent(status(`p${i} (build)`, 'SUCCESS'));
+    }
+    fail(renderer, 'p700 (build)', [
+      'src/x.ts:1:1 - error TS2304: Cannot find name "y".',
+      'Encountered 1 error'
+    ]);
+    for (let i: number = 701; i < 772; i++) {
+      renderer.onEvent(status(`p${i} (build)`, 'BLOCKED'));
+    }
+    renderer.finish({ exitCode: 1 });
+    expect(lines()).toEqual([
+      'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+      'rush build 0/772 · 0.0s · running',
+      'rush build 701/772 · 0.0s · running · first failure: p700 (build)',
+      'failed: p700 (build) · full log: /repo/p700/rush-logs/x.log',
+      '  src/x.ts:1:1 - error TS2304: Cannot find name "y".',
+      '  Encountered 1 error',
+      'rush build: FAILURE 772/772 operations (1 failure, 71 blocked, 700 success) in 0.0s · failed: p700 (build)'
+    ]);
+  });
+
+  it('ignores silent operations in the counters unless they fail', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(registered('s1 (tool-build)', true));
+    renderer.onEvent(registered('s2 (tool-build)', true));
+    renderer.onLog(Buffer.from('silent output\n'), 's1 (tool-build)', 'stderr');
+    renderer.onEvent(status('s1 (tool-build)', 'NO OP'));
+    renderer.onEvent(status('s2 (tool-build)', 'FAILURE'));
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.finish({ exitCode: 1 });
+    const text: string = output.join('');
+    expect(text).not.toContain('silent output');
+    expect(output[output.length - 1]).toMatch(
+      /rush build: FAILURE 2\/2 operations \(1 failure, 1 success\) in 0\.0s · failed: s2 \(tool-build\)\n$/
+    );
+  });
+
+  it('uses the per-request total from the operation header', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(header('a (build)', 1, 772));
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.finish({ exitCode: 0 });
+    expect(lines()).toEqual([
+      'rush build 1/772 · 0.0s · running',
+      'rush build: SUCCESS 1/772 operations (1 success) in 0.0s'
+    ]);
+  });
+
+  it('counts an operation that runs again once', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(status('a (build)', 'FAILURE'));
+    renderer.onEvent(status('a (build)', 'READY'));
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.finish({ exitCode: 0 });
+    expect(output[output.length - 1]).toBe('rush build: SUCCESS 1/1 operations (1 success) in 0.0s\n');
+  });
+
+  it('reports operations with warnings when the warnings failed the request', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(status('w (build)', 'EXECUTING'));
+    renderer.onLog(
+      Buffer.from('[build:lint] Warning: src/x.ts:1:1 - (rule) message\n'),
+      'w (build)',
+      'stderr'
+    );
+    renderer.onEvent(status('w (build)', 'SUCCESS WITH WARNINGS', '/repo/w/rush-logs/w._phase_build.log'));
+    renderer.finish({ exitCode: 1 });
+    expect(lines().slice(-3)).toEqual([
+      'warnings: w (build) · full log: /repo/w/rush-logs/w._phase_build.log',
+      '  [build:lint] Warning: src/x.ts:1:1 - (rule) message',
+      'rush build: FAILURE 1/1 operations (1 success with warnings) in 0.0s · warnings: w (build)'
+    ]);
+  });
+
+  it('does not report warnings when the request succeeded', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(status('w (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('Warning: x\n'), 'w (build)', 'stderr');
+    renderer.onEvent(status('w (build)', 'SUCCESS WITH WARNINGS'));
+    renderer.finish({ exitCode: 0 });
+    expect(lines().slice(-1)).toEqual([
+      'rush build: SUCCESS 1/1 operations (1 success with warnings) in 0.0s'
+    ]);
+    expect(lines().join('\n')).not.toContain('Warning: x');
+  });
+
+  it('caps the reported operations, their excerpts and the names in the summary', () => {
+    const { renderer, lines } = createRenderer(false);
+    for (let i: number = 0; i < 8; i++) {
+      fail(
+        renderer,
+        `f${i} (build)`,
+        Array.from({ length: 12 }, (unused, j) => `f${i} error ${j}`)
+      );
+    }
+    renderer.finish({ exitCode: 1 });
+    const report: string[] = lines().slice(2);
+    expect(report.filter((line) => line.startsWith('failed: '))).toEqual([
+      'failed: f0 (build) · full log: /repo/f0/rush-logs/x.log',
+      'failed: f1 (build) · full log: /repo/f1/rush-logs/x.log',
+      'failed: f2 (build) · full log: /repo/f2/rush-logs/x.log'
+    ]);
+    expect(report.filter((line) => line.startsWith('  f0 '))).toHaveLength(8);
+    expect(report.filter((line) => line.startsWith('  f1 '))).toHaveLength(3);
+    expect(report.filter((line) => line.startsWith('  f2 '))).toHaveLength(3);
+    expect(report.slice(-2)).toEqual([
+      "+5 more failed operations; their logs are in each project's rush-logs folder",
+      'rush build: FAILURE 8/8 operations (8 failure) in 0.0s · failed: f0 (build), f1 (build), f2 (build), ' +
+        'f3 (build), f4 (build) +3 more'
+    ]);
+  });
+
+  it('shows the output of a command that failed without running operations', () => {
+    const { renderer, lines } = createRenderer(false, 'install');
+    renderer.onLog(Buffer.from('Installing packages\n'), 'request-id', 'stdout');
+    renderer.onLog(
+      Buffer.from('ERR_PNPM_FETCH_401 GET https://registry.example/pkg: Unauthorized\n'),
+      'request-id',
+      'stderr'
+    );
+    renderer.finish({ exitCode: 1 });
+    expect(lines()).toEqual([
+      '  ERR_PNPM_FETCH_401 GET https://registry.example/pkg: Unauthorized',
+      'rush install: FAILURE in 0.0s'
+    ]);
+  });
+
+  it('does not claim a successful global command was up to date', () => {
+    const { renderer, output } = createRenderer(false, 'install');
+    renderer.onLog(Buffer.from('Installing packages\n'), 'request-id', 'stdout');
+    renderer.finish({ exitCode: 0 });
+    expect(output).toEqual(['rush install: SUCCESS in 0.0s\n']);
+  });
+
+  describe('on a pipe, with timers', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    function advance(clock: { ms: number }, ms: number): void {
+      clock.ms += ms;
+      jest.advanceTimersByTime(ms);
+    }
+
+    it('writes the connecting line only when the connection takes more than a second', () => {
+      const { renderer, output, clock, lines } = createRenderer(false);
+      renderer.start();
+      advance(clock, 999);
+      expect(output).toEqual([]);
+      advance(clock, 1);
+      renderer.onRequestSent();
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 1.0s · connecting to rushd (auto-starts if needed)',
+        'rush build · 1.0s · sent to rushd; preparing the workspace graph (status at least every 25s)'
+      ]);
+    });
+
+    it('writes one line when the client waits for a daemon that is still starting (task 95)', () => {
+      const { renderer, output, clock, lines } = createRenderer(false);
+      renderer.start();
+      advance(clock, 300);
+      renderer.onAwaitStartup(15_000);
+      expect(lines()).toEqual([
+        'rush build · 0.3s · rushd is still starting; waiting for it (up to 15s more)'
+      ]);
+      advance(clock, 1_000);
+      renderer.onAwaitStartup(15_000);
+      expect(output).toHaveLength(1);
+      advance(clock, 11_000);
+      renderer.onRequestSent();
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.3s · rushd is still starting; waiting for it (up to 15s more)',
+        'rush build · 12.3s · sent to rushd; preparing the workspace graph (status at least every 25s)'
+      ]);
+    });
+
+    it('writes nothing for a request that is handed to in-process Rush within a second', () => {
+      const { renderer, output, clock } = createRenderer(false);
+      renderer.start();
+      advance(clock, 500);
+      renderer.dispose();
+      advance(clock, 60_000);
+      expect(output).toEqual([]);
+    });
+
+    it('writes a status line after 25 s of silence, with the running and failed operations', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      for (const name of ['a', 'b', 'c', 'd', 'e']) {
+        renderer.onEvent(registered(`${name} (build)`));
+      }
+      advance(clock, 20_000);
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      renderer.onEvent(status('b (build)', 'EXECUTING'));
+      advance(clock, 24_999);
+      expect(lines()).toHaveLength(2);
+      advance(clock, 1);
+      renderer.onEvent(status('c (build)', 'EXECUTING'));
+      renderer.onEvent(status('d (build)', 'EXECUTING'));
+      renderer.onEvent(status('e (build)', 'EXECUTING'));
+      fail(renderer, 'a (build)', ['error TS2322']);
+      advance(clock, 25_000);
+      renderer.onEvent(status('b (build)', 'SUCCESS'));
+      advance(clock, 25_000);
+      clock.ms += 1000;
+      renderer.finish({ exitCode: 1 });
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush build 0/5 · 20.0s · running',
+        'rush build 0/5 · 45.0s · running: a (build), b (build)',
+        // The first failure is a milestone, so it is written although status lines were written before it.
+        'rush build 1/5 · 45.0s · running · first failure: a (build)',
+        'rush build 1/5 · 70.0s · running: b (build), c (build), d (build) +1 more · failed: a (build)',
+        'rush build 2/5 · 95.0s · running: c (build), d (build), e (build) · failed: a (build)',
+        'failed: a (build) · full log: /repo/a/rush-logs/x.log',
+        '  error TS2322',
+        'rush build: FAILURE 2/5 operations (1 failure, 1 success) in 96.0s · failed: a (build)'
+      ]);
+    });
+
+    it('does not claim that a request is still queued once it may have been admitted', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 2000);
+      renderer.onQueuePosition(1);
+      advance(clock, 25_000);
+      renderer.onEvent(registered('a (build)'));
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      advance(clock, 25_000);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush build · 2.0s · queued behind another request (position 1)',
+        'rush build · 27.0s · waiting for admission or the workspace graph (queue position 1 at 2.0s)',
+        'rush build 0/1 · 27.0s · running',
+        'rush build 0/1 · 52.0s · running: a (build)'
+      ]);
+    });
+
+    it('writes status lines after the milestone lines ran out, and none after the summary', () => {
+      const { renderer, output, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      renderer.onQueuePosition(1);
+      renderer.onEvent(registered('a (build)'));
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      fail(renderer, 'a (build)', ['error']);
+      expect(lines()).toHaveLength(3);
+      advance(clock, 25_000);
+      expect(lines()[3]).toBe('rush build 1/1 · 25.0s · running · failed: a (build)');
+      renderer.finish({ exitCode: 1 });
+      const written: number = output.length;
+      advance(clock, 100_000);
+      expect(output).toHaveLength(written);
+    });
   });
 
   it('renders at most three live rows on a TTY and clears them before the summary', () => {
@@ -195,5 +744,41 @@ describe(AgentProgressRenderer.name, () => {
     }
     expect(output[output.length - 2]).toBe('\x1b[3A\x1b[0J\x1b[?25h');
     expect(output[output.length - 1]).toContain('rush build: SUCCESS');
+  });
+
+  it('shows the wait for a daemon that is still starting as the phase on a TTY', () => {
+    const { renderer, output } = createRenderer(true);
+    renderer.start();
+    renderer.onAwaitStartup(15_000);
+    renderer.dispose();
+    expect(output).toHaveLength(3);
+    // The row is clipped to the 60 columns of the test terminal.
+    expect(output[1].replace(ANSI_ESCAPE, '').split('\n')[0]).toMatch(
+      /^. rush build · 0\.0s · rushd is still starting; waiting for…$/
+    );
+  });
+
+  it('repaints a TTY on its timer rather than on every event, and shows failures in the last row', () => {
+    jest.useFakeTimers();
+    try {
+      const { renderer, output } = createRenderer(true);
+      renderer.start();
+      for (let i: number = 0; i < 100; i++) {
+        renderer.onEvent(status(`p${i} (build)`, 'EXECUTING'));
+      }
+      renderer.onEvent(status('p0 (build)', 'FAILURE'));
+      expect(output).toHaveLength(1);
+      jest.advanceTimersByTime(100);
+      expect(output).toHaveLength(2);
+      const rows: string[] = output[1].replace(ANSI_ESCAPE, '').split('\n');
+      expect(rows[0]).toMatch(/^. rush build 1\/100 · 0\.0s · running$/);
+      expect(rows[1]).toBe('running: p1 (build), p2 (build), p3 (build) +96 more');
+      expect(rows[2]).toBe('failed: p0 (build)');
+      renderer.dispose();
+      jest.advanceTimersByTime(1000);
+      expect(output).toHaveLength(3);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

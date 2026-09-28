@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent output on a pipe, write a line when the client waits for a daemon that is still starting, as agent output on a TTY and legacy output already say.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

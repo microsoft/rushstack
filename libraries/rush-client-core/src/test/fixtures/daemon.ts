@@ -83,6 +83,12 @@ async function mainAsync(): Promise<void> {
           if (message.payload.admission?.waitTimeoutMs !== undefined) {
             fs.appendFileSync(path.join(folder, 'waits'), `${message.payload.admission.waitTimeoutMs}\n`);
           }
+          if (message.payload.admission?.waitTimeoutIsDefault) {
+            fs.appendFileSync(
+              path.join(folder, 'default-waits'),
+              `${message.payload.admission.waitTimeoutMs}\n`
+            );
+          }
           const restartCount: number = fs.existsSync(path.join(folder, 'restarted'))
             ? fs.readFileSync(path.join(folder, 'restarted'), 'utf8').length
             : 0;
@@ -90,6 +96,11 @@ async function mainAsync(): Promise<void> {
             restartMode !== undefined &&
             (restartMode !== 'restart-once' || restartCount < 1) &&
             (restartMode !== 'restart-twice' || restartCount < 2);
+          const drainMsPath: string = path.join(folder, 'drain-ms');
+          if (restart && fs.existsSync(drainMsPath)) {
+            // Like a daemon that restarts only after the requests it serves finish.
+            await new Promise((resolve) => setTimeout(resolve, Number(fs.readFileSync(drainMsPath, 'utf8'))));
+          }
           await connection.sendFrameAsync({
             kind: DaemonFrameType.controlJson,
             payload: encodeDaemonControlMessage({

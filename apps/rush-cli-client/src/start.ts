@@ -23,7 +23,8 @@ const agentRenderer: AgentProgressRenderer | undefined =
   commandName !== undefined
     ? new AgentProgressRenderer({
         commandName,
-        isTTY: !!process.stdout.isTTY && process.env.TERM !== 'dumb',
+        // A pty without a size (e.g. `script` run without a terminal) cannot be repainted; treat it as a pipe.
+        isTTY: !!process.stdout.isTTY && process.env.TERM !== 'dumb' && !!process.stdout.columns,
         columns: process.stdout.columns || 80,
         write: (text: string) => process.stdout.write(text),
         startTimeMs
@@ -34,7 +35,9 @@ agentRenderer?.start();
 const { launchClientAsync } = require('./launchClient') as typeof import('./launchClient');
 
 launchClientAsync(false, agentRenderer).catch((error: Error) => {
-  agentRenderer?.finish({ exitCode: 1, errorMessage: error.message });
-  process.stderr.write(`rush-client: ${error.message}\n`);
+  // In agent mode the summary line may already carry the complete message; do not repeat it.
+  if (!agentRenderer?.finish({ exitCode: 1, errorMessage: error.message })) {
+    process.stderr.write(`rush-client: ${error.message}\n`);
+  }
   process.exitCode = 1;
 });

@@ -14,7 +14,8 @@ import type {
   DaemonEventType,
   IDaemonActivityPayload,
   IDaemonEventEnvelope,
-  IDaemonEventScope
+  IDaemonEventScope,
+  IDaemonOperationStatusChangedPayload
 } from '@rushstack/rush-daemon-protocol';
 import { TerminalChunkKind } from '@rushstack/terminal';
 import type { ITerminalChunk } from '@rushstack/terminal';
@@ -186,11 +187,18 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       executionResult: result,
       status: result.status
     });
-    this.#emitEvent('operationStatusChanged', {
+    // Summarizing clients (agent output) point at the full log of the operations that explain a failure.
+    const logFilePath: string | undefined =
+      result.status === OperationStatus.Failure || result.status === OperationStatus.SuccessWithWarning
+        ? result.logFilePaths?.text
+        : undefined;
+    const payload: IDaemonOperationStatusChangedPayload = {
       operationId,
       previousStatus,
-      status: result.status
-    });
+      status: result.status,
+      ...(logFilePath ? { logFilePath } : {})
+    };
+    this.#emitEvent('operationStatusChanged', payload);
   }
 
   public onOperationHeader(operationId: string): void {

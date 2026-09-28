@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent output, keep \"daemon admission failed (<code>)\" in the summary line when the daemon did not admit a request, and word an empty selection like native Rush: \"the selection parameters did not match any projects\".",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

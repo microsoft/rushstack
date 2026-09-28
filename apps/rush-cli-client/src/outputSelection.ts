@@ -14,6 +14,10 @@ export const RUSHD_OUTPUT_ENV_VAR: 'RUSHD_OUTPUT' = 'RUSHD_OUTPUT';
  * `detectAgent()` in `@rushstack/reporter` (libraries/reporter/src/config/AgentDetection.ts).
  */
 const AGENT_MARKERS: readonly string[] = ['COPILOT_CLI'];
+
+/** Every environment variable that `selectClientOutputMode()` reads to choose between agent and legacy output. */
+export const CLIENT_OUTPUT_SELECTION_ENV_VARS: readonly string[] = [RUSHD_OUTPUT_ENV_VAR, ...AGENT_MARKERS];
+
 const INACTIVE_VALUES: ReadonlySet<string> = new Set(['', '0', 'false', 'no', 'off']);
 const NATIVE_REPORTER_FLAGS: readonly string[] = ['--reporter', '--output', '--log-level'];
 

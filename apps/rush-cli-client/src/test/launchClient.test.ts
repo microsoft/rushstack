@@ -27,6 +27,7 @@ import {
   getSignalExitCode,
   isCancelledOutcome
 } from '../clientCancellation';
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
 
 interface IInvocationResult {
   readonly code: number | undefined;
@@ -106,7 +107,7 @@ describe('standalone rushx fallback', () => {
     const child: ChildProcess = spawn(process.execPath, args, {
       cwd: project,
       env: {
-        ...process.env,
+        ...getTestProcessEnvironment(),
         CLIENT_MARKER: 'script-output',
         RUSH_DAEMON: optIn ? '1' : '0',
         CI: managementArgs ? 'true' : 'false',
@@ -661,6 +662,22 @@ describe('daemon client cancellation exit codes', () => {
     expect(isCancelledOutcome(cancelledWithFailure, true)).toBe(true);
   });
 
+  it('does not report a request that a daemon shutdown aborted as cancelled, unless the client was signalled', () => {
+    const shutDown: DaemonClientOutcome = {
+      kind: 'result',
+      result: {
+        requestId: 'r',
+        outcome: 'failure',
+        exitCode: 1,
+        aborted: true,
+        errorMessage:
+          'The Rush daemon was shut down (idle timeout) while this request was running; re-run the command.'
+      }
+    };
+    expect(isCancelledOutcome(shutDown, false)).toBe(false);
+    expect(isCancelledOutcome(shutDown, true)).toBe(true);
+  });
+
   it('keeps completed results and rejections when a signal arrives late', () => {
     const succeeded: DaemonClientOutcome = {
       kind: 'result',
@@ -670,9 +687,29 @@ describe('daemon client cancellation exit codes', () => {
       kind: 'rejected',
       rejection: { requestId: 'r', code: 'unsupportedProtocolVersion', message: 'no' }
     } as unknown as DaemonClientOutcome;
+    const invalid: DaemonClientOutcome = {
+      kind: 'rejected',
+      rejection: { requestId: 'r', code: 'invalidRequest', message: 'Unknown operation id.' }
+    };
     expect(isCancelledOutcome(succeeded, true)).toBe(false);
     expect(isCancelledOutcome(rejected, true)).toBe(false);
+    expect(isCancelledOutcome(invalid, true)).toBe(false);
     expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, true)).toBe(true);
     expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, false)).toBe(false);
+  });
+
+  it('treats a request that a signal cancelled before engine initialization as cancelled (#711)', () => {
+    // The daemon rejects a request that was cancelled while it prepared the workspace graph.
+    const cancelledBeforeEngine: DaemonClientOutcome = {
+      kind: 'rejected',
+      rejection: {
+        requestId: 'r',
+        code: 'routingFailed',
+        message: 'The request was cancelled before engine initialization.'
+      }
+    };
+    expect(isCancelledOutcome(cancelledBeforeEngine, true)).toBe(true);
+    // Without a signal, the daemon failed to route the request for its own reason, such as a shutdown.
+    expect(isCancelledOutcome(cancelledBeforeEngine, false)).toBe(false);
   });
 });

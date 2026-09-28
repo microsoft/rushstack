@@ -25,15 +25,19 @@ export function formatCancellationMessage(commandName: string): string {
 
 /**
  * Returns whether a daemon outcome represents a cancelled command. A result is cancelled when the daemon reports it
- * as aborted, even if an operation failure determines its semantic outcome. A completed (non-aborted) result wins
- * over a late signal, and a rejection is never reported as a cancellation.
+ * as aborted, even if an operation failure determines its semantic outcome, unless the daemon aborted it for its own
+ * reason (such as a daemon shutdown), which the result's error message carries and a signal did not cause. A
+ * completed (non-aborted) result wins over a late signal. A rejection is only a cancellation when the client was
+ * signalled and the daemon could not route the request: that is how the daemon answers a request cancelled before
+ * engine initialization. A rejection of the request itself (for example an invalid or unsupported request) is
+ * always reported.
  */
 export function isCancelledOutcome(outcome: DaemonClientOutcome, signalled: boolean): boolean {
   switch (outcome.kind) {
     case 'result':
-      return outcome.result.aborted;
+      return outcome.result.aborted && (signalled || !outcome.result.errorMessage);
     case 'rejected':
-      return false;
+      return signalled && outcome.rejection.code === 'routingFailed';
     default:
       return signalled;
   }

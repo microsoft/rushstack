@@ -22,6 +22,8 @@ import {
 } from '@rushstack/rush-daemon';
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 export interface IScriptResult {
   readonly exitCode: number | undefined;
   readonly stdout: Buffer;
@@ -155,7 +157,7 @@ setInterval(() => {}, 1000);
 
   public environment(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     return {
-      ...process.env,
+      ...getTestProcessEnvironment(),
       HOME: this.home,
       USERPROFILE: this.home,
       CLIENT_MARKER: 'client',

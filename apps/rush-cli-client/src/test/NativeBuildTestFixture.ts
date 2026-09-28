@@ -17,6 +17,8 @@ import {
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 export interface INativeBuildResult {
   readonly code: number | undefined;
   readonly stdout: string;
@@ -41,7 +43,7 @@ export interface INativeBuildTestFixture {
 export function createNativeBuildTestFixture(): INativeBuildTestFixture {
   const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-native-'));
   const environment: NodeJS.ProcessEnv = {
-    ...process.env,
+    ...getTestProcessEnvironment(),
     RUSH_DAEMON: '1',
     RUSH_REPORTER: 'legacy',
     CI: 'false',

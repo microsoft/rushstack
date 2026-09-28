@@ -410,6 +410,7 @@ export interface IDaemonOperationRegisteredPayload {
 
 // @beta
 export interface IDaemonOperationStatusChangedPayload {
+    readonly logFilePath?: string;
     readonly operationId: string;
     readonly previousStatus?: string;
     readonly status: string;

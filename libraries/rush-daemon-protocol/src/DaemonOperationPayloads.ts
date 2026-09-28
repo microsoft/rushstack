@@ -32,6 +32,11 @@ export interface IDaemonOperationStatusChangedPayload {
   readonly status: string;
   /** The previous raw engine status string, when known. */
   readonly previousStatus?: string;
+  /**
+   * The absolute path of the operation's full text log, when the operation failed or succeeded with
+   * warnings and wrote a log. Clients that summarize output print it so the full output can be read later.
+   */
+  readonly logFilePath?: string;
 }
 
 /**
