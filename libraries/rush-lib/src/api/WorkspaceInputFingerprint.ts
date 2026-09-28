@@ -34,6 +34,92 @@ export interface IWorkspaceInputFingerprintOptions {
 }
 
 /**
+ * Environment variable names that are excluded from {@link IWorkspaceInputFingerprint.environmentHash}.
+ *
+ * @remarks
+ * These variables are maintained per shell, terminal, remote session or client invocation. Rush never reads them
+ * to configure the engine, construct the operation graph or compute operation hashes, so a difference must not
+ * discard a warm workspace:
+ *
+ * - shell bookkeeping: `_`, `PWD`, `OLDPWD`, `SHLVL`, `PS1`, `HISTFILE`, `HISTSIZE`
+ *   (a child shell recomputes `PWD`/`SHLVL`/`_` for its own working directory)
+ * - terminal presentation: `TERM`, `TERM_PROGRAM`, `TERM_PROGRAM_VERSION`, `TERM_SESSION_ID`, `COLORTERM`,
+ *   `COLUMNS`, `LINES`, `LS_COLORS`, `WINDOWID`
+ * - session and multiplexer handles: `WSL_INTEROP`, `WSLENV`, `SSH_CLIENT`, `SSH_CONNECTION`, `SSH_TTY`,
+ *   `SSH_AUTH_SOCK`, `TMUX`, `TMUX_PANE`, `STY`, `XDG_SESSION_ID`, `XDG_SESSION_TYPE`, `DBUS_SESSION_BUS_ADDRESS`
+ * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed
+ * - client routing: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon, and
+ *   `RUSH_DAEMON_EXPERIMENTAL` is read from each request rather than from the process
+ *
+ * Every other variable remains a process-bound input, including the remaining `RUSH_*` settings (such as
+ * `RUSH_BUILD_CACHE_*` and the daemon's own `RUSH_DAEMON_*` resource settings), `NODE_*`, npm/pnpm
+ * configuration, `PATH` and `HOME`. On Windows, names are matched case-insensitively.
+ *
+ * A long-lived host that ignores these variables keeps the values from its own startup environment for the
+ * processes it launches. Projects that need one of these values as an operation input should not rely on it
+ * being request-specific in such a host.
+ *
+ * @alpha
+ */
+export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string> = new Set([
+  '_',
+  'PWD',
+  'OLDPWD',
+  'SHLVL',
+  'PS1',
+  'HISTFILE',
+  'HISTSIZE',
+  'TERM',
+  'TERM_PROGRAM',
+  'TERM_PROGRAM_VERSION',
+  'TERM_SESSION_ID',
+  'COLORTERM',
+  'COLUMNS',
+  'LINES',
+  'LS_COLORS',
+  'WINDOWID',
+  'WSL_INTEROP',
+  'WSLENV',
+  'SSH_CLIENT',
+  'SSH_CONNECTION',
+  'SSH_TTY',
+  'SSH_AUTH_SOCK',
+  'TMUX',
+  'TMUX_PANE',
+  'STY',
+  'XDG_SESSION_ID',
+  'XDG_SESSION_TYPE',
+  'DBUS_SESSION_BUS_ADDRESS',
+  'INIT_CWD',
+  'RUSH_DAEMON',
+  'RUSH_DAEMON_AUTO_START',
+  'RUSH_DAEMON_EXPERIMENTAL'
+]);
+
+/**
+ * Returns the defined environment entries that participate in workspace fingerprints, sorted by name.
+ *
+ * @remarks
+ * Omits undefined values and {@link workspaceFingerprintIgnoredEnvironmentVariables}. Hosts that compare
+ * environments outside {@link captureWorkspaceInputFingerprintAsync} must use this function so that every
+ * comparison applies the same normalization.
+ *
+ * @alpha
+ */
+export function getWorkspaceFingerprintEnvironmentEntries(
+  environment: Readonly<Record<string, string | undefined>>
+): [string, string][] {
+  const isWindows: boolean = process.platform === 'win32';
+  return Object.entries(environment)
+    .filter(
+      (entry): entry is [string, string] =>
+        entry[1] !== undefined &&
+        !workspaceFingerprintIgnoredEnvironmentVariables.has(isWindows ? entry[0].toUpperCase() : entry[0])
+    )
+    .sort(([left], [right]) => Sort.compareByValue(left, right));
+}
+
+/**
  * Memoizes runtime content digests behind file identity, size, nanosecond mtime and ctime checks.
  * Changes to metadata alone still produce the same content fingerprint.
  *
@@ -180,13 +266,7 @@ export async function captureWorkspaceInputFingerprintAsync(
   );
   return {
     configurationHash: await hashFilesAsync(definitions),
-    environmentHash: hashText(
-      JSON.stringify(
-        Object.entries(environment)
-          .filter(([, value]) => value !== undefined)
-          .sort(([left], [right]) => Sort.compareByValue(left, right))
-      )
-    ),
+    environmentHash: hashText(JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment))),
     installationHash: await hashFilesAsync(installation),
     runtimeHash: hashText(JSON.stringify([process.execPath, process.version, runtimeHash])),
     selectedRushVersion: environment.RUSH_PREVIEW_VERSION ?? rushJson.rushVersion

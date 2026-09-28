@@ -32,6 +32,7 @@ import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection
 import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
+import type { DaemonShutdownError } from './DaemonShutdownError';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
 import {
   InteractiveInputRoutingError,
@@ -49,6 +50,8 @@ export interface IDaemonControlSessionOptions {
   readonly onError: (error: Error) => void;
   readonly onRequestStarted?: () => () => void;
   readonly onShutdownRequested: () => void;
+  /** Counts requests running on every connection, reported in the shutdown acknowledgement. */
+  readonly getActiveRequestCount?: () => number;
   readonly getWorkspaceStatus?: () => IDaemonWorkspaceStatus;
 }
 
@@ -103,9 +106,13 @@ export class DaemonControlSession {
     options.onInteractiveConnection?.(this.#interactiveConnection);
   }
 
-  public closeAsync(drainRequests: boolean = false): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync(drainRequests);
+  public closeAsync(drainRequests: boolean = false, reason?: DaemonShutdownError): Promise<void> {
+    this.#closePromise ??= this.#closeOnceAsync(drainRequests, reason);
     return this.#closePromise;
+  }
+
+  public get activeRequestCount(): number {
+    return this.#requestById.size;
   }
 
   async #handleFrameSafelyAsync(frame: IDaemonFrame): Promise<void> {
@@ -240,8 +247,15 @@ export class DaemonControlSession {
         'Daemon shutdown requires a lifecycle-capable protocol version.'
       );
     }
-    await this.#enqueueControlAsync({ kind: 'shutdownAck', payload: {} });
+    const activeRequests: number | undefined = this.#options.getActiveRequestCount?.();
+    // Queue the acknowledgement, then begin shutdown synchronously so the reported count is the set that
+    // shutdown aborts; closing drains the send queue, so the acknowledgement is still delivered first.
+    const ackPromise: Promise<void> = this.#enqueueControlAsync({
+      kind: 'shutdownAck',
+      payload: activeRequests === undefined ? {} : { activeRequests }
+    });
     this.#options.onShutdownRequested();
+    await ackPromise;
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
@@ -443,8 +457,8 @@ export class DaemonControlSession {
     }
   }
 
-  async #closeOnceAsync(drainRequests: boolean = false): Promise<void> {
-    const closeReason: Error = new Error('The daemon control session is closing.');
+  async #closeOnceAsync(drainRequests: boolean = false, reason?: DaemonShutdownError): Promise<void> {
+    const closeReason: Error = reason ?? new Error('The daemon control session is closing.');
     if (drainRequests) {
       const pending: Promise<PromiseSettledResult<void>[]> = Promise.allSettled(
         Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)

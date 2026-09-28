@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+
+## 7.30.17
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Patches
+
+- Update js-yaml dependency to ~4.3.2 to address security advisories for CPU consumption with certain inputs.
 
 ## 7.30.16
 Tue, 22 Sep 2026 17:35:41 GMT

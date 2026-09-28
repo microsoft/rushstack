@@ -4,16 +4,22 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import * as fs from 'node:fs';
+import * as net from 'node:net';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { FileSystem } from '@rushstack/node-core-library';
-import type { IDaemonLockfile, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import {
+  readDaemonLockfile,
+  type IDaemonLockfile,
+  type IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
 import { DaemonClient } from '../DaemonClient';
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { getDaemonLogFilePath } from '../DaemonLogFile';
+import { resetDaemonArtifactsAsync } from '../DaemonOwnership';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
 import { getDaemonStartupFilePath } from '../DaemonStartup';
@@ -98,6 +104,19 @@ describe('detached daemon startup', () => {
     };
   }
 
+  async function leaveStaleSocketAsync(): Promise<void> {
+    // A listener killed without cleanup leaves a bound-nowhere socket file behind.
+    const child: ChildProcess = spawn(
+      process.execPath,
+      [
+        '-e',
+        `require('net').createServer().listen(${JSON.stringify(paths.socketPath)}, () => process.kill(process.pid, 'SIGKILL'))`
+      ],
+      { stdio: 'ignore' }
+    );
+    await once(child, 'close');
+  }
+
   async function killStarterBeforeBindAsync(): Promise<number> {
     fs.writeFileSync(path.join(folder, 'hold-prebind'), '');
     const starter = startClient();
@@ -156,6 +175,7 @@ describe('detached daemon startup', () => {
       code: 1,
       stderr: expect.stringContaining('unresolved startup handoff')
     });
+    expect((await result).stderr).toContain('daemon stop --force');
     expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
@@ -358,9 +378,33 @@ describe('detached daemon startup', () => {
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
   });
 
-  it.each(['restart-once', 'restart-always', 'restart-held'])(
+  it('resolves a lazy start command only when no compatible daemon is ready', async () => {
+    const { startCommand, ...connectOnly } = options;
+    const resolveStartCommandAsync = jest.fn(async () => startCommand!);
+    const started = await connectOrStartDaemonAsync({ ...connectOnly, resolveStartCommandAsync });
+    await started.closeAsync();
+    expect(resolveStartCommandAsync).toHaveBeenCalledTimes(1);
+    const warm = await connectOrStartDaemonAsync({ ...connectOnly, resolveStartCommandAsync });
+    await warm.closeAsync();
+    expect(resolveStartCommandAsync).toHaveBeenCalledTimes(1);
+    const replaced = await connectOrStartDaemonAsync({
+      ...connectOnly,
+      expectedDaemonVersion: 'replacement',
+      resolveStartCommandAsync: async () => ({
+        ...startCommand!,
+        args: [...startCommand!.args, 'replacement']
+      })
+    });
+    expect((await replaced.status).daemonVersion).toBe('replacement');
+    await replaced.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(2);
+  });
+
+  it.each(['restart-once', 'restart-twice', 'restart-always', 'restart-held'])(
     'retries only the typed pre-execution result for %s after ownership release',
     async (mode) => {
+      // restart-always exhausts the deadline; the others need room for loaded CI machines.
+      const waitTimeoutMs: number = mode === 'restart-always' ? 1000 : 10000;
       const connection: IConnectOrStartDaemonOptions = {
         ...options,
         startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
@@ -373,7 +417,7 @@ describe('detached daemon startup', () => {
         cwd: folder,
         environment: {},
         terminal: { isTTY: false, supportsColor: false },
-        admission: { waitTimeoutMs: 1000 }
+        admission: { waitTimeoutMs }
       });
       const pending = executeWithDaemonRestartAsync(
         client,
@@ -383,24 +427,36 @@ describe('detached daemon startup', () => {
         },
         { request }
       );
-      if (mode === 'restart-once') {
+      if (mode === 'restart-once' || mode === 'restart-twice') {
+        const restarts: number = mode === 'restart-once' ? 1 : 2;
         expect(await pending).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
         const waits = fs.readFileSync(path.join(folder, 'waits'), 'utf8').trim().split('\n').map(Number);
-        expect(waits[0]).toBe(1000);
-        expect(waits[1]).toBeLessThan(1000);
-        expect(waits[1]).toBeGreaterThanOrEqual(0);
-        expect(request.admission?.waitTimeoutMs).toBe(1000);
-      } else {
-        await expect(pending).rejects.toThrow(
-          mode === 'restart-held' ? 'previous daemon still owns' : 'single safe retry was exhausted'
+        expect(waits).toHaveLength(restarts + 1);
+        expect(waits[0]).toBe(waitTimeoutMs);
+        for (let index: number = 1; index <= restarts; index++) {
+          expect(waits[index]).toBeLessThanOrEqual(waits[index - 1]);
+          expect(waits[index]).toBeLessThan(waitTimeoutMs);
+          expect(waits[index]).toBeGreaterThanOrEqual(0);
+        }
+        expect(request.admission?.waitTimeoutMs).toBe(waitTimeoutMs);
+        expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(
+          restarts + 1
         );
+      } else if (mode === 'restart-always') {
+        // Every successor asks again: bounded retries inside the admission deadline, then a fallback.
+        expect(await pending).toMatchObject({ kind: 'fallback', reason: 'restartRetriesExhausted' });
+        const starts: number = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n').length;
+        expect(starts).toBeGreaterThanOrEqual(2);
+        expect(starts).toBeLessThanOrEqual(7);
+        // The deadline may expire after the last successor started but before the request was resubmitted.
+        const requests: number = fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n').length;
+        expect(requests).toBeGreaterThanOrEqual(starts - 1);
+        expect(requests).toBeLessThanOrEqual(starts);
+      } else {
+        await expect(pending).rejects.toThrow('previous daemon still owns');
+        expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+        expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
       }
-      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(
-        mode === 'restart-held' ? 1 : 2
-      );
-      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(
-        mode === 'restart-held' ? 1 : 2
-      );
     },
     15000
   );
@@ -440,6 +496,35 @@ describe('detached daemon startup', () => {
       }
     }
   );
+
+  it('bounds the successor hand-off by the admission deadline instead of a fresh startup timeout', async () => {
+    const connection: IConnectOrStartDaemonOptions = {
+      ...options,
+      startupTimeoutMs: 7000,
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'fixture', 'restart-held']
+      }
+    };
+    const client = await connectOrStartDaemonAsync(connection);
+    const request = captureDaemonRequest({
+      argv: ['test'],
+      commandName: 'test',
+      commandOrigin: 'custom',
+      cwd: folder,
+      environment: {},
+      terminal: { isTTY: false, supportsColor: false },
+      admission: { waitTimeoutMs: 500 }
+    });
+    const startedAt: number = Date.now();
+    expect(await executeWithDaemonRestartAsync(client, connection, { request })).toMatchObject({
+      kind: 'fallback',
+      reason: 'restartRetriesExhausted'
+    });
+    expect(Date.now() - startedAt).toBeLessThan(5000);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
 
   it('refuses restart retry if ownership was not attested before submitting', async () => {
     const connection: IConnectOrStartDaemonOptions = {
@@ -581,18 +666,133 @@ describe('detached daemon startup', () => {
     }
   );
 
-  it('never reclaims a live or reused PID', async () => {
+  it('reclaims a parseable record with an invalid timestamp without waiting out the deadline', async () => {
+    const record: string = JSON.stringify({
+      pid: process.pid,
+      protocolVersion: { major: 0, minor: 6 },
+      startedAt: 'invalid',
+      socketPath: paths.socketPath
+    });
+    fs.writeFileSync(paths.lockfilePath, record);
+    const started: number = Date.now();
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs! - 2000);
+    expect(readDaemonLockfile(paths.lockfilePath)?.pid).not.toBe(process.pid);
+  });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'force reset waits for a listener to release the endpoint',
+    async () => {
+      fs.writeFileSync(getDaemonStartupFilePath(paths), 'abandoned');
+      const listener: net.Server = net.createServer((socket) => socket.destroy());
+      await new Promise<void>((resolve) => listener.listen(paths.socketPath, resolve));
+      await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow('still listening');
+      const closing: NodeJS.Timeout = setTimeout(() => listener.close(), 300);
+      try {
+        expect(await resetDaemonArtifactsAsync(paths, { waitTimeoutMs: 5000 })).toEqual({
+          removedPaths: [getDaemonStartupFilePath(paths)]
+        });
+      } finally {
+        clearTimeout(closing);
+        listener.close();
+      }
+    }
+  );
+
+  it('never reclaims a live PID that may still own the record', async () => {
     const record: string = JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() });
     fs.writeFileSync(paths.lockfilePath, record);
-    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('may be a reused PID');
+    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('or a reused PID');
+    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('daemon stop --force');
+    expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
+    await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow(`PID ${process.pid} still owns`);
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
   });
 
-  it('fails closed on corrupt ownership records', async () => {
+  it('reclaims a corrupt ownership record once the endpoint refuses connections', async () => {
     fs.writeFileSync(paths.lockfilePath, 'not json');
-    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('refusing automatic reclaim');
-    expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('not json');
+    const client = await connectOrStartDaemonAsync(options);
+    await client.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    expect(readDaemonLockfile(paths.lockfilePath)?.pid).toBe(
+      Number(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim())
+    );
   });
+
+  it('fails closed on a corrupt ownership record while something still listens', async () => {
+    fs.writeFileSync(paths.lockfilePath, 'not json');
+    const listener: net.Server = net.createServer((socket) => socket.destroy());
+    await new Promise<void>((resolve) => listener.listen(paths.socketPath, resolve));
+    try {
+      await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 2000 })).rejects.toThrow(
+        'did not refuse a connection'
+      );
+      await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow('still listening');
+      expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe('not json');
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    } finally {
+      await new Promise<void>((resolve) => listener.close(() => resolve()));
+    }
+  });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'reclaims a socket without an ownership record once it refuses connections',
+    async () => {
+      await leaveStaleSocketAsync();
+      expect(fs.existsSync(paths.socketPath)).toBe(true);
+      const client = await connectOrStartDaemonAsync(options);
+      await client.closeAsync();
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    }
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'reclaims a record whose live PID started after the record was written',
+    async () => {
+      const unrelated: ChildProcess = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
+        stdio: 'ignore'
+      });
+      await once(unrelated, 'spawn');
+      try {
+        await leaveStaleSocketAsync();
+        fs.writeFileSync(
+          paths.lockfilePath,
+          JSON.stringify({
+            pid: unrelated.pid,
+            protocolVersion: { major: 0, minor: 6 },
+            startedAt: new Date(Date.now() - 3600000).toISOString(),
+            socketPath: paths.socketPath
+          })
+        );
+        const started: number = Date.now();
+        const client = await connectOrStartDaemonAsync(options);
+        await client.closeAsync();
+        // Not the full startup deadline spent polling the unrelated process.
+        expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs! - 2000);
+        expect(unrelated.exitCode).toBeNull();
+        expect(readDaemonLockfile(paths.lockfilePath)?.pid).not.toBe(unrelated.pid);
+      } finally {
+        const closed: Promise<unknown[]> = once(unrelated, 'close');
+        unrelated.kill('SIGKILL');
+        await closed;
+      }
+    }
+  );
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'force reset removes stale artifacts without starting a daemon',
+    async () => {
+      await leaveStaleSocketAsync();
+      fs.writeFileSync(paths.lockfilePath, 'garbage{');
+      fs.writeFileSync(getDaemonStartupFilePath(paths), 'abandoned');
+      expect(await resetDaemonArtifactsAsync(paths)).toEqual({
+        removedPaths: [paths.lockfilePath, getDaemonStartupFilePath(paths), paths.socketPath]
+      });
+      expect(await resetDaemonArtifactsAsync(paths)).toEqual({ removedPaths: [] });
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    }
+  );
 
   it('starts after ownership release even while the original process remains alive', async () => {
     const client = await connectOrStartDaemonAsync({

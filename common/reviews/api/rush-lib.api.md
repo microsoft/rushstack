@@ -381,6 +381,9 @@ export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) =>
 // @beta
 export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined>;
 
+// @alpha
+export function getWorkspaceFingerprintEnvironmentEntries(environment: Readonly<Record<string, string | undefined>>): [string, string][];
+
 // @alpha (undocumented)
 export interface IBaseOperationExecutionResult {
     getStateHash(): string;
@@ -718,7 +721,9 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
 // @alpha
 export interface IOperationGraph {
     readonly abortController: AbortController;
-    abortCurrentIterationAsync(): Promise<void>;
+    abortCurrentIterationAsync(options?: {
+        terminateRunning?: boolean;
+    }): Promise<void>;
     addTerminalDestination(destination: TerminalWritable): void;
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
@@ -820,6 +825,7 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
+    readonly abortSignal?: AbortSignal;
     collatedWriter: CollatedWriter;
     // @internal
     createChildProcessReporter(): _IOperationChildProcessReporter | undefined;
@@ -948,6 +954,14 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
     readonly pluginNames: ReadonlyArray<string>;
     // (undocumented)
     readonly rushSession: RushSession;
+}
+
+// @alpha
+export interface IPhasedCommandEngineRequestSettings {
+    // (undocumented)
+    readonly parallelism: Parallelism;
+    // (undocumented)
+    readonly quietMode: boolean;
 }
 
 // @alpha
@@ -1509,6 +1523,7 @@ export class PhasedCommandEngine {
     readonly parameterIdentity: string;
     // (undocumented)
     static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
+    get requestSettings(): IPhasedCommandEngineRequestSettings;
     selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
 }
 
@@ -1586,6 +1601,9 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 
 // @public
 export type PnpmTrustPolicy = 'no-downgrade' | 'off';
+
+// @internal
+export function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): void;
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
@@ -2093,6 +2111,9 @@ export enum VersionPolicyDefinitionName {
     // (undocumented)
     'lockStepVersion' = 0
 }
+
+// @alpha
+export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string>;
 
 // @alpha
 export enum WorkspaceInputChangeTier {

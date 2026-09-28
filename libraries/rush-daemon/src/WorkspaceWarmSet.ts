@@ -53,6 +53,7 @@ interface IProjectHistory {
   readonly operations: Operation[];
   lastUsed: number;
   frequency: number;
+  requestedTarget: boolean;
 }
 
 interface IOperationTiming {
@@ -63,6 +64,8 @@ interface IOperationTiming {
 interface IWarmProject extends IWarmSetRank {
   readonly operations: ReadonlyArray<Operation>;
   readonly protected: boolean;
+  /** Owns a live runner or a file watcher. Only these count toward, and are evicted for, `warmSetMaxProjects`. */
+  readonly holdsResources: boolean;
 }
 
 const PLUGIN_NAME: string = 'WorkspaceWarmSet';
@@ -99,7 +102,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       const name: string = operation.associatedProject.packageName;
       let project: IProjectHistory | undefined = this.#projects.get(name);
       if (!project) {
-        project = { operations: [], lastUsed: now, frequency: 0 };
+        project = { operations: [], lastUsed: now, frequency: 0, requestedTarget: false };
         this.#projects.set(name, project);
       }
       project.operations.push(operation);
@@ -110,9 +113,11 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       const requested: string[] = [];
       const requestedAt: number = performance.now();
       for (const [name, project] of this.#projects) {
-        if (!project.operations.some((operation) => operation.enabled !== false)) continue;
+        const enabled: Operation[] = project.operations.filter((operation) => operation.enabled !== false);
+        if (!enabled.length) continue;
         project.lastUsed = requestedAt;
         project.frequency++;
+        project.requestedTarget = enabled.some((operation) => !hasEnabledConsumer(operation));
         requested.push(name);
       }
       try {
@@ -202,7 +207,9 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       overMemoryBudget:
         daemonResidentMemoryBytes + measuredRunnerMemoryBytes >
         this.#configuration.warmMemoryBudgetMB * BYTES_PER_MB,
-      overProjectLimit: projects.length > this.#configuration.warmSetMaxProjects,
+      // Retained results of resource-free projects are cheap and are what makes a warm no-op skip possible.
+      overProjectLimit:
+        projects.filter((project) => project.holdsResources).length > this.#configuration.warmSetMaxProjects,
       deferredReason: this.#deferredReason,
       cleanupFailures: [
         ...this.#cleanupFailures.values(),
@@ -358,7 +365,8 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         project.operations.every(
           (operation) => !graph.resultByOperation.has(operation) && !operation.runner?.isActive
         );
-      if (!unrequested && !expired && !status.overMemoryBudget && !status.overProjectLimit) continue;
+      const overProjectLimit: boolean = status.overProjectLimit && project.holdsResources;
+      if (!unrequested && !expired && !status.overMemoryBudget && !overProjectLimit) continue;
       try {
         await graph.closeRunnersAsync(project.operations);
         if (project.operations.some((operation) => operation.runner?.isActive)) {
@@ -409,7 +417,9 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         ...history,
         residentMemoryBytes,
         timeSavedMs,
-        protected: history.operations.some((operation) => protectedOperations?.has(operation))
+        protected: history.operations.some((operation) => protectedOperations?.has(operation)),
+        holdsResources:
+          watched.has(key) || resident.some((operation) => mayHoldRunnerResources(operation.runner))
       });
     }
     return projects.sort((a, b) => compareWarmSetRanks(a, b, this.#configuration.autoWarmByTelemetry));
@@ -497,6 +507,22 @@ export class WorkspaceWarmSet implements AsyncDisposable {
 
 function isMeasuredMemory(bytes: number | undefined): bytes is number {
   return bytes !== undefined && Number.isSafeInteger(bytes) && bytes > 0;
+}
+
+/**
+ * `isActive` is optional for backward compatibility; a retained runner that leaves it undefined but can be closed
+ * may own background resources, matching the conservative accounting in `getStatus()`.
+ */
+function mayHoldRunnerResources(runner: IOperationRunner | undefined): boolean {
+  if (!runner) return false;
+  return runner.isActive === undefined ? !!runner.closeAsync : runner.isActive;
+}
+
+function hasEnabledConsumer(operation: Operation): boolean {
+  for (const consumer of operation.consumers) {
+    if (consumer.enabled !== false) return true;
+  }
+  return false;
 }
 
 function isGraphBusy(graph: IOperationGraph): boolean {

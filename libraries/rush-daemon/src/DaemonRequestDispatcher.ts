@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 import type {
   IDaemonCommandResult,
   IDaemonEventEnvelope,
@@ -32,6 +33,8 @@ export interface IResolvedDaemonPhasedRequest {
   readonly request: IDaemonPhasedRequest;
   /** Native selection has already resolved all required project/phase dependencies. */
   readonly exactSelection?: boolean;
+  /** Verbosity and parallelism for this request; applied to the shared graph before its iteration. */
+  readonly requestSettings?: IPhasedCommandEngineRequestSettings;
 }
 
 /** A resolver outcome that uses the existing isolated global executor contract. @beta */
@@ -187,7 +190,8 @@ async function dispatchWorkspaceRequestAsync(
       resolved.request,
       createPhasedClient(client),
       resolved.exactSelection,
-      onExecutionStarting
+      onExecutionStarting,
+      resolved.requestSettings
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);
@@ -197,6 +201,7 @@ async function dispatchWorkspaceRequestAsync(
     commandOrigin: isRushxInvocation(envelope) ? 'custom' : envelope.commandOrigin,
     cwd: envelope.cwd,
     environment: envelope.environment,
+    invocationKind: isRushxInvocation(envelope) ? 'rushx' : 'rush',
     requestId: envelope.requestId,
     terminal: {
       ...envelope.terminal,

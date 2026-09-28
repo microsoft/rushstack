@@ -59,6 +59,52 @@ it('uses zero when a host has no native workspace lifecycle, without inventing a
   }
 });
 
+it('reuses the warm generation when only volatile per-shell environment variables differ', async () => {
+  const fixture = await DaemonGraphTestFixture.createAsync((created) => {
+    setDaemonPolicy(created, {});
+    created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+  });
+  try {
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect(fixture.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reuse);
+    const before = await pongAsync(fixture);
+    const generation: number = fixture.host.workspaceGeneration;
+    const graph = fixture.session.operationGraph;
+    for (const [label, environment] of Object.entries({
+      same: fixture.environment,
+      shell: {
+        ...fixture.environment,
+        OLDPWD: '/elsewhere',
+        PWD: `${fixture.folder}/b`,
+        SHLVL: '7',
+        _: '/usr/bin/env'
+      },
+      terminal: { ...fixture.environment, TERM: 'dumb', COLUMNS: '91', WSL_INTEROP: '/run/WSL/1_interop' },
+      routing: { ...fixture.environment, RUSH_DAEMON: '1', RUSH_DAEMON_EXPERIMENTAL: '1' }
+    })) {
+      const result = await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], { environment });
+      expect(result.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect({ label, tier: fixture.host.workspaceStatus.lastReloadTier }).toEqual({
+        label,
+        tier: WorkspaceInputChangeTier.Reuse
+      });
+    }
+    expect(fixture.host.workspaceGeneration).toBe(generation);
+    expect(fixture.session.operationGraph).toBe(graph);
+    expect((await pongAsync(fixture)).pid).toBe(before.pid);
+    expect(fixture.runs()).toEqual(['a', 'b']);
+  } finally {
+    try {
+      await fixture.host.closeAsync();
+      await fixture.host.restartCompleted;
+    } finally {
+      await stopSuccessorAsync(fixture.host.paths);
+      await fixture[Symbol.asyncDispose]();
+    }
+  }
+});
+
 it('retains the requested restart tier on the old host while a real successor starts cold', async () => {
   const fixture = await DaemonGraphTestFixture.createAsync((created) => {
     setDaemonPolicy(created, {});

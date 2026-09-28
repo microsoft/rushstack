@@ -11,6 +11,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient, connectOrStartDaemonAsync, getDaemonLogFilePath } from '@rushstack/rush-client-core';
+import type { DaemonClientOutcome } from '@rushstack/rush-client-core';
 import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
 import {
   removeTestFolderAsync,
@@ -20,6 +21,12 @@ import { captureTestDaemonListenerAsync } from '@rushstack/rush-daemon/lib/test/
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+import {
+  CANCELLATION_SIGNALS,
+  formatCancellationMessage,
+  getSignalExitCode,
+  isCancelledOutcome
+} from '../clientCancellation';
 
 interface IInvocationResult {
   readonly code: number | undefined;
@@ -248,13 +255,83 @@ describe('standalone rushx fallback', () => {
     expect((await invokeAsync(true, false, false, ['daemon', 'logs', '--follow', 'extra'])).code).toBe(1);
   });
 
-  it('does not start an absent daemon when stop or restart cannot be acknowledged', async () => {
-    for (const verb of ['stop', 'restart']) {
-      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', verb]);
-      expect(result.code).toBe(1);
-      expect(result.stderr).toContain('Could not connect to daemon');
+  it('treats stop as idempotent and restart as start when no daemon is running', async () => {
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    for (const args of [
+      ['daemon', 'stop'],
+      ['daemon', 'stop', '--force']
+    ]) {
+      const result: IInvocationResult = await invokeAsync(true, false, false, args);
+      expect(result).toMatchObject({ code: 0, stderr: '' });
+      expect(JSON.parse(result.stdout)).toEqual({
+        state: 'notRunning',
+        socketPath: paths.socketPath,
+        ...(args[2] ? { removedPaths: [] } : {})
+      });
     }
-  });
+    try {
+      const restarted: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'restart']);
+      expect(restarted.stderr).toBe('');
+      expect(restarted.code).toBe(0);
+      expect(JSON.parse(restarted.stdout)).toMatchObject({ state: 'ready', socketPath: paths.socketPath });
+      const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop']);
+      expect(stopped.code).toBe(0);
+      expect(JSON.parse(stopped.stdout)).toMatchObject({ state: 'shutdownAccepted' });
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    }
+  }, 30000);
+
+  it('stop --force clears an abandoned startup reservation next to a running daemon', async () => {
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    const reservation: string = `${paths.lockfilePath}.starting`;
+    try {
+      expect((await invokeAsync(true, false, false, ['daemon', 'start'])).code).toBe(0);
+      fs.writeFileSync(reservation, 'abandoned');
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
+      expect(result).toMatchObject({ code: 0, stderr: '' });
+      expect(JSON.parse(result.stdout)).toEqual({
+        state: 'shutdownAccepted',
+        socketPath: paths.socketPath,
+        cancelledRequests: 0,
+        removedPaths: [reservation]
+      });
+      expect(fs.existsSync(reservation)).toBe(false);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+    }
+  }, 30000);
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'stop --force removes stale artifacts left by a killed daemon',
+    async () => {
+      const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+      fs.mkdirSync(path.dirname(paths.lockfilePath), { recursive: true, mode: 0o700 });
+      const listener: ChildProcess = spawn(
+        process.execPath,
+        [
+          '-e',
+          `require('net').createServer().listen(${JSON.stringify(paths.socketPath)}, () => process.kill(process.pid, 'SIGKILL'))`
+        ],
+        { stdio: 'ignore' }
+      );
+      await once(listener, 'close');
+      fs.writeFileSync(paths.lockfilePath, 'garbage{');
+      const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
+      expect(result).toMatchObject({ code: 0, stderr: '' });
+      expect(JSON.parse(result.stdout)).toEqual({
+        state: 'reset',
+        socketPath: paths.socketPath,
+        removedPaths: [paths.lockfilePath, paths.socketPath]
+      });
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+      expect(fs.existsSync(paths.socketPath)).toBe(false);
+    }
+  );
 
   it.each([false, true])(
     'restarts after ownership release and stops the successor (embedded: %s)',
@@ -421,5 +498,49 @@ describe('standalone rushx fallback', () => {
     ]);
     expect(result.code).toBe(1);
     expect(result.stderr).toContain('--no-daemon cannot be combined with daemon start');
+  });
+});
+
+describe('daemon client cancellation exit codes', () => {
+  const abortedResult: DaemonClientOutcome = {
+    kind: 'result',
+    result: { requestId: 'r', outcome: 'aborted', exitCode: 1, aborted: true }
+  };
+
+  it('maps cancellation signals to 128 + signal number', () => {
+    expect(getSignalExitCode('SIGINT')).toBe(130);
+    expect(getSignalExitCode('SIGTERM')).toBe(143);
+    expect(getSignalExitCode('SIGHUP')).toBe(129);
+    expect(CANCELLATION_SIGNALS).toEqual(['SIGINT', 'SIGTERM', 'SIGHUP']);
+  });
+
+  it('treats an aborted daemon result as cancelled instead of copying its exit code', () => {
+    expect(isCancelledOutcome(abortedResult, true)).toBe(true);
+    // Ctrl+C read from a raw-mode TTY cancels without a process signal.
+    expect(isCancelledOutcome(abortedResult, false)).toBe(true);
+    expect(formatCancellationMessage('build')).toBe('rush-client: build cancelled.\n');
+  });
+
+  it('treats a cancelled result as cancelled even when a failure outcome takes precedence', () => {
+    const cancelledWithFailure: DaemonClientOutcome = {
+      kind: 'result',
+      result: { requestId: 'r', outcome: 'failure', exitCode: 1, aborted: true }
+    };
+    expect(isCancelledOutcome(cancelledWithFailure, true)).toBe(true);
+  });
+
+  it('keeps completed results and rejections when a signal arrives late', () => {
+    const succeeded: DaemonClientOutcome = {
+      kind: 'result',
+      result: { requestId: 'r', outcome: 'success', exitCode: 0, aborted: false }
+    };
+    const rejected: DaemonClientOutcome = {
+      kind: 'rejected',
+      rejection: { requestId: 'r', code: 'unsupportedProtocolVersion', message: 'no' }
+    } as unknown as DaemonClientOutcome;
+    expect(isCancelledOutcome(succeeded, true)).toBe(false);
+    expect(isCancelledOutcome(rejected, true)).toBe(false);
+    expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, true)).toBe(true);
+    expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, false)).toBe(false);
   });
 });

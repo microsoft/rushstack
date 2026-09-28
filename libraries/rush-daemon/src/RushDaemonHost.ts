@@ -18,6 +18,7 @@ import { DaemonIdleTimer } from './DaemonIdleTimer';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
 import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
+import { DaemonShutdownError, type DaemonShutdownInitiator } from './DaemonShutdownError';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
@@ -180,7 +181,12 @@ export class RushDaemonHost {
             },
             onError: (error: Error) => options.onError?.(error),
             onRequestStarted: () => idleTimer.acquire(),
-            onShutdownRequested: requestShutdown
+            onShutdownRequested: () => requestShutdown('controlClient'),
+            getActiveRequestCount: () => {
+              let count: number = 0;
+              for (const activeSession of sessions) count += activeSession.activeRequestCount;
+              return count;
+            }
           });
           sessions.add(session);
           if (lifecycle.closing) {
@@ -223,13 +229,13 @@ export class RushDaemonHost {
     function requestRestart(plan: IWorkspaceProcessRestartPlan): void {
       host.#requestRestart(plan);
     }
-    function requestShutdown(): void {
-      void host.closeAsync().catch((error: Error) => {
+    function requestShutdown(initiator: DaemonShutdownInitiator): void {
+      void host.closeAsync(new DaemonShutdownError({ initiator })).catch((error: Error) => {
         if (options.onError) options.onError(error);
         else process.emitWarning(error);
       });
     }
-    idleTimer.start(requestShutdown);
+    idleTimer.start(() => requestShutdown('idleTimeout'));
     return host;
   }
 
@@ -248,9 +254,13 @@ export class RushDaemonHost {
     return this.#readWorkspaceStatus();
   }
 
-  /** Closes active connections, stops listening, and removes transport artifacts. */
-  public closeAsync(): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync().finally(() => {
+  /**
+   * Closes active connections, stops listening, and removes transport artifacts.
+   *
+   * @param reason - Delivered to requests that are still running; only the first close call's reason is used.
+   */
+  public closeAsync(reason?: DaemonShutdownError): Promise<void> {
+    this.#closePromise ??= this.#closeOnceAsync(reason).finally(() => {
       this.#notifyClosed?.();
       if (!this.#restartPromise) this.#resolveRestart?.(undefined);
     });
@@ -272,7 +282,7 @@ export class RushDaemonHost {
   }
 
   async #restartOnceAsync(plan: IWorkspaceProcessRestartPlan): Promise<IWorkspaceProcessRestartResult> {
-    await this.closeAsync();
+    await this.closeAsync(new DaemonShutdownError({ initiator: 'restart' }));
     if (plan.failure) throw plan.failure;
     if (!plan.launch) throw new Error('A successor was not selected.');
     const paths: IDaemonPaths = resolveDaemonPathsFromProcess(
@@ -297,7 +307,7 @@ export class RushDaemonHost {
     }
   }
 
-  async #closeOnceAsync(): Promise<void> {
+  async #closeOnceAsync(reason: DaemonShutdownError | undefined): Promise<void> {
     this.#idleTimer[Symbol.dispose]();
     this.#lifecycle.closing = true;
     const errors: unknown[] = [];
@@ -305,7 +315,7 @@ export class RushDaemonHost {
     // A failed standalone host must not exit naturally and become reclaimable over unjoined children.
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this.#sessions, (session: DaemonControlSession) =>
-        session.closeAsync(!!this.#restartPromise)
+        session.closeAsync(!!this.#restartPromise, reason ?? new DaemonShutdownError({ initiator: 'host' }))
       )
     );
     for (const settlement of sessionSettlements) {

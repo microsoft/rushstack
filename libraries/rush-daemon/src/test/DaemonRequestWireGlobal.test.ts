@@ -10,6 +10,7 @@ import type { DaemonControlMessage, IDaemonRequestEnvelope } from '@rushstack/ru
 
 import type { GlobalCommandExecutor, IDaemonRequestResolver } from '../index';
 import { MAX_REQUESTS_PER_CONNECTION } from '../DaemonConnectionLimits';
+import { DaemonShutdownError } from '../DaemonShutdownError';
 import { RushDaemonHost } from '../RushDaemonHost';
 import type { IRushDaemonHostOptions } from '../RushDaemonHost';
 import { TestWorkspaceSession } from './TestWorkspaceSession';
@@ -296,6 +297,51 @@ describe('daemon global request wire integration', () => {
         kind: 'requestResult',
         payload: { outcome: 'success' }
       });
+    } finally {
+      releaseHolder.resolve();
+      await Promise.all(clients.map((client: DaemonRequestWireClient) => client.closeAsync()));
+      await host.closeAsync();
+    }
+  });
+
+  it('tells a request queued for admission that the daemon shut down', async () => {
+    const repoRoot: string = createRepoRoot();
+    const holderStarted: IDeferred<void> = createDeferred<void>();
+    const releaseHolder: IDeferred<void> = createDeferred<void>();
+    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(async ({ envelope }) => {
+      const executorAsync: GlobalCommandExecutor = async () => {
+        if (envelope.requestId === 'holder') {
+          holderStarted.resolve();
+          await releaseHolder.promise;
+        }
+        return { exitCode: 0 };
+      };
+      return { executor: executorAsync, kind: 'global' };
+    });
+    const host: RushDaemonHost = await RushDaemonHost.startAsync(createHostOptions(repoRoot, resolver));
+    const clients: DaemonRequestWireClient[] = await Promise.all([connectAsync(host), connectAsync(host)]);
+    const shutdown: DaemonShutdownError = new DaemonShutdownError({ initiator: 'controlClient' });
+    try {
+      await clients[0].sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('holder', 'custom', repoRoot)
+      });
+      await holderStarted.promise;
+      await clients[1].sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('queued', 'custom', repoRoot)
+      });
+      expect(await clients[1].readControlAsync()).toMatchObject({
+        kind: 'queuePosition',
+        payload: { requestId: 'queued' }
+      });
+      const closePromise: Promise<void> = host.closeAsync(shutdown);
+      releaseHolder.resolve();
+      expect((await clients[1].readTerminalAsync('queued')).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { aborted: true, admissionErrorCode: 'aborted', errorMessage: shutdown.message }
+      });
+      await closePromise;
     } finally {
       releaseHolder.resolve();
       await Promise.all(clients.map((client: DaemonRequestWireClient) => client.closeAsync()));

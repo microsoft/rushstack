@@ -12,6 +12,11 @@ export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-time
 export interface IDaemonRequestAdmissionOptions {
   /** Fail immediately when the request cannot be admitted. */
   readonly noWait?: boolean;
+  /**
+   * True when `waitTimeoutMs` is a client default rather than an explicit user choice. A default timeout bounds
+   * workspace admission only, not waiting behind running compatible shared builds.
+   */
+  readonly waitTimeoutIsDefault?: boolean;
   /** Maximum queue wait in milliseconds. Omission means no timeout. */
   readonly waitTimeoutMs?: number;
 }
@@ -33,7 +38,8 @@ export function validateDaemonRequestAdmissionOptions(
     return;
   }
   validateAdmissionRecord(options);
-  validateNoWait(options.noWait);
+  validateBoolean(options.noWait, 'noWait');
+  validateBoolean(options.waitTimeoutIsDefault, 'waitTimeoutIsDefault');
   validateWaitTimeout(options.waitTimeoutMs);
 }
 
@@ -43,9 +49,9 @@ function validateAdmissionRecord(options: IDaemonRequestAdmissionOptions): void 
   }
 }
 
-function validateNoWait(value: unknown): void {
+function validateBoolean(value: unknown, name: string): void {
   if (value !== undefined && typeof value !== 'boolean') {
-    throw new TypeError('Daemon request admission noWait must be a boolean.');
+    throw new TypeError(`Daemon request admission ${name} must be a boolean.`);
   }
 }
 

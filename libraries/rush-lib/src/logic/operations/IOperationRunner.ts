@@ -64,6 +64,14 @@ export interface IOperationRunnerContext {
   readonly shouldRunnerPersist: boolean;
 
   /**
+   * When defined, this signal is aborted if the host requests termination of in-progress work
+   * (see `IOperationGraph.abortCurrentIterationAsync` with `terminateRunning: true`). Runners that observe it
+   * should promptly stop any work they started (for example, kill their child process tree) and return
+   * `OperationStatus.Aborted`. It is `undefined` when the graph does not support terminating running operations.
+   */
+  readonly abortSignal?: AbortSignal;
+
+  /**
    * The environment in which the operation is being executed.
    * A return value of `undefined` indicates that it should inherit the environment from the parent process.
    */

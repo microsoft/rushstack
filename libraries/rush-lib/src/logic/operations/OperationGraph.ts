@@ -54,6 +54,12 @@ export interface IOperationGraphOptions {
   abortController: AbortController;
   /** Hosts with awaited lifetime cleanup can disable the legacy fire-and-forget abort cleanup. */
   closeRunnersOnAbort?: boolean;
+  /**
+   * If true, runners receive `IOperationRunnerContext.abortSignal`, and
+   * `abortCurrentIterationAsync({ terminateRunning: true })` terminates operations that are already running.
+   * Runners may isolate their child processes (e.g. in a separate process group) to support this.
+   */
+  supportsTerminateRunning?: boolean;
 
   isWatch?: boolean;
   pauseNextIteration?: boolean;
@@ -82,6 +88,7 @@ interface IStatefulExecutionContext {
  */
 interface IExecutionIterationContext extends IOperationExecutionRecordContext {
   abortController: AbortController;
+  terminateController: AbortController | undefined;
   terminal: CollatedTerminal;
 
   records: Map<Operation, OperationExecutionRecord>;
@@ -176,6 +183,7 @@ export class OperationGraph implements IOperationGraph {
 
   // Immutable properties from options
   readonly #isWatch: boolean;
+  readonly #supportsTerminateRunning: boolean;
   readonly #telemetry: IOperationGraphTelemetry | undefined;
   readonly #getInputsSnapshotAsync: (() => Promise<IInputsSnapshot | undefined>) | undefined;
 
@@ -220,11 +228,13 @@ export class OperationGraph implements IOperationGraph {
       abortController,
       isWatch = false,
       pauseNextIteration = false,
+      supportsTerminateRunning = false,
       telemetry,
       getInputsSnapshotAsync
     } = options;
 
     this.operations = operations;
+    this.#supportsTerminateRunning = supportsTerminateRunning;
 
     this.#maxParallelism = maxParallelism;
     this.#parallelism = coerceParallelism(parallelism, maxParallelism, 1);
@@ -627,9 +637,12 @@ export class OperationGraph implements IOperationGraph {
     return true;
   }
 
-  public async abortCurrentIterationAsync(): Promise<void> {
+  public async abortCurrentIterationAsync(options?: { terminateRunning?: boolean }): Promise<void> {
     const iteration: IExecutionIterationContext | undefined = this.#currentIteration;
     if (iteration) {
+      if (options?.terminateRunning) {
+        iteration.terminateController?.abort();
+      }
       iteration.abortController.abort();
       try {
         await iteration.promise;
@@ -709,10 +722,16 @@ export class OperationGraph implements IOperationGraph {
       return hooks.createEnvironmentForOperation.call({ ...process.env }, record);
     }
 
+    const terminateController: AbortController | undefined = this.#supportsTerminateRunning
+      ? new AbortController()
+      : undefined;
+
     // Convert the developer graph to the mutable execution graph
     const iterationContext: IExecutionIterationContext = {
       iterationId: this.#nextIterationId++,
       abortController,
+      terminateController,
+      terminateSignal: terminateController?.signal,
       startTime,
       streamCollator,
       terminal,

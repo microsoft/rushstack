@@ -61,6 +61,8 @@ export async function createNativeScriptGateAsync(
   const server: net.Server = net.createServer((socket) => {
     sockets.add(socket);
     socket.once('close', () => sockets.delete(socket));
+    // A daemon shutdown or cancellation may terminate the gated script, which resets its connection.
+    socket.on('error', () => undefined);
     entered.resolve();
   });
   await new Promise<void>((resolve, reject) => {

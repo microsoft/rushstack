@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import {
   captureWorkspaceInputFingerprintAsync,
   classifyWorkspaceInputChange,
+  getWorkspaceFingerprintEnvironmentEntries,
   WorkspaceInputChangeTier,
   WorkspaceRuntimeFingerprintCache,
   type IWorkspaceInputFingerprint
@@ -36,6 +37,60 @@ describe('workspace input fingerprints', () => {
         environment: { 'e\u0301': 'decomposed', '\u00e9': 'composed' }
       });
       expect(first.environmentHash).toBe(second.environmentHash);
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+
+  it('ignores volatile per-shell variables but not engine, Node.js or tool resolution inputs', async () => {
+    const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
+    try {
+      const rushJsonPath: string = path.join(folder, 'rush.json');
+      fs.writeFileSync(
+        rushJsonPath,
+        JSON.stringify({ rushVersion: '5.179.0', pnpmVersion: '10.27.0', projects: [] })
+      );
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
+      const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+      const base: Record<string, string> = {
+        HOME: '/home/user',
+        PATH: '/usr/local/bin:/usr/bin',
+        PWD: '/repo',
+        SHLVL: '1',
+        TERM: 'xterm-256color'
+      };
+      const getHashAsync = async (environment: Record<string, string | undefined>): Promise<string> =>
+        (await captureWorkspaceInputFingerprintAsync({ rushConfiguration, runtimeCache, environment }))
+          .environmentHash;
+      const baseHash: string = await getHashAsync(base);
+      for (const volatile of [
+        { PWD: '/repo/packages/p03', OLDPWD: '/repo' },
+        { SHLVL: '7', _: '/usr/bin/env' },
+        { TERM: 'dumb', COLUMNS: '91', LINES: '40', COLORTERM: 'truecolor' },
+        { WSL_INTEROP: '/run/WSL/12345_interop', WSLENV: 'WT_SESSION' },
+        { SSH_CONNECTION: '10.0.0.1 1 10.0.0.2 22', SSH_AUTH_SOCK: '/tmp/agent', TMUX: '/tmp/tmux' },
+        { INIT_CWD: '/repo/packages/p03' },
+        { RUSH_DAEMON: '1', RUSH_DAEMON_AUTO_START: '0', RUSH_DAEMON_EXPERIMENTAL: '1' },
+        { TERM: undefined, PWD: undefined }
+      ]) {
+        expect(await getHashAsync({ ...base, ...volatile })).toBe(baseHash);
+      }
+      for (const relevant of [
+        { FOO: '1' },
+        { RUSH_BUILD_CACHE_ENABLED: '1' },
+        { RUSH_BUILD_CACHE_WRITE_ALLOWED: '0' },
+        { RUSH_DAEMON_WATCH: '1' },
+        { NODE_OPTIONS: '--max-old-space-size=8192' },
+        { NPM_CONFIG_REGISTRY: 'https://example.invalid/' },
+        { PATH: '/usr/bin:/usr/local/bin' },
+        { HOME: '/home/other' }
+      ]) {
+        expect(await getHashAsync({ ...base, ...relevant })).not.toBe(baseHash);
+      }
+      expect(getWorkspaceFingerprintEnvironmentEntries({ ...base, OLDPWD: '/x', FOO: undefined })).toEqual([
+        ['HOME', '/home/user'],
+        ['PATH', '/usr/local/bin:/usr/bin']
+      ]);
     } finally {
       fs.rmSync(folder, { recursive: true, force: true });
     }

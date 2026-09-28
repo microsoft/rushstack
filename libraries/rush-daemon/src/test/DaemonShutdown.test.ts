@@ -38,7 +38,7 @@ describe('daemon management shutdown', () => {
     await client.sendControlAsync(createDaemonHello(DAEMON_PROTOCOL_VERSION));
     expect((await client.readControlAsync()).kind).toBe('helloAck');
     await client.sendControlAsync({ kind: 'shutdown', payload: {} });
-    expect(await client.readControlAsync()).toEqual({ kind: 'shutdownAck', payload: {} });
+    expect(await client.readControlAsync()).toEqual({ kind: 'shutdownAck', payload: { activeRequests: 0 } });
     await client.closed;
     await host.closed;
     expect(readDaemonLockfile(host.paths.lockfilePath)).toBeUndefined();

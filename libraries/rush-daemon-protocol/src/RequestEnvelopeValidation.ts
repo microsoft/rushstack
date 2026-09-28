@@ -23,6 +23,7 @@ export function validateRequestAdmission(value: unknown): void {
   if (value === undefined) return;
   const admission: Record<string, unknown> = requireRecord(value, 'requestStart payload.admission');
   validateOptionalBoolean(admission.noWait, 'Request admission noWait');
+  validateOptionalBoolean(admission.waitTimeoutIsDefault, 'Request admission waitTimeoutIsDefault');
   validateWaitTimeout(admission.waitTimeoutMs);
 }
 

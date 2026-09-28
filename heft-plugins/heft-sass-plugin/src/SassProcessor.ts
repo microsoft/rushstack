@@ -105,6 +105,27 @@ export interface ISassProcessorOptions {
   excludeFiles?: string[];
 
   /**
+   * Absolute paths of folders to search when resolving a bare specifier, e.g. `@use 'theme/colors'`.
+   * These are analogous to the `loadPaths` option of the Sass compiler, and are consulted after
+   * resolution relative to the importing file fails.
+   */
+  loadPaths?: string[];
+
+  /**
+   * If true, a bare specifier that does not resolve relative to the importing file or from `loadPaths`
+   * will additionally be resolved as a package, using Node module resolution.
+   *
+   * This is off by default because the Sass specification defines the target of `@use`, `@import` and
+   * `@forward` to be a URL, so `@use '@scope/pkg/theme'` is a relative path rather than a reference to
+   * a package. Enabling this deviates from the specification, and should only be done when consuming
+   * stylesheets that rely on it, such as third-party packages authored for toolchains that resolve
+   * bare specifiers from `node_modules`.
+   *
+   * Prefer the unambiguous `pkg:` scheme in stylesheets that you control.
+   */
+  resolveBareSpecifiersAsPackages?: boolean;
+
+  /**
    * If set, deprecation warnings from dependencies will be suppressed.
    */
   ignoreDeprecationsInDependencies?: boolean;
@@ -179,6 +200,13 @@ interface ISerializedFileRecord {
  */
 const importTildeRegex: RegExp = /^(\s*@(?:import|use|forward)\s*)('~(?:[^']+)'|"~(?:[^"]+)")/gm;
 
+/**
+ * Regexp matching the scheme of an absolute URL, e.g. the `pkg:` in `pkg:@fluentui/react/dist/sass/blah`.
+ * Per RFC 3986 a scheme starts with a letter and may contain letters, digits, `+`, `-` and `.`.
+ * This also matches a Windows drive letter prefix such as `C:`, which is likewise not a bare specifier.
+ */
+const urlSchemeRegex: RegExp = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
+
 // eslint-disable-next-line @rushstack/no-new-null
 type SyncResolution = URL | null;
 type AsyncResolution = Promise<SyncResolution>;
@@ -204,6 +232,8 @@ export class SassProcessor {
   readonly #resolutions: Map<string, SyncOrAsyncResolution>;
 
   readonly #isFileModule: (filePath: string) => boolean;
+  readonly #loadPaths: readonly string[];
+  readonly #resolveBareSpecifiersAsPackages: boolean;
   readonly #options: ISassProcessorOptions;
   readonly #realpathSync: (path: string) => string;
   readonly #scssOptions: Options<'async'>;
@@ -258,6 +288,8 @@ export class SassProcessor {
     this.#configFilePath = undefined;
     this.#fileInfo = new Map();
     this.#isFileModule = isFileModule;
+    this.#loadPaths = options.loadPaths ?? [];
+    this.#resolveBareSpecifiersAsPackages = options.resolveBareSpecifiersAsPackages ?? false;
     this.#resolutions = new Map();
     this.#options = options;
     this.#realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
@@ -558,7 +590,11 @@ export class SassProcessor {
    */
   async #canonicalizeAsync(url: string, context: CanonicalizeContext): AsyncResolution {
     if (url.startsWith('~')) {
-      throw new Error(`Unexpected tilde in URL: ${url} in context: ${context.containingUrl?.href}`);
+      // Legacy `~<package>` syntax. `preprocessScss` rewrites these to `pkg:` in `@import`, `@use` and
+      // `@forward` rules, but a tilde can also appear in constructs it does not cover, most notably
+      // `@include meta.load-css('~<package>')`. Apply the same rewrite here so that all of them behave
+      // consistently instead of failing with a confusing error.
+      return await this.#canonicalizePackageAsync(`pkg:${url.slice(1)}`, context);
     }
 
     if (url.startsWith('pkg:')) {
@@ -576,7 +612,46 @@ export class SassProcessor {
     }
 
     const resolvedUrl: string = new URL(url, containingUrl.toString()).toString();
-    return await this.#canonicalizeHeftUrlAsync(resolvedUrl, context);
+    const relativeResolution: SyncResolution = await this.#canonicalizeHeftUrlAsync(resolvedUrl, context);
+    if (relativeResolution || !isBareSpecifier(url)) {
+      return relativeResolution;
+    }
+
+    // Per the Sass specification the target of `@use`/`@import`/`@forward` is a URL, so a bare
+    // specifier such as `@use '@scope/pkg/theme'` is a relative path and has already been handled
+    // above. The fallbacks below deviate from that, so each one happens only when the configuration
+    // explicitly asks for it.
+    return await this.#canonicalizeBareSpecifierAsync(url, context);
+  }
+
+  /**
+   * Resolves a bare specifier, e.g. `theme/colors` or `@fluentui/react/dist/sass/blah`, against the
+   * opt-in `loadPaths` and `resolveBareSpecifiersAsPackages` options. Returns null when neither option
+   * is configured.
+   * @param url - The bare specifier to canonicalize
+   * @param context - The context in which the canonicalization is being performed
+   * @returns The canonical URL of the target file, or null if it does not resolve
+   */
+  async #canonicalizeBareSpecifierAsync(url: string, context: CanonicalizeContext): AsyncResolution {
+    for (const loadPath of this.#loadPaths) {
+      const candidateUrl: string = pathToHeftUrl(`${loadPath}/${url}`).href;
+      const result: SyncResolution = await this.#canonicalizeHeftUrlAsync(candidateUrl, context);
+      if (result) {
+        return result;
+      }
+    }
+
+    if (!this.#resolveBareSpecifiersAsPackages) {
+      return null;
+    }
+
+    try {
+      return await this.#canonicalizePackageAsync(`pkg:${url}`, context);
+    } catch {
+      // The specifier does not name an installed package. Returning null lets Sass report its usual
+      // "Can't find stylesheet to import" error, which points at the offending line in the stylesheet.
+      return null;
+    }
   }
 
   /**
@@ -1058,6 +1133,17 @@ function pathToHeftUrl(filePath: string): URL {
  */
 function isSassPartial(filePath: string): boolean {
   return path.basename(filePath)[0] === '_';
+}
+
+/**
+ * Determines whether a Sass load specifier is "bare", i.e. it names a package or a file within a load
+ * path rather than a location relative to the importing file. For example `@fluentui/react/dist/sass/blah`
+ * and `theme/colors` are bare, while `./colors`, `../theme/colors`, `/theme/colors` and `pkg:blah` are not.
+ * @param url - The specifier exactly as it was written in the stylesheet
+ * @returns true if the specifier is bare
+ */
+function isBareSpecifier(url: string): boolean {
+  return url.length > 0 && !url.startsWith('.') && !url.startsWith('/') && !urlSchemeRegex.test(url);
 }
 
 function getContentsHash(fileName: string, fileContents: string): string {

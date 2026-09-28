@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@rushstack/rush-published-versions-json-plugin':
-        specifier: 0.1.20
-        version: 0.1.20
+        specifier: 0.1.21
+        version: 0.1.21
 
 packages:
 
@@ -48,6 +48,15 @@ packages:
       '@types/node':
         optional: true
 
+  '@rushstack/node-core-library@5.24.2':
+    resolution: {integrity: sha512-sgSqy/lqce+uMrggF/wEIISIfpMX8pAXE5qSzGgDYFrWJkrsttrw/MzU4GFVNcbHSkPz5KbSh/A4/JSpDHoNQA==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/node-core-library/-/node-core-library-5.24.2.tgz}
+    engines: {node: '>=20.9.0'}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   '@rushstack/package-deps-hash@4.7.28':
     resolution: {integrity: sha1-f31YqiftxGUwwAnTeIObe8XDHc8=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/package-deps-hash/-/package-deps-hash-4.7.28.tgz}
     engines: {node: '>=20.9.0'}
@@ -60,8 +69,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.20':
-    resolution: {integrity: sha1-I+6sqh8vs/oKyP7RXG7jXvT+NNU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rush-published-versions-json-plugin/-/rush-published-versions-json-plugin-0.1.20.tgz}
+  '@rushstack/rush-published-versions-json-plugin@0.1.21':
+    resolution: {integrity: sha512-+XdUL7mxalnYqKDbUQlCEhKbZpS6GBpu/9lKAVcuD2pnKI5j7+rQreeIrDLwWO5c5yCeQIoDN9K25/VC2QT3cA==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/rush-published-versions-json-plugin/-/rush-published-versions-json-plugin-0.1.21.tgz}
     engines: {node: '>=20.9.0'}
 
   '@rushstack/rush-sdk@5.179.0':
@@ -70,6 +79,15 @@ packages:
 
   '@rushstack/terminal@0.24.4':
     resolution: {integrity: sha1-xVWqe4Vu6wrSyQqmmC6/61irX6s=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/terminal/-/terminal-0.24.4.tgz}
+    engines: {node: '>=20.9.0'}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@rushstack/terminal@0.24.5':
+    resolution: {integrity: sha512-AkbHjc48S7g4HkFO2wKHVMuJiZs/KaRI/rjcSpEj7o6SXgRYZrpXDE10NFa8ov/bxm4F5x+A8iqxkAGfEUTuTA==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/terminal/-/terminal-0.24.5.tgz}
     engines: {node: '>=20.9.0'}
     peerDependencies:
       '@types/node': '*'
@@ -103,8 +121,8 @@ packages:
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha1-On1WtVnWy8PrUSMlJE5hmmXGxSU=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz}
 
-  fast-uri@3.1.7:
-    resolution: {integrity: sha1-dDFX2Vfzy7TGUxDgM9wq1K19xgo=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-uri/-/fast-uri-3.1.7.tgz}
+  fast-uri@3.1.8:
+    resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fast-uri/-/fast-uri-3.1.8.tgz}
 
   fs-extra@11.3.6:
     resolution: {integrity: sha1-98uA6d9VDNHbb1N/pc3VaNPnDRA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/fs-extra/-/fs-extra-11.3.6.tgz}
@@ -204,6 +222,17 @@ snapshots:
       resolve: 1.22.12
       semver: 7.7.4
 
+  '@rushstack/node-core-library@5.24.2':
+    dependencies:
+      ajv: 8.20.0
+      ajv-draft-04: 1.0.0(ajv@8.20.0)
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      fs-extra: 11.3.6
+      import-lazy: 4.0.0
+      jju: 1.4.0
+      resolve: 1.22.12
+      semver: 7.7.4
+
   '@rushstack/package-deps-hash@4.7.28':
     dependencies:
       '@rushstack/node-core-library': 5.24.1
@@ -212,11 +241,11 @@ snapshots:
 
   '@rushstack/problem-matcher@0.2.1': {}
 
-  '@rushstack/rush-published-versions-json-plugin@0.1.20':
+  '@rushstack/rush-published-versions-json-plugin@0.1.21':
     dependencies:
-      '@rushstack/node-core-library': 5.24.1
+      '@rushstack/node-core-library': 5.24.2
       '@rushstack/rush-sdk': 5.179.0
-      '@rushstack/terminal': 0.24.4
+      '@rushstack/terminal': 0.24.5
     transitivePeerDependencies:
       - '@types/node'
 
@@ -238,6 +267,12 @@ snapshots:
       '@rushstack/problem-matcher': 0.2.1
       supports-color: 8.1.1
 
+  '@rushstack/terminal@0.24.5':
+    dependencies:
+      '@rushstack/node-core-library': 5.24.2
+      '@rushstack/problem-matcher': 0.2.1
+      supports-color: 8.1.1
+
   ajv-draft-04@1.0.0(ajv@8.20.0):
     optionalDependencies:
       ajv: 8.20.0
@@ -249,7 +284,7 @@ snapshots:
   ajv@8.20.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.7
+      fast-uri: 3.1.8
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -257,7 +292,7 @@ snapshots:
 
   fast-deep-equal@3.1.3: {}
 
-  fast-uri@3.1.7: {}
+  fast-uri@3.1.8: {}
 
   fs-extra@11.3.6:
     dependencies:

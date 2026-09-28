@@ -13,6 +13,7 @@ import { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 import { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 import { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonRequestRejectedMessage } from '@rushstack/rush-daemon-protocol';
+import { IDaemonShutdownAckMessage } from '@rushstack/rush-daemon-protocol';
 import type { Readable } from 'node:stream';
 
 // @beta
@@ -29,7 +30,7 @@ export class DaemonClient {
     static connectAsync(options: IDaemonClientConnectOptions): Promise<DaemonClient>;
     executeAsync(options: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
     get protocolVersion(): IDaemonProtocolVersion;
-    shutdownAsync(timeoutMs?: number): Promise<void>;
+    shutdownAsync(timeoutMs?: number): Promise<IDaemonShutdownAckMessage['payload']>;
     get status(): Promise<IDaemonPongMessage['payload']>;
 }
 
@@ -49,7 +50,7 @@ export type DaemonClientOutcome = {
     readonly result: IDaemonCommandResult;
 } | {
     readonly kind: 'fallback';
-    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported';
+    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported' | 'restartRetriesExhausted';
     readonly message?: string;
 } | {
     readonly kind: 'rejected';
@@ -76,8 +77,19 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
     // (undocumented)
     readonly paths: IDaemonPaths;
     readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
+    readonly resolveStartCommandAsync?: () => Promise<IDaemonStartCommand>;
     readonly startCommand?: IDaemonStartCommand;
     readonly startupTimeoutMs?: number;
+}
+
+// @beta
+export interface IDaemonArtifactResetOptions {
+    readonly waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IDaemonArtifactResetResult {
+    readonly removedPaths: ReadonlyArray<string>;
 }
 
 // @beta
@@ -129,5 +141,8 @@ export interface IDaemonStartCommand {
 
 // @beta
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
+
+// @beta
+export function resetDaemonArtifactsAsync(paths: IDaemonPaths, options?: IDaemonArtifactResetOptions): Promise<IDaemonArtifactResetResult>;
 
 ```

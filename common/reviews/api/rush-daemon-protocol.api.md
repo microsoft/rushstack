@@ -80,6 +80,9 @@ export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
 export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number;
 
 // @beta
@@ -500,6 +503,7 @@ export interface IDaemonRawModeChangedMessage {
 // @beta
 export interface IDaemonRequestAdmissionOptions {
     readonly noWait?: boolean;
+    readonly waitTimeoutIsDefault?: boolean;
     readonly waitTimeoutMs?: number;
 }
 
@@ -591,7 +595,9 @@ export interface IDaemonShutdownAckMessage {
     // (undocumented)
     readonly kind: 'shutdownAck';
     // (undocumented)
-    readonly payload: Record<string, never>;
+    readonly payload: {
+        readonly activeRequests?: number;
+    };
 }
 
 // @beta
