@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Daemon: running the operations of a Rush project folder nested under common/config no longer changes the workspace configuration fingerprint and forces a graph reload on the next request.",
+      "type": "none"
+    }
+  ]
+}

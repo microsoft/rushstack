@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Admission: a client-default wait budget no longer runs while another request loads or reloads the workspace graph, or while its own admitted request is routed and executed, so early arrivals and graph-gate waiters no longer fail with wait-timeout behind a slow cold load.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

@@ -260,6 +260,37 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(fixture.runs()).toEqual(['a', 'b']);
   });
 
+  it('keeps resource-free retained results under memory pressure and idle expiry, and warns once', async () => {
+    test = await WarmSetTestFixture.createAsync();
+    test.configuration = { ...GENEROUS_WARM_CONFIGURATION, watch: false };
+    const { fixture } = test;
+    await fixture.buildSuccessfullyAsync();
+    const { warm, graph, watcher } = test;
+    const records: Map<string, IOperationExecutionResult | undefined> = new Map(
+      ['a', 'b'].map((name) => [name, graph.resultByOperation.get(test!.operation(name))])
+    );
+    expect([...records.values()].every((record) => record !== undefined)).toBe(true);
+    const runs: string[] = fixture.runs();
+    test.update({ watch: false, warmMemoryBudgetMB: 0.01, warmIdleTimeoutSeconds: 0.01 });
+    await delayAsync(50);
+    for (let pass: number = 0; pass < 2; pass++) {
+      const status = await warm.maintainAsync();
+      expect(status).toMatchObject({ overMemoryBudget: true, overProjectLimit: false });
+      expect(status.deferredReason).toBeUndefined();
+      expect([...status.retainedProjectNames].sort()).toEqual(['a', 'b']);
+    }
+    for (const [name, record] of records) {
+      expect(graph.resultByOperation.get(test.operation(name))).toBe(record);
+    }
+    expect(watcher.watchedProjectNames.size).toBe(0);
+
+    // The retained results still make an unchanged build a warm no-op skip.
+    await fixture.buildSuccessfullyAsync();
+    await warm.maintainAsync();
+    expect(fixture.runs()).toEqual(runs);
+    expect(test.diagnostics.filter((error) => error.message.includes('Warm-set pressure'))).toHaveLength(1);
+  });
+
   it('reports missing child measurements and uses conservative LRU instead of inventing memory scores', async () => {
     const { fixture, warm } = await startAsync({ ipc: true });
     const missing = ['a', 'b'].map((name) => test!.operation(name).runner!);

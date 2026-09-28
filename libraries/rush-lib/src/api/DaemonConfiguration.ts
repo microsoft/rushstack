@@ -15,9 +15,15 @@ export interface IDaemonConfigurationJson {
   readonly usePersistentIpcRunners?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
-  /** Idle resource expiration in an attached daemon warm set. Defaults to 300 seconds. */
+  /**
+   * Idle resource expiration in an attached daemon warm set; retained results of resource-free projects do not
+   * expire. Defaults to 300 seconds.
+   */
   readonly warmIdleTimeoutSeconds?: number;
-  /** Best-effort sampled RSS budget for an attached warm set, not a hard ceiling. Defaults to 512 MiB. */
+  /**
+   * Best-effort sampled RSS budget for an attached warm set, not a hard ceiling; active/protected work and retained
+   * results of resource-free projects are exempt. Defaults to 512 MiB.
+   */
   readonly warmMemoryBudgetMB?: number;
   /**
    * Best-effort limit on projects holding warm resources (active runners or file watchers); active/protected work

@@ -236,7 +236,20 @@ export async function captureWorkspaceInputFingerprintAsync(
     installation.add(path.join(subspace.getSubspaceTempFolderPath(), 'last-install.flag'));
   }
   installation.add(path.join(rushConfiguration.commonTempFolder, 'current-variants.json'));
-  const configurationFiles: string[] = await listFilesAsync(path.join(root, 'common', 'config'), false);
+  const projectFolders: string[] = [];
+  for (const project of rushJson.projects) {
+    const projectFolder: string = path.resolve(root, project.projectFolder);
+    if (!Path.isUnderOrEqual(projectFolder, root)) {
+      throw new Error('A fingerprint project folder must be inside the workspace.');
+    }
+    projectFolders.push(projectFolder);
+  }
+  const commonConfigFolder: string = path.join(root, 'common', 'config');
+  const configurationFiles: string[] = await listFilesAsync(
+    commonConfigFolder,
+    false,
+    getNestedProjectFolders(commonConfigFolder, projectFolders, rushConfiguration)
+  );
   for (const filename of configurationFiles) {
     (isProcessBoundConfiguration(filename) ? installation : definitions).add(filename);
   }
@@ -249,11 +262,7 @@ export async function captureWorkspaceInputFingerprintAsync(
       definitions.add(filename);
     }
   }
-  for (const project of rushJson.projects) {
-    const projectFolder: string = path.resolve(root, project.projectFolder);
-    if (!Path.isUnderOrEqual(projectFolder, root)) {
-      throw new Error('A fingerprint project folder must be inside the workspace.');
-    }
+  for (const projectFolder of projectFolders) {
     for (const relativePath of [
       'package.json',
       '.gitignore',
@@ -333,7 +342,38 @@ async function hashFilesAsync(filenames: Iterable<string>): Promise<string> {
   return hashText(JSON.stringify(entries));
 }
 
-async function listFilesAsync(folderOrFile: string, runtime: boolean): Promise<string[]> {
+/**
+ * Returns the Rush project folders nested inside `common/config`. Rush reads such a project only through the
+ * project definition files fingerprinted for every project, and running its operations rewrites logs, build
+ * outputs and `.rush/temp` state inside it, which must not look like a configuration change. A project folder
+ * that is inside or contains a Rush configuration folder is never excluded.
+ */
+function getNestedProjectFolders(
+  commonConfigFolder: string,
+  projectFolders: ReadonlyArray<string>,
+  rushConfiguration: RushConfiguration
+): ReadonlySet<string> {
+  const rushConfigurationFolders: string[] = [
+    rushConfiguration.commonRushConfigFolder,
+    path.join(commonConfigFolder, 'subspaces'),
+    ...rushConfiguration.subspaces.map((subspace) => subspace.getSubspaceConfigFolderPath())
+  ];
+  return new Set(
+    projectFolders.filter(
+      (projectFolder) =>
+        Path.isUnder(projectFolder, commonConfigFolder) &&
+        !rushConfigurationFolders.some(
+          (folder) => Path.isUnderOrEqual(folder, projectFolder) || Path.isUnderOrEqual(projectFolder, folder)
+        )
+    )
+  );
+}
+
+async function listFilesAsync(
+  folderOrFile: string,
+  runtime: boolean,
+  excludedFolders: ReadonlySet<string> = new Set()
+): Promise<string[]> {
   try {
     const stat: Awaited<ReturnType<typeof fs.stat>> = await fs.stat(folderOrFile);
     if (!stat.isDirectory()) return [folderOrFile];
@@ -341,8 +381,14 @@ async function listFilesAsync(folderOrFile: string, runtime: boolean): Promise<s
     for (const entry of await fs.readdir(folderOrFile, { withFileTypes: true })) {
       if (entry.name === 'node_modules' || (runtime && entry.name === 'test')) continue;
       const filename: string = path.join(folderOrFile, entry.name);
-      if (entry.isDirectory()) files.push(...(await listFilesAsync(filename, runtime)));
-      else if (!runtime || (/\.(?:js|cjs|mjs|json)$/.test(entry.name) && !entry.name.endsWith('.test.js'))) {
+      if (entry.isDirectory()) {
+        if (!excludedFolders.has(filename)) {
+          files.push(...(await listFilesAsync(filename, runtime, excludedFolders)));
+        }
+      } else if (
+        !runtime ||
+        (/\.(?:js|cjs|mjs|json)$/.test(entry.name) && !entry.name.endsWith('.test.js'))
+      ) {
         files.push(filename);
       }
     }

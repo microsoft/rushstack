@@ -233,11 +233,13 @@ export class WorkspaceWarmSet implements AsyncDisposable {
           const now: number = performance.now();
           const delay: number = Math.min(
             MAX_POLL_DELAY_MS,
-            ...this.#rankProjects().map((project) => {
-              const remaining: number =
-                project.lastUsed + this.#configuration.warmIdleTimeoutSeconds * 1000 - now;
-              return remaining > 0 ? Math.max(1, remaining) : RETRY_DELAY_MS;
-            })
+            ...this.#rankProjects()
+              .filter((project) => this.#mayRelease(project))
+              .map((project) => {
+                const remaining: number =
+                  project.lastUsed + this.#configuration.warmIdleTimeoutSeconds * 1000 - now;
+                return remaining > 0 ? Math.max(1, remaining) : RETRY_DELAY_MS;
+              })
           );
           this.#schedule(
             this.#deferredReason || this.#watcherPolicyFailure ? Math.min(delay, RETRY_DELAY_MS) : delay
@@ -365,8 +367,13 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         project.operations.every(
           (operation) => !graph.resultByOperation.has(operation) && !operation.runner?.isActive
         );
-      const overProjectLimit: boolean = status.overProjectLimit && project.holdsResources;
-      if (!unrequested && !expired && !status.overMemoryBudget && !overProjectLimit) continue;
+      // Idle expiry and every limit release runners and watchers, and finish an eviction that failed earlier.
+      // Otherwise the retained results of a resource-free project stay until the generation ends: they are
+      // revalidated on every request, they are what makes a warm no-op skip possible, and dropping them cannot
+      // bring daemon RSS below the budget.
+      const release: boolean =
+        this.#mayRelease(project) && (expired || status.overMemoryBudget || status.overProjectLimit);
+      if (!unrequested && !release) continue;
       try {
         await graph.closeRunnersAsync(project.operations);
         if (project.operations.some((operation) => operation.runner?.isActive)) {
@@ -382,6 +389,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         this.#diagnose(new Error(message, { cause: error }));
       }
     }
+  }
+
+  #mayRelease(project: IWarmProject): boolean {
+    return project.holdsResources || this.#cleanupFailures.has(project.key);
   }
 
   #rankProjects(): IWarmProject[] {
@@ -463,14 +474,14 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   }
 
   #reportPressure(status: IWorkspaceWarmSetStatus): void {
-    // A queued project-cap cleanup is normal during a request; status still exposes the deferral.
-    if (status.deferredReason && !status.overMemoryBudget) return;
+    // Cleanup queued behind a request is normal and status still exposes the deferral. Only a completed pass
+    // shows what remains, and the key ignores the deferral so alternating busy/idle passes do not repeat it.
+    if (status.deferredReason) return;
     const key: string | undefined =
       status.overMemoryBudget || status.overProjectLimit
         ? JSON.stringify([
             status.overMemoryBudget,
             status.overProjectLimit,
-            status.deferredReason,
             status.protectedProjectNames,
             status.cleanupFailures,
             status.unmeasuredRunnerCount
@@ -483,7 +494,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
             `limit ${this.#configuration.warmSetMaxProjects} projects): daemon RSS ${status.daemonResidentMemoryBytes} bytes, ` +
             `measured child RSS ${status.measuredRunnerMemoryBytes} bytes, ${status.unmeasuredRunnerCount} unmeasured runners, ` +
             `${status.retainedProjectNames.length} retained projects, ${status.protectedProjectNames.length} protected. ` +
-            `Deferred: ${status.deferredReason ?? 'no'}. Active/protected resources and remaining daemon memory cannot be forced below the budget.`
+            `Active or protected resources, resource-free retained results and remaining daemon memory are not released to meet the budget.`
         )
       );
     }

@@ -96,12 +96,78 @@ class QueuePositionWriter {
   }
 }
 
+/**
+ * Reports whether a request that other requests wait behind is doing work on their behalf, such as loading the
+ * workspace graph that they need.
+ */
+export class AdmissionProgress {
+  readonly #listeners: Set<() => void> = new Set();
+  #active: boolean = false;
+
+  public get active(): boolean {
+    return this.#active;
+  }
+
+  public setActive(active: boolean): void {
+    if (this.#active === active) return;
+    this.#active = active;
+    for (const listener of [...this.#listeners]) listener();
+  }
+
+  public subscribe(listener: () => void): () => void {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
+  }
+}
+
+/** A wait budget that is spent only while `progress` is inactive. */
+class ProgressPausedBudget {
+  readonly #onExhausted: () => void;
+  readonly #progress: AdmissionProgress;
+  readonly #unsubscribe: () => void;
+  #remainingMs: number;
+  #runningSinceMs: number | undefined;
+  #timer: ReturnType<typeof setTimeout> | undefined;
+
+  public constructor(remainingMs: number, progress: AdmissionProgress, onExhausted: () => void) {
+    this.#remainingMs = remainingMs;
+    this.#progress = progress;
+    this.#onExhausted = onExhausted;
+    this.#unsubscribe = progress.subscribe(() => this.#update());
+    this.#update();
+  }
+
+  /** Stops spending and returns the unspent budget. */
+  public stop(): number {
+    this.#unsubscribe();
+    this.#pause();
+    return this.#remainingMs;
+  }
+
+  #update(): void {
+    if (this.#progress.active) {
+      this.#pause();
+    } else if (this.#runningSinceMs === undefined) {
+      this.#runningSinceMs = Date.now();
+      this.#timer = setTimeout(this.#onExhausted, this.#remainingMs);
+    }
+  }
+
+  #pause(): void {
+    if (this.#runningSinceMs === undefined) return;
+    this.#remainingMs = Math.max(0, this.#remainingMs - (Date.now() - this.#runningSinceMs));
+    this.#runningSinceMs = undefined;
+    clearTimeout(this.#timer);
+    this.#timer = undefined;
+  }
+}
+
 export class RequestAdmissionController {
   readonly #abortController: AbortController = new AbortController();
   readonly #abortFromClient: () => void;
   readonly #admission: IDaemonRequestAdmissionOptions | undefined;
   readonly #client: IRequestAdmissionClient;
-  readonly #deadlineMs: number | undefined;
+  #deadlineMs: number | undefined;
   readonly #writer: QueuePositionWriter | undefined;
 
   public constructor(options: IRequestAdmissionControllerOptions) {
@@ -124,7 +190,7 @@ export class RequestAdmissionController {
     }
   }
 
-  /** Waits for workspace admission, bounded by the request's absolute admission deadline. */
+  /** Waits for workspace admission within the request's remaining admission budget. */
   public async acquireAsync(
     scheduler: RequestScheduler,
     exclusivityClass: RequestExclusivityClass
@@ -161,17 +227,83 @@ export class RequestAdmissionController {
     );
   }
 
+  /**
+   * Waits for shared-build workspace admission while another request loads or reloads the workspace graph.
+   *
+   * @remarks
+   * While `transition` reports progress, the other request holds the exclusive gate and is loading the graph that
+   * this request needs, so a client-default timeout is not spent: at a cold start every concurrent build waits for
+   * the first build's graph load. The default budget is still spent while the transition itself waits for another
+   * request, so a transition that cannot start does not hold its followers indefinitely. Unspent budget carries over
+   * to later waits of this request. An explicit `noWait` or `waitTimeoutMs` applies unchanged.
+   */
+  public async acquireBehindTransitionAsync(
+    scheduler: RequestScheduler,
+    transition: AdmissionProgress
+  ): Promise<IRequestLease> {
+    const waitingFor: string = "another request's load or reload of the workspace graph";
+    const remainingMs: number | undefined = this.#getRemainingWaitTimeoutMs();
+    if (!this.#admission?.waitTimeoutIsDefault || remainingMs === undefined) {
+      return await this.#acquireAsync(scheduler, RequestExclusivityClass.SharedBuild, remainingMs, waitingFor);
+    }
+    const exhausted: AbortController = new AbortController();
+    const budget: ProgressPausedBudget = new ProgressPausedBudget(remainingMs, transition, () =>
+      exhausted.abort()
+    );
+    try {
+      return await this.#acquireAsync(
+        scheduler,
+        RequestExclusivityClass.SharedBuild,
+        undefined,
+        waitingFor,
+        AbortSignal.any([this.#abortController.signal, exhausted.signal])
+      );
+    } catch (error) {
+      if (!exhausted.signal.aborted || this.#abortController.signal.aborted) throw error;
+      throw this.#getReportedError(
+        new RequestSchedulerError(
+          RequestSchedulerErrorCode.WaitTimeout,
+          `The request was not admitted within ${this.#admission.waitTimeoutMs}ms.`
+        ),
+        waitingFor
+      );
+    } finally {
+      this.#deadlineMs = Date.now() + budget.stop();
+    }
+  }
+
+  /**
+   * Runs `action`, such as routing and executing an admitted request, without spending a client-default budget.
+   *
+   * @remarks
+   * Work after admission either runs or waits behind progress, such as the exempt graph-execution gate. A request that
+   * re-enters workspace admission afterwards, for example to reload the graph after its inputs changed, therefore
+   * keeps the budget it had before `action`. An explicit `noWait` or `waitTimeoutMs` keeps its absolute deadline.
+   */
+  public async runOutsideDefaultBudgetAsync<T>(action: () => Promise<T>): Promise<T> {
+    const remainingMs: number | undefined = this.#getRemainingWaitTimeoutMs();
+    if (!this.#admission?.waitTimeoutIsDefault || remainingMs === undefined) {
+      return await action();
+    }
+    try {
+      return await action();
+    } finally {
+      this.#deadlineMs = Date.now() + remainingMs;
+    }
+  }
+
   async #acquireAsync(
     scheduler: RequestScheduler,
     exclusivityClass: RequestExclusivityClass,
     waitTimeoutMs: number | undefined,
-    waitingFor: string
+    waitingFor: string,
+    abortSignal: AbortSignal = this.#abortController.signal
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     let lease: IRequestLease | undefined;
     try {
       lease = await scheduler.acquireAsync({
-        abortSignal: this.#abortController.signal,
+        abortSignal,
         exclusivityClass,
         noWait: this.#admission?.noWait,
         onQueuePositionChanged: writer ? (position: number) => writer.enqueue(position) : undefined,

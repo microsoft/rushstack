@@ -313,9 +313,9 @@ preserves its records and diagnostics without failing an otherwise successful bu
 | Policy | Runtime behavior |
 | --- | --- |
 | `watch` | Retains host observation of requested warm projects between requests when true. False (the default) keeps root/config guards only. Never schedules builds. |
-| `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
+| `warmIdleTimeoutSeconds` | Expires unused project runners and watchers, together with those projects' retained results, after requests finish. Unchanged requests refresh recency too. Projects whose only retained state is operation results from resource-free (shell/null) runners do not expire: those results are revalidated on every request and stay until the generation ends, so an agent that returns after a long pause still gets no-op skips. |
 | `warmSetMaxProjects` | Limits the projects that hold warm **resources** (an active runner such as a persistent IPC child, or a `watch: true` file watcher). The lowest-ranked holders are released (runners closed, watchers removed, records deleted); executing/prepared and explicitly protected work is exempt. Projects whose only retained state is operation results from resource-free (shell/null) runners neither count toward nor are evicted for this limit, so no-op re-requests of large workspaces stay skipped. |
-| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. The comparison uses the **whole daemon process RSS** (graph, Node heap and retained records, typically 130-190 MiB) plus measured child RSS, so a budget below the daemon's baseline evicts every idle project on each pass and disables warm skipping. Never treats cache files as memory or claims a hard RSS ceiling. |
+| `warmMemoryBudgetMB` | Attempts idle eviction of resource-holding projects under sampled daemon-plus-measured-child RSS pressure. The comparison uses the **whole daemon process RSS** (graph, Node heap and retained records, typically 130-190 MiB for a small workspace and more for a large one) plus measured child RSS, so a budget below the daemon's baseline releases every idle runner and watcher on each pass. Retained results of resource-free projects are not evicted for the budget, so warm skipping keeps working, and the pressure warning is reported once per distinct state. Never treats cache files as memory or claims a hard RSS ceiling. |
 | `autoWarmByTelemetry` | Promotes already-requested high-value work instead of pure LRU. Never schedules or executes speculative scripts. |
 
 One deterministic best-first comparator is shared by retention and reverse-order eviction. With complete
@@ -459,10 +459,16 @@ the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE
 built-in names fail closed to `EXCLUSIVE`, including plugin replacements of built-in names. Queued clients receive
 ordered, one-based position controls and can request fail-fast or bounded waiting. One progress channel covers both
 workspace admission and the temporary phased graph-execution gate. An explicit `noWait` or `waitTimeoutMs` is one
-absolute deadline for both waits. When the client marks `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), the
-deadline bounds workspace admission only: a `SHARED-BUILD` request that arrives after the current batch has closed waits
+absolute deadline for both waits. When the client marks `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), it is
+a budget that only contention spends: a `SHARED-BUILD` request that arrives after the current batch has closed waits
 on the graph-execution gate without a deadline, because it is queued only behind running compatible shared builds, and
-then runs in the next batch. Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
+then runs in the next batch. A request queued behind another request that holds exclusive workspace admission to load
+or reload the graph does not spend the budget during that load, so every build that arrives while the first build
+after startup loads the graph is admitted when the load finishes. The budget does run while that other request still
+waits for exclusive admission, so requests behind a reload that cannot start, for example behind a long build, still
+time out. Routing and executing an admitted request do not spend the budget either: a request that re-enters
+workspace admission to reload the graph after its inputs changed keeps the budget it had when it was admitted.
+Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
 A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
 backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output
 drains. The result translates only that client's operation subset to Rush's success, warning, failure, or abort exit

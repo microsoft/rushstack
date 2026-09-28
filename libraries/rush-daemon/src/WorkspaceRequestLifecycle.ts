@@ -35,6 +35,7 @@ import {
   type IRequestLease
 } from './RequestScheduler';
 import {
+  AdmissionProgress,
   RequestAdmissionController,
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler
@@ -126,6 +127,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #restartPending: boolean = false;
   #lastReloadTier: WorkspaceInputChangeTier = WorkspaceInputChangeTier.Reuse;
   #transitioning: boolean = false;
+  /** Active while the transition owner holds the exclusive gate and loads or reloads the workspace graph. */
+  readonly #transitionProgress: AdmissionProgress = new AdmissionProgress();
   #cleanupFailure: unknown;
   #disposePromise: Promise<void> | undefined;
 
@@ -204,25 +207,28 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     try {
       for (let attempt: number = 0; ; attempt++) {
         try {
-          generation = await this.#prepareAsync(envelope, client, admission, ticket);
+          const prepared: IPreparedGeneration = await this.#prepareAsync(envelope, client, admission, ticket);
+          generation = prepared;
           const requestEnvelope: IDaemonRequestEnvelope = {
             ...envelope,
             admission: admission.remainingAdmission
           };
-          if (isMutation(envelope)) {
-            await this.#executeMutationAsync(generation, requestEnvelope, client, state, dispatchAsync);
-          } else {
-            await dispatchAsync({
-              envelope: requestEnvelope,
-              client,
-              workspaceSession: generation.session,
-              resolver: generation.resolver,
-              onExecutionStarting: () => {
-                this.#assertGeneration(generation!);
-                state.began = true;
-              }
-            });
-          }
+          await admission.runOutsideDefaultBudgetAsync(async () => {
+            if (isMutation(envelope)) {
+              await this.#executeMutationAsync(prepared, requestEnvelope, client, state, dispatchAsync);
+            } else {
+              await dispatchAsync({
+                envelope: requestEnvelope,
+                client,
+                workspaceSession: prepared.session,
+                resolver: prepared.resolver,
+                onExecutionStarting: () => {
+                  this.#assertGeneration(prepared);
+                  state.began = true;
+                }
+              });
+            }
+          });
           return;
         } catch (error) {
           if (
@@ -294,7 +300,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     admittedLease?: IRequestLease
   ): Promise<IPreparedGeneration> {
     let lease: IRequestLease =
-      admittedLease ?? (await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild));
+      admittedLease ??
+      (this.#transitioning
+        ? await admission.acquireBehindTransitionAsync(this.#gate, this.#transitionProgress)
+        : await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild));
     let ownsTransition: boolean = false;
     try {
       if (this.#restartPending) throw new RestartPendingBeforeExecution();
@@ -429,15 +438,16 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         if (this.#restartPending) throw new RestartPendingBeforeExecution();
       }
       if (this.#transitioning) {
-        const shared: IRequestLease = await admission.acquireAsync(
+        const shared: IRequestLease = await admission.acquireBehindTransitionAsync(
           this.#gate,
-          RequestExclusivityClass.SharedBuild
+          this.#transitionProgress
         );
         return await this.#prepareAsync(envelope, client, admission, ticket, shared);
       }
       this.#transitioning = ownsTransition = true;
       this.#cancelObservers();
       lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
+      this.#transitionProgress.setActive(true);
       if (this.#restartPending) throw new RestartPendingBeforeExecution();
       if (this.#closing)
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
@@ -609,7 +619,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       if (!(error instanceof RestartBeforeExecution)) lease.release();
       throw error;
     } finally {
-      if (ownsTransition) this.#transitioning = false;
+      if (ownsTransition) {
+        this.#transitioning = false;
+        this.#transitionProgress.setActive(false);
+      }
     }
   }
 

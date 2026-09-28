@@ -192,4 +192,65 @@ describe('workspace input fingerprints', () => {
       fs.rmSync(folder, { recursive: true, force: true });
     }
   });
+
+  it('ignores operation state inside a project nested in common/config but not its definitions', async () => {
+    const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fingerprint-'));
+    try {
+      const write = (relativePath: string, content: string): void => {
+        const filename: string = path.join(folder, relativePath);
+        fs.mkdirSync(path.dirname(filename), { recursive: true });
+        fs.writeFileSync(filename, content);
+      };
+      write(
+        'rush.json',
+        JSON.stringify({
+          rushVersion: '5.179.0',
+          pnpmVersion: '10.27.0',
+          projectFolderMaxDepth: 4,
+          projects: [
+            { packageName: 'pipelines', projectFolder: 'common/config/pipelines' },
+            { packageName: 'inside-rush', projectFolder: 'common/config/rush/inside-rush' }
+          ]
+        })
+      );
+      write('common/config/pipelines/package.json', '{"name":"pipelines","version":"1.0.0"}');
+      write('common/config/rush/inside-rush/package.json', '{"name":"inside-rush","version":"1.0.0"}');
+      write('common/config/rush/command-line.json', '{"commands":[]}');
+      write('common/config/other/settings.json', '{}');
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        path.join(folder, 'rush.json')
+      );
+      const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+      const captureAsync = (): Promise<IWorkspaceInputFingerprint> =>
+        captureWorkspaceInputFingerprintAsync({ rushConfiguration, runtimeCache, environment: {} });
+
+      let previous: IWorkspaceInputFingerprint = await captureAsync();
+      for (const relativePath of [
+        'common/config/pipelines/rush-logs/pipelines._phase_build.log',
+        'common/config/pipelines/.rush/temp/operation/_phase_build/state.json',
+        'common/config/pipelines/lib/index.js',
+        'common/config/pipelines/config/heft.json'
+      ]) {
+        write(relativePath, String(Math.random()));
+        const next: IWorkspaceInputFingerprint = await captureAsync();
+        expect(next.configurationHash).toBe(previous.configurationHash);
+        expect(classifyWorkspaceInputChange(previous, next)).toBe(WorkspaceInputChangeTier.Reuse);
+      }
+      for (const [relativePath, content] of [
+        ['common/config/pipelines/package.json', '{"name":"pipelines","version":"1.0.1"}'],
+        ['common/config/pipelines/config/rush-project.json', '{"operationSettings":[]}'],
+        ['common/config/pipelines/config/rig.json', '{"rigPackageName":"rig"}'],
+        ['common/config/rush/command-line.json', '{"commands":[],"parameters":[]}'],
+        ['common/config/rush/inside-rush/rush-logs/inside-rush._phase_build.log', 'log'],
+        ['common/config/other/settings.json', '{"changed":true}']
+      ]) {
+        write(relativePath, content);
+        const next: IWorkspaceInputFingerprint = await captureAsync();
+        expect(classifyWorkspaceInputChange(previous, next)).toBe(WorkspaceInputChangeTier.Reload);
+        previous = next;
+      }
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
 });

@@ -34,6 +34,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
   public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
+  /** Awaited before each workspace session is created, including a request's graph load or reload. */
+  public beforeCreateSessionAsync: (() => Promise<void>) | undefined;
   public readonly folder: string = fs.realpathSync.native(
     fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
   );
@@ -154,6 +156,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
             }
           },
       createWorkspaceSessionAsync: async (options) => {
+        await this.beforeCreateSessionAsync?.();
         this.session = await WorkspaceSession.createAsync(options);
         return this.session;
       }

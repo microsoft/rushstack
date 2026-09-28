@@ -290,7 +290,7 @@
           "exclusiveMinimum": true,
           "maximum": 2147483.647,
           "default": 300,
-          "description": "Idle resource expiration for an attached warm set in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
+          "description": "Idle resource expiration for an attached warm set in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). Retained results of resource-free projects do not expire. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
         },
         "warmMemoryBudgetMB": {
           "type": "number",
@@ -298,7 +298,7 @@
           "exclusiveMinimum": true,
           "maximum": 9007199254740991,
           "default": 512,
-          "description": "Best-effort sampled RSS budget in MiB, not a hard process/tree memory ceiling. At most 9007199254740991 (Number.MAX_SAFE_INTEGER). Active/protected work is exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
+          "description": "Best-effort sampled RSS budget in MiB, not a hard process/tree memory ceiling. At most 9007199254740991 (Number.MAX_SAFE_INTEGER). Active/protected work and retained results of resource-free projects are exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
         },
         "warmSetMaxProjects": {
           "type": "integer",
