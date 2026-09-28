@@ -393,6 +393,26 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(graph.resultByOperation.size).toBe(0);
   });
 
+  it('leaves the real repository lock to a native CLI command in a pass that has nothing to release', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync();
+    const acquire = jest.spyOn(fixture.session, 'acquireExecutionLeaseAsync');
+    const gate = await createNativeScriptGateAsync(fixture.folder, 'c');
+    const native = runNativeCommandAsync(fixture.folder, ['build', '--only', 'c', '--parallelism', '3']);
+    try {
+      await gate.entered;
+      const status = await warm.maintainAsync();
+      expect(status.deferredReason).toBeUndefined();
+      expect(acquire).not.toHaveBeenCalled();
+      expect(graph.resultByOperation.size).toBe(2);
+      expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
+    } finally {
+      await gate.releaseAsync();
+      acquire.mockRestore();
+      await native;
+    }
+    expect((await native).exitCode).toBe(0);
+  });
+
   it('does not touch paused prepared records or native ownership until a plan has been discarded', async () => {
     const { fixture, warm, graph } = await startAsync();
     const admission = await getWorkspaceRequestScheduler(fixture.session).acquireAsync({

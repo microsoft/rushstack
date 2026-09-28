@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Warm set: an idle maintenance pass takes the repository lock only when it releases warm resources or changes project observation, so native Rush commands no longer fail with \"Another Rush command is already running\" because of a pass that has nothing to do.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

@@ -288,12 +288,17 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         } else if (isGraphBusy(graph)) {
           this.#deferredReason = 'graph-busy';
         } else {
-          nativeLease = await this.#options.acquireExecutionLeaseAsync();
-          if (this.#disposed) this.#deferredReason = 'disposed';
-          else if (isGraphBusy(graph)) this.#deferredReason = 'graph-busy';
-          else {
-            await this.#evictIdleAsync();
-            if (!this.#disposed) await this.#reconcileWatcherPolicyAsync();
+          const status: IWorkspaceWarmSetStatus = this.getStatus();
+          // Native Rush commands can't start while the repository lock is held, so a pass that would neither
+          // release anything nor change project observation doesn't take it.
+          if (this.#needsNativeLease(status)) {
+            nativeLease = await this.#options.acquireExecutionLeaseAsync();
+            if (this.#disposed) this.#deferredReason = 'disposed';
+            else if (isGraphBusy(graph)) this.#deferredReason = 'graph-busy';
+            else {
+              await this.#evictIdleAsync(status);
+              if (!this.#disposed) await this.#reconcileWatcherPolicyAsync();
+            }
           }
         }
       }
@@ -353,30 +358,48 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     this.#diagnose(this.#watcherPolicyFailure);
   }
 
-  async #evictIdleAsync(): Promise<void> {
+  /** Whether a pass must own the repository to release resources or to apply the observation policy. */
+  #needsNativeLease(status: IWorkspaceWarmSetStatus): boolean {
+    if (this.#watcherPolicyFailure) return true;
+    const projects: IWarmProject[] = this.#rankProjects();
+    if (projects.some((project) => this.#shouldEvict(project, status))) return true;
+    const watched: ReadonlySet<string> = this.#options.watcher.watchedProjectNames;
+    // The same projects that #reconcileWatcherPolicyAsync observes or stops observing.
+    return this.#configuration.watch
+      ? projects.some((project) => !this.#cleanupFailures.has(project.key) && !watched.has(project.key))
+      : projects.some((project) => !project.protected && watched.has(project.key));
+  }
+
+  #shouldEvict(project: IWarmProject, status: IWorkspaceWarmSetStatus): boolean {
+    if (project.protected) return false;
+    const graph: IOperationGraph = this.#options.operationGraph;
+    const expired: boolean =
+      performance.now() - project.lastUsed >= this.#configuration.warmIdleTimeoutSeconds * 1000;
+    const unrequested: boolean =
+      project.frequency === 0 &&
+      project.operations.every(
+        (operation) => !graph.resultByOperation.has(operation) && !operation.runner?.isActive
+      );
+    // Idle expiry and every limit release runners and watchers, and finish an eviction that failed earlier.
+    // Otherwise the retained results of a resource-free project stay until the generation ends: they are
+    // revalidated on every request, they are what makes a warm no-op skip possible, and dropping them cannot
+    // bring daemon RSS below the budget.
+    return (
+      unrequested ||
+      (this.#mayRelease(project) && (expired || status.overMemoryBudget || status.overProjectLimit))
+    );
+  }
+
+  async #evictIdleAsync(initialStatus: IWorkspaceWarmSetStatus): Promise<void> {
     const { operationGraph: graph, watcher } = this.#options;
     // getStatus() re-ranks every project. Only an eviction attempt (which awaits) can change it during a pass, so
     // it is reused until then; recomputing it per project made a pass without evictions quadratic.
-    let currentStatus: IWorkspaceWarmSetStatus | undefined;
+    let currentStatus: IWorkspaceWarmSetStatus | undefined = initialStatus;
     // Retention and eviction use exactly the same ordering, reversed only to release the lowest value first.
     for (const project of this.#rankProjects().reverse()) {
       if (this.#disposed) break;
       if (project.protected) continue;
-      const status: IWorkspaceWarmSetStatus = (currentStatus ??= this.getStatus());
-      const expired: boolean =
-        performance.now() - project.lastUsed >= this.#configuration.warmIdleTimeoutSeconds * 1000;
-      const unrequested: boolean =
-        project.frequency === 0 &&
-        project.operations.every(
-          (operation) => !graph.resultByOperation.has(operation) && !operation.runner?.isActive
-        );
-      // Idle expiry and every limit release runners and watchers, and finish an eviction that failed earlier.
-      // Otherwise the retained results of a resource-free project stay until the generation ends: they are
-      // revalidated on every request, they are what makes a warm no-op skip possible, and dropping them cannot
-      // bring daemon RSS below the budget.
-      const release: boolean =
-        this.#mayRelease(project) && (expired || status.overMemoryBudget || status.overProjectLimit);
-      if (!unrequested && !release) continue;
+      if (!this.#shouldEvict(project, (currentStatus ??= this.getStatus()))) continue;
       try {
         await graph.closeRunnersAsync(project.operations);
         if (project.operations.some((operation) => operation.runner?.isActive)) {
