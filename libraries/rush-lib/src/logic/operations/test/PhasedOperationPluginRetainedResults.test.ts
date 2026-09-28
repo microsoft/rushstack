@@ -36,7 +36,8 @@ import { OperationGraph } from '../OperationGraph';
 import { Operation } from '../Operation';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
-import type { IExecutionResult } from '../IOperationExecutionResult';
+import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
+import { markResultUnverifiable } from '../RetainedResultVerification';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -301,6 +302,32 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
     c.enabled = true;
     await testGraph.executeAsync();
     expect(testGraph.executions).toEqual(['c']);
+  });
+
+  it('re-executes a result that a plugin marked unverifiable, and the results built against it', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] });
+    const a: Operation = testGraph.operations.get('a')!;
+    let isMarkingA: boolean = true;
+    // Like CacheableOperationPlugin when input files of "a" changed while "a" was executing
+    testGraph.graph.hooks.afterExecuteOperationAsync.tap(
+      'TestPlugin',
+      (record: IOperationExecutionResult) => {
+        if (isMarkingA && record.operation === a) {
+          markResultUnverifiable(record);
+        }
+      }
+    );
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a', 'b']);
+
+    // The same state hashes
+    isMarkingA = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a', 'b']);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.executions).toEqual([]);
   });
 
   it('does not re-execute retained results of operations that ignore dependency changes', async () => {

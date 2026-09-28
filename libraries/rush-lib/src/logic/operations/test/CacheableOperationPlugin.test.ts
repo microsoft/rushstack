@@ -92,14 +92,17 @@ class CacheableMockRunner implements IOperationRunner {
   public readonly isNoOp: boolean = false;
   public readonly name: string;
   readonly #executions: string[];
+  readonly #onExecute: ((name: string) => void) | undefined;
 
-  public constructor(name: string, executions: string[]) {
+  public constructor(name: string, executions: string[], onExecute?: (name: string) => void) {
     this.name = name;
     this.#executions = executions;
+    this.#onExecute = onExecute;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     this.#executions.push(this.name);
+    this.#onExecute?.(this.name);
     return OperationStatus.Success;
   }
 
@@ -116,19 +119,26 @@ interface ITestGraph {
   trackedFileHashes: Map<string, Map<string, string>>;
   executions: string[];
   cacheWrites: string[];
+  // Called when an operation executes, e.g. to save one of its input files while it executes
+  onExecute: ((name: string) => void) | undefined;
   executeAsync(workingTreeReadStartTimeMs?: number): Promise<IExecutionResult>;
 }
 
 /**
  * Creates a linear chain of cacheable operations: names[0] <- names[1] <- ... (each depends on the previous).
  */
-async function createTestGraphAsync(names: string[], rootDirectory: string = '/repo'): Promise<ITestGraph> {
+async function createTestGraphAsync(
+  names: string[],
+  rootDirectory: string = '/repo',
+  cacheWriteEnabled: boolean = true
+): Promise<ITestGraph> {
   const executions: string[] = [];
   const cacheWrites: string[] = [];
   const localHashes: Map<string, string> = new Map();
   const trackedFileHashes: Map<string, Map<string, string>> = new Map();
   const operations: Map<string, Operation> = new Map();
   const projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
+  let onExecute: ((name: string) => void) | undefined;
 
   let previous: Operation | undefined;
   for (const name of names) {
@@ -140,7 +150,7 @@ async function createTestGraphAsync(names: string[], rootDirectory: string = '/r
       getCacheDisabledReason: () => undefined
     } as unknown as RushProjectConfiguration);
     const operation: Operation = new Operation({
-      runner: new CacheableMockRunner(name, executions),
+      runner: new CacheableMockRunner(name, executions, (executedName: string) => onExecute?.(executedName)),
       logFilenameIdentifier: name,
       phase: mockPhase,
       project
@@ -171,7 +181,7 @@ async function createTestGraphAsync(names: string[], rootDirectory: string = '/r
     allowWarningsInSuccessfulBuild: false,
     buildCacheConfiguration: {
       buildCacheEnabled: true,
-      cacheWriteEnabled: true
+      cacheWriteEnabled
     } as unknown as BuildCacheConfiguration,
     cobuildConfiguration: undefined,
     terminal,
@@ -199,6 +209,12 @@ async function createTestGraphAsync(names: string[], rootDirectory: string = '/r
     trackedFileHashes,
     executions,
     cacheWrites,
+    get onExecute(): ((name: string) => void) | undefined {
+      return onExecute;
+    },
+    set onExecute(value: ((name: string) => void) | undefined) {
+      onExecute = value;
+    },
     executeAsync: async (workingTreeReadStartTimeMs?: number) => {
       executions.length = 0;
       cacheWrites.length = 0;
@@ -408,5 +424,87 @@ describe(CacheableOperationPlugin.name, () => {
       expect(testGraph.cacheWrites).toEqual(['a', 'b']);
       expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
     });
+
+    it.each([true, false])(
+      'runs the operations again if a later snapshot has the same state hashes (cache writes enabled: %s)',
+      async (cacheWriteEnabled: boolean) => {
+        const testGraph: ITestGraph = await createTestGraphAsync(
+          ['a', 'b'],
+          rootDirectory,
+          cacheWriteEnabled
+        );
+        const inputFilePath: string = path.join(rootDirectory, inputFile);
+        testGraph.trackedFileHashes.set('a', new Map([[inputFile, getGitBlobHash('export const a = 1;')]]));
+
+        await testGraph.executeAsync(Date.now());
+        expect(testGraph.executions).toEqual(['a', 'b']);
+        expect(testGraph.cacheWrites).toEqual([]);
+
+        // Reverting the save gives the next snapshot the same state hashes, but the outputs of "a" and "b" were
+        // built from the saved content.
+        fs.writeFileSync(inputFilePath, 'export const a = 1;');
+        const afterRevertMs: number = getLatestFileTimeMs(inputFilePath) + FILE_TIME_TOLERANCE_MS + 1;
+        await testGraph.executeAsync(afterRevertMs);
+        expect(testGraph.executions).toEqual(['a', 'b']);
+        expect(testGraph.cacheWrites).toEqual(cacheWriteEnabled ? ['a', 'b'] : []);
+
+        const hotResult: IExecutionResult = await testGraph.executeAsync(afterRevertMs);
+        expect(hotResult.status).toBe(OperationStatus.NoOp);
+        expect(testGraph.executions).toEqual([]);
+      }
+    );
+  });
+
+  describe('input files saved while an operation executes', () => {
+    const inputFile: string = 'a/src/index.ts';
+    let rootDirectory: string;
+    let inputFilePath: string;
+
+    beforeEach(() => {
+      rootDirectory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'rush-cacheable-')));
+      fs.mkdirSync(path.join(rootDirectory, 'a', 'src'), { recursive: true });
+      inputFilePath = path.join(rootDirectory, inputFile);
+      fs.writeFileSync(inputFilePath, 'export const a = 1;');
+    });
+
+    afterEach(() => {
+      fs.rmSync(rootDirectory, { recursive: true, force: true });
+    });
+
+    it.each([true, false])(
+      'runs the operations again if a later snapshot has the same state hashes (cache writes enabled: %s)',
+      async (cacheWriteEnabled: boolean) => {
+        const testGraph: ITestGraph = await createTestGraphAsync(
+          ['a', 'b'],
+          rootDirectory,
+          cacheWriteEnabled
+        );
+        testGraph.trackedFileHashes.set('a', new Map([[inputFile, getGitBlobHash('export const a = 1;')]]));
+        const afterWriteMs: number = getLatestFileTimeMs(inputFilePath) + FILE_TIME_TOLERANCE_MS + 1;
+        testGraph.onExecute = (name: string) => {
+          if (name === 'a') {
+            // A different size, so that the save is detected even if the file time does not change
+            fs.writeFileSync(inputFilePath, 'export const a = 22;');
+          }
+        };
+
+        await testGraph.executeAsync(afterWriteMs);
+        expect(testGraph.executions).toEqual(['a', 'b']);
+        expect(testGraph.cacheWrites).toEqual([]);
+
+        // Reverting the save gives the next snapshot the same state hashes, but the outputs of "a" and "b" may
+        // have been built from the saved content.
+        testGraph.onExecute = undefined;
+        fs.writeFileSync(inputFilePath, 'export const a = 1;');
+        const afterRevertMs: number = getLatestFileTimeMs(inputFilePath) + FILE_TIME_TOLERANCE_MS + 1;
+        await testGraph.executeAsync(afterRevertMs);
+        expect(testGraph.executions).toEqual(['a', 'b']);
+        expect(testGraph.cacheWrites).toEqual(cacheWriteEnabled ? ['a', 'b'] : []);
+
+        const hotResult: IExecutionResult = await testGraph.executeAsync(afterRevertMs);
+        expect(hotResult.status).toBe(OperationStatus.NoOp);
+        expect(testGraph.executions).toEqual([]);
+      }
+    );
   });
 });

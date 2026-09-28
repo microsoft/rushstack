@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where a long-lived operation graph, such as the Rush daemon, with build cache writes disabled kept an operation as up to date after its tracked input files changed while the inputs snapshot was being taken or while the operation was executing, so that a later build after the files were changed back skipped the operation and its consumers over outputs built from the changed files.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

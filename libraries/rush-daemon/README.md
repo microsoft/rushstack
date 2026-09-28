@@ -98,6 +98,10 @@ unchanged and are checked normally. Phased operation processes inherit the daemo
 see the daemon's startup values for the ignored variables rather than the submitting shell's values.
 Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
 still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
+With the build cache enabled, a cacheable operation whose tracked input files change while the inputs snapshot is
+taken or while it executes is not kept as up to date, whether or not cache writes are allowed: the next request runs
+it and its consumers again, even if the files were changed back in between. Operations whose build cache is
+disabled, and workspaces without a build cache, don't get this check.
 
 A generation lease spans resolution through final output. Reload also takes exclusive workspace admission and
 the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before

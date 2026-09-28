@@ -5,6 +5,29 @@ import type { Operation } from './Operation';
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import { SUCCESS_STATUSES } from './OperationStatus';
 
+const unverifiableResults: WeakSet<IOperationExecutionResult> = new WeakSet();
+
+/**
+ * Records that the outputs of a result of the executing iteration may not match its state hash, e.g. because input
+ * files of the operation changed while the inputs snapshot was being taken or while the operation was executing.
+ * Such a result is never verified at its state hash, so a later iteration of a long-lived graph runs the operation
+ * again, and the consumers that were built against its outputs, instead of skipping them.
+ *
+ * @remarks
+ * Call this from an `afterExecuteOperationAsync` tap with the default stage. The taps that verify results use a
+ * later stage.
+ */
+export function markResultUnverifiable(result: IOperationExecutionResult): void {
+  unverifiableResults.add(result);
+}
+
+/**
+ * Returns true if `markResultUnverifiable` was called for the result.
+ */
+export function isResultUnverifiable(result: IOperationExecutionResult): boolean {
+  return unverifiableResults.has(result);
+}
+
 /**
  * Re-enables selected operations whose successful result retained by a previous iteration of a long-lived graph
  * (e.g. the Rush daemon) is current by state hash, but not verified at that state hash, so that they are restored

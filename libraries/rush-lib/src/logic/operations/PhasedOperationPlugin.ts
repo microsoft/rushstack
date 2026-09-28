@@ -19,9 +19,12 @@ import type {
 } from './IOperationExecutionResult';
 import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
-import { enableUnverifiedRetainedOperations } from './RetainedResultVerification';
+import { enableUnverifiedRetainedOperations, isResultUnverifiable } from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
+// Runs after the default-stage taps (e.g. CacheableOperationPlugin's input file checks), which can mark a result as
+// unverifiable.
+const VERIFY_RESULT_STAGE: number = 1;
 
 /**
  * Core phased command plugin that provides the functionality for generating a base operation graph
@@ -169,11 +172,14 @@ function configureExecutionManager(graph: IOperationGraph, context: IOperationGr
     }
   );
 
-  graph.hooks.afterExecuteOperationAsync.tap(PLUGIN_NAME, (record: IOperationExecutionResult) => {
-    if (iterationRecords) {
-      updateVerifiedStateHash(record, iterationRecords, verifiedStateHashByOperation);
+  graph.hooks.afterExecuteOperationAsync.tap(
+    { name: PLUGIN_NAME, stage: VERIFY_RESULT_STAGE },
+    (record: IOperationExecutionResult) => {
+      if (iterationRecords) {
+        updateVerifiedStateHash(record, iterationRecords, verifiedStateHashByOperation);
+      }
     }
-  });
+  );
 
   graph.hooks.afterExecuteIterationAsync.tap(PLUGIN_NAME, (status: OperationStatus) => {
     iterationRecords = undefined;
@@ -202,7 +208,10 @@ function updateVerifiedStateHash(
     case OperationStatus.Success:
     case OperationStatus.SuccessWithWarning:
     case OperationStatus.NoOp: {
-      if (areDependenciesVerified(operation, records, verifiedStateHashByOperation)) {
+      if (
+        !isResultUnverifiable(record) &&
+        areDependenciesVerified(operation, records, verifiedStateHashByOperation)
+      ) {
         verifiedStateHashByOperation.set(operation, record.getStateHash());
         return;
       }

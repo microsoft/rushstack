@@ -50,7 +50,7 @@ import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperat
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { enableUnverifiedRetainedOperations } from './RetainedResultVerification';
+import { enableUnverifiedRetainedOperations, markResultUnverifiable } from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -84,8 +84,9 @@ export interface IOperationBuildCacheContext {
   isCacheReadAttempted: boolean;
 
   // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
-  // the iteration's inputs snapshot. Used to refuse cache writes if the inputs changed while the snapshot was
-  // being taken or while the operation was executing.
+  // the iteration's inputs snapshot. Used to refuse cache writes, and to keep a long-lived graph from skipping
+  // the operation later, if the inputs changed while the snapshot was being taken or while the operation was
+  // executing.
   inputFilesState?: IInputFilesState;
   // The hashes of the tracked input files in the iteration's inputs snapshot
   inputFileHashes?: ReadonlyMap<string, string>;
@@ -271,8 +272,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             disjointSet?.add(operation);
 
+            // Captured even if cache writes are disabled, since a long-lived graph (e.g. the Rush daemon) must not
+            // retain outputs that were built from input files that changed during the iteration.
             const inputFilesState: IInputFilesState | undefined =
-              cacheWriteEnabled && !cacheDisabledReason && record.enabled
+              !cacheDisabledReason && record.enabled
                 ? captureInputFilesState(
                     inputsSnapshot.rootDirectory,
                     fileHashes.keys(),
@@ -645,7 +648,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
             const { inputFilesState, inputFileHashes } = buildCacheContext;
             let inputFilesChangedMessage: string | undefined;
-            if (!cacheRestored && isCacheWriteAllowed && inputFilesState) {
+            if (!cacheRestored && inputFilesState) {
               // If Git hashed a file that was saved during the snapshot before it was saved, the outputs were
               // built from newer content than the cache key describes.
               const haveSnapshotHashesChanged: boolean =
@@ -677,9 +680,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               // The cache key was derived from the iteration's inputs snapshot. Storing outputs produced from
               // edited inputs under that key would poison the cache for every consumer of the entry.
               // Consumers' cache keys also embed this operation's pre-edit state, so block their writes too.
-              buildCacheTerminal.writeLine(inputFilesChangedMessage);
+              if (isCacheWriteAllowed) {
+                buildCacheTerminal.writeLine(inputFilesChangedMessage);
+              }
               buildCacheContext.isCacheWriteAllowed = false;
               setCacheEntryPromise = undefined;
+              // For the same reason, a long-lived graph must not skip this operation, or the consumers built against
+              // its outputs, while the state hash is unchanged, whether or not cache writes are enabled.
+              markResultUnverifiable(record);
             }
             if (!cacheRestored) {
               const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise?.();
