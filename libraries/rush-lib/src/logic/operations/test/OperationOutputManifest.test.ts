@@ -58,6 +58,8 @@ describe(describeOutputFileChanges.name, () => {
 });
 
 describe(readOperationOutputManifestAsync.name, () => {
+  // Whole seconds, so that the time is set exactly
+  const KEPT_MODIFICATION_TIME_SECONDS: number = 1_700_000_000;
   let projectFolder: string;
 
   beforeEach(() => {
@@ -112,12 +114,46 @@ describe(readOperationOutputManifestAsync.name, () => {
     expect((await readAsync()).signature).toBe(signature);
   });
 
+  // E.g. `cp -p`, `rsync -t` or `tar -x`, which give the files that they write the modification time of their source.
+  it.each([
+    [
+      'a file is rewritten in place by an append',
+      (folder: string) => fs.appendFileSync(`${folder}/lib/sub/util.js`, ' 2')
+    ],
+    [
+      'an output file that is not in a folder is replaced by a rename with the same size',
+      (folder: string) => {
+        fs.writeFileSync(`${folder}/tsconfig.tsbuildinfo.tmp`, '[]');
+        fs.renameSync(`${folder}/tsconfig.tsbuildinfo.tmp`, `${folder}/tsconfig.tsbuildinfo`);
+      }
+    ]
+  ])(
+    'changes if %s and its modification time is kept',
+    async (description: string, change: (folder: string) => void) => {
+      const files: string[] = [`${projectFolder}/lib/sub/util.js`, `${projectFolder}/tsconfig.tsbuildinfo`];
+      const keepModificationTimes = (): void => {
+        for (const file of files) {
+          fs.utimesSync(file, KEPT_MODIFICATION_TIME_SECONDS, KEPT_MODIFICATION_TIME_SECONDS);
+        }
+      };
+      keepModificationTimes();
+      const { signature } = await readAsync();
+      change(projectFolder);
+      keepModificationTimes();
+      expect((await readAsync()).signature).not.toBe(signature);
+    }
+  );
+
   it.each([
     [
       'a file is added to a subfolder',
       (folder: string) => fs.writeFileSync(`${folder}/lib/sub/new.js`, 'new')
     ],
     ['a file is deleted', (folder: string) => fs.rmSync(`${folder}/lib/sub/util.js`)],
+    [
+      'an output file that is not in a folder is rewritten in place',
+      (folder: string) => fs.appendFileSync(`${folder}/tsconfig.tsbuildinfo`, ' ')
+    ],
     [
       'a file in a subfolder is replaced by a rename',
       (folder: string) => {

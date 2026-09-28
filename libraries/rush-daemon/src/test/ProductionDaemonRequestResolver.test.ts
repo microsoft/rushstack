@@ -1517,19 +1517,23 @@ process.exit(23);
       incrementalScript: true,
       incrementalBuilds: false
     });
+    // With incremental builds on, an edit of this source file runs the incremental script (see the next test).
+    const inputPath: string = path.join(fixture.repoRoot, 'projects/a/src/input.txt');
     try {
+      fs.mkdirSync(path.dirname(inputPath), { recursive: true });
       for (const [requestId, input] of [
         ['initial-script-1', 'one'],
         ['initial-script-2', 'two'],
         ['initial-script-3', 'three']
       ]) {
-        fs.writeFileSync(path.join(fixture.repoRoot, 'projects/a/input.txt'), input);
+        fs.writeFileSync(inputPath, input);
         const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'a']);
         expect(exchange.terminal).toMatchObject({
           kind: 'requestResult',
           payload: { exitCode: 0, operationResults: [{ operationId: 'a (compile)', status: 'SUCCESS' }] }
         });
         expect(logText(exchange)).toContain('Invoking (initial): node build.cjs');
+        expect(logText(exchange)).not.toContain('Not using the incremental command');
       }
       // A watch-only incremental script can keep outputs of deleted inputs, and its output would be cached
       // under the key of the initial script that native Rush runs.

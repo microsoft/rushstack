@@ -48,7 +48,7 @@ import { PassThrough } from 'node:stream';
 
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { SubprocessTerminator } from '@rushstack/node-core-library';
-import { MockWritable } from '@rushstack/terminal';
+import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
@@ -62,6 +62,7 @@ import {
   NATIVE_COMMAND_INVALIDATION_REASON
 } from '../IncrementalExecutionState';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
+import { LegacySkipPlugin } from '../LegacySkipPlugin';
 import { NullOperationRunner } from '../NullOperationRunner';
 import { Operation } from '../Operation';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
@@ -105,6 +106,10 @@ interface IProjectSpec {
    * If set, the project has a `profiles` folder, like a rig package.
    */
   readonly isRig?: boolean;
+  /**
+   * Files outside of the project that its build depends on, like `dependsOnAdditionalFiles` in rush-project.json
+   */
+  readonly additionalFiles?: ReadonlyArray<string>;
 }
 
 interface IWorkspaceOptions {
@@ -113,6 +118,10 @@ interface IWorkspaceOptions {
    * operation of its own project, which has no script and depends on the builds of the project's dependencies.
    */
   readonly hasPassThroughPhase?: boolean;
+  /**
+   * If set, applies the skip detection that Rush uses when the build cache is not enabled.
+   */
+  readonly hasLegacySkipDetection?: boolean;
 }
 
 interface ITestIteration {
@@ -204,7 +213,7 @@ function build(projectFolder: string, isBundle: boolean, isIncremental: boolean)
 
 async function createWorkspaceAsync(
   projectSpecs: ReadonlyArray<IProjectSpec>,
-  { hasPassThroughPhase }: IWorkspaceOptions = {}
+  { hasPassThroughPhase, hasLegacySkipDetection }: IWorkspaceOptions = {}
 ): Promise<ITestWorkspace> {
   const rootFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-incremental-guard-'));
   workspaceFolders.push(rootFolder);
@@ -256,8 +265,17 @@ async function createWorkspaceAsync(
   const projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
   const lookupByPath: LookupByPath<RushConfigurationProject> = new LookupByPath();
   const outputFolderByPrefix: Map<string, string> = new Map();
+  const additionalFiles: Set<string> = new Set();
   for (const spec of projectSpecs) {
-    const { name, dependencies = [], devDependencies = [], isBundle, dependsOnEnvVars, isRig } = spec;
+    const {
+      name,
+      dependencies = [],
+      devDependencies = [],
+      isBundle,
+      dependsOnEnvVars,
+      isRig,
+      additionalFiles: projectAdditionalFiles = []
+    } = spec;
     const projectFolder: string = `${rootFolder}/${name}`;
     const toVersions = (names: ReadonlyArray<string>): Record<string, string> =>
       Object.fromEntries(names.map((dependencyName: string) => [dependencyName, 'workspace:*']));
@@ -274,11 +292,17 @@ async function createWorkspaceAsync(
     if (isRig) {
       writeFile(`${name}/profiles/default/config/heft.json`, '{}');
     }
+    for (const file of projectAdditionalFiles) {
+      writeFile(file, '{}');
+      additionalFiles.add(file);
+    }
 
     const project: RushConfigurationProject = {
       packageName: name,
       projectFolder,
       projectRelativeFolder: name,
+      // Outside of the project folder, so that its files are not inputs
+      projectRushTempFolder: `${rootFolder}/common/temp/projects/${name}`,
       packageJson,
       rushConfiguration: { commonTempFolder: `${rootFolder}/common/temp` }
     } as unknown as RushConfigurationProject;
@@ -293,7 +317,10 @@ async function createWorkspaceAsync(
       getCacheDisabledReason: () => undefined
     } as unknown as RushProjectConfiguration;
     projectConfigurations.set(project, projectConfiguration);
-    projectMap.set(project, { projectConfig: projectConfiguration });
+    projectMap.set(project, {
+      projectConfig: projectConfiguration,
+      additionalFilesByOperationName: new Map([[PHASE_NAME, new Set(projectAdditionalFiles)]])
+    });
     lookupByPath.setItem(name, project);
     outputFolderByPrefix.set(name, outputFolderName);
     specByFolder.set(projectFolder, spec);
@@ -338,6 +365,13 @@ async function createWorkspaceAsync(
   const hooks: PhasedCommandHooks = new PhasedCommandHooks();
   new PhasedOperationPlugin().apply(hooks);
   new IncrementalExecutionGuardPlugin().apply(hooks);
+  if (hasLegacySkipDetection) {
+    new LegacySkipPlugin({
+      terminal: new Terminal(new StringBufferTerminalProvider()),
+      changedProjectsOnly: false,
+      isIncrementalBuildAllowed: true
+    }).apply(hooks);
+  }
   const destination: MockWritable = new MockWritable();
   const graphOperations: Set<Operation> = new Set([...operations.values(), ...passThroughOperations]);
   const graph: OperationGraph = new OperationGraph(graphOperations, {
@@ -359,11 +393,17 @@ async function createWorkspaceAsync(
   // Like `git hash-object` for each file, except the outputs, which are ignored by git.
   const createInputsSnapshot = (environment: Readonly<Record<string, string>>): InputsSnapshot => {
     const hashes: Map<string, string> = new Map();
+    const hashFile = (file: string): void => {
+      const content: Buffer = fs.readFileSync(`${rootFolder}/${file}`);
+      hashes.set(file, createHash('sha1').update(content).digest('hex'));
+    };
     for (const [prefix, outputFolderName] of outputFolderByPrefix) {
       for (const file of listFiles(`${rootFolder}/${prefix}`, new Set([outputFolderName]))) {
-        const content: Buffer = fs.readFileSync(`${rootFolder}/${prefix}/${file}`);
-        hashes.set(`${prefix}/${file}`, createHash('sha1').update(content).digest('hex'));
+        hashFile(`${prefix}/${file}`);
       }
+    }
+    for (const file of additionalFiles) {
+      hashFile(file);
     }
     return new InputsSnapshot({
       rootDir: rootFolder,
@@ -420,6 +460,14 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
   });
 
   interface IInputChangeCase {
+    /**
+     * The project, `{ name: 'a' }` by default
+     */
+    readonly spec?: IProjectSpec;
+    /**
+     * Runs before the first build
+     */
+    readonly prepare?: (workspace: ITestWorkspace) => void;
     readonly change: (workspace: ITestWorkspace) => void;
     readonly reason: string;
     /**
@@ -464,20 +512,63 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
         reason: 'a configuration file changed ("a/tsconfig.json")',
         sourceFile: 'a/src/one.ts'
       }
+    ],
+    [
+      'a configuration file in a subfolder changes',
+      {
+        prepare: (workspace: ITestWorkspace) => workspace.writeFile('a/test/tsconfig.json', '{}'),
+        change: (workspace: ITestWorkspace) =>
+          workspace.writeFile('a/test/tsconfig.json', '{ "compilerOptions": {} }'),
+        reason: 'a configuration file changed ("a/test/tsconfig.json")',
+        sourceFile: 'a/src/one.ts'
+      }
+    ],
+    [
+      'a file in the root folder of the project changes',
+      {
+        prepare: (workspace: ITestWorkspace) => workspace.writeFile('a/build.js', '// build'),
+        change: (workspace: ITestWorkspace) => workspace.writeFile('a/build.js', '// build 2'),
+        reason: 'a configuration file changed ("a/build.js")',
+        sourceFile: 'a/src/one.ts'
+      }
+    ],
+    [
+      'a file in the config folder of the project changes',
+      {
+        prepare: (workspace: ITestWorkspace) => workspace.writeFile('a/config/heft.json', '{}'),
+        change: (workspace: ITestWorkspace) =>
+          workspace.writeFile('a/config/heft.json', '{ "phasesByName": {} }'),
+        reason: 'a configuration file changed ("a/config/heft.json")',
+        sourceFile: 'a/src/one.ts'
+      }
+    ],
+    [
+      'a file outside of the project that it depends on changes',
+      {
+        spec: { name: 'a', additionalFiles: ['tools/shared/data.json'] },
+        change: (workspace: ITestWorkspace) =>
+          workspace.writeFile('tools/shared/data.json', '{ "edited": true }'),
+        reason: 'a configuration file changed ("tools/shared/data.json")',
+        sourceFile: 'a/src/one.ts'
+      }
     ]
-  ])('runs the initial command if %s', async (description: string, { change, reason, sourceFile }) => {
-    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
-    await workspace.executeAsync();
+  ])(
+    'runs the initial command if %s',
+    async (description: string, { spec = { name: 'a' }, prepare, change, reason, sourceFile }) => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([spec]);
+      prepare?.(workspace);
+      await workspace.executeAsync();
 
-    change(workspace);
-    const changed: ITestIteration = await workspace.executeAsync();
-    expect(changed.commands).toEqual(['a:initial']);
-    expect(changed.output).toContain(`Not using the incremental command because ${reason}.`);
+      change(workspace);
+      const changed: ITestIteration = await workspace.executeAsync();
+      expect(changed.commands).toEqual(['a:initial']);
+      expect(changed.output).toContain(`Not using the incremental command because ${reason}.`);
 
-    // The result of the initial command is the new base.
-    workspace.writeFile(sourceFile, 'edited');
-    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
-  });
+      // The result of the initial command is the new base.
+      workspace.writeFile(sourceFile, 'edited');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+    }
+  );
 
   it('runs the initial command if an environment variable that the operation depends on changes', async () => {
     const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a', dependsOnEnvVars: ['MODE'] }]);
@@ -616,6 +707,46 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     );
   });
 
+  it('runs the initial command after an incremental command that emitted a content-hashed file', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+    await workspace.executeAsync();
+
+    // Like a chunk with webpack's default hash length. Comparing the output files ignores such names.
+    workspace.writeFile('a/src/one.ts', 'one emit:chunk_0123456789abcdef0123');
+    const changed: ITestIteration = await workspace.executeAsync();
+    expect(changed.commands).toEqual(['a:incremental', 'a:initial']);
+    expect(changed.getStatus('a')).toBe(OperationStatus.Success);
+    expect(changed.output).toContain(
+      'Running the initial command, because its outputs include the content-hashed file "lib/chunk_0123456789abcdef0123.js".'
+    );
+
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual(['a:initial']);
+    expect(next.output).toContain(
+      'Not using the incremental command because its outputs include the content-hashed file "lib/chunk_0123456789abcdef0123.js".'
+    );
+  });
+
+  it('does not let a later command skip an operation after its incremental command', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      hasLegacySkipDetection: true
+    });
+    const packageDepsPath: string = `${workspace.rootFolder}/common/temp/projects/a/package-deps__phase_build.json`;
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(fs.existsSync(packageDepsPath)).toBe(true);
+
+    // The outputs of the incremental command can differ from those of the initial command, so a later command,
+    // e.g. one that does not use the Rush daemon, must not skip the operation.
+    workspace.writeFile('a/src/one.ts', 'one 2');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+    expect(fs.existsSync(packageDepsPath)).toBe(false);
+
+    workspace.graph.invalidateOperations(undefined, NATIVE_COMMAND_INVALIDATION_REASON);
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(fs.existsSync(packageDepsPath)).toBe(true);
+  });
+
   it('runs the initial command after a failure', async () => {
     const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
     await workspace.executeAsync();
@@ -701,5 +832,20 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     workspace.writeFile('a/src/one.ts', 'one 3');
     workspace.writeFile('b/src/one.ts', 'one 3');
     expect([...(await workspace.executeAsync()).commands].sort()).toEqual(['a:initial', 'b:initial']);
+  });
+
+  it('forgets the base of an operation that is invalidated for another reason', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }, { name: 'b' }]);
+    await workspace.executeAsync();
+
+    // E.g. a client of the Rush daemon that invalidates the operation.
+    workspace.graph.invalidateOperations([workspace.operations.get('a')!], 'daemon graph invalidate');
+    workspace.writeFile('a/src/one.ts', 'one 2');
+    workspace.writeFile('b/src/one.ts', 'one 2');
+    const next: ITestIteration = await workspace.executeAsync();
+    expect([...next.commands].sort()).toEqual(['a:initial', 'b:incremental']);
+    expect(next.output).toContain(
+      'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+    );
   });
 });
