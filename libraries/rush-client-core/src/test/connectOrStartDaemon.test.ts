@@ -343,6 +343,53 @@ describe('detached daemon startup', () => {
     await client.closeAsync();
   }, 15000);
 
+  // On Linux, LockFile checks the owners of other lockfiles. It used to run "ps" for each of them on every attempt,
+  // and "ps" reads every process on the system, so clients that started at once timed out on a busy machine.
+  (process.platform === 'linux' ? it : it.skip)(
+    'connects 32 concurrent clients to a daemon that takes 8 seconds to start, running "ps" once per client',
+    async () => {
+      const clientCount: number = 32;
+      fs.writeFileSync(path.join(folder, 'startup-delay-ms'), '8000');
+      // A "ps" script ahead of the real one on the PATH records the client that runs each "ps" command.
+      const binFolder: string = path.join(folder, 'bin');
+      const psCallsPath: string = path.join(folder, 'ps-calls');
+      fs.mkdirSync(binFolder);
+      fs.writeFileSync(
+        path.join(binFolder, 'ps'),
+        `#!/bin/sh\necho "$PPID" >> '${psCallsPath}'\nPATH='${process.env.PATH}' exec ps "$@"\n`,
+        { mode: 0o755 }
+      );
+      // The default deadline, instead of the 7 seconds that this suite uses.
+      const startOptions: IConnectOrStartDaemonOptions = { ...options, startupTimeoutMs: 15000 };
+      const starters: ChildProcess[] = Array.from({ length: clientCount }, () =>
+        spawn(process.execPath, [path.join(__dirname, 'fixtures/starter.js'), JSON.stringify(startOptions)], {
+          // With another locale, "ps" can print localized names, and LockFile then runs "ps" to check them.
+          env: { ...process.env, PATH: `${binFolder}${path.delimiter}${process.env.PATH}`, LC_ALL: 'C' },
+          stdio: ['ignore', 'ignore', 'pipe']
+        })
+      );
+      starterProcesses.push(...starters);
+      const results = await Promise.all(
+        starters.map(async (starter) => {
+          let stderr: string = '';
+          starter.stderr!.on('data', (chunk: Buffer) => {
+            stderr += chunk.toString();
+          });
+          const [code] = await once(starter, 'close');
+          return { code, stderr };
+        })
+      );
+
+      expect(results).toEqual(Array.from({ length: clientCount }, () => ({ code: 0, stderr: '' })));
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+      // Each client runs "ps" once, for its own start time. Lockfiles of other clients are checked with /proc.
+      const psCalls: number = fs.readFileSync(psCallsPath, 'utf8').trim().split('\n').length;
+      expect(psCalls).toBeGreaterThan(0);
+      expect(psCalls).toBeLessThan(2 * clientCount);
+    },
+    30000
+  );
+
   it('replaces a mismatched daemon exactly once for concurrent clients before requests start', async () => {
     const old = await connectOrStartDaemonAsync(options);
     const previous = await old.status;
@@ -468,7 +515,10 @@ describe('detached daemon startup', () => {
         expect(starts).toBeGreaterThanOrEqual(2);
         expect(starts).toBeLessThanOrEqual(7);
         // The deadline may expire after the last successor started but before the request was resubmitted.
-        const requests: number = fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n').length;
+        const requests: number = fs
+          .readFileSync(path.join(folder, 'requests'), 'utf8')
+          .trim()
+          .split('\n').length;
         expect(requests).toBeGreaterThanOrEqual(starts - 1);
         expect(requests).toBeLessThanOrEqual(starts);
       } else {

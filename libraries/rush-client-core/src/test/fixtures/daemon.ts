@@ -39,7 +39,7 @@ async function mainAsync(): Promise<void> {
       await new Promise((resolve) => setTimeout(resolve, 20));
     }
   }
-  await new Promise((resolve) => setTimeout(resolve, 250));
+  await new Promise((resolve) => setTimeout(resolve, readStartupDelayMs(folder)));
   const listener = await DaemonFrameListener.listenAsync(paths, {
     protocolVersion: DAEMON_PROTOCOL_VERSION,
     onConnection: (connection) => {
@@ -125,6 +125,12 @@ async function mainAsync(): Promise<void> {
     await listener.closeAsync();
     fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
   }
+}
+
+/** How long the daemon waits before it listens: 250 milliseconds, or the number in the "startup-delay-ms" file. */
+function readStartupDelayMs(folder: string): number {
+  const delayPath: string = path.join(folder, 'startup-delay-ms');
+  return fs.existsSync(delayPath) ? Number(fs.readFileSync(delayPath, 'utf8')) : 250;
 }
 
 mainAsync().catch((error: Error) => {

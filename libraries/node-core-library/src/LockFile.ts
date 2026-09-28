@@ -138,6 +138,147 @@ export function getProcessStartTime(pid: number): string | undefined {
   throw new Error(`Unexpected output from the "ps" command`);
 }
 
+const LSTART_MONTHS: string[] = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec'
+];
+
+/**
+ * Helper function that is exported for unit tests only.
+ * Returns the time when the process started, in milliseconds since the epoch, rounded down to a whole second.
+ * Unlike getProcessStartTime(), the result doesn't depend on the time zone or locale of the current process.
+ * Returns undefined if the process doesn't exist with that pid, or if its start time can't be determined.
+ */
+export function getProcessStartTimeMs(pid: number): number | undefined {
+  const pidString: string = pid.toString();
+  if (pid < 0 || pidString.indexOf('e') >= 0 || pidString.indexOf('E') >= 0) {
+    return undefined;
+  }
+  let args: string[];
+  if (process.platform === 'darwin') {
+    args = [`-p ${pidString}`, '-o lstart'];
+  } else if (process.platform === 'linux') {
+    args = ['-p', pidString, '-o', 'lstart'];
+  } else {
+    return undefined;
+  }
+
+  // "ps -o lstart" formats the time using the time zone and locale of the "ps" process
+  const psResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync('ps', args, {
+    encoding: 'utf8',
+    env: { ...process.env, LC_ALL: 'C', TZ: 'UTC0' }
+  });
+
+  // For example: "Sun Sep 27 17:15:08 2026"
+  const match: RegExpExecArray | null =
+    /^\s*[A-Za-z]{3} ([A-Za-z]{3}) +(\d{1,2}) (\d{2}):(\d{2}):(\d{2}) (\d{4})\s*$/.exec(
+      (psResult.stdout || '').split('\n')[1] || ''
+    );
+  if (!match) {
+    return undefined;
+  }
+  const month: number = LSTART_MONTHS.indexOf(match[1]);
+  if (month < 0) {
+    return undefined;
+  }
+  return Date.UTC(
+    Number(match[6]),
+    month,
+    Number(match[2]),
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5])
+  );
+}
+
+const LSTART_DAYS: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// The number of clock ticks per second in /proc/[pid]/stat.  This is sysconf(_SC_CLK_TCK), which Linux fixes
+// at 100 (USER_HZ) on every architecture that Node.js supports.
+const LINUX_CLOCK_TICKS_PER_SECOND: number = 100;
+
+/**
+ * Helper function that is exported for unit tests only.
+ * Linux only: returns the time when the system booted, in seconds since the epoch, from the "btime" line of
+ * /proc/stat.  "ps -o lstart" adds the start time of a process to this time.
+ */
+export function getLinuxBootTimeSeconds(): number {
+  const match: RegExpExecArray | null = /^btime (\d+)$/m.exec(FileSystem.readFile('/proc/stat'));
+  if (!match) {
+    throw new Error('The contents of /proc/stat have an unexpected format');
+  }
+  return Number(match[1]);
+}
+
+/**
+ * The start time of a Linux process, in the formats that getProcessStartTime() returns.
+ */
+export interface ILinuxProcessStartTime {
+  /**
+   * What "ps -o lstart" prints with the C locale and the current time zone, for example "Mon Sep 28 13:52:39 2026"
+   */
+  lstart: string;
+  /**
+   * The start time in clock ticks after boot, from /proc/[pid]/stat.  getProcessStartTime() returns this if
+   * "ps" can't be run.
+   */
+  ticks: string;
+}
+
+/**
+ * Helper function that is exported for unit tests only.
+ * Linux only: returns the start time of a process from /proc, without running "ps" like getProcessStartTime()
+ * does.  Returns undefined if the process doesn't exist with that pid.  Throws if /proc can't be read for another
+ * reason, or if it has an unexpected format.
+ * @param pid - The process ID
+ * @param getBootTimeSeconds - Returns what getLinuxBootTimeSeconds() returns
+ */
+export function getLinuxProcessStartTime(
+  pid: number,
+  getBootTimeSeconds: () => number
+): ILinuxProcessStartTime | undefined {
+  const pidString: string = pid.toString();
+  if (pid < 0 || pidString.indexOf('e') >= 0 || pidString.indexOf('E') >= 0) {
+    throw new Error(`"pid" is negative or too large`);
+  }
+  let stat: string;
+  try {
+    stat = FileSystem.readFile(`/proc/${pidString}/stat`);
+  } catch (error) {
+    // ESRCH means that the process exited while we were reading the file.
+    if (FileSystem.isNotExistError(error as Error) || (error as NodeJS.ErrnoException).code === 'ESRCH') {
+      return undefined;
+    }
+    throw error;
+  }
+  const ticks: string | undefined = getProcessStartTimeFromProcStat(stat);
+  if (ticks === undefined || !/^[0-9]+$/.test(ticks)) {
+    throw new Error(`The contents of /proc/${pidString}/stat have an unexpected format`);
+  }
+
+  // Like "ps", round down to a whole second and use "%a %b %e %H:%M:%S %Y" in the local time zone.
+  const date: Date = new Date(
+    (getBootTimeSeconds() + Math.floor(Number(ticks) / LINUX_CLOCK_TICKS_PER_SECOND)) * 1000
+  );
+  const twoDigits: (value: number) => string = (value: number) => (value < 10 ? `0${value}` : `${value}`);
+  const lstart: string =
+    `${LSTART_DAYS[date.getDay()]} ${LSTART_MONTHS[date.getMonth()]} ` +
+    `${date.getDate() < 10 ? ' ' : ''}${date.getDate()} ` +
+    `${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}:${twoDigits(date.getSeconds())} ` +
+    `${date.getFullYear()}`;
+  return { lstart, ticks };
+}
+
 // A set of locks that currently exist in the current process, to be used when
 // multiple locks are acquired in the same process.
 const IN_PROC_LOCKS: Set<string> = new Set<string>();
@@ -145,12 +286,41 @@ const IN_PROC_LOCKS: Set<string> = new Set<string>();
 // The function used to determine a process's start time.  Overridable for unit testing.
 let _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
 
+// On Linux, what _getStartTime() returned for the current process, and what getLinuxProcessStartTime()
+// returned for it at the same time.  See _getCurrentProcessStartTime().
+let _currentProcessStartTime: { startTime: string; linuxLstart: string } | undefined;
+
 /**
  * For unit testing only: overrides the function used to determine a process's start time.
  * @internal
  */
 export function _setLockFileGetProcessStartTime(fn: (pid: number) => string | undefined): void {
   _getStartTime = fn;
+  _currentProcessStartTime = undefined;
+}
+
+/**
+ * Returns the start time of the current process, which its lockfiles contain.  On Linux, this runs "ps" again only
+ * if the start time that /proc gives changes, which happens when the system clock is set or process.env.TZ
+ * changes.  A process that acquires locks often would otherwise run "ps" each time, which is slow when there are
+ * many processes.
+ */
+function _getCurrentProcessStartTime(getLinuxBootTime: () => number): string | undefined {
+  let linuxLstart: string | undefined;
+  if (process.platform === 'linux') {
+    try {
+      linuxLstart = getLinuxProcessStartTime(process.pid, getLinuxBootTime)?.lstart;
+    } catch (error) {
+      // /proc can't be read, so run "ps" every time.
+    }
+  }
+  if (linuxLstart !== undefined && _currentProcessStartTime?.linuxLstart === linuxLstart) {
+    return _currentProcessStartTime.startTime;
+  }
+  const startTime: string | undefined = _getStartTime(process.pid);
+  _currentProcessStartTime =
+    startTime !== undefined && linuxLstart !== undefined ? { startTime, linuxLstart } : undefined;
+  return startTime;
 }
 
 /**
@@ -415,6 +585,67 @@ function _tryAcquireInner(
   }
 }
 
+// How much later than a lockfile's birthtime its process may appear to have started.  "ps" reports whole
+// seconds, and the system clock can be adjusted while a process runs.
+const START_TIME_TOLERANCE_MS: number = 5000;
+
+/**
+ * Called when the start time in the lockfile of another running process differs from the start time that
+ * we got for its PID.  Returns true if the lockfile still belongs to that process.
+ */
+function _isLockFileOfRunningProcess(
+  pid: string,
+  lockFileStartTime: string | undefined,
+  lockFileBirthtimeMs: number | undefined
+): boolean {
+  // "ps -o lstart" formats the start time using the time zone and locale of the process that runs it,
+  // so a process whose TZ, LANG, LC_TIME or LC_ALL differs from ours wrote its start time differently.
+  // If the start time differs because the lockfile's process exited and the OS gave its PID to a new
+  // process, then the new process started after the lockfile was created.  An empty lockfile is still
+  // treated as stale here, as before.
+  if (!lockFileStartTime || lockFileBirthtimeMs === undefined) {
+    return false;
+  }
+  const startTimeMs: number | undefined = getProcessStartTimeMs(parseInt(pid, 10));
+  return startTimeMs !== undefined && startTimeMs <= lockFileBirthtimeMs + START_TIME_TOLERANCE_MS;
+}
+
+/**
+ * Returns true if /proc shows that the lockfile of another process belongs to the running process with its PID.
+ * This is much faster than running "ps", which reads the files of every process in /proc.  Returns false if the
+ * start time in the lockfile is different, if /proc can't tell, or if this isn't Linux.  Then the caller must
+ * run "ps", so this never makes a lockfile stale.
+ */
+function _isLockFileOfLinuxProcess(
+  pid: string,
+  lockFileStartTime: string | undefined,
+  getBootTimeSeconds: () => number
+): boolean {
+  if (process.platform !== 'linux' || !lockFileStartTime) {
+    return false;
+  }
+  let startTime: ILinuxProcessStartTime | undefined;
+  try {
+    startTime = getLinuxProcessStartTime(parseInt(pid, 10), getBootTimeSeconds);
+  } catch (error) {
+    // For example, /proc isn't mounted, or it doesn't let us read the files of this process.
+    return false;
+  }
+  // These are the formats that getProcessStartTime() returns.  If the other process wrote its start time with a
+  // locale other than C, the caller runs "ps".
+  return (
+    startTime !== undefined &&
+    (lockFileStartTime === startTime.lstart || lockFileStartTime === startTime.ticks)
+  );
+}
+
+// Returned by _tryAcquireMacOrLinuxOnce() when the lockfile of another process has the same birthtime as ours.
+const TIED: unique symbol = Symbol('tied');
+// The maximum number of attempts that _tryAcquireMacOrLinux() makes while lockfiles keep tying.
+const MAX_TIED_ATTEMPTS: number = 4;
+// After a tie, the next attempt waits a random time of up to this many milliseconds times the attempt number.
+const TIE_RETRY_DELAY_MS: number = 20;
+
 /**
  * Attempts to acquire the lock on a Linux or OSX machine
  */
@@ -423,18 +654,58 @@ function _tryAcquireMacOrLinux(
   resourceName: string,
   pidLockFilePath: string
 ): ITryAcquireResult | undefined {
-  // get the current process identifier (PID)
-  const pid: number = process.pid;
+  // On Linux, the time when the system booted, which we read from /proc/stat at most once per call
+  let linuxBootTimeSeconds: number | undefined;
+  const getLinuxBootTime: () => number = () => {
+    if (linuxBootTimeSeconds === undefined) {
+      linuxBootTimeSeconds = getLinuxBootTimeSeconds();
+    }
+    return linuxBootTimeSeconds;
+  };
 
   // Suppose that a process terminates unexpectedly without deleting its PID-based lockfile,
   // then we check to see if the process is still alive.  The OS may have given the same PID
   // to a new process, how to detect that?  We will rely on getProcessStartTime() which
   // is stored in the file itself for comparison.
-  const startTime: string | undefined = _getStartTime(pid);
+  const startTime: string | undefined = _getCurrentProcessStartTime(getLinuxBootTime);
 
   if (!startTime) {
     throw new Error(`Unable to calculate start time for current process.`);
   }
+
+  for (let attempt: number = 1; ; attempt++) {
+    const result: ITryAcquireResult | typeof TIED | undefined = _tryAcquireMacOrLinuxOnce(
+      resourceFolder,
+      resourceName,
+      pidLockFilePath,
+      startTime,
+      getLinuxBootTime
+    );
+    if (result !== TIED) {
+      return result;
+    }
+    if (attempt >= MAX_TIED_ATTEMPTS) {
+      return undefined;
+    }
+    // If the other process also saw the tie, neither of us has the lock.  Wait a random time so that
+    // our next lockfile is unlikely to tie again, and try again.
+    const delayMs: number = 1 + Math.floor(Math.random() * TIE_RETRY_DELAY_MS * attempt);
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
+  }
+}
+
+/**
+ * Makes one attempt to acquire the lock on a Linux or OSX machine
+ */
+function _tryAcquireMacOrLinuxOnce(
+  resourceFolder: string,
+  resourceName: string,
+  pidLockFilePath: string,
+  startTime: string,
+  getLinuxBootTime: () => number
+): ITryAcquireResult | typeof TIED | undefined {
+  // get the current process identifier (PID)
+  const pid: number = process.pid;
 
   let lockFileHandle: FileWriter | undefined;
 
@@ -448,8 +719,8 @@ function _tryAcquireMacOrLinux(
     lockFileHandle.write(startTime);
     const currentBirthTimeMs: number = lockFileHandle.getStatistics().birthtime.getTime();
 
-    let smallestBirthTimeMs: number = currentBirthTimeMs;
-    let smallestBirthTimePid: string = pid.toString();
+    // Set if another process has a lockfile with the same birthtime as ours
+    let tied: boolean = false;
 
     // now, scan the directory for all lockfiles
     const files: string[] = FileSystem.readFolderItemNames(resourceFolder);
@@ -474,9 +745,6 @@ function _tryAcquireMacOrLinux(
         const fileInFolderPath: string = `${resourceFolder}/${fileInFolder}`;
 
         // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
-
-        // Actual start time of the other PID
-        const otherPidCurrentStartTime: string | undefined = _getStartTime(parseInt(otherPid, 10));
 
         // The start time from the file, which we will compare with otherPidCurrentStartTime
         // to determine whether the PID got reused by a new process.
@@ -506,6 +774,13 @@ function _tryAcquireMacOrLinux(
 
             // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
             continue;
+          } else if (otherBirthtimeMs === currentBirthTimeMs) {
+            // ==> Tie
+            // The other process's file has the same birthtime as ours, and they may acquire the lock
+            // after they finish writing the contents, so we must not treat this file as stale below.
+            // See the comment about ties below.
+            tied = true;
+            continue;
           } else if (
             otherBirthtimeMs - currentBirthTimeMs < 0 &&
             otherBirthtimeMs - currentBirthTimeMs > -1000
@@ -522,16 +797,39 @@ function _tryAcquireMacOrLinux(
         }
 
         // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
+
+        // Actual start time of the other PID.  On Linux, /proc usually shows that the file belongs to the
+        // process with that PID, and then we don't need to run "ps", which is slow when there are many
+        // processes.  When many processes wait for the same lock, each of their attempts checks the file
+        // of every other process.
+        const otherPidCurrentStartTime: string | undefined = _isLockFileOfLinuxProcess(
+          otherPid,
+          otherPidOldStartTime,
+          getLinuxBootTime
+        )
+          ? otherPidOldStartTime
+          : _getStartTime(parseInt(otherPid, 10));
+
         // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
 
         // Time to compare
-        if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
+        if (
+          !otherPidCurrentStartTime ||
+          (otherPidOldStartTime !== otherPidCurrentStartTime &&
+            !_isLockFileOfRunningProcess(otherPid, otherPidOldStartTime, otherBirthtimeMs))
+        ) {
           // ==> Stale lockfile
           // This file doesn't prevent us from acquiring the lock, but it does indicate that
           // the resource was left in a dirty state.  (If we delete the file right now, that
           // information would be lost, so we clean up later when we acquire successfully.)
 
           // console.log(`Other pid ${otherPid} is no longer executing!`);
+
+          // We checked the other process after we read its file.  If the file is gone now, the other process
+          // released the lock in between, so the resource isn't dirty.
+          if (!FileSystem.exists(fileInFolderPath)) {
+            continue;
+          }
           staleFilesToDelete.push(fileInFolderPath);
           continue;
         }
@@ -541,33 +839,29 @@ function _tryAcquireMacOrLinux(
 
         if (otherBirthtimeMs !== undefined) {
           // ==> We found a valid file belonging to another process.
-          // With multiple parties trying to acquire, the winner is the smallestBirthTime,
-          // so we need to sort.
+          // With multiple parties trying to acquire, the winner is the one with the earliest file.
+          if (otherBirthtimeMs < currentBirthTimeMs) {
+            // we do not have the lock
+            return undefined;
+          }
 
-          // the other lock file was created before the current earliest lock file
-          // or the other lock file was created at the same exact time, but has earlier pid
-
-          // note that it is acceptable to do a direct comparison of the PIDs in this case
-          // since we are establishing a consistent order to apply to the lock files in all
-          // execution instances.
-
-          // it doesn't matter that the PIDs roll over, we've already
-          // established that these processes all started at the same time, so we just
-          // need to get all instances of the lock test to agree which one won.
-          if (
-            otherBirthtimeMs < smallestBirthTimeMs ||
-            (otherBirthtimeMs === smallestBirthTimeMs && otherPid < smallestBirthTimePid)
-          ) {
-            smallestBirthTimeMs = otherBirthtimeMs;
-            smallestBirthTimePid = otherPid;
+          if (otherBirthtimeMs === currentBirthTimeMs) {
+            // ==> Tie
+            // Birthtimes have millisecond precision (often coarser), so files created at about the
+            // same time can have equal birthtimes.  We read the folder only once, so the other process
+            // may have read it before our file existed and concluded that it holds the lock.  Breaking
+            // the tie by PID could then let both processes acquire the lock.  Instead, a tie means that
+            // neither process acquires the lock in this attempt.  At least one of the two processes
+            // sees the other's file, so at most one of them acquires the lock.
+            tied = true;
           }
         }
       }
     }
 
-    if (smallestBirthTimePid !== pid.toString()) {
-      // we do not have the lock
-      return undefined;
+    if (tied) {
+      // we do not have the lock, but we may acquire it if we try again with a new file
+      return TIED;
     }
 
     let dirtyWhenAcquired: boolean = false;

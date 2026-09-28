@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Make `LockFile` on Linux much faster when other processes hold or wait for the same lock. It now confirms that another process's lockfile is valid by reading /proc, instead of running a `ps` command for each lockfile on each attempt.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix `LockFile` on Linux and macOS granting a lock to two processes at once when their lockfiles have the same birthtime. A tie no longer lets either process acquire the lock in that attempt; instead, `LockFile.tryAcquire()` waits a random time and tries again with a new lockfile, up to 4 attempts.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
