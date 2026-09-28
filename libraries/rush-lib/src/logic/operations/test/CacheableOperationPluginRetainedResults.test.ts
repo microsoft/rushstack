@@ -61,6 +61,7 @@ import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRun
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { setCommandExecution } from '../IncrementalExecutionState';
+import { NullOperationRunner } from '../NullOperationRunner';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -124,6 +125,10 @@ interface ITestGraph {
 
 interface ITestGraphOptions {
   /**
+   * The names of the operations that have no script, like a phase whose script is missing
+   */
+  noOpNames?: ReadonlySet<string>;
+  /**
    * The names of the dependencies of each operation. By default, each operation depends on the previous one.
    */
   dependencies?: Record<string, string[]>;
@@ -161,7 +166,9 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
       getCacheDisabledReason: () => undefined
     } as unknown as RushProjectConfiguration);
     const operation: Operation = new Operation({
-      runner: new CacheableMockRunner(name, executions, incrementalNames),
+      runner: options.noOpNames?.has(name)
+        ? new NullOperationRunner({ name, result: OperationStatus.NoOp, silent: true })
+        : new CacheableMockRunner(name, executions, incrementalNames),
       logFilenameIdentifier: name,
       phase: mockPhase,
       project
@@ -541,6 +548,30 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
     operations.get('c')!.enabled = true;
     await testGraph.executeAsync();
     expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+  });
+
+  it('does not write results built against an incremental result through an operation without a script', async () => {
+    // "a" <- "b-lite" <- "b", like the phases of the rushstack repo: the build of a project depends only on a phase of
+    // its own project that has no script and depends on the builds of upstream projects.
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b-lite', 'b'], {
+      noOpNames: new Set(['b-lite'])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+
+    testGraph.localHashes.set('a', 'a-v2');
+    testGraph.incrementalNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a:incremental', 'b']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // --only b: "b" is built against the retained incremental result of "a", through the retained "b-lite".
+    testGraph.localHashes.set('b', 'b-v2');
+    testGraph.operations.get('a')!.enabled = false;
+    testGraph.operations.get('b-lite')!.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
     expect(testGraph.cacheWrites).toEqual([]);
   });
 
