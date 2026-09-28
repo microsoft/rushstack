@@ -4,9 +4,15 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import type { RushConfiguration } from '@microsoft/rush-lib';
+import {
+  RushProjectConfiguration,
+  type RushConfiguration,
+  type RushConfigurationProject
+} from '@microsoft/rush-lib';
+import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IWorkspaceInvalidationWatcher } from './WorkspaceSession';
+import { createLinuxTreeWatcher, type LinuxTreeWatcher } from './LinuxTreeWatcher';
 
 /** Options for the generation-owned workspace watcher. @beta */
 export interface IWorkspaceSessionFileWatcherOptions {
@@ -20,6 +26,7 @@ export interface IWorkspaceSessionFileWatcherOptions {
 interface IWatchPath {
   readonly folderPath: string;
   readonly recursive: boolean;
+  readonly project?: RushConfigurationProject;
 }
 
 /** Creates an individual filesystem watcher. @beta */
@@ -38,9 +45,10 @@ const PATH_SEGMENT_SEPARATOR_REGEXP: RegExp = /[\\/]/;
  */
 export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatcher {
   readonly #onError: ((error: Error) => void) | undefined;
-  readonly #watchFactory: WorkspaceWatchFactory;
+  readonly #watchFactory: WorkspaceWatchFactory | undefined;
   readonly #permanentPaths: ReadonlyArray<IWatchPath>;
   readonly #projectFolders: ReadonlyMap<string, string>;
+  readonly #projects: ReadonlyMap<string, RushConfigurationProject>;
   readonly #initialProjectNames: ReadonlyArray<string>;
   readonly #watchers: Map<string, fs.FSWatcher> = new Map();
   readonly #closing: Map<fs.FSWatcher, Promise<void>> = new Map();
@@ -49,8 +57,11 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
 
   public constructor(options: IWorkspaceSessionFileWatcherOptions) {
     this.#onError = options.onError;
-    this.#watchFactory = options.watchFactory ?? fs.watch;
+    this.#watchFactory = options.watchFactory;
     this.#permanentPaths = getPermanentWatchPaths(options.rushConfiguration);
+    this.#projects = new Map(
+      options.rushConfiguration.projects.map((project) => [project.packageName, project])
+    );
     this.#projectFolders = new Map(
       options.rushConfiguration.projects.map((project) => [project.packageName, project.projectFolder])
     );
@@ -77,6 +88,10 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
     for (const watchPath of this.#permanentPaths) {
       this.#watchers.set(watchPath.folderPath, this.#createWatcher(watchPath));
     }
+    // Permanent config folders are small; finish registering them before initialization is acknowledged.
+    await Promise.all(
+      Array.from(this.#watchers.values(), (watcher) => (watcher as Partial<LinuxTreeWatcher>).initialWalk)
+    );
     this.watchProjects(this.#initialProjectNames);
   }
 
@@ -94,7 +109,10 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
         throw new Error(`Project watcher is still closing: ${name}`);
       }
       if (!existing) {
-        this.#watchers.set(folderPath, this.#createWatcher({ folderPath, recursive: true }));
+        this.#watchers.set(
+          folderPath,
+          this.#createWatcher({ folderPath, recursive: true, project: this.#projects.get(name) })
+        );
         // Cover the observation gap without claiming an unknown graph/configuration mutation.
         this.#onInvalidation(folderPath);
       }
@@ -167,19 +185,22 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
   }
 
   #createWatcher(watchPath: IWatchPath): fs.FSWatcher {
-    const watcher: fs.FSWatcher = this.#watchFactory(
-      watchPath.folderPath,
-      { encoding: 'utf8', recursive: watchPath.recursive },
-      (eventType: string, filename: string | null) => {
-        void eventType;
-        const changedFilename: string | undefined = filename ?? undefined;
-        if (!isIgnoredPath(changedFilename)) {
-          this.#onInvalidation?.(
-            changedFilename === undefined ? undefined : path.resolve(watchPath.folderPath, changedFilename)
-          );
-        }
+    const listener: fs.WatchListener<string> = (eventType: string, filename: string | null) => {
+      void eventType;
+      const changedFilename: string | undefined = filename ?? undefined;
+      if (!isIgnoredPath(changedFilename)) {
+        this.#onInvalidation?.(
+          changedFilename === undefined ? undefined : path.resolve(watchPath.folderPath, changedFilename)
+        );
       }
-    );
+    };
+    const watchOptions: { encoding: 'utf8'; recursive: boolean } = {
+      encoding: 'utf8',
+      recursive: watchPath.recursive
+    };
+    const watcher: fs.FSWatcher = this.#watchFactory
+      ? this.#watchFactory(watchPath.folderPath, watchOptions, listener)
+      : createDefaultWatcher(watchPath, watchOptions, listener);
     watcher.on('error', (error: Error) => {
       this.#onInvalidation?.();
       if (this.#onError) this.#onError(error);
@@ -193,6 +214,49 @@ export class WorkspaceSessionFileWatcher implements IWorkspaceInvalidationWatche
     watcher.unref();
     return watcher;
   }
+}
+
+/**
+ * Node's recursive `fs.watch` on Linux walks the tree synchronously and adds one inotify watch per file,
+ * including build outputs. On Linux, recursive observation uses per-directory watches from an async walk instead.
+ */
+function createDefaultWatcher(
+  watchPath: IWatchPath,
+  watchOptions: { encoding: 'utf8'; recursive: boolean },
+  listener: fs.WatchListener<string>
+): fs.FSWatcher {
+  if (process.platform !== 'linux' || !watchPath.recursive) {
+    return fs.watch(watchPath.folderPath, watchOptions, listener);
+  }
+  const project: RushConfigurationProject | undefined = watchPath.project;
+  return createLinuxTreeWatcher(watchPath.folderPath, listener, {
+    getExcludedFolderPathsAsync: project ? () => getProjectExcludedFolderPathsAsync(project) : undefined,
+    reportInitialWalkCompletion: project !== undefined
+  });
+}
+
+/** The project's `.rush/temp` folder plus every declared operation output folder. @internal */
+export async function getProjectExcludedFolderPathsAsync(
+  project: RushConfigurationProject
+): Promise<ReadonlySet<string>> {
+  const excluded: Set<string> = new Set([path.resolve(project.projectRushTempFolder)]);
+  const terminal: Terminal = new Terminal(new NoOpTerminalProvider());
+  let configuration: RushProjectConfiguration | undefined;
+  try {
+    configuration = await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+  } catch {
+    // Output-folder pruning is an optimization; an unreadable configuration only loses that part.
+    return excluded;
+  }
+  const projectFolder: string = path.resolve(project.projectFolder);
+  for (const settings of configuration?.operationSettingsByOperationName.values() ?? []) {
+    for (const outputFolderName of settings.outputFolderNames ?? []) {
+      const outputFolder: string = path.resolve(projectFolder, outputFolderName);
+      // Never prune the project folder itself or anything outside it.
+      if (outputFolder.startsWith(projectFolder + path.sep)) excluded.add(outputFolder);
+    }
+  }
+  return excluded;
 }
 
 function getPermanentWatchPaths(rushConfiguration: RushConfiguration): ReadonlyArray<IWatchPath> {

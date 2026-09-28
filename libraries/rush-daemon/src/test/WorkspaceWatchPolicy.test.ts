@@ -40,7 +40,8 @@ describe('daemon.watch observation-only policy', () => {
       expect((await pongAsync(fixture)).workspace?.warmSet).toMatchObject({
         configuration: { watch: false },
         watchedProjectNames: [],
-        retainedProjectNames: ['a', 'b']
+        // Ranked best-first: the requested target b precedes its same-request dependency a.
+        retainedProjectNames: ['b', 'a']
       });
       fixture.write('a/input.txt', 'changed-unwatched');
       await fixture.buildSuccessfullyAsync();

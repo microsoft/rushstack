@@ -51,6 +51,8 @@ export interface IOperationExecutionRecordContext {
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
   maxParallelism: number;
+  /** Aborted when the host requests termination of running operations in this iteration. */
+  terminateSignal?: AbortSignal;
 
   /**
    * Optional structured event sink for dual-emit. When present, every status
@@ -243,6 +245,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get environment(): IEnvironment | undefined {
     return this.#context.createEnvironment?.(this);
+  }
+
+  public get abortSignal(): AbortSignal | undefined {
+    return this.#context.terminateSignal;
   }
 
   public getInvalidateCallback(): (reason: string) => void {

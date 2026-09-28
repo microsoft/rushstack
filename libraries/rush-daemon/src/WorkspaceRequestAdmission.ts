@@ -18,6 +18,7 @@ import {
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
+import type { IWorkspaceRestartTicket, WorkspaceRestartArbiter } from './WorkspaceRestartArbiter';
 
 export interface IRequestAdmissionClient {
   readonly abortSignal: AbortSignal;
@@ -189,6 +190,19 @@ export class RequestAdmissionController {
       await writer?.flushAsync();
       throw this.#getReportedError(error, waitingFor);
     }
+  }
+
+  /** Waits, within the same admission budget, until a restart would not preempt another request. */
+  public async waitForRestartDrainAsync(
+    arbiter: WorkspaceRestartArbiter,
+    ticket: IWorkspaceRestartTicket
+  ): Promise<void> {
+    // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
+    await arbiter.waitForDrainAsync(ticket, {
+      abortSignal: this.#abortController.signal,
+      noWait: this.#admission?.noWait,
+      waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
+    });
   }
 
   public dispose(): void {

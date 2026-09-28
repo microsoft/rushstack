@@ -25,6 +25,9 @@ export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number = 8;
 /** The first minor supporting native mutations and guaranteed pre-execution restart outcomes. @beta */
 export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number = 10;
 
+/** The first additive protocol minor whose shutdown acknowledgement reports the active request count. @beta */
+export const DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR: number = 11;
+
 /**
  * A rushd wire protocol version.
  *
@@ -58,7 +61,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR
+  minor: DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR
 };
 
 /**

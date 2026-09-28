@@ -68,7 +68,11 @@ jest.setTimeout(30_000);
         .spyOn(linuxProcessGroupExit, 'waitForLinuxProcessGroupExitAsync')
         .mockImplementation(async (pid) => {
           workerPid = pid;
-          await originalWait(pid, 25);
+          // Hide procfs so the injected `ps` inspection outcome is what the join observes.
+          await originalWait(pid, 25, {
+            listEntriesAsync: () => Promise.reject(new Error('procfs hidden by test')),
+            readStatAsync: () => Promise.reject(new Error('procfs hidden by test'))
+          });
         });
       jest
         .spyOn(process, 'kill')

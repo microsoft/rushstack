@@ -140,7 +140,11 @@ fallback can run immediately after a completed single-client warm request withou
 A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
 automatic retry. A later explicit request can retry after contention ends, including contention during the first
 engine initialization. A dirty native lock left by another command invalidates retained successes so the native
-incremental/cache pipeline can reconcile possibly changed ignored outputs. Installation validity is also checked on
+incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also
+fingerprinted (one `stat` per folder: existence, identity and modification time) when an operation succeeds or is
+restored from cache; a request whose reconciliation finds a missing or changed output folder (for example after
+`rm -rf lib`, `git clean -xdf` or `heft clean`) invalidates only that operation, so it is re-executed or restored from
+the build cache. In-place edits of nested output files are not detected. Installation validity is also checked on
 every snapshot refresh. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
 runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 
@@ -310,13 +314,15 @@ preserves its records and diagnostics without failing an otherwise successful bu
 | --- | --- |
 | `watch` | Retains host observation of requested warm projects between requests when true. False (the default) keeps root/config guards only. Never schedules builds. |
 | `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
-| `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
-| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
+| `warmSetMaxProjects` | Limits the projects that hold warm **resources** (an active runner such as a persistent IPC child, or a `watch: true` file watcher). The lowest-ranked holders are released (runners closed, watchers removed, records deleted); executing/prepared and explicitly protected work is exempt. Projects whose only retained state is operation results from resource-free (shell/null) runners neither count toward nor are evicted for this limit, so no-op re-requests of large workspaces stay skipped. |
+| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. The comparison uses the **whole daemon process RSS** (graph, Node heap and retained records, typically 130-190 MiB) plus measured child RSS, so a budget below the daemon's baseline evicts every idle project on each pass and disables warm skipping. Never treats cache files as memory or claims a hard RSS ceiling. |
 | `autoWarmByTelemetry` | Promotes already-requested high-value work instead of pure LRU. Never schedules or executes speculative scripts. |
 
 One deterministic best-first comparator is shared by retention and reverse-order eviction. With complete
-measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then ordinal project
-name. Measured entries precede the missing-data bucket; that bucket uses LRU and the same name tie-break.
+measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then whether the
+project owned an explicitly requested target (an enabled operation with no enabled consumer, so `--to x` keeps
+`x` over its same-request dependencies), then ordinal project name. Measured entries precede the missing-data
+bucket; that bucket uses LRU and the same tie-breaks.
 Without telemetry mode the entire order is LRU. Savings compare actual cold and reused execution stopwatches
 (or native non-cached duration versus cache-restoration duration); no startup cost or RSS is invented.
 `operation-graph`'s existing `WatchLoop` now reports its own measured RSS in an optional IPC completion field.

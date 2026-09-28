@@ -132,11 +132,11 @@ describe('standalone client piped input', () => {
   );
 
   it.each([
-    { args: ['--no-wait'], admission: { noWait: true }, reason: 'no-wait' },
-    { args: ['--wait-timeout=0.01'], admission: { waitTimeoutMs: 10 }, reason: 'wait-timeout' }
+    { args: ['--no-wait'], admission: { noWait: true } },
+    { args: ['--wait-timeout=0.01'], admission: { waitTimeoutMs: 10 } }
   ])(
-    'forwards $args without leaking queue flags to scripts',
-    async ({ args, admission, reason }) => {
+    'forwards $args without leaking queue flags to scripts, which do not queue for admission',
+    async ({ args, admission }) => {
       let started: () => void = () => {};
       let release: () => void = () => {};
       const running: Promise<void> = new Promise((resolve) => {
@@ -178,9 +178,9 @@ describe('standalone client piped input', () => {
           })
         ]);
         const result: IPipedResult = await invokeAsync(Buffer.alloc(0), true, args);
-        expect(result.code).toBe(1);
-        expect(result.stderr.toString()).toContain(`daemon admission failed (${reason})`);
-        expect(runScriptAsync).not.toHaveBeenCalled();
+        expect(result.code).toBe(0);
+        expect(result.stderr.toString()).not.toContain('daemon admission failed');
+        expect(runScriptAsync).toHaveBeenCalledTimes(1);
       } finally {
         release();
         await holding;

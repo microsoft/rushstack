@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Document that the daemon warmSetMaxProjects limit only counts projects holding warm resources (active runners or file watchers).",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

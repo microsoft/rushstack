@@ -10,6 +10,7 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
@@ -140,6 +141,45 @@ function eventOperationId(event: IDaemonEventEnvelope): string | undefined {
 }
 
 describe('shared phased request batching', () => {
+  it('schedules separate iterations for overlapping requests with different request settings', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const graph: ITestRoutingFixture['graph'] = fixture.graph;
+    const scheduledSettings: IPhasedCommandEngineRequestSettings[] = [];
+    const originalScheduleAsync: typeof graph.scheduleIterationAsync =
+      graph.scheduleIterationAsync.bind(graph);
+    const scheduleSpy: jest.SpyInstance = jest
+      .spyOn(graph, 'scheduleIterationAsync')
+      .mockImplementation((...args: Parameters<typeof graph.scheduleIterationAsync>) => {
+        scheduledSettings.push({ parallelism: graph.parallelism, quietMode: graph.quietMode });
+        return originalScheduleAsync(...args);
+      });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const defaultSettings: IPhasedCommandEngineRequestSettings = { parallelism: 4, quietMode: true };
+    const verboseSerialSettings: IPhasedCommandEngineRequestSettings = { parallelism: 1, quietMode: false };
+
+    const [first, second] = await Promise.all([
+      router.executeAsync(
+        createRequest('default', OPERATION_A),
+        new TestPhasedRequestClient('one'),
+        false,
+        undefined,
+        defaultSettings
+      ),
+      router.executeAsync(
+        createRequest('verbose-serial', OPERATION_B),
+        new TestPhasedRequestClient('two'),
+        false,
+        undefined,
+        verboseSerialSettings
+      )
+    ]);
+
+    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+    expect(scheduledSettings).toEqual([defaultSettings, verboseSerialSettings]);
+    expect(first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(second).toMatchObject({ exitCode: 0, outcome: 'success' });
+  });
+
   it('merges overlapping selections into one real graph iteration and executes shared operations once', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
@@ -391,7 +431,7 @@ describe('shared phased request batching', () => {
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
   });
 
-  it('reports authoritative retained status when a client cancels during a shared operation', async () => {
+  it('answers a client that cancels during a shared operation immediately, without waiting for the batch', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -408,12 +448,14 @@ describe('shared phased request batching', () => {
     await operationStarted.promise;
 
     cancelledClient.abortController.abort();
+    // The shared operation is still running for the other client.
+    const cancelledResult: IDaemonPhasedRequestResult = await cancelled;
     releaseOperation.resolve();
-    const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
+    const continuingResult: IDaemonPhasedRequestResult = await continuing;
 
     expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
     expect(cancelledResult.operationResults).toEqual([
-      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success })
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Aborted })
     ]);
     expect(continuingResult).toMatchObject({ exitCode: 0, outcome: 'success' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
@@ -446,7 +488,7 @@ describe('shared phased request batching', () => {
     ]);
   });
 
-  it('preserves failure precedence when a client cancels during a failing shared operation', async () => {
+  it('keeps failure for the continuing client when another client cancels during a failing shared operation', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -466,14 +508,16 @@ describe('shared phased request batching', () => {
     await operationStarted.promise;
 
     cancelledClient.abortController.abort();
+    const cancelledResult: IDaemonPhasedRequestResult = await cancelled;
     releaseOperation.resolve();
-    const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
+    const continuingResult: IDaemonPhasedRequestResult = await continuing;
 
-    expect(cancelledResult).toMatchObject({ aborted: true, exitCode: 1, outcome: 'failure' });
-    expect(cancelledResult.operationResults).toEqual([
+    // The cancelled client detached before the shared operation failed.
+    expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(continuingResult).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
+    expect(continuingResult.operationResults).toEqual([
       expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Failure })
     ]);
-    expect(continuingResult).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
   });
 

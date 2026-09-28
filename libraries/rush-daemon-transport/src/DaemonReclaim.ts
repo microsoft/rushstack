@@ -10,6 +10,7 @@ import {
   readDaemonLockfile,
   removeDaemonArtifacts
 } from './DaemonLockfile';
+import { reapOrphansOfDeadOwnerAsync } from './DaemonOrphanReaper';
 import type { IDaemonPaths } from './DaemonPaths';
 import { tryAcquireReclaimLock } from './DaemonReclaimLock';
 import type { DaemonReclaimLockOutcome } from './DaemonReclaimLock';
@@ -24,7 +25,8 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * never reclaimed underneath itself. Reclaims are serialized through the
  * lockfile mutex ({@link tryAcquireReclaimLock}): only the mutex holder may
  * unlink the socket path, so a concurrent starter cannot delete a socket that
- * another process just bound.
+ * another process just bound. Operation processes still running in the dead
+ * daemon's process group are terminated first (see `DaemonOrphanReaper`).
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a
  * live (or plausibly live) daemon owns the path, or when another starter holds
@@ -57,13 +59,16 @@ function reclaimLockPath(paths: IDaemonPaths): string {
 }
 
 async function reclaimUnderLockAsync(paths: IDaemonPaths): Promise<void> {
-  if (isLockfilePidAlive(readDaemonLockfile(paths.lockfilePath))) {
+  const owner: ReturnType<typeof readDaemonLockfile> = readDaemonLockfile(paths.lockfilePath);
+  if (isLockfilePidAlive(owner)) {
     throwAlreadyRunning(paths, 'its lockfile PID is alive');
   }
   const probeFailed: boolean = await probeConnectionFailsAsync(paths.socketPath);
   if (!probeFailed) {
     throwAlreadyRunning(paths, 'it answers a connect probe');
   }
+  // A daemon that died uncleanly leaves its operations running; stop them before a successor re-runs them.
+  await reapOrphansOfDeadOwnerAsync(owner);
   removeDaemonArtifacts(paths.lockfilePath, paths.socketPath);
 }
 

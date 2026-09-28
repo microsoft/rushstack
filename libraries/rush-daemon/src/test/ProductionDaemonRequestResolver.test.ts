@@ -34,6 +34,7 @@ import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 import { removeTestFolderAsync } from './TestProcessExit';
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
+import { DaemonShutdownError } from '../DaemonShutdownError';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import type {
   GetWorkspaceSuccessorLaunchAsync,
@@ -1329,6 +1330,66 @@ process.exit(23);
     }
   });
 
+  it('re-runs only the operation whose declared outputs were deleted after a warm build', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build']);
+      expect(runs(fixture)).toEqual(expect.arrayContaining(['a:one:', 'b:one:', 'c:one:']));
+      expect((await runAsync(fixture, 'warm', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/a/lib'), { recursive: true });
+      expect((await runAsync(fixture, 'unrelated', ['build', '--only', 'c'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect((await runAsync(fixture, 'deleted', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(3)).toEqual(['a:one:']);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/c/lib/extra.txt'), 'stray');
+      expect((await runAsync(fixture, 'changed', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(4)).toEqual(['c:one:']);
+      expect((await runAsync(fixture, 'unchanged', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(runs(fixture)).toHaveLength(5);
+      expect(fixture.session.operationGraph).toBe(graph);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('restores deleted outputs of a warm operation from the native build cache', async () => {
+    const fixture: IFixture = await createFixtureAsync(true);
+    try {
+      await runAsync(fixture, 'initial', ['build', '--to', 'b']);
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/a/lib'), { recursive: true });
+      const deleted: ITerminalExchange = await runAsync(fixture, 'deleted', ['build', '--to', 'b']);
+      expect(deleted.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      const { operationResults } = (deleted.terminal as { payload: IDaemonPhasedRequestResult }).payload;
+      expect(operationResults.filter((result) => result.status !== 'SKIPPED')).toEqual([
+        expect.objectContaining({ operationId: 'a (compile)', status: 'FROM CACHE' })
+      ]);
+      expect(runs(fixture)).toEqual(['a:one:', 'b:one:']);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+      expect((await runAsync(fixture, 'restored', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('reconciles changes made without a connected client and preserves an empty native selection', async () => {
     const fixture: IFixture = await createFixtureAsync();
     let reconnected: DaemonRequestWireClient | undefined;
@@ -1433,6 +1494,69 @@ process.exit(23);
       expect(events).toContain('snapshot-diagnostic');
       expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  const canRevokeReadAccess: boolean = process.platform !== 'win32' && process.getuid?.() !== 0;
+  (canRevokeReadAccess ? it : it.skip)(
+    'reports a warm snapshot failure to the failing request and never replays it into the next request',
+    async () => {
+      const fixture: IFixture = await createFixtureAsync();
+      const inputPath: string = path.join(fixture.repoRoot, 'projects/a/input.txt');
+      try {
+        await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+        fs.writeFileSync(inputPath, 'unreadable');
+        fs.chmodSync(inputPath, 0);
+        const failed: ITerminalExchange = await runAsync(fixture, 'unreadable', ['build', '--only', 'a']);
+        expect(failed.terminal).toMatchObject({
+          kind: 'requestRejected',
+          payload: {
+            message: expect.stringMatching(
+              /Permission denied[\s\S]*Rush could not capture the next workspace inputs snapshot\./
+            )
+          }
+        });
+        fs.chmodSync(inputPath, 0o644);
+        const recovered: ITerminalExchange = await runAsync(fixture, 'recovered', ['build', '--only', 'a']);
+        expect(recovered.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+        const output: string = [
+          logText(recovered),
+          ...recovered.frames
+            .filter((frame) => frame.kind === DaemonFrameType.event)
+            .map((frame) => JSON.stringify(decodeDaemonEventFrame(frame.payload)))
+        ].join('\n');
+        expect(output).not.toContain('Permission denied');
+        expect(output).not.toContain('state of the repo');
+      } finally {
+        if (fs.existsSync(inputPath)) fs.chmodSync(inputPath, 0o644);
+        await fixture[Symbol.asyncDispose]();
+      }
+    }
+  );
+
+  it('aborts an in-flight build with the typed daemon shutdown reason', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const gate: INativeScriptGate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
+    try {
+      const victim: Promise<ITerminalExchange> = runAsync(fixture, 'victim', ['build', '--only', 'a']);
+      await gate.entered;
+      const closing: Promise<void> = fixture.host.closeAsync(
+        new DaemonShutdownError({ initiator: 'signal', signal: 'SIGTERM' })
+      );
+      await gate.releaseAsync();
+      expect((await victim).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          aborted: true,
+          errorMessage: expect.stringMatching(
+            /^The Rush daemon was shut down \(the daemon process received SIGTERM\) while this request was running; re-run the command\.$/
+          )
+        }
+      });
+      await closing;
+    } finally {
+      await gate.releaseAsync();
       await fixture[Symbol.asyncDispose]();
     }
   });

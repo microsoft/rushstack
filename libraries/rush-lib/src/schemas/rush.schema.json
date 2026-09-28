@@ -305,7 +305,7 @@
           "minimum": 1,
           "maximum": 9007199254740991,
           "default": 20,
-          "description": "Best-effort retained project limit for an attached warm set, at most 9007199254740991 (Number.MAX_SAFE_INTEGER). RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
+          "description": "Best-effort limit on projects holding warm resources (active runners or file watchers) in an attached warm set, at most 9007199254740991 (Number.MAX_SAFE_INTEGER). Retained results of resource-free projects do not count and are not evicted for this limit. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
         },
         "autoWarmByTelemetry": {
           "type": "boolean",

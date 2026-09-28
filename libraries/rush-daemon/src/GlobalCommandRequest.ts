@@ -7,6 +7,7 @@ import * as path from 'node:path';
 import { EnvironmentMap } from '@rushstack/node-core-library';
 import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 import type {
+  DaemonInvocationKind,
   DaemonRushCommandOrigin,
   DaemonTerminalRequirement,
   IDaemonRequestAdmissionOptions
@@ -48,6 +49,8 @@ export interface IResolveGlobalCommandRequestOptions {
   readonly commandOrigin: DaemonRushCommandOrigin;
   readonly cwd: string;
   readonly environment: Readonly<NodeJS.ProcessEnv>;
+  /** Whether the request runs a Rush command or a Rushx package script. Defaults to `rush`. */
+  readonly invocationKind?: DaemonInvocationKind;
   readonly requestId: string;
   readonly terminal: IGlobalCommandTerminalProperties;
 }
@@ -63,6 +66,7 @@ export interface IResolvedGlobalCommandRequest {
   readonly commandOrigin: DaemonRushCommandOrigin;
   readonly cwd: string;
   readonly environment: IGlobalCommandEnvironment;
+  readonly invocationKind?: DaemonInvocationKind;
   readonly requestId: string;
   readonly terminal: IGlobalCommandTerminalProperties;
 }
@@ -101,6 +105,7 @@ export function resolveGlobalCommandRequest(
     commandOrigin: options.commandOrigin,
     cwd,
     environment: new GlobalCommandEnvironment(options.environment),
+    invocationKind: options.invocationKind === 'rushx' ? 'rushx' : 'rush',
     requestId: options.requestId,
     terminal: resolveTerminalProperties(options.terminal)
   });
