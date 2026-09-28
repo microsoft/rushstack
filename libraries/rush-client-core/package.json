@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-client-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Transport and request lifecycle for opt-in Rush daemon clients",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",

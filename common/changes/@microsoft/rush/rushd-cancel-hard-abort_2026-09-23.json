@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Add an opt-in hard abort for operation graphs (`abortCurrentIterationAsync({ terminateRunning: true })`) that terminates running shell operation process trees and reports them as Aborted; daemon engine graphs enable it.",
-      "type": "none"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "selarkin@microsoft.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Add an opt-in hard abort for operation graphs (`abortCurrentIterationAsync({ terminateRunning: true })`) that terminates running shell operation process trees and reports them as Aborted; daemon engine graphs enable it.","type":"none"}],"packageName":"@microsoft/rush","email":"selarkin@microsoft.com"}

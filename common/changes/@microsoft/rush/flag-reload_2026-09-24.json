@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Exclude `--verbose`, `--parallelism` and `--timeline` from the daemon engine parameter identity and expose them as per-request settings, so these flags no longer force the Rush daemon to reload its warm operation graph.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "selarkin@microsoft.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Exclude `--verbose`, `--parallelism` and `--timeline` from the daemon engine parameter identity and expose them as per-request settings, so these flags no longer force the Rush daemon to reload its warm operation graph.","type":"patch"}],"packageName":"@microsoft/rush","email":"selarkin@microsoft.com"}
