@@ -55,7 +55,10 @@ import { associateParametersByPhase } from '../parsing/associateParametersByPhas
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
-import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import {
+  ProjectChangeAnalyzer,
+  tryGetMissingProjectShrinkwrapFileErrorAsync
+} from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
 import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
@@ -732,7 +735,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         ? new Map()
         : await measureAsyncFn(`${PERF_PREFIX}:loadProjectConfigurations`, () =>
             onEngine
-              ? RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal)
+              ? this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal)
               : RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
           );
       const projectConfigurationIdentity: string | undefined = onEngine
@@ -781,7 +784,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               projectConfigurations,
               terminal,
               // We need to include all dependencies, otherwise build cache id calculation will be incorrect
-              relevantProjects
+              relevantProjects,
+              // An engine cannot continue without a snapshot, so it reports why none could be taken.
+              { throwOnMissingProjectShrinkwrapFile: !!onEngine }
             );
           const innerInitialSnapshot: IInputsSnapshot | undefined = innerGetInputsSnapshotAsync
             ? await innerGetInputsSnapshotAsync()
@@ -820,7 +825,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           ? async () => {
               await this.#validateInstallStateAsync();
               const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
-                await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal);
+                await this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal);
               if (
                 (await getProjectConfigurationIdentityAsync(
                   currentConfigurations,
@@ -1022,6 +1027,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
     if (!success) {
       throw new AlreadyReportedError();
+    }
+  }
+
+  /**
+   * Loads the configuration of every specified project for an engine, which loads projects that a native
+   * command might not select.
+   */
+  async #loadEngineProjectConfigurationsAsync(
+    projects: ReadonlySet<RushConfigurationProject>,
+    terminal: ITerminal
+  ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
+    try {
+      return await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(projects, terminal);
+    } catch (error) {
+      // An incomplete install can leave both a project dependency file and a rig package missing. Without the
+      // file, native Rush cannot analyze the repo state either, so report it: "rush install" fixes both.
+      throw (await tryGetMissingProjectShrinkwrapFileErrorAsync(this.rushConfiguration)) ?? error;
     }
   }
 

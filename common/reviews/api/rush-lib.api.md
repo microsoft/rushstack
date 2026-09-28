@@ -1549,6 +1549,12 @@ export class PhasedCommandEngineConfigurationChangedError extends Error {
 }
 
 // @alpha
+export class PhasedCommandEngineProjectConfigurationError extends Error {
+    constructor(projectName: string, cause: unknown);
+    readonly projectName: string;
+}
+
+// @alpha
 export class PhasedCommandHooks {
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
     Set<Operation>,
@@ -1625,7 +1631,9 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
-    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
+    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>, options?: {
+        readonly throwOnMissingProjectShrinkwrapFile?: boolean;
+    }): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
 export { ReporterExtensionEventName }

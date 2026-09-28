@@ -114,6 +114,7 @@ jest.mock('../incremental/InputsSnapshot', () => {
   };
 });
 
+import * as fs from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { IDetailedRepoState, IFileDiffStatus } from '@rushstack/package-deps-hash';
@@ -122,7 +123,8 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import {
   ProjectChangeAnalyzer,
   isPackageJsonVersionBumpChange,
-  isPackageJsonVersionOnlyChange
+  isPackageJsonVersionOnlyChange,
+  tryGetMissingProjectShrinkwrapFileErrorAsync
 } from '../ProjectChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type {
@@ -181,6 +183,108 @@ describe(ProjectChangeAnalyzer.name, () => {
       // The start time is recorded before Git reads the working tree
       expect(mockInput.workingTreeReadStartTimeMs).toBeGreaterThanOrEqual(beforeSnapshotTimeMs);
       expect(mockInput.workingTreeReadStartTimeMs).toBeLessThanOrEqual(repoStateReadTimeMs!);
+    });
+
+    describe('with PNPM project dependency files', () => {
+      let folder: string;
+      let rushConfiguration: RushConfiguration;
+      let terminalProvider: StringBufferTerminalProvider;
+      let terminal: Terminal;
+      const dependencyFile = (name: string): string =>
+        resolve(folder, name, '.rush/temp/shrinkwrap-deps.json');
+      const instruction = (name: string): string =>
+        `A project dependency file (${dependencyFile(name)}) is missing. ` +
+        'You may need to run "rush install" or "rush update".';
+      const gitFailure: () => never = () => {
+        throw new Error('git hash-object failed');
+      };
+      const hostOptions: { throwOnMissingProjectShrinkwrapFile: boolean } = {
+        throwOnMissingProjectShrinkwrapFile: true
+      };
+
+      beforeEach(() => {
+        // Change detection requires a Git working tree, which contains this folder.
+        folder = fs.mkdtempSync(resolve(__dirname, 'shrinkwrap-deps-'));
+        fs.writeFileSync(
+          resolve(folder, 'rush.json'),
+          JSON.stringify({
+            rushVersion: '5.162.0',
+            pnpmVersion: '9.15.9',
+            projects: ['a', 'b'].map((name) => ({ packageName: name, projectFolder: name }))
+          })
+        );
+        for (const name of ['a', 'b']) {
+          fs.mkdirSync(resolve(folder, name, '.rush/temp'), { recursive: true });
+          fs.writeFileSync(resolve(folder, name, 'package.json'), JSON.stringify({ name, version: '1.0.0' }));
+          fs.writeFileSync(dependencyFile(name), '{}');
+        }
+        rushConfiguration = RushConfiguration.loadFromConfigurationFile(resolve(folder, 'rush.json'));
+        terminalProvider = new StringBufferTerminalProvider();
+        terminal = new Terminal(terminalProvider);
+      });
+
+      afterEach(() => {
+        fs.rmSync(folder, { recursive: true, force: true });
+      });
+
+      it('warns and continues without a snapshot provider if a file is missing', async () => {
+        fs.rmSync(dependencyFile('b'));
+        const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        await expect(analyzer._tryGetSnapshotProviderAsync(new Map(), terminal)).resolves.toBeUndefined();
+        expect(terminalProvider.getWarningOutput()).toContain(instruction('b'));
+      });
+
+      it('throws the error of a missing file for a host that requires a snapshot', async () => {
+        fs.rmSync(dependencyFile('b'));
+        const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        await expect(
+          analyzer._tryGetSnapshotProviderAsync(new Map(), terminal, undefined, hostOptions)
+        ).rejects.toThrow(new Error(instruction('b')));
+        expect(terminalProvider.getWarningOutput()).toBe('');
+      });
+
+      it('reports a file that was removed after the provider was created instead of the Git failure', async () => {
+        const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const nativeProvider: GetInputsSnapshotAsyncFn | undefined =
+          await analyzer._tryGetSnapshotProviderAsync(new Map(), terminal);
+        const hostProvider: GetInputsSnapshotAsyncFn | undefined =
+          await analyzer._tryGetSnapshotProviderAsync(new Map(), terminal, undefined, hostOptions);
+        fs.rmSync(dependencyFile('a'));
+        mockOnGetDetailedRepoState.mockImplementationOnce(gitFailure).mockImplementationOnce(gitFailure);
+
+        await expect(nativeProvider!()).resolves.toBeUndefined();
+        expect(terminalProvider.getWarningOutput()).toContain(instruction('a'));
+        expect(terminalProvider.getWarningOutput()).not.toContain('git hash-object failed');
+        await expect(hostProvider!()).rejects.toThrow(new Error(instruction('a')));
+      });
+
+      it('continues without a snapshot after other failures, even for a host that requires one', async () => {
+        const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const hostProvider: GetInputsSnapshotAsyncFn | undefined =
+          await analyzer._tryGetSnapshotProviderAsync(new Map(), terminal, undefined, hostOptions);
+        mockOnGetDetailedRepoState.mockImplementationOnce(gitFailure);
+
+        await expect(hostProvider!()).resolves.toBeUndefined();
+        expect(terminalProvider.getWarningOutput()).toContain('git hash-object failed');
+      });
+
+      it('finds the first missing file in project order', async () => {
+        await expect(
+          tryGetMissingProjectShrinkwrapFileErrorAsync(rushConfiguration)
+        ).resolves.toBeUndefined();
+        fs.rmSync(dependencyFile('b'));
+        fs.rmSync(dependencyFile('a'));
+        await expect(tryGetMissingProjectShrinkwrapFileErrorAsync(rushConfiguration)).resolves.toEqual(
+          new Error(instruction('a'))
+        );
+      });
+    });
+
+    it('never reports a missing project dependency file for a package manager that has none', async () => {
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        resolve(__dirname, 'repo', 'rush.json')
+      );
+      await expect(tryGetMissingProjectShrinkwrapFileErrorAsync(rushConfiguration)).resolves.toBeUndefined();
     });
   });
 

@@ -21,6 +21,7 @@ import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/anything.schema.json';
 import { HotlinkManager } from '../utilities/HotlinkManager';
 import type { RushConfiguration } from './RushConfiguration';
+import { PhasedCommandEngineProjectConfigurationError } from './PhasedCommandEngineProjectConfigurationError';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.
@@ -572,6 +573,10 @@ export class RushProjectConfiguration {
   /**
    * Loads a fresh native configuration snapshot without reading or modifying process-wide
    * project, inherited-file, or rig caches. The loaders are owned only by this invocation.
+   *
+   * @remarks
+   * Throws a {@link PhasedCommandEngineProjectConfigurationError} that names a project whose
+   * configuration could not be loaded.
    * @internal
    */
   public static async _tryLoadForProjectsUncachedAsync(
@@ -589,20 +594,24 @@ export class RushProjectConfiguration {
     await Async.forEachAsync(
       projects,
       async (project) => {
-        const rushProjectJson: IRushProjectJson | undefined = await _tryLoadJsonForProjectAsync(
-          project,
-          terminal,
-          loaders
-        );
-        if (rushProjectJson) {
-          result.set(
+        try {
+          const rushProjectJson: IRushProjectJson | undefined = await _tryLoadJsonForProjectAsync(
             project,
-            new RushProjectConfiguration(
-              project,
-              rushProjectJson,
-              _getRushProjectConfiguration(project, rushProjectJson, terminal)
-            )
+            terminal,
+            loaders
           );
+          if (rushProjectJson) {
+            result.set(
+              project,
+              new RushProjectConfiguration(
+                project,
+                rushProjectJson,
+                _getRushProjectConfiguration(project, rushProjectJson, terminal)
+              )
+            );
+          }
+        } catch (error) {
+          throw new PhasedCommandEngineProjectConfigurationError(project.packageName, error);
         }
       },
       { concurrency: 50 }

@@ -421,7 +421,11 @@ export async function captureWorkspaceInputFingerprintAsync(
   };
 }
 
-/** Fingerprints native merged project/rig/inherited configuration using invocation-owned loader caches. @alpha */
+/**
+ * Fingerprints native merged project/rig/inherited configuration using invocation-owned loader caches.
+ * Throws a {@link PhasedCommandEngineProjectConfigurationError} if a project's configuration cannot be loaded.
+ * @alpha
+ */
 export async function captureProjectConfigurationFingerprintAsync(
   rushConfiguration: RushConfiguration,
   terminal: ITerminal

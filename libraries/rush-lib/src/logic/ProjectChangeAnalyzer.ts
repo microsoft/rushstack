@@ -87,6 +87,18 @@ export interface IRawRepoState {
 }
 
 /**
+ * A project dependency file (shrinkwrap-deps.json) that change detection hashes is missing.
+ */
+class MissingProjectShrinkwrapFileError extends Error {
+  public constructor(projectShrinkwrapFilePath: string) {
+    super(
+      `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
+        '"rush install" or "rush update".'
+    );
+  }
+}
+
+/**
  * @beta
  */
 export class ProjectChangeAnalyzer {
@@ -316,13 +328,21 @@ export class ProjectChangeAnalyzer {
   /**
    * Gets a snapshot of the input state of the Rush workspace that can be queried for incremental
    * build operations and use by the build cache.
+   *
+   * @remarks
+   * If the state cannot be calculated, this writes a warning and continues without a snapshot. With
+   * `throwOnMissingProjectShrinkwrapFile`, a missing project dependency file (shrinkwrap-deps.json) instead
+   * throws its error, whether it is detected when the provider is created or when a snapshot fails. A host that
+   * cannot continue without a snapshot can then report that actionable cause.
    * @internal
    */
   public async _tryGetSnapshotProviderAsync(
     projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>,
     terminal: ITerminal,
-    projectSelection?: ReadonlySet<RushConfigurationProject>
+    projectSelection?: ReadonlySet<RushConfigurationProject>,
+    options?: { readonly throwOnMissingProjectShrinkwrapFile?: boolean }
   ): Promise<GetInputsSnapshotAsyncFn | undefined> {
+    const throwOnMissingProjectShrinkwrapFile: boolean = !!options?.throwOnMissingProjectShrinkwrapFile;
     try {
       const gitPath: string = this.#git.getGitPathOrThrow();
 
@@ -375,6 +395,7 @@ export class ProjectChangeAnalyzer {
 
       // Include project shrinkwrap files as part of the computation
       const additionalRelativePathsToHash: string[] = [];
+      const projectShrinkwrapFilePaths: string[] = [];
       const globalAdditionalFiles: string[] = [];
       if (rushConfiguration.isPnpm) {
         await Async.forEachAsync(rushConfiguration.projects, async (project: RushConfigurationProject) => {
@@ -384,16 +405,16 @@ export class ProjectChangeAnalyzer {
               return;
             }
 
-            throw new Error(
-              `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
-                '"rush install" or "rush update".'
-            );
+            throw new MissingProjectShrinkwrapFileError(projectShrinkwrapFilePath);
           }
 
           const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
             path.relative(rootDirectory, projectShrinkwrapFilePath)
           );
           additionalRelativePathsToHash.push(relativeProjectShrinkwrapFilePath);
+          if (!rushConfiguration.subspacesFeatureEnabled) {
+            projectShrinkwrapFilePaths.push(projectShrinkwrapFilePath);
+          }
         });
       } else {
         // Add the shrinkwrap file to every project's dependencies
@@ -465,11 +486,18 @@ export class ProjectChangeAnalyzer {
             workingTreeReadStartTimeMs
           });
         } catch (e) {
+          // The files were checked once, when this provider was created. A file removed since then fails
+          // "git hash-object" with an obscure message, so check them again, only after a failure.
+          const error: Error = (await tryGetMissingFileErrorAsync(projectShrinkwrapFilePaths)) ?? e;
+          if (throwOnMissingProjectShrinkwrapFile && error instanceof MissingProjectShrinkwrapFileError) {
+            throw error;
+          }
+
           // If getRepoState fails, don't fail the whole build. Treat this case as if we don't know anything about
           // the state of the files in the repo. This can happen if the environment doesn't have Git.
           terminal.writeWarningLine(
             `Error calculating the state of the repo. (inner error: ${
-              e.stack ?? e.message ?? e
+              error.stack ?? error.message ?? error
             }). Continuing without diffing files.`
           );
 
@@ -477,6 +505,10 @@ export class ProjectChangeAnalyzer {
         }
       };
     } catch (e) {
+      if (throwOnMissingProjectShrinkwrapFile && e instanceof MissingProjectShrinkwrapFileError) {
+        throw e;
+      }
+
       // If getRepoState fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
       terminal.writeWarningLine(
@@ -685,6 +717,41 @@ async function isVersionBumpChangeAsync(
   } catch (error) {
     return false;
   }
+}
+
+/**
+ * Returns an error naming the first of the specified project dependency files that is missing, if any.
+ */
+async function tryGetMissingFileErrorAsync(
+  projectShrinkwrapFilePaths: ReadonlyArray<string>
+): Promise<MissingProjectShrinkwrapFileError | undefined> {
+  const exists: boolean[] = await Async.mapAsync(
+    projectShrinkwrapFilePaths,
+    (filePath: string) => FileSystem.existsAsync(filePath),
+    { concurrency: 50 }
+  );
+  const missingIndex: number = exists.indexOf(false);
+  return missingIndex < 0
+    ? undefined
+    : new MissingProjectShrinkwrapFileError(projectShrinkwrapFilePaths[missingIndex]);
+}
+
+/**
+ * Returns the error that {@link ProjectChangeAnalyzer._tryGetSnapshotProviderAsync} reports for a missing
+ * project dependency file, if any is missing. This happens when a project is added before "rush install".
+ */
+export async function tryGetMissingProjectShrinkwrapFileErrorAsync(
+  rushConfiguration: RushConfiguration
+): Promise<Error | undefined> {
+  if (!rushConfiguration.isPnpm || rushConfiguration.subspacesFeatureEnabled) {
+    return undefined;
+  }
+
+  return await tryGetMissingFileErrorAsync(
+    rushConfiguration.projects.map((project: RushConfigurationProject) =>
+      BaseProjectShrinkwrapFile.getFilePathForProject(project)
+    )
+  );
 }
 
 interface IAdditionalGlob {

@@ -79,6 +79,8 @@ interface IFixtureOptions {
   readonly resolver?: IDaemonRequestResolver;
   /** Adds the watch-only `_phase:compile:incremental` script, which passes `--incremental` to build.cjs. */
   readonly incrementalScript?: boolean;
+  /** Uses PNPM, which installs a dependency file (shrinkwrap-deps.json) that change detection hashes per project. */
+  readonly pnpm?: boolean;
 }
 
 class DecoratedTestResolver implements IDaemonRequestResolver {
@@ -137,7 +139,7 @@ async function createFixtureAsync(
     'rush.json',
     JSON.stringify({
       rushVersion: RUSH_VERSION,
-      npmVersion: '10.0.0',
+      ...(options.pnpm ? { pnpmVersion: '9.15.9' } : { npmVersion: '10.0.0' }),
       // Retention assertions must not depend on the surrounding Jest worker's accumulated RSS.
       daemon: { warmMemoryBudgetMB: 100_000 },
       projectFolderMinDepth: 2,
@@ -150,7 +152,11 @@ async function createFixtureAsync(
   );
   write('.gitignore', 'common/temp/\n**/.rush/\n**/rush-logs/\n**/lib/\n**/node_modules/\nruns.txt\n');
   write('common/temp/last-link.flag', '{}');
-  write('common/config/rush/npm-shrinkwrap.json', '{"lockfileVersion":3,"packages":{}}');
+  if (options.pnpm) {
+    write('common/config/rush/pnpm-lock.yaml', "lockfileVersion: '9.0'\n");
+  } else {
+    write('common/config/rush/npm-shrinkwrap.json', '{"lockfileVersion":3,"packages":{}}');
+  }
   write(
     'common/config/rush/command-line.json',
     JSON.stringify({
@@ -207,6 +213,7 @@ async function createFixtureAsync(
       })
     );
     write(`projects/${name}/input.txt`, 'one');
+    if (options.pnpm) write(`projects/${name}/.rush/temp/shrinkwrap-deps.json`, '{}');
     write(
       `projects/${name}/build.cjs`,
       `
@@ -1585,16 +1592,115 @@ process.exit(23);
 
   it('rejects invalid inherited project configuration before creating a graph or running scripts', async () => {
     const fixture: IFixture = await createFixtureAsync();
+    const stderrWrite: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     try {
       fs.writeFileSync(
         path.join(fixture.repoRoot, 'projects/a/config/rush-project.json'),
         '{"extends":"./unowned.json"}'
       );
       expect((await runAsync(fixture, 'unsupported', ['build'])).terminal).toMatchObject({
-        kind: 'requestRejected'
+        kind: 'requestRejected',
+        // In-process Rush reports the error natively if the request selects the project.
+        payload: {
+          code: 'unsupported',
+          message: expect.stringMatching(/^The daemon could not load the configuration of project "a": /)
+        }
       });
+      expect(stderrWrite).toHaveBeenCalledWith(
+        expect.stringMatching(/^Warning: Rush could not load the configuration of project "a": /)
+      );
       expect(fixture.session.operationGraph).toBeUndefined();
       expect(runs(fixture)).toEqual([]);
+    } finally {
+      stderrWrite.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('hands requests to in-process Rush while a project that a filtered install skipped has no rig package', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'rig');
+    const rigFolder: string = path.join(fixture.repoRoot, 'projects/a/node_modules/fixture-rig');
+    const installedRigFolder: string = `${rigFolder}-installed`;
+    const stderr: string[] = [];
+    const stderrWrite: jest.SpyInstance = jest
+      .spyOn(process.stderr, 'write')
+      .mockImplementation((chunk: string | Uint8Array) => stderr.push(chunk.toString()) > 0);
+    const expectFallbackAsync = async (requestId: string): Promise<void> => {
+      stderr.length = 0;
+      const rejected: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'c']);
+      expect(rejected.terminal).toMatchObject({
+        kind: 'requestRejected',
+        payload: {
+          code: 'unsupported',
+          message:
+            `The daemon could not load the configuration of project "a": Cannot find module ` +
+            `'fixture-rig/package.json' from '${path.join(fixture.repoRoot, 'projects/a')}' ` +
+            '(the daemon loads every project, so it needs a full "rush install")'
+        }
+      });
+      expect(stderr.join('')).toContain(
+        `Warning: Rush could not load the configuration of project "a": Cannot find module 'fixture-rig/package.json'`
+      );
+    };
+    try {
+      fs.renameSync(rigFolder, installedRigFolder);
+      await expectFallbackAsync('unbound');
+      expect(fixture.session.operationGraph).toBeUndefined();
+
+      fs.renameSync(installedRigFolder, rigFolder);
+      const installed: ITerminalExchange = await runAsync(fixture, 'installed', ['build', '--only', 'c']);
+      expect(installed.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+
+      // Removing an installed package changes no watched file, but the next request must not reuse the graph.
+      fs.renameSync(rigFolder, installedRigFolder);
+      await expectFallbackAsync('uninstalled');
+      fs.renameSync(installedRigFolder, rigFolder);
+      const reinstalled: ITerminalExchange = await runAsync(fixture, 'reinstalled', ['build', '--only', 'c']);
+      expect(reinstalled.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(runs(fixture)).toEqual(['c:one:']);
+    } finally {
+      stderrWrite.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('rejects a missing project dependency file with the native instruction as the last line', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { pnpm: true });
+    const dependencyFile: string = path.join(fixture.repoRoot, 'projects/c/.rush/temp/shrinkwrap-deps.json');
+    const instruction: string =
+      `A project dependency file (${dependencyFile}) is missing. ` +
+      'You may need to run "rush install" or "rush update".';
+    const expectRejectedAsync = async (requestId: string): Promise<void> => {
+      const { terminal } = await runAsync(fixture, requestId, ['build', '--only', 'a']);
+      expect(terminal).toMatchObject({ kind: 'requestRejected', payload: { code: 'routingFailed' } });
+      const { message } = (terminal as { payload: { message: string } }).payload;
+      expect(message.split('\n').pop()).toBe(instruction);
+    };
+    try {
+      fs.rmSync(dependencyFile);
+      await expectRejectedAsync('cold');
+      expect(fixture.session.operationGraph).toBeUndefined();
+
+      fs.writeFileSync(dependencyFile, '{}');
+      const initial: ITerminalExchange = await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      expect(initial.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      fs.rmSync(dependencyFile);
+      await expectRejectedAsync('warm');
+
+      fs.writeFileSync(dependencyFile, '{}');
+      const restored: ITerminalExchange = await runAsync(fixture, 'restored', ['build', '--only', 'a']);
+      expect(restored.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+
+      // A project added before "rush install" has no dependency file, so in-process Rush cannot hash the repo
+      // state either. Its missing rig package must not hide that instruction.
+      fs.rmSync(dependencyFile);
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/c/config/rush-project.json'));
+      fs.writeFileSync(
+        path.join(fixture.repoRoot, 'projects/c/config/rig.json'),
+        '{"rigPackageName":"uninstalled-rig"}'
+      );
+      await expectRejectedAsync('added');
+      expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }

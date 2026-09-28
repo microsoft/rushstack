@@ -3,6 +3,7 @@
 
 import * as path from 'node:path';
 
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type { LockFile } from '@rushstack/node-core-library';
 import {
   EnvironmentVariableNames,
@@ -10,6 +11,7 @@ import {
   PhasedCommandEngine,
   PhasedCommandEngineBusyError,
   PhasedCommandEngineConfigurationChangedError,
+  PhasedCommandEngineProjectConfigurationError,
   type IPhasedCommandEngine,
   type IInputsSnapshot,
   type IOperationGraph,
@@ -208,6 +210,9 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         engine = await command.createEngineAsync(this.#preparationLock);
       } catch (error) {
         if (error instanceof PhasedCommandEngineBusyError) throw error;
+        if (error instanceof PhasedCommandEngineProjectConfigurationError) {
+          throw createProjectConfigurationFallback(error);
+        }
         throw new Error(terminal.describeError(error), { cause: error });
       }
       try {
@@ -267,6 +272,32 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       }
     });
   }
+}
+
+/**
+ * An engine loads the configuration of every project, whereas native Rush loads only the projects that a request
+ * selects. In-process Rush can therefore serve a request that the daemon cannot, for example after a filtered
+ * install, and it reports the error itself if the request selects the project.
+ */
+function createProjectConfigurationFallback(
+  error: PhasedCommandEngineProjectConfigurationError
+): DaemonRequestDispatchError {
+  // The launcher log keeps the whole error for daemon diagnostics; the client prints one line.
+  process.stderr.write(`Warning: ${error.message}\n`);
+  const cause: unknown = error.cause;
+  const detail: string =
+    cause instanceof Error && !(cause instanceof AlreadyReportedError)
+      ? `: ${cause.message.split('\n', 1)[0]}`
+      : '';
+  const hint: string =
+    (cause as { code?: unknown } | undefined)?.code === 'MODULE_NOT_FOUND'
+      ? ' (the daemon loads every project, so it needs a full "rush install")'
+      : '';
+  return new DaemonRequestDispatchError(
+    'unsupported',
+    `The daemon could not load the configuration of project "${error.projectName}"${detail}${hint}`,
+    { cause: error }
+  );
 }
 
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {

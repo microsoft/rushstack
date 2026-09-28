@@ -5,13 +5,14 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { AlreadyReportedError, FileSystem, Path } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { IPhase } from '../CommandLineConfiguration';
 import type { RushConfigurationProject } from '../RushConfigurationProject';
 import { RushProjectConfiguration } from '../RushProjectConfiguration';
+import { PhasedCommandEngineProjectConfigurationError } from '../PhasedCommandEngineProjectConfigurationError';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function stripSymbolsFromObject(obj: any | undefined): void {
@@ -165,6 +166,39 @@ describe(RushProjectConfiguration.name, () => {
       const ownFile: RushConfigurationProject = project('own-file');
       const configurations = await loadAsync(ownFile);
       expect(getOutputFolderNames(configurations.get(ownFile))).toEqual(['from-project']);
+    });
+
+    it('names the project whose rig package is not installed, with the native error as the cause', async () => {
+      write('uninstalled/package.json', { name: 'uninstalled', version: '1.0.0' });
+      write('uninstalled/config/rig.json', { rigPackageName: 'uninstalled-rig' });
+      const uninstalled: RushConfigurationProject = project('uninstalled');
+      const nativeError: Error = await RushProjectConfiguration.tryLoadForProjectAsync(
+        uninstalled,
+        new Terminal(new StringBufferTerminalProvider())
+      ).then(
+        () => {
+          throw new Error('The native load succeeded.');
+        },
+        (error: Error) => error
+      );
+      expect(nativeError).toMatchObject({ code: 'MODULE_NOT_FOUND' });
+
+      const error: unknown = await loadAsync(project('rigged'), uninstalled).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PhasedCommandEngineProjectConfigurationError);
+      expect(error).toMatchObject({
+        projectName: 'uninstalled',
+        message: `Rush could not load the configuration of project "uninstalled": ${nativeError.message}`,
+        cause: { code: 'MODULE_NOT_FOUND', message: nativeError.message }
+      });
+    });
+
+    it('does not repeat the message of an error that has already been reported', () => {
+      expect(
+        new PhasedCommandEngineProjectConfigurationError('reported', new AlreadyReportedError())
+      ).toMatchObject({
+        projectName: 'reported',
+        message: 'Rush could not load the configuration of project "reported".'
+      });
     });
 
     it('loads a rig profile shared through per-project node_modules symlinks once, with native results', async () => {

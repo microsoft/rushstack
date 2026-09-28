@@ -10,6 +10,7 @@ import {
   EnvironmentVariableNames,
   getWorkspaceFingerprintEnvironmentEntries,
   PhasedCommandEngineBusyError,
+  PhasedCommandEngineProjectConfigurationError,
   Rush,
   WorkspaceInputChangeTier,
   WorkspaceRuntimeFingerprintCache,
@@ -422,10 +423,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           abortSignal: client.abortSignal
         });
         if (tier === WorkspaceInputChangeTier.Reuse) {
-          projectFingerprint = await this.#captureProjectFingerprintAsync(session, receivedTimeMs);
+          projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session, receivedTimeMs);
           if (
             this.#boundSession !== session ||
             this.#commandIdentity !== commandIdentity ||
+            projectFingerprint === undefined ||
             this.#projectFingerprint !== projectFingerprint ||
             this.#forceReload ||
             !session.invalidations.getSnapshot().isWatcherHealthy ||
@@ -516,8 +518,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         session.invalidations.getSnapshot().isWatcherHealthy &&
         !session.invalidations.hasUnattributedUnknownChanges
       ) {
-        projectFingerprint = await this.#captureProjectFingerprintAsync(session);
-        if (projectFingerprint === this.#projectFingerprint) {
+        projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session);
+        if (projectFingerprint !== undefined && projectFingerprint === this.#projectFingerprint) {
           this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
           this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
           return {
@@ -598,7 +600,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         expectedFingerprint = after;
         this.#boundSession = session;
         this.#fingerprint = after;
-        this.#projectFingerprint = await this.#captureProjectFingerprintAsync(session);
+        this.#projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session);
         this.#commandIdentity = await getResolverLifecycle(resolver).getCommandParameterIdentityAsync({
           envelope,
           workspaceSession: session,
@@ -678,6 +680,23 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       () => captureProjectConfigurationFingerprintAsync(rushConfiguration, this.#terminal),
       notBeforeMs
     );
+  }
+
+  /**
+   * Returns undefined, which must not match any fingerprint, if a project's configuration cannot be loaded.
+   * Binding a new generation then reports the error, or hands the request to in-process Rush, which loads only
+   * the projects that a request selects.
+   */
+  async #tryCaptureProjectFingerprintAsync(
+    session: IWorkspaceSession,
+    notBeforeMs?: number
+  ): Promise<string | undefined> {
+    try {
+      return await this.#captureProjectFingerprintAsync(session, notBeforeMs);
+    } catch (error) {
+      if (error instanceof PhasedCommandEngineProjectConfigurationError) return undefined;
+      throw error;
+    }
   }
 
   #classify(fingerprint: IWorkspaceInputFingerprint, mutation: boolean): WorkspaceInputChangeTier {

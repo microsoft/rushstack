@@ -182,6 +182,7 @@ export {
   type IParsePhasedCommandOptions
 } from './api/PhasedCommandEngine';
 export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
+export { PhasedCommandEngineProjectConfigurationError } from './api/PhasedCommandEngineProjectConfigurationError';
 export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
 export {
   captureWorkspaceInputFingerprintAsync,
