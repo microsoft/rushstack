@@ -6,7 +6,12 @@ import * as path from 'node:path';
 import { AlreadyReportedError, Async, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { RigConfig, type IRigConfigJson, type ILoadForProjectFolderOptions } from '@rushstack/rig-package';
+import {
+  RigConfig,
+  type IRigConfig,
+  type IRigConfigJson,
+  type ILoadForProjectFolderOptions
+} from '@rushstack/rig-package';
 
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
@@ -660,7 +665,7 @@ async function _tryLoadJsonForProjectAsync(
     loaders?.configurationFile ?? RUSH_PROJECT_CONFIGURATION_FILE;
   const oldConfigurationFile: ProjectConfigurationFile<IOldRushProjectJson> =
     loaders?.oldConfigurationFile ?? OLD_RUSH_PROJECT_CONFIGURATION_FILE;
-  const rigConfig: RigConfig | undefined = loaders
+  const rigConfig: IRigConfig | undefined = loaders
     ? await loadIsolatedRigConfigAsync(project.projectFolder)
     : await RigConfig.loadForProjectFolderAsync({ projectFolderPath: project.projectFolder });
 
@@ -699,7 +704,50 @@ async function _tryLoadJsonForProjectAsync(
   }
 }
 
-async function loadIsolatedRigConfigAsync(projectFolder: string): Promise<RigConfig | undefined> {
+/**
+ * A found rig whose resolved profile folder is the real path of the rig package's profile folder.
+ */
+class RealProfileFolderRigConfig implements IRigConfig {
+  public readonly projectFolderOriginalPath: string;
+  public readonly projectFolderPath: string;
+  public readonly rigFound: boolean;
+  public readonly filePath: string;
+  public readonly rigPackageName: string;
+  public readonly rigProfile: string;
+  public readonly relativeProfileFolderPath: string;
+  readonly #rigConfig: IRigConfig;
+  readonly #profileFolder: string;
+
+  public constructor(rigConfig: IRigConfig, profileFolder: string) {
+    this.projectFolderOriginalPath = rigConfig.projectFolderOriginalPath;
+    this.projectFolderPath = rigConfig.projectFolderPath;
+    this.rigFound = rigConfig.rigFound;
+    this.filePath = rigConfig.filePath;
+    this.rigPackageName = rigConfig.rigPackageName;
+    this.rigProfile = rigConfig.rigProfile;
+    this.relativeProfileFolderPath = rigConfig.relativeProfileFolderPath;
+    this.#rigConfig = rigConfig;
+    this.#profileFolder = profileFolder;
+  }
+
+  public getResolvedProfileFolder(): string {
+    return this.#profileFolder;
+  }
+
+  public async getResolvedProfileFolderAsync(): Promise<string> {
+    return this.#profileFolder;
+  }
+
+  public tryResolveConfigFilePath(configFileRelativePath: string): string | undefined {
+    return this.#rigConfig.tryResolveConfigFilePath(configFileRelativePath);
+  }
+
+  public async tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined> {
+    return await this.#rigConfig.tryResolveConfigFilePathAsync(configFileRelativePath);
+  }
+}
+
+async function loadIsolatedRigConfigAsync(projectFolder: string): Promise<IRigConfig | undefined> {
   let rigJson: IRigConfigJson;
   try {
     rigJson = await JsonFile.loadAsync(path.join(projectFolder, 'config', 'rig.json'));
@@ -718,14 +766,18 @@ async function loadIsolatedRigConfigAsync(projectFolder: string): Promise<RigCon
   };
   const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync(options);
   if (rigConfig.rigFound) {
+    let profileFolder: string;
     try {
       // The configuration file loader resolves the rig profile synchronously, which serializes these
       // concurrent project loads. Resolving it asynchronously first caches the same result on this instance.
-      await rigConfig.getResolvedProfileFolderAsync();
+      profileFolder = await rigConfig.getResolvedProfileFolderAsync();
     } catch {
       // A fresh instance reports the failure exactly as the native loader does, if and when the rig is used.
       return await RigConfig.loadForProjectFolderAsync(options);
     }
+    // Each project reaches a shared rig through its own node_modules symlink, and the loaders cache by file
+    // path. The real profile folder lets every project share one load of the rig's files and "extends" chain.
+    return new RealProfileFolderRigConfig(rigConfig, await FileSystem.getRealPathAsync(profileFolder));
   }
   return rigConfig;
 }

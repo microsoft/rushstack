@@ -355,11 +355,14 @@ export class WorkspaceWarmSet implements AsyncDisposable {
 
   async #evictIdleAsync(): Promise<void> {
     const { operationGraph: graph, watcher } = this.#options;
+    // getStatus() re-ranks every project. Only an eviction attempt (which awaits) can change it during a pass, so
+    // it is reused until then; recomputing it per project made a pass without evictions quadratic.
+    let currentStatus: IWorkspaceWarmSetStatus | undefined;
     // Retention and eviction use exactly the same ordering, reversed only to release the lowest value first.
     for (const project of this.#rankProjects().reverse()) {
       if (this.#disposed) break;
       if (project.protected) continue;
-      const status: IWorkspaceWarmSetStatus = this.getStatus();
+      const status: IWorkspaceWarmSetStatus = (currentStatus ??= this.getStatus());
       const expired: boolean =
         performance.now() - project.lastUsed >= this.#configuration.warmIdleTimeoutSeconds * 1000;
       const unrequested: boolean =
@@ -388,6 +391,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         this.#cleanupFailures.set(project.key, message);
         this.#diagnose(new Error(message, { cause: error }));
       }
+      currentStatus = undefined;
     }
   }
 

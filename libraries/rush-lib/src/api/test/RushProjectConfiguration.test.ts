@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { FileSystem, Path } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -164,6 +165,61 @@ describe(RushProjectConfiguration.name, () => {
       const ownFile: RushConfigurationProject = project('own-file');
       const configurations = await loadAsync(ownFile);
       expect(getOutputFolderNames(configurations.get(ownFile))).toEqual(['from-project']);
+    });
+
+    it('loads a rig profile shared through per-project node_modules symlinks once, with native results', async () => {
+      write('store/example-rig/package.json', { name: 'example-rig', version: '1.0.0' });
+      write('store/example-rig/profiles/default/config/rush-project.json', {
+        extends: '../../../shared/rush-project.json',
+        operationSettings: [{ operationName: '_phase:build', outputFolderNames: ['from-rig'] }]
+      });
+      write('store/example-rig/shared/rush-project.json', {
+        operationSettings: [{ operationName: '_phase:test', outputFolderNames: ['from-shared'] }]
+      });
+      const names: string[] = ['linked-1', 'linked-2', 'linked-3', 'linked-own'];
+      for (const name of names) {
+        write(`${name}/package.json`, { name, version: '1.0.0' });
+        write(`${name}/config/rig.json`, { rigPackageName: 'example-rig' });
+        fs.mkdirSync(path.join(folder, name, 'node_modules'));
+        fs.symlinkSync(
+          path.join(folder, 'store/example-rig'),
+          path.join(folder, name, 'node_modules/example-rig'),
+          'junction'
+        );
+      }
+      write('linked-own/config/rush-project.json', {
+        operationSettings: [{ operationName: '_phase:build', outputFolderNames: ['from-project'] }]
+      });
+      const projects: RushConfigurationProject[] = names.map(project);
+
+      const readFileAsync: jest.SpyInstance = jest.spyOn(FileSystem, 'readFileAsync');
+      let configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
+      let readPaths: string[];
+      try {
+        configurations = await loadAsync(...projects);
+        readPaths = readFileAsync.mock.calls.map(([filePath]) => Path.convertToSlashes(filePath));
+      } finally {
+        readFileAsync.mockRestore();
+      }
+      expect(readPaths.filter((p) => p.endsWith('/profiles/default/config/rush-project.json'))).toHaveLength(1);
+      expect(readPaths.filter((p) => p.endsWith('/shared/rush-project.json'))).toHaveLength(1);
+
+      for (const linked of projects.slice(0, 3)) {
+        expect(getOutputFolderNames(configurations.get(linked))).toEqual(['from-rig']);
+        expect([
+          ...configurations.get(linked)!.operationSettingsByOperationName.get('_phase:test')!.outputFolderNames!
+        ]).toEqual(['from-shared']);
+      }
+      expect(getOutputFolderNames(configurations.get(projects[3]))).toEqual(['from-project']);
+
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+      for (const linked of projects) {
+        const native: RushProjectConfiguration | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(
+          linked,
+          terminal
+        );
+        expect(configurations.get(linked)!._getJsonForFingerprint()).toBe(native!._getJsonForFingerprint());
+      }
     });
   });
 
