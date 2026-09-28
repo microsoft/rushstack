@@ -13,7 +13,7 @@ import { JsonFile } from '@rushstack/node-core-library';
 import {
   DaemonClientError,
   captureDaemonRequest,
-  connectOrStartDaemonAsync,
+  connectOrAwaitDaemonStartupAsync,
   executeWithDaemonRestartAsync,
   type DaemonClient,
   type DaemonClientOutcome,
@@ -141,7 +141,22 @@ export async function launchClientAsync(
         verbosity
       }
     };
-    client = await connectOrStartDaemonAsync(connection);
+    // While a live daemon or starter can still make the daemon ready, a startup failure rejects with a
+    // DaemonStartupPendingError, which is not a DaemonClientError, so Rush does not run in-process next to it.
+    client = await connectOrAwaitDaemonStartupAsync({
+      ...connection,
+      onAwaitStartup: (owner: string, waitMs: number): void => {
+        if (agentRenderer) {
+          agentRenderer.setPhase('rushd is still starting; waiting for it');
+          return;
+        }
+        const seconds: number = Math.round(waitMs / 1000);
+        process.stderr.write(
+          `rush-client: The daemon is not ready yet. ${owner}, so this command waits up to ${seconds} s ` +
+            'more for it instead of running Rush in-process.\n'
+        );
+      }
+    });
   } catch (error) {
     if (
       !(error instanceof DaemonClientError) &&

@@ -155,9 +155,11 @@ node common/scripts/install-run-rush.js deploy --scenario rush-daemon-dogfood --
 ```
 
 On Windows, the first daemon start from a new or refreshed snapshot can take longer than the client's 15-second
-startup deadline while Windows scans the newly written files. That request then uses native Rush (with a
-`rush-client: ... Using in-process Rush.` message), but the daemon finishes starting in the background and the next
-request uses it.
+startup deadline while Windows scans the newly written files. Because the startup helper is still waiting for the
+daemon, the client says so and keeps trying for another 15 seconds, then uses the daemon once it is ready. If it is
+still not ready, the request fails with exit code 1 and a `rush-client: ...` message that says Rush was not run
+in-process, rather than running native Rush next to the starting daemon. The daemon finishes starting in the
+background, so rerun the command (`rush-client daemon status` shows when it is ready).
 
 The daemon's identity is the canonical repository root plus the selected Rush version, so each checkout or
 worktree has its own daemon, and `rush-client daemon ...` commands address the daemon for the checkout that

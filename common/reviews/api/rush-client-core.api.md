@@ -23,6 +23,9 @@ export function assertDaemonRuntimeFolderIsPrivate(paths: IDaemonPaths): void;
 export function captureDaemonRequest(options: ICaptureDaemonRequestOptions): IDaemonRequestEnvelope;
 
 // @beta
+export function connectOrAwaitDaemonStartupAsync(options: IConnectOrAwaitDaemonStartupOptions): Promise<DaemonClient>;
+
+// @beta
 export function connectOrStartDaemonAsync(options: IConnectOrStartDaemonOptions): Promise<DaemonClient>;
 
 // @beta
@@ -64,6 +67,11 @@ export type DaemonClientOutcome = {
 export type DaemonStartupHelperState = 'running' | 'exited' | 'unknown';
 
 // @beta
+export class DaemonStartupPendingError extends Error {
+    constructor(message: string, options?: ErrorOptions);
+}
+
+// @beta
 export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, execution: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
 
 // @beta
@@ -75,6 +83,11 @@ export interface ICaptureDaemonRequestOptions extends Omit<IDaemonRequestEnvelop
     readonly environment: Readonly<Record<string, string | undefined>>;
     // (undocumented)
     readonly requestId?: string;
+}
+
+// @beta
+export interface IConnectOrAwaitDaemonStartupOptions extends IConnectOrStartDaemonOptions {
+    onAwaitStartup?: (owner: string, waitMs: number) => void;
 }
 
 // @beta

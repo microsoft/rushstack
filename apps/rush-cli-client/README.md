@@ -42,6 +42,20 @@ Routing precedence:
 3. `RUSH_DAEMON` overrides `rush.json`'s `daemon.enabled`; the default is false.
 4. Auto-start is considered only after selecting daemon execution.
 
+When the selected daemon cannot be reached or started, an ordinary invocation prints the reason and runs
+in-process (`rush-client: <reason> Using in-process Rush.`). A startup failure while a live process can
+still make the daemon ready is the exception: a process that listens at the endpoint but does not
+complete hello/ping in time, a startup helper that still waits for its daemon, or another client that
+holds the start mutex, as in a burst of clients that all find no daemon. In-process Rush would take the
+repository lock, and the daemon would then reject the requests it serves with "Another Rush command is
+already running in this repository." Instead, the client keeps trying for one more startup deadline
+(15 seconds, so about 30 seconds in all) and uses the daemon once it is ready. It says so when it starts
+waiting (`rush-client: The daemon is not ready yet. <live process>, so this command waits up to 15 s more
+for it instead of running Rush in-process.`; agent output shows "rushd is still starting; waiting for it"
+as the progress phase). If the daemon is still not ready, the command exits with code 1. The message
+gives the startup error with its `--no-daemon` hint, then the process that is still live, "so Rush was
+not run in-process", and a pointer to `rush-client daemon status`.
+
 `--no-wait` fails immediately when daemon admission is unavailable.
 `--wait-timeout SECONDS` (or `--wait-timeout=SECONDS`) overrides the configured queue
 timeout; finite nonnegative decimal seconds up to 2147483.647 are accepted and

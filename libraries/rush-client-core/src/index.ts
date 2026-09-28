@@ -28,6 +28,11 @@ export {
 } from './DaemonStartupReservation';
 export { executeWithDaemonRestartAsync } from './executeWithDaemonRestart';
 export {
+  connectOrAwaitDaemonStartupAsync,
+  DaemonStartupPendingError,
+  type IConnectOrAwaitDaemonStartupOptions
+} from './connectOrAwaitDaemonStartup';
+export {
   connectOrStartDaemonAsync,
   requestDaemonShutdownAsync,
   resolveDaemonStartupReservationAsync,

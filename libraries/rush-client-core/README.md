@@ -119,6 +119,21 @@ Socket resets and broken pipes during hello/ping readiness are retried within th
 a closing host may still retain its listener while joining owned resources. This applies only before
 `requestStart`; a connection failure after execution begins still never permits replay.
 
+`connectOrAwaitDaemonStartupAsync()` wraps `connectOrStartDaemonAsync()` for a caller that runs Rush
+in-process when no daemon is available, as the CLI client does. A `startupFailed` or `timeout` error
+alone does not make that safe while a live process can still make the daemon ready: a listener at the
+endpoint that did not complete hello/ping in time, a recorded startup helper that is still running, or
+another client that holds the start mutex. In-process Rush would take the repository lock that the
+daemon's requests need. The wrapper instead keeps connecting (and starting, through the same mutex and
+reservation) until one more startup deadline has passed. If the daemon is still not ready, it rejects
+with `DaemonStartupPendingError`, which is not a `DaemonClientError`: the message is the startup error
+followed by the process that is still live, and `cause` is that error. When none remains, it rejects at
+once with the original `DaemonClientError`, for example when auto-start is disabled and nothing listens,
+or when the helper has exited. An ownership record alone does not count, because a daemon publishes it
+only after binding. Other errors, such as `versionMismatch`, pass through unchanged. Before it keeps
+waiting, it calls the optional `onAwaitStartup(owner, waitMs)` once, with the live process and the
+remaining wait, so that the caller can say why the command has not started yet.
+
 `getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
 and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across
 restarts, including startup failures; the parent always closes its descriptor
