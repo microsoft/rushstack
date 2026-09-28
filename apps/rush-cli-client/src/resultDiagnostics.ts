@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonCommandResult, IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+
+import { formatAdmissionFailure } from './ClientAdmissionControls';
 
 /**
  * Returns the stderr line that explains a failed daemon result, if any.
@@ -22,4 +24,20 @@ export function getResultDiagnostic(
     return `rush-client: ${result.errorMessage}\n`;
   }
   return undefined;
+}
+
+/**
+ * Returns the stderr text that explains a daemon result when no agent summary line explains it, if any.
+ *
+ * @remarks
+ * An admission failure is explained with the daemon's reason when it sent one, so that the text names what
+ * the request waited for, such as a daemon restart.
+ */
+export function getResultStderr(
+  result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>,
+  admission: IDaemonRequestAdmissionOptions | undefined
+): string | undefined {
+  const diagnostic: string | undefined = getResultDiagnostic(result);
+  if (diagnostic || !result.admissionErrorCode) return diagnostic;
+  return formatAdmissionFailure(result.admissionErrorCode, admission, result.errorMessage);
 }

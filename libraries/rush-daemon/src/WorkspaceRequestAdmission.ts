@@ -21,7 +21,11 @@ import {
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
-import type { IWorkspaceRestartTicket, WorkspaceRestartArbiter } from './WorkspaceRestartArbiter';
+import type {
+  IWorkspaceRestartDrainOptions,
+  IWorkspaceRestartTicket,
+  WorkspaceRestartArbiter
+} from './WorkspaceRestartArbiter';
 
 export interface IRequestAdmissionClient {
   readonly abortSignal: AbortSignal;
@@ -36,6 +40,21 @@ export interface IRequestAdmissionControllerOptions {
 }
 
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
+
+/** What a remaining admission budget does not show about the request that it came from. */
+interface IAdmissionBudgetHistory {
+  /** The wait timeout that the client asked for. */
+  readonly waitTimeoutMs: number;
+  /** Time spent behind another request's graph load or reload, which did not count against the wait timeout. */
+  readonly pausedMs: number;
+}
+
+/**
+ * The history of each remaining budget that a controller hands to another routing boundary, so that the boundary's
+ * timeout message names the client's timeout and the time that did not count, rather than the remainder alone.
+ */
+const HISTORY_BY_REMAINING_ADMISSION: WeakMap<IDaemonRequestAdmissionOptions, IAdmissionBudgetHistory> =
+  new WeakMap();
 /** A request waits for another request's graph load or reload for up to this many times its wait timeout. */
 const GRAPH_LOAD_WAIT_FACTOR: number = 10;
 // Only the per-invocation flag is offered: Rush versions that do not recognize the environment variable reject it.
@@ -43,6 +62,22 @@ const WAIT_LONGER_HINT: string = 'Use --wait-timeout <seconds> to wait longer.';
 
 function formatSeconds(ms: number): string {
   return `${Math.round(ms / 100) / 10}s`;
+}
+
+/** Describes time that did not count against a request's wait timeout, unless it rounds to nothing. */
+function formatUncountedTime(pausedMs: number, spentWhile: string): string {
+  const seconds: string = formatSeconds(pausedMs);
+  return seconds === '0s' ? '' : `; ${seconds} spent ${spentWhile} did not count`;
+}
+
+/** Returns a frozen copy of admission options that keeps the history of a remaining budget. */
+export function freezeDaemonRequestAdmissionOptions(
+  admission: IDaemonRequestAdmissionOptions
+): IDaemonRequestAdmissionOptions {
+  const copy: IDaemonRequestAdmissionOptions = Object.freeze({ ...admission });
+  const history: IAdmissionBudgetHistory | undefined = HISTORY_BY_REMAINING_ADMISSION.get(admission);
+  if (history) HISTORY_BY_REMAINING_ADMISSION.set(copy, history);
+  return copy;
 }
 
 class WorkspaceRequestScheduler extends RequestScheduler {
@@ -208,17 +243,27 @@ export class RequestAdmissionController {
   readonly #abortFromClient: () => void;
   readonly #admission: IDaemonRequestAdmissionOptions | undefined;
   readonly #client: IRequestAdmissionClient;
-  #deadlineMs: number | undefined;
+  /** The wait timeout that the client asked for; `#admission` holds only the remainder at a later boundary. */
+  readonly #configuredWaitTimeoutMs: number | undefined;
+  /** Time spent behind another request's graph load or reload, which did not count against the wait timeout. */
+  #pausedMs: number;
+  /**
+   * The unspent wait timeout, or undefined when waiting is not limited. Only this controller's waits for other
+   * requests spend it, so the request's own work, such as capturing its inputs, loading or reloading the workspace
+   * graph, routing and execution, does not.
+   */
+  #remainingMs: number | undefined;
   readonly #writer: QueuePositionWriter | undefined;
 
   public constructor(options: IRequestAdmissionControllerOptions) {
     validateDaemonRequestAdmissionOptions(options.admission);
     this.#admission = options.admission;
+    const history: IAdmissionBudgetHistory | undefined =
+      options.admission && HISTORY_BY_REMAINING_ADMISSION.get(options.admission);
+    this.#configuredWaitTimeoutMs = history?.waitTimeoutMs ?? options.admission?.waitTimeoutMs;
+    this.#pausedMs = history?.pausedMs ?? 0;
     this.#client = options.client;
-    this.#deadlineMs =
-      options.admission?.waitTimeoutMs === undefined
-        ? undefined
-        : Date.now() + options.admission.waitTimeoutMs;
+    this.#remainingMs = options.admission?.waitTimeoutMs;
     this.#writer =
       options.client.supportsRequestAdmission === true
         ? new QueuePositionWriter(options.client, options.requestId, this.#abortController)
@@ -231,17 +276,16 @@ export class RequestAdmissionController {
     }
   }
 
-  /** Waits for workspace admission within the request's remaining admission budget. */
+  /**
+   * Waits for workspace admission within the request's remaining admission budget. A wait-timeout error says the
+   * request was waiting for `waitingFor`.
+   */
   public async acquireAsync(
     scheduler: RequestScheduler,
-    exclusivityClass: RequestExclusivityClass
+    exclusivityClass: RequestExclusivityClass,
+    waitingFor: string = 'workspace admission'
   ): Promise<IRequestLease> {
-    return await this.#acquireAsync(
-      scheduler,
-      exclusivityClass,
-      this.#getRemainingWaitTimeoutMs(),
-      'workspace admission'
-    );
+    return await this.#acquireAsync(scheduler, exclusivityClass, this.#remainingMs, waitingFor);
   }
 
   /**
@@ -259,7 +303,7 @@ export class RequestAdmissionController {
     const waitTimeoutMs: number | undefined =
       exclusivityClass === RequestExclusivityClass.SharedBuild && this.#admission?.waitTimeoutIsDefault
         ? undefined
-        : this.#getRemainingWaitTimeoutMs();
+        : this.#remainingMs;
     return await this.#acquireAsync(
       scheduler,
       exclusivityClass,
@@ -285,8 +329,8 @@ export class RequestAdmissionController {
     transition: AdmissionProgress
   ): Promise<IRequestLease> {
     const waitingFor: string = "another request's load or reload of the workspace graph";
-    const remainingMs: number | undefined = this.#getRemainingWaitTimeoutMs();
-    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutMs;
+    const remainingMs: number | undefined = this.#remainingMs;
+    const waitTimeoutMs: number | undefined = this.#configuredWaitTimeoutMs;
     if (remainingMs === undefined || waitTimeoutMs === undefined) {
       return await this.#acquireAsync(
         scheduler,
@@ -319,42 +363,22 @@ export class RequestAdmissionController {
     } catch (error) {
       budget.stop();
       if (!exhausted.signal.aborted || this.#abortController.signal.aborted) throw error;
-      const message: string = pausedLimitReached
-        ? `The request was not admitted within ${GRAPH_LOAD_WAIT_FACTOR} times its ${waitTimeoutMs}ms wait ` +
-          `timeout because ${waitingFor} was still running after ${formatSeconds(budget.pausedMs)}.`
-        : `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ` +
-          `${waitingFor}` +
-          (budget.pausedMs > 0
-            ? `; ${formatSeconds(budget.pausedMs)} spent while that request loaded the graph did not count.`
-            : '.');
+      // A zero timeout has no paused allowance, so it fails at once without reaching a limit worth naming.
+      const message: string =
+        pausedLimitReached && waitTimeoutMs > 0
+          ? `The request was not admitted within ${GRAPH_LOAD_WAIT_FACTOR} times its ${waitTimeoutMs}ms wait ` +
+            `timeout because ${waitingFor} was still running after ${formatSeconds(budget.pausedMs)}.`
+          : `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ` +
+            `${waitingFor}` +
+            `${formatUncountedTime(this.#pausedMs + budget.pausedMs, 'while that request loaded the graph')}.`;
       throw new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,
         `${message} ${WAIT_LONGER_HINT}`
       );
     } finally {
       budget.stop();
-      this.#deadlineMs = Date.now() + budget.remainingMs;
-    }
-  }
-
-  /**
-   * Runs `action`, such as routing and executing an admitted request, without spending the request's wait timeout.
-   *
-   * @remarks
-   * Work after admission either runs or waits at a routing boundary that applies the timeout it received, such as the
-   * graph-execution gate. A request that re-enters workspace admission afterwards, for example to reload the graph
-   * after its inputs changed, therefore keeps the unspent timeout it had before `action`, whether that timeout is the
-   * client default or explicit.
-   */
-  public async runOutsideWaitBudgetAsync<T>(action: () => Promise<T>): Promise<T> {
-    const remainingMs: number | undefined = this.#getRemainingWaitTimeoutMs();
-    if (remainingMs === undefined) {
-      return await action();
-    }
-    try {
-      return await action();
-    } finally {
-      this.#deadlineMs = Date.now() + remainingMs;
+      this.#pausedMs += budget.pausedMs;
+      this.#remainingMs = budget.remainingMs;
     }
   }
 
@@ -366,6 +390,7 @@ export class RequestAdmissionController {
     abortSignal: AbortSignal = this.#abortController.signal
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
+    const startMs: number = Date.now();
     let lease: IRequestLease | undefined;
     try {
       lease = await scheduler.acquireAsync({
@@ -387,6 +412,9 @@ export class RequestAdmissionController {
       lease?.release();
       await writer?.flushAsync();
       throw this.#getReportedError(error, waitingFor);
+    } finally {
+      // A wait that the timeout does not limit does not spend it either; see `acquireGraphExecutionAsync`.
+      if (waitTimeoutMs !== undefined) this.#spend(Date.now() - startMs);
     }
   }
 
@@ -400,26 +428,53 @@ export class RequestAdmissionController {
    * still being served and no rushx script is, and that time does not count against it. The default still limits
    * the wait while a rushx script is served, since a script may not exit until it is stopped, and waiting for
    * requests that arrived later, which could otherwise keep the request waiting for as long as they keep arriving.
-   * An explicit `noWait` or `waitTimeoutMs` applies to the whole wait, using the same absolute deadline as workspace
-   * admission.
+   * An explicit `noWait` or `waitTimeoutMs` applies to the whole wait, using the same budget as workspace admission.
    */
   public async waitForRestartDrainAsync(
     arbiter: WorkspaceRestartArbiter,
     ticket: IWorkspaceRestartTicket
   ): Promise<void> {
+    await this.#waitForRestartArbiterAsync((options: IWorkspaceRestartDrainOptions) =>
+      arbiter.waitForDrainAsync(ticket, options)
+    );
+  }
+
+  /**
+   * Waits, for a rushx script, until no other request needs to restart the daemon for its environment, so that the
+   * restart does not also wait for the script. The client is told how many requests are served or need a restart, as
+   * a queue position.
+   *
+   * @remarks
+   * The wait timeout applies as it does to the restart drain, relative to the requests served when this wait began:
+   * a client-default timeout is not spent while one of them is still being served and no rushx script is.
+   */
+  public async waitForPendingRestartAsync(
+    arbiter: WorkspaceRestartArbiter,
+    ticket: IWorkspaceRestartTicket
+  ): Promise<void> {
+    await this.#waitForRestartArbiterAsync((options: IWorkspaceRestartDrainOptions) =>
+      arbiter.waitForPendingRestartAsync(ticket, options)
+    );
+  }
+
+  async #waitForRestartArbiterAsync(
+    waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<number>
+  ): Promise<void> {
     const writer: QueuePositionWriter | undefined = this.#writer;
+    const startMs: number = Date.now();
+    let waivedMs: number = 0;
     try {
       // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
-      const waivedMs: number = await arbiter.waitForDrainAsync(ticket, {
+      waivedMs = await waitAsync({
         abortSignal: this.#abortController.signal,
         noWait: this.#admission?.noWait,
-        waitTimeoutMs: this.#getRemainingWaitTimeoutMs(),
+        waitTimeoutMs: this.#remainingMs,
         waivesTimeoutForServedWork: this.#admission?.waitTimeoutIsDefault === true,
-        onServingCountChanged: writer ? (servingCount: number) => writer.enqueue(servingCount) : undefined
+        onServingCountChanged: writer ? (count: number) => writer.enqueue(count) : undefined
       });
-      if (this.#deadlineMs !== undefined) this.#deadlineMs += waivedMs;
     } finally {
       await writer?.flushAsync();
+      this.#spend(Date.now() - startMs - waivedMs);
     }
   }
 
@@ -429,17 +484,29 @@ export class RequestAdmissionController {
 
   /** Passes the remaining admission budget to another existing routing boundary. */
   public get remainingAdmission(): IDaemonRequestAdmissionOptions | undefined {
-    return this.#admission
-      ? { ...this.#admission, waitTimeoutMs: this.#getRemainingWaitTimeoutMs() }
-      : undefined;
+    if (!this.#admission) return undefined;
+    const remaining: IDaemonRequestAdmissionOptions = {
+      ...this.#admission,
+      waitTimeoutMs: this.#remainingMs
+    };
+    if (this.#configuredWaitTimeoutMs !== undefined) {
+      HISTORY_BY_REMAINING_ADMISSION.set(remaining, {
+        waitTimeoutMs: this.#configuredWaitTimeoutMs,
+        pausedMs: this.#pausedMs
+      });
+    }
+    return remaining;
   }
 
-  #getRemainingWaitTimeoutMs(): number | undefined {
-    return this.#deadlineMs === undefined ? undefined : Math.max(0, this.#deadlineMs - Date.now());
+  /** Spends `elapsedMs` of the wait timeout, if one applies. */
+  #spend(elapsedMs: number): void {
+    if (this.#remainingMs !== undefined) {
+      this.#remainingMs = Math.max(0, this.#remainingMs - Math.max(0, elapsedMs));
+    }
   }
 
   #getReportedError(error: unknown, waitingFor: string): unknown {
-    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutMs;
+    const waitTimeoutMs: number | undefined = this.#configuredWaitTimeoutMs;
     if (
       waitTimeoutMs !== undefined &&
       error instanceof RequestSchedulerError &&
@@ -447,7 +514,8 @@ export class RequestAdmissionController {
     ) {
       return new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,
-        `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ${waitingFor}. ` +
+        `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ${waitingFor}` +
+          `${formatUncountedTime(this.#pausedMs, 'earlier while another request loaded the workspace graph')}. ` +
           WAIT_LONGER_HINT
       );
     }

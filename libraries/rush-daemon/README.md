@@ -105,7 +105,8 @@ taken or while it executes is not kept as up to date, whether or not cache write
 it and its consumers again, even if the files were changed back in between. Operations whose build cache is
 disabled, and workspaces without a build cache, don't get this check.
 
-A generation lease spans resolution through final output. Reload also takes exclusive workspace admission and
+A generation lease spans resolution through final output; a Rushx script releases it when the script starts (see
+below). Reload also takes exclusive workspace admission and
 the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before
 publishing the replacement. The initiating request atomically downgrades its admission so another reload cannot
 dispose the newly selected graph before it runs. Watch requests are cancelled and drained before their generation
@@ -174,7 +175,9 @@ The default entrypoint supports the `rush.json` version, not a separate preview-
 
 Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
 resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
-`restartCompleted` reports completion or failure.
+`restartCompleted` reports completion or failure. Clients that retry a `retryAfterRestart: true` result do not start a
+daemon while this process lives, so the successor is the one it selected; only a client that did not follow the
+restart can still take the startup mutex first.
 
 A request whose environment needs another process does not restart the daemon while it serves other requests. It
 first waits for the requests that this process is serving to finish (the restart drain), and its queue position is the
@@ -186,6 +189,14 @@ served, since a script may not exit until it is stopped, and while it waits for 
 drain, which could otherwise keep it waiting for as long as they keep arriving. An explicit `noWait` or
 `waitTimeoutMs` limits the whole drain, and only its remaining time carries over to the successor. When a drain times
 out, its message names the time that did not count.
+
+A restart is pending from when a request begins its restart drain until the request has planned the restart, or has
+failed or been cancelled. A rushx script that arrives while a restart is pending does not start, since the restart
+would then wait for it to exit: the script waits for the pending restart instead, and the drain does not count it. If
+the restart was planned, the script's result carries `retryAfterRestart: true` so that the client runs it on the
+successor; otherwise it runs on this process. Its queue position is the number of requests that are served or waiting
+to restart, and its wait timeout applies as it does to the drain, relative to the requests that were served when the
+script began to wait.
 
 Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
 Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted
@@ -223,8 +234,13 @@ this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
 ```
 
 The helper returns `undefined` for a delegate without lifecycle support. Explicit `invocationKind: "rushx"`
-requests retain a generation lease but go directly to the composite resolver, without native build/mutation/graph
-interception or phased environment matching. They use exclusive global admission. The host disposes each old
+requests go directly to the composite resolver, without native build/mutation/graph interception, phased
+environment matching, or workspace admission. A script uses its generation only to resolve, so it holds its
+generation lease only until it starts: a reload that another request needs never waits for a long-running script
+such as a dev server. A restart, a native `install` or `update`, and lifecycle disposal would end a running script,
+so they still wait for every running script to exit, and a planned restart counts a script as running work until it
+exits. A script that arrives while a restart is pending waits for the restart instead of starting. The host disposes
+each old
 resolver before replacing its session, and disposes the current resolver at shutdown; the composite must forward
 its normal disposer to its owned delegates.
 
@@ -482,10 +498,13 @@ the graph does not spend its budget during that load, so every build that arrive
 loads the graph is admitted when the load finishes. That wait is limited separately, to 10 times `waitTimeoutMs`, so
 a load that never finishes does not hold the requests behind it indefinitely. The budget does run while that other
 request still waits for exclusive admission, so requests behind a reload that cannot start, for example behind a long
-build, still time out. Routing and executing an admitted request do not spend the budget either. Routing boundaries
+build, still time out. The request's own work does not spend the budget either, before or after admission: capturing
+its inputs, loading or reloading the graph, routing and execution. Routing boundaries
 such as the graph-execution gate apply the remaining budget they receive, and a request that re-enters workspace
 admission to reload the graph after its inputs changed starts again from the budget it had when it was admitted; time
-it spent at those boundaries is not charged again. The default and an explicit value differ only at the
+it spent at those boundaries is not charged again. A timeout message at any boundary names the timeout that the
+client asked for rather than the remaining budget, and says how long the request waited behind another request's
+graph load without spending it. The default and an explicit value differ only at the
 graph-execution gate and at a restart drain (see "Process restart and isolated install/update"). When the client marks
 `waitTimeoutMs` as its default (`waitTimeoutIsDefault`), a `SHARED-BUILD` request that arrives after the current batch
 has closed waits at the graph-execution gate without a deadline, because it is queued only behind running compatible

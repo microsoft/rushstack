@@ -16,6 +16,8 @@ import {
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
+import { connectOrStartDaemonAsync } from '../../connectOrStartDaemon';
+
 async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
   const folder: string = path.dirname(paths.lockfilePath);
@@ -25,7 +27,12 @@ async function mainAsync(): Promise<void> {
   const connections: Set<DaemonFrameConnection> = new Set();
   let closing: Promise<void> | undefined;
   let heldRequest: { connection: DaemonFrameConnection; requestId: string } | undefined;
+  let plannedRestartAnswers: number = 0;
   fs.appendFileSync(path.join(folder, 'starts'), `${process.pid}\n`);
+  fs.appendFileSync(
+    path.join(folder, 'identities'),
+    `${process.pid} ${process.env.FIXTURE_IDENTITY ?? 'client'}\n`
+  );
   fs.appendFileSync(path.join(folder, 'parents'), `${process.ppid}\n`);
   fs.writeFileSync(path.join(folder, 'runtime-base'), process.env.RUSHD_RUNTIME_DIR ?? '(unset)');
   process.stdout.write('launcher stdout\n');
@@ -114,7 +121,15 @@ async function mainAsync(): Promise<void> {
               }
             })
           });
-          if (restart && restartMode !== 'restart-held') {
+          if (restart && restartMode === 'restart-planned') {
+            // Like RushDaemonHost: answer every request, then release ownership and launch the successor itself.
+            if (++plannedRestartAnswers === readNumber(folder, 'planned-requests', 1)) {
+              void launchPlannedSuccessorAsync().catch((error: Error) => {
+                process.stderr.write(`${error.stack}\n`);
+                process.exitCode = 1;
+              });
+            }
+          } else if (restart && restartMode !== 'restart-held') {
             fs.appendFileSync(path.join(folder, 'restarted'), 'r');
             await stopAsync();
           }
@@ -168,6 +183,32 @@ async function mainAsync(): Promise<void> {
     });
   }
 
+  async function launchPlannedSuccessorAsync(): Promise<void> {
+    await stopAsync();
+    // The "planned-launch-delay-ms" file models a launch that begins well after ownership is released.
+    await new Promise((resolve) => setTimeout(resolve, readNumber(folder, 'planned-launch-delay-ms', 0)));
+    const environment: Record<string, string> = {};
+    for (const [name, value] of Object.entries(process.env)) {
+      if (value !== undefined) environment[name] = value;
+    }
+    const successor = await connectOrStartDaemonAsync({
+      paths,
+      expectedDaemonVersion: daemonVersion,
+      startCommand: {
+        command: process.execPath,
+        args: [__filename, JSON.stringify(paths), daemonVersion],
+        cwd: folder,
+        environment: { ...environment, FIXTURE_IDENTITY: 'planned' }
+      }
+    });
+    try {
+      const { pid } = await successor.status;
+      fs.writeFileSync(path.join(folder, 'planned-successor'), String(pid));
+    } finally {
+      await successor.closeAsync();
+    }
+  }
+
   async function closeOnceAsync(): Promise<void> {
     clearInterval(timer);
     const stopped: Promise<void> = listener.stopAcceptingAsync();
@@ -181,8 +222,12 @@ async function mainAsync(): Promise<void> {
 
 /** How long the daemon waits before it listens: 250 milliseconds, or the number in the "startup-delay-ms" file. */
 function readStartupDelayMs(folder: string): number {
-  const delayPath: string = path.join(folder, 'startup-delay-ms');
-  return fs.existsSync(delayPath) ? Number(fs.readFileSync(delayPath, 'utf8')) : 250;
+  return readNumber(folder, 'startup-delay-ms', 250);
+}
+
+function readNumber(folder: string, name: string, defaultValue: number): number {
+  const filePath: string = path.join(folder, name);
+  return fs.existsSync(filePath) ? Number(fs.readFileSync(filePath, 'utf8')) : defaultValue;
 }
 
 mainAsync().catch((error: Error) => {

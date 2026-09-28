@@ -13,6 +13,7 @@ import type {
   IDaemonRequestAdmissionOptions
 } from '@rushstack/rush-daemon-protocol';
 
+import { freezeDaemonRequestAdmissionOptions } from './WorkspaceRequestAdmission';
 import type { IWorkspaceSession } from './WorkspaceSession';
 
 /**
@@ -100,7 +101,7 @@ export function resolveGlobalCommandRequest(
   validateDaemonRequestAdmissionOptions(options.admission);
   const cwd: string = resolveGlobalCommandWorkingDirectory(options.cwd, workspaceSession);
   const request: IResolvedGlobalCommandRequest = Object.freeze({
-    admission: options.admission ? Object.freeze({ ...options.admission }) : undefined,
+    admission: options.admission ? freezeDaemonRequestAdmissionOptions(options.admission) : undefined,
     commandName: options.commandName,
     commandOrigin: options.commandOrigin,
     cwd,

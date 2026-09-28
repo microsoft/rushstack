@@ -23,7 +23,7 @@ import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-da
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
-import { formatAdmissionFailure, getConfiguredAdmission } from './ClientAdmissionControls';
+import { getConfiguredAdmission } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import type { AgentProgressRenderer } from './AgentProgressRenderer';
 import {
@@ -35,7 +35,7 @@ import {
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
-import { getResultDiagnostic } from './resultDiagnostics';
+import { getResultStderr } from './resultDiagnostics';
 import { getTerminalColumns } from './terminalColumns';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
@@ -269,16 +269,12 @@ export async function launchClientAsync(
     // In agent mode the summary line may already carry the complete error message; do not repeat it.
     const reportedByAgent: boolean = agentRenderer?.finish(outcome.result) ?? false;
     process.exitCode = outcome.result.exitCode;
-    const diagnostic: string | undefined = getResultDiagnostic(outcome.result);
-    if (reportedByAgent) {
-      // The summary line already explains the failure.
-    } else if (diagnostic) {
-      await writeStreamAsync(process.stderr, Buffer.from(diagnostic));
-    } else if (outcome.result.admissionErrorCode) {
-      await writeStreamAsync(
-        process.stderr,
-        Buffer.from(formatAdmissionFailure(outcome.result.admissionErrorCode, request.admission))
-      );
+    // When the agent summary line explains the failure, nothing more is printed.
+    const stderr: string | undefined = reportedByAgent
+      ? undefined
+      : getResultStderr(outcome.result, request.admission);
+    if (stderr) {
+      await writeStreamAsync(process.stderr, Buffer.from(stderr));
     }
   } else if (outcome.kind === 'rejected') {
     const message: string = `Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`;

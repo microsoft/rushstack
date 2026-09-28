@@ -12,7 +12,11 @@ import {
   RequestScheduler,
   RequestSchedulerErrorCode
 } from '../RequestScheduler';
-import { AdmissionProgress, RequestAdmissionController } from '../WorkspaceRequestAdmission';
+import {
+  AdmissionProgress,
+  freezeDaemonRequestAdmissionOptions,
+  RequestAdmissionController
+} from '../WorkspaceRequestAdmission';
 
 const DEFAULT_BUDGET: IDaemonRequestAdmissionOptions = { waitTimeoutMs: 100, waitTimeoutIsDefault: true };
 const EXPLICIT_BUDGET: IDaemonRequestAdmissionOptions = { waitTimeoutMs: 100 };
@@ -47,6 +51,24 @@ function createController(
   abortSignal: AbortSignal = new AbortController().signal
 ): RequestAdmissionController {
   return new RequestAdmissionController({ admission, client: { abortSignal }, requestId: 'request' });
+}
+
+/** Makes `controller` wait `waitMs` behind another request, on a scheduler of its own, and then be admitted. */
+async function waitBehindAnotherRequestAsync(
+  controller: RequestAdmissionController,
+  waitMs: number
+): Promise<void> {
+  const scheduler: RequestScheduler = new RequestScheduler();
+  const other: IRequestLease = await scheduler.acquireAsync({
+    exclusivityClass: RequestExclusivityClass.Exclusive
+  });
+  const waiting: IAcquisition = track(controller.acquireAsync(scheduler, RequestExclusivityClass.SharedBuild));
+  await jest.advanceTimersByTimeAsync(waitMs);
+  expect(waiting.settled).toBe(false);
+  other.release();
+  await jest.advanceTimersByTimeAsync(0);
+  expect(waiting.lease).toBeDefined();
+  waiting.lease?.release();
 }
 
 describe(RequestAdmissionController.name, () => {
@@ -111,6 +133,25 @@ describe(RequestAdmissionController.name, () => {
     }
   );
 
+  it.each(BUDGETS)(
+    'carries what is left of $kind timeout after it waits behind a transition to its later waits',
+    async ({ budget }) => {
+      const controller: RequestAdmissionController = createController(budget);
+      const behind: IAcquisition = track(controller.acquireBehindTransitionAsync(scheduler, transition));
+      // The transition itself waits for 30ms, which the request spends, and then loads the graph.
+      await jest.advanceTimersByTimeAsync(30);
+      transition.setActive(true);
+      await jest.advanceTimersByTimeAsync(500);
+      scheduler.downgradeExclusiveLease(owner, RequestExclusivityClass.SharedBuild);
+      transition.setActive(false);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(behind.error).toBeUndefined();
+      behind.lease?.release();
+      expect(controller.remainingAdmission).toEqual({ ...budget, waitTimeoutMs: 70 });
+      controller.dispose();
+    }
+  );
+
   it('fails once the transition it waits behind has made progress for ten times its timeout', async () => {
     const controller: RequestAdmissionController = createController(EXPLICIT_BUDGET);
     transition.setActive(true);
@@ -162,6 +203,57 @@ describe(RequestAdmissionController.name, () => {
     controller.dispose();
   });
 
+  it('reports a zero timeout behind a transition as a plain timeout, not as the paused limit', async () => {
+    const controller: RequestAdmissionController = createController({ waitTimeoutMs: 0 });
+    transition.setActive(true);
+    const waiting: IAcquisition = track(controller.acquireBehindTransitionAsync(scheduler, transition));
+    await jest.advanceTimersByTimeAsync(0);
+    expect(waiting.error).toMatchObject({
+      code: RequestSchedulerErrorCode.WaitTimeout,
+      message:
+        "The request was not admitted within its 0ms wait timeout while waiting for another request's load or " +
+        'reload of the workspace graph. Use --wait-timeout <seconds> to wait longer.'
+    });
+    expect(scheduler.queuedRequestCount).toBe(0);
+    controller.dispose();
+  });
+
+  it('reports paused time that did not count when a later boundary times out', async () => {
+    const controller: RequestAdmissionController = createController(EXPLICIT_BUDGET);
+    transition.setActive(true);
+    const behind: IAcquisition = track(controller.acquireBehindTransitionAsync(scheduler, transition));
+    await jest.advanceTimersByTimeAsync(500);
+    scheduler.downgradeExclusiveLease(owner, RequestExclusivityClass.SharedBuild);
+    transition.setActive(false);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(behind.error).toBeUndefined();
+    behind.lease?.release();
+    // A routing boundary receives a frozen copy of the remaining budget.
+    const remaining: IDaemonRequestAdmissionOptions | undefined = controller.remainingAdmission;
+    const boundary: RequestAdmissionController = new RequestAdmissionController({
+      admission: remaining && freezeDaemonRequestAdmissionOptions(remaining),
+      client: { abortSignal: new AbortController().signal },
+      requestId: 'request'
+    });
+
+    const here: IAcquisition = track(controller.acquireAsync(scheduler, RequestExclusivityClass.Exclusive));
+    const there: IAcquisition = track(boundary.acquireAsync(scheduler, RequestExclusivityClass.Exclusive));
+    await jest.advanceTimersByTimeAsync(99);
+    expect(here.settled || there.settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    const error: { code: RequestSchedulerErrorCode; message: string } = {
+      code: RequestSchedulerErrorCode.WaitTimeout,
+      message:
+        'The request was not admitted within its 100ms wait timeout while waiting for workspace admission; 0.5s ' +
+        'spent earlier while another request loaded the workspace graph did not count. ' +
+        'Use --wait-timeout <seconds> to wait longer.'
+    };
+    expect(here.error).toMatchObject(error);
+    expect(there.error).toMatchObject(error);
+    boundary.dispose();
+    controller.dispose();
+  });
+
   it('reports cancellation behind a transition as an abort', async () => {
     const client: AbortController = new AbortController();
     const controller: RequestAdmissionController = createController(DEFAULT_BUDGET, client.signal);
@@ -175,15 +267,15 @@ describe(RequestAdmissionController.name, () => {
   });
 
   it.each(BUDGETS)(
-    'keeps the unspent part of $kind timeout across admitted work for a later admission wait',
+    'spends $kind timeout only while it waits, not on the work before and between its waits',
     async ({ budget }) => {
       const controller: RequestAdmissionController = createController(budget);
-      await jest.advanceTimersByTimeAsync(40);
-      const work: Promise<void> = controller.runOutsideWaitBudgetAsync(
-        () => new Promise<void>((resolve) => setTimeout(resolve, 10_000))
-      );
+      // Such as capturing the request's inputs before its first wait.
       await jest.advanceTimersByTimeAsync(10_000);
-      await work;
+      expect(controller.remainingAdmission).toEqual({ ...budget, waitTimeoutMs: 100 });
+      await waitBehindAnotherRequestAsync(controller, 40);
+      // Such as loading the graph, routing and execution.
+      await jest.advanceTimersByTimeAsync(10_000);
       expect(controller.remainingAdmission).toEqual({ ...budget, waitTimeoutMs: 60 });
 
       const waiting: IAcquisition = track(
@@ -201,4 +293,53 @@ describe(RequestAdmissionController.name, () => {
       controller.dispose();
     }
   );
+
+  it('does not spend a default timeout at the graph-execution gate, which it does not limit', async () => {
+    const controller: RequestAdmissionController = createController(DEFAULT_BUDGET);
+    const running: IAcquisition = track(
+      controller.acquireGraphExecutionAsync(scheduler, RequestExclusivityClass.SharedBuild)
+    );
+    await jest.advanceTimersByTimeAsync(10_000);
+    expect(running.settled).toBe(false);
+    owner.release();
+    await jest.advanceTimersByTimeAsync(0);
+    running.lease?.release();
+    expect(controller.remainingAdmission).toEqual({ ...DEFAULT_BUDGET, waitTimeoutMs: 100 });
+    controller.dispose();
+  });
+
+  it('names the configured timeout, not the remainder, when a later routing boundary times out', async () => {
+    const controller: RequestAdmissionController = createController(EXPLICIT_BUDGET);
+    await waitBehindAnotherRequestAsync(controller, 23);
+    const remaining: IDaemonRequestAdmissionOptions | undefined = controller.remainingAdmission;
+    expect(remaining).toEqual({ ...EXPLICIT_BUDGET, waitTimeoutMs: 77 });
+    const boundary: RequestAdmissionController = new RequestAdmissionController({
+      admission: remaining,
+      client: { abortSignal: new AbortController().signal },
+      requestId: 'request'
+    });
+    await waitBehindAnotherRequestAsync(boundary, 7);
+    // A boundary that hands its own remainder on again still names the client's timeout.
+    const nested: RequestAdmissionController = new RequestAdmissionController({
+      admission: boundary.remainingAdmission,
+      client: { abortSignal: new AbortController().signal },
+      requestId: 'request'
+    });
+
+    const waiting: IAcquisition = track(
+      nested.acquireGraphExecutionAsync(scheduler, RequestExclusivityClass.SharedBuild)
+    );
+    await jest.advanceTimersByTimeAsync(69);
+    expect(waiting.settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(waiting.error).toMatchObject({
+      code: RequestSchedulerErrorCode.WaitTimeout,
+      message:
+        'The request was not admitted within its 100ms wait timeout while waiting for the running build of the ' +
+        'workspace operation graph. Use --wait-timeout <seconds> to wait longer.'
+    });
+    nested.dispose();
+    boundary.dispose();
+    controller.dispose();
+  });
 });

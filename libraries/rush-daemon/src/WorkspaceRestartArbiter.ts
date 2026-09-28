@@ -29,9 +29,25 @@ export interface IWorkspaceRestartTicketOptions {
 }
 
 interface IMutableTicket {
+  /** The request waits for a drain or for a pending restart, so it is not counted as served. */
   waitingForDrain: boolean;
   left: boolean;
   readonly runsScript: boolean;
+}
+
+interface IWaitKind {
+  /**
+   * The request waits to restart the daemon, so {@link WorkspaceRestartArbiter.hasPendingRestart} reports its restart
+   * to other requests until it leaves.
+   */
+  readonly restarts: boolean;
+  /** Whether the request must keep waiting. */
+  readonly isBlocked: () => boolean;
+  /** How many other requests the request waits for, reported as its queue position. */
+  readonly countWaitedFor: () => number;
+  readonly noWaitMessage: string;
+  /** Begins the timeout message, which goes on to name the requests that the restart waits for. */
+  readonly timeoutPrefix: string;
 }
 
 /** Options for {@link WorkspaceRestartArbiter.waitForDrainAsync}, supplied by request admission. */
@@ -57,11 +73,15 @@ export interface IWorkspaceRestartDrainOptions {
  * Arbitrates process restarts between requests whose environments differ from the running daemon.
  * A request that needs a restart waits until every other request this process can serve has finished,
  * so a mismatched environment never preempts queued or in-flight work that matches the running process.
+ * A rushx script that arrives while a restart is pending waits for the restart instead, since it may not exit until
+ * it is stopped and the restart would otherwise wait for it.
  */
 export class WorkspaceRestartArbiter {
   readonly #listeners: Set<() => void> = new Set();
-  readonly #countListeners: Set<(servingCount: number) => void> = new Set();
+  readonly #countListeners: Set<() => void> = new Set();
   readonly #serving: Set<IMutableTicket> = new Set();
+  /** Requests that began a restart drain and have not left, so their restarts are still pending. */
+  readonly #restartCandidates: Set<IMutableTicket> = new Set();
 
   /** The number of tracked requests that are not waiting for a restart. */
   public get servingCount(): number {
@@ -82,41 +102,92 @@ export class WorkspaceRestartArbiter {
     const state: IMutableTicket = ticket as IMutableTicket;
     if (state.left) return;
     state.left = true;
+    this.#restartCandidates.delete(state);
     if (!state.waitingForDrain) this.#stopServing(state);
+  }
+
+  /**
+   * Whether another tracked request needs to restart the daemon for its environment: it waits for the drain, or it
+   * has drained and not yet left. A request that needs a restart leaves once the restart is planned, or once it
+   * fails or is cancelled.
+   */
+  public hasPendingRestart(ticket: IWorkspaceRestartTicket): boolean {
+    return Array.from(this.#restartCandidates).some((candidate: IMutableTicket) => candidate !== ticket);
   }
 
   /**
    * Waits until no other tracked request is still being served by this process, then counts the ticket
    * as served again so concurrent restart candidates proceed one at a time. Returns how many milliseconds of the
    * wait did not spend `waitTimeoutMs` (see {@link IWorkspaceRestartDrainOptions.waivesTimeoutForServedWork}).
+   * From when the wait begins until the ticket leaves, {@link WorkspaceRestartArbiter.hasPendingRestart} reports
+   * the restart to other requests.
    */
   public async waitForDrainAsync(
     ticket: IWorkspaceRestartTicket,
     options: IWorkspaceRestartDrainOptions
   ): Promise<number> {
+    return await this.#waitAsync(ticket, options, {
+      restarts: true,
+      isBlocked: () => this.#serving.size > 0,
+      countWaitedFor: () => this.#serving.size,
+      noWaitMessage: 'Another environment is still being served; the request did not wait for a restart.',
+      timeoutPrefix:
+        'The request was not admitted before the daemon could restart for its environment, which waits for'
+    });
+  }
+
+  /**
+   * Waits, for a request that runs a rushx script, until no other tracked request needs to restart the daemon for
+   * its environment, then counts the ticket as served again. A script may not exit until it is stopped, so it waits
+   * for a pending restart instead of starting and delaying the restart until it exits. The options apply as for
+   * {@link WorkspaceRestartArbiter.waitForDrainAsync}, and the queue position counts the requests that are served or
+   * need a restart.
+   */
+  public async waitForPendingRestartAsync(
+    ticket: IWorkspaceRestartTicket,
+    options: IWorkspaceRestartDrainOptions
+  ): Promise<number> {
+    return await this.#waitAsync(ticket, options, {
+      restarts: false,
+      isBlocked: () => this.hasPendingRestart(ticket),
+      countWaitedFor: () => new Set([...this.#serving, ...this.#restartCandidates]).size,
+      noWaitMessage:
+        'Another request is waiting to restart the daemon for its environment; the rushx script did not wait ' +
+        'for the restart.',
+      timeoutPrefix:
+        "The rushx script was not admitted before the daemon could restart for another request's environment. A " +
+        'script waits for a pending restart so that the restart does not wait for the script, and the restart ' +
+        'waits for'
+    });
+  }
+
+  async #waitAsync(
+    ticket: IWorkspaceRestartTicket,
+    options: IWorkspaceRestartDrainOptions,
+    kind: IWaitKind
+  ): Promise<number> {
     const state: IMutableTicket = ticket as IMutableTicket;
     if (state.left || state.waitingForDrain) throw new Error('The restart ticket is not being served.');
+    if (kind.restarts) this.#restartCandidates.add(state);
     state.waitingForDrain = true;
     this.#stopServing(state);
     const waivedFor: IMutableTicket[] = options.waivesTimeoutForServedWork ? Array.from(this.#serving) : [];
     let remainingMs: number | undefined = options.waitTimeoutMs;
     let waivedMs: number = 0;
     let reported: number | undefined;
-    const report = (servingCount: number): void => {
-      if (servingCount > 0 && servingCount !== reported) {
-        reported = servingCount;
-        options.onServingCountChanged?.(servingCount);
+    const report = (): void => {
+      const count: number = kind.countWaitedFor();
+      if (count > 0 && count !== reported) {
+        reported = count;
+        options.onServingCountChanged?.(count);
       }
     };
     try {
-      while (this.#serving.size > 0) {
+      while (kind.isBlocked()) {
         if (options.noWait) {
-          throw new RequestSchedulerError(
-            RequestSchedulerErrorCode.NoWait,
-            'Another environment is still being served; the request did not wait for a restart.'
-          );
+          throw new RequestSchedulerError(RequestSchedulerErrorCode.NoWait, kind.noWaitMessage);
         }
-        report(this.#serving.size);
+        report();
         const waived: boolean =
           !this.#isServingScript() && waivedFor.some((served: IMutableTicket) => this.#serving.has(served));
         const startedAt: number = Date.now();
@@ -125,7 +196,7 @@ export class WorkspaceRestartArbiter {
           await this.#waitForChangeAsync(
             options.abortSignal,
             waived || remainingMs === undefined ? undefined : startedAt + remainingMs,
-            waivedMs
+            () => this.#createTimeoutError(kind, waivedMs)
           );
         } finally {
           this.#countListeners.delete(report);
@@ -151,9 +222,9 @@ export class WorkspaceRestartArbiter {
     this.#notifyChange();
   }
 
-  /** Reports the new count, and wakes every waiting candidate to re-check what it waits for. */
+  /** Reports the new count, and wakes every waiting request to re-check what it waits for. */
   #notifyChange(): void {
-    for (const listener of Array.from(this.#countListeners)) listener(this.#serving.size);
+    for (const listener of Array.from(this.#countListeners)) listener();
     for (const listener of Array.from(this.#listeners)) listener();
   }
 
@@ -161,12 +232,11 @@ export class WorkspaceRestartArbiter {
     return Array.from(this.#serving).some((served: IMutableTicket) => served.runsScript);
   }
 
-  #createTimeoutError(waivedMs: number): RequestSchedulerError {
+  #createTimeoutError(kind: IWaitKind, waivedMs: number): RequestSchedulerError {
     const script: boolean = this.#isServingScript();
     return new RequestSchedulerError(
       RequestSchedulerErrorCode.WaitTimeout,
-      'The request was not admitted before the daemon could restart for its environment, which waits for the ' +
-        `requests that the daemon is serving to finish${script ? SCRIPT_TIMEOUT_CLAUSE : ''}` +
+      `${kind.timeoutPrefix} the requests that the daemon is serving to finish${script ? SCRIPT_TIMEOUT_CLAUSE : ''}` +
         `${formatWaivedTime(waivedMs)}. ${script ? SCRIPT_TIMEOUT_REMEDY : TIMEOUT_REMEDY}`
     );
   }
@@ -174,7 +244,7 @@ export class WorkspaceRestartArbiter {
   #waitForChangeAsync(
     abortSignal: AbortSignal,
     deadline: number | undefined,
-    waivedMs: number
+    createTimeoutError: () => RequestSchedulerError
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let timer: ReturnType<typeof setTimeout> | undefined;
@@ -201,7 +271,7 @@ export class WorkspaceRestartArbiter {
       abortSignal.addEventListener('abort', settleAborted, { once: true, signal: unsubscribe.signal });
       if (deadline !== undefined) {
         timer = setTimeout(
-          () => settle(this.#createTimeoutError(waivedMs)),
+          () => settle(createTimeoutError()),
           Math.min(MAX_TIMER_DELAY_MS, Math.max(0, deadline - Date.now()))
         );
       }

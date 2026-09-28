@@ -114,6 +114,13 @@ class RestartPendingBeforeExecution extends Error {
 export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #options: IWorkspaceRequestLifecycleOptions;
   readonly #gate: RequestScheduler = new RequestScheduler();
+  /**
+   * A served rushx script needs its generation only to resolve, so once it starts it releases `#gate` and holds a
+   * shared lease here until it exits: a reload no longer waits for a dev server or watch script (#113). Whatever
+   * would end the script with this process (a restart, a native mutation, disposal) waits for this lease after
+   * taking `#gate` exclusively, when no other script can start.
+   */
+  readonly #scripts: RequestScheduler = new RequestScheduler();
   readonly #restartArbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   readonly #abortController: AbortController = new AbortController();
   readonly #observers: Set<AbortController> = new Set();
@@ -216,14 +223,16 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       client,
       requestId: envelope.requestId
     });
-    // Long-lived observers are cancelled by a transition, so they never delay a restart. A rushx script does delay
-    // one until it exits, so a client-default timeout still limits waiting for it.
+    // Long-lived observers are cancelled by a transition, so they never delay a restart. A running rushx script does
+    // delay one until it exits, so a client-default timeout still limits waiting for it; a script that arrives while a
+    // restart is pending waits for that restart instead (#prepareAsync).
     const ticket: IWorkspaceRestartTicket | undefined = observer
       ? undefined
       : this.#restartArbiter.enter({ runsScript: isRushxInvocation(envelope) });
     let generation: IPreparedGeneration | undefined;
     try {
       for (let attempt: number = 0; ; attempt++) {
+        let scriptLease: IRequestLease | undefined;
         try {
           const prepared: IPreparedGeneration = await this.#prepareAsync(
             envelope,
@@ -233,27 +242,32 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             receivedTimeMs
           );
           generation = prepared;
+          if (isRushxInvocation(envelope)) {
+            // Never waits: exclusive holders of this lease also hold `#gate` exclusively, and this request holds it.
+            scriptLease = await admission.acquireAsync(this.#scripts, RequestExclusivityClass.SharedBuild);
+          }
+          // Routing boundaries spend a copy of the remaining budget, so a retry after dispatch starts from this one.
           const requestEnvelope: IDaemonRequestEnvelope = {
             ...envelope,
             admission: admission.remainingAdmission
           };
-          await admission.runOutsideWaitBudgetAsync(async () => {
-            if (isMutation(envelope)) {
-              await this.#executeMutationAsync(prepared, requestEnvelope, client, state, dispatchAsync);
-            } else {
-              await dispatchAsync({
-                envelope: requestEnvelope,
-                client,
-                workspaceSession: prepared.session,
-                resolver: prepared.resolver,
-                receivedTimeMs,
-                onExecutionStarting: () => {
-                  this.#assertGeneration(prepared);
-                  state.began = true;
-                }
-              });
-            }
-          });
+          if (isMutation(envelope)) {
+            await this.#executeMutationAsync(prepared, requestEnvelope, client, state, dispatchAsync);
+          } else {
+            await dispatchAsync({
+              envelope: requestEnvelope,
+              client,
+              workspaceSession: prepared.session,
+              resolver: prepared.resolver,
+              receivedTimeMs,
+              onExecutionStarting: () => {
+                this.#assertGeneration(prepared);
+                state.began = true;
+                // The script keeps its restart ticket and script lease; only reloads stop waiting for it.
+                if (scriptLease) prepared.lease.release();
+              }
+            });
+          }
           return;
         } catch (error) {
           if (
@@ -308,6 +322,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         } finally {
           generation?.lease.release();
           generation = undefined;
+          scriptLease?.release();
         }
       }
     } finally {
@@ -339,6 +354,13 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       let session: IWorkspaceSession = await this.#options.provider.getSessionAsync();
       assertWorkspaceRequestResourcesHealthy(session);
       if (isRushxInvocation(envelope)) {
+        if (ticket && this.#restartArbiter.hasPendingRestart(ticket)) {
+          // The restart would wait for the script to exit, so the script waits for the restart instead. If the restart
+          // is planned, the next attempt tells the client to run the script on the successor.
+          lease.release();
+          await admission.waitForPendingRestartAsync(this.#restartArbiter, ticket);
+          return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
+        }
         return {
           session,
           resolver: this.#resolver,
@@ -368,6 +390,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
+            await this.#waitForServedScriptsAsync(admission);
             session = await this.#options.provider.getSessionAsync();
             await this.#quiesceWarmSetAsync(session);
             const workspaceLease: IRequestLease = await admission.acquireAsync(
@@ -478,6 +501,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       fingerprint = await this.#captureAsync(session, envelope);
       tier = this.#classify(fingerprint, isMutation(envelope));
       if (tier === WorkspaceInputChangeTier.Restart) {
+        await this.#waitForServedScriptsAsync(admission);
         await this.#quiesceWarmSetAsync(session);
         const workspaceLease: IRequestLease = await admission.acquireAsync(
           getWorkspaceRequestScheduler(session),
@@ -502,6 +526,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             'Native mutations require a successor launcher. No worker was started.'
           );
         }
+        await this.#waitForServedScriptsAsync(admission);
         await this.#quiesceWarmSetAsync(session);
         return {
           session,
@@ -649,6 +674,26 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         this.#transitioning = false;
         this.#transitionProgress.setActive(false);
       }
+    }
+  }
+
+  /**
+   * Waits, while holding `#gate` exclusively, until no served rushx script is running; none can start meanwhile.
+   * This is contention, not graph-load progress, so requests queued behind it spend their wait timeouts.
+   */
+  async #waitForServedScriptsAsync(admission: RequestAdmissionController): Promise<void> {
+    const loading: boolean = this.#transitionProgress.active;
+    this.#transitionProgress.setActive(false);
+    try {
+      (
+        await admission.acquireAsync(
+          this.#scripts,
+          RequestExclusivityClass.Exclusive,
+          'a rushx script that this daemon runs to exit'
+        )
+      ).release();
+    } finally {
+      this.#transitionProgress.setActive(loading);
     }
   }
 
@@ -853,6 +898,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       });
       const failures: unknown[] = [];
       try {
+        // Served scripts don't hold `#gate`; they were aborted above, so wait for them to stop.
+        (await this.#scripts.acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive })).release();
         for (const resolver of this.#ownedResolvers) {
           try {
             await resolver[Symbol.asyncDispose]?.();

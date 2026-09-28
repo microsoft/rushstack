@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "A client that retries a request after the daemon answered it with retryAfterRestart no longer starts a daemon while the restarting daemon's process lives; it connects to the successor that daemon launches, and starts one only if that process exits without a ready successor. Previously such a client could win the startup race with its own environment.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

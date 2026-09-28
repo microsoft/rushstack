@@ -72,25 +72,39 @@ export function getConfiguredAdmission(options: IConfiguredAdmissionOptions): ID
   return options.explicit ? { waitTimeoutMs } : { waitTimeoutMs, waitTimeoutIsDefault: true };
 }
 
-/** Explains a daemon admission failure and how to wait longer. */
+// Only the per-invocation flag is offered: Rush versions that do not recognize the variable reject it.
+const WAIT_LONGER_REMEDY: string = 'To wait longer, pass --wait-timeout <seconds>.';
+
+/**
+ * Explains a daemon admission failure and how to wait longer.
+ *
+ * @remarks
+ * The daemon's reason for the failure (`daemonMessage`), when present, replaces the generic explanation,
+ * because it names what the request waited for, such as a daemon restart.
+ */
 export function formatAdmissionFailure(
   code: DaemonRequestAdmissionErrorCode,
-  admission: IDaemonRequestAdmissionOptions | undefined
+  admission: IDaemonRequestAdmissionOptions | undefined,
+  daemonMessage?: string
 ): string {
   const prefix: string = `rush-client: daemon admission failed (${code})`;
   if (code === 'no-wait') {
-    return `${prefix}: another daemon request is using this workspace and --no-wait was specified.\n`;
+    return daemonMessage
+      ? `${prefix}: ${daemonMessage}\n`
+      : `${prefix}: another daemon request is using this workspace and --no-wait was specified.\n`;
   }
   if (code === 'wait-timeout') {
+    if (daemonMessage) {
+      const remedy: string = daemonMessage.includes('--wait-timeout') ? '' : ` ${WAIT_LONGER_REMEDY}`;
+      return `${prefix}: ${daemonMessage}${remedy}\n`;
+    }
     const timeout: string =
       admission?.waitTimeoutMs === undefined
         ? ''
         : ` after its ${admission.waitTimeoutMs / 1000}s wait timeout`;
     return (
       `${prefix}: timed out${timeout} waiting for another daemon request in this workspace to finish ` +
-      '(a command that needs exclusive access, or a running build). ' +
-      // Only the per-invocation flag is offered: Rush versions that do not recognize the variable reject it.
-      'To wait longer, pass --wait-timeout <seconds>.\n'
+      `(a command that needs exclusive access, or a running build). ${WAIT_LONGER_REMEDY}\n`
     );
   }
   return `${prefix}.\n`;

@@ -25,6 +25,7 @@ import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { resetDaemonArtifactsAsync } from '../DaemonOwnership';
 import {
   connectOrStartDaemonAsync,
+  connectToPlannedSuccessorAsync,
   requestDaemonShutdownAsync,
   resolveDaemonStartupReservationAsync,
   type IConnectOrStartDaemonOptions
@@ -1062,6 +1063,102 @@ describe('detached daemon startup', () => {
     } finally {
       await starter.closeAsync();
     }
+  });
+
+  it('lets a restarting daemon start its planned successor while the clients that follow it only connect', async () => {
+    // The old daemon launches only after both clients could have started one, so a race would always be lost.
+    fs.writeFileSync(path.join(folder, 'planned-requests'), '2');
+    fs.writeFileSync(path.join(folder, 'planned-launch-delay-ms'), '1500');
+    const planned: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'fixture', 'restart-planned']
+      }
+    };
+    const clients: DaemonClient[] = [
+      await connectOrStartDaemonAsync(planned),
+      await connectOrStartDaemonAsync(planned)
+    ];
+    const { pid: restartingPid } = await clients[0].status;
+    const outcomes = await Promise.all(
+      clients.map((client, index) =>
+        executeWithDaemonRestartAsync(client, options, {
+          request: captureDaemonRequest({
+            requestId: `follower-${index}`,
+            argv: ['test'],
+            commandName: 'test',
+            commandOrigin: 'custom',
+            cwd: folder,
+            environment: {},
+            terminal: { isTTY: false, supportsColor: false }
+          })
+        })
+      )
+    );
+    await Promise.all(clients.map((client) => client.closeAsync()));
+    expect(outcomes).toMatchObject([
+      { kind: 'result', result: { exitCode: 0 } },
+      { kind: 'result', result: { exitCode: 0 } }
+    ]);
+    // The restarting daemon exits only after it attests the successor it launched.
+    await waitForTestProcessExitAsync(restartingPid!);
+    const identities: string[] = fs.readFileSync(path.join(folder, 'identities'), 'utf8').trim().split('\n');
+    expect(identities.map((line) => line.split(' ')[1])).toEqual(['client', 'planned']);
+    expect(fs.readFileSync(path.join(folder, 'planned-successor'), 'utf8')).toBe(identities[1].split(' ')[0]);
+    expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(4);
+  }, 15000);
+
+  it('connects to the successor that another process starts while the restarting predecessor lives', async () => {
+    const waiting = connectToPlannedSuccessorAsync({
+      ...options,
+      previousDaemon: { pid: process.pid, startedAt: new Date().toISOString() }
+    });
+    await delayAsync(300);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    const starter = await connectOrStartDaemonAsync(options);
+    try {
+      const follower = await waiting;
+      expect((await follower.status).pid).toBe((await starter.status).pid);
+      await follower.closeAsync();
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    } finally {
+      await starter.closeAsync();
+    }
+  });
+
+  it('never starts a daemon while the restarting predecessor lives, even when its deadline expires', async () => {
+    await expect(
+      connectToPlannedSuccessorAsync({
+        ...options,
+        previousDaemon: { pid: process.pid, startedAt: new Date().toISOString() },
+        startupTimeoutMs: 300
+      })
+    ).rejects.toThrow(`timed out waiting for the successor that the previous daemon (PID ${process.pid}) is starting`);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
+
+  it('starts a daemon once the restarting predecessor exits without a successor', async () => {
+    // The predecessor exits only when its stdin ends, so it provably lives during the first check.
+    const predecessor: ChildProcess = spawn(process.execPath, ['-e', 'process.stdin.resume()'], {
+      stdio: ['pipe', 'ignore', 'ignore']
+    });
+    await once(predecessor, 'spawn');
+    const exited: Promise<unknown[]> = once(predecessor, 'exit');
+    const pending = connectToPlannedSuccessorAsync({
+      ...options,
+      previousDaemon: { pid: predecessor.pid!, startedAt: new Date().toISOString() }
+    });
+    try {
+      await delayAsync(300);
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    } finally {
+      predecessor.stdin!.end();
+    }
+    await exited;
+    const client = await pending;
+    await client.closeAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
   });
 
   it('does not stop a mismatched daemon with unverifiable ownership', async () => {

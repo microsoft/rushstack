@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Document that a client retrying a retryAfterRestart result must not start a daemon while the predecessor process lives, because the predecessor launches the selected successor itself.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

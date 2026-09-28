@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In legacy output and in rushx-client, a daemon admission failure prints the daemon's reason, such as a pending daemon restart, instead of only a generic explanation.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

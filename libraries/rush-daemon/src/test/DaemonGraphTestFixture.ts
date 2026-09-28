@@ -19,6 +19,7 @@ import {
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
 import { RushDaemonHost } from '../RushDaemonHost';
+import { RushDaemonRequestResolver } from '../RushDaemonRequestResolver';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { getWorkspaceGenerationToken } from '../WorkspaceGeneration';
 import type { GetWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
@@ -36,6 +37,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
   /** Awaited before each workspace session is created, including a request's graph load or reload. */
   public beforeCreateSessionAsync: (() => Promise<void>) | undefined;
+  /** Also serves rushx package scripts, like the production host. Set it in `createAsync`'s `configure`. */
+  public servesRushx: boolean = false;
   public readonly folder: string = fs.realpathSync.native(
     fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
   );
@@ -141,7 +144,10 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   private async _startAsync(): Promise<void> {
-    const resolver: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const production: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const resolver: IDaemonRequestResolver = this.servesRushx
+      ? new RushDaemonRequestResolver(production)
+      : production;
     this.host = await RushDaemonHost.startAsync({
       repoRoot: this.folder,
       rushVersion: Rush.version,

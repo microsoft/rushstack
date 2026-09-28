@@ -32,6 +32,10 @@ on success, cancellation, disconnect and failure. No resize messages are sent.
 retries an explicit `retryAfterRestart: true` result a bounded number of times. Before
 each hand-off it captures the endpoint's PID/start identity, requires protocol 0.10,
 waits for that ownership to be released, and reconnects through the same startup mutex.
+The restarting daemon launches the successor it selected after that release, so while
+its process lives the client only connects: starting a daemon itself could win the
+startup mutex with the client's own environment instead of the one the restart was for.
+It starts one only if that process exits without a ready successor.
 Retries after the first use jittered backoff, and the backoff, the successor hand-off
 and the resubmitted request all share the request's admission deadline.
 The original immutable request and unread input are preserved. Output, events,

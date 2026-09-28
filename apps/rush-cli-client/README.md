@@ -63,15 +63,16 @@ rounded down to milliseconds. These controls are mutually exclusive and are
 consumed before forwarding, never appended to a project script. Arguments after
 `--` remain literal script arguments.
 
-The queue timeout is measured from when the daemon receives the request, and only
-time spent waiting for other requests counts against it, whether it comes from
-`--wait-timeout`, `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, `daemon.queueTimeoutSeconds`
-in `rush.json`, or the built-in 30-second default. Waiting while another request
+Only time that the request spends waiting for other requests counts against the
+queue timeout, whether it comes from `--wait-timeout`,
+`RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, `daemon.queueTimeoutSeconds` in `rush.json`,
+or the built-in 30-second default. Waiting while another request
 loads or reloads the workspace graph does not count, so every build that arrives
 while the first build after startup loads the graph runs once the load finishes.
 That wait fails after 10 times the timeout (5 minutes with the default), so a load
-that never finishes does not hold other requests forever. The request's own routing
-and execution do not count either. A configured or per-invocation timeout also
+that never finishes does not hold other requests forever. The request's own work,
+such as checking its inputs, loading the graph, routing and execution, does not
+count either. A configured or per-invocation timeout also
 limits waiting for a running build that the request could not join, and waiting for
 the requests that the daemon is serving to finish before it restarts for the
 request's environment. The built-in default does not: with it, a build that arrives
@@ -80,11 +81,18 @@ instead of failing after 30 seconds, and a request that needs a restart waits fo
 the requests that were running when it arrived to finish and then runs on the
 restarted daemon. The default still limits a restart wait while the daemon runs a
 `rushx` script, such as a dev server, which may not exit until it is stopped, and
-while it serves requests that arrived later. `--no-wait` fails wherever the request
-would wait. On a timeout, the client exits with code 1 and suggests
-`--wait-timeout`. It does not suggest exporting `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`,
-because Rush versions that do not recognize a `RUSH_` environment variable fail
-every command while it is set.
+while it serves requests that arrived later. A `rushx-client` script that arrives
+while another request waits for the daemon to restart does not start on the old
+daemon, where the restart would wait for it to exit: it waits for the restart and
+then runs on the restarted daemon, and its timeout applies to that wait as it does
+to the restart wait. `--no-wait` fails wherever the request would wait. On a
+timeout, the client exits with code 1 and suggests `--wait-timeout`. It does not
+suggest exporting `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, because Rush versions that do
+not recognize a `RUSH_` environment variable fail every command while it is set.
+In legacy output and in `rushx-client`, the admission failure line
+(`rush-client: daemon admission failed (wait-timeout): …`, or `(no-wait)`) gives the
+daemon's reason, as agent mode's summary line does, so it names what the request
+waited for, such as a daemon restart.
 
 Admission controls also apply to experimental graph requests, but not
 `start|stop|restart|status|logs`. They affect daemon admission only; native fallback

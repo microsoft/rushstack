@@ -87,4 +87,44 @@ describe(formatAdmissionFailure.name, () => {
   it('explains a no-wait failure', () => {
     expect(formatAdmissionFailure('no-wait', { noWait: true })).toContain('--no-wait was specified');
   });
+
+  it("prints the daemon's reason for a wait timeout instead of the generic explanation", () => {
+    const reason: string =
+      "The rushx script was not admitted before the daemon could restart for another request's environment. " +
+      'Use --wait-timeout <seconds> to wait longer.';
+    expect(formatAdmissionFailure('wait-timeout', { waitTimeoutMs: 5000 }, reason)).toBe(
+      `rush-client: daemon admission failed (wait-timeout): ${reason}\n`
+    );
+  });
+
+  it("adds the way to wait longer when the daemon's reason does not name it", () => {
+    expect(
+      formatAdmissionFailure(
+        'wait-timeout',
+        { waitTimeoutMs: 5000 },
+        'The request was not admitted within 5000ms.'
+      )
+    ).toBe(
+      'rush-client: daemon admission failed (wait-timeout): The request was not admitted within 5000ms. ' +
+        'To wait longer, pass --wait-timeout <seconds>.\n'
+    );
+  });
+
+  it("prints the daemon's reason for a no-wait failure", () => {
+    const reason: string =
+      'Another request is waiting to restart the daemon for its environment; ' +
+      'the rushx script did not wait for the restart.';
+    expect(formatAdmissionFailure('no-wait', { noWait: true }, reason)).toBe(
+      `rush-client: daemon admission failed (no-wait): ${reason}\n`
+    );
+  });
+
+  it('keeps the generic explanation when the daemon sent no reason', () => {
+    expect(formatAdmissionFailure('wait-timeout', { waitTimeoutMs: 5000 }, '')).toBe(
+      formatAdmissionFailure('wait-timeout', { waitTimeoutMs: 5000 })
+    );
+    expect(formatAdmissionFailure('no-wait', { noWait: true }, '')).toBe(
+      formatAdmissionFailure('no-wait', { noWait: true })
+    );
+  });
 });

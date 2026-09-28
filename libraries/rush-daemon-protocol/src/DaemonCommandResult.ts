@@ -20,6 +20,8 @@ export interface IDaemonCommandResult {
    * Protocol 0.10: no execution or request IO occurred, and a successor has been selected.
    * Retry only after attested predecessor ownership release, within the request's admission deadline and a
    * small client-defined retry bound; then fall back instead of retrying. Never infer this from an error.
+   * The predecessor launches the selected successor itself after that release, and its process exits once the
+   * launch settles: until then, a retrying client connects to the successor but must not start a daemon.
    */
   readonly retryAfterRestart?: true;
   /** Whether cancellation or disconnect was observed, even if a cleanup failure determines the outcome. */

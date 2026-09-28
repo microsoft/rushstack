@@ -9,7 +9,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
-import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from './connectOrStartDaemon';
+import { connectToPlannedSuccessorAsync, type IConnectOrStartDaemonOptions } from './connectOrStartDaemon';
 import { captureDaemonRequest } from './captureDaemonRequest';
 import type { DaemonClient, DaemonClientOutcome, IDaemonClientExecuteOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
@@ -90,7 +90,8 @@ export async function executeWithDaemonRestartAsync(
         const startupTimeoutMs: number = connection.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS;
         // The successor handoff shares the request's admission deadline rather than starting a fresh one.
         boundedByAdmission = remainingMs !== undefined && remainingMs < startupTimeoutMs;
-        successor = await connectOrStartDaemonAsync({
+        // The restarting daemon launches the successor itself; this only connects while that process lives.
+        successor = await connectToPlannedSuccessorAsync({
           ...connection,
           startupTimeoutMs: boundedByAdmission ? Math.max(1, Math.ceil(remainingMs!)) : startupTimeoutMs,
           previousDaemon: { pid: owner.pid, startedAt: owner.startedAt },

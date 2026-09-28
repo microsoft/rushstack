@@ -102,6 +102,26 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
 export async function connectOrStartDaemonAsync(
   options: IConnectOrStartDaemonOptions
 ): Promise<DaemonClient> {
+  return await connectOrStartAsync(options, false);
+}
+
+/**
+ * Like {@link connectOrStartDaemonAsync}, after `previousDaemon` answered a request with `retryAfterRestart`.
+ * @remarks That daemon releases its ownership and then launches the successor it selected, and its process exits
+ * only once that launch settles. A client that started a daemon meanwhile would race that launch, and if it won,
+ * the successor would have this client's environment rather than the one the restart was for. So while the
+ * previous process lives, this only connects; after it exits without a ready successor, this may start one.
+ */
+export async function connectToPlannedSuccessorAsync(
+  options: IConnectOrStartDaemonOptions & { readonly previousDaemon: DaemonOwnership }
+): Promise<DaemonClient> {
+  return await connectOrStartAsync(options, true);
+}
+
+async function connectOrStartAsync(
+  options: IConnectOrStartDaemonOptions,
+  previousStartsSuccessor: boolean
+): Promise<DaemonClient> {
   const timeoutMs: number = options.startupTimeoutMs ?? 15000;
   if (!Number.isInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 0x7fffffff) {
     throw new RangeError('startupTimeoutMs must be an integer between 1 and 2147483647.');
@@ -112,6 +132,14 @@ export async function connectOrStartDaemonAsync(
   await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline, options.abortSignal);
   const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
   if (initial) return initial;
+  if (previousStartsSuccessor && options.previousDaemon) {
+    const successor: DaemonClient | undefined = await waitForPlannedSuccessorAsync(
+      options,
+      options.previousDaemon,
+      deadline
+    );
+    if (successor) return successor;
+  }
   const startCommand: IDaemonStartCommand | undefined =
     options.startCommand ?? (await options.resolveStartCommandAsync?.());
   if (!startCommand) {
@@ -452,6 +480,28 @@ async function tryConnectEndpointAsync(
     }
     throw error;
   }
+}
+
+/** Connects to a successor while the previous daemon process lives; undefined once it has exited without one. */
+async function waitForPlannedSuccessorAsync(
+  options: IConnectOrStartDaemonOptions,
+  previous: DaemonOwnership,
+  deadline: number
+): Promise<DaemonClient | undefined> {
+  while (isOwnerProcessAlive(previous)) {
+    if (Date.now() >= deadline) {
+      throw startupError(
+        options,
+        `timed out waiting for the successor that the previous daemon (PID ${previous.pid}) is starting`
+      );
+    }
+    await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
+      signal: options.abortSignal
+    });
+    const successor: DaemonClient | undefined = await tryConnectAsync(options, deadline);
+    if (successor) return successor;
+  }
+  return undefined;
 }
 
 async function waitForHandoffAsync(
