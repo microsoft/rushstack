@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+
+## 1.5.0
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Minor changes
+
+- Add opt-in `loadPaths` and `resolveBareSpecifiersAsPackages` options, which allow a bare specifier such as `@use '@scope/pkg/theme'` to be resolved from a load path or as a package when it does not resolve relative to the importing file. Both are disabled by default, preserving the specification behavior in which such a specifier is a relative URL.
+
+### Patches
+
+- Apply the legacy `~` to `pkg:` rewrite during canonicalization, so that it also works in constructs other than `@use`/`@import`/`@forward`, such as `meta.load-css()`. Previously these threw an `Unexpected tilde in URL` error.
 
 ## 1.4.12
 Tue, 22 Sep 2026 17:35:41 GMT
