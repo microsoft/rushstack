@@ -3,7 +3,7 @@
 
 import type { Operation } from './Operation';
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
-import { SUCCESS_STATUSES } from './OperationStatus';
+import { type OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 
 const unverifiableResults: WeakSet<IOperationExecutionResult> = new WeakSet();
 
@@ -29,7 +29,7 @@ export function isResultUnverifiable(result: IOperationExecutionResult): boolean
 }
 
 /**
- * Re-enables selected operations whose successful result retained by a previous iteration of a long-lived graph
+ * Re-enables selected operations whose result retained by a previous iteration of a long-lived graph
  * (e.g. the Rush daemon) is current by state hash, but not verified at that state hash, so that they are restored
  * from the build cache or executed instead of being skipped. Such a result was produced while the outputs of one
  * of its dependencies were not verified (e.g. that dependency was not selected and had changed), so its outputs
@@ -43,11 +43,13 @@ export function isResultUnverifiable(result: IOperationExecutionResult): boolean
  * @param records - The records of the iteration that is being configured
  * @param lastStates - The results retained by previous iterations of the graph
  * @param verifiedStateHashByOperation - The state hash at which the retained result of each operation is verified
+ * @param retainedResultStatuses - The statuses of retained results that running the operation again can verify
  */
 export function enableUnverifiedRetainedOperations(
   records: ReadonlyMap<Operation, IConfigurableOperation>,
   lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
-  verifiedStateHashByOperation: ReadonlyMap<Operation, string>
+  verifiedStateHashByOperation: ReadonlyMap<Operation, string>,
+  retainedResultStatuses: ReadonlySet<OperationStatus> = SUCCESS_STATUSES
 ): void {
   // Whether the result of each operation will still be unverified at the end of this iteration.
   const remainsUnverifiedByOperation: Map<Operation, boolean> = new Map();
@@ -79,7 +81,7 @@ export function enableUnverifiedRetainedOperations(
         if (
           operation.enabled === true &&
           lastState &&
-          SUCCESS_STATUSES.has(lastState.status) &&
+          retainedResultStatuses.has(lastState.status) &&
           lastState.getStateHash() === stateHash
         ) {
           record.enabled = true;

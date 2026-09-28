@@ -82,6 +82,10 @@ interface ITestGraph {
   operations: Map<string, Operation>;
   localHashes: Map<string, string>;
   executions: string[];
+  /**
+   * The operations that the emulated change detection plugin checked, if enabled by `upToDate`.
+   */
+  checks: string[];
   executeAsync(): Promise<IExecutionResult>;
 }
 
@@ -94,6 +98,11 @@ interface ITestGraphOptions {
    * If set, the incremental state files of the legacy skip detection are stored in this folder.
    */
   legacySkipFolder?: string;
+  /**
+   * If set, emulates a plugin with its own change detection (e.g. by tracing the files that each operation reads),
+   * which reports a selected operation as skipped if its name is in this set, because its outputs are up to date.
+   */
+  upToDate?: ReadonlySet<string>;
 }
 
 /**
@@ -103,8 +112,9 @@ async function createTestGraphAsync(
   dependencies: Record<string, string[]>,
   options: ITestGraphOptions = {}
 ): Promise<ITestGraph> {
-  const { noOps, legacySkipFolder } = options;
+  const { noOps, legacySkipFolder, upToDate } = options;
   const executions: string[] = [];
+  const checks: string[] = [];
   const localHashes: Map<string, string> = new Map();
   const operations: Map<string, Operation> = new Map();
 
@@ -153,6 +163,21 @@ async function createTestGraphAsync(
     isIncrementalBuildAllowed: true,
     projectConfigurations: new Map()
   } as unknown as IOperationGraphContext);
+  if (upToDate) {
+    graph.hooks.beforeExecuteOperationAsync.tapPromise(
+      { name: 'TestChangeDetectionPlugin', stage: -200 },
+      async (
+        record: IOperationRunnerContext & IOperationExecutionResult
+      ): Promise<OperationStatus | undefined> => {
+        if (record.silent) {
+          return;
+        }
+        const { name } = record.operation;
+        checks.push(name);
+        return upToDate.has(name) ? OperationStatus.Skipped : undefined;
+      }
+    );
+  }
 
   const inputsSnapshot: IInputsSnapshot = {
     hashes: new Map(),
@@ -168,11 +193,25 @@ async function createTestGraphAsync(
     operations,
     localHashes,
     executions,
+    checks,
     executeAsync: async () => {
       executions.length = 0;
+      checks.length = 0;
       return await graph.executeAsync({ inputsSnapshot });
     }
   };
+}
+
+/**
+ * Returns the status of each operation in the result of an iteration, or "silent" if it was not selected.
+ */
+function getStatuses(testGraph: ITestGraph, result: IExecutionResult): Record<string, string> {
+  const statuses: Record<string, string> = {};
+  for (const [name, operation] of testGraph.operations) {
+    const record: IOperationExecutionResult = result.operationResults.get(operation)!;
+    statuses[name] = record.silent ? 'silent' : record.status;
+  }
+  return statuses;
 }
 
 // How results retained by earlier iterations of a long-lived graph (e.g. the Rush daemon) are verified,
@@ -374,6 +413,87 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
     expect(testGraph.executions).toEqual([]);
   });
 
+  it('reuses the result of a selected operation that a plugin found up to date while its state hash is unchanged', async () => {
+    const upToDate: Set<string> = new Set(['a', 'b']);
+    const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { upToDate });
+
+    // The outputs were built before this graph was created.
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['a', 'b']);
+    expect(testGraph.executions).toEqual([]);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
+
+    // Edit "b"
+    testGraph.localHashes.set('b', 'b-v2');
+    upToDate.delete('b');
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['b']);
+    expect(testGraph.executions).toEqual(['b']);
+
+    const secondHotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(secondHotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
+    expect(testGraph.executions).toEqual([]);
+  });
+
+  it('checks a result that a plugin found up to date against outputs of a dependency that were not current again', async () => {
+    const upToDate: Set<string> = new Set(['a', 'b']);
+    const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { upToDate });
+    const a: Operation = testGraph.operations.get('a')!;
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['a', 'b']);
+
+    // --only b, after editing "a": "b" is found up to date with the outputs of the previous "a".
+    testGraph.localHashes.set('a', 'a-v2');
+    upToDate.delete('a');
+    a.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['b']);
+    expect(testGraph.executions).toEqual([]);
+
+    // --to b: "b" has the same state hash as its retained result, but "a" is rebuilt, which changes the inputs of "b".
+    a.enabled = true;
+    upToDate.delete('b');
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['a', 'b']);
+    expect(testGraph.executions).toEqual(['a', 'b']);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
+  });
+
+  it('checks a result that a plugin found up to date again if it was marked unverifiable, and the results checked against it', async () => {
+    const upToDate: Set<string> = new Set(['a', 'b']);
+    const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { upToDate });
+    const a: Operation = testGraph.operations.get('a')!;
+    let isMarkingA: boolean = true;
+    // Like CacheableOperationPlugin when input files of "a" changed during the iteration
+    testGraph.graph.hooks.afterExecuteOperationAsync.tap(
+      'TestPlugin',
+      (record: IOperationExecutionResult) => {
+        if (isMarkingA && record.operation === a) {
+          markResultUnverifiable(record);
+        }
+      }
+    );
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['a', 'b']);
+
+    // The same state hashes
+    isMarkingA = false;
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['a', 'b']);
+    expect(testGraph.executions).toEqual([]);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
+  });
+
   describe('with legacy skip detection', () => {
     let legacySkipFolder: string;
 
@@ -429,17 +549,41 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
       // Build once in another process, then start a long-lived graph.
       await (await createTestGraphAsync({ a: [], b: ['a'] }, { legacySkipFolder })).executeAsync();
       const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { legacySkipFolder });
-      await testGraph.executeAsync();
-      expect(testGraph.executions).toEqual([]);
+      const a: Operation = testGraph.operations.get('a')!;
 
-      // --to b, after editing "b": "a" is skipped, so it is not verified in this graph.
+      // --only b, after editing "b": "a" is not selected, so it is not verified in this graph.
       testGraph.localHashes.set('b', 'b-v2');
+      a.enabled = false;
       await testGraph.executeAsync();
       expect(testGraph.executions).toEqual(['b']);
 
-      // --to b: the legacy skip detection still skips "b".
+      // --to b: the legacy skip detection skips "a", and still skips "b".
+      a.enabled = true;
       await testGraph.executeAsync();
       expect(testGraph.executions).toEqual([]);
+
+      const hotResult: IExecutionResult = await testGraph.executeAsync();
+      expect(hotResult.status).toBe(OperationStatus.NoOp);
+      expect(testGraph.executions).toEqual([]);
+    });
+
+    it('reuses results that the legacy skip detection found up to date while their state hashes are unchanged', async () => {
+      // Build once in another process, then start a long-lived graph.
+      await (await createTestGraphAsync({ a: [], b: ['a'] }, { legacySkipFolder })).executeAsync();
+      const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { legacySkipFolder });
+      const result: IExecutionResult = await testGraph.executeAsync();
+      expect(getStatuses(testGraph, result)).toEqual({ a: 'SKIPPED', b: 'SKIPPED' });
+      expect(testGraph.executions).toEqual([]);
+
+      // No iteration is scheduled.
+      const hotResult: IExecutionResult = await testGraph.executeAsync();
+      expect(hotResult.status).toBe(OperationStatus.NoOp);
+
+      // Edit "b": "a" is not checked again.
+      testGraph.localHashes.set('b', 'b-v2');
+      const changedResult: IExecutionResult = await testGraph.executeAsync();
+      expect(getStatuses(testGraph, changedResult)).toEqual({ a: 'silent', b: 'SUCCESS' });
+      expect(testGraph.executions).toEqual(['b']);
     });
   });
 });

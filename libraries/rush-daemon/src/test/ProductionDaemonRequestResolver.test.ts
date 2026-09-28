@@ -1569,6 +1569,55 @@ process.exit(23);
     }
   });
 
+  it('reuses results that legacy skip detection found up to date until their declared outputs are deleted', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build']);
+      expect(runs(fixture)).toHaveLength(3);
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      // Reload the configuration without changing the inputs of any operation, so the new graph has no results.
+      const commandLineFile: string = path.join(fixture.repoRoot, 'common/config/rush/command-line.json');
+      const commandLine: { commands: object[] } = JSON.parse(fs.readFileSync(commandLineFile, 'utf8'));
+      commandLine.commands.push({
+        commandKind: 'global',
+        name: 'unrelated',
+        summary: 'Unrelated',
+        shellCommand: 'node --version'
+      });
+      fs.writeFileSync(commandLineFile, JSON.stringify(commandLine));
+      const reloaded: ITerminalExchange = await runAsync(fixture, 'reloaded', ['build']);
+      expect(reloaded.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          exitCode: 0,
+          scheduled: true,
+          operationResults: [
+            { operationId: 'a (compile)', status: 'SKIPPED' },
+            { operationId: 'b (compile)', status: 'SKIPPED' },
+            { operationId: 'c (compile)', status: 'SKIPPED' }
+          ]
+        }
+      });
+      expect(fixture.session.operationGraph).not.toBe(graph);
+
+      // The skipped results are current, so they are not checked again.
+      expect((await runAsync(fixture, 'warm', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/c/lib'), { recursive: true });
+      expect((await runAsync(fixture, 'deleted', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(3)).toEqual(['c:one:']);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/c/lib/output.txt'), 'utf8')).toBe('one');
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('restores deleted outputs of a warm operation from the native build cache', async () => {
     const fixture: IFixture = await createFixtureAsync(true);
     try {

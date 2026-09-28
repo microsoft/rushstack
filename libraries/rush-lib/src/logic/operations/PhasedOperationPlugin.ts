@@ -27,6 +27,16 @@ const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 const VERIFY_RESULT_STAGE: number = 1;
 
 /**
+ * The statuses of results retained by an earlier iteration of the graph that are reused while the state hash of the
+ * operation is unchanged. The graph only retains a `Skipped` result for an operation that was selected to execute,
+ * when a plugin (e.g. change detection) found its outputs up to date.
+ */
+const RETAINED_RESULT_STATUSES: ReadonlySet<OperationStatus> = new Set([
+  ...SUCCESS_STATUSES,
+  OperationStatus.Skipped
+]);
+
+/**
  * Core phased command plugin that provides the functionality for generating a base operation graph
  * from the set of selected projects and phases.
  */
@@ -151,7 +161,12 @@ function configureExecutionManager(graph: IOperationGraph, context: IOperationGr
       if (iterationOptions.inputsSnapshot) {
         // A retained result that is current by state hash can still have been built against outputs of a
         // dependency that were not current, e.g. by an `--only` request.
-        enableUnverifiedRetainedOperations(currentStates, lastStates, verifiedStateHashByOperation);
+        enableUnverifiedRetainedOperations(
+          currentStates,
+          lastStates,
+          verifiedStateHashByOperation,
+          RETAINED_RESULT_STATUSES
+        );
       }
     }
   );
@@ -195,8 +210,20 @@ function updateVerifiedStateHash(
   const { operation } = record;
   switch (record.status) {
     case OperationStatus.Skipped: {
-      // The outputs were left as they were.
-      return;
+      if (!record.enabled) {
+        // The operation was not selected, so its outputs were left as they were.
+        return;
+      }
+      // A plugin (e.g. change detection) found the outputs of the selected operation up to date for its state
+      // hash, which verifies them in the same way as executing it.
+      if (
+        !isResultUnverifiable(record) &&
+        areDependenciesVerified(operation, records, verifiedStateHashByOperation)
+      ) {
+        verifiedStateHashByOperation.set(operation, record.getStateHash());
+        return;
+      }
+      break;
     }
 
     case OperationStatus.FromCache: {
@@ -234,7 +261,10 @@ function areDependenciesVerified(
 ): boolean {
   for (const dependency of operation.dependencies) {
     const dependencyRecord: IOperationExecutionResult | undefined = records.get(dependency);
-    if (!dependencyRecord || verifiedStateHashByOperation.get(dependency) !== dependencyRecord.getStateHash()) {
+    if (
+      !dependencyRecord ||
+      verifiedStateHashByOperation.get(dependency) !== dependencyRecord.getStateHash()
+    ) {
       return false;
     }
   }
@@ -250,7 +280,7 @@ function shouldEnableOperation(
     return true;
   }
 
-  if (!SUCCESS_STATUSES.has(lastState.status)) {
+  if (!RETAINED_RESULT_STATUSES.has(lastState.status)) {
     return true;
   }
 

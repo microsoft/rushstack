@@ -54,7 +54,9 @@ export interface IOperationGraph {
    * A map from each `Operation` in the graph to its current result record.
    * The map is updated in real time as operations execute during an iteration.
    * Only statuses representing a completed execution (e.g. `Success`, `Failure`,
-   * `SuccessWithWarning`) write to this map; statuses such as `Skipped` or `Aborted` —
+   * `SuccessWithWarning`) write to this map, as does `Skipped` for an operation that was
+   * selected to execute and whose outputs a plugin (e.g. change detection) found up to date.
+   * Statuses such as `Aborted`, or `Skipped` for an operation that was not selected —
    * which indicate that an operation did not actually run — do not update it.
    * For operations that have not yet run in the current iteration, the map retains the
    * result from whichever prior iteration the operation last ran in.

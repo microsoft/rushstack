@@ -58,7 +58,7 @@ import { OperationGraph } from '../OperationGraph';
 import { Operation } from '../Operation';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
-import type { IExecutionResult } from '../IOperationExecutionResult';
+import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 
 const mockPhase: IPhase = {
@@ -74,7 +74,7 @@ const mockPhase: IPhase = {
 class CacheableMockRunner implements IOperationRunner {
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
-  public readonly cacheable: boolean = true;
+  public cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean = false;
   public readonly isNoOp: boolean = false;
   public readonly name: string;
@@ -102,6 +102,10 @@ interface ITestGraph {
   executions: string[];
   cacheWrites: string[];
   cacheRestores: string[];
+  /**
+   * The operations that the emulated change detection plugin checked, if enabled by `upToDate`.
+   */
+  checks: string[];
   executeAsync(): Promise<IExecutionResult>;
 }
 
@@ -111,6 +115,11 @@ interface ITestGraphOptions {
    */
   dependencies?: Record<string, string[]>;
   cacheWriteEnabled?: boolean;
+  /**
+   * If set, emulates a plugin with its own change detection (e.g. by tracing the files that each operation reads),
+   * which reports a selected operation as skipped if its name is in this set, because its outputs are up to date.
+   */
+  upToDate?: ReadonlySet<string>;
 }
 
 /**
@@ -118,8 +127,9 @@ interface ITestGraphOptions {
  * The mock build cache stores an entry per operation and state hash, and restores it if it exists.
  */
 async function createTestGraphAsync(names: string[], options: ITestGraphOptions = {}): Promise<ITestGraph> {
-  const { dependencies, cacheWriteEnabled = true } = options;
+  const { dependencies, cacheWriteEnabled = true, upToDate } = options;
   const executions: string[] = [];
+  const checks: string[] = [];
   const cacheWrites: string[] = [];
   const cacheRestores: string[] = [];
   const cacheEntries: Set<string> = new Set();
@@ -201,6 +211,32 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     isIncrementalBuildAllowed: true,
     projectConfigurations
   } as unknown as IOperationGraphContext);
+  if (upToDate) {
+    graph.hooks.beforeExecuteIterationAsync.tap('TestChangeDetectionPlugin', (records) => {
+      for (const operation of records.keys()) {
+        (operation.runner as CacheableMockRunner).cacheable = true;
+      }
+    });
+    graph.hooks.beforeExecuteOperationAsync.tapPromise(
+      // Before the build cache is read
+      { name: 'TestChangeDetectionPlugin', stage: -200 },
+      async (
+        record: IOperationRunnerContext & IOperationExecutionResult
+      ): Promise<OperationStatus | undefined> => {
+        if (record.silent) {
+          return;
+        }
+        const { name } = record.operation;
+        checks.push(name);
+        if (!upToDate.has(name)) {
+          return;
+        }
+        // The build cache does not handle operations that another plugin skipped.
+        (record.operation.runner as CacheableMockRunner).cacheable = false;
+        return OperationStatus.Skipped;
+      }
+    );
+  }
 
   const inputsSnapshot: IInputsSnapshot = {
     hashes: new Map(),
@@ -217,10 +253,12 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     executions,
     cacheWrites,
     cacheRestores,
+    checks,
     executeAsync: async () => {
       executions.length = 0;
       cacheWrites.length = 0;
       cacheRestores.length = 0;
+      checks.length = 0;
       return await graph.executeAsync({ inputsSnapshot });
     }
   };
@@ -395,6 +433,34 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
 
     const hotResult: IExecutionResult = await testGraph.executeAsync();
     expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.executions).toEqual([]);
+  });
+
+  it('does not check results that a plugin found up to date again while their state hashes are unchanged', async () => {
+    const upToDate: Set<string> = new Set(['lib', 'tool', 'app']);
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], { upToDate });
+
+    // The outputs were built before this graph was created.
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['lib', 'tool', 'app']);
+    expect(testGraph.executions).toEqual([]);
+
+    // Checking a skipped result again cannot make it trusted, so it is not re-enabled.
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
+
+    // Edit "app": its dependencies are not trusted, so its cache entry is not written.
+    testGraph.localHashes.set('app', 'app-v2');
+    upToDate.delete('app');
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['app']);
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    const secondHotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(secondHotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
     expect(testGraph.executions).toEqual([]);
   });
 

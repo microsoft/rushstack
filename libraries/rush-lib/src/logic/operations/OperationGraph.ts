@@ -1400,8 +1400,13 @@ function _handleOperationFromCache(
  * Handle skipped operation.
  */
 function _handleOperationSkipped(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
-  // Do not set resultByOperation here. "Skipped" means the operation was not executed,
-  // so it should not be considered the last *execution* result.
+  if (record.enabled) {
+    // The operation was selected to execute, and a plugin (e.g. change detection) reported that its outputs are
+    // already up to date for its current state hash. Keep this as its last result, so that a long-lived graph
+    // (e.g. the Rush daemon) can reuse it while the state hash is unchanged instead of checking it again.
+    context.resultByOperation.set(record.operation, record);
+  }
+  // Otherwise, the operation was not executed, so it should not be considered the last *execution* result.
   if (!record.silent) {
     record.eventSink?.onActivity?.(`"${record.name}" was skipped.`, { operationId: record.name });
     record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${record.name}" was skipped.`));

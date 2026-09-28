@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "In long-lived operation graphs such as the Rush daemon, a selected operation that a plugin or the legacy skip detection found up to date now keeps that result while its state hash is unchanged, so later builds no longer check it again.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

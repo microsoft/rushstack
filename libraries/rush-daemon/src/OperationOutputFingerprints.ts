@@ -14,11 +14,14 @@ import {
 const PLUGIN_NAME: 'DaemonOperationOutputFingerprints' = 'DaemonOperationOutputFingerprints';
 
 /**
- * Retained results that allow the warm graph to skip an operation. Other statuses always re-run.
+ * Retained results that allow the warm graph to skip an operation. Other statuses always re-run. The graph only
+ * retains a `Skipped` result for an operation that it selected, when a plugin (e.g. change detection) found its
+ * outputs up to date.
  */
 const TRACKED_STATUSES: ReadonlySet<OperationStatus> = new Set([
   OperationStatus.Success,
-  OperationStatus.FromCache
+  OperationStatus.FromCache,
+  OperationStatus.Skipped
 ]);
 
 interface IOutputFingerprint {
@@ -27,7 +30,8 @@ interface IOutputFingerprint {
 }
 
 /**
- * Detects retained successful operations whose declared output folders were changed outside the daemon.
+ * Detects retained successful or up-to-date operations whose declared output folders were changed outside
+ * the daemon.
  *
  * @remarks
  * Build outputs are normally git-ignored, so they do not contribute to any operation state hash. Without
@@ -52,7 +56,7 @@ export class OperationOutputFingerprints {
   }
 
   /**
-   * Returns retained successful operations whose output folders no longer match the recorded fingerprint.
+   * Returns retained operations whose output folders no longer match the recorded fingerprint.
    *
    * @remarks
    * Fingerprints of changed operations are forgotten only after all cleanup succeeded, so a failed
