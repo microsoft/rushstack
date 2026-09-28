@@ -11,6 +11,7 @@ describe('daemon configuration', () => {
       enabled: false,
       autoStart: true,
       usePersistentIpcRunners: false,
+      incrementalBuilds: true,
       idleTimeoutSeconds: 900
     });
     expect(
@@ -35,7 +36,8 @@ describe('daemon configuration', () => {
     { RUSH_DAEMON_WARM_SET_MAX_PROJECTS: '1.5' },
     { RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: '' },
     { RUSH_DAEMON_EXPERIMENTAL: 'yes' },
-    { RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'yes' }
+    { RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'yes' },
+    { RUSH_DAEMON_INCREMENTAL_BUILDS: 'off' }
   ])('rejects invalid overrides %j', (environment) => {
     expect(() => resolveDaemonConfiguration({}, environment)).toThrow();
   });
@@ -53,6 +55,7 @@ describe('daemon configuration', () => {
     { warmSetMaxProjects: 0.5 },
     { autoWarmByTelemetry: 1 },
     { usePersistentIpcRunners: 'true' },
+    { incrementalBuilds: 'false' },
     { compatiblePlugins: 'rush-example-plugin' },
     { compatiblePlugins: [''] },
     { compatiblePlugins: [' rush-example-plugin'] },
@@ -66,6 +69,17 @@ describe('daemon configuration', () => {
         'rush.json'
       )
     ).toThrow();
+  });
+
+  it('runs :incremental scripts in the daemon unless the environment or configuration turns it off', () => {
+    expect(resolveDaemonConfiguration({ incrementalBuilds: false }, {}).incrementalBuilds).toBe(false);
+    expect(
+      resolveDaemonConfiguration({ incrementalBuilds: false }, { RUSH_DAEMON_INCREMENTAL_BUILDS: '1' })
+        .incrementalBuilds
+    ).toBe(true);
+    expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_INCREMENTAL_BUILDS: '0' }).incrementalBuilds).toBe(
+      false
+    );
   });
 
   it('resolves compatible plugin names from the environment, then configuration, then no plugins', () => {

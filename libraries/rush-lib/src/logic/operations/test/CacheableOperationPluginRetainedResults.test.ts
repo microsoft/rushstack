@@ -60,6 +60,7 @@ import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
+import { setCommandExecution } from '../IncrementalExecutionState';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -79,14 +80,22 @@ class CacheableMockRunner implements IOperationRunner {
   public readonly isNoOp: boolean = false;
   public readonly name: string;
   readonly #executions: string[];
+  readonly #incrementalNames: ReadonlySet<string>;
 
-  public constructor(name: string, executions: string[]) {
+  public constructor(name: string, executions: string[], incrementalNames: ReadonlySet<string>) {
     this.name = name;
     this.#executions = executions;
+    this.#incrementalNames = incrementalNames;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    this.#executions.push(this.name);
+    if (this.#incrementalNames.has(this.name)) {
+      // Like a ShellOperationRunner whose incremental execution guard allowed its incremental command
+      setCommandExecution(context, { kind: 'incremental', hasIncrementalCommand: true });
+      this.#executions.push(`${this.name}:incremental`);
+    } else {
+      this.#executions.push(this.name);
+    }
     return OperationStatus.Success;
   }
 
@@ -106,6 +115,10 @@ interface ITestGraph {
    * The operations that the emulated change detection plugin checked, if enabled by `upToDate`.
    */
   checks: string[];
+  /**
+   * The names of the operations whose runner executes its incremental command
+   */
+  incrementalNames: Set<string>;
   executeAsync(): Promise<IExecutionResult>;
 }
 
@@ -132,6 +145,7 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
   const checks: string[] = [];
   const cacheWrites: string[] = [];
   const cacheRestores: string[] = [];
+  const incrementalNames: Set<string> = new Set();
   const cacheEntries: Set<string> = new Set();
   const localHashes: Map<string, string> = new Map();
   const operations: Map<string, Operation> = new Map();
@@ -147,7 +161,7 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
       getCacheDisabledReason: () => undefined
     } as unknown as RushProjectConfiguration);
     const operation: Operation = new Operation({
-      runner: new CacheableMockRunner(name, executions),
+      runner: new CacheableMockRunner(name, executions, incrementalNames),
       logFilenameIdentifier: name,
       phase: mockPhase,
       project
@@ -254,6 +268,7 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     cacheWrites,
     cacheRestores,
     checks,
+    incrementalNames,
     executeAsync: async () => {
       executions.length = 0;
       cacheWrites.length = 0;
@@ -462,6 +477,99 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
     expect(secondHotResult.status).toBe(OperationStatus.NoOp);
     expect(testGraph.checks).toEqual([]);
     expect(testGraph.executions).toEqual([]);
+  });
+
+  it('trusts an incremental result, but writes neither it nor the results built against it to the build cache', async () => {
+    // "a" <- "b" <- "c"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['a', 'b', 'c']);
+
+    // Edit "a", which runs its incremental command.
+    testGraph.localHashes.set('a', 'a-v2');
+    testGraph.incrementalNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a:incremental', 'b', 'c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // Nothing changed, so nothing runs again.
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.executions).toEqual([]);
+
+    // Edit "c": it is built against the retained outputs of "b", which were built against the incremental result.
+    testGraph.localHashes.set('c', 'c-v2');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    const secondHotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(secondHotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.executions).toEqual([]);
+
+    // Edit "a", which runs its initial command: every result can be written again.
+    testGraph.localHashes.set('a', 'a-v3');
+    testGraph.incrementalNames.delete('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+    expect(testGraph.cacheWrites).toEqual(['a', 'b', 'c']);
+  });
+
+  it('does not write results built against an incremental result that the request did not select', async () => {
+    // "a" <- "b" <- "c"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+    const { operations } = testGraph;
+    await testGraph.executeAsync();
+
+    testGraph.localHashes.set('a', 'a-v2');
+    testGraph.incrementalNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a:incremental', 'b', 'c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // --only b: "b" is built against the retained incremental result of "a".
+    testGraph.localHashes.set('b', 'b-v2');
+    operations.get('a')!.enabled = false;
+    operations.get('c')!.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // --only c: "c" is built against "b", which was built against the incremental result of "a".
+    testGraph.localHashes.set('c', 'c-v2');
+    operations.get('b')!.enabled = false;
+    operations.get('c')!.enabled = true;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+  });
+
+  it('restores a consumer of an incremental result from the build cache and trusts it as a cacheable result', async () => {
+    // "a" <- "b" <- "c"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+    await testGraph.executeAsync();
+
+    // Edit "a", which runs its incremental command, and "c".
+    testGraph.localHashes.set('a', 'a-v2');
+    testGraph.localHashes.set('c', 'c-v2');
+    testGraph.incrementalNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a:incremental', 'b', 'c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // Revert both: every operation has an entry from the first iteration.
+    testGraph.localHashes.set('a', 'a-v1');
+    testGraph.localHashes.set('c', 'c-v1');
+    testGraph.incrementalNames.delete('a');
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual(['a', 'b', 'c']);
+    expect(testGraph.executions).toEqual([]);
+
+    // Edit "c": it is built against restored outputs, so its result is written.
+    testGraph.localHashes.set('c', 'c-v3');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual(['c']);
   });
 
   it('does not re-enable operations that another plugin disabled', async () => {

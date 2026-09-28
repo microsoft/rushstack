@@ -77,8 +77,10 @@ interface IFixtureOptions {
   readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
   readonly onSessionCreated?: (session: WorkspaceSession) => void;
   readonly resolver?: IDaemonRequestResolver;
-  /** Adds the watch-only `_phase:compile:incremental` script, which passes `--incremental` to build.cjs. */
+  /** Adds the `_phase:compile:incremental` script, which passes `--incremental` to build.cjs. */
   readonly incrementalScript?: boolean;
+  /** Sets `daemon.incrementalBuilds` in rush.json. */
+  readonly incrementalBuilds?: boolean;
   /** Uses PNPM, which installs a dependency file (shrinkwrap-deps.json) that change detection hashes per project. */
   readonly pnpm?: boolean;
 }
@@ -141,7 +143,10 @@ async function createFixtureAsync(
       rushVersion: RUSH_VERSION,
       ...(options.pnpm ? { pnpmVersion: '9.15.9' } : { npmVersion: '10.0.0' }),
       // Retention assertions must not depend on the surrounding Jest worker's accumulated RSS.
-      daemon: { warmMemoryBudgetMB: 100_000 },
+      daemon: {
+        warmMemoryBudgetMB: 100_000,
+        ...(options.incrementalBuilds === undefined ? {} : { incrementalBuilds: options.incrementalBuilds })
+      },
       projectFolderMinDepth: 2,
       projectFolderMaxDepth: 2,
       projects: ['a', 'b', 'c'].map((name) => ({
@@ -220,7 +225,7 @@ async function createFixtureAsync(
 const fs = require('node:fs');
 const path = require('node:path');
 const name = require('./package.json').name;
-const input = fs.readFileSync('input.txt', 'utf8');
+const input = fs.readFileSync(fs.existsSync('src/input.txt') ? 'src/input.txt' : 'input.txt', 'utf8');
 (async () => {
 const gateFile = path.resolve('../../common/temp/gate-' + name + '.json');
 if (fs.existsSync(gateFile)) {
@@ -1507,8 +1512,11 @@ process.exit(23);
     }
   });
 
-  it('runs the initial script for every warm build request, as native rush build does, not the watch-only one', async () => {
-    const fixture: IFixture = await createFixtureAsync(true, 'direct', { incrementalScript: true });
+  it('runs the initial script for every warm build request, as native rush build does, if incremental builds are off', async () => {
+    const fixture: IFixture = await createFixtureAsync(true, 'direct', {
+      incrementalScript: true,
+      incrementalBuilds: false
+    });
     try {
       for (const [requestId, input] of [
         ['initial-script-1', 'one'],
@@ -1526,6 +1534,55 @@ process.exit(23);
       // A watch-only incremental script can keep outputs of deleted inputs, and its output would be cached
       // under the key of the initial script that native Rush runs.
       expect(runs(fixture)).toEqual(['a:one:', 'a:two:', 'a:three:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('runs the incremental script for an edit of a built file, and never caches its result', async () => {
+    const fixture: IFixture = await createFixtureAsync(true, 'direct', { incrementalScript: true });
+    const inputPath: string = path.join(fixture.repoRoot, 'projects/a/src/input.txt');
+    const buildAsync = async (requestId: string, input: string, status: string): Promise<string> => {
+      fs.mkdirSync(path.dirname(inputPath), { recursive: true });
+      fs.writeFileSync(inputPath, input);
+      const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'a']);
+      expect(exchange.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, operationResults: [{ operationId: 'a (compile)', status }] }
+      });
+      return logText(exchange);
+    };
+    try {
+      expect(await buildAsync('incremental-1', 'one', 'SUCCESS')).toContain(
+        'Invoking (initial): node build.cjs'
+      );
+      const incremental: string = await buildAsync('incremental-2', 'two', 'SUCCESS');
+      expect(incremental).toContain('Invoking (incremental): node build.cjs --incremental');
+      expect(incremental).toContain(
+        'This operation ran its incremental command; not writing a build cache entry.'
+      );
+      await buildAsync('incremental-3', 'three', 'SUCCESS');
+      // The result of the incremental script was not cached, so it runs again.
+      await buildAsync('incremental-4', 'two', 'SUCCESS');
+      // The result of the initial script was cached.
+      await buildAsync('incremental-5', 'one', 'FROM CACHE');
+      // The incremental script never runs on top of outputs restored from the build cache.
+      expect(await buildAsync('incremental-6', 'three', 'SUCCESS')).toContain(
+        'Not using the incremental command because its outputs were not built by a successful run of its own' +
+          ' command in this process.'
+      );
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/a/input.txt'), 'root');
+      expect(await buildAsync('incremental-7', 'three', 'SUCCESS')).toContain(
+        'Not using the incremental command because a configuration file changed ("projects/a/input.txt").'
+      );
+      expect(runs(fixture)).toEqual([
+        'a:one:',
+        'a:two:--incremental',
+        'a:three:--incremental',
+        'a:two:--incremental',
+        'a:three:',
+        'a:three:'
+      ]);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }

@@ -167,4 +167,33 @@ describe('OperationGraph operation environment', () => {
       ])
     );
   });
+
+  it('gives every iteration hook the environment lookup that the iteration was scheduled with', async () => {
+    const graph: OperationGraph = createGraph([new EnvironmentRecordingRunner('operation')]);
+    type GetOperationEnvironment = IOperationGraphIterationOptions['getOperationEnvironment'];
+    const received: [string, GetOperationEnvironment][] = [];
+    graph.hooks.configureIteration.tap('test', (records, lastResults, options) => {
+      received.push(['configureIteration', options.getOperationEnvironment]);
+    });
+    graph.hooks.beforeExecuteIterationAsync.tapPromise('test', async (records, options) => {
+      received.push(['beforeExecuteIterationAsync', options.getOperationEnvironment]);
+    });
+    graph.hooks.afterExecuteIterationAsync.tapPromise('test', async (status, records, options) => {
+      received.push(['afterExecuteIterationAsync', options.getOperationEnvironment]);
+      return status;
+    });
+    const getOperationEnvironment: GetOperationEnvironment = () => ({ [SESSION_VARIABLE]: 'A' });
+
+    expect((await graph.executeAsync({ getOperationEnvironment })).status).toBe(OperationStatus.Success);
+    expect((await graph.executeAsync({})).status).toBe(OperationStatus.Success);
+
+    expect(received).toEqual([
+      ['configureIteration', getOperationEnvironment],
+      ['beforeExecuteIterationAsync', getOperationEnvironment],
+      ['afterExecuteIterationAsync', getOperationEnvironment],
+      ['configureIteration', undefined],
+      ['beforeExecuteIterationAsync', undefined],
+      ['afterExecuteIterationAsync', undefined]
+    ]);
+  });
 });

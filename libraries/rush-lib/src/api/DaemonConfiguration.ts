@@ -13,6 +13,13 @@ export interface IDaemonConfigurationJson {
   readonly watch?: boolean;
   /** Enables explicit operationSettings[].daemonIpc Node runners for daemon builds. Defaults to false. */
   readonly usePersistentIpcRunners?: boolean;
+  /**
+   * Lets daemon builds run an operation's `<phase>:incremental` script, instead of its initial script, on top of the
+   * outputs of its last successful run in the daemon, when only files that it builds were edited since then and its
+   * output folders are unchanged. Otherwise the initial script runs, as it does for native Rush. Results of an
+   * incremental script are not written to the build cache. Defaults to true.
+   */
+  readonly incrementalBuilds?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
   /**
@@ -45,6 +52,7 @@ const defaults: Required<IDaemonConfigurationJson> = {
   autoStart: true,
   watch: false,
   usePersistentIpcRunners: false,
+  incrementalBuilds: true,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
@@ -61,6 +69,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     autoStart: 'RUSH_DAEMON_AUTO_START',
     watch: 'RUSH_DAEMON_WATCH',
     usePersistentIpcRunners: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
+    incrementalBuilds: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
@@ -103,6 +112,7 @@ export function resolveDaemonConfiguration(
     autoStart: booleanOption('autoStart', json, environment),
     watch: booleanOption('watch', json, environment),
     usePersistentIpcRunners: booleanOption('usePersistentIpcRunners', json, environment),
+    incrementalBuilds: booleanOption('incrementalBuilds', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
@@ -143,7 +153,13 @@ function isPluginName(name: string): boolean {
 }
 
 function booleanOption(
-  key: 'enabled' | 'autoStart' | 'watch' | 'autoWarmByTelemetry' | 'usePersistentIpcRunners',
+  key:
+    | 'enabled'
+    | 'autoStart'
+    | 'watch'
+    | 'autoWarmByTelemetry'
+    | 'usePersistentIpcRunners'
+    | 'incrementalBuilds',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { daemonEnvironmentVariables } from '../DaemonConfiguration';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 
 describe(EnvironmentConfiguration.name, () => {
@@ -35,6 +36,13 @@ describe(EnvironmentConfiguration.name, () => {
       expect(EnvironmentConfiguration.validate).not.toThrow();
       expect(process.env.RUSH_REPORTER).toBe(env.RUSH_REPORTER);
       expect(process.env.RUSH_LOG_LEVEL).toBe(env.RUSH_LOG_LEVEL);
+    });
+
+    it('allows every daemon environment variable', () => {
+      for (const name of Object.values(daemonEnvironmentVariables)) {
+        process.env[name] = '1';
+      }
+      expect(EnvironmentConfiguration.validate).not.toThrow();
     });
 
     it('does not allow unknown environment variables', () => {

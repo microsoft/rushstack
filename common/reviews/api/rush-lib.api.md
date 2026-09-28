@@ -321,6 +321,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_AUTO_START: "RUSH_DAEMON_AUTO_START";
     readonly RUSH_DAEMON_WATCH: "RUSH_DAEMON_WATCH";
     readonly RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: "RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS";
+    readonly RUSH_DAEMON_INCREMENTAL_BUILDS: "RUSH_DAEMON_INCREMENTAL_BUILDS";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
@@ -528,6 +529,7 @@ export interface IDaemonConfigurationJson {
     readonly compatiblePlugins?: ReadonlyArray<string>;
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
+    readonly incrementalBuilds?: boolean;
     readonly queueTimeoutSeconds?: number;
     readonly usePersistentIpcRunners?: boolean;
     readonly warmIdleTimeoutSeconds?: number;

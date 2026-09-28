@@ -660,6 +660,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           );
           new DaemonIpcOperationRunnerPlugin().apply(this.hooks);
         }
+        if (
+          onEngine &&
+          this.#isIncrementalBuildAllowed &&
+          this.rushConfiguration.daemon.incrementalBuilds &&
+          !cobuildConfiguration?.cobuildFeatureEnabled
+        ) {
+          const { IncrementalExecutionGuardPlugin } = await import(
+            /* webpackChunkName: 'IncrementalExecutionGuardPlugin' */ '../../logic/operations/IncrementalExecutionGuardPlugin'
+          );
+          new IncrementalExecutionGuardPlugin().apply(this.hooks);
+        }
         if (isWatch && this.#noIPCParameter?.value === false) {
           new (
             await import(

@@ -38,6 +38,7 @@ import {
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import { defineCustomParameters } from '../../../cli/parsing/defineCustomParameters';
 import { associateParametersByPhase } from '../../../cli/parsing/associateParametersByPhase';
+import { getCommandExecution, setIncrementalExecutionGuard } from '../IncrementalExecutionState';
 
 interface ISerializedOperation {
   name: string;
@@ -349,4 +350,119 @@ describe(ShellOperationRunnerPlugin.name, () => {
       expect(commands).toEqual(expectedCommands);
     }
   );
+
+  describe('outside watch mode', () => {
+    async function runTwiceAsync(options: {
+      scripts: Record<string, string>;
+      shellCommand?: string;
+      guarded: boolean;
+    }): Promise<{ commands: string[]; hasIncrementalCommand: boolean | undefined }> {
+      const phase: IPhase = {
+        name: '_phase:build',
+        isSynthetic: false,
+        missingScriptBehavior: 'error',
+        allowWarningsOnSuccess: false,
+        associatedParameters: new Set(),
+        shellCommand: options.shellCommand
+      } as unknown as IPhase;
+      const project: RushConfigurationProject = {
+        packageName: 'a',
+        projectFolder: process.cwd(),
+        packageJson: { scripts: options.scripts },
+        rushConfiguration: { commonTempFolder: process.cwd() }
+      } as unknown as RushConfigurationProject;
+      const operation: Operation = new Operation({ phase, project, logFilenameIdentifier: 'a' });
+      const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+      new ShellOperationRunnerPlugin().apply(hooks);
+      await hooks.createOperationsAsync.promise(new Set([operation]), {
+        isIncrementalBuildAllowed: true,
+        isWatch: false
+      } as unknown as ICreateOperationsContext);
+
+      const commands: string[] = [];
+      const executeSpy = jest
+        .spyOn(Utilities, 'executeLifecycleCommandAsync')
+        .mockImplementation((command) => {
+          commands.push(command.trim());
+          const stdout: PassThrough = new PassThrough();
+          const stderr: PassThrough = new PassThrough();
+          const child: childProcess.ChildProcess = Object.assign(new EventEmitter(), {
+            stdout,
+            stderr,
+            stdio: []
+          }) as unknown as childProcess.ChildProcess;
+          queueMicrotask(() => {
+            stdout.end();
+            stderr.end();
+            child.emit('close', 0, null);
+          });
+          return child;
+        });
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+      const context: IOperationRunnerContext = {
+        environment: undefined,
+        async runWithTerminalAsync<T>(
+          callback: (
+            terminal: ITerminal,
+            operationTerminalProvider: ITerminalProvider,
+            structuredChildOutputTerminalProvider: ITerminalProvider
+          ) => Promise<T>
+        ): Promise<T> {
+          return await callback(new Terminal(terminalProvider), terminalProvider, terminalProvider);
+        }
+      } as unknown as IOperationRunnerContext;
+      if (options.guarded) {
+        setIncrementalExecutionGuard(context, {
+          getBlockReasonAsync: async () => undefined,
+          verifyIncrementalResultAsync: async () => undefined
+        });
+      }
+      try {
+        await expect(operation.runner!.executeAsync(context)).resolves.toBe(OperationStatus.Success);
+        await expect(
+          operation.runner!.executeAsync(context, { status: OperationStatus.Success })
+        ).resolves.toBe(OperationStatus.Success);
+      } finally {
+        executeSpy.mockRestore();
+      }
+      return { commands, hasIncrementalCommand: getCommandExecution(context)?.hasIncrementalCommand };
+    }
+
+    it('runs the :incremental script for a repeated operation when its guard allows it', async () => {
+      const { commands, hasIncrementalCommand } = await runTwiceAsync({
+        scripts: {
+          '_phase:build': 'node build.js',
+          '_phase:build:incremental': 'node build.js --incremental'
+        },
+        guarded: true
+      });
+      expect(commands).toEqual(['node build.js', 'node build.js --incremental']);
+      expect(hasIncrementalCommand).toBe(true);
+    });
+
+    it('does not treat an :incremental script that equals the initial script as an incremental command', async () => {
+      const { commands, hasIncrementalCommand } = await runTwiceAsync({
+        scripts: {
+          '_phase:build': 'node build.js',
+          '_phase:build:incremental': 'node build.js'
+        },
+        guarded: true
+      });
+      expect(commands).toEqual(['node build.js', 'node build.js']);
+      expect(hasIncrementalCommand).toBe(false);
+    });
+
+    it('does not use the :incremental script of an operation with a shellCommand', async () => {
+      const { commands, hasIncrementalCommand } = await runTwiceAsync({
+        scripts: {
+          '_phase:build': 'node build.js',
+          '_phase:build:incremental': 'node build.js --incremental'
+        },
+        shellCommand: 'node custom.js',
+        guarded: true
+      });
+      expect(commands).toEqual(['node custom.js', 'node custom.js']);
+      expect(hasIncrementalCommand).toBe(false);
+    });
+  });
 });

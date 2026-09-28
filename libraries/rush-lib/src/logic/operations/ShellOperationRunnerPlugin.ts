@@ -54,14 +54,18 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
 
             // For execution of non-initial watch iterations, prefer the `:incremental` script if it exists.
             // However, the `shellCommand` value still takes precedence per the spec for that feature.
-            // Outside watch mode, every command runs the initial script, as a single `rush build` does, even
-            // when a long-lived host (rushd) executes it on a graph that already ran the operation. The
-            // incremental script may keep outputs of deleted inputs, and only watch mode disables cache writes.
+            // Outside watch mode, the `:incremental` script only runs where a long-lived host (rushd) registers an
+            // incremental execution guard for the operation (IncrementalExecutionGuardPlugin). Without one, every
+            // command runs the initial script, as a single `rush build` does: the incremental script may keep the
+            // outputs of deleted inputs, and outside watch mode its results could be written to the build cache.
             const initialCommand: string | undefined = shellCommand ?? scripts?.[phaseName];
-            const incrementalCommand: string | undefined =
-              isIncrementalBuildAllowed && isWatch
+            const incrementalCommand: string | undefined = !isIncrementalBuildAllowed
+              ? undefined
+              : isWatch
                 ? (shellCommand ?? scripts?.[`${phaseName}:incremental`])
-                : undefined;
+                : shellCommand === undefined
+                  ? scripts?.[`${phaseName}:incremental`]
+                  : undefined;
 
             operation.runner = initializeShellOperationRunner({
               phase,
@@ -70,6 +74,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
               commandForHash,
               initialCommand,
               incrementalCommand,
+              incrementalCommandRequiresGuard: !isWatch,
               customParameterValues,
               ignoredParameterValues,
               rushConfiguration
@@ -90,6 +95,10 @@ export function initializeShellOperationRunner(options: {
   rushConfiguration: RushConfiguration;
   initialCommand: string | undefined;
   incrementalCommand: string | undefined;
+  /**
+   * See `IShellOperationRunnerOptions.incrementalCommandRequiresGuard`. Defaults to false.
+   */
+  incrementalCommandRequiresGuard?: boolean;
   commandForHash?: string;
   customParameterValues: ReadonlyArray<string>;
   ignoredParameterValues: ReadonlyArray<string>;
@@ -99,6 +108,7 @@ export function initializeShellOperationRunner(options: {
     project,
     initialCommand: rawInitialCommand,
     incrementalCommand: rawIncrementalCommand,
+    incrementalCommandRequiresGuard = false,
     displayName,
     ignoredParameterValues
   } = options;
@@ -113,9 +123,13 @@ export function initializeShellOperationRunner(options: {
     const { commandForHash: rawCommandForHash, customParameterValues } = options;
 
     const initialCommand: string = formatCommand(rawInitialCommand, customParameterValues);
-    const incrementalCommand: string | undefined = rawIncrementalCommand
+    let incrementalCommand: string | undefined = rawIncrementalCommand
       ? formatCommand(rawIncrementalCommand, customParameterValues)
       : undefined;
+    if (incrementalCommandRequiresGuard && incrementalCommand === initialCommand) {
+      // Running it as the incremental command would only prevent its results from being cached.
+      incrementalCommand = undefined;
+    }
     const commandForHash: string = rawCommandForHash
       ? formatCommand(rawCommandForHash, customParameterValues)
       : initialCommand;
@@ -123,6 +137,7 @@ export function initializeShellOperationRunner(options: {
     return new ShellOperationRunner({
       initialCommand,
       incrementalCommand,
+      incrementalCommandRequiresGuard,
       commandForHash,
       displayName,
       phase,

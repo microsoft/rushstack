@@ -276,6 +276,8 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
   /** Enables explicitly configured persistent Node IPC operations in the daemon. */
   RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
+  /** Lets daemon builds run an operation's guarded `:incremental` script outside watch mode. */
+  RUSH_DAEMON_INCREMENTAL_BUILDS: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
   /** Overrides idle eviction in an attached daemon warm set. */
@@ -694,6 +696,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_DAEMON_AUTO_START:
           case EnvironmentVariableNames.RUSH_DAEMON_WATCH:
           case EnvironmentVariableNames.RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS:
+          case EnvironmentVariableNames.RUSH_DAEMON_INCREMENTAL_BUILDS:
           case EnvironmentVariableNames.RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_MEMORY_BUDGET_MB:

@@ -277,6 +277,11 @@
           "default": false,
           "description": "Enable explicit operationSettings[].daemonIpc Node launchers for incremental daemon builds. Never enables watch mode or unrequested execution. RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS overrides."
         },
+        "incrementalBuilds": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let daemon builds run an operation's `<phase>:incremental` script on top of the outputs of its last successful run in the daemon, when only files that it builds were edited since then and its output folders are unchanged. Otherwise the initial script runs, as it does for native Rush. Results of an incremental script are not written to the build cache. RUSH_DAEMON_INCREMENTAL_BUILDS overrides."
+        },
         "queueTimeoutSeconds": {
           "type": "number",
           "minimum": 0,

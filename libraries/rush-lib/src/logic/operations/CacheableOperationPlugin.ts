@@ -51,6 +51,7 @@ import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration'
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import { enableUnverifiedRetainedOperations, markResultUnverifiable } from './RetainedResultVerification';
+import { wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -82,6 +83,12 @@ export interface IOperationBuildCacheContext {
   periodicCallback: PeriodicCallback;
   cacheRestored: boolean;
   isCacheReadAttempted: boolean;
+
+  // True if the outputs of this operation were produced by its incremental command in this iteration (see
+  // IncrementalExecutionGuardPlugin), or if it executed against outputs of a dependency that were. Such outputs
+  // can differ from those of the initial command, so neither they nor the outputs of their consumers are written
+  // to the build cache. Unlike a blocked cache write, this does not stop a long-lived graph from trusting them.
+  isIncrementalResult: boolean;
 
   // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
   // the iteration's inputs snapshot. Used to refuse cache writes, and to keep a long-lived graph from skipping
@@ -192,10 +199,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       // The state hash at which each operation last completed successfully in an iteration of this graph
       // in which cache writes were allowed for it (i.e. no dependency had an unknown state).
       const trustedStateHashByOperation: Map<Operation, string> = new Map();
+      // The trusted state hash of each operation whose trusted outputs are an incremental result, which must not
+      // be written to the build cache, nor may the outputs of its consumers.
+      const incrementalStateHashByOperation: Map<Operation, string> = new Map();
 
       graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations: ReadonlySet<Operation>) => {
         for (const operation of operations) {
           trustedStateHashByOperation.delete(operation);
+          incrementalStateHashByOperation.delete(operation);
         }
         // Terminals and cobuild callbacks can retain the entire completed iteration, including other
         // projects' records. All of this scratch state is rebuilt by beforeExecuteIterationAsync.
@@ -300,6 +311,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }),
               cacheRestored: false,
               isCacheReadAttempted: false,
+              isIncrementalResult: false,
               inputFilesState,
               inputFileHashes: inputFilesState ? fileHashes : undefined
             };
@@ -576,8 +588,21 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             return;
           }
 
-          const { cobuildLock, operationBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =
-            buildCacheContext;
+          const ranIncrementalCommand: boolean =
+            !buildCacheContext.cacheRestored && wasExecutedIncrementally(record);
+          if (ranIncrementalCommand) {
+            buildCacheContext.isIncrementalResult = true;
+          }
+
+          const {
+            cobuildLock,
+            operationBuildCache,
+            isCacheWriteAllowed: isCacheWriteAllowedForOperation,
+            isIncrementalResult,
+            buildCacheTerminal,
+            cacheRestored
+          } = buildCacheContext;
+          const isCacheWriteAllowed: boolean = isCacheWriteAllowedForOperation && !isIncrementalResult;
 
           try {
             if (!cacheRestored) {
@@ -605,6 +630,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (!buildCacheTerminal) {
               // This should not happen
               throw new InternalError(`Build Cache Terminal is not created`);
+            }
+
+            if (ranIncrementalCommand && isCacheWriteAllowedForOperation) {
+              buildCacheTerminal.writeLine(
+                'This operation ran its incremental command; not writing a build cache entry.'
+              );
             }
 
             let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
@@ -712,6 +743,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             this.#buildCacheContextByOperation.get(operation);
           // Status changes to direct dependents
           let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
+          // Whether the outputs that consumers execute against are an incremental result
+          let isIncrementalResult: boolean = false;
 
           switch (record.status) {
             case OperationStatus.Skipped: {
@@ -724,30 +757,50 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               if (blockCacheWrite || trustedStateHashByOperation.get(operation) !== record.getStateHash()) {
                 blockCacheWrite = true;
                 trustedStateHashByOperation.delete(operation);
+                incrementalStateHashByOperation.delete(operation);
+              } else {
+                isIncrementalResult =
+                  incrementalStateHashByOperation.get(operation) === record.getStateHash();
               }
               break;
             }
 
             default: {
+              // Outputs restored from the build cache are those of the initial command.
+              isIncrementalResult =
+                record.status !== OperationStatus.FromCache &&
+                (!!buildCacheContext?.isIncrementalResult || wasExecutedIncrementally(record));
               if (!blockCacheWrite && buildCacheContext && SUCCESS_STATUSES.has(record.status)) {
                 // The outputs of this operation were produced (or restored) in an iteration where cache
                 // writes were allowed, so they can be trusted by consumers in later iterations as long as
-                // the state hash is unchanged.
+                // the state hash is unchanged. An incremental result is trusted too, but it still blocks the
+                // cache writes of consumers.
                 trustedStateHashByOperation.set(operation, record.getStateHash());
+                if (isIncrementalResult) {
+                  incrementalStateHashByOperation.set(operation, record.getStateHash());
+                } else {
+                  incrementalStateHashByOperation.delete(operation);
+                }
               } else {
                 trustedStateHashByOperation.delete(operation);
+                incrementalStateHashByOperation.delete(operation);
               }
               break;
             }
           }
 
           // Apply status changes to direct dependents
-          if (blockCacheWrite) {
+          if (blockCacheWrite || isIncrementalResult) {
             for (const consumer of operation.consumers) {
               const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
                 this.#getBuildCacheContextByOperation(consumer);
               if (consumerBuildCacheContext) {
-                consumerBuildCacheContext.isCacheWriteAllowed = false;
+                if (blockCacheWrite) {
+                  consumerBuildCacheContext.isCacheWriteAllowed = false;
+                }
+                if (isIncrementalResult) {
+                  consumerBuildCacheContext.isIncrementalResult = true;
+                }
               }
             }
           }

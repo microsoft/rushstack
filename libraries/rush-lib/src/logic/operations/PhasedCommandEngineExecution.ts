@@ -5,6 +5,7 @@ import { LockFile } from '@rushstack/node-core-library';
 
 import type { IPhasedCommandEngine } from '../../api/PhasedCommandEngine';
 import { PhasedCommandEngineBusyError } from '../../api/PhasedCommandEngineBusyError';
+import { NATIVE_COMMAND_INVALIDATION_REASON } from './IncrementalExecutionState';
 
 /**
  * Owns the native process lock only while a host is reconciling or executing one graph iteration.
@@ -34,7 +35,7 @@ export class PhasedCommandEngineExecution implements AsyncDisposable {
       // Native CLI actions leave their process lock file behind on exit. Their work may have
       // changed ignored outputs, so do not trust the previous in-memory success records.
       if (lock.dirtyWhenAcquired) {
-        this._engine.operationGraph.invalidateOperations(undefined, 'native-command-completed');
+        this._engine.operationGraph.invalidateOperations(undefined, NATIVE_COMMAND_INVALIDATION_REASON);
       }
     } catch (error) {
       lock.release();

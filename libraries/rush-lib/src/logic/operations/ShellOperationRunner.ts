@@ -17,6 +17,12 @@ import type { IOperationChildProcessReporter } from './OperationEventSink';
 import { HeftChildReporterNonFatalError } from './HeftChildProcessReporter';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
+import {
+  getIncrementalExecutionGuard,
+  setCommandExecution,
+  type ICommandExecution,
+  type IIncrementalExecutionGuard
+} from './IncrementalExecutionState';
 
 export interface IShellOperationRunnerOptions {
   phase: IPhase;
@@ -24,8 +30,21 @@ export interface IShellOperationRunnerOptions {
   displayName: string;
   initialCommand: string;
   incrementalCommand: string | undefined;
+  /**
+   * If true, the incremental command runs only if a plugin registered an incremental execution guard for the
+   * operation's execution record and the guard allows it, and the guard checks the outputs of the incremental command
+   * afterwards. Otherwise the incremental command runs whenever the operation has a last state, as in watch mode.
+   * Defaults to false.
+   */
+  incrementalCommandRequiresGuard?: boolean;
   commandForHash: string;
   ignoredParameterValues: ReadonlyArray<string>;
+}
+
+interface ICommandTerminals {
+  readonly terminal: ITerminal;
+  readonly terminalProvider: ITerminalProvider;
+  readonly structuredChildOutputTerminalProvider: ITerminalProvider;
 }
 
 /**
@@ -48,6 +67,7 @@ export class ShellOperationRunner implements IOperationRunner {
   readonly #commandForHash: string;
   readonly #initialCommand: string;
   readonly #incrementalCommand: string | undefined;
+  readonly #incrementalCommandRequiresGuard: boolean;
 
   readonly #rushProject: RushConfigurationProject;
 
@@ -60,6 +80,7 @@ export class ShellOperationRunner implements IOperationRunner {
       rushProject,
       initialCommand,
       incrementalCommand,
+      incrementalCommandRequiresGuard = false,
       commandForHash,
       ignoredParameterValues
     } = options;
@@ -70,6 +91,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this.#rushProject = rushProject;
     this.#initialCommand = initialCommand;
     this.#incrementalCommand = incrementalCommand;
+    this.#incrementalCommandRequiresGuard = incrementalCommandRequiresGuard;
     this.#commandForHash = commandForHash;
     this.#ignoredParameterValues = ignoredParameterValues;
   }
@@ -84,130 +106,53 @@ export class ShellOperationRunner implements IOperationRunner {
         terminalProvider: ITerminalProvider,
         structuredChildOutputTerminalProvider: ITerminalProvider
       ) => {
-        let hasWarningOrError: boolean = false;
-
         // Log any ignored parameters
         if (this.#ignoredParameterValues.length > 0) {
           terminal.writeLine(
             `These parameters were ignored for this operation by project-level configuration: ${this.#ignoredParameterValues.join(' ')}`
           );
         }
-        const incrementalCommand: string | undefined =
-          lastState && this.#incrementalCommand ? this.#incrementalCommand : undefined;
-        const commandToRun: string = incrementalCommand ?? this.#initialCommand;
 
-        // Run the operation
-        terminal.writeLine(
-          `Invoking (${incrementalCommand !== undefined ? 'incremental' : 'initial'}): ${commandToRun}`
-        );
-
-        const { rushConfiguration, projectFolder } = this.#rushProject;
-
-        const { environment: initialEnvironment, abortSignal } = context;
-        const childProcessReporter: IOperationChildProcessReporter | undefined =
-          !IS_WINDOWS && isHeftCommand(commandToRun) ? context.createChildProcessReporter() : undefined;
-
-        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
-          rushConfiguration: rushConfiguration,
-          workingDirectory: projectFolder,
-          initCwd: rushConfiguration.commonTempFolder,
-          handleOutput: true,
-          environmentPathOptions: {
-            includeProjectBin: true
-          },
-          initialEnvironment,
-          additionalEnvironment: childProcessReporter?.environment,
-          stdio: childProcessReporter?.stdio,
-          // Isolate the process tree so that a hard abort can terminate it.
-          connectSubprocessTerminator: abortSignal !== undefined
-        });
-        const terminateProcessTree: () => void = () => {
-          try {
-            if (!IS_WINDOWS && subProcess.pid !== undefined && typeof subProcess.exitCode === 'number') {
-              // The shell already exited, but descendants in its process group may still hold its stdio open.
-              // killProcessTree() is a no-op in that state, so signal the process group directly.
-              killExitedProcessGroup(subProcess.pid);
-            } else {
-              SubprocessTerminator.killProcessTree(subProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
-            }
-          } catch (error) {
-            terminal.writeErrorLine(`Failed to terminate the operation process tree: ${error}`);
-          }
+        const terminals: ICommandTerminals = {
+          terminal,
+          terminalProvider,
+          structuredChildOutputTerminalProvider
         };
-        if (abortSignal?.aborted) {
-          terminateProcessTree();
-        } else {
-          abortSignal?.addEventListener('abort', terminateProcessTree, { once: true });
+        const incrementalCommand: string | undefined = lastState ? this.#incrementalCommand : undefined;
+        if (incrementalCommand === undefined) {
+          return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
         }
-        let reporterError: Error | undefined;
-        const reporterDrainPromise: Promise<void> = childProcessReporter
-          ? childProcessReporter
-              .attachAsync(subProcess, structuredChildOutputTerminalProvider)
-              .catch((error) => {
-                reporterError =
-                  error instanceof Error ? error : new Error('The Heft child reporter channel failed.');
-              })
-          : Promise.resolve();
+        if (!this.#incrementalCommandRequiresGuard) {
+          return await this.#invokeCommandAsync(context, terminals, 'incremental', incrementalCommand);
+        }
 
-        // Hook into events, in order to get live streaming of the log
-        subProcess.stdout?.on('data', (data: Buffer) => {
-          const text: string = data.toString();
-          terminalProvider.write(text, TerminalProviderSeverity.log);
-        });
-        subProcess.stderr?.on('data', (data: Buffer) => {
-          const text: string = data.toString();
-          terminalProvider.write(text, TerminalProviderSeverity.error);
-          hasWarningOrError = true;
-        });
+        const guard: IIncrementalExecutionGuard | undefined = getIncrementalExecutionGuard(context);
+        if (!guard) {
+          return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
+        }
+        const blockReason: string | undefined = await getGuardResultAsync(() => guard.getBlockReasonAsync());
+        if (blockReason !== undefined) {
+          terminal.writeLine(`Not using the incremental command because ${blockReason}.`);
+          return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
+        }
 
-        const closePromise: Promise<{
-          readonly exitCode: number | null;
-          readonly signal: NodeJS.Signals | null;
-        }> = new Promise(
-          (
-            resolve: (result: {
-              readonly exitCode: number | null;
-              readonly signal: NodeJS.Signals | null;
-            }) => void,
-            reject: (error: OperationError) => void
-          ) => {
-            subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
-              try {
-                resolve({ exitCode, signal });
-              } catch (error) {
-                context.error = error as OperationError;
-                reject(error as OperationError);
-              }
-            });
-          }
+        const status: OperationStatus = await this.#invokeCommandAsync(
+          context,
+          terminals,
+          'incremental',
+          incrementalCommand
         );
-        const [{ exitCode, signal }]: [
-          { readonly exitCode: number | null; readonly signal: NodeJS.Signals | null },
-          void
-        ] = await Promise.all([closePromise, reporterDrainPromise]).finally(() => {
-          abortSignal?.removeEventListener('abort', terminateProcessTree);
-        });
-
-        if (abortSignal?.aborted) {
-          terminal.writeLine('Terminated because the operation was aborted.');
-          return OperationStatus.Aborted;
-        } else if (signal) {
-          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
-          context.error = new OperationError('error', `Terminated by signal: ${signal}`);
-          return OperationStatus.Failure;
-        } else if (exitCode !== 0) {
-          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
-          context.error = new OperationError('error', `Returned error code: ${exitCode}`);
-          return OperationStatus.Failure;
-        } else if (reporterError && !(reporterError instanceof HeftChildReporterNonFatalError)) {
-          // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
-          context.error = new OperationError('error', reporterError.message);
-          return OperationStatus.Failure;
-        } else if (hasWarningOrError || childProcessReporter?.hasWarningOrError) {
-          return OperationStatus.SuccessWithWarning;
-        } else {
-          return OperationStatus.Success;
+        if (status !== OperationStatus.Success && status !== OperationStatus.SuccessWithWarning) {
+          return status;
         }
+        const rerunReason: string | undefined = await getGuardResultAsync(() =>
+          guard.verifyIncrementalResultAsync()
+        );
+        if (rerunReason === undefined) {
+          return status;
+        }
+        terminal.writeLine(`Running the initial command, because ${rerunReason}.`);
+        return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
       },
       {
         createLogFile: true
@@ -217,6 +162,142 @@ export class ShellOperationRunner implements IOperationRunner {
 
   public getConfigHash(): string {
     return this.#commandForHash;
+  }
+
+  async #invokeCommandAsync(
+    context: IOperationRunnerContext,
+    { terminal, terminalProvider, structuredChildOutputTerminalProvider }: ICommandTerminals,
+    kind: ICommandExecution['kind'],
+    commandToRun: string
+  ): Promise<OperationStatus> {
+    let hasWarningOrError: boolean = false;
+
+    if (this.#incrementalCommandRequiresGuard) {
+      // Recorded before the command starts, so that outputs of a command that fails or is aborted are attributed to it.
+      setCommandExecution(context, { kind, hasIncrementalCommand: this.#incrementalCommand !== undefined });
+    }
+
+    // Run the operation
+    terminal.writeLine(`Invoking (${kind}): ${commandToRun}`);
+
+    const { rushConfiguration, projectFolder } = this.#rushProject;
+
+    const { environment: initialEnvironment, abortSignal } = context;
+    const childProcessReporter: IOperationChildProcessReporter | undefined =
+      !IS_WINDOWS && isHeftCommand(commandToRun) ? context.createChildProcessReporter() : undefined;
+
+    const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
+      rushConfiguration: rushConfiguration,
+      workingDirectory: projectFolder,
+      initCwd: rushConfiguration.commonTempFolder,
+      handleOutput: true,
+      environmentPathOptions: {
+        includeProjectBin: true
+      },
+      initialEnvironment,
+      additionalEnvironment: childProcessReporter?.environment,
+      stdio: childProcessReporter?.stdio,
+      // Isolate the process tree so that a hard abort can terminate it.
+      connectSubprocessTerminator: abortSignal !== undefined
+    });
+    const terminateProcessTree: () => void = () => {
+      try {
+        if (!IS_WINDOWS && subProcess.pid !== undefined && typeof subProcess.exitCode === 'number') {
+          // The shell already exited, but descendants in its process group may still hold its stdio open.
+          // killProcessTree() is a no-op in that state, so signal the process group directly.
+          killExitedProcessGroup(subProcess.pid);
+        } else {
+          SubprocessTerminator.killProcessTree(subProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+        }
+      } catch (error) {
+        terminal.writeErrorLine(`Failed to terminate the operation process tree: ${error}`);
+      }
+    };
+    if (abortSignal?.aborted) {
+      terminateProcessTree();
+    } else {
+      abortSignal?.addEventListener('abort', terminateProcessTree, { once: true });
+    }
+    let reporterError: Error | undefined;
+    const reporterDrainPromise: Promise<void> = childProcessReporter
+      ? childProcessReporter.attachAsync(subProcess, structuredChildOutputTerminalProvider).catch((error) => {
+          reporterError =
+            error instanceof Error ? error : new Error('The Heft child reporter channel failed.');
+        })
+      : Promise.resolve();
+
+    // Hook into events, in order to get live streaming of the log
+    subProcess.stdout?.on('data', (data: Buffer) => {
+      const text: string = data.toString();
+      terminalProvider.write(text, TerminalProviderSeverity.log);
+    });
+    subProcess.stderr?.on('data', (data: Buffer) => {
+      const text: string = data.toString();
+      terminalProvider.write(text, TerminalProviderSeverity.error);
+      hasWarningOrError = true;
+    });
+
+    const closePromise: Promise<{
+      readonly exitCode: number | null;
+      readonly signal: NodeJS.Signals | null;
+    }> = new Promise(
+      (
+        resolve: (result: {
+          readonly exitCode: number | null;
+          readonly signal: NodeJS.Signals | null;
+        }) => void,
+        reject: (error: OperationError) => void
+      ) => {
+        subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
+          try {
+            resolve({ exitCode, signal });
+          } catch (error) {
+            context.error = error as OperationError;
+            reject(error as OperationError);
+          }
+        });
+      }
+    );
+    const [{ exitCode, signal }]: [
+      { readonly exitCode: number | null; readonly signal: NodeJS.Signals | null },
+      void
+    ] = await Promise.all([closePromise, reporterDrainPromise]).finally(() => {
+      abortSignal?.removeEventListener('abort', terminateProcessTree);
+    });
+
+    if (abortSignal?.aborted) {
+      terminal.writeLine('Terminated because the operation was aborted.');
+      return OperationStatus.Aborted;
+    } else if (signal) {
+      // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+      context.error = new OperationError('error', `Terminated by signal: ${signal}`);
+      return OperationStatus.Failure;
+    } else if (exitCode !== 0) {
+      // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+      context.error = new OperationError('error', `Returned error code: ${exitCode}`);
+      return OperationStatus.Failure;
+    } else if (reporterError && !(reporterError instanceof HeftChildReporterNonFatalError)) {
+      // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+      context.error = new OperationError('error', reporterError.message);
+      return OperationStatus.Failure;
+    } else if (hasWarningOrError || childProcessReporter?.hasWarningOrError) {
+      return OperationStatus.SuccessWithWarning;
+    } else {
+      return OperationStatus.Success;
+    }
+  }
+}
+
+/**
+ * Returns what an incremental execution guard returned, or why it failed.
+ */
+async function getGuardResultAsync(
+  getResultAsync: () => Promise<string | undefined>
+): Promise<string | undefined> {
+  try {
+    return await getResultAsync();
+  } catch (error) {
+    return `its incremental execution guard failed: ${error}`;
   }
 }
 

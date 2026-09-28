@@ -23,6 +23,8 @@ import type {
   WorkspaceInvalidationTracker
 } from './WorkspaceInvalidationTracker';
 
+// Rush's incremental execution guard keeps the base of an operation that is invalidated with this reason, because it
+// compares the operation's inputs itself (INPUTS_CHANGED_INVALIDATION_REASON in rush-lib). Keep the two in sync.
 const INVALIDATION_REASON: 'workspace-inputs-changed' = 'workspace-inputs-changed';
 
 /**

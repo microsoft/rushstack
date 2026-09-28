@@ -191,6 +191,14 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
 - **No persistent Heft or TypeScript workers.** Each operation still starts its Heft process; the daemon
   saves Rush startup and graph construction, not compilation. The `usePersistentIpcRunners`/`daemonIpc`
   mode requires a bundled, self-contained worker entry point, and Heft is not packaged that way.
+- **`:incremental` scripts.** With `daemon.incrementalBuilds` (on by default), an operation whose project
+  defines a `_phase:<name>:incremental` script runs it instead of the initial script when only files that the
+  operation builds were edited since its last successful run in the daemon. The operation log then says
+  `Invoking (incremental): ...`. An added, deleted or renamed input, a configuration, tool, environment or
+  command-line change, a change to its output folders, bundled outputs, a cache restore or a native `rush`
+  command make it run the initial script, and the log says why (`Not using the incremental command because
+  ...`). Incremental results are never written to the build cache, and neither are the results of operations
+  built against them. Set `RUSH_DAEMON_INCREMENTAL_BUILDS=0` to always run the initial script.
 - **Plugins.** This repository's only configured plugin, `@rushstack/rush-published-versions-json-plugin`,
   is associated only with `record-published-versions` and is inert for builds. A plugin without
   `associatedCommands`, a plugin associated with `build` or `rebuild`, or a plugin command-line that defines

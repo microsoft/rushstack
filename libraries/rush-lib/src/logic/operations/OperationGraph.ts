@@ -910,7 +910,8 @@ export class OperationGraph implements IOperationGraph {
 
     const iterationOptions: IOperationGraphIterationOptions = {
       inputsSnapshot: iterationContext.inputsSnapshot,
-      startTime: iterationContext.startTime
+      startTime: iterationContext.startTime,
+      getOperationEnvironment: iterationContext.getOperationEnvironment
     };
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(

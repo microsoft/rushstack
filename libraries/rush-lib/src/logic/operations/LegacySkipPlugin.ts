@@ -12,6 +12,7 @@ import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFrame
 import type { IOperationGraphIterationOptions } from './IOperationGraph';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import { wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 
@@ -244,6 +245,12 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           }
 
           const { packageDeps, packageDepsPath } = skipRecord;
+
+          if (wasExecutedIncrementally(record)) {
+            // The outputs of an incremental command can differ from those of the initial command, so a later
+            // command must not skip the operation.
+            return;
+          }
 
           if (
             status === OperationStatus.NoOp ||
