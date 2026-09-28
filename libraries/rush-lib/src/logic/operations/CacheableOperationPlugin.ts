@@ -48,11 +48,14 @@ import type {
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import { enableUnverifiedRetainedOperations } from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
+// Runs after the default-stage taps (e.g. PhasedOperationPlugin) have decided which operations to enable.
+const RE_ENABLE_UNTRUSTED_RESULTS_STAGE: number = 1;
 
 export interface IProjectDeps {
   files: { [filePath: string]: string };
@@ -201,6 +204,21 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
         this.#buildCacheContextByOperation.clear();
       });
+      graph.hooks.configureIteration.tap(
+        { name: PLUGIN_NAME, stage: RE_ENABLE_UNTRUSTED_RESULTS_STAGE },
+        (
+          currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
+          lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
+          iterationOptions: IOperationGraphIterationOptions
+        ) => {
+          // PhasedOperationPlugin re-verifies results that were built against unverified dependency outputs.
+          // This also re-verifies results that are not trusted for other reasons, e.g. because their input files
+          // changed while they were executing. Without cache writes, nothing is ever trusted.
+          if (buildCacheConfiguration.cacheWriteEnabled && iterationOptions.inputsSnapshot) {
+            enableUnverifiedRetainedOperations(currentStates, lastStates, trustedStateHashByOperation);
+          }
+        }
+      );
       graph.hooks.beforeExecuteIterationAsync.tap(
         PLUGIN_NAME,
         (
@@ -692,13 +710,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               // Skipping generally means we cannot guarantee integrity, so prevent cache writes in dependents.
               // The exception is an operation that was not re-run because a previous iteration of this graph
               // produced a trusted result at exactly the same state hash (e.g. a result retained by a
-              // long-lived graph such as the Rush daemon). Since the state hash of an operation covers the
-              // state hashes of all of its dependencies, a consumer's cache key fully describes this input.
-              if (
-                blockCacheWrite ||
-                record.operation.enabled === false ||
-                trustedStateHashByOperation.get(operation) !== record.getStateHash()
-              ) {
+              // long-lived graph such as the Rush daemon), whether or not this iteration selected it. Since the
+              // state hash of an operation covers the state hashes of all of its dependencies, a consumer's
+              // cache key fully describes this input.
+              if (blockCacheWrite || trustedStateHashByOperation.get(operation) !== record.getStateHash()) {
                 blockCacheWrite = true;
                 trustedStateHashByOperation.delete(operation);
               }

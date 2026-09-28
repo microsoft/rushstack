@@ -276,11 +276,25 @@ describe(CacheableOperationPlugin.name, () => {
     expect(testGraph.cacheWrites).toEqual(['c']);
   });
 
-  it('does not write a cache entry when a dependency was skipped by the user (e.g. --only)', async () => {
+  it('writes a cache entry when a dependency that was not selected (e.g. --only) is trusted at its state hash', async () => {
     const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
     await testGraph.executeAsync();
 
     testGraph.operations.get('a')!.enabled = false;
+    testGraph.localHashes.set('b', 'b-v2');
+    const result: IExecutionResult = await testGraph.executeAsync();
+
+    expect(getStatus(testGraph, result, 'a')).toBe(OperationStatus.Skipped);
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual(['b']);
+  });
+
+  it('does not write a cache entry when a dependency that was not selected (e.g. --only) has changed', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    await testGraph.executeAsync();
+
+    testGraph.operations.get('a')!.enabled = false;
+    testGraph.localHashes.set('a', 'a-v2');
     testGraph.localHashes.set('b', 'b-v2');
     const result: IExecutionResult = await testGraph.executeAsync();
 
@@ -299,7 +313,7 @@ describe(CacheableOperationPlugin.name, () => {
     expect(testGraph.cacheWrites).toEqual([]);
   });
 
-  it('does not trust a retained result that was produced while one of its dependencies was skipped', async () => {
+  it('re-executes a retained result that was produced while one of its dependencies was skipped', async () => {
     const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
     const a: Operation = testGraph.operations.get('a')!;
 
@@ -314,10 +328,10 @@ describe(CacheableOperationPlugin.name, () => {
     testGraph.localHashes.set('c', 'c-v2');
     const result: IExecutionResult = await testGraph.executeAsync();
 
-    expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Skipped);
-    expect(testGraph.executions).toEqual(['a', 'c']);
-    // "b" was built against an unknown "a", so "c" must not write to the cache.
-    expect(testGraph.cacheWrites).toEqual(['a']);
+    // "b" was built against an unknown "a", so it must not be skipped now that "a" has executed.
+    expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Success);
+    expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+    expect(testGraph.cacheWrites).toEqual(['a', 'b', 'c']);
   });
 
   it('does not trust results whose state hash changed without re-execution', async () => {

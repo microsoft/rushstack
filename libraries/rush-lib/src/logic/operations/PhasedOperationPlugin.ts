@@ -17,8 +17,9 @@ import type {
   IOperationExecutionResult,
   IOperationStateHashComponents
 } from './IOperationExecutionResult';
-import { SUCCESS_STATUSES } from './OperationStatus';
+import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import { enableUnverifiedRetainedOperations } from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 
@@ -124,6 +125,18 @@ function createOperations(
 }
 
 function configureExecutionManager(graph: IOperationGraph, context: IOperationGraphContext): void {
+  // The state hash at which each operation last produced its outputs, or restored them from the build cache,
+  // in an iteration of this graph in which the outputs of all of its dependencies were verified.
+  const verifiedStateHashByOperation: Map<Operation, string> = new Map();
+  // The records of the executing iteration, if its state hashes are available.
+  let iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult> | undefined;
+
+  graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations: ReadonlySet<Operation>) => {
+    for (const operation of operations) {
+      verifiedStateHashByOperation.delete(operation);
+    }
+  });
+
   graph.hooks.configureIteration.tap(
     PLUGIN_NAME,
     (
@@ -132,8 +145,91 @@ function configureExecutionManager(graph: IOperationGraph, context: IOperationGr
       iterationOptions: IOperationGraphIterationOptions
     ) => {
       configureOperations(currentStates, lastStates, iterationOptions);
+      if (iterationOptions.inputsSnapshot) {
+        // A retained result that is current by state hash can still have been built against outputs of a
+        // dependency that were not current, e.g. by an `--only` request.
+        enableUnverifiedRetainedOperations(currentStates, lastStates, verifiedStateHashByOperation);
+      }
     }
   );
+
+  graph.hooks.beforeExecuteIterationAsync.tap(
+    PLUGIN_NAME,
+    (
+      records: ReadonlyMap<Operation, IOperationExecutionResult>,
+      iterationOptions: IOperationGraphIterationOptions
+    ): void => {
+      if (iterationOptions.inputsSnapshot) {
+        iterationRecords = records;
+      } else {
+        // Without state hashes, nothing can be verified.
+        iterationRecords = undefined;
+        verifiedStateHashByOperation.clear();
+      }
+    }
+  );
+
+  graph.hooks.afterExecuteOperationAsync.tap(PLUGIN_NAME, (record: IOperationExecutionResult) => {
+    if (iterationRecords) {
+      updateVerifiedStateHash(record, iterationRecords, verifiedStateHashByOperation);
+    }
+  });
+
+  graph.hooks.afterExecuteIterationAsync.tap(PLUGIN_NAME, (status: OperationStatus) => {
+    iterationRecords = undefined;
+    return status;
+  });
+}
+
+function updateVerifiedStateHash(
+  record: IOperationExecutionResult,
+  records: ReadonlyMap<Operation, IOperationExecutionResult>,
+  verifiedStateHashByOperation: Map<Operation, string>
+): void {
+  const { operation } = record;
+  switch (record.status) {
+    case OperationStatus.Skipped: {
+      // The outputs were left as they were.
+      return;
+    }
+
+    case OperationStatus.FromCache: {
+      // The outputs were restored from the build cache entry for this state hash.
+      verifiedStateHashByOperation.set(operation, record.getStateHash());
+      return;
+    }
+
+    case OperationStatus.Success:
+    case OperationStatus.SuccessWithWarning:
+    case OperationStatus.NoOp: {
+      if (areDependenciesVerified(operation, records, verifiedStateHashByOperation)) {
+        verifiedStateHashByOperation.set(operation, record.getStateHash());
+        return;
+      }
+      break;
+    }
+
+    default: {
+      // The outputs may be incomplete.
+      break;
+    }
+  }
+
+  verifiedStateHashByOperation.delete(operation);
+}
+
+function areDependenciesVerified(
+  operation: Operation,
+  records: ReadonlyMap<Operation, IOperationExecutionResult>,
+  verifiedStateHashByOperation: ReadonlyMap<Operation, string>
+): boolean {
+  for (const dependency of operation.dependencies) {
+    const dependencyRecord: IOperationExecutionResult | undefined = records.get(dependency);
+    if (!dependencyRecord || verifiedStateHashByOperation.get(dependency) !== dependencyRecord.getStateHash()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function shouldEnableOperation(

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "In long-lived operation graphs such as the Rush daemon, a selected operation whose retained result was built against outputs of a dependency that have since been rebuilt is now run again instead of being skipped, even if build cache writes are disabled or the build cache is off.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

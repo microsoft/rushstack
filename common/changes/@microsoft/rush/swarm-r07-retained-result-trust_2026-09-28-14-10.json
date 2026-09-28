@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "In long-lived operation graphs such as the Rush daemon, an operation that a request did not select no longer blocks build cache writes for its consumers if its retained result is trusted at its current state hash. A selected operation whose retained result is not trusted is now restored from the build cache or run again instead of being skipped, so it no longer stops cache writes for its consumers or keeps outputs that were built against dependencies that have since been rebuilt.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
