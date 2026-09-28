@@ -120,6 +120,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #startupFingerprint: IWorkspaceInputFingerprint;
   readonly #runtimeCache: WorkspaceRuntimeFingerprintCache;
   // Concurrent requests share captures; each capture still starts after the requests it serves arrived.
+  // The coalescers' default clock, performance.now(), is also the clock of receivedTimeMs.
   readonly #fingerprintCaptures: FreshCaptureCoalescer<RushConfiguration, IWorkspaceInputFingerprint> =
     new FreshCaptureCoalescer();
   readonly #projectFingerprintCaptures: FreshCaptureCoalescer<RushConfiguration, string> =
@@ -216,7 +217,13 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     try {
       for (let attempt: number = 0; ; attempt++) {
         try {
-          const prepared: IPreparedGeneration = await this.#prepareAsync(envelope, client, admission, ticket);
+          const prepared: IPreparedGeneration = await this.#prepareAsync(
+            envelope,
+            client,
+            admission,
+            ticket,
+            receivedTimeMs
+          );
           generation = prepared;
           const requestEnvelope: IDaemonRequestEnvelope = {
             ...envelope,
@@ -307,6 +314,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     client: IDaemonRequestDispatchClient,
     admission: RequestAdmissionController,
     ticket: IWorkspaceRestartTicket | undefined,
+    receivedTimeMs: number,
     admittedLease?: IRequestLease
   ): Promise<IPreparedGeneration> {
     let lease: IRequestLease =
@@ -401,7 +409,9 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           fingerprint: this.#fingerprint
         };
       }
-      let fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
+      // The client changes the workspace before it sends a request, so any capture that started after the request
+      // was received sees those changes. Captures that must detect changes made during a transition stay strict.
+      let fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope, receivedTimeMs);
       let tier: WorkspaceInputChangeTier = this.#classify(fingerprint, isMutation(envelope));
       let commandIdentity: string | undefined;
       let projectFingerprint: string | undefined;
@@ -412,7 +422,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           abortSignal: client.abortSignal
         });
         if (tier === WorkspaceInputChangeTier.Reuse) {
-          projectFingerprint = await this.#captureProjectFingerprintAsync(session);
+          projectFingerprint = await this.#captureProjectFingerprintAsync(session, receivedTimeMs);
           if (
             this.#boundSession !== session ||
             this.#commandIdentity !== commandIdentity ||
@@ -446,7 +456,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           this.#gate,
           this.#transitionProgress
         );
-        return await this.#prepareAsync(envelope, client, admission, ticket, shared);
+        return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs, shared);
       }
       this.#transitioning = ownsTransition = true;
       this.#cancelObservers();
@@ -636,7 +646,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
 
   #captureAsync(
     session: IWorkspaceSession,
-    envelope: IDaemonRequestEnvelope
+    envelope: IDaemonRequestEnvelope,
+    notBeforeMs?: number
   ): Promise<IWorkspaceInputFingerprint> {
     const { rushConfiguration } = session;
     const { environment } = envelope;
@@ -645,20 +656,27 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       environment.RUSH_PREVIEW_VERSION ?? null,
       getWorkspaceFingerprintEnvironmentEntries(environment)
     ]);
-    return this.#fingerprintCaptures.captureAsync(rushConfiguration, key, () =>
-      captureWorkspaceInputFingerprintAsync({
-        rushConfiguration,
-        environment,
-        runtimePaths: this.#runtimePaths,
-        runtimeCache: this.#runtimeCache
-      })
+    return this.#fingerprintCaptures.captureAsync(
+      rushConfiguration,
+      key,
+      () =>
+        captureWorkspaceInputFingerprintAsync({
+          rushConfiguration,
+          environment,
+          runtimePaths: this.#runtimePaths,
+          runtimeCache: this.#runtimeCache
+        }),
+      notBeforeMs
     );
   }
 
-  #captureProjectFingerprintAsync(session: IWorkspaceSession): Promise<string> {
+  #captureProjectFingerprintAsync(session: IWorkspaceSession, notBeforeMs?: number): Promise<string> {
     const { rushConfiguration } = session;
-    return this.#projectFingerprintCaptures.captureAsync(rushConfiguration, '', () =>
-      captureProjectConfigurationFingerprintAsync(rushConfiguration, this.#terminal)
+    return this.#projectFingerprintCaptures.captureAsync(
+      rushConfiguration,
+      '',
+      () => captureProjectConfigurationFingerprintAsync(rushConfiguration, this.#terminal),
+      notBeforeMs
     );
   }
 
