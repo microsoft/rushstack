@@ -18,6 +18,7 @@ import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResol
 import { RushDaemonHost } from '../RushDaemonHost';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { removeTestFolderAsync } from './TestProcessExit';
+import { trackTestDaemonHostAsync } from './TestDaemonHostCleanup';
 import type { GetWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import type {
   IDaemonRequestResolver,
@@ -359,6 +360,7 @@ if (input === 'failure') process.exitCode = 7;
         return session;
       }
     });
+    await trackTestDaemonHostAsync(host);
     const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
     await client.handshakeAsync();
     const runningHost: RushDaemonHost = host;

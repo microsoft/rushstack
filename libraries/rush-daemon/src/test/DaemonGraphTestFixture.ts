@@ -31,6 +31,7 @@ import {
 } from './DaemonRequestWireTestUtilities';
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 import { removeTestFolderAsync } from './TestProcessExit';
+import { trackTestDaemonHostAsync } from './TestDaemonHostCleanup';
 
 /**
  * How long a fixture script that waits for its test may run. Keep it longer than the timeout of every test that uses
@@ -200,6 +201,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
         return this.session;
       }
     });
+    await trackTestDaemonHostAsync(this.host);
   }
 
   public async restartAsync(): Promise<void> {

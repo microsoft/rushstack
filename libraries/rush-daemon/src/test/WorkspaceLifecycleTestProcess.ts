@@ -4,7 +4,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { DaemonClient, requestDaemonShutdownAsync } from '@rushstack/rush-client-core';
+import { DaemonClient, getDaemonLogFilePath, requestDaemonShutdownAsync } from '@rushstack/rush-client-core';
 import {
   readDaemonLockfile,
   type IDaemonLockfile,
@@ -12,10 +12,18 @@ import {
 } from '@rushstack/rush-daemon-transport';
 import { waitForTestProcessExitAsync } from './TestProcessExit';
 
-/** Waits on attested ownership removal, not an arbitrary sleep or mere connection close. */
+/**
+ * Stops the daemon that owns `paths` unless it is this process, then removes the log that the daemons for `paths`
+ * appended to. Waits on attested ownership removal, not an arbitrary sleep or mere connection close.
+ */
 export async function stopSuccessorAsync(paths: IDaemonPaths): Promise<void> {
   const owner: IDaemonLockfile | undefined = readDaemonLockfile(paths.lockfilePath);
-  if (!owner || owner.pid === process.pid) return;
+  if (owner && owner.pid !== process.pid) await stopOwnerAsync(paths, owner);
+  // Nothing else removes it. When the stop fails, it stays for diagnosis.
+  await fs.promises.rm(getDaemonLogFilePath(paths), { force: true });
+}
+
+async function stopOwnerAsync(paths: IDaemonPaths, owner: IDaemonLockfile): Promise<void> {
   const { pid: ownerPid, startedAt: ownerStartedAt } = owner;
   const client: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
   const removed: Promise<void> = new Promise((resolve, reject) => {
