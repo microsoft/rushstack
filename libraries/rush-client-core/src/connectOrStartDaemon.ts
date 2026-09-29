@@ -68,6 +68,9 @@ const STARTUP_HELPER_READINESS_TIMEOUT_MS: number = 120_000;
 /** Matches the default of {@link DaemonClient.shutdownAsync}. */
 const DEFAULT_SHUTDOWN_TIMEOUT_MS: number = 15000;
 
+/** How often a client that waits for another client's startup checks whether a startup reservation remains. */
+const STARTUP_RESERVATION_POLL_MS: number = 25;
+
 /** A version-selected launch command supplied by the embedding application, never guessed by the core. @beta */
 export interface IDaemonStartCommand {
   readonly command: string;
@@ -177,13 +180,18 @@ async function startDaemonAsync(
   ensureDaemonRuntimeFolder(options.paths);
   let lock: IStartupLock | undefined;
   let backoffMs: number = 50;
+  // Whether a startup reservation remained when this client last checked.
+  let reserved: boolean = false;
   while (Date.now() < deadline) {
     options.abortSignal?.throwIfAborted();
     lock = await tryAcquireStartupLockAsync(options.paths);
     if (lock) break;
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
-      signal: options.abortSignal
-    });
+    reserved = await delayUntilStartupReleasedAsync(
+      options.paths,
+      reserved,
+      Math.min(backoffMs, Math.max(1, deadline - Date.now())),
+      options.abortSignal
+    );
     backoffMs = Math.min(500, backoffMs * 2);
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
@@ -800,6 +808,32 @@ async function delayUntilHelperExitAsync(
     await Promise.race([delayAsync(delayMs, undefined, { signal }), helper.closed]);
   } finally {
     timer.abort();
+  }
+}
+
+/**
+ * Waits `delayMs`, or until a startup reservation that this client saw is released if that is sooner. While another
+ * client holds the start mutex, this client drops each connection as long as a reservation remains (see
+ * `tryConnectAsync()`), and the reservation is released once the daemon completes hello/ping, so the next
+ * connection can be kept. Checks every {@link STARTUP_RESERVATION_POLL_MS} milliseconds, since a reservation can
+ * also appear during the wait. `wasReserved` tells whether a reservation remained at this client's previous check,
+ * which may have been in an earlier wait.
+ * @returns Whether a reservation remained at the last check.
+ */
+async function delayUntilStartupReleasedAsync(
+  paths: IDaemonPaths,
+  wasReserved: boolean,
+  delayMs: number,
+  abortSignal: AbortSignal | undefined
+): Promise<boolean> {
+  const end: number = Date.now() + delayMs;
+  let previous: boolean = wasReserved;
+  while (true) {
+    const reserved: boolean = readDaemonStartupReservation(paths) !== undefined;
+    const remainingMs: number = end - Date.now();
+    if ((previous && !reserved) || remainingMs <= 0) return reserved;
+    previous = reserved;
+    await delayAsync(Math.min(STARTUP_RESERVATION_POLL_MS, remainingMs), undefined, { signal: abortSignal });
   }
 }
 

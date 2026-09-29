@@ -13,6 +13,7 @@ import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { DaemonClient } from '../DaemonClient';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
+import { trackPendingDelays, type IPendingDelays } from './PendingDelays';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 function readIfPresent(filePath: string): string {
@@ -82,29 +83,6 @@ function recordStartupTimeline(holdFailedAttemptsAfterMs: number = Infinity): {
       observer.mockRestore();
     }
   };
-}
-
-interface IPendingDelays {
-  /** The `node:timers/promises` delays that have begun but not yet settled. */
-  readonly pending: ReadonlySet<Promise<unknown>>;
-  readonly restore: () => void;
-}
-
-/** Tracks the delays that are pending until `restore` is called. */
-function trackPendingDelays(): IPendingDelays {
-  const timersPromises = jest.requireActual<typeof import('node:timers/promises')>('node:timers/promises');
-  const originalDelayAsync: typeof delayAsync = timersPromises.setTimeout;
-  const pending: Set<Promise<unknown>> = new Set();
-  const spy = jest.spyOn(timersPromises, 'setTimeout').mockImplementation((delayMs, value, delayOptions) => {
-    const delay: Promise<unknown> = originalDelayAsync(delayMs, value, delayOptions);
-    pending.add(delay);
-    const settle = (): void => {
-      pending.delete(delay);
-    };
-    void delay.then(settle, settle);
-    return delay;
-  });
-  return { pending, restore: () => spy.mockRestore() };
 }
 
 // A file of its own, since connectOrStartDaemon.test.ts is close to the 2,000-line max-lines limit.

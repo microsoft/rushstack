@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "A client that waits while another client starts the daemon now connects as soon as the startup reservation is released, instead of at the end of its current backoff step, which added up to 0.5 seconds to each concurrent cold start.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}
