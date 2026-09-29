@@ -651,6 +651,7 @@ export interface IWorkspaceResolverLifecycle {
     createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): IDaemonRequestResolver;
     // (undocumented)
     getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
+    getUnsupportedCommandError?(envelope: IDaemonRequestEnvelope): DaemonRequestDispatchError | undefined;
 }
 
 // @beta
@@ -778,6 +779,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     });
     createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): ProductionDaemonRequestResolver;
     getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
+    getUnsupportedCommandError(envelope: IDaemonRequestEnvelope): DaemonRequestDispatchError | undefined;
     // (undocumented)
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
     // (undocumented)

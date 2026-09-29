@@ -29,6 +29,7 @@ import type {
 
 import {
   DaemonRequestDispatchError,
+  isDaemonGraphCommand,
   type DispatchWorkspaceRequestAsync,
   type IDaemonRequestDispatchClient,
   type IDaemonRequestLifecycle,
@@ -332,6 +333,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         }
         let scriptLease: IRequestLease | undefined;
         try {
+          this.#throwIfUnsupportedCommand(envelope);
           const prepared: IPreparedGeneration = await this.#prepareAsync(
             envelope,
             client,
@@ -1199,6 +1201,19 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         'so that the next client starts a new daemon'
     );
     return change;
+  }
+
+  /**
+   * Rejects a command that the resolver never serves before the request waits for admission, so that its client can
+   * run the command in-process at once. Otherwise the request would wait, for example behind a build that waits for
+   * the running build before it reloads the graph, and could fail when its own wait timeout ran out. The rejection is
+   * handled as one after admission: once the installation changed, the request gets the restart result instead.
+   */
+  #throwIfUnsupportedCommand(envelope: IDaemonRequestEnvelope): void {
+    if (isRushxInvocation(envelope) || isDaemonGraphCommand(envelope) || isMutation(envelope)) return;
+    const unsupported: DaemonRequestDispatchError | undefined =
+      this.#resolver.workspaceLifecycle?.getUnsupportedCommandError?.(envelope);
+    if (unsupported) throw unsupported;
   }
 
   #throwIfInstallationChanged(): void {

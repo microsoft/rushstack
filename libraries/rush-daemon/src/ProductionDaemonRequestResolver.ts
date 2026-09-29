@@ -132,6 +132,32 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   }
 
   /**
+   * Rejects a rushx script and a built-in command that is not phased, since the resolver never serves either.
+   *
+   * @remarks
+   * It reads only the envelope, so it needs no session: command-line.json cannot redefine a built-in command, so
+   * the name identifies one without a parse. Whether the resolver serves a custom command is known only once its
+   * command line is parsed (`getCommandParameterIdentityAsync`), so this never rejects one.
+   */
+  public getUnsupportedCommandError(
+    envelope: IDaemonRequestEnvelope
+  ): DaemonRequestDispatchError | undefined {
+    if (isRushxInvocation(envelope)) {
+      return new DaemonRequestDispatchError('unsupported', 'A rushx script is not a phased command request.');
+    }
+    if (
+      Object.hasOwn(BUILT_IN_RUSH_COMMAND_CLASSIFICATION, envelope.commandName) &&
+      !BUILT_IN_PHASED_COMMAND_NAMES.has(envelope.commandName)
+    ) {
+      return new DaemonRequestDispatchError(
+        'unsupported',
+        `"${envelope.commandName}" is a built-in command that is not phased.`
+      );
+    }
+    return undefined;
+  }
+
+  /**
    * Inspects the native command shape without constructing or executing an operation graph.
    *
    * @remarks
@@ -296,19 +322,9 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     identityParse?: IParsedCommand
   ): Promise<IParsedCommand> {
     const { envelope, workspaceSession, abortSignal } = options;
-    if (isRushxInvocation(envelope)) {
-      throw new DaemonRequestDispatchError('unsupported', 'A rushx script is not a phased command request.');
-    }
-    if (
-      Object.hasOwn(BUILT_IN_RUSH_COMMAND_CLASSIFICATION, envelope.commandName) &&
-      !BUILT_IN_PHASED_COMMAND_NAMES.has(envelope.commandName)
-    ) {
-      // Skips parsing, because command-line.json cannot redefine a built-in command.
-      throw new DaemonRequestDispatchError(
-        'unsupported',
-        `"${envelope.commandName}" is a built-in command that is not phased.`
-      );
-    }
+    // Skips parsing for a command that the resolver never serves.
+    const unsupported: DaemonRequestDispatchError | undefined = this.getUnsupportedCommandError(envelope);
+    if (unsupported) throw unsupported;
     if (environmentIdentity(envelope.environment) !== this.#environmentIdentity) {
       throw new DaemonRequestDispatchError(
         'unsupported',

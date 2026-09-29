@@ -194,11 +194,7 @@ async function dispatchWorkspaceRequestAsync(
 ): Promise<IDaemonCommandResult | undefined> {
   const { envelope, client, workspaceSession, resolver, onExecutionStarting, lifecycleInfo } = options;
   workspaceSession.assertActive?.();
-  if (
-    !isRushxInvocation(envelope) &&
-    envelope.commandOrigin === 'built-in' &&
-    (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
-  ) {
+  if (isDaemonGraphCommand(envelope)) {
     onExecutionStarting?.();
     await new DaemonGraphRequestRouter(workspaceSession).executeAsync(envelope, client);
     return undefined;
@@ -254,6 +250,15 @@ async function dispatchWorkspaceRequestAsync(
       return await resolved.executor(context);
     },
     createGlobalClient(client)
+  );
+}
+
+/** Whether the dispatcher answers the request with the daemon's graph router instead of the resolver. */
+export function isDaemonGraphCommand(envelope: IDaemonRequestEnvelope): boolean {
+  return (
+    !isRushxInvocation(envelope) &&
+    envelope.commandOrigin === 'built-in' &&
+    (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
   );
 }
 

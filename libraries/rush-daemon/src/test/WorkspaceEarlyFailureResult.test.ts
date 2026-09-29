@@ -177,6 +177,105 @@ async function returnEarlyAsync(fixture: DaemonGraphTestFixture): Promise<void> 
   expect(countRuns(fixture, 'b')).toBe(0);
 }
 
+/**
+ * The daemon rejects this command before admission, as rush-client sends it: rush-client marks only build, rebuild,
+ * install and update as built-in commands, and the daemon finds a built-in command that is not phased by its name.
+ * Unlike `list`, it does not only read the workspace.
+ */
+const NOT_PHASED: string[] = ['install-autoinstaller', '--name', 'tools'];
+
+/**
+ * After a failed build returned early, sends `argv`, which the daemon rejects so that the client runs it in-process,
+ * and checks that the daemon stopped the work that continues before it sent the rejection.
+ */
+async function expectStopBeforeRejectionAsync(argv: string[]): Promise<void> {
+  const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
+  const hold: string = path.join(fixture.folder, 'hold');
+  try {
+    await returnEarlyAsync(fixture);
+
+    const custom: ITerminalExchange = await fixture.runAsync(argv, { commandOrigin: 'custom' });
+    expect(custom.terminal).toMatchObject({ kind: 'requestRejected', payload: { code: 'unsupported' } });
+    // The held c was stopped before the rejection was sent, and the in-process command can take the Rush lock.
+    expect(fs.existsSync(hold)).toBe(true);
+    expect(fixture.session.operationGraph?.status).not.toBe(OperationStatus.Executing);
+    expect(isNativeLockFree(fixture)).toBe(true);
+
+    // So a later build runs c again at once, instead of waiting for the held c.
+    const later: Promise<ITerminalExchange> = fixture.runAsync(['build', '--to', 'c', '--parallelism', '3']);
+    await waitForRunsAsync(fixture, 'c', 2);
+    expect(countRuns(fixture, 'c')).toBe(2);
+    fs.rmSync(hold);
+    expect((await later).terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+  } finally {
+    fs.rmSync(hold, { force: true });
+    await fixture[Symbol.asyncDispose]();
+  }
+}
+
+/**
+ * After a failed build returned early, and while a later build waits for the work that continues, sends `argv`,
+ * which the daemon rejects so that the client would run it in-process. `changeInstallationWhenChecked` changes the
+ * installation while the daemon checks the command. Checks that the daemon answers with the restart instead, and
+ * leaves the work that continues running.
+ */
+async function expectRestartForRejectedCommandAsync(
+  argv: string[],
+  changeInstallationWhenChecked: (custom: IDaemonRequestEnvelope, change: IDaemonInstallationChange) => void
+): Promise<void> {
+  const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
+  const hold: string = path.join(fixture.folder, 'hold');
+  let later: DaemonRequestWireClient | undefined;
+  let rejected: DaemonRequestWireClient | undefined;
+  try {
+    await returnEarlyAsync(fixture);
+    // A later build waits for the held c, so the daemon serves it until that c finishes.
+    later = await fixture.connectAsync();
+    const build: IDaemonRequestEnvelope = fixture.envelope(['build', '--to', 'c', '--parallelism', '3']);
+    await later.sendControlAsync({ kind: 'requestStart', payload: build });
+    await readUntilQueuedAsync(later);
+
+    // The installation changes while the daemon rejects a command that the client would run in-process.
+    const change: IDaemonInstallationChange = {
+      change: 'replaced',
+      folder: path.join(fixture.folder, 'daemon')
+    };
+    const custom: IDaemonRequestEnvelope = fixture.envelope(argv, { commandOrigin: 'custom' });
+    changeInstallationWhenChecked(custom, change);
+    rejected = await fixture.connectAsync();
+    await rejected.sendControlAsync({ kind: 'requestStart', payload: custom });
+
+    // So the client restarts the daemon instead of running the command in-process, and the restart waits for
+    // the later build, which still waits for the held c.
+    const restartReason: object = { kind: 'installationChanged', ...change };
+    expect(queuePositions(await readUntilQueuedAsync(rejected))).toEqual([
+      expect.objectContaining({ position: 1, restartReason })
+    ]);
+    expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
+    expect(countRuns(fixture, 'c')).toBe(1);
+
+    fs.rmSync(hold);
+    expect((await later.readTerminalAsync(build.requestId)).terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: { exitCode: 0 }
+    });
+    expect((await rejected.readTerminalAsync(custom.requestId)).terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: { exitCode: 1, retryAfterRestart: true, restartReason }
+    });
+    // The held c finished, and the later build found it done.
+    expect(countRuns(fixture, 'c')).toBe(1);
+    await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+  } finally {
+    installationChange = undefined;
+    jest.restoreAllMocks();
+    fs.rmSync(hold, { force: true });
+    await later?.closeAsync();
+    await rejected?.closeAsync();
+    await fixture[Symbol.asyncDispose]();
+  }
+}
+
 describe('a failed build that returns early', () => {
   it('lets a rebuild stop the work that continues instead of waiting for it', async () => {
     const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
@@ -293,36 +392,12 @@ describe('a failed build that returns early', () => {
   });
 
   it('stops the work that continues before it rejects a command that the client then runs in-process', async () => {
-    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
-    const hold: string = path.join(fixture.folder, 'hold');
-    try {
-      await returnEarlyAsync(fixture);
+    // The fixture's `test` is not a phased command, so the daemon rejects it at its parse, after admission.
+    await expectStopBeforeRejectionAsync(['test', '--to', 'c']);
+  });
 
-      const custom: ITerminalExchange = await fixture.runAsync(['test', '--to', 'c'], {
-        commandOrigin: 'custom'
-      });
-      expect(custom.terminal).toMatchObject({ kind: 'requestRejected', payload: { code: 'unsupported' } });
-      // The held c was stopped before the rejection was sent, and the in-process command can take the Rush lock.
-      expect(fs.existsSync(hold)).toBe(true);
-      expect(fixture.session.operationGraph?.status).not.toBe(OperationStatus.Executing);
-      expect(isNativeLockFree(fixture)).toBe(true);
-
-      // So a later build runs c again at once, instead of waiting for the held c.
-      const later: Promise<ITerminalExchange> = fixture.runAsync([
-        'build',
-        '--to',
-        'c',
-        '--parallelism',
-        '3'
-      ]);
-      await waitForRunsAsync(fixture, 'c', 2);
-      expect(countRuns(fixture, 'c')).toBe(2);
-      fs.rmSync(hold);
-      expect((await later).terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
-    } finally {
-      fs.rmSync(hold, { force: true });
-      await fixture[Symbol.asyncDispose]();
-    }
+  it('stops the work that continues before it rejects a built-in command that is not phased, before admission', async () => {
+    await expectStopBeforeRejectionAsync(NOT_PHASED);
   });
 
   it('answers a client that cancels while the work that continues is stopping, without waiting for it to stop', async () => {
@@ -473,27 +548,8 @@ describe('a failed build that returns early', () => {
   });
 
   it('answers a command that it rejects with the restart once the installation changed, and leaves the work that continues running', async () => {
-    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
-    const hold: string = path.join(fixture.folder, 'hold');
-    let later: DaemonRequestWireClient | undefined;
-    let rejected: DaemonRequestWireClient | undefined;
-    try {
-      await returnEarlyAsync(fixture);
-      // A later build waits for the held c, so the daemon serves it until that c finishes.
-      later = await fixture.connectAsync();
-      const build: IDaemonRequestEnvelope = fixture.envelope(['build', '--to', 'c', '--parallelism', '3']);
-      await later.sendControlAsync({ kind: 'requestStart', payload: build });
-      await readUntilQueuedAsync(later);
-
-      // The installation changes while the daemon rejects a command that the client would run in-process.
-      const change: IDaemonInstallationChange = {
-        change: 'replaced',
-        folder: path.join(fixture.folder, 'daemon')
-      };
-      const custom: IDaemonRequestEnvelope = fixture.envelope(['test', '--to', 'c'], {
-        commandOrigin: 'custom'
-      });
-      // The daemon parses a custom command before it resolves the request, and rejects this one there.
+    // The daemon parses a custom command before it resolves the request, and rejects this one there.
+    await expectRestartForRejectedCommandAsync(['test', '--to', 'c'], (custom, change) => {
       const getIdentityAsync: ProductionDaemonRequestResolver['getCommandParameterIdentityAsync'] =
         ProductionDaemonRequestResolver.prototype.getCommandParameterIdentityAsync;
       jest
@@ -505,37 +561,23 @@ describe('a failed build that returns early', () => {
           if (options.envelope.requestId === custom.requestId) installationChange = change;
           return await getIdentityAsync.call(this, options);
         });
-      rejected = await fixture.connectAsync();
-      await rejected.sendControlAsync({ kind: 'requestStart', payload: custom });
+    });
+  });
 
-      // So the client restarts the daemon instead of running the command in-process, and the restart waits for
-      // the later build, which still waits for the held c.
-      const restartReason: object = { kind: 'installationChanged', ...change };
-      expect(queuePositions(await readUntilQueuedAsync(rejected))).toEqual([
-        expect.objectContaining({ position: 1, restartReason })
-      ]);
-      expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
-      expect(countRuns(fixture, 'c')).toBe(1);
-
-      fs.rmSync(hold);
-      expect((await later.readTerminalAsync(build.requestId)).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
-      expect((await rejected.readTerminalAsync(custom.requestId)).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 1, retryAfterRestart: true, restartReason }
-      });
-      // The held c finished, and the later build found it done.
-      expect(countRuns(fixture, 'c')).toBe(1);
-      await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
-    } finally {
-      installationChange = undefined;
-      jest.restoreAllMocks();
-      fs.rmSync(hold, { force: true });
-      await later?.closeAsync();
-      await rejected?.closeAsync();
-      await fixture[Symbol.asyncDispose]();
-    }
+  it('answers a built-in command that it rejects before admission with the restart once the installation changed, and leaves the work that continues running', async () => {
+    // The daemon rejects it before admission, since it never serves the command.
+    await expectRestartForRejectedCommandAsync(NOT_PHASED, (custom, change) => {
+      const getUnsupportedCommandError: ProductionDaemonRequestResolver['getUnsupportedCommandError'] =
+        ProductionDaemonRequestResolver.prototype.getUnsupportedCommandError;
+      jest
+        .spyOn(ProductionDaemonRequestResolver.prototype, 'getUnsupportedCommandError')
+        .mockImplementation(function (
+          this: ProductionDaemonRequestResolver,
+          envelope: IDaemonRequestEnvelope
+        ) {
+          if (envelope.requestId === custom.requestId) installationChange = change;
+          return getUnsupportedCommandError.call(this, envelope);
+        });
+    });
   });
 });
