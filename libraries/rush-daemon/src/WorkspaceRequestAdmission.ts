@@ -8,10 +8,15 @@ import {
 import type {
   DaemonRequestAdmissionErrorCode,
   DaemonRestartReason,
+  IDaemonNativeLockHolder,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
-import { formatDaemonRestartCause, type IDaemonRestartWaitDetails } from '@rushstack/rush-client-core';
+import {
+  formatDaemonRestartCause,
+  formatNativeLockHolder,
+  type IDaemonRestartWaitDetails
+} from '@rushstack/rush-client-core';
 
 import {
   type IRequestLease,
@@ -44,6 +49,27 @@ export interface IRequestAdmissionControllerOptions {
   readonly requestId: string;
 }
 
+/**
+ * A request's wait for native Rush's repository lock while another Rush process holds it; see
+ * {@link RequestAdmissionController.beginNativeLockWait}.
+ */
+export interface INativeLockWait {
+  /** How long to wait before trying the lock again: 250ms, or less when the wait timeout runs out sooner. */
+  readonly retryDelayMs: number;
+  /**
+   * Records which process holds the lock, after the request failed to take it, and tells the client when that
+   * process changed.
+   *
+   * @returns The error that ends the wait, if the request may not wait any longer.
+   */
+  update(holder: IDaemonNativeLockHolder): RequestSchedulerError | undefined;
+  /**
+   * Ends the wait: spends its time from the request's wait timeout, and waits until the client has been told about
+   * it. Calling it again returns the same promise.
+   */
+  endAsync(): Promise<void>;
+}
+
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
 
 /** What a remaining admission budget does not show about the request that it came from. */
@@ -64,6 +90,8 @@ const HISTORY_BY_REMAINING_ADMISSION: WeakMap<IDaemonRequestAdmissionOptions, IA
 const GRAPH_LOAD_WAIT_FACTOR: number = 10;
 // Only the per-invocation flag is offered: Rush versions that do not recognize the environment variable reject it.
 const WAIT_LONGER_HINT: string = 'Use --wait-timeout <seconds> to wait longer.';
+/** Native Rush does not say when it releases the repository's lock, so a request that waits for it tries this often. */
+const NATIVE_LOCK_RETRY_MS: number = 250;
 
 function formatSeconds(ms: number): string {
   return `${Math.round(ms / 100) / 10}s`;
@@ -73,6 +101,21 @@ function formatSeconds(ms: number): string {
 function formatUncountedTime(pausedMs: number, spentWhile: string): string {
   const seconds: string = formatSeconds(pausedMs);
   return seconds === '0s' ? '' : `; ${seconds} spent ${spentWhile} did not count`;
+}
+
+/** Resolves after `delayMs`, or as soon as `abortSignal` aborts. */
+function delayAsync(delayMs: number, abortSignal: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve: () => void) => {
+    const timer: ReturnType<typeof setTimeout> = setTimeout(finish, delayMs);
+    abortSignal.addEventListener('abort', finish, { once: true });
+    if (abortSignal.aborted) finish();
+
+    function finish(): void {
+      clearTimeout(timer);
+      abortSignal.removeEventListener('abort', finish);
+      resolve();
+    }
+  });
 }
 
 /** Returns a frozen copy of admission options that keeps the history of a remaining budget. */
@@ -161,6 +204,21 @@ class QueuePositionWriter {
     this.#requestId = requestId;
     this.#writeQueuePositionAsync = (message: IDaemonRequestQueuePositionMessage) =>
       writeQueuePositionAsync.call(client, message);
+  }
+
+  /** Reports a wait for native Rush's repository lock, which `holder` holds, as the first queue position. */
+  public enqueueNativeLockWait(holder: IDaemonNativeLockHolder): void {
+    this.#tail = this.#tail
+      .then(() =>
+        this.#writeQueuePositionAsync({
+          kind: 'queuePosition',
+          payload: { position: 1, requestId: this.#requestId, nativeLockHolder: holder }
+        })
+      )
+      .catch((error: unknown) => {
+        this.#failure ??= error;
+        this.#abortController.abort(error);
+      });
   }
 
   public enqueue(
@@ -656,6 +714,125 @@ export class RequestAdmissionController {
       });
     }
     return remaining;
+  }
+
+  /**
+   * Begins a wait for native Rush's repository lock while another Rush process holds it. The request waits as it
+   * does for another request, within its remaining admission budget: `noWait` and a zero timeout fail at once, and
+   * otherwise the client is told which process the request waits for, as the first queue position, each time that
+   * process changes. A client-default timeout applies, since the other process can run for any length of time.
+   *
+   * @remarks
+   * {@link RequestAdmissionController.acquireNativeLockAsync} waits for the lock with it. A caller that waits once for
+   * several requests uses it directly: it tries the lock again, and then calls `update` for each request, which says
+   * when the request may not wait any longer, and finally `endAsync`.
+   */
+  public beginNativeLockWait(): INativeLockWait {
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    const startMs: number = Date.now();
+    const budgetMs: number | undefined = this.#remainingMs;
+    let holder: IDaemonNativeLockHolder = {};
+    let reportedHolder: string | undefined;
+    let ended: Promise<void> | undefined;
+    return {
+      get retryDelayMs(): number {
+        return budgetMs === undefined
+          ? NATIVE_LOCK_RETRY_MS
+          : Math.min(NATIVE_LOCK_RETRY_MS, Math.max(0, budgetMs - (Date.now() - startMs)));
+      },
+      update: (foundHolder: IDaemonNativeLockHolder): RequestSchedulerError | undefined => {
+        // A process that cannot be identified, for instance once the one that was found exits, does not replace it.
+        if (foundHolder.pid !== undefined || holder.pid === undefined) holder = foundHolder;
+        const error: RequestSchedulerError | undefined = this.#getNativeLockWaitError(
+          formatNativeLockHolder(holder),
+          Date.now() - startMs,
+          budgetMs
+        );
+        const key: string = `${holder.pid}:${holder.command}`;
+        if (!error && !ended && key !== reportedHolder) {
+          reportedHolder = key;
+          writer?.enqueueNativeLockWait(holder);
+        }
+        return error;
+      },
+      endAsync: (): Promise<void> => {
+        if (!ended) {
+          this.#spend(Date.now() - startMs);
+          ended = writer ? writer.flushAsync() : Promise.resolve();
+        }
+        return ended;
+      }
+    };
+  }
+
+  /**
+   * Takes native Rush's repository lock with `tryAcquire`, which returns undefined while another Rush process holds
+   * it, and waits for that process as {@link RequestAdmissionController.beginNativeLockWait} describes. `findHolder`
+   * says which process holds the lock.
+   *
+   * @remarks
+   * The lock is tried every 250ms, since native Rush does not say when it releases it, and it is released again if
+   * the client could not be told about the wait.
+   */
+  public async acquireNativeLockAsync<TLock extends { release(): void }>(
+    tryAcquire: () => TLock | undefined,
+    findHolder: () => IDaemonNativeLockHolder
+  ): Promise<TLock> {
+    let lock: TLock | undefined = tryAcquire();
+    if (lock) return lock;
+    const wait: INativeLockWait = this.beginNativeLockWait();
+    const abortSignal: AbortSignal = this.#abortController.signal;
+    try {
+      while (!lock) {
+        const error: RequestSchedulerError | undefined = wait.update(findHolder());
+        if (error) throw error;
+        await delayAsync(wait.retryDelayMs, abortSignal);
+        if (!abortSignal.aborted) lock = tryAcquire();
+      }
+      await wait.endAsync();
+      return lock;
+    } catch (error) {
+      lock?.release();
+      await wait.endAsync();
+      throw error;
+    }
+  }
+
+  /** Returns the error that ends a wait for native Rush's repository lock, which `holder` holds, if it must end. */
+  #getNativeLockWaitError(
+    holder: string,
+    elapsedMs: number,
+    budgetMs: number | undefined
+  ): RequestSchedulerError | undefined {
+    if (this.#abortController.signal.aborted) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.Aborted,
+        `The request was aborted while waiting for ${holder} to release this repository's lock.`
+      );
+    }
+    if (this.#admission?.noWait) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.NoWait,
+        `The request cannot be admitted immediately because ${holder} holds this repository's lock, and ` +
+          '--no-wait was specified.'
+      );
+    }
+    if (this.#configuredWaitTimeoutMs === 0) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `The request cannot be admitted immediately because ${holder} holds this repository's lock. ` +
+          'Use --wait-timeout <seconds> to wait for it.'
+      );
+    }
+    if (budgetMs === undefined || elapsedMs < budgetMs) return undefined;
+    const waitingFor: string = `${holder} to release this repository's lock`;
+    return this.#getReportedError(
+      new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `The request timed out while waiting for ${waitingFor}.`
+      ),
+      waitingFor
+    ) as RequestSchedulerError;
   }
 
   /** Spends `elapsedMs` of the wait timeout, if one applies. */

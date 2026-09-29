@@ -24,6 +24,7 @@ import {
   type IDaemonCommandResult,
   type IDaemonEventEnvelope,
   type IDaemonFrame,
+  type IDaemonNativeLockHolder,
   type IDaemonPongMessage,
   type IDaemonProtocolVersion,
   type IDaemonRequestEnvelope,
@@ -89,7 +90,12 @@ export interface IDaemonClientExecuteOptions {
   readonly onQueuePositionAsync?: (
     position: number,
     restartReason?: DaemonRestartReason,
-    restartWait?: IDaemonRestartWaitDetails
+    restartWait?: IDaemonRestartWaitDetails,
+    /**
+     * Set while the request waits for a Rush process that the daemon does not run to release the repository's lock,
+     * with what the daemon knows about that process.
+     */
+    nativeLockHolder?: IDaemonNativeLockHolder
   ) => Promise<void>;
   /**
    * Called once, when the daemon first admits the request's input. For a rushx script, that is when the script
@@ -632,11 +638,14 @@ export class DaemonClient {
         }
         return;
       case 'queuePosition': {
-        const { position, restartReason, scriptCount, restartsForAnotherRequest } = message.payload;
-        await execution.onQueuePositionAsync?.(position, restartReason, {
-          scriptCount,
-          restartsForAnotherRequest
-        });
+        const { position, restartReason, scriptCount, restartsForAnotherRequest, nativeLockHolder } =
+          message.payload;
+        await execution.onQueuePositionAsync?.(
+          position,
+          restartReason,
+          { scriptCount, restartsForAnotherRequest },
+          nativeLockHolder
+        );
         return;
       }
       default:

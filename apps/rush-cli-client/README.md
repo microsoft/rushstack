@@ -66,8 +66,8 @@ in-process (`rush-client: <reason>; using in-process Rush.`). A startup failure 
 still make the daemon ready is the exception: a process that listens at the endpoint but does not
 complete hello/ping in time, a startup helper that still waits for its daemon, or another client that
 holds the start mutex, as in a burst of clients that all find no daemon. In-process Rush would take the
-repository lock, and the daemon would then reject the requests it serves with "Another Rush command is
-already running in this repository." Instead, the client keeps trying for one more startup deadline
+repository lock, and the requests that the daemon serves would then wait for it, or fail when their wait
+timeout ends (see below). Instead, the client keeps trying for one more startup deadline
 (15 seconds, so about 30 seconds in all) and uses the daemon once it is ready. It says so when it starts
 waiting (`rush-client: The daemon is not ready yet. <live process>, so this command waits up to 15 s more
 for it instead of running Rush in-process.`; agent output shows "rushd is still starting; waiting for it"
@@ -114,11 +114,23 @@ In legacy output and in `rushx-client`, the admission failure line
 mode's summary line does, so it names what the request waited for, such as a daemon
 restart, and why the daemon restarts.
 
+A request also waits while a Rush process that the daemon does not run, such as
+`rush install` or a `--no-daemon` build, holds the repository's lock. Every timeout,
+the built-in default included, limits that wait, since that process can run for any
+length of time. Stderr, on a terminal and on a pipe, names the process at once
+(`rush-client: waiting for another Rush process (PID 12345: rush install) to release
+this repository's lock.`), and again with the time waited every 10 seconds
+(`still waiting after 10s for …`); agent output shows it as the progress phase. Only
+Linux tells the PID and command; elsewhere the line says `another Rush process`.
+`--no-wait` and `--wait-timeout 0` fail at once, and the admission failure line of
+these and of a timeout names the process. A request never waits for a lock that the
+daemon itself holds for another request: it fails at once, as before.
+
 Admission controls also apply to experimental graph requests, but not
 `start|stop|restart|status|logs`. They affect daemon admission only; native fallback
 retains native command behavior. Waiting positions are shown on interactive stderr,
-and a wait for a daemon restart on a pipe too (see below). Admission failures report
-their typed reason and a nonzero exit code.
+and a wait for a daemon restart (see below) or for another Rush process on a pipe
+too. Admission failures report their typed reason and a nonzero exit code.
 
 Explicit reporter/output/log-level controls (`--reporter`, `--output`, `--log-level`,
 `RUSH_REPORTER` other than `legacy`, or `RUSH_LOG_LEVEL`) retain the native frontend

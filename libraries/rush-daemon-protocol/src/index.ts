@@ -61,7 +61,7 @@ export type { IDaemonInstallationChangedRestartReason } from './DaemonInstallati
 export type { IDaemonEnvironmentChangedRestartReason } from './DaemonEnvironmentChange';
 export type { IDaemonWorkspaceInputsChangedRestartReason } from './DaemonWorkspaceInputsChange';
 export { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from './DaemonRequestAdmission';
-export { validateDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
+export { validateDaemonRequestAdmissionOptions } from './DaemonRequestAdmissionValidation';
 export type { DaemonRequestRejectionCode, IDaemonRequestCancelMessage } from './DaemonRequestControl';
 export type { IDaemonRequestRejectedMessage, IDaemonRequestResultMessage } from './DaemonRequestControl';
 export type { IDaemonRequestStartMessage } from './DaemonRequestControl';
@@ -70,6 +70,7 @@ export type { DaemonInvocationKind } from './DaemonInvocationKind';
 export type { DaemonRequestAdmissionErrorCode } from './DaemonRequestAdmission';
 export type { IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 export type { IDaemonRequestQueuePositionMessage } from './DaemonRequestAdmission';
+export type { IDaemonNativeLockHolder } from './DaemonNativeLockHolder';
 export type { DaemonRushCommandOrigin } from './DaemonRushCommand';
 export { RUSHD_GRAPH_SNAPSHOT } from './DaemonGraphSnapshot';
 export type { IDaemonGraphInvalidations, IDaemonGraphOperation } from './DaemonGraphSnapshot';
@@ -83,8 +84,7 @@ export type { DaemonEventPrivacy, IDaemonEventEnvelope, IDaemonEventScope } from
 export type { IDaemonEventSource } from './DaemonEventEnvelope';
 export { isDaemonEventEnvelope, validateDaemonEventEnvelope } from './DaemonEventValidation';
 export { isDaemonExtensionEventName, isRushdExtensionEventName } from './DaemonExtensionEventName';
-export { RUSHD_EXTENSION_NAMESPACE } from './DaemonExtensionEventName';
-export type { DaemonExtensionEventName } from './DaemonExtensionEventName';
+export { RUSHD_EXTENSION_NAMESPACE, type DaemonExtensionEventName } from './DaemonExtensionEventName';
 export { compareDaemonVerbosity, isDaemonVerbosity, type DaemonVerbosity } from './DaemonVerbosity';
 export { shouldSerializeDaemonEvent } from './DaemonVerbosityFilter';
 export type { DaemonDiagnosticSeverity, IDaemonDiagnosticPayload } from './DaemonVerbosityFilter';

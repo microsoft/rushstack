@@ -427,6 +427,37 @@ describe('DaemonClient', () => {
     expect(outcome).toMatchObject({ kind: 'result', result: { retryAfterRestart: true, restartReason } });
   });
 
+  it('reports which Rush process a request waits for when it holds the repository lock', async () => {
+    const holder = { pid: 4242, command: 'rush install' } as const;
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      const { requestId } = message.payload;
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, nativeLockHolder: holder }
+      });
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId, nativeLockHolder: {} } });
+      await sendAsync({ kind: 'queuePosition', payload: { position: 2, requestId } });
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    };
+    const positions: unknown[] = [];
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.executeAsync({
+      request: request(),
+      onQueuePositionAsync: async (...args: unknown[]) => {
+        positions.push([args[0], args[1], args[3]]);
+      }
+    });
+    expect(positions).toEqual([
+      [1, undefined, holder],
+      [1, undefined, {}],
+      [2, undefined, undefined]
+    ]);
+  });
+
   it('reports once, before any input is forwarded, that the daemon admitted input', async () => {
     const stdin = new PassThrough();
     const seen: string[] = [];

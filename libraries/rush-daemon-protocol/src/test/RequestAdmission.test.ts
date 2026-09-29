@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS,
-  validateDaemonRequestAdmissionOptions
-} from '../DaemonRequestAdmission';
+import { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from '../DaemonRequestAdmission';
+import { validateDaemonRequestAdmissionOptions } from '../DaemonRequestAdmissionValidation';
 
 const OUT_OF_RANGE_INCREMENT: number = 1;
 

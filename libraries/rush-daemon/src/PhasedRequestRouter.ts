@@ -10,10 +10,16 @@ import type {
   Operation,
   _IOperationGraphEventSink
 } from '@microsoft/rush-lib';
-import { getWorkspaceRequestOperationEnvironment, OperationStatus } from '@microsoft/rush-lib';
+import {
+  getWorkspaceRequestOperationEnvironment,
+  OperationStatus,
+  PhasedCommandEngineBusyError
+} from '@microsoft/rush-lib';
 import { Sort } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+import { findNativeLockHolder } from '@rushstack/rush-client-core';
 import type {
+  IDaemonNativeLockHolder,
   IDaemonPhasedEngineShape,
   IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest,
@@ -40,8 +46,10 @@ import {
 import {
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler,
+  type INativeLockWait,
   RequestAdmissionController
 } from './WorkspaceRequestAdmission';
+import { isNativeLockHeldByThisProcess } from './NativeRepositoryLock';
 import type { IWorkspaceEngineShape } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import {
@@ -119,6 +127,8 @@ interface IBatchTimings {
 interface IBatchEntry extends IPreparedPhasedRequest {
   abortListener: (() => void) | undefined;
   abortRequested: boolean;
+  /** Waits for native Rush's repository lock for this request; see `#acquireExecutionLeaseAsync`. */
+  readonly admissionController: RequestAdmissionController;
   batchTimings: IBatchTimings | undefined;
   completed: boolean;
   /**
@@ -365,6 +375,7 @@ class PhasedRequestBatchCoordinator {
         ...request,
         abortListener: undefined,
         abortRequested: false,
+        admissionController,
         batchTimings: undefined,
         completed: false,
         continuesAfterResult: false,
@@ -511,7 +522,7 @@ class PhasedRequestBatchCoordinator {
       if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
         throw new Error('The warm workspace operation graph is not idle.');
       }
-      executionLease = await this.#workspaceSession.acquireExecutionLeaseAsync?.();
+      executionLease = await this.#acquireExecutionLeaseAsync(batch);
       timings.leasesAcquiredTimeMs = performance.now();
       if (this.#acceptingCurrentBatch) {
         // A client that connected while the daemon was busy may not have sent its request yet. Let it, so that
@@ -1157,6 +1168,75 @@ class PhasedRequestBatchCoordinator {
     }
     this.#completeEntry(entry);
     entry.reject(combineErrors(error, cleanupErrors));
+  }
+
+  /**
+   * Acquires the workspace session's execution lease, which holds native Rush's repository lock. While another Rush
+   * process holds that lock, each request of the batch waits for it as it would for another request, within its own
+   * remaining admission budget, and its client is told which process it waits for; see
+   * `RequestAdmissionController.beginNativeLockWait`. A request that may not wait any longer leaves the batch with
+   * an admission error while the others wait on, and compatible requests that arrive meanwhile join the batch.
+   *
+   * @remarks
+   * The lease is acquired again rather than probed, since acquiring it invalidates what native Rush may have
+   * changed. If this process holds the lock itself, the batch fails at once, since waiting would not end.
+   */
+  async #acquireExecutionLeaseAsync(batch: IBatchEntry[]): Promise<AsyncDisposable | undefined> {
+    const session: IWorkspaceSession = this.#workspaceSession;
+    const lockFolder: string = session.rushConfiguration.commonTempFolder;
+    const waits: Map<IBatchEntry, INativeLockWait> = new Map();
+    try {
+      for (;;) {
+        try {
+          return await session.acquireExecutionLeaseAsync?.();
+        } catch (error) {
+          if (!(error instanceof PhasedCommandEngineBusyError) || isNativeLockHeldByThisProcess(lockFolder)) {
+            throw error;
+          }
+        }
+        if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
+          this.#takeCompatiblePending(batch);
+        }
+        const holder: IDaemonNativeLockHolder = findNativeLockHolder(lockFolder);
+        let retryDelayMs: number | undefined;
+        let lastError: unknown;
+        for (const entry of [...batch]) {
+          // A client that left the batch while others wait on has its answer already.
+          if (entry.finishPromise || entry.completed) continue;
+          let wait: INativeLockWait | undefined = waits.get(entry);
+          if (!wait) {
+            wait = entry.admissionController.beginNativeLockWait();
+            waits.set(entry, wait);
+          }
+          const error: RequestSchedulerError | undefined = wait.update(holder);
+          if (!error) {
+            retryDelayMs = Math.min(retryDelayMs ?? wait.retryDelayMs, wait.retryDelayMs);
+            continue;
+          }
+          batch.splice(batch.indexOf(entry), 1);
+          waits.delete(entry);
+          lastError = await wait.endAsync().then(
+            () => error,
+            (writeError: unknown) => writeError
+          );
+          await this.#rejectEntryAsync(entry, lastError);
+        }
+        if (retryDelayMs === undefined) {
+          throw lastError ?? new Error('No request of the batch waits for the repository lock any longer.');
+        }
+        await new Promise<void>((resolve: () => void) => setTimeout(resolve, retryDelayMs));
+      }
+    } finally {
+      await Promise.all(
+        Array.from(waits, async ([entry, wait]: [IBatchEntry, INativeLockWait]) => {
+          try {
+            await wait.endAsync();
+          } catch (error) {
+            this.#deactivateEntry(entry, false, error instanceof Error ? error : undefined);
+          }
+        })
+      );
+    }
   }
 
   #completeEntry(entry: IBatchEntry): void {

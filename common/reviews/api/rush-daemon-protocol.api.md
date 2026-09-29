@@ -423,6 +423,12 @@ export interface IDaemonLogChunk {
 }
 
 // @beta
+export interface IDaemonNativeLockHolder {
+    readonly command?: string;
+    readonly pid?: number;
+}
+
+// @beta
 export interface IDaemonOperationHeaderPayload {
     readonly completedOperations: number;
     readonly operationId: string;
@@ -583,6 +589,7 @@ export interface IDaemonRequestQueuePositionMessage {
         readonly restartReason?: DaemonRestartReason;
         readonly scriptCount?: number;
         readonly restartsForAnotherRequest?: boolean;
+        readonly nativeLockHolder?: IDaemonNativeLockHolder;
     };
 }
 

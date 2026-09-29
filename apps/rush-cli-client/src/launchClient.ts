@@ -28,6 +28,7 @@ import { executeDaemonCommandAsync } from './daemonCommands';
 import { getConfiguredAdmission, type ClientName } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import type { AgentProgressRenderer } from './AgentProgressRenderer';
+import { withNativeLockWaitNotices, type INativeLockWaitNoticeHandlers } from './nativeLockWaitNotice';
 import {
   CANCELLATION_SIGNALS,
   formatCancellationMessage,
@@ -272,13 +273,17 @@ export async function launchClientAsync(
     }
     await renderer.initializeAsync();
     agentRenderer?.onRequestSent();
-    const requestNotices: IDaemonRequestNoticeHandlers = createDaemonRequestNoticeHandlers({
-      rushx,
-      agentRenderer,
-      stderrIsTTY: !!process.stderr.isTTY,
-      daemonPid: (await client.status).pid,
-      writeStderrAsync: (text) => output.stderr.writeAsync(Buffer.from(text))
-    });
+    const writeStderrAsync = (text: string): Promise<void> => output.stderr.writeAsync(Buffer.from(text));
+    const requestNotices: INativeLockWaitNoticeHandlers = withNativeLockWaitNotices(
+      createDaemonRequestNoticeHandlers({
+        rushx,
+        agentRenderer,
+        stderrIsTTY: !!process.stderr.isTTY,
+        daemonPid: (await client.status).pid,
+        writeStderrAsync
+      }),
+      { rushx, agentRenderer, writeStderrAsync }
+    );
     notices = requestNotices;
     outcome = await executeWithDaemonRestartAsync(client, connection, {
       request,

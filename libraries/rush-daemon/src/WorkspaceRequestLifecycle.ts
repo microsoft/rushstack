@@ -9,7 +9,6 @@ import {
   classifyWorkspaceInputChange,
   EnvironmentVariableNames,
   getWorkspaceFingerprintEnvironmentEntries,
-  PhasedCommandEngineBusyError,
   PhasedCommandEngineProjectConfigurationError,
   Rush,
   WorkspaceInputChangeTier,
@@ -17,8 +16,9 @@ import {
   type IWorkspaceInputFingerprint,
   type RushConfiguration
 } from '@microsoft/rush-lib';
-import { LockFile } from '@rushstack/node-core-library';
+import type { LockFile } from '@rushstack/node-core-library';
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
+import { findNativeLockHolder } from '@rushstack/rush-client-core';
 import type {
   DaemonRestartReason,
   IDaemonCommandResult,
@@ -54,6 +54,7 @@ import {
   getWorkspaceRequestScheduler
 } from './WorkspaceRequestAdmission';
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
+import { tryAcquireNativeLock } from './NativeRepositoryLock';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
 import { getRushLibPathHandoff } from './RushLibPathHandoff';
 import type { IWorkspaceSession } from './WorkspaceSession';
@@ -760,13 +761,21 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         getWorkspaceRequestScheduler(session),
         RequestExclusivityClass.Exclusive
       );
-      const nativeLock: LockFile | undefined = LockFile.tryAcquire(
-        session.rushConfiguration.commonTempFolder,
-        'rush'
-      );
-      if (!nativeLock) {
+      const lockFolder: string = session.rushConfiguration.commonTempFolder;
+      let nativeLock: LockFile;
+      // Waiting for another Rush process is contention, not graph-load progress; see `#waitForServedScriptsAsync`.
+      const loading: boolean = this.#transitionProgress.active;
+      this.#transitionProgress.setActive(false);
+      try {
+        nativeLock = await admission.acquireNativeLockAsync(
+          () => tryAcquireNativeLock(lockFolder),
+          () => findNativeLockHolder(lockFolder)
+        );
+      } catch (error) {
         workspaceLease.release();
-        throw new PhasedCommandEngineBusyError();
+        throw error;
+      } finally {
+        this.#transitionProgress.setActive(loading);
       }
       let selectionRejection: DaemonRequestDispatchError | undefined;
       try {

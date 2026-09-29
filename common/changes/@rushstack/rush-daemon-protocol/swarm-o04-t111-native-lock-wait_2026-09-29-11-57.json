@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add an optional `nativeLockHolder` (`IDaemonNativeLockHolder`: `pid` and `command`) to queue positions, which says that a request waits for a Rush process that the daemon does not run to release the repository's lock, and which process that is. Older clients ignore it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

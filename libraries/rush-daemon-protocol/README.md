@@ -34,7 +34,10 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   `install` or `update`).
   `workspaceInputsChanged` names the installation files or the files of Rush and its plugins that
   changed since the daemon started, or the Rush version that the request selects. Older daemons
-  omit these fields, and clients ignore reason kinds they do not know.
+  omit these fields, and clients ignore reason kinds they do not know. A queue position may instead
+  carry `nativeLockHolder` (`IDaemonNativeLockHolder`) while the request waits for a Rush process
+  that the daemon does not run to release the repository's lock: that process's `pid` and
+  `command`, such as `rush install`, as far as the daemon can tell. Its `position` is then 1.
 - **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
   typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
   and Rush action construction remain outside the protocol.

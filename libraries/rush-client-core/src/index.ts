@@ -51,3 +51,4 @@ export {
   type IConnectOrStartDaemonOptions,
   type IDaemonStartCommand
 } from './connectOrStartDaemon';
+export { findNativeLockHolder, formatNativeLockHolder } from './NativeLockHolder';

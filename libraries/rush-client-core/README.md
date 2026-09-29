@@ -65,7 +65,13 @@ third argument: `scriptCount`, how many of the requests ahead run a rushx script
 `restartsForAnotherRequest`, set for a rushx script that waits for another request's restart.
 `formatDaemonRestartCause` words a reason as the end of "the daemon restarts ...", for the
 request or for such a script, and `onInputAdmittedAsync` reports when the daemon first admits
-the request's input, which for a rushx script is when the script starts. After each hand-off
+the request's input, which for a rushx script is when the script starts. While the request
+waits for a Rush process that the daemon does not run to release the repository's lock,
+`onQueuePositionAsync` gets that process as its fourth argument (`nativeLockHolder`).
+`findNativeLockHolder` finds it the way the daemon does, from the `rush#<pid>.lock` files in the
+common temp folder: on Linux, the live process with the oldest one, and its program and action
+from `/proc`, such as `rush install`, never its other arguments; elsewhere, nothing.
+`formatNativeLockHolder` words it, for example `another Rush process (PID 12345: rush install)`. After each hand-off
 to a ready successor, the optional `onRestartAsync` callback gets the restart number, the
 reason (`undefined` when the daemon gave none, as older daemons do) and the successor's PID,
 before the request is resubmitted.

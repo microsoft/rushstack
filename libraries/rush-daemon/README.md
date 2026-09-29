@@ -175,9 +175,19 @@ whose own operations all completed earlier may receive its result while the iter
 below); it must not assume the lock is already released. Thus ordinary native actions and permanent `--no-daemon`
 fallback can run immediately after a completed single-client warm request without stopping the daemon.
 
-A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
-automatic retry. A later explicit request can retry after contention ends, including contention during the first
-engine initialization. A dirty native lock left by another command invalidates retained successes so the native
+When a Rush process that the daemon does not run, such as `rush install` or a `--no-daemon` build, holds the lock,
+preparation and execution wait for it within the request's wait timeout, including during the first engine
+initialization; there is no lock bypass. The daemon tries the lock every 250 ms, since native Rush does not say when
+it releases it. Coalesced requests wait together, and each one stops waiting when its own timeout ends. Each waiting
+client gets a queue position with `nativeLockHolder`, the process as far as the daemon can tell (see
+`findNativeLockHolder` in `@rushstack/rush-client-core`; on Linux, its PID and command, such as `rush install`), and
+another whenever that process changes. `--no-wait` and a zero timeout fail at once, naming the process. The built-in
+default timeout also limits this wait, because the other process can run for any length of time; a request that
+waits longer fails with an admission failure that names the process and suggests `--wait-timeout`. A cancelled
+request stops waiting and never runs. When the daemon itself holds the lock for another request, the request still
+fails at once, and the experimental graph request's lease does not wait.
+
+A dirty native lock left by another command invalidates retained successes so the native
 incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also
 fingerprinted (one `stat` per folder: existence, identity and modification time) when an operation succeeds or is
 restored from cache; a request whose reconciliation finds a missing or changed output folder (for example after

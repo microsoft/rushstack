@@ -671,59 +671,6 @@ process.exit(23);
     }
   });
 
-  it('refuses native lock contention at preparation and at iteration time, and accepts a later explicit retry', async () => {
-    const fixture: IFixture = await createFixtureAsync();
-    const gate: INativeScriptGate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
-    let native: Promise<INativeCommandResult> | undefined;
-    try {
-      native = runNativeCommandAsync(fixture.repoRoot, ['rebuild', '--only', 'a', '--parallelism', '3']);
-      await Promise.race([
-        gate.entered,
-        native.then((result) => {
-          throw new Error(`Native action did not enter its script gate: ${JSON.stringify(result)}`);
-        })
-      ]);
-      expect(
-        (await runAsync(fixture, 'busy-initialization', ['build', '--only', 'b'])).terminal
-      ).toMatchObject({
-        kind: 'requestRejected',
-        payload: { message: expect.stringContaining('Another Rush command') }
-      });
-      expect(fixture.session.operationGraph).toBeUndefined();
-      await gate.releaseAsync();
-      expect(await native).toMatchObject({ exitCode: 0 });
-      expect((await runAsync(fixture, 'retry', ['build', '--only', 'b'])).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
-      const secondGate: INativeScriptGate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
-      try {
-        native = runNativeCommandAsync(fixture.repoRoot, ['rebuild', '--only', 'a', '--parallelism', '3']);
-        await Promise.race([
-          secondGate.entered,
-          native.then((result) => {
-            throw new Error(`Native action did not enter its script gate: ${JSON.stringify(result)}`);
-          })
-        ]);
-        expect((await runAsync(fixture, 'busy-iteration', ['build', '--only', 'b'])).terminal).toMatchObject({
-          kind: 'requestRejected',
-          payload: { message: expect.stringContaining('Another Rush command') }
-        });
-      } finally {
-        await secondGate.releaseAsync();
-        await native;
-      }
-      expect((await runAsync(fixture, 'retry-iteration', ['build', '--only', 'b'])).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
-    } finally {
-      await gate.releaseAsync();
-      await native;
-      await fixture[Symbol.asyncDispose]();
-    }
-  });
-
   it('uses one native lease for a merged batch and excludes native actions throughout reconciliation and execution', async () => {
     const fixture: IFixture = await createFixtureAsync();
     const leaseRequested: IDeferred<void> = createDeferred();

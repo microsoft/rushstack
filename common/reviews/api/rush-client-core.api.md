@@ -9,6 +9,7 @@ import { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import { IDaemonNativeLockHolder } from '@rushstack/rush-daemon-protocol';
 import { IDaemonOrphanReap } from '@rushstack/rush-daemon-transport';
 import { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
@@ -90,10 +91,16 @@ export class DaemonStartupPendingError extends Error {
 export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, options: IExecuteWithDaemonRestartOptions): Promise<DaemonClientOutcome>;
 
 // @beta
+export function findNativeLockHolder(lockFolder: string, ownPid?: number): IDaemonNativeLockHolder;
+
+// @beta
 export function findReclaimedDaemonPid(paths: IDaemonPaths): number | undefined;
 
 // @beta
 export function formatDaemonRestartCause(reason: DaemonRestartReason, requester: DaemonRestartRequester): string | undefined;
+
+// @beta
+export function formatNativeLockHolder(holder: IDaemonNativeLockHolder | undefined): string;
 
 // @beta
 export function getDaemonLogFilePath(paths: IDaemonPaths): string;
@@ -158,7 +165,7 @@ export interface IDaemonClientExecuteOptions {
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
     readonly onInputAdmittedAsync?: () => Promise<void>;
-    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails) => Promise<void>;
+    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails, nativeLockHolder?: IDaemonNativeLockHolder) => Promise<void>;
     // (undocumented)
     readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)
