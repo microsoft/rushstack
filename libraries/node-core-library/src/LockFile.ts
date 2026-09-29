@@ -179,11 +179,17 @@ export function getProcessStartTimeMs(pid: number): number | undefined {
     env: { ...process.env, LC_ALL: 'C', TZ: 'UTC0' }
   });
 
-  // For example: "Sun Sep 27 17:15:08 2026"
+  return _parseLstartAsUtcMs((psResult.stdout || '').split('\n')[1] || '');
+}
+
+/**
+ * Parses a start time that "ps -o lstart" printed with the C locale, for example "Sun Sep 27 17:15:08 2026",
+ * as if it were in UTC.  Returns the time in milliseconds since the epoch, or undefined if the text has another
+ * format, such as the format of another locale.
+ */
+function _parseLstartAsUtcMs(lstart: string): number | undefined {
   const match: RegExpExecArray | null =
-    /^\s*[A-Za-z]{3} ([A-Za-z]{3}) +(\d{1,2}) (\d{2}):(\d{2}):(\d{2}) (\d{4})\s*$/.exec(
-      (psResult.stdout || '').split('\n')[1] || ''
-    );
+    /^\s*[A-Za-z]{3} ([A-Za-z]{3}) +(\d{1,2}) (\d{2}):(\d{2}):(\d{2}) (\d{4})\s*$/.exec(lstart);
   if (!match) {
     return undefined;
   }
@@ -233,6 +239,11 @@ export interface ILinuxProcessStartTime {
    * "ps" can't be run.
    */
   ticks: string;
+  /**
+   * The start time in milliseconds since the epoch, rounded down to a whole second like lstart.  This is what
+   * getProcessStartTimeMs() returns, and it doesn't depend on the time zone.
+   */
+  startTimeMs: number;
 }
 
 /**
@@ -267,16 +278,16 @@ export function getLinuxProcessStartTime(
   }
 
   // Like "ps", round down to a whole second and use "%a %b %e %H:%M:%S %Y" in the local time zone.
-  const date: Date = new Date(
-    (getBootTimeSeconds() + Math.floor(Number(ticks) / LINUX_CLOCK_TICKS_PER_SECOND)) * 1000
-  );
+  const startTimeMs: number =
+    (getBootTimeSeconds() + Math.floor(Number(ticks) / LINUX_CLOCK_TICKS_PER_SECOND)) * 1000;
+  const date: Date = new Date(startTimeMs);
   const twoDigits: (value: number) => string = (value: number) => (value < 10 ? `0${value}` : `${value}`);
   const lstart: string =
     `${LSTART_DAYS[date.getDay()]} ${LSTART_MONTHS[date.getMonth()]} ` +
     `${date.getDate() < 10 ? ' ' : ''}${date.getDate()} ` +
     `${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}:${twoDigits(date.getSeconds())} ` +
     `${date.getFullYear()}`;
-  return { lstart, ticks };
+  return { lstart, ticks, startTimeMs };
 }
 
 // A set of locks that currently exist in the current process, to be used when
@@ -589,6 +600,36 @@ function _tryAcquireInner(
 // seconds, and the system clock can be adjusted while a process runs.
 const START_TIME_TOLERANCE_MS: number = 5000;
 
+// Every time zone is ahead of or behind UTC by a whole number of 15-minute steps, from UTC-12 to UTC+14.
+const TIME_ZONE_OFFSET_STEP_MS: number = 15 * 60 * 1000;
+const MIN_TIME_ZONE_OFFSET_MS: number = -12 * 60 * 60 * 1000;
+const MAX_TIME_ZONE_OFFSET_MS: number = 14 * 60 * 60 * 1000;
+
+/**
+ * Returns false if the start time in a lockfile can't be what "ps -o lstart" printed for a process that started
+ * at `startTimeMs`, in any time zone.  Returns true if it can, or if the start time is in a format other than the
+ * C locale's, which can't be checked.
+ *
+ * On Linux, the start time that "ps" reports for a process moves with the system clock.  So if the clock is
+ * changed by more than START_TIME_TOLERANCE_MS while a process holds a lock, this can return false for the
+ * lockfile of that process, which is then treated as stale.
+ */
+function _isStartTimeInSomeTimeZone(lockFileStartTime: string, startTimeMs: number): boolean {
+  const lockFileStartTimeMs: number | undefined = _parseLstartAsUtcMs(lockFileStartTime);
+  if (lockFileStartTimeMs === undefined) {
+    return true;
+  }
+  const offsetMs: number = lockFileStartTimeMs - startTimeMs;
+  if (
+    offsetMs < MIN_TIME_ZONE_OFFSET_MS - START_TIME_TOLERANCE_MS ||
+    offsetMs > MAX_TIME_ZONE_OFFSET_MS + START_TIME_TOLERANCE_MS
+  ) {
+    return false;
+  }
+  const stepOffsetMs: number = Math.round(offsetMs / TIME_ZONE_OFFSET_STEP_MS) * TIME_ZONE_OFFSET_STEP_MS;
+  return Math.abs(offsetMs - stepOffsetMs) <= START_TIME_TOLERANCE_MS;
+}
+
 /**
  * Called when the start time in the lockfile of another running process differs from the start time that
  * we got for its PID.  Returns true if the lockfile still belongs to that process.
@@ -601,13 +642,19 @@ function _isLockFileOfRunningProcess(
   // "ps -o lstart" formats the start time using the time zone and locale of the process that runs it,
   // so a process whose TZ, LANG, LC_TIME or LC_ALL differs from ours wrote its start time differently.
   // If the start time differs because the lockfile's process exited and the OS gave its PID to a new
-  // process, then the new process started after the lockfile was created.  An empty lockfile is still
-  // treated as stale here, as before.
+  // process, then the new process usually started after the lockfile was created.  It can have started
+  // before, if the lockfile was copied or restored, or if a process in another PID namespace (such as a
+  // container) wrote it.  So the lockfile must also hold the process's start time in some time zone.
+  // An empty lockfile is still treated as stale here, as before.
   if (!lockFileStartTime || lockFileBirthtimeMs === undefined) {
     return false;
   }
   const startTimeMs: number | undefined = getProcessStartTimeMs(parseInt(pid, 10));
-  return startTimeMs !== undefined && startTimeMs <= lockFileBirthtimeMs + START_TIME_TOLERANCE_MS;
+  return (
+    startTimeMs !== undefined &&
+    startTimeMs <= lockFileBirthtimeMs + START_TIME_TOLERANCE_MS &&
+    _isStartTimeInSomeTimeZone(lockFileStartTime, startTimeMs)
+  );
 }
 
 /**
@@ -619,6 +666,7 @@ function _isLockFileOfRunningProcess(
 function _isLockFileOfLinuxProcess(
   pid: string,
   lockFileStartTime: string | undefined,
+  lockFileBirthtimeMs: number | undefined,
   getBootTimeSeconds: () => number
 ): boolean {
   if (process.platform !== 'linux' || !lockFileStartTime) {
@@ -631,11 +679,19 @@ function _isLockFileOfLinuxProcess(
     // For example, /proc isn't mounted, or it doesn't let us read the files of this process.
     return false;
   }
-  // These are the formats that getProcessStartTime() returns.  If the other process wrote its start time with a
-  // locale other than C, the caller runs "ps".
+  if (startTime === undefined) {
+    return false;
+  }
+  // These are the formats that getProcessStartTime() returns.
+  if (lockFileStartTime === startTime.lstart || lockFileStartTime === startTime.ticks) {
+    return true;
+  }
+  // The other process may have written its start time with another time zone or locale.  This is the check
+  // that _isLockFileOfRunningProcess() makes after running "ps" twice, with the start time from /proc.
   return (
-    startTime !== undefined &&
-    (lockFileStartTime === startTime.lstart || lockFileStartTime === startTime.ticks)
+    lockFileBirthtimeMs !== undefined &&
+    startTime.startTimeMs <= lockFileBirthtimeMs + START_TIME_TOLERANCE_MS &&
+    _isStartTimeInSomeTimeZone(lockFileStartTime, startTime.startTimeMs)
   );
 }
 
@@ -799,12 +855,13 @@ function _tryAcquireMacOrLinuxOnce(
         // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
 
         // Actual start time of the other PID.  On Linux, /proc usually shows that the file belongs to the
-        // process with that PID, and then we don't need to run "ps", which is slow when there are many
-        // processes.  When many processes wait for the same lock, each of their attempts checks the file
-        // of every other process.
+        // process with that PID, even if that process has another time zone or locale, and then we don't need
+        // to run "ps", which is slow when there are many processes.  When many processes wait for the same
+        // lock, each of their attempts checks the file of every other process.
         const otherPidCurrentStartTime: string | undefined = _isLockFileOfLinuxProcess(
           otherPid,
           otherPidOldStartTime,
+          otherBirthtimeMs,
           getLinuxBootTime
         )
           ? otherPidOldStartTime
