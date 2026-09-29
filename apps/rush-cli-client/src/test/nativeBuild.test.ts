@@ -596,4 +596,59 @@ describe('native build through the standalone client', () => {
       }),
     30000
   );
+
+  it(
+    'cancels a build whose output reader exits, as `head` does, and exits with 141 (task 226)',
+    () =>
+      runWithFixtureAsync(async ({ folder, environment, trackWatch }) => {
+        // An operation that writes a line every 20 ms for 20 s.
+        fs.writeFileSync(
+          path.join(folder, 'a/build.cjs'),
+          "let n=0;const t=setInterval(()=>{console.log('tick-'+ ++n);if(n===1000)clearInterval(t);},20);"
+        );
+        const client = spawn(
+          process.execPath,
+          [path.resolve(__dirname, '../../bin/rush-client'), 'build', '--to', 'a', '--verbose'],
+          { cwd: folder, env: environment, stdio: ['ignore', 'pipe', 'pipe'] }
+        );
+        const closed = once(client, 'close');
+        trackWatch(client, closed);
+        let errors: string = '';
+        client.stderr!.on('data', (bytes: Buffer) => {
+          errors += bytes.toString();
+        });
+        let output: string = '';
+        // Stops reading once the operation's output arrives, as `head -5` does.
+        const read = new Promise<void>((resolve) => {
+          client.stdout!.on('data', (bytes: Buffer) => {
+            output += bytes.toString();
+            if (output.includes('tick-')) {
+              client.stdout!.destroy();
+              resolve();
+            }
+          });
+        });
+        try {
+          await Promise.race([
+            read,
+            closed.then(() => {
+              throw new Error(`The build ended before its output arrived: ${errors}`);
+            })
+          ]);
+          expect(await closed).toEqual([141, null]);
+          // A socket (here) may report ECONNRESET where a shell's pipe reports EPIPE.
+          expect(
+            errors.split('\n').filter((line) => /cancel|connection|EPIPE|ECONNRESET/i.test(line))
+          ).toEqual([
+            expect.stringMatching(
+              /^rush-client: build cancelled, because the process reading its stdout exited \((EPIPE|ECONNRESET)\)\.$/
+            )
+          ]);
+        } finally {
+          if (client.exitCode === null && client.signalCode === null) client.kill('SIGTERM');
+          await closed;
+        }
+      }),
+    30000
+  );
 });

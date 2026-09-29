@@ -11,6 +11,7 @@ jest.mock('@rushstack/rush-client-core', () => ({
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { Writable } from 'node:stream';
 
 import {
   DaemonClientError,
@@ -23,6 +24,7 @@ import {
 import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 
 import { AgentProgressRenderer } from '../AgentProgressRenderer';
+import { ClientOutput } from '../clientOutput';
 import * as connectionOptions from '../daemonConnectionOptions';
 import { launchClientAsync } from '../launchClient';
 import { getTestProcessEnvironment } from './TestProcessEnvironment';
@@ -33,7 +35,33 @@ const CANCELLED: string = 'rush-client: build cancelled.\n';
 const UNCONFIRMED: string =
   'rush-client: build cancelled, but rushd did not confirm that the request stopped; it may still be stopping.\n';
 
+const CLOSED_STDOUT: string =
+  'rush-client: build cancelled, because the process reading its stdout exited (EPIPE).\n';
+
 type Execution = (options: IDaemonClientExecuteOptions) => Promise<DaemonClientOutcome>;
+
+function brokenPipe(): NodeJS.ErrnoException {
+  return Object.assign(new Error('write EPIPE'), { code: 'EPIPE', errno: -32, syscall: 'write' });
+}
+
+/** Agent output whose writes fail once `readerExited` is set, as a pipe's do once the process reading it exits. */
+class ClosingOutput extends Writable {
+  public text: string = '';
+  public readerExited: boolean = false;
+
+  public constructor() {
+    super({
+      write: (chunk: Buffer, encoding, callback) => {
+        if (this.readerExited) {
+          callback(brokenPipe());
+        } else {
+          this.text += chunk.toString();
+          callback();
+        }
+      }
+    });
+  }
+}
 
 describe('the cancellation of a daemon request (task 132)', () => {
   let folder: string;
@@ -41,6 +69,7 @@ describe('the cancellation of a daemon request (task 132)', () => {
   let originalEnvironment: NodeJS.ProcessEnv;
   let originalExitCode: typeof process.exitCode;
   let listenersBefore: Map<NodeJS.Signals, unknown[]>;
+  let errorListenersBefore: Map<NodeJS.WriteStream, unknown[]>;
   let stderr: string[];
   /** What the client had written to stderr when the daemon heard of the cancellation. */
   let stderrAtCancel: string[] | undefined;
@@ -52,6 +81,9 @@ describe('the cancellation of a daemon request (task 132)', () => {
     originalExitCode = process.exitCode;
     listenersBefore = new Map(
       (['SIGINT', 'SIGTERM'] as const).map((signal) => [signal, process.listeners(signal)])
+    );
+    errorListenersBefore = new Map(
+      [process.stdout, process.stderr].map((stream) => [stream, stream.listeners('error')])
     );
     stderr = [];
     stderrAtCancel = undefined;
@@ -95,6 +127,12 @@ describe('the cancellation of a daemon request (task 132)', () => {
     jest.restoreAllMocks();
     jest.mocked(connectOrAwaitDaemonStartupAsync).mockReset();
     jest.mocked(executeWithDaemonRestartAsync).mockReset();
+    // A failed write leaves its 'error' listener, which a real pipe's error event would have removed.
+    for (const [stream, listeners] of errorListenersBefore) {
+      for (const listener of stream.listeners('error')) {
+        if (!listeners.includes(listener)) stream.removeListener('error', listener as (error: Error) => void);
+      }
+    }
     fs.rmSync(folder, { recursive: true });
   });
 
@@ -132,6 +170,43 @@ describe('the cancellation of a daemon request (task 132)', () => {
       'timeout',
       'Daemon did not finish cancellation; disconnected without retrying the command.'
     );
+  }
+
+  /**
+   * Makes each write to `stream` fail, as a pipe's writes do once the process reading it (for example `head`)
+   * exited, and records what the client tried to write.
+   */
+  function closeReader(stream: NodeJS.WriteStream, written: string[] = []): void {
+    jest.spyOn(stream, 'write').mockImplementation(((
+      chunk: string | Uint8Array,
+      ...rest: unknown[]
+    ): boolean => {
+      written.push(Buffer.from(chunk).toString());
+      const callback: ((error: Error) => void) | undefined = rest.find(
+        (argument) => typeof argument === 'function'
+      ) as ((error: Error) => void) | undefined;
+      process.nextTick(() => callback?.(brokenPipe()));
+      return false;
+    }) as typeof stream.write);
+  }
+
+  /** Resolves once the client aborts the request; `DaemonClient` then asks rushd to cancel it. */
+  async function abortedAsync(signal: AbortSignal): Promise<void> {
+    if (signal.aborted) return;
+    await new Promise<void>((resolve, reject) => {
+      const timer: NodeJS.Timeout = setTimeout(
+        () => reject(new Error('The client did not cancel the request.')),
+        2000
+      );
+      signal.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(timer);
+          resolve();
+        },
+        { once: true }
+      );
+    });
   }
 
   function disconnected(): DaemonClientError {
@@ -273,5 +348,133 @@ describe('the cancellation of a daemon request (task 132)', () => {
     ]);
     expect(stderr).toEqual([CANCELLED]);
     expect(process.exitCode).toBe(130);
+  });
+
+  describe('when the process reading its output exits, as `head` does (task 226)', () => {
+    it('cancels the request, says why in one line and exits with 141, as SIGPIPE would', async () => {
+      closeReader(process.stdout);
+      execute(async (options) => {
+        // As for `rush-client build --verbose | head -5`, once head has read its lines.
+        await options.onStdoutAsync!(Buffer.from('built-a\n'), options.request.requestId);
+        await abortedAsync(options.abortSignal!);
+        requestCancel(options);
+        return aborted(options);
+      });
+      await launchClientAsync(false);
+      // Nothing is left to read a line that says the client waits for rushd.
+      expect(stderrAtCancel).toEqual([]);
+      expect(stderr).toEqual([CLOSED_STDOUT]);
+      expect(process.exitCode).toBe(141);
+    });
+
+    it('fails no write when stderr has the same reader (`2>&1 | head`)', async () => {
+      const written: string[] = [];
+      closeReader(process.stdout, written);
+      closeReader(process.stderr, written);
+      execute(async (options) => {
+        await options.onStdoutAsync!(Buffer.from('built-a\n'), options.request.requestId);
+        await abortedAsync(options.abortSignal!);
+        requestCancel(options);
+        return aborted(options);
+      });
+      await launchClientAsync(false);
+      expect(written).toEqual(['built-a\n', CLOSED_STDOUT]);
+      expect(process.exitCode).toBe(141);
+    });
+
+    it("keeps a signal's exit code and lines when the signal cancelled the request first", async () => {
+      closeReader(process.stdout);
+      execute(async (options) => {
+        deliverSignal('SIGTERM');
+        requestCancel(options);
+        // Output that was already on its way to the client.
+        await options.onStdoutAsync!(Buffer.from('built-a\n'), options.request.requestId);
+        return aborted(options);
+      });
+      await launchClientAsync(false);
+      expect(stderr).toEqual([CANCELLING, CANCELLED]);
+      expect(process.exitCode).toBe(143);
+    });
+
+    it('keeps the exit code of a result that arrived before the client found the reader gone', async () => {
+      const written: string[] = [];
+      closeReader(process.stderr, written);
+      execute(async (options) => ({
+        kind: 'result',
+        result: {
+          requestId: options.request.requestId,
+          exitCode: 1,
+          outcome: 'failure',
+          aborted: false,
+          errorMessage: 'Rush build failed.'
+        }
+      }));
+      await launchClientAsync(false);
+      expect(written).toEqual(['rush-client: Rush build failed.\n']);
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('still fails on an EPIPE that is not from its own output', async () => {
+      execute(async () => {
+        throw brokenPipe();
+      });
+      await expect(launchClientAsync(false)).rejects.toThrow('write EPIPE');
+      expect(stderr).toEqual([]);
+    });
+
+    it('cancels the request in agent output when a status line finds the reader gone', async () => {
+      const stdout: ClosingOutput = new ClosingOutput();
+      const output: ClientOutput = new ClientOutput({ stdout, stderr: process.stderr });
+      const renderer: AgentProgressRenderer = new AgentProgressRenderer({
+        commandName: 'build',
+        isTTY: false,
+        columns: 80,
+        write: (text: string) => output.stdout.write(text)
+      });
+      const lockfile: DaemonRestartReason = {
+        kind: 'workspaceInputsChanged',
+        installationFiles: ['common/config/rush/pnpm-lock.yaml']
+      };
+      execute(async (options) => {
+        stdout.readerExited = true;
+        // On a pipe, a new cause gets a status line at once; otherwise the next one is due every 25 s.
+        await options.onQueuePositionAsync!(1, lockfile, { scriptCount: 1 });
+        await abortedAsync(options.abortSignal!);
+        requestCancel(options);
+        return aborted(options);
+      });
+      await launchClientAsync(false, renderer, output);
+      expect(stdout.text).toMatch(
+        /^rush build · \d+\.\ds · sent to rushd; preparing the workspace graph [^\n]*\n$/
+      );
+      // The summary line can no longer be read, so the line on stderr is the only report.
+      expect(stderr).toEqual([CLOSED_STDOUT]);
+      expect(process.exitCode).toBe(141);
+    });
+
+    it("keeps the result's exit code in agent output when only the summary line finds the reader gone", async () => {
+      const stdout: ClosingOutput = new ClosingOutput();
+      const output: ClientOutput = new ClientOutput({ stdout, stderr: process.stderr });
+      const renderer: AgentProgressRenderer = new AgentProgressRenderer({
+        commandName: 'build',
+        isTTY: false,
+        columns: 80,
+        write: (text: string) => output.stdout.write(text)
+      });
+      execute(async (options) => {
+        // As for `rush-client build | head -1` on a request that takes less than 25 s.
+        stdout.readerExited = true;
+        return {
+          kind: 'result',
+          result: { requestId: options.request.requestId, exitCode: 0, outcome: 'success', aborted: false }
+        };
+      });
+      await launchClientAsync(false, renderer, output);
+      expect(stdout.text).toMatch(
+        /^rush build · \d+\.\ds · sent to rushd; preparing the workspace graph [^\n]*\n$/
+      );
+      expect(stderr).toEqual([]);
+      expect(process.exitCode).toBe(0);
+    });
   });
 });

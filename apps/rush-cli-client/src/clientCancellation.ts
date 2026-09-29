@@ -39,6 +39,23 @@ export function formatCancellationMessage(commandName: string, stopUnconfirmed: 
 }
 
 /**
+ * Formats the notice printed when a daemon-routed command is cancelled because the process reading its output
+ * exited, for example `head` in `rush-client build | head -5`. It is the only notice of that cancellation.
+ */
+export function formatClosedOutputMessage(
+  commandName: string,
+  streamName: string,
+  code: string | undefined,
+  stopUnconfirmed: boolean
+): string {
+  const reason: string = `the process reading its ${streamName} exited${code ? ` (${code})` : ''}`;
+  return stopUnconfirmed
+    ? `rush-client: ${commandName} cancelled, because ${reason}, but rushd did not confirm that the request ` +
+        'stopped; it may still be stopping.\n'
+    : `rush-client: ${commandName} cancelled, because ${reason}.\n`;
+}
+
+/**
  * Returns whether a daemon outcome represents a cancelled command. A result is cancelled when the daemon reports it
  * as aborted, even if an operation failure determines its semantic outcome, unless the daemon aborted it for its own
  * reason (such as a daemon shutdown), which the result's error message carries and a signal did not cause. A

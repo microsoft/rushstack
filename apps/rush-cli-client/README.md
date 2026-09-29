@@ -388,6 +388,17 @@ asks rushd to cancel the command, which a stopped rushd cannot confirm, so the c
 when its 5 s cancellation wait ends, and writes no more of these lines once it asked. Daemons older
 than protocol 0.13 are not checked.
 
+When the process that reads the client's output exits first, for example `head` in
+`rush-client build | head -5`, the client's next write to that stream fails with EPIPE. The client
+does not report that as a lost connection. It asks rushd to cancel the command, waits for the stop
+as it does after Ctrl+C, and exits with code 141 (128 + SIGPIPE), which a shell reports for a writer
+that SIGPIPE ended. Instead of the cancelling and cancelled lines it prints one line, which names
+the stream: `rush-client: build cancelled, because the process reading its stdout exited (EPIPE).`
+Agent output prints the same line on stderr. The client only learns of the exit at its next write,
+which in agent output on a pipe can be the next status line, up to 25 s later. A command whose
+result arrived before a write failed keeps the result's exit code. Rush run in-process and
+`rush-client daemon logs` still report a failed write as an error.
+
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
 not read input until the command attaches an input destination, and sends bounded
 chunks only as the daemon grants write credits. EOF follows all preceding writes;

@@ -32,9 +32,11 @@ import {
   CANCELLATION_SIGNALS,
   formatCancellationMessage,
   formatCancellingMessage,
+  formatClosedOutputMessage,
   getSignalExitCode,
   isCancelledOutcome
 } from './clientCancellation';
+import { CLOSED_OUTPUT_EXIT_CODE, ClientOutput, type ClientOutputStream } from './clientOutput';
 import { getDaemonConnectionOptionsAsync, getDaemonPaths } from './daemonConnectionOptions';
 import { readUseRushReporter, selectClientOutputMode } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
@@ -48,7 +50,6 @@ import {
 } from './daemonRestartNotice';
 import { formatInProcessFallbackMessage } from './inProcessFallback';
 import { createOrphanReapNoticeHandler, writeStderr } from './daemonReclaimNotice';
-import { writeStreamAsync } from './writeStreamAsync';
 import {
   getBundledRushVersion,
   loadMinimalRushConfiguration,
@@ -63,7 +64,8 @@ interface IWorkspaceJson {
 
 export async function launchClientAsync(
   rushx: boolean,
-  agentRenderer?: AgentProgressRenderer
+  agentRenderer?: AgentProgressRenderer,
+  output: ClientOutput = new ClientOutput()
 ): Promise<void> {
   const cwd: string = process.cwd();
   const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({ ...process.env });
@@ -88,6 +90,7 @@ export async function launchClientAsync(
     environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? getBundledRushVersion();
   if (!rushx && route.commandName === 'daemon') {
     agentRenderer?.dispose();
+    output.release();
     if ((route.argv[1] === 'start' || route.argv[1] === 'restart') && process.argv.includes('--no-daemon')) {
       throw new Error(`--no-daemon cannot be combined with daemon ${route.argv[1]}.`);
     }
@@ -106,6 +109,7 @@ export async function launchClientAsync(
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
     agentRenderer?.dispose();
+    output.release();
     // Agent output says why a command runs in-process; legacy output, which rushx-client always uses, says so only
     // when RUSH_DAEMON=1 asked for the daemon.
     if (
@@ -196,6 +200,7 @@ export async function launchClientAsync(
     )
       throw error;
     agentRenderer?.dispose();
+    output.release();
     process.stderr.write(formatInProcessFallbackMessage(error.message, clientName));
     await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
     return;
@@ -205,6 +210,8 @@ export async function launchClientAsync(
   let cancellationSignal: NodeJS.Signals | undefined;
   // Whether the client asked the daemon to cancel the request: after a signal, or a raw Ctrl+C, which raises none.
   let cancelRequested: boolean = false;
+  // The output stream whose reader exited while the request ran, when nothing else had cancelled it first.
+  let closedOutput: ClientOutputStream | undefined;
   // Windows test harnesses emit signals without a name; treat those as Ctrl+C.
   const onSignal = (signal?: NodeJS.Signals): void => {
     cancellationSignal ??= signal ?? 'SIGINT';
@@ -219,13 +226,21 @@ export async function launchClientAsync(
       agentRenderer.onCancelRequested(timeoutMs);
       return;
     }
+    // One line, written once the request stops, says why it was cancelled.
+    if (closedOutput) return;
     // After SIGHUP the terminal may be gone.
-    writeStreamAsync(process.stderr, Buffer.from(formatCancellingMessage(commandName, timeoutMs))).catch(
-      () => undefined
-    );
+    output.stderr
+      .writeAsync(Buffer.from(formatCancellingMessage(commandName, timeoutMs)))
+      .catch(() => undefined);
   };
   const isCancelled = (): boolean => abort.signal.aborted || cancelRequested;
+  // A reader that exits (for example `| head`) cancels the request, as SIGPIPE stops a native command.
+  const onOutputClosed = (stream: ClientOutputStream): void => {
+    if (!isCancelled()) closedOutput = stream;
+    abort.abort();
+  };
   for (const signal of CANCELLATION_SIGNALS) process.on(signal, onSignal);
+  const removeOutputListener: () => void = output.onClosed(onOutputClosed);
   const renderer: ClientOperationRenderer = new ClientOperationRenderer({
     requestId: request.requestId,
     colorLevel: terminal.supportsColor ? 1 : 0,
@@ -238,14 +253,13 @@ export async function launchClientAsync(
         return !!process.stdout.isTTY;
       }
     },
-    writeAsync: (bytes, stream) =>
-      writeStreamAsync(stream === 'stderr' ? process.stderr : process.stdout, bytes)
+    writeAsync: (bytes, stream) => (stream === 'stderr' ? output.stderr : output.stdout).writeAsync(bytes)
   });
   let outcome: DaemonClientOutcome | undefined;
   const discoveryLines: string[] = [];
   const writeDiscoveryAsync = async (): Promise<void> => {
     if (discoveryLines.length > 0) {
-      await writeStreamAsync(process.stdout, Buffer.from(discoveryLines.splice(0).join('\n') + '\n'));
+      await output.stdout.writeAsync(Buffer.from(discoveryLines.splice(0).join('\n') + '\n'));
     }
   };
   try {
@@ -261,7 +275,7 @@ export async function launchClientAsync(
       agentRenderer,
       stderrIsTTY: !!process.stderr.isTTY,
       daemonPid: (await client.status).pid,
-      writeStderrAsync: (text) => writeStreamAsync(process.stderr, Buffer.from(text))
+      writeStderrAsync: (text) => output.stderr.writeAsync(Buffer.from(text))
     });
     notices = requestNotices;
     outcome = await executeWithDaemonRestartAsync(client, connection, {
@@ -293,7 +307,7 @@ export async function launchClientAsync(
       liveness: createDaemonLivenessOptions({
         rushx,
         agentRenderer,
-        writeStderrAsync: (text) => writeStreamAsync(process.stderr, Buffer.from(text))
+        writeStderrAsync: (text) => output.stderr.writeAsync(Buffer.from(text))
       }),
       initialRawMode: !!process.stdin.isRaw,
       setRawMode: process.stdin.isTTY
@@ -309,6 +323,7 @@ export async function launchClientAsync(
   } finally {
     notices?.dispose();
     for (const signal of CANCELLATION_SIGNALS) process.removeListener(signal, onSignal);
+    removeOutputListener();
     try {
       await renderer.closeAsync();
     } finally {
@@ -316,7 +331,9 @@ export async function launchClientAsync(
     }
   }
   if (outcome === undefined || isCancelledOutcome(outcome, isCancelled())) {
-    const exitCode: number = getSignalExitCode(cancellationSignal ?? 'SIGINT');
+    const exitCode: number = closedOutput
+      ? CLOSED_OUTPUT_EXIT_CODE
+      : getSignalExitCode(cancellationSignal ?? 'SIGINT');
     // The client stopped waiting (at the cancellation deadline, or when the connection closed) before the daemon
     // confirmed that the request stopped. The daemon also cancels a request whose client disconnects.
     const stopUnconfirmed: boolean = outcome === undefined && cancelRequested;
@@ -327,11 +344,21 @@ export async function launchClientAsync(
     );
     process.exitCode = exitCode;
     // After SIGHUP the terminal may be gone; the exit code is what matters. Agent output's summary line already
-    // says whether the daemon confirmed the stop.
-    await writeStreamAsync(
-      process.stderr,
-      Buffer.from(formatCancellationMessage(commandName, stopUnconfirmed && !agentRenderer))
-    ).catch(() => undefined);
+    // says whether the daemon confirmed the stop, unless its reader exited: then this line is the only report.
+    await output.stderr
+      .writeAsync(
+        Buffer.from(
+          closedOutput
+            ? formatClosedOutputMessage(
+                commandName,
+                closedOutput.name,
+                closedOutput.closedCode,
+                stopUnconfirmed
+              )
+            : formatCancellationMessage(commandName, stopUnconfirmed && !agentRenderer)
+        )
+      )
+      .catch(() => undefined);
   } else if (outcome.kind === 'result') {
     // In agent mode the summary line may already carry the complete error message; do not repeat it.
     const reportedByAgent: boolean = agentRenderer?.finish(outcome.result) ?? false;
@@ -341,7 +368,7 @@ export async function launchClientAsync(
       ? undefined
       : getResultStderr(outcome.result, request.admission, rushx ? 'rushx-client' : 'rush-client');
     if (stderr) {
-      await writeStreamAsync(process.stderr, Buffer.from(stderr));
+      await output.stderr.writeAsync(Buffer.from(stderr));
     }
   } else if (outcome.kind === 'rejected') {
     const message: string = `Daemon rejected the request (${outcome.rejection.code}): ${outcome.rejection.message}`;
@@ -349,6 +376,7 @@ export async function launchClientAsync(
     throw new Error(message);
   } else {
     agentRenderer?.dispose();
+    output.release();
     process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason, clientName));
     await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
   }
