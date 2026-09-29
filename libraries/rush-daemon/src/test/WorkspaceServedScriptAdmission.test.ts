@@ -602,6 +602,61 @@ describe('a restart drain whose change is reverted', () => {
       await closeRestartingFixtureAsync(fixture);
     }
   });
+
+  it('does not check again for a request that needs the restart for its environment, so the others see their revert', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    });
+    const capturesOfChangedEnvironment: () => number = () =>
+      inputCaptureMock.mock.calls.filter(
+        ([options]) => options.environment.RUSHD_RELOAD_TIER_TEST === 'changed'
+      ).length;
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      const revert: () => void = changeInstallation(fixture);
+      const changed: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        environment: { ...fixture.environment, RUSHD_RELOAD_TIER_TEST: 'changed' },
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      await waitForAsync(() => changed.positions.length > 0 || changed.settled(), 'the first build to wait');
+      // Each second, its check would start about 0.3 s before the second build's, which would then share it.
+      await delayAsync(300);
+      const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the second build to wait');
+      inputCaptureMock.mockClear();
+      await delayAsync(2500);
+      expect(capturesOfChangedEnvironment()).toBe(0);
+      expect(changed.settled()).toBe(false);
+      expect(build.settled()).toBe(false);
+
+      const revertedAt: number = Date.now();
+      revert();
+      expectSuccess(await build.exchange);
+      expect(Date.now() - revertedAt).toBeLessThan(5000);
+      // A request's environment does not change, so the first build still waits for the restart.
+      expect(changed.settled()).toBe(false);
+      expect(capturesOfChangedEnvironment()).toBe(0);
+      expect((await pongAsync(fixture)).pid).toBe(before.pid);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+      expect((await changed.exchange).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, retryAfterRestart: true }
+      });
+      const restarted = await fixture.host.restartCompleted;
+      expect(restarted?.pid).not.toBe(before.pid);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      await closeRestartingFixtureAsync(fixture);
+    }
+  });
 });
 
 describe('the reason for a restart that waits for a served rushx script', () => {
