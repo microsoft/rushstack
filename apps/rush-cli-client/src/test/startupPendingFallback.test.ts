@@ -16,8 +16,10 @@ import {
   DaemonClientError,
   DaemonStartupPendingError,
   connectOrAwaitDaemonStartupAsync,
-  connectToStartingDaemonAsync
+  connectToStartingDaemonAsync,
+  getDaemonLogFilePath
 } from '@rushstack/rush-client-core';
+import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { AgentProgressRenderer } from '../AgentProgressRenderer';
 import * as connectionOptions from '../daemonConnectionOptions';
@@ -138,4 +140,38 @@ describe('a daemon startup failure', () => {
     ]);
     expect(connectOrAwaitDaemonStartupAsync).not.toHaveBeenCalled();
   });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'runs Rush in-process when auto-start cannot open the launcher log, and says why',
+    async () => {
+      jest
+        .mocked(connectOrAwaitDaemonStartupAsync)
+        .mockImplementation(
+          jest.requireActual('@rushstack/rush-client-core').connectOrAwaitDaemonStartupAsync
+        );
+      const paths: IDaemonPaths = {
+        runtimeDir: folder,
+        socketPath: path.join(folder, 'd.sock'),
+        lockfilePath: path.join(folder, 'daemon.pid.json')
+      };
+      jest.mocked(connectionOptions.getDaemonConnectionOptionsAsync).mockResolvedValue({
+        paths,
+        startCommand: { command: process.execPath, args: ['-e', ''], cwd: folder, environment: {} }
+      });
+      const logFilePath: string = getDaemonLogFilePath(paths);
+      fs.symlinkSync(`${logFilePath}.target`, logFilePath);
+      await launchClientAsync(false);
+      expect(process.argv[1]).toBe(
+        path.join(path.dirname(require.resolve('@microsoft/rush/package.json')), 'bin/rush')
+      );
+      expect(process.argv.slice(2)).toEqual(['build', '--to', 'project']);
+      // The reason and the path; the tests above pin the rest of the fallback line.
+      expect(output).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `rush-client: Launcher log cannot be opened for writing (ELOOP): ${logFilePath}`
+        )
+      );
+      expect(fs.existsSync(`${logFilePath}.target`)).toBe(false);
+    }
+  );
 });

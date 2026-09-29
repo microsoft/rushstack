@@ -667,17 +667,29 @@ async function spawnDetachedAsync(
     fs.constants.O_APPEND +
     fs.constants.O_CREAT +
     (process.platform === 'win32' ? 0 : fs.constants.O_NOFOLLOW + fs.constants.O_NONBLOCK);
-  const logFd: number = fs.openSync(logFilePath, flags, 0o600);
+  let logFd: number;
   try {
-    const stats: fs.Stats = fs.fstatSync(logFd);
-    if (!stats.isFile() || stats.nlink !== 1) {
+    logFd = fs.openSync(logFilePath, flags, 0o600);
+  } catch (error) {
+    // For example a symlink, a directory, a FIFO without a reader, or a file that this user may not write to.
+    throw new DaemonClientError(
+      'startupFailed',
+      `Launcher log cannot be opened for writing (${(error as NodeJS.ErrnoException).code}): ${logFilePath}`,
+      { cause: error }
+    );
+  }
+  try {
+    // A plain stat would leave the log's file type in Node's shared stat array, which Node's cached realpath reads:
+    // after a FIFO, a later require() in this process, such as by Rush run in-process, would not resolve symlinks.
+    const stats: fs.BigIntStats = fs.fstatSync(logFd, { bigint: true });
+    if (!stats.isFile() || stats.nlink !== 1n) {
       throw new DaemonClientError(
         'startupFailed',
         `Launcher log must be a regular, unshared file: ${logFilePath}`
       );
     }
     if (process.platform !== 'win32') {
-      if (stats.uid !== process.getuid?.()) {
+      if (Number(stats.uid) !== process.getuid?.()) {
         throw new DaemonClientError('startupFailed', `Launcher log is owned by another user: ${logFilePath}`);
       }
       fs.fchmodSync(logFd, 0o600);

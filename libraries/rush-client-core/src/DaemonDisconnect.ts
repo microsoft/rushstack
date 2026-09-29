@@ -172,10 +172,12 @@ function readLogTail(logFilePath: string, offset: number): string | undefined {
       fs.constants.O_RDONLY +
         (process.platform === 'win32' ? 0 : fs.constants.O_NOFOLLOW + fs.constants.O_NONBLOCK)
     );
-    const stats: fs.Stats = fs.fstatSync(fd);
-    if (!stats.isFile() || stats.size < offset) return undefined;
-    const start: number = Math.max(offset, stats.size - MAX_LOG_READ_BYTES);
-    const buffer: Buffer = Buffer.alloc(stats.size - start);
+    // A bigint stat; see tryGetFileSize.
+    const stats: fs.BigIntStats = fs.fstatSync(fd, { bigint: true });
+    const size: number = Number(stats.size);
+    if (!stats.isFile() || size < offset) return undefined;
+    const start: number = Math.max(offset, size - MAX_LOG_READ_BYTES);
+    const buffer: Buffer = Buffer.alloc(size - start);
     return buffer.toString('utf8', 0, fs.readSync(fd, buffer, 0, buffer.length, start));
   } catch {
     return undefined;
@@ -184,10 +186,15 @@ function readLogTail(logFilePath: string, offset: number): string | undefined {
   }
 }
 
+/**
+ * A plain stat would leave the file's type in Node's shared stat array, which Node's cached realpath reads: after
+ * a FIFO or socket, a later require() in this process, such as by Rush run in-process, would not resolve symlinks.
+ * A bigint stat fills another array.
+ */
 function tryGetFileSize(filePath: string): number | undefined {
   try {
-    const stats: fs.Stats = fs.statSync(filePath);
-    return stats.isFile() ? stats.size : undefined;
+    const stats: fs.BigIntStats = fs.statSync(filePath, { bigint: true });
+    return stats.isFile() ? Number(stats.size) : undefined;
   } catch {
     return undefined;
   }

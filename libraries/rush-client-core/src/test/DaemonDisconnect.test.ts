@@ -17,7 +17,12 @@ import {
 
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from '../DaemonClientError';
-import { explainLostConnectionAsync, findLoggedFatalError, type IServingDaemon } from '../DaemonDisconnect';
+import {
+  explainLostConnectionAsync,
+  findLoggedFatalError,
+  observeServingDaemonAsync,
+  type IServingDaemon
+} from '../DaemonDisconnect';
 import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { reserveDaemonStartup } from '../DaemonStartup';
 import { isProcessDefunct } from '../ProcessStartTime';
@@ -29,9 +34,11 @@ import {
   startOrphanedOperationAsync,
   stopOperationIfRunning
 } from './OrphanedOperation';
+import { runThenRequireSymlinkedPackage, type IRequireAfterScriptResult } from './SymlinkedPackageRequire';
 import { withUnreapedChildAsync } from './UnreapedChildProcess';
 
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
+const posixIt: typeof it = process.platform === 'win32' ? it.skip : it;
 
 /** The lines that this Node.js version writes to stderr when `script` fails with an uncaught error. */
 function getCrashReport(script: string): string[] {
@@ -343,5 +350,64 @@ describe(explainLostConnectionAsync.name, () => {
     } finally {
       warning.mockRestore();
     }
+  });
+
+  // For example, Rush that runs in-process after the daemon exited. Jest resolves modules itself, so a Node
+  // process of its own makes the call.
+  posixIt('leaves require() resolving symlinks after it read a launcher log that is a FIFO', () => {
+    const logFilePath: string = getDaemonLogFilePath(paths);
+    expect(spawnSync('mkfifo', ['-m', '600', logFilePath]).status).toBe(0);
+    // A process that has exited.
+    const pid: number = spawnSync(process.execPath, ['-e', '']).pid!;
+    const daemon: IServingDaemon = { pid, startedAt: undefined, logFilePath, logOffset: 0, paths };
+    const result: IRequireAfterScriptResult = runThenRequireSymlinkedPackage(
+      folder,
+      [
+        'const [modulePath, daemonJson, requestJson] = args;',
+        "const lost = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });",
+        'const { explainLostConnectionAsync } = require(modulePath);',
+        'const explained = await explainLostConnectionAsync(lost, JSON.parse(daemonJson), JSON.parse(requestJson));',
+        'process.stdout.write(`${explained.message}\\n`);'
+      ].join('\n'),
+      [require.resolve('../DaemonDisconnect'), JSON.stringify(daemon), JSON.stringify(request)]
+    );
+    expect(result).toEqual({ status: 0, stdout: `${getExitMessage(pid)}\nfound`, stderr: '' });
+  });
+});
+
+describe(observeServingDaemonAsync.name, () => {
+  let folder: string;
+  let paths: IDaemonPaths;
+
+  beforeEach(() => {
+    folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-serving-daemon-'));
+    paths = {
+      runtimeDir: folder,
+      socketPath: path.join(folder, 'd.sock'),
+      lockfilePath: path.join(folder, 'daemon.pid.json')
+    };
+  });
+
+  afterEach(async () => {
+    await fs.promises.rm(folder, { recursive: true, force: true });
+  });
+
+  // For example, Rush that runs in-process after the daemon exited. Jest resolves modules itself, so a Node
+  // process of its own makes the call.
+  posixIt('leaves require() resolving symlinks after it measured a launcher log that is a FIFO', () => {
+    expect(spawnSync('mkfifo', ['-m', '600', getDaemonLogFilePath(paths)]).status).toBe(0);
+    const result: IRequireAfterScriptResult = runThenRequireSymlinkedPackage(
+      folder,
+      [
+        'const [modulePath, pathsJson] = args;',
+        'const client = { status: Promise.resolve({ pid: process.pid }) };',
+        'const { observeServingDaemonAsync } = require(modulePath);',
+        'const daemon = await observeServingDaemonAsync(client, JSON.parse(pathsJson));',
+        'process.stdout.write(`${daemon.logOffset}\\n`);'
+      ].join('\n'),
+      [require.resolve('../DaemonDisconnect'), JSON.stringify(paths)]
+    );
+    // The log is not a regular file, so the client does not read it later.
+    expect(result).toEqual({ status: 0, stdout: 'undefined\nfound', stderr: '' });
   });
 });

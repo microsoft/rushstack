@@ -1736,7 +1736,10 @@ describe('detached daemon startup', () => {
       fs.writeFileSync(target, 'unchanged', { mode: 0o644 });
       fs.chmodSync(target, 0o644);
       fs.symlinkSync(target, logFilePath);
-      await expect(connectOrStartDaemonAsync(options)).rejects.toMatchObject({ code: 'ELOOP' });
+      await expect(connectOrStartDaemonAsync(options)).rejects.toMatchObject({
+        code: 'startupFailed',
+        cause: { code: 'ELOOP' }
+      });
       fs.unlinkSync(logFilePath);
       fs.linkSync(target, logFilePath);
       await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('regular, unshared file');

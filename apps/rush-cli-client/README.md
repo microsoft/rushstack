@@ -501,6 +501,10 @@ Windows uses the named pipe `\\.\pipe\rushd-<key>` and is unchanged.
 The client refuses a runtime folder that is a symbolic link, is not a directory or belongs to
 another user, and a `RUSHD_RUNTIME_DIR` too long for the socket path: commands run in-process
 with that reason, and `daemon` commands exit 1. Remove the folder or change `RUSHD_RUNTIME_DIR`.
+Auto-start likewise refuses a launcher log that is not a regular file of yours with one link, or
+that it cannot open for writing, such as a symlink, a directory or a FIFO: commands run in-process
+with that reason (for example `Launcher log cannot be opened for writing (ELOOP): <path>`), and
+`daemon start` exits 1. Remove the file.
 A folder that others can open is made owner-only (`0700`).
 Within one runtime folder, `TMPDIR`, `TMP`, `TEMP`, `XDG_RUNTIME_DIR` and `RUSHD_RUNTIME_DIR`
 never select a different daemon; each operation receives the requesting client's values.

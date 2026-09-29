@@ -225,6 +225,12 @@ and the CLI's local `daemon logs` reader. Child stdout/stderr are appended acros
 restarts, including startup failures; the parent always closes its descriptor
 after spawn or failure. On POSIX the launcher enforces `0600` permissions on a
 regular, unshared, current-user-owned file and refuses symlink destinations.
+A log that it cannot open for writing, such as a symlink, a directory, a FIFO
+without a reader or a read-only file, rejects the start with a `startupFailed`
+error that names the log and the error code, as a log that fails those checks
+does, before anything is spawned. The client stats the log with
+`{ bigint: true }`: a plain stat of a FIFO would stop a later `require()` in the
+same process, such as by Rush run in-process, from resolving symlinks.
 This is a text launcher log, not structured request observability. A client that reclaims a daemon
 that exited without shutting down, after a lost connection or in `reclaimCrashedDaemonAsync()`,
 appends a line that names the daemon's PID to it, under the same file checks. Once the reclaim has
