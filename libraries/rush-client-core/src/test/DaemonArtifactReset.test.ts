@@ -9,6 +9,7 @@ import * as path from 'node:path';
 
 import {
   tryAcquireReclaimLock,
+  type IDaemonOperationGroupLeftRunning,
   type IDaemonOrphanReap,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
@@ -17,7 +18,9 @@ import { resetDaemonArtifactsAsync } from '../DaemonOwnership';
 import { getDaemonStartupFilePath } from '../DaemonStartup';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import {
+  describeGroupLeftRunning,
   isRunning,
+  readClientLogTexts,
   readProcessStartTime,
   recordDaemonOwner,
   recordOperationGroup,
@@ -136,6 +139,9 @@ describe(`${resetDaemonArtifactsAsync.name} when the owner exited without shutti
       expect(await resetDaemonArtifactsAsync(paths)).toEqual({ removedPaths: [paths.lockfilePath] });
       expect(isRunning(recorded)).toBe(false);
       expect(isRunning(other)).toBe(true);
+      expect(readClientLogTexts(paths)).toEqual([
+        describeGroupLeftRunning(daemonPid, other, 'leaderChanged')
+      ]);
       // Without onOrphansReaped, each set of stopped groups is reported as a process warning.
       expect(warning.mock.calls).toEqual([
         [
@@ -225,7 +231,52 @@ describe(`${resetDaemonArtifactsAsync.name} when the owner exited without shutti
       expect(isRunning(unrelated)).toBe(true);
       expect(reaps).toEqual([{ daemonPid: unrelated, processGroupIds: [recorded], outcome: 'terminated' }]);
       expect(warning).not.toHaveBeenCalled();
+      // The records are read in no set order.
+      expect(readClientLogTexts(paths).sort()).toEqual(
+        [
+          describeGroupLeftRunning(unrelated, unrelated, 'daemonPidInUse'),
+          describeGroupLeftRunning(unrelated, other, 'leaderChanged')
+        ].sort()
+      );
       expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(false);
+    }
+  );
+
+  /**
+   * Records an owner that exited, or one whose PID a later process has, that recorded a group whose leader has
+   * another start time. Returns the owner's PID and the group's.
+   */
+  async function recordChangedLeaderAsync(owner: string): Promise<[number, number]> {
+    if (owner === 'reused') {
+      const [unrelated, , other] = await recordReusedOwnerAsync();
+      return [unrelated, other];
+    }
+    const daemonPid: number = await startExitedProcessAsync();
+    const other: number = await startDetachedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    recordOperationGroup(
+      paths.lockfilePath,
+      daemonPid,
+      other,
+      String(Number(readProcessStartTime(other)) - 1)
+    );
+    return [daemonPid, other];
+  }
+
+  linuxIt.each(['exited', 'reused'])(
+    'gives a recorded group that it leaves running to onOperationGroupLeftRunning instead (%s owner)',
+    async (owner: string) => {
+      const [ownerPid, other] = await recordChangedLeaderAsync(owner);
+      const groups: IDaemonOperationGroupLeftRunning[] = [];
+      const onOperationGroupLeftRunning = (group: IDaemonOperationGroupLeftRunning): void => {
+        groups.push(group);
+      };
+      expect(await resetDaemonArtifactsAsync(paths, { onOperationGroupLeftRunning })).toEqual({
+        removedPaths: [paths.lockfilePath]
+      });
+      expect(isRunning(other)).toBe(true);
+      expect(groups).toContainEqual({ daemonPid: ownerPid, processGroupId: other, reason: 'leaderChanged' });
+      expect(readClientLogTexts(paths)).toEqual([]);
     }
   );
 
@@ -246,6 +297,7 @@ describe(`${resetDaemonArtifactsAsync.name} when the owner exited without shutti
       expect(isRunning(recorded)).toBe(true);
       expect(isRunning(unrelated)).toBe(true);
       expect(reaps).toEqual([]);
+      expect(readClientLogTexts(paths)).toEqual([]);
       expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
       expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(true);
     }

@@ -51,8 +51,12 @@ import {
 } from '../DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import {
+  describeGroupLeftRunning,
   isRunning,
+  readClientLogTexts,
   recordDaemonOwner,
+  recordOperationGroup,
+  startDetachedOperationAsync,
   startOrphanedOperationAsync,
   stopOperationIfRunning
 } from './OrphanedOperation';
@@ -1833,7 +1837,7 @@ describe('detached daemon startup', () => {
   );
 
   (process.platform === 'linux' ? it : it.skip)(
-    'reports the operations that a crashed daemon left running to onOrphansReaped before a start',
+    'reports the operations that a crashed daemon left running to onOrphansReaped, and logs a recorded group that it leaves running, before a start',
     async () => {
       const operationPids: number[] = [];
       const warning: jest.SpyInstance = jest
@@ -1841,6 +1845,9 @@ describe('detached daemon startup', () => {
         .mockImplementation(() => undefined);
       try {
         const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+        // A start time that its leader does not have, as if a later process had the recorded PID.
+        const other: number = await startDetachedOperationAsync(operationPids);
+        recordOperationGroup(paths.lockfilePath, daemonPid, other, '1');
         await leaveStaleSocketAsync();
         recordDaemonOwner(paths, daemonPid);
         const reaps: IDaemonOrphanReap[] = [];
@@ -1851,6 +1858,10 @@ describe('detached daemon startup', () => {
         await client.closeAsync();
         expect(isRunning(operationPid)).toBe(false);
         expect(reaps).toEqual([{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]);
+        expect(isRunning(other)).toBe(true);
+        expect(readClientLogTexts(paths)).toEqual([
+          describeGroupLeftRunning(daemonPid, other, 'leaderChanged')
+        ]);
         expect(warning).not.toHaveBeenCalled();
         expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
       } finally {

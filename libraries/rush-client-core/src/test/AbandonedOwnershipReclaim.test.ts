@@ -8,13 +8,16 @@ import * as path from 'node:path';
 import {
   DaemonTransportErrorCode,
   tryAcquireReclaimLock,
+  type IDaemonOperationGroupLeftRunning,
   type IDaemonOrphanReap,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
 import { reclaimAbandonedOwnershipAsync } from '../DaemonOwnership';
 import {
+  describeGroupLeftRunning,
   isRunning,
+  readClientLogTexts,
   readProcessStartTime,
   recordDaemonOwner,
   recordOperationGroup,
@@ -69,9 +72,29 @@ describe(`${reclaimAbandonedOwnershipAsync.name} when a process that started lat
     expect(isRunning(recorded)).toBe(false);
     expect(isRunning(unrelated)).toBe(true);
     expect(reaps).toEqual([{ daemonPid: unrelated, processGroupIds: [recorded], outcome: 'terminated' }]);
+    // The group of that process is left running, and the launcher log says why.
+    expect(readClientLogTexts(paths)).toEqual([
+      describeGroupLeftRunning(unrelated, unrelated, 'daemonPidInUse')
+    ]);
     expect(fs.existsSync(paths.lockfilePath)).toBe(false);
     expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(false);
   });
+
+  linuxIt(
+    'gives a recorded group that it leaves running to onOperationGroupLeftRunning instead',
+    async () => {
+      const [unrelated, recorded] = await recordReusedOwnerAsync();
+      const groups: IDaemonOperationGroupLeftRunning[] = [];
+      await reclaimAbandonedOwnershipAsync(paths, {
+        onOrphansReaped,
+        onOperationGroupLeftRunning: (group: IDaemonOperationGroupLeftRunning) => groups.push(group)
+      });
+      expect(isRunning(recorded)).toBe(false);
+      expect(isRunning(unrelated)).toBe(true);
+      expect(groups).toEqual([{ daemonPid: unrelated, processGroupId: unrelated, reason: 'daemonPidInUse' }]);
+      expect(readClientLogTexts(paths)).toEqual([]);
+    }
+  );
 
   linuxIt(
     'keeps the record and signals nothing while the recorded operations cannot be stopped',
@@ -91,6 +114,7 @@ describe(`${reclaimAbandonedOwnershipAsync.name} when a process that started lat
       expect(isRunning(recorded)).toBe(true);
       expect(isRunning(unrelated)).toBe(true);
       expect(reaps).toEqual([]);
+      expect(readClientLogTexts(paths)).toEqual([]);
       expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
       expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(true);
     }

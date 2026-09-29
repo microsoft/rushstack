@@ -17,7 +17,9 @@ import { captureDaemonRequest } from '../captureDaemonRequest';
 import type { DaemonClient } from '../DaemonClient';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 import {
+  describeGroupLeftRunning,
   isRunning,
+  readClientLogTexts,
   readProcessStartTime,
   recordDaemonOwner,
   recordOperationGroup,
@@ -120,6 +122,9 @@ describe('detached daemon startup after a daemon whose PID a later process has',
         expect(isRunning(recorded)).toBe(false);
         expect(isRunning(unrelated)).toBe(true);
         expect(reaps).toEqual([{ daemonPid: unrelated, processGroupIds: [recorded], outcome: 'terminated' }]);
+        expect(readClientLogTexts(paths)).toEqual([
+          describeGroupLeftRunning(unrelated, unrelated, 'daemonPidInUse')
+        ]);
         expect(warning).not.toHaveBeenCalled();
         expect(readDaemonLockfile(paths.lockfilePath)?.pid).not.toBe(unrelated);
         expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(false);

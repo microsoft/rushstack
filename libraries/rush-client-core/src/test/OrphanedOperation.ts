@@ -9,11 +9,14 @@ import type { Readable } from 'node:stream';
 
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import {
+  formatOperationGroupLeftRunning,
   isDaemonProcessAlive,
   writeDaemonLockfile,
+  type DaemonOperationGroupLeftRunningReason,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
+import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { isProcessDefunct } from '../ProcessStartTime';
 
 /** An operation process that a stand-in daemon starts; it exits by itself after a minute. */
@@ -134,4 +137,26 @@ export function stopOperationIfRunning(pid: number): void {
   } catch {
     // It has exited.
   }
+}
+
+// A line that a client appends to the launcher log.
+const CLIENT_LOG_LINE: RegExp = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z rush-client \(PID (\d+)\): (.*)$/;
+
+/** The texts of the lines that this process appended to the launcher log, in order. */
+export function readClientLogTexts(paths: IDaemonPaths): string[] {
+  const logFilePath: string = getDaemonLogFilePath(paths);
+  const lines: string[] = fs.existsSync(logFilePath) ? fs.readFileSync(logFilePath, 'utf8').split('\n') : [];
+  return lines.flatMap((line: string) => {
+    const match: RegExpExecArray | null = CLIENT_LOG_LINE.exec(line);
+    return match && Number(match[1]) === process.pid ? [match[2]] : [];
+  });
+}
+
+/** The text of the line that a client appends for a recorded group that its reclaim left running. */
+export function describeGroupLeftRunning(
+  daemonPid: number,
+  processGroupId: number,
+  reason: DaemonOperationGroupLeftRunningReason
+): string {
+  return `${formatOperationGroupLeftRunning({ daemonPid, processGroupId, reason })}.`;
 }

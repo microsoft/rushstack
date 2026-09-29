@@ -3,6 +3,7 @@
 
 import { terminateProcessGroupsAsync } from './DaemonGroupTermination';
 import type { DaemonOrphanReapOutcome } from './DaemonGroupTermination';
+import { reportOperationGroupsLeftRunning } from './DaemonOperationGroupLeftRunning';
 import { getOperationGroupsMarker } from './DaemonOperationGroupMarker';
 import { isProvenOperationGroup } from './DaemonOperationGroupProof';
 import {
@@ -12,6 +13,7 @@ import {
 } from './DaemonOperationGroups';
 import type { IOperationGroupRecord } from './DaemonOperationGroups';
 import { isOwnedEntry } from './DaemonOwnedEntry';
+import { withProcessReadsOnce } from './DaemonProcessReadsOnce';
 import { createReapContext, reportOrphansReaped } from './DaemonReapOptions';
 import type { IDaemonOrphanReaperOptions, IReapContext } from './DaemonReapOptions';
 import type { IDaemonOrphanReap } from './DaemonReclaimOptions';
@@ -39,12 +41,20 @@ async function reapRecordedGroupsAsync(
   context: IReapContext
 ): Promise<DaemonOrphanReapOutcome> {
   const marker: string = getOperationGroupsMarker(folder);
-  const groupIds: number[] = readOperationGroupRecords(folder)
-    .filter((record: IOperationGroupRecord) => isProvenOperationGroup(record, context, marker))
-    .map((record: IOperationGroupRecord) => record.groupId);
+  const records: IOperationGroupRecord[] = readOperationGroupRecords(folder);
+  // The termination polls the groups itself, and never through these reads.
+  const probe: IReapContext = withProcessReadsOnce(context);
+  const proven: IOperationGroupRecord[] = records.filter((record: IOperationGroupRecord) =>
+    isProvenOperationGroup(record, probe, marker)
+  );
+  const groupIds: number[] = proven.map((record: IOperationGroupRecord) => record.groupId);
   const outcome: DaemonOrphanReapOutcome =
     groupIds.length > NO_MEMBERS ? await terminateAndLogAsync(context, groupIds) : NOTHING_REAPED;
   removeOperationGroupRecords(folder);
+  const unproven: IOperationGroupRecord[] = records.filter(
+    (record: IOperationGroupRecord) => !proven.includes(record)
+  );
+  reportOperationGroupsLeftRunning(probe, { records: unproven, marker });
   return outcome;
 }
 
@@ -57,9 +67,11 @@ async function reapRecordedGroupsAsync(
  * the recorded start time and still leads group and session `groupId` (a reused pid has another start
  * time), or its leader has exited (a zombie leader has too), every live member of the group is in
  * session `groupId`, and at least one of them carries the daemon's marker (`RUSHD_OPERATION_GROUPS` set to
- * the record folder; see `startOperationGroupRecording`). Unproven records are dropped without a signal.
- * A daemon from a release before that marker sets none, so the first reclaim after an upgrade drops its
- * recorded groups whose leader has exited and leaves them running.
+ * the record folder; see `startOperationGroupRecording`). Unproven records are dropped without a signal, and
+ * each whose group still has a live process goes to `options.onOperationGroupLeftRunning` with the first
+ * condition that the group fails, judged on what the proof read of it. A daemon from a release before that
+ * marker sets none, so the first reclaim after an upgrade drops its recorded groups whose leader has exited
+ * and leaves them running.
  * Records survive a failed reap, so the next reclaim retries.
  * A record folder that is a symbolic link, or that another user owns, is left alone without a signal.
  * Call only under the reclaim mutex, after the daemon has been proven dead, or its pid proven reused

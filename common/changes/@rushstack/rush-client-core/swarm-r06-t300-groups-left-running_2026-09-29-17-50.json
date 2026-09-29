@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "When a reclaim of an exited daemon's files leaves an operation process group running that the daemon recorded, because it cannot prove that the group still runs the daemon's operation, the client now appends a line to the launcher log that names the group and the daemon and says which check the group failed. This covers the reclaims after a lost connection, before Rush runs in-process, before a daemon start and in `resetDaemonArtifactsAsync()`. `reclaimCrashedDaemonAsync()` and `resetDaemonArtifactsAsync()` pass each such group to `options.onOperationGroupLeftRunning` instead, if it is given. Nothing is printed to the terminal.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

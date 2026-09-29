@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Add `onOperationGroupLeftRunning` to `IDaemonReclaimOptions`, and `formatOperationGroupLeftRunning`. On POSIX, a reclaim gives no signal to an operation process group that the dead daemon recorded but that it cannot prove still runs that daemon's operation. When such a group still has a live process, the reclaim now passes it to `onOperationGroupLeftRunning` with the first check that the group failed (`callerGroup`, `daemonPidInUse`, `leaderChanged`, `otherSession` or `noMarker`), after it has removed the records. Without the callback, nothing more is read. `DaemonFrameListener.listenAsync` passes the callback to its reclaim too.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A daemon that reclaims the endpoint of a daemon that exited without shutting down now writes a line to its log for each operation process group that the exited daemon recorded and that it left running, because it could not prove that the group still ran that operation, with the check that the group failed.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

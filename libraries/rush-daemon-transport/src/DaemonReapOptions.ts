@@ -60,7 +60,8 @@ export function createReapContext(deadPid: number, options: IDaemonOrphanReaperO
     ops: options.ops ?? POSIX_PROCESS_GROUP_OPS,
     deadPid,
     uid: resolveCallerUid(options),
-    onOrphansReaped: options.onOrphansReaped
+    onOrphansReaped: options.onOrphansReaped,
+    onOperationGroupLeftRunning: options.onOperationGroupLeftRunning
   };
 }
 

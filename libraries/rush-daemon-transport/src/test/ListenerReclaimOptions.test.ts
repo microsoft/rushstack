@@ -9,7 +9,7 @@ import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import { DaemonFrameListener } from '../DaemonListener';
 import type { IDaemonPaths } from '../DaemonPaths';
 import * as daemonReclaim from '../DaemonReclaim';
-import type { IDaemonOrphanReap } from '../DaemonReclaimOptions';
+import type { IDaemonOperationGroupLeftRunning, IDaemonOrphanReap } from '../DaemonReclaimOptions';
 
 import { createTestDaemonPaths } from './TestDaemonFixture';
 
@@ -27,7 +27,7 @@ function plantStaleSocket(paths: IDaemonPaths): void {
   fs.writeFileSync(paths.socketPath, STALE_SOCKET);
 }
 
-async function passesOnlyOnOrphansReapedAsync(): Promise<void> {
+async function passesOnlyTheReclaimCallbacksAsync(): Promise<void> {
   const paths: IDaemonPaths = createTestDaemonPaths();
   plantStaleSocket(paths);
   // The reclaim is stubbed: it only removes the stale socket, so that the second attempt to publish succeeds.
@@ -35,17 +35,19 @@ async function passesOnlyOnOrphansReapedAsync(): Promise<void> {
     .spyOn(daemonReclaim, 'reclaimStaleDaemonAsync')
     .mockImplementation(async (stalePaths: IDaemonPaths) => fs.unlinkSync(stalePaths.socketPath));
   const onOrphansReaped: (reap: IDaemonOrphanReap) => void = () => undefined;
+  const onOperationGroupLeftRunning: (group: IDaemonOperationGroupLeftRunning) => void = () => undefined;
   const listener: DaemonFrameListener = await DaemonFrameListener.listenAsync(paths, {
     protocolVersion: DAEMON_PROTOCOL_VERSION,
     onConnection: () => undefined,
-    onOrphansReaped
+    onOrphansReaped,
+    onOperationGroupLeftRunning
   });
   await listener.closeAsync();
   // The reaper behind the reclaim also reads fields for tests from its options: nothing else may reach it.
-  expect(reclaim.mock.calls).toEqual([[paths, { onOrphansReaped }]]);
+  expect(reclaim.mock.calls).toEqual([[paths, { onOrphansReaped, onOperationGroupLeftRunning }]]);
 }
 
 posixIt(
-  'passes only onOrphansReaped from its options on to the reclaim of a stale socket',
-  passesOnlyOnOrphansReapedAsync
+  "passes only the reclaim's callbacks from its options on to the reclaim of a stale socket",
+  passesOnlyTheReclaimCallbacksAsync
 );

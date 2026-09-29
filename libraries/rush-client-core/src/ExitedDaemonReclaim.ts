@@ -15,7 +15,7 @@ import {
 import { isProcessAlive } from './DaemonOwnership';
 import { readDaemonStartupReservation } from './DaemonStartup';
 import { isProcessDefunct } from './ProcessStartTime';
-import { logReclaimedDaemon } from './ReclaimedDaemonLog';
+import { getClientReclaimOptions, logReclaimedDaemon } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 /**
@@ -48,7 +48,9 @@ export interface IExitedDaemon {
  * @remarks
  * Call it before Rush runs in-process. Like the next daemon start, it terminates the daemon's orphaned
  * operation process groups and removes the ownership record and socket. Each set of groups that it stops is
- * reported to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. It does so
+ * reported to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. Each
+ * recorded group that it leaves running, because it cannot prove that the group still runs an operation of the
+ * daemon, goes to `options.onOperationGroupLeftRunning`, or else to a line in the launcher log. It does so
  * only under the start mutex and when no startup is reserved. It waits up to 5 seconds while another client
  * holds the mutex, and up to 1 second while the exited process is not reaped yet. It does nothing when there is
  * no record, when a process with the recorded PID runs, or when the runtime folder is not private, and it never
@@ -80,10 +82,11 @@ export async function reclaimCrashedDaemonAsync(
 /**
  * Stops the operations that an exited daemon left running, and removes its ownership record and socket, as
  * the next daemon start would (`options.onOrphansReaped` or `RUSH_DAEMON_ORPHANS_REAPED` warnings say what was
- * stopped). Best effort: it acts only while the ownership record names that daemon, under the start mutex, and
- * when no startup is reserved. While another client holds the mutex, for example to reclaim the same daemon,
- * it waits up to 5 seconds, and it waits up to 1 second for the exited process to be reaped. A reclaim is
- * logged ({@link logReclaimedDaemon}).
+ * stopped, and `options.onOperationGroupLeftRunning` or the launcher log what was left running). Best effort:
+ * it acts only while the ownership record names that daemon, under the start mutex, and when no startup is
+ * reserved. While another client holds the mutex, for example to reclaim the same daemon, it waits up to 5
+ * seconds, and it waits up to 1 second for the exited process to be reaped. A reclaim is logged
+ * ({@link logReclaimedDaemon}).
  */
 export async function reclaimExitedDaemonAsync(
   daemon: IExitedDaemon,
@@ -99,7 +102,7 @@ export async function reclaimExitedDaemonAsync(
         if (lock) {
           try {
             if (isRecordedOwner(daemon) && !readDaemonStartupReservation(daemon.paths)) {
-              await reclaimStaleDaemonAsync(daemon.paths, options);
+              await reclaimStaleDaemonAsync(daemon.paths, getClientReclaimOptions(daemon.paths, options));
               logReclaimedDaemon(daemon.paths, daemon.pid);
             }
           } finally {

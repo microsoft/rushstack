@@ -36,7 +36,11 @@ finds the process idle, and after some requests it never does.
 A daemon that exits without releasing its endpoint, for example after SIGKILL, can leave operations running.
 On POSIX, a host that reclaims such an endpoint at startup first stops them, so that they cannot overwrite the
 outputs of its own requests. The daemon log (`onLog`) gets one line for each set of process groups that it
-stopped; without `onLog`, each set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning.
+stopped; without `onLog`, each set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. A process
+group that the exited daemon recorded for an operation, but that the host cannot prove still runs that
+operation, gets no signal; while it has a live process, the daemon log gets a line that names it and says which
+check it failed, for example `rushd: left process group 4242 running, which the exited daemon (PID 4000)
+recorded for an operation: the process with PID 4242 now is not the leader that the daemon recorded`.
 
 Whatever starts a shutdown (a signal, a management client, the idle timeout, a lost socket, a restart or
 `closeAsync()`), the host writes one line to `onLog` when it begins, with its process ID and the reason, for example

@@ -52,6 +52,7 @@ import {
   tryTakeOverAbandonedStartupReservationAsync,
   type DaemonStartupHelperState
 } from './DaemonStartupReservation';
+import { getClientReclaimOptions } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 import { findStoppedDaemonOwnerAsync } from './StoppedDaemonOwner';
 
@@ -212,7 +213,10 @@ async function startDaemonAsync(
     if (handoff) return handoff;
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
     await reclaimAbandonedOwnershipAsync(options.paths, { onOrphansReaped: options.onOrphansReaped });
-    await reclaimStaleDaemonAsync(options.paths, { onOrphansReaped: options.onOrphansReaped });
+    await reclaimStaleDaemonAsync(
+      options.paths,
+      getClientReclaimOptions(options.paths, { onOrphansReaped: options.onOrphansReaped })
+    );
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();
     const helper: IStartupHelper = await spawnDetachedAsync(options, deadline, abandonedHelper);

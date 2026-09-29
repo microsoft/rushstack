@@ -3,7 +3,12 @@
 
 import * as fs from 'node:fs';
 
-import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import {
+  formatOperationGroupLeftRunning,
+  type IDaemonOperationGroupLeftRunning,
+  type IDaemonPaths,
+  type IDaemonReclaimOptions
+} from '@rushstack/rush-daemon-transport';
 
 import { getDaemonLogFilePath } from './DaemonLogFile';
 
@@ -24,9 +29,39 @@ const READY_LINE: RegExp = /\brushd ready at /;
 export function logReclaimedDaemon(paths: IDaemonPaths, pid: number): void {
   appendClientLine(
     paths,
-    `rushd (PID ${pid}) exited without shutting down; stopped any operations it left running and removed ` +
-      'its ownership record and socket.'
+    `rushd (PID ${pid}) exited without shutting down; stopped the operations it left running that could be ` +
+      'proven to be its own, and removed its ownership record and socket.'
   );
+}
+
+/**
+ * Appends a line to the workspace's launcher log that names a process group that an exited daemon recorded
+ * for an operation and that a reclaim by this client left running, and says why
+ * (`formatOperationGroupLeftRunning`). Nothing goes to the terminal, because the group may be another
+ * program's; whoever later finds its processes can read here why they still run. Best effort; it never throws.
+ */
+export function logOperationGroupLeftRunning(
+  paths: IDaemonPaths,
+  group: IDaemonOperationGroupLeftRunning
+): void {
+  appendClientLine(paths, `${formatOperationGroupLeftRunning(group)}.`);
+}
+
+/**
+ * Returns the options for a reclaim of the workspace's daemon files by this client: `options.onOrphansReaped`
+ * as given, and `options.onOperationGroupLeftRunning`, or else {@link logOperationGroupLeftRunning} for each
+ * operation group that the reclaim leaves running. No other field of `options` reaches the transport.
+ */
+export function getClientReclaimOptions(
+  paths: IDaemonPaths,
+  options: IDaemonReclaimOptions | undefined
+): IDaemonReclaimOptions {
+  return {
+    onOrphansReaped: options?.onOrphansReaped,
+    onOperationGroupLeftRunning:
+      options?.onOperationGroupLeftRunning ??
+      ((group: IDaemonOperationGroupLeftRunning) => logOperationGroupLeftRunning(paths, group))
+  };
 }
 
 /**

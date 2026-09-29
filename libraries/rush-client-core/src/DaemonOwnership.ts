@@ -29,7 +29,7 @@ import {
 } from './DaemonOwnerDiagnosis';
 import { getDaemonStartupFilePath } from './DaemonStartup';
 import { isProcessStartedAfter } from './ProcessStartTime';
-import { clearReclaimedDaemonReport } from './ReclaimedDaemonLog';
+import { clearReclaimedDaemonReport, getClientReclaimOptions } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 const PROBE_TIMEOUT_MS: number = 1000;
@@ -171,7 +171,8 @@ function tryReadLiveOwner(paths: IDaemonPaths): DaemonOwnership | undefined {
  * shutting down, and once its record is gone no reclaim finds the operations that it recorded. So they are
  * stopped first, with the proof that `reclaimStaleDaemonAsync` requires of each group but never the group of
  * that process, and reported to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings).
- * If they cannot be stopped, it throws and removes nothing.
+ * A recorded group that it leaves running goes to `options.onOperationGroupLeftRunning`, or else to a line in
+ * the launcher log (`logOperationGroupLeftRunning`). If they cannot be stopped, it throws and removes nothing.
  */
 export async function reclaimAbandonedOwnershipAsync(
   paths: IDaemonPaths,
@@ -189,7 +190,13 @@ export async function reclaimAbandonedOwnershipAsync(
       `${describeOwnership(state, paths)}, but ${paths.socketPath} did not refuse a connection; refusing automatic reclaim. ${DAEMON_RESET_HINT}`
     );
   }
-  if (state.kind === 'owned') await reapReusedOwnerOperationGroupsAsync(paths, state.owner.pid, options);
+  if (state.kind === 'owned') {
+    await reapReusedOwnerOperationGroupsAsync(
+      paths,
+      state.owner.pid,
+      getClientReclaimOptions(paths, options)
+    );
+  }
   // The transport reclaim then removes the unbound socket under its own two-factor checks.
   if (state.kind !== 'absent') removeIfUnchanged(paths.lockfilePath, state.raw);
 }
@@ -201,8 +208,10 @@ export async function reclaimAbandonedOwnershipAsync(
  * it now, the owner exited without shutting down and may have left operations running, which only its records
  * name. So the reset first stops them, as the next daemon start would (`reclaimStaleDaemonAsync`), but never
  * the process group of a process that has the recorded PID now, and reports each set of process groups that it
- * stops to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. When they
- * cannot be stopped, it throws and removes nothing. Otherwise it never signals a process. Fails when another
+ * stops to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. Each recorded
+ * operation group that it leaves running, because it cannot prove that the group is still the owner's, goes to
+ * `options.onOperationGroupLeftRunning`, or else to a line in the launcher log. When the operations cannot be
+ * stopped, it throws and removes nothing. Otherwise it never signals a process. Fails when another
  * client holds the start mutex, a listener is bound, the recorded owner is alive, or another process reclaims
  * the files of the owner that exited; with `waitTimeoutMs`, those conditions are re-checked until the deadline
  * (for example, while a daemon that just acknowledged shutdown finishes its cleanup). A reset also clears the
@@ -300,7 +309,7 @@ async function stopOwnerLeftoversAsync(
   const ownerPid: number = state.owner.pid;
   if (!isProcessAlive(ownerPid)) return await reclaimExitedOwnerAsync(paths, ownerPid, options);
   return await tryReclaimOwnerAsync(paths, ownerPid, () =>
-    reapReusedOwnerOperationGroupsAsync(paths, ownerPid, { onOrphansReaped: options?.onOrphansReaped })
+    reapReusedOwnerOperationGroupsAsync(paths, ownerPid, getClientReclaimOptions(paths, options))
   );
 }
 
@@ -318,7 +327,7 @@ async function reclaimExitedOwnerAsync(
     process.platform === 'win32' ? [paths.lockfilePath] : [paths.lockfilePath, paths.socketPath];
   const present: string[] = files.filter((filePath) => isPresent(filePath));
   const failure: DaemonClientError | undefined = await tryReclaimOwnerAsync(paths, ownerPid, () =>
-    reclaimStaleDaemonAsync(paths, { onOrphansReaped: options?.onOrphansReaped })
+    reclaimStaleDaemonAsync(paths, getClientReclaimOptions(paths, options))
   );
   return failure ?? new Set(present.filter((filePath) => !isPresent(filePath)));
 }

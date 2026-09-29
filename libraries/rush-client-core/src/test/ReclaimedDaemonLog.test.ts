@@ -6,11 +6,20 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type {
+  IDaemonOperationGroupLeftRunning,
+  IDaemonPaths,
+  IDaemonReclaimOptions
+} from '@rushstack/rush-daemon-transport';
 
 import { getDaemonLogFilePath } from '../DaemonLogFile';
-import { resetDaemonArtifactsAsync } from '../DaemonOwnership';
-import { findReclaimedDaemonPid, logReclaimedDaemon } from '../ReclaimedDaemonLog';
+import { resetDaemonArtifactsAsync, type IDaemonArtifactResetOptions } from '../DaemonOwnership';
+import {
+  findReclaimedDaemonPid,
+  getClientReclaimOptions,
+  logOperationGroupLeftRunning,
+  logReclaimedDaemon
+} from '../ReclaimedDaemonLog';
 
 const posixIt: typeof it = process.platform === 'win32' ? it.skip : it;
 
@@ -18,7 +27,8 @@ const posixIt: typeof it = process.platform === 'win32' ? it.skip : it;
 function getReclaimLine(pid: number): RegExp {
   return new RegExp(
     `^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d{3}Z rush-client \\(PID ${process.pid}\\): rushd \\(PID ${pid}\\) ` +
-      'exited without shutting down; stopped any operations it left running and removed its ownership record and socket\\.$'
+      'exited without shutting down; stopped the operations it left running that could be proven to be its own, ' +
+      'and removed its ownership record and socket\\.$'
   );
 }
 
@@ -207,5 +217,80 @@ describe(findReclaimedDaemonPid.name, () => {
     expect(readLogLines()).toHaveLength(3);
     logReclaimedDaemon(paths, 108);
     expect(findReclaimedDaemonPid(paths)).toBe(108);
+  });
+});
+
+describe(getClientReclaimOptions.name, () => {
+  const group: IDaemonOperationGroupLeftRunning = {
+    daemonPid: 4000,
+    processGroupId: 4242,
+    reason: 'otherSession'
+  };
+  let folder: string;
+  let paths: IDaemonPaths;
+
+  beforeEach(() => {
+    folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-reclaim-options-'));
+    paths = {
+      runtimeDir: folder,
+      socketPath: path.join(folder, 'd.sock'),
+      lockfilePath: path.join(folder, 'daemon.pid.json')
+    };
+  });
+
+  afterEach(async () => {
+    await fs.promises.rm(folder, { recursive: true, force: true });
+  });
+
+  function readLogLines(): string[] {
+    return fs.readFileSync(getDaemonLogFilePath(paths), 'utf8').split('\n');
+  }
+
+  it('logs each group that a reclaim leaves running, in a line that names no reclaimed or ready daemon', () => {
+    const options: IDaemonReclaimOptions = getClientReclaimOptions(paths, undefined);
+    expect(Object.keys(options).sort()).toEqual(['onOperationGroupLeftRunning', 'onOrphansReaped']);
+    expect(options.onOrphansReaped).toBeUndefined();
+    options.onOperationGroupLeftRunning!(group);
+    expect(readLogLines()).toEqual([
+      expect.stringMatching(
+        new RegExp(
+          `^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d{3}Z rush-client \\(PID ${process.pid}\\): ` +
+            'left process group 4242 running, which the exited daemon \\(PID 4000\\) recorded for an operation: ' +
+            'its leader has exited, and a process of the group is in another session\\.$'
+        )
+      ),
+      ''
+    ]);
+    expect(findReclaimedDaemonPid(paths)).toBeUndefined();
+    // A later reclaim may log a group that it leaves running after the line of a reclaimed daemon.
+    logReclaimedDaemon(paths, 101);
+    expect(findReclaimedDaemonPid(paths)).toBe(101);
+    logOperationGroupLeftRunning(paths, group);
+    expect(findReclaimedDaemonPid(paths)).toBe(101);
+    expect(readLogLines()).toHaveLength(4);
+  });
+
+  it("passes on only the caller's callbacks, which replace the log", () => {
+    const onOrphansReaped: jest.Mock = jest.fn();
+    const onOperationGroupLeftRunning: jest.Mock = jest.fn();
+    const resetOptions: IDaemonArtifactResetOptions = {
+      onOrphansReaped,
+      onOperationGroupLeftRunning,
+      waitTimeoutMs: 5000
+    };
+    const options: IDaemonReclaimOptions = getClientReclaimOptions(paths, resetOptions);
+    expect(options).toStrictEqual({ onOrphansReaped, onOperationGroupLeftRunning });
+    expect(options.onOperationGroupLeftRunning).toBe(onOperationGroupLeftRunning);
+    const reapOnly: IDaemonReclaimOptions = getClientReclaimOptions(paths, { onOrphansReaped });
+    expect(reapOnly.onOrphansReaped).toBe(onOrphansReaped);
+    reapOnly.onOperationGroupLeftRunning!(group);
+    expect(readLogLines()).toEqual([expect.stringContaining('left process group 4242 running'), '']);
+  });
+
+  it('never throws when it cannot write the log', () => {
+    fs.mkdirSync(getDaemonLogFilePath(paths));
+    expect(() => logOperationGroupLeftRunning(paths, group)).not.toThrow();
+    const missing: IDaemonPaths = { ...paths, lockfilePath: path.join(folder, 'missing', 'daemon.pid.json') };
+    expect(() => logOperationGroupLeftRunning(missing, group)).not.toThrow();
   });
 });

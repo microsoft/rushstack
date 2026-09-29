@@ -18,14 +18,18 @@ const WINDOWS_PLATFORM: NodeJS.Platform = 'win32';
 /**
  * Binds the listener, reclaiming its path once from a dead daemon. Returns the identity of a POSIX socket; a
  * Windows named pipe has no file and disappears with its server. Of the listener's options, only
- * `onOrphansReaped` goes on to the reclaim, because the reaper also reads fields for tests from that object.
+ * `onOrphansReaped` and `onOperationGroupLeftRunning` go on to the reclaim, because the reaper also reads
+ * fields for tests from that object.
  */
 export async function listenWithReclaimAsync(
   server: net.Server,
   paths: IDaemonPaths,
   listenerOptions: IDaemonReclaimOptions
 ): Promise<IDaemonFileIdentity | undefined> {
-  const options: IDaemonReclaimOptions = { onOrphansReaped: listenerOptions.onOrphansReaped };
+  const options: IDaemonReclaimOptions = {
+    onOrphansReaped: listenerOptions.onOrphansReaped,
+    onOperationGroupLeftRunning: listenerOptions.onOperationGroupLeftRunning
+  };
   if (process.platform !== WINDOWS_PLATFORM) return listenPublishedAsync(server, paths, options);
   await listenPipeWithReclaimAsync(server, paths, options);
   return undefined;

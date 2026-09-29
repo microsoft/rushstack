@@ -18,9 +18,18 @@ import {
   resolveDaemonPathsFromProcess,
   writeDaemonLockfile
 } from '@rushstack/rush-daemon-transport';
-import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type {
+  IDaemonOperationGroupLeftRunning,
+  IDaemonOrphanReap,
+  IDaemonPaths,
+  IDaemonReclaimOptions
+} from '@rushstack/rush-daemon-transport';
 
-import { formatOrphanReapLogLine, getOrphanReapLogOptions } from '../DaemonOrphanReapLog';
+import {
+  formatOperationGroupLeftRunningLogLine,
+  formatOrphanReapLogLine,
+  getOrphanReapLogOptions
+} from '../DaemonOrphanReapLog';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { TestWorkspaceSession } from './TestWorkspaceSession';
 
@@ -37,6 +46,16 @@ const linuxIt: jest.It = process.platform === 'linux' ? it : it.skip;
 const FAKE_DAEMON_SCRIPT: string =
   "const c=require('node:child_process').spawn(process.execPath,['-e','setTimeout(()=>{},60000)'],{stdio:'ignore'});" +
   "process.stdout.write(String(c.pid)+'\\n');setInterval(()=>{},1000);";
+// A detached operation leads its own process group and session. It exits by itself after a minute.
+const DETACHED_OPERATION_SCRIPT: string = 'setTimeout(()=>{},60000)';
+// No process of a test starts one clock tick after boot, so a record with this start time names no leader.
+const OTHER_START_TIME: string = '1';
+const LEFT_RUNNING_PREFIX: string = 'rushd: left process group ';
+const GROUP_LEFT_RUNNING: IDaemonOperationGroupLeftRunning = {
+  daemonPid: DEAD_PID,
+  processGroupId: 5001,
+  reason: 'otherSession'
+};
 
 describe(formatOrphanReapLogLine.name, () => {
   it('names the exited daemon and its process group', () => {
@@ -61,6 +80,15 @@ describe(formatOrphanReapLogLine.name, () => {
   });
 });
 
+describe(formatOperationGroupLeftRunningLogLine.name, () => {
+  it('names the group, the exited daemon and the reason that the reclaim left the group running', () => {
+    expect(formatOperationGroupLeftRunningLogLine(GROUP_LEFT_RUNNING)).toBe(
+      'rushd: left process group 5001 running, which the exited daemon (PID 4242) recorded for an ' +
+        'operation: its leader has exited, and a process of the group is in another session'
+    );
+  });
+});
+
 describe(getOrphanReapLogOptions.name, () => {
   it('keeps the process warning without onLog', () => {
     expect(getOrphanReapLogOptions(undefined)).toEqual({});
@@ -71,6 +99,15 @@ describe(getOrphanReapLogOptions.name, () => {
     const reap: IDaemonOrphanReap = { daemonPid: DEAD_PID, processGroupIds: [11, 12], outcome: 'terminated' };
     getOrphanReapLogOptions((message: string) => messages.push(message)).onOrphansReaped?.(reap);
     expect(messages).toEqual([formatOrphanReapLogLine(reap)]);
+  });
+
+  it('writes each operation group that the reclaim left running to onLog', () => {
+    const messages: string[] = [];
+    const options: IDaemonReclaimOptions = getOrphanReapLogOptions((message: string) =>
+      messages.push(message)
+    );
+    options.onOperationGroupLeftRunning?.(GROUP_LEFT_RUNNING);
+    expect(messages).toEqual([formatOperationGroupLeftRunningLogLine(GROUP_LEFT_RUNNING)]);
   });
 });
 
@@ -100,6 +137,19 @@ async function crashFakeDaemonAsync(paths: IDaemonPaths): Promise<ICrashedDaemon
   });
   fs.writeFileSync(paths.socketPath, 'stale');
   return { daemonPid, orphanPid: Number(chunk.toString().trim()) };
+}
+
+/** Records a group for the daemon `daemonPid`, as that daemon does when it starts a detached operation. */
+function recordOperationGroup(
+  paths: IDaemonPaths,
+  daemonPid: number,
+  groupId: number,
+  startTime: string
+): string {
+  const folder: string = `${paths.lockfilePath}.groups-${daemonPid}`;
+  fs.mkdirSync(folder, { mode: 0o700 });
+  fs.writeFileSync(path.join(folder, `${groupId}-${startTime}`), '', { mode: 0o600 });
+  return folder;
 }
 
 async function waitUntilDeadAsync(pid: number): Promise<boolean> {
@@ -152,6 +202,46 @@ describe('startup reclaim', () => {
         expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
       );
       expect(await waitUntilDeadAsync(orphanPid)).toBe(true);
+    },
+    REAP_TEST_TIMEOUT_MS
+  );
+
+  linuxIt(
+    'writes a recorded operation group that it cannot prove to the daemon log, and leaves it running',
+    async () => {
+      const paths: IDaemonPaths = resolveDaemonPathsFromProcess(
+        computeDaemonWorkspaceKey({
+          canonicalRepoRoot: fs.realpathSync.native(repoRoot),
+          rushVersion: RUSH_VERSION
+        })
+      );
+      const operation: ChildProcess = spawn(process.execPath, ['-e', DETACHED_OPERATION_SCRIPT], {
+        detached: true,
+        stdio: 'ignore'
+      });
+      const groupId: number = Number(operation.pid);
+      try {
+        const { daemonPid } = await crashFakeDaemonAsync(paths);
+        const folder: string = recordOperationGroup(paths, daemonPid, groupId, OTHER_START_TIME);
+        const messages: string[] = [];
+        const host: RushDaemonHost = await RushDaemonHost.startAsync({
+          createWorkspaceSessionAsync: () => Promise.resolve(new TestWorkspaceSession(repoRoot)),
+          daemonVersion: 'orphan-log-test',
+          repoRoot,
+          rushVersion: RUSH_VERSION,
+          onLog: (message: string) => messages.push(message)
+        });
+        await host.closeAsync();
+        expect(messages.filter((message: string) => message.startsWith(LEFT_RUNNING_PREFIX))).toEqual([
+          `${LEFT_RUNNING_PREFIX}${groupId} running, which the exited daemon (PID ${daemonPid}) recorded ` +
+            `for an operation: the process with PID ${groupId} now is not the leader that the daemon recorded`
+        ]);
+        expect(isDaemonProcessAlive(groupId)).toBe(true);
+        expect(fs.existsSync(folder)).toBe(false);
+      } finally {
+        // The operation is this test's own child, which has not been waited for, so its PID is still its own.
+        operation.kill('SIGKILL');
+      }
     },
     REAP_TEST_TIMEOUT_MS
   );

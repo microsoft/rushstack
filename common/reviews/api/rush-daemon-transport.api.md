@@ -49,6 +49,9 @@ export class DaemonFrameListener {
 }
 
 // @beta
+export type DaemonOperationGroupLeftRunningReason = 'callerGroup' | 'daemonPidInUse' | 'leaderChanged' | 'otherSession' | 'noMarker';
+
+// @beta
 export type DaemonReclaimLockOutcome = {
     readonly acquired: true;
 } | {
@@ -76,6 +79,9 @@ export enum DaemonTransportErrorCode {
 export function ensureDaemonRuntimeDir(paths: IDaemonPaths): void;
 
 // @beta
+export function formatOperationGroupLeftRunning(group: IDaemonOperationGroupLeftRunning): string;
+
+// @beta
 export interface IDaemonConnectorOptions {
     readonly connectTimeoutMs?: number;
 }
@@ -93,6 +99,13 @@ export interface IDaemonLockfile {
     readonly protocolVersion: IDaemonProtocolVersion;
     readonly socketPath: string;
     readonly startedAt: string;
+}
+
+// @beta
+export interface IDaemonOperationGroupLeftRunning {
+    readonly daemonPid: number;
+    readonly processGroupId: number;
+    readonly reason: DaemonOperationGroupLeftRunningReason;
 }
 
 // @beta
@@ -119,6 +132,7 @@ export interface IDaemonPaths {
 
 // @beta
 export interface IDaemonReclaimOptions {
+    readonly onOperationGroupLeftRunning?: (group: IDaemonOperationGroupLeftRunning) => void;
     readonly onOrphansReaped?: (reap: IDaemonOrphanReap) => void;
 }
 

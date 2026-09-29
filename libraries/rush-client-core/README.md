@@ -111,7 +111,10 @@ group has exited but is not reaped yet (a zombie), the group counts as stopped, 
 can end it. Each set of groups that it stops is
 passed to the connection's optional `onOrphansReaped(reap)` (the daemon's PID, the process groups,
 and whether they were `terminated` or `killed`), so that the caller can say so in its own words;
-without it, each is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. The reclaim before
+without it, each is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. A recorded operation
+group that the reclaim cannot prove still runs an operation of the daemon gets no signal; when it still
+has a live process, the client appends a line to the launcher log that names the group and the daemon
+and says which check the group failed, and reports nothing else about it. The reclaim before
 a daemon start reports the same way. It waits up to 5 seconds while another client holds the start
 mutex, and up to 1 second while the exited process is not reaped yet: its parent, usually init or a
 subreaper, reaps it at once, and one that has not by then may never do so. If the reclaim fails or
@@ -165,7 +168,8 @@ record whose PID now belongs to a process that started after the record's `start
 owner left running, so before it removes the record it stops the operation process groups that the
 owner recorded (`reapReusedOwnerOperationGroupsAsync()`), with the proof of each group that
 `reclaimStaleDaemonAsync()` requires, but never the process group whose ID is the recorded PID, which
-the later process may lead. If they cannot be stopped, the start fails and removes nothing.
+the later process may lead. Each recorded group that it leaves running gets a line in the launcher log,
+as above. If they cannot be stopped, the start fails and removes nothing.
 Any other live PID with an unreachable socket fails
 closed, and never signals that process. The error says on its first line what that process is doing and
 on its last line what to do about it. On Linux the first line comes from `/proc`: whether the process
@@ -197,8 +201,9 @@ says the same.
 When the recorded PID no longer exists, the reset first stops the operations that the owner left
 running, as `reclaimStaleDaemonAsync()` does before the next start; when a process that started later
 has it, the reset stops the recorded operation process groups as the start does. Both report what they
-stop to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings). The reset removes
-nothing when they cannot be stopped, and it never signals a process otherwise.
+stop to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings), and each recorded
+group that they leave running to `options.onOperationGroupLeftRunning` (or else to a line in the launcher
+log). The reset removes nothing when they cannot be stopped, and it never signals a process otherwise.
 The reset stats the socket with `{ bigint: true }`. After a plain stat of a socket, a `require()` in the
 same process, made while the reset awaits the reclaim, would not resolve symlinks.
 The helper uses a stable tool cwd, and the starting client awaits its exit after
@@ -297,7 +302,9 @@ not reaped yet), it reclaims that daemon as described above for a lost connectio
 mutex, only when no startup is reserved, and waiting up to 5 seconds for the mutex and up to 1 second
 for the exited process to be reaped. It does nothing when there is no
 record, when a process with the recorded PID runs, or when the runtime folder is not private, and it
-never throws. Its optional `options.onOrphansReaped` receives what it stopped, as above.
+never throws. Its optional `options.onOrphansReaped` receives what it stopped, as above, and its optional
+`options.onOperationGroupLeftRunning` receives each recorded group that it left running, instead of the
+launcher log.
 
 `getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
 and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across
@@ -315,7 +322,10 @@ that exited without shutting down, after a lost connection or in `reclaimCrashed
 appends a line that names the daemon's PID to it, under the same file checks. Once the reclaim has
 removed the ownership record, `findReclaimedDaemonPid(paths)` returns that PID from the log's last
 64 KiB, unless a daemon wrote its `rushd ready at` line after it or `resetDaemonArtifactsAsync()`
-cleared the report with a line of its own; `rush-client daemon status` uses it.
+cleared the report with a line of its own; `rush-client daemon status` uses it. A reclaim that leaves a
+recorded operation group running appends a line such as `left process group 4242 running, which the
+exited daemon (PID 4000) recorded for an operation: the process with PID 4242 now is not the leader that
+the daemon recorded.`, which does not change what `findReclaimedDaemonPid` returns.
 
 `shutdownAsync()` requires a fresh connection with negotiated minor >= 6. It sends
 the existing `shutdown` control and resolves only after `shutdownAck` and EOF,

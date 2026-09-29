@@ -6,7 +6,11 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type {
+  IDaemonOperationGroupLeftRunning,
+  IDaemonOrphanReap,
+  IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
 import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { reclaimCrashedDaemonAsync } from '../ExitedDaemonReclaim';
@@ -15,7 +19,12 @@ import { findReclaimedDaemonPid } from '../ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import {
   isRunning,
+  readClientLogTexts,
+  readProcessStartTime,
   recordDaemonOwner,
+  recordOperationGroup,
+  startDetachedOperationAsync,
+  startExitedProcessAsync,
   startOrphanedOperationAsync,
   startStandInDaemonAsync,
   stopOperationIfRunning,
@@ -83,6 +92,51 @@ describe(reclaimCrashedDaemonAsync.name, () => {
     expect(reaps).toEqual([{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]);
     expect(warning).not.toHaveBeenCalled();
   });
+
+  /**
+   * Records an exited owner that recorded one operation group whose leader has another start time, as if a
+   * process that started later has the PID of the group's leader now. Returns the owner's PID and that PID.
+   */
+  async function recordChangedLeaderAsync(): Promise<[number, number]> {
+    const daemonPid: number = await startExitedProcessAsync();
+    const other: number = await startDetachedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    const earlier: string = String(Number(readProcessStartTime(other)) - 1);
+    recordOperationGroup(paths.lockfilePath, daemonPid, other, earlier);
+    return [daemonPid, other];
+  }
+
+  linuxIt('logs a recorded group that it leaves running, before the line that names the daemon', async () => {
+    const [daemonPid, other] = await recordChangedLeaderAsync();
+    await reclaimCrashedDaemonAsync(paths);
+    expect(isRunning(other)).toBe(true);
+    expect(readClientLogTexts(paths)).toEqual([
+      `left process group ${other} running, which the exited daemon (PID ${daemonPid}) recorded for an ` +
+        `operation: the process with PID ${other} now is not the leader that the daemon recorded.`,
+      `rushd (PID ${daemonPid}) exited without shutting down; stopped the operations it left running that ` +
+        'could be proven to be its own, and removed its ownership record and socket.'
+    ]);
+    expect(findReclaimedDaemonPid(paths)).toBe(daemonPid);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    expect(fs.existsSync(`${paths.lockfilePath}.groups-${daemonPid}`)).toBe(false);
+    expect(warning).not.toHaveBeenCalled();
+  });
+
+  linuxIt(
+    'gives a recorded group that it leaves running to onOperationGroupLeftRunning instead',
+    async () => {
+      const [daemonPid, other] = await recordChangedLeaderAsync();
+      const groups: IDaemonOperationGroupLeftRunning[] = [];
+      await reclaimCrashedDaemonAsync(paths, {
+        onOperationGroupLeftRunning: (group: IDaemonOperationGroupLeftRunning) => groups.push(group)
+      });
+      expect(isRunning(other)).toBe(true);
+      expect(groups).toEqual([{ daemonPid, processGroupId: other, reason: 'leaderChanged' }]);
+      expect(readClientLogTexts(paths)).toEqual([
+        expect.stringMatching(new RegExp(`^rushd \\(PID ${daemonPid}\\) exited without shutting down;`))
+      ]);
+    }
+  );
 
   linuxIt(
     'leaves a running daemon alone, without waiting while another client holds the start mutex',
@@ -178,7 +232,8 @@ describe(reclaimCrashedDaemonAsync.name, () => {
     expect(logged).toMatch(
       new RegExp(
         `^\\S+Z rush-client \\(PID ${process.pid}\\): rushd \\(PID ${daemonPid}\\) exited without shutting down; ` +
-          'stopped any operations it left running and removed its ownership record and socket\\.\\n$'
+          'stopped the operations it left running that could be proven to be its own, and removed its ' +
+          'ownership record and socket\\.\\n$'
       )
     );
     expect(fs.statSync(logFilePath).mode % 0o1000).toBe(0o600);

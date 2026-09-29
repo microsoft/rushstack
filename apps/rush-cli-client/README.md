@@ -684,7 +684,10 @@ process group whose ID is that PID, which the later process may lead. It prints 
 line shown above for a lost connection and reports what it stopped in `orphansReaped` (`daemonPid`,
 `processGroupIds`, `outcome`). A recorded group that it cannot prove, such as a PID that a later
 process now has, or a group whose leader has exited under a daemon from a release that did not set
-`RUSHD_OPERATION_GROUPS`, is not signalled; its record is removed with the others. If the operations cannot be
+`RUSHD_OPERATION_GROUPS`, is not signalled; its record is removed with the others. When such a group still
+has a live process, the launcher log that `daemon logs` prints gets a line that names the group and the
+daemon and says which check the group failed; nothing about it is printed. The reclaims after a lost
+connection, before Rush runs in-process and before a daemon start do the same. If the operations cannot be
 stopped, it exits with code 1 and removes nothing. While another process reclaims the same files it
 also exits with code 1, except that after a shutdown it re-checks for up to 15 seconds. Otherwise it
 never signals a process. Automatic startup already reclaims
