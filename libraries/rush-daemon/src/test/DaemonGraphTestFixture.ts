@@ -121,6 +121,9 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       execFileSync(
         'git',
         [
+          // Don't start a detached `git maintenance` that could still be writing into .git during cleanup
+          '-c',
+          'maintenance.auto=false',
           '-c',
           'user.name=Graph Test',
           '-c',

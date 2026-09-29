@@ -112,6 +112,9 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
   execFileSync(
     'git',
     [
+      // Don't start a detached `git maintenance` that could still be writing into .git during cleanup
+      '-c',
+      'maintenance.auto=false',
       '-c',
       'user.name=Client Test',
       '-c',

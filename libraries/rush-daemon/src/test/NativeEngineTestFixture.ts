@@ -258,6 +258,9 @@ if (input === 'failure') process.exitCode = 7;
   execFileSync(
     'git',
     [
+      // Don't start a detached `git maintenance` that could still be writing into .git during cleanup
+      '-c',
+      'maintenance.auto=false',
       '-c',
       'user.name=Engine Test',
       '-c',
