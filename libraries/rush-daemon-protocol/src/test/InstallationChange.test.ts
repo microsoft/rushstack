@@ -37,7 +37,7 @@ it('round-trips a restart result that names the changed installation', () => {
 it('accepts a restart reason kind from a newer daemon', () => {
   const payload: object = {
     ...RESULT,
-    restartReason: { kind: 'environmentChanged', names: ['NODE_OPTIONS'] }
+    restartReason: { kind: 'newerReason', detail: ['NODE_OPTIONS'] }
   };
   expect(decodeDaemonControlMessage(resultFrame(payload))).toMatchObject({ payload });
 });

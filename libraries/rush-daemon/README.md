@@ -202,6 +202,14 @@ successor; otherwise it runs on this process. Its queue position is the number o
 to restart, and its wait timeout applies as it does to the drain, relative to the requests that were served when the
 script began to wait.
 
+The `retryAfterRestart: true` result of the request that restarts the daemon for its environment carries
+`restartReason: { kind: 'environmentChanged', variableNames }`: the sorted names of the variables that are set in only
+one of the two environments, or set to different values, compared as the fingerprint's `environmentHash` compares them
+(without the variables that it ignores, and with repeated `PATH` entries removed). Values are never sent, since a
+variable such as `NODE_OPTIONS` can hold a secret. Each request that is answered while that restart is pending gets
+the same reason, because the successor starts with the restarting request's environment, not its own. The daemon log
+(`onLog`) names the request and the variables.
+
 Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
 Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted
 queued requests drain those typed results before disconnect rather than being reduced to ambiguous connection

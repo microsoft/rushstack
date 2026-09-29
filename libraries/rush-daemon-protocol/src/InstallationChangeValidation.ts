@@ -3,9 +3,11 @@
 
 import { isDaemonControlRecord } from './ControlRecord';
 import { DaemonProtocolError } from './DaemonProtocolError';
+import { validateEnvironmentChange } from './EnvironmentChangeValidation';
 
 const INSTALLATION_CHANGE_KINDS: ReadonlySet<unknown> = new Set(['removed', 'replaced']);
 const INSTALLATION_CHANGED: string = 'installationChanged';
+const ENVIRONMENT_CHANGED: string = 'environmentChanged';
 const EMPTY_LENGTH: number = 0;
 
 /** Validates an optional installation change, as reported by pong or by a restart reason. @internal */
@@ -32,6 +34,7 @@ function validateReason(reason: unknown): void {
   requireRecord(reason, 'restartReason');
   requireKind(reason.kind);
   if (reason.kind === INSTALLATION_CHANGED) validateInstallationChange(reason, 'restartReason');
+  if (reason.kind === ENVIRONMENT_CHANGED) validateEnvironmentChange(reason);
 }
 
 function requireRecord(value: unknown, field: string): asserts value is Record<string, unknown> {

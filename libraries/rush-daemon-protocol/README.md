@@ -58,6 +58,9 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   with cancellation, admission errors or operation results. Clients may retry once
   after attested predecessor ownership release, never on transport loss or an error
   string. The ordinary mutation result has no retry flag and drains before restart.
+  A retry result may say why in `restartReason`: `installationChanged` names the folder that
+  was removed or replaced, and `environmentChanged` names the environment variables that
+  differ from the daemon's, never their values. Clients ignore kinds they do not know.
 - **Read-only workspace status** - optional `pong.payload.workspace` reports the provider generation,
   installed session token, graph existence and real warm accounting. An absent token means no session is
   installed; an absent `warmSet` means no controller is attached, not zero memory. Warm status includes

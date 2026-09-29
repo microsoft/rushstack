@@ -13,7 +13,10 @@ import {
 } from '../daemonRestartNotice';
 
 // A kind that only a newer daemon knows.
-const NEWER_REASON: DaemonRestartReason = { kind: 'environmentChanged' } as unknown as DaemonRestartReason;
+const NEWER_REASON: DaemonRestartReason = {
+  kind: 'newerReason',
+  detail: ['NODE_OPTIONS']
+} as unknown as DaemonRestartReason;
 
 describe(formatDaemonRestartNotice.name, () => {
   it('names the changed installation and the new daemon', () => {
@@ -39,6 +42,33 @@ describe(formatDaemonRestartNotice.name, () => {
         true
       )
     ).toBe("rushx-client: The daemon's installation at /snapshots/s9 was removed; restarted the daemon.");
+  });
+
+  it("names the variables in which a command's environment differed, at most four of them", () => {
+    const format = (
+      variableNames: string[],
+      successorPid: number | undefined,
+      rushx: boolean
+    ): string | undefined =>
+      formatDaemonRestartNotice(
+        { restart: 1, reason: { kind: 'environmentChanged', variableNames }, successorPid },
+        rushx
+      );
+    expect(format(['NODE_OPTIONS'], 42, false)).toBe(
+      "rush-client: A command's environment differed from the daemon's in NODE_OPTIONS; " +
+        'restarted the daemon (PID 42).'
+    );
+    expect(format(['FOO', 'NODE_OPTIONS'], undefined, true)).toBe(
+      "rushx-client: A command's environment differed from the daemon's in FOO and NODE_OPTIONS; " +
+        'restarted the daemon.'
+    );
+    expect(format(['A', 'B', 'C', 'D'], 42, false)).toContain("the daemon's in A, B, C and D; restarted");
+    expect(format(['A', 'B', 'C', 'D', 'E', 'F'], 42, false)).toContain(
+      "the daemon's in A, B, C, D and 2 more; restarted"
+    );
+    expect(format([], 42, false)).toBe(
+      "rush-client: A command's environment differed from the daemon's; restarted the daemon (PID 42)."
+    );
   });
 
   it('says nothing about restarts that need no explanation', () => {

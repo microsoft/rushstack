@@ -83,7 +83,9 @@ export function freezeDaemonRequestAdmissionOptions(
 
 /** Says why the daemon restarts, completing "the daemon could restart <cause>". */
 function formatRestartCause(restartReason: DaemonRestartReason): string {
-  return `because its installation at ${restartReason.folder} was ${restartReason.change}`;
+  return restartReason.kind === 'environmentChanged'
+    ? `because a command's environment differs from its own in ${restartReason.variableNames.join(', ')}`
+    : `because its installation at ${restartReason.folder} was ${restartReason.change}`;
 }
 
 class WorkspaceRequestScheduler extends RequestScheduler {

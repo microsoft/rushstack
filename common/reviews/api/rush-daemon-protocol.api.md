@@ -170,7 +170,7 @@ export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-time
 export type DaemonRequestRejectionCode = 'invalidRequest' | 'routingFailed' | 'unsupported' | 'workspaceRecreationRequired';
 
 // @beta
-export type DaemonRestartReason = IDaemonInstallationChangedRestartReason;
+export type DaemonRestartReason = IDaemonInstallationChangedRestartReason | IDaemonEnvironmentChangedRestartReason;
 
 // @beta
 export type DaemonRushCommandOrigin = 'built-in' | 'custom';
@@ -258,6 +258,12 @@ export interface IDaemonCommandResult {
 export interface IDaemonDiagnosticPayload {
     // (undocumented)
     readonly severity: DaemonDiagnosticSeverity;
+}
+
+// @beta
+export interface IDaemonEnvironmentChangedRestartReason {
+    readonly kind: 'environmentChanged';
+    readonly variableNames: readonly string[];
 }
 
 // @beta

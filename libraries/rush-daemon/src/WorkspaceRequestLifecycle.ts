@@ -22,6 +22,7 @@ import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 import type {
   DaemonRestartReason,
   IDaemonCommandResult,
+  IDaemonEnvironmentChangedRestartReason,
   IDaemonInstallationChange,
   IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
@@ -66,6 +67,11 @@ import { WorkspaceRestartArbiter, type IWorkspaceRestartTicket } from './Workspa
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import { FreshCaptureCoalescer } from './FreshCaptureCoalescer';
 import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
+import {
+  getEnvironmentIdentityEntries,
+  getEnvironmentRestartReason,
+  type EnvironmentIdentityEntries
+} from './EnvironmentRestartReason';
 
 interface IExecutionState {
   began: boolean;
@@ -154,9 +160,9 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   );
   readonly #repoRoot: string;
   /** The daemon's environment before any engine ran. A plugin may add names to `process.env` later. */
-  readonly #startupEnvironment: Record<string, string> = Object.fromEntries(
-    Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
-  );
+  readonly #startupEnvironment: Record<string, string>;
+  /** The variables of `#startupEnvironment` that the startup fingerprint's `environmentHash` includes. */
+  readonly #startupEnvironmentEntries: EnvironmentIdentityEntries;
   readonly #startupFingerprint: IWorkspaceInputFingerprint;
   readonly #runtimeCache: WorkspaceRuntimeFingerprintCache;
   // Concurrent requests share captures; each capture still starts after the requests it serves arrived.
@@ -174,6 +180,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #forceReload: boolean = false;
   #closing: boolean = false;
   #restartPending: boolean = false;
+  /** Why the pending restart happens, when the request that it is for has a different environment. */
+  #restartReason: IDaemonEnvironmentChangedRestartReason | undefined;
   #lastReloadTier: WorkspaceInputChangeTier = WorkspaceInputChangeTier.Reuse;
   #installationChange: IDaemonInstallationChange | undefined;
   #transitioning: boolean = false;
@@ -186,7 +194,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     options: IWorkspaceRequestLifecycleOptions,
     repoRoot: string,
     fingerprint: IWorkspaceInputFingerprint,
-    runtimeCache: WorkspaceRuntimeFingerprintCache
+    runtimeCache: WorkspaceRuntimeFingerprintCache,
+    startupEnvironment: Record<string, string>
   ) {
     this.#options = options;
     this.#repoRoot = repoRoot;
@@ -194,6 +203,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     this.#resolver = options.resolver;
     this.#ownedResolvers.add(options.resolver);
     this.#runtimeCache = runtimeCache;
+    this.#startupEnvironment = startupEnvironment;
+    this.#startupEnvironmentEntries = getEnvironmentIdentityEntries(startupEnvironment);
   }
 
   public static async createAsync(
@@ -201,13 +212,23 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   ): Promise<WorkspaceRequestLifecycle> {
     const session: IWorkspaceSession = await options.provider.getSessionAsync();
     const runtimeCache: WorkspaceRuntimeFingerprintCache = new WorkspaceRuntimeFingerprintCache();
+    // The startup fingerprint hashes this copy, so that a restart for another environment can name what differs.
+    const startupEnvironment: Record<string, string> = Object.fromEntries(
+      Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
+    );
     const fingerprint: IWorkspaceInputFingerprint = await captureWorkspaceInputFingerprintAsync({
       rushConfiguration: session.rushConfiguration,
-      environment: process.env,
+      environment: startupEnvironment,
       runtimePaths: [__dirname, path.resolve(__dirname, '../package.json')],
       runtimeCache
     });
-    return new WorkspaceRequestLifecycle(options, session.metadata.repoRoot, fingerprint, runtimeCache);
+    return new WorkspaceRequestLifecycle(
+      options,
+      session.metadata.repoRoot,
+      fingerprint,
+      runtimeCache,
+      startupEnvironment
+    );
   }
 
   /** The last applied input decision; reading status never changes or reloads the workspace. */
@@ -342,16 +363,27 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             continue;
           }
           if (error instanceof RestartBeforeExecution && !state.began && !state.terminalAttempted) {
+            // The request, and each request that is answered while the restart is pending, learns why it happens.
+            const restartReason: IDaemonEnvironmentChangedRestartReason | undefined =
+              getEnvironmentRestartReason(this.#startupEnvironmentEntries, error.plan.environment);
             try {
               await client.interactiveSession.finishAsync();
               await client.writeResultAsync({
                 ...preExecutionFailure(envelope.requestId, error),
-                retryAfterRestart: true
+                retryAfterRestart: true,
+                ...(restartReason && { restartReason })
               });
               error.session.retire?.();
               this.#lastReloadTier = WorkspaceInputChangeTier.Restart;
+              this.#restartReason = restartReason;
               this.#restartPending = true;
               this.#closing = true;
+              if (restartReason) {
+                this.#options.onLog?.(
+                  `rushd: restarting for request ${envelope.requestId}, whose environment differs from this ` +
+                    `daemon's in ${restartReason.variableNames.join(', ')}`
+                );
+              }
               this.#options.onRestartRequested(error.plan);
             } finally {
               error.workspaceLease.release();
@@ -1061,7 +1093,14 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
 
   #restartPendingResult(requestId: string, pending: RestartPendingBeforeExecution): IDaemonCommandResult {
     const change: IDaemonInstallationChange | undefined = this.#installationChange;
-    if (!change) return { ...preExecutionFailure(requestId, pending), retryAfterRestart: true };
+    if (!change) {
+      const restartReason: IDaemonEnvironmentChangedRestartReason | undefined = this.#restartReason;
+      return {
+        ...preExecutionFailure(requestId, pending),
+        retryAfterRestart: true,
+        ...(restartReason && { restartReason })
+      };
+    }
     return {
       ...preExecutionFailure(requestId, new InstallationChangedBeforeExecution(change)),
       retryAfterRestart: true,

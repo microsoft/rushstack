@@ -32,7 +32,7 @@ it('round-trips a queue position that says the daemon restarts once the requests
 });
 
 it('accepts a queued restart reason kind from a newer daemon', () => {
-  const restartReason: object = { kind: 'environmentChanged', names: ['NODE_OPTIONS'] };
+  const restartReason: object = { kind: 'newerReason', detail: ['NODE_OPTIONS'] };
   expect(decodeDaemonControlMessage(queuePositionFrame(restartReason))).toMatchObject({
     payload: { restartReason }
   });

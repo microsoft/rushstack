@@ -280,6 +280,15 @@ ends, resubmits the request, and prints one line on stderr (or above the agent
 progress rows): `rush-client: The daemon's installation at <folder> was removed;
 restarted the daemon (PID <pid>).`
 
+When the daemon restarts for a command's environment, the client prints a line of the
+same kind that names the variables that differed, never their values:
+`rush-client: A command's environment differed from the daemon's in NODE_OPTIONS;
+restarted the daemon (PID <pid>).` It names at most four variables and then says how
+many more differed (`A, B, C, D and 2 more`). A command that was waiting when another
+command's environment restarted the daemon prints that command's variables, because the
+successor starts with that command's environment. A daemon that does not name the
+variables gets no line.
+
 When the connection is lost before a command's result, the command fails with exit code 1
 and is not retried. The diagnostic keeps "Daemon disconnected before delivering a result; the
 command was not retried." and says what happened to rushd. If its process exited (a crash, an

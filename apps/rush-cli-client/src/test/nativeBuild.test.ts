@@ -360,10 +360,17 @@ describe('native build through the standalone client', () => {
           fs.writeFileSync(path.join(folder, 'a/input.txt'), 'two');
           const changed: IResult = await invokeAsync(argv);
           expect(changed.code).toBe(0);
-          expect(changed.stderr).not.toMatch(/using in-process|restart/i);
+          expect(changed.stderr).not.toMatch(/using in-process/i);
           expect(changed.stdout).toContain('built-a-two');
           const after = JSON.parse((await invokeAsync(['daemon', 'status'])).stdout);
           expect(after.pid).not.toBe(previousPid);
+          // One line names the variable that differed, never its value.
+          expect(changed.stderr).toContain(
+            "rush-client: A command's environment differed from the daemon's in RUSHD_TEST_RESTART_VALUE; " +
+              `restarted the daemon (PID ${after.pid}).\n`
+          );
+          expect(changed.stderr.match(/restarted the daemon/g)).toHaveLength(1);
+          expect(changed.stderr).not.toContain('new-process-environment');
           expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\na:two\nb:one\n');
           expect((await invokeAsync(argv)).code).toBe(0);
           expect(JSON.parse((await invokeAsync(['daemon', 'status'])).stdout).pid).toBe(after.pid);

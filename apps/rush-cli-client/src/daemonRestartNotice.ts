@@ -4,18 +4,43 @@
 import type { IDaemonRestartNotice } from '@rushstack/rush-client-core';
 import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 
+/** The most variables that a restart line names before it says how many more differed. */
+const MAX_NAMED_VARIABLES: number = 4;
+
+/** Lists names as `A`, `A and B`, `A, B and C`, or `A, B, C, D and 2 more`. */
+function formatVariableNames(names: readonly string[]): string {
+  const items: string[] = names.slice(0, MAX_NAMED_VARIABLES);
+  if (names.length > items.length) items.push(`${names.length - items.length} more`);
+  const last: string | undefined = items.pop();
+  return items.length === 0 ? (last ?? '') : `${items.join(', ')} and ${last}`;
+}
+
+/** Says why the daemon restarted, or returns `undefined` for a reason that this client does not know. */
+function formatRestartedCause(reason: DaemonRestartReason | undefined): string | undefined {
+  switch (reason?.kind) {
+    case 'installationChanged':
+      return `The daemon's installation at ${reason.folder} was ${reason.change}`;
+    case 'environmentChanged': {
+      // Names only: a value, such as NODE_OPTIONS's, can hold a secret.
+      const { variableNames } = reason;
+      const names: string = variableNames.length === 0 ? '' : ` in ${formatVariableNames(variableNames)}`;
+      return `A command's environment differed from the daemon's${names}`;
+    }
+    default:
+      return undefined;
+  }
+}
+
 /**
  * Returns the line that tells the user why the daemon restarted during a command, or `undefined` for a restart
  * that needs no explanation.
  */
 export function formatDaemonRestartNotice(notice: IDaemonRestartNotice, rushx: boolean): string | undefined {
   const { reason, successorPid } = notice;
-  if (reason?.kind !== 'installationChanged') return undefined;
+  const cause: string | undefined = formatRestartedCause(reason);
+  if (cause === undefined) return undefined;
   const pid: string = successorPid === undefined ? '' : ` (PID ${successorPid})`;
-  return (
-    `${rushx ? 'rushx-client' : 'rush-client'}: The daemon's installation at ${reason.folder} was ` +
-    `${reason.change}; restarted the daemon${pid}.`
-  );
+  return `${rushx ? 'rushx-client' : 'rush-client'}: ${cause}; restarted the daemon${pid}.`;
 }
 
 /**

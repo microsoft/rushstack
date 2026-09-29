@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonEnvironmentChangedRestartReason } from './DaemonEnvironmentChange';
+
 /**
  * How a folder of a running daemon's installation changed after the daemon started.
  *
@@ -37,4 +39,6 @@ export interface IDaemonInstallationChangedRestartReason extends IDaemonInstalla
  *
  * @beta
  */
-export type DaemonRestartReason = IDaemonInstallationChangedRestartReason;
+export type DaemonRestartReason =
+  | IDaemonInstallationChangedRestartReason
+  | IDaemonEnvironmentChangedRestartReason;

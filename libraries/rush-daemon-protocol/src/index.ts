@@ -59,6 +59,7 @@ export type { DaemonCommandOutcome, IDaemonCommandResult } from './DaemonCommand
 export type { DaemonInstallationChangeKind, DaemonRestartReason } from './DaemonInstallationChange';
 export type { IDaemonInstallationChange } from './DaemonInstallationChange';
 export type { IDaemonInstallationChangedRestartReason } from './DaemonInstallationChange';
+export type { IDaemonEnvironmentChangedRestartReason } from './DaemonEnvironmentChange';
 export { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from './DaemonRequestAdmission';
 export { validateDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 export type { DaemonRequestRejectionCode, IDaemonRequestCancelMessage } from './DaemonRequestControl';
