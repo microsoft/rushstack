@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 
 const WINDOWS_PLATFORM: NodeJS.Platform = 'win32';
 const READ_ONLY: string = 'r';
+const NOT_A_DIRECTORY: string = 'ENOTDIR';
 
 /** The device and inode of a file that this process created. */
 export interface IDaemonFileIdentity {
@@ -14,9 +15,19 @@ export interface IDaemonFileIdentity {
   readonly fd?: number;
 }
 
+function lstatIfPresent(filePath: string): fs.Stats | undefined {
+  try {
+    return fs.lstatSync(filePath, { throwIfNoEntry: false });
+  } catch (error) {
+    // A folder on the path that became a file leaves nothing at the path, as a deletion does.
+    if ((error as NodeJS.ErrnoException).code !== NOT_A_DIRECTORY) throw error;
+    return undefined;
+  }
+}
+
 /** The identity of the file (not a link target) at `filePath`, or `undefined` when nothing is there. */
 export function readFileIdentity(filePath: string): IDaemonFileIdentity | undefined {
-  const stats: fs.Stats | undefined = fs.lstatSync(filePath, { throwIfNoEntry: false });
+  const stats: fs.Stats | undefined = lstatIfPresent(filePath);
   return stats && { dev: stats.dev, ino: stats.ino };
 }
 
@@ -46,8 +57,8 @@ function release(identity: IDaemonFileIdentity): void {
 }
 
 /**
- * Deletes `filePath` only while it is still the file this process created, then releases `identity`. Call it
- * once for each identity.
+ * Deletes `filePath` only while it is still the file this process created, then releases `identity`, even
+ * when the deletion fails. Call it once for each identity.
  *
  * @remarks
  * Once a daemon's socket or lockfile has been replaced, for example after someone deleted it and a successor
@@ -55,6 +66,9 @@ function release(identity: IDaemonFileIdentity): void {
  */
 export function removeOwnFile(filePath: string, identity: IDaemonFileIdentity | undefined): void {
   if (!identity) return;
-  if (isSameFile(readFileIdentity(filePath), identity)) fs.rmSync(filePath, { force: true });
-  release(identity);
+  try {
+    if (isSameFile(readFileIdentity(filePath), identity)) fs.rmSync(filePath, { force: true });
+  } finally {
+    release(identity);
+  }
 }

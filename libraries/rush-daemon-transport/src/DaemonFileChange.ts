@@ -14,7 +14,6 @@ export type DaemonFileChange = 'removed' | 'replaced';
 
 const REMOVED: DaemonFileChange = 'removed';
 const REPLACED: DaemonFileChange = 'replaced';
-const NOT_A_DIRECTORY: string = 'ENOTDIR';
 
 interface IFileIdentityRead {
   /** False when the path could not be read for a reason that says nothing about the file. */
@@ -25,9 +24,8 @@ interface IFileIdentityRead {
 function readIdentity(filePath: string): IFileIdentityRead {
   try {
     return { known: true, identity: readFileIdentity(filePath) };
-  } catch (error) {
-    // A folder on the path that became a file leaves the name as unreachable as a deletion does.
-    return { known: (error as NodeJS.ErrnoException).code === NOT_A_DIRECTORY };
+  } catch {
+    return { known: false };
   }
 }
 

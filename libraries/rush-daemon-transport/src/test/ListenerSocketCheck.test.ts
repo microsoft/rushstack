@@ -52,6 +52,18 @@ posixIt('reports a socket whose runtime folder was deleted as removed', () => {
 });
 
 posixIt(
+  'closes without an error after a file took the name of its runtime folder, and leaves it',
+  async () => {
+    const folder: string = paths.runtimeDir ?? paths.socketPath;
+    fs.rmSync(folder, { recursive: true });
+    fs.writeFileSync(folder, REPLACEMENT);
+    expect(listener.checkSocket()).toBe('removed');
+    await listener.closeAsync();
+    expect(fs.readFileSync(folder, UTF8)).toBe(REPLACEMENT);
+  }
+);
+
+posixIt(
   'reports a socket name that another file took as replaced, and closes without deleting it',
   async () => {
     fs.rmSync(paths.socketPath);

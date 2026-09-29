@@ -10,6 +10,7 @@ import { removeOwnFile } from './DaemonFileIdentity';
 import type { IDaemonFileIdentity } from './DaemonFileIdentity';
 import type { StopOperationGroupRecording } from './DaemonOperationGroupRecorder';
 import type { IDaemonPaths } from './DaemonPaths';
+import { releaseAfterAsync } from './DaemonReleaseAfter';
 
 /** The files a listener created: its published POSIX socket and its lockfile. */
 export interface IDaemonListenerFiles {
@@ -50,7 +51,7 @@ export class DaemonListenerLifetime {
   }
 
   public closeAsync(): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync();
+    this.#closePromise ??= releaseAfterAsync(this.stopAcceptingAsync(), () => this.#releaseLockfile());
     return this.#closePromise;
   }
 
@@ -71,16 +72,14 @@ export class DaemonListenerLifetime {
     return compareFileIdentity(this.#paths.socketPath, this.#files.socket);
   }
 
-  #stopOnceAsync(): Promise<void> {
-    // Unlink before closing, as libuv does for the path it bound, but only this listener's own socket: the
-    // name may belong to a successor by now.
-    this.#releaseSocket();
-    return new Promise<void>((resolve: () => void) => this.#server.close(() => resolve()));
-  }
-
-  async #closeOnceAsync(): Promise<void> {
-    await this.stopAcceptingAsync();
-    this.#releaseLockfile();
+  async #stopOnceAsync(): Promise<void> {
+    // Unlink first, as libuv does for the path it bound, but only this listener's own socket: the name may
+    // belong to a successor by now. Close even when that fails, or the open server keeps the process up.
+    try {
+      this.#releaseSocket();
+    } finally {
+      await new Promise<void>((resolve: () => void) => this.#server.close(() => resolve()));
+    }
   }
 
   #releaseSocket(): void {

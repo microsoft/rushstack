@@ -36,6 +36,15 @@ interface IFixtureDaemon {
 
 type StopRoute = 'daemon stop' | 'SIGTERM';
 
+/**
+ * Deletes a daemon's socket with no stat of it (`fs.rmSync` would stat it first). After a sync stat of a socket,
+ * Node 22's `fs.realpathSync` can return a path with a link unresolved (it checks a stale stat), and jest then
+ * fails to load its own modules.
+ */
+function unlinkSocket(socketPath: string): void {
+  fs.unlinkSync(socketPath);
+}
+
 (process.platform === 'win32' ? describe.skip : describe)('a daemon process after the daemon stops', () => {
   let folder: string;
   let repoRoot: string;
@@ -213,5 +222,39 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
     expect(fixture.getStderr()).not.toMatch(/kept its process running/);
     expect(fs.existsSync(paths.socketPath)).toBe(false);
     expect(readDaemonLockfile(paths.lockfilePath)).toBeUndefined();
+  }, 30000);
+
+  it('exits as soon as it stops, without an error, after a file took the name of its runtime folder', async () => {
+    const fixture: IFixtureDaemon = startDaemon('nothing', 'callbacks', 'process');
+    const { paths } = await waitForJsonAsync<{ paths: IDaemonPaths }>(fixture, 'ready.json');
+    const runtimeDir: string = paths.runtimeDir ?? '';
+    unlinkSocket(paths.socketPath);
+    fs.rmSync(runtimeDir, { recursive: true });
+    fs.writeFileSync(runtimeDir, 'another file');
+    await stopAsync(fixture, paths, 'SIGTERM');
+
+    const { code, signal } = await waitForExitAsync(fixture);
+    expect({ code, signal }).toEqual({ code: 0, signal: undefined });
+    expect(fixture.getStderr()).not.toMatch(/fixture error: |ENOTDIR|kept its process running|^\s+at /m);
+    expect(fs.readFileSync(runtimeDir, 'utf8')).toBe('another file');
+  }, 30000);
+
+  it('exits as soon as it stops when it cannot delete its files, and reports why', async () => {
+    const fixture: IFixtureDaemon = startDaemon('nothing', 'callbacks', 'process');
+    const { paths } = await waitForJsonAsync<{ paths: IDaemonPaths }>(fixture, 'ready.json');
+    const runtimeDir: string = paths.runtimeDir ?? '';
+    // A runtime folder that became a link to itself: every path through it fails with ELOOP.
+    fs.renameSync(runtimeDir, `${runtimeDir}.moved`);
+    fs.symlinkSync(runtimeDir, runtimeDir);
+    await stopAsync(fixture, paths, 'SIGTERM');
+
+    const { code, signal } = await waitForExitAsync(fixture);
+    // The daemon could not delete its socket, so the test does.
+    unlinkSocket(path.join(`${runtimeDir}.moved`, path.basename(paths.socketPath)));
+    expect({ code, signal }).toEqual({ code: 1, signal: undefined });
+    // Both failures are reported: the socket's first, then the lockfile's.
+    expect(fixture.getStderr()).toContain(`lstat '${paths.socketPath}'. Then: ELOOP`);
+    expect(fixture.getStderr()).toContain(`lstat '${paths.lockfilePath}'`);
+    expect(fixture.getStderr()).not.toMatch(/kept its process running/);
   }, 30000);
 });
