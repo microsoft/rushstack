@@ -194,6 +194,88 @@ describe(summarizeGitIndex.name, () => {
     expect(summary.sizesDigest).toBe(initialSummary.sizesDigest);
   });
 
+  it.each([2, 3, 4])(
+    'lists the .gitattributes files that a version %i index marks "assume unchanged" or "skip worktree"',
+    (version: number) => {
+      createRepo();
+      for (const filePath of [
+        '.gitattributes',
+        'dir/.gitattributes.bak',
+        'dir/not.gitattributes',
+        'dir/sub/.gitattribute',
+        'dir/sub/.gitattributes',
+        'dir/\u00fc/.gitattributes',
+        'visible/.gitattributes'
+      ]) {
+        writeFile(filePath, '# No attributes\n');
+      }
+
+      runGit('add', '.');
+      // A version 4 index stores each path relative to the previous one, even one longer than a file system allows
+      const longFilePath: string = `dir/${'long/'.repeat(1000)}.gitattributes`;
+      const objectId: string = runGit('rev-parse', ':a.txt').trim();
+      runGit('update-index', '--add', '--cacheinfo', `100644,${objectId},${longFilePath}`);
+      setIndexVersion(version);
+      expect(summarize().hiddenAttributesFilePaths).toEqual([]);
+
+      const assumeUnchangedPaths: string[] = [
+        '.gitattributes',
+        'dir/not.gitattributes',
+        'dir/sub/.gitattributes'
+      ];
+      const skipWorktreePaths: string[] = [
+        'dir/.gitattributes.bak',
+        'dir/sub/.gitattribute',
+        'dir/\u00fc/.gitattributes',
+        longFilePath
+      ];
+      if (version === 2) {
+        // Git would write a version 3 index to mark a file "skip worktree"
+        assumeUnchangedPaths.push(...skipWorktreePaths.splice(0));
+      } else {
+        // Another extended flag, which doesn't hide the file
+        writeFile('new/.gitattributes', '# No attributes\n');
+        runGit('add', '--intent-to-add', '--', 'new/.gitattributes');
+      }
+
+      runGit('update-index', '--assume-unchanged', '--', ...assumeUnchangedPaths);
+      if (skipWorktreePaths.length > 0) {
+        runGit('update-index', '--skip-worktree', '--', ...skipWorktreePaths);
+      }
+
+      expect(readIndex().readUInt32BE(4)).toBe(version);
+      expect(summarize().hiddenAttributesFilePaths).toEqual([
+        '.gitattributes',
+        longFilePath,
+        'dir/sub/.gitattributes',
+        'dir/\u00fc/.gitattributes'
+      ]);
+    }
+  );
+
+  it('lists the hidden .gitattributes files in the index of a SHA-256 repository', () => {
+    createRepo('--object-format=sha256');
+    writeFile('dir/.gitattributes', '# No attributes\n');
+    writeFile('dir/sub/.gitattributes', '# No attributes\n');
+    runGit('add', '.');
+    runGit('update-index', '--skip-worktree', '--', 'dir/sub/.gitattributes');
+    runGit('update-index', '--index-version=4');
+
+    expect(summarize(SHA256_OBJECT_ID_LENGTH).hiddenAttributesFilePaths).toEqual(['dir/sub/.gitattributes']);
+  });
+
+  it('rejects a version 4 index whose path removes more bytes than the previous path has', () => {
+    createRepo();
+    runGit('update-index', '--assume-unchanged', '--', 'dir/b.txt');
+    runGit('update-index', '--index-version=4');
+    const index: Buffer = readIndex();
+    // The first path removes a byte from the empty path before it
+    index[parseGitIndexLayout(index, SHA1_OBJECT_ID_LENGTH).pathOffsets[0]] = 1;
+    expect(() => summarizeGitIndex(index, SHA1_OBJECT_ID_LENGTH)).toThrow(
+      'The Git index has a malformed path'
+    );
+  });
+
   it('detects a split index', () => {
     createRepo();
     runGit('update-index', '--split-index');

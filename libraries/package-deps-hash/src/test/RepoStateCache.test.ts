@@ -615,6 +615,63 @@ describe(RepoStateCache.name, () => {
     expect(takeUsesPrivateIndex()).toBe(true);
   });
 
+  it.each([
+    ['--assume-unchanged', '.gitattributes', 2],
+    ['--assume-unchanged', 'dir/.gitattributes', 2],
+    ['--assume-unchanged', 'dir/.gitattributes', 4],
+    ['--skip-worktree', '.gitattributes', 3],
+    ['--skip-worktree', 'dir/.gitattributes', 3],
+    ['--skip-worktree', 'dir/.gitattributes', 4]
+  ])(
+    'copies the index again when a .gitattributes file that the index marks %s changes (%s, index version %i)',
+    async (flag: string, attributesPath: string, indexVersion: number) => {
+      settleFiles();
+      writeFile('dir/crlf.txt', 'a\r\n');
+      writeFile(attributesPath, '# No attributes\n');
+      commit();
+      runGit('update-index', flag, '--', attributesPath);
+      runGit('update-index', `--index-version=${indexVersion}`);
+      expect(fs.readFileSync(path.join(repoPath, '.git', 'index')).readUInt32BE(4)).toBe(indexVersion);
+      await getStateAsync();
+      // Git refreshes the recorded times of the file in the copy of the index, but not in the index
+      touchSettledFile('dir/crlf.txt');
+      await getStateAsync();
+      takeGitCommands();
+      await getStateAsync();
+      expect(takeGitCommandNames()).toEqual(['status']);
+
+      // "git status" doesn't list the attributes file, since Git doesn't examine it. Git now converts the line
+      // endings of the other file, so it no longer matches the index.
+      writeFile(attributesPath, '*.txt text eol=lf\n');
+      let state: IDetailedRepoState = await getStateAsync();
+      await expectUncachedStateAsync(state);
+      expect(state.files.get('dir/crlf.txt')).toBe(hashText('a\n'));
+
+      takeGitCommands();
+      state = await getStateAsync();
+      await expectUncachedStateAsync(state);
+      expect(takeUsesPrivateIndex()).toBe(true);
+    }
+  );
+
+  it('copies the index again when a .gitattributes file within the filter that the index marks --skip-worktree changes', async () => {
+    settleFiles();
+    writeFile('sub/dir/crlf.txt', 'a\r\n');
+    writeFile('sub/dir/.gitattributes', '# No attributes\n');
+    commit();
+    runGit('update-index', '--skip-worktree', '--', 'sub/dir/.gitattributes');
+    const filterPath: string[] = ['sub'];
+    await getStateAsync([], filterPath);
+    touchSettledFile('sub/dir/crlf.txt');
+    await getStateAsync([], filterPath);
+
+    // The attributes file is neither listed by "git status" nor in a folder that contains the filter
+    writeFile('sub/dir/.gitattributes', '*.txt text eol=lf\n');
+    const state: IDetailedRepoState = await getStateAsync([], filterPath);
+    await expectUncachedStateAsync(state, [], filterPath);
+    expect(state.files.get('sub/dir/crlf.txt')).toBe(hashText('a\n'));
+  });
+
   it('copies the index again when the filter changes, instead of computing the state without the cache', async () => {
     settleFiles();
     writeFile('dir/crlf.txt', 'a\r\n');

@@ -127,6 +127,11 @@ interface IPrivateIndex {
    * Whether the attributes files changed since the first "git status", so that the index must be copied again.
    */
   hasAttributesChanged: boolean;
+  /**
+   * The attributes files that the index marks "assume unchanged" or "skip worktree". "git status" doesn't list
+   * them, even when they change.
+   */
+  readonly hiddenAttributesFilePaths: ReadonlyArray<string>;
 }
 
 interface ITree {
@@ -182,7 +187,8 @@ function noop(): void {}
  * the user's configuration folder, or when one of these files may have been written during the previous call, while
  * Git read it. A file that is rewritten with the same content, as `git branch -D` rewrites the configuration of the
  * repository, isn't a change. The index is copied again when a `.gitattributes` file changes that `git status`
- * lists as modified or untracked, or that is in a folder that contains a filter path; the call that detects the
+ * lists as modified or untracked; that the index marks "assume unchanged" or "skip worktree", so that `git status`
+ * doesn't list it; or that is in a folder that contains a filter path. The call that detects the
  * change computes the state without the cache. The index is also copied again when the filter changes. Changes to
  * the system configuration, to a configuration file included by another, to a custom `core.attributesFile`, or to
  * an ignored `.gitattributes` file that applies to files that the index records aren't detected. In rare cases,
@@ -345,7 +351,12 @@ export class RepoStateCache {
 
     const locallyModified: Map<string, boolean> = parseGitStatus(statusOutput);
     const attributesFingerprint: string = this.#getFingerprint(
-      getAttributesFilePaths(this.#rootDirectory, locallyModified.keys(), filterPath),
+      getAttributesFilePaths(
+        this.#rootDirectory,
+        locallyModified.keys(),
+        privateIndex.hiddenAttributesFilePaths,
+        filterPath
+      ),
       settledBeforeNs
     );
     if (privateIndex.attributesFingerprint === undefined) {
@@ -620,7 +631,8 @@ export class RepoStateCache {
       // The file system monitor's state that the new copy keeps says which files Git found unchanged under the
       // attributes of the previous copy, so the next call must detect a change since then
       attributesFingerprint: carriedOverCopy ? previousIndex?.attributesFingerprint : undefined,
-      hasAttributesChanged: false
+      hasAttributesChanged: false,
+      hiddenAttributesFilePaths: summary.hiddenAttributesFilePaths
     };
     this.#privateIndex = privateIndex;
     return privateIndex;
@@ -959,17 +971,23 @@ function haveSameContent(
 
 /**
  * Lists the attributes files that affect how "git status" refreshes the files within the filter: those that it
- * lists as modified or untracked, and those in the folders that contain the filter paths, which it doesn't list.
+ * lists as modified or untracked; those that the index marks "assume unchanged" or "skip worktree", which it doesn't
+ * list even when they change; and those in the folders that contain the filter paths, which it doesn't list either.
  */
 function* getAttributesFilePaths(
   rootDirectory: string,
   modifiedFilePaths: Iterable<string>,
+  hiddenAttributesFilePaths: ReadonlyArray<string>,
   filterPath: ReadonlyArray<string> | undefined
 ): IterableIterator<string> {
   for (const filePath of modifiedFilePaths) {
     if (filePath === ATTRIBUTES_FILE_NAME || filePath.endsWith(`/${ATTRIBUTES_FILE_NAME}`)) {
       yield path.resolve(rootDirectory, filePath);
     }
+  }
+
+  for (const filePath of hiddenAttributesFilePaths) {
+    yield path.resolve(rootDirectory, filePath);
   }
 
   const rootPath: string = path.resolve(rootDirectory);

@@ -19,8 +19,20 @@ const ENTRY_MODE_TYPE_SHIFT: number = 12;
 const ENTRY_SIZE_OFFSET: number = 36;
 const ENTRY_SIZE_LENGTH: number = 4;
 const ENTRY_FLAGS_LENGTH: number = 2;
+// "git update-index --assume-unchanged" sets this flag
+const ENTRY_ASSUME_VALID_FLAG: number = 0x8000;
 const ENTRY_EXTENDED_FLAG: number = 0x4000;
 const ENTRY_STAGE_MASK: number = 0x3000;
+// An extended flag, which "git update-index --skip-worktree" and sparse checkouts set
+const ENTRY_SKIP_WORKTREE_FLAG: number = 0x4000;
+// In a version 4 index, each byte of the variable-length integer that starts a path has 7 bits of its value, and a
+// bit that says whether another byte follows
+const VARINT_CONTINUATION_FLAG: number = 0x80;
+const VARINT_VALUE_MASK: number = 0x7f;
+const VARINT_VALUE_BITS_FACTOR: number = 0x80;
+const INITIAL_PATH_BUFFER_LENGTH: number = 4096;
+const ATTRIBUTES_FILE_NAME: Buffer = Buffer.from('.gitattributes');
+const SLASH_CHARACTER_CODE: number = 0x2f;
 const EXTENSION_HEADER_LENGTH: number = 8;
 const SPLIT_INDEX_EXTENSION_SIGNATURE: string = 'link';
 const UNTRACKED_CACHE_EXTENSION_SIGNATURE: string = 'UNTR';
@@ -78,6 +90,11 @@ export interface IGitIndexSummary {
    * Whether the index is split: its entries are then completed by a shared index file.
    */
   readonly isSplit: boolean;
+  /**
+   * The paths of the `.gitattributes` files that the index marks "assume unchanged" or "skip worktree", in the
+   * order of the index. Git doesn't examine these files, so `git status` doesn't list them, even when they change.
+   */
+  readonly hiddenAttributesFilePaths: ReadonlyArray<string>;
 }
 
 /**
@@ -226,19 +243,21 @@ export function parseGitIndexLayout(content: Buffer, objectIdLength: number): IG
  * @param objectIdLength - The length of an object ID in bytes: 20 for SHA-1, or 32 for SHA-256
  */
 export function summarizeGitIndex(content: Buffer, objectIdLength: number): IGitIndexSummary {
-  const { entryCount, entryOffsets, extensions }: IGitIndexLayout = parseGitIndexLayout(
-    content,
-    objectIdLength
-  );
+  const layout: IGitIndexLayout = parseGitIndexLayout(content, objectIdLength);
+  const { entryCount, entryOffsets, extensions }: IGitIndexLayout = layout;
   const entriesEnd: number = entryOffsets[entryCount];
   // A copy of the entries in which the file system data of each entry is cleared, except for the mode
   const entries: Buffer = Buffer.from(content.subarray(0, entriesEnd));
   const sizes: Buffer = Buffer.alloc(entryCount * ENTRY_SIZE_LENGTH);
+  const hiddenEntryIndices: number[] = [];
   for (let i: number = 0; i < entryCount; i++) {
     const offset: number = entryOffsets[i];
     sizes.writeUInt32BE(content.readUInt32BE(offset + ENTRY_SIZE_OFFSET), i * ENTRY_SIZE_LENGTH);
     entries.fill(0, offset, offset + ENTRY_MODE_OFFSET);
     entries.fill(0, offset + ENTRY_MODE_OFFSET + ENTRY_MODE_LENGTH, offset + ENTRY_STAT_LENGTH);
+    if (isEntryHidden(content, offset + ENTRY_STAT_LENGTH + objectIdLength)) {
+      hiddenEntryIndices.push(i);
+    }
   }
 
   return {
@@ -247,8 +266,91 @@ export function summarizeGitIndex(content: Buffer, objectIdLength: number): IGit
     sizesDigest: createHash('sha1').update(sizes).digest('hex'),
     isSplit: extensions.some(
       ({ signature }: IGitIndexExtension) => signature === SPLIT_INDEX_EXTENSION_SIGNATURE
-    )
+    ),
+    hiddenAttributesFilePaths: findAttributesFilePaths(content, layout, hiddenEntryIndices)
   };
+}
+
+/**
+ * Whether the index marks an entry "assume unchanged" or "skip worktree", so that Git doesn't examine its file.
+ */
+function isEntryHidden(content: Buffer, flagsOffset: number): boolean {
+  const flags: number = content.readUInt16BE(flagsOffset);
+  return (
+    (flags & ENTRY_ASSUME_VALID_FLAG) !== 0 ||
+    ((flags & ENTRY_EXTENDED_FLAG) !== 0 &&
+      (content.readUInt16BE(flagsOffset + ENTRY_FLAGS_LENGTH) & ENTRY_SKIP_WORKTREE_FLAG) !== 0)
+  );
+}
+
+/**
+ * Returns the paths of the given entries that name a `.gitattributes` file, in the order of the entries.
+ */
+function findAttributesFilePaths(
+  content: Buffer,
+  { version, pathOffsets, pathEndOffsets }: IGitIndexLayout,
+  entryIndices: ReadonlyArray<number>
+): string[] {
+  const filePaths: string[] = [];
+  if (entryIndices.length === 0) {
+    return filePaths;
+  }
+
+  if (version !== 4) {
+    for (const i of entryIndices) {
+      if (isAttributesFilePath(content, pathOffsets[i], pathEndOffsets[i])) {
+        filePaths.push(content.toString('utf8', pathOffsets[i], pathEndOffsets[i]));
+      }
+    }
+
+    return filePaths;
+  }
+
+  // Each path only stores how many bytes to remove from the end of the previous path, and the bytes to add after
+  // those that remain, so the paths must be rebuilt in order
+  let filePath: Buffer = Buffer.alloc(INITIAL_PATH_BUFFER_LENGTH);
+  let filePathLength: number = 0;
+  let nextIndex: number = 0;
+  for (let i: number = 0; nextIndex < entryIndices.length; i++) {
+    let offset: number = pathOffsets[i];
+    let byte: number = content[offset++];
+    let removedLength: number = byte & VARINT_VALUE_MASK;
+    while (byte & VARINT_CONTINUATION_FLAG) {
+      byte = content[offset++];
+      removedLength = (removedLength + 1) * VARINT_VALUE_BITS_FACTOR + (byte & VARINT_VALUE_MASK);
+    }
+
+    if (removedLength > filePathLength) {
+      throw new Error('The Git index has a malformed path');
+    }
+
+    const keptLength: number = filePathLength - removedLength;
+    filePathLength = keptLength + pathEndOffsets[i] - offset;
+    if (filePathLength > filePath.length) {
+      const newFilePath: Buffer = Buffer.alloc(Math.max(filePathLength, filePath.length * 2));
+      filePath.copy(newFilePath, 0, 0, keptLength);
+      filePath = newFilePath;
+    }
+
+    content.copy(filePath, keptLength, offset, pathEndOffsets[i]);
+    if (i === entryIndices[nextIndex]) {
+      nextIndex++;
+      if (isAttributesFilePath(filePath, 0, filePathLength)) {
+        filePaths.push(filePath.toString('utf8', 0, filePathLength));
+      }
+    }
+  }
+
+  return filePaths;
+}
+
+function isAttributesFilePath(buffer: Buffer, start: number, end: number): boolean {
+  const nameStart: number = end - ATTRIBUTES_FILE_NAME.length;
+  return (
+    nameStart >= start &&
+    (nameStart === start || buffer[nameStart - 1] === SLASH_CHARACTER_CODE) &&
+    buffer.compare(ATTRIBUTES_FILE_NAME, 0, ATTRIBUTES_FILE_NAME.length, nameStart, end) === 0
+  );
 }
 
 /**
