@@ -14,6 +14,7 @@ import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvide
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
+import { OutputFolderReceipt, type PendingOutputFolderReceipt } from './OutputFolderReceipt';
 
 /**
  * How long to wait to acquire the per-cache-entry download lock (see
@@ -138,8 +139,13 @@ export class OperationBuildCache {
   readonly #cacheId: string | undefined;
   readonly #excludeAppleDoubleFiles: boolean;
   readonly #useDirectFileTransfersForBuildCache: boolean;
+  readonly #receipt: OutputFolderReceipt | undefined;
 
-  private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
+  private constructor(
+    cacheId: string | undefined,
+    options: IProjectBuildCacheOptions,
+    receipt?: OutputFolderReceipt
+  ) {
     const {
       buildCacheConfiguration: {
         localCacheProvider,
@@ -161,6 +167,7 @@ export class OperationBuildCache {
     this.#cacheId = cacheId;
     this.#excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
     this.#useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
+    this.#receipt = receipt;
   }
 
   public get cacheId(): string | undefined {
@@ -198,7 +205,14 @@ export class OperationBuildCache {
       useDirectFileTransfersForBuildCache
     };
     const cacheId: string | undefined = _getCacheId(buildCacheOptions);
-    return new OperationBuildCache(cacheId, buildCacheOptions);
+    // Only an operation's own build cache has a receipt, because the receipt is kept per operation.
+    const receipt: OutputFolderReceipt | undefined = OutputFolderReceipt.tryCreate({
+      projectFolder: buildCacheOptions.project.projectFolder,
+      projectRushTempFolder: buildCacheOptions.project.projectRushTempFolder,
+      logFilenameIdentifier: executionResult.operation.logFilenameIdentifier,
+      outputFolderNames: outputFolders
+    });
+    return new OperationBuildCache(cacheId, buildCacheOptions, receipt);
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
@@ -215,6 +229,18 @@ export class OperationBuildCache {
 
     let localCacheEntryPath: string | undefined =
       await this.#localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
+    if (
+      localCacheEntryPath &&
+      (await this.#tryReceiptActionAsync(terminal, 'read', (receipt: OutputFolderReceipt) =>
+        receipt.isMatchAsync(cacheId)
+      ))
+    ) {
+      terminal.writeLine('Build cache hit.');
+      terminal.writeVerboseLine(`Cache key: ${cacheId}`);
+      terminal.writeLine('The output folders already match this cache entry; nothing to restore.');
+      return true;
+    }
+
     let cloudCacheHit: boolean = false;
     let updateLocalCacheSuccess: boolean | undefined;
     if (!localCacheEntryPath && this.#cloudBuildCacheProvider) {
@@ -333,6 +359,11 @@ export class OperationBuildCache {
 
     const projectFolderPath: string = this.#project.projectFolder;
 
+    // The receipt describes the output folders, so it must not outlive them, even if the restore fails.
+    await this.#tryReceiptActionAsync(terminal, 'delete', (receipt: OutputFolderReceipt) =>
+      receipt.deleteAsync()
+    );
+
     // Purge output folders
     terminal.writeVerboseLine(`Clearing cached folders: ${this.#projectOutputFolderNames.join(', ')}`);
     await Promise.all(
@@ -353,6 +384,7 @@ export class OperationBuildCache {
       if (tarExitCode === 0) {
         restoreSuccess = true;
         terminal.writeLine('Successfully restored output from the build cache.');
+        await this.#tryWriteRestoredReceiptAsync(terminal, cacheId);
       } else {
         terminal.writeWarningLine(
           'Unable to restore output from the build cache. ' +
@@ -380,6 +412,21 @@ export class OperationBuildCache {
       return false;
     }
 
+    // The stamp comes before the output folders are read, so a change to them while they are archived keeps the
+    // receipt from being written.
+    const pendingReceipt: PendingOutputFolderReceipt | undefined = await this.#tryBeginReceiptAsync(terminal);
+    try {
+      return await this.#trySetCacheEntryWithReceiptAsync(terminal, cacheId, pendingReceipt);
+    } finally {
+      await this.#tryDisposeReceiptAsync(terminal, pendingReceipt);
+    }
+  }
+
+  async #trySetCacheEntryWithReceiptAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    pendingReceipt: PendingOutputFolderReceipt | undefined
+  ): Promise<boolean> {
     const filesToCache: IPathsToCache | undefined = await this._tryCollectPathsToCacheAsync(terminal);
     if (!filesToCache) {
       return false;
@@ -426,6 +473,7 @@ export class OperationBuildCache {
           throw moveError;
         }
         localCacheEntryPath = finalLocalCacheEntryPath;
+        await this.#tryCommitReceiptAsync(terminal, pendingReceipt, cacheId, filesToCache.outputFilePaths);
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
@@ -577,5 +625,63 @@ export class OperationBuildCache {
 
   #getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
     return path.join(this.#project.projectRushTempFolder, `${cacheId}.${mode}.log`);
+  }
+
+  // The stamp comes after the untar, so a change to the output folders after it keeps the receipt from being
+  // written, or from matching later.
+  async #tryWriteRestoredReceiptAsync(terminal: ITerminal, cacheId: string): Promise<void> {
+    const pendingReceipt: PendingOutputFolderReceipt | undefined = await this.#tryBeginReceiptAsync(terminal);
+    try {
+      await this.#tryCommitReceiptAsync(terminal, pendingReceipt, cacheId);
+    } finally {
+      await this.#tryDisposeReceiptAsync(terminal, pendingReceipt);
+    }
+  }
+
+  async #tryBeginReceiptAsync(terminal: ITerminal): Promise<PendingOutputFolderReceipt | undefined> {
+    return await this.#tryReceiptActionAsync(terminal, 'write', (receipt: OutputFolderReceipt) =>
+      receipt.beginAsync()
+    );
+  }
+
+  async #tryCommitReceiptAsync(
+    terminal: ITerminal,
+    pendingReceipt: PendingOutputFolderReceipt | undefined,
+    cacheId: string,
+    archivedFilePaths?: ReadonlyArray<string>
+  ): Promise<void> {
+    if (pendingReceipt) {
+      const reason: string | undefined = await this.#tryReceiptActionAsync(terminal, 'write', () =>
+        pendingReceipt.tryCommitAsync(cacheId, archivedFilePaths)
+      );
+      if (reason) {
+        terminal.writeVerboseLine(`Not writing a build cache receipt: ${reason}.`);
+      }
+    }
+  }
+
+  async #tryDisposeReceiptAsync(
+    terminal: ITerminal,
+    pendingReceipt: PendingOutputFolderReceipt | undefined
+  ): Promise<void> {
+    await this.#tryReceiptActionAsync(terminal, 'clean up', async () => await pendingReceipt?.disposeAsync());
+  }
+
+  // A receipt only saves work, so if it can't be read or written, the build cache works as it would without one.
+  async #tryReceiptActionAsync<T>(
+    terminal: ITerminal,
+    verb: 'read' | 'write' | 'delete' | 'clean up',
+    action: (receipt: OutputFolderReceipt) => Promise<T>
+  ): Promise<T | undefined> {
+    const receipt: OutputFolderReceipt | undefined = this.#receipt;
+    if (!receipt) {
+      return undefined;
+    }
+    try {
+      return await action(receipt);
+    } catch (error) {
+      terminal.writeVerboseLine(`Unable to ${verb} the build cache receipt "${receipt.filePath}": ${error}`);
+      return undefined;
+    }
   }
 }
