@@ -194,7 +194,8 @@ afterEach(async () => {
 });
 
 async function createHarnessAsync(
-  options: Partial<IWarmWorkerOperationRunnerOptions> = {}
+  options: Partial<IWarmWorkerOperationRunnerOptions> = {},
+  otherOperations: Operation[] = []
 ): Promise<ITestHarness> {
   const project: RushConfigurationProject = createProject('a', undefined);
   const runner: WarmWorkerOperationRunner = new WarmWorkerOperationRunner({
@@ -212,7 +213,7 @@ async function createHarnessAsync(
   });
   const operation: Operation = new Operation({ phase, project, runner, logFilenameIdentifier: 'a' });
   const destination: MockWritable = new MockWritable();
-  const graph: OperationGraph = new OperationGraph(new Set([operation]), {
+  const graph: OperationGraph = new OperationGraph(new Set([operation, ...otherOperations]), {
     quietMode: false,
     debugMode: false,
     parallelism: 1,
@@ -932,5 +933,39 @@ describe(DaemonWarmWorkerPlugin.name, () => {
       await hooks.createOperationsAsync.promise(new Set([operation]), otherContext);
       expect(operation.runner).toBeInstanceOf(ShellOperationRunner);
     }
+  });
+
+  it('does not prepare the worker of an operation that an iteration does not run', async () => {
+    // An iteration in which no operation is enabled does not run at all, so another operation runs in each one.
+    const other: Operation = new Operation({
+      phase,
+      project: createProject('other', undefined),
+      runner: new NullOperationRunner({ name: 'other', result: OperationStatus.Success, silent: false }),
+      logFilenameIdentifier: 'other'
+    });
+    const harness: ITestHarness = await createHarnessAsync({}, [other]);
+    await harness.executeAsync();
+    await harness.executeAsync();
+    const worker: ChildProcess = children[1];
+    const operation: Operation = [...harness.graph.operations].find(
+      ({ runner }: Operation) => runner === harness.runner
+    )!;
+
+    // If the operation ran, the guard would make the runner close the worker before the initial command.
+    harness.blockReason = 'its command line changed';
+    const guardCallCount: number = harness.guardOptions.length;
+    harness.graph.setEnabledStates([operation], false, 'unsafe');
+    const skipped: ITestIteration = await harness.executeAsync();
+    expect(skipped.record.status).toBe(OperationStatus.Skipped);
+    expect(skipped.commands).toEqual([]);
+    expect(harness.runner.isActive).toBe(true);
+    expect(worker.exitCode).toBeNull();
+    expect(harness.guardOptions).toHaveLength(guardCallCount);
+
+    harness.blockReason = undefined;
+    harness.graph.setEnabledStates([operation], true, 'unsafe');
+    const next: ITestIteration = await harness.executeAsync();
+    expect(next.commands).toEqual([]);
+    expect(next.output).toContain(`Sending run 2 to the warm worker (pid ${worker.pid}).`);
   });
 });
