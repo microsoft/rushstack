@@ -4,7 +4,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { IOperationExecutionResult, Operation, _IOperationGraphEventSink } from '@microsoft/rush-lib';
-import { OperationStatus } from '@microsoft/rush-lib';
+import { OperationStatus, _formatIterationStartLines } from '@microsoft/rush-lib';
 import { getCommandExecution } from '@microsoft/rush-lib/lib/logic/operations/IncrementalExecutionState';
 import type { ICommandExecution } from '@microsoft/rush-lib/lib/logic/operations/IncrementalExecutionState';
 import {
@@ -202,6 +202,31 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       if (!TERMINAL_OPERATION_STATUSES.has(record.status)) {
         this.#pendingOperationIds.add(operationId);
       }
+    }
+  }
+
+  /**
+   * Announces the iteration to this client with only its own operations, as the iteration would be announced if
+   * the client's request were the only one in it.
+   */
+  public onIterationStarting(
+    records: ReadonlyArray<IOperationExecutionResult>,
+    parallelism: number,
+    quietMode: boolean
+  ): void {
+    const operationNames: string[] = [];
+    for (const record of records) {
+      const operationId: string = record.operation.name;
+      if (!record.silent && this.#activeOperationIds.has(operationId)) {
+        operationNames.push(operationId);
+      }
+    }
+    if (operationNames.length === 0) {
+      // Alone, a request with nothing to run starts no iteration, so it is not announced.
+      return;
+    }
+    for (const line of _formatIterationStartLines(operationNames, parallelism, quietMode)) {
+      this.onActivity(line);
     }
   }
 

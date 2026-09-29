@@ -250,10 +250,11 @@ export type {
   IOperationGraphIterationOptions,
   IOperationGraphRequestResult
 } from './logic/operations/IOperationGraph';
-export type {
-  IOperationChildProcessReporter as _IOperationChildProcessReporter,
-  IOperationGraphEventSink as _IOperationGraphEventSink,
-  IOperationActivityOptions as _IOperationActivityOptions
+export {
+  type IOperationChildProcessReporter as _IOperationChildProcessReporter,
+  type IOperationGraphEventSink as _IOperationGraphEventSink,
+  type IOperationActivityOptions as _IOperationActivityOptions,
+  _formatIterationStartLines
 } from './logic/operations/OperationEventSink';
 export { OperationGraphHooks } from './pluginFramework/OperationGraphHooks';
 

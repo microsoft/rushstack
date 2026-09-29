@@ -15,7 +15,7 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus, SUCCESS_STATUSES, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import { _formatIterationStartLines, type IOperationGraphEventSink } from './OperationEventSink';
 import {
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
@@ -905,7 +905,7 @@ export class OperationGraph implements IOperationGraph {
     const { hooks } = this;
     const graph: OperationGraph = this;
 
-    const { abortController, records: executionRecords, terminal, totalOperations } = iterationContext;
+    const { abortController, records: executionRecords, terminal } = iterationContext;
 
     const isInitial: boolean = this.resultByOperation.size === 0;
 
@@ -958,31 +958,24 @@ export class OperationGraph implements IOperationGraph {
     };
 
     const { eventSink } = this;
-    if (!this.quietMode) {
-      const plural: string = totalOperations === 1 ? '' : 's';
-      const selectedLine: string = `Selected ${totalOperations} operation${plural}:`;
-      terminal.writeStdoutLine(selectedLine);
-      eventSink?.onActivity?.(selectedLine);
-      const nonSilentOperations: string[] = [];
-      for (const record of executionRecords.values()) {
-        if (!record.silent) {
-          nonSilentOperations.push(record.name);
-        }
+    const { parallelism, quietMode } = this;
+    const nonSilentOperations: string[] = [];
+    for (const record of executionRecords.values()) {
+      if (!record.silent) {
+        nonSilentOperations.push(record.name);
       }
-      nonSilentOperations.sort();
-      for (const name of nonSilentOperations) {
-        terminal.writeStdoutLine(`  ${name}`);
-        eventSink?.onActivity?.(`  ${name}`);
-      }
-      terminal.writeStdoutLine('');
-      eventSink?.onActivity?.('');
     }
-
-    const maxSimultaneousProcesses: number = Math.min(totalOperations, this.parallelism);
-    // For logging purposes, don't confuse the user by suggesting we might run more operations in parallel than are scheduled.
-    const parallelismLine: string = `Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`;
-    terminal.writeStdoutLine(parallelismLine);
-    eventSink?.onActivity?.(parallelismLine);
+    // A sink that announces the iteration itself does not also receive the announcement as activity.
+    const sinkAnnouncesIteration: boolean = eventSink?.onIterationStarting !== undefined;
+    for (const line of _formatIterationStartLines(nonSilentOperations, parallelism, quietMode)) {
+      terminal.writeStdoutLine(line);
+      if (!sinkAnnouncesIteration) {
+        eventSink?.onActivity?.(line);
+      }
+    }
+    if (eventSink?.onIterationStarting) {
+      eventSink.onIterationStarting([...executionRecords.values()], parallelism, quietMode);
+    }
 
     let bailStatus: OperationStatus | undefined | void;
     try {

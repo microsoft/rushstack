@@ -379,6 +379,9 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
     protected _state: TState;
 }
 
+// @internal
+export function _formatIterationStartLines(operationNames: Iterable<string>, parallelism: number, quietMode: boolean): string[];
+
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
@@ -789,6 +792,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 export interface _IOperationGraphEventSink {
     createChildProcessReporter?(operationId: string, iterationId: number): _IOperationChildProcessReporter | undefined;
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
+    onIterationStarting?(records: ReadonlyArray<IOperationExecutionResult>, parallelism: number, quietMode: boolean): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;

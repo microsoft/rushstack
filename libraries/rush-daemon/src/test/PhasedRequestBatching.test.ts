@@ -636,6 +636,121 @@ describe('shared phased request batching', () => {
     ]);
   });
 
+  it.each([false, true])(
+    'announces a shared iteration to each client with only its own operations (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const fixture: ITestRoutingFixture = createFixture();
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const settings: IPhasedCommandEngineRequestSettings = {
+        parallelism: 4,
+        quietMode,
+        isIncrementalBuildAllowed: true
+      };
+      const clientB: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientC: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(createRequest('b', OPERATION_B), clientB, false, undefined, settings),
+        router.executeAsync(createRequest('c', OPERATION_C), clientC, false, undefined, settings)
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(getIterationAnnouncement(clientB)).toEqual([
+        ...(quietMode ? [] : ['Selected 2 operations:', `  ${OPERATION_A}`, `  ${OPERATION_B}`, '']),
+        'Executing a maximum of 2 simultaneous processes...'
+      ]);
+      expect(getIterationAnnouncement(clientC)).toEqual([
+        ...(quietMode ? [] : ['Selected 1 operation:', `  ${OPERATION_C}`, '']),
+        'Executing a maximum of 1 simultaneous processes...'
+      ]);
+    }
+  );
+
+  it.each([false, true])(
+    'announces an operation that two clients of a shared iteration both select to each of them (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const fixture: ITestRoutingFixture = createFixture();
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const settings: IPhasedCommandEngineRequestSettings = {
+        parallelism: 4,
+        quietMode,
+        isIncrementalBuildAllowed: true
+      };
+      const clientA: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientB: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(createRequest('a', OPERATION_A), clientA, false, undefined, settings),
+        router.executeAsync(createRequest('b', OPERATION_B), clientB, false, undefined, settings)
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(getIterationAnnouncement(clientA)).toEqual([
+        ...(quietMode ? [] : ['Selected 1 operation:', `  ${OPERATION_A}`, '']),
+        'Executing a maximum of 1 simultaneous processes...'
+      ]);
+      expect(getIterationAnnouncement(clientB)).toEqual([
+        ...(quietMode ? [] : ['Selected 2 operations:', `  ${OPERATION_A}`, `  ${OPERATION_B}`, '']),
+        'Executing a maximum of 2 simultaneous processes...'
+      ]);
+      expect(getHeaderData(clientA)).toEqual([
+        { completedOperations: 1, operationId: OPERATION_A, totalOperations: 1 }
+      ]);
+      expect(getHeaderData(clientB)).toEqual([
+        { completedOperations: 1, operationId: OPERATION_A, totalOperations: 2 },
+        { completedOperations: 2, operationId: OPERATION_B, totalOperations: 2 }
+      ]);
+    }
+  );
+
+  it.each([false, true])(
+    'does not announce a shared iteration to a client that has nothing to run in it, as when it is alone (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const fixture: ITestRoutingFixture = createFixture();
+      let upToDate: boolean = false;
+      fixture.graph.hooks.configureIteration.tap('project-a is up to date', (records) => {
+        for (const record of records.values()) {
+          if (upToDate && record.operation.name === OPERATION_A) {
+            record.enabled = false;
+          }
+        }
+      });
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const settings: IPhasedCommandEngineRequestSettings = {
+        parallelism: 4,
+        quietMode,
+        isIncrementalBuildAllowed: true
+      };
+      const clientA: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientC: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+      await router.executeAsync(
+        createRequest('first', OPERATION_A),
+        new TestPhasedRequestClient('zero'),
+        false,
+        undefined,
+        settings
+      );
+      upToDate = true;
+
+      await Promise.all([
+        router.executeAsync(createRequest('a', OPERATION_A), clientA, false, undefined, settings),
+        router.executeAsync(createRequest('c', OPERATION_C), clientC, false, undefined, settings)
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(2);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(getIterationAnnouncement(clientA)).toEqual([]);
+      expect(getIterationAnnouncement(clientC)).toEqual([
+        ...(quietMode ? [] : ['Selected 1 operation:', `  ${OPERATION_C}`, '']),
+        'Executing a maximum of 1 simultaneous processes...'
+      ]);
+    }
+  );
+
   it('publishes a coalesced client result as soon as its own closure settles', async () => {
     const releaseB: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -1408,6 +1523,25 @@ describe('shared phased request batching', () => {
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
   });
 });
+
+/** The activity lines that announced an iteration to a client, from the `Selected` listing through the `Executing` line. */
+function getIterationAnnouncement(client: TestPhasedRequestClient): ReadonlyArray<string> {
+  const texts: string[] = client.writes.flatMap(({ event }) =>
+    event?.type === 'activityChanged' && event.scope === undefined
+      ? [(event.payload as { text: string }).text]
+      : []
+  );
+  const executingIndexes: number[] = texts.flatMap((text: string, index: number) =>
+    text.startsWith('Executing a maximum of ') ? [index] : []
+  );
+  if (executingIndexes.length === 0) {
+    expect(texts.some((text: string) => text.startsWith('Selected '))).toBe(false);
+    return [];
+  }
+  expect(executingIndexes).toHaveLength(1);
+  const selectedIndex: number = texts.findIndex((text: string) => text.startsWith('Selected '));
+  return texts.slice(selectedIndex === -1 ? executingIndexes[0] : selectedIndex, executingIndexes[0] + 1);
+}
 
 function getWrittenOperationIds(client: TestPhasedRequestClient): ReadonlySet<string> {
   const operationIdSet: Set<string> = new Set();

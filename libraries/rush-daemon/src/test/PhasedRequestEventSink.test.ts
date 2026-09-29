@@ -253,3 +253,85 @@ describe('the early failure offer', () => {
     expect(onSettled).not.toHaveBeenCalled();
   });
 });
+
+describe('the iteration announcement', () => {
+  async function getActivityTextsAsync(
+    client: TestPhasedRequestClient,
+    sink: PhasedRequestEventSink
+  ): Promise<string[]> {
+    await sink.flushAsync();
+    return client.writes.flatMap(({ event }) =>
+      event?.type === 'activityChanged' ? [(event.payload as { text: string }).text] : []
+    );
+  }
+
+  function createAnnouncingSink(client: TestPhasedRequestClient): PhasedRequestEventSink {
+    return new PhasedRequestEventSink({
+      activeOperationIds: new Set([ACTIVE_OPERATION, SECOND_ACTIVE_OPERATION]),
+      client,
+      getNextSequence: () => client.getNextEventSequence(),
+      onWriteFailure: () => undefined,
+      rushVersion: '5.178.1'
+    });
+  }
+
+  it("lists only the client's own operations that are not silent, and caps the processes at their count", async () => {
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const sink: PhasedRequestEventSink = createAnnouncingSink(client);
+
+    sink.onIterationStarting(
+      [
+        createRecord(OTHER_OPERATION, OperationStatus.Ready),
+        createRecord(ACTIVE_OPERATION, OperationStatus.Ready),
+        { ...createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.Ready), silent: true }
+      ] as IOperationExecutionResult[],
+      8,
+      false
+    );
+
+    expect(await getActivityTextsAsync(client, sink)).toEqual([
+      'Selected 1 operation:',
+      `  ${ACTIVE_OPERATION}`,
+      '',
+      'Executing a maximum of 1 simultaneous processes...'
+    ]);
+  });
+
+  it('caps the processes at the parallelism and omits the listing in quiet mode', async () => {
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const sink: PhasedRequestEventSink = createAnnouncingSink(client);
+
+    sink.onIterationStarting(
+      [
+        createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.Ready),
+        createRecord(OTHER_OPERATION, OperationStatus.Ready),
+        createRecord(ACTIVE_OPERATION, OperationStatus.Ready)
+      ],
+      1,
+      true
+    );
+
+    expect(await getActivityTextsAsync(client, sink)).toEqual([
+      'Executing a maximum of 1 simultaneous processes...'
+    ]);
+  });
+
+  it.each([false, true])(
+    'announces nothing when the client has nothing to run in the iteration (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+      const sink: PhasedRequestEventSink = createAnnouncingSink(client);
+
+      sink.onIterationStarting(
+        [
+          createRecord(OTHER_OPERATION, OperationStatus.Ready),
+          { ...createRecord(ACTIVE_OPERATION, OperationStatus.Ready), silent: true }
+        ] as IOperationExecutionResult[],
+        8,
+        quietMode
+      );
+
+      expect(await getActivityTextsAsync(client, sink)).toEqual([]);
+    }
+  );
+});

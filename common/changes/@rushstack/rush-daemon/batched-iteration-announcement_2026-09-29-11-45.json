@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "When one iteration serves a batch of requests, each client's `Selected N operations:` list and `Executing a maximum of N simultaneous processes...` line count only that client's own operations, and a client with nothing to run in the iteration prints neither line, as when its request runs alone.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}
