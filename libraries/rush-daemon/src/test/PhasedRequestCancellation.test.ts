@@ -363,13 +363,80 @@ describe('phased request client cancellation', () => {
     expect((result as IDaemonPhasedRequestResult).operationResults).toEqual([
       expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success })
     ]);
-    expect(abortSpy).toHaveBeenCalledWith({ terminateRunning: true });
+    // The abandoned operations had not started, so they finished as skipped and nothing had to be aborted.
+    expect(abortSpy).not.toHaveBeenCalledWith({ terminateRunning: true });
     expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(0);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(0);
     // The remaining client's result stays warm; the abandoned operations are not retained.
     expect(new Set([...fixture.graph.resultByOperation.keys()].map(({ name }) => name))).toEqual(
       new Set([OPERATION_A])
     );
+  });
+
+  it('never starts work that only a cancelled client needed while the remaining client still needs its own', async () => {
+    const { hanging: shared, actionAsync: sharedActionAsync } = createHangingOperation();
+    const { hanging: orphan, actionAsync: orphanActionAsync } = createHangingOperation();
+    // The cancelled client needs A, C and D. The remaining client needs A and B. Once A finishes, the queue hands C to
+    // the only slot before B: C comes later in the graph's order and, through D, has the longer critical path.
+    const fixture: ITestRoutingFixture = createRoutingFixture(
+      new Map([
+        [OPERATION_A, new TestOperationRunner(OPERATION_A, OperationStatus.Success, sharedActionAsync)],
+        [OPERATION_B, new TestOperationRunner(OPERATION_B)],
+        [OPERATION_C, new TestOperationRunner(OPERATION_C, OperationStatus.Success, orphanActionAsync)],
+        [OPERATION_D, new TestOperationRunner(OPERATION_D)]
+      ]),
+      [
+        [OPERATION_B, OPERATION_A],
+        [OPERATION_C, OPERATION_A],
+        [OPERATION_D, OPERATION_C]
+      ],
+      { supportsTerminateRunning: true }
+    );
+    const abortSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'abortCurrentIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    const cancelled: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('cancelled', OPERATION_D),
+      cancelledClient
+    );
+    const continuing: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('continuing', OPERATION_B),
+      new TestPhasedRequestClient('two')
+    );
+    await shared.started;
+
+    cancelledClient.abortController.abort();
+    expect(await cancelled).toMatchObject({ aborted: true, outcome: 'aborted' });
+
+    const releasedAt: number = Date.now();
+    shared.release();
+    const result: IDaemonPhasedRequestResult | typeof TIMED_OUT = await raceWithTimeoutAsync(
+      continuing,
+      PROMPT_CANCELLATION_MS
+    );
+    // Lets an iteration that started the abandoned work finish, so a failure below is reported cleanly.
+    orphan.release();
+
+    expect(result).toMatchObject({ aborted: false, exitCode: 0, outcome: 'success' });
+    expect(Date.now() - releasedAt).toBeLessThan(PROMPT_CANCELLATION_MS);
+    expect((result as IDaemonPhasedRequestResult).operationResults).toEqual([
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success }),
+      expect.objectContaining({ operationId: OPERATION_B, status: OperationStatus.Success })
+    ]);
+    expect(
+      [OPERATION_A, OPERATION_B, OPERATION_C, OPERATION_D].map((id: string) => fixture.runners.get(id)?.runCount)
+    ).toEqual([1, 1, 0, 0]);
+    expect(abortSpy).not.toHaveBeenCalledWith({ terminateRunning: true });
+    // The skipped operations are not retained, so the next request that selects them runs them.
+    expect(new Set([...fixture.graph.resultByOperation.keys()].map(({ name }) => name))).toEqual(
+      new Set([OPERATION_A, OPERATION_B])
+    );
+    const next: IDaemonPhasedRequestResult = await router.executeAsync(
+      createRequest('next', OPERATION_D),
+      new TestPhasedRequestClient('three')
+    );
+    expect(next).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect([OPERATION_C, OPERATION_D].map((id: string) => fixture.runners.get(id)?.runCount)).toEqual([1, 1]);
   });
 
   it('terminates running work that only a cancelled client needed once the remaining client has its operations', async () => {

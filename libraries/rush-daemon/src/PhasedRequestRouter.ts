@@ -716,10 +716,11 @@ class PhasedRequestBatchCoordinator {
    * Narrows the running iteration to the remaining participants' selections after a participant left it.
    *
    * @remarks
-   * The departed client's selection stays merged into the iteration, so without this the last remaining
-   * participant would wait for, and queued requests would queue behind, work that only the departed client needed.
-   * Once every operation a remaining participant needs has finished, the iteration is aborted instead: operations
-   * that have not started are never started, and running ones are terminated, as when every client cancels.
+   * The departed client's selection stays merged into the iteration, so without this the remaining participants
+   * would wait for, and queued requests would queue behind, work that only the departed client needed. Operations
+   * that no remaining participant needs and that have not been handed to an execution slot finish as skipped
+   * instead of starting. Once every operation a remaining participant needs has finished, the iteration is aborted
+   * if unneeded work is still running, which terminates that work, as when every client cancels.
    */
   #restrictBatchDemand(): void {
     this.#batchDemand?.restrictTo(
@@ -774,7 +775,8 @@ class PhasedRequestBatchCoordinator {
    * drains them before writing the result. The iteration, graph lease and execution lease stay owned by the batch.
    * The last participant that needs the iteration keeps the ordinary contract: its result follows iteration end
    * and execution lease release, so single-client requests and warm-state retention are unchanged. When other
-   * participants left the batch, `#restrictBatchDemand` makes that end prompt by aborting work only they needed.
+   * participants left the batch, `#restrictBatchDemand` makes that end prompt by skipping or aborting work only they
+   * needed.
    */
   #finishSettledEntry(entry: IBatchEntry): void {
     if (

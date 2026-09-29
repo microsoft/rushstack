@@ -7,7 +7,7 @@ import { OperationStatus } from '@microsoft/rush-lib';
 import { PhasedIterationDemand } from '../PhasedIterationDemand';
 
 interface ITestRecord {
-  readonly enabled: boolean;
+  enabled: boolean;
   readonly operation: Operation;
   status: OperationStatus;
 }
@@ -52,6 +52,7 @@ describe(PhasedIterationDemand.name, () => {
 
     expect(abandonedCount()).toBe(0);
     expect(demand.abandoned).toBe(false);
+    expect(other.enabled).toBe(true);
   });
 
   it('reports abandonment once, when the needed work finishes before enabled unneeded work', () => {
@@ -60,10 +61,11 @@ describe(PhasedIterationDemand.name, () => {
     const running: ITestRecord = createRecord('running');
     const waiting: ITestRecord = createRecord('waiting');
     schedule(needed, running, waiting);
-    demand.restrictTo([needed.operation]);
     setStatus(running, OperationStatus.Executing);
+    demand.restrictTo([needed.operation]);
     setStatus(needed, OperationStatus.Executing);
     expect(abandonedCount()).toBe(0);
+    expect([running.enabled, waiting.enabled]).toEqual([true, false]);
 
     setStatus(needed, OperationStatus.Success);
     expect(abandonedCount()).toBe(1);
@@ -79,6 +81,7 @@ describe(PhasedIterationDemand.name, () => {
     const needed: ITestRecord = createRecord('needed');
     const other: ITestRecord = createRecord('other');
     schedule(needed, other);
+    setStatus(other, OperationStatus.Executing);
     demand.restrictTo([needed.operation]);
 
     setStatus(other, OperationStatus.Success);
@@ -102,7 +105,9 @@ describe(PhasedIterationDemand.name, () => {
     const { abandonedCount, demand, schedule, setStatus } = createDemand();
     const first: ITestRecord = createRecord('first');
     const second: ITestRecord = createRecord('second');
-    schedule(first, second, createRecord('unneeded'));
+    const unneeded: ITestRecord = createRecord('unneeded');
+    schedule(first, second, unneeded);
+    setStatus(unneeded, OperationStatus.Executing);
     demand.restrictTo([first.operation, second.operation]);
 
     setStatus(first, OperationStatus.Success);
@@ -119,8 +124,10 @@ describe(PhasedIterationDemand.name, () => {
   it('reports abandonment at once when it is armed after the needed work finished', () => {
     const { abandonedCount, demand, schedule, setStatus } = createDemand();
     const needed: ITestRecord = createRecord('needed');
-    schedule(needed, createRecord('unneeded'));
+    const unneeded: ITestRecord = createRecord('unneeded');
+    schedule(needed, unneeded);
     setStatus(needed, OperationStatus.FromCache);
+    setStatus(unneeded, OperationStatus.Executing);
     expect(abandonedCount()).toBe(0);
 
     demand.restrictTo([needed.operation]);
@@ -132,27 +139,85 @@ describe(PhasedIterationDemand.name, () => {
     const { abandonedCount, demand, schedule, setStatus } = createDemand();
     const small: ITestRecord = createRecord('small');
     const large: ITestRecord = createRecord('large');
-    schedule(small, large, createRecord('departed'));
+    const departed: ITestRecord = createRecord('departed');
+    schedule(small, large, departed);
+    setStatus(departed, OperationStatus.Executing);
     demand.restrictTo([small.operation, large.operation]);
     setStatus(small, OperationStatus.Success);
     expect(abandonedCount()).toBe(0);
+    expect(large.enabled).toBe(true);
 
     demand.restrictTo([small.operation]);
 
+    expect(large.enabled).toBe(false);
     expect(abandonedCount()).toBe(1);
   });
 
-  it('applies an arming that precedes scheduling, and treats records that are already terminal as finished', () => {
+  it('applies an arming that precedes scheduling, and withholds the unneeded work when it is scheduled', () => {
+    const { abandonedCount, demand, schedule, setStatus } = createDemand();
+    const needed: ITestRecord = createRecord('needed');
+    const unneeded: ITestRecord = createRecord('unneeded');
+    unneeded.status = OperationStatus.Ready;
+    demand.restrictTo([needed.operation]);
+
+    schedule(needed, unneeded);
+
+    expect([needed.enabled, unneeded.enabled]).toEqual([true, false]);
+    setStatus(needed, OperationStatus.Success);
+    expect(abandonedCount()).toBe(0);
+  });
+
+  it('treats records that are already terminal when the iteration is scheduled as finished', () => {
     const { abandonedCount, demand, schedule, setStatus } = createDemand();
     const needed: ITestRecord = createRecord('needed');
     const alreadyFinished: ITestRecord = createRecord('already-finished');
     alreadyFinished.status = OperationStatus.Success;
+    const running: ITestRecord = createRecord('running');
+    schedule(needed, alreadyFinished, running);
+    setStatus(running, OperationStatus.Executing);
     demand.restrictTo([needed.operation, alreadyFinished.operation]);
-    schedule(needed, alreadyFinished, createRecord('unneeded'));
     expect(abandonedCount()).toBe(0);
 
     setStatus(needed, OperationStatus.Success);
 
     expect(abandonedCount()).toBe(1);
+  });
+
+  it('withholds only the unneeded work that the graph has not handed to an execution slot', () => {
+    const { demand, schedule, setStatus } = createDemand();
+    const neededWaiting: ITestRecord = createRecord('needed-waiting');
+    const neededReady: ITestRecord = createRecord('needed-ready');
+    const waiting: ITestRecord = createRecord('waiting');
+    const ready: ITestRecord = createRecord('ready');
+    const queued: ITestRecord = createRecord('queued');
+    const executing: ITestRecord = createRecord('executing');
+    schedule(neededWaiting, neededReady, waiting, ready, queued, executing);
+    setStatus(neededReady, OperationStatus.Ready);
+    setStatus(ready, OperationStatus.Ready);
+    setStatus(queued, OperationStatus.Queued);
+    setStatus(executing, OperationStatus.Executing);
+
+    demand.restrictTo([neededWaiting.operation, neededReady.operation]);
+
+    expect(
+      [neededWaiting, neededReady, waiting, ready, queued, executing].map((record) => record.enabled)
+    ).toEqual([true, true, false, false, true, true]);
+  });
+
+  it('does not report abandonment when all unneeded work was withheld', () => {
+    const { abandonedCount, demand, schedule, setStatus } = createDemand();
+    const needed: ITestRecord = createRecord('needed');
+    const unneeded: ITestRecord = createRecord('unneeded');
+    schedule(needed, unneeded);
+    setStatus(needed, OperationStatus.Executing);
+    demand.restrictTo([needed.operation]);
+
+    setStatus(needed, OperationStatus.Success);
+
+    expect(unneeded.enabled).toBe(false);
+    expect(abandonedCount()).toBe(0);
+    // The withheld record finishes as skipped when the graph dispatches it.
+    setStatus(unneeded, OperationStatus.Skipped);
+    expect(abandonedCount()).toBe(0);
   });
 });
