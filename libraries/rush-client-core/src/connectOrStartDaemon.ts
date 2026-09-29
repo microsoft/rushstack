@@ -388,7 +388,7 @@ async function resolveReservationBeforeShutdownAsync(
   if (!lock) {
     throw new DaemonClientError(
       'startupFailed',
-      `Another client is starting the daemon for ${paths.lockfilePath}; shutdown was not sent.`
+      `Another client is starting or resetting the daemon for ${paths.lockfilePath}; shutdown was not sent.`
     );
   }
   try {

@@ -6,7 +6,14 @@ import * as net from 'node:net';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import type { IDaemonLockfile, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import {
+  DaemonTransportError,
+  DaemonTransportErrorCode,
+  reclaimStaleDaemonAsync,
+  type IDaemonLockfile,
+  type IDaemonPaths,
+  type IDaemonReclaimOptions
+} from '@rushstack/rush-daemon-transport';
 
 import { DaemonClientError } from './DaemonClientError';
 import { getDaemonStartupFilePath } from './DaemonStartup';
@@ -29,8 +36,11 @@ type OwnershipState =
   | { readonly kind: 'owned'; readonly raw: string; readonly owner: DaemonOwnership };
 
 /** Options for {@link resetDaemonArtifactsAsync}. @beta */
-export interface IDaemonArtifactResetOptions {
-  /** How long to keep re-checking a bound listener, live owner, or held start mutex. Defaults to 0. */
+export interface IDaemonArtifactResetOptions extends IDaemonReclaimOptions {
+  /**
+   * How long to keep re-checking a bound listener, a live owner, a held start mutex, or another process that
+   * reclaims the files of an owner that exited. Defaults to 0.
+   */
   readonly waitTimeoutMs?: number;
 }
 
@@ -123,11 +133,15 @@ export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promi
 /**
  * Removes this workspace's leftover daemon files (ownership record, socket, and startup reservation)
  * after verifying that no listener is bound and that the recorded owner, if any, is gone.
- * @remarks Never kills a process. Fails when another client holds the start mutex, a listener is bound,
- * or the recorded owner is alive; with `waitTimeoutMs`, those conditions are re-checked until the deadline
- * (for example, while a daemon that just acknowledged shutdown finishes its cleanup). A reset also clears
- * the report of a daemon that a client reclaimed after it exited without shutting down
- * ({@link findReclaimedDaemonPid}).
+ * @remarks When the recorded PID no longer exists, the owner exited without shutting down and may have left
+ * operations running, which only its records name. So the reset first stops them, as the next daemon start
+ * would (`reclaimStaleDaemonAsync`), and reports each set of process groups that it stops to
+ * `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. When they cannot be
+ * stopped, it throws and removes nothing. Otherwise it never signals a process. Fails when another client holds
+ * the start mutex, a listener is bound, the recorded owner is alive, or another process reclaims the files of
+ * the owner that exited; with `waitTimeoutMs`, those conditions are re-checked until the deadline (for example,
+ * while a daemon that just acknowledged shutdown finishes its cleanup). A reset also clears the report of a
+ * daemon that a client reclaimed after it exited without shutting down ({@link findReclaimedDaemonPid}).
  * @beta
  */
 export async function resetDaemonArtifactsAsync(
@@ -136,7 +150,10 @@ export async function resetDaemonArtifactsAsync(
 ): Promise<IDaemonArtifactResetResult> {
   const deadline: number = Date.now() + (options?.waitTimeoutMs ?? 0);
   while (true) {
-    const outcome: IDaemonArtifactResetResult | DaemonClientError = await tryResetDaemonArtifactsAsync(paths);
+    const outcome: IDaemonArtifactResetResult | DaemonClientError = await tryResetDaemonArtifactsAsync(
+      paths,
+      options
+    );
     if (!(outcome instanceof DaemonClientError)) return outcome;
     if (Date.now() >= deadline) throw outcome;
     await delayAsync(Math.min(RESET_RETRY_MS, Math.max(1, deadline - Date.now())));
@@ -145,14 +162,15 @@ export async function resetDaemonArtifactsAsync(
 
 /** Returns a (not thrown) error for conditions that may clear on their own. */
 async function tryResetDaemonArtifactsAsync(
-  paths: IDaemonPaths
+  paths: IDaemonPaths,
+  options: IDaemonReclaimOptions | undefined
 ): Promise<IDaemonArtifactResetResult | DaemonClientError> {
   if (!fs.existsSync(path.dirname(paths.lockfilePath))) return { removedPaths: [] };
   const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
   if (!lock) {
     return new DaemonClientError(
       'startupFailed',
-      `Another client is starting the daemon for ${paths.lockfilePath}; retry after it finishes.`
+      `Another client is starting or resetting the daemon for ${paths.lockfilePath}; retry after it finishes.`
     );
   }
   try {
@@ -169,20 +187,74 @@ async function tryResetDaemonArtifactsAsync(
         `PID ${state.owner.pid} still owns ${paths.lockfilePath}; it may be a daemon that is shutting down. Wait for it to exit (or stop that process yourself), then retry. No process was killed.`
       );
     }
+    // A reclaim removes the record and the socket itself, right after its own checks.
+    const reclaimed: ReadonlySet<string> | DaemonClientError | undefined =
+      state.kind === 'owned' && !isProcessAlive(state.owner.pid)
+        ? await reclaimExitedOwnerAsync(paths, state.owner.pid, options)
+        : undefined;
+    if (reclaimed instanceof DaemonClientError) return reclaimed;
     const removedPaths: string[] = [];
-    if (state.kind !== 'absent' && removeIfUnchanged(paths.lockfilePath, state.raw)) {
+    if (
+      reclaimed
+        ? reclaimed.has(paths.lockfilePath)
+        : state.kind !== 'absent' && removeIfUnchanged(paths.lockfilePath, state.raw)
+    ) {
       removedPaths.push(paths.lockfilePath);
     }
-    const others: string[] = [getDaemonStartupFilePath(paths)];
-    if (process.platform !== 'win32') others.push(paths.socketPath);
-    for (const filePath of others) {
-      if (tryUnlink(filePath)) removedPaths.push(filePath);
+    const startupFilePath: string = getDaemonStartupFilePath(paths);
+    if (tryUnlink(startupFilePath)) removedPaths.push(startupFilePath);
+    if (
+      process.platform !== 'win32' &&
+      (reclaimed ? reclaimed.has(paths.socketPath) : tryUnlink(paths.socketPath))
+    ) {
+      removedPaths.push(paths.socketPath);
     }
     clearReclaimedDaemonReport(paths);
     return { removedPaths };
   } finally {
     await lock.releaseAsync();
   }
+}
+
+/**
+ * Stops the operations that an owner that exited left running, and removes its record and socket, as the next
+ * daemon start would. Returns the files that it removed, or a (not thrown) error while another process
+ * reclaims them. Removing the record without this would strand those operations: nothing else names them.
+ */
+async function reclaimExitedOwnerAsync(
+  paths: IDaemonPaths,
+  ownerPid: number,
+  options: IDaemonReclaimOptions | undefined
+): Promise<ReadonlySet<string> | DaemonClientError> {
+  const files: string[] =
+    process.platform === 'win32' ? [paths.lockfilePath] : [paths.lockfilePath, paths.socketPath];
+  const present: string[] = files.filter((filePath) => isPresent(filePath));
+  try {
+    await reclaimStaleDaemonAsync(paths, { onOrphansReaped: options?.onOrphansReaped });
+  } catch (error) {
+    // Another process holds the reclaim lock, or a daemon started since the checks above.
+    if (
+      error instanceof DaemonTransportError &&
+      error.code === DaemonTransportErrorCode.daemonAlreadyRunning
+    ) {
+      return new DaemonClientError(
+        'startupFailed',
+        `Another process is reclaiming the files of rushd (PID ${ownerPid}), which exited without shutting down, or a daemon is starting at ${paths.socketPath}; retry after it finishes.`,
+        { cause: error }
+      );
+    }
+    const reason: string = error instanceof Error ? error.message : String(error);
+    throw new DaemonClientError(
+      'startupFailed',
+      `rushd (PID ${ownerPid}) exited without shutting down, and stopping the operations that it left running failed, so no file was removed: ${reason}`,
+      { cause: error }
+    );
+  }
+  return new Set(present.filter((filePath) => !isPresent(filePath)));
+}
+
+function isPresent(filePath: string): boolean {
+  return fs.lstatSync(filePath, { throwIfNoEntry: false }) !== undefined;
 }
 
 /** Resolves true only when a connection attempt proves that nothing listens at the endpoint. */

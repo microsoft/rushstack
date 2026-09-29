@@ -362,8 +362,8 @@ ownership record and socket, as the next daemon start would, so a rerun, with or
 `--no-daemon`, does not race them.
 Rush run in-process, with `--no-daemon` or as a fallback, first does the same when the ownership
 record names a daemon that no longer runs, for example when the client that ran the command was
-killed along with the daemon. Each of these reclaims, and the one that `daemon start` or an automatic
-start does, prints one line that says what it stopped, for example:
+killed along with the daemon. Each of these reclaims, and the ones that `daemon start`, an automatic
+start and `daemon stop --force` do, prints one line that says what it stopped, for example:
 
 ```
 rush-client: Stopped the operations that the exited daemon (PID 4242) left running (process group 4242).
@@ -566,7 +566,17 @@ any remaining artifacts, such as an abandoned startup reservation, reporting the
 `state: "reset"` and the `removedPaths` (or `state: "notRunning"` if nothing was
 left behind). It holds the start mutex, proves that no listener is bound, and
 refuses (exit 1) while the recorded owner PID still exists and cannot be shown to
-be a reused PID. It never kills a process. Automatic startup already reclaims
+be a reused PID. When the recorded owner PID no longer exists, the daemon exited without shutting
+down and may have left operations running that only its records name, so the reset first stops them
+as the next daemon start would: SIGTERM, then SIGKILL 2 seconds later, to the daemon's own process
+group and to each operation process group that it recorded whose leader still has the recorded start
+time (or has exited, while every live member of the group is in the group's own session). It prints the
+line shown above for a lost connection and reports what it stopped in `orphansReaped` (`daemonPid`,
+`processGroupIds`, `outcome`). A recorded group that it cannot prove, such as a PID that a later
+process now has, is not signalled; its record is removed with the others. If the operations cannot be
+stopped, it exits with code 1 and removes nothing. While another process reclaims the same files it
+also exits with code 1, except that after a shutdown it re-checks for up to 15 seconds. Otherwise it
+never signals a process. Automatic startup already reclaims
 the common leftovers on its own (see below); this is the documented escape hatch
 that every fail-closed startup message points to. A reset also appends a line to the launcher log
 that clears the report of a daemon that a client reclaimed, so status no longer names it.

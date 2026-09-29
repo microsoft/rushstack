@@ -692,7 +692,9 @@ describe('detached daemon startup', () => {
     expect(lock).toBeDefined();
     const running: DaemonClient = await DaemonClient.connectAsync({ socketPath: paths.socketPath });
     try {
-      await expect(requestDaemonShutdownAsync(running, paths, 300)).rejects.toThrow('shutdown was not sent');
+      await expect(requestDaemonShutdownAsync(running, paths, 300)).rejects.toThrow(
+        `Another client is starting or resetting the daemon for ${paths.lockfilePath}; shutdown was not sent.`
+      );
     } finally {
       await running.closeAsync();
       await lock!.releaseAsync();

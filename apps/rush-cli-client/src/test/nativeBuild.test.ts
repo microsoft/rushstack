@@ -47,6 +47,27 @@ async function startCrashedDaemonAsync(
   return { daemonPid: daemon.pid!, operationPid: Number(chunk.toString().trim()) };
 }
 
+/**
+ * Starts a stand-in daemon that exits without releasing its files once it acknowledges a shutdown, and waits until
+ * it listens and its operation runs.
+ */
+async function startShutdownExitDaemonAsync(
+  paths: IDaemonPaths
+): Promise<{ daemon: ChildProcess; operationPid: number }> {
+  const daemon: ChildProcess = spawn(
+    process.execPath,
+    [path.join(__dirname, 'ShutdownExitDaemonTestProcess.js'), JSON.stringify(paths), OPERATION_SCRIPT],
+    { detached: true, stdio: ['ignore', 'pipe', 'inherit'] }
+  );
+  const listening: [Buffer] | undefined = await Promise.race([
+    once(daemon.stdout!, 'data') as Promise<[Buffer]>,
+    once(daemon, 'exit').then(() => undefined)
+  ]);
+  daemon.stdout!.destroy();
+  if (!listening) throw new Error('The stand-in daemon exited before it listened.');
+  return { daemon, operationPid: Number(listening[0].toString().trim()) };
+}
+
 /** False once the operation process has exited, even before it is reaped: a zombie's command line is empty. */
 function isOperationRunning(pid: number): boolean {
   try {
@@ -513,6 +534,63 @@ describe('native build through the standalone client', () => {
           expectOneReclaimLine(started, daemonPid, 'stderr');
           expect(isOperationRunning(operationPid)).toBe(false);
         } finally {
+          if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
+        }
+      }),
+    30000
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'stops the operations that a crashed daemon left running when "daemon stop --force" removes its files',
+    () =>
+      runWithFixtureAsync(async ({ paths, invokeAsync }) => {
+        const { daemonPid, operationPid } = await startCrashedDaemonAsync(paths);
+        try {
+          const reset: IResult = await invokeAsync(['daemon', 'stop', '--force']);
+          expect(reset.code).toBe(0);
+          expectOneReclaimLine(reset, daemonPid, 'stderr');
+          expect(isOperationRunning(operationPid)).toBe(false);
+          expect(JSON.parse(reset.stdout)).toEqual({
+            state: 'reset',
+            socketPath: paths.socketPath,
+            removedPaths: [paths.lockfilePath],
+            orphansReaped: [{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]
+          });
+          // Nothing that the record led to is left, so a second reset stops and removes nothing.
+          const again: IResult = await invokeAsync(['daemon', 'stop', '--force']);
+          expect(again).toMatchObject({ code: 0, stderr: '' });
+          expect(JSON.parse(again.stdout)).toEqual({
+            state: 'notRunning',
+            socketPath: paths.socketPath,
+            removedPaths: []
+          });
+        } finally {
+          if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
+        }
+      }),
+    30000
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'stops the operations that a daemon left running when it exits after it acknowledges "daemon stop --force"',
+    () =>
+      runWithFixtureAsync(async ({ paths, invokeAsync }) => {
+        const { daemon, operationPid } = await startShutdownExitDaemonAsync(paths);
+        const daemonPid: number = daemon.pid!;
+        try {
+          const stopped: IResult = await invokeAsync(['daemon', 'stop', '--force']);
+          expect(stopped.code).toBe(0);
+          expectOneReclaimLine(stopped, daemonPid, 'stderr');
+          expect(isOperationRunning(operationPid)).toBe(false);
+          expect(JSON.parse(stopped.stdout)).toEqual({
+            state: 'shutdownAccepted',
+            socketPath: paths.socketPath,
+            removedPaths: [paths.lockfilePath, paths.socketPath],
+            orphansReaped: [{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]
+          });
+        } finally {
+          // Node signals the stand-in only until it is reaped, so never a process that reused its PID.
+          daemon.kill('SIGKILL');
           if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
         }
       }),

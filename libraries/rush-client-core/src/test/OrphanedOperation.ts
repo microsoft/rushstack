@@ -4,6 +4,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import * as fs from 'node:fs';
+import * as path from 'node:path';
 import type { Readable } from 'node:stream';
 
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
@@ -56,6 +57,52 @@ export async function startOrphanedOperationAsync(
   await once(daemon, 'exit');
   if (!isRunning(operationPid)) throw new Error(`The orphaned operation ${operationPid} is not running.`);
   return { daemonPid: daemon.pid!, operationPid };
+}
+
+/**
+ * Starts an operation process that leads its own process group and session, as Rush starts an operation. Its PID
+ * is added to `operationPids` first, so that {@link stopOperationIfRunning} can clean it up. POSIX only.
+ */
+export async function startDetachedOperationAsync(operationPids: number[]): Promise<number> {
+  const operation: ChildProcess = spawn(process.execPath, ['-e', OPERATION_SCRIPT], {
+    detached: true,
+    stdio: 'ignore'
+  });
+  await once(operation, 'spawn');
+  operationPids.push(operation.pid!);
+  return operation.pid!;
+}
+
+/** Starts a process and waits until it has exited and was reaped, so that its PID names no process. */
+export async function startExitedProcessAsync(): Promise<number> {
+  const child: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
+  await once(child, 'exit');
+  return child.pid!;
+}
+
+// Fields after the ")" that ends the command name in /proc/<pid>/stat; starttime is field 22 of the record.
+const START_TIME_INDEX: number = 20;
+
+/** The start time that a daemon records for an operation process group (clock ticks after boot). Linux only. */
+export function readProcessStartTime(pid: number): string {
+  const stat: string = fs.readFileSync(`/proc/${pid}/stat`, 'utf8');
+  // The command name may contain spaces and ")".
+  return stat.slice(stat.lastIndexOf(')')).split(' ')[START_TIME_INDEX];
+}
+
+/**
+ * Records the operation process group `groupId` of daemon `daemonPid` as the daemon does: an empty file named
+ * `<groupId>-<startTime>` in the folder `<lockfile>.groups-<daemonPid>`.
+ */
+export function recordOperationGroup(
+  lockfilePath: string,
+  daemonPid: number,
+  groupId: number,
+  startTime: string
+): void {
+  const folder: string = `${lockfilePath}.groups-${daemonPid}`;
+  fs.mkdirSync(folder, { recursive: true, mode: 0o700 });
+  fs.writeFileSync(path.join(folder, `${groupId}-${startTime}`), '', { mode: 0o600 });
 }
 
 /** Writes the ownership record that a daemon with this PID would write. */

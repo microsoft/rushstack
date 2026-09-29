@@ -124,7 +124,7 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
 }
 
 // @beta
-export interface IDaemonArtifactResetOptions {
+export interface IDaemonArtifactResetOptions extends IDaemonReclaimOptions {
     readonly waitTimeoutMs?: number;
 }
 

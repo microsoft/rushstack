@@ -23,6 +23,7 @@ import {
   isDaemonProcessAlive,
   readDaemonLockfile,
   type IDaemonLockfile,
+  type IDaemonOrphanReap,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 import type { IDaemonPongMessage, IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
@@ -80,7 +81,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       options.environment,
       mayStart
     )),
-    // A start reclaims a daemon that exited uncleanly, and says what it stopped.
+    // A start, or a forced stop, reclaims a daemon that exited uncleanly, and says what it stopped.
     onOrphansReaped: createOrphanReapNoticeHandler({ rushx: false, agentRenderer: undefined, writeStderr })
   };
   if (command === 'logs') {
@@ -123,14 +124,12 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       }
       return;
     }
-    const { removedPaths } =
-      options.argv[1] === '--force'
-        ? await resetDaemonArtifactsAsync(connectionOptions.paths)
-        : { removedPaths: [] };
+    const reset: IForceResetResult | undefined =
+      options.argv[1] === '--force' ? await forceResetAsync(connectionOptions) : undefined;
     await writeStatusAsync({
-      state: removedPaths.length > 0 ? 'reset' : 'notRunning',
+      state: reset && reset.removedPaths.length > 0 ? 'reset' : 'notRunning',
       socketPath: connectionOptions.paths.socketPath,
-      ...(options.argv[1] === '--force' ? { removedPaths } : {}),
+      ...reset,
       ...getStartupReservationStatus(connectionOptions.paths)
     });
     return;
@@ -156,14 +155,12 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       if (options.argv[1] === '--force') {
         // Wait for the acknowledged daemon to release its listener and record, then clear leftovers
         // such as an abandoned startup reservation in the same invocation.
-        const { removedPaths } = await resetDaemonArtifactsAsync(connectionOptions.paths, {
-          waitTimeoutMs: FORCE_STOP_WAIT_MS
-        });
+        const reset: IForceResetResult = await forceResetAsync(connectionOptions, FORCE_STOP_WAIT_MS);
         await writeStatusAsync({
           state: 'shutdownAccepted',
           socketPath: connectionOptions.paths.socketPath,
           ...cancelled,
-          removedPaths
+          ...reset
         });
         return;
       }
@@ -365,6 +362,28 @@ async function restartDaemonAsync(
 
 function writeStatusAsync(status: object): Promise<void> {
   return writeStreamAsync(process.stdout, Buffer.from(`${JSON.stringify(status)}\n`));
+}
+
+interface IForceResetResult {
+  readonly removedPaths: ReadonlyArray<string>;
+  /** Present when the reset first stopped operations that a daemon that exited had left running. */
+  readonly orphansReaped?: ReadonlyArray<IDaemonOrphanReap>;
+}
+
+/** Removes the leftover daemon files; the operations that it stops first are also noted on stderr. */
+async function forceResetAsync(
+  connectionOptions: IConnectOrStartDaemonOptions,
+  waitTimeoutMs?: number
+): Promise<IForceResetResult> {
+  const orphansReaped: IDaemonOrphanReap[] = [];
+  const { removedPaths } = await resetDaemonArtifactsAsync(connectionOptions.paths, {
+    waitTimeoutMs,
+    onOrphansReaped: (reap: IDaemonOrphanReap): void => {
+      orphansReaped.push(reap);
+      connectionOptions.onOrphansReaped?.(reap);
+    }
+  });
+  return orphansReaped.length > 0 ? { removedPaths, orphansReaped } : { removedPaths };
 }
 
 /** A daemon whose installation was removed or replaced still answers, but restarts on its next request. */
