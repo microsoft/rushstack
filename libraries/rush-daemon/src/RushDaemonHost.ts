@@ -4,6 +4,7 @@
 import * as fs from 'node:fs';
 import { realpath } from 'node:fs/promises';
 
+import type { IOperationGraph } from '@microsoft/rush-lib';
 import { LockFile } from '@rushstack/node-core-library';
 import { connectOrStartDaemonAsync, type DaemonClient } from '@rushstack/rush-client-core';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
@@ -17,6 +18,7 @@ import type { DaemonFileChange, DaemonFrameConnection, IDaemonPaths } from '@rus
 
 import { DaemonControlSession } from './DaemonControlSession';
 import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
+import { DaemonIdleGarbageCollector, type IDaemonIdleGarbageCollection } from './DaemonIdleGarbageCollector';
 import { DaemonIdleTimer } from './DaemonIdleTimer';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
@@ -25,11 +27,13 @@ import { DaemonShutdownDeadline } from './DaemonShutdownDeadline';
 import { DaemonShutdownDeadlineError, type DaemonShutdownStage } from './DaemonShutdownDeadlineError';
 import { DaemonShutdownError, type DaemonShutdownInitiator } from './DaemonShutdownError';
 import { DaemonSocketWatch } from './DaemonSocketWatch';
+import { getReducingGarbageCollection } from './ReducingGarbageCollection';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
 import { getWorkspaceStatus } from './WorkspaceStatus';
 import { WorkspaceRequestLifecycle } from './WorkspaceRequestLifecycle';
+import { isGraphBusy } from './WorkspaceWarmSet';
 import type {
   GetWorkspaceSuccessorLaunchAsync,
   IWorkspaceProcessRestartPlan,
@@ -50,6 +54,15 @@ export interface IRushDaemonHostOptions {
   readonly daemonVersion: string;
   /** Shuts down after this many seconds without pending requests. Disabled when omitted. */
   readonly idleTimeoutSeconds?: number;
+  /**
+   * After a request, once no request has been pending for this many milliseconds and the operation graph is idle,
+   * runs one full garbage collection that returns the freed heap pages to the operating system, and logs what it
+   * returned through {@link IRushDaemonHostOptions.onLog}. It runs again only after another request. Without it, the
+   * process keeps the resident memory of its busiest recent request until V8 finds it idle by itself, which after
+   * some requests doesn't happen. Disabled when omitted, except that {@link serveRushDaemonAsync} defaults it for a
+   * daemon that owns its process.
+   */
+  readonly idleGarbageCollectionDelayMs?: number;
   /**
    * How long {@link RushDaemonHost.closeAsync} waits for shutdown cleanup before it rejects with
    * {@link DaemonShutdownDeadlineError}, so that an await that ignores cancellation cannot keep the daemon from
@@ -99,6 +112,7 @@ export interface IRushDaemonHostOptions {
 export class RushDaemonHost {
   readonly #listener: DaemonFrameListener;
   readonly #idleTimer: DaemonIdleTimer;
+  readonly #idleGarbageCollector: DaemonIdleGarbageCollector | undefined;
   #socketWatch: DaemonSocketWatch | undefined;
   readonly #sessions: Set<DaemonControlSession>;
   readonly #workspaceSessionProvider: WorkspaceSessionProvider;
@@ -136,6 +150,7 @@ export class RushDaemonHost {
     requestDispatcher: DaemonRequestDispatcher,
     workspaceSessionProvider: WorkspaceSessionProvider,
     idleTimer: DaemonIdleTimer,
+    idleGarbageCollector: DaemonIdleGarbageCollector | undefined,
     options: IRushDaemonHostOptions,
     startedAt: string,
     readWorkspaceStatus: () => IDaemonWorkspaceStatus
@@ -151,6 +166,7 @@ export class RushDaemonHost {
     this.#workspaceSessionProvider = workspaceSessionProvider;
     this.#readWorkspaceStatus = readWorkspaceStatus;
     this.#idleTimer = idleTimer;
+    this.#idleGarbageCollector = idleGarbageCollector;
     this.#options = options;
     this.#startedAt = startedAt;
     this.#shutdownDeadline = new DaemonShutdownDeadline({
@@ -189,6 +205,10 @@ export class RushDaemonHost {
         repoRoot: canonicalRepoRoot,
         rushVersion: options.rushVersion
       }
+    );
+    const idleGarbageCollector: DaemonIdleGarbageCollector | undefined = createIdleGarbageCollector(
+      options,
+      workspaceSessionProvider
     );
     const startedAtMs: number = Date.now();
     const workspaceSession: IWorkspaceSession = await workspaceSessionProvider.getSessionAsync();
@@ -237,7 +257,14 @@ export class RushDaemonHost {
               }
             },
             onError: (error: Error) => options.onError?.(error),
-            onRequestStarted: () => idleTimer.acquire(),
+            onRequestStarted: () => {
+              const releaseIdleTimer: () => void = idleTimer.acquire();
+              const releaseIdleGarbageCollector: (() => void) | undefined = idleGarbageCollector?.acquire();
+              return () => {
+                releaseIdleTimer();
+                releaseIdleGarbageCollector?.();
+              };
+            },
             onShutdownRequested: () => requestShutdown('controlClient'),
             getActiveRequestCount: () => {
               let count: number = 0;
@@ -279,6 +306,7 @@ export class RushDaemonHost {
       requestDispatcher,
       workspaceSessionProvider,
       idleTimer,
+      idleGarbageCollector,
       options,
       new Date(startedAtMs).toISOString(),
       readWorkspaceStatus
@@ -421,6 +449,7 @@ export class RushDaemonHost {
   async #closeOnceAsync(reason: DaemonShutdownError | undefined): Promise<void> {
     this.#logShutdown(reason);
     this.#idleTimer[Symbol.dispose]();
+    this.#idleGarbageCollector?.[Symbol.dispose]();
     this.#socketWatch?.[Symbol.dispose]();
     this.#lifecycle.closing = true;
     const errors: unknown[] = [];
@@ -510,4 +539,36 @@ function describeShutdown(
     default:
       return 'the daemon host was closed';
   }
+}
+
+const BYTES_PER_MB: number = 1024 * 1024;
+
+function createIdleGarbageCollector(
+  options: IRushDaemonHostOptions,
+  workspaceSessionProvider: WorkspaceSessionProvider
+): DaemonIdleGarbageCollector | undefined {
+  const { idleGarbageCollectionDelayMs: delayMs, onLog } = options;
+  if (delayMs === undefined) return undefined;
+  let collect: (() => void) | undefined;
+  return new DaemonIdleGarbageCollector({
+    delayMs,
+    collect: () => (collect ??= getReducingGarbageCollection())(),
+    isEngineBusy: () => {
+      const graph: IOperationGraph | undefined = workspaceSessionProvider.currentSession?.operationGraph;
+      return graph !== undefined && isGraphBusy(graph);
+    },
+    onCollected: (collection: IDaemonIdleGarbageCollection) =>
+      onLog?.(formatIdleGarbageCollection(collection)),
+    onError: (error: Error) =>
+      onLog?.(`rushd: idle garbage collection failed and is now off: ${error.message}`)
+  });
+}
+
+function formatIdleGarbageCollection(collection: IDaemonIdleGarbageCollection): string {
+  const toMB = (bytes: number): number => Math.round(bytes / BYTES_PER_MB);
+  return (
+    `rushd: idle garbage collection: resident memory ${toMB(collection.residentBytesBefore)} MB -> ` +
+    `${toMB(collection.residentBytesAfter)} MB, heap ${toMB(collection.heapUsedBytesBefore)} MB -> ` +
+    `${toMB(collection.heapUsedBytesAfter)} MB, paused ${Math.round(collection.durationMs)} ms`
+  );
 }

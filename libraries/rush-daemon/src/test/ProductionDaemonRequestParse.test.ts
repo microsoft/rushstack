@@ -48,6 +48,24 @@ async function checkIdentityAsync(
   await resolver.getCommandParameterIdentityAsync(createOptions(session));
 }
 
+/**
+ * Returns V8's garbage collection function. Unless the process already exposes `gc`, `--expose-gc` is turned off
+ * again once one context has it, because every context that is created while it is on gets a `gc` global: that
+ * includes the one that jest creates for the next test file in this worker.
+ */
+function getGarbageCollection(): () => void {
+  const exposed: unknown = (globalThis as { gc?: unknown }).gc;
+  if (typeof exposed === 'function') {
+    return exposed as () => void;
+  }
+  v8.setFlagsFromString('--expose-gc');
+  try {
+    return vm.runInNewContext('gc');
+  } finally {
+    v8.setFlagsFromString('--no-expose-gc');
+  }
+}
+
 /** The workspace lifecycle resolves a request with a copy of the envelope of its identity check. */
 function dispatched(options: IResolveDaemonRequestOptions): IResolveDaemonRequestOptions {
   return { ...options, envelope: { ...options.envelope, admission: { waitTimeoutMs: 1000 } } };
@@ -181,8 +199,7 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
   });
 
   it('keeps the parse of an identity check only as long as its request', async () => {
-    v8.setFlagsFromString('--expose-gc');
-    const collectGarbage: () => void = vm.runInNewContext('gc');
+    const collectGarbage: () => void = getGarbageCollection();
     const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();
     await checkIdentityAsync(resolver, createSession());
     parse.mockClear();

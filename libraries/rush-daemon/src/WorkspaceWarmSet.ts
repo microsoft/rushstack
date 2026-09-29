@@ -563,7 +563,8 @@ function hasEnabledConsumer(operation: Operation): boolean {
   return false;
 }
 
-function isGraphBusy(graph: IOperationGraph): boolean {
+/** Whether the graph has an iteration scheduled or running, or is closing. */
+export function isGraphBusy(graph: IOperationGraph): boolean {
   return (
     graph.hasScheduledIteration ||
     graph.status === OperationStatus.Executing ||

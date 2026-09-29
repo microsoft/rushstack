@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Return the memory that a request freed to the operating system once the daemon has been idle for 10 seconds, instead of keeping the resident memory of its busiest recent request.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

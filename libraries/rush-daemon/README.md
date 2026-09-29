@@ -25,6 +25,14 @@ the existing unlimited lifetime; invalid, nonpositive, or overflowing timeouts a
 The host's `closed` promise signals completion of shutdown, including idle shutdown, and `closeAsync()`
 reports cleanup failures. `serveRushDaemonAsync()` returns after either idle shutdown or its shutdown signal.
 
+Hosts can also set `idleGarbageCollectionDelayMs`, which `serveRushDaemonAsync()` defaults to 10 seconds for a
+daemon that owns its process. After a request, once no request has been pending for that long and the operation
+graph has no iteration scheduled or running, the host runs one full garbage collection that returns the freed heap
+pages to the operating system. It logs the resident memory and heap before and after, and how long the collection
+paused the daemon. It runs again only after another request. Collections during a request free the heap but keep
+its pages pooled for reuse. V8 returns them by itself only when its memory reducer, which checks every 8 seconds,
+finds the process idle, and after some requests it never does.
+
 Whatever starts a shutdown (a signal, a management client, the idle timeout, a lost socket, a restart or
 `closeAsync()`), the host writes one line to `onLog` when it begins, with its process ID and the reason, for example
 `rushd (PID 2750564) shutting down: received SIGTERM`; later close calls write nothing. The standalone daemon

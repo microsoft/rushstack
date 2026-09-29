@@ -21,7 +21,8 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
   readonly onReady?: (host: RushDaemonHost) => void | Promise<void>;
   /**
    * Requests a clean shutdown. When omitted, the daemon owns its process: the first SIGINT or SIGTERM requests a
-   * clean shutdown, and {@link IRushDaemonHostOptions.shutdownDeadlineMs} defaults to 10 seconds. If the shutdown
+   * clean shutdown, {@link IRushDaemonHostOptions.shutdownDeadlineMs} defaults to 10 seconds and
+   * {@link IRushDaemonHostOptions.idleGarbageCollectionDelayMs} defaults to 10 seconds. If the shutdown
    * does not finish by then, or another signal arrives first, the daemon reports why, releases what it safely can
    * and exits the process with code 1. Once it stops, if something else keeps the process running for 2 seconds,
    * it writes its PID, when it stopped and the active resources that Node.js lists to the daemon log
@@ -36,6 +37,14 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
  * 5 seconds for which a closing connection waits for its requests.
  */
 export const DEFAULT_SHUTDOWN_DEADLINE_MS: number = 10000;
+
+/**
+ * How long a daemon that owns its process waits after a request, with no request pending and its operation graph
+ * idle, before it returns the heap pages that the request freed to the operating system. V8's memory reducer checks
+ * whether the process is idle every 8 seconds; after requests in a large workspace, it returned them only 12 to 17
+ * seconds after the request, or not at all.
+ */
+export const DEFAULT_IDLE_GARBAGE_COLLECTION_DELAY_MS: number = 10000;
 
 /**
  * How long a daemon that owns its process waits, after it stops serving, for the process to end by itself before it
@@ -70,7 +79,12 @@ export async function serveRushDaemonAsync(options: IRushDaemonServeOptions): Pr
   });
   try {
     await serveUntilClosedAsync(
-      { ...options, shutdownDeadlineMs: options.shutdownDeadlineMs ?? DEFAULT_SHUTDOWN_DEADLINE_MS },
+      {
+        ...options,
+        shutdownDeadlineMs: options.shutdownDeadlineMs ?? DEFAULT_SHUTDOWN_DEADLINE_MS,
+        idleGarbageCollectionDelayMs:
+          options.idleGarbageCollectionDelayMs ?? DEFAULT_IDLE_GARBAGE_COLLECTION_DELAY_MS
+      },
       signalRegistration,
       (startedHost: RushDaemonHost) => (host = startedHost)
     );

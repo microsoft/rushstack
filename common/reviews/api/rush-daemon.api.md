@@ -535,6 +535,7 @@ export interface IRushDaemonHostOptions {
     readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
     readonly daemonVersion: string;
     readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
+    readonly idleGarbageCollectionDelayMs?: number;
     readonly idleTimeoutSeconds?: number;
     readonly onError?: (error: Error) => void;
     readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
