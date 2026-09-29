@@ -724,7 +724,10 @@ describe(LockFile.name, () => {
         test.each<[string, string, number]>([
           ['5 hours and 45 minutes ahead of UTC', '20', (5 * 60 + 45) * 60 * 1000],
           ['12 hours behind UTC', '21', -12 * 60 * 60 * 1000],
-          ['7 hours behind UTC, printed 2 seconds off', '22', -7 * 60 * 60 * 1000 + 2000]
+          ['7 hours behind UTC, printed 2 seconds off', '22', -7 * 60 * 60 * 1000 + 2000],
+          ['7 hours behind UTC, printed 2 seconds early', '31', -7 * 60 * 60 * 1000 - 2000],
+          ['14 hours ahead of UTC, printed 3 seconds late', '32', 14 * 60 * 60 * 1000 + 3000],
+          ['12 hours behind UTC, printed 3 seconds early', '33', -12 * 60 * 60 * 1000 - 3000]
         ])(
           'cannot acquire a lock if the other process wrote its start time in a time zone %s',
           (description: string, folderName: string, offsetMs: number) => {
@@ -743,6 +746,7 @@ describe(LockFile.name, () => {
 
         test.each<[string, string, number]>([
           ['7 minutes after', '23', 7 * 60 * 1000],
+          ['15 hours after', '34', 15 * 60 * 60 * 1000],
           ['25 hours after', '24', 25 * 60 * 60 * 1000],
           ['13 hours before', '25', -13 * 60 * 60 * 1000]
         ])(
@@ -1096,6 +1100,28 @@ describe(LockFile.name, () => {
             expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
 
             expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPids[0]]]);
+          });
+
+          test('keeps a lockfile with a start time from another time zone if /proc/[pid]/stat cannot be read', () => {
+            const testFolder: string = path.join(libTestFolder, '35');
+            const otherPids: number[] = startProcesses(1);
+            // UTC+5:45, or UTC-12 if that is the local time zone
+            const otherTimeZone: string = new Date().getTimezoneOffset() === -345 ? 'XYZ+12' : 'XYZ-05:45';
+            const otherPidStartTime: string = getLstartWithCLocale(otherPids[0], otherTimeZone);
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              otherPids,
+              () => otherPidStartTime
+            );
+            mockReadFile(`/proc/${otherPids[0]}/stat`, createEaccesError());
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
+
+            // "ps" printed another start time for it, so the time zone check kept the lockfile.
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPids[0]]]);
+            expect(getStartTimeSpy.mock.results[1].value).not.toEqual(otherPidStartTime);
           });
 
           test('does not run "ps" for them if they wrote their start times with other time zones or locales', () => {

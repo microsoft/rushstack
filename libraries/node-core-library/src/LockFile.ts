@@ -613,6 +613,10 @@ const MAX_TIME_ZONE_OFFSET_MS: number = 14 * 60 * 60 * 1000;
  * On Linux, the start time that "ps" reports for a process moves with the system clock.  So if the clock is
  * changed by more than START_TIME_TOLERANCE_MS while a process holds a lock, this can return false for the
  * lockfile of that process, which is then treated as stale.
+ *
+ * A custom POSIX TZ string can set an offset that no time zone has, such as TZ=XYZ-5:07.  This returns false
+ * for a start time written with such an offset, so a process with another time zone treats that lockfile as
+ * stale.
  */
 function _isStartTimeInSomeTimeZone(lockFileStartTime: string, startTimeMs: number): boolean {
   const lockFileStartTimeMs: number | undefined = _parseLstartAsUtcMs(lockFileStartTime);
