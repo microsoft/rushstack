@@ -20,7 +20,8 @@ import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import {
   WorkspaceRestartArbiter,
   type IWorkspaceRestartTicket,
-  type IWorkspaceRestartTicketOptions
+  type IWorkspaceRestartTicketOptions,
+  type IWorkspaceRestartWaitResult
 } from '../WorkspaceRestartArbiter';
 
 const INSTALLATION_REMOVED: DaemonRestartReason = {
@@ -74,11 +75,11 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
       waitTimeoutMs: 50,
       waitTimeoutIsDefault: true
     });
-    const draining: Promise<void> = admission.waitForRestartDrainAsync(arbiter, ticket);
+    const draining: Promise<boolean> = admission.waitForRestartDrainAsync(arbiter, ticket);
     await delayAsync(250);
     expect(await isSettledAsync(draining)).toBe(false);
     arbiter.leave(serving);
-    await draining;
+    expect(await draining).toBe(true);
     // The later admission steps keep what was left of the default when the drain began.
     expect(admission.remainingAdmission).toMatchObject({ waitTimeoutIsDefault: true });
     expect(admission.remainingAdmission?.waitTimeoutMs).toBeGreaterThan(0);
@@ -110,7 +111,7 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
       waitTimeoutMs: 50,
       waitTimeoutIsDefault: true
     });
-    const draining: Promise<void> = admission.waitForRestartDrainAsync(arbiter, ticket);
+    const draining: Promise<boolean> = admission.waitForRestartDrainAsync(arbiter, ticket);
     const late: IWorkspaceRestartTicket = arbiter.enter();
     await delayAsync(150);
     expect(await isSettledAsync(draining)).toBe(false);
@@ -143,7 +144,7 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
     const { admission, arbiter, serving, ticket } = createDrainTest({ waitTimeoutMs: 10_000 });
     // Such as capturing the request's inputs before the wait, and planning the restart after it.
     await delayAsync(1_000);
-    const draining: Promise<void> = admission.waitForRestartDrainAsync(arbiter, ticket);
+    const draining: Promise<boolean> = admission.waitForRestartDrainAsync(arbiter, ticket);
     await delayAsync(300);
     arbiter.leave(serving);
     await draining;
@@ -152,6 +153,26 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
     expect(remainingMs).toBeLessThanOrEqual(9_710);
     expect(remainingMs).toBeGreaterThan(8_700);
     arbiter.leave(ticket);
+    admission.dispose();
+    expect(arbiter.servingCount).toBe(0);
+  });
+
+  it('ends the drain once a recheck finds that the restart is no longer needed, and spends the time waited', async () => {
+    const { admission, arbiter, serving, ticket } = createDrainTest({ waitTimeoutMs: 10_000 });
+    const answers: boolean[] = [true, false];
+    let calls: number = 0;
+    const draining: Promise<boolean> = admission.waitForRestartDrainAsync(arbiter, ticket, undefined, {
+      intervalMs: 100,
+      stillNeedsRestartAsync: async () => answers[calls++]
+    });
+    // The other request is still being served.
+    expect(await draining).toBe(false);
+    expect(calls).toBe(2);
+    const remainingMs: number | undefined = admission.remainingAdmission?.waitTimeoutMs;
+    expect(remainingMs).toBeLessThanOrEqual(9_810);
+    expect(remainingMs).toBeGreaterThan(9_000);
+    arbiter.leave(ticket);
+    arbiter.leave(serving);
     admission.dispose();
     expect(arbiter.servingCount).toBe(0);
   });
@@ -273,7 +294,7 @@ interface IPendingRestartTest {
   readonly admission: RequestAdmissionController;
   readonly arbiter: WorkspaceRestartArbiter;
   readonly candidate: IWorkspaceRestartTicket;
-  readonly draining: Promise<number>;
+  readonly draining: Promise<IWorkspaceRestartWaitResult>;
   readonly positions: number[];
   readonly script: IWorkspaceRestartTicket;
   readonly serving: IWorkspaceRestartTicket;
@@ -287,7 +308,7 @@ function createPendingRestartTest(
   const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   const serving: IWorkspaceRestartTicket = arbiter.enter(servingOptions);
   const candidate: IWorkspaceRestartTicket = arbiter.enter();
-  const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, {
+  const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, {
     abortSignal: new AbortController().signal,
     noWait: undefined,
     waitTimeoutMs: undefined

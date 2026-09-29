@@ -24,7 +24,9 @@ import type { IWorkspaceSession } from './WorkspaceSession';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 import type {
   IWorkspaceRestartDrainOptions,
+  IWorkspaceRestartRecheck,
   IWorkspaceRestartTicket,
+  IWorkspaceRestartWaitResult,
   WorkspaceRestartArbiter
 } from './WorkspaceRestartArbiter';
 
@@ -467,16 +469,20 @@ export class RequestAdmissionController {
    *
    * A `restartReason` says that the daemon restarts for that reason rather than for the request's environment. Queue
    * positions then carry it, and admission errors name it.
+   *
+   * @returns true once the drain finishes, or false if `recheck` found that the request no longer needs the restart.
    */
   public async waitForRestartDrainAsync(
     arbiter: WorkspaceRestartArbiter,
     ticket: IWorkspaceRestartTicket,
-    restartReason?: DaemonRestartReason
-  ): Promise<void> {
-    await this.#waitForRestartArbiterAsync(
-      (options: IWorkspaceRestartDrainOptions) => arbiter.waitForDrainAsync(ticket, options),
+    restartReason?: DaemonRestartReason,
+    recheck?: IWorkspaceRestartRecheck
+  ): Promise<boolean> {
+    const result: IWorkspaceRestartWaitResult = await this.#waitForRestartArbiterAsync(
+      (options: IWorkspaceRestartDrainOptions) => arbiter.waitForDrainAsync(ticket, options, recheck),
       restartReason
     );
+    return !result.restartWithdrawn;
   }
 
   /**
@@ -498,15 +504,15 @@ export class RequestAdmissionController {
   }
 
   async #waitForRestartArbiterAsync(
-    waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<number>,
+    waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<IWorkspaceRestartWaitResult>,
     restartReason?: DaemonRestartReason
-  ): Promise<void> {
+  ): Promise<IWorkspaceRestartWaitResult> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
     let waivedMs: number = 0;
     try {
       // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
-      waivedMs = await waitAsync({
+      const result: IWorkspaceRestartWaitResult = await waitAsync({
         abortSignal: this.#abortController.signal,
         noWait: this.#admission?.noWait,
         waitTimeoutMs: this.#remainingMs,
@@ -514,6 +520,8 @@ export class RequestAdmissionController {
         restartCause: restartReason && formatRestartCause(restartReason),
         onServingCountChanged: writer ? (count: number) => writer.enqueue(count, restartReason) : undefined
       });
+      waivedMs = result.waivedMs;
+      return result;
     } finally {
       await writer?.flushAsync();
       this.#spend(Date.now() - startMs - waivedMs);

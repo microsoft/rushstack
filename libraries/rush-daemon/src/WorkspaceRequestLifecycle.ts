@@ -63,7 +63,11 @@ import type {
   IWorkspaceProcessRestartPlan,
   IWorkspaceSuccessorLaunch
 } from './WorkspaceProcessRestart';
-import { WorkspaceRestartArbiter, type IWorkspaceRestartTicket } from './WorkspaceRestartArbiter';
+import {
+  WorkspaceRestartArbiter,
+  type IWorkspaceRestartRecheck,
+  type IWorkspaceRestartTicket
+} from './WorkspaceRestartArbiter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import { FreshCaptureCoalescer } from './FreshCaptureCoalescer';
 import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
@@ -72,6 +76,15 @@ import {
   getEnvironmentRestartReason,
   type EnvironmentIdentityEntries
 } from './EnvironmentRestartReason';
+
+/** How often a request that waits for a restart drain checks whether it still needs the restart. */
+const RESTART_RECHECK_INTERVAL_MS: number = 1000;
+
+interface IRecheckCapture {
+  /** On the clock of `performance.now()`. */
+  readonly startTimeMs: number;
+  readonly fingerprint: Promise<IWorkspaceInputFingerprint>;
+}
 
 interface IExecutionState {
   began: boolean;
@@ -171,6 +184,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     new FreshCaptureCoalescer();
   readonly #projectFingerprintCaptures: FreshCaptureCoalescer<RushConfiguration, string> =
     new FreshCaptureCoalescer();
+  /** The latest capture that a request waiting for a restart drain started, for each workspace configuration. */
+  readonly #recheckCaptures: WeakMap<RushConfiguration, IRecheckCapture> = new WeakMap();
   #fingerprint: IWorkspaceInputFingerprint;
   #projectFingerprint: string | undefined;
   #commandIdentity: string | undefined;
@@ -517,8 +532,14 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             lease.release();
             if (ticket) {
               // Like build requests, a graph-control restart must not preempt requests this process can serve.
-              await admission.waitForRestartDrainAsync(this.#restartArbiter, ticket);
+              const drained: boolean = await admission.waitForRestartDrainAsync(
+                this.#restartArbiter,
+                ticket,
+                undefined,
+                this.#createRestartRecheck(session, controlEnvelope, current, false)
+              );
               if (this.#restartPending) throw new RestartPendingBeforeExecution();
+              if (!drained) return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
             }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
@@ -613,8 +634,15 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       lease.release();
       if (tier === WorkspaceInputChangeTier.Restart && ticket) {
         // Serve every queued or in-flight request that matches this process before restarting for another one.
-        await admission.waitForRestartDrainAsync(this.#restartArbiter, ticket);
+        const drained: boolean = await admission.waitForRestartDrainAsync(
+          this.#restartArbiter,
+          ticket,
+          undefined,
+          this.#createRestartRecheck(session, envelope, fingerprint, isMutation(envelope))
+        );
         if (this.#restartPending) throw new RestartPendingBeforeExecution();
+        // The request no longer needs the restart, so it is admitted as it would be if it arrived now.
+        if (!drained) return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
       }
       if (this.#transitioning) {
         const shared: IRequestLease = await admission.acquireBehindTransitionAsync(
@@ -653,6 +681,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           throw error;
         }
       }
+      // A request that drained for a restart it no longer needs must not keep rushx scripts waiting for the restart.
+      if (ticket) this.#restartArbiter.withdrawRestart(ticket);
       if (isMutation(envelope)) {
         if (!this.#options.getSuccessorLaunchAsync) {
           throw new DaemonRequestDispatchError(
@@ -902,6 +932,47 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       if (error instanceof PhasedCommandEngineProjectConfigurationError) return undefined;
       throw error;
     }
+  }
+
+  /**
+   * The change that needs a restart may be reverted while the request waits for the restart drain, and requests that
+   * do not need a restart can keep the drain from finishing for as long as they keep arriving. The request therefore
+   * captures its inputs again while it waits, and stops waiting once they no longer need a restart. A request's
+   * environment does not change, so a request that needs a restart for its environment does not capture again.
+   */
+  #createRestartRecheck(
+    session: IWorkspaceSession,
+    envelope: IDaemonRequestEnvelope,
+    fingerprint: IWorkspaceInputFingerprint,
+    mutation: boolean
+  ): IWorkspaceRestartRecheck | undefined {
+    if (fingerprint.environmentHash !== this.#startupFingerprint.environmentHash) return undefined;
+    return {
+      intervalMs: RESTART_RECHECK_INTERVAL_MS,
+      stillNeedsRestartAsync: async () =>
+        this.#classify(await this.#recheckCaptureAsync(session, envelope), mutation) ===
+        WorkspaceInputChangeTier.Restart
+    };
+  }
+
+  /**
+   * Every request that waits for a restart drain checks its inputs once per interval, so the waiters share the
+   * latest check's capture, whether it still runs or has settled, until it is one interval old. The checks then cost
+   * one capture per interval however many requests wait, and each waiter still sees a change within about two
+   * intervals. Only requests whose environments match this process's environment check again (see
+   * `#createRestartRecheck`), so every waiter of one workspace configuration requests the same capture.
+   */
+  #recheckCaptureAsync(
+    session: IWorkspaceSession,
+    envelope: IDaemonRequestEnvelope
+  ): Promise<IWorkspaceInputFingerprint> {
+    const { rushConfiguration } = session;
+    const nowMs: number = performance.now();
+    const latest: IRecheckCapture | undefined = this.#recheckCaptures.get(rushConfiguration);
+    if (latest && nowMs - latest.startTimeMs < RESTART_RECHECK_INTERVAL_MS) return latest.fingerprint;
+    const fingerprint: Promise<IWorkspaceInputFingerprint> = this.#captureAsync(session, envelope);
+    this.#recheckCaptures.set(rushConfiguration, { startTimeMs: nowMs, fingerprint });
+    return fingerprint;
   }
 
   #classify(fingerprint: IWorkspaceInputFingerprint, mutation: boolean): WorkspaceInputChangeTier {

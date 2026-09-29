@@ -1,10 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock('@microsoft/rush-lib', () => {
+  const actual: typeof import('@microsoft/rush-lib') = jest.requireActual('@microsoft/rush-lib');
+  return {
+    ...actual,
+    captureWorkspaceInputFingerprintAsync: jest.fn(actual.captureWorkspaceInputFingerprintAsync)
+  };
+});
+
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+import { captureWorkspaceInputFingerprintAsync, WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 import {
   DaemonFrameType,
   decodeDaemonControlMessage,
@@ -14,7 +22,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, responseSnapshot } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
@@ -24,6 +32,9 @@ jest.setTimeout(60_000);
 const BUILD_A: string[] = ['build', '--to', 'a', '--parallelism', '3'];
 const RELEASE_FILE: string = 'release-serve';
 const LATE_RELEASE_FILE: string = 'release-serve2';
+const inputCaptureMock: jest.MockedFunction<typeof captureWorkspaceInputFingerprintAsync> = jest.mocked(
+  captureWorkspaceInputFingerprintAsync
+);
 
 function delayAsync(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -135,6 +146,27 @@ async function startRequestAsync(
   // A failed expectation leaves the exchange unread until the fixture closes the connection.
   exchange.catch(() => undefined);
   return { exchange, positions, settled: () => settled };
+}
+
+/**
+ * Changes an input that only a new daemon process picks up, as an install does, and returns a function that
+ * restores its content.
+ */
+function changeInstallation(fixture: DaemonGraphTestFixture): () => void {
+  const filePath: string = path.join(fixture.folder, 'common/config/rush/npm-shrinkwrap.json');
+  const original: string = fs.readFileSync(filePath, 'utf8');
+  fs.writeFileSync(filePath, `${original}\n`);
+  return () => fs.writeFileSync(filePath, original);
+}
+
+async function closeRestartingFixtureAsync(fixture: DaemonGraphTestFixture): Promise<void> {
+  try {
+    await fixture.host.closeAsync();
+    await fixture.host.restartCompleted;
+  } finally {
+    await stopSuccessorAsync(fixture.host.paths);
+    await fixture[Symbol.asyncDispose]();
+  }
 }
 
 function changeProjectConfiguration(fixture: DaemonGraphTestFixture): void {
@@ -300,6 +332,221 @@ describe('workspace admission while a served rushx script runs', () => {
         await stopSuccessorAsync(fixture.host.paths);
         await fixture[Symbol.asyncDispose]();
       }
+    }
+  });
+});
+
+describe('a restart drain whose change is reverted', () => {
+  const SERVE2: Partial<IDaemonRequestEnvelope> = { commandOrigin: 'custom', invocationKind: 'rushx' };
+
+  it('serves the request on this process, while the script that holds the drain still runs', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    });
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      // A transition would cancel the watcher, and a request that arrives when nothing needs one does not transition.
+      const watch: IStreamedRequest = await startRequestAsync(fixture, ['daemon', 'graph', 'watch'], {});
+      const script: IServedScript = await serveAsync(fixture);
+
+      const revert: () => void = changeInstallation(fixture);
+      const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the build to wait for the drain');
+      const late: IStreamedRequest = await startRequestAsync(fixture, ['serve2'], {
+        ...SERVE2,
+        cwd: path.join(fixture.folder, 'a')
+      });
+      await waitForAsync(() => late.positions.length > 0 || late.settled(), 'the script to wait for the restart');
+      // Several rechecks find that the change is still there.
+      await delayAsync(2500);
+      expect(build.settled()).toBe(false);
+      expect(fixture.runs()).not.toContain('serve2-start');
+
+      const revertedAt: number = Date.now();
+      revert();
+      // The build used to wait for the script to exit, which a dev server never does (#127).
+      expectSuccess(await build.exchange);
+      expect(Date.now() - revertedAt).toBeLessThan(5000);
+      expect(script.settled()).toBe(false);
+      // The later script no longer waits for a restart either.
+      await waitForAsync(() => fixture.runs().includes('serve2-start'), 'the later script to start');
+      expect((await pongAsync(fixture)).pid).toBe(before.pid);
+      expect(fixture.host.workspaceStatus.lastReloadTier).not.toBe(WorkspaceInputChangeTier.Restart);
+      expect(watch.settled()).toBe(false);
+
+      fixture.write(RELEASE_FILE, '');
+      fixture.write(LATE_RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+      expectSuccess(await late.exchange);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      fixture.write(LATE_RELEASE_FILE, '');
+      await closeRestartingFixtureAsync(fixture);
+    }
+  });
+
+  it('serves a graph control request on this process', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    });
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      const revert: () => void = changeInstallation(fixture);
+      const pause: IStreamedRequest = await startRequestAsync(fixture, ['daemon', 'graph', 'pause'], {
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      await waitForAsync(() => pause.positions.length > 0 || pause.settled(), 'the request to wait for the drain');
+      await delayAsync(1500);
+      expect(pause.settled()).toBe(false);
+
+      const revertedAt: number = Date.now();
+      revert();
+      expect(responseSnapshot(await pause.exchange)).toMatchObject({ pauseNextIteration: true });
+      expect(Date.now() - revertedAt).toBeLessThan(5000);
+      expect(script.settled()).toBe(false);
+      expect((await pongAsync(fixture)).pid).toBe(before.pid);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      await closeRestartingFixtureAsync(fixture);
+    }
+  });
+
+  it('still restarts after the drain when the change stays', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    });
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      changeInstallation(fixture);
+      const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the build to wait for the drain');
+      await delayAsync(2500);
+      expect(build.settled()).toBe(false);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+      expect((await build.exchange).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, retryAfterRestart: true }
+      });
+      const restarted = await fixture.host.restartCompleted;
+      expect(restarted?.pid).not.toBe(before.pid);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      await closeRestartingFixtureAsync(fixture);
+    }
+  });
+
+  it('does not keep scripts waiting when the request finds after its drain that it no longer needs the restart', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+      // Project c builds until the test creates release-build.
+      created.write(
+        'c/build.cjs',
+        "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c-start\\n');" +
+          "const t=setInterval(()=>{if(fs.existsSync('../release-build')){clearInterval(t);" +
+          "fs.appendFileSync('../runs.txt','c-end\\n');}},20);"
+      );
+    });
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      const revert: () => void = changeInstallation(fixture);
+      const build: IStreamedRequest = await startRequestAsync(fixture, ['build', '--to', 'c'], {
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the build to wait for the drain');
+      const late: IStreamedRequest = await startRequestAsync(fixture, ['serve2'], {
+        ...SERVE2,
+        cwd: path.join(fixture.folder, 'a')
+      });
+      await waitForAsync(() => late.positions.length > 0 || late.settled(), 'the script to wait for the restart');
+
+      // The drain ends as the script exits, so the build most likely finds the revert only after the drain.
+      revert();
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+      await waitForAsync(() => fixture.runs().includes('c-start'), 'the build to start');
+      // The later script used to wait for the build to finish, since its restart stayed pending.
+      await waitForAsync(() => fixture.runs().includes('serve2-start'), 'the later script to start');
+      expect(fixture.runs()).not.toContain('c-end');
+
+      fixture.write('release-build', '');
+      fixture.write(LATE_RELEASE_FILE, '');
+      expectSuccess(await build.exchange);
+      expectSuccess(await late.exchange);
+      expect((await pongAsync(fixture)).pid).toBe(before.pid);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      fixture.write(LATE_RELEASE_FILE, '');
+      fixture.write('release-build', '');
+      await closeRestartingFixtureAsync(fixture);
+    }
+  });
+
+  it('shares one capture a second between the requests that wait for the drain', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    });
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      const revert: () => void = changeInstallation(fixture);
+      const builds: IStreamedRequest[] = [];
+      // The requests arrive over about a second, so each one's checks would start at another time.
+      for (let i: number = 0; i < 16; i++) {
+        builds.push(await startRequestAsync(fixture, BUILD_A, { admission: { waitTimeoutMs: 20_000 } }));
+        await delayAsync(60);
+      }
+      await waitForAsync(
+        () => builds.every((build) => build.positions.length > 0 || build.settled()),
+        'every build to wait for the drain'
+      );
+      inputCaptureMock.mockClear();
+      await delayAsync(3000);
+      // Each waiting request used to capture its inputs once a second, 16 captures a second in all (#2239).
+      const captures: number = inputCaptureMock.mock.calls.length;
+      expect(captures).toBeGreaterThanOrEqual(2);
+      expect(captures).toBeLessThanOrEqual(5);
+      expect(builds.some((build) => build.settled())).toBe(false);
+
+      const revertedAt: number = Date.now();
+      revert();
+      for (const build of builds) {
+        expectSuccess(await build.exchange);
+      }
+      expect(Date.now() - revertedAt).toBeLessThan(10_000);
+      expect(script.settled()).toBe(false);
+      expect((await pongAsync(fixture)).pid).toBe(before.pid);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      await closeRestartingFixtureAsync(fixture);
     }
   });
 });

@@ -46,6 +46,8 @@ interface IWaitKind {
   readonly isBlocked: () => boolean;
   /** How many other requests the request waits for, reported as its queue position. */
   readonly countWaitedFor: () => number;
+  /** Lets a request that waits to restart find that it no longer needs to. */
+  readonly recheck: IWorkspaceRestartRecheck | undefined;
   readonly noWaitMessage: string;
   /** Begins the timeout message, which goes on to name the requests that the restart waits for. */
   readonly timeoutPrefix: string;
@@ -77,9 +79,82 @@ export interface IWorkspaceRestartDrainOptions {
 }
 
 /**
+ * Lets a request that waits for a restart drain find that it no longer needs the restart. The change that needed it
+ * may be reverted during the drain, while requests that do not need a restart keep the drain from finishing.
+ */
+export interface IWorkspaceRestartRecheck {
+  /**
+   * Resolves whether the request still needs the restart. It is called every `intervalMs` while the request waits,
+   * each time after the previous call settles. A call that rejects counts as true.
+   */
+  readonly stillNeedsRestartAsync: () => Promise<boolean>;
+  readonly intervalMs: number;
+}
+
+/** How a wait for a restart drain or a pending restart ended. */
+export interface IWorkspaceRestartWaitResult {
+  /**
+   * How many milliseconds of the wait did not spend `waitTimeoutMs`
+   * (see {@link IWorkspaceRestartDrainOptions.waivesTimeoutForServedWork}).
+   */
+  readonly waivedMs: number;
+  /**
+   * The wait ended because {@link IWorkspaceRestartRecheck.stillNeedsRestartAsync} resolved false, so the request no
+   * longer counts as a pending restart. Otherwise the wait ended because the request no longer had to wait.
+   */
+  readonly restartWithdrawn: boolean;
+}
+
+/** Calls {@link IWorkspaceRestartRecheck.stillNeedsRestartAsync} while a restart candidate waits. */
+class RestartRecheck {
+  /** A call resolved false. */
+  public withdrawn: boolean = false;
+  readonly #recheck: IWorkspaceRestartRecheck;
+  readonly #onWithdrawn: () => void;
+  #timer: ReturnType<typeof setTimeout> | undefined;
+  #stopped: boolean = false;
+
+  public constructor(recheck: IWorkspaceRestartRecheck, onWithdrawn: () => void) {
+    this.#recheck = recheck;
+    this.#onWithdrawn = onWithdrawn;
+    this.#schedule();
+  }
+
+  /** Ignores a call that is still running, and makes no more. */
+  public stop(): void {
+    this.#stopped = true;
+    clearTimeout(this.#timer);
+  }
+
+  #schedule(): void {
+    this.#timer = setTimeout(() => {
+      void this.#recheckAsync();
+    }, this.#recheck.intervalMs);
+  }
+
+  async #recheckAsync(): Promise<void> {
+    let stillNeeded: boolean = true;
+    try {
+      stillNeeded = await this.#recheck.stillNeedsRestartAsync();
+    } catch {
+      // For example, a file that the capture reads was being rewritten. The next call tries again.
+    }
+    if (this.#stopped) return;
+    if (stillNeeded) {
+      this.#schedule();
+    } else {
+      this.withdrawn = true;
+      this.#onWithdrawn();
+    }
+  }
+}
+
+/**
  * Arbitrates process restarts between requests whose environments differ from the running daemon.
  * A request that needs a restart waits until every other request this process can serve has finished,
  * so a mismatched environment never preempts queued or in-flight work that matches the running process.
+ * A request that finds during or after the drain that it no longer needs the restart, since the change that needed it
+ * was reverted, withdraws the restart.
  * A rushx script that arrives while a restart is pending waits for the restart instead, since it may not exit until
  * it is stopped and the restart would otherwise wait for it.
  */
@@ -116,28 +191,37 @@ export class WorkspaceRestartArbiter {
   /**
    * Whether another tracked request needs to restart the daemon for its environment: it waits for the drain, or it
    * has drained and not yet left. A request that needs a restart leaves once the restart is planned, or once it
-   * fails or is cancelled.
+   * fails or is cancelled. A request that finds it no longer needs one withdraws its restart.
    */
   public hasPendingRestart(ticket: IWorkspaceRestartTicket): boolean {
     return Array.from(this.#restartCandidates).some((candidate: IMutableTicket) => candidate !== ticket);
   }
 
   /**
+   * Records that a request which drained for a restart no longer needs one, for example because the change was
+   * reverted, so that requests waiting for its restart stop waiting. Does nothing for other requests.
+   */
+  public withdrawRestart(ticket: IWorkspaceRestartTicket): void {
+    if (this.#restartCandidates.delete(ticket as IMutableTicket)) this.#notifyChange();
+  }
+
+  /**
    * Waits until no other tracked request is still being served by this process, then counts the ticket
-   * as served again so concurrent restart candidates proceed one at a time. Returns how many milliseconds of the
-   * wait did not spend `waitTimeoutMs` (see {@link IWorkspaceRestartDrainOptions.waivesTimeoutForServedWork}).
-   * From when the wait begins until the ticket leaves, {@link WorkspaceRestartArbiter.hasPendingRestart} reports
-   * the restart to other requests.
+   * as served again so concurrent restart candidates proceed one at a time. From when the wait begins until the
+   * ticket leaves, {@link WorkspaceRestartArbiter.hasPendingRestart} reports the restart to other requests. If
+   * `recheck` finds that the request no longer needs the restart, the wait ends then and the restart is withdrawn.
    */
   public async waitForDrainAsync(
     ticket: IWorkspaceRestartTicket,
-    options: IWorkspaceRestartDrainOptions
-  ): Promise<number> {
+    options: IWorkspaceRestartDrainOptions,
+    recheck?: IWorkspaceRestartRecheck
+  ): Promise<IWorkspaceRestartWaitResult> {
     const { restartCause } = options;
     return await this.#waitAsync(ticket, options, {
       restarts: true,
       isBlocked: () => this.#serving.size > 0,
       countWaitedFor: () => this.#serving.size,
+      recheck,
       noWaitMessage:
         restartCause === undefined
           ? 'Another environment is still being served; the request did not wait for a restart.'
@@ -159,11 +243,12 @@ export class WorkspaceRestartArbiter {
   public async waitForPendingRestartAsync(
     ticket: IWorkspaceRestartTicket,
     options: IWorkspaceRestartDrainOptions
-  ): Promise<number> {
+  ): Promise<IWorkspaceRestartWaitResult> {
     return await this.#waitAsync(ticket, options, {
       restarts: false,
       isBlocked: () => this.hasPendingRestart(ticket),
       countWaitedFor: () => new Set([...this.#serving, ...this.#restartCandidates]).size,
+      recheck: undefined,
       noWaitMessage:
         'Another request is waiting to restart the daemon for its environment; the rushx script did not wait ' +
         'for the restart.',
@@ -178,7 +263,7 @@ export class WorkspaceRestartArbiter {
     ticket: IWorkspaceRestartTicket,
     options: IWorkspaceRestartDrainOptions,
     kind: IWaitKind
-  ): Promise<number> {
+  ): Promise<IWorkspaceRestartWaitResult> {
     const state: IMutableTicket = ticket as IMutableTicket;
     if (state.left || state.waitingForDrain) throw new Error('The restart ticket is not being served.');
     if (kind.restarts) this.#restartCandidates.add(state);
@@ -195,8 +280,12 @@ export class WorkspaceRestartArbiter {
         options.onServingCountChanged?.(count);
       }
     };
+    // The ticket is a restart candidate for as long as the wait lasts, so withdrawing its restart wakes the wait.
+    const recheck: RestartRecheck | undefined = kind.recheck
+      ? new RestartRecheck(kind.recheck, () => this.withdrawRestart(ticket))
+      : undefined;
     try {
-      while (kind.isBlocked()) {
+      while (!recheck?.withdrawn && kind.isBlocked()) {
         if (options.noWait) {
           throw new RequestSchedulerError(RequestSchedulerErrorCode.NoWait, kind.noWaitMessage);
         }
@@ -218,8 +307,9 @@ export class WorkspaceRestartArbiter {
           else if (remainingMs !== undefined) remainingMs -= elapsedMs;
         }
       }
-      return waivedMs;
+      return { waivedMs, restartWithdrawn: recheck?.withdrawn === true };
     } finally {
+      recheck?.stop();
       state.waitingForDrain = false;
       this.#serve(state);
     }

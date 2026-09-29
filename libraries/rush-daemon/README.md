@@ -194,13 +194,21 @@ drain, which could otherwise keep it waiting for as long as they keep arriving. 
 `waitTimeoutMs` limits the whole drain, and only its remaining time carries over to the successor. When a drain times
 out, its message names the time that did not count.
 
-A restart is pending from when a request begins its restart drain until the request has planned the restart, or has
-failed or been cancelled. A rushx script that arrives while a restart is pending does not start, since the restart
-would then wait for it to exit: the script waits for the pending restart instead, and the drain does not count it. If
-the restart was planned, the script's result carries `retryAfterRestart: true` so that the client runs it on the
-successor; otherwise it runs on this process. Its queue position is the number of requests that are served or waiting
-to restart, and its wait timeout applies as it does to the drain, relative to the requests that were served when the
-script began to wait.
+The change that needs a restart may be reverted during the drain, while requests that do not need one keep the drain
+from finishing for as long as they keep arriving. A request that waits for the drain therefore captures its inputs
+again every second, and once they no longer need a restart it stops waiting and is admitted as if it had just
+arrived, on this process. The requests that wait share these captures: a request reuses the latest one until it is a
+second old, so the drain costs one capture a second however many requests wait, and each request still sees a revert
+within about two seconds. A request that needs a restart only for its environment does not capture again, since its
+environment cannot change.
+
+A restart is pending from when a request begins its restart drain until the request has planned the restart, has found
+that it no longer needs it, or has failed or been cancelled. A rushx script that arrives while a restart is pending
+does not start, since the restart would then wait for it to exit: the script waits for the pending restart instead,
+and the drain does not count it. If the restart was planned, the script's result carries `retryAfterRestart: true` so
+that the client runs it on the successor; otherwise it runs on this process. Its queue position is the number of
+requests that are served or waiting to restart, and its wait timeout applies as it does to the drain, relative to the
+requests that were served when the script began to wait.
 
 The `retryAfterRestart: true` result of the request that restarts the daemon for its environment carries
 `restartReason: { kind: 'environmentChanged', variableNames }`: the sorted names of the variables that are set in only

@@ -7,7 +7,9 @@ import { RequestSchedulerError, RequestSchedulerErrorCode } from '../RequestSche
 import {
   WorkspaceRestartArbiter,
   type IWorkspaceRestartDrainOptions,
-  type IWorkspaceRestartTicket
+  type IWorkspaceRestartRecheck,
+  type IWorkspaceRestartTicket,
+  type IWorkspaceRestartWaitResult
 } from '../WorkspaceRestartArbiter';
 
 const WAIT: { abortSignal: AbortSignal; noWait: undefined; waitTimeoutMs: undefined } = {
@@ -24,6 +26,23 @@ async function isSettledAsync(promise: Promise<unknown>): Promise<boolean> {
   );
   await new Promise((resolve) => setImmediate(resolve));
   return settled;
+}
+
+/** Answers each recheck from a list, repeating the last answer. An `Error` answer rejects. */
+class ScriptedRecheck implements IWorkspaceRestartRecheck {
+  public readonly intervalMs: number = 20;
+  public calls: number = 0;
+  readonly #answers: ReadonlyArray<boolean | Error>;
+
+  public constructor(answers: ReadonlyArray<boolean | Error>) {
+    this.#answers = answers;
+  }
+
+  public readonly stillNeedsRestartAsync: () => Promise<boolean> = async () => {
+    const answer: boolean | Error = this.#answers[Math.min(this.calls++, this.#answers.length - 1)];
+    if (answer instanceof Error) throw answer;
+    return answer;
+  };
 }
 
 function expectWaitTimeout(error: unknown): RequestSchedulerError {
@@ -47,8 +66,8 @@ describe(WorkspaceRestartArbiter.name, () => {
     const serving: IWorkspaceRestartTicket = arbiter.enter();
     const first: IWorkspaceRestartTicket = arbiter.enter();
     const second: IWorkspaceRestartTicket = arbiter.enter();
-    const firstWait: Promise<number> = arbiter.waitForDrainAsync(first, WAIT);
-    const secondWait: Promise<number> = arbiter.waitForDrainAsync(second, WAIT);
+    const firstWait: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(first, WAIT);
+    const secondWait: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(second, WAIT);
     const late: IWorkspaceRestartTicket = arbiter.enter();
     arbiter.leave(serving);
     expect(await isSettledAsync(firstWait)).toBe(false);
@@ -70,7 +89,7 @@ describe(WorkspaceRestartArbiter.name, () => {
     const serving: IWorkspaceRestartTicket = arbiter.enter();
     const ticket: IWorkspaceRestartTicket = arbiter.enter();
     const abort: AbortController = new AbortController();
-    const waiting: Promise<number> = arbiter.waitForDrainAsync(ticket, {
+    const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(ticket, {
       abortSignal: abort.signal,
       noWait: mode === 'no-wait' ? true : undefined,
       waitTimeoutMs: mode === 'timeout' ? 10 : undefined
@@ -91,7 +110,7 @@ describe(WorkspaceRestartArbiter.name, () => {
     const second: IWorkspaceRestartTicket = arbiter.enter();
     const candidate: IWorkspaceRestartTicket = arbiter.enter();
     const counts: number[] = [];
-    const waiting: Promise<number> = arbiter.waitForDrainAsync(candidate, {
+    const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, {
       ...WAIT,
       onServingCountChanged: (count: number) => counts.push(count)
     });
@@ -103,7 +122,7 @@ describe(WorkspaceRestartArbiter.name, () => {
     // Another restart candidate stops counting once it waits too; it then waits for the first candidate.
     const other: IWorkspaceRestartTicket = arbiter.enter();
     const otherCounts: number[] = [];
-    const otherWaiting: Promise<number> = arbiter.waitForDrainAsync(other, {
+    const otherWaiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(other, {
       ...WAIT,
       onServingCountChanged: (count: number) => otherCounts.push(count)
     });
@@ -153,11 +172,11 @@ describe(WorkspaceRestartArbiter.name, () => {
       const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const waiting: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIVED);
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIVED);
       await delayAsync(150);
       expect(await isSettledAsync(waiting)).toBe(false);
       arbiter.leave(earlier);
-      expect(await waiting).toBeGreaterThanOrEqual(140);
+      expect((await waiting).waivedMs).toBeGreaterThanOrEqual(140);
       arbiter.leave(candidate);
       expect(arbiter.servingCount).toBe(0);
     });
@@ -166,7 +185,7 @@ describe(WorkspaceRestartArbiter.name, () => {
       const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const waiting: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIVED);
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIVED);
       const late: IWorkspaceRestartTicket = arbiter.enter();
       await delayAsync(150);
       expect(await isSettledAsync(waiting)).toBe(false);
@@ -216,12 +235,12 @@ describe(WorkspaceRestartArbiter.name, () => {
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const waiting: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIVED);
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIVED);
       arbiter.leave(script);
       await delayAsync(150);
       expect(await isSettledAsync(waiting)).toBe(false);
       arbiter.leave(earlier);
-      expect(await waiting).toBeGreaterThanOrEqual(140);
+      expect((await waiting).waivedMs).toBeGreaterThanOrEqual(140);
       arbiter.leave(candidate);
       expect(arbiter.servingCount).toBe(0);
     });
@@ -249,13 +268,13 @@ describe(WorkspaceRestartArbiter.name, () => {
       const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const waiting: Promise<number> = arbiter.waitForDrainAsync(candidate, {
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, {
         ...WAIT,
         waitTimeoutMs: 5_000
       });
       await delayAsync(20);
       arbiter.leave(earlier);
-      expect(await waiting).toBe(0);
+      expect((await waiting).waivedMs).toBe(0);
       arbiter.leave(candidate);
       expect(arbiter.servingCount).toBe(0);
     });
@@ -273,7 +292,7 @@ describe(WorkspaceRestartArbiter.name, () => {
       const running: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
       expect(arbiter.hasPendingRestart(running)).toBe(false);
-      const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIT);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT);
       expect(arbiter.hasPendingRestart(running)).toBe(true);
       expect(arbiter.hasPendingRestart(candidate)).toBe(false);
       arbiter.leave(running);
@@ -292,7 +311,7 @@ describe(WorkspaceRestartArbiter.name, () => {
       const serving: IWorkspaceRestartTicket = arbiter.enter();
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const counts: number[] = [];
-      const waivedMs: number = await arbiter.waitForPendingRestartAsync(script, {
+      const { waivedMs } = await arbiter.waitForPendingRestartAsync(script, {
         ...WAIT,
         noWait: true,
         onServingCountChanged: (count: number) => counts.push(count)
@@ -308,10 +327,10 @@ describe(WorkspaceRestartArbiter.name, () => {
       const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
       const running: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIT);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT);
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const counts: number[] = [];
-      const waiting: Promise<number> = arbiter.waitForPendingRestartAsync(script, {
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, {
         ...WAIT,
         onServingCountChanged: (count: number) => counts.push(count)
       });
@@ -322,7 +341,7 @@ describe(WorkspaceRestartArbiter.name, () => {
       expect(counts).toEqual([2, 1]);
       expect(await isSettledAsync(waiting)).toBe(false);
       arbiter.leave(candidate);
-      expect(await waiting).toBe(0);
+      expect((await waiting).waivedMs).toBe(0);
       expect(arbiter.servingCount).toBe(1);
       arbiter.leave(script);
       expect(arbiter.servingCount).toBe(0);
@@ -333,10 +352,10 @@ describe(WorkspaceRestartArbiter.name, () => {
       const running: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const first: IWorkspaceRestartTicket = arbiter.enter();
       const second: IWorkspaceRestartTicket = arbiter.enter();
-      const firstDrain: Promise<number> = arbiter.waitForDrainAsync(first, WAIT);
-      const secondDrain: Promise<number> = arbiter.waitForDrainAsync(second, WAIT);
+      const firstDrain: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(first, WAIT);
+      const secondDrain: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(second, WAIT);
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
-      const waiting: Promise<number> = arbiter.waitForPendingRestartAsync(script, WAIT);
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, WAIT);
       arbiter.leave(running);
       await firstDrain;
       arbiter.leave(first);
@@ -365,10 +384,10 @@ describe(WorkspaceRestartArbiter.name, () => {
         const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
         const running: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
         const candidate: IWorkspaceRestartTicket = arbiter.enter();
-        const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIT);
+        const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT);
         const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
         const abort: AbortController = new AbortController();
-        const waiting: Promise<number> = arbiter.waitForPendingRestartAsync(script, {
+        const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, {
           abortSignal: abort.signal,
           noWait: mode === 'no-wait' ? true : undefined,
           waitTimeoutMs: mode === 'timeout' ? 10 : undefined
@@ -392,15 +411,15 @@ describe(WorkspaceRestartArbiter.name, () => {
       const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIT);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT);
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
-      const waiting: Promise<number> = arbiter.waitForPendingRestartAsync(script, WAIVED);
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, WAIVED);
       await delayAsync(150);
       expect(await isSettledAsync(waiting)).toBe(false);
       arbiter.leave(earlier);
       await draining;
       arbiter.leave(candidate);
-      expect(await waiting).toBeGreaterThanOrEqual(140);
+      expect((await waiting).waivedMs).toBeGreaterThanOrEqual(140);
       arbiter.leave(script);
       expect(arbiter.servingCount).toBe(0);
     });
@@ -409,7 +428,7 @@ describe(WorkspaceRestartArbiter.name, () => {
       const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIT);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT);
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const outcome: Promise<unknown> = arbiter
         .waitForPendingRestartAsync(script, WAIVED)
@@ -432,7 +451,7 @@ describe(WorkspaceRestartArbiter.name, () => {
       const running: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const earlier: IWorkspaceRestartTicket = arbiter.enter();
       const candidate: IWorkspaceRestartTicket = arbiter.enter();
-      const draining: Promise<number> = arbiter.waitForDrainAsync(candidate, WAIT);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT);
       const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
       const outcome: Promise<unknown> = arbiter
         .waitForPendingRestartAsync(script, WAIVED)
@@ -443,6 +462,117 @@ describe(WorkspaceRestartArbiter.name, () => {
       for (const served of [running, earlier, script]) arbiter.leave(served);
       await draining;
       arbiter.leave(candidate);
+      expect(arbiter.servingCount).toBe(0);
+    });
+  });
+
+  describe('rechecks while a restart candidate drains', () => {
+    it('withdraws the restart once it is no longer needed, while other requests are served, and wakes scripts', async () => {
+      const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+      const serving: IWorkspaceRestartTicket = arbiter.enter();
+      const candidate: IWorkspaceRestartTicket = arbiter.enter();
+      const recheck: ScriptedRecheck = new ScriptedRecheck([true, false]);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT, recheck);
+      const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, WAIT);
+      expect(arbiter.hasPendingRestart(script)).toBe(true);
+      expect(await draining).toEqual({ waivedMs: 0, restartWithdrawn: true });
+      expect(recheck.calls).toBe(2);
+      expect(arbiter.hasPendingRestart(script)).toBe(false);
+      await waiting;
+      expect(arbiter.servingCount).toBe(3);
+      for (const served of [serving, candidate, script]) arbiter.leave(served);
+      expect(arbiter.servingCount).toBe(0);
+    });
+
+    it('keeps waiting while the restart is still needed, and stops rechecking once the drain ends', async () => {
+      const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+      const serving: IWorkspaceRestartTicket = arbiter.enter();
+      const candidate: IWorkspaceRestartTicket = arbiter.enter();
+      const recheck: ScriptedRecheck = new ScriptedRecheck([true]);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT, recheck);
+      await delayAsync(150);
+      expect(await isSettledAsync(draining)).toBe(false);
+      expect(recheck.calls).toBeGreaterThanOrEqual(2);
+      arbiter.leave(serving);
+      expect(await draining).toEqual({ waivedMs: 0, restartWithdrawn: false });
+      const calls: number = recheck.calls;
+      await delayAsync(100);
+      expect(recheck.calls).toBe(calls);
+      // The restart stays pending until the candidate plans it and leaves.
+      const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+      expect(arbiter.hasPendingRestart(script)).toBe(true);
+      arbiter.leave(candidate);
+      expect(arbiter.hasPendingRestart(script)).toBe(false);
+      arbiter.leave(script);
+      expect(arbiter.servingCount).toBe(0);
+    });
+
+    it('counts a recheck that fails as still needing the restart, and tries again', async () => {
+      const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+      const serving: IWorkspaceRestartTicket = arbiter.enter();
+      const candidate: IWorkspaceRestartTicket = arbiter.enter();
+      const recheck: ScriptedRecheck = new ScriptedRecheck([new Error('rush.json was being rewritten'), false]);
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, WAIT, recheck);
+      expect(await draining).toEqual({ waivedMs: 0, restartWithdrawn: true });
+      expect(recheck.calls).toBe(2);
+      arbiter.leave(candidate);
+      arbiter.leave(serving);
+      expect(arbiter.servingCount).toBe(0);
+    });
+
+    it.each(['timeout', 'abort'])(
+      'still reports a %s while a recheck runs, and ignores the recheck once the wait has failed',
+      async (mode) => {
+        const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+        const serving: IWorkspaceRestartTicket = arbiter.enter();
+        const candidate: IWorkspaceRestartTicket = arbiter.enter();
+        let finishRecheck: ((stillNeeded: boolean) => void) | undefined;
+        const recheck: IWorkspaceRestartRecheck = {
+          intervalMs: 10,
+          stillNeedsRestartAsync: () =>
+            new Promise<boolean>((resolve) => {
+              finishRecheck = resolve;
+            })
+        };
+        const abort: AbortController = new AbortController();
+        const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(
+          candidate,
+          { ...WAIT, abortSignal: abort.signal, waitTimeoutMs: mode === 'timeout' ? 100 : undefined },
+          recheck
+        );
+        await delayAsync(50);
+        expect(finishRecheck).toBeDefined();
+        if (mode === 'abort') abort.abort();
+        const error: unknown = await waiting.catch((caught: unknown) => caught);
+        expect((error as RequestSchedulerError).code).toBe(
+          mode === 'timeout' ? RequestSchedulerErrorCode.WaitTimeout : RequestSchedulerErrorCode.Aborted
+        );
+        finishRecheck!(false);
+        await delayAsync(50);
+        // The request fails and leaves; until then, its restart is still pending.
+        const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+        expect(arbiter.hasPendingRestart(script)).toBe(true);
+        for (const served of [candidate, serving, script]) arbiter.leave(served);
+        expect(arbiter.servingCount).toBe(0);
+      }
+    );
+
+    it('lets a request that drained withdraw its restart, which wakes scripts that wait for it', async () => {
+      const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+      const candidate: IWorkspaceRestartTicket = arbiter.enter();
+      expect(await arbiter.waitForDrainAsync(candidate, WAIT)).toEqual({ waivedMs: 0, restartWithdrawn: false });
+      const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, WAIT);
+      expect(await isSettledAsync(waiting)).toBe(false);
+      // Only a restart candidate has a restart to withdraw.
+      arbiter.withdrawRestart(script);
+      expect(await isSettledAsync(waiting)).toBe(false);
+      arbiter.withdrawRestart(candidate);
+      expect(await waiting).toEqual({ waivedMs: 0, restartWithdrawn: false });
+      expect(arbiter.hasPendingRestart(script)).toBe(false);
+      arbiter.leave(candidate);
+      arbiter.leave(script);
       expect(arbiter.servingCount).toBe(0);
     });
   });
