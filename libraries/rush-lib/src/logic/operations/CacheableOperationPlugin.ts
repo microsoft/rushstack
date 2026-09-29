@@ -52,8 +52,10 @@ import type { IConfigurableOperation, IOperationExecutionResult } from './IOpera
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import {
   enableUnverifiedRetainedOperations,
+  getVerifiedSkipStateHash,
   markInputFilesChecked,
-  markResultUnverifiable
+  markResultUnverifiable,
+  setTrustedStateHash
 } from './RetainedResultVerification';
 import { isBuildCacheReadSkipped, wasExecutedIncrementally } from './IncrementalExecutionState';
 
@@ -781,11 +783,21 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           switch (record.status) {
             case OperationStatus.Skipped: {
               // Skipping generally means we cannot guarantee integrity, so prevent cache writes in dependents.
-              // The exception is an operation that was not re-run because a previous iteration of this graph
+              // The exceptions are an operation that was not re-run because a previous iteration of this graph
               // produced a trusted result at exactly the same state hash (e.g. a result retained by a
-              // long-lived graph such as the Rush daemon). Since the state hash of an operation covers the
-              // state hashes of all of its dependencies, a consumer's cache key fully describes this input.
-              if (blockCacheWrite || trustedStateHashByOperation.get(operation) !== record.getStateHash()) {
+              // long-lived graph such as the Rush daemon), and an operation that a plugin skipped because it
+              // verified that the outputs are those of the build cache entry at exactly this state hash (see
+              // markSkipVerified). Since the state hash of an operation covers the state hashes of all of its
+              // dependencies, a consumer's cache key fully describes this input.
+              if (!blockCacheWrite && getVerifiedSkipStateHash(record) === record.getStateHash()) {
+                // Trusted as if the outputs were restored from that build cache entry.
+                trustedStateHashByOperation.set(operation, record.getStateHash());
+                incrementalStateHashByOperation.delete(operation);
+                setTrustedStateHash(record, record.getStateHash());
+              } else if (
+                blockCacheWrite ||
+                trustedStateHashByOperation.get(operation) !== record.getStateHash()
+              ) {
                 blockCacheWrite = true;
                 trustedStateHashByOperation.delete(operation);
                 incrementalStateHashByOperation.delete(operation);
@@ -822,6 +834,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                   incrementalStateHashByOperation.set(operation, record.getStateHash());
                 } else {
                   incrementalStateHashByOperation.delete(operation);
+                  setTrustedStateHash(record, record.getStateHash());
                 }
               } else {
                 trustedStateHashByOperation.delete(operation);

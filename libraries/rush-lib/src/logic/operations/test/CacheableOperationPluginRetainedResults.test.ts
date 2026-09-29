@@ -63,6 +63,7 @@ import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRun
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { setCommandExecution, skipBuildCacheRead } from '../IncrementalExecutionState';
+import { getTrustedStateHash, markSkipVerified } from '../RetainedResultVerification';
 import { NullOperationRunner } from '../NullOperationRunner';
 
 const mockPhase: IPhase = {
@@ -84,14 +85,25 @@ class CacheableMockRunner implements IOperationRunner {
   public readonly name: string;
   readonly #executions: string[];
   readonly #incrementalNames: ReadonlySet<string>;
+  readonly #failingNames: ReadonlySet<string>;
 
-  public constructor(name: string, executions: string[], incrementalNames: ReadonlySet<string>) {
+  public constructor(
+    name: string,
+    executions: string[],
+    incrementalNames: ReadonlySet<string>,
+    failingNames: ReadonlySet<string>
+  ) {
     this.name = name;
     this.#executions = executions;
     this.#incrementalNames = incrementalNames;
+    this.#failingNames = failingNames;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+    if (this.#failingNames.has(this.name)) {
+      this.#executions.push(`${this.name}:failed`);
+      return OperationStatus.Failure;
+    }
     if (this.#incrementalNames.has(this.name)) {
       // Like a ShellOperationRunner whose incremental execution guard allowed its incremental command
       setCommandExecution(context, { kind: 'incremental', hasIncrementalCommand: true });
@@ -126,7 +138,26 @@ interface ITestGraph {
    * The names of the operations whose runner executes its incremental command
    */
   incrementalNames: Set<string>;
+  /**
+   * The names of the operations whose runner fails
+   */
+  failingNames: Set<string>;
+  /**
+   * The names of the operations whose build cache entry cannot be written
+   */
+  failingWrites: Set<string>;
+  /**
+   * What an `afterExecuteOperationAsync` tap with a later stage than `CacheableOperationPlugin` saw for each
+   * operation in the last iteration
+   */
+  results: Map<string, IRecordedResult>;
   executeAsync(isIncrementalBuildAllowed?: boolean): Promise<IExecutionResult>;
+}
+
+interface IRecordedResult {
+  status: OperationStatus;
+  stateHash: string;
+  trustedStateHash: string | undefined;
 }
 
 interface ITestGraphOptions {
@@ -148,6 +179,20 @@ interface ITestGraphOptions {
    * If true, enables cobuilds with a lock provider that grants every lock and has no completed states.
    */
   cobuild?: boolean;
+  /**
+   * The operations whose skipped results the emulated change detection plugin marks as verified, each with the
+   * state hash that it marks, or undefined for the state hash of the operation in the iteration.
+   */
+  verifiedSkips?: ReadonlyMap<string, string | undefined>;
+  /**
+   * If set, emulates a plugin that reports a selected operation as restored from the build cache if its name is in
+   * this set and the build cache has no entry for it, because the plugin restored its outputs from elsewhere.
+   */
+  pluginFromCache?: ReadonlySet<string>;
+  /**
+   * The build cache entries, to share them with another test graph. By default, each test graph has its own.
+   */
+  cacheEntries?: Set<string>;
 }
 
 /**
@@ -155,14 +200,24 @@ interface ITestGraphOptions {
  * The mock build cache stores an entry per operation and state hash, and restores it if it exists.
  */
 async function createTestGraphAsync(names: string[], options: ITestGraphOptions = {}): Promise<ITestGraph> {
-  const { dependencies, cacheWriteEnabled = true, upToDate, cobuild } = options;
+  const {
+    dependencies,
+    cacheWriteEnabled = true,
+    upToDate,
+    cobuild,
+    verifiedSkips,
+    pluginFromCache,
+    cacheEntries = new Set()
+  } = options;
   const executions: string[] = [];
   const checks: string[] = [];
   const cacheWrites: string[] = [];
   const cacheRestores: string[] = [];
   const cobuildLocks: string[] = [];
   const incrementalNames: Set<string> = new Set();
-  const cacheEntries: Set<string> = new Set();
+  const failingNames: Set<string> = new Set();
+  const failingWrites: Set<string> = new Set();
+  const results: Map<string, IRecordedResult> = new Map();
   const localHashes: Map<string, string> = new Map();
   const operations: Map<string, Operation> = new Map();
   const projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
@@ -180,7 +235,7 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     const operation: Operation = new Operation({
       runner: options.noOpNames?.has(name)
         ? new NullOperationRunner({ name, result: OperationStatus.NoOp, silent: true })
-        : new CacheableMockRunner(name, executions, incrementalNames),
+        : new CacheableMockRunner(name, executions, incrementalNames, failingNames),
       logFilenameIdentifier: name,
       phase: mockPhase,
       project
@@ -213,6 +268,9 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
         return restored;
       },
       trySetCacheEntryAsync: async () => {
+        if (failingWrites.has(name)) {
+          return false;
+        }
         cacheWrites.push(name);
         cacheEntries.add(getCacheKey());
         return true;
@@ -294,10 +352,38 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
         }
         // The build cache does not handle operations that another plugin skipped.
         (record.operation.runner as CacheableMockRunner).cacheable = false;
+        if (verifiedSkips?.has(name)) {
+          markSkipVerified(record, verifiedSkips.get(name) ?? record.getStateHash());
+        }
         return OperationStatus.Skipped;
       }
     );
   }
+  if (pluginFromCache) {
+    graph.hooks.beforeExecuteOperationAsync.tapPromise(
+      // After the build cache is read
+      { name: 'TestRestorePlugin', stage: 10 },
+      async (
+        record: IOperationRunnerContext & IOperationExecutionResult
+      ): Promise<OperationStatus | undefined> => {
+        if (record.silent || !pluginFromCache.has(record.operation.name)) {
+          return;
+        }
+        return OperationStatus.FromCache;
+      }
+    );
+  }
+  graph.hooks.afterExecuteOperationAsync.tap(
+    // After CacheableOperationPlugin decided whether to trust the result
+    { name: 'TestTrustObserverPlugin', stage: 100 },
+    (record: IOperationRunnerContext & IOperationExecutionResult): void => {
+      results.set(record.operation.name, {
+        status: record.status,
+        stateHash: record.getStateHash(),
+        trustedStateHash: getTrustedStateHash(record)
+      });
+    }
+  );
 
   const inputsSnapshot: IInputsSnapshot = {
     hashes: new Map(),
@@ -317,12 +403,16 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     cobuildLocks,
     checks,
     incrementalNames,
+    failingNames,
+    failingWrites,
+    results,
     executeAsync: async (isIncrementalBuildAllowed?: boolean) => {
       executions.length = 0;
       cacheWrites.length = 0;
       cacheRestores.length = 0;
       cobuildLocks.length = 0;
       checks.length = 0;
+      results.clear();
       return await graph.executeAsync({ inputsSnapshot, isIncrementalBuildAllowed });
     }
   };
@@ -848,5 +938,271 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
     const result: IExecutionResult = await testGraph.executeAsync();
     expect(result.status).toBe(OperationStatus.NoOp);
     expect(testGraph.executions).toEqual([]);
+  });
+});
+
+// Skipped results that a plugin verified, and the state hash at which each result is trusted.
+describe(`${CacheableOperationPlugin.name} verified skipped results`, () => {
+  function expectTrusted(testGraph: ITestGraph, name: string): void {
+    const result: IRecordedResult | undefined = testGraph.results.get(name);
+    expect(result?.trustedStateHash).toBeDefined();
+    expect(result?.trustedStateHash).toBe(result?.stateHash);
+  }
+
+  function expectNotTrusted(testGraph: ITestGraph, name: string): void {
+    expect(testGraph.results.has(name)).toBe(true);
+    expect(testGraph.results.get(name)?.trustedStateHash).toBeUndefined();
+  }
+
+  it('writes the consumers of skipped results that a plugin verified, in the first iteration of a graph', async () => {
+    // "lib" <- "tool" <- "app"
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate: new Set(['lib', 'tool']),
+      verifiedSkips: new Map([
+        ['lib', undefined],
+        ['tool', undefined]
+      ])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['lib', 'tool', 'app']);
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual(['app']);
+  });
+
+  it('does not write the consumers of a skipped result that a plugin verified at another state hash', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate: new Set(['lib', 'tool']),
+      verifiedSkips: new Map([
+        ['lib', undefined],
+        ['tool', 'another-state-hash']
+      ])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual([]);
+  });
+
+  it('does not write the consumers of skipped results that no plugin verified', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate: new Set(['lib', 'tool'])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual([]);
+  });
+
+  it('does not trust a verified skipped result whose dependency blocks cache writes', async () => {
+    // "lib" was skipped without verification, so "tool" was verified against outputs that may not match.
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate: new Set(['lib', 'tool']),
+      verifiedSkips: new Map([['tool', undefined]])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual([]);
+    expectNotTrusted(testGraph, 'tool');
+  });
+
+  it('does not trust a verified skipped result whose dependency blocked cache writes after that dependency runs again', async () => {
+    // "lib" was skipped without verification, so "tool" was verified against outputs that may not match.
+    const upToDate: Set<string> = new Set(['lib', 'tool']);
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate,
+      verifiedSkips: new Map([['tool', undefined]])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // The daemon invalidates "lib", which runs again at the same state hash. "tool" keeps the result that was
+    // verified against the unverified outputs of "lib", so "app", which was built against it, is not written.
+    upToDate.delete('lib');
+    testGraph.graph.invalidateOperations([testGraph.operations.get('lib')!], 'daemon graph invalidate');
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['lib']);
+    expect(testGraph.executions).toEqual(['lib']);
+    expect(testGraph.cacheWrites).toEqual(['lib']);
+  });
+
+  it('does not write the consumers of a verified skipped result whose dependency the request did not select', async () => {
+    const upToDate: Set<string> = new Set();
+    const verifiedSkips: Map<string, string | undefined> = new Map();
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate,
+      verifiedSkips
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['lib', 'tool', 'app']);
+
+    // Edit "tool", which the plugin verifies, then --impacted-by tool: "app" can read the unverified outputs of
+    // "lib" through "tool".
+    testGraph.localHashes.set('tool', 'tool-v2');
+    upToDate.add('tool');
+    verifiedSkips.set('tool', undefined);
+    testGraph.operations.get('lib')!.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['tool', 'app']);
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual([]);
+  });
+
+  it('keeps trusting skipped results that a plugin verified in later iterations of a long-lived graph', async () => {
+    const upToDate: Set<string> = new Set(['lib', 'tool', 'app']);
+    const testGraph: ITestGraph = await createTestGraphAsync(['lib', 'tool', 'app'], {
+      upToDate,
+      verifiedSkips: new Map([
+        ['lib', undefined],
+        ['tool', undefined],
+        ['app', undefined]
+      ])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual([]);
+
+    // Edit "app": its dependencies are trusted, so its cache entry is written.
+    testGraph.localHashes.set('app', 'app-v2');
+    upToDate.delete('app');
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['app']);
+    expect(testGraph.executions).toEqual(['app']);
+    expect(testGraph.cacheWrites).toEqual(['app']);
+  });
+
+  it('reports the state hash of results built while cache writes are allowed', async () => {
+    // "a" <- "b"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+    expectTrusted(testGraph, 'a');
+    expectTrusted(testGraph, 'b');
+  });
+
+  it('reports the state hash of results restored from the build cache', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    await testGraph.executeAsync();
+    testGraph.localHashes.set('a', 'a-v2');
+    await testGraph.executeAsync();
+
+    // Revert "a": both have entries from the first iteration.
+    testGraph.localHashes.set('a', 'a-v1');
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual(['a', 'b']);
+    expectTrusted(testGraph, 'a');
+    expectTrusted(testGraph, 'b');
+  });
+
+  it('does not report a state hash for a skipped result that no plugin verified, or for its consumers', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], { upToDate: new Set(['a']) });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expectNotTrusted(testGraph, 'a');
+    expectNotTrusted(testGraph, 'b');
+  });
+
+  it('does not report a state hash for a failed result', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    testGraph.failingNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.Failure);
+    expectNotTrusted(testGraph, 'a');
+  });
+
+  it('does not report a state hash for an incremental result, or for the results built against it', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    await testGraph.executeAsync();
+
+    // Edit "a", which runs its incremental command.
+    testGraph.localHashes.set('a', 'a-v2');
+    testGraph.incrementalNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a:incremental', 'b']);
+    expectNotTrusted(testGraph, 'a');
+    expectNotTrusted(testGraph, 'b');
+  });
+
+  it('does not report a state hash when cache writes are disabled', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], { cacheWriteEnabled: false });
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a', 'b']);
+    expectNotTrusted(testGraph, 'a');
+    expectNotTrusted(testGraph, 'b');
+  });
+
+  it('reports the state hash of a skipped result that a plugin verified at that state hash', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], {
+      upToDate: new Set(['a']),
+      verifiedSkips: new Map([['a', undefined]])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.Skipped);
+    expectTrusted(testGraph, 'a');
+  });
+
+  it('does not report a state hash for a skipped result that a plugin verified at another state hash', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], {
+      upToDate: new Set(['a']),
+      verifiedSkips: new Map([['a', 'another-state-hash']])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.Skipped);
+    expectNotTrusted(testGraph, 'a');
+  });
+
+  it('reports the state hash of a result that a plugin restored while cache writes are allowed', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a'], { pluginFromCache: new Set(['a']) });
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual([]);
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.FromCache);
+    expectTrusted(testGraph, 'a');
+  });
+
+  it('does not report a state hash for a result that a plugin restored while a dependency blocks cache writes', async () => {
+    // "x" <- "a"
+    const testGraph: ITestGraph = await createTestGraphAsync(['x', 'a'], {
+      upToDate: new Set(['x']),
+      pluginFromCache: new Set(['a'])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.FromCache);
+    expectNotTrusted(testGraph, 'a');
+  });
+
+  it('does not report a state hash for a result restored from the build cache while a dependency blocks cache writes', async () => {
+    // "x" <- "b"
+    const cacheEntries: Set<string> = new Set();
+    const firstGraph: ITestGraph = await createTestGraphAsync(['x', 'b'], { cacheEntries });
+    await firstGraph.executeAsync();
+    expect(firstGraph.cacheWrites).toEqual(['x', 'b']);
+
+    // A new graph with the same build cache, in which a plugin skips "x" without verifying it
+    const testGraph: ITestGraph = await createTestGraphAsync(['x', 'b'], {
+      cacheEntries,
+      upToDate: new Set(['x'])
+    });
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual(['b']);
+    expectNotTrusted(testGraph, 'b');
+  });
+
+  it('does not report a state hash for a result whose build cache entry could not be written', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a']);
+    testGraph.failingWrites.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.SuccessWithWarning);
+    expectNotTrusted(testGraph, 'a');
+  });
+
+  it('does not report a state hash for a result retained by a previous iteration, or for its consumers', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    await testGraph.executeAsync();
+
+    // Edit "b", then --only b
+    testGraph.localHashes.set('b', 'b-v2');
+    testGraph.operations.get('a')!.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.results.get('a')?.status).toBe(OperationStatus.Skipped);
+    expectNotTrusted(testGraph, 'a');
+    expectNotTrusted(testGraph, 'b');
   });
 });

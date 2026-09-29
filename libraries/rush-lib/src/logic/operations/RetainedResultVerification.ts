@@ -7,6 +7,8 @@ import { type OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 
 const unverifiableResults: WeakSet<IOperationExecutionResult> = new WeakSet();
 const resultsWithCheckedInputFiles: WeakSet<IOperationExecutionResult> = new WeakSet();
+const verifiedSkipStateHashByResult: WeakMap<IOperationExecutionResult, string> = new WeakMap();
+const trustedStateHashByResult: WeakMap<IOperationExecutionResult, string> = new WeakMap();
 
 /**
  * Records that the outputs of a result of the executing iteration may not match its state hash, e.g. because input
@@ -46,6 +48,53 @@ export function markInputFilesChecked(result: IOperationExecutionResult): void {
  */
 export function areInputFilesChecked(result: IOperationExecutionResult): boolean {
   return resultsWithCheckedInputFiles.has(result);
+}
+
+/**
+ * Records that a plugin which reports the result as skipped verified that the outputs of the operation are exactly
+ * those of its build cache entry at the given state hash, e.g. because they were restored from that entry or written
+ * to it, and have not changed since. If that is the state hash of the result, `CacheableOperationPlugin` trusts the
+ * skipped result as it trusts a result restored from the build cache, so it does not block the cache writes of the
+ * consumers of the operation.
+ *
+ * @remarks
+ * Call this from the `beforeExecuteOperationAsync` tap that returns `OperationStatus.Skipped` for the result.
+ */
+export function markSkipVerified(result: IOperationExecutionResult, stateHash: string): void {
+  verifiedSkipStateHashByResult.set(result, stateHash);
+}
+
+/**
+ * Returns the state hash that was passed to `markSkipVerified` for the result, if any.
+ */
+export function getVerifiedSkipStateHash(result: IOperationExecutionResult): string | undefined {
+  return verifiedSkipStateHashByResult.get(result);
+}
+
+/**
+ * Records the state hash at which `CacheableOperationPlugin` trusts the result of the executing iteration as a
+ * complete result that the build cache entries of consumers may be written against.
+ *
+ * @remarks
+ * Only `CacheableOperationPlugin` calls this.
+ */
+export function setTrustedStateHash(result: IOperationExecutionResult, stateHash: string): void {
+  trustedStateHashByResult.set(result, stateHash);
+}
+
+/**
+ * Returns the state hash at which `CacheableOperationPlugin` trusted the result in the executing iteration as a
+ * complete result that the build cache entries of consumers may be written against: its outputs were produced,
+ * restored from the build cache, or verified by the plugin that skipped it, while cache writes were allowed for the
+ * operation, and they are not the outputs of an incremental command. Returns undefined otherwise, including for a
+ * result that a previous iteration of a long-lived graph retained.
+ *
+ * @remarks
+ * Call this from an `afterExecuteOperationAsync` tap with a stage greater than 0, which runs after
+ * `CacheableOperationPlugin` decided whether to trust the result.
+ */
+export function getTrustedStateHash(result: IOperationExecutionResult): string | undefined {
+  return trustedStateHashByResult.get(result);
 }
 
 /**
