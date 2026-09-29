@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { Rush } from '@microsoft/rush-lib';
 
 import {
+  ignoreClosedReader,
   launchRushDaemonAsync,
   resolveRushDaemonWorkspace,
   type IRushDaemonWorkspace
@@ -90,5 +91,15 @@ describe(resolveRushDaemonWorkspace.name, () => {
     } finally {
       write.mockRestore();
     }
+  });
+});
+
+describe(ignoreClosedReader.name, () => {
+  it('ignores the EPIPE of an output whose reader has gone, and throws any other error', () => {
+    const closedReader: NodeJS.ErrnoException = Object.assign(new Error('write EPIPE'), { code: 'EPIPE' });
+    const otherError: NodeJS.ErrnoException = Object.assign(new Error('write EIO'), { code: 'EIO' });
+
+    expect(() => ignoreClosedReader(closedReader)).not.toThrow();
+    expect(() => ignoreClosedReader(otherError)).toThrow(otherError);
   });
 });

@@ -29,7 +29,9 @@ Whatever starts a shutdown (a signal, a management client, the idle timeout, a l
 `closeAsync()`), the host writes one line to `onLog` when it begins, with its process ID and the reason, for example
 `rushd (PID 2750564) shutting down: received SIGTERM`; later close calls write nothing. The standalone daemon
 starts each log line with the time, and its `rushd ready at` line also has the time and the process ID, so that
-each start can be matched with its end.
+each start can be matched with its end. If whatever reads the output of `rushd` goes away first, as with
+`rushd 2>&1 | tee rushd.log` when Ctrl+C stops `tee` as well, `rushd` goes on without its output: it still stops
+cleanly and removes its socket and lockfile.
 
 Protocol 0.6 management clients can stop the host through the workspace transport rather than signaling a PID
 read from disk. The host requires a lifecycle-capable hello, drains `shutdownAck` before beginning shutdown,
