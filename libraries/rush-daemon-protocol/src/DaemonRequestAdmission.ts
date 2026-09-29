@@ -37,7 +37,12 @@ export interface IDaemonRequestQueuePositionMessage {
      * unknown kinds.
      */
     readonly restartReason?: DaemonRestartReason;
-    /** Set with `restartReason` if any of the requests that `position` counts run a rushx script: how many. */
+    /**
+     * Set with `restartReason` if any of the requests that `position` counts run a rushx script: how many. Set
+     * without it while the request waits for that many running rushx scripts to exit before it runs, because it
+     * restarts the daemon once it ends (a native `install` or `update`), which would end them; `position` then
+     * counts the same scripts. Older daemons send a plain position instead.
+     */
     readonly scriptCount?: number;
     /** Set with `restartReason` for a rushx script that waits for another request's restart, not its own. */
     readonly restartsForAnotherRequest?: boolean;

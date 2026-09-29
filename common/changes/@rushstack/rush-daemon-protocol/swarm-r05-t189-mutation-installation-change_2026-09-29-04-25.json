@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "A queue position's scriptCount can now come without a restartReason, while a native install or update waits for that many running rushx scripts to exit before it runs.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

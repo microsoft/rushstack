@@ -30,6 +30,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
+import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import { DaemonGraphTestFixture, responseSnapshot, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
@@ -100,10 +101,13 @@ interface IServedScript {
   readonly settled: () => boolean;
 }
 
-async function serveAsync(fixture: DaemonGraphTestFixture): Promise<IServedScript> {
+async function serveAsync(
+  fixture: DaemonGraphTestFixture,
+  script: 'serve' | 'serve2' = 'serve'
+): Promise<IServedScript> {
   let settled: boolean = false;
   const exchange: Promise<ITerminalExchange> = fixture
-    .runAsync(['serve'], {
+    .runAsync([script], {
       commandOrigin: 'custom',
       invocationKind: 'rushx',
       cwd: path.join(fixture.folder, 'a')
@@ -111,7 +115,10 @@ async function serveAsync(fixture: DaemonGraphTestFixture): Promise<IServedScrip
     .finally(() => {
       settled = true;
     });
-  await waitForAsync(() => fixture.runs().includes('serve-start') || settled, 'the served script to start');
+  await waitForAsync(
+    () => fixture.runs().includes(`${script}-start`) || settled,
+    'the served script to start'
+  );
   expect(settled).toBe(false);
   return { exchange, settled: () => settled };
 }
@@ -226,10 +233,10 @@ describe('workspace admission while a served rushx script runs', () => {
       expectSuccess(await fixture.runAsync(BUILD_A));
       const script: IServedScript = await serveAsync(fixture);
 
-      const install: ITerminalExchange = await fixture.runAsync(['install'], {
+      const install: IStreamedRequest = await startRequestAsync(fixture, ['install'], {
         admission: { waitTimeoutMs: 500 }
       });
-      expect(install.terminal).toMatchObject({
+      expect((await install.exchange).terminal).toMatchObject({
         kind: 'requestResult',
         payload: {
           exitCode: 1,
@@ -239,6 +246,10 @@ describe('workspace admission while a served rushx script runs', () => {
           )
         }
       });
+      // The install runs once the script exits, and then restarts the daemon, so its client names no reason.
+      expect(install.positionPayloads).toEqual([
+        { position: 1, requestId: install.requestId, scriptCount: 1 }
+      ]);
       expect(script.settled()).toBe(false);
 
       fixture.write(RELEASE_FILE, '');
@@ -853,4 +864,153 @@ describe('the reason for a restart that waits for a served rushx script', () => 
       }
     }
   );
+
+  const INSTALLATION_FILE_CHANGED: DaemonRestartReason = {
+    kind: 'workspaceInputsChanged',
+    installationFiles: ['common/config/rush/npm-shrinkwrap.json']
+  };
+
+  /**
+   * Changes an installation file once the next capture of the workspace inputs has read them. A build that needs a
+   * reload then finds that it needs a restart only when it captures them again, while it holds the workspace
+   * exclusively, so that it waits for the served scripts there rather than in the restart drain.
+   */
+  function changeInstallationAfterNextCapture(fixture: DaemonGraphTestFixture): void {
+    changeProjectConfiguration(fixture);
+    inputCaptureMock.mockImplementationOnce(async (options) => {
+      const fingerprint: IWorkspaceInputFingerprint = await actualCaptureAsync(options);
+      changeInstallation(fixture);
+      return fingerprint;
+    });
+  }
+
+  it('names the restart in the queue positions and the admission error of a build that finds it late', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      // The build is never admitted, so no successor is launched.
+      created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
+    });
+    try {
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      changeInstallationAfterNextCapture(fixture);
+      const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: 1500 }
+      });
+      const { terminal } = await build.exchange;
+      expect(terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+      });
+      expect((terminal.payload as IDaemonCommandResult).errorMessage).toContain(
+        'within its 1500ms wait timeout while waiting for a rushx script that this daemon runs to exit, before ' +
+          'the daemon restarts because common/config/rush/npm-shrinkwrap.json changed.'
+      );
+      expect(build.positionPayloads).toEqual([
+        { position: 1, requestId: build.requestId, restartReason: INSTALLATION_FILE_CHANGED, scriptCount: 1 }
+      ]);
+      expect(script.settled()).toBe(false);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('names the restart in the script wait of a graph control request as well', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      // The request is never admitted, so no successor is launched.
+      created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
+    });
+    // The restart drain before this wait waits for every served script, so the request finds one only if the drain
+    // did not wait for it. Skipping the drain isolates the wait for the scripts.
+    const drain: jest.SpiedFunction<RequestAdmissionController['waitForRestartDrainAsync']> = jest
+      .spyOn(RequestAdmissionController.prototype, 'waitForRestartDrainAsync')
+      .mockResolvedValue(true);
+    try {
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      changeInstallation(fixture);
+      const pause: IStreamedRequest = await startRequestAsync(fixture, ['daemon', 'graph', 'pause'], {
+        admission: { waitTimeoutMs: 1500 }
+      });
+      const { terminal } = await pause.exchange;
+      expect(drain).toHaveBeenCalledTimes(1);
+      expect(terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+      });
+      expect((terminal.payload as IDaemonCommandResult).errorMessage).toContain(
+        'within its 1500ms wait timeout while waiting for a rushx script that this daemon runs to exit, before ' +
+          'the daemon restarts because common/config/rush/npm-shrinkwrap.json changed.'
+      );
+      expect(pause.positionPayloads).toEqual([
+        { position: 1, requestId: pause.requestId, restartReason: INSTALLATION_FILE_CHANGED, scriptCount: 1 }
+      ]);
+      expect(script.settled()).toBe(false);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+    } finally {
+      drain.mockRestore();
+      fixture.write(RELEASE_FILE, '');
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('counts down the scripts that such a build waits for, and restarts once the last one exits', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    });
+    try {
+      const before = await pongAsync(fixture);
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+      const script2: IServedScript = await serveAsync(fixture, 'serve2');
+
+      changeInstallationAfterNextCapture(fixture);
+      const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: 20_000 }
+      });
+      const waitingFor = (scriptCount: number): IDaemonRequestQueuePositionMessage['payload'] => ({
+        position: scriptCount,
+        requestId: build.requestId,
+        restartReason: INSTALLATION_FILE_CHANGED,
+        scriptCount
+      });
+      await waitForAsync(
+        () => build.positionPayloads.length > 0 || build.settled(),
+        'the build to wait for the scripts'
+      );
+      expect(build.positionPayloads).toEqual([waitingFor(2)]);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+      await waitForAsync(
+        () => build.positionPayloads.length > 1 || build.settled(),
+        'the build to learn that a script exited'
+      );
+      expect(build.positionPayloads).toEqual([waitingFor(2), waitingFor(1)]);
+      expect(build.settled()).toBe(false);
+
+      fixture.write(LATE_RELEASE_FILE, '');
+      expectSuccess(await script2.exchange);
+      expect((await build.exchange).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, retryAfterRestart: true }
+      });
+      // The last script to exit admitted the build, which then waited for no script.
+      expect(build.positionPayloads).toEqual([waitingFor(2), waitingFor(1)]);
+      const restarted = await fixture.host.restartCompleted;
+      expect(restarted?.pid).not.toBe(before.pid);
+    } finally {
+      fixture.write(RELEASE_FILE, '');
+      fixture.write(LATE_RELEASE_FILE, '');
+      await closeRestartingFixtureAsync(fixture);
+    }
+  });
 });

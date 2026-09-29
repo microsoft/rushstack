@@ -267,7 +267,10 @@ folder. A request that times out there, or that sets `noWait`, gets its admissio
 restart. The first request that gets the result makes the daemon exit without selecting a successor, and each
 client starts one with its own launcher. A build or graph control request that waits to restart the daemon for its
 inputs checks the installation again once those waits end, just before it would select a successor, so a change
-during them gets the same result. Embedded hosts opt in with `checkInstallation`
+during them gets the same result. So does a native `install` or `update` once its waits end, just before its worker
+starts. When the installation changes after that, while the worker runs or the successor is selected, the daemon
+exits after the mutation without selecting a successor, the mutation's output says so, and each request that is
+answered from then on gets the typed result. Embedded hosts opt in with `checkInstallation`
 (`captureDaemonInstallation`).
 The daemon log (`onLog`) gets one line for the change and one for each rejected request, with its code, its
 message and, for an unexpected `routingFailed`, the stack.
@@ -305,8 +308,10 @@ environment matching, or workspace admission. A script uses its generation only 
 generation lease only until it starts: a reload that another request needs never waits for a long-running script
 such as a dev server. A restart, a native `install` or `update`, and lifecycle disposal would end a running script,
 so they still wait for every running script to exit, and a planned restart counts a script as running work until it
-exits. A script that arrives while a restart is pending waits for the restart instead of starting. The host disposes
-each old
+exits. While a request waits for them, its queue position is the number of scripts that still run, which is also its
+`scriptCount`, with the `restartReason` of a restart, or without one for a native `install` or `update`, which runs
+before its restart. A script that arrives while a restart is pending waits for the restart instead of starting.
+The host disposes each old
 resolver before replacing its session, and disposes the current resolver at shutdown; the composite must forward
 its normal disposer to its owned delegates.
 

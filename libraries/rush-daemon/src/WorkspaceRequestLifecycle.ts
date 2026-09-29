@@ -48,6 +48,7 @@ import {
 import {
   AdmissionProgress,
   RequestAdmissionController,
+  ServedScriptScheduler,
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler
 } from './WorkspaceRequestAdmission';
@@ -162,7 +163,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
    * would end the script with this process (a restart, a native mutation, disposal) waits for this lease after
    * taking `#gate` exclusively, when no other script can start.
    */
-  readonly #scripts: RequestScheduler = new RequestScheduler();
+  readonly #scripts: ServedScriptScheduler = new ServedScriptScheduler();
   readonly #restartArbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   readonly #abortController: AbortController = new AbortController();
   readonly #observers: Set<AbortController> = new Set();
@@ -531,13 +532,18 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           const current: IWorkspaceInputFingerprint = await this.#captureAsync(session, controlEnvelope);
           const currentTier: WorkspaceInputChangeTier = this.#classify(current, false);
           if (currentTier === WorkspaceInputChangeTier.Restart) {
+            const restartReason: DaemonRestartReason = this.#getRestartReason(
+              current,
+              controlEnvelope.environment,
+              false
+            );
             lease.release();
             if (ticket) {
               // Like build requests, a graph-control restart must not preempt requests this process can serve.
               const drained: boolean = await admission.waitForRestartDrainAsync(
                 this.#restartArbiter,
                 ticket,
-                this.#getRestartReason(current, controlEnvelope.environment, false),
+                restartReason,
                 this.#createRestartRecheck(session, controlEnvelope, current, false)
               );
               if (this.#restartPending) throw new RestartPendingBeforeExecution();
@@ -545,7 +551,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
-            await this.#waitForServedScriptsAsync(admission);
+            await this.#waitForServedScriptsAsync(admission, restartReason);
             session = await this.#options.provider.getSessionAsync();
             await this.#quiesceWarmSetAsync(session);
             const workspaceLease: IRequestLease = await admission.acquireAsync(
@@ -675,7 +681,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       fingerprint = await this.#captureAsync(session, envelope);
       tier = this.#classify(fingerprint, isMutation(envelope));
       if (tier === WorkspaceInputChangeTier.Restart) {
-        await this.#waitForServedScriptsAsync(admission);
+        await this.#waitForServedScriptsAsync(
+          admission,
+          this.#getRestartReason(fingerprint, envelope.environment, isMutation(envelope))
+        );
         await this.#quiesceWarmSetAsync(session);
         const workspaceLease: IRequestLease = await admission.acquireAsync(
           getWorkspaceRequestScheduler(session),
@@ -704,8 +713,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             'Native mutations require a successor launcher. No worker was started.'
           );
         }
-        await this.#waitForServedScriptsAsync(admission);
+        await this.#waitForServedScriptsAsync(admission, undefined);
         await this.#quiesceWarmSetAsync(session);
+        // After every wait, as before them: a daemon whose installation changed would run the worker from, and select
+        // the successor with, code that is gone or replaced.
+        this.#throwIfInstallationChanged();
         return {
           session,
           resolver: this.#resolver,
@@ -857,19 +869,18 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
 
   /**
    * Waits, while holding `#gate` exclusively, until no served rushx script is running; none can start meanwhile.
-   * This is contention, not graph-load progress, so requests queued behind it spend their wait timeouts.
+   * This is contention, not graph-load progress, so requests queued behind it spend their wait timeouts. The client
+   * learns how many scripts still run and, with `restartReason`, why the daemon then restarts; without one, the
+   * request is a native mutation, which runs once they exit and then restarts the daemon.
    */
-  async #waitForServedScriptsAsync(admission: RequestAdmissionController): Promise<void> {
+  async #waitForServedScriptsAsync(
+    admission: RequestAdmissionController,
+    restartReason: DaemonRestartReason | undefined
+  ): Promise<void> {
     const loading: boolean = this.#transitionProgress.active;
     this.#transitionProgress.setActive(false);
     try {
-      (
-        await admission.acquireAsync(
-          this.#scripts,
-          RequestExclusivityClass.Exclusive,
-          'a rushx script that this daemon runs to exit'
-        )
-      ).release();
+      await admission.waitForServedScriptsAsync(this.#scripts, restartReason);
     } finally {
       this.#transitionProgress.setActive(loading);
     }
@@ -1091,26 +1102,44 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     dispatchAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
     let restart: IWorkspaceProcessRestartPlan | undefined;
+    let installationChange: IDaemonInstallationChange | undefined;
+    const planWithoutSuccessor = (
+      reason: IWorkspaceProcessRestartPlan['reason'],
+      failure: Error | undefined
+    ): IWorkspaceProcessRestartPlan => ({
+      repoRoot: generation.session.metadata.repoRoot,
+      rushVersion: generation.fingerprint.selectedRushVersion,
+      environment: Object.freeze({ ...envelope.environment }),
+      reason,
+      launch: undefined,
+      failure
+    });
     const prepareRestartAsync: () => Promise<void> = async () => {
       try {
-        restart = await this.#restartPlanAsync(generation.session, envelope, 'native-mutation');
+        // A daemon whose installation changed selects no successor, which would run code that is gone or replaced.
+        if (!this.#detectInstallationChange())
+          restart = await this.#restartPlanAsync(generation.session, envelope, 'native-mutation');
       } catch (error) {
-        restart = {
-          repoRoot: generation.session.metadata.repoRoot,
-          rushVersion: generation.fingerprint.selectedRushVersion,
-          environment: Object.freeze({ ...envelope.environment }),
-          reason: 'native-mutation',
-          launch: undefined,
-          failure: error instanceof Error ? error : new Error(String(error))
-        };
+        restart = planWithoutSuccessor(
+          'native-mutation',
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
+      // Also when it changed while the successor was selected, or made that fail: each client starts one instead.
+      installationChange = this.#detectInstallationChange();
+      if (installationChange) restart = planWithoutSuccessor('installation-changed', undefined);
     };
     const resolver: IDaemonRequestResolver = createNativeMutationResolver(
       envelope,
       generation.fingerprint.selectedRushVersion,
       async (context) => {
         await prepareRestartAsync();
-        if (restart?.failure)
+        if (installationChange)
+          context.terminal.writeWarningLine(
+            `The daemon's installation at ${installationChange.folder} was ${installationChange.change}, so the ` +
+              'daemon exits after this command without starting a new one; the next command starts one.'
+          );
+        else if (restart?.failure)
           context.terminal.writeErrorLine(
             `Mutation completed, but successor startup is unavailable: ${restart.failure.message}`
           );
@@ -1134,6 +1163,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         if (!state.resultDrained) {
           restart = {
             ...restart!,
+            // Unlike a changed installation, this is a failure that the host reports.
+            reason: 'native-mutation',
             launch: undefined,
             failure: new Error(
               'Mutation result could not be drained; stopping without an automatic successor.'
@@ -1142,7 +1173,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         }
         this.#lastReloadTier = WorkspaceInputChangeTier.Restart;
         this.#closing = true;
-        this.#restartPending = restart!.launch !== undefined && restart!.failure === undefined;
+        // Requests that are answered from now on retry on the successor, or on the daemon that their client starts.
+        this.#restartPending =
+          restart!.failure === undefined &&
+          (restart!.launch !== undefined || restart!.reason === 'installation-changed');
         generation.session.retire?.();
         this.#options.onRestartRequested(restart!);
       }

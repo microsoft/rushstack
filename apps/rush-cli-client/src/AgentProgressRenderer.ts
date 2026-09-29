@@ -502,8 +502,9 @@ export class AgentProgressRenderer {
     } else if (verdict === 'CANCELLED' && result?.stopUnconfirmed) {
       summary += ` · ${UNCONFIRMED_STOP}`;
     }
-    // An admission failure says that the request waited, and why it stopped waiting.
-    if (this.#firstQueued && !result?.admissionErrorCode) {
+    // Why a success or a cancellation took long. A failure has its own reason, which an old queue position is not,
+    // and an admission failure says that the request waited, and why it stopped waiting.
+    if (this.#firstQueued && verdict !== 'FAILURE' && !result?.admissionErrorCode) {
       const { position, elapsed } = this.#firstQueued;
       summary += ` · queued behind another request (position ${position} at ${elapsed})`;
     }

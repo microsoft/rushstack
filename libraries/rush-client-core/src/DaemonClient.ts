@@ -57,7 +57,11 @@ export interface IDaemonClientConnectOptions {
  * @beta
  */
 export interface IDaemonRestartWaitDetails {
-  /** How many of the requests that the queue position counts run a rushx script. */
+  /**
+   * How many of the requests that the queue position counts run a rushx script. Without a restart reason, the
+   * request waits for that many running rushx scripts to exit before it runs, because it restarts the daemon once
+   * it ends (a native `install` or `update`), which would end them.
+   */
   readonly scriptCount?: number;
   /** The request, a rushx script, waits for another request's restart rather than its own. */
   readonly restartsForAnotherRequest?: boolean;
@@ -71,7 +75,9 @@ export interface IDaemonClientExecuteOptions {
   readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
   /**
    * Called with the request's one-based queue position whenever it changes. `restartReason` is set while the request
-   * waits for a daemon restart for that reason, and `restartWait` then says more about the wait.
+   * waits for a daemon restart for that reason, and `restartWait` then says more about the wait. Without one,
+   * `restartWait.scriptCount` is set while the request waits for rushx scripts to exit, since it restarts the daemon
+   * once it ends.
    */
   readonly onQueuePositionAsync?: (
     position: number,

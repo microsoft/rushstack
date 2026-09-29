@@ -5,6 +5,8 @@ import * as os from 'node:os';
 
 import type { DaemonClientOutcome } from '@rushstack/rush-client-core';
 
+import type { ClientName } from './ClientAdmissionControls';
+
 /** Signals that cancel a daemon-routed command. */
 export const CANCELLATION_SIGNALS: ReadonlyArray<NodeJS.Signals> = ['SIGINT', 'SIGTERM', 'SIGHUP'];
 
@@ -20,39 +22,50 @@ export function getSignalExitCode(signal: NodeJS.Signals): number {
 
 /**
  * Formats the notice printed as soon as the client asks the daemon to cancel a daemon-routed command, which can take
- * the daemon seconds, for example while it prepares the workspace graph.
+ * the daemon seconds, for example while it prepares the workspace graph. `clientName` begins the line, as it does
+ * the client's other lines.
  */
-export function formatCancellingMessage(commandName: string, timeoutMs: number): string {
+export function formatCancellingMessage(
+  commandName: string,
+  timeoutMs: number,
+  clientName: ClientName = 'rush-client'
+): string {
   const seconds: number = Math.round(timeoutMs / 1000);
-  return `rush-client: cancelling ${commandName}; waiting up to ${seconds} s for rushd to stop the request.\n`;
+  return `${clientName}: cancelling ${commandName}; waiting up to ${seconds} s for rushd to stop the request.\n`;
 }
 
 /**
  * Formats the notice printed when a daemon-routed command is cancelled. `stopUnconfirmed` says that the client
- * stopped waiting before the daemon confirmed that the request stopped.
+ * stopped waiting before the daemon confirmed that the request stopped. `clientName` begins the line.
  */
-export function formatCancellationMessage(commandName: string, stopUnconfirmed: boolean = false): string {
+export function formatCancellationMessage(
+  commandName: string,
+  stopUnconfirmed: boolean = false,
+  clientName: ClientName = 'rush-client'
+): string {
   return stopUnconfirmed
-    ? `rush-client: ${commandName} cancelled, but rushd did not confirm that the request stopped; ` +
+    ? `${clientName}: ${commandName} cancelled, but rushd did not confirm that the request stopped; ` +
         'it may still be stopping.\n'
-    : `rush-client: ${commandName} cancelled.\n`;
+    : `${clientName}: ${commandName} cancelled.\n`;
 }
 
 /**
  * Formats the notice printed when a daemon-routed command is cancelled because the process reading its output
  * exited, for example `head` in `rush-client build | head -5`. It is the only notice of that cancellation.
+ * `clientName` begins the line.
  */
 export function formatClosedOutputMessage(
   commandName: string,
   streamName: string,
   code: string | undefined,
-  stopUnconfirmed: boolean
+  stopUnconfirmed: boolean,
+  clientName: ClientName = 'rush-client'
 ): string {
   const reason: string = `the process reading its ${streamName} exited${code ? ` (${code})` : ''}`;
   return stopUnconfirmed
-    ? `rush-client: ${commandName} cancelled, because ${reason}, but rushd did not confirm that the request ` +
+    ? `${clientName}: ${commandName} cancelled, because ${reason}, but rushd did not confirm that the request ` +
         'stopped; it may still be stopping.\n'
-    : `rush-client: ${commandName} cancelled, because ${reason}.\n`;
+    : `${clientName}: ${commandName} cancelled, because ${reason}.\n`;
 }
 
 /**

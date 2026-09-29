@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "A native install or update that waits for the rushx scripts that the daemon runs now says so, for example \"waiting for 1 running rushx script to finish, since this command restarts the daemon (PID 41), which would end it\", on a pipe too. A failed command's agent summary line no longer ends with the queue position at which it once waited. The cancellation notices of rushx-client begin with \"rushx-client:\".",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

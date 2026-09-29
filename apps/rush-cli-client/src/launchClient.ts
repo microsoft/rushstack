@@ -25,7 +25,7 @@ import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-tra
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
-import { getConfiguredAdmission } from './ClientAdmissionControls';
+import { getConfiguredAdmission, type ClientName } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
 import type { AgentProgressRenderer } from './AgentProgressRenderer';
 import {
@@ -77,7 +77,7 @@ export async function launchClientAsync(
   );
   const argv: ReadonlyArray<string> = process.argv.slice(2);
   const useRushReporter: boolean = !rushx && !!rushJsonPath && readUseRushReporter(rushJsonPath);
-  const clientName: string = rushx ? 'rushx-client' : 'rush-client';
+  const clientName: ClientName = rushx ? 'rushx-client' : 'rush-client';
   const route: IClientRoute = selectClientRoute({
     argv,
     environment,
@@ -230,7 +230,7 @@ export async function launchClientAsync(
     if (closedOutput) return;
     // After SIGHUP the terminal may be gone.
     output.stderr
-      .writeAsync(Buffer.from(formatCancellingMessage(commandName, timeoutMs)))
+      .writeAsync(Buffer.from(formatCancellingMessage(commandName, timeoutMs, clientName)))
       .catch(() => undefined);
   };
   const isCancelled = (): boolean => abort.signal.aborted || cancelRequested;
@@ -353,9 +353,10 @@ export async function launchClientAsync(
                 commandName,
                 closedOutput.name,
                 closedOutput.closedCode,
-                stopUnconfirmed
+                stopUnconfirmed,
+                clientName
               )
-            : formatCancellationMessage(commandName, stopUnconfirmed && !agentRenderer)
+            : formatCancellationMessage(commandName, stopUnconfirmed && !agentRenderer, clientName)
         )
       )
       .catch(() => undefined);
@@ -366,7 +367,7 @@ export async function launchClientAsync(
     // When the agent summary line explains the failure, nothing more is printed.
     const stderr: string | undefined = reportedByAgent
       ? undefined
-      : getResultStderr(outcome.result, request.admission, rushx ? 'rushx-client' : 'rush-client');
+      : getResultStderr(outcome.result, request.admission, clientName);
     if (stderr) {
       await output.stderr.writeAsync(Buffer.from(stderr));
     }

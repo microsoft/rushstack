@@ -247,6 +247,31 @@ describe(formatDaemonRestartWait.name, () => {
     );
   });
 
+  it('says how many rushx scripts a command that restarts the daemon itself waits for (task 189)', () => {
+    const format = (scriptCount: number, daemonPid?: number, elapsedMs?: number): string =>
+      formatDaemonRestartWait({
+        position: 1,
+        reason: undefined,
+        details: { scriptCount },
+        daemonPid,
+        elapsedMs
+      });
+    expect(format(1, 41)).toBe(
+      'waiting for 1 running rushx script to finish, since this command restarts the daemon (PID 41), which ' +
+        'would end it'
+    );
+    expect(format(2)).toBe(
+      'waiting for 2 running rushx scripts to finish, since this command restarts the daemon, which would end them'
+    );
+    expect(format(1, 41, 25_400)).toMatch(
+      /^still waiting after 25s for 1 running rushx script to finish, since this command restarts the daemon /
+    );
+    // Without a count, the position counts them.
+    expect(formatDaemonRestartWait({ position: 3, reason: undefined, details: {}, daemonPid: 41 })).toMatch(
+      /^waiting for 3 running rushx scripts to finish, since /
+    );
+  });
+
   it('says how long the request has waited, from a second on', () => {
     const format = (elapsedMs: number, details: IDaemonRestartWaitDetails): string =>
       formatDaemonRestartWait({ position: 1, reason: LOCKFILE, details, daemonPid: 41, elapsedMs });
@@ -320,6 +345,11 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
 
   const LOCKFILE_WAIT: string =
     'the daemon (PID 41) then restarts, because common/config/rush/pnpm-lock.yaml changed';
+  // What a native install or update, which restarts the daemon itself once it ends, waits for.
+  const TWO_SCRIPTS: string =
+    '2 running rushx scripts to finish, since this command restarts the daemon (PID 41), which would end them';
+  const ONE_SCRIPT: string =
+    '1 running rushx script to finish, since this command restarts the daemon (PID 41), which would end it';
   const ENV_NODE_OPTIONS: DaemonRestartReason = {
     kind: 'environmentChanged',
     variableNames: ['NODE_OPTIONS']
@@ -401,6 +431,29 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             'Rush plugin changed (common/autoinstallers/p/node_modules/q/lib/x.js).\n',
           `stderr: ${client}: still waiting after 3s ${another} (2 requests ahead), because the daemon's ` +
             'installation at /snapshots/s9 was removed.\n'
+        ]);
+      }
+    });
+
+    it('writes a line for a command that restarts the daemon itself once the rushx scripts exit (task 189)', async () => {
+      for (const stderrIsTTY of [false, true]) {
+        const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
+        // The install first waits for the workspace, as any request can, and then for the scripts.
+        await handlers.onQueuePositionAsync(1);
+        await handlers.onQueuePositionAsync(2, undefined, { scriptCount: 2 });
+        advance(RESTART_WAIT_REPEAT_MS);
+        await handlers.onQueuePositionAsync(1, undefined, { scriptCount: 1 });
+        advance(RESTART_WAIT_REPEAT_MS);
+        handlers.onRequestProgress();
+        advance(RESTART_WAIT_REPEAT_MS * 2);
+        handlers.dispose();
+        expect(calls).toEqual([
+          ...(stderrIsTTY ? [`stderr: ${client}: waiting for daemon admission (position 1).\n`] : []),
+          `stderr: ${client}: waiting for ${TWO_SCRIPTS}.\n`,
+          `stderr: ${client}: still waiting after 25s for ${TWO_SCRIPTS}.\n`,
+          // On a pipe, a new count waits for the next line.
+          ...(stderrIsTTY ? [`stderr: ${client}: still waiting after 25s for ${ONE_SCRIPT}.\n`] : []),
+          `stderr: ${client}: still waiting after 50s for ${ONE_SCRIPT}.\n`
         ]);
       }
     });
@@ -591,6 +644,19 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       `announce: waiting for 1 running request to finish; the daemon (PID 41) then restarts, ${removed}`,
       `phase: ${RESUBMITTED_PHASE}`,
       `announce: waiting for 1 running request to finish; the daemon (PID 42) then restarts, ${removed}`
+    ]);
+  });
+
+  it('shows the rushx scripts that a command which restarts the daemon itself waits for as the agent phase (task 189)', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
+    await handlers.onQueuePositionAsync(1);
+    await handlers.onQueuePositionAsync(2, undefined, { scriptCount: 2 });
+    await handlers.onQueuePositionAsync(1, undefined, { scriptCount: 1 });
+    handlers.dispose();
+    expect(calls).toEqual([
+      'position: 1',
+      `announce: waiting for ${TWO_SCRIPTS}`,
+      `wait: waiting for ${ONE_SCRIPT}`
     ]);
   });
 

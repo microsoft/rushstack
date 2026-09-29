@@ -106,6 +106,44 @@ class WorkspaceRequestScheduler extends RequestScheduler {
   }
 }
 
+/**
+ * Admits the rushx scripts that a daemon runs, each with a shared lease that it holds until it exits, and tells a
+ * request that waits for all of them to exit (see {@link RequestAdmissionController.waitForServedScriptsAsync}) how
+ * many still run. Its leases can only be released: they cannot be downgraded or marked preemptible.
+ */
+export class ServedScriptScheduler extends RequestScheduler {
+  readonly #listeners: Set<(runningCount: number) => void> = new Set();
+
+  public override async acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
+    const lease: IRequestLease = await super.acquireAsync(options);
+    let released: boolean = false;
+    return {
+      get exclusivityClass(): RequestExclusivityClass {
+        return lease.exclusivityClass;
+      },
+      release: (): void => {
+        if (released) return;
+        released = true;
+        // Counted first: the release can admit the request that waits, which then holds a lease itself.
+        const runningCount: number = this.activeRequestCount - 1;
+        lease.release();
+        if (runningCount > 0) {
+          for (const listener of [...this.#listeners]) listener(runningCount);
+        }
+      }
+    };
+  }
+
+  /**
+   * Calls `listener` with the number of leases that are still held each time one is released while others remain,
+   * until the returned function is called.
+   */
+  public onLeaseReleased(listener: (runningCount: number) => void): () => void {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
+  }
+}
+
 class QueuePositionWriter {
   readonly #abortController: AbortController;
   readonly #requestId: string;
@@ -131,21 +169,35 @@ class QueuePositionWriter {
     restartWait?: IDaemonRestartWaitDetails
   ): void {
     const { scriptCount, restartsForAnotherRequest } = restartWait ?? {};
+    this.#enqueuePayload({
+      position,
+      requestId: this.#requestId,
+      ...(restartReason && {
+        restartReason,
+        ...(scriptCount ? { scriptCount } : undefined),
+        ...(restartsForAnotherRequest && { restartsForAnotherRequest })
+      })
+    });
+  }
+
+  /**
+   * Reports a wait for the rushx scripts that the daemon runs to exit, as a position that counts them. With a
+   * `restartReason`, the daemon then restarts for it. Without one, the request runs once they exit, and then restarts
+   * the daemon, as a native install or update does. A request that waits for no script reports nothing.
+   */
+  public enqueueScriptWait(scriptCount: number, restartReason: DaemonRestartReason | undefined): void {
+    if (scriptCount < 1) return;
+    this.#enqueuePayload({
+      position: scriptCount,
+      requestId: this.#requestId,
+      ...(restartReason && { restartReason }),
+      scriptCount
+    });
+  }
+
+  #enqueuePayload(payload: IDaemonRequestQueuePositionMessage['payload']): void {
     this.#tail = this.#tail
-      .then(() =>
-        this.#writeQueuePositionAsync({
-          kind: 'queuePosition',
-          payload: {
-            position,
-            requestId: this.#requestId,
-            ...(restartReason && {
-              restartReason,
-              ...(scriptCount ? { scriptCount } : undefined),
-              ...(restartsForAnotherRequest && { restartsForAnotherRequest })
-            })
-          }
-        })
-      )
+      .then(() => this.#writeQueuePositionAsync({ kind: 'queuePosition', payload }))
       .catch((error: unknown) => {
         this.#failure ??= error;
         this.#abortController.abort(error);
@@ -159,6 +211,12 @@ class QueuePositionWriter {
     }
   }
 }
+
+/** Reports a request's queue position in a scheduler's queue to its client. */
+type ReportQueuePosition = (writer: QueuePositionWriter, position: number) => void;
+
+const reportQueuePosition: ReportQueuePosition = (writer: QueuePositionWriter, position: number) =>
+  writer.enqueue(position);
 
 /**
  * Reports whether a request that other requests wait behind is doing work on their behalf, such as loading the
@@ -351,8 +409,43 @@ export class RequestAdmissionController {
       'the running requests to finish before the daemon restarts ' +
         (formatDaemonRestartCause(restartReason, 'thisRequest') ?? 'for its environment'),
       this.#abortController.signal,
-      restartReason
+      (writer: QueuePositionWriter, position: number) => writer.enqueue(position, restartReason)
     );
+  }
+
+  /**
+   * Waits until none of the rushx scripts that `scripts` admits still runs, for a request that holds the workspace's
+   * exclusive gate, so that no script can start meanwhile. What comes next would end them with this process: the
+   * daemon restarts for `restartReason`, or without one, the request runs and then restarts the daemon, as a native
+   * install or update does.
+   *
+   * @remarks
+   * Queue positions count the scripts that still run (`scriptCount`), and carry `restartReason`, so that the client
+   * can say what the request waits for, and why. The request's remaining admission budget applies, since a script
+   * may not exit until it is stopped, and a timeout names what the request waited for.
+   */
+  public async waitForServedScriptsAsync(
+    scripts: ServedScriptScheduler,
+    restartReason: DaemonRestartReason | undefined
+  ): Promise<void> {
+    const cause: string | undefined = restartReason && formatDaemonRestartCause(restartReason, 'thisRequest');
+    const unsubscribe: () => void = scripts.onLeaseReleased((runningCount: number) =>
+      this.#writer?.enqueueScriptWait(runningCount, restartReason)
+    );
+    try {
+      const lease: IRequestLease = await this.#acquireAsync(
+        scripts,
+        RequestExclusivityClass.Exclusive,
+        this.#remainingMs,
+        `a rushx script that this daemon runs to exit${cause ? `, before the daemon restarts ${cause}` : ''}`,
+        this.#abortController.signal,
+        // Until it is admitted, the request does not hold a lease itself.
+        (writer: QueuePositionWriter) => writer.enqueueScriptWait(scripts.activeRequestCount, restartReason)
+      );
+      lease.release();
+    } finally {
+      unsubscribe();
+    }
   }
 
   /**
@@ -431,7 +524,7 @@ export class RequestAdmissionController {
     waitTimeoutMs: number | undefined,
     waitingFor: string,
     abortSignal: AbortSignal = this.#abortController.signal,
-    restartReason?: DaemonRestartReason
+    reportPosition: ReportQueuePosition = reportQueuePosition
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
@@ -441,9 +534,7 @@ export class RequestAdmissionController {
         abortSignal,
         exclusivityClass,
         noWait: this.#admission?.noWait,
-        onQueuePositionChanged: writer
-          ? (position: number) => writer.enqueue(position, restartReason)
-          : undefined,
+        onQueuePositionChanged: writer ? (position: number) => reportPosition(writer, position) : undefined,
         waitTimeoutMs
       });
       await writer?.flushAsync();

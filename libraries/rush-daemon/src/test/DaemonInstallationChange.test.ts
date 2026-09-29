@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as childProcess from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -9,6 +10,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import {
   DaemonFrameType,
   decodeDaemonControlMessage,
+  decodeDaemonLogChunk,
   type DaemonControlMessage,
   type IDaemonCommandResult,
   type IDaemonFrame,
@@ -18,7 +20,13 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { captureDaemonInstallation, type CheckDaemonInstallation } from '../DaemonInstallationMonitor';
-import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
+import { DaemonWireRequestClient } from '../DaemonWireRequestClient';
+import type { RushDaemonHost } from '../RushDaemonHost';
+import {
+  getInstalledWorkspaceSuccessorLaunchAsync,
+  type GetWorkspaceSuccessorLaunchAsync
+} from '../WorkspaceProcessRestart';
+import { WorkspaceRequestLifecycle } from '../WorkspaceRequestLifecycle';
 import type { WorkspaceSession } from '../WorkspaceSession';
 import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import {
@@ -510,6 +518,202 @@ describe('a daemon whose installation changed', () => {
     fs.writeFileSync(path.join(installation.lib, 'late.js'), '');
     await fixture.buildSuccessfullyAsync();
     expect(fixture.logs).toEqual([]);
+  });
+});
+
+describe('a native install or update in a daemon whose installation changes', () => {
+  const current: { change?: IDaemonInstallationChange } = {};
+  let installation: IInstallation;
+  let fixture: DaemonGraphTestFixture;
+  let launcher: jest.MockedFunction<GetWorkspaceSuccessorLaunchAsync>;
+  let workerSpawns: number;
+  /** Called as the native mutation worker is spawned, after the request's last check before it runs. */
+  let onWorkerSpawn: () => void;
+
+  beforeEach(async () => {
+    installation = createInstallation();
+    current.change = undefined;
+    workerSpawns = 0;
+    onWorkerSpawn = () => undefined;
+    // A mutation requires a successor launcher. This one never starts a daemon, even for code that selects one.
+    launcher = jest.fn<
+      ReturnType<GetWorkspaceSuccessorLaunchAsync>,
+      Parameters<GetWorkspaceSuccessorLaunchAsync>
+    >(() => Promise.reject(new Error('No successor was expected.')));
+    const nativeChildProcess: typeof childProcess = jest.requireActual('node:child_process');
+    const spawn: typeof childProcess.spawn = nativeChildProcess.spawn;
+    jest.spyOn(nativeChildProcess, 'spawn').mockImplementation(((
+      ...args: Parameters<typeof childProcess.spawn>
+    ) => {
+      if (args[1]?.some((arg: string) => arg.endsWith(`${path.sep}NativeMutationWorker.js`))) {
+        workerSpawns++;
+        onWorkerSpawn();
+      }
+      return spawn(...args);
+    }) as typeof childProcess.spawn);
+    fixture = await DaemonGraphTestFixture.createAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.checkInstallation = () => current.change;
+      created.getSuccessorLaunchAsync = launcher;
+    });
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    try {
+      await fixture.host.closeAsync();
+      await fixture.host.restartCompleted.catch(() => undefined);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+      fs.rmSync(installation.root, { recursive: true, force: true });
+    }
+  });
+
+  function changeInstallation(): void {
+    current.change ??= { change: 'replaced', folder: installation.folder };
+  }
+
+  function stderrText(exchange: ITerminalExchange): string {
+    return exchange.frames
+      .filter((frame: IDaemonFrame) => frame.kind === DaemonFrameType.logStderr)
+      .map((frame: IDaemonFrame) => Buffer.from(decodeDaemonLogChunk(frame.payload).chunk).toString())
+      .join('');
+  }
+
+  const installationChangedResult: () => object = () => ({
+    kind: 'requestResult',
+    payload: {
+      exitCode: 1,
+      retryAfterRestart: true,
+      restartReason: { kind: 'installationChanged', change: 'replaced', folder: installation.folder }
+    }
+  });
+
+  const exitWithoutSuccessorLine: () => string = () =>
+    `The daemon's installation at ${installation.folder} was replaced, so the daemon exits after this command ` +
+    'without starting a new one; the next command starts one.';
+
+  it('answers an install whose waits end after the change with the restart, and runs no worker', async () => {
+    await fixture.buildSuccessfullyAsync();
+    // The installation changes while the install waits for the warm set to stop, after its earlier checks.
+    const session: WorkspaceSession = fixture.session;
+    const quiesceAsync: () => Promise<void> = session.quiesceWarmSetAsync.bind(session);
+    jest.spyOn(session, 'quiesceWarmSetAsync').mockImplementation(async () => {
+      changeInstallation();
+      await quiesceAsync();
+    });
+
+    // --help runs the real worker, which would install nothing.
+    const { terminal } = await fixture.runAsync(['install', '--help']);
+    expect(terminal).toMatchObject(installationChangedResult());
+    expect(workerSpawns).toBe(0);
+    expect(launcher).not.toHaveBeenCalled();
+    await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+    await fixture.host.closed;
+    expect(fixture.logs).toEqual([
+      `rushd: the installation at ${installation.folder} was replaced; exiting once running requests finish, ` +
+        'so that the next client starts a new daemon',
+      INSTALLATION_CHANGED_SHUTDOWN
+    ]);
+  });
+
+  it('exits without selecting a successor when the installation changes while the worker runs, and says why', async () => {
+    onWorkerSpawn = changeInstallation;
+
+    const exchange: ITerminalExchange = await fixture.runAsync(['install', '--help']);
+    expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+    expect(exchange.terminal.payload).not.toHaveProperty('retryAfterRestart');
+    expect(workerSpawns).toBe(1);
+    const stderr: string = stderrText(exchange);
+    expect(stderr).toContain(exitWithoutSuccessorLine());
+    expect(stderr).not.toContain('Mutation completed');
+    // The successor would run code that is gone or replaced.
+    expect(launcher).not.toHaveBeenCalled();
+    await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+  });
+
+  it('reports an install result that could not be delivered as a failure, even though the installation changed', async () => {
+    onWorkerSpawn = changeInstallation;
+    const warnings: unknown[] = [];
+    jest.spyOn(process, 'emitWarning').mockImplementation((warning) => {
+      warnings.push(warning);
+    });
+    // The result is lost, as it is when the client's connection fails while the worker runs.
+    jest
+      .spyOn(DaemonWireRequestClient.prototype, 'writeResultAsync')
+      .mockRejectedValueOnce(new Error('The connection to the client failed.'));
+
+    const { terminal } = await fixture.runAsync(['install', '--help']);
+    // The session answers a request whose result was not delivered with a rejection.
+    expect(terminal.kind).toBe('requestRejected');
+    expect(workerSpawns).toBe(1);
+    const undrained: string =
+      'Mutation result could not be drained; stopping without an automatic successor.';
+    // Unlike the change on its own, which the host does not report, this is a failure that it reports.
+    await expect(fixture.host.restartCompleted).rejects.toThrow(undrained);
+    expect(warnings).toContainEqual(expect.objectContaining({ message: undrained }));
+    expect(launcher).not.toHaveBeenCalled();
+  });
+
+  it('exits without a successor when the installation changes while the successor is selected', async () => {
+    launcher.mockImplementation(async () => {
+      changeInstallation();
+      // The launcher could not load a module that the change removed.
+      throw new Error("Cannot find module 'successor'");
+    });
+
+    const exchange: ITerminalExchange = await fixture.runAsync(['install', '--help']);
+    expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+    const stderr: string = stderrText(exchange);
+    expect(stderr).toContain(exitWithoutSuccessorLine());
+    expect(stderr).not.toContain('Mutation completed');
+    expect(launcher).toHaveBeenCalledTimes(1);
+    // The host reports no failure, since each client starts a daemon with its own launcher.
+    await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+  });
+
+  it('answers a request that reaches the lifecycle after the install finished with the restart', async () => {
+    onWorkerSpawn = changeInstallation;
+    // The later request is held where it enters the lifecycle until the daemon starts to exit.
+    const late: IDaemonRequestEnvelope = fixture.envelope(BUILD_B);
+    const lateEntered: IDeferred<void> = createDeferred<void>();
+    const releaseLate: IDeferred<void> = createDeferred<void>();
+    const dispatchAsync: WorkspaceRequestLifecycle['dispatchAsync'] =
+      WorkspaceRequestLifecycle.prototype.dispatchAsync;
+    jest.spyOn(WorkspaceRequestLifecycle.prototype, 'dispatchAsync').mockImplementation(async function (
+      this: WorkspaceRequestLifecycle,
+      ...args: Parameters<WorkspaceRequestLifecycle['dispatchAsync']>
+    ) {
+      if (args[0].requestId === late.requestId) {
+        lateEntered.resolve();
+        await releaseLate.promise;
+      }
+      return await dispatchAsync.apply(this, args);
+    });
+    const closeAsync: RushDaemonHost['closeAsync'] = fixture.host.closeAsync.bind(fixture.host);
+    jest.spyOn(fixture.host, 'closeAsync').mockImplementation((reason) => {
+      releaseLate.resolve();
+      return closeAsync(reason);
+    });
+
+    const client: DaemonRequestWireClient = await fixture.connectAsync();
+    try {
+      await client.sendControlAsync({ kind: 'requestStart', payload: late });
+      await lateEntered.promise;
+      const install: ITerminalExchange = await fixture.runAsync(['install', '--help']);
+      expect(install.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(stderrText(install)).toContain(exitWithoutSuccessorLine());
+
+      expect((await client.readTerminalAsync(late.requestId)).terminal).toMatchObject(
+        installationChangedResult()
+      );
+    } finally {
+      releaseLate.resolve();
+      await client.closeAsync();
+    }
+    await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+    expect(launcher).not.toHaveBeenCalled();
+    expect(fixture.runs()).toEqual([]);
   });
 });
 

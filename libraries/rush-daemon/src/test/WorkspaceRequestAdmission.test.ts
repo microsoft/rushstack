@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import {
+  type DaemonRestartReason,
   type IDaemonRequestAdmissionOptions,
+  type IDaemonRequestQueuePositionMessage,
   MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS
 } from '@rushstack/rush-daemon-protocol';
 
@@ -15,7 +17,8 @@ import {
 import {
   AdmissionProgress,
   freezeDaemonRequestAdmissionOptions,
-  RequestAdmissionController
+  RequestAdmissionController,
+  ServedScriptScheduler
 } from '../WorkspaceRequestAdmission';
 
 const DEFAULT_BUDGET: IDaemonRequestAdmissionOptions = { waitTimeoutMs: 100, waitTimeoutIsDefault: true };
@@ -340,6 +343,53 @@ describe(RequestAdmissionController.name, () => {
     });
     nested.dispose();
     boundary.dispose();
+    controller.dispose();
+  });
+
+  it('reports no more running scripts to a request once its wait for them has ended (task 189)', async () => {
+    const scripts: ServedScriptScheduler = new ServedScriptScheduler();
+    const [first, second, third]: IRequestLease[] = [
+      await scripts.acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedBuild }),
+      await scripts.acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedBuild }),
+      await scripts.acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedBuild })
+    ];
+    const restartReason: DaemonRestartReason = {
+      kind: 'workspaceInputsChanged',
+      installationFiles: ['common/config/rush/pnpm-lock.yaml']
+    };
+    const positions: IDaemonRequestQueuePositionMessage['payload'][] = [];
+    const controller: RequestAdmissionController = new RequestAdmissionController({
+      admission: EXPLICIT_BUDGET,
+      client: {
+        abortSignal: new AbortController().signal,
+        supportsRequestAdmission: true,
+        writeQueuePositionAsync: async (message: IDaemonRequestQueuePositionMessage) => {
+          positions.push(message.payload);
+        }
+      },
+      requestId: 'request'
+    });
+    const waitingFor = (scriptCount: number): IDaemonRequestQueuePositionMessage['payload'] => ({
+      position: scriptCount,
+      requestId: 'request',
+      restartReason,
+      scriptCount
+    });
+
+    const waiting: Promise<void> = controller.waitForServedScriptsAsync(scripts, restartReason);
+    const ended: Promise<unknown> = waiting.catch((error: unknown) => error);
+    await jest.advanceTimersByTimeAsync(0);
+    third.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(positions).toEqual([waitingFor(3), waitingFor(2)]);
+
+    await jest.advanceTimersByTimeAsync(100);
+    expect(await ended).toMatchObject({ code: RequestSchedulerErrorCode.WaitTimeout });
+    // A script that exits after the wait timed out, while another still runs, is not reported to the request.
+    second.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(positions).toEqual([waitingFor(3), waitingFor(2)]);
+    first.release();
     controller.dispose();
   });
 });

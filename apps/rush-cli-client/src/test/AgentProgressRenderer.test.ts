@@ -492,6 +492,29 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
+  it('gives no old queue position as the reason for a failure, but keeps it for a cancellation (task 189)', () => {
+    const failed: ITestRenderer = createRenderer(false, 'install');
+    failed.clock.ms = 200;
+    failed.renderer.onQueuePosition(1);
+    failed.clock.ms = 21_600;
+    failed.renderer.finish({ exitCode: 1 });
+    expect(failed.lines()).toEqual(['rush install: FAILURE in 21.6s']);
+
+    const withMessage: ITestRenderer = createRenderer(false, 'install');
+    withMessage.renderer.onQueuePosition(1);
+    withMessage.renderer.finish({ exitCode: 1, errorMessage: 'The mutation failed.' });
+    expect(withMessage.lines()).toEqual(['rush install: FAILURE in 0.0s · The mutation failed.']);
+
+    const cancelled: ITestRenderer = createRenderer(false);
+    cancelled.clock.ms = 200;
+    cancelled.renderer.onQueuePosition(1);
+    cancelled.clock.ms = 3_000;
+    cancelled.renderer.finish({ exitCode: 130, cancelled: true });
+    expect(cancelled.lines()).toEqual([
+      'rush build: CANCELLED in 3.0s · queued behind another request (position 1 at 0.2s)'
+    ]);
+  });
+
   it('shows the excerpt of a failed operation that reported errors on stdout', () => {
     const { renderer, output } = createRenderer(false);
     renderer.onEvent(status('ok (build)', 'EXECUTING'));

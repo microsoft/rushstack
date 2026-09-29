@@ -153,7 +153,8 @@ wait for a daemon that is still starting gets a line of its own
 (`rushd is still starting; waiting for it (up to 15s more) because its startup helper (PID 4242) is
 still waiting for the daemon`). A
 request that waited for admission says so at the end of its summary line
-(`· queued behind another request (position 1 at 0.2s)`). It always ends with one summary
+(`· queued behind another request (position 1 at 0.2s)`), unless it failed: a failure's summary
+line gives the failure, not the wait. It always ends with one summary
 line, for example
 `rush build: SUCCESS 772/772 operations (12 success, 760 from cache) in 3.1s`, or
 `up to date (no operations needed)`, or, when the selection parameters matched no projects,
@@ -320,7 +321,12 @@ scripts, because a script such as a dev server may run until it is stopped. A
 `rushx-client` script that waits for another request's restart prints `rushx-client:
 waiting for the daemon (PID <pid>) to restart for another request (2 requests ahead),
 because <cause>.` The line goes to the stderr that the script writes to, which is a
-pipe, because a `rushx-client` with a terminal runs the script in-process. A terminal
+pipe, because a `rushx-client` with a terminal runs the script in-process. Its first line
+comes once `rushx-client` itself has started and sent the request, which takes about half a
+second on a busy machine. A native `install` or `update` restarts the daemon once it ends,
+which would end the `rushx` scripts that the daemon runs, so it first waits for them and
+says so the same way: `rush-client: waiting for 1 running rushx script to finish, since
+this command restarts the daemon (PID <pid>), which would end it.` A terminal
 gets a line whenever the wait changes, and a pipe when the wait begins or its cause
 changes. Both get the line again with the time waited (`still waiting after 25s for
 …`) whenever 25 seconds pass without one, until the command follows the restart,
@@ -394,6 +400,7 @@ does not report that as a lost connection. It asks rushd to cancel the command, 
 as it does after Ctrl+C, and exits with code 141 (128 + SIGPIPE), which a shell reports for a writer
 that SIGPIPE ended. Instead of the cancelling and cancelled lines it prints one line, which names
 the stream: `rush-client: build cancelled, because the process reading its stdout exited (EPIPE).`
+In `rushx-client` it begins with `rushx-client:`.
 Agent output prints the same line on stderr. The client only learns of the exit at its next write,
 which in agent output on a pipe can be the next status line, up to 25 s later. A command whose
 result arrived before a write failed keeps the result's exit code. Rush run in-process and

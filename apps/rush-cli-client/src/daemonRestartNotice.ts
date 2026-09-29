@@ -100,7 +100,11 @@ export interface IDaemonRestartWait {
    * request's restart, also those that wait to restart the daemon.
    */
   readonly position: number;
-  readonly reason: DaemonRestartReason;
+  /**
+   * Why the daemon restarts. Without one, the request restarts the daemon itself once it ends, as a native
+   * `install` or `update` does, and first waits for the rushx scripts that `details.scriptCount` counts to finish.
+   */
+  readonly reason: DaemonRestartReason | undefined;
   readonly details: IDaemonRestartWaitDetails;
 }
 
@@ -124,21 +128,30 @@ function formatIncludedScripts(scriptCount: number): string {
  * Says what a request that waits for a daemon restart waits for and why the daemon restarts, for example
  * "waiting for 2 running requests to finish, including 1 rushx script; the daemon (PID 41) then restarts, because
  * common/config/rush/pnpm-lock.yaml changed". A rushx script that waits for another request's restart gets
- * "waiting for the daemon (PID 41) to restart for another request (2 requests ahead), because ...". The line names
- * environment variables, never their values, and leaves out a cause that this client cannot word.
+ * "waiting for the daemon (PID 41) to restart for another request (2 requests ahead), because ...", and a request
+ * that restarts the daemon itself once it ends gets "waiting for 1 running rushx script to finish, since this
+ * command restarts the daemon (PID 41), which would end it". The line names environment variables, never their
+ * values, and leaves out a cause that this client cannot word.
  */
 export function formatDaemonRestartWait(options: IDaemonRestartWaitLineOptions): string {
   const { position, reason, details, daemonPid, elapsedMs = 0 } = options;
   const anotherRequest: boolean = !!details.restartsForAnotherRequest;
+  const pid: string = daemonPid === undefined ? '' : ` (PID ${daemonPid})`;
+  const waiting: string =
+    elapsedMs < 1000 ? 'waiting' : `still waiting after ${Math.round(elapsedMs / 1000)}s`;
+  const scriptCount: number = details.scriptCount ?? 0;
+  if (!reason) {
+    const scripts: number = scriptCount || position;
+    return (
+      `${waiting} for ${formatCount(scripts, 'running rushx script')} to finish, since this command restarts ` +
+      `the daemon${pid}, which would end ${scripts === 1 ? 'it' : 'them'}`
+    );
+  }
   const cause: string | undefined = formatDaemonRestartCause(
     reason,
     anotherRequest ? 'anotherRequest' : 'thisRequest'
   );
   const because: string = cause === undefined ? '' : `, ${cause}`;
-  const pid: string = daemonPid === undefined ? '' : ` (PID ${daemonPid})`;
-  const waiting: string =
-    elapsedMs < 1000 ? 'waiting' : `still waiting after ${Math.round(elapsedMs / 1000)}s`;
-  const scriptCount: number = details.scriptCount ?? 0;
   if (anotherRequest) {
     const ahead: string = `${formatCount(position, 'request')} ahead${formatIncludedScripts(scriptCount)}`;
     return `${waiting} for the daemon${pid} to restart for another request (${ahead})${because}`;
@@ -152,12 +165,14 @@ export function formatDaemonRestartWait(options: IDaemonRestartWaitLineOptions):
 
 /** The part of a restart wait that a pipe gets a line for at once when it changes: whose restart, and why. */
 function getRestartWaitCause(wait: IDaemonRestartWait): string {
-  const anotherRequest: boolean = !!wait.details.restartsForAnotherRequest;
+  const { reason, details } = wait;
+  if (!reason) return 'thisCommand';
+  const anotherRequest: boolean = !!details.restartsForAnotherRequest;
   const cause: string | undefined = formatDaemonRestartCause(
-    wait.reason,
+    reason,
     anotherRequest ? 'anotherRequest' : 'thisRequest'
   );
-  return `${anotherRequest}:${cause ?? wait.reason.kind}`;
+  return `${anotherRequest}:${cause ?? reason.kind}`;
 }
 
 /**
@@ -292,7 +307,8 @@ export function createDaemonRequestNoticeHandlers(
       details: IDaemonRestartWaitDetails = {}
     ): Promise<void> => {
       if (disposed) return;
-      if (!restartReason) {
+      // Without a reason, a count of scripts means that the request restarts the daemon itself once it ends.
+      if (!restartReason && !details.scriptCount) {
         endRestartWait();
         if (agentRenderer) agentRenderer.onQueuePosition(position);
         else if (stderrIsTTY) {

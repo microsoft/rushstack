@@ -296,6 +296,49 @@ describe('the cancellation of a daemon request (task 132)', () => {
     expect(process.exitCode).toBe(130);
   });
 
+  it.each([
+    ['confirms', 'rushx-client: build cancelled.\n'],
+    [
+      'does not confirm',
+      'rushx-client: build cancelled, but rushd did not confirm that the request stopped; it may still be ' +
+        'stopping.\n'
+    ]
+  ])(
+    'begins both notices of a rushx script with rushx-client when rushd %s the stop (task 189)',
+    async (confirmation: string, cancelled: string) => {
+      process.argv = [process.execPath, 'rushx-client', 'build'];
+      execute(async (options) => {
+        deliverSignal('SIGINT');
+        requestCancel(options);
+        if (confirmation === 'confirms') return aborted(options);
+        throw cancellationDeadline();
+      });
+      await launchClientAsync(true);
+      expect(stderr).toEqual([
+        'rushx-client: cancelling build; waiting up to 5 s for rushd to stop the request.\n',
+        cancelled
+      ]);
+      expect(process.exitCode).toBe(130);
+    }
+  );
+
+  it('begins the error line of a rushx script that rushd failed with rushx-client, like its notices (task 189)', async () => {
+    process.argv = [process.execPath, 'rushx-client', 'build'];
+    execute(async (options) => ({
+      kind: 'result',
+      result: {
+        requestId: options.request.requestId,
+        exitCode: 1,
+        outcome: 'failure',
+        aborted: false,
+        errorMessage: 'The daemon shut down before the request finished.'
+      }
+    }));
+    await launchClientAsync(true);
+    expect(stderr).toEqual(['rushx-client: The daemon shut down before the request finished.\n']);
+    expect(process.exitCode).toBe(1);
+  });
+
   it('writes both notices in the agent output, once', async () => {
     const output: string[] = [];
     const renderer: AgentProgressRenderer = new AgentProgressRenderer({
@@ -366,6 +409,31 @@ describe('the cancellation of a daemon request (task 132)', () => {
       expect(stderr).toEqual([CLOSED_STDOUT]);
       expect(process.exitCode).toBe(141);
     });
+
+    it.each([
+      ['confirms', 'rushx-client: build cancelled, because the process reading its stdout exited (EPIPE).\n'],
+      [
+        'does not confirm',
+        'rushx-client: build cancelled, because the process reading its stdout exited (EPIPE), but rushd did ' +
+          'not confirm that the request stopped; it may still be stopping.\n'
+      ]
+    ])(
+      'begins the line of a rushx script with rushx-client when rushd %s the stop, like its other notices (task 189)',
+      async (confirmation: string, closed: string) => {
+        process.argv = [process.execPath, 'rushx-client', 'build'];
+        closeReader(process.stdout);
+        execute(async (options) => {
+          await options.onStdoutAsync!(Buffer.from('built-a\n'), options.request.requestId);
+          await abortedAsync(options.abortSignal!);
+          requestCancel(options);
+          if (confirmation === 'confirms') return aborted(options);
+          throw cancellationDeadline();
+        });
+        await launchClientAsync(true);
+        expect(stderr).toEqual([closed]);
+        expect(process.exitCode).toBe(141);
+      }
+    );
 
     it('fails no write when stderr has the same reader (`2>&1 | head`)', async () => {
       const written: string[] = [];
