@@ -120,7 +120,15 @@ reclaims only an absent/dead owner, spawns a detached startup helper, and reserv
 handing it the explicit command. The helper spawns the launcher without
 a shell and retains that reservation until the daemon completes hello/ping readiness,
 independently of whether the requesting client survives. It tries to connect every 50 ms, so it
-releases the reservation within about 50 ms of the daemon's readiness. It waits for a live launcher for
+releases the reservation within about 50 ms of the daemon's readiness. On Linux, the helper first
+closes the file descriptors that it inherited without close-on-exec, other than its IPC channel, so
+that the daemon does not hold them for as long as it runs: for example the pipe of a bash process
+substitution (`rush-client build 2> >(sed …)`), whose reader would otherwise wait for the daemon to
+exit, or a lock file that a script opened. On other platforms it closes nothing. A daemon that a
+client from an earlier release started still holds what it inherited. If the daemon is from an
+earlier release too, so does the successor that it starts when it restarts itself (after an
+environment change, for example), because it starts that successor through its own helper. The
+helper waits for a live launcher for
 at least 120 seconds, even when the requesting client's own deadline is shorter, so a slow
 first start (for example while Windows scans newly installed files) is still handed off to
 later clients instead of leaving an abandoned reservation. The starting client holds the start

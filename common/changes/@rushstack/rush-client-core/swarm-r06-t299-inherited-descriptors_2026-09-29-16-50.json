@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "On Linux, the daemon startup helper now closes the file descriptors that it inherited without close-on-exec before it starts the daemon. The daemon no longer holds, for as long as it runs, a pipe or lock file that the client's caller left open, such as the pipe of a bash process substitution (`rush-client build 2> >(sed …)`), whose reader waited for the daemon to exit. A daemon that a client from an earlier release started still holds what it inherited. If the daemon is from an earlier release too, so does the successor that it starts when it restarts itself.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}
