@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When a command fails, Rush now waits for stdout and stderr to accept the output already written to them before it calls `process.exit()`. Before, when stdout was a pipe that was read more slowly than Rush wrote to it, the reader lost the end of the output, including the summary of the failed operations. If the reader closes the pipe while Rush waits, Rush still exits with the command's exit code.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

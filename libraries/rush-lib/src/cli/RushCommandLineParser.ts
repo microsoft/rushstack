@@ -74,6 +74,7 @@ import { RushAlerts } from '../utilities/RushAlerts';
 import { getEngineJsonFileLoadCache, type JsonFileLoadCache } from '../utilities/JsonFileLoadCache';
 import { initializeDotEnv } from '../logic/dotenv';
 import { measureAsyncFn } from '../utilities/performance';
+import { waitForStreamsToFlushAsync } from '../utilities/streamUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import {
   _correlateRushSessionError,
@@ -830,7 +831,11 @@ export class RushCommandLineParser extends CommandLineParser {
     if (telemetryFlushAsync) {
       pendingFlushes.push(telemetryFlushAsync);
     }
-    void Promise.allSettled(pendingFlushes).then(handleExit);
+    // process.exit() discards output that a pipe hasn't accepted yet, such as the end of a failed build's
+    // log and its summary when the reader is slower than Rush.
+    void Promise.allSettled(pendingFlushes)
+      .then(() => waitForStreamsToFlushAsync([process.stdout, process.stderr]))
+      .finally(handleExit);
   }
 
   #reportInitializationErrorAndSetExitCode(error: Error): void {
