@@ -48,7 +48,7 @@ aware `LockFile` for the first-start mutex, including kernel-enforced exclusive
 file sharing on Windows. The winning client rechecks readiness,
 reclaims only an absent/dead owner, and reserves `<lockfilePath>.starting` before
 handing the explicit command to a detached startup helper. The helper spawns without
-a shell and retains that reservation until the daemon completes hello/ping readiness,
+a shell and holds that reservation until the daemon completes hello/ping readiness,
 independently of whether the requesting client survives. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed. While holding the mutex with no startup reservation, stale leftovers are
@@ -61,14 +61,34 @@ which removes the record, socket and reservation after the same no-listener/no-l
 The helper uses a stable tool cwd, and the starting client awaits its exit after
 readiness. The explicit launcher's cwd is unchanged.
 
-An unresolved startup reservation is never automatically reclaimed based on PID
-liveness or elapsed time. If the helper cannot establish readiness, subsequent starts
-fail closed instead of risking a second detached daemon. Only a known spawn failure
-(no executable started) releases the reservation immediately. An arbitrary launcher
-can spawn descendants, so its exit is not proof that another launch is safe.
-Recovery of an abandoned reservation requires operator confirmation that the original
-startup cannot still publish an endpoint; normal successful startup releases it
-automatically. Cancellation stops the client waiting, not the detached handoff.
+The startup reservation is bounded and verifiable. It is a JSON record of its token,
+creation time, startup timeout, the process responsible for releasing it (the starting
+client until the helper is spawned, then the helper, with its start time) and the
+launcher PID once spawned. The reservation is released when:
+
+- the daemon completes hello/ping readiness (by the helper);
+- no executable could be started, or the launcher the helper started exits before
+  publishing an endpoint (by the helper). The client reports this immediately with the
+  last lines of `<lockfilePath>.log`, such as the launcher's own error;
+- any client finds a ready endpoint whose published ownership record matches the
+  hello/ping status while the reservation's owner is gone. Such an endpoint is used even
+  while a reservation exists; a live helper releases its own reservation;
+- a client holding the first-start mutex finds it stale: neither its owner nor its
+  launcher is alive, or it has outlived its own startup timeout by a fixed 60-second
+  grace period (this bounds PID reuse and a wedged launcher). Unrecognized records, such
+  as token-only reservations from older clients, have no verifiable owner and become
+  stale by file age. A stale reservation is reclaimed without waiting for the deadline.
+
+Every check-then-write of the reservation (owner/launcher updates, release, stale
+reclaim, and cleanup after a dead owner) holds a short `<lockfile>-reservation` lock,
+so a resumed stale owner can never overwrite or remove a replacement reservation.
+
+Otherwise, a live reservation makes later starts wait for readiness, then fail with the
+reservation's owner/launcher state instead of launching a second daemon. A launcher that
+misses the deadline but later binds is still accepted. If a stale reservation is
+reclaimed while an old launcher is merely suspended, the transport's bind-time ownership
+check still rejects whichever daemon binds second, so one workspace never has two
+serving daemons. Cancellation stops the client waiting, not the detached handoff.
 
 If a wire-compatible daemon reports the wrong implementation version and an explicit
 replacement launcher is available, startup serializes replacement under that same mutex.
@@ -129,6 +149,5 @@ graph reference client. A successful handshake is still transport readiness, not
 guarantee that every command or configuration is supported. Version-selected daemon
 installation and incompatible-protocol replacement remain
 separate integration work; this core package does not construct an engine.
-The startup helper and durable pre-bind reservation protect concurrent first-invocations
-even if the original client dies. They do not add a new daemon protocol or authorize
-automatic recovery of ambiguous launcher failures.
+The startup helper and bounded pre-bind reservation protect concurrent first-invocations
+even if the original client dies. They do not add a new daemon protocol.

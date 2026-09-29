@@ -177,6 +177,7 @@ export async function launchClientAsync(
       writeStreamAsync(stream === 'stderr' ? process.stderr : process.stdout, bytes)
   });
   let outcome: DaemonClientOutcome | undefined;
+  let restartFailure: DaemonClientError | undefined;
   const discoveryLines: string[] = [];
   const writeDiscoveryAsync = async (): Promise<void> => {
     if (discoveryLines.length > 0) {
@@ -226,8 +227,13 @@ export async function launchClientAsync(
         : undefined
     });
   } catch (error) {
+    if (!(error instanceof DaemonClientError)) throw error;
+    if (!abort.signal.aborted) {
+      // A restart handoff fails only before the request executes, so in-process fallback cannot replay work.
+      if (error.code !== 'startupFailed') throw error;
+      restartFailure = error;
+    }
     // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
-    if (!abort.signal.aborted || !(error instanceof DaemonClientError)) throw error;
     outcome = undefined;
   } finally {
     for (const signal of CANCELLATION_SIGNALS) process.removeListener(signal, onSignal);
@@ -236,6 +242,12 @@ export async function launchClientAsync(
     } finally {
       await client.closeAsync();
     }
+  }
+  if (restartFailure) {
+    agentRenderer?.dispose();
+    process.stderr.write(`rush-client: ${restartFailure.message} Using in-process Rush.\n`);
+    launchInProcess(route.argv, rushx, selectedVersion);
+    return;
   }
   if (outcome === undefined || isCancelledOutcome(outcome, abort.signal.aborted)) {
     const exitCode: number = getSignalExitCode(cancellationSignal ?? 'SIGINT');

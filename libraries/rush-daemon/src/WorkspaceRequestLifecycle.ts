@@ -41,6 +41,7 @@ import {
 } from './WorkspaceRequestAdmission';
 import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineComponentFactory';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
+import { validateRequestRushEnvironment } from './RushEnvironmentValidation';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
@@ -98,6 +99,17 @@ class RestartBeforeExecution extends Error {
 class RestartPendingBeforeExecution extends Error {
   public constructor() {
     super('The workspace is restarting. No operation was scheduled or executed.');
+  }
+}
+
+/** The request's Rush environment would prevent a successor from starting; the current daemon is kept. */
+class InvalidRequestEnvironment extends Error {}
+
+function assertValidRequestEnvironment(envelope: IDaemonRequestEnvelope): void {
+  try {
+    validateRequestRushEnvironment(envelope.environment);
+  } catch (error) {
+    throw new InvalidRequestEnvironment(error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -261,6 +273,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             });
             return;
           }
+          if (error instanceof InvalidRequestEnvironment && !state.began && !state.terminalAttempted) {
+            await client.interactiveSession.finishAsync();
+            await client.writeResultAsync(preExecutionFailure(envelope.requestId, error));
+            return;
+          }
           if (error instanceof RequestSchedulerError && !state.began && !state.terminalAttempted) {
             await client.interactiveSession.finishAsync();
             await client.writeResultAsync({
@@ -387,6 +404,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       }
       let fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
       let tier: WorkspaceInputChangeTier = this.#classify(fingerprint, isMutation(envelope));
+      if (tier === WorkspaceInputChangeTier.Restart) assertValidRequestEnvironment(envelope);
       let commandIdentity: string | undefined;
       let projectFingerprint: string | undefined;
       if (tier !== WorkspaceInputChangeTier.Restart && !isMutation(envelope)) {
@@ -445,6 +463,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       fingerprint = await this.#captureAsync(session, envelope);
       tier = this.#classify(fingerprint, isMutation(envelope));
       if (tier === WorkspaceInputChangeTier.Restart) {
+        assertValidRequestEnvironment(envelope);
         await this.#quiesceWarmSetAsync(session);
         const workspaceLease: IRequestLease = await admission.acquireAsync(
           getWorkspaceRequestScheduler(session),
