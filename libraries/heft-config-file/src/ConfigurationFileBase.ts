@@ -5,7 +5,13 @@ import * as nodeJsPath from 'node:path';
 
 import { JSONPath } from 'jsonpath-plus';
 
-import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
+import {
+  JsonSchema,
+  JsonFile,
+  Import,
+  FileSystem,
+  type IJsonSchemaCompiledValidator
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 interface IConfigurationJson {
@@ -367,6 +373,7 @@ export type IConfigurationFileOptionsWithJsonSchemaFilePath<
      */
     jsonSchemaPath: string;
     jsonSchemaObject?: never;
+    jsonSchemaValidator?: never;
   };
 
 /**
@@ -382,6 +389,23 @@ export type IConfigurationFileOptionsWithJsonSchemaObject<
      */
     jsonSchemaObject: object;
     jsonSchemaPath?: never;
+    jsonSchemaValidator?: never;
+  };
+
+/**
+ * @beta
+ */
+export type IConfigurationFileOptionsWithJsonSchemaValidator<
+  TConfigurationFile,
+  TExtraOptions extends {}
+> = IConfigurationFileOptionsBase<TConfigurationFile> &
+  TExtraOptions & {
+    /**
+     * A precompiled JSON schema validator generated during the build.
+     */
+    jsonSchemaValidator: IJsonSchemaCompiledValidator;
+    jsonSchemaPath?: never;
+    jsonSchemaObject?: never;
   };
 
 /**
@@ -389,7 +413,8 @@ export type IConfigurationFileOptionsWithJsonSchemaObject<
  */
 export type IConfigurationFileOptions<TConfigurationFile, TExtraOptions extends object> =
   | IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile, TExtraOptions>
-  | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions>;
+  | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions>
+  | IConfigurationFileOptionsWithJsonSchemaValidator<TConfigurationFile, TExtraOptions>;
 
 interface IJsonPathCallbackObject {
   path: string;
@@ -450,12 +475,15 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     const {
       jsonSchemaObject,
       jsonSchemaPath,
+      jsonSchemaValidator,
       jsonPathMetadata = {},
       propertyInheritance = {},
       propertyInheritanceDefaults = {},
       customValidationFunction
     } = options;
-    if (jsonSchemaObject) {
+    if (jsonSchemaValidator) {
+      this.#getSchema = () => JsonSchema.fromCompiledValidator(jsonSchemaValidator);
+    } else if (jsonSchemaObject) {
       this.#getSchema = () => JsonSchema.fromLoadedObject(jsonSchemaObject);
     } else {
       this.#getSchema = () => JsonSchema.fromFile(jsonSchemaPath);

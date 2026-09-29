@@ -1,0 +1,9 @@
+{
+  "$id": "http://example.com/schemas/test-schema-standalone.schema.json",
+  "x-myvendor-description": "Standalone schema",
+  "type": "object",
+  "properties": {
+    "item": { "$ref": "test-schema-nested-child.schema.json#/definitions/type1" }
+  },
+  "required": ["item"]
+}

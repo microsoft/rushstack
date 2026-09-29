@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { runInNewContext } from 'node:vm';
+
+import Ajv, { type ValidateFunction } from 'ajv';
+
 import { JsonFile, type JsonObject } from '../JsonFile';
 import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema';
 
@@ -103,6 +107,71 @@ describe(JsonSchema.name, () => {
       const errorDetails: string[] = [];
       schema.validateObjectWithCallback(jsonObject, (errorInfo: IJsonSchemaErrorInfo) => {
         errorDetails.push(errorInfo.details);
+      });
+
+      test('wraps a compiled validator without loading a schema and preserves error formatting', () => {
+        const validator: ValidateFunction = new Ajv().compile({
+          type: 'object',
+          properties: { name: { type: 'string' } },
+          required: ['name']
+        });
+        const compiledSchema: JsonSchema = JsonSchema.fromCompiledValidator(validator, 'compiled schema');
+        const loadSpy = jest.spyOn(JsonFile, 'load');
+        try {
+          expect(compiledSchema.shortName).toBe('compiled schema');
+          expect(() => compiledSchema.ensureCompiled()).not.toThrow();
+          expect(() => compiledSchema.validateObject({ name: 'valid' }, 'input.json')).not.toThrow();
+          expect(() => compiledSchema.validateObject({}, 'input.json')).toThrow(
+            /JSON validation failed:\s+input\.json\s+Error: #\s+must have required property 'name'/
+          );
+          expect(loadSpy).not.toHaveBeenCalled();
+        } finally {
+          loadSpy.mockRestore();
+        }
+        expect(JsonSchema.fromCompiledValidator(validator).shortName).toBe('(anonymous schema)');
+      });
+
+      describe(JsonSchema.compileStandaloneCodeFromFile.name, () => {
+        function loadStandaloneSchema(filename: string, options?: Parameters<typeof JsonSchema.fromFile>[1]): JsonSchema {
+          const code: string = JsonSchema.compileStandaloneCodeFromFile(filename, options);
+          const generatedModule: { exports?: ValidateFunction } = {};
+          runInNewContext(code, { module: generatedModule, require });
+          expect(typeof generatedModule.exports).toBe('function');
+          return JsonSchema.fromCompiledValidator(generatedModule.exports!);
+        }
+
+        test.each([DRAFT_04_SCHEMA_PATH, DRAFT_07_SCHEMA_PATH])(
+          'validates formats and inferred draft version for %s',
+          (filename) => {
+            const standaloneSchema: JsonSchema = loadStandaloneSchema(filename);
+            expect(() =>
+              standaloneSchema.validateObject(
+                { exampleString: 'hello', exampleArray: [], exampleLink: 'https://example.com' },
+                'input.json'
+              )
+            ).not.toThrow();
+            expect(() =>
+              standaloneSchema.validateObject(
+                { exampleString: 'hello', exampleArray: [], exampleLink: 'not a URI' },
+                'input.json'
+              )
+            ).toThrow(/must match format "uri"/);
+          }
+        );
+
+        test('resolves dependent $ref schemas and accepts vendor keywords', () => {
+          const child: JsonSchema = JsonSchema.fromFile(
+            `${__dirname}/test-data/test-schemas/test-schema-nested-child.schema.json`
+          );
+          const standaloneSchema: JsonSchema = loadStandaloneSchema(
+            `${__dirname}/test-data/test-schemas/test-schema-standalone.schema.json`,
+            { dependentSchemas: [child] }
+          );
+          expect(() => standaloneSchema.validateObject({ item: { field1: 'valid' } }, 'input.json')).not.toThrow();
+          expect(() => standaloneSchema.validateObject({ item: {} }, 'input.json')).toThrow(
+            /must have required property 'field1'/
+          );
+        });
       });
 
       expect(errorDetails).toMatchSnapshot();

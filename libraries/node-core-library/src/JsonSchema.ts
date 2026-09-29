@@ -5,6 +5,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
+import standaloneCode from 'ajv/dist/standalone';
 import AjvDraft04 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
 
@@ -203,6 +204,7 @@ function _inferJsonSchemaVersion({ $schema }: JsonObject): JsonSchemaVersion | u
 export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
+  private _shortName: string | undefined = undefined;
   private _validator: ValidateFunction | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
   private _schemaVersion: JsonSchemaVersion | undefined = undefined;
@@ -260,12 +262,40 @@ export class JsonSchema {
   }
 
   /**
+   * Wraps an already compiled AJV-compatible validator without loading or compiling a schema at runtime.
+   * The validator must expose AJV's `errors` property after a failed validation.
+   */
+  public static fromCompiledValidator(validator: ValidateFunction, shortName?: string): JsonSchema {
+    const schema: JsonSchema = new JsonSchema();
+    schema._validator = validator;
+    schema._shortName = shortName;
+    return schema;
+  }
+
+  /**
+   * Compiles a schema file into CommonJS standalone AJV code.
+   * @remarks
+   * The generated code requires the `ajv` runtime package in the consuming project.
+   */
+  public static compileStandaloneCodeFromFile(
+    filename: string,
+    options?: IJsonSchemaFromFileOptions
+  ): string {
+    const schema: JsonSchema = JsonSchema.fromFile(filename, options);
+    const { ajv, validator } = schema._compileValidator({ code: { source: true } });
+    return standaloneCode(ajv, validator);
+  }
+
+  /**
    * Returns a short name for this schema, for use in error messages.
    * @remarks
    * If the schema was loaded from a file, then the base filename is used.  Otherwise, the "$id"
    * field is used if available.
    */
   public get shortName(): string {
+    if (this._shortName !== undefined) {
+      return this._shortName;
+    }
     if (!this._filename) {
       if (this._schemaObject) {
         const schemaWithId: ISchemaWithId = this._schemaObject as ISchemaWithId;
@@ -287,76 +317,80 @@ export class JsonSchema {
    * Any dependencies will be compiled as well.
    */
   public ensureCompiled(): void {
-    this._ensureLoaded();
-
     if (!this._validator) {
-      const targetSchemaVersion: JsonSchemaVersion | undefined =
-        this._schemaVersion ?? _inferJsonSchemaVersion(this._schemaObject);
-      const validatorOptions: AjvOptions = {
-        strictSchema: true,
-        allowUnionTypes: true
-      };
-
-      let validator: Ajv;
-      // Keep legacy support for older draft-04 schema
-      switch (targetSchemaVersion) {
-        case 'draft-04': {
-          validator = new AjvDraft04(validatorOptions);
-          break;
-        }
-
-        case 'draft-07':
-        default: {
-          validator = new Ajv(validatorOptions);
-          break;
-        }
-      }
-
-      // Enable json-schema format validation
-      // https://ajv.js.org/packages/ajv-formats.html
-      addFormats(validator);
-      if (this._customFormats) {
-        for (const [name, format] of Object.entries(this._customFormats)) {
-          validator.addFormat(name, { ...format, async: false });
-        }
-      }
-
-      const collectedSchemas: JsonSchema[] = [];
-      const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
-      const seenIds: Set<string> = new Set<string>();
-
-      this._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
-
-      // Unless explicitly rejected, scan the top-level keys of each schema for vendor
-      // extension keys matching the x-<vendor>-<keyword> pattern and register them with
-      // AJV so that strict mode does not reject them as unknown keywords.
-      if (!this._rejectVendorExtensionKeywords) {
-        const vendorKeywords: Set<string> = new Set<string>();
-        _collectVendorExtensionKeywords(this._schemaObject, vendorKeywords);
-        for (const collectedSchema of collectedSchemas) {
-          _collectVendorExtensionKeywords(collectedSchema._schemaObject, vendorKeywords);
-        }
-        for (const keyword of vendorKeywords) {
-          validator.addKeyword(keyword);
-        }
-      }
-
-      // Validate each schema in order.  We specifically do not supply them all together, because we want
-      // to make sure that circular references will fail to validate.
-      for (const collectedSchema of collectedSchemas) {
-        validator.validateSchema(collectedSchema._schemaObject) as boolean;
-        if (validator.errors && validator.errors.length > 0) {
-          throw new Error(
-            `Failed to validate schema "${collectedSchema.shortName}":` +
-              os.EOL +
-              _formatErrorDetails(validator.errors)
-          );
-        }
-        validator.addSchema(collectedSchema._schemaObject);
-      }
-
-      this._validator = validator.compile(this._schemaObject);
+      this._validator = this._compileValidator({}).validator;
     }
+  }
+
+  private _compileValidator(options: AjvOptions): { ajv: Ajv; validator: ValidateFunction } {
+    this._ensureLoaded();
+    const targetSchemaVersion: JsonSchemaVersion | undefined =
+      this._schemaVersion ?? _inferJsonSchemaVersion(this._schemaObject!);
+    const validatorOptions: AjvOptions = {
+      strictSchema: true,
+      allowUnionTypes: true,
+      ...options
+    };
+
+    let validator: Ajv;
+    // Keep legacy support for older draft-04 schema
+    switch (targetSchemaVersion) {
+      case 'draft-04': {
+        validator = new AjvDraft04(validatorOptions);
+        break;
+      }
+
+      case 'draft-07':
+      default: {
+        validator = new Ajv(validatorOptions);
+        break;
+      }
+    }
+
+    // Enable json-schema format validation
+    // https://ajv.js.org/packages/ajv-formats.html
+    addFormats(validator);
+    if (this._customFormats) {
+      for (const [name, format] of Object.entries(this._customFormats)) {
+        validator.addFormat(name, { ...format, async: false });
+      }
+    }
+
+    const collectedSchemas: JsonSchema[] = [];
+    const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
+    const seenIds: Set<string> = new Set<string>();
+
+    this._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
+
+    // Unless explicitly rejected, scan the top-level keys of each schema for vendor
+    // extension keys matching the x-<vendor>-<keyword> pattern and register them with
+    // AJV so that strict mode does not reject them as unknown keywords.
+    if (!this._rejectVendorExtensionKeywords) {
+      const vendorKeywords: Set<string> = new Set<string>();
+      _collectVendorExtensionKeywords(this._schemaObject, vendorKeywords);
+      for (const collectedSchema of collectedSchemas) {
+        _collectVendorExtensionKeywords(collectedSchema._schemaObject, vendorKeywords);
+      }
+      for (const keyword of vendorKeywords) {
+        validator.addKeyword(keyword);
+      }
+    }
+
+    // Validate each schema in order.  We specifically do not supply them all together, because we want
+    // to make sure that circular references will fail to validate.
+    for (const collectedSchema of collectedSchemas) {
+      validator.validateSchema(collectedSchema._schemaObject) as boolean;
+      if (validator.errors && validator.errors.length > 0) {
+        throw new Error(
+          `Failed to validate schema "${collectedSchema.shortName}":` +
+            os.EOL +
+            _formatErrorDetails(validator.errors)
+        );
+      }
+      validator.addSchema(collectedSchema._schemaObject);
+    }
+
+    return { ajv: validator, validator: validator.compile(this._schemaObject) };
   }
 
   /**
