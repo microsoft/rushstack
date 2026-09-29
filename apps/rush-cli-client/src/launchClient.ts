@@ -41,6 +41,7 @@ import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
 import { getTerminalColumns } from './terminalColumns';
 import { createDaemonRequestNoticeHandlers } from './daemonRestartNotice';
+import { formatInProcessFallbackMessage } from './inProcessFallback';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
   getBundledRushVersion,
@@ -307,7 +308,7 @@ export async function launchClientAsync(
     throw new Error(message);
   } else {
     agentRenderer?.dispose();
-    process.stderr.write(`rush-client: ${outcome.message ?? outcome.reason}; using in-process Rush.\n`);
+    process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason));
     await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
   }
 }

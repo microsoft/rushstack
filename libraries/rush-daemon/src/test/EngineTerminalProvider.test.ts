@@ -12,7 +12,7 @@ describe(EngineTerminalProvider.name, () => {
     const terminal: EngineTerminalProvider = new EngineTerminalProvider();
     terminal.write('Permission denied', TerminalProviderSeverity.error);
     expect(terminal.hasBufferedMessages).toBe(true);
-    expect(terminal.describeError(new Error('snapshot failed'))).toBe('Permission denied\nsnapshot failed');
+    expect(terminal.describeError(new Error('snapshot failed'))).toBe('snapshot failed\nPermission denied');
     expect(terminal.hasBufferedMessages).toBe(false);
     expect(terminal.describeError(new Error('next request'))).toBe('next request');
   });
@@ -35,7 +35,7 @@ describe(EngineTerminalProvider.name, () => {
         throw failure;
       })
     ).rejects.toBe(failure);
-    expect(failure.message).toBe('binding request diagnostic\nPermission denied\ncould not capture');
+    expect(failure.message).toBe('could not capture\nbinding request diagnostic\nPermission denied');
 
     terminal.write('stale', TerminalProviderSeverity.warning);
     await expect(terminal.reconcileWithRequestDiagnosticsAsync(async () => 'ok')).resolves.toBe('ok');
@@ -54,7 +54,7 @@ describe(EngineTerminalProvider.name, () => {
     terminal.write('\n', TerminalProviderSeverity.log);
     terminal.write('Project "a" has no "build" script.\n', TerminalProviderSeverity.warning);
     expect(terminal.describeError(new Error('selection failed'))).toBe(
-      'Project "a" has no "build" script.\nselection failed'
+      'selection failed\nProject "a" has no "build" script.'
     );
   });
 
@@ -71,8 +71,29 @@ describe(EngineTerminalProvider.name, () => {
 
     terminal.write('No error line was written.\n', TerminalProviderSeverity.warning);
     expect(terminal.describeError(new AlreadyReportedError())).toBe(
-      'No error line was written.\nAn error occurred.'
+      'An error occurred.\nNo error line was written.'
     );
+  });
+
+  it('gives the error first, since clients give the first line as the reason, and the other lines in order', () => {
+    const terminal: EngineTerminalProvider = new EngineTerminalProvider();
+    const warning: string =
+      `The daemon's compatible plugin list names plugins that are not configured in rush-plugins.json: ` +
+      `"no-such-plugin".`;
+    const unknownProject: string = 'The project name "@x/nope" passed to "--to" does not exist in rush.json.';
+    terminal.write(`${warning}\n`, TerminalProviderSeverity.warning);
+    terminal.write(`${unknownProject}\n`, TerminalProviderSeverity.error);
+    expect(terminal.describeError(new AlreadyReportedError())).toBe(`${unknownProject}\n${warning}`);
+
+    terminal.write(`${warning}\n`, TerminalProviderSeverity.warning);
+    expect(terminal.describeError(new Error('Plugins must be daemon-compatible.'))).toBe(
+      `Plugins must be daemon-compatible.\n${warning}`
+    );
+
+    terminal.write(`${warning}\n`, TerminalProviderSeverity.warning);
+    terminal.write('first error\n', TerminalProviderSeverity.error);
+    terminal.write('second error\n', TerminalProviderSeverity.error);
+    expect(terminal.describeError(new AlreadyReportedError())).toBe(`first error\n${warning}\nsecond error`);
   });
 
   it('drops diagnostics when the engine must be recreated', async () => {

@@ -25,21 +25,30 @@ export class EngineTerminalProvider implements ITerminalProvider {
    * Drains buffered diagnostics into the failure description, so that they belong to the failing request
    * and are never replayed into a later request. Like the request output, the description omits verbose and
    * debug messages unless the graph runs in debug mode: loading a large workspace writes thousands of them.
+   *
+   * The error comes first, because clients give the first line as the reason for the failure. The other
+   * diagnostics follow in the order they were written: a warning written while parsing the command line, such
+   * as one about the compatible plugin list, is not the reason for an error that selecting operations throws.
    */
   public describeError(error: unknown): string {
     const lines: string[] = [];
-    let hasErrorLine: boolean = false;
+    let firstErrorLineIndex: number = -1;
     for (const { text, severity } of this.#messages.splice(0)) {
       const line: string = text.replace(/\r?\n$/, '');
       if (this.#isHidden(severity) || !line.trim()) continue;
-      hasErrorLine ||= severity === TerminalProviderSeverity.error;
+      if (firstErrorLineIndex < 0 && severity === TerminalProviderSeverity.error) {
+        firstErrorLineIndex = lines.length;
+      }
       lines.push(line);
     }
     // An AlreadyReportedError only says "An error occurred."; the error lines written before it are the report.
-    if (!(hasErrorLine && error instanceof Error && error instanceof AlreadyReportedError)) {
-      lines.push(error instanceof Error ? error.message : String(error));
-    }
-    return lines.join('\n');
+    const reason: string =
+      firstErrorLineIndex >= 0 && error instanceof Error && error instanceof AlreadyReportedError
+        ? lines.splice(firstErrorLineIndex, 1)[0]
+        : error instanceof Error
+          ? error.message
+          : String(error);
+    return [reason, ...lines].join('\n');
   }
 
   public get hasBufferedMessages(): boolean {

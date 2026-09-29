@@ -54,6 +54,8 @@ export interface IFixtureOptions {
   /** Uses PNPM, which installs a dependency file (shrinkwrap-deps.json) that change detection hashes per project. */
   readonly pnpm?: boolean;
   readonly telemetryEnabled?: boolean;
+  /** Sets `daemon.compatiblePlugins` in rush.json. */
+  readonly compatiblePlugins?: ReadonlyArray<string>;
 }
 
 export class DecoratedTestResolver implements IDaemonRequestResolver {
@@ -117,7 +119,8 @@ export async function createFixtureAsync(
       // Retention assertions must not depend on the surrounding Jest worker's accumulated RSS.
       daemon: {
         warmMemoryBudgetMB: 100_000,
-        ...(options.incrementalBuilds === undefined ? {} : { incrementalBuilds: options.incrementalBuilds })
+        ...(options.incrementalBuilds === undefined ? {} : { incrementalBuilds: options.incrementalBuilds }),
+        ...(options.compatiblePlugins === undefined ? {} : { compatiblePlugins: options.compatiblePlugins })
       },
       ...(options.telemetryEnabled ? { telemetryEnabled: true } : {}),
       projectFolderMinDepth: 2,

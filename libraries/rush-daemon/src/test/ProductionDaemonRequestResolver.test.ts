@@ -191,6 +191,33 @@ describe('native production daemon engine', () => {
     }
   });
 
+  it('gives the error as the reason for an invalid selection, before a warning that the parse wrote', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+      compatiblePlugins: ['no-such-plugin']
+    });
+    // The binding request also writes the warning to the daemon's own stderr, which is the launcher log.
+    const stderr: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockReturnValue(true);
+    try {
+      const rejection: { kind: string; payload: { code: string; message: string } } = {
+        kind: 'requestRejected',
+        payload: {
+          code: 'invalidRequest',
+          message:
+            'The project name "nope" passed to "--to" does not exist in rush.json.\n' +
+            `The daemon's compatible plugin list (rush.json "daemon.compatiblePlugins" or ` +
+            'RUSH_DAEMON_COMPATIBLE_PLUGINS) names plugins that are not configured in rush-plugins.json: ' +
+            `"no-such-plugin". Check that each entry is the plugin's "pluginName".`
+        }
+      };
+      expect((await runAsync(fixture, 'cold', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      expect((await runAsync(fixture, 'warm', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      expect(runs(fixture)).toEqual([]);
+    } finally {
+      stderr.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('keeps tier0 session and graph identity for unchanged content, including metadata touches', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
@@ -1622,7 +1649,7 @@ process.exit(23);
           kind: 'requestRejected',
           payload: {
             message: expect.stringMatching(
-              /Permission denied[\s\S]*Rush could not capture the next workspace inputs snapshot\./
+              /^Rush could not capture the next workspace inputs snapshot\.\n[\s\S]*Permission denied/
             )
           }
         });

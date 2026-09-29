@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "When the daemon rejects a request, the error now comes first in the message, so that the client gives it as the reason. Warnings written before the error, such as one about the compatible plugin list, follow it instead of taking its place in the summary line.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}
