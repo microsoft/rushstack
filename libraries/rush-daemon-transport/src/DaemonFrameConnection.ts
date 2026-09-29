@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { once } from 'node:events';
 import type * as net from 'node:net';
 
 import { DaemonFrameDecoder, encodeDaemonFrame } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonFrame } from '@rushstack/rush-daemon-protocol';
 
+import { waitForBufferedWriteAsync } from './DaemonBufferedWrite';
 import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 
 /** One end of a framed rushd connection over a `net` socket (Unix socket or named pipe).
@@ -36,11 +36,11 @@ export class DaemonFrameConnection {
   public onClosed(handler: (error: Error | undefined) => void): void {
     this.#closedHandler = handler;
   }
-  /** Encodes and writes a frame, resolving when the socket has drained it. @throws {@link DaemonTransportError} when closed. */
+  /** Encodes and writes a frame, resolving once the socket has written it. @throws {@link DaemonTransportError} when closed, or when it closes first. */
   public async sendFrameAsync(frame: IDaemonFrame): Promise<void> {
     this.#assertOpen();
     if (!this.#socket.write(encodeDaemonFrame(frame))) {
-      await once(this.#socket, 'drain');
+      await waitForBufferedWriteAsync(this.#socket);
     }
   }
   /** Half-closes the writable side and releases the socket. */
