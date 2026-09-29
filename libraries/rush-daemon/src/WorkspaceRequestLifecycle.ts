@@ -39,6 +39,11 @@ import {
 } from './DaemonRequestDispatcher';
 import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import { createNativeMutationResolver } from './NativeMutationRequest';
+import {
+  captureNativeMutationInstallationStateAsync,
+  isInstallationUnchangedByMutation,
+  type INativeMutationInstallationState
+} from './NativeMutationInstallationState';
 import { parseDaemonGraphRequest, type IDaemonGraphRequest } from './DaemonGraphRequest';
 import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 import {
@@ -1177,6 +1182,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   ): Promise<void> {
     let restart: IWorkspaceProcessRestartPlan | undefined;
     let installationChange: IDaemonInstallationChange | undefined;
+    // The exit code of a mutation that failed before it changed the installation, as far as the daemon can tell when the
+    // worker exits. The worker's processes are joined after that, so the daemon keeps running only if that still holds.
+    let keptExitCode: number | undefined;
+    const installationBefore: INativeMutationInstallationState | undefined =
+      await captureNativeMutationInstallationStateAsync(generation.session.rushConfiguration);
     const planWithoutSuccessor = (
       reason: IWorkspaceProcessRestartPlan['reason'],
       failure: Error | undefined
@@ -1206,7 +1216,14 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     const resolver: IDaemonRequestResolver = createNativeMutationResolver(
       envelope,
       generation.fingerprint.selectedRushVersion,
-      async (context) => {
+      async (context, exitCode: number) => {
+        if (
+          exitCode !== 0 &&
+          (await this.#mayKeepAfterFailedMutationAsync(generation, envelope, installationBefore))
+        ) {
+          keptExitCode = exitCode;
+          return;
+        }
         await prepareRestartAsync();
         if (installationChange)
           context.terminal.writeWarningLine(
@@ -1232,7 +1249,17 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         }
       });
     } finally {
-      if (state.began) {
+      if (
+        keptExitCode !== undefined &&
+        (await this.#isInstallationUnchangedAfterJoinAsync(generation, installationBefore))
+      ) {
+        // This daemon is now in the state that a reload which found the Rush lock busy leaves: quiescing the warm set
+        // required a reload, so the next request that needs the graph loads it again.
+        this.#options.onLog?.(
+          `rushd: "rush ${envelope.commandName}" failed (exit code ${keptExitCode}) before it changed the ` +
+            'installation, so this daemon keeps running and reloads the workspace for the next request'
+        );
+      } else if (state.began) {
         if (!restart) await prepareRestartAsync();
         if (!state.resultDrained) {
           restart = {
@@ -1255,6 +1282,61 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         this.#options.onRestartRequested(restart!);
       }
     }
+  }
+
+  /**
+   * Whether a native mutation that failed may keep this daemon: when its worker exited, the installation was as it
+   * was before, and the workspace inputs don't require a new daemon process for any other reason.
+   */
+  async #mayKeepAfterFailedMutationAsync(
+    generation: IPreparedGeneration,
+    envelope: IDaemonRequestEnvelope,
+    installationBefore: INativeMutationInstallationState | undefined
+  ): Promise<boolean> {
+    try {
+      if (!(await this.#isInstallationUnchangedAsync(generation, installationBefore))) return false;
+      // Classified as for a build, which also compares the installation files, such as a lockfile that the mutation
+      // wrote: a daemon that the next build would restart for its inputs restarts now instead.
+      const fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(generation.session, envelope);
+      return (
+        this.#classify(fingerprint, false) !== WorkspaceInputChangeTier.Restart &&
+        !this.#detectInstallationChange()
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  /** Whether the installation is still as it was once the worker's processes were joined. */
+  async #isInstallationUnchangedAfterJoinAsync(
+    generation: IPreparedGeneration,
+    installationBefore: INativeMutationInstallationState | undefined
+  ): Promise<boolean> {
+    try {
+      // A worker whose processes could not be joined may still be changing the installation.
+      assertWorkspaceRequestResourcesHealthy(generation.session);
+      return await this.#isInstallationUnchangedAsync(generation, installationBefore);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Whether the files that show a native `install` or `update` changed the installation are as they were before its
+   * worker started, and the daemon's own installation did not change.
+   */
+  async #isInstallationUnchangedAsync(
+    generation: IPreparedGeneration,
+    installationBefore: INativeMutationInstallationState | undefined
+  ): Promise<boolean> {
+    if (!installationBefore) return false;
+    const installationAfter: INativeMutationInstallationState | undefined =
+      await captureNativeMutationInstallationStateAsync(generation.session.rushConfiguration);
+    return (
+      installationAfter !== undefined &&
+      isInstallationUnchangedByMutation(installationBefore, installationAfter) &&
+      !this.#detectInstallationChange()
+    );
   }
 
   /**

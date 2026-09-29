@@ -321,9 +321,21 @@ may have changed files: its exact result is drained before old generation cleanu
 Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
 launched, the host stops without silently starting an incorrect successor. A mutation that started is never
 replayed, even after failure; an unstarted request can retry only through the typed pre-execution contract above.
-An ordinary nonzero mutation result still permits restart once its resources have joined. A failed worker
-join is different: its failure result drains, but the sticky workspace ownership barrier forbids both the
-host's successor and a competing client's auto-start, even after the result connection closes.
+A mutation that exits nonzero before it changed the installation keeps the daemon instead, for example one that
+fails on the Rush lock, on `common/scripts` or on its arguments. It keeps it only if every subspace's
+`last-install.flag` existed when the worker started and has the same file identity (device, inode, size and times)
+when it ends, since Rush deletes that flag before it changes the subspace and a reinstall writes the same content
+again; if the hotlink state records no link, since Rush unlinks those packages before it deletes the flag; if a
+fresh input capture, which compares the installation files as a build does, would not restart the daemon; and if the
+daemon's own installation did not change. It decides only once the worker's processes have joined, and it checks the
+flags, the hotlink state and its own installation again then, since a process that the worker started can still
+change them after the worker exits; a mutation whose worker could not be joined never keeps the daemon. The kept
+daemon selects no successor, even when the result could not be drained, and logs `rushd: "rush install" failed (exit
+code 1) before it changed the installation, so this daemon keeps running and reloads the workspace for the next
+request`. The mutation quiesced the warm set, so the next request that needs the graph reloads it, as after a reload
+that found the Rush lock busy. Any other nonzero mutation result still permits restart once its resources have
+joined. A failed worker join is different: its failure result drains, but the sticky workspace ownership barrier
+forbids both the host's successor and a competing client's auto-start, even after the result connection closes.
 
 The opt-in CLI forwards positively identified built-in `install` and `update` only to peers supporting protocol
 0.10. Other administrative commands remain native; Rushx script names are not reinterpreted as Rush built-ins.

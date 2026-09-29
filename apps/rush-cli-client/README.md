@@ -369,9 +369,11 @@ because <cause>.` The line goes to the stderr that the script writes to, which i
 pipe, because a `rushx-client` with a terminal runs the script in-process. Its first line
 comes once `rushx-client` itself has started and sent the request, which takes about half a
 second on a busy machine. A native `install` or `update` restarts the daemon once it ends,
-which would end the `rushx` scripts that the daemon runs, so it first waits for them and
-says so the same way: `rush-client: waiting for 1 running rushx script to finish, since
-this command restarts the daemon (PID <pid>), which would end it.` A terminal
+unless it fails before it changes the installation (for example on the Rush lock), and
+that restart would end the `rushx` scripts that the daemon runs. The daemon can't tell
+beforehand whether the command will fail, so it first waits for them and says so the
+same way: `rush-client: waiting for 1 running rushx script to finish, since this command
+restarts the daemon (PID <pid>), which would end it.` A terminal
 gets a line whenever the wait changes, and a pipe when the wait begins or its cause
 changes. Both get the line again with the time waited (`still waiting after 25s for
 …`) whenever 25 seconds pass without one, until the command follows the restart,
