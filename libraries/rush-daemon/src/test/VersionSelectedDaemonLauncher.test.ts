@@ -99,11 +99,17 @@ describe('version-selected daemon launcher', () => {
         RUSH_PARALLELISM: '48',
         COPILOT_AGENT_SESSION_ID: 'session-1',
         ODSP_TELEMETRY_TAG: 'tag-1',
+        CLAUDE_CODE_SESSION_ID: 'claude-session-1',
+        CLAUDE_PID: '4242',
+        CLAUDE_CODE_MESSAGING_TOKEN: 'token-1',
+        TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
         RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
         RUSHD_OUTPUT: 'agent',
         // The first client's session folders may disappear while the daemon lives on.
         TMPDIR: '/tmp/session-1',
         XDG_RUNTIME_DIR: '/run/user/1000',
+        CLAUDE_JOB_DIR: '/home/user/.claude/jobs/job-1',
+        CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-1.sock',
         TEMP: '/tmp/temp-1',
         RUSHD_RUNTIME_DIR: '/var/rushd',
         UNSET: undefined

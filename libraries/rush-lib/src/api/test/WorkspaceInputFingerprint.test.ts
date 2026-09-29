@@ -221,6 +221,23 @@ describe('workspace input fingerprints', () => {
           WT_SESSION: 'w'
         },
         { ODSP_TELEMETRY_TAG: 'nightly-7' },
+        // What Claude Code's Bash tool sets in every command, and with Remote Control, messaging or a
+        // background session
+        {
+          CLAUDECODE: '1',
+          CLAUDE_CODE_ENTRYPOINT: 'cli',
+          CLAUDE_CODE_CHILD_SESSION: '1',
+          CLAUDE_CODE_SESSION_ID: 'claude-session-2',
+          CLAUDE_EFFORT: 'high',
+          CLAUDE_PID: '4242'
+        },
+        {
+          CLAUDE_CODE_BRIDGE_SESSION_ID: 'session_01bridge',
+          CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-2.sock',
+          CLAUDE_CODE_MESSAGING_TOKEN: 'token-2',
+          CLAUDE_JOB_DIR: '/home/user/.claude/jobs/job-2'
+        },
+        { TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01', TRACESTATE: 'vendor=1' },
         { PATH: `${base.PATH}${path.delimiter}${base.PATH}` },
         { TERM: undefined, PWD: undefined },
         { TMPDIR: '/scratch/job-1', XDG_RUNTIME_DIR: '/run/user/1000' },
@@ -264,6 +281,16 @@ describe('workspace input fingerprints', () => {
       RUSH_PARALLELISM: '48',
       COPILOT_AGENT_SESSION_ID: 'session-1',
       ODSP_TELEMETRY_TAG: 'tag-1',
+      CLAUDE_CODE_CHILD_SESSION: '1',
+      CLAUDE_CODE_SESSION_ID: 'claude-session-1',
+      CLAUDE_EFFORT: 'high',
+      CLAUDE_PID: '4242',
+      CLAUDE_CODE_BRIDGE_SESSION_ID: 'session_01bridge',
+      CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-1.sock',
+      CLAUDE_CODE_MESSAGING_TOKEN: 'token-1',
+      CLAUDE_JOB_DIR: '/home/user/.claude/jobs/job-1',
+      TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+      TRACESTATE: 'vendor=1',
       RUSHD_OUTPUT: 'agent',
       RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
       TMPDIR: '/scratch/job-1',
@@ -274,6 +301,9 @@ describe('workspace input fingerprints', () => {
     };
     expect(getWorkspaceHostEnvironment(environment)).toEqual({
       HOME: '/home/user',
+      // Markers and settings that name no session, process, folder or secret stay.
+      CLAUDE_CODE_CHILD_SESSION: '1',
+      CLAUDE_EFFORT: 'high',
       RUSHD_OUTPUT: 'agent',
       RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
       TEMP: 'C:\\Temp',
@@ -292,6 +322,10 @@ describe('workspace input fingerprints', () => {
       COPILOT_AGENT_SESSION_ID: 'session-A',
       ODSP_TELEMETRY_TAG: 'tag-A',
       COPILOT_CLI: '1',
+      CLAUDE_CODE_SESSION_ID: 'claude-session-A',
+      CLAUDE_EFFORT: 'high',
+      CLAUDE_PID: '4242',
+      TRACEPARENT: '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01',
       GIT_ASKPASS: '/window-A/askpass.sh',
       WT_SESSION: 'wt-A',
       UNSET: undefined
@@ -301,6 +335,9 @@ describe('workspace input fingerprints', () => {
       PATH: '/other/bin',
       COPILOT_AGENT_SESSION_ID: 'session-B',
       ODSP_TELEMETRY_TAG: 'tag-B',
+      CLAUDE_CODE_SESSION_ID: 'claude-session-B',
+      CLAUDE_EFFORT: 'max',
+      TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
       RUSH_PARALLELISM: '2',
       WT_SESSION: 'wt-B',
       RUSH_INVOKED_FOLDER: '/repo/apps/b',
@@ -312,6 +349,9 @@ describe('workspace input fingerprints', () => {
       NODE_OPTIONS: '--max-old-space-size=8192',
       COPILOT_AGENT_SESSION_ID: 'session-B',
       ODSP_TELEMETRY_TAG: 'tag-B',
+      CLAUDE_CODE_SESSION_ID: 'claude-session-B',
+      CLAUDE_EFFORT: 'max',
+      TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
       RUSH_PARALLELISM: '2',
       WT_SESSION: 'wt-B',
       RUSH_INVOKED_FOLDER: '/repo/apps/b'

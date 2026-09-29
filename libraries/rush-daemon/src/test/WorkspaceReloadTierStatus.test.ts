@@ -73,6 +73,18 @@ it('reuses the warm generation when only volatile per-shell environment variable
     const before = await pongAsync(fixture);
     const generation: number = fixture.host.workspaceGeneration;
     const graph = fixture.session.operationGraph;
+    // What Claude Code's Bash tool sets in every command it runs
+    const claudeCode: Record<string, string> = {
+      ...fixture.environment,
+      CLAUDECODE: '1',
+      CLAUDE_CODE_ENTRYPOINT: 'cli',
+      CLAUDE_CODE_CHILD_SESSION: '1',
+      CLAUDE_CODE_SESSION_ID: 'claude-session-1',
+      CLAUDE_EFFORT: 'high',
+      CLAUDE_PID: '4242',
+      CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-1.sock',
+      CLAUDE_CODE_MESSAGING_TOKEN: 'token-1'
+    };
     for (const [label, environment] of Object.entries({
       same: fixture.environment,
       shell: {
@@ -99,6 +111,20 @@ it('reuses the warm generation when only volatile per-shell environment variable
       },
       telemetryTag: { ...fixture.environment, ODSP_TELEMETRY_TAG: 'nightly-7' },
       anotherTelemetryTag: { ...fixture.environment, ODSP_TELEMETRY_TAG: 'nightly-8' },
+      claudeCode,
+      claudeEffort: { ...claudeCode, CLAUDE_EFFORT: 'max' },
+      anotherClaudeSession: {
+        ...claudeCode,
+        CLAUDE_CODE_SESSION_ID: 'claude-session-2',
+        CLAUDE_PID: '4343',
+        CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-2.sock',
+        CLAUDE_CODE_MESSAGING_TOKEN: 'token-2',
+        CLAUDE_CODE_BRIDGE_SESSION_ID: 'session_01bridge',
+        CLAUDE_JOB_DIR: '/home/user/.claude/jobs/job-2',
+        TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+        TRACESTATE: 'vendor=1'
+      },
+      humanAfterClaude: fixture.environment,
       repeatedPath: {
         ...fixture.environment,
         PATH: [fixture.environment.PATH, fixture.environment.PATH].join(path.delimiter)
