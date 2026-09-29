@@ -10,7 +10,7 @@ import { DaemonFrameType, decodeDaemonControlMessage } from '@rushstack/rush-dae
 import type { DaemonControlMessage, IDaemonFrame } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
@@ -34,8 +34,10 @@ it('queues a mismatched-environment restart until matching queued and in-flight 
     created.write('hold', '');
     created.write(
       'c/build.cjs',
-      "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c\\n');" +
-        "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+      withScriptDeadline(
+        "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c\\n');" +
+          "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+      )
     );
   });
   const order: string[] = [];

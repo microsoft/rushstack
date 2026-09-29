@@ -30,7 +30,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture, responseSnapshot } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, responseSnapshot, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
@@ -85,9 +85,11 @@ function createServingFixtureAsync(
     );
     created.write(
       'a/serve.cjs',
-      "const fs=require('node:fs');const n=process.argv[2]||'serve';fs.appendFileSync('../runs.txt',n+'-start\\n');" +
-        "const t=setInterval(()=>{if(fs.existsSync('../release-'+n)){clearInterval(t);" +
-        "fs.appendFileSync('../runs.txt',n+'-end\\n');}},20);"
+      withScriptDeadline(
+        "const fs=require('node:fs');const n=process.argv[2]||'serve';fs.appendFileSync('../runs.txt',n+'-start\\n');" +
+          "const t=setInterval(()=>{if(fs.existsSync('../release-'+n)){clearInterval(t);" +
+          "fs.appendFileSync('../runs.txt',n+'-end\\n');}},20);"
+      )
     );
     configure?.(created);
   });
@@ -399,12 +401,18 @@ describe('a restart drain whose change is reverted', () => {
       const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
         admission: { waitTimeoutMs: 20_000 }
       });
-      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the build to wait for the drain');
+      await waitForAsync(
+        () => build.positions.length > 0 || build.settled(),
+        'the build to wait for the drain'
+      );
       const late: IStreamedRequest = await startRequestAsync(fixture, ['serve2'], {
         ...SERVE2,
         cwd: path.join(fixture.folder, 'a')
       });
-      await waitForAsync(() => late.positions.length > 0 || late.settled(), 'the script to wait for the restart');
+      await waitForAsync(
+        () => late.positions.length > 0 || late.settled(),
+        'the script to wait for the restart'
+      );
       // Several rechecks find that the change is still there.
       await delayAsync(2500);
       expect(build.settled()).toBe(false);
@@ -447,7 +455,10 @@ describe('a restart drain whose change is reverted', () => {
       const pause: IStreamedRequest = await startRequestAsync(fixture, ['daemon', 'graph', 'pause'], {
         admission: { waitTimeoutMs: 20_000 }
       });
-      await waitForAsync(() => pause.positions.length > 0 || pause.settled(), 'the request to wait for the drain');
+      await waitForAsync(
+        () => pause.positions.length > 0 || pause.settled(),
+        'the request to wait for the drain'
+      );
       await delayAsync(1500);
       expect(pause.settled()).toBe(false);
       // Like a build, the request is told why it waits (task 166).
@@ -490,7 +501,10 @@ describe('a restart drain whose change is reverted', () => {
       const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
         admission: { waitTimeoutMs: 20_000 }
       });
-      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the build to wait for the drain');
+      await waitForAsync(
+        () => build.positions.length > 0 || build.settled(),
+        'the build to wait for the drain'
+      );
       await delayAsync(2500);
       expect(build.settled()).toBe(false);
 
@@ -515,9 +529,11 @@ describe('a restart drain whose change is reverted', () => {
       // Project c builds until the test creates release-build.
       created.write(
         'c/build.cjs',
-        "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c-start\\n');" +
-          "const t=setInterval(()=>{if(fs.existsSync('../release-build')){clearInterval(t);" +
-          "fs.appendFileSync('../runs.txt','c-end\\n');}},20);"
+        withScriptDeadline(
+          "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c-start\\n');" +
+            "const t=setInterval(()=>{if(fs.existsSync('../release-build')){clearInterval(t);" +
+            "fs.appendFileSync('../runs.txt','c-end\\n');}},20);"
+        )
       );
     });
     try {
@@ -529,12 +545,18 @@ describe('a restart drain whose change is reverted', () => {
       const build: IStreamedRequest = await startRequestAsync(fixture, ['build', '--to', 'c'], {
         admission: { waitTimeoutMs: 20_000 }
       });
-      await waitForAsync(() => build.positions.length > 0 || build.settled(), 'the build to wait for the drain');
+      await waitForAsync(
+        () => build.positions.length > 0 || build.settled(),
+        'the build to wait for the drain'
+      );
       const late: IStreamedRequest = await startRequestAsync(fixture, ['serve2'], {
         ...SERVE2,
         cwd: path.join(fixture.folder, 'a')
       });
-      await waitForAsync(() => late.positions.length > 0 || late.settled(), 'the script to wait for the restart');
+      await waitForAsync(
+        () => late.positions.length > 0 || late.settled(),
+        'the script to wait for the restart'
+      );
 
       // The drain ends as the script exits, so the build most likely finds the revert only after the drain.
       revert();

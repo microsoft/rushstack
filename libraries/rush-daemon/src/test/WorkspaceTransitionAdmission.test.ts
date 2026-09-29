@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
-import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import { createDeferred, type IDeferred, type ITerminalExchange } from './DaemonRequestWireTestUtilities';
 
 jest.setTimeout(60_000);
@@ -113,8 +113,10 @@ describe('workspace admission behind a graph transition', () => {
       created.write('.gitignore', 'common/temp/\n**/.rush/\n**/rush-logs/\nruns.txt\nrelease-a\n');
       created.write(
         'a/build.cjs',
-        "const fs=require('node:fs');fs.appendFileSync('../runs.txt','a\\n');" +
-          "const wait=()=>fs.existsSync('../release-a')?console.log('finished-a'):setTimeout(wait,20);wait();"
+        withScriptDeadline(
+          "const fs=require('node:fs');fs.appendFileSync('../runs.txt','a\\n');" +
+            "const wait=()=>fs.existsSync('../release-a')?console.log('finished-a'):setTimeout(wait,20);wait();"
+        )
       );
     });
     const releaseFile: string = path.join(fixture.folder, 'release-a');

@@ -20,7 +20,7 @@ import {
 import { captureDaemonInstallation, type CheckDaemonInstallation } from '../DaemonInstallationMonitor';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import type { WorkspaceSession } from '../WorkspaceSession';
-import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import {
   createDeferred,
   type DaemonRequestWireClient,
@@ -34,15 +34,17 @@ import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 jest.setTimeout(30_000);
 
 const BUILD_B: string[] = ['build', '--to', 'b', '--parallelism', '3'];
-const LONG_BUILD_A: string =
+const LONG_BUILD_A: string = withScriptDeadline(
   "const fs=require('node:fs');fs.appendFileSync('../runs.txt','a\\n');" +
-  "const wait=()=>fs.existsSync('../common/temp/release.flag')?console.log('finished-a'):setTimeout(wait,20);" +
-  'wait();';
+    "const wait=()=>fs.existsSync('../common/temp/release.flag')?console.log('finished-a'):setTimeout(wait,20);" +
+    'wait();'
+);
 // A script such as a dev server, which runs until it is stopped.
-const SERVE_A: string =
+const SERVE_A: string = withScriptDeadline(
   "const fs=require('node:fs');fs.appendFileSync('../runs.txt','serve\\n');" +
-  "const wait=()=>fs.existsSync('../common/temp/release.flag')?console.log('stopped'):setTimeout(wait,20);" +
-  'wait();';
+    "const wait=()=>fs.existsSync('../common/temp/release.flag')?console.log('stopped'):setTimeout(wait,20);" +
+    'wait();'
+);
 const INSTALLATION_CHANGED_SHUTDOWN: string =
   `rushd (PID ${process.pid}) shutting down: its installation changed, ` +
   'so the next client starts a new daemon';

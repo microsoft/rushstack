@@ -20,7 +20,7 @@ import {
 import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
@@ -38,8 +38,9 @@ interface IEarlyFailureFixtureOptions {
 }
 
 /** Keeps the output that it inherits open until the test removes the `hold` marker. */
-const HOLD_OUTPUT_SCRIPT: string =
-  "const fs=require('node:fs');const t=setInterval(()=>{if(!fs.existsSync('../hold'))clearInterval(t);},20);";
+const HOLD_OUTPUT_SCRIPT: string = withScriptDeadline(
+  "const fs=require('node:fs');const t=setInterval(()=>{if(!fs.existsSync('../hold'))clearInterval(t);},20);"
+);
 
 /**
  * b consumes a and c. a fails, and c holds its build open until the test removes the `hold` marker, so a build of b
@@ -77,10 +78,12 @@ function createEarlyFailureFixtureAsync({
     );
     created.write(
       'c/build.cjs',
-      "const fs=require('node:fs');" +
-        startOutputHolder +
-        "fs.appendFileSync('../runs.txt','c\\n');" +
-        "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+      withScriptDeadline(
+        "const fs=require('node:fs');" +
+          startOutputHolder +
+          "fs.appendFileSync('../runs.txt','c\\n');" +
+          "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+      )
     );
   });
 }

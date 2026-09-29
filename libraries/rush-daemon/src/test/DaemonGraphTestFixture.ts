@@ -32,6 +32,27 @@ import {
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 import { removeTestFolderAsync } from './TestProcessExit';
 
+/**
+ * How long a fixture script that waits for its test may run. Keep it longer than the timeout of every test that uses
+ * it (60 s at most today). Each of these scripts runs in its own session (the daemon starts every operation that way),
+ * so when a test never reaches the `finally` that releases its script (the test timed out, or its Jest worker exited
+ * first), nothing else ends the script.
+ */
+export const FIXTURE_SCRIPT_DEADLINE_MS: number = 120_000;
+
+/**
+ * Prefixes `script` with a timer that ends it with exit code 1 once `deadlineMs` has passed. Use it for every fixture
+ * script that waits for a marker file its test writes or removes. The timer is unref'd, so a script that its test
+ * released still exits as soon as it finishes.
+ */
+export function withScriptDeadline(script: string, deadlineMs: number = FIXTURE_SCRIPT_DEADLINE_MS): string {
+  if (!Number.isSafeInteger(deadlineMs) || deadlineMs <= 0) {
+    throw new RangeError(`Expected a positive whole number of milliseconds, not ${deadlineMs}.`);
+  }
+  const message: string = `fixture script: its test did not release it within ${deadlineMs} ms`;
+  return `setTimeout(()=>{console.error(${JSON.stringify(message)});process.exit(1);},${deadlineMs}).unref();${script}`;
+}
+
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
