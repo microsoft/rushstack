@@ -18,7 +18,7 @@ import {
 } from '@rushstack/rush-daemon-transport';
 
 import { connectOrStartDaemonAsync } from '../../connectOrStartDaemon';
-import { getDaemonStartupFilePath } from '../../DaemonStartup';
+import { getDaemonStartupFilePath, reserveDaemonStartup } from '../../DaemonStartup';
 import { OPERATION_SCRIPT } from '../OrphanedOperation';
 
 async function mainAsync(): Promise<void> {
@@ -182,11 +182,19 @@ async function mainAsync(): Promise<void> {
   });
   const expiry: number = Date.now() + 10000;
   const timer = setInterval(() => {
+    // The startup helper releases its reservation once it has seen this daemon ready.
+    const readySeen: boolean =
+      (mode === 'stop-when-ready' || mode === 'reserve-and-stop-when-ready') &&
+      !fs.existsSync(getDaemonStartupFilePath(paths));
+    if (readySeen && mode === 'reserve-and-stop-when-ready') {
+      // Like a daemon that exits while another startup is reserved, for example its successor's.
+      reserveDaemonStartup(paths, { pid: process.pid, startedAt: new Date().toISOString() });
+    }
     const stopRequested: boolean =
       fs.existsSync(path.join(folder, 'stop')) ||
       Date.now() >= expiry ||
       // Like a "daemon stop" that arrives as soon as the startup helper has seen this daemon ready.
-      (mode === 'stop-when-ready' && !fs.existsSync(getDaemonStartupFilePath(paths)));
+      readySeen;
     if (!stopRequested) return;
     void stopAsync().catch((error: Error) => {
       process.stderr.write(`${error.stack}\n`);

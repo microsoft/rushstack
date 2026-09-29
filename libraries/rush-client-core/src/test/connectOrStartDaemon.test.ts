@@ -429,6 +429,47 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
   }, 15000);
 
+  it('waits out its deadline for a daemon that became ready and still has its lockfile', async () => {
+    // As above, the helper sees the daemon ready and this client never connects, but the daemon stays up.
+    const started: number = Date.now();
+    const error: Error = await connectOrStartDaemonAsync({
+      ...options,
+      startupTimeoutMs: 3000,
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'other'] }
+    }).then(
+      () => new Error('Expected startup to fail.'),
+      (failure: Error) => failure
+    );
+    expect(error.message).toContain('Daemon startup timed out awaiting hello/ping readiness.');
+    expect(Date.now() - started).toBeGreaterThanOrEqual(3000);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+  }, 15000);
+
+  it('waits out its deadline while another startup is reserved after the daemon that became ready exited', async () => {
+    // As above, but the daemon exits once it has reserved another startup, as a successor's starter would.
+    const started: number = Date.now();
+    const error: Error = await connectOrStartDaemonAsync({
+      ...options,
+      startupTimeoutMs: 3000,
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'other', 'reserve-and-stop-when-ready']
+      }
+    }).then(
+      () => new Error('Expected startup to fail.'),
+      (failure: Error) => failure
+    );
+    expect(error.message).toContain('Daemon startup timed out awaiting hello/ping readiness.');
+    expect(Date.now() - started).toBeGreaterThanOrEqual(3000);
+    const daemonPids: string[] = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n');
+    expect(daemonPids).toHaveLength(1);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    expect(JSON.parse(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8'))).toMatchObject({
+      helperPid: Number(daemonPids[0])
+    });
+  }, 15000);
+
   it('refuses a relaunch while a process accepts connections at the endpoint', async () => {
     const sockets: Set<net.Socket> = new Set();
     // Accepts connections but never completes hello, like a daemon that listens but is not ready.

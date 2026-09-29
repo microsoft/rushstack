@@ -4,7 +4,8 @@
 jest.mock('@microsoft/rush/lib/start', () => ({}));
 jest.mock('@rushstack/rush-client-core', () => ({
   ...jest.requireActual('@rushstack/rush-client-core'),
-  connectOrAwaitDaemonStartupAsync: jest.fn()
+  connectOrAwaitDaemonStartupAsync: jest.fn(),
+  connectToStartingDaemonAsync: jest.fn()
 }));
 
 import * as fs from 'node:fs';
@@ -14,7 +15,8 @@ import * as path from 'node:path';
 import {
   DaemonClientError,
   DaemonStartupPendingError,
-  connectOrAwaitDaemonStartupAsync
+  connectOrAwaitDaemonStartupAsync,
+  connectToStartingDaemonAsync
 } from '@rushstack/rush-client-core';
 
 import { AgentProgressRenderer } from '../AgentProgressRenderer';
@@ -54,6 +56,7 @@ describe('a daemon startup failure', () => {
     process.env = originalEnvironment;
     jest.restoreAllMocks();
     jest.mocked(connectOrAwaitDaemonStartupAsync).mockReset();
+    jest.mocked(connectToStartingDaemonAsync).mockReset();
     fs.rmSync(folder, { recursive: true });
   });
 
@@ -110,5 +113,29 @@ describe('a daemon startup failure', () => {
     expect(output).toHaveBeenCalledWith(
       'rush-client: No ready daemon; auto-start is disabled; using in-process Rush.\n'
     );
+  });
+
+  it('fails daemon stop without stopping a daemon that is still starting, and says to run stop again', async () => {
+    process.argv = [process.execPath, 'rush-client', 'daemon', 'stop'];
+    const pending: string = `The daemon at ${path.join(folder, 'd.sock')} is still starting after 15 s. Another client is still starting the daemon.`;
+    jest.mocked(connectToStartingDaemonAsync).mockImplementation(async (options) => {
+      options.onAwaitStartup?.('Another client is still starting the daemon', 15000);
+      throw new DaemonStartupPendingError(pending);
+    });
+    const error: Error = await launchClientAsync(false).then(
+      () => new Error('Expected daemon stop to fail.'),
+      (failure: Error) => failure
+    );
+    expect(error.message).toBe(
+      `${pending} It was not stopped; run "rush-client daemon stop" again once "rush-client daemon status" reports it ready.`
+    );
+    expect(connectToStartingDaemonAsync).toHaveBeenCalledTimes(1);
+    expect(output.mock.calls).toEqual([
+      [
+        'rush-client: The daemon is not ready yet. Another client is still starting the daemon, ' +
+          'so stop waits up to 15 s for it to become ready and then stops it.\n'
+      ]
+    ]);
+    expect(connectOrAwaitDaemonStartupAsync).not.toHaveBeenCalled();
   });
 });

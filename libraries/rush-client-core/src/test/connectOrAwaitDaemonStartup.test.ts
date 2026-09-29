@@ -15,6 +15,7 @@ import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import type { DaemonClient } from '../DaemonClient';
 import { DaemonClientError } from '../DaemonClientError';
+import * as DaemonOwnership from '../DaemonOwnership';
 import { getDaemonStartupFilePath } from '../DaemonStartup';
 import {
   DaemonStartupPendingError,
@@ -396,6 +397,49 @@ describe('connectOrAwaitDaemonStartupAsync', () => {
       fs.unlinkSync(path.join(folder, 'hold-prebind'));
       expect(await starter.result).toEqual({ code: 0, stdout: '', stderr: '' });
       expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    }, 30000);
+
+    it('connects to a daemon that became ready between its first connect and its check for a live owner', async () => {
+      // The daemon waits to listen until this client has found nothing listening, and is ready before that check
+      // returns. Then nothing owns a startup, so only the last connect can find the ready daemon.
+      fs.writeFileSync(path.join(folder, 'hold-prebind'), '');
+      const daemon = run('daemon.js', [JSON.stringify(paths)]);
+      const daemonPid: number = Number(await waitForFileAsync(path.join(folder, 'prebind')));
+      // This test, not a startup helper, is the daemon's parent, so afterEach must not wait for it to exit.
+      expect(fs.readFileSync(path.join(folder, 'parents'), 'utf8')).toBe(`${process.pid}\n`);
+      fs.unlinkSync(path.join(folder, 'parents'));
+      const isEndpointUnboundAsync: (socketPath: string) => Promise<boolean> =
+        DaemonOwnership.isEndpointUnboundAsync;
+      const endpointCheck: jest.SpyInstance = jest
+        .spyOn(DaemonOwnership, 'isEndpointUnboundAsync')
+        .mockImplementation(async (socketPath: string) => {
+          const unbound: boolean = await isEndpointUnboundAsync(socketPath);
+          fs.unlinkSync(path.join(folder, 'hold-prebind'));
+          const deadline: number = Date.now() + 10000;
+          while ((await isEndpointUnboundAsync(socketPath)) && Date.now() < deadline) await delayAsync(20);
+          return unbound;
+        });
+      const onAwaitStartup: jest.Mock = jest.fn();
+      try {
+        const client: DaemonClient | undefined = await connectToStartingDaemonAsync({
+          ...options,
+          onAwaitStartup
+        });
+        expect(endpointCheck).toHaveBeenCalledTimes(1);
+        expect(client).toBeDefined();
+        const { pid } = await client!.status;
+        await client!.closeAsync();
+        expect(pid).toBe(daemonPid);
+      } finally {
+        endpointCheck.mockRestore();
+      }
+      expect(onAwaitStartup).not.toHaveBeenCalled();
+      fs.writeFileSync(path.join(folder, 'stop'), '');
+      expect(await daemon.result).toEqual({
+        code: 0,
+        stdout: 'launcher stdout\n',
+        stderr: 'launcher stderr\n'
+      });
     }, 30000);
 
     it('waits while another client holds the start mutex, until it is released or the wait is aborted', async () => {
