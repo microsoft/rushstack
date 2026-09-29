@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
 import { realpath } from 'node:fs/promises';
 
+import { LockFile } from '@rushstack/node-core-library';
 import { connectOrStartDaemonAsync, type DaemonClient } from '@rushstack/rush-client-core';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
@@ -19,6 +21,8 @@ import { DaemonIdleTimer } from './DaemonIdleTimer';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
 import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
+import { DaemonShutdownDeadline } from './DaemonShutdownDeadline';
+import { DaemonShutdownDeadlineError, type DaemonShutdownStage } from './DaemonShutdownDeadlineError';
 import { DaemonShutdownError, type DaemonShutdownInitiator } from './DaemonShutdownError';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
@@ -45,6 +49,13 @@ export interface IRushDaemonHostOptions {
   readonly daemonVersion: string;
   /** Shuts down after this many seconds without pending requests. Disabled when omitted. */
   readonly idleTimeoutSeconds?: number;
+  /**
+   * How long {@link RushDaemonHost.closeAsync} waits for shutdown cleanup before it rejects with
+   * {@link DaemonShutdownDeadlineError}, so that an await that ignores cancellation cannot keep the daemon from
+   * exiting. The cleanup goes on in the background. No deadline when omitted, except that
+   * {@link serveRushDaemonAsync} defaults it for a daemon that owns its process.
+   */
+  readonly shutdownDeadlineMs?: number;
   /** Reports connection-level failures. */
   readonly onError?: (error: Error) => void;
   /**
@@ -86,7 +97,9 @@ export class RushDaemonHost {
   readonly #requestDispatcher: DaemonRequestDispatcher;
   public readonly paths: IDaemonPaths;
   #closePromise: Promise<void> | undefined;
+  #closeStage: DaemonShutdownStage = 'requests';
   #notifyClosed: (() => void) | undefined;
+  readonly #shutdownDeadline: DaemonShutdownDeadline;
   readonly #options: IRushDaemonHostOptions;
   readonly #startedAt: string;
   #restartPromise: Promise<IWorkspaceProcessRestartResult | undefined> | undefined;
@@ -98,7 +111,10 @@ export class RushDaemonHost {
    */
   public readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
 
-  /** Resolves after shutdown cleanup finishes. Use closeAsync() to observe cleanup failures. */
+  /**
+   * Resolves after shutdown cleanup finishes, fails, or is cut short by its deadline. Use closeAsync() to observe
+   * cleanup failures.
+   */
   public readonly closed: Promise<void>;
 
   private constructor(
@@ -126,6 +142,16 @@ export class RushDaemonHost {
     this.#idleTimer = idleTimer;
     this.#options = options;
     this.#startedAt = startedAt;
+    this.#shutdownDeadline = new DaemonShutdownDeadline({
+      timeoutMs: options.shutdownDeadlineMs,
+      getProgress: () => ({
+        stage: this.#closeStage,
+        unfinishedRequests: Array.from(this.#sessions, (session: DaemonControlSession) =>
+          session.describeActiveRequests()
+        ).flat()
+      }),
+      onLateFailure: (error: Error) => this.#reportError(error)
+    });
     this.restartCompleted = new Promise((resolve, reject) => {
       this.#resolveRestart = resolve;
       this.#rejectRestart = reject;
@@ -251,8 +277,8 @@ export class RushDaemonHost {
     }
     function requestShutdown(initiator: DaemonShutdownInitiator): void {
       void host.closeAsync(new DaemonShutdownError({ initiator })).catch((error: Error) => {
-        if (options.onError) options.onError(error);
-        else process.emitWarning(error);
+        // The host's owner sees a shutdown cut short through closeAsync(), and decides whether to exit.
+        if (!(error instanceof DaemonShutdownDeadlineError)) host.#reportError(error);
       });
     }
     idleTimer.start(() => requestShutdown('idleTimeout'));
@@ -277,14 +303,53 @@ export class RushDaemonHost {
   /**
    * Closes active connections, stops listening, and removes transport artifacts.
    *
+   * @remarks
+   * Rejects with {@link DaemonShutdownDeadlineError} when the cleanup does not finish within
+   * {@link IRushDaemonHostOptions.shutdownDeadlineMs}, or when {@link RushDaemonHost.expireShutdownDeadline} is
+   * called first. The listener then keeps its socket and lockfile; see {@link RushDaemonHost.releaseForExit}.
+   *
    * @param reason - Delivered to requests that are still running; only the first close call's reason is used.
    */
   public closeAsync(reason?: DaemonShutdownError): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync(reason).finally(() => {
+    this.#closePromise ??= this.#shutdownDeadline.raceAsync(this.#closeOnceAsync(reason)).finally(() => {
       this.#notifyClosed?.();
       if (!this.#restartPromise) this.#resolveRestart?.(undefined);
     });
     return this.#closePromise;
+  }
+
+  /**
+   * Cuts the shutdown short, for example on a second termination signal: a running or later
+   * {@link RushDaemonHost.closeAsync} rejects with {@link DaemonShutdownDeadlineError} at once.
+   *
+   * @param forcedBy - What cut the shutdown short, such as "a second SIGTERM", for the error message.
+   */
+  public expireShutdownDeadline(forcedBy: string): void {
+    this.#shutdownDeadline.expire(forcedBy);
+  }
+
+  /**
+   * For a daemon process that exits after its shutdown was cut short: removes the socket, the lockfile and this
+   * process's repository lock (`common/temp/rush#<pid>.lock`), unless the daemon still has child processes. Then
+   * they all stay, as after a crash, so that the next daemon reaps those processes when it reclaims the socket.
+   *
+   * @returns Whether they were removed.
+   */
+  public releaseForExit(): boolean {
+    if (!this.#listener.releaseForExit()) return false;
+    const session: IWorkspaceSession | undefined = this.#workspaceSessionProvider.currentSession;
+    // On Windows the lock is an open handle that the exit releases.
+    if (session && process.platform !== 'win32') {
+      fs.rmSync(LockFile.getLockFilePath(session.rushConfiguration.commonTempFolder, 'rush'), {
+        force: true
+      });
+    }
+    return true;
+  }
+
+  #reportError(error: Error): void {
+    if (this.#options.onError) this.#options.onError(error);
+    else process.emitWarning(error);
   }
 
   #requestRestart(plan: IWorkspaceProcessRestartPlan): void {
@@ -295,8 +360,7 @@ export class RushDaemonHost {
       (error: unknown) => {
         const failure: Error = error instanceof Error ? error : new Error(String(error));
         this.#rejectRestart?.(failure);
-        if (this.#options.onError) this.#options.onError(failure);
-        else process.emitWarning(failure);
+        this.#reportError(failure);
       }
     );
   }
@@ -336,6 +400,7 @@ export class RushDaemonHost {
     const errors: unknown[] = [];
     // Refuse new sessions but keep the listener's live ownership until every resource join succeeds.
     // A failed standalone host must not exit naturally and become reclaimable over unjoined children.
+    this.#closeStage = 'requests';
     const sessionSettlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this.#sessions, (session: DaemonControlSession) =>
         session.closeAsync(!!this.#restartPromise, reason ?? new DaemonShutdownError({ initiator: 'host' }))
@@ -346,17 +411,20 @@ export class RushDaemonHost {
         errors.push(settlement.reason);
       }
     }
+    this.#closeStage = 'workspaceMaintenance';
     try {
       const workspace: IWorkspaceSession = await this.#workspaceSessionProvider.getSessionAsync();
       await workspace.quiesceWarmSetAsync?.();
     } catch (error) {
       throw new AggregateError([...errors, error], 'Could not quiesce workspace maintenance for shutdown.');
     }
+    this.#closeStage = 'requestDispatcher';
     try {
       await this.#requestDispatcher[Symbol.asyncDispose]();
     } catch (error) {
       errors.push(error);
     }
+    this.#closeStage = 'workspaceSession';
     try {
       await this.#workspaceSessionProvider[Symbol.asyncDispose]();
     } catch (error) {
@@ -364,6 +432,7 @@ export class RushDaemonHost {
     }
 
     if (errors.length === 0) {
+      this.#closeStage = 'listener';
       try {
         await this.#listener.closeAsync();
       } catch (error) {

@@ -64,6 +64,11 @@ export {
   type DaemonShutdownInitiator,
   type IDaemonShutdownErrorOptions
 } from './DaemonShutdownError';
+export {
+  DaemonShutdownDeadlineError,
+  type DaemonShutdownStage,
+  type IDaemonShutdownDeadlineErrorOptions
+} from './DaemonShutdownDeadlineError';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
   WorkspaceEngineComponentFactory,

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A daemon that owns its process now exits 2 seconds after it stops if something else, such as a timer that a plugin left behind, keeps the process running after the daemon released its socket and lockfile. It reports the active resources that Node.js lists and keeps `process.exitCode`. Reports that come right before the daemon exits are now written synchronously when no `onError` callback is given.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

@@ -78,6 +78,15 @@ export class DaemonRequiresInProcessError extends Error {
 }
 
 // @beta
+export class DaemonShutdownDeadlineError extends Error {
+    constructor(options: IDaemonShutdownDeadlineErrorOptions);
+    readonly elapsedMs: number;
+    readonly forcedBy: string | undefined;
+    readonly stage: DaemonShutdownStage;
+    readonly unfinishedRequests: ReadonlyArray<string>;
+}
+
+// @beta
 export class DaemonShutdownError extends Error {
     constructor(options: IDaemonShutdownErrorOptions);
     // (undocumented)
@@ -88,6 +97,9 @@ export class DaemonShutdownError extends Error {
 
 // @beta
 export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host';
+
+// @beta
+export type DaemonShutdownStage = 'requests' | 'workspaceMaintenance' | 'requestDispatcher' | 'workspaceSession' | 'listener';
 
 // @beta
 export type DispatchWorkspaceRequestAsync = (options: IDispatchWorkspaceRequestOptions) => Promise<IDaemonCommandResult | undefined>;
@@ -205,6 +217,14 @@ export interface IDaemonRequestResolver {
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
     // (undocumented)
     readonly workspaceLifecycle?: IWorkspaceResolverLifecycle;
+}
+
+// @beta
+export interface IDaemonShutdownDeadlineErrorOptions {
+    readonly elapsedMs: number;
+    readonly forcedBy?: string;
+    readonly stage: DaemonShutdownStage;
+    readonly unfinishedRequests: ReadonlyArray<string>;
 }
 
 // @beta
@@ -522,6 +542,7 @@ export interface IRushDaemonHostOptions {
     readonly repoRoot: string;
     readonly requestResolver?: IDaemonRequestResolver;
     readonly rushVersion: string;
+    readonly shutdownDeadlineMs?: number;
     readonly startupOptions?: Readonly<Record<string, unknown>>;
 }
 
@@ -802,9 +823,11 @@ export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaem
 export class RushDaemonHost {
     closeAsync(reason?: DaemonShutdownError): Promise<void>;
     readonly closed: Promise<void>;
+    expireShutdownDeadline(forcedBy: string): void;
     getWorkspaceSessionAsync(): Promise<IWorkspaceSession>;
     // (undocumented)
     readonly paths: IDaemonPaths;
+    releaseForExit(): boolean;
     readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
     static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
     get workspaceGeneration(): number;

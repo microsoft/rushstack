@@ -73,6 +73,12 @@ export class DaemonFrameListener {
   public stopAcceptingAsync(): Promise<void> {
     return this.#lifetime.stopAcceptingAsync();
   }
+  /** For a daemon process that exits before its shutdown finished: releases the socket/pipe and lockfile,
+   * unless the daemon still has children that a successor must reap. Then both stay, as after a crash.
+   * @returns Whether they were released. */
+  public releaseForExit(): boolean {
+    return this.#lifetime.releaseForExit();
+  }
 }
 
 function writeListenerLockfile(paths: IDaemonPaths, options: IDaemonListenerOptions): IDaemonFileIdentity {

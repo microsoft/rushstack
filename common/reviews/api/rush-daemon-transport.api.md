@@ -37,6 +37,7 @@ export class DaemonFrameConnection {
 export class DaemonFrameListener {
     closeAsync(): Promise<void>;
     static listenAsync(paths: IDaemonPaths, options: IDaemonListenerOptions): Promise<DaemonFrameListener>;
+    releaseForExit(): boolean;
     stopAcceptingAsync(): Promise<void>;
 }
 

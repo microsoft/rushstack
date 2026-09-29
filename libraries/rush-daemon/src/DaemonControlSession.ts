@@ -28,12 +28,13 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
+import { createGlobalCommandResult } from './CommandResultPolicy';
 import { DaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
-import type { DaemonShutdownError } from './DaemonShutdownError';
+import { DaemonShutdownError } from './DaemonShutdownError';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
 import {
   InteractiveInputRoutingError,
@@ -64,6 +65,9 @@ interface IRequestState {
   readonly abortController: AbortController;
   readonly client: DaemonWireRequestClient;
   completion: Promise<void>;
+  /** The quoted command line, for reports about requests that did not finish. */
+  readonly description: string;
+  readonly startedAtMs: number;
 }
 
 interface IClassifiedRejection {
@@ -72,6 +76,11 @@ interface IClassifiedRejection {
 }
 
 const CLOSE_DRAIN_TIMEOUT_MS: number = 5000;
+// How long the typed results for requests that did not stop get to reach their clients before the connection is
+// aborted.
+const SHUTDOWN_RESULT_SEND_TIMEOUT_MS: number = 1000;
+const MAX_REQUEST_DESCRIPTION_LENGTH: number = 100;
+const MS_PER_SECOND: number = 1000;
 
 export class DaemonControlSession {
   readonly #connection: DaemonFrameConnection;
@@ -125,6 +134,15 @@ export class DaemonControlSession {
 
   public get activeRequestCount(): number {
     return this.#requestById.size;
+  }
+
+  /** Describes each request that has not finished, such as `"build -t a" (running for 12.3 s)`. */
+  public describeActiveRequests(): string[] {
+    const nowMs: number = Date.now();
+    return Array.from(this.#requestById.values(), (state: IRequestState) => {
+      const runningSeconds: string = ((nowMs - state.startedAtMs) / MS_PER_SECOND).toFixed(1);
+      return `${state.description} (running for ${runningSeconds} s)`;
+    });
   }
 
   async #handleFrameSafelyAsync(frame: IDaemonFrame): Promise<void> {
@@ -316,7 +334,13 @@ export class DaemonControlSession {
       sessionId,
       supportsRequestAdmission: this.#peerSupportsRequestAdmission
     });
-    const state: IRequestState = { abortController, client, completion: Promise.resolve() };
+    const state: IRequestState = {
+      abortController,
+      client,
+      completion: Promise.resolve(),
+      description: describeRequest(envelope),
+      startedAtMs: Date.now()
+    };
     this.#requestById.set(requestId, state);
     const releaseActivity: (() => void) | undefined = this.#options.onRequestStarted?.();
     state.completion = Promise.resolve()
@@ -491,7 +515,7 @@ export class DaemonControlSession {
           CLOSE_DRAIN_TIMEOUT_MS
         ))
       ) {
-        this.#connection.abort(closeReason);
+        await this.#abortConnectionAsync(closeReason);
       }
       await pending;
     }
@@ -501,11 +525,32 @@ export class DaemonControlSession {
       this.#sendQueue
     ]).then(() => undefined);
     if (!(await settlesWithinAsync(drainPromise, CLOSE_DRAIN_TIMEOUT_MS))) {
-      this.#connection.abort(closeReason);
+      await this.#abortConnectionAsync(closeReason);
     }
     await drainPromise;
     if (!this.#connectionClosed) await this.#connection.closeAsync();
     await this.#closedPromise;
+  }
+
+  /**
+   * Aborts a connection whose requests did not finish in time. When the daemon is shutting down, each request that
+   * has no terminal outcome yet first gets a typed result that carries the shutdown's reason, so that its client
+   * reports that instead of a lost connection. The request's own late result is then refused.
+   */
+  async #abortConnectionAsync(reason: Error): Promise<void> {
+    if (reason instanceof DaemonShutdownError && !this.#connectionClosed) {
+      const writes: Promise<void>[] = [];
+      for (const [requestId, state] of this.#requestById) {
+        if (!state.client.terminalOutcomeSent) {
+          writes.push(writeShutdownResultAsync(requestId, state, reason));
+        }
+      }
+      await settlesWithinAsync(
+        Promise.allSettled(writes).then(() => undefined),
+        SHUTDOWN_RESULT_SEND_TIMEOUT_MS
+      );
+    }
+    this.#connection.abort(reason);
   }
 
   async #handleConnectionClosedAsync(error: Error | undefined): Promise<void> {
@@ -532,6 +577,28 @@ function createDeferred(): { promise: Promise<void>; resolve: () => void } {
     resolvePromise = resolve;
   });
   return { promise, resolve: resolvePromise };
+}
+
+function describeRequest(envelope: IDaemonRequestEnvelope): string {
+  const command: string = envelope.argv.length > 0 ? envelope.argv.join(' ') : envelope.commandName;
+  return command.length > MAX_REQUEST_DESCRIPTION_LENGTH
+    ? `"${command.slice(0, MAX_REQUEST_DESCRIPTION_LENGTH - 1)}…"`
+    : `"${command}"`;
+}
+
+function writeShutdownResultAsync(
+  requestId: string,
+  state: IRequestState,
+  reason: DaemonShutdownError
+): Promise<void> {
+  try {
+    // The result that a router writes for a request that the shutdown aborted.
+    return state.client.writeResultAsync(
+      createGlobalCommandResult({ aborted: true, error: reason, exitCode: undefined, requestId })
+    );
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }
 
 function normalizeProtocolError(error: unknown): DaemonProtocolError {
