@@ -80,6 +80,33 @@ function holdWorkspaceRequests(requests: jest.SpyInstance, count: number): void 
   });
 }
 
+/**
+ * Makes the first `count` project configuration requests wait until all of them have arrived, and then makes them
+ * one at a time, each after the previous request's capture settled. A capture that awaits no I/O holds the event
+ * loop from start to end, so requests received together reach the coalescer in this order.
+ */
+function serializeProjectRequests(requests: jest.SpyInstance, count: number): void {
+  const waiting: (() => Promise<unknown>)[] = [];
+  requests.mockImplementation(function (
+    this: FreshCaptureCoalescer<object, unknown>,
+    ...request: CaptureRequest
+  ): Promise<unknown> {
+    if (waiting.length === count || !isProjectRequest(request)) return originalCaptureAsync.apply(this, request);
+    return new Promise((resolve, reject) => {
+      waiting.push(() => {
+        const result: Promise<unknown> = originalCaptureAsync.apply(this, request);
+        result.then(resolve, reject);
+        return result;
+      });
+      if (waiting.length === count) {
+        void (async () => {
+          for (const ask of waiting) await ask().catch(() => undefined);
+        })();
+      }
+    });
+  });
+}
+
 function gateNextCapture<TArgs extends unknown[], TResult>(
   mock: jest.MockedFunction<(...args: TArgs) => Promise<TResult>>,
   actual: (...args: TArgs) => Promise<TResult>
@@ -167,6 +194,23 @@ describe('workspace input captures shared from the time a request was received',
     projectGate.release();
 
     await expectSuccessfulBuildsAsync(builds);
+    expect(projectCaptureMock).toHaveBeenCalledTimes(1);
+    expect(warm.host.workspaceGeneration).toBe(generation);
+    expect(warm.host.workspaceStatus.lastReloadTier).toBe(rushLib.WorkspaceInputChangeTier.Reuse);
+  });
+
+  it('gives warm builds the project configuration capture that started after they were received, even once it finished', async () => {
+    fixture = await createWarmFixtureAsync();
+    const warm: DaemonGraphTestFixture = fixture;
+    const generation: number = warm.host.workspaceGeneration;
+    const spy: jest.SpyInstance = spyOnRequests();
+    serializeProjectRequests(spy, 3);
+    projectCaptureMock.mockClear();
+
+    const builds: BuildExchange[] = [warm.buildAsync(), warm.buildAsync(), warm.buildAsync()];
+    await expectSuccessfulBuildsAsync(builds);
+    expect(countRequests(spy, 'project')).toBe(3);
+    // Each build asked after the previous capture had finished; all of them were received before it started.
     expect(projectCaptureMock).toHaveBeenCalledTimes(1);
     expect(warm.host.workspaceGeneration).toBe(generation);
     expect(warm.host.workspaceStatus.lastReloadTier).toBe(rushLib.WorkspaceInputChangeTier.Reuse);

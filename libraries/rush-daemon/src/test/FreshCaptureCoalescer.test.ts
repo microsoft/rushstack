@@ -5,19 +5,9 @@ import { FreshCaptureCoalescer } from '../FreshCaptureCoalescer';
 
 interface IStartedCapture {
   readonly index: number;
+  readonly startTimeMs: number;
   readonly resolve: (value: string) => void;
   readonly reject: (error: Error) => void;
-}
-
-/** Captures that start in order and settle only when the test says so. */
-class ControlledCaptures {
-  public readonly started: IStartedCapture[] = [];
-
-  public readonly captureAsync = (): Promise<string> => {
-    return new Promise<string>((resolve, reject) => {
-      this.started.push({ index: this.started.length, resolve, reject });
-    });
-  };
 }
 
 /** A clock that moves only when the test says so. */
@@ -26,12 +16,29 @@ class ManualClock {
   public readonly now = (): number => this.nowMs;
 }
 
+/** Captures that start in order and settle only when the test says so. */
+class ControlledCaptures {
+  public readonly started: IStartedCapture[] = [];
+  readonly #clock: ManualClock | undefined;
+
+  public constructor(clock?: ManualClock) {
+    this.#clock = clock;
+  }
+
+  public readonly captureAsync = (): Promise<string> => {
+    return new Promise<string>((resolve, reject) => {
+      const startTimeMs: number = this.#clock?.nowMs ?? Number.NaN;
+      this.started.push({ index: this.started.length, startTimeMs, resolve, reject });
+    });
+  };
+}
+
 async function flushAsync(): Promise<void> {
   await new Promise((resolve) => setImmediate(resolve));
 }
 
 describe(FreshCaptureCoalescer.name, () => {
-  it('starts a capture for a caller when none is running and retains nothing once it settles', async () => {
+  it('starts a new capture for a caller without notBeforeMs once the previous capture settled', async () => {
     const coalescer: FreshCaptureCoalescer<object, string> = new FreshCaptureCoalescer();
     const scope: object = {};
     const captures: ControlledCaptures = new ControlledCaptures();
@@ -252,6 +259,121 @@ describe(FreshCaptureCoalescer.name, () => {
     expect(captures.started).toHaveLength(1);
   });
 
+  it('gives a caller the latest capture that succeeded if it started at or after the caller\'s notBeforeMs', async () => {
+    const clock: ManualClock = new ManualClock();
+    const coalescer: FreshCaptureCoalescer<object, string> = new FreshCaptureCoalescer({ now: clock.now });
+    const scope: object = {};
+    const captures: ControlledCaptures = new ControlledCaptures();
+
+    clock.nowMs = 10;
+    const first: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync, 10);
+    captures.started[0].resolve('started at 10');
+    await expect(first).resolves.toBe('started at 10');
+
+    // Callers received before the capture started that ask only after it settled, as they do when it held the
+    // event loop from start to end.
+    clock.nowMs = 20;
+    await expect(coalescer.captureAsync(scope, 'key', captures.captureAsync, 10)).resolves.toBe('started at 10');
+    await expect(coalescer.captureAsync(scope, 'key', captures.captureAsync, 5)).resolves.toBe('started at 10');
+    expect(captures.started).toHaveLength(1);
+
+    const receivedAfterItStarted: Promise<string> = coalescer.captureAsync(
+      scope,
+      'key',
+      captures.captureAsync,
+      11
+    );
+    expect(captures.started).toHaveLength(2);
+    captures.started[1].resolve('started at 20');
+    await expect(receivedAfterItStarted).resolves.toBe('started at 20');
+
+    // A capture that started later replaces the retained one.
+    await expect(coalescer.captureAsync(scope, 'key', captures.captureAsync, 11)).resolves.toBe('started at 20');
+    await expect(coalescer.captureAsync(scope, 'key', captures.captureAsync, 5)).resolves.toBe('started at 20');
+    expect(captures.started).toHaveLength(2);
+  });
+
+  it('never gives a caller without notBeforeMs a capture that has settled', async () => {
+    const clock: ManualClock = new ManualClock();
+    const coalescer: FreshCaptureCoalescer<object, string> = new FreshCaptureCoalescer({ now: clock.now });
+    const scope: object = {};
+    const captures: ControlledCaptures = new ControlledCaptures();
+
+    clock.nowMs = 10;
+    const first: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync, 10);
+    captures.started[0].resolve('started at 10');
+    await expect(first).resolves.toBe('started at 10');
+
+    clock.nowMs = 20;
+    const strict: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync);
+    expect(captures.started).toHaveLength(2);
+    captures.started[1].resolve('started at 20');
+    await expect(strict).resolves.toBe('started at 20');
+  });
+
+  it('gives a caller the retained capture while a later one runs, and never retains a capture that failed', async () => {
+    const clock: ManualClock = new ManualClock();
+    const coalescer: FreshCaptureCoalescer<object, string> = new FreshCaptureCoalescer({ now: clock.now });
+    const scope: object = {};
+    const captures: ControlledCaptures = new ControlledCaptures();
+
+    clock.nowMs = 10;
+    const first: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync, 10);
+    captures.started[0].resolve('started at 10');
+    await expect(first).resolves.toBe('started at 10');
+
+    clock.nowMs = 20;
+    const failed: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync);
+    // A caller received before the retained capture started doesn't wait for the running one.
+    await expect(coalescer.captureAsync(scope, 'key', captures.captureAsync, 5)).resolves.toBe('started at 10');
+    captures.started[1].reject(new Error('a configuration file is being rewritten'));
+    await expect(failed).rejects.toThrow('a configuration file is being rewritten');
+
+    // The failed capture started at 20, but a caller received at 15 must not receive its failure.
+    clock.nowMs = 30;
+    const receivedAfterTheRetainedOneStarted: Promise<string> = coalescer.captureAsync(
+      scope,
+      'key',
+      captures.captureAsync,
+      15
+    );
+    expect(captures.started).toHaveLength(3);
+    captures.started[2].resolve('started at 30');
+    await expect(receivedAfterTheRetainedOneStarted).resolves.toBe('started at 30');
+  });
+
+  it('retains the capture that started last when overlapping captures succeed in the opposite order', async () => {
+    const clock: ManualClock = new ManualClock();
+    const coalescer: FreshCaptureCoalescer<object, string> = new FreshCaptureCoalescer({
+      now: () => (clock.nowMs += 10)
+    });
+    const scope: object = {};
+    const captures: ControlledCaptures = new ControlledCaptures(clock);
+
+    const first: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync);
+    const queued: Promise<string> = coalescer.captureAsync(scope, 'key', captures.captureAsync);
+    // A caller that asks as soon as the first capture settles starts a capture before the queued one starts.
+    const asksOnSettle: Promise<string> = first.then(() =>
+      coalescer.captureAsync(scope, 'key', captures.captureAsync)
+    );
+    captures.started[0].resolve('first');
+    await flushAsync();
+    expect(captures.started).toHaveLength(3);
+
+    const [earlier, later] = captures.started.slice(1).sort((a, b) => a.startTimeMs - b.startTimeMs);
+    expect(earlier.startTimeMs).toBeLessThan(later.startTimeMs);
+    later.resolve(`started at ${later.startTimeMs}`);
+    await flushAsync();
+    earlier.resolve(`started at ${earlier.startTimeMs}`);
+    const results: string[] = await Promise.all([queued, asksOnSettle]);
+    expect(results.sort()).toEqual([`started at ${earlier.startTimeMs}`, `started at ${later.startTimeMs}`]);
+
+    await expect(
+      coalescer.captureAsync(scope, 'key', captures.captureAsync, later.startTimeMs)
+    ).resolves.toBe(`started at ${later.startTimeMs}`);
+    expect(captures.started).toHaveLength(3);
+  });
+
   it('compares notBeforeMs with performance.now() by default', async () => {
     const coalescer: FreshCaptureCoalescer<object, string> = new FreshCaptureCoalescer();
     const scope: object = {};
@@ -290,5 +412,14 @@ describe(FreshCaptureCoalescer.name, () => {
     expect(captures.started).toHaveLength(3);
     for (const capture of captures.started) capture.resolve(String(capture.index));
     await expect(Promise.all(results)).resolves.toEqual(['0', '1', '2']);
+
+    // Retained captures are not shared across scopes or keys either.
+    const retained: Promise<string>[] = [
+      coalescer.captureAsync(firstScope, 'c', captures.captureAsync, 0),
+      coalescer.captureAsync(secondScope, 'b', captures.captureAsync, 0)
+    ];
+    expect(captures.started).toHaveLength(5);
+    for (const capture of captures.started.slice(3)) capture.resolve(String(capture.index));
+    await expect(Promise.all(retained)).resolves.toEqual(['3', '4']);
   });
 });
