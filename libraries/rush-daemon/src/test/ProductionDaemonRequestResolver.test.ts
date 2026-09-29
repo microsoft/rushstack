@@ -1751,6 +1751,7 @@ fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/outpu
     const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
     try {
       const beforeLogIndexes: unknown[] = [];
+      const beforeLogRequestIndexes: unknown[] = [];
       for (const [requestId, argv] of [
         ['initial', ['build', '--only', 'a']],
         ['repeat', ['build', '--only', 'a']],
@@ -1761,8 +1762,14 @@ fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/outpu
           payload: { exitCode: 0 }
         });
         if (requestId === 'initial') {
-          fixture.session.operationGraph!.hooks.beforeLog.tap('test', (data: ITelemetryData) => {
+          const { hooks } = fixture.session.operationGraph!;
+          hooks.beforeLog.tap('test', (data: ITelemetryData) => {
             beforeLogIndexes.push(data.extraData?.requestIndex);
+          });
+          // Like a plugin that flags every entry that it is active, such as fstrace.
+          hooks.beforeLogRequest.tap('test', (data: ITelemetryData) => {
+            beforeLogRequestIndexes.push(data.extraData?.requestIndex);
+            data.extraData!.pluginActive = true;
           });
         }
       }
@@ -1820,6 +1827,9 @@ fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/outpu
       }
       // The repeated request needed no iteration, so iteration-scoped beforeLog taps do not see its entry.
       expect(beforeLogIndexes).toEqual([3]);
+      // beforeLogRequest taps see every entry, and what they add is logged.
+      expect(beforeLogRequestIndexes).toEqual([2, 3]);
+      expect(entries.map(({ extraData }) => extraData!.pluginActive)).toEqual([undefined, true, true]);
       expect(runs(fixture)).toEqual(['a:one:', 'b:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();

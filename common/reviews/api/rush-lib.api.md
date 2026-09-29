@@ -1443,6 +1443,7 @@ export class OperationGraphHooks {
     IOperationRunnerContext & IOperationExecutionResult
     ], OperationStatus | undefined>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
+    readonly beforeLogRequest: SyncHook<ITelemetryData, void>;
     readonly configureIteration: SyncHook<[
     ReadonlyMap<Operation, IConfigurableOperation>,
     ReadonlyMap<Operation, IOperationExecutionResult>,

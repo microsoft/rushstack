@@ -21,6 +21,7 @@ import { PhasedCommandEngineExecution } from '../logic/operations/PhasedCommandE
 import { createPhasedTelemetryData } from '../logic/operations/PhasedCommandTelemetry';
 import { type ITelemetryData, Telemetry } from '../logic/Telemetry';
 import { getRunAnyPhasedCommandBlocker } from '../pluginFramework/PhasedCommandHookTaps';
+import type { OperationGraphHooks } from '../pluginFramework/OperationGraphHooks';
 import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushUserConfiguration } from './RushUserConfiguration';
@@ -47,11 +48,11 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
   readonly pluginNames: ReadonlyArray<string>;
   readonly isIncremental: boolean;
   /**
-   * Logs one request's telemetry entry the way a native iteration logs its own: `beforeLog` taps run first, then
-   * the entry is saved under `common/temp/telemetry` and passed to `flushTelemetry` taps. Disposing the engine waits
-   * up to 2 seconds for taps that are still running; a tap that takes longer, such as an upload over a stalled
-   * network, keeps running in the background, so that it cannot hold the host. Saving does nothing when telemetry
-   * is disabled for the repository.
+   * Logs one request's telemetry entry the way a native iteration logs its own: `beforeLogRequest` and `beforeLog`
+   * taps run first, then the entry is saved under `common/temp/telemetry` and passed to `flushTelemetry` taps.
+   * Disposing the engine waits up to 2 seconds for taps that are still running; a tap that takes longer, such as an
+   * upload over a stalled network, keeps running in the background, so that it cannot hold the host. Saving does
+   * nothing when telemetry is disabled for the repository.
    *
    * @remarks
    * `beforeLog` taps describe the latest iteration, so a host logs an iteration's entries before it starts the
@@ -67,8 +68,8 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
 export interface IPhasedCommandEngineLogTelemetryOptions {
   /**
    * Whether a graph iteration served the request. If `false`, as for a request that the warm graph answered
-   * without an iteration, `beforeLog` taps are skipped, because they would describe an earlier iteration.
-   * Defaults to `true`.
+   * without an iteration, `beforeLog` taps are skipped, because they would describe an earlier iteration;
+   * `beforeLogRequest` taps still run. Defaults to `true`.
    */
   readonly servedByIteration?: boolean;
 }
@@ -298,13 +299,8 @@ export class PhasedCommandEngine {
       return {
         ...engine,
         acquireExecutionLeaseAsync: () => execution.acquireExecutionLeaseAsync(),
-        logTelemetry: (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) => {
-          if (options?.servedByIteration !== false) {
-            operationGraph.hooks.beforeLog.call(data);
-          }
-          telemetry.log(data);
-          telemetry.flush();
-        },
+        logTelemetry: (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) =>
+          logEngineTelemetry(operationGraph.hooks, telemetry, data, options),
         [Symbol.asyncDispose]: async () => {
           try {
             await execution[Symbol.asyncDispose]();
@@ -480,6 +476,24 @@ function rebasePerformanceEntry(entry: PerformanceEntry, timeOriginMs: number): 
     detail,
     toJSON: () => ({ name, entryType, startTime, duration, detail })
   };
+}
+
+/**
+ * Logs one request's telemetry entry for an engine: the graph's `beforeLogRequest` taps run first, then its
+ * `beforeLog` taps if an iteration served the request, then the entry is saved and flushed.
+ */
+export function logEngineTelemetry(
+  hooks: Pick<OperationGraphHooks, 'beforeLog' | 'beforeLogRequest'>,
+  telemetry: Pick<Telemetry, 'log' | 'flush'>,
+  data: ITelemetryData,
+  options: IPhasedCommandEngineLogTelemetryOptions | undefined
+): void {
+  hooks.beforeLogRequest.call(data);
+  if (options?.servedByIteration !== false) {
+    hooks.beforeLog.call(data);
+  }
+  telemetry.log(data);
+  telemetry.flush();
 }
 
 /**

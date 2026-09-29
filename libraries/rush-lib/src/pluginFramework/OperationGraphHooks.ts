@@ -181,8 +181,27 @@ export class OperationGraphHooks {
   /**
    * Hook invoked after executing an iteration, before the telemetry entry is written.
    * Allows the caller to augment or modify the log entry.
+   *
+   * @remarks
+   * Taps describe the iteration that just ran. A long-lived host such as the Rush daemon logs one entry for each
+   * request, and skips this hook for a request that it served without an iteration. Use `beforeLogRequest` for data
+   * that every entry needs.
    */
   public readonly beforeLog: SyncHook<ITelemetryData, void> = new SyncHook(['telemetryData'], 'beforeLog');
+
+  /**
+   * Hook invoked before any telemetry entry for this graph's work is written, including the entry of a request that
+   * a long-lived host such as the Rush daemon served without an iteration. Use it instead of `beforeLog` for data
+   * that does not describe an iteration, such as a flag that says that a plugin is active.
+   *
+   * @remarks
+   * A native command invokes this hook for each iteration's entry, before `beforeLog`. A long-lived host invokes it
+   * once for each request that it logs, and invokes `beforeLog` after it only if an iteration served the request.
+   */
+  public readonly beforeLogRequest: SyncHook<ITelemetryData, void> = new SyncHook(
+    ['telemetryData'],
+    'beforeLogRequest'
+  );
 
   /**
    * Hook invoked before executing a operation.

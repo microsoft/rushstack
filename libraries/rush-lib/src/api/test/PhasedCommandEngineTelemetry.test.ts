@@ -10,7 +10,9 @@ import { NoOpTerminalProvider } from '@rushstack/terminal';
 
 import {
   PhasedCommandEngine,
+  logEngineTelemetry,
   waitForTelemetryFlushAsync,
+  type IPhasedCommandEngineLogTelemetryOptions,
   type IPhasedCommandEngineTelemetryOptions,
   type IPhasedCommandEngineTelemetryRecord
 } from '../PhasedCommandEngine';
@@ -21,6 +23,7 @@ import type { ITelemetryData } from '../../logic/Telemetry';
 import { Operation } from '../../logic/operations/Operation';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
 import { MockOperationRunner } from '../../logic/operations/test/MockOperationRunner';
+import { OperationGraphHooks } from '../../pluginFramework/OperationGraphHooks';
 
 describe(`${PhasedCommandEngine.name} telemetry`, () => {
   let folder: string;
@@ -213,6 +216,52 @@ describe(`${PhasedCommandEngine.name} telemetry`, () => {
 
     expect(data.extraData).toMatchObject({ daemon: true, requestIndex: 3, countAll: 99, countSuccess: 1 });
     expect(data.performanceEntries).toEqual([]);
+  });
+});
+
+describe(logEngineTelemetry.name, () => {
+  // One tap is like a plugin that flags that it is active; the other reports what it did since the last iteration.
+  function logEntry(options: IPhasedCommandEngineLogTelemetryOptions | undefined): string[] {
+    const hooks: OperationGraphHooks = new OperationGraphHooks();
+    const events: string[] = [];
+    hooks.beforeLogRequest.tap('plugin flag', (data: ITelemetryData) => {
+      events.push('beforeLogRequest');
+      data.extraData!.pluginActive = true;
+    });
+    hooks.beforeLog.tap('iteration report', (data: ITelemetryData) => {
+      events.push(`beforeLog, pluginActive ${data.extraData!.pluginActive}`);
+      data.extraData!.iterationAuthSeconds = 2;
+    });
+    const data: ITelemetryData = { name: 'build', durationInSeconds: 1, result: 'Succeeded', extraData: {} };
+    logEngineTelemetry(
+      hooks,
+      {
+        log: (entry: ITelemetryData) => events.push(`log ${JSON.stringify(entry.extraData)}`),
+        flush: () => events.push('flush')
+      },
+      data,
+      options
+    );
+    return events;
+  }
+
+  it('runs only beforeLogRequest taps for a request that no iteration served', () => {
+    expect(logEntry({ servedByIteration: false })).toEqual([
+      'beforeLogRequest',
+      'log {"pluginActive":true}',
+      'flush'
+    ]);
+  });
+
+  it('runs beforeLogRequest taps, then beforeLog taps, for a request that an iteration served', () => {
+    for (const options of [{ servedByIteration: true }, {}, undefined]) {
+      expect(logEntry(options)).toEqual([
+        'beforeLogRequest',
+        'beforeLog, pluginActive true',
+        'log {"pluginActive":true,"iterationAuthSeconds":2}',
+        'flush'
+      ]);
+    }
   });
 });
 

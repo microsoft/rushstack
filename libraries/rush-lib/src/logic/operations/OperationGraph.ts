@@ -1134,7 +1134,10 @@ export class OperationGraph implements IOperationGraph {
         });
       });
 
-      measureFn(`${PERF_PREFIX}:beforeLog`, () => this.hooks.beforeLog.call(logEntry));
+      measureFn(`${PERF_PREFIX}:beforeLog`, () => {
+        this.hooks.beforeLogRequest.call(logEntry);
+        this.hooks.beforeLog.call(logEntry);
+      });
       telemetry.log(logEntry);
     }
 

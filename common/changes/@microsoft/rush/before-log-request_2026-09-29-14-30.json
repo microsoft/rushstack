@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add the `beforeLogRequest` operation graph hook, which runs before every telemetry entry of the graph is written, including the entry of a request that a long-lived host such as the Rush daemon served without an iteration. Plugins use it instead of `beforeLog` for data that does not describe an iteration, such as a flag that says that the plugin is active, so that the daemon's entries for up-to-date requests carry it too.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
