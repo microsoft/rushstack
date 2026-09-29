@@ -285,15 +285,18 @@ export class AgentProgressRenderer {
 
   /**
    * The daemon is not ready yet, but a live process can still make it ready, so the client waits up to `waitMs`
-   * more for it instead of running Rush in-process. On a pipe, says so once; the connecting line is then not due.
+   * more for it instead of running Rush in-process. On a pipe, says so once, with `owner`, the sentence that
+   * describes that process, for example "Its startup helper (PID 123) is still waiting for the daemon"; the
+   * connecting line is then not due.
    */
-  public onAwaitStartup(waitMs: number): void {
+  public onAwaitStartup(waitMs: number, owner?: string): void {
     this.setPhase(STARTING_PHASE);
     clearTimeout(this.#connectingTimer);
     this.#connectingTimer = undefined;
     if (!this.#options.isTTY && !this.#stopped && !this.#startingLineWritten) {
       this.#startingLineWritten = true;
-      this.#writePipeLine(`${this.#rows()[0]} (up to ${Math.round(waitMs / 1000)}s more)`);
+      const reason: string = owner ? ` because ${owner.charAt(0).toLowerCase()}${owner.slice(1)}` : '';
+      this.#writePipeLine(`${this.#rows()[0]} (up to ${Math.round(waitMs / 1000)}s more)${reason}`);
     }
   }
 

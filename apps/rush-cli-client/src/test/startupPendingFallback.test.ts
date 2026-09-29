@@ -79,7 +79,7 @@ describe('a daemon startup failure', () => {
         'so this command waits up to 15 s more for it instead of running Rush in-process.\n'
     );
 
-    // Agent output shows it as the phase of its progress line instead.
+    // Agent output shows it as the phase of its progress line instead, and names the live process there.
     output.mockClear();
     const write: jest.Mock = jest.fn();
     const renderer: AgentProgressRenderer = new AgentProgressRenderer({
@@ -89,7 +89,12 @@ describe('a daemon startup failure', () => {
       write
     });
     await expect(launchClientAsync(false, renderer)).rejects.toBe(pending);
-    expect(write).toHaveBeenCalledWith(expect.stringContaining('rushd is still starting; waiting for it'));
+    expect(write).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'rushd is still starting; waiting for it (up to 15s more) because its startup helper (PID 42) is ' +
+          'still waiting for the daemon'
+      )
+    );
     expect(output).not.toHaveBeenCalledWith(expect.stringContaining('The daemon is not ready yet'));
   });
 

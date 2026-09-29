@@ -71,7 +71,7 @@ already running in this repository." Instead, the client keeps trying for one mo
 (15 seconds, so about 30 seconds in all) and uses the daemon once it is ready. It says so when it starts
 waiting (`rush-client: The daemon is not ready yet. <live process>, so this command waits up to 15 s more
 for it instead of running Rush in-process.`; agent output shows "rushd is still starting; waiting for it"
-as the progress phase, and on a pipe writes it as a progress line). If the daemon is still not ready, the command exits with code 1. The message
+as the progress phase, and on a pipe writes it as a progress line that ends with `because <live process>`). If the daemon is still not ready, the command exits with code 1. The message
 gives the startup error with its `--no-daemon` hint, then the process that is still live, "so Rush was
 not run in-process", and a pointer to `rush-client daemon status`.
 
@@ -150,7 +150,8 @@ daemon has the request (`rush build · 0.1s · sent to rushd; preparing the work
 lines, so that it does not look hung: one whenever nothing was written for 25 s, with the counts
 and the running operations, and one when connecting to the daemon takes more than 10 s. A
 wait for a daemon that is still starting gets a line of its own
-(`rushd is still starting; waiting for it (up to 15s more)`). A
+(`rushd is still starting; waiting for it (up to 15s more) because its startup helper (PID 4242) is
+still waiting for the daemon`). A
 request that waited for admission says so at the end of its summary line
 (`· queued behind another request (position 1 at 0.2s)`). It always ends with one summary
 line, for example

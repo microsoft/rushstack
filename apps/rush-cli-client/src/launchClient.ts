@@ -171,7 +171,7 @@ export async function launchClientAsync(
       ...connection,
       onAwaitStartup: (owner: string, waitMs: number): void => {
         if (agentRenderer) {
-          agentRenderer.onAwaitStartup(waitMs);
+          agentRenderer.onAwaitStartup(waitMs, owner);
           return;
         }
         const seconds: number = Math.round(waitMs / 1000);

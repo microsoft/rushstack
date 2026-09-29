@@ -1110,6 +1110,19 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
+    it('names the process it waits for in the line for a daemon that is still starting', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      advance(clock, 300);
+      renderer.onAwaitStartup(15_000, 'Its startup helper (PID 4242) is still waiting for the daemon');
+      renderer.onAwaitStartup(14_000, 'Another client is still starting the daemon');
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.3s · rushd is still starting; waiting for it (up to 15s more) because its startup ' +
+          'helper (PID 4242) is still waiting for the daemon'
+      ]);
+    });
+
     it('writes nothing for a request that is handed to in-process Rush within 10 s', () => {
       const { renderer, output, clock } = createRenderer(false);
       renderer.start();
