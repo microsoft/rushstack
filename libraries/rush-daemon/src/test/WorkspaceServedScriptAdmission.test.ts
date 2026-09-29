@@ -15,7 +15,8 @@ import * as path from 'node:path';
 import {
   captureWorkspaceInputFingerprintAsync,
   type IWorkspaceInputFingerprint,
-  WorkspaceInputChangeTier
+  WorkspaceInputChangeTier,
+  WorkspaceRuntimeFingerprintCache
 } from '@microsoft/rush-lib';
 import {
   DaemonFrameType,
@@ -673,8 +674,67 @@ describe('the reason for a restart that waits for a served rushx script', () => 
     }));
   }
 
+  let changedImplementationPaths: jest.SpyInstance<ReadonlyArray<string>, []> | undefined;
+
+  /** Makes every later capture find the given files of Rush or its plugins changed, in this order. */
+  function changeImplementationFiles(fixture: DaemonGraphTestFixture, files: ReadonlyArray<string>): void {
+    changeCapturedInputs({ runtimeHash: 'changed' });
+    changedImplementationPaths = jest
+      .spyOn(WorkspaceRuntimeFingerprintCache.prototype, 'changedPaths', 'get')
+      .mockReturnValue(files.map((file: string) => path.join(fixture.folder, file)));
+  }
+
   afterEach(() => {
     inputCaptureMock.mockImplementation(actualCaptureAsync);
+    changedImplementationPaths?.mockRestore();
+    changedImplementationPaths = undefined;
+  });
+
+  const PLUGIN_FILES: ReadonlyArray<string> = ['a', 'b', 'c', 'd'].map(
+    (name: string) => `common/autoinstallers/plugins/node_modules/rush-plugin/lib/${name}.js`
+  );
+
+  it('leaves the changed installation files out of the reason of an install that restarts for another reason', async () => {
+    const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+      // The install is never admitted, so no successor is launched.
+      created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
+    });
+    try {
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      const script: IServedScript = await serveAsync(fixture);
+
+      // An install is expected to change the installation, so only the changed code makes it restart first.
+      changeInstallation(fixture);
+      changeImplementationFiles(fixture, PLUGIN_FILES.slice(0, 1));
+      const install: IStreamedRequest = await startRequestAsync(fixture, ['install'], {
+        admission: { waitTimeoutMs: 1500 }
+      });
+      const { terminal } = await install.exchange;
+      expect(terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+      });
+      expect((terminal.payload as IDaemonCommandResult).errorMessage).toContain(
+        'The request was not admitted before the daemon could restart because the code of Rush or a Rush plugin ' +
+          `changed (${PLUGIN_FILES[0]}).`
+      );
+      expect(install.positionPayloads).toEqual([
+        {
+          position: 1,
+          requestId: install.requestId,
+          restartReason: { kind: 'workspaceInputsChanged', implementationFiles: PLUGIN_FILES.slice(0, 1) },
+          scriptCount: 1
+        }
+      ]);
+      expect(script.settled()).toBe(false);
+
+      fixture.write(RELEASE_FILE, '');
+      expectSuccess(await script.exchange);
+    } finally {
+      inputCaptureMock.mockImplementation(actualCaptureAsync);
+      fixture.write(RELEASE_FILE, '');
+      await fixture[Symbol.asyncDispose]();
+    }
   });
 
   it.each<
@@ -703,6 +763,16 @@ describe('the reason for a restart that waits for a served rushx script', () => 
       // The capture found no changed file, since the test only changed its hash.
       { kind: 'workspaceInputsChanged', implementationFiles: [] },
       'because the code of Rush or a Rush plugin changed'
+    ],
+    [
+      'at most 3 changed files of Rush or its plugins',
+      (fixture: DaemonGraphTestFixture) => {
+        changeImplementationFiles(fixture, PLUGIN_FILES);
+        return {};
+      },
+      { kind: 'workspaceInputsChanged', implementationFiles: PLUGIN_FILES.slice(0, 3) },
+      `because the code of Rush or a Rush plugin changed (${PLUGIN_FILES[0]}, ${PLUGIN_FILES[1]} and ` +
+        `${PLUGIN_FILES[2]})`
     ],
     [
       'another Rush version',
