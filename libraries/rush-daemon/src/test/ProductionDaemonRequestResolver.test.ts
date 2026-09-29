@@ -238,6 +238,23 @@ describe('native production daemon engine', () => {
     }
   });
 
+  it('parses the command line of a warm request once, for its identity check and its resolution', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const parse: jest.SpyInstance = jest.spyOn(PhasedCommandEngine, 'parseAsync');
+    try {
+      await runAsync(fixture, 'cold-parse', ['build', '--only', 'a']);
+      parse.mockClear();
+      expect((await runAsync(fixture, 'warm-parse', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(parse).toHaveBeenCalledTimes(1);
+    } finally {
+      parse.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('serves client output and request-scoped settings in the same generation instead of restarting', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {

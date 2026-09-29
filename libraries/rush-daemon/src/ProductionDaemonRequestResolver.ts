@@ -19,7 +19,7 @@ import {
   type Operation,
   type OperationEnabledState
 } from '@microsoft/rush-lib';
-import type { IDaemonPhasedOperationSelection } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonPhasedOperationSelection, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import {
   DaemonRequestDispatchError,
@@ -41,6 +41,14 @@ import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
 import { createInputsCompatibilityCheck, getOperationsWithChangedInputs } from './WorkspaceInputsComparison';
 import { createDaemonRequestTelemetrySink, type IDaemonEngineCreationTiming } from './DaemonRequestTelemetry';
+
+/** A native parse of the command line of a request. */
+interface IParsedCommand {
+  readonly command: PhasedCommandEngine;
+  readonly terminal: EngineTerminalProvider;
+  readonly envelope: IDaemonRequestEnvelope;
+  readonly workspaceSession: IWorkspaceSession;
+}
 
 /**
  * Binds the standalone host to a real native build/rebuild graph on its first request.
@@ -68,6 +76,9 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   /** The daemon's environment when it started. Replacement sessions keep it; see `createForSession`. */
   readonly #startupEnvironment: Readonly<Record<string, string | undefined>>;
   readonly #validateGraphInputsAsync: (() => Promise<void>) | undefined;
+  // The workspace lifecycle checks the command identity of a request, and then resolves the request under the same
+  // admission lease. Keyed by the abort signal of the request, a parse is kept only as long as its request.
+  readonly #identityParses: WeakMap<AbortSignal, IParsedCommand> = new WeakMap();
 
   public constructor(options?: {
     readonly preparationLock?: LockFile;
@@ -102,14 +113,19 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
 
   /** Inspects the native command shape without constructing or executing an operation graph. */
   public async getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string> {
-    return (await this.#parseCommandAsync(options, new EngineTerminalProvider())).parameterIdentity;
+    const parsed: IParsedCommand = await this.#parseCommandAsync(options);
+    // Resolving the same request uses this parse instead of parsing the same command line again.
+    this.#identityParses.set(options.abortSignal, parsed);
+    return parsed.command.parameterIdentity;
   }
 
   public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
     const resolveStartTimeMs: number = performance.now();
     const { envelope, workspaceSession } = options;
-    const terminal: EngineTerminalProvider = new EngineTerminalProvider();
-    const command: PhasedCommandEngine = await this.#parseCommandAsync(options, terminal);
+    const { command, terminal }: IParsedCommand = await this.#parseCommandAsync(
+      options,
+      this.#takeIdentityParse(options)
+    );
     let bindingStartTimeMs: number | undefined;
     if (this.#binding) {
       if (
@@ -191,10 +207,17 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     };
   }
 
+  /** Returns the parse of the identity check of this request, if its command line and session are unchanged. */
+  #takeIdentityParse(options: IResolveDaemonRequestOptions): IParsedCommand | undefined {
+    const parsed: IParsedCommand | undefined = this.#identityParses.get(options.abortSignal);
+    this.#identityParses.delete(options.abortSignal);
+    return parsed && isSameCommandLine(parsed, options) ? parsed : undefined;
+  }
+
   async #parseCommandAsync(
     options: IResolveDaemonRequestOptions,
-    terminal: EngineTerminalProvider
-  ): Promise<PhasedCommandEngine> {
+    identityParse?: IParsedCommand
+  ): Promise<IParsedCommand> {
     const { envelope, workspaceSession, abortSignal } = options;
     if (!['build', 'rebuild'].includes(envelope.commandName) || envelope.commandOrigin !== 'built-in') {
       throw new DaemonRequestDispatchError(
@@ -216,23 +239,27 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           'may have changed process.env. Restart the daemon or use --no-daemon.'
       );
     }
-    let command: PhasedCommandEngine;
-    try {
-      command = await PhasedCommandEngine.parseAsync({
-        argv: envelope.argv,
-        cwd: envelope.cwd,
-        environment: envelope.environment,
-        rushConfiguration: workspaceSession.rushConfiguration,
-        terminalProvider: terminal
-      });
-    } catch (error) {
-      // Answer only for a command line of the requested command; in-process Rush reports any other one.
-      if (error instanceof PhasedCommandEngineUsageError && envelope.argv[0] === envelope.commandName) {
-        throw new DaemonRequestUsageError(terminal.describeError(error), error.exitCode, { cause: error });
+    let parsed: IParsedCommand | undefined = identityParse;
+    if (!parsed) {
+      const terminal: EngineTerminalProvider = new EngineTerminalProvider();
+      try {
+        const command: PhasedCommandEngine = await PhasedCommandEngine.parseAsync({
+          argv: envelope.argv,
+          cwd: envelope.cwd,
+          environment: envelope.environment,
+          rushConfiguration: workspaceSession.rushConfiguration,
+          terminalProvider: terminal
+        });
+        parsed = { command, terminal, envelope, workspaceSession };
+      } catch (error) {
+        // Answer only for a command line of the requested command; in-process Rush reports any other one.
+        if (error instanceof PhasedCommandEngineUsageError && envelope.argv[0] === envelope.commandName) {
+          throw new DaemonRequestUsageError(terminal.describeError(error), error.exitCode, { cause: error });
+        }
+        throw new DaemonRequestDispatchError('unsupported', terminal.describeError(error), { cause: error });
       }
-      throw new DaemonRequestDispatchError('unsupported', terminal.describeError(error), { cause: error });
     }
-    if (command.commandName !== envelope.commandName) {
+    if (parsed.command.commandName !== envelope.commandName) {
       throw new DaemonRequestDispatchError(
         'invalidRequest',
         'The command name does not match the native parsed argv.'
@@ -244,7 +271,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         getDaemonShutdownReason(abortSignal)?.message ??
           'The request was cancelled before engine initialization.'
       );
-    return command;
+    return parsed;
   }
 
   /**
@@ -384,6 +411,18 @@ type EngineLogTelemetry = (data: ITelemetryData, options?: IPhasedCommandEngineL
 
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {
   return JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment));
+}
+
+/** Whether a parse has exactly the inputs that parsing the command line of this request would have. */
+function isSameCommandLine(parsed: IParsedCommand, options: IResolveDaemonRequestOptions): boolean {
+  const { envelope, workspaceSession } = options;
+  return (
+    parsed.workspaceSession === workspaceSession &&
+    parsed.envelope.requestId === envelope.requestId &&
+    parsed.envelope.argv === envelope.argv &&
+    parsed.envelope.cwd === envelope.cwd &&
+    parsed.envelope.environment === envelope.environment
+  );
 }
 
 /** The value of one variable as {@link getWorkspaceFingerprintEnvironmentEntries} records it, if it is set. */

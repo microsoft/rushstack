@@ -71,6 +71,7 @@ import { type IRushSessionReporterOptions, RushSession } from '../pluginFramewor
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
+import { getEngineJsonFileLoadCache, type JsonFileLoadCache } from '../utilities/JsonFileLoadCache';
 import { initializeDotEnv } from '../logic/dotenv';
 import { measureAsyncFn } from '../utilities/performance';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
@@ -187,6 +188,8 @@ export class RushCommandLineParser extends CommandLineParser {
   readonly #quietParameter: CommandLineFlagParameter;
   readonly #restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   readonly #rushOptions: IRushCommandLineParserOptions;
+  /** For a parser that serves a long-lived engine host, the cache through which it reads JSON configuration files. */
+  readonly #jsonFileLoadCache: JsonFileLoadCache | undefined;
   readonly #terminalProvider: ITerminalProvider;
   readonly #terminal: Terminal;
   readonly #autocreateBuildCommand: boolean;
@@ -243,6 +246,9 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.#rushOptions = this.#normalizeOptions(options || {});
     const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations, reporter } = this.#rushOptions;
+    this.#jsonFileLoadCache = this.#rushOptions.engine
+      ? getEngineJsonFileLoadCache(this.#rushOptions.engine.rushConfiguration)
+      : undefined;
     const reporterTerminalProvider: ReporterTerminalProvider | undefined = reporter?.operationStreamEnabled
       ? new ReporterTerminalProvider()
       : undefined;
@@ -296,7 +302,8 @@ export class RushCommandLineParser extends CommandLineParser {
       terminal,
       builtInPluginConfigurations,
       restrictConsoleOutput: this.#restrictConsoleOutput,
-      rushGlobalFolder: this.rushGlobalFolder
+      rushGlobalFolder: this.rushGlobalFolder,
+      jsonFileLoadCache: this.#jsonFileLoadCache
     });
     if (this.#initializationFailed) {
       this.#autocreateBuildCommand = true;
@@ -583,7 +590,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
     const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
       commandLineConfigFilePath,
-      doNotIncludeDefaultBuildCommands
+      doNotIncludeDefaultBuildCommands,
+      this.#jsonFileLoadCache
     );
     this.#addCommandLineConfigActions(commandLineConfiguration);
   }
@@ -661,7 +669,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
         shellCommand,
         autoinstallerName,
-        providedByPlugin
+        providedByPlugin,
+        jsonFileLoadCache: this.#jsonFileLoadCache
       })
     );
   }

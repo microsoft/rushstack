@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+import { JsonSchema, FileSystem } from '@rushstack/node-core-library';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { RushConstants } from '../logic/RushConstants';
+import { type JsonFileLoadCache, loadJsonFile } from '../utilities/JsonFileLoadCache';
 import type {
   CommandJson,
   ICommandLineJson,
@@ -635,11 +636,19 @@ export class CommandLineConfiguration {
    * use {@see loadFromFileOrDefault} instead.
    *
    * If the file does not exist, this function returns `undefined`
+   *
+   * @param jsonFileLoadCache - The cache of a long-lived engine host, which parses the file again only if it changed.
    */
-  public static tryLoadFromFile(jsonFilePath: string): CommandLineConfiguration | undefined {
+  public static tryLoadFromFile(
+    jsonFilePath: string,
+    jsonFileLoadCache?: JsonFileLoadCache
+  ): CommandLineConfiguration | undefined {
     let commandLineJson: ICommandLineJson | undefined;
     try {
-      commandLineJson = JsonFile.loadAndValidate(jsonFilePath, _jsonSchema);
+      commandLineJson = loadJsonFile(jsonFileLoadCache, jsonFilePath, (json) => {
+        _jsonSchema.validateObject(json, jsonFilePath);
+        return json as ICommandLineJson;
+      });
     } catch (e) {
       if (!FileSystem.isNotExistError(e as Error)) {
         throw e;
@@ -667,37 +676,23 @@ export class CommandLineConfiguration {
    * Loads the configuration from the specified file and applies any omitted default build
    * settings.  If the file does not exist, then a default instance is returned.
    * If the file contains errors, then an exception is thrown.
+   *
+   * @param jsonFileLoadCache - The cache of a long-lived engine host, which parses the file again only if it changed.
    */
   public static loadFromFileOrDefault(
     jsonFilePath?: string,
-    doNotIncludeDefaultBuildCommands?: boolean
+    doNotIncludeDefaultBuildCommands?: boolean,
+    jsonFileLoadCache?: JsonFileLoadCache
   ): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
     if (jsonFilePath) {
       try {
-        commandLineJson = JsonFile.load(jsonFilePath);
+        commandLineJson = loadJsonFile(jsonFileLoadCache, jsonFilePath, (json) =>
+          _prepareRepoCommandLineJson(json as ICommandLineJson, jsonFilePath)
+        );
       } catch (e) {
         if (!FileSystem.isNotExistError(e as Error)) {
           throw e;
-        }
-      }
-
-      // merge commands specified in command-line.json and default (re)build settings
-      // Ensure both build commands are included and preserve any other commands specified
-      if (commandLineJson?.commands) {
-        _applyBuildCommandDefaults(commandLineJson);
-
-        _jsonSchema.validateObject(commandLineJson, jsonFilePath);
-
-        // Validate that globalPlugin commands are not used in the repo's command-line.json
-        for (const { commandKind, name } of commandLineJson.commands) {
-          if (commandKind === RushConstants.globalPluginCommandKind) {
-            throw new Error(
-              `${RushConstants.commandLineFilename} defines a command "${name}" using ` +
-                `the command kind "${RushConstants.globalPluginCommandKind}". This command kind can only ` +
-                `be used in command-line.json files provided by Rush plugins.`
-            );
-          }
         }
       }
     }
@@ -749,6 +744,31 @@ export class CommandLineConfiguration {
 
     return translatedCommand;
   }
+}
+
+function _prepareRepoCommandLineJson(
+  commandLineJson: ICommandLineJson,
+  jsonFilePath: string
+): ICommandLineJson {
+  // merge commands specified in command-line.json and default (re)build settings
+  // Ensure both build commands are included and preserve any other commands specified
+  if (commandLineJson?.commands) {
+    _applyBuildCommandDefaults(commandLineJson);
+
+    _jsonSchema.validateObject(commandLineJson, jsonFilePath);
+
+    // Validate that globalPlugin commands are not used in the repo's command-line.json
+    for (const { commandKind, name } of commandLineJson.commands) {
+      if (commandKind === RushConstants.globalPluginCommandKind) {
+        throw new Error(
+          `${RushConstants.commandLineFilename} defines a command "${name}" using ` +
+            `the command kind "${RushConstants.globalPluginCommandKind}". This command kind can only ` +
+            `be used in command-line.json files provided by Rush plugins.`
+        );
+      }
+    }
+  }
+  return commandLineJson;
 }
 
 function _applyBuildCommandDefaults(commandLineJson: ICommandLineJson): void {

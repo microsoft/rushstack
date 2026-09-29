@@ -5,11 +5,15 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { NoOpTerminalProvider, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { PhasedCommandEngine } from '../PhasedCommandEngine';
 import { PhasedCommandEngineUsageError } from '../PhasedCommandEngineUsageError';
 import { RushConfiguration } from '../RushConfiguration';
+import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
+import { RushCommandLineParser } from '../../cli/RushCommandLineParser';
+import { JsonFileLoadCache } from '../../utilities/JsonFileLoadCache';
 
 const PACKAGE_NAME: string = '@example/rush-example-plugin';
 const PLUGIN_NAME: string = 'rush-example-plugin';
@@ -399,6 +403,187 @@ describe(PhasedCommandEngine.name, () => {
       process.env[COMPATIBLE_PLUGINS_VARIABLE] = 'rush-exmaple-plugin';
       await expect(parseBuildAsync(createTestRepo(BUILD_PLUGIN))).rejects.toThrow(
         `"${PLUGIN_NAME}" (${PACKAGE_NAME}) is associated with "build"`
+      );
+    });
+  });
+
+  describe('JSON configuration files of parses that share a workspace configuration', () => {
+    const REPO_COMMAND_LINE_PATH: string = 'common/config/rush/command-line.json';
+    const AUTOINSTALLER_PACKAGE_JSON_PATH: string = 'common/autoinstallers/plugins/package.json';
+    const PLUGIN_STORE_FOLDER: string = `common/autoinstallers/plugins/rush-plugins/${PACKAGE_NAME}`;
+    const MANIFEST_PATH: string = `${PLUGIN_STORE_FOLDER}/rush-plugin-manifest.json`;
+    const PLUGIN_COMMAND_LINE_PATH: string = `${PLUGIN_STORE_FOLDER}/${PLUGIN_NAME}/command-line.json`;
+    const EXAMPLE_MODE_PARAMETER: object = {
+      parameterKind: 'choice',
+      longName: '--example-mode',
+      description: 'An example mode.',
+      associatedCommands: ['build'],
+      alternatives: [
+        { name: 'on', description: 'On.' },
+        { name: 'off', description: 'Off.' }
+      ],
+      defaultValue: 'on'
+    };
+    // A global command whose autoinstaller's package.json Rush reads while it parses any command line.
+    const GLOBAL_COMMAND_LINE_JSON: object = {
+      ...REPO_COMMAND_LINE_JSON,
+      commands: [
+        ...(REPO_COMMAND_LINE_JSON as { commands: object[] }).commands,
+        {
+          commandKind: 'global',
+          name: 'example-global',
+          summary: 'An example.',
+          shellCommand: 'node example.js',
+          autoinstallerName: 'plugins'
+        }
+      ]
+    };
+
+    interface IManifestJson {
+      plugins: { associatedCommands: string[] }[];
+    }
+
+    function createSharedConfigurationRepo(): RushConfiguration {
+      const folder: string = createTestRepo(
+        { associatedCommands: [PLUGIN_COMMAND], commandLineJson: COMMAND_SCOPED_COMMAND_LINE_JSON },
+        { commandLineJson: GLOBAL_COMMAND_LINE_JSON }
+      );
+      return RushConfiguration.loadFromConfigurationFile(path.join(folder, 'rush.json'));
+    }
+
+    function editJson<T>(rushConfiguration: RushConfiguration, relativePath: string, edit: (json: T) => void): void {
+      const filePath: string = path.join(rushConfiguration.rushJsonFolder, relativePath);
+      const json: T = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      edit(json);
+      fs.writeFileSync(filePath, JSON.stringify(json));
+    }
+
+    async function parseAsync(
+      rushConfiguration: RushConfiguration,
+      argv: string[] = ['build']
+    ): Promise<PhasedCommandEngine> {
+      return await PhasedCommandEngine.parseAsync({
+        argv,
+        cwd: rushConfiguration.rushJsonFolder,
+        rushConfiguration,
+        terminalProvider: new NoOpTerminalProvider()
+      });
+    }
+
+    async function getParseErrorAsync(rushConfiguration: RushConfiguration): Promise<Error | undefined> {
+      return await parseAsync(rushConfiguration).then(
+        () => undefined,
+        (error: Error) => error
+      );
+    }
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('sees each change to the repository command-line.json', async () => {
+      const rushConfiguration: RushConfiguration = createSharedConfigurationRepo();
+      await expect(parseAsync(rushConfiguration, ['build', '--example-mode', 'off'])).rejects.toThrow(
+        '--example-mode'
+      );
+
+      editJson<{ parameters?: object[] }>(rushConfiguration, REPO_COMMAND_LINE_PATH, (json) => {
+        json.parameters = [EXAMPLE_MODE_PARAMETER];
+      });
+      const offIdentity: string = (await parseAsync(rushConfiguration, ['build', '--example-mode', 'off']))
+        .parameterIdentity;
+      expect((await parseAsync(rushConfiguration)).parameterIdentity).not.toBe(offIdentity);
+    });
+
+    it('reports an invalid repository command-line.json for every parse, as a parse without the cache does', async () => {
+      const rushConfiguration: RushConfiguration = createSharedConfigurationRepo();
+      await parseAsync(rushConfiguration);
+
+      editJson<{ unknownSetting?: boolean }>(rushConfiguration, REPO_COMMAND_LINE_PATH, (json) => {
+        json.unknownSetting = true;
+      });
+      const error: Error | undefined = await getParseErrorAsync(rushConfiguration);
+      expect(error?.message).toMatch(/command-line\.json/);
+      expect((await getParseErrorAsync(rushConfiguration))?.message).toBe(error?.message);
+      await expect(parseBuildAsync(rushConfiguration.rushJsonFolder)).rejects.toThrow(error?.message);
+
+      editJson<{ unknownSetting?: boolean }>(rushConfiguration, REPO_COMMAND_LINE_PATH, (json) => {
+        delete json.unknownSetting;
+      });
+      await expect(parseAsync(rushConfiguration)).resolves.toBeInstanceOf(PhasedCommandEngine);
+    });
+
+    it("sees each change to a plugin's manifest and command-line.json", async () => {
+      const rushConfiguration: RushConfiguration = createSharedConfigurationRepo();
+      await expect(parseAsync(rushConfiguration)).resolves.toBeInstanceOf(PhasedCommandEngine);
+
+      editJson<IManifestJson>(rushConfiguration, MANIFEST_PATH, (manifest) => {
+        manifest.plugins[0].associatedCommands.push('build');
+      });
+      await expect(parseAsync(rushConfiguration)).rejects.toThrow(
+        `"${PLUGIN_NAME}" (${PACKAGE_NAME}) is associated with "build"`
+      );
+
+      editJson<IManifestJson>(rushConfiguration, MANIFEST_PATH, (manifest) => {
+        manifest.plugins[0].associatedCommands.pop();
+      });
+      fs.writeFileSync(
+        path.join(rushConfiguration.rushJsonFolder, PLUGIN_COMMAND_LINE_PATH),
+        JSON.stringify(PHASE_SHAPING_COMMAND_LINE_JSON)
+      );
+      await expect(parseAsync(rushConfiguration)).rejects.toThrow(
+        `"${PLUGIN_NAME}" (${PACKAGE_NAME}) associates "--example-flag" with the "_phase:build" phase`
+      );
+    });
+
+    it("sees each change to the package.json of a global command's autoinstaller", async () => {
+      const rushConfiguration: RushConfiguration = createSharedConfigurationRepo();
+      await expect(parseAsync(rushConfiguration)).resolves.toBeInstanceOf(PhasedCommandEngine);
+
+      editJson<{ name: string }>(rushConfiguration, AUTOINSTALLER_PACKAGE_JSON_PATH, (packageJson) => {
+        packageJson.name = 'other';
+      });
+      await expect(parseAsync(rushConfiguration)).rejects.toThrow(
+        `specifies an "autoinstallerName" setting, but the package.json file's "name" field is not "plugins"`
+      );
+    });
+
+    it('reads each file for every parse, but parses it only if it changed', async () => {
+      const rushConfiguration: RushConfiguration = createSharedConfigurationRepo();
+      const filePaths: string[] = [
+        REPO_COMMAND_LINE_PATH,
+        AUTOINSTALLER_PACKAGE_JSON_PATH,
+        MANIFEST_PATH,
+        PLUGIN_COMMAND_LINE_PATH
+      ].map((relativePath) => path.join(rushConfiguration.rushJsonFolder, relativePath));
+      const texts: string[] = filePaths.map((filePath) => fs.readFileSync(filePath, 'utf8'));
+      await parseAsync(rushConfiguration);
+
+      const readFileSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFile');
+      const loadSpy: jest.SpyInstance = jest.spyOn(JsonFile, 'load');
+      const parseStringSpy: jest.SpyInstance = jest.spyOn(JsonFile, 'parseString');
+      await parseAsync(rushConfiguration);
+
+      const readFilePaths: Set<string> = new Set(readFileSpy.mock.calls.map(([filePath]) => filePath));
+      expect(filePaths.filter((filePath) => !readFilePaths.has(filePath))).toEqual([]);
+      expect(loadSpy.mock.calls.filter(([filePath]) => filePaths.includes(filePath))).toEqual([]);
+      expect(parseStringSpy.mock.calls.filter(([text]) => texts.includes(text))).toEqual([]);
+    });
+
+    it('does not cache the files for a native command line', async () => {
+      const rushConfiguration: RushConfiguration = createSharedConfigurationRepo();
+      const cacheLoadSpy: jest.SpyInstance = jest.spyOn(JsonFileLoadCache.prototype, 'load');
+      const loadSpy: jest.SpyInstance = jest.spyOn(JsonFile, 'load');
+      // Engine parses in this process validated the environment, and a native parser must load .env files first.
+      EnvironmentConfiguration.reset();
+
+      const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: rushConfiguration.rushJsonFolder });
+      expect(parser.getAction('example-global')).toBeDefined();
+      expect(cacheLoadSpy).not.toHaveBeenCalled();
+      const loadedFilePaths: Set<string> = new Set(loadSpy.mock.calls.map(([filePath]) => filePath));
+      expect(loadedFilePaths).toContain(path.join(rushConfiguration.rushJsonFolder, REPO_COMMAND_LINE_PATH));
+      expect(loadedFilePaths).toContain(
+        path.join(rushConfiguration.rushJsonFolder, AUTOINSTALLER_PACKAGE_JSON_PATH)
       );
     });
   });

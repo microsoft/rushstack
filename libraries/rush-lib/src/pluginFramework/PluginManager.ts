@@ -15,6 +15,7 @@ import { Rush } from '../api/Rush';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { findNodeModulesPackageFolder } from '../utilities/RushLibPathHandoff';
 import { rushLibPathHandoff } from '../utilities/SetRushLibPath';
+import type { JsonFileLoadCache } from '../utilities/JsonFileLoadCache';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -23,6 +24,8 @@ export interface IPluginManagerOptions {
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
   restrictConsoleOutput: boolean;
   rushGlobalFolder: RushGlobalFolder;
+  /** The cache of a long-lived engine host, through which plugin loaders read the plugins' JSON files. */
+  jsonFileLoadCache?: JsonFileLoadCache;
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -114,7 +117,8 @@ export class PluginManager {
       return new BuiltInPluginLoader({
         pluginConfiguration,
         rushConfiguration: this.#rushConfiguration,
-        terminal: this.#terminal
+        terminal: this.#terminal,
+        jsonFileLoadCache: options.jsonFileLoadCache
       });
     });
 
@@ -126,7 +130,8 @@ export class PluginManager {
         rushConfiguration: this.#rushConfiguration,
         terminal: this.#terminal,
         restrictConsoleOutput: this.#restrictConsoleOutput,
-        rushGlobalFolder: this.#rushGlobalFolder
+        rushGlobalFolder: this.#rushGlobalFolder,
+        jsonFileLoadCache: options.jsonFileLoadCache
       });
     });
   }
