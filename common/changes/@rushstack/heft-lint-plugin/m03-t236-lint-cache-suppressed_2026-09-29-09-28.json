@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Fix an issue where the ESLint cache treated a file as passing when it had a suppressed message (from an `eslint-disable` comment or a bulk suppression), even if it also had warnings or errors that weren't suppressed. Runs without `--clean` didn't lint the file again, so those warnings and errors weren't reported.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}
