@@ -322,6 +322,50 @@ describe(RepoStateCache.name, () => {
     expect(state.files.get('untracked.txt')).toBe(hashText('two\n'));
   });
 
+  it('hashes a file that changed recently again even when only its change time is recent', async () => {
+    settleFiles();
+    writeFile('untracked.txt', 'one\n');
+    const filePath: string = path.join(repoPath, 'untracked.txt');
+    // As after a write that put back the modification time of the file. The stamp stays the same when the file
+    // changes again within the granularity of the file times.
+    const recentTimeNs: bigint = BigInt(Date.now()) * BigInt(1e6);
+    const oldTimeNs: bigint = BigInt(originalDateNow() - 100000) * BigInt(1e6);
+    const recentStats: fs.BigIntStats = Object.create(fs.lstatSync(filePath, { bigint: true }), {
+      mtimeNs: { value: oldTimeNs },
+      ctimeNs: { value: recentTimeNs }
+    });
+    const lstatAsync: typeof fs.promises.lstat = fs.promises.lstat;
+    jest
+      .spyOn(fs.promises, 'lstat')
+      .mockImplementation(async (lstatPath: fs.PathLike, options?: fs.StatOptions) =>
+        lstatPath === filePath ? recentStats : await lstatAsync(lstatPath, options)
+      );
+    await getStateAsync(['untracked.txt']);
+
+    writeFile('untracked.txt', 'two\n');
+    takeGitCommands();
+    const state: IDetailedRepoState = await getStateAsync(['untracked.txt']);
+    expect(takeGitCommandNames()).toEqual(['hash-object', 'hash-object', 'status']);
+    expect(state.files.get('untracked.txt')).toBe(hashText('two\n'));
+  });
+
+  it('hashes a settled file again when it changes at the same size and its modification time is put back', async () => {
+    settleFiles();
+    const filePath: string = path.join(repoPath, 'untracked.txt');
+    const time: number = Math.floor(originalDateNow() / 1000) - 100;
+    writeFile('untracked.txt', 'one\n');
+    fs.utimesSync(filePath, time, time);
+    await getStateAsync(['untracked.txt']);
+
+    // Only the change time of the file reveals the change, since userspace can't set it
+    writeFile('untracked.txt', 'two\n');
+    fs.utimesSync(filePath, time, time);
+    takeGitCommands();
+    const state: IDetailedRepoState = await getStateAsync(['untracked.txt']);
+    expect(takeGitCommandNames()).toEqual(['hash-object', 'status']);
+    expect(state.files.get('untracked.txt')).toBe(hashText('two\n'));
+  });
+
   it('copies the index again when the files that it records change', async () => {
     settleFiles();
     const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
@@ -346,6 +390,30 @@ describe(RepoStateCache.name, () => {
     state = await getStateAsync();
     await expectUncachedStateAsync(state);
     expect(writeFileSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('follows a checkout between commits that record the same files with the same sizes', async () => {
+    settleFiles();
+    const firstCommit: string = runGit('rev-parse', 'HEAD').trim();
+    writeFile('a.txt', 'A\n');
+    commit();
+    const secondCommit: string = runGit('rev-parse', 'HEAD').trim();
+    let state: IDetailedRepoState = await getStateAsync();
+    expect(state.files.get('a.txt')).toBe(hashText('A\n'));
+
+    // The working tree stays clean, so "git status" reports the same output each time. Only the list of the
+    // files in the index tells the states apart.
+    runGit('reset', '--quiet', '--hard', firstCommit);
+    state = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(state.hasUncommittedChanges).toBe(false);
+    expect(state.files.get('a.txt')).toBe(hashText('a\n'));
+
+    runGit('checkout', '--quiet', secondCommit);
+    state = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(state.hasUncommittedChanges).toBe(false);
+    expect(state.files.get('a.txt')).toBe(hashText('A\n'));
   });
 
   it('lists the files in the copy of the index while "git status" refreshes it', async () => {
@@ -465,6 +533,35 @@ describe(RepoStateCache.name, () => {
     expect(state.files.get('a.txt')).toBe(hashText('a\r\n'));
     expect(writeFileSpy).toHaveBeenCalledTimes(1);
     expect(takeGitCommandNames()).toEqual(['hash-object', 'status']);
+  });
+
+  it('copies the index again on each call while the configuration of the repository may still change', async () => {
+    runGit('config', 'core.autocrlf', 'true');
+    // Git writes the file with CRLF line endings
+    fs.unlinkSync(path.join(repoPath, 'a.txt'));
+    runGit('checkout', '--', 'a.txt');
+    // Git refreshes the recorded times of the file in the copy of the index, but not in the index
+    touchSettledFile('a.txt');
+    // The configuration may change again without changing its stamp
+    unsettleFiles();
+    const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+    let state: IDetailedRepoState = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(state.files.get('a.txt')).toBe(hashText('a\n'));
+    expect(writeFileSpy).toHaveBeenCalledTimes(1);
+
+    const changes: [string, string][] = [
+      ['false', 'a\r\n'],
+      ['true', 'a\n']
+    ];
+    for (const [autocrlf, content] of changes) {
+      runGit('config', 'core.autocrlf', autocrlf);
+      state = await getStateAsync();
+      await expectUncachedStateAsync(state);
+      expect(state.files.get('a.txt')).toBe(hashText(content));
+    }
+
+    expect(writeFileSpy).toHaveBeenCalledTimes(3);
   });
 
   it('copies the index again when a .gitattributes file changes, after computing the state without the cache', async () => {
