@@ -377,8 +377,23 @@ export class ProjectChangeAnalyzer {
       const additionalRelativePathsToHash: string[] = [];
       const globalAdditionalFiles: string[] = [];
       if (rushConfiguration.isPnpm) {
+        // When the `useProjectDependencyGraph` experiment is enabled, the scoped dependency graph
+        // file supersedes `shrinkwrap-deps.json`. It covers strictly more of the lockfile, since it
+        // carries a Merkle hash of every context the project can resolve rather than a flattened
+        // list of specifiers, so change detection cannot become less sensitive.
+        const useProjectDependencyGraph: boolean =
+          !!rushConfiguration.experimentsConfiguration.configuration.useProjectDependencyGraph;
+        const { getProjectDependencyGraphFilePathForProject } = useProjectDependencyGraph
+          ? await import(
+              /* webpackChunkName: 'ProjectDependencyGraphFile' */
+              './pnpm/ProjectDependencyGraphFile'
+            )
+          : { getProjectDependencyGraphFilePathForProject: undefined };
+
         await Async.forEachAsync(rushConfiguration.projects, async (project: RushConfigurationProject) => {
-          const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
+          const projectShrinkwrapFilePath: string =
+            getProjectDependencyGraphFilePathForProject?.(project) ??
+            BaseProjectShrinkwrapFile.getFilePathForProject(project);
           if (!(await FileSystem.existsAsync(projectShrinkwrapFilePath))) {
             if (rushConfiguration.subspacesFeatureEnabled) {
               return;
