@@ -69,31 +69,67 @@ export function findReclaimedDaemonPid(paths: IDaemonPaths): number | undefined 
   return undefined;
 }
 
-/** Appends one line in the form of the launcher's own lines, under the launcher's checks of the log file. */
+interface IAppendableLog {
+  readonly fd: number;
+  /** Whether the log was also opened for reading. */
+  readonly readable: boolean;
+}
+
+/**
+ * Appends one line in the form of the launcher's own lines, under the launcher's checks of the log file. When
+ * the log ends inside a line, for example after a daemon that was killed before it finished one, the line starts
+ * on a line of its own, so that {@link findReclaimedDaemonPid} can read it; that needs a log this user may read.
+ */
 function appendClientLine(paths: IDaemonPaths, text: string): void {
-  let fd: number | undefined;
+  let log: IAppendableLog | undefined;
   try {
-    fd = fs.openSync(
-      getDaemonLogFilePath(paths),
-      // These distinct native flags have non-overlapping values.
-      fs.constants.O_WRONLY +
-        fs.constants.O_APPEND +
-        fs.constants.O_CREAT +
-        (process.platform === 'win32' ? 0 : fs.constants.O_NOFOLLOW + fs.constants.O_NONBLOCK),
-      0o600
-    );
-    const stats: fs.Stats = fs.fstatSync(fd);
-    if (!stats.isFile() || stats.nlink !== 1) return;
+    log = openLogForAppend(getDaemonLogFilePath(paths));
+    const stats: fs.BigIntStats = statOpenLog(log.fd);
+    if (!stats.isFile() || stats.nlink !== 1n) return;
     if (process.platform !== 'win32') {
-      if (stats.uid !== process.getuid?.()) return;
-      fs.fchmodSync(fd, 0o600);
+      if (Number(stats.uid) !== process.getuid?.()) return;
+      fs.fchmodSync(log.fd, 0o600);
     }
-    fs.writeSync(fd, `${new Date().toISOString()} rush-client (PID ${process.pid}): ${text}\n`);
+    const separator: string = log.readable && endsInsideLine(log.fd, Number(stats.size)) ? '\n' : '';
+    fs.writeSync(
+      log.fd,
+      `${separator}${new Date().toISOString()} rush-client (PID ${process.pid}): ${text}\n`
+    );
   } catch {
     // Whatever the line reports is done; only the report of it is lost.
   } finally {
-    if (fd !== undefined) fs.closeSync(fd);
+    if (log !== undefined) fs.closeSync(log.fd);
   }
+}
+
+/** Opens the log to read it too when this user may, and else, as the launcher does, only to write to it. */
+function openLogForAppend(logFilePath: string): IAppendableLog {
+  // These distinct native flags have non-overlapping values.
+  const flags: number =
+    fs.constants.O_APPEND +
+    fs.constants.O_CREAT +
+    (process.platform === 'win32' ? 0 : fs.constants.O_NOFOLLOW + fs.constants.O_NONBLOCK);
+  try {
+    return { fd: fs.openSync(logFilePath, fs.constants.O_RDWR + flags, 0o600), readable: true };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'EACCES') throw error;
+    return { fd: fs.openSync(logFilePath, fs.constants.O_WRONLY + flags, 0o600), readable: false };
+  }
+}
+
+function endsInsideLine(fd: number, size: number): boolean {
+  if (size === 0) return false;
+  const lastByte: Buffer = Buffer.alloc(1);
+  return fs.readSync(fd, lastByte, 0, 1, size - 1) === 1 && lastByte[0] !== 0x0a;
+}
+
+/**
+ * Stats the open log. A plain stat would leave the log's file type in Node's shared stat array, and Node's cached
+ * realpath reads that array: after a FIFO, the next require() in this process would not resolve symlinks, so a
+ * package that pnpm installed could not find its dependencies. A bigint stat fills another array.
+ */
+function statOpenLog(fd: number): fs.BigIntStats {
+  return fs.fstatSync(fd, { bigint: true });
 }
 
 function readLogTailLines(logFilePath: string): string[] | undefined {
@@ -105,10 +141,11 @@ function readLogTailLines(logFilePath: string): string[] | undefined {
       fs.constants.O_RDONLY +
         (process.platform === 'win32' ? 0 : fs.constants.O_NOFOLLOW + fs.constants.O_NONBLOCK)
     );
-    const stats: fs.Stats = fs.fstatSync(fd);
+    const stats: fs.BigIntStats = statOpenLog(fd);
     if (!stats.isFile()) return undefined;
-    const start: number = Math.max(0, stats.size - MAX_LOG_READ_BYTES);
-    const buffer: Buffer = Buffer.alloc(stats.size - start);
+    const size: number = Number(stats.size);
+    const start: number = Math.max(0, size - MAX_LOG_READ_BYTES);
+    const buffer: Buffer = Buffer.alloc(size - start);
     const lines: string[] = buffer
       .toString('utf8', 0, fs.readSync(fd, buffer, 0, buffer.length, start))
       .split(/\r?\n/);
