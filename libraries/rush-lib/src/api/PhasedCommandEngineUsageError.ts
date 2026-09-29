@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * The command line is not valid for the command, for example because it names an unknown parameter.
+ * The command line is not valid for a phased command, for example because it names an unknown parameter.
  * Native Rush prints the message and exits with {@link PhasedCommandEngineUsageError.exitCode}.
  * No engine preparation has begun.
  * @alpha

@@ -98,15 +98,23 @@ describe(`${PhasedCommandEngine.name} parameter identity`, () => {
   it('reports the excluded settings per request', async () => {
     expect((await parseAsync('build')).requestSettings).toEqual({
       quietMode: true,
-      parallelism: parseParallelism(undefined)
+      parallelism: parseParallelism(undefined),
+      isIncrementalBuildAllowed: true
     });
     expect((await parseAsync('build', '--verbose', '-p', '2')).requestSettings).toEqual({
       quietMode: false,
-      parallelism: 2
+      parallelism: 2,
+      isIncrementalBuildAllowed: true
     });
     expect((await parseAsync('build', '-p', '50%')).requestSettings).toEqual({
       quietMode: true,
-      parallelism: { scalar: 0.5 }
+      parallelism: { scalar: 0.5 },
+      isIncrementalBuildAllowed: true
+    });
+    expect((await parseAsync('rebuild', '--only', 'a')).requestSettings).toEqual({
+      quietMode: true,
+      parallelism: parseParallelism(undefined),
+      isIncrementalBuildAllowed: false
     });
   });
 
@@ -127,7 +135,8 @@ describe(`${PhasedCommandEngine.name} parameter identity`, () => {
     try {
       expect((await parseInEnvironmentAsync({ RUSH_PARALLELISM: '3' }, 'build')).requestSettings).toEqual({
         quietMode: true,
-        parallelism: 3
+        parallelism: 3,
+        isIncrementalBuildAllowed: true
       });
       expect(
         (await parseInEnvironmentAsync({ RUSH_PARALLELISM: '3' }, 'build', '-p', '5')).requestSettings

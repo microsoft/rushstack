@@ -55,6 +55,7 @@ import {
   createFixtureAsync,
   DecoratedTestResolver,
   logText,
+  readTelemetryEntries,
   requestEnvironment,
   runAsync,
   runs,
@@ -62,14 +63,6 @@ import {
 } from './NativeEngineTestFixture';
 
 jest.setTimeout(30_000);
-
-function readTelemetryEntries(repoRoot: string): ITelemetryData[] {
-  const folder: string = path.join(repoRoot, 'common/temp/telemetry');
-  return fs
-    .readdirSync(folder)
-    .sort()
-    .flatMap((name: string) => JSON.parse(fs.readFileSync(path.join(folder, name), 'utf8')));
-}
 
 describe('native production daemon engine', () => {
   it("runs each request's operations with its requester's session and invocation folder", async () => {
@@ -366,12 +359,12 @@ describe('native production daemon engine', () => {
       expect(fixture.host.workspaceGeneration).toBeGreaterThan(firstGeneration);
       expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
       const second: WorkspaceSession = fixture.session;
-      expect((await runAsync(fixture, 'shape', ['rebuild', '--only', 'a'])).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
+      // A rebuild would share the engine of build, so change a parameter of the compile phase instead.
+      const shape: ITerminalExchange = await runAsync(fixture, 'shape', ['build', '-o', 'a', '--production']);
+      expect(shape.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
       expect(fixture.session).not.toBe(second);
-      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--new-definition', 'a:one:--new-definition']);
+      const production: string = 'a:one:--new-definition --production';
+      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--new-definition', production]);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }
@@ -1526,7 +1519,9 @@ fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/outpu
       fs.rmSync(path.join(fixture.repoRoot, 'projects/b/lib'), { recursive: true });
       const restored: ITerminalExchange = await runAsync(fixture, 'restored', ['build', '--to', 'b']);
       expect((restored.terminal as { payload: IDaemonPhasedRequestResult }).payload.operationResults).toEqual(
-        expect.arrayContaining([expect.objectContaining({ operationId: 'b (compile)', status: 'FROM CACHE' })])
+        expect.arrayContaining([
+          expect.objectContaining({ operationId: 'b (compile)', status: 'FROM CACHE' })
+        ])
       );
       expect(fs.readFileSync(outputPath, 'utf8')).toBe('two+one');
       expect(runs(fixture)).toEqual(['a:one:', 'b:one:', 'b:two:']);

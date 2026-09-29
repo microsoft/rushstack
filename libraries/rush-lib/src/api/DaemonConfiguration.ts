@@ -51,7 +51,16 @@ export interface IDaemonConfigurationJson {
    * for long-lived daemon engines, in addition to plugins whose manifest sets `daemonCompatible`. Defaults to none.
    */
   readonly compatiblePlugins?: ReadonlyArray<string>;
+  /**
+   * Names of configured Rush plugins (their `pluginName` in rush-plugins.json) that the repository has verified to be
+   * command-agnostic, in addition to plugins whose manifest sets `daemonCommandAgnostic`. Such a plugin's
+   * `runAnyPhasedCommand` taps do the same for every phased command, so they don't stop one daemon engine from
+   * serving several commands. Defaults to none.
+   */
+  readonly commandAgnosticPlugins?: ReadonlyArray<string>;
 }
+
+type PluginNamesKey = 'compatiblePlugins' | 'commandAgnosticPlugins';
 
 const defaults: Required<IDaemonConfigurationJson> = {
   enabled: false,
@@ -66,7 +75,8 @@ const defaults: Required<IDaemonConfigurationJson> = {
   warmMemoryBudgetMB: 512,
   warmSetMaxProjects: 20,
   autoWarmByTelemetry: false,
-  compatiblePlugins: Object.freeze([])
+  compatiblePlugins: Object.freeze([]),
+  commandAgnosticPlugins: Object.freeze([])
 };
 
 /** The exact recognized environment names. Unknown RUSH_DAEMON* names are rejected. @beta */
@@ -84,7 +94,8 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
     warmSetMaxProjects: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
     autoWarmByTelemetry: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
-    compatiblePlugins: 'RUSH_DAEMON_COMPATIBLE_PLUGINS'
+    compatiblePlugins: 'RUSH_DAEMON_COMPATIBLE_PLUGINS',
+    commandAgnosticPlugins: 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS'
   });
 
 /**
@@ -129,26 +140,28 @@ export function resolveDaemonConfiguration(
     warmIdleTimeoutSeconds: numberOption('warmIdleTimeoutSeconds', json, environment),
     warmMemoryBudgetMB: numberOption('warmMemoryBudgetMB', json, environment),
     warmSetMaxProjects: numberOption('warmSetMaxProjects', json, environment),
-    compatiblePlugins: pluginNamesOption(json, environment)
+    compatiblePlugins: pluginNamesOption('compatiblePlugins', json, environment),
+    commandAgnosticPlugins: pluginNamesOption('commandAgnosticPlugins', json, environment)
   });
 }
 
 function pluginNamesOption(
+  key: PluginNamesKey,
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): ReadonlyArray<string> {
-  const configured: unknown = json.compatiblePlugins;
+  const configured: unknown = json[key];
   if (
     configured !== undefined &&
     (!Array.isArray(configured) ||
       configured.some((name: unknown) => typeof name !== 'string' || !isPluginName(name)))
   ) {
-    throw new Error('daemon.compatiblePlugins must be an array of plugin names.');
+    throw new Error(`daemon.${key} must be an array of plugin names.`);
   }
-  const name: string = daemonEnvironmentVariables.compatiblePlugins;
+  const name: string = daemonEnvironmentVariables[key];
   const value: string | undefined = environment[name];
   if (value === undefined) {
-    return configured ? Object.freeze([...(configured as string[])]) : defaults.compatiblePlugins;
+    return configured ? Object.freeze([...(configured as string[])]) : defaults[key];
   }
   // An empty value overrides rush.json with no plugins.
   const names: string[] = value.trim() === '' ? [] : value.split(',').map((entry: string) => entry.trim());

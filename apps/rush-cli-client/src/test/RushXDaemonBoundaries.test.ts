@@ -194,7 +194,14 @@ describe('native Rushx execution boundaries', () => {
       kind: 'global',
       executor: holdAsync
     });
-    const holder = fixture.runAsync({ ...fixture.request(['hold'], cwd), invocationKind: 'rush' });
+    // The workspace parses a custom Rush command before it captures inputs, and that parse falls back in this
+    // fixture. A built-in origin reaches the mocked resolution unparsed, and an unknown built-in command is
+    // still exclusive.
+    const holder = fixture.runAsync({
+      ...fixture.request(['hold'], cwd),
+      commandOrigin: 'built-in',
+      invocationKind: 'rush'
+    });
     await holding;
     const onQueuePositionAsync = jest.fn(async () => undefined);
     try {
@@ -212,7 +219,9 @@ describe('native Rushx execution boundaries', () => {
 
   it('does not guess package scripts for legacy or custom workspace requests', async () => {
     const cwd: string = await startAsync();
-    const phased = jest.spyOn(fixture.phasedResolver, 'resolveRequestAsync');
+    // The workspace parses a custom Rush command before it captures inputs, and this fixture's requests fall
+    // back there. A rushx request never reaches that parse.
+    const phased = jest.spyOn(fixture.phasedResolver, 'getCommandParameterIdentityAsync');
     for (const invocationKind of [undefined, 'rush'] as const) {
       const request: IDaemonRequestEnvelope = { ...fixture.request(['build'], cwd), invocationKind };
       expect((await fixture.runAsync(request)).outcome).toMatchObject({

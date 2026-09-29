@@ -249,6 +249,8 @@ describe('workspace input fingerprints', () => {
         { FOO: '1' },
         // Declaring a plugin daemon-compatible changes which plugins the engine applies.
         { RUSH_DAEMON_COMPATIBLE_PLUGINS: 'rush-example-plugin' },
+        // Declaring a plugin command-agnostic changes which commands the engine serves.
+        { RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS: 'rush-example-plugin' },
         { RUSH_BUILD_CACHE_ENABLED: '1' },
         { RUSH_BUILD_CACHE_WRITE_ALLOWED: '0' },
         { RUSH_DAEMON_WATCH: '1' },

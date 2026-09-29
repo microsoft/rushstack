@@ -84,7 +84,8 @@ a workspace graph. Embedded hosts can install the composite explicitly; omitting
 
 ### Bounded native engine integration
 
-`PhasedCommandEngine` in `rush-lib` parses native `build` and `rebuild` commands without invoking CLI execution,
+`PhasedCommandEngine` in `rush-lib` parses native `build` and `rebuild` commands, and the phased commands of
+command-line.json, without invoking CLI execution,
 initializing `.env`, changing the process working directory, or mutating `process.env`. Graph preparation reuses
 `PhasedScriptAction`'s standard operation, sharding, shell-runner, validation, cache/legacy-skip, and situational
 plugin pipeline. It does not launch a Rush CLI subprocess. The graph includes every project, and native
@@ -118,8 +119,10 @@ environment, so it sees the submitting shell's values, as a native command would
 the daemon's `process.env` when the operation starts, so it includes variables that a plugin sets in the same
 iteration's `beforeExecuteIterationAsync`; state hashes use the values from when the iteration was scheduled, before
 those hooks run, as native Rush does.
-Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
-still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
+Compatible selections reuse the same graph and records. An unchanged successful build schedules no work. A
+`rebuild`, or another command with `"incremental": false`, runs every operation that it selects again, without
+earlier results, build cache restores or the legacy skip check, and the graph keeps the new results for later
+requests. Every execution refreshes operation inputs under its native lease.
 With the build cache enabled, a cacheable operation whose tracked input files change while the inputs snapshot is
 taken or while it executes is not kept as up to date, whether or not cache writes are allowed: the next request runs
 it and its consumers again, even if the files were changed back in between. Operations whose build cache is
@@ -308,9 +311,24 @@ resolver before replacing its session, and disposes the current resolver at shut
 its normal disposer to its owned delegates.
 
 **Client integration boundary:** the resolver requires `commandOrigin: "built-in"` for native
-`build`/`rebuild`. The standalone client identifies these workspace commands while leaving
-`rushx build` and other script invocations custom. The resolver also validates the native parsed
-action; identical script names alone never authorize a workspace build.
+`build`/`rebuild` and `commandOrigin: "custom"` for the phased commands of command-line.json. The
+standalone client identifies these workspace commands while leaving `rushx build` and other script
+invocations custom. The resolver also validates the native parsed action; identical script names alone
+never authorize a workspace build. Commands share one graph where they can
+(`PhasedCommandEngine.getEngineSharingBlocker`). The graph of an incremental command serves another phased
+command if it has every operation of the phases that the request selects, both commands give the same arguments
+to the phases that the request can run, the same plugins are associated with both commands, and no plugin taps
+`runAnyPhasedCommand` or the `runPhasedCommand` hook of either command. So a `test` graph serves `build` and
+`rebuild`, and a `build` graph serves `rebuild`. The graph of a non-incremental command serves only that
+command. With `daemon.usePersistentIpcRunners`, no other graph serves a non-incremental command such as
+`rebuild` either, because persistent IPC runners serve only incremental commands. Any other built-in request
+reloads the graph. Any other custom request reloads it only if the new
+graph could serve the current graph's command, so that two commands never replace each other's graph on every
+request; otherwise, for example `retest` after `build`, it is rejected as unsupported and the client runs it
+in-process. Each request keeps its own admission class: an incremental custom command shares build admission
+like `build`; one with `"incremental": false` is exclusive and reruns its selection like `rebuild`. A global
+command, or a built-in command that is not phased, is rejected as unsupported before any workspace input is read,
+so the client runs it in-process.
 
 ### Explicit persistent Node operations
 
@@ -339,9 +357,11 @@ including on Windows. Descriptor args and non-ignored native custom parameter to
 quotes, spaces and shell metacharacters are not parsed or expanded. Native cwd, environment, IPC stdio and
 process ownership are preserved. No shell string is rewritten to obtain a launcher.
 
-Only unsharded incremental daemon builds use this path. Rebuild, ordinary/native fallback, empty/missing
-canonical scripts, and preassigned runners (including shard/collator and architectural NoOp nodes) retain their
-native behavior. Existing watch-only `:ipc` declarations and the graph's `isWatch` setting are unchanged.
+Only unsharded graphs of incremental commands use this path. A graph created by `rebuild`, ordinary/native
+fallback, empty/missing canonical scripts, and preassigned runners (including shard/collator and architectural
+NoOp nodes) retain their native behavior. A `rebuild` that the graph of an incremental command serves first closes
+the runners of the operations that it selects, so each one starts cold, as in a native `rush rebuild` process.
+Existing watch-only `:ipc` declarations and the graph's `isWatch` setting are unchanged.
 The existing `--no-ipc` is honored when the native command registers it. IPC runners remain **non-cacheable**,
 as in native watch mode; this is an explicit execution/cache-policy choice. Their hash still uses the native
 canonical command and non-ignored custom parameters, not an invented command identity.

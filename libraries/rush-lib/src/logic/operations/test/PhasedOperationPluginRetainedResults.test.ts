@@ -57,18 +57,26 @@ class MockRunner implements IOperationRunner {
   public readonly name: string;
   public readonly isNoOp: boolean;
   readonly #executions: string[];
+  readonly #incrementalExecutions: string[];
 
-  public constructor(name: string, isNoOp: boolean, executions: string[]) {
+  public constructor(name: string, isNoOp: boolean, executions: string[], incrementalExecutions: string[]) {
     this.name = name;
     this.isNoOp = isNoOp;
     this.#executions = executions;
+    this.#incrementalExecutions = incrementalExecutions;
   }
 
-  public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+  public async executeAsync(
+    context: IOperationRunnerContext,
+    lastState?: IOperationExecutionResult
+  ): Promise<OperationStatus> {
     if (this.isNoOp) {
       return OperationStatus.NoOp;
     }
     this.#executions.push(this.name);
+    if (lastState) {
+      this.#incrementalExecutions.push(this.name);
+    }
     return OperationStatus.Success;
   }
 
@@ -82,11 +90,13 @@ interface ITestGraph {
   operations: Map<string, Operation>;
   localHashes: Map<string, string>;
   executions: string[];
+  /** The executions that were given the result of the previous execution. */
+  incrementalExecutions: string[];
   /**
    * The operations that the emulated change detection plugin checked, if enabled by `upToDate`.
    */
   checks: string[];
-  executeAsync(): Promise<IExecutionResult>;
+  executeAsync(isIncrementalBuildAllowed?: boolean): Promise<IExecutionResult>;
 }
 
 interface ITestGraphOptions {
@@ -114,6 +124,7 @@ async function createTestGraphAsync(
 ): Promise<ITestGraph> {
   const { noOps, legacySkipFolder, upToDate } = options;
   const executions: string[] = [];
+  const incrementalExecutions: string[] = [];
   const checks: string[] = [];
   const localHashes: Map<string, string> = new Map();
   const operations: Map<string, Operation> = new Map();
@@ -126,7 +137,7 @@ async function createTestGraphAsync(
       projectRushTempFolder: projectFolder
     } as unknown as RushConfigurationProject;
     const operation: Operation = new Operation({
-      runner: new MockRunner(name, !!noOps?.has(name), executions),
+      runner: new MockRunner(name, !!noOps?.has(name), executions, incrementalExecutions),
       logFilenameIdentifier: name,
       phase: mockPhase,
       project
@@ -193,11 +204,13 @@ async function createTestGraphAsync(
     operations,
     localHashes,
     executions,
+    incrementalExecutions,
     checks,
-    executeAsync: async () => {
+    executeAsync: async (isIncrementalBuildAllowed?: boolean) => {
       executions.length = 0;
+      incrementalExecutions.length = 0;
       checks.length = 0;
-      return await graph.executeAsync({ inputsSnapshot });
+      return await graph.executeAsync({ inputsSnapshot, isIncrementalBuildAllowed });
     }
   };
 }
@@ -413,6 +426,32 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
     expect(testGraph.executions).toEqual([]);
   });
 
+  it('runs every selected operation of a non-incremental iteration without its previous result', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] });
+    const b: Operation = testGraph.operations.get('b')!;
+    await testGraph.executeAsync();
+
+    // rebuild --to b
+    await testGraph.executeAsync(false);
+    expect(testGraph.executions).toEqual(['a', 'b']);
+    expect(testGraph.incrementalExecutions).toEqual([]);
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+
+    // rebuild --only a: "a" has the same state hash, so "b" stays verified.
+    b.enabled = false;
+    await testGraph.executeAsync(false);
+    expect(testGraph.executions).toEqual(['a']);
+    b.enabled = true;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual([]);
+
+    // An incremental iteration gives each operation its previous result.
+    testGraph.localHashes.set('a', 'a-v2');
+    await testGraph.executeAsync();
+    expect(testGraph.incrementalExecutions).toEqual(['a', 'b']);
+  });
+
   it('reuses the result of a selected operation that a plugin found up to date while its state hash is unchanged', async () => {
     const upToDate: Set<string> = new Set(['a', 'b']);
     const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { upToDate });
@@ -494,6 +533,31 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
     expect(testGraph.checks).toEqual([]);
   });
 
+  it('enables every selected operation of a non-incremental iteration, even with a result that a plugin found up to date', async () => {
+    const upToDate: Set<string> = new Set(['a', 'b']);
+    const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { upToDate });
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual(['a', 'b']);
+    await testGraph.executeAsync();
+    expect(testGraph.checks).toEqual([]);
+
+    // rebuild --to b: the retained results are current, but each operation is checked again.
+    await testGraph.executeAsync(false);
+    expect(testGraph.checks).toEqual(['a', 'b']);
+    expect(testGraph.executions).toEqual([]);
+
+    // The plugin no longer finds "b" up to date, so it runs without its previous result.
+    upToDate.delete('b');
+    await testGraph.executeAsync(false);
+    expect(testGraph.checks).toEqual(['a', 'b']);
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.incrementalExecutions).toEqual([]);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.checks).toEqual([]);
+  });
+
   describe('with legacy skip detection', () => {
     let legacySkipFolder: string;
 
@@ -543,6 +607,18 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
       c.enabled = true;
       await testGraph.executeAsync();
       expect(testGraph.executions).toEqual(['c']);
+    });
+
+    it('skips no operation of a non-incremental iteration', async () => {
+      // Build once in another process, then start a long-lived graph.
+      await (await createTestGraphAsync({ a: [], b: ['a'] }, { legacySkipFolder })).executeAsync();
+      const testGraph: ITestGraph = await createTestGraphAsync({ a: [], b: ['a'] }, { legacySkipFolder });
+      await testGraph.executeAsync(false);
+      expect(testGraph.executions).toEqual(['a', 'b']);
+
+      const hotResult: IExecutionResult = await testGraph.executeAsync();
+      expect(hotResult.status).toBe(OperationStatus.NoOp);
+      expect(testGraph.executions).toEqual([]);
     });
 
     it('still skips an unverified retained result if no dependency executes', async () => {

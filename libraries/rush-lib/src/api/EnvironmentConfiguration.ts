@@ -292,6 +292,8 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
   /** Overrides the plugins that the repository has verified for long-lived daemon engines. */
   RUSH_DAEMON_COMPATIBLE_PLUGINS: 'RUSH_DAEMON_COMPATIBLE_PLUGINS',
+  /** Overrides the plugins that the repository has verified to tap `runAnyPhasedCommand` the same way for every command. */
+  RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS: 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS',
   /** Gates the experimental graph client; requires host graph integration. */
   RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'
 } as const;
@@ -706,6 +708,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_SET_MAX_PROJECTS:
           case EnvironmentVariableNames.RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY:
           case EnvironmentVariableNames.RUSH_DAEMON_COMPATIBLE_PLUGINS:
+          case EnvironmentVariableNames.RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS:
           case EnvironmentVariableNames.RUSH_DAEMON_EXPERIMENTAL:
             // Validated together by resolveDaemonConfiguration().
             break;

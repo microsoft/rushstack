@@ -93,6 +93,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         ): void => {
           let logGitWarning: boolean = false;
           const { inputsSnapshot } = iterationOptions;
+          const allowSkip: boolean =
+            isIncrementalBuildAllowed && iterationOptions.isIncrementalBuildAllowed !== false;
 
           for (const record of operations.values()) {
             const { operation } = record;
@@ -147,7 +149,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             stateMap.set(operation, {
               packageDepsPath,
               packageDeps,
-              allowSkip: isIncrementalBuildAllowed
+              allowSkip
             });
           }
 

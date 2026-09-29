@@ -217,8 +217,9 @@ Request cwd, environment, argv, width and color are captured before connecting.
 The protocol currently expresses request color as a boolean; subscriptions carry
 the corresponding color level. There is no SIGWINCH forwarding.
 
-The standalone host now binds native `build`/`rebuild` requests to a reusable
-all-project graph. Native Rush parsing, project selection, graph plugins, and
+The standalone host now binds native `build`/`rebuild` requests, and the phased
+commands of command-line.json (such as `test`), to a reusable all-project graph.
+Global commands still run in-process. Native Rush parsing, project selection, graph plugins, and
 incremental/cache semantics are reused rather than spawning another Rush CLI.
 The client renders operation headers, collated text, and activity events; global
 command byte streams remain byte-preserving. A `rushx build` script never claims

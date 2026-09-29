@@ -18,6 +18,7 @@ function createSession(): IWorkspaceSession {
   // The native engine is already bound, so that a resolution only parses and selects operations.
   return {
     rushConfiguration: {},
+    rushSession: {},
     operationGraph: {},
     engineShape: {},
     initializeEngineAsync: async () => undefined
@@ -73,12 +74,14 @@ function dispatched(options: IResolveDaemonRequestOptions): IResolveDaemonReques
 
 describe('ProductionDaemonRequestResolver command line parsing', () => {
   let parses: number;
+  let parameterIdentity: string;
   let selectionError: Error | undefined;
   let commands: WeakRef<PhasedCommandEngine>[];
   let parse: jest.SpyInstance;
 
   beforeEach(() => {
     parses = 0;
+    parameterIdentity = 'parameters';
     selectionError = undefined;
     commands = [];
     parse = jest
@@ -87,9 +90,11 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
         terminalProvider.write(`Warning from parse ${++parses}\n`, TerminalProviderSeverity.warning);
         const command: PhasedCommandEngine = {
           commandName: 'build',
-          parameterIdentity: 'parameters',
+          parameterIdentity,
           requestSettings: {},
           unmatchedCompatiblePluginNames: [],
+          // The engine of any parse can serve any other parse.
+          getEngineSharingBlocker: () => undefined,
           selectOperationsAsync: async () => {
             if (selectionError) throw selectionError;
             return new Map();
@@ -114,6 +119,41 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
     });
     expect(parses).toBe(1);
   });
+
+  it('resolves a request that the bound engine serves with the parse of its identity check', async () => {
+    const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const session: IWorkspaceSession = createSession();
+    await resolver.resolveRequestAsync(createOptions(session));
+    // The identity check answers with the identity of the bound engine, which can serve this parse.
+    parameterIdentity = 'other parameters';
+    const options: IResolveDaemonRequestOptions = createOptions(session);
+    await expect(resolver.getCommandParameterIdentityAsync(options)).resolves.toBe('parameters');
+    await expect(resolver.resolveRequestAsync(dispatched(options))).resolves.toMatchObject({
+      kind: 'phased',
+      request: { requestId: 'request' }
+    });
+    expect(parses).toBe(2);
+  });
+
+  it.each<[string, Partial<IDaemonRequestEnvelope>]>([
+    // build and rebuild are both built-in, so here only the name does not match the parse.
+    ['name', { commandName: 'rebuild' }],
+    ['origin', { commandOrigin: 'custom' }]
+  ])(
+    'checks the command %s of a request that it resolves with the parse of its identity check',
+    async (name, change) => {
+      const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();
+      const options: IResolveDaemonRequestOptions = createOptions(createSession());
+      await resolver.getCommandParameterIdentityAsync(options);
+      await expect(
+        resolver.resolveRequestAsync({ ...options, envelope: { ...options.envelope, ...change } })
+      ).rejects.toMatchObject({
+        code: 'invalidRequest',
+        message: 'The command name or origin does not match the native parsed argv.'
+      });
+      expect(parses).toBe(1);
+    }
+  );
 
   it('reports the diagnostics of the parse that it reused with a selection error', async () => {
     const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();

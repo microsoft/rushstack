@@ -6,12 +6,13 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-import { Rush, RushUserConfiguration } from '@microsoft/rush-lib';
+import { Rush, RushUserConfiguration, type ITelemetryData } from '@microsoft/rush-lib';
 import {
   DaemonFrameType,
   decodeDaemonLogChunk,
   type IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
+import type { LockFile } from '@rushstack/node-core-library';
 
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { RushDaemonHost } from '../RushDaemonHost';
@@ -51,11 +52,45 @@ export interface IFixtureOptions {
   readonly incrementalScript?: boolean;
   /** Sets `daemon.incrementalBuilds` in rush.json. */
   readonly incrementalBuilds?: boolean;
+  /** Adds the phased `test` (incremental) and `retest` commands, with a `_phase:test`, and a global `hello`. */
+  readonly customCommands?: boolean;
+  /** Adds a preRushBuild event hook, which only build and rebuild run. */
+  readonly buildEventHook?: boolean;
   /** Uses PNPM, which installs a dependency file (shrinkwrap-deps.json) that change detection hashes per project. */
   readonly pnpm?: boolean;
   readonly telemetryEnabled?: boolean;
   /** Sets `daemon.compatiblePlugins` in rush.json. */
   readonly compatiblePlugins?: ReadonlyArray<string>;
+}
+
+/** Records the admission class of every phased request that a production resolver, or its replacement, resolves. */
+export class ClassRecordingResolver extends ProductionDaemonRequestResolver {
+  readonly #classes: string[];
+
+  public constructor(
+    classes: string[],
+    options?: ConstructorParameters<typeof ProductionDaemonRequestResolver>[0]
+  ) {
+    super(options);
+    this.#classes = classes;
+  }
+
+  public override createForSession(
+    preparationLock?: LockFile,
+    validateGraphInputsAsync?: () => Promise<void>
+  ): ProductionDaemonRequestResolver {
+    return new ClassRecordingResolver(this.#classes, { preparationLock, validateGraphInputsAsync });
+  }
+
+  public override async resolveRequestAsync(
+    options: IResolveDaemonRequestOptions
+  ): Promise<ResolvedDaemonRequest> {
+    const resolved: ResolvedDaemonRequest = await super.resolveRequestAsync(options);
+    if (resolved.kind === 'phased') {
+      this.#classes.push(`${resolved.request.commandName}:${resolved.exclusivityClass}`);
+    }
+    return resolved;
+  }
 }
 
 export class DecoratedTestResolver implements IDaemonRequestResolver {
@@ -122,6 +157,7 @@ export async function createFixtureAsync(
         ...(options.incrementalBuilds === undefined ? {} : { incrementalBuilds: options.incrementalBuilds }),
         ...(options.compatiblePlugins === undefined ? {} : { compatiblePlugins: options.compatiblePlugins })
       },
+      ...(options.buildEventHook ? { eventHooks: { preRushBuild: ['node -e ""'] } } : {}),
       ...(options.telemetryEnabled ? { telemetryEnabled: true } : {}),
       projectFolderMinDepth: 2,
       projectFolderMaxDepth: 2,
@@ -141,7 +177,12 @@ export async function createFixtureAsync(
   write(
     'common/config/rush/command-line.json',
     JSON.stringify({
-      phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
+      phases: [
+        { name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } },
+        ...(options.customCommands
+          ? [{ name: '_phase:test', dependencies: { self: ['_phase:compile'] } }]
+          : [])
+      ],
       commands: [
         {
           commandKind: 'phased',
@@ -149,7 +190,33 @@ export async function createFixtureAsync(
           phases: ['_phase:compile'],
           incremental: true,
           enableParallelism: true
-        }
+        },
+        ...(options.customCommands
+          ? [
+              {
+                commandKind: 'phased',
+                name: 'test',
+                summary: 'Builds and tests',
+                phases: ['_phase:compile', '_phase:test'],
+                incremental: true,
+                enableParallelism: true
+              },
+              {
+                commandKind: 'phased',
+                name: 'retest',
+                summary: 'Rebuilds and tests',
+                phases: ['_phase:compile', '_phase:test'],
+                incremental: false,
+                enableParallelism: true
+              },
+              {
+                commandKind: 'global',
+                name: 'hello',
+                summary: 'A global command',
+                shellCommand: 'node -e ""'
+              }
+            ]
+          : [])
       ],
       parameters: [
         {
@@ -182,7 +249,8 @@ export async function createFixtureAsync(
           '_phase:compile': 'node build.cjs',
           ...(options.incrementalScript
             ? { '_phase:compile:incremental': 'node build.cjs --incremental' }
-            : {})
+            : {}),
+          ...(options.customCommands ? { '_phase:test': 'node test.cjs' } : {})
         },
         dependencies: name === 'b' ? { a: '1.0.0' } : {}
       })
@@ -195,6 +263,10 @@ export async function createFixtureAsync(
     );
     write(`projects/${name}/input.txt`, 'one');
     if (options.pnpm) write(`projects/${name}/.rush/temp/shrinkwrap-deps.json`, '{}');
+    write(
+      `projects/${name}/test.cjs`,
+      `require('node:fs').appendFileSync('../../runs.txt', 'test-${name}\\n');\n`
+    );
     write(
       `projects/${name}/build.cjs`,
       `
@@ -349,4 +421,12 @@ export function requestEnvironment(): Record<string, string> {
   return Object.fromEntries(
     Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
   );
+}
+
+export function readTelemetryEntries(repoRoot: string): ITelemetryData[] {
+  const folder: string = path.join(repoRoot, 'common/temp/telemetry');
+  return fs
+    .readdirSync(folder)
+    .sort()
+    .flatMap((name: string) => JSON.parse(fs.readFileSync(path.join(folder, name), 'utf8')));
 }

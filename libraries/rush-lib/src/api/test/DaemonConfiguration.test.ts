@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { JsonSchema } from '@rushstack/node-core-library';
-import { resolveDaemonConfiguration } from '../DaemonConfiguration';
+import { type IDaemonConfigurationJson, resolveDaemonConfiguration } from '../DaemonConfiguration';
 import schemaJson from '../../schemas/rush.schema.json';
 
 describe('daemon configuration', () => {
@@ -63,7 +63,12 @@ describe('daemon configuration', () => {
     { compatiblePlugins: [''] },
     { compatiblePlugins: [' rush-example-plugin'] },
     { compatiblePlugins: ['rush-a-plugin,rush-b-plugin'] },
-    { compatiblePlugins: [1] }
+    { compatiblePlugins: [1] },
+    { commandAgnosticPlugins: 'rush-example-plugin' },
+    { commandAgnosticPlugins: [''] },
+    { commandAgnosticPlugins: [' rush-example-plugin'] },
+    { commandAgnosticPlugins: ['rush-a-plugin,rush-b-plugin'] },
+    { commandAgnosticPlugins: [1] }
   ])('publishes schema rejection for %j', (daemon) => {
     const schema = JsonSchema.fromLoadedObject(schemaJson);
     expect(() =>
@@ -93,55 +98,60 @@ describe('daemon configuration', () => {
     expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_WARM_WORKERS: '1' }).warmWorkers).toBe(true);
   });
 
-  it('resolves compatible plugin names from the environment, then configuration, then no plugins', () => {
-    expect(resolveDaemonConfiguration({}, {}).compatiblePlugins).toEqual([]);
-    const configured: string[] = ['rush-a-plugin', 'rush-b-plugin'];
-    expect(resolveDaemonConfiguration({ compatiblePlugins: configured }, {}).compatiblePlugins).toEqual(
-      configured
-    );
-    expect(
-      resolveDaemonConfiguration(
-        { compatiblePlugins: configured },
-        { RUSH_DAEMON_COMPATIBLE_PLUGINS: ' rush-c-plugin , rush-d-plugin' }
-      ).compatiblePlugins
-    ).toEqual(['rush-c-plugin', 'rush-d-plugin']);
-    // An empty value is an explicit override that declares no plugins.
-    for (const value of ['', ' ']) {
+  describe.each([
+    ['compatiblePlugins', 'RUSH_DAEMON_COMPATIBLE_PLUGINS'],
+    ['commandAgnosticPlugins', 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS']
+  ] as const)('%s', (key, variable) => {
+    it('resolves plugin names from the environment, then configuration, then no plugins', () => {
+      expect(resolveDaemonConfiguration({}, {})[key]).toEqual([]);
+      const configured: string[] = ['rush-a-plugin', 'rush-b-plugin'];
+      expect(resolveDaemonConfiguration({ [key]: configured }, {})[key]).toEqual(configured);
       expect(
-        resolveDaemonConfiguration(
-          { compatiblePlugins: configured },
-          { RUSH_DAEMON_COMPATIBLE_PLUGINS: value }
-        ).compatiblePlugins
-      ).toEqual([]);
-    }
-    const resolved: readonly string[] = resolveDaemonConfiguration(
-      { compatiblePlugins: configured },
-      {}
-    ).compatiblePlugins;
-    expect(Object.isFrozen(resolved)).toBe(true);
-    expect(resolved).not.toBe(configured);
-  });
+        resolveDaemonConfiguration({ [key]: configured }, { [variable]: ' rush-c-plugin , rush-d-plugin' })[
+          key
+        ]
+      ).toEqual(['rush-c-plugin', 'rush-d-plugin']);
+      // An empty value is an explicit override that declares no plugins.
+      for (const value of ['', ' ']) {
+        expect(resolveDaemonConfiguration({ [key]: configured }, { [variable]: value })[key]).toEqual([]);
+      }
+      const resolved: readonly string[] = resolveDaemonConfiguration({ [key]: configured }, {})[key];
+      expect(Object.isFrozen(resolved)).toBe(true);
+      expect(resolved).not.toBe(configured);
+    });
 
-  it.each([',', 'rush-a-plugin,', 'rush-a-plugin,,rush-b-plugin', ' , rush-a-plugin'])(
-    'rejects compatible plugin override %j with an empty entry',
-    (value) => {
-      expect(() => resolveDaemonConfiguration({}, { RUSH_DAEMON_COMPATIBLE_PLUGINS: value })).toThrow(
-        'RUSH_DAEMON_COMPATIBLE_PLUGINS must be a comma-separated list of plugin names.'
+    it('resolves the other plugin list independently', () => {
+      const otherKey: typeof key =
+        key === 'compatiblePlugins' ? 'commandAgnosticPlugins' : 'compatiblePlugins';
+      const resolved: Readonly<Required<IDaemonConfigurationJson>> = resolveDaemonConfiguration(
+        { [key]: ['rush-a-plugin'] },
+        { [variable]: 'rush-b-plugin' }
       );
-    }
-  );
+      expect(resolved[key]).toEqual(['rush-b-plugin']);
+      expect(resolved[otherKey]).toEqual([]);
+    });
 
-  it.each([
-    'rush-example-plugin',
-    [''],
-    [' rush-example-plugin'],
-    ['rush-a-plugin,rush-b-plugin'],
-    [1],
-    [null]
-  ])('rejects configured compatible plugins %j', (compatiblePlugins) => {
-    expect(() =>
-      resolveDaemonConfiguration({ compatiblePlugins: compatiblePlugins as unknown as string[] }, {})
-    ).toThrow('daemon.compatiblePlugins must be an array of plugin names.');
+    it.each([',', 'rush-a-plugin,', 'rush-a-plugin,,rush-b-plugin', ' , rush-a-plugin'])(
+      'rejects override %j with an empty entry',
+      (value) => {
+        expect(() => resolveDaemonConfiguration({}, { [variable]: value })).toThrow(
+          `${variable} must be a comma-separated list of plugin names.`
+        );
+      }
+    );
+
+    it.each([
+      'rush-example-plugin',
+      [''],
+      [' rush-example-plugin'],
+      ['rush-a-plugin,rush-b-plugin'],
+      [1],
+      [null]
+    ])('rejects configured value %j', (value) => {
+      expect(() => resolveDaemonConfiguration({ [key]: value as unknown as string[] }, {})).toThrow(
+        `daemon.${key} must be an array of plugin names.`
+      );
+    });
   });
 
   it('accepts all valid knobs in the published schema', () => {
@@ -159,7 +169,10 @@ describe('daemon configuration', () => {
         rushVersion: '5.179.0',
         pnpmVersion: '10.27.0',
         projects: [],
-        daemon: resolveDaemonConfiguration({ compatiblePlugins: ['rush-example-plugin'] }, {})
+        daemon: resolveDaemonConfiguration(
+          { compatiblePlugins: ['rush-example-plugin'], commandAgnosticPlugins: ['rush-example-plugin'] },
+          {}
+        )
       },
       'rush.json'
     );

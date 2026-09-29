@@ -17,7 +17,7 @@ import {
   type IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
 
-import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
+import type { IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
@@ -411,17 +411,17 @@ describe('a failed build that returns early', () => {
       const custom: IDaemonRequestEnvelope = fixture.envelope(['test', '--to', 'c'], {
         commandOrigin: 'custom'
       });
-      const resolveAsync: ProductionDaemonRequestResolver['resolveRequestAsync'] =
-        ProductionDaemonRequestResolver.prototype.resolveRequestAsync;
+      // The daemon parses a custom command before it resolves the request, and rejects this one there.
+      const getIdentityAsync: ProductionDaemonRequestResolver['getCommandParameterIdentityAsync'] =
+        ProductionDaemonRequestResolver.prototype.getCommandParameterIdentityAsync;
       jest
-        .spyOn(ProductionDaemonRequestResolver.prototype, 'resolveRequestAsync')
+        .spyOn(ProductionDaemonRequestResolver.prototype, 'getCommandParameterIdentityAsync')
         .mockImplementation(async function (
           this: ProductionDaemonRequestResolver,
           options: IResolveDaemonRequestOptions
         ) {
           if (options.envelope.requestId === custom.requestId) installationChange = change;
-          const resolved: ResolvedDaemonRequest = await resolveAsync.call(this, options);
-          return resolved;
+          return await getIdentityAsync.call(this, options);
         });
       rejected = await fixture.connectAsync();
       await rejected.sendControlAsync({ kind: 'requestStart', payload: custom });

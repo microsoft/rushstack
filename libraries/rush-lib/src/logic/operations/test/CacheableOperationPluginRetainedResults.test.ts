@@ -126,7 +126,7 @@ interface ITestGraph {
    * The names of the operations whose runner executes its incremental command
    */
   incrementalNames: Set<string>;
-  executeAsync(): Promise<IExecutionResult>;
+  executeAsync(isIncrementalBuildAllowed?: boolean): Promise<IExecutionResult>;
 }
 
 interface ITestGraphOptions {
@@ -317,13 +317,13 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     cobuildLocks,
     checks,
     incrementalNames,
-    executeAsync: async () => {
+    executeAsync: async (isIncrementalBuildAllowed?: boolean) => {
       executions.length = 0;
       cacheWrites.length = 0;
       cacheRestores.length = 0;
       cobuildLocks.length = 0;
       checks.length = 0;
-      return await graph.executeAsync({ inputsSnapshot });
+      return await graph.executeAsync({ inputsSnapshot, isIncrementalBuildAllowed });
     }
   };
 }
@@ -607,6 +607,24 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
     await testGraph.executeAsync();
     expect(testGraph.executions).toEqual(['b']);
     expect(testGraph.cacheWrites).toEqual(['b']);
+  });
+
+  it('restores nothing from the build cache in a non-incremental iteration, but still writes to it', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    await testGraph.executeAsync();
+    testGraph.localHashes.set('a', 'a-v2');
+    await testGraph.executeAsync();
+
+    // Revert "a", then rebuild --to b: both have entries from the first iteration.
+    testGraph.localHashes.set('a', 'a-v1');
+    const result: IExecutionResult = await testGraph.executeAsync(false);
+    expect(getStatus(testGraph, result, 'a')).toBe(OperationStatus.Success);
+    expect(testGraph.executions).toEqual(['a', 'b']);
+    expect(testGraph.cacheRestores).toEqual([]);
+    expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
   });
 
   it('does not re-execute untrusted retained results when cache writes are disabled', async () => {

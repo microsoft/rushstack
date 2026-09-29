@@ -320,11 +320,14 @@ function configureOperations(
   lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
   iterationOptions: IOperationGraphIterationOptions
 ): void {
+  // A non-incremental request runs every operation that it enables, like `rush rebuild`.
+  const runAllEnabled: boolean = iterationOptions.isIncrementalBuildAllowed === false;
   for (const [operation, currentState] of currentStates) {
     const lastState: IOperationExecutionResult | undefined = lastStates.get(operation);
 
     currentState.enabled =
-      operation.enabled && shouldEnableOperation(currentState, lastState, iterationOptions.inputsSnapshot);
+      operation.enabled &&
+      (runAllEnabled || shouldEnableOperation(currentState, lastState, iterationOptions.inputsSnapshot));
   }
 }
 

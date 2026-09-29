@@ -586,7 +586,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         };
       }
       if (
-        envelope.commandOrigin !== 'built-in' ||
+        envelope.commandOrigin === 'built-in' &&
         !['build', 'rebuild', 'install', 'update'].includes(envelope.commandName)
       ) {
         return {
@@ -597,14 +597,23 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           fingerprint: this.#fingerprint
         };
       }
+      let commandIdentity: string | undefined;
+      if (envelope.commandOrigin === 'custom') {
+        // Only phased custom commands are served. Parsing before any input capture rejects a global command
+        // before it can reload or restart this workspace.
+        commandIdentity = await tryGetCustomCommandParameterIdentityAsync(this.#resolver, {
+          envelope,
+          workspaceSession: session,
+          abortSignal: client.abortSignal
+        });
+      }
       // The client changes the workspace before it sends a request, so any capture that started after the request
       // was received sees those changes. Captures that must detect changes made during a transition stay strict.
       let fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope, receivedTimeMs);
       let tier: WorkspaceInputChangeTier = this.#classify(fingerprint, isMutation(envelope));
-      let commandIdentity: string | undefined;
       let projectFingerprint: string | undefined;
       if (tier !== WorkspaceInputChangeTier.Restart && !isMutation(envelope)) {
-        commandIdentity = await getCommandParameterIdentityAsync(
+        commandIdentity ??= await getCommandParameterIdentityAsync(
           this.#resolver,
           { envelope, workspaceSession: session, abortSignal: client.abortSignal },
           this.#isConfigurationCurrent(session, tier)
@@ -1315,6 +1324,22 @@ async function getCommandParameterIdentityAsync(
     if (error instanceof DaemonRequestUsageError && !isConfigurationCurrent) {
       throw new DaemonRequestDispatchError('unsupported', error.message, { cause: error });
     }
+    throw error;
+  }
+}
+
+/**
+ * Parses a custom command before the input capture, or returns `undefined` for a usage error. The parse after the
+ * capture answers that error only if the configuration is current (`getCommandParameterIdentityAsync`).
+ */
+async function tryGetCustomCommandParameterIdentityAsync(
+  resolver: IDaemonRequestResolver,
+  options: IResolveDaemonRequestOptions
+): Promise<string | undefined> {
+  try {
+    return await getResolverLifecycle(resolver).getCommandParameterIdentityAsync(options);
+  } catch (error) {
+    if (error instanceof DaemonRequestUsageError) return undefined;
     throw error;
   }
 }

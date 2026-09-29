@@ -158,8 +158,12 @@ console.log(JSON.stringify({
       kind: 'global',
       executor: holdAsync
     });
+    // The workspace parses a custom Rush command before it captures inputs, and that parse falls back in this
+    // fixture. A built-in origin reaches the mocked resolution unparsed, and an unknown built-in command is
+    // still exclusive.
     const holder = fixture.runAsync({
       ...fixture.request(['hold'], path.join(physicalRoot, 'projects/a')),
+      commandOrigin: 'built-in',
       invocationKind: 'rush'
     });
     await holding;

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Serve phased commands on one shared engine where possible instead of reloading the graph whenever the command changes: a `test` engine serves `build` and `rebuild`, and a `build` engine serves `rebuild`, which runs every operation that it selects. The first `test` after a `build` reloads the graph once. A custom command whose engine could not serve the current engine's command either, such as `retest` after `build`, is unsupported, so the client runs it in-process instead of making the daemon switch between two engines.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

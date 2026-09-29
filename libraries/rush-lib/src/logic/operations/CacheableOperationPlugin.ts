@@ -314,7 +314,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
               isCacheWriteAllowed: cacheWriteEnabled,
-              isCacheReadAllowed: isIncrementalBuildAllowed,
+              isCacheReadAllowed:
+                isIncrementalBuildAllowed && iterationOptions.isIncrementalBuildAllowed !== false,
               operationBuildCache: undefined,
               outputFolderNames,
               get cacheDisabledReason(): string | undefined {

@@ -485,6 +485,7 @@ export interface IResolvedDaemonGlobalRequest {
 // @beta
 export interface IResolvedDaemonPhasedRequest {
     readonly exactSelection?: boolean;
+    readonly exclusivityClass?: RequestExclusivityClass;
     // (undocumented)
     readonly kind: 'phased';
     // (undocumented)
@@ -765,7 +766,7 @@ export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspace
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings, telemetry?: IPhasedRequestTelemetrySink, receivedTimeMs?: number): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings, telemetry?: IPhasedRequestTelemetrySink, receivedTimeMs?: number, requestExclusivityClass?: RequestExclusivityClass): Promise<IDaemonPhasedRequestResult>;
 }
 
 // @beta

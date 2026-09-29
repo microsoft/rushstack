@@ -6,13 +6,17 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
-import { NoOpTerminalProvider, StringBufferTerminalProvider } from '@rushstack/terminal';
+import { NoOpTerminalProvider, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { PhasedCommandEngine } from '../PhasedCommandEngine';
 import { PhasedCommandEngineUsageError } from '../PhasedCommandEngineUsageError';
 import { RushConfiguration } from '../RushConfiguration';
+import { RushGlobalFolder } from '../RushGlobalFolder';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { RushCommandLineParser } from '../../cli/RushCommandLineParser';
+import { Autoinstaller } from '../../logic/Autoinstaller';
+import { PluginManager } from '../../pluginFramework/PluginManager';
+import { RushSession } from '../../pluginFramework/RushSession';
 import { JsonFileLoadCache } from '../../utilities/JsonFileLoadCache';
 
 const PACKAGE_NAME: string = '@example/rush-example-plugin';
@@ -20,6 +24,7 @@ const PLUGIN_NAME: string = 'rush-example-plugin';
 const PLUGIN_COMMAND: string = 'record-example';
 const OTHER_PLUGIN_NAME: string = 'rush-other-plugin';
 const COMPATIBLE_PLUGINS_VARIABLE: string = 'RUSH_DAEMON_COMPATIBLE_PLUGINS';
+const COMMAND_AGNOSTIC_PLUGINS_VARIABLE: string = 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS';
 
 interface IPluginFixture {
   /** Defaults to PLUGIN_NAME. The plugin's package is `@example/<pluginName>`. */
@@ -28,12 +33,21 @@ interface IPluginFixture {
   readonly commandLineJson?: object;
   readonly writeManifest?: boolean;
   readonly daemonCompatible?: boolean;
+  readonly daemonCommandAgnostic?: boolean;
+  /** If set, the plugin package has an entry point whose apply() taps these session hooks. */
+  readonly taps?: {
+    readonly runAnyPhasedCommand?: boolean;
+    /** The commands whose runPhasedCommand hook it taps. */
+    readonly runPhasedCommand?: string[];
+  };
 }
 
 interface IRepoFixture {
   readonly plugins: ReadonlyArray<IPluginFixture>;
   /** The rush.json `daemon.compatiblePlugins` setting. */
   readonly compatiblePlugins?: string[];
+  /** The rush.json `daemon.commandAgnosticPlugins` setting. */
+  readonly commandAgnosticPlugins?: string[];
   readonly commandLineJson?: object;
 }
 
@@ -91,11 +105,14 @@ function createRepo(repo: IRepoFixture): string {
     fs.mkdirSync(path.dirname(filename), { recursive: true });
     fs.writeFileSync(filename, JSON.stringify(json));
   };
+  const { compatiblePlugins, commandAgnosticPlugins } = repo;
   write('rush.json', {
     rushVersion: '5.179.0',
     pnpmVersion: '10.27.0',
     projects: [],
-    ...(repo.compatiblePlugins ? { daemon: { compatiblePlugins: repo.compatiblePlugins } } : {})
+    ...(compatiblePlugins || commandAgnosticPlugins
+      ? { daemon: { compatiblePlugins, commandAgnosticPlugins } }
+      : {})
   });
   write('common/config/rush/command-line.json', repo.commandLineJson ?? REPO_COMMAND_LINE_JSON);
   write('common/config/rush/rush-plugins.json', {
@@ -123,7 +140,8 @@ function createRepo(repo: IRepoFixture): string {
             entryPoint: './lib/index.js',
             associatedCommands: plugin.associatedCommands,
             commandLineJsonFilePath: './command-line.json',
-            daemonCompatible: plugin.daemonCompatible
+            daemonCompatible: plugin.daemonCompatible,
+            daemonCommandAgnostic: plugin.daemonCommandAgnostic
           }
         ]
       });
@@ -131,8 +149,50 @@ function createRepo(repo: IRepoFixture): string {
     if (plugin.commandLineJson) {
       write(`${storeFolder}/${pluginName}/command-line.json`, plugin.commandLineJson);
     }
+    if (plugin.taps) {
+      const packageFolder: string = `common/autoinstallers/plugins/node_modules/${getPackageName(plugin)}`;
+      write(`${packageFolder}/package.json`, { name: getPackageName(plugin), version: '1.0.0' });
+      const { runAnyPhasedCommand, runPhasedCommand = [] } = plugin.taps;
+      const statements: string[] = [
+        ...(runAnyPhasedCommand ? ['hooks.runAnyPhasedCommand.tapPromise(name, async () => {});'] : []),
+        ...runPhasedCommand.map(
+          (commandName) => `hooks.runPhasedCommand.for(${JSON.stringify(commandName)}).tap(name, () => {});`
+        )
+      ];
+      const entryPoint: string = path.join(folder, packageFolder, 'lib/index.js');
+      fs.mkdirSync(path.dirname(entryPoint), { recursive: true });
+      fs.writeFileSync(
+        entryPoint,
+        [
+          'module.exports = class {',
+          '  apply({ hooks }) {',
+          `    const name = ${JSON.stringify(pluginName)};`,
+          ...statements.map((statement) => `    ${statement}`),
+          '  }',
+          '};'
+        ].join('\n')
+      );
+    }
   }
   return folder;
+}
+
+/** Applies the plugins that Rush initializes for `commandName` to a new session, as an engine does. */
+async function applyPluginsAsync(folder: string, commandName: string): Promise<RushSession> {
+  const terminalProvider: NoOpTerminalProvider = new NoOpTerminalProvider();
+  const rushSession: RushSession = new RushSession({ terminalProvider, getIsDebugMode: () => false });
+  const pluginManager: PluginManager = new PluginManager({
+    terminal: new Terminal(terminalProvider),
+    rushConfiguration: RushConfiguration.loadFromConfigurationFile(path.join(folder, 'rush.json')),
+    rushSession,
+    builtInPluginConfigurations: [],
+    restrictConsoleOutput: true,
+    rushGlobalFolder: new RushGlobalFolder()
+  });
+  await pluginManager.tryInitializeUnassociatedPluginsAsync();
+  await pluginManager.tryInitializeAssociatedCommandPluginsAsync(commandName);
+  expect(pluginManager.error).toBeUndefined();
+  return rushSession;
 }
 
 async function parseBuildAsync(
@@ -162,12 +222,16 @@ describe(PhasedCommandEngine.name, () => {
     return folder;
   }
 
-  const originalCompatiblePlugins: string | undefined = process.env[COMPATIBLE_PLUGINS_VARIABLE];
+  const originalEnvironment: ReadonlyMap<string, string | undefined> = new Map(
+    [COMPATIBLE_PLUGINS_VARIABLE, COMMAND_AGNOSTIC_PLUGINS_VARIABLE].map((name) => [name, process.env[name]])
+  );
   afterEach(() => {
-    if (originalCompatiblePlugins === undefined) {
-      delete process.env[COMPATIBLE_PLUGINS_VARIABLE];
-    } else {
-      process.env[COMPATIBLE_PLUGINS_VARIABLE] = originalCompatiblePlugins;
+    for (const [name, value] of originalEnvironment) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
     }
     for (const folder of folders.splice(0)) {
       fs.rmSync(folder, { recursive: true, force: true });
@@ -189,6 +253,63 @@ describe(PhasedCommandEngine.name, () => {
     const folder: string = createTestRepo({ associatedCommands: [] });
     const command: PhasedCommandEngine = await parseBuildAsync(folder);
     expect(command.commandName).toBe('build');
+  });
+
+  it('parses the phased commands of command-line.json and rejects a global command', async () => {
+    const phase: string = '_phase:build';
+    const folder: string = createMultiPluginTestRepo({
+      plugins: [],
+      commandLineJson: {
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'build',
+            summary: 'Build',
+            phases: [phase],
+            enableParallelism: true,
+            incremental: true
+          },
+          {
+            commandKind: 'phased',
+            name: 'retest',
+            summary: 'Retest',
+            phases: [phase],
+            enableParallelism: true
+          },
+          { commandKind: 'global', name: 'hello', summary: 'Hello', shellCommand: 'echo hello' }
+        ],
+        phases: [{ name: phase, dependencies: { upstream: [phase] } }]
+      }
+    });
+    const build: PhasedCommandEngine = await parseBuildAsync(folder);
+    const retest: PhasedCommandEngine = await parseBuildAsync(folder, ['retest']);
+    expect([build.commandName, build.isIncremental]).toEqual(['build', true]);
+    expect([retest.commandName, retest.isIncremental]).toEqual(['retest', false]);
+    expect(retest.parameterIdentity).not.toBe(build.parameterIdentity);
+    await expect(parseBuildAsync(folder, ['hello'])).rejects.toThrow(
+      'The daemon engine runs phased commands only; "hello" is not a phased command.'
+    );
+    // Only a phased command's command line is a usage error. In-process Rush reports any other invalid one.
+    const stderrWrite: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockReturnValue(true);
+    try {
+      for (const argv of [
+        ['retest', '--nope'],
+        ['--debug', 'retest', '--nope']
+      ]) {
+        await expect(parseBuildAsync(folder, argv)).rejects.toMatchObject({
+          name: PhasedCommandEngineUsageError.name,
+          message: 'rush retest: error: Unrecognized arguments: --nope.',
+          exitCode: 2
+        });
+      }
+      for (const argv of [['hello', '--nope'], ['nope']]) {
+        const error: unknown = await parseBuildAsync(folder, argv).catch((e: unknown) => e);
+        expect(error).toBeInstanceOf(Error);
+        expect(error).not.toBeInstanceOf(PhasedCommandEngineUsageError);
+      }
+    } finally {
+      stderrWrite.mockRestore();
+    }
   });
 
   it('reports an invalid command line as a usage error with the exit code of native Rush', async () => {
@@ -326,7 +447,10 @@ describe(PhasedCommandEngine.name, () => {
         createTestRepo({ commandLineJson: COMMAND_SCOPED_COMMAND_LINE_JSON, daemonCompatible: true })
       );
       await expectAcceptedAsync(
-        createTestRepo({ commandLineJson: COMMAND_SCOPED_COMMAND_LINE_JSON }, { compatiblePlugins: [PLUGIN_NAME] })
+        createTestRepo(
+          { commandLineJson: COMMAND_SCOPED_COMMAND_LINE_JSON },
+          { compatiblePlugins: [PLUGIN_NAME] }
+        )
       );
     });
 
@@ -353,7 +477,11 @@ describe(PhasedCommandEngine.name, () => {
       // The native parser also reads the file, and may fail first; either way, parsing fails.
       await expect(
         parseBuildAsync(
-          createTestRepo({ ...BUILD_PLUGIN, daemonCompatible: true, commandLineJson: { commands: 'invalid' } })
+          createTestRepo({
+            ...BUILD_PLUGIN,
+            daemonCompatible: true,
+            commandLineJson: { commands: 'invalid' }
+          })
         )
       ).rejects.toThrow(/command-line\.json/);
     });
@@ -388,6 +516,26 @@ describe(PhasedCommandEngine.name, () => {
       );
     });
 
+    it('shares an engine between commands only if the same plugins are associated with both', async () => {
+      const rushSession: RushSession = new RushSession({
+        terminalProvider: new NoOpTerminalProvider(),
+        getIsDebugMode: () => false
+      });
+      const getRebuildBlockerAsync = async (plugin: IPluginFixture): Promise<string | undefined> => {
+        const folder: string = createTestRepo({ ...plugin, daemonCompatible: true });
+        const build: PhasedCommandEngine = await parseBuildAsync(folder, ['build']);
+        return build.getEngineSharingBlocker(await parseBuildAsync(folder, ['rebuild']), rushSession);
+      };
+      expect(await getRebuildBlockerAsync(BUILD_PLUGIN)).toBeUndefined();
+      // Rush initializes a plugin that is associated with no command for every command.
+      expect(
+        await getRebuildBlockerAsync({ commandLineJson: COMMAND_SCOPED_COMMAND_LINE_JSON })
+      ).toBeUndefined();
+      expect(await getRebuildBlockerAsync({ ...BUILD_PLUGIN, associatedCommands: ['build'] })).toBe(
+        'different plugins are associated with "rebuild" and "build"'
+      );
+    });
+
     it('warns about declared names that match no configured plugin', async () => {
       const folder: string = createTestRepo(
         { ...BUILD_PLUGIN, daemonCompatible: true },
@@ -404,6 +552,130 @@ describe(PhasedCommandEngine.name, () => {
       await expect(parseBuildAsync(createTestRepo(BUILD_PLUGIN))).rejects.toThrow(
         `"${PLUGIN_NAME}" (${PACKAGE_NAME}) is associated with "build"`
       );
+    });
+  });
+
+  describe('command-agnostic declarations', () => {
+    // Initialized for every command, like swarm-dogfood's watch-skip plugin, which taps runAnyPhasedCommand.
+    const ANY_COMMAND_PLUGIN: IPluginFixture = {
+      daemonCompatible: true,
+      taps: { runAnyPhasedCommand: true }
+    };
+    const UNDECLARED: string =
+      `the plugin "${PLUGIN_NAME}" (${PACKAGE_NAME}) taps the runAnyPhasedCommand hook and is not ` +
+      'declared command-agnostic';
+
+    beforeEach(() => {
+      jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async () => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    /** Whether an engine that `build` created, with the plugins applied, can serve `rebuild`. */
+    async function getRebuildBlockerAsync(folder: string): Promise<string | undefined> {
+      const build: PhasedCommandEngine = await parseBuildAsync(folder, ['build']);
+      const rushSession: RushSession = await applyPluginsAsync(folder, 'build');
+      // The plugins never prevent the engine from serving its own command.
+      expect(
+        build.getEngineSharingBlocker(await parseBuildAsync(folder, ['build']), rushSession)
+      ).toBeUndefined();
+      return build.getEngineSharingBlocker(await parseBuildAsync(folder, ['rebuild']), rushSession);
+    }
+
+    it('shares no engine between commands while an undeclared plugin taps runAnyPhasedCommand', async () => {
+      expect(await getRebuildBlockerAsync(createTestRepo(ANY_COMMAND_PLUGIN))).toBe(UNDECLARED);
+    });
+
+    it('shares an engine between commands if the manifest declares the plugin command-agnostic', async () => {
+      expect(
+        await getRebuildBlockerAsync(createTestRepo({ ...ANY_COMMAND_PLUGIN, daemonCommandAgnostic: true }))
+      ).toBeUndefined();
+      // The declaration also covers a plugin that is associated with both commands.
+      expect(
+        await getRebuildBlockerAsync(
+          createTestRepo({
+            ...ANY_COMMAND_PLUGIN,
+            associatedCommands: ['build', 'rebuild'],
+            daemonCommandAgnostic: true
+          })
+        )
+      ).toBeUndefined();
+    });
+
+    it('shares an engine between commands if rush.json declares the plugin command-agnostic', async () => {
+      expect(
+        await getRebuildBlockerAsync(
+          createTestRepo(ANY_COMMAND_PLUGIN, { commandAgnosticPlugins: [PLUGIN_NAME] })
+        )
+      ).toBeUndefined();
+    });
+
+    it('lets RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS override rush.json', async () => {
+      process.env[COMMAND_AGNOSTIC_PLUGINS_VARIABLE] = ` ${PLUGIN_NAME} `;
+      expect(
+        await getRebuildBlockerAsync(createTestRepo(ANY_COMMAND_PLUGIN, { commandAgnosticPlugins: [] }))
+      ).toBeUndefined();
+      // An empty value withdraws the rush.json declarations.
+      process.env[COMMAND_AGNOSTIC_PLUGINS_VARIABLE] = '';
+      expect(
+        await getRebuildBlockerAsync(
+          createTestRepo(ANY_COMMAND_PLUGIN, { commandAgnosticPlugins: [PLUGIN_NAME] })
+        )
+      ).toBe(UNDECLARED);
+    });
+
+    it('names an undeclared plugin that taps runAnyPhasedCommand next to a declared one', async () => {
+      const folder: string = createMultiPluginTestRepo({
+        plugins: [ANY_COMMAND_PLUGIN, { ...ANY_COMMAND_PLUGIN, pluginName: OTHER_PLUGIN_NAME }],
+        commandAgnosticPlugins: [PLUGIN_NAME]
+      });
+      expect(await getRebuildBlockerAsync(folder)).toBe(
+        `the plugin "${OTHER_PLUGIN_NAME}" (@example/${OTHER_PLUGIN_NAME}) taps the runAnyPhasedCommand hook ` +
+          'and is not declared command-agnostic'
+      );
+    });
+
+    it('shares no engine while a declared plugin taps the runPhasedCommand hook of either command', async () => {
+      for (const commandName of ['build', 'rebuild']) {
+        const folder: string = createTestRepo({
+          ...ANY_COMMAND_PLUGIN,
+          daemonCommandAgnostic: true,
+          taps: { runAnyPhasedCommand: true, runPhasedCommand: [commandName] }
+        });
+        expect(await getRebuildBlockerAsync(folder)).toBe(
+          `a plugin taps the runPhasedCommand hook of "${commandName}"`
+        );
+      }
+    });
+
+    it('shares no engine while a tap that no plugin applied is on runAnyPhasedCommand', async () => {
+      const folder: string = createTestRepo({ ...ANY_COMMAND_PLUGIN, daemonCommandAgnostic: true });
+      const build: PhasedCommandEngine = await parseBuildAsync(folder, ['build']);
+      const rushSession: RushSession = await applyPluginsAsync(folder, 'build');
+      const rebuild: PhasedCommandEngine = await parseBuildAsync(folder, ['rebuild']);
+      expect(build.getEngineSharingBlocker(rebuild, rushSession)).toBeUndefined();
+      rushSession.hooks.runAnyPhasedCommand.tap('late', () => {});
+      expect(build.getEngineSharingBlocker(rebuild, rushSession)).toBe(
+        'a plugin taps the runAnyPhasedCommand hook outside its apply() (the tap "late")'
+      );
+    });
+
+    it('warns about command-agnostic names that match no configured plugin', async () => {
+      const folder: string = createTestRepo(ANY_COMMAND_PLUGIN, {
+        commandAgnosticPlugins: ['rush-exmaple-plugin']
+      });
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+      const command: PhasedCommandEngine = await parseBuildAsync(folder, ['build'], terminalProvider);
+      expect(command.unmatchedCompatiblePluginNames).toEqual([]);
+      expect(terminalProvider.getWarningOutput()).toContain(
+        `The daemon's command-agnostic plugin list (rush.json "daemon.commandAgnosticPlugins" or ` +
+          `RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS) names plugins that are not configured in rush-plugins.json: ` +
+          `"rush-exmaple-plugin".`
+      );
+      // A misspelled name does not declare the plugin that it was meant to name.
+      expect(await getRebuildBlockerAsync(folder)).toBe(UNDECLARED);
     });
   });
 
@@ -451,7 +723,11 @@ describe(PhasedCommandEngine.name, () => {
       return RushConfiguration.loadFromConfigurationFile(path.join(folder, 'rush.json'));
     }
 
-    function editJson<T>(rushConfiguration: RushConfiguration, relativePath: string, edit: (json: T) => void): void {
+    function editJson<T>(
+      rushConfiguration: RushConfiguration,
+      relativePath: string,
+      edit: (json: T) => void
+    ): void {
       const filePath: string = path.join(rushConfiguration.rushJsonFolder, relativePath);
       const json: T = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       edit(json);
@@ -577,7 +853,9 @@ describe(PhasedCommandEngine.name, () => {
       // Engine parses in this process validated the environment, and a native parser must load .env files first.
       EnvironmentConfiguration.reset();
 
-      const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: rushConfiguration.rushJsonFolder });
+      const parser: RushCommandLineParser = new RushCommandLineParser({
+        cwd: rushConfiguration.rushJsonFolder
+      });
       expect(parser.getAction('example-global')).toBeDefined();
       expect(cacheLoadSpy).not.toHaveBeenCalled();
       const loadedFilePaths: Set<string> = new Set(loadSpy.mock.calls.map(([filePath]) => filePath));

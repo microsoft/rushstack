@@ -98,6 +98,9 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
 
   startTime?: number;
 
+  /** See `IOperationGraphIterationOptions.isIncrementalBuildAllowed`. */
+  isIncrementalBuildAllowed?: boolean;
+
   getOperationRequestId?: (operation: Operation) => string | undefined;
 
   completedOperations: number;
@@ -686,12 +689,14 @@ export class OperationGraph implements IOperationGraph {
       startTime = performance.now(),
       inputsSnapshot = await getInputsSnapshotAsync?.(),
       getOperationEnvironment,
+      isIncrementalBuildAllowed,
       getOperationRequestId
     } = iterationOptions;
     const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
       startTime,
       inputsSnapshot,
       getOperationEnvironment,
+      isIncrementalBuildAllowed,
       getOperationRequestId
     };
 
@@ -738,6 +743,7 @@ export class OperationGraph implements IOperationGraph {
       streamCollator,
       terminal,
       inputsSnapshot,
+      isIncrementalBuildAllowed,
       stateHashCache: this.#stateHashCache,
       maxParallelism: this.#maxParallelism,
       onOperationStateChanged: undefined,
@@ -907,6 +913,7 @@ export class OperationGraph implements IOperationGraph {
       inputsSnapshot: iterationContext.inputsSnapshot,
       startTime: iterationContext.startTime,
       getOperationEnvironment: iterationContext.getOperationEnvironment,
+      isIncrementalBuildAllowed: iterationContext.isIncrementalBuildAllowed,
       getOperationRequestId: iterationContext.getOperationRequestId
     };
 
@@ -1028,9 +1035,11 @@ export class OperationGraph implements IOperationGraph {
               state.hasAnyAborted = true;
               executionQueue.complete(record);
             } else {
-              const lastState: OperationExecutionRecord | undefined = state.resultByOperation.get(
-                record.operation
-              );
+              // A non-incremental iteration runs each operation as a fresh `rush rebuild` process would.
+              const lastState: OperationExecutionRecord | undefined =
+                iterationContext.isIncrementalBuildAllowed === false
+                  ? undefined
+                  : state.resultByOperation.get(record.operation);
               await record.executeAsync(lastState, executionContext);
             }
           },

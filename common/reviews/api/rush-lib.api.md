@@ -329,6 +329,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_WARM_SET_MAX_PROJECTS: "RUSH_DAEMON_WARM_SET_MAX_PROJECTS";
     readonly RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: "RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY";
     readonly RUSH_DAEMON_COMPATIBLE_PLUGINS: "RUSH_DAEMON_COMPATIBLE_PLUGINS";
+    readonly RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS: "RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS";
     readonly RUSH_DAEMON_EXPERIMENTAL: "RUSH_DAEMON_EXPERIMENTAL";
 };
 
@@ -527,6 +528,7 @@ export interface ICustomTipsJson {
 export interface IDaemonConfigurationJson {
     readonly autoStart?: boolean;
     readonly autoWarmByTelemetry?: boolean;
+    readonly commandAgnosticPlugins?: ReadonlyArray<string>;
     readonly compatiblePlugins?: ReadonlyArray<string>;
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
@@ -801,6 +803,7 @@ export interface IOperationGraphIterationOptions {
     getOperationRequestId?: (operation: Operation) => string | undefined;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
+    isIncrementalBuildAllowed?: boolean;
     startTime?: number;
 }
 
@@ -1011,6 +1014,7 @@ export interface IPhasedCommandEngineLogTelemetryOptions {
 
 // @alpha
 export interface IPhasedCommandEngineRequestSettings {
+    readonly isIncrementalBuildAllowed: boolean;
     // (undocumented)
     readonly parallelism: Parallelism;
     // (undocumented)
@@ -1594,6 +1598,8 @@ export class PhasedCommandEngine {
     readonly commandName: string;
     createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
     createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData;
+    getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession): string | undefined;
+    readonly isIncremental: boolean;
     // (undocumented)
     readonly parameterIdentity: string;
     static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;

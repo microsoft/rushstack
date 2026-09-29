@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When a daemon engine can't serve a request because the parameters differ, the reason now names the parameters that differ, for example `--test-path-pattern for \"_phase:test\"`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

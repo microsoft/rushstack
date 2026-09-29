@@ -11,7 +11,7 @@ import type { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineParserExitError } from '@rushstack/ts-command-line/lib/providers/CommandLineParserExitError';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { PhasedScriptAction } from '../cli/scriptActions/PhasedScriptAction';
+import { PhasedScriptAction, type IEnginePhaseNames } from '../cli/scriptActions/PhasedScriptAction';
 import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
 import type { IOperationGraph } from '../logic/operations/IOperationGraph';
 import type { Operation, OperationEnabledState } from '../logic/operations/Operation';
@@ -20,6 +20,7 @@ import type { Parallelism } from '../logic/operations/ParseParallelism';
 import { PhasedCommandEngineExecution } from '../logic/operations/PhasedCommandEngineExecution';
 import { createPhasedTelemetryData } from '../logic/operations/PhasedCommandTelemetry';
 import { type ITelemetryData, Telemetry } from '../logic/Telemetry';
+import { getRunAnyPhasedCommandBlocker } from '../pluginFramework/PhasedCommandHookTaps';
 import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushUserConfiguration } from './RushUserConfiguration';
@@ -123,19 +124,27 @@ export interface IParsePhasedCommandOptions {
 /**
  * Presentation and scheduling settings of one parsed command. They do not affect the operation graph or any
  * operation hash, so they are not part of `PhasedCommandEngine.parameterIdentity`; hosts apply them to the
- * shared graph (`IOperationGraph.quietMode` / `IOperationGraph.parallelism`) before each iteration.
+ * shared graph (`IOperationGraph.quietMode` / `IOperationGraph.parallelism`) and to the iteration before each
+ * iteration.
  * @alpha
  */
 export interface IPhasedCommandEngineRequestSettings {
   readonly quietMode: boolean;
   readonly parallelism: Parallelism;
+  /**
+   * False for a command that runs every selected operation, such as `rebuild`. Hosts pass it to the iteration
+   * (`IOperationGraphIterationOptions.isIncrementalBuildAllowed`), because an engine created by an incremental
+   * command can serve such a command; see `PhasedCommandEngine.getEngineSharingBlocker`.
+   */
+  readonly isIncrementalBuildAllowed: boolean;
 }
 
 /**
- * A parsed native build/rebuild command. Parsing never runs scripts or changes cwd/process.env.
+ * A parsed native phased command, such as build, rebuild or a phased command from command-line.json.
+ * Parsing never runs scripts or changes cwd/process.env.
  *
  * @remarks
- * The initial engine surface deliberately rejects watch/install, event-hook scripts, .env files, and
+ * The initial engine surface deliberately rejects watch/install, build event-hook scripts, .env files, and
  * external plugins that Rush would initialize for the command or whose command-line.json shapes it, unless
  * the plugin's manifest (`daemonCompatible`) or the repository (`daemon.compatiblePlugins`) declares that the
  * plugin supports the engine lifecycle. An engine applies each plugin once and serves many requests: session
@@ -152,6 +161,8 @@ export class PhasedCommandEngine {
 
   public readonly parameterIdentity: string;
   public readonly commandName: string;
+  /** False when every run executes all selected operations: `rebuild`, or `"incremental": false`. */
+  public readonly isIncremental: boolean;
   /**
    * Names listed by `daemon.compatiblePlugins` (or `RUSH_DAEMON_COMPATIBLE_PLUGINS`) that match no plugin
    * configured in rush-plugins.json. They have no effect and are usually misspellings, so hosts should report them.
@@ -166,13 +177,14 @@ export class PhasedCommandEngine {
     this._parser = parser;
     this._action = action;
     this.commandName = action.actionName;
+    this.isIncremental = action.isIncrementalBuildAllowed;
     this.parameterIdentity = action.getEngineParameterIdentity();
     this.unmatchedCompatiblePluginNames = unmatchedCompatiblePluginNames;
   }
 
   /**
-   * Parses a native build or rebuild command line. Throws a {@link PhasedCommandEngineUsageError} for a command
-   * line that native Rush rejects as invalid.
+   * Parses a native phased command line. Throws a {@link PhasedCommandEngineUsageError} for a command line of a
+   * phased command that native Rush rejects as invalid.
    */
   public static async parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine> {
     const { rushConfiguration, terminalProvider, cwd, argv, environment = process.env } = options;
@@ -192,29 +204,42 @@ export class PhasedCommandEngine {
     try {
       await parser.executeWithoutErrorHandlingAsync([...argv]);
     } catch (error) {
-      // Native Rush prints this message and exits with this exit code.
-      if (error instanceof CommandLineParserExitError && error.exitCode !== 0) {
+      // Native Rush prints this message and exits with this exit code. It's a usage error only for a phased command,
+      // since the daemon serves no other command: in-process Rush reports an unknown or global command itself.
+      // Rush's global parameters are all flags, so the first argument that isn't a flag names the command.
+      const commandName: string | undefined = argv.find((arg: string) => !arg.startsWith('-'));
+      if (
+        error instanceof CommandLineParserExitError &&
+        error.exitCode !== 0 &&
+        commandName !== undefined &&
+        parser.tryGetAction(commandName) instanceof PhasedScriptAction
+      ) {
         throw new PhasedCommandEngineUsageError(error.message.trim(), error.exitCode, { cause: error });
       }
       throw error;
     }
     const action: CommandLineAction | undefined = parser.selectedAction;
-    if (!(action instanceof PhasedScriptAction) || !['build', 'rebuild'].includes(action.actionName)) {
-      throw new Error('The production daemon engine currently supports native build and rebuild only.');
+    if (!(action instanceof PhasedScriptAction)) {
+      throw new Error(
+        `The daemon engine runs phased commands only; "${action?.actionName ?? argv[0]}" is not a phased command.`
+      );
     }
     const compatiblePluginNames: ReadonlySet<string> = new Set(rushConfiguration.daemon.compatiblePlugins);
     const configuredPluginNames: ReadonlySet<string> = parser.pluginManager.configuredPluginNames;
-    const unmatchedCompatiblePluginNames: ReadonlyArray<string> = Array.from(compatiblePluginNames).filter(
-      (pluginName) => !configuredPluginNames.has(pluginName)
+    const terminal: Terminal = new Terminal(terminalProvider);
+    const unmatchedCompatiblePluginNames: ReadonlyArray<string> = warnAboutUnmatchedPluginNames(
+      terminal,
+      configuredPluginNames,
+      compatiblePluginNames,
+      'compatible plugin list (rush.json "daemon.compatiblePlugins" or RUSH_DAEMON_COMPATIBLE_PLUGINS)'
     );
-    if (unmatchedCompatiblePluginNames.length > 0) {
-      new Terminal(terminalProvider).writeWarningLine(
-        `The daemon's compatible plugin list (rush.json "daemon.compatiblePlugins" or ` +
-          `RUSH_DAEMON_COMPATIBLE_PLUGINS) names plugins that are not configured in rush-plugins.json: ` +
-          `${unmatchedCompatiblePluginNames.map((pluginName) => `"${pluginName}"`).join(', ')}. ` +
-          `Check that each entry is the plugin's "pluginName".`
-      );
-    }
+    warnAboutUnmatchedPluginNames(
+      terminal,
+      configuredPluginNames,
+      new Set(rushConfiguration.daemon.commandAgnosticPlugins),
+      'command-agnostic plugin list (rush.json "daemon.commandAgnosticPlugins" or ' +
+        'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS)'
+    );
     // Plugins which the command would never initialize, and whose command-line.json does not shape
     // this command, cannot affect a shared engine. Every other external plugin must be declared compatible
     // with the engine lifecycle; otherwise the command still requires native Rush.
@@ -327,6 +352,96 @@ export class PhasedCommandEngine {
   }
 
   /**
+   * Explains why the engine created by this command cannot serve a request of `request`, or returns undefined if it
+   * can serve it. `rushSession` is the session of an engine created by this command or by `request`.
+   *
+   * @remarks
+   * An engine serves another request of the same command if its graph has the request's operations and the
+   * parameters of the two requests are the same, other than the ones that each request applies to its own iteration
+   * (selection, `requestSettings`, `--ignore-hooks` and `--include-phase-deps`). An engine created by an incremental
+   * command also serves another command, for example `rebuild` on a `build` engine or `build` on a `test` engine,
+   * if:
+   *
+   * - its graph has an operation of every project in each phase that the request selects;
+   *
+   * - the parameters of both commands give the same arguments to the phases that the request can run;
+   *
+   * - the same plugins are associated with both commands, and no plugin taps the `runPhasedCommand` hook of either
+   *   command. Rush calls this hook and `runAnyPhasedCommand` once per engine, with the command that created it, so
+   *   every tap of `runAnyPhasedCommand` must come from the `apply()` of a plugin that is declared command-agnostic:
+   *   its manifest sets `daemonCommandAgnostic`, or the repository lists it in `daemon.commandAgnosticPlugins`
+   *   (or `RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS`).
+   *
+   * A request of a command that is not incremental runs each operation that it selects
+   * (`IPhasedCommandEngineRequestSettings.isIncrementalBuildAllowed`). An engine that runs persistent
+   * IPC runners (`daemon.usePersistentIpcRunners`) does not serve it, because those runners serve only
+   * incremental commands.
+   */
+  public getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession): string | undefined {
+    const { commandName } = this;
+    const requestName: string = request.commandName;
+    const sameCommand: boolean = requestName === commandName;
+    if (!sameCommand && !this.isIncremental) {
+      return `"${commandName}" is not incremental`;
+    }
+    if (!request.isIncremental && this._action.usesPersistentIpcRunners) {
+      return `"${requestName}" is not incremental, and "${commandName}" runs persistent IPC runners`;
+    }
+    const enginePhases: IEnginePhaseNames = this._action.getEnginePhaseNames();
+    const requestPhases: IEnginePhaseNames = request._action.getEnginePhaseNames();
+    for (const phaseName of requestPhases.selected) {
+      if (!enginePhases.complete.has(phaseName)) {
+        return `the graph of "${commandName}" does not have every operation of the "${phaseName}" phase`;
+      }
+    }
+    const { reachable } = requestPhases;
+    if (
+      this._action.getEngineGraphIdentity(reachable) !== request._action.getEngineGraphIdentity(reachable)
+    ) {
+      const differences: string = describeDifferences(
+        this._action.getEngineGraphIdentityParts(reachable),
+        request._action.getEngineGraphIdentityParts(reachable)
+      );
+      return `"${requestName}" has different parameters for its phases${differences}`;
+    }
+    if (sameCommand) {
+      if (
+        this._action.getEngineCustomParameterIdentity(reachable) ===
+        request._action.getEngineCustomParameterIdentity(reachable)
+      ) {
+        return undefined;
+      }
+      const differences: string = describeDifferences(
+        this._action.getEngineCustomParameterIdentityParts(reachable),
+        request._action.getEngineCustomParameterIdentityParts(reachable)
+      );
+      return `"${requestName}" has different parameters${differences}`;
+    }
+    let samePlugins: boolean;
+    try {
+      samePlugins =
+        this._parser.pluginManager.getPluginsAssociatedWithCommand(commandName).join('\n') ===
+        request._parser.pluginManager.getPluginsAssociatedWithCommand(requestName).join('\n');
+    } catch (error) {
+      return `a plugin manifest could not be read: ${(error as Error).message}`;
+    }
+    if (!samePlugins) {
+      return `different plugins are associated with "${requestName}" and "${commandName}"`;
+    }
+    const { runAnyPhasedCommand, runPhasedCommand } = rushSession.hooks;
+    const runAnyPhasedCommandBlocker: string | undefined = getRunAnyPhasedCommandBlocker(runAnyPhasedCommand);
+    if (runAnyPhasedCommandBlocker !== undefined) {
+      return runAnyPhasedCommandBlocker;
+    }
+    for (const name of [commandName, requestName]) {
+      if (runPhasedCommand.get(name)?.isUsed()) {
+        return `a plugin taps the runPhasedCommand hook of "${name}"`;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Builds the native telemetry entry for one request that this command made of a long-lived engine.
    *
    * @remarks
@@ -392,4 +507,41 @@ export async function waitForTelemetryFlushAsync(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/**
+ * Names the parts whose values differ between the engine's command and the request, as " (a, b)". It returns an
+ * empty string if every part is the same, which happens only if two commands add the same arguments in another order.
+ */
+function describeDifferences(
+  engineParts: ReadonlyMap<string, string>,
+  requestParts: ReadonlyMap<string, string>
+): string {
+  const names: string[] = [];
+  for (const name of new Set([...engineParts.keys(), ...requestParts.keys()])) {
+    if (engineParts.get(name) !== requestParts.get(name)) {
+      names.push(name);
+    }
+  }
+  return names.length > 0 ? ` (${names.sort().join(', ')})` : '';
+}
+
+/** Warns about the names in a daemon plugin list that match no plugin configured in rush-plugins.json. */
+function warnAboutUnmatchedPluginNames(
+  terminal: Terminal,
+  configuredPluginNames: ReadonlySet<string>,
+  listedPluginNames: ReadonlySet<string>,
+  listDescription: string
+): ReadonlyArray<string> {
+  const unmatchedPluginNames: ReadonlyArray<string> = Array.from(listedPluginNames).filter(
+    (pluginName) => !configuredPluginNames.has(pluginName)
+  );
+  if (unmatchedPluginNames.length > 0) {
+    terminal.writeWarningLine(
+      `The daemon's ${listDescription} names plugins that are not configured in rush-plugins.json: ` +
+        `${unmatchedPluginNames.map((pluginName) => `"${pluginName}"`).join(', ')}. ` +
+        `Check that each entry is the plugin's "pluginName".`
+    );
+  }
+  return unmatchedPluginNames;
 }

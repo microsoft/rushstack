@@ -105,6 +105,28 @@ const ENGINE_REQUEST_SCOPED_PARAMETER_NAMES: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * Parameters that are part of the engine parameter identity, but that do not keep an engine created by one command
+ * from serving another command (see `getEngineGraphIdentity`). An engine never runs build event-hook scripts, and
+ * it selects the operations of each request with the request's own `--include-phase-deps`.
+ */
+const ENGINE_SHAREABLE_PARAMETER_NAMES: ReadonlySet<string> = new Set([
+  '--ignore-hooks',
+  '--include-phase-deps'
+]);
+
+/**
+ * The phases of an engine's graph and of one request, by name; see `PhasedScriptAction.getEnginePhaseNames`.
+ */
+export interface IEnginePhaseNames {
+  /** The phases for which the graph of an engine created by this command has an operation of every project. */
+  readonly complete: ReadonlySet<string>;
+  /** The phases whose operations a request of this command selects for each project that it selects. */
+  readonly selected: ReadonlySet<string>;
+  /** Every phase that a request of this command can run: its selected phases and all of their dependencies. */
+  readonly reachable: ReadonlySet<string>;
+}
+
+/**
  * The set of overall execution statuses that mean the command did what was asked of it and should
  * exit with code 0.
  *
@@ -183,6 +205,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   readonly #alwaysWatch: boolean;
   readonly #alwaysInstall: boolean | undefined;
   readonly #includeAllProjectsInWatchGraph: boolean;
+  readonly #phases: ReadonlyMap<string, IPhase>;
   readonly #terminal: ITerminal;
   readonly #engineEnvironment: Readonly<Record<string, string | undefined>> | undefined;
 
@@ -228,6 +251,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     this.#alwaysWatch = alwaysWatch;
     this.#alwaysInstall = alwaysInstall;
     this.#includeAllProjectsInWatchGraph = includeAllProjectsInWatchGraph;
+    this.#phases = phases;
     this._runsBeforeInstall = false;
     this.sessionAbortController = new AbortController();
 
@@ -372,6 +396,24 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     await this.#runAsync();
   }
 
+  /** False when every run executes all selected operations: `rebuild`, or `"incremental": false`. */
+  public get isIncrementalBuildAllowed(): boolean {
+    return this.#isIncrementalBuildAllowed;
+  }
+
+  /**
+   * Whether an engine created by this command runs the operations that declare `daemonIpc` in persistent
+   * Node IPC processes. `DaemonIpcOperationRunnerPlugin` installs those runners only for an incremental
+   * command.
+   */
+  public get usesPersistentIpcRunners(): boolean {
+    return (
+      this.#isIncrementalBuildAllowed &&
+      this.rushConfiguration.daemon.usePersistentIpcRunners &&
+      !this.#noIPCParameter?.value
+    );
+  }
+
   /** The names of every phase this command can schedule, including dependency and watch phases. */
   public get schedulablePhaseNames(): ReadonlySet<string> {
     const phaseNames: Set<string> = new Set();
@@ -395,6 +437,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       throw new Error('Watch, install, variant and diagnostic-directory options require --no-daemon.');
     }
     if (
+      this.#runsBuildEventHooks() &&
       !this.#ignoreHooksParameter.value &&
       (this.rushConfiguration.eventHooks.get(Event.preRushBuild).length ||
         this.rushConfiguration.eventHooks.get(Event.postRushBuild).length)
@@ -415,13 +458,145 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   /**
+   * The phases of the graph of an engine created by this command, and of the operations of one request of it.
+   *
+   * @remarks
+   * An engine creates operations of every project for the phases that the command selects, and, through their
+   * dependencies, operations of the phases that these depend on. A phase that is reached only through an `upstream`
+   * dependency has operations only for the projects that other projects depend on.
+   */
+  public getEnginePhaseNames(): IEnginePhaseNames {
+    const selected: ReadonlySet<IPhase> = this.#includePhaseDeps?.value
+      ? this.#originalPhases
+      : this.#initialPhases;
+    const complete: Set<IPhase> = new Set(selected);
+    for (const phase of complete) {
+      for (const dependency of phase.dependencies.self) {
+        complete.add(dependency);
+      }
+    }
+    const getNames = (phases: Iterable<IPhase>): ReadonlySet<string> =>
+      new Set(Array.from(phases, (phase: IPhase) => phase.name));
+    return {
+      complete: getNames(complete),
+      selected: getNames(selected),
+      reachable: getNames(this.#initialPhases)
+    };
+  }
+
+  /**
+   * The settings of this command that shape the operations of the specified phases or the graph that contains them,
+   * as JSON. An engine created by one command can serve a request of another command only if both commands have the
+   * same graph identity for the phases that the request can run.
+   *
+   * @remarks
+   * It includes the global parameters, the arguments that the custom parameters associated with each phase add to
+   * the phase's commands (and therefore to the hashes of its operations), the built-in parameters that are set,
+   * other than selection, request-scoped and `ENGINE_SHAREABLE_PARAMETER_NAMES` parameters, and the command's
+   * build cache and oversubscription settings. Unlike `getEngineParameterIdentity`, it excludes the command name
+   * and whether the command is incremental, which each request applies to its own iteration.
+   */
+  public getEngineGraphIdentity(phaseNames: ReadonlySet<string>): string {
+    const phaseArguments: [string, string[]][] = [];
+    for (const phaseName of Array.from(phaseNames).sort()) {
+      const phaseArgumentList: string[] = [];
+      for (const parameter of this.#phases.get(phaseName)?.associatedParameters ?? []) {
+        parameter.appendToArgList(phaseArgumentList);
+      }
+      phaseArguments.push([phaseName, phaseArgumentList]);
+    }
+    return JSON.stringify({
+      global: this.parser.getParameterStringMap(),
+      phases: phaseArguments,
+      builtIn: this.#getEngineGraphBuiltInParameters(),
+      disableBuildCache: this.#disableBuildCache,
+      allowOversubscription: this.#allowOversubscription
+    });
+  }
+
+  /**
+   * The contents of `getEngineGraphIdentity` for the specified phases, keyed by what each describes, so that the
+   * parameters and settings that differ between two commands can be named: `--name for "phase"` for the arguments
+   * that a phase's parameter adds, the name of a global or built-in parameter, or `name in command-line.json`.
+   */
+  public getEngineGraphIdentityParts(phaseNames: ReadonlySet<string>): ReadonlyMap<string, string> {
+    const parts: Map<string, string> = new Map(Object.entries(this.parser.getParameterStringMap()));
+    for (const phaseName of phaseNames) {
+      for (const parameter of this.#phases.get(phaseName)?.associatedParameters ?? []) {
+        const argumentList: string[] = [];
+        parameter.appendToArgList(argumentList);
+        if (argumentList.length > 0) {
+          parts.set(`${parameter.longName} for "${phaseName}"`, JSON.stringify(argumentList));
+        }
+      }
+    }
+    for (const [name, value] of this.#getEngineGraphBuiltInParameters()) {
+      parts.set(name, value);
+    }
+    parts.set('disableBuildCache in command-line.json', String(this.#disableBuildCache));
+    parts.set('allowOversubscription in command-line.json', String(this.#allowOversubscription));
+    return parts;
+  }
+
+  /**
+   * The arguments of the custom parameters of this command that are associated with none of the specified phases,
+   * as JSON. They cannot affect the operations of these phases, but a plugin that is initialized for this command can
+   * read them, so an engine serves another request of the same command only if they are equal.
+   */
+  public getEngineCustomParameterIdentity(phaseNames: ReadonlySet<string>): string {
+    const argumentList: string[] = [];
+    for (const parameter of this.#getCustomParametersOfNoPhase(phaseNames)) {
+      parameter.appendToArgList(argumentList);
+    }
+    return JSON.stringify(argumentList);
+  }
+
+  /** The arguments in `getEngineCustomParameterIdentity`, keyed by the name of the parameter that adds them. */
+  public getEngineCustomParameterIdentityParts(phaseNames: ReadonlySet<string>): ReadonlyMap<string, string> {
+    const parts: Map<string, string> = new Map();
+    for (const parameter of this.#getCustomParametersOfNoPhase(phaseNames)) {
+      const argumentList: string[] = [];
+      parameter.appendToArgList(argumentList);
+      if (argumentList.length > 0) {
+        parts.set(parameter.longName, JSON.stringify(argumentList));
+      }
+    }
+    return parts;
+  }
+
+  /** The set built-in parameters that shape the graph: not selection, request-scoped or shareable ones. */
+  #getEngineGraphBuiltInParameters(): [string, string][] {
+    const excludedNames: Set<string> = new Set([
+      ...this.#selectionParameters.parameterNames,
+      ...ENGINE_REQUEST_SCOPED_PARAMETER_NAMES,
+      ...ENGINE_SHAREABLE_PARAMETER_NAMES
+    ]);
+    for (const parameter of this.customParameters.values()) {
+      excludedNames.add(parameter.scopedLongName ?? parameter.longName);
+    }
+    return Object.entries(this.getParameterStringMap()).filter(
+      ([name, value]) => !excludedNames.has(name) && isParameterValueSet(value)
+    );
+  }
+
+  #getCustomParametersOfNoPhase(phaseNames: ReadonlySet<string>): CommandLineParameter[] {
+    return Array.from(this.customParameters)
+      .filter(
+        ([parameterJson]) =>
+          !parameterJson.associatedPhases?.some((phaseName: string) => phaseNames.has(phaseName))
+      )
+      .map(([, parameter]) => parameter);
+  }
+
+  /**
    * Output verbosity and scheduling settings for one engine request. These are excluded from
    * `getEngineParameterIdentity` and must be applied to the shared graph before each iteration.
    */
   public getEngineRequestSettings(): IPhasedCommandEngineRequestSettings {
     return {
       quietMode: !this.#verboseParameter.value,
-      parallelism: this.#getParallelism()
+      parallelism: this.#getParallelism(),
+      isIncrementalBuildAllowed: this.#isIncrementalBuildAllowed
     };
   }
 
@@ -1143,10 +1318,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   #doBeforeTask(): void {
-    if (
-      this.actionName !== RushConstants.buildCommandName &&
-      this.actionName !== RushConstants.rebuildCommandName
-    ) {
+    if (!this.#runsBuildEventHooks()) {
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
@@ -1157,15 +1329,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   #doAfterTask(): void {
-    if (
-      this.actionName !== RushConstants.buildCommandName &&
-      this.actionName !== RushConstants.rebuildCommandName
-    ) {
+    if (!this.#runsBuildEventHooks()) {
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
     this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this.#ignoreHooksParameter.value);
   }
+
+  /** Whether this command runs the preRushBuild/postRushBuild event hooks, which only build and rebuild do. */
+  #runsBuildEventHooks(): boolean {
+    return (
+      this.actionName === RushConstants.buildCommandName ||
+      this.actionName === RushConstants.rebuildCommandName
+    );
+  }
+}
+
+/** `getParameterStringMap` maps an unset flag to "false", an unset list to "" and other unset values to undefined. */
+function isParameterValueSet(value: string | undefined): boolean {
+  return value !== undefined && value !== 'false' && value !== '';
 }
 
 async function getProjectConfigurationIdentityAsync(

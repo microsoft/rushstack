@@ -91,7 +91,15 @@ rush-client build --to @rushstack/tree-pattern
 ```
 
 Any project selection that `rush build` accepts works, including projects in the `build-tests-subspace`
-subspace. `rush-client rebuild` is also supported.
+subspace. `rush-client rebuild` is also supported, as are the phased commands of command-line.json
+(for example `rush-client test`). Commands share the warm graph where they can: a `test` graph also serves
+`build` and `rebuild`, and a `build` graph serves `rebuild`. The first `rush-client test` after a build reloads
+the graph once; later builds reuse the test graph. A custom command whose graph could not serve the current
+graph's command either, such as `retest` (which is not incremental) after a build, runs in-process instead, so
+that the two commands don't reload the graph on every switch. With `daemon.usePersistentIpcRunners`, a
+command that is not incremental never runs on another command's graph, because persistent IPC runners serve
+only incremental commands. After a `rush-client test`, for example, `rebuild` reloads the graph and `retest`
+runs in-process.
 
 ## 4. Confirm that the daemon served the build
 
@@ -184,9 +192,10 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   `VSCODE_*` value from another terminal window, or a changed `PATH`, restarts the daemon before anything runs,
   and the new process then serves the request. This is not a fallback, but it costs a cold start and changes
   `pid`. Run related requests from the same terminal.
-- **Only phased `build` and `rebuild` use the warm engine.** `rush start` (which always watches),
+- **Only phased commands use the warm engine:** `build`, `rebuild`, and the phased commands of
+  command-line.json. Global commands, `rush start` (which always watches),
   `--watch`, `--install`, `--variant`, and `--node-diagnostic-dir` stay native, as do build event-hook
-  scripts and reporter controls such as `--output`. Keep using ordinary Rush for `install`, `update`, and
+  scripts (for `build` and `rebuild`, the only commands that run them) and reporter controls such as `--output`. Keep using ordinary Rush for `install`, `update`, and
   other commands. `rushx-client` keeps scripts attached to a TTY in-process.
 - **No persistent Heft or TypeScript workers by default.** Each operation still starts its Heft process; the
   daemon saves Rush startup and graph construction, not compilation. The `usePersistentIpcRunners`/`daemonIpc`
@@ -314,9 +323,13 @@ The engine lifecycle that a declared plugin must support:
 - **Once per engine:** the plugin's `apply()`, `runAnyPhasedCommand`, `runPhasedCommand.for(<command>)`,
   `createOperationsAsync` and `onGraphCreatedAsync`. The engine builds the graph for every project, with
   `isWatch` false; each request then selects operations from it. A request whose parameters differ from the
-  engine's (other than project selection, `--verbose`, `--parallelism` and `--timeline`) or a changed
+  engine's (other than project selection, `--include-phase-deps`, `--ignore-hooks`, `--verbose`, `--parallelism`
+  and `--timeline`) or a changed
   configuration file replaces the engine, and the new engine applies the plugin again in the same process.
-  Module-level state therefore outlives an engine.
+  Module-level state therefore outlives an engine. An engine serves another command, such as `rebuild` on a
+  `build` engine, only if the same plugins are associated with both commands, no plugin taps the
+  `runPhasedCommand` hook of either command, and every plugin that taps `runAnyPhasedCommand` is declared
+  command-agnostic (below), because Rush calls these hooks only with the command that created the engine.
 - **Once per iteration:** the operation graph hooks, such as `configureIteration`,
   `beforeExecuteIterationAsync`, `before`/`afterExecuteOperationAsync`, `createEnvironmentForOperation` and
   `afterExecuteIterationAsync`. One iteration can serve several concurrent requests. If every operation that
@@ -340,6 +353,19 @@ Rules for a daemon-compatible plugin:
   clients, and output written while the engine is created reaches the request that created it; the daemon
   drops output written between iterations.
 
+A plugin that taps `runAnyPhasedCommand` keeps an engine from serving any command other than the one that
+created it, unless the plugin is also declared command-agnostic: what it does from that hook doesn't depend on
+the command. Its callbacks there, and the command hooks that they tap in turn (such as `createOperationsAsync`
+and `onGraphCreatedAsync`), don't read the command's name, its parameters, its phase selection or
+`isIncrementalBuildAllowed`. A plugin that only reads `isWatch`, for example, is command-agnostic. Declare it the
+same three ways as above: `"daemonCommandAgnostic": true` in the manifest, the `rush.json` setting
+`"daemon": { "commandAgnosticPlugins": [...] }`, or `RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS` in one shell. The
+same release rules apply: releases whose schemas predate these settings reject them, and then only the
+variable works, only for `rush-client`, and only with an engine that recognizes it. The declaration covers only
+the taps that the plugin's `apply()` adds; a tap added later, an interceptor on the hook, or a tap of
+`runPhasedCommand` still keeps the engine to its own command. When a plugin keeps an engine to its own command,
+a request of another command replaces the engine, or, for a `rush-client` custom command that neither engine
+could serve, falls back to native Rush with a message that names the plugin.
 Node.js loads a plugin's code only once, so the daemon treats the installed package folder of every configured
 plugin as part of its implementation: a change to a plugin's `.js` or `.json` files, including through a
 `link:` dependency, starts a new daemon for the next request. Declaration (`lib-dts`) and ES module (`lib-esm`)

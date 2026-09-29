@@ -50,6 +50,10 @@
           "daemonCompatible": {
             "description": "If true, the plugin declares that it works in a long-lived Rush daemon engine, where one applied instance serves many requests: its session hooks and createOperationsAsync run once per engine (with isWatch false), and its operation graph hooks run for each iteration. Such a plugin does not change process globals (such as process.env, process.exitCode, the working directory or global timers), keeps no per-request state in the process, never prompts, reads the operation environment rather than the daemon's process.env, and releases its resources when the engine is disposed. Without it, the daemon runs commands that the plugin participates in with in-process Rush, unless the repository lists the plugin in the rush.json \"daemon.compatiblePlugins\" setting.",
             "type": "boolean"
+          },
+          "daemonCommandAgnostic": {
+            "description": "If true, the plugin declares that what it does from the runAnyPhasedCommand hook doesn't depend on the command: the callbacks that its apply() taps there, and the command hooks that those callbacks tap in turn (such as createOperationsAsync and onGraphCreatedAsync), don't read the command's name, its parameters, its phase selection or isIncrementalBuildAllowed. Rush calls runAnyPhasedCommand once per daemon engine, with the command that created the engine, so without this declaration an engine serves no other command while the plugin taps the hook, unless the repository lists the plugin in the rush.json \"daemon.commandAgnosticPlugins\" setting. Taps of runPhasedCommand still prevent sharing, because Rush calls them for one command only.",
+            "type": "boolean"
           }
         }
       }

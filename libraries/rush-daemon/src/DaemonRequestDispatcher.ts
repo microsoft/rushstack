@@ -21,6 +21,7 @@ import { PhasedRequestRouter } from './PhasedRequestRouter';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
 import type { IPhasedRequestTelemetrySink } from './PhasedRequestTelemetry';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import type { RequestExclusivityClass } from './RequestScheduler';
 import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
 import { getDaemonGraphObserver } from './DaemonGraphObserver';
 import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
@@ -36,6 +37,11 @@ export interface IResolvedDaemonPhasedRequest {
   readonly exactSelection?: boolean;
   /** Verbosity and parallelism for this request; applied to the shared graph before its iteration. */
   readonly requestSettings?: IPhasedCommandEngineRequestSettings;
+  /**
+   * Workspace admission class of the parsed command. Defaults to the built-in command classification, which
+   * makes every command that is not built in `EXCLUSIVE`.
+   */
+  readonly exclusivityClass?: RequestExclusivityClass;
   /** Receives the request's telemetry report once it has taken part in a graph iteration or no-op check. */
   readonly telemetry?: IPhasedRequestTelemetrySink;
 }
@@ -222,7 +228,8 @@ async function dispatchWorkspaceRequestAsync(
       onExecutionStarting,
       resolved.requestSettings,
       resolved.telemetry,
-      lifecycleInfo?.receivedTimeMs ?? client.receivedTimeMs
+      lifecycleInfo?.receivedTimeMs ?? client.receivedTimeMs,
+      resolved.exclusivityClass
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);

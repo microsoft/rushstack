@@ -17,9 +17,13 @@ import {
   type IOperationGraph,
   type ITelemetryData,
   type Operation,
-  type OperationEnabledState
+  type OperationEnabledState,
+  type RushSession
 } from '@microsoft/rush-lib';
-import type { IDaemonPhasedOperationSelection, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonPhasedOperationSelection,
+  IDaemonRequestEnvelope
+} from '@rushstack/rush-daemon-protocol';
 
 import {
   DaemonRequestDispatchError,
@@ -38,9 +42,18 @@ import type { IWorkspaceSession, IWorkspaceSessionComponents } from './Workspace
 import { EngineTerminalProvider } from './EngineTerminalProvider';
 import { OperationOutputFingerprints } from './OperationOutputFingerprints';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
-import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
+import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
+import { BUILT_IN_RUSH_COMMAND_CLASSIFICATION, classifyPhasedRushCommand } from './RushCommandRequestPolicy';
 import { createInputsCompatibilityCheck, getOperationsWithChangedInputs } from './WorkspaceInputsComparison';
 import { createDaemonRequestTelemetrySink, type IDaemonEngineCreationTiming } from './DaemonRequestTelemetry';
+
+const BUILT_IN_PHASED_COMMAND_NAMES: ReadonlySet<string> = new Set(['build', 'rebuild']);
+
+/** The parsed command that created an engine, and the Rush session that its plugins were applied to. */
+interface IBoundEngine {
+  readonly command: PhasedCommandEngine;
+  readonly rushSession: RushSession | undefined;
+}
 
 /** A native parse of the command line of a request. */
 interface IParsedCommand {
@@ -51,25 +64,32 @@ interface IParsedCommand {
 }
 
 /**
- * Binds the standalone host to a real native build/rebuild graph on its first request.
+ * Binds the standalone host to a real native phased command graph on its first request.
  *
  * @remarks
- * A host is pinned to its first command and graph-affecting, non-selection parameters. Presentation and
- * scheduling parameters (`--verbose`, `--parallelism`, `--timeline`) are applied per request instead.
- * Incompatible parameters,
+ * A host is pinned to the engine of its first command. That engine serves every later request whose command it can
+ * serve (`PhasedCommandEngine.getEngineSharingBlocker`): requests of the same command whose graph-affecting,
+ * non-selection parameters are the same, and, if the first command is incremental, requests of other commands, for
+ * example `rebuild` on the engine of `build`, or `build` on the engine of `test`. Presentation and scheduling
+ * parameters (`--verbose`, `--parallelism`, `--timeline`) and whether the command is incremental are applied per
+ * request instead.
+ * Another built-in command, or another custom command whose own engine could serve the first command, replaces
+ * the engine through a reload; any other custom command is unsupported, so that the host never switches back and
+ * forth between two engines. Incompatible parameters,
  * environments, or graph inputs are rejected before scheduling; no request is retried automatically.
- * The initial supported surface excludes external plugins that participate in the requested command
+ * It serves build, rebuild and the phased commands of command-line.json. The initial supported surface excludes
+ * external plugins that participate in the requested command
  * (unless their manifest or the repository declares them daemon-compatible), .env initialization,
- * install/watch, event-hook scripts, and rushx/global commands. Use the unchanged native CLI for those surfaces.
+ * install/watch, build event-hook scripts, and rushx/global commands. Use the unchanged native CLI for those surfaces.
  * @beta
  */
 export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   #binding: Promise<void> | undefined;
+  #boundCommand: PhasedCommandEngine | undefined;
   /** The request whose handling created the warm engine, and when it did. */
   #engineCreation: (IDaemonEngineCreationTiming & { readonly requestId: string }) | undefined;
   #logTelemetry: EngineLogTelemetry | undefined;
   #loggedRequestCount: number = 0;
-  #parameterIdentity: string | undefined;
   #workspaceSession: IWorkspaceSession | undefined;
   readonly #environmentIdentity: string;
   readonly #preparationLock: LockFile | undefined;
@@ -111,12 +131,41 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     });
   }
 
-  /** Inspects the native command shape without constructing or executing an operation graph. */
+  /**
+   * Inspects the native command shape without constructing or executing an operation graph.
+   *
+   * @remarks
+   * Returns the identity of the bound engine's command when that engine can serve the request, so that the
+   * lifecycle reuses it, and the request's own identity otherwise, so that the lifecycle reloads. A custom command
+   * that the bound engine cannot serve, and whose own engine could not serve the bound engine's command, is
+   * unsupported.
+   */
   public async getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string> {
+    const { envelope, workspaceSession } = options;
     const parsed: IParsedCommand = await this.#parseCommandAsync(options);
     // Resolving the same request uses this parse instead of parsing the same command line again.
     this.#identityParses.set(options.abortSignal, parsed);
-    return parsed.command.parameterIdentity;
+    const { command } = parsed;
+    const engine: IBoundEngine | undefined = await this.#tryGetBoundEngineAsync(workspaceSession);
+    if (!engine) return command.parameterIdentity;
+    const blocker: string | undefined = getEngineSharingBlocker(engine, command);
+    if (blocker === undefined) return engine.command.parameterIdentity;
+    if (envelope.commandOrigin === 'custom') {
+      const reverseBlocker: string | undefined = getEngineSharingBlocker(
+        { command, rushSession: engine.rushSession },
+        engine.command
+      );
+      if (reverseBlocker !== undefined) {
+        const engineName: string = engine.command.commandName;
+        throw new DaemonRequestDispatchError(
+          'unsupported',
+          `The daemon's engine, created by "${engineName}", cannot serve "${command.commandName}" because ` +
+            `${blocker}, and an engine created by "${command.commandName}" could not serve "${engineName}" ` +
+            `because ${reverseBlocker}.`
+        );
+      }
+    }
+    return command.parameterIdentity;
   }
 
   public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
@@ -128,14 +177,11 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     );
     let bindingStartTimeMs: number | undefined;
     if (this.#binding) {
-      if (
-        this.#parameterIdentity !== command.parameterIdentity ||
-        this.#workspaceSession !== workspaceSession
-      ) {
+      if (!(await this.#canServeAsync(command, workspaceSession))) {
         throw new WorkspaceEngineRecreationRequiredError();
       }
     } else {
-      this.#parameterIdentity = command.parameterIdentity;
+      this.#boundCommand = command;
       this.#workspaceSession = workspaceSession;
       bindingStartTimeMs = performance.now();
       const binding: Promise<void> = this.#bindAsync(command, terminal, workspaceSession);
@@ -143,7 +189,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       void binding.catch((error: unknown) => {
         if (error instanceof PhasedCommandEngineBusyError && this.#binding === binding) {
           this.#binding = undefined;
-          this.#parameterIdentity = undefined;
+          this.#boundCommand = undefined;
           this.#workspaceSession = undefined;
         }
       });
@@ -177,6 +223,11 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       kind: 'phased',
       exactSelection: true,
       requestSettings: command.requestSettings,
+      exclusivityClass: classifyPhasedRushCommand({
+        commandName: command.commandName,
+        commandOrigin: envelope.commandOrigin,
+        isIncremental: command.isIncremental
+      }),
       telemetry: logTelemetry
         ? createDaemonRequestTelemetrySink({
             command,
@@ -207,6 +258,32 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     };
   }
 
+  /** Whether the engine bound to `session` can serve `command`; see `PhasedCommandEngine.getEngineSharingBlocker`. */
+  async #canServeAsync(command: PhasedCommandEngine, session: IWorkspaceSession): Promise<boolean> {
+    if (this.#workspaceSession !== session) return false;
+    // Equal identities need no initialized engine; the caller then awaits the binding and sees its error, if any.
+    if (this.#boundCommand?.parameterIdentity === command.parameterIdentity) return true;
+    const engine: IBoundEngine | undefined = await this.#tryGetBoundEngineAsync(session);
+    return !!engine && getEngineSharingBlocker(engine, command) === undefined;
+  }
+
+  /**
+   * The command and session of the engine bound to `session`, or undefined if none is bound to it or it failed to
+   * initialize. The lifecycle binds engines under an exclusive transition lease, so no request that holds a lease
+   * waits here for a binding in progress.
+   */
+  async #tryGetBoundEngineAsync(session: IWorkspaceSession): Promise<IBoundEngine | undefined> {
+    const binding: Promise<void> | undefined = this.#binding;
+    const command: PhasedCommandEngine | undefined = this.#boundCommand;
+    if (!binding || !command || this.#workspaceSession !== session) return undefined;
+    try {
+      await binding;
+    } catch {
+      return undefined;
+    }
+    return { command, rushSession: session.rushSession };
+  }
+
   /** Returns the parse of the identity check of this request, if its command line and session are unchanged. */
   #takeIdentityParse(options: IResolveDaemonRequestOptions): IParsedCommand | undefined {
     const parsed: IParsedCommand | undefined = this.#identityParses.get(options.abortSignal);
@@ -219,10 +296,17 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     identityParse?: IParsedCommand
   ): Promise<IParsedCommand> {
     const { envelope, workspaceSession, abortSignal } = options;
-    if (!['build', 'rebuild'].includes(envelope.commandName) || envelope.commandOrigin !== 'built-in') {
+    if (isRushxInvocation(envelope)) {
+      throw new DaemonRequestDispatchError('unsupported', 'A rushx script is not a phased command request.');
+    }
+    if (
+      Object.hasOwn(BUILT_IN_RUSH_COMMAND_CLASSIFICATION, envelope.commandName) &&
+      !BUILT_IN_PHASED_COMMAND_NAMES.has(envelope.commandName)
+    ) {
+      // Skips parsing, because command-line.json cannot redefine a built-in command.
       throw new DaemonRequestDispatchError(
         'unsupported',
-        'The production daemon requires an explicitly identified native build/rebuild request. Ambiguous custom/rushx requests require --no-daemon.'
+        `"${envelope.commandName}" is a built-in command that is not phased.`
       );
     }
     if (environmentIdentity(envelope.environment) !== this.#environmentIdentity) {
@@ -259,10 +343,15 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         throw new DaemonRequestDispatchError('unsupported', terminal.describeError(error), { cause: error });
       }
     }
-    if (parsed.command.commandName !== envelope.commandName) {
+    // Clients mark only build and rebuild as built-in; every other phased command comes from command-line.json.
+    if (
+      parsed.command.commandName !== envelope.commandName ||
+      BUILT_IN_PHASED_COMMAND_NAMES.has(parsed.command.commandName) !==
+        (envelope.commandOrigin === 'built-in')
+    ) {
       throw new DaemonRequestDispatchError(
         'invalidRequest',
-        'The command name does not match the native parsed argv.'
+        'The command name or origin does not match the native parsed argv.'
       );
     }
     if (abortSignal.aborted)
@@ -411,6 +500,13 @@ type EngineLogTelemetry = (data: ITelemetryData, options?: IPhasedCommandEngineL
 
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {
   return JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment));
+}
+
+/** Explains why `engine` cannot serve `request`, or returns undefined if it can. */
+function getEngineSharingBlocker(engine: IBoundEngine, request: PhasedCommandEngine): string | undefined {
+  if (engine.command.parameterIdentity === request.parameterIdentity) return undefined;
+  if (!engine.rushSession) return 'the engine has no Rush session';
+  return engine.command.getEngineSharingBlocker(request, engine.rushSession);
 }
 
 /** Whether a parse has exactly the inputs that parsing the command line of this request would have. */

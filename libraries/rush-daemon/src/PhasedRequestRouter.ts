@@ -194,6 +194,7 @@ export class PhasedRequestRouter {
    *
    * `receivedTimeMs` is the `performance.now()` timestamp at which the daemon received the request. The request can
    * join a batch whose input reconcile started after this time. It defaults to the time of this call.
+   * `requestExclusivityClass` is the admission class chosen by the resolver; it defaults to `classifyRushCommand`.
    */
   public async executeAsync(
     request: IDaemonPhasedRequest,
@@ -202,7 +203,8 @@ export class PhasedRequestRouter {
     onExecutionStarting?: () => void,
     requestSettings?: IPhasedCommandEngineRequestSettings,
     telemetry?: IPhasedRequestTelemetrySink,
-    receivedTimeMs?: number
+    receivedTimeMs?: number,
+    requestExclusivityClass?: RequestExclusivityClass
   ): Promise<IDaemonPhasedRequestResult> {
     const startTimeMs: number = performance.now();
     validateRequestIdentity(request);
@@ -221,10 +223,12 @@ export class PhasedRequestRouter {
     }
     const graph: IDualEmitOperationGraph = getDualEmitGraph(this.#workspaceSession);
     const routingState: IGraphRoutingState = getGraphRoutingState(graph, this.#workspaceSession);
-    const exclusivityClass: RequestExclusivityClass = classifyRushCommand({
-      commandName: request.commandName,
-      commandOrigin: request.commandOrigin
-    });
+    const exclusivityClass: RequestExclusivityClass =
+      requestExclusivityClass ??
+      classifyRushCommand({
+        commandName: request.commandName,
+        commandOrigin: request.commandOrigin
+      });
     const workspaceScheduler: RequestScheduler = getWorkspaceRequestScheduler(this.#workspaceSession);
     let admissionController: RequestAdmissionController | undefined;
     let admissionLease: IRequestLease;
@@ -551,6 +555,15 @@ class PhasedRequestBatchCoordinator {
           this.#finishDetachedEntry(entry);
         }
       }
+      // Batches never mix request settings (`requestSettingsKey`).
+      const isIncrementalBuildAllowed: boolean | undefined =
+        participants[0].requestSettings?.isIncrementalBuildAllowed;
+      if (isIncrementalBuildAllowed === false) {
+        // Like a native `rush rebuild` process, a non-incremental request starts every operation it runs cold.
+        await this.#graph.closeRunnersAsync(
+          Array.from(this.#graph.operations).filter((operation: Operation) => operation.enabled !== false)
+        );
+      }
       const demand: PhasedIterationDemand = new PhasedIterationDemand(() => this.#onBatchAbandoned(demand));
       this.#batchDemand = demand;
       const unsubscribeDemand: () => void = this.#multiplexer.subscribe(demand);
@@ -590,7 +603,8 @@ class PhasedRequestBatchCoordinator {
         timings.scheduleStartTimeMs = performance.now();
         scheduled = await this.#graph.scheduleIterationAsync({
           inputsSnapshot: this.#workspaceSession.inputsSnapshot,
-          ...createOperationParticipantLookups(participants)
+          ...createOperationParticipantLookups(participants),
+          isIncrementalBuildAllowed
         });
         timings.scheduledTimeMs = performance.now();
         if (scheduled) {

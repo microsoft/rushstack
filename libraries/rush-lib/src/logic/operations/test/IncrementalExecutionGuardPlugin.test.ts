@@ -177,7 +177,10 @@ interface ITestWorkspace {
    * Deletes a folder and writes its files again, like a branch switch that removed the folder and restored it.
    */
   recreateFolder(relativePath: string): void;
-  executeAsync(environment?: Readonly<Record<string, string>>): Promise<ITestIteration>;
+  executeAsync(
+    environment?: Readonly<Record<string, string>>,
+    isIncrementalBuildAllowed?: boolean
+  ): Promise<ITestIteration>;
   /**
    * Resolves when the next command that hangs has written its outputs. It runs until it is terminated.
    */
@@ -616,12 +619,16 @@ async function createWorkspaceAsync(
     writeFile,
     deleteFile: (relativePath: string) => fs.rmSync(`${rootFolder}/${relativePath}`),
     recreateFolder: (relativePath: string) => recreateFolder(`${rootFolder}/${relativePath}`),
-    executeAsync: async (environment: Readonly<Record<string, string>> = {}): Promise<ITestIteration> => {
+    executeAsync: async (
+      environment: Readonly<Record<string, string>> = {},
+      isIncrementalBuildAllowed?: boolean
+    ): Promise<ITestIteration> => {
       commands.length = 0;
       destination.reset();
       const result: IExecutionResult = await graph.executeAsync({
         inputsSnapshot: createInputsSnapshot(environment),
-        getOperationEnvironment: () => environment
+        getOperationEnvironment: () => environment,
+        isIncrementalBuildAllowed
       });
       return {
         result,
@@ -652,6 +659,22 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
 
     // An unchanged workspace runs nothing.
     expect((await workspace.executeAsync()).commands).toEqual([]);
+  });
+
+  it('runs the initial command in an iteration that allows no incremental build, and uses its result as the base', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+    await workspace.executeAsync();
+
+    // Like `rush rebuild`, served by a graph of `rush build`: the runner gets no last result.
+    workspace.writeFile('a/tsconfig.json', '{ "compilerOptions": {} }');
+    const rebuilt: ITestIteration = await workspace.executeAsync({}, false);
+    expect(rebuilt.commands).toEqual(['a:initial']);
+    expect(rebuilt.output).not.toContain('Not using the incremental command');
+    expect((await workspace.executeAsync({}, false)).commands).toEqual(['a:initial']);
+
+    // The configuration file changed after the first iteration, but before the base.
+    workspace.writeFile('a/src/one.ts', 'one 2');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
   });
 
   interface IInputChangeCase {

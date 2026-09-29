@@ -183,12 +183,24 @@ describe('shared phased request batching', () => {
     const scheduleSpy: jest.SpyInstance = jest
       .spyOn(graph, 'scheduleIterationAsync')
       .mockImplementation((...args: Parameters<typeof graph.scheduleIterationAsync>) => {
-        scheduledSettings.push({ parallelism: graph.parallelism, quietMode: graph.quietMode });
+        scheduledSettings.push({
+          parallelism: graph.parallelism,
+          quietMode: graph.quietMode,
+          isIncrementalBuildAllowed: args[0].isIncrementalBuildAllowed as boolean
+        });
         return originalScheduleAsync(...args);
       });
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
-    const defaultSettings: IPhasedCommandEngineRequestSettings = { parallelism: 4, quietMode: true };
-    const verboseSerialSettings: IPhasedCommandEngineRequestSettings = { parallelism: 1, quietMode: false };
+    const defaultSettings: IPhasedCommandEngineRequestSettings = {
+      parallelism: 4,
+      quietMode: true,
+      isIncrementalBuildAllowed: true
+    };
+    const verboseSerialSettings: IPhasedCommandEngineRequestSettings = {
+      parallelism: 1,
+      quietMode: false,
+      isIncrementalBuildAllowed: false
+    };
 
     const [first, second] = await Promise.all([
       router.executeAsync(

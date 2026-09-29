@@ -9,6 +9,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
 import type { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
+import { applyAndAttributeTaps } from './PhasedCommandHookTaps';
 import { _createRushSessionForPlugin, type RushSession } from './RushSession';
 import type { PluginLoaderBase, IRushPluginManifest } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
@@ -303,6 +304,20 @@ export class PluginManager {
     return reasons;
   }
 
+  /**
+   * The configured plugins that Rush initializes for the specified command because their manifests associate them
+   * with it, as sorted `packageName:pluginName` keys. Plugins that are not associated with specific commands are
+   * initialized for every command, and are not included.
+   */
+  public getPluginsAssociatedWithCommand(commandName: string): ReadonlyArray<string> {
+    return [
+      ...this.#getPluginLoadersForCommand(commandName, this.#builtInPluginLoaders),
+      ...this.#getPluginLoadersForCommand(commandName, this.#autoinstallerPluginLoaders)
+    ]
+      .map(({ packageName, pluginName }) => `${packageName}:${pluginName}`)
+      .sort();
+  }
+
   #initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
@@ -342,9 +357,24 @@ export class PluginManager {
         packageVersion: pluginLoader.packageVersion,
         component: pluginName
       }));
-      plugin.apply(pluginSession, this.#rushConfiguration);
+      applyAndAttributeTaps(
+        this.#rushSession.hooks.runAnyPhasedCommand,
+        { pluginName, packageName, isCommandAgnostic: this.#isCommandAgnostic(pluginLoader) },
+        () => plugin.apply(pluginSession, this.#rushConfiguration)
+      );
     } catch (e) {
       throw new InternalError(`Error applying "${pluginName}": ${e}`);
     }
+  }
+
+  #isCommandAgnostic(pluginLoader: PluginLoaderBase): boolean {
+    if (pluginLoader.pluginManifest.daemonCommandAgnostic === true) {
+      return true;
+    }
+    // Like daemon.compatiblePlugins, the repository's list names plugins that rush-plugins.json configures.
+    return (
+      pluginLoader instanceof AutoinstallerPluginLoader &&
+      this.#rushConfiguration.daemon.commandAgnosticPlugins.includes(pluginLoader.pluginName)
+    );
   }
 }

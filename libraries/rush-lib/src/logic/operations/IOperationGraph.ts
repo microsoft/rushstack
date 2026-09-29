@@ -35,6 +35,18 @@ export interface IOperationGraphIterationOptions {
   getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
 
   /**
+   * False to run every enabled operation of this iteration as a fresh process of a non-incremental command such as
+   * `rush rebuild` would: without skipping unchanged operations, without reading the build cache, and without
+   * passing the last result to the runner (so no runner uses its incremental command). Cache writes are unaffected.
+   * When omitted or true, the graph's own setting (`ICreateOperationsContext.isIncrementalBuildAllowed`) applies.
+   *
+   * @remarks
+   * A long-lived graph created by an incremental command serves a non-incremental request this way. The results
+   * of operations that the iteration does not enable are kept.
+   */
+  isIncrementalBuildAllowed?: boolean;
+
+  /**
    * Returns the identifier of the request whose environment `getOperationEnvironment` returns for an operation of
    * this iteration, or `undefined` if there is no such request. When omitted, the iteration serves no identified
    * request.

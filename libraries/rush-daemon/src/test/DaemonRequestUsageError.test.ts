@@ -3,6 +3,7 @@
 
 import type { IOperationGraph } from '@microsoft/rush-lib';
 import { LockFile } from '@rushstack/node-core-library';
+import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 
@@ -44,6 +45,63 @@ it('fails an invalid command line with the exit code of native Rush instead of h
   }
 });
 
+it('answers an invalid command line of a custom phased command as it does one of build, and of no other custom command', async () => {
+  const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync((created) => {
+    created.write(
+      'common/config/rush/command-line.json',
+      JSON.stringify({
+        phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'build',
+            phases: ['_phase:compile'],
+            incremental: true,
+            enableParallelism: true
+          },
+          {
+            commandKind: 'phased',
+            name: 'test',
+            summary: 'Builds and tests',
+            phases: ['_phase:compile'],
+            incremental: true,
+            enableParallelism: true
+          },
+          { commandKind: 'global', name: 'hello', summary: 'Hello', shellCommand: 'echo hello' }
+        ]
+      })
+    );
+  });
+  try {
+    const custom: Partial<IDaemonRequestEnvelope> = { commandOrigin: 'custom' };
+    const testMessage: string = 'rush test: error: Unrecognized arguments: --nope.';
+    const invalidTest: string[] = ['test', '--to', 'b', '--nope'];
+    // A custom command is parsed before the input capture, but its usage error waits for the same check as build's.
+    expect((await fixture.runAsync(invalidTest, custom)).terminal).toMatchObject({
+      kind: 'requestRejected',
+      payload: { code: 'unsupported', message: testMessage }
+    });
+    expect((await fixture.buildAsync()).terminal).toMatchObject(success);
+    expect((await fixture.runAsync(invalidTest, custom)).terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: { exitCode: 2, outcome: 'failure', aborted: false, errorMessage: testMessage }
+    });
+    // The daemon serves no global or unknown command, so in-process Rush reports its invalid command line.
+    for (const argv of [
+      ['hello', '--nope'],
+      ['nope', '--to', 'b']
+    ]) {
+      expect((await fixture.runAsync(argv, custom)).terminal).toMatchObject({
+        kind: 'requestRejected',
+        payload: { code: 'unsupported' }
+      });
+    }
+    expect(fixture.runs()).toEqual(['a', 'b']);
+  } finally {
+    await fixture[Symbol.asyncDispose]();
+  }
+});
+
 it('hands an invalid command line to in-process Rush after a configuration change, which parses it again', async () => {
   const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
   try {
@@ -71,14 +129,17 @@ it('hands an invalid command line to in-process Rush while the warm set waits fo
   try {
     expect((await fixture.buildAsync()).terminal).toMatchObject(success);
     expect((await fixture.runAsync(invalid)).terminal).toMatchObject(usageFailure);
-    // Other parameters need a reload. It stops the warm set before it takes the Rush lock, which this test holds.
+    // A graph-affecting parameter needs a reload (the engine of build serves --ignore-hooks itself). The reload
+    // stops the warm set before it takes the Rush lock, which this test holds.
     const native: LockFile | undefined = LockFile.tryAcquire(
       fixture.session.rushConfiguration.commonTempFolder,
       'rush'
     );
     expect(native).toBeDefined();
     try {
-      expect((await fixture.runAsync(['build', '--to', 'b', '--ignore-hooks'])).terminal).toMatchObject({
+      expect(
+        (await fixture.runAsync(['build', '--to', 'b', '--changed-projects-only'])).terminal
+      ).toMatchObject({
         kind: 'requestRejected',
         payload: { message: expect.stringContaining('Another Rush command') }
       });
