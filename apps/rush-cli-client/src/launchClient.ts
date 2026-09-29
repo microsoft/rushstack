@@ -404,8 +404,7 @@ export async function launchClientAsync(
     await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath, {
       startedAtMs: requestStartedAtMs,
       admission: request.admission,
-      daemonPid:
-        restarts.length > 0 ? restarts[restarts.length - 1].successorPid : (await client.status).pid
+      daemonPid: restarts.length > 0 ? restarts[restarts.length - 1].successorPid : (await client.status).pid
     });
   }
 }

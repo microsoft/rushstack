@@ -43,7 +43,11 @@ describe(consumeRepositoryLockWait.name, () => {
   });
 
   it('reads the deadline and the daemon PID, and removes both variables', () => {
-    const environment: NodeJS.ProcessEnv = { PATH: '/bin', [DEADLINE]: '1700000030000', [DAEMON_PID]: '4242' };
+    const environment: NodeJS.ProcessEnv = {
+      PATH: '/bin',
+      [DEADLINE]: '1700000030000',
+      [DAEMON_PID]: '4242'
+    };
     expect(consumeRepositoryLockWait(environment)).toEqual({ deadlineMs: 1700000030000, daemonPid: 4242 });
     expect(environment).toEqual({ PATH: '/bin' });
   });
@@ -191,7 +195,10 @@ describe(acquireRepositoryLockAsync.name, () => {
   });
 
   it('waits until the holder releases the lock', async () => {
-    const { result, attempts, sleeps, warnings } = await acquireAsync({ deadlineMs: 30000, daemonPid: DAEMON }, 3);
+    const { result, attempts, sleeps, warnings } = await acquireAsync(
+      { deadlineMs: 30000, daemonPid: DAEMON },
+      3
+    );
     expect(result).toEqual({ lock: HELD_LOCK });
     expect(attempts).toBe(4);
     expect(sleeps).toEqual([100, 100, 100]);

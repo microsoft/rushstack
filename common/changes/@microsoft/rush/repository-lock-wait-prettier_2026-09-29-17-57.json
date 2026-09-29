@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Make the repository lock wait tests fail, not hang, when a wait never ends.",
+      "comment": "Format the repository lock wait tests with Prettier.",
       "type": "none"
     }
   ],

@@ -297,15 +297,22 @@ describe('RushCommandLineParser', () => {
           }
         });
 
+        // The file's default timeout is about 17 minutes, so each lock-wait test, which takes a few seconds, sets
+        // its own: a wait that never ends then fails the test in a minute.
         it('waits for the lock until the deadline that rush-client set, and names the daemon that holds it', async () => {
           const daemonPid: number = process.pid + 1;
           const deadlineMs: number = Date.now() + 60000;
           process.env._RUSH_LOCK_WAIT_DEADLINE = `${deadlineMs}`;
           process.env._RUSH_LOCK_WAIT_DAEMON_PID = `${daemonPid}`;
           const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          let attempts: number = 0;
           const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
             .spyOn(LockFile, 'tryAcquire')
-            .mockReturnValue(undefined);
+            .mockImplementation(() => {
+              // The wait below tries every 100 ms for 300 ms. One that never stopped would outlive this test.
+              if (++attempts > 100) throw new Error(`tryAcquire was called ${attempts} times`);
+              return undefined;
+            });
           const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
             .spyOn(process, 'exit')
             .mockImplementation(() => undefined as never);
@@ -339,9 +346,9 @@ describe('RushCommandLineParser', () => {
             await new Promise<void>((resolve: () => void) => setImmediate(resolve));
 
             expect(Date.now()).toBeGreaterThanOrEqual(shortDeadlineMs);
-            expect(lockSpy.mock.calls.filter(([, resourceName]) => resourceName === 'rush').length).toBeGreaterThan(
-              1
-            );
+            expect(
+              lockSpy.mock.calls.filter(([, resourceName]) => resourceName === 'rush').length
+            ).toBeGreaterThan(1);
             const messages: unknown[] = reporterSink.inputs
               .filter(({ type }) => type === 'messageEmitted')
               .map(({ payload }) => payload);
@@ -368,7 +375,7 @@ describe('RushCommandLineParser', () => {
             exitSpy.mockRestore();
             lockSpy.mockRestore();
           }
-        });
+        }, 60000);
 
         it('runs the command once the lock is released before the deadline that rush-client set', async () => {
           process.env._RUSH_LOCK_WAIT_DEADLINE = `${Date.now() + 60000}`;
@@ -413,7 +420,7 @@ describe('RushCommandLineParser', () => {
             exitSpy.mockRestore();
             lockSpy.mockRestore();
           }
-        });
+        }, 60000);
 
         it('leaves the wait that rush-client set alone in an engine host, whose environment is not the request', async () => {
           process.env._RUSH_LOCK_WAIT_DEADLINE = '1000';

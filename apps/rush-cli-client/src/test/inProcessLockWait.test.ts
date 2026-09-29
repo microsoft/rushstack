@@ -56,7 +56,11 @@ describe(getInProcessLockWaitDeadlineMs.name, () => {
       })
     ).toBe(31000);
     expect(
-      getInProcessLockWaitDeadlineMs({ startedAtMs: 1000, admission: { waitTimeoutMs: 60500 }, daemonPid: 42 })
+      getInProcessLockWaitDeadlineMs({
+        startedAtMs: 1000,
+        admission: { waitTimeoutMs: 60500 },
+        daemonPid: 42
+      })
     ).toBe(61500);
   });
 
@@ -70,13 +74,21 @@ describe(getInProcessLockWaitDeadlineMs.name, () => {
 describe(setInProcessLockWait.name, () => {
   it('sets the deadline and the daemon PID', () => {
     const environment: NodeJS.ProcessEnv = { PATH: '/bin' };
-    setInProcessLockWait(environment, { startedAtMs: 1000, admission: { waitTimeoutMs: 5000 }, daemonPid: 42 });
+    setInProcessLockWait(environment, {
+      startedAtMs: 1000,
+      admission: { waitTimeoutMs: 5000 },
+      daemonPid: 42
+    });
     expect(environment).toEqual({ PATH: '/bin', [DEADLINE]: '6000', [DAEMON_PID]: '42' });
   });
 
   it('removes a daemon PID that no daemon handed over', () => {
     const environment: NodeJS.ProcessEnv = { [DAEMON_PID]: '7' };
-    setInProcessLockWait(environment, { startedAtMs: 1000, admission: { noWait: true }, daemonPid: undefined });
+    setInProcessLockWait(environment, {
+      startedAtMs: 1000,
+      admission: { noWait: true },
+      daemonPid: undefined
+    });
     expect(environment).toEqual({ [DEADLINE]: '1000' });
   });
 });
@@ -134,7 +146,8 @@ describe('rush-client asks in-process Rush to wait for the repository lock after
     now = jest.spyOn(Date, 'now').mockReturnValue(SENT_AT_MS);
     process.argv = [process.execPath, 'rush-client', 'build', '--to', 'project'];
     process.env = { ...originalEnvironment, CI: 'false', RUSH_DAEMON: '1', RUSH_REPORTER: 'legacy' };
-    for (const name of ['RUSH_LOG_LEVEL', 'RUSH_PREVIEW_VERSION', DEADLINE, DAEMON_PID]) delete process.env[name];
+    for (const name of ['RUSH_LOG_LEVEL', 'RUSH_PREVIEW_VERSION', DEADLINE, DAEMON_PID])
+      delete process.env[name];
   });
 
   afterEach(() => {
