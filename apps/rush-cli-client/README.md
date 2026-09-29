@@ -413,12 +413,16 @@ the next command: status then prints `state: "installationChanged"` with the pon
 A startup reservation (`<key>.pid.json.starting`) refuses another daemon launch until
 the daemon it reserved becomes ready. Status reports one that remains as
 `startupReservation` with its `path`, the startup helper's `helperPid` when recorded, and
-`helperState`: `running` (the helper still waits for readiness), `exited` (nothing else will
+`helperState`: `running` (the helper still waits for readiness), `exited` (the helper will not
 release it), or `unknown` (written by an older client). Status never removes it. Next to a
 ready daemon, the next command that uses, stops or restarts that daemon removes it; when status
-cannot connect, its diagnostic explains the reservation. After an `exited` helper, every automatic start is
-refused at once unless that daemon still becomes ready: check `daemon logs`, and if the daemon
-failed to start, run `daemon stop --force`.
+cannot connect, its diagnostic explains the reservation. After an `exited` helper, status also
+reports `relaunchAfter`, 15 seconds after that helper was launched. Until then every automatic
+start is refused at once (the command runs in-process), so that a daemon that fails the same way
+each time, for example because of a configuration error, is not launched by every command. The
+first command after it that finds nothing listening at the endpoint takes the reservation over
+and starts the daemon again, and `daemon logs` shows a line saying so. `daemon logs` may also show
+why the daemon did not become ready.
 
 The optional workspace snapshot reports the provider generation/token, graph existence,
 and available warm accounting without initializing a graph. Missing fields are unknown,
@@ -478,7 +482,8 @@ started/reused successor must pass hello/ping before reporting `state: "ready"`.
 When nothing listens at the endpoint, restart starts a daemon exactly like `daemon start`.
 
 Automatic and explicit startup reclaim stale artifacts only when that is provably
-safe: while holding the start mutex with no `.starting` reservation, a socket
+safe: while holding the start mutex with no `.starting` reservation (or after taking over
+one whose helper exited, as described above), a socket
 without an ownership record, or an unreadable/corrupt record, is removed only after
 a connection attempt is refused (so no listener exists). On Linux, a record whose
 PID now belongs to a process that started after the record's `startedAt` (PID reuse)

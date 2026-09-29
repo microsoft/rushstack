@@ -217,7 +217,8 @@ function explainExitedDaemon(error: unknown, paths: IDaemonPaths): unknown {
 /**
  * Reports a startup reservation, which refuses another daemon launch until it is resolved. Clients resolve it
  * once the daemon it reserved is ready, so the next command that uses, stops or restarts a ready daemon resolves
- * a remaining one; status only reports it.
+ * a remaining one. Once its helper exited, a command that starts the daemon after `relaunchAfter` takes it over.
+ * Status only reports it.
  */
 function getStartupReservationStatus(paths: IDaemonPaths): {
   startupReservation?: IDaemonStartupReservationInfo;
@@ -238,7 +239,7 @@ function explainStartupReservation(error: unknown, paths: IDaemonPaths): unknown
       explanation = `A daemon is starting: ${helper} is still waiting for it to become ready; retry shortly.`;
       break;
     case 'exited':
-      explanation = `The startup reservation at ${reservation.path} remains, but ${helper} exited before the daemon became ready, so the reservation refuses every automatic start unless that daemon still becomes ready. Check "rush-client daemon logs"; if the daemon failed to start, run "rush-client daemon stop --force" to remove it.`;
+      explanation = `The startup reservation at ${reservation.path} remains, but ${helper} exited before the daemon became ready. A command that starts the daemon after ${reservation.relaunchAfter} takes the reservation over and launches the daemon again, provided that nothing listens at ${paths.socketPath} then. "rush-client daemon logs" may show why the daemon did not become ready.`;
       break;
     default:
       explanation = `The startup reservation at ${reservation.path} refuses another daemon launch. Check "rush-client daemon logs"; if no daemon is starting, run "rush-client daemon stop --force" to remove it.`;

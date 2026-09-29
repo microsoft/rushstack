@@ -38,13 +38,16 @@ import {
   getDaemonStartupFilePath,
   readDaemonStartupReservation,
   reserveDaemonStartup,
+  type IDaemonStartupHelper,
   type IDaemonStartupOptions,
   type IDaemonStartupReservation
 } from './DaemonStartup';
 import {
   getStartupHelperState,
+  getStartupRelaunchTime,
   resolveStartupReservationForReadyDaemon,
   tryResolveStartupReservationAsync,
+  tryTakeOverAbandonedStartupReservationAsync,
   type DaemonStartupHelperState
 } from './DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
@@ -180,7 +183,10 @@ async function startDaemonAsync(
   }
   if (!lock) throw startupError(options, 'timed out waiting for another starting client');
   try {
-    await waitForStartupReservationAsync(options, deadline);
+    const abandonedHelper: IDaemonStartupHelper | undefined = await waitForStartupReservationAsync(
+      options,
+      deadline
+    );
     const ready: DaemonClient | undefined = await tryConnectAsync(options, deadline);
     if (ready) return ready;
     const replacement: DaemonClient | undefined = await replaceMismatchedDaemonAsync(options, deadline);
@@ -192,7 +198,7 @@ async function startDaemonAsync(
     await reclaimStaleDaemonAsync(options.paths);
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();
-    const helper: IStartupHelper = await spawnDetachedAsync(options, deadline);
+    const helper: IStartupHelper = await spawnDetachedAsync(options, deadline, abandonedHelper);
     const { child } = helper;
     backoffMs = 50;
     while (Date.now() < deadline) {
@@ -229,24 +235,37 @@ async function startDaemonAsync(
 /**
  * Holding the start mutex, waits until no startup reservation remains. The helper releases its reservation once
  * the daemon completes hello/ping, and this client resolves it on the same evidence, so a daemon that became
- * ready after its helper stopped waiting is still used. Another launch is refused while the reservation remains:
- * at once when its helper exited, since nothing else will release it, and otherwise at the deadline.
+ * ready after its helper stopped waiting is still used. Once the helper is provably gone, nothing else will
+ * release the reservation: this client refuses another launch at once until the reservation's relaunch time, and
+ * then takes the reservation over as soon as nothing listens at the endpoint. Otherwise another launch is refused
+ * at the deadline.
+ * @returns the helper of a reservation that this client took over, if any.
  */
 async function waitForStartupReservationAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
-): Promise<void> {
+): Promise<IDaemonStartupHelper | undefined> {
   while (true) {
     options.abortSignal?.throwIfAborted();
     const reservation: IDaemonStartupReservation | undefined = readDaemonStartupReservation(options.paths);
-    if (!reservation) return;
+    if (!reservation) return undefined;
     if (await tryResolveForReadyDaemonAsync(options, deadline)) continue;
+    if (await tryTakeOverAbandonedStartupReservationAsync(options.paths, reservation))
+      return reservation.helper;
     const helperState: DaemonStartupHelperState = getStartupHelperState(reservation);
-    if (helperState === 'exited' || Date.now() >= deadline) {
-      // The helper may have released its reservation just before it exited.
+    const now: number = Date.now();
+    const relaunchTime: number | undefined =
+      helperState === 'exited' ? getStartupRelaunchTime(reservation.helper!) : undefined;
+    const pendingRelaunchTime: number | undefined =
+      relaunchTime !== undefined && now < relaunchTime ? relaunchTime : undefined;
+    if (now >= deadline || pendingRelaunchTime !== undefined) {
+      // The helper may have released its reservation just before it exited or before the deadline.
       const current: IDaemonStartupReservation | undefined = readDaemonStartupReservation(options.paths);
       if (!current || current.contents !== reservation.contents) continue;
-      throw startupError(options, describeUnresolvedReservation(options.paths, reservation, helperState));
+      throw startupError(
+        options,
+        describeUnresolvedReservation(options.paths, reservation, helperState, pendingRelaunchTime)
+      );
     }
     await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
       signal: options.abortSignal
@@ -279,16 +298,20 @@ async function tryResolveForReadyDaemonAsync(
   }
 }
 
+/** `pendingRelaunchTime` is the relaunch time of a helper that exited, while that time has not passed yet. */
 function describeUnresolvedReservation(
   paths: IDaemonPaths,
   reservation: IDaemonStartupReservation,
-  helperState: DaemonStartupHelperState
+  helperState: DaemonStartupHelperState,
+  pendingRelaunchTime: number | undefined
 ): string {
   const prefix: string = `has an unresolved startup handoff at ${getDaemonStartupFilePath(paths)}`;
   const helperPid: number | undefined = reservation.helper?.pid;
   switch (helperState) {
     case 'exited':
-      return `${prefix}: its startup helper (PID ${helperPid}) exited before the daemon became ready; refusing another launch. ${DAEMON_RESET_HINT}`;
+      return pendingRelaunchTime !== undefined
+        ? `${prefix}: its startup helper (PID ${helperPid}) exited before the daemon became ready; refusing another launch until ${new Date(pendingRelaunchTime).toISOString()}, so that a daemon that cannot start is not launched by every command.`
+        : `${prefix}: its startup helper (PID ${helperPid}) exited before the daemon became ready, but a process still accepts connections at ${paths.socketPath}; refusing another launch. ${DAEMON_RESET_HINT}`;
     case 'running':
       return `${prefix}: its startup helper (PID ${helperPid}) is still waiting for the daemon to become ready; refusing another launch`;
     default:
@@ -604,7 +627,8 @@ async function waitForPreviousDaemonAsync(
 
 async function spawnDetachedAsync(
   options: IConnectOrStartDaemonOptions,
-  deadline: number
+  deadline: number,
+  abandonedHelper: IDaemonStartupHelper | undefined
 ): Promise<IStartupHelper> {
   const start: IDaemonStartCommand = {
     ...options.startCommand!,
@@ -632,6 +656,14 @@ async function spawnDetachedAsync(
         throw new DaemonClientError('startupFailed', `Launcher log is owned by another user: ${logFilePath}`);
       }
       fs.fchmodSync(logFd, 0o600);
+    }
+    if (abandonedHelper) {
+      fs.writeSync(
+        logFd,
+        `${new Date().toISOString()} rush-client (PID ${process.pid}): took over the startup reservation of ` +
+          `startup helper PID ${abandonedHelper.pid} (started ${abandonedHelper.startedAt}), which exited ` +
+          'before the daemon became ready; starting the daemon again.\n'
+      );
     }
     let helper: IStartupHelper | undefined;
     try {

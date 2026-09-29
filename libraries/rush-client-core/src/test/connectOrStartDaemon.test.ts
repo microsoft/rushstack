@@ -8,6 +8,7 @@ import * as fs from 'node:fs';
 import * as net from 'node:net';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { performance } from 'node:perf_hooks';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { FileSystem } from '@rushstack/node-core-library';
@@ -28,13 +29,21 @@ import {
   connectToPlannedSuccessorAsync,
   requestDaemonShutdownAsync,
   resolveDaemonStartupReservationAsync,
-  type IConnectOrStartDaemonOptions
+  type IConnectOrStartDaemonOptions,
+  type IDaemonStartCommand
 } from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync, type IDaemonRestartNotice } from '../executeWithDaemonRestart';
 import { getDaemonStartupFilePath, releaseDaemonStartup, reserveDaemonStartup } from '../DaemonStartup';
 import { inspectDaemonStartupReservation } from '../DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
+
+/** How long after a launch a client may take over its reservation once the helper exited. */
+const RELAUNCH_DELAY_MS: number = 15000;
+
+function readIfPresent(filePath: string): string {
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+}
 
 describe('detached daemon startup', () => {
   let folder: string;
@@ -88,6 +97,8 @@ describe('detached daemon startup', () => {
       await Promise.all(pids.map((pid) => waitForTestProcessExitAsync(Number(pid))));
       expect(pids.every((pid) => fs.existsSync(path.join(folder, `stopped-${pid}`)))).toBe(true);
     }
+    // A test that expects a fixture daemon to fail checks and removes this record.
+    expect(readIfPresent(path.join(folder, 'failures'))).toBe('');
     if (fs.existsSync(path.join(folder, 'parents'))) {
       const parents = new Set(fs.readFileSync(path.join(folder, 'parents'), 'utf8').trim().split('\n'));
       await Promise.all([...parents].map((pid) => waitForTestProcessExitAsync(Number(pid))));
@@ -155,6 +166,89 @@ describe('detached daemon startup', () => {
     const contents: string = JSON.stringify({ token: randomUUID(), helperPid, helperStartedAt });
     fs.writeFileSync(getDaemonStartupFilePath(paths), contents);
     return contents;
+  }
+
+  /** Records the reservation's launch as one relaunch delay earlier, so that its relaunch time has passed. */
+  function ageReservation(): string {
+    const record: { helperStartedAt: string } = JSON.parse(
+      fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')
+    );
+    const helperStartedAt: string = new Date(
+      Date.parse(record.helperStartedAt) - RELAUNCH_DELAY_MS
+    ).toISOString();
+    const contents: string = JSON.stringify({ ...record, helperStartedAt });
+    fs.writeFileSync(getDaemonStartupFilePath(paths), contents);
+    return helperStartedAt;
+  }
+
+  function readTakeOverLines(): string[] {
+    return readIfPresent(getDaemonLogFilePath(paths))
+      .split('\n')
+      .filter((line) => line.includes('took over the startup reservation'));
+  }
+
+  /** Unlike waitForTestProcessExitAsync, a zombie does not count: until it is reaped, its PID looks alive. */
+  async function waitForProcessGoneAsync(pid: number): Promise<void> {
+    const deadline: number = Date.now() + 5000;
+    while (true) {
+      try {
+        process.kill(pid, 0);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ESRCH') return;
+        throw error;
+      }
+      if (Date.now() >= deadline) throw new Error(`Process ${pid} was not reaped in time.`);
+      await delayAsync(10);
+    }
+  }
+
+  async function waitForFileAsync(filePath: string): Promise<string> {
+    const deadline: number = Date.now() + 5000;
+    while (!fs.existsSync(filePath) && Date.now() < deadline) await delayAsync(20);
+    return fs.readFileSync(filePath, 'utf8');
+  }
+
+  /**
+   * Leaves a daemon held before it listens, whose startup helper was killed after its client gave up, and a
+   * reservation whose relaunch time has passed.
+   */
+  async function abandonStartupBeforeBindAsync(): Promise<{ daemonPid: number; helperPid: number }> {
+    fs.writeFileSync(path.join(folder, 'hold-prebind'), '');
+    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 1000 })).rejects.toThrow(
+      'timed out awaiting hello/ping readiness'
+    );
+    const daemonPid: number = Number(await waitForFileAsync(path.join(folder, 'prebind')));
+    const { helperPid } = JSON.parse(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8'));
+    expect(fs.readFileSync(path.join(folder, 'parents'), 'utf8')).toBe(`${helperPid}\n`);
+    // This test started the helper (through connectOrStartDaemonAsync), so it may signal that PID.
+    process.kill(helperPid, 'SIGKILL');
+    await waitForProcessGoneAsync(helperPid);
+    expect(inspectDaemonStartupReservation(paths)).toMatchObject({ helperPid, helperState: 'exited' });
+    ageReservation();
+    return { daemonPid, helperPid };
+  }
+
+  /** The start command of a second fixture daemon, which waits before it listens while "hold-prebind-b" exists. */
+  function getSecondDaemonOptions(): IConnectOrStartDaemonOptions {
+    const startCommand: IDaemonStartCommand = options.startCommand!;
+    return {
+      ...options,
+      startCommand: {
+        ...startCommand,
+        environment: { ...startCommand.environment, FIXTURE_HOLD_PREBIND: 'hold-prebind-b' }
+      }
+    };
+  }
+
+  /** Waits for the fixture daemon that lost the race for the endpoint to exit, and checks why it failed. */
+  async function expectLostEndpointRaceAsync(loserPid: number, winnerPid: number): Promise<void> {
+    await waitForTestProcessExitAsync(loserPid);
+    const failuresPath: string = path.join(folder, 'failures');
+    expect(readIfPresent(failuresPath)).toMatch(
+      new RegExp(`^${loserPid} (Daemon process ${winnerPid} still owns |A live daemon already listens at )`)
+    );
+    expect(readIfPresent(failuresPath).trim().split('\n')).toHaveLength(1);
+    fs.unlinkSync(failuresPath);
   }
 
   async function startFixtureDaemonAsync(): Promise<number> {
@@ -249,7 +343,7 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
 
-  it('refuses another launch at once when the startup helper exited without releasing its reservation', async () => {
+  it('refuses another launch at once after the startup helper exited, until the relaunch time', async () => {
     const startupPath: string = getDaemonStartupFilePath(paths);
     const failing: IConnectOrStartDaemonOptions = {
       ...options,
@@ -257,11 +351,13 @@ describe('detached daemon startup', () => {
     };
     await expect(connectOrStartDaemonAsync(failing)).rejects.toThrow('Unable to start');
     const contents: string = fs.readFileSync(startupPath, 'utf8');
-    const { helperPid } = JSON.parse(contents);
+    const { helperPid, helperStartedAt } = JSON.parse(contents);
+    const relaunchAfter: string = new Date(Date.parse(helperStartedAt) + RELAUNCH_DELAY_MS).toISOString();
     expect(inspectDaemonStartupReservation(paths)).toEqual({
       path: startupPath,
       helperPid,
-      helperState: 'exited'
+      helperState: 'exited',
+      relaunchAfter
     });
     const started: number = Date.now();
     const error: Error = await connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 20000 }).then(
@@ -270,13 +366,143 @@ describe('detached daemon startup', () => {
     );
     expect(Date.now() - started).toBeLessThan(3000);
     expect(error.message).toContain(
-      `unresolved startup handoff at ${startupPath}: its startup helper (PID ${helperPid}) exited before the daemon became ready; refusing another launch.`
+      `unresolved startup handoff at ${startupPath}: its startup helper (PID ${helperPid}) exited before the daemon became ready; refusing another launch until ${relaunchAfter}, so that a daemon that cannot start is not launched by every command.`
     );
-    expect(error.message).toContain('daemon stop --force');
     expect(error.message).not.toContain('..');
     expect(fs.readFileSync(startupPath, 'utf8')).toBe(contents);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    expect(readTakeOverLines()).toEqual([]);
+
+    // Once the relaunch time has passed, the next client takes the reservation over and starts the daemon.
+    const agedStartedAt: string = ageReservation();
+    const daemonPid: number = await startFixtureDaemonAsync();
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    const takeOvers: string[] = readTakeOverLines();
+    expect(takeOvers).toHaveLength(1);
+    expect(takeOvers[0]).toMatch(/^\d{4}-\d\d-\d\dT[\d:.]+Z rush-client /);
+    expect(takeOvers[0]).toContain(
+      `rush-client (PID ${process.pid}): took over the startup reservation of startup helper PID ${helperPid} (started ${agedStartedAt}), which exited before the daemon became ready; starting the daemon again.`
+    );
   });
+
+  it('refuses a relaunch while a process accepts connections at the endpoint', async () => {
+    const sockets: Set<net.Socket> = new Set();
+    // Accepts connections but never completes hello, like a daemon that listens but is not ready.
+    const server: net.Server = net.createServer((socket) => {
+      sockets.add(socket);
+      socket.on('close', () => sockets.delete(socket));
+    });
+    await new Promise<void>((resolve) => server.listen(paths.socketPath, resolve));
+    try {
+      const helperPid: number = await getExitedPidAsync();
+      const contents: string = writeReservation(
+        helperPid,
+        new Date(Date.now() - 2 * RELAUNCH_DELAY_MS).toISOString()
+      );
+      const started: number = Date.now();
+      const error: Error = await connectOrStartDaemonAsync({
+        ...options,
+        startupTimeoutMs: 1500,
+        timeoutMs: 200
+      }).then(
+        () => new Error('Expected startup to be refused.'),
+        (refusal: Error) => refusal
+      );
+      // It keeps checking until the deadline, since that process may still become ready.
+      expect(Date.now() - started).toBeGreaterThanOrEqual(1400);
+      expect(error.message).toContain(
+        `its startup helper (PID ${helperPid}) exited before the daemon became ready, but a process still accepts connections at ${paths.socketPath}; refusing another launch.`
+      );
+      expect(error.message).toContain('daemon stop --force');
+      expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+      expect(readTakeOverLines()).toEqual([]);
+    } finally {
+      for (const socket of sockets) socket.destroy();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
+
+  it('never takes over a reservation whose startup helper still runs, however old', async () => {
+    // Recorded when this process started, so the reservation names this process, which still runs.
+    const helperStartedAt: number = performance.timeOrigin;
+    const age: number = Date.now() - helperStartedAt;
+    if (age <= RELAUNCH_DELAY_MS + 1000) await delayAsync(RELAUNCH_DELAY_MS + 1000 - age);
+    const contents: string = writeReservation(process.pid, new Date(helperStartedAt).toISOString());
+    expect(inspectDaemonStartupReservation(paths)).toMatchObject({ helperState: 'running' });
+    await expect(connectOrStartDaemonAsync({ ...options, startupTimeoutMs: 500 })).rejects.toThrow(
+      `its startup helper (PID ${process.pid}) is still waiting for the daemon to become ready; refusing another launch`
+    );
+    expect(fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8')).toBe(contents);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    expect(readTakeOverLines()).toEqual([]);
+  }, 30000);
+
+  it('lets exactly one of several clients take over a reservation whose helper exited', async () => {
+    const helperPid: number = await getExitedPidAsync();
+    writeReservation(helperPid, new Date(Date.now() - 2 * RELAUNCH_DELAY_MS).toISOString());
+    const results = await Promise.all(Array.from({ length: 4 }, () => startClient().result));
+    expect(results).toEqual(Array.from({ length: 4 }, () => ({ code: 0, stderr: '' })));
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    const takeOvers: string[] = readTakeOverLines();
+    expect(takeOvers).toHaveLength(1);
+    expect(takeOvers[0]).toContain(`took over the startup reservation of startup helper PID ${helperPid} `);
+  }, 15000);
+
+  it('keeps one daemon when a relaunch outpaces the daemon of a killed startup helper', async () => {
+    const { daemonPid, helperPid } = await abandonStartupBeforeBindAsync();
+    const client: DaemonClient = await connectOrStartDaemonAsync(getSecondDaemonOptions());
+    let successorPid: number;
+    try {
+      successorPid = (await client.status).pid!;
+    } finally {
+      await client.closeAsync();
+    }
+    expect(successorPid).not.toBe(daemonPid);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n${successorPid}\n`);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+    expect(readTakeOverLines()).toHaveLength(1);
+    expect(readTakeOverLines()[0]).toContain(`startup helper PID ${helperPid} `);
+
+    // The first daemon finds the successor at the endpoint and exits.
+    fs.unlinkSync(path.join(folder, 'hold-prebind'));
+    await expectLostEndpointRaceAsync(daemonPid, successorPid);
+    const next: DaemonClient = await connectOrStartDaemonAsync(options);
+    try {
+      expect((await next.status).pid).toBe(successorPid);
+    } finally {
+      await next.closeAsync();
+    }
+  }, 20000);
+
+  it('keeps one daemon when the daemon of a killed startup helper outpaces the relaunch', async () => {
+    const { daemonPid } = await abandonStartupBeforeBindAsync();
+    fs.writeFileSync(path.join(folder, 'hold-prebind-b'), '');
+    const relaunch: Promise<DaemonClient> = connectOrStartDaemonAsync(getSecondDaemonOptions());
+    const successorPid: number = Number(await waitForFileAsync(path.join(folder, 'prebind-b')));
+    expect(successorPid).not.toBe(daemonPid);
+
+    // The first daemon publishes the endpoint first, so the relaunch's helper finds it ready.
+    fs.unlinkSync(path.join(folder, 'hold-prebind'));
+    const client: DaemonClient = await relaunch;
+    try {
+      expect((await client.status).pid).toBe(daemonPid);
+    } finally {
+      await client.closeAsync();
+    }
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+
+    fs.unlinkSync(path.join(folder, 'hold-prebind-b'));
+    await expectLostEndpointRaceAsync(successorPid, daemonPid);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n${successorPid}\n`);
+    const next: DaemonClient = await connectOrStartDaemonAsync(options);
+    try {
+      expect((await next.status).pid).toBe(daemonPid);
+    } finally {
+      await next.closeAsync();
+    }
+  }, 20000);
 
   it.each(['legacy', 'exited helper', 'no auto-start'])(
     'uses and resolves a ready daemon next to a retained startup reservation (%s)',
@@ -430,11 +656,13 @@ describe('detached daemon startup', () => {
       helperState: 'running'
     });
     const exitedPid: number = await getExitedPidAsync();
-    writeReservation(exitedPid);
+    const helperStartedAt: Date = new Date();
+    writeReservation(exitedPid, helperStartedAt.toISOString());
     expect(inspectDaemonStartupReservation(paths)).toEqual({
       path: startupPath,
       helperPid: exitedPid,
-      helperState: 'exited'
+      helperState: 'exited',
+      relaunchAfter: new Date(helperStartedAt.getTime() + RELAUNCH_DELAY_MS).toISOString()
     });
     if (process.platform === 'linux') {
       // This process started after the recorded helper, so it merely reuses the PID.

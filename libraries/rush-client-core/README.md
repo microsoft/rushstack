@@ -86,8 +86,8 @@ at least 120 seconds, even when the requesting client's own deadline is shorter,
 first start (for example while Windows scans newly installed files) is still handed off to
 later clients instead of leaving an abandoned reservation. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
-is killed. While holding the mutex with no startup reservation, stale leftovers are
-reclaimed only when provably safe: a socket without an ownership record, or a corrupt
+is killed. While holding the mutex with no startup reservation (or after taking over an
+abandoned one, see below), stale leftovers are reclaimed only when provably safe: a socket without an ownership record, or a corrupt
 record, once a connection attempt is refused (no listener exists); and, on Linux, a
 record whose PID now belongs to a process that started after the record's `startedAt`
 (PID reuse, detected from `/proc`). Any other live PID with an unreachable socket fails
@@ -96,14 +96,23 @@ which removes the record, socket and reservation after the same no-listener/no-l
 The helper uses a stable tool cwd, and the starting client awaits its exit after
 readiness. The explicit launcher's cwd is unchanged.
 
-An unresolved startup reservation is never automatically reclaimed based on PID
-liveness or elapsed time. If the helper cannot establish readiness, subsequent starts
-fail closed instead of risking a second detached daemon. Only a known spawn failure
-(no executable started) releases the reservation immediately. An arbitrary launcher
-can spawn descendants, so its exit is not proof that another launch is safe.
-Recovery of an abandoned reservation requires operator confirmation that the original
-startup cannot still publish an endpoint; normal successful startup releases it
-automatically. Cancellation stops the client waiting, not the detached handoff.
+While its helper runs, a startup reservation is never taken over, however long startup
+takes. Only a known spawn failure (no executable started) releases the reservation
+immediately. If the helper cannot establish readiness (its launcher exited, or it timed
+out), it exits and leaves the reservation. An arbitrary launcher can spawn descendants, so
+neither exit proves that no daemon can still publish an endpoint. A reservation whose helper
+is provably gone is therefore taken over only once its relaunch time has passed (15 seconds
+after the helper was launched) and while nothing listens at the endpoint; the starting client
+logs that it took the reservation over and launches the daemon again. This is safe even if a
+daemon of the gone helper is still starting: a daemon listens before it publishes the endpoint,
+publishes it only with link(2) (or as the first instance of a named pipe), and reclaims it
+only from a dead owner that does not accept a connection. So of two such daemons, the one
+that publishes second finds the other and exits, and the readiness of either releases the new
+reservation. Before the relaunch time, clients refuse another launch at once, so that a
+daemon that fails the same way each time (for example because of a configuration error) is
+not launched by every client, and their callers can run without it. Normal successful startup
+releases the reservation automatically. Cancellation stops the client waiting, not the
+detached handoff.
 
 A client resolves a reservation on the same evidence the helper waits for, so a daemon
 that became ready after its helper stopped waiting (for example a first start slower than
@@ -114,8 +123,11 @@ Reservations written by older clients, without a helper, are resolved the same w
 The recorded helper decides how long a refused launch waits: while it is alive, a starting
 client waits for it until the client's own deadline; once it is provably gone (its PID
 no longer exists or was reused), nothing else can release the reservation, so clients
-refuse another launch at once. `inspectDaemonStartupReservation(paths)` reports the
-reservation and its helper's state without changing it (`rush-client daemon status`), and
+refuse another launch at once until the relaunch time, and then take the reservation over
+as described above (while something listens at the endpoint, they wait for it until their
+deadline instead). `inspectDaemonStartupReservation(paths)` reports the reservation, its
+helper's state and, once the helper exited, the relaunch time (`relaunchAfter`) without
+changing it (`rush-client daemon status`), and
 `requestDaemonShutdownAsync()` resolves a reservation for the attested daemon before it
 sends shutdown, so that its successor can start. `resolveDaemonStartupReservationAsync(client,
 paths)` does the same for a caller that stops the daemon without replacing it (`rush-client

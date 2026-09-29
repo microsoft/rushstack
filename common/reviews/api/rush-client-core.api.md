@@ -171,6 +171,7 @@ export interface IDaemonStartupReservationInfo {
     readonly helperPid?: number;
     readonly helperState: DaemonStartupHelperState;
     readonly path: string;
+    readonly relaunchAfter?: string;
 }
 
 // @beta

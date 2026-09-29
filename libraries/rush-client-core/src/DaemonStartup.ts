@@ -153,9 +153,9 @@ function isNotFound(error: unknown): boolean {
 /**
  * Runs independently of the requesting client. Once spawn succeeds, only protocol readiness releases
  * the reservation: an arbitrary launcher may outlive its parent or spawn descendants.
- * Failure before readiness deliberately leaves a durable reservation instead of guessing that a PID is safe.
- * The reservation records this helper, so once it exits, later clients report the retained reservation at once
- * instead of waiting for a release that cannot happen.
+ * Failure before readiness deliberately leaves the reservation instead of guessing that a PID is safe.
+ * The reservation records this helper, so once it exits, the next client that starts the daemon takes the
+ * reservation over instead of waiting for a release that cannot happen.
  */
 export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Promise<void> {
   const { paths, startCommand: start, token, timeoutMs } = options;
@@ -183,6 +183,10 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
   const deadline: number = Date.now() + timeoutMs;
   let backoffMs: number = 50;
   while (Date.now() < deadline) {
+    // Sampled before connecting: a launcher can exit because another daemon published this endpoint first (for
+    // example one that an abandoned reservation's helper launched before a client took the reservation over).
+    // That daemon already listens by then, so the attempt below finds it.
+    const launcherExited: boolean = child.exitCode !== null || child.signalCode !== null;
     let client: DaemonClient | undefined;
     try {
       client = await DaemonClient.connectAsync({
@@ -209,7 +213,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
       }
       return;
     }
-    if (child.exitCode !== null || child.signalCode !== null) {
+    if (launcherExited) {
       await closed;
       throw new DaemonClientError(
         'startupFailed',

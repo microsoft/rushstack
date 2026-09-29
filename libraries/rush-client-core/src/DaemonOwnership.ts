@@ -94,9 +94,10 @@ export function isOwnerProcessAlive(owner: { readonly pid: number; readonly star
 }
 
 /**
- * Makes stale ownership reclaimable when that is provably safe. The caller must hold the start mutex and
- * have observed no startup reservation, so no legitimate daemon can be between bind and record publication;
- * a refused connection then proves no listener exists.
+ * Makes stale ownership reclaimable when that is provably safe. The caller must hold the start mutex and have
+ * observed no startup reservation, or taken over one whose helper is gone. A daemon publishes its endpoint only
+ * after it listens, so a refused connection then proves no listener exists. A daemon that a gone helper
+ * launched may still publish later; of two daemons that publish, the second finds the first and exits.
  */
 export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promise<void> {
   const state: OwnershipState = inspectOwnership(paths.lockfilePath);

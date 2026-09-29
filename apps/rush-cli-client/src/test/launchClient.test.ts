@@ -400,16 +400,18 @@ describe('standalone rushx fallback', () => {
         await once(exited, 'close');
         helperPid = exited.pid!;
       }
+      const helperStartedAt: Date = new Date();
       fs.writeFileSync(
         reservation,
-        JSON.stringify({ token: 'fixture', helperPid, helperStartedAt: new Date().toISOString() })
+        JSON.stringify({ token: 'fixture', helperPid, helperStartedAt: helperStartedAt.toISOString() })
       );
+      const relaunchAfter: string = new Date(helperStartedAt.getTime() + 15000).toISOString();
       const status: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
       expect(status).toMatchObject({ code: 1, stdout: '' });
       expect(status.stderr).toContain('Could not connect to daemon');
       expect(status.stderr).toContain(
         helperState === 'exited'
-          ? `its startup helper (PID ${helperPid}) exited before the daemon became ready, so the reservation refuses every automatic start unless that daemon still becomes ready. Check "rush-client daemon logs"; if the daemon failed to start, run "rush-client daemon stop --force" to remove it.`
+          ? `its startup helper (PID ${helperPid}) exited before the daemon became ready. A command that starts the daemon after ${relaunchAfter} takes the reservation over and launches the daemon again, provided that nothing listens at ${paths.socketPath} then. "rush-client daemon logs" may show why the daemon did not become ready.`
           : `A daemon is starting: its startup helper (PID ${helperPid}) is still waiting for it to become ready; retry shortly.`
       );
       const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop']);
@@ -417,7 +419,12 @@ describe('standalone rushx fallback', () => {
       expect(JSON.parse(stopped.stdout)).toEqual({
         state: 'notRunning',
         socketPath: paths.socketPath,
-        startupReservation: { path: reservation, helperPid, helperState }
+        startupReservation: {
+          path: reservation,
+          helperPid,
+          helperState,
+          ...(helperState === 'exited' ? { relaunchAfter } : {})
+        }
       });
       const reset: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
       expect(reset).toMatchObject({ code: 0, stderr: '' });

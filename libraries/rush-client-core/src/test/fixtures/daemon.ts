@@ -24,6 +24,8 @@ async function mainAsync(): Promise<void> {
   const daemonVersion: string = process.argv[3] ?? 'fixture';
   const mode: string | undefined = process.argv[4];
   const restartMode: string | undefined = mode?.startsWith('restart-') ? mode : undefined;
+  // While this file exists, the daemon waits before it listens. It writes its PID to the file named without "hold-".
+  const holdPrebindName: string = process.env.FIXTURE_HOLD_PREBIND ?? 'hold-prebind';
   const connections: Set<DaemonFrameConnection> = new Set();
   let closing: Promise<void> | undefined;
   let heldRequest: { connection: DaemonFrameConnection; requestId: string } | undefined;
@@ -37,11 +39,11 @@ async function mainAsync(): Promise<void> {
   fs.writeFileSync(path.join(folder, 'runtime-base'), process.env.RUSHD_RUNTIME_DIR ?? '(unset)');
   process.stdout.write('launcher stdout\n');
   process.stderr.write('launcher stderr\n');
-  if (fs.existsSync(path.join(folder, 'hold-prebind'))) {
+  if (fs.existsSync(path.join(folder, holdPrebindName))) {
     const marker: string = path.join(folder, `prebind-${process.pid}.tmp`);
     fs.writeFileSync(marker, String(process.pid));
-    fs.renameSync(marker, path.join(folder, 'prebind'));
-    while (fs.existsSync(path.join(folder, 'hold-prebind'))) {
+    fs.renameSync(marker, path.join(folder, holdPrebindName.replace(/^hold-/, '')));
+    while (fs.existsSync(path.join(folder, holdPrebindName))) {
       if (fs.existsSync(path.join(folder, 'stop'))) {
         fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
         return;
@@ -241,6 +243,10 @@ function readNumber(folder: string, name: string, defaultValue: number): number 
 }
 
 mainAsync().catch((error: Error) => {
+  // For example, the daemon found another one at the endpoint. The test expects this exit, so it counts as stopped.
+  const folder: string = path.dirname((JSON.parse(process.argv[2]) as IDaemonPaths).lockfilePath);
+  fs.appendFileSync(path.join(folder, 'failures'), `${process.pid} ${error.message}\n`);
+  fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
   process.stderr.write(`${error.stack}\n`);
   process.exitCode = 1;
 });

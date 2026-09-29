@@ -294,7 +294,10 @@ describe('connectOrAwaitDaemonStartupAsync', () => {
       (error: unknown) => error
     );
     expect(refusal).toBeInstanceOf(DaemonClientError);
-    expect((refusal as Error).message).toContain('exited before the daemon became ready');
+    // Until the relaunch time, the refusal is at once, so that the caller can run without the daemon.
+    expect((refusal as Error).message).toContain(
+      'exited before the daemon became ready; refusing another launch until '
+    );
     expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs!);
     expect(onAwaitStartup).not.toHaveBeenCalled();
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
