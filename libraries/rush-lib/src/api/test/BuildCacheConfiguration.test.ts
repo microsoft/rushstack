@@ -94,9 +94,37 @@ describe(BuildCacheConfiguration.name, () => {
       tryLoadAzureConfigurationAsync({
         storageAccountName: 'example',
         storageContainerName: 'build-cache',
-        storageEndpoint: '127.0.0.1 port 10000'
+        storageEndpoint: 'http://127.0.0.1 port 10000'
       })
     ).rejects.toThrow(/#\/azureBlobStorageConfiguration\/storageEndpoint\s+must match format "uri"/);
     expect(factory).not.toHaveBeenCalled();
+  });
+
+  it('rejects a storageEndpoint without an http or https scheme', async () => {
+    // "localhost:" parses as a URI scheme, so only the pattern catches this common mistake.
+    await expect(
+      tryLoadAzureConfigurationAsync({
+        storageAccountName: 'example',
+        storageContainerName: 'build-cache',
+        storageEndpoint: 'localhost:10000/devstoreaccount1'
+      })
+    ).rejects.toThrow(
+      /#\/azureBlobStorageConfiguration\/storageEndpoint\s+must match pattern "\^\[Hh\]\[Tt\]\[Tt\]\[Pp\]\[Ss\]\?:\/\/"/
+    );
+    expect(factory).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { kind: 'an https storageEndpoint', storageEndpoint: 'https://my-proxy.example.com/devstoreaccount1' },
+    // URI schemes are case-insensitive, and Rush accepted this before the pattern existed.
+    { kind: 'a storageEndpoint with an uppercase scheme', storageEndpoint: 'HTTP://127.0.0.1:10000/x' }
+  ])('accepts $kind', async ({ storageEndpoint }: { storageEndpoint: string }) => {
+    await tryLoadAzureConfigurationAsync({
+      storageAccountName: 'example',
+      storageContainerName: 'build-cache',
+      storageEndpoint
+    });
+    expect(factory).toHaveBeenCalledTimes(1);
+    expect(factory.mock.calls[0][0]).toMatchObject({ azureBlobStorageConfiguration: { storageEndpoint } });
   });
 });

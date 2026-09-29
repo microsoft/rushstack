@@ -73,8 +73,9 @@
             },
             "storageEndpoint": {
               "type": "string",
-              "description": "An optional custom endpoint URL for the Azure Blob Storage account. Use this to connect to Azurite, private endpoints, or storage emulators. When specified, this overrides the default endpoint derived from storageAccountName. Example: \"http://127.0.0.1:10000/devstoreaccount1\" or \"https://my-proxy.example.com/devstoreaccount1\"",
-              "format": "uri"
+              "description": "An optional custom endpoint URL for the Azure Blob Storage account. Use this to connect to Azurite, private endpoints, or storage emulators. When specified, this overrides the default endpoint derived from storageAccountName. The URL must start with \"http://\" or \"https://\". A credential saved by \"rush update-cloud-credentials\" is used only with the endpoint that it was saved for. An Azure login (\"rush update-cloud-credentials --interactive\") needs an \"https://\" endpoint. For an \"http://\" endpoint, such as Azurite, provide a SAS token with \"rush update-cloud-credentials --credential\" or the RUSH_BUILD_CACHE_CREDENTIAL environment variable, or read without a credential. Example: \"http://127.0.0.1:10000/devstoreaccount1\" or \"https://my-proxy.example.com/devstoreaccount1\"",
+              "format": "uri",
+              "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://"
             },
             "loginFlow": {
               "$ref": "#/definitions/entraLoginFlow"

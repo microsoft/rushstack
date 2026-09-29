@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import { BlobServiceClient, type BlockBlobClient, type ContainerClient } from '@azure/storage-blob';
 
 import { CredentialCache, type ICredentialCacheEntry } from '@rushstack/credential-cache';
@@ -64,6 +68,78 @@ describe(AzureStorageBuildCacheProvider.name, () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((subject as any)._storageAccountUrl).toBe('https://my-proxy.example.com/devstoreaccount1/');
+    });
+  });
+
+  describe('a saved credential', () => {
+    const EMULATOR_ENDPOINT: string = 'http://127.0.0.1:10000/devstoreaccount1';
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+    let cacheFolder: string;
+
+    beforeEach(() => {
+      cacheFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'azure-storage-credentials-'));
+      const usingAsync: typeof CredentialCache.usingAsync = CredentialCache.usingAsync.bind(CredentialCache);
+      jest
+        .spyOn(CredentialCache, 'usingAsync')
+        .mockImplementation((options, doActionAsync) =>
+          usingAsync({ ...options, cacheFilePath: `${cacheFolder}/credentials.json` }, doActionAsync)
+        );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      fs.rmSync(cacheFolder, { recursive: true, force: true });
+    });
+
+    function createProvider(storageEndpoint?: string): AzureStorageBuildCacheProvider {
+      return new AzureStorageBuildCacheProvider({
+        storageAccountName: 'storage-account',
+        storageContainerName: 'container-name',
+        storageEndpoint,
+        isCacheWriteAllowed: true
+      });
+    }
+
+    async function tryGetSavedCredentialAsync(storageEndpoint?: string): Promise<string | undefined> {
+      return (await createProvider(storageEndpoint).tryGetCachedCredentialAsync())?.credential;
+    }
+
+    it('is used only with the endpoint that it was saved for', async () => {
+      await createProvider().updateCachedCredentialAsync(terminal, 'account-sas');
+      expect(await tryGetSavedCredentialAsync()).toBe('account-sas');
+      expect(await tryGetSavedCredentialAsync(EMULATOR_ENDPOINT)).toBeUndefined();
+
+      await createProvider(EMULATOR_ENDPOINT).updateCachedCredentialAsync(terminal, 'emulator-sas');
+      expect(await tryGetSavedCredentialAsync(EMULATOR_ENDPOINT)).toBe('emulator-sas');
+      expect(await tryGetSavedCredentialAsync(`${EMULATOR_ENDPOINT}/`)).toBe('emulator-sas');
+      expect(await tryGetSavedCredentialAsync('https://proxy.example.com/devstoreaccount1')).toBeUndefined();
+      expect(await tryGetSavedCredentialAsync()).toBe('account-sas');
+
+      const savedJson: { cacheEntries: Record<string, unknown> } = JSON.parse(
+        fs.readFileSync(`${cacheFolder}/credentials.json`, 'utf8')
+      );
+      expect(Object.keys(savedJson.cacheEntries).sort()).toEqual([
+        'azure-blob-storage|AzurePublicCloud|storage-account|container-name|cacheWriteAllowed',
+        `azure-blob-storage|AzurePublicCloud|storage-account|container-name|${EMULATOR_ENDPOINT}/|cacheWriteAllowed`
+      ]);
+    });
+
+    it("is shared with a storageEndpoint that names the account's default endpoint", async () => {
+      await createProvider().updateCachedCredentialAsync(terminal, 'account-sas');
+      expect(await tryGetSavedCredentialAsync('https://storage-account.blob.core.windows.net')).toBe(
+        'account-sas'
+      );
+      expect(await tryGetSavedCredentialAsync('https://storage-account.blob.core.windows.net/')).toBe(
+        'account-sas'
+      );
+    });
+
+    it('is deleted only for the configured endpoint', async () => {
+      await createProvider().updateCachedCredentialAsync(terminal, 'account-sas');
+      await createProvider(EMULATOR_ENDPOINT).updateCachedCredentialAsync(terminal, 'emulator-sas');
+      await createProvider(EMULATOR_ENDPOINT).deleteCachedCredentialsAsync(terminal);
+      expect(await tryGetSavedCredentialAsync(EMULATOR_ENDPOINT)).toBeUndefined();
+      expect(await tryGetSavedCredentialAsync()).toBe('account-sas');
     });
   });
 
