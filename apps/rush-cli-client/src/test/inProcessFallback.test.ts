@@ -18,6 +18,12 @@ describe(formatInProcessFallbackMessage.name, () => {
     );
   });
 
+  it('starts with the given client name', () => {
+    expect(
+      formatInProcessFallbackMessage('the daemon does not run scripts in a terminal', 'rushx-client')
+    ).toBe('rushx-client: the daemon does not run scripts in a terminal; using in-process Rush.\n');
+  });
+
   it('gives the first line of a multi-line reason on the fallback line and the other lines as details', () => {
     expect(
       formatInProcessFallbackMessage(

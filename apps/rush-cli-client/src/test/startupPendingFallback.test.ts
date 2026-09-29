@@ -64,7 +64,7 @@ describe('a daemon startup failure', () => {
     await expect(launchClientAsync(false)).rejects.toThrow('Another client is still starting the daemon.');
     expect(connectOrAwaitDaemonStartupAsync).toHaveBeenCalledTimes(1);
     expect(process.argv).toEqual([process.execPath, 'rush-client', 'build', '--to', 'project']);
-    expect(output).not.toHaveBeenCalledWith(expect.stringContaining('Using in-process Rush'));
+    expect(output).not.toHaveBeenCalledWith(expect.stringContaining('using in-process Rush'));
   });
 
   it('says why it keeps waiting for a daemon that is still starting', async () => {
@@ -103,7 +103,7 @@ describe('a daemon startup failure', () => {
     );
     expect(process.argv.slice(2)).toEqual(['build', '--to', 'project']);
     expect(output).toHaveBeenCalledWith(
-      'rush-client: No ready daemon; auto-start is disabled. Using in-process Rush.\n'
+      'rush-client: No ready daemon; auto-start is disabled; using in-process Rush.\n'
     );
   });
 });

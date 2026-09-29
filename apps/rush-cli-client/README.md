@@ -37,13 +37,32 @@ reporter behavior without duplicating or relocating bootstrap code.
 
 Routing precedence:
 
-1. `--no-daemon` before `--`, help, never-daemonize commands, and Rushx with any TTY stdio stay in-process.
+1. `--no-daemon` before `--`, help, never-daemonize commands, an option before the command other than
+   `--quiet`/`-q` (such as `--debug`), and Rushx with any TTY stdio stay in-process. `--quiet` and `-q` only hide
+   native Rush's startup banner, which a daemon request never prints, so `rush -q build` is sent to the daemon
+   without them.
 2. CI stays in-process unless `RUSH_DAEMON=1` explicitly opts in, even if config enables the daemon.
 3. `RUSH_DAEMON` overrides `rush.json`'s `daemon.enabled`; the default is false.
 4. Auto-start is considered only after selecting daemon execution.
 
+A command that routing keeps in-process shows no progress line. It says why in one stderr line before native
+Rush starts, in agent mode (see [Output modes](#output-modes)) and, in legacy mode, when `RUSH_DAEMON=1` asked
+for the daemon. Rushx uses the `rushx-client:` prefix. `--no-daemon` and help print nothing. The lines are:
+
+- `rush-client: RUSH_LOG_LEVEL selects the native reporter; using in-process Rush.` The same line names
+  `RUSH_REPORTER=<value>`, `--reporter`, `--output`, `--log-level` or `useRushReporter in experiments.json`
+  (see below).
+- `rush-client: the daemon does not support "--debug"; using in-process Rush.`
+- `rush-client: the daemon does not run "check"; using in-process Rush.`
+- `rushx-client: the daemon does not run scripts in a terminal; using in-process Rush.`
+- `rush-client: RUSH_DAEMON=0 turns the daemon off; using in-process Rush.`
+- `rush-client: the daemon is not enabled for this repo; using in-process Rush.` To enable it, set `daemon.enabled`
+  to `true` in `rush.json`, or set `RUSH_DAEMON=1` in the environment.
+- `rush-client: CI is set, so the daemon is off unless RUSH_DAEMON=1; using in-process Rush.` The line names
+  the first CI marker that is set: `CI`, `TF_BUILD`, `GITHUB_ACTIONS`, `JENKINS_URL` or `TEAMCITY_VERSION`.
+
 When the selected daemon cannot be reached or started, an ordinary invocation prints the reason and runs
-in-process (`rush-client: <reason> Using in-process Rush.`). A startup failure while a live process can
+in-process (`rush-client: <reason>; using in-process Rush.`). A startup failure while a live process can
 still make the daemon ready is the exception: a process that listens at the endpoint but does not
 complete hello/ping in time, a startup helper that still waits for its daemon, or another client that
 holds the start mutex, as in a burst of clients that all find no daemon. In-process Rush would take the

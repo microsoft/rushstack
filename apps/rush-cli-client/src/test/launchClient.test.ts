@@ -175,8 +175,122 @@ describe('standalone rushx fallback', () => {
     const client: IInvocationResult = await invokeAsync(true, true, true);
     expect(client.code).toBe(native.code);
     expect(client.stdout).toBe(native.stdout);
-    expect(client).toEqual(native);
+    // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it (task 60).
+    expect(client).toEqual({
+      ...native,
+      stderr:
+        'rushx-client: the daemon does not run scripts in a terminal; using in-process Rush.\n' +
+        native.stderr
+    });
+    // rushx-client always uses legacy output, so an agent marker adds no line.
+    expect(await invokeAsync(true, false, true, undefined, { COPILOT_CLI: '1' })).toEqual(native);
   }, 15000);
+
+  it('says why a command runs in-process in agent mode, or when RUSH_DAEMON=1 asked for the daemon (task 60)', async () => {
+    const agent: IInvocationResult = await invokeAsync(true, false, false, ['-q', 'list'], {
+      COPILOT_CLI: '1'
+    });
+    expect(agent.code).toBe(0);
+    expect(agent.stderr).toBe('rush-client: RUSH_DAEMON=0 turns the daemon off; using in-process Rush.\n');
+    // In-process Rush got the quiet flag, and no progress line was written.
+    expect(agent.stdout).toContain('sample');
+    expect(agent.stdout).not.toMatch(/Rush Multi-Project Build Tool|rushd/);
+    const legacy: IInvocationResult = await invokeAsync(true, false, false, ['-q', 'list']);
+    expect(legacy).toEqual({ ...agent, stderr: '' });
+    const requested: IInvocationResult = await invokeAsync(true, true, false, ['-q', '--debug', 'list']);
+    expect(requested.code).toBe(0);
+    expect(requested.stderr).toBe(
+      'rush-client: the daemon does not support "--debug"; using in-process Rush.\n'
+    );
+    // In-process Rush got both flags: --debug lists the plugins that Rush loads.
+    expect(requested.stdout).toMatch(/^Loaded rush plugin[^]*\nsample\n$/);
+    expect(requested.stdout).not.toContain('Rush Multi-Project Build Tool');
+    expect(await invokeAsync(true, true, false, ['--no-daemon', '-q', 'list'])).toEqual(legacy);
+    expect((await invokeAsync(true, false, false, ['list'])).stdout).toContain(
+      'Rush Multi-Project Build Tool'
+    );
+  }, 30000);
+
+  it('keeps the quiet flag for in-process Rush after the daemon could not run the command (task 36)', async () => {
+    const unreachable: IInvocationResult = await invokeAsync(true, true, false, ['-q', 'list']);
+    expect(unreachable).toMatchObject({ code: 0, stdout: 'sample\n' });
+    expect(unreachable.stderr).toMatch(
+      /^rush-client: No ready daemon at .*; auto-start is disabled; using in-process Rush\.\n$/
+    );
+    const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+    host = await RushDaemonHost.startAsync({
+      repoRoot: folder,
+      rushVersion: Rush.version,
+      daemonVersion: daemonPackage.version
+    });
+    const sentBack: IInvocationResult = await invokeAsync(true, true, false, ['-q', 'list']);
+    expect(sentBack).toMatchObject({ code: 0, stdout: 'sample\n' });
+    expect(sentBack.stderr).toMatch(/^rush-client: .*; using in-process Rush\.\n$/);
+  }, 30000);
+
+  it('paints no progress line on a terminal for a command that runs in-process (task 60)', async () => {
+    const entry: string = path.resolve(__dirname, '../../bin/rush-client');
+    const invokeOnTerminalAsync = async (environment: NodeJS.ProcessEnv): Promise<IInvocationResult> => {
+      const child: ChildProcess = spawn(
+        process.execPath,
+        [
+          '-e',
+          `Object.assign(process.stdout, { isTTY: true, columns: 80 }); process.argv = [process.execPath, ${JSON.stringify(entry)}, '-q', 'list']; require(${JSON.stringify(entry)});`
+        ],
+        {
+          cwd: project,
+          env: {
+            ...getTestProcessEnvironment(),
+            COPILOT_CLI: '1',
+            TERM: 'xterm',
+            CI: 'false',
+            ...environment
+          },
+          stdio: ['ignore', 'pipe', 'pipe']
+        }
+      );
+      let stdout: string = '';
+      let stderr: string = '';
+      child.stdout!.on('data', (chunk: Buffer) => (stdout += chunk.toString()));
+      child.stderr!.on('data', (chunk: Buffer) => (stderr += chunk.toString()));
+      const closed: Promise<unknown[]> = once(child, 'close');
+      invocationClosures.push(closed);
+      const [code] = await closed;
+      return { code: typeof code === 'number' ? code : undefined, stdout, stderr };
+    };
+    for (const environment of [
+      { RUSH_DAEMON: '0' },
+      { RUSH_DAEMON: undefined },
+      { CI: '1', RUSH_DAEMON: undefined }
+    ]) {
+      const result: IInvocationResult = await invokeOnTerminalAsync(environment);
+      expect(result).toMatchObject({ code: 0, stdout: 'sample\n' });
+      expect(result.stderr).toContain('; using in-process Rush.');
+    }
+
+    // The early guess misses the escaped key and paints nothing; the line starts once routing chose the daemon.
+    const rushJsonPath: string = path.join(folder, 'rush.json');
+    const config: Record<string, unknown> = JSON.parse(fs.readFileSync(rushJsonPath, 'utf8'));
+    fs.writeFileSync(
+      rushJsonPath,
+      JSON.stringify({ ...config, daemon: { autoStart: false } }).replace(
+        '"daemon":{',
+        '"daemon":{"\\u0065nabled":true,'
+      )
+    );
+    const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+    host = await RushDaemonHost.startAsync({
+      repoRoot: folder,
+      rushVersion: Rush.version,
+      daemonVersion: daemonPackage.version
+    });
+    const routed: IInvocationResult = await invokeOnTerminalAsync({ RUSH_DAEMON: undefined });
+    expect(routed.code).toBe(0);
+    // Painted before the request was sent, so the line started when routing chose the daemon.
+    expect(routed.stdout).toContain('rush list · ');
+    expect(routed.stdout).toContain('connecting to rushd');
+    expect(routed.stdout).toMatch(/sample\n$/);
+  }, 30000);
 
   it('starts idempotently and reports real readiness in CI without execution opt-in', async () => {
     const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');

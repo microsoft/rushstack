@@ -227,6 +227,7 @@ export class AgentProgressRenderer {
   #frame: number = 0;
   #startingLineWritten: boolean = false;
   #sentLineWritten: boolean = false;
+  #started: boolean = false;
   #timer: ReturnType<typeof setInterval> | undefined;
   #connectingTimer: ReturnType<typeof setTimeout> | undefined;
   #statusTimer: ReturnType<typeof setTimeout> | undefined;
@@ -250,9 +251,14 @@ export class AgentProgressRenderer {
 
   /**
    * On a TTY, paints the first line and starts the spinner. On a pipe, starts the status lines, and writes the
-   * connecting line after 10 s unless the request was sent by then.
+   * connecting line after 10 s unless the request was sent by then. Does nothing if rendering already started or
+   * stopped.
    */
   public start(): void {
+    if (this.#started || this.#stopped) {
+      return;
+    }
+    this.#started = true;
     if (!this.#options.isTTY) {
       this.#connectingTimer = setTimeout(
         () => this.#writePipeLine(this.#rows()[0]),

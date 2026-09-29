@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AgentProgressRenderer } from './AgentProgressRenderer';
+import { isDaemonOffBeforeRouting } from './earlyRouting';
 import {
   findRushJsonPath,
   getAgentCommandName,
@@ -30,7 +31,10 @@ const agentRenderer: AgentProgressRenderer | undefined =
         startTimeMs
       })
     : undefined;
-agentRenderer?.start();
+// A command that runs in-process shows no progress. When routing sends it to the daemon, launchClient starts this.
+if (agentRenderer && !isDaemonOffBeforeRouting(process.env, rushJsonPath)) {
+  agentRenderer.start();
+}
 
 const { launchClientAsync } = require('./launchClient') as typeof import('./launchClient');
 

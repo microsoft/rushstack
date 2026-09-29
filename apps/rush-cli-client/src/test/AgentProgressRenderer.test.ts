@@ -1045,6 +1045,35 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
+    it('starts once, and not after it stopped (task 60)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      advance(clock, 5_000);
+      // The client starts it again once routing chose the daemon.
+      renderer.start();
+      advance(clock, 5_000);
+      advance(clock, 10_000);
+      expect(lines()).toEqual(['rush build · 10.0s · connecting to rushd (auto-starts if needed)']);
+      renderer.dispose();
+
+      for (const isTTY of [false, true]) {
+        const stopped: ITestRenderer = createRenderer(isTTY);
+        stopped.renderer.dispose();
+        stopped.renderer.start();
+        // A timer would keep the client alive after rendering stopped.
+        expect(jest.getTimerCount()).toBe(0);
+        advance(stopped.clock, 30_000);
+        expect(stopped.output).toEqual([]);
+      }
+
+      const tty: ITestRenderer = createRenderer(true);
+      tty.renderer.start();
+      const painted: number = tty.output.length;
+      tty.renderer.start();
+      expect(tty.output).toHaveLength(painted);
+      tty.renderer.dispose();
+    });
+
     it('writes one line when the client waits for a daemon that is still starting (task 95)', () => {
       const early: ITestRenderer = createRenderer(false);
       early.renderer.start();

@@ -53,6 +53,7 @@ describe(parseClientAdmissionControls.name, () => {
       })
     ).toEqual({
       argv: ['build', '--', '--wait-timeout=2'],
+      nativeArgv: ['build', '--', '--wait-timeout=2'],
       commandName: 'build',
       daemon: false,
       admission: { noWait: true }

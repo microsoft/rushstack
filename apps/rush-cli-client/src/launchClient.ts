@@ -36,7 +36,7 @@ import {
   isCancelledOutcome
 } from './clientCancellation';
 import { getDaemonConnectionOptionsAsync, getDaemonPaths } from './daemonConnectionOptions';
-import { readUseRushReporter } from './outputSelection';
+import { readUseRushReporter, selectClientOutputMode } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
 import { getTerminalColumns } from './terminalColumns';
@@ -67,13 +67,16 @@ export async function launchClientAsync(
     workspace?.daemon,
     environment
   );
+  const argv: ReadonlyArray<string> = process.argv.slice(2);
+  const useRushReporter: boolean = !rushx && !!rushJsonPath && readUseRushReporter(rushJsonPath);
+  const clientName: string = rushx ? 'rushx-client' : 'rush-client';
   const route: IClientRoute = selectClientRoute({
-    argv: process.argv.slice(2),
+    argv,
     environment,
     enabled: config.enabled,
     rushx,
     hasTerminal: !!(process.stdin.isTTY || process.stdout.isTTY || process.stderr.isTTY),
-    useRushReporter: !rushx && !!rushJsonPath && readUseRushReporter(rushJsonPath)
+    useRushReporter
   });
   const selectedVersion: string =
     environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? getBundledRushVersion();
@@ -97,9 +100,21 @@ export async function launchClientAsync(
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
     agentRenderer?.dispose();
-    await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
+    // Agent output says why a command runs in-process; legacy output, which rushx-client always uses, says so only
+    // when RUSH_DAEMON=1 asked for the daemon.
+    if (
+      route.inProcessReason !== undefined &&
+      rushJsonPath &&
+      (environment.RUSH_DAEMON === '1' ||
+        (!rushx && selectClientOutputMode({ argv, environment, useRushReporter }) === 'agent'))
+    ) {
+      process.stderr.write(formatInProcessFallbackMessage(route.inProcessReason, clientName));
+    }
+    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
     return;
   }
+  // start.ts skips the progress line when it guesses that the daemon is off; routing decides.
+  agentRenderer?.start();
   const terminal: ConsoleTerminalProvider = new ConsoleTerminalProvider();
   const verbosity: DaemonVerbosity =
     route.argv.includes('--verbose') || route.argv.includes('-v')
@@ -161,7 +176,7 @@ export async function launchClientAsync(
         }
         const seconds: number = Math.round(waitMs / 1000);
         process.stderr.write(
-          `rush-client: The daemon is not ready yet. ${owner}, so this command waits up to ${seconds} s ` +
+          `${clientName}: The daemon is not ready yet. ${owner}, so this command waits up to ${seconds} s ` +
             'more for it instead of running Rush in-process.\n'
         );
       }
@@ -173,8 +188,8 @@ export async function launchClientAsync(
     )
       throw error;
     agentRenderer?.dispose();
-    process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
-    await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
+    process.stderr.write(formatInProcessFallbackMessage(error.message, clientName));
+    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
     return;
   }
   const abort: AbortController = new AbortController();
@@ -321,8 +336,8 @@ export async function launchClientAsync(
     throw new Error(message);
   } else {
     agentRenderer?.dispose();
-    process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason));
-    await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
+    process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason, clientName));
+    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
   }
 }
 

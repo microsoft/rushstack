@@ -351,7 +351,7 @@ output folders are left out, because a plugin's CommonJS entry point doesn't loa
 version (`RUSH_PREVIEW_VERSION`, otherwise `rushVersion` in `rush.json`). Today both are the same, so the
 snapshot's engine is used. If a release bumps `apps/rush` and `libraries/rush-lib` without updating
 `rushVersion`, the client instead looks for a daemon-capable published release of the selected version.
-None exists, so every build falls back to native Rush, with a `rush-client: ... Using in-process Rush.`
+None exists, so every build falls back to native Rush, with a `rush-client: ...; using in-process Rush.`
 message (see [Confirm](#4-confirm-that-the-daemon-served-the-build)).
 
 To keep dogfooding in that state, select the snapshot's exact version for `rush-client` invocations only:

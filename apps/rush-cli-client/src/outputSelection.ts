@@ -6,6 +6,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { NEVER_DAEMONIZED_COMMANDS, QUIET_FLAGS } from './earlyRouting';
+
 /** Environment variable that selects the rush-client output mode: `agent` or `legacy`. */
 export const RUSHD_OUTPUT_ENV_VAR: 'RUSHD_OUTPUT' = 'RUSHD_OUTPUT';
 
@@ -37,7 +39,8 @@ export function isNativeReporterEnvironmentRequested(value: string | undefined):
 
 /**
  * Returns the command name for early agent output, or undefined when the invocation has no plain
- * command (a leading option, `--help`/`-h`, or `daemon`). Daemon admission controls (`--no-wait`,
+ * command that the daemon could run (a leading option other than `--quiet`/`-q`, `--help`/`-h`, or a command
+ * that always runs in-process, such as `daemon` or `check`). Daemon admission controls (`--no-wait`,
  * `--wait-timeout SECONDS`) are skipped like `parseClientAdmissionControls()`, which is not imported
  * here to avoid loading `@rushstack/rush-daemon-protocol` before the first line; invalid controls
  * are reported later by the full parser.
@@ -52,11 +55,11 @@ export function getAgentCommandName(argv: ReadonlyArray<string>): string | undef
       remaining.push(arg);
     }
   }
-  const commandName: string | undefined = remaining[0];
+  const commandName: string | undefined = remaining.find((arg) => !QUIET_FLAGS.has(arg));
   if (
     commandName === undefined ||
     commandName.startsWith('-') ||
-    commandName === 'daemon' ||
+    NEVER_DAEMONIZED_COMMANDS.has(commandName) ||
     remaining.includes('--help') ||
     remaining.includes('-h')
   ) {
