@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "The tests that compare rushx-client with native Rushx no longer fail when the test's daemon answers the client's first connection late, on a loaded host.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

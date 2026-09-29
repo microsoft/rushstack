@@ -34,6 +34,15 @@ export interface IRequestResult extends IScriptResult {
   readonly outcome: DaemonClientOutcome;
 }
 
+/** Matches the notice a client prints when a daemon listens but misses its hello/ping budget. */
+function createReadinessNoticePattern(socketPath: string): RegExp {
+  const escapedSocketPath: string = socketPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(
+    `^rushx?-client: The daemon is not ready yet\\. A process listens at ${escapedSocketPath} but was not ` +
+      'ready in time, so this command waits up to \\d+ s more for it instead of running Rush in-process\\.$'
+  );
+}
+
 export class RushXDaemonTestFixture implements AsyncDisposable {
   public readonly folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushx-daemon-'));
   public readonly home: string = path.join(this.folder, 'home');
@@ -41,6 +50,9 @@ export class RushXDaemonTestFixture implements AsyncDisposable {
   public readonly errors: Error[] = [];
   public host!: RushDaemonHost;
   public session!: WorkspaceSession;
+  /** The number of readiness notices that {@link RushXDaemonTestFixture.invokeAsync} removed. */
+  public readinessNotices: number = 0;
+  #nextConnectionDelayMs: number = 0;
 
   public constructor(hooks: boolean = false, pnpmSync: boolean = false) {
     this.write(
@@ -143,6 +155,11 @@ setInterval(() => {}, 1000);
       onError: (error) => {
         this.errors.push(error);
       },
+      onInteractiveConnection: () => {
+        const delayMs: number = this.#nextConnectionDelayMs;
+        this.#nextConnectionDelayMs = 0;
+        if (delayMs > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
+      },
       createWorkspaceSessionAsync: async (options) => {
         this.session = await WorkspaceSession.createAsync(options);
         return this.session;
@@ -154,6 +171,14 @@ setInterval(() => {}, 1000);
     const fullPath: string = path.join(this.folder, filename);
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, content);
+  }
+
+  /**
+   * Blocks the daemon's event loop (this test process) for `delayMs` as the next client connects, as a loaded
+   * host can, so that client's hello/ping answer arrives late.
+   */
+  public delayNextConnection(delayMs: number): void {
+    this.#nextConnectionDelayMs = delayMs;
   }
 
   public environment(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
@@ -251,10 +276,23 @@ setInterval(() => {}, 1000);
         resolve({
           exitCode: exitCode ?? undefined,
           stdout: Buffer.concat(stdout),
-          stderr: Buffer.concat(stderr)
+          stderr: native ? Buffer.concat(stderr) : this.#removeReadinessNotice(Buffer.concat(stderr))
         })
       );
     });
+  }
+
+  /**
+   * This daemon runs in the test process, so on a loaded host it can miss a client's 1 s hello/ping budget. The
+   * client then prints a notice as its first line of stderr and waits for the daemon. The notice isn't output of
+   * the command, so this removes it before the comparison with native Rushx. Any other difference still fails.
+   */
+  #removeReadinessNotice(stderr: Buffer): Buffer {
+    const end: number = stderr.indexOf('\n');
+    const firstLine: string = end < 0 ? '' : stderr.toString('utf8', 0, end);
+    if (!createReadinessNoticePattern(this.host.paths.socketPath).test(firstLine)) return stderr;
+    this.readinessNotices++;
+    return stderr.subarray(end + 1);
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
