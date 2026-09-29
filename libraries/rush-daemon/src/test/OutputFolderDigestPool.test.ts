@@ -440,6 +440,30 @@ describe(OutputFolderDigester.name, () => {
     expect(disabled.isParallel).toBe(false);
   });
 
+  it('starts a pool after digests of several folder sets that a caller made one at a time took longer together', () => {
+    const digester: OutputFolderDigester = new OutputFolderDigester({
+      threadCount: 2,
+      poolStartThresholdMs: 50
+    });
+    try {
+      digester.recordCallingThreadDigests(1, 51);
+      expect(digester.isParallel).toBe(false);
+      digester.recordCallingThreadDigests(2, 50);
+      expect(digester.isParallel).toBe(false);
+      digester.recordCallingThreadDigests(2, 51);
+      expect(digester.isParallel).toBe(true);
+    } finally {
+      digester.dispose();
+    }
+
+    const disabled: OutputFolderDigester = new OutputFolderDigester({
+      threadCount: 0,
+      poolStartThresholdMs: -1
+    });
+    disabled.recordCallingThreadDigests(2, 51);
+    expect(disabled.isParallel).toBe(false);
+  });
+
   it('starts background digests only while its pool runs', () => {
     const folderSets: IOutputFolderSet[] = createProjects(root);
     const digester: OutputFolderDigester = new OutputFolderDigester({

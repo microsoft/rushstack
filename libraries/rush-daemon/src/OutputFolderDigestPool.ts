@@ -21,7 +21,10 @@ const WAIT_SLICE_MS: number = 1000;
  */
 const DEFAULT_STALL_TIMEOUT_MS: number = 10000;
 
-/** A digest on the calling thread that takes longer than this starts a pool for later digests. */
+/**
+ * Digests of several folder sets on the calling thread that take longer than this together start a pool for later
+ * digests.
+ */
 const POOL_START_THRESHOLD_MS: number = 50;
 const MAX_POOL_THREAD_COUNT: number = 7;
 /**
@@ -77,7 +80,10 @@ export interface IOutputFolderDigestPoolOptions {
 export interface IOutputFolderDigesterOptions {
   /** Defaults to one less than the available parallelism, at most 7. Zero never starts a pool. */
   readonly threadCount?: number;
-  /** A digest on the calling thread that takes longer than this starts the pool. Defaults to 50 ms. */
+  /**
+   * Digests of several folder sets on the calling thread that take longer than this together start the pool (see
+   * `recordCallingThreadDigests`). Defaults to 50 ms.
+   */
   readonly poolStartThresholdMs?: number;
 }
 
@@ -281,8 +287,8 @@ export class OutputFolderDigestPool {
 }
 
 /**
- * Digests output folder sets on the calling thread until one call takes longer than a threshold, and through
- * an {@link OutputFolderDigestPool} after that, so a workspace with small outputs never starts threads.
+ * Digests output folder sets on the calling thread until digests of several folder sets take longer than a threshold,
+ * and through an {@link OutputFolderDigestPool} after that, so a workspace with small outputs never starts threads.
  */
 export class OutputFolderDigester {
   readonly #poolStartThresholdMs: number;
@@ -311,11 +317,20 @@ export class OutputFolderDigester {
     const digests: IOutputFolderDigest[] = folderSets.map((folderSet: IOutputFolderSet) =>
       digestOutputFolders(folderSet)
     );
+    this.recordCallingThreadDigests(folderSets.length, performance.now() - startTimeMs);
+    return digests;
+  }
+
+  /**
+   * Starts the pool for later digests if digests of several folder sets on the calling thread took longer than the
+   * threshold together, including a caller's digests of one folder set at a time.
+   */
+  public recordCallingThreadDigests(folderSetCount: number, durationMs: number): void {
     if (
       !this.#pool &&
       this.#threadCount > 0 &&
-      folderSets.length > 1 &&
-      performance.now() - startTimeMs > this.#poolStartThresholdMs
+      folderSetCount > 1 &&
+      durationMs > this.#poolStartThresholdMs
     ) {
       try {
         this.#pool = new OutputFolderDigestPool({ threadCount: this.#threadCount });
@@ -323,7 +338,6 @@ export class OutputFolderDigester {
         this.#threadCount = 0;
       }
     }
-    return digests;
   }
 
   /**

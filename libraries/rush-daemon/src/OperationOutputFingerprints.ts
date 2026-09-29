@@ -29,6 +29,12 @@ const PLUGIN_NAME: 'DaemonOperationOutputFingerprints' = 'DaemonOperationOutputF
 const CONFIGURE_ITERATION_STAGE: number = 100;
 
 /**
+ * Runs after Rush's own `afterExecuteOperationAsync` taps, which use stages up to 1, so that the outputs are recorded
+ * with the final status of the result.
+ */
+const RECORD_OPERATION_STAGE: number = 100;
+
+/**
  * Retained results that allow the warm graph to skip an operation. Other statuses always re-run. The graph only
  * retains a `Skipped` result for an operation that it selected, when a plugin (e.g. change detection) found its
  * outputs up to date.
@@ -96,6 +102,9 @@ interface IEarlyWalk {
  *   selection, not with the whole warm graph. Once a walk takes long enough to matter, walks are spread
  *   over a pool of worker threads (see {@link OutputFolderDigester}), and the pool walks the folders that
  *   the last iteration walked while the inputs are reconciled (see `walkWhileReconcilingAsync`).
+ *
+ * Both record the outputs of a result when Rush reports it, before any consumer of the operation starts, so that
+ * a change that is made while the rest of the iteration runs is found by the next request.
  */
 export class OperationOutputFingerprints {
   readonly #digester: OutputFolderDigester;
@@ -104,6 +113,9 @@ export class OperationOutputFingerprints {
   /** The operations whose output folders the last iteration walked. The next one probably walks them again. */
   #lastWalkedOperations: Set<Operation> = new Set();
   #earlyWalk: IEarlyWalk | undefined;
+  /** The walks of results that this iteration recorded when Rush reported them, one folder set at a time. */
+  #recordedWalkCount: number = 0;
+  #recordedWalkMs: number = 0;
 
   public constructor(graph: IOperationGraph, digester: OutputFolderDigester = getSharedOutputFolderDigester()) {
     this.#digester = digester;
@@ -117,6 +129,10 @@ export class OperationOutputFingerprints {
       ) => {
         this.#enableOperationsWithChangedContents(currentStates, this.#takeEarlyWalk(context));
       }
+    );
+    graph.hooks.afterExecuteOperationAsync.tap(
+      { name: PLUGIN_NAME, stage: RECORD_OPERATION_STAGE },
+      (record: IOperationExecutionResult) => this.#recordOperation(record)
     );
     graph.hooks.afterExecuteIterationAsync.tap(
       PLUGIN_NAME,
@@ -226,12 +242,41 @@ export class OperationOutputFingerprints {
     });
   }
 
+  /**
+   * Records the stat fingerprint and the content digest of the outputs of a result that the graph will retain, and
+   * that allows it to skip the operation later. Rush reports a result before any consumer of the operation starts,
+   * so the outputs are recorded as the operation left them.
+   */
+  #recordOperation(record: IOperationExecutionResult): void {
+    const { operation, status } = record;
+    // The graph retains a skipped result only for an operation that it selected.
+    if (!TRACKED_STATUSES.has(status) || (status === OperationStatus.Skipped && !record.enabled)) {
+      return;
+    }
+    const fingerprint: string | undefined = getOutputFingerprint(operation);
+    const folderSet: IOutputFolderSet | undefined = getOutputFolderSet(operation);
+    if (fingerprint === undefined || folderSet === undefined) {
+      this.#fingerprints.delete(operation);
+      return;
+    }
+    const startTimeMs: number = performance.now();
+    const [{ digest: contentFingerprint, entryCount }] = this.#digester.digest([folderSet]);
+    this.#recordedWalkMs += performance.now() - startTimeMs;
+    this.#recordedWalkCount++;
+    this.#fingerprints.set(operation, { record, fingerprint, contentFingerprint, entryCount });
+    this.#lastWalkedOperations.add(operation);
+  }
+
+  /**
+   * Records the outputs of each retained result that was not recorded when Rush reported it, and lets the digester
+   * start its pool if this iteration's walks took long enough together.
+   */
   #recordIteration(records: ReadonlyMap<Operation, IOperationExecutionResult>): void {
     const walks: IRecordWalk[] = [];
     for (const [operation, record] of records) {
       // Only records produced by this iteration become the retained result; disabled operations keep
       // their earlier record and fingerprint.
-      if (this.#isRetained(operation, record)) {
+      if (this.#isRetained(operation, record) && this.#fingerprints.get(operation)?.record !== record) {
         const fingerprint: string | undefined = getOutputFingerprint(operation);
         const folderSet: IOutputFolderSet | undefined = getOutputFolderSet(operation);
         if (fingerprint === undefined || folderSet === undefined) {
@@ -248,6 +293,9 @@ export class OperationOutputFingerprints {
       this.#fingerprints.set(operation, { record, fingerprint, contentFingerprint, entryCount });
       this.#lastWalkedOperations.add(operation);
     });
+    this.#digester.recordCallingThreadDigests(this.#recordedWalkCount, this.#recordedWalkMs);
+    this.#recordedWalkCount = 0;
+    this.#recordedWalkMs = 0;
   }
 
   /**

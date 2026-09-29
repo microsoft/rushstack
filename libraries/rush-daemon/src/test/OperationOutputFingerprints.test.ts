@@ -12,6 +12,7 @@ import {
   type IConfigurableOperation,
   type IInputsSnapshot,
   type IOperationExecutionResult,
+  type IOperationRunnerContext,
   type IOperationSettings,
   type IPhase,
   type IOperationGraph,
@@ -27,6 +28,17 @@ const PHASE: IPhase = { name: '_phase:build', logFilenameIdentifier: '_phase_bui
 
 interface IReconciliation {
   readonly inputsSnapshot: IInputsSnapshot;
+}
+
+interface ITestResult {
+  readonly name: string;
+  readonly status: OperationStatus;
+  /** Defaults to true. */
+  readonly enabled?: boolean;
+}
+
+function getNames(operations: ReadonlyArray<Operation>): string[] {
+  return operations.map((operation: Operation) => operation.associatedProject.packageName);
 }
 
 function getProjectNames(folderSets: ReadonlyArray<IOutputFolderSet>): string {
@@ -117,14 +129,32 @@ class TestGraph {
 
   /** Runs the operations successfully, which records the fingerprints of their outputs. */
   public async runAsync(...names: string[]): Promise<void> {
+    await this.executeAsync(names.map((name: string) => ({ name, status: OperationStatus.Success })));
+  }
+
+  /**
+   * Reports each result as Rush does: the `afterExecuteOperationAsync` taps run before Rush retains the result, and
+   * Rush retains a skipped result only for an enabled operation. `beforeIterationEnds` runs after the last result.
+   */
+  public async executeAsync(
+    results: ReadonlyArray<ITestResult>,
+    beforeIterationEnds?: () => void
+  ): Promise<void> {
     const records: Map<Operation, IOperationExecutionResult> = new Map();
-    for (const name of names) {
-      const record: IOperationExecutionResult = {
-        status: OperationStatus.Success
-      } as IOperationExecutionResult;
-      this.resultByOperation.set(this.getOperation(name), record);
-      records.set(this.getOperation(name), record);
+    for (const { name, status, enabled = true } of results) {
+      const operation: Operation = this.getOperation(name);
+      const record: IOperationRunnerContext & IOperationExecutionResult = {
+        operation,
+        status,
+        enabled
+      } as IOperationRunnerContext & IOperationExecutionResult;
+      await this.hooks.afterExecuteOperationAsync.promise(record);
+      if (enabled || status !== OperationStatus.Skipped) {
+        this.resultByOperation.set(operation, record);
+      }
+      records.set(operation, record);
     }
+    beforeIterationEnds?.();
     await this.hooks.afterExecuteIterationAsync.promise(OperationStatus.Success, records, {});
   }
 
@@ -170,7 +200,7 @@ describe(OperationOutputFingerprints.name, () => {
   async function createGraphAsync(): Promise<TestGraph> {
     const graph: TestGraph = new TestGraph(root, { a: 1, b: 2, c: 4 }, digester);
     await graph.runAsync('a', 'b', 'c');
-    expect(digester.takeCalls()).toEqual(['digest a,b,c']);
+    expect(digester.takeCalls()).toEqual(['digest a', 'digest b', 'digest c']);
     return graph;
   }
 
@@ -258,7 +288,7 @@ describe(OperationOutputFingerprints.name, () => {
     it('walks the output folders that the last iteration walked, and others when they are checked', async () => {
       const graph: TestGraph = new TestGraph(root, { a: 1, b: 2, c: 4, d: 8 }, digester);
       await graph.runAsync('a', 'b', 'c', 'd');
-      expect(digester.takeCalls()).toEqual(['digest a,b,c,d']);
+      expect(digester.takeCalls()).toEqual(['digest a', 'digest b', 'digest c', 'digest d']);
       const select = (...names: string[]): void => {
         for (const name of ['a', 'b', 'c', 'd']) {
           graph.getOperation(name).enabled = names.includes(name);
@@ -365,6 +395,91 @@ describe(OperationOutputFingerprints.name, () => {
       } finally {
         poolDigester.dispose();
       }
+    });
+  });
+
+  describe('records the outputs of each operation when Rush reports its result', () => {
+    it('finds a change to an output folder that was made before the iteration ended', async () => {
+      const graph: TestGraph = new TestGraph(root, { c: 1, d: 2 }, digester);
+      await graph.executeAsync(
+        [
+          { name: 'd', status: OperationStatus.Success },
+          { name: 'c', status: OperationStatus.Success }
+        ],
+        () => graph.addFile('d', 'lib/race.js')
+      );
+      expect(getNames(graph.fingerprints.getOperationsWithChangedOutputs())).toEqual(['d']);
+      expect(digester.takeCalls()).toEqual(['digest d', 'digest c']);
+    });
+
+    it('finds an output file that was edited in place before the iteration ended', async () => {
+      const graph: TestGraph = new TestGraph(root, { c: 1, d: 2 }, digester);
+      await graph.executeAsync(
+        [
+          { name: 'd', status: OperationStatus.Success },
+          { name: 'c', status: OperationStatus.Success }
+        ],
+        () => fs.appendFileSync(path.join(root, 'd', 'lib', 'file-0.js'), ' edited')
+      );
+      // The output folder itself did not change.
+      expect(graph.fingerprints.getOperationsWithChangedOutputs()).toEqual([]);
+      const first: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(first);
+      expect(graph.configure(first)).toEqual(['d']);
+
+      await graph.runAsync('d');
+      const second: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(second);
+      expect(graph.configure(second)).toEqual([]);
+    });
+
+    it('records restored and up-to-date results, but not failed ones', async () => {
+      const graph: TestGraph = new TestGraph(root, { a: 1, b: 2, c: 4 }, digester);
+      await graph.runAsync('a', 'b', 'c');
+      digester.takeCalls();
+      await graph.executeAsync(
+        [
+          { name: 'a', status: OperationStatus.FromCache },
+          { name: 'b', status: OperationStatus.Skipped },
+          { name: 'c', status: OperationStatus.Failure }
+        ],
+        () => {
+          for (const name of ['a', 'b', 'c']) {
+            graph.addFile(name, 'lib/race.js');
+          }
+        }
+      );
+      expect(getNames(graph.fingerprints.getOperationsWithChangedOutputs())).toEqual(['a', 'b']);
+      expect(digester.takeCalls()).toEqual(['digest a', 'digest b']);
+    });
+
+    it('keeps the fingerprint of an operation that was skipped while it was disabled', async () => {
+      const graph: TestGraph = new TestGraph(root, { a: 1, b: 2 }, digester);
+      await graph.runAsync('a', 'b');
+      digester.takeCalls();
+      await graph.executeAsync([{ name: 'b', status: OperationStatus.Skipped, enabled: false }]);
+      expect(digester.takeCalls()).toEqual([]);
+      fs.appendFileSync(path.join(root, 'b', 'lib', 'file-0.js'), ' edited');
+      expect(graph.configure(undefined)).toEqual(['b']);
+    });
+
+    it('records a retained result when the iteration ends if Rush did not report it', async () => {
+      const graph: TestGraph = new TestGraph(root, { a: 1 }, digester);
+      const operation: Operation = graph.getOperation('a');
+      const record: IOperationExecutionResult = {
+        operation,
+        status: OperationStatus.Success,
+        enabled: true
+      } as IOperationExecutionResult;
+      graph.resultByOperation.set(operation, record);
+      await graph.hooks.afterExecuteIterationAsync.promise(
+        OperationStatus.Success,
+        new Map([[operation, record]]),
+        {}
+      );
+      expect(digester.takeCalls()).toEqual(['digest a']);
+      graph.addFile('a', 'lib/new.js');
+      expect(getNames(graph.fingerprints.getOperationsWithChangedOutputs())).toEqual(['a']);
     });
   });
 });
