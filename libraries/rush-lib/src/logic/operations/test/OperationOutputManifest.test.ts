@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import {
   describeOutputFileChanges,
   getCleanOnlyReason,
+  hasContentHashedOutputChange,
   readOperationOutputManifestAsync,
   type IOperationOutputManifest
 } from '../OperationOutputManifest';
@@ -54,6 +55,33 @@ describe(describeOutputFileChanges.name, () => {
         new Set(['temp/jest-transform-cache-0123456789abcdef-0123456789abcdef/8e/b_2'])
       )
     ).toBeUndefined();
+  });
+
+  it.each([
+    ['lib/0dd8cf755e5195a5.js', 'lib/7c1e0b4f9a2d3e6f.js'],
+    ['dist/app.0123456789abcdef0123.js', 'dist/app.3210fedcba9876543210.js'],
+    ['dist/2d0bb124b0ce1c65888f.png', 'dist/5c7a3e9f1b2d4068ace1.png']
+  ])(
+    'describes a content-hashed output that a bundler renamed from %s to %s',
+    (before: string, after: string) => {
+      expect(describeOutputFileChanges(new Set([before]), new Set([after]))).toBe(
+        `1 added (${JSON.stringify(after)}), 1 removed (${JSON.stringify(before)})`
+      );
+    }
+  );
+});
+
+describe(hasContentHashedOutputChange.name, () => {
+  it.each<[string[], string[], boolean]>([
+    [['lib/a.js'], ['lib/a.js', 'lib/chunk_0123456789abcdef0123.js'], true],
+    [['lib/a.js', 'lib/chunk.main_1a2b3c4d.js'], ['lib/a.js'], true],
+    [['dist/2d0bb124b0ce1c65888f.png'], ['dist/5c7a3e9f1b2d4068ace1.png'], true],
+    [['lib/a.js'], ['lib/a.js', 'lib/b.js'], false],
+    [['dist/a.js'], ['dist/a.js', 'dist/b.js'], false],
+    [['lib/chunk.main_1a2b3c4d.js'], ['lib/chunk.main_1a2b3c4d.js', 'lib/b.js'], false],
+    [['lib/a.js'], ['lib/a.js', 'temp/jest-transform-cache-0123456789abcdef-0123456789abcdef/7f/a_1'], false]
+  ])('for %j before and %j after, returns %s', (before: string[], after: string[], expected: boolean) => {
+    expect(hasContentHashedOutputChange(new Set(before), new Set(after))).toBe(expected);
   });
 });
 

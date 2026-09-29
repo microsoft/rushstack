@@ -19,6 +19,22 @@ export const INPUTS_CHANGED_INVALIDATION_REASON: 'workspace-inputs-changed' = 'w
 export const NATIVE_COMMAND_INVALIDATION_REASON: 'native-command-completed' = 'native-command-completed';
 
 /**
+ * Options that an operation runner passes to its {@link IIncrementalExecutionGuard}.
+ *
+ * @beta
+ */
+export interface IIncrementalExecutionGuardOptions {
+  /**
+   * Set by a runner whose incremental runs keep the previous build in memory, such as a watch-mode bundler in a
+   * warm worker. Outputs that look like bundles then do not require the initial command. If an incremental run
+   * changes which output files exist, that run is still followed by the initial command, but later runs of the
+   * operation may use the incremental command again, unless the run added or removed a content-hashed file.
+   * Defaults to false.
+   */
+  readonly outputsMayBeBundles?: boolean;
+}
+
+/**
  * Decides whether an operation may run its `:incremental` command outside watch mode.
  * The Rush daemon registers one for each execution record. Runners get it from
  * {@link IOperationRunnerContext.getIncrementalExecutionGuard}.
@@ -30,12 +46,12 @@ export interface IIncrementalExecutionGuard {
    * Returns `undefined` if the incremental command may run, otherwise why it may not, as a clause that completes
    * "Not using the incremental command because ...", e.g. `its command line changed`.
    */
-  getBlockReasonAsync(): Promise<string | undefined>;
+  getBlockReasonAsync(options?: IIncrementalExecutionGuardOptions): Promise<string | undefined>;
   /**
    * Called after the incremental command succeeded. Returns `undefined` if its outputs can be kept, otherwise why
    * the initial command must run as well, as a clause that completes "Running the initial command, because ...".
    */
-  verifyIncrementalResultAsync(): Promise<string | undefined>;
+  verifyIncrementalResultAsync(options?: IIncrementalExecutionGuardOptions): Promise<string | undefined>;
 }
 
 /**
@@ -57,11 +73,19 @@ export interface IOperationCommandExecution {
    * Whether the runner has an incremental command that a later iteration could use.
    */
   readonly hasIncrementalCommand: boolean;
+  /**
+   * Whether the command ran in a process that keeps watching the operation's input files after the command
+   * completed, to run the incremental command again, such as a warm worker. A watcher can miss changes in a folder
+   * that was deleted and recreated, so the next incremental run then requires that none of the folders that held
+   * input files was deleted or recreated since this run. Defaults to false.
+   */
+  readonly watchesInputs?: boolean;
 }
 
-// Both maps are keyed by the execution record, which is the runner's context and the hooks' argument.
+// All are keyed by the execution record, which is the runner's context and the hooks' argument.
 const guardByRecord: WeakMap<object, IIncrementalExecutionGuard> = new WeakMap();
 const commandExecutionByRecord: WeakMap<object, ICommandExecution> = new WeakMap();
+const recordsWithoutCacheRead: WeakSet<object> = new WeakSet();
 
 export function setIncrementalExecutionGuard(record: object, guard: IIncrementalExecutionGuard): void {
   guardByRecord.set(record, guard);
@@ -90,4 +114,20 @@ export function getCommandExecution(record: object): ICommandExecution | undefin
  */
 export function wasExecutedIncrementally(record: object): boolean {
   return commandExecutionByRecord.get(record)?.kind === 'incremental';
+}
+
+/**
+ * Records that the runner of an execution record will run its incremental command without first trying to restore
+ * the operation from the build cache, e.g. because a restore would replace the outputs that a warm worker built and
+ * keeps in memory. Call it from a `beforeExecuteOperationAsync` tap that runs before `CacheableOperationPlugin`'s.
+ */
+export function skipBuildCacheRead(record: object): void {
+  recordsWithoutCacheRead.add(record);
+}
+
+/**
+ * Returns true if `skipBuildCacheRead` was called for the execution record.
+ */
+export function isBuildCacheReadSkipped(record: object): boolean {
+  return recordsWithoutCacheRead.has(record);
 }

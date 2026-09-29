@@ -238,7 +238,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           parameterShortName: '-p',
           argumentName: 'COUNT',
           // An engine host reads this default from the request's environment instead; see #getParallelism().
-          environmentVariable: this.#engineEnvironment ? undefined : EnvironmentVariableNames.RUSH_PARALLELISM,
+          environmentVariable: this.#engineEnvironment
+            ? undefined
+            : EnvironmentVariableNames.RUSH_PARALLELISM,
           description:
             'Specifies the maximum number of concurrent processes to launch during a build.' +
             ' The COUNT should be a positive integer, a percentage value (eg. "50%") or the word "max"' +
@@ -688,6 +690,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             /* webpackChunkName: 'IncrementalExecutionGuardPlugin' */ '../../logic/operations/IncrementalExecutionGuardPlugin'
           );
           new IncrementalExecutionGuardPlugin().apply(this.hooks);
+          if (this.rushConfiguration.daemon.warmWorkers && !this.#noIPCParameter?.value) {
+            // Applied after DaemonIpcOperationRunnerPlugin, so that an explicit IPC tool keeps its runner.
+            const { DaemonWarmWorkerPlugin } = await import(
+              /* webpackChunkName: 'DaemonWarmWorkerPlugin' */ '../../logic/operations/DaemonWarmWorkerPlugin'
+            );
+            new DaemonWarmWorkerPlugin().apply(this.hooks);
+          }
         }
         if (isWatch && this.#noIPCParameter?.value === false) {
           new (

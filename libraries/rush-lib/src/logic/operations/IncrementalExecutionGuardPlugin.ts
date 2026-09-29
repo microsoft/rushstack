@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createHash, type Hash } from 'node:crypto';
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { FileSystem, InternalError, Path } from '@rushstack/node-core-library';
@@ -24,10 +25,12 @@ import {
   NATIVE_COMMAND_INVALIDATION_REASON,
   setIncrementalExecutionGuard,
   type ICommandExecution,
-  type IIncrementalExecutionGuard
+  type IIncrementalExecutionGuard,
+  type IIncrementalExecutionGuardOptions
 } from './IncrementalExecutionState';
 import {
   describeOutputFileChanges,
+  hasContentHashedOutputChange,
   readOperationOutputManifestAsync,
   type IOperationOutputManifest
 } from './OperationOutputManifest';
@@ -38,6 +41,9 @@ const PLUGIN_NAME: 'IncrementalExecutionGuardPlugin' = 'IncrementalExecutionGuar
 // Runs after the default-stage taps, e.g. CacheableOperationPlugin's input file checks, which can mark a result as
 // unverifiable.
 const RECORD_RESULT_STAGE: number = 1;
+// Runs before those checks, so that a folder that was recreated before the input folders were read makes the result
+// unverifiable, if the build cache checks the operation's input files.
+const READ_INPUT_FOLDERS_STAGE: number = -1;
 
 const MAX_EXAMPLE_PATHS: number = 3;
 
@@ -225,14 +231,19 @@ export function getIncrementalInputChangeReason(
  *    failure, or a run that was interrupted or whose input files changed while it ran. A native Rush command that
  *    ran in the workspace since then forgets every such result.
  * 2. Its inputs changed as {@link getIncrementalInputChangeReason} allows.
- * 3. Its declared output folders hold the same files and folders as at the end of that run, and none of the folders
+ * 3. If that run was in a process that keeps watching the input files, such as a warm worker, none of the folders
+ *    that held its input files was deleted or recreated since that run. A watcher can miss changes in such a folder,
+ *    e.g. one that a branch switch recreated.
+ * 4. Its declared output folders hold the same files and folders as at the end of that run, and none of the folders
  *    was recreated or had an entry added, removed or replaced since then.
- * 4. Its outputs do not include bundles (JavaScript or CSS in a `dist` or `release` folder, or with a content hash in
- *    the name). A bundler can replace a chunk with a differently named one and leave the old one behind.
+ * 5. Its outputs do not include bundles (JavaScript or CSS in a `dist` or `release` folder, or with a content hash in
+ *    the name). A bundler can replace a chunk with a differently named one and leave the old one behind. A runner
+ *    whose incremental runs keep the previous build in memory can accept bundles with `outputsMayBeBundles`.
  *
  * When the incremental command succeeds, the operation's output files must be the files that it had before, or the
- * initial command runs as well. Results of the incremental command are never written to the build cache (see
- * `CacheableOperationPlugin`).
+ * initial command runs as well. The operation then never runs its incremental command again in this graph, unless
+ * the runner passed `outputsMayBeBundles` and no content-hashed output was added or removed. Results of the
+ * incremental command are never written to the build cache (see `CacheableOperationPlugin`).
  */
 export class IncrementalExecutionGuardPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
@@ -251,6 +262,9 @@ interface IOutputState {
 
 interface IIncrementalBase {
   readonly inputs: IIncrementalInputState;
+  // The identity of each folder that held an input file, if the last run was in a process that keeps watching the
+  // input files. Read before that run started, unless no check preceded it.
+  readonly inputFolders: ReadonlyMap<string, string> | undefined;
   // Rejects if the output folders could not be read.
   readonly outputsPromise: Promise<IOutputState>;
 }
@@ -261,10 +275,13 @@ interface IRecordState {
   readonly getOperationEnvironment: IOperationGraphIterationOptions['getOperationEnvironment'];
   preRunOutputs?: IOperationOutputManifest;
   verifiedOutputs?: IOutputState;
+  inputFolders?: ReadonlyMap<string, string>;
 }
 
 function applyToGraph(graph: IOperationGraph): void {
   const baseByOperation: Map<Operation, IIncrementalBase> = new Map();
+  // Callers that pass `outputsMayBeBundles` add an entry only after their incremental command renamed a
+  // content-hashed output. An operation keeps its runner for the life of the graph.
   const cleanOnlyReasonByOperation: Map<Operation, string> = new Map();
   const stateByRecord: WeakMap<IOperationExecutionResult, IRecordState> = new WeakMap();
 
@@ -284,8 +301,10 @@ function applyToGraph(graph: IOperationGraph): void {
         const recordState: IRecordState = { records, inputsSnapshot, getOperationEnvironment };
         stateByRecord.set(record, recordState);
         const guard: IIncrementalExecutionGuard = {
-          getBlockReasonAsync: () => getBlockReasonAsync(record, recordState),
-          verifyIncrementalResultAsync: () => verifyIncrementalResultAsync(record, recordState)
+          getBlockReasonAsync: (options?: IIncrementalExecutionGuardOptions) =>
+            getBlockReasonAsync(record, recordState, options),
+          verifyIncrementalResultAsync: (options?: IIncrementalExecutionGuardOptions) =>
+            verifyIncrementalResultAsync(record, recordState, options)
         };
         setIncrementalExecutionGuard(record, guard);
       }
@@ -294,7 +313,8 @@ function applyToGraph(graph: IOperationGraph): void {
 
   async function getBlockReasonAsync(
     record: IOperationExecutionResult,
-    recordState: IRecordState
+    recordState: IRecordState,
+    { outputsMayBeBundles = false }: IIncrementalExecutionGuardOptions = {}
   ): Promise<string | undefined> {
     const { operation } = record;
     const cleanOnlyReason: string | undefined = cleanOnlyReasonByOperation.get(operation);
@@ -304,6 +324,16 @@ function applyToGraph(graph: IOperationGraph): void {
     const base: IIncrementalBase | undefined = baseByOperation.get(operation);
     if (!base) {
       return 'its outputs were not built by a successful run of its own command in this process';
+    }
+    let changedFolders: string[] | undefined;
+    if (base.inputFolders) {
+      // Read before the command starts, so that the next check notices a folder that is recreated while it runs.
+      const inputFolders: ReadonlyMap<string, string> = readInputFolderIdentities(
+        operation,
+        recordState.inputsSnapshot
+      );
+      recordState.inputFolders = inputFolders;
+      changedFolders = getChangedFolders(base.inputFolders, inputFolders);
     }
 
     const inputChangeReason: string | undefined = getIncrementalInputChangeReason(
@@ -319,6 +349,11 @@ function applyToGraph(graph: IOperationGraph): void {
     if (inputChangeReason) {
       return inputChangeReason;
     }
+    if (changedFolders?.length) {
+      return `folders that held its input files were deleted or recreated since its last run${formatExamplePaths(
+        changedFolders
+      )}`;
+    }
 
     const outputFolderNames: ReadonlyArray<string> | undefined = operation.settings?.outputFolderNames;
     if (!outputFolderNames?.length) {
@@ -330,7 +365,7 @@ function applyToGraph(graph: IOperationGraph): void {
     } catch (error) {
       return `its output folders could not be read after its last run: ${error}`;
     }
-    if (baseOutputs.cleanOnlyReason) {
+    if (baseOutputs.cleanOnlyReason && !outputsMayBeBundles) {
       cleanOnlyReasonByOperation.set(operation, baseOutputs.cleanOnlyReason);
       return baseOutputs.cleanOnlyReason;
     }
@@ -348,7 +383,8 @@ function applyToGraph(graph: IOperationGraph): void {
 
   async function verifyIncrementalResultAsync(
     record: IOperationExecutionResult,
-    recordState: IRecordState
+    recordState: IRecordState,
+    { outputsMayBeBundles = false }: IIncrementalExecutionGuardOptions = {}
   ): Promise<string | undefined> {
     const { operation } = record;
     const { preRunOutputs } = recordState;
@@ -360,23 +396,38 @@ function applyToGraph(graph: IOperationGraph): void {
       operation.associatedProject.projectFolder,
       outputFolderNames
     );
-    const changes: string | undefined = describeOutputFileChanges(preRunOutputs.files, outputs.files);
-    if (changes) {
-      // Its outputs may be named after their content, so a later incremental run could leave stale files behind.
-      cleanOnlyReasonByOperation.set(
-        operation,
-        `its incremental command changed which output files it has in an earlier run: ${changes}`
-      );
-      return `the incremental command changed which output files it has: ${changes}`;
-    }
-    if (outputs.cleanOnlyReason) {
+    if (outputs.cleanOnlyReason && !outputsMayBeBundles) {
       cleanOnlyReasonByOperation.set(operation, outputs.cleanOnlyReason);
       return outputs.cleanOnlyReason;
+    }
+    const changes: string | undefined = describeOutputFileChanges(preRunOutputs.files, outputs.files);
+    if (changes) {
+      // Its outputs may be named after their content, so a later incremental run could leave stale files behind. A
+      // runner that keeps its build in memory can run again, unless a content-hashed output was renamed: a bundler
+      // renames it whenever its content changes, so the initial command would run after every incremental run.
+      if (!outputsMayBeBundles || hasContentHashedOutputChange(preRunOutputs.files, outputs.files)) {
+        cleanOnlyReasonByOperation.set(
+          operation,
+          `its incremental command changed which output files it has in an earlier run: ${changes}`
+        );
+      }
+      return `the incremental command changed which output files it has: ${changes}`;
     }
     // eslint-disable-next-line require-atomic-updates -- The runner of the execution record calls the guard sequentially.
     recordState.verifiedOutputs = { signature: outputs.signature, cleanOnlyReason: undefined };
     return undefined;
   }
+
+  graph.hooks.afterExecuteOperationAsync.tap(
+    { name: PLUGIN_NAME, stage: READ_INPUT_FOLDERS_STAGE },
+    (record: IOperationRunnerContext & IOperationExecutionResult): void => {
+      const recordState: IRecordState | undefined = stateByRecord.get(record);
+      // E.g. the first run of the operation in this graph, which no check preceded
+      if (recordState && !recordState.inputFolders && getCommandExecution(record)?.watchesInputs) {
+        recordState.inputFolders = readInputFolderIdentities(record.operation, recordState.inputsSnapshot);
+      }
+    }
+  );
 
   graph.hooks.afterExecuteOperationAsync.tapPromise(
     { name: PLUGIN_NAME, stage: RECORD_RESULT_STAGE },
@@ -427,6 +478,7 @@ function applyToGraph(graph: IOperationGraph): void {
           getEnvironment(record, recordState),
           recordState.records
         ),
+        inputFolders: execution.watchesInputs ? recordState.inputFolders : undefined,
         outputsPromise
       });
       // Finish reading the outputs before anything else can change them, e.g. an operation that depends on this one.
@@ -504,12 +556,87 @@ function describeInputFileChanges(
   if (changedFiles.length === 0) {
     return '';
   }
-  changedFiles.sort();
-  const examples: string = changedFiles
+  return formatExamplePaths(changedFiles);
+}
+
+function formatExamplePaths(paths: string[]): string {
+  paths.sort();
+  const examples: string = paths
     .slice(0, MAX_EXAMPLE_PATHS)
     .map((filePath: string) => JSON.stringify(filePath))
     .join(', ');
-  return ` (${examples}${changedFiles.length > MAX_EXAMPLE_PATHS ? ', ...' : ''})`;
+  return ` (${examples}${paths.length > MAX_EXAMPLE_PATHS ? ', ...' : ''})`;
+}
+
+/**
+ * Returns the identity of each folder of the operation's project that holds one of its input files, by the path of
+ * the folder relative to the root of the inputs snapshot.
+ */
+function readInputFolderIdentities(
+  operation: Operation,
+  inputsSnapshot: IInputsSnapshot
+): ReadonlyMap<string, string> {
+  const { associatedProject: project, associatedPhase: phase } = operation;
+  const projectPrefix: string = getProjectPrefix(inputsSnapshot, project);
+  const folderPaths: Set<string> = new Set();
+  for (const filePath of inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name).keys()) {
+    if (filePath.startsWith(projectPrefix) && !path.isAbsolute(filePath)) {
+      folderPaths.add(filePath.slice(0, Math.max(filePath.lastIndexOf('/'), 0)));
+    }
+  }
+  const identities: Map<string, string> = new Map();
+  for (const folderPath of folderPaths) {
+    identities.set(folderPath, getFolderIdentity(path.resolve(inputsSnapshot.rootDirectory, folderPath)));
+  }
+  return identities;
+}
+
+/**
+ * Returns the folders of `lastIdentities` whose identity changed, including folders that no longer hold input files.
+ * A changed folder inside another changed folder is left out, e.g. a recreated "src" is named without its subfolders.
+ */
+function getChangedFolders(
+  lastIdentities: ReadonlyMap<string, string>,
+  currentIdentities: ReadonlyMap<string, string>
+): string[] {
+  const changedFolders: Set<string> = new Set();
+  for (const [folderPath, identity] of lastIdentities) {
+    if (currentIdentities.get(folderPath) !== identity) {
+      changedFolders.add(folderPath);
+    }
+  }
+  const topFolders: string[] = [];
+  for (const folderPath of changedFolders) {
+    if (!hasAncestorFolder(folderPath, changedFolders)) {
+      topFolders.push(folderPath);
+    }
+  }
+  return topFolders;
+}
+
+// Folder paths are relative, with "/" separators, and "" is the root of the inputs snapshot.
+function hasAncestorFolder(folderPath: string, folderPaths: ReadonlySet<string>): boolean {
+  let parentPath: string = folderPath;
+  while (parentPath) {
+    parentPath = parentPath.slice(0, Math.max(parentPath.lastIndexOf('/'), 0));
+    if (folderPaths.has(parentPath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// A folder that was deleted and recreated has another inode, or at least another birth time. Unlike its modification
+// and status change times, neither changes when an entry of the folder is added, removed or replaced, e.g. by an
+// editor that saves a file by renaming a new file over it.
+function getFolderIdentity(folderPath: string): string {
+  try {
+    const stats: fs.Stats | undefined = fs.lstatSync(folderPath, { throwIfNoEntry: false });
+    return stats ? `${stats.dev}:${stats.ino}:${stats.birthtimeMs}` : 'missing';
+  } catch (error) {
+    // E.g. ENOTDIR, if a folder on its path was replaced by a file
+    return `${(error as NodeJS.ErrnoException).code}`;
+  }
 }
 
 /**

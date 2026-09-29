@@ -282,6 +282,11 @@
           "default": true,
           "description": "Let daemon builds run an operation's `<phase>:incremental` script on top of the outputs of its last successful run in the daemon, when only files that it builds were edited since then and its output folders are unchanged. Otherwise the initial script runs, as it does for native Rush. Results of an incremental script are not written to the build cache. RUSH_DAEMON_INCREMENTAL_BUILDS overrides."
         },
+        "warmWorkers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Keep a watch-mode worker (the `<phase>:incremental:ipc` script) alive between daemon builds for each operation whose rush-project.json operation settings set `allowDaemonWarmWorker`, and send it the next incremental run when incrementalBuilds allows one. Otherwise the worker is closed and the initial script runs. Requires incrementalBuilds. RUSH_DAEMON_WARM_WORKERS overrides."
+        },
         "queueTimeoutSeconds": {
           "type": "number",
           "minimum": 0,

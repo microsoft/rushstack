@@ -65,9 +65,15 @@ import { Utilities } from '../../../utilities/Utilities';
 import { InputsSnapshot, type IInputsSnapshotProjectMetadata } from '../../incremental/InputsSnapshot';
 import { IncrementalExecutionGuardPlugin } from '../IncrementalExecutionGuardPlugin';
 import {
+  getCommandExecution,
+  getIncrementalExecutionGuard,
   INPUTS_CHANGED_INVALIDATION_REASON,
   NATIVE_COMMAND_INVALIDATION_REASON,
-  wasExecutedIncrementally
+  setCommandExecution,
+  setIncrementalExecutionGuard,
+  wasExecutedIncrementally,
+  type ICommandExecution,
+  type IIncrementalExecutionGuardOptions
 } from '../IncrementalExecutionState';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import { LegacySkipPlugin } from '../LegacySkipPlugin';
@@ -132,9 +138,18 @@ interface IWorkspaceOptions {
    */
   readonly hasPassThroughPhase?: boolean;
   /**
+   * If set, the runners pass these options to the guard, like `WarmWorkerOperationRunner`.
+   */
+  readonly guardOptions?: IIncrementalExecutionGuardOptions;
+  /**
    * If set, applies the skip detection that Rush uses when the build cache is not enabled.
    */
   readonly hasLegacySkipDetection?: boolean;
+  /**
+   * If set, the runners report that each command ran in a process that keeps watching the input files, like
+   * `WarmWorkerOperationRunner`.
+   */
+  readonly watchesInputs?: boolean;
 }
 
 interface ITestIteration {
@@ -153,6 +168,10 @@ interface ITestWorkspace {
   readonly operations: ReadonlyMap<string, Operation>;
   writeFile(relativePath: string, content: string): void;
   deleteFile(relativePath: string): void;
+  /**
+   * Deletes a folder and writes its files again, like a branch switch that removed the folder and restored it.
+   */
+  recreateFolder(relativePath: string): void;
   executeAsync(environment?: Readonly<Record<string, string>>): Promise<ITestIteration>;
   /**
    * Resolves when the next command that hangs has written its outputs. It runs until it is terminated.
@@ -188,8 +207,20 @@ function listFiles(folder: string, exclude: ReadonlySet<string> = new Set()): st
   return files.sort();
 }
 
+function recreateFolder(folder: string): void {
+  const contentByFile: Map<string, Buffer> = new Map(
+    listFiles(folder).map((file: string) => [file, fs.readFileSync(`${folder}/${file}`)])
+  );
+  fs.rmSync(folder, { recursive: true });
+  for (const [file, content] of contentByFile) {
+    fs.mkdirSync(path.dirname(`${folder}/${file}`), { recursive: true });
+    fs.writeFileSync(`${folder}/${file}`, content);
+  }
+}
+
 // Like a compiler: writes a file per source file, and its incremental mode neither cleans the output folder nor
 // deletes the outputs of deleted source files. A source containing "emit:<name>" also emits "<name>.js", a
+// source containing "recreate:<folder>" deletes and recreates that folder of the project while the build runs, a
 // source containing "error" fails the build, and after the output of a source containing "hang", the build runs
 // until it is terminated (it returns undefined).
 function build(projectFolder: string, isBundle: boolean, isIncremental: boolean): number | undefined {
@@ -213,6 +244,10 @@ function build(projectFolder: string, isBundle: boolean, isIncremental: boolean)
     const emitted: RegExpExecArray | null = /emit:(\w+)/.exec(source);
     if (emitted) {
       fs.writeFileSync(`${outputFolder}/${emitted[1]}.js`, '');
+    }
+    const recreated: RegExpExecArray | null = /recreate:([\w/]+)/.exec(source);
+    if (recreated) {
+      recreateFolder(`${projectFolder}/${recreated[1]}`);
     }
     if (source.includes('hang')) {
       return undefined;
@@ -293,7 +328,7 @@ class PluginOperationRunner implements IOperationRunner {
 
 async function createWorkspaceAsync(
   projectSpecs: ReadonlyArray<IProjectSpec>,
-  { hasPassThroughPhase, hasLegacySkipDetection }: IWorkspaceOptions = {}
+  { hasPassThroughPhase, guardOptions, hasLegacySkipDetection, watchesInputs }: IWorkspaceOptions = {}
 ): Promise<ITestWorkspace> {
   const rootFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-incremental-guard-'));
   workspaceFolders.push(rootFolder);
@@ -475,6 +510,35 @@ async function createWorkspaceAsync(
     isWatch: false,
     projectConfigurations
   } as unknown as IOperationGraphContext);
+  if (guardOptions) {
+    // After the guard plugin registered the guards of the iteration.
+    graph.hooks.beforeExecuteIterationAsync.tap(
+      { name: 'guardOptions', stage: 1 },
+      (records: ReadonlyMap<Operation, IOperationExecutionResult>): void => {
+        for (const record of records.values()) {
+          const guard: IIncrementalExecutionGuard | undefined = getIncrementalExecutionGuard(record);
+          if (guard) {
+            setIncrementalExecutionGuard(record, {
+              getBlockReasonAsync: () => guard.getBlockReasonAsync(guardOptions),
+              verifyIncrementalResultAsync: () => guard.verifyIncrementalResultAsync(guardOptions)
+            });
+          }
+        }
+      }
+    );
+  }
+  if (watchesInputs) {
+    // Before the guard's taps
+    graph.hooks.afterExecuteOperationAsync.tap(
+      { name: 'watchesInputs', stage: -2 },
+      (record: IOperationExecutionResult): void => {
+        const execution: ICommandExecution | undefined = getCommandExecution(record);
+        if (execution) {
+          setCommandExecution(record, { ...execution, watchesInputs: true });
+        }
+      }
+    );
+  }
 
   // Like `git hash-object` for each file, except the outputs, which are ignored by git.
   const createInputsSnapshot = (environment: Readonly<Record<string, string>>): InputsSnapshot => {
@@ -507,6 +571,7 @@ async function createWorkspaceAsync(
     operations,
     writeFile,
     deleteFile: (relativePath: string) => fs.rmSync(`${rootFolder}/${relativePath}`),
+    recreateFolder: (relativePath: string) => recreateFolder(`${rootFolder}/${relativePath}`),
     executeAsync: async (environment: Readonly<Record<string, string>> = {}): Promise<ITestIteration> => {
       commands.length = 0;
       destination.reset();
@@ -791,6 +856,148 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     expect(next.output).toContain(
       'Not using the incremental command because its incremental command changed which output files it has in an earlier run: 1 added ("lib/chunk.js").'
     );
+  });
+
+  it('runs the incremental command of an operation that builds a bundle for a runner that allows bundles', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a', isBundle: true }], {
+      guardOptions: { outputsMayBeBundles: true }
+    });
+    await workspace.executeAsync();
+
+    for (const content of ['one 2', 'one 3']) {
+      workspace.writeFile('a/src/one.ts', content);
+      const changed: ITestIteration = await workspace.executeAsync();
+      expect(changed.commands).toEqual(['a:incremental']);
+      expect(changed.getStatus('a')).toBe(OperationStatus.Success);
+      expect(changed.output).not.toContain('Not using the incremental command');
+    }
+  });
+
+  it('runs only the initial command after an incremental command renamed a content-hashed file, for a runner that allows bundles', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      guardOptions: { outputsMayBeBundles: true }
+    });
+    await workspace.executeAsync();
+
+    // Like a chunk with webpack's default hash length, which a bundler renames whenever its content changes.
+    workspace.writeFile('a/src/one.ts', 'one emit:chunk_0123456789abcdef0123');
+    const changed: ITestIteration = await workspace.executeAsync();
+    expect(changed.commands).toEqual(['a:incremental', 'a:initial']);
+    expect(changed.output).toContain(
+      'Running the initial command, because the incremental command changed which output files it has: 1 added ("lib/chunk_0123456789abcdef0123.js").'
+    );
+
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual(['a:initial']);
+    expect(next.output).toContain(
+      'Not using the incremental command because its incremental command changed which output files it has in an earlier run: 1 added ("lib/chunk_0123456789abcdef0123.js").'
+    );
+  });
+
+  it('runs the initial command only once after an incremental command that changed which output files exist, for a runner that allows bundles', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      guardOptions: { outputsMayBeBundles: true }
+    });
+    await workspace.executeAsync();
+
+    workspace.writeFile('a/src/one.ts', 'one emit:chunk');
+    const changed: ITestIteration = await workspace.executeAsync();
+    expect(changed.commands).toEqual(['a:incremental', 'a:initial']);
+    expect(changed.output).toContain(
+      'Running the initial command, because the incremental command changed which output files it has: 1 added ("lib/chunk.js").'
+    );
+
+    // The initial command removed any stale outputs, and the runner keeps its build state in memory.
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+  });
+
+  it('runs the initial command after a folder of its input files was recreated, for a runner that watches its inputs', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs: true });
+    await workspace.executeAsync();
+
+    // Unlike an editor that saves a file by renaming a new file over it
+    workspace.writeFile('a/src/sub/two.ts.tmp', 'two 1');
+    fs.renameSync(`${workspace.rootFolder}/a/src/sub/two.ts.tmp`, `${workspace.rootFolder}/a/src/sub/two.ts`);
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+    // The input files did not change, but a watcher of the old folder misses later edits of its files.
+    workspace.recreateFolder('a/src/sub');
+    expect((await workspace.executeAsync()).commands).toEqual([]);
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    const changed: ITestIteration = await workspace.executeAsync();
+    expect(changed.commands).toEqual(['a:initial']);
+    expect(changed.output).toContain(
+      'Not using the incremental command because folders that held its input files were deleted or recreated since its last run ("a/src/sub").'
+    );
+
+    // The process of the initial command watches the new folder.
+    workspace.writeFile('a/src/sub/two.ts', 'two 3');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+  });
+
+  it('names only the top folder of recreated folders of its input files, for a runner that watches its inputs', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs: true });
+    await workspace.executeAsync();
+
+    // Recreates "a/src/sub" as well
+    workspace.recreateFolder('a/src');
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    const changed: ITestIteration = await workspace.executeAsync();
+    expect(changed.commands).toEqual(['a:initial']);
+    expect(changed.output).toContain(
+      'Not using the incremental command because folders that held its input files were deleted or recreated since its last run ("a/src").'
+    );
+  });
+
+  it('runs the initial command after a folder of its input files was recreated while it ran, for a runner that watches its inputs', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs: true });
+    await workspace.executeAsync();
+
+    workspace.writeFile('a/src/one.ts', 'one recreate:src/sub');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+    workspace.writeFile('a/src/one.ts', 'one 3');
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual(['a:initial']);
+    expect(next.output).toContain(
+      'Not using the incremental command because folders that held its input files were deleted or recreated since its last run ("a/src/sub").'
+    );
+  });
+
+  it('runs the incremental command after a folder of its input files was recreated, for a runner that does not watch its inputs', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+    await workspace.executeAsync();
+
+    workspace.recreateFolder('a/src/sub');
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+  });
+
+  it('runs the incremental command after a folder of its input files was recreated, if its last run was not in a process that watches its inputs', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+    let watchesInputs: boolean = true;
+    workspace.graph.hooks.afterExecuteOperationAsync.tap(
+      { name: 'watchesInputs', stage: -2 },
+      (record: IOperationExecutionResult): void => {
+        const execution: ICommandExecution | undefined = getCommandExecution(record);
+        if (execution && watchesInputs) {
+          setCommandExecution(record, { ...execution, watchesInputs: true });
+        }
+      }
+    );
+    await workspace.executeAsync();
+    workspace.writeFile('a/src/sub/two.ts', 'two 2');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+    // E.g. a runner that closed its worker ran the command in a shell. The next process watches the new folder.
+    watchesInputs = false;
+    workspace.writeFile('a/src/sub/two.ts', 'two 3');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+    workspace.recreateFolder('a/src/sub');
+    workspace.writeFile('a/src/sub/two.ts', 'two 4');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
   });
 
   it('runs the initial command after an incremental command that emitted a content-hashed file', async () => {

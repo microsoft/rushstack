@@ -322,6 +322,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_WATCH: "RUSH_DAEMON_WATCH";
     readonly RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: "RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS";
     readonly RUSH_DAEMON_INCREMENTAL_BUILDS: "RUSH_DAEMON_INCREMENTAL_BUILDS";
+    readonly RUSH_DAEMON_WARM_WORKERS: "RUSH_DAEMON_WARM_WORKERS";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
@@ -535,6 +536,7 @@ export interface IDaemonConfigurationJson {
     readonly warmIdleTimeoutSeconds?: number;
     readonly warmMemoryBudgetMB?: number;
     readonly warmSetMaxProjects?: number;
+    readonly warmWorkers?: boolean;
     readonly watch?: boolean;
 }
 
@@ -620,8 +622,13 @@ export interface IGlobalCommand extends IRushCommand {
 
 // @beta
 export interface IIncrementalExecutionGuard {
-    getBlockReasonAsync(): Promise<string | undefined>;
-    verifyIncrementalResultAsync(): Promise<string | undefined>;
+    getBlockReasonAsync(options?: IIncrementalExecutionGuardOptions): Promise<string | undefined>;
+    verifyIncrementalResultAsync(options?: IIncrementalExecutionGuardOptions): Promise<string | undefined>;
+}
+
+// @beta
+export interface IIncrementalExecutionGuardOptions {
+    readonly outputsMayBeBundles?: boolean;
 }
 
 // @public
@@ -724,6 +731,7 @@ export interface _IOperationChildProcessReporter {
 export interface IOperationCommandExecution {
     readonly hasIncrementalCommand: boolean;
     readonly kind: 'initial' | 'incremental';
+    readonly watchesInputs?: boolean;
 }
 
 // @alpha
@@ -875,6 +883,7 @@ export interface IOperationRunnerContext {
 // @alpha (undocumented)
 export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
+    allowDaemonWarmWorker?: boolean;
     daemonIpc?: IDaemonIpcConfiguration;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];

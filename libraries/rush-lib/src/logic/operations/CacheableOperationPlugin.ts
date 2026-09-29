@@ -51,7 +51,7 @@ import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration'
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import { enableUnverifiedRetainedOperations, markResultUnverifiable } from './RetainedResultVerification';
-import { wasExecutedIncrementally } from './IncrementalExecutionState';
+import { isBuildCacheReadSkipped, wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -516,6 +516,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }
               return !!restoreFromCacheSuccess;
             };
+            // A runner that reuses outputs that it keeps in memory, e.g. a warm worker, can skip the read.
+            const isCacheReadAllowed: boolean =
+              buildCacheContext.isCacheReadAllowed && !isBuildCacheReadSkipped(record);
             if (cobuildLock) {
               // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
               // the build cache once completed, but does not retrieve them (since the "incremental"
@@ -539,14 +542,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 if (restoreFromCacheSuccess) {
                   return status;
                 }
-              } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
+              } else if (!buildCacheContext.isCacheReadAttempted && isCacheReadAllowed) {
                 const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
 
                 if (restoreFromCacheSuccess) {
                   return OperationStatus.FromCache;
                 }
               }
-            } else if (buildCacheContext.isCacheReadAllowed) {
+            } else if (isCacheReadAllowed) {
               const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
 
               if (restoreFromCacheSuccess) {

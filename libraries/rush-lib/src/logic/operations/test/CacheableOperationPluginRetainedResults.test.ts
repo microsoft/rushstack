@@ -60,7 +60,7 @@ import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
-import { setCommandExecution } from '../IncrementalExecutionState';
+import { setCommandExecution, skipBuildCacheRead } from '../IncrementalExecutionState';
 import { NullOperationRunner } from '../NullOperationRunner';
 
 const mockPhase: IPhase = {
@@ -601,6 +601,36 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
     await testGraph.executeAsync();
     expect(testGraph.executions).toEqual(['c']);
     expect(testGraph.cacheWrites).toEqual(['c']);
+  });
+
+  it('does not restore an operation whose runner skipped the build cache read, and writes neither it nor its consumers', async () => {
+    // "a" <- "b"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    // Like a warm worker, whose outputs are what it keeps in memory: a restore would not update them.
+    testGraph.graph.hooks.beforeExecuteOperationAsync.tapPromise(
+      { name: 'skip-read', stage: -1 },
+      async (record: IOperationRunnerContext & IOperationExecutionResult): Promise<undefined> => {
+        if (testGraph.incrementalNames.has(record.operation.associatedProject.packageName)) {
+          skipBuildCacheRead(record);
+        }
+        return undefined;
+      }
+    );
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+
+    testGraph.localHashes.set('a', 'a-v2');
+    testGraph.incrementalNames.add('a');
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['a:incremental', 'b']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // Revert "a": both operations have an entry from the first iteration, but only "b" may be restored.
+    testGraph.localHashes.set('a', 'a-v1');
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual(['b']);
+    expect(testGraph.executions).toEqual(['a:incremental']);
+    expect(testGraph.cacheWrites).toEqual([]);
   });
 
   it('does not re-enable operations that another plugin disabled', async () => {

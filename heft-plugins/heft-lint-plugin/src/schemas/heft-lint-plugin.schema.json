@@ -13,6 +13,12 @@
       "type": "boolean"
     },
 
+    "lintInWatchMode": {
+      "title": "Lint In Watch Mode",
+      "description": "If set to true, lint in watch mode too. Each run lints the files that TypeScript reports as changed and the files that had lint failures, as a run that is not in watch mode does. Defaults to false, which skips linting in watch mode.",
+      "type": "boolean"
+    },
+
     "sarifLogPath": {
       "title": "SARIF Log Path",
       "description": "If specified and using ESLint, a log describing the lint configuration and all messages (suppressed or not) will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the project root.",

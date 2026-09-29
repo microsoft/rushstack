@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Fix an issue where, with `onlyResolveSymlinksInNodeModules`, every build in watch mode failed with an ENOENT error after the `package.json` file of a dependency was rewritten, for example by Git.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

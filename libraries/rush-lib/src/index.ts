@@ -166,6 +166,7 @@ export type {
 } from './logic/operations/IOperationRunner';
 export type {
   IIncrementalExecutionGuard,
+  IIncrementalExecutionGuardOptions,
   IOperationCommandExecution
 } from './logic/operations/IncrementalExecutionState';
 export type {

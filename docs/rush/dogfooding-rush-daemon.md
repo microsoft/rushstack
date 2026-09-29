@@ -188,9 +188,10 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   `--watch`, `--install`, `--variant`, and `--node-diagnostic-dir` stay native, as do build event-hook
   scripts and reporter controls such as `--output`. Keep using ordinary Rush for `install`, `update`, and
   other commands. `rushx-client` keeps scripts attached to a TTY in-process.
-- **No persistent Heft or TypeScript workers.** Each operation still starts its Heft process; the daemon
-  saves Rush startup and graph construction, not compilation. The `usePersistentIpcRunners`/`daemonIpc`
-  mode requires a bundled, self-contained worker entry point, and Heft is not packaged that way.
+- **No persistent Heft or TypeScript workers by default.** Each operation still starts its Heft process; the
+  daemon saves Rush startup and graph construction, not compilation. The `usePersistentIpcRunners`/`daemonIpc`
+  mode requires a bundled, self-contained worker entry point, and Heft is not packaged that way. See
+  `daemon.warmWorkers` below for Heft workers that stay alive between builds.
 - **`:incremental` scripts.** With `daemon.incrementalBuilds` (on by default), an operation whose project
   defines a `_phase:<name>:incremental` script runs it instead of the initial script when only files that the
   operation builds were edited since its last successful run in the daemon. The operation log then says
@@ -199,6 +200,72 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   command make it run the initial script, and the log says why (`Not using the incremental command because
   ...`). Incremental results are never written to the build cache, and neither are the results of operations
   built against them. Set `RUSH_DAEMON_INCREMENTAL_BUILDS=0` to always run the initial script.
+- **Warm workers.** With `daemon.warmWorkers` (or `RUSH_DAEMON_WARM_WORKERS=1`, off by default) and
+  `incrementalBuilds`, an operation whose project defines a `_phase:<name>:incremental:ipc` script (for Heft,
+  `heft run-watch --only <phase> --`) and whose `rush-project.json` operation settings set
+  `"allowDaemonWarmWorker": true` runs its incremental builds in a worker started from that script. Set it only
+  if the script, run in watch mode, runs every task and check that the initial script runs: the daemon reports
+  a run on the worker as if the initial script had run, and `rush start` may run the same script with fewer
+  tasks on purpose. Heft skips lint and API Extractor in watch mode unless the lint task sets heft-lint-plugin's
+  `lintInWatchMode` option and `config/api-extractor-task.json` sets `runInWatchMode`; without them, a lint
+  error does not fail the build, and consumers read a stale `.d.ts` rollup. A rig can set all three for its
+  projects. The worker stays alive between builds and keeps its last build in memory, so the next build sends
+  it another run instead of starting Heft again. The operation log says `Invoking (incremental): ...`, followed
+  by `Starting a warm worker for it.` or `Sending run <n> to the warm worker (pid <pid>).`. When the rules above
+  require the initial script, the worker is closed first (`Closing the warm worker (pid <pid>), because ...`),
+  and that line is written even if the build cache then restores the operation. The initial script then runs
+  as usual, or in a new worker if the project defines `_phase:<name>:ipc` (for Heft,
+  `heft run-watch --only <phase> -- --clean`). A worker also accepts bundled outputs, because it keeps its
+  bundler state in memory; if a run changes which output files exist, the initial script runs after it. If the
+  run added or removed a file with a content hash in its name, as a bundler does when a chunk's content changes,
+  the operation runs only its initial script from then on, until a request replaces the engine, because each
+  later edit would rename the chunk again and leave the old one behind.
+  A worker starts with `TSC_WATCHFILE=UseFsEventsOnParentDirectory` unless the operation's environment sets
+  `TSC_WATCHFILE`. On Linux and macOS, TypeScript's default file watcher follows each file's inode, and after Git
+  replaces a file it can lose track of that file for the life of the process, so the worker would miss every later
+  edit to the file and keep its stale outputs, with no error. TypeScript reads the variable only if
+  `tsconfig.json` does not set `watchOptions.watchFile`. The variable's watcher fails loudly instead: on Linux,
+  if a source file is missing when a run on the worker updates the TypeScript program, for example because a
+  checkout deleted it during the build and then restored it, TypeScript never finds that file again in the
+  process. The run usually fails with error `TS6053` (file not found), or with `ENOENT` if a whole folder was
+  missing, and like any failed run it closes the worker (see below), so it costs a failed run but leaves no stale
+  outputs. But if Heft sees the change while the run is in progress, it runs its tasks again, and the last pass
+  decides the result. The run can then succeed with warnings, which fails the build unless the phase sets
+  `allowWarningsOnSuccess`, but nothing runs again and the worker stays alive. The next build does not reuse that
+  worker if a folder that held the operation's input files was recreated (see below), or if the build cache is
+  enabled for the operation, because input files that changed while an operation ran make its result
+  unverifiable. A single file that is deleted and restored keeps its folder, so neither check applies to it, but
+  a program that still misses the file reports `TS6053` again in the next run on the worker, which then fails
+  and closes the worker as above.
+  A watcher of a folder can also miss every later change in it once the folder is deleted and created again, for
+  example by a branch switch that removed the folder and then restored it. So the next build runs the initial
+  script if a folder that held the operation's input files was deleted or recreated since the last run on the
+  worker (`Not using the incremental command because folders that held its input files were deleted or
+  recreated since its last run (...)`), even if the files kept their content. The daemon compares each folder's
+  inode and creation time; a file that an editor saves by renaming a new file over it does not count. The
+  message names only the top folder of a recreated tree.
+  A worker's outputs are only as current as Heft's watchers. A change that a watcher misses is not built, and
+  because the run still succeeds, later builds report the operation as up to date and keep the stale outputs
+  until the file is edited again. The checks above cover the cases found in testing: a file that Git replaces, a
+  folder that is recreated, and a file that is missing while a run updates TypeScript. A case that none of them
+  covers would leave stale outputs without an error.
+  A reused worker can fail where the initial script passes, for example after Git rewrites the `package.json` of
+  a dependency, because some tools keep state between runs. So if a run on a reused worker fails, or the worker
+  exits during a run, the worker is closed and the initial script runs in the same build
+  (`Running the initial command, because the run on the warm worker failed.`), and the operation fails only if
+  the initial script fails too. A genuine error then costs an extra run of the initial script. The failed first
+  run of a new worker is reported as it stands, because that run had no earlier state. The build cache is not
+  read for a run on a live worker. A worker is closed after its operation fails, because the next build runs the
+  initial script, and after 25 runs or once its memory doubles. Builds that follow each other within seconds can
+  double a worker's memory in a few runs without a leak, because V8 collects each run's garbage later, while the
+  worker is idle: with API Extractor in watch mode, a small package's worker grew by 120 to 180 MB per run and was
+  replaced every 4 or 5 runs, but with 20 seconds between builds it stayed flat. Workers count toward
+  `warmMemoryBudgetMB` and `warmSetMaxProjects`. Over either limit, or once no build has included a project for
+  `warmIdleTimeoutSeconds`, the warm set closes the project's workers and drops its last results, so its next
+  build runs the initial script (`The warm worker (pid <pid>) was closed after the operation last ran.`). The
+  default budget, 512 MiB, includes the daemon itself and leaves room for few workers, so raise both limits when
+  you turn workers on. A request that replaces the engine, e.g. a `rebuild` after a `build`, closes every worker
+  without a note, and each operation's next build runs the initial script.
 - **Plugins.** This repository's only configured plugin, `@rushstack/rush-published-versions-json-plugin`,
   is associated only with `record-published-versions` and is inert for builds. A plugin without
   `associatedCommands`, a plugin associated with `build` or `rebuild`, or a plugin command-line that defines

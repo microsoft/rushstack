@@ -323,8 +323,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   /**
    * {@inheritdoc IOperationRunnerContext.reportCommandExecution}
    */
-  public reportCommandExecution({ kind, hasIncrementalCommand }: IOperationCommandExecution): void {
-    setCommandExecution(this, { kind, hasIncrementalCommand });
+  public reportCommandExecution({
+    kind,
+    hasIncrementalCommand,
+    watchesInputs
+  }: IOperationCommandExecution): void {
+    setCommandExecution(this, { kind, hasIncrementalCommand, watchesInputs });
   }
 
   public get silent(): boolean {

@@ -118,8 +118,7 @@ export function getCleanOnlyReason(files: Iterable<string>): string | undefined 
   let bundleFile: string | undefined;
   for (const file of files) {
     const baseName: string = file.slice(file.lastIndexOf('/') + 1);
-    const match: RegExpExecArray | null = HASHED_BUNDLE_FILE_REGEXP.exec(baseName);
-    if (match && /\d/.test(match[1])) {
+    if (isContentHashedBundleFile(baseName)) {
       return `its outputs include the content-hashed file "${file}"`;
     }
     if (bundleFile === undefined && BUNDLE_FILE_REGEXP.test(baseName) && BUNDLE_FOLDER_REGEXP.test(file)) {
@@ -129,9 +128,48 @@ export function getCleanOnlyReason(files: Iterable<string>): string | undefined 
   return bundleFile === undefined ? undefined : `its outputs include the bundle "${bundleFile}"`;
 }
 
+function isContentHashedBundleFile(baseName: string): boolean {
+  const match: RegExpExecArray | null = HASHED_BUNDLE_FILE_REGEXP.exec(baseName);
+  return !!match && /\d/.test(match[1]);
+}
+
+// A chunk or asset that a bundler named after its content, which it renames whenever the content changes.
+function isContentHashedOutput(file: string): boolean {
+  return (
+    isContentHashedBundleFile(file.slice(file.lastIndexOf('/') + 1)) ||
+    (CONTENT_ADDRESSED_PATH_REGEXP.test(file) && BUNDLE_FOLDER_REGEXP.test(file))
+  );
+}
+
+// A content-hashed file that a bundler emits is not a cache entry: a full build would not leave an old one behind.
+function isCacheEntry(file: string): boolean {
+  return CONTENT_ADDRESSED_PATH_REGEXP.test(file) && !isContentHashedOutput(file);
+}
+
+/**
+ * Whether a content-hashed chunk or asset, as bundlers emit, is among the files that were added or removed.
+ */
+export function hasContentHashedOutputChange(
+  before: ReadonlySet<string>,
+  after: ReadonlySet<string>
+): boolean {
+  for (const file of after) {
+    if (!before.has(file) && isContentHashedOutput(file)) {
+      return true;
+    }
+  }
+  for (const file of before) {
+    if (!after.has(file) && isContentHashedOutput(file)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Describes how two sets of output files differ, e.g. `2 added ("lib/a.js", ...), 1 removed ("lib/b.js")`.
- * Files whose paths contain a content hash, such as cache entries, are ignored.
+ * Cache entries whose paths contain a content hash are ignored. Content-hashed bundles, and files in a `dist` or
+ * `release` folder, are not.
  */
 export function describeOutputFileChanges(
   before: ReadonlySet<string>,
@@ -140,12 +178,12 @@ export function describeOutputFileChanges(
   const added: string[] = [];
   const removed: string[] = [];
   for (const file of after) {
-    if (!before.has(file) && !CONTENT_ADDRESSED_PATH_REGEXP.test(file)) {
+    if (!before.has(file) && !isCacheEntry(file)) {
       added.push(file);
     }
   }
   for (const file of before) {
-    if (!after.has(file) && !CONTENT_ADDRESSED_PATH_REGEXP.test(file)) {
+    if (!after.has(file) && !isCacheEntry(file)) {
       removed.push(file);
     }
   }

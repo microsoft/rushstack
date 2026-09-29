@@ -20,6 +20,13 @@ export interface IDaemonConfigurationJson {
    * incremental script are not written to the build cache. Defaults to true.
    */
   readonly incrementalBuilds?: boolean;
+  /**
+   * Keeps a watch-mode worker (the `<phase>:incremental:ipc` script) alive between daemon builds for each operation
+   * whose rush-project.json operation settings set `allowDaemonWarmWorker`, and sends it the next incremental run
+   * when `incrementalBuilds` allows one. Otherwise the worker is closed and the initial script runs. Requires
+   * `incrementalBuilds`. Defaults to false.
+   */
+  readonly warmWorkers?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
   /**
@@ -53,6 +60,7 @@ const defaults: Required<IDaemonConfigurationJson> = {
   watch: false,
   usePersistentIpcRunners: false,
   incrementalBuilds: true,
+  warmWorkers: false,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
@@ -70,6 +78,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     watch: 'RUSH_DAEMON_WATCH',
     usePersistentIpcRunners: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
     incrementalBuilds: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
+    warmWorkers: 'RUSH_DAEMON_WARM_WORKERS',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
@@ -113,6 +122,7 @@ export function resolveDaemonConfiguration(
     watch: booleanOption('watch', json, environment),
     usePersistentIpcRunners: booleanOption('usePersistentIpcRunners', json, environment),
     incrementalBuilds: booleanOption('incrementalBuilds', json, environment),
+    warmWorkers: booleanOption('warmWorkers', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
@@ -159,7 +169,8 @@ function booleanOption(
     | 'watch'
     | 'autoWarmByTelemetry'
     | 'usePersistentIpcRunners'
-    | 'incrementalBuilds',
+    | 'incrementalBuilds'
+    | 'warmWorkers',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

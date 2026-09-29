@@ -162,5 +162,21 @@ describe(OperationExecutionRecord.name, () => {
       record.reportCommandExecution({ kind: 'initial', hasIncrementalCommand: true });
       expect(wasExecutedIncrementally(record)).toBe(false);
     });
+
+    it('records whether the runner reports that the command ran in a process that watches the input files', () => {
+      const record: OperationExecutionRecord = createRecord(
+        createOperation({ project: createProject('project-watching') })
+      );
+
+      record.reportCommandExecution({
+        kind: 'incremental',
+        hasIncrementalCommand: true,
+        watchesInputs: true
+      });
+      expect(getCommandExecution(record)?.watchesInputs).toBe(true);
+
+      record.reportCommandExecution({ kind: 'initial', hasIncrementalCommand: true });
+      expect(getCommandExecution(record)?.watchesInputs).toBeUndefined();
+    });
   });
 });

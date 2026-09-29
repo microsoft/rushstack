@@ -12,6 +12,7 @@ describe('daemon configuration', () => {
       autoStart: true,
       usePersistentIpcRunners: false,
       incrementalBuilds: true,
+      warmWorkers: false,
       idleTimeoutSeconds: 900
     });
     expect(
@@ -37,7 +38,8 @@ describe('daemon configuration', () => {
     { RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: '' },
     { RUSH_DAEMON_EXPERIMENTAL: 'yes' },
     { RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'yes' },
-    { RUSH_DAEMON_INCREMENTAL_BUILDS: 'off' }
+    { RUSH_DAEMON_INCREMENTAL_BUILDS: 'off' },
+    { RUSH_DAEMON_WARM_WORKERS: 'true' }
   ])('rejects invalid overrides %j', (environment) => {
     expect(() => resolveDaemonConfiguration({}, environment)).toThrow();
   });
@@ -56,6 +58,7 @@ describe('daemon configuration', () => {
     { autoWarmByTelemetry: 1 },
     { usePersistentIpcRunners: 'true' },
     { incrementalBuilds: 'false' },
+    { warmWorkers: 1 },
     { compatiblePlugins: 'rush-example-plugin' },
     { compatiblePlugins: [''] },
     { compatiblePlugins: [' rush-example-plugin'] },
@@ -82,6 +85,14 @@ describe('daemon configuration', () => {
     );
   });
 
+  it('keeps warm workers only if the environment or configuration turns them on', () => {
+    expect(resolveDaemonConfiguration({ warmWorkers: true }, {}).warmWorkers).toBe(true);
+    expect(
+      resolveDaemonConfiguration({ warmWorkers: true }, { RUSH_DAEMON_WARM_WORKERS: '0' }).warmWorkers
+    ).toBe(false);
+    expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_WARM_WORKERS: '1' }).warmWorkers).toBe(true);
+  });
+
   it('resolves compatible plugin names from the environment, then configuration, then no plugins', () => {
     expect(resolveDaemonConfiguration({}, {}).compatiblePlugins).toEqual([]);
     const configured: string[] = ['rush-a-plugin', 'rush-b-plugin'];
@@ -97,8 +108,10 @@ describe('daemon configuration', () => {
     // An empty value is an explicit override that declares no plugins.
     for (const value of ['', ' ']) {
       expect(
-        resolveDaemonConfiguration({ compatiblePlugins: configured }, { RUSH_DAEMON_COMPATIBLE_PLUGINS: value })
-          .compatiblePlugins
+        resolveDaemonConfiguration(
+          { compatiblePlugins: configured },
+          { RUSH_DAEMON_COMPATIBLE_PLUGINS: value }
+        ).compatiblePlugins
       ).toEqual([]);
     }
     const resolved: readonly string[] = resolveDaemonConfiguration(

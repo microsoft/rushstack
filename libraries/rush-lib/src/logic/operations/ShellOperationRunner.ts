@@ -41,7 +41,10 @@ export interface IShellOperationRunnerOptions {
   ignoredParameterValues: ReadonlyArray<string>;
 }
 
-interface ICommandTerminals {
+/**
+ * The terminals that `ShellOperationRunner.invokeCommandAsync` writes to.
+ */
+export interface ICommandTerminals {
   readonly terminal: ITerminal;
   readonly terminalProvider: ITerminalProvider;
   readonly structuredChildOutputTerminalProvider: ITerminalProvider;
@@ -166,21 +169,40 @@ export class ShellOperationRunner implements IOperationRunner {
 
   async #invokeCommandAsync(
     context: IOperationRunnerContext,
+    terminals: ICommandTerminals,
+    kind: ICommandExecution['kind'],
+    commandToRun: string
+  ): Promise<OperationStatus> {
+    if (this.#incrementalCommandRequiresGuard) {
+      // Recorded before the command starts, so that outputs of a command that fails or is aborted are attributed to it.
+      setCommandExecution(context, { kind, hasIncrementalCommand: this.#incrementalCommand !== undefined });
+    }
+    return await ShellOperationRunner.invokeCommandAsync(
+      context,
+      terminals,
+      this.#rushProject,
+      kind,
+      commandToRun
+    );
+  }
+
+  /**
+   * Runs a command of an operation in a shell, in the folder of its project, and returns the operation's status.
+   * It does not record the command execution for the incremental execution guard; the caller does that.
+   */
+  public static async invokeCommandAsync(
+    context: IOperationRunnerContext,
     { terminal, terminalProvider, structuredChildOutputTerminalProvider }: ICommandTerminals,
+    rushProject: RushConfigurationProject,
     kind: ICommandExecution['kind'],
     commandToRun: string
   ): Promise<OperationStatus> {
     let hasWarningOrError: boolean = false;
 
-    if (this.#incrementalCommandRequiresGuard) {
-      // Recorded before the command starts, so that outputs of a command that fails or is aborted are attributed to it.
-      setCommandExecution(context, { kind, hasIncrementalCommand: this.#incrementalCommand !== undefined });
-    }
-
     // Run the operation
     terminal.writeLine(`Invoking (${kind}): ${commandToRun}`);
 
-    const { rushConfiguration, projectFolder } = this.#rushProject;
+    const { rushConfiguration, projectFolder } = rushProject;
 
     const { environment: initialEnvironment, abortSignal } = context;
     const childProcessReporter: IOperationChildProcessReporter | undefined =
@@ -291,7 +313,7 @@ export class ShellOperationRunner implements IOperationRunner {
 /**
  * Returns what an incremental execution guard returned, or why it failed.
  */
-async function getGuardResultAsync(
+export async function getGuardResultAsync(
   getResultAsync: () => Promise<string | undefined>
 ): Promise<string | undefined> {
   try {

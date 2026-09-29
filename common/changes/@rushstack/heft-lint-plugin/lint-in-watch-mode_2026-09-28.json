@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Add a `lintInWatchMode` option. When it is set, each run in watch mode lints the files that changed and the files that had lint failures, as a run that is not in watch mode does.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}
