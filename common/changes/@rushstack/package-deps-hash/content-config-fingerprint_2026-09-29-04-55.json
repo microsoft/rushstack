@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "`RepoStateCache` now compares the content of the Git configuration and attributes files, not their timestamps, so a file that Git rewrites with the same content, for example the repository's configuration when `git branch -D` deletes a branch, no longer makes the next calls copy the Git index and hash files again. A missing file counts as an empty one. The cache still copies the index again after a call during which one of these files may have been written.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "selarkin@microsoft.com"
+}

@@ -709,6 +709,113 @@ describe(RepoStateCache.name, () => {
     expect(state.files.get('a.txt')).toBe(hashText('modified\n'));
   });
 
+  it('reuses the copy of the index and the hashes when Git rewrites its configuration with the same content', async () => {
+    settleFiles();
+    writeFile('a.txt', 'modified\n');
+    await getStateAsync();
+    const configurationPath: string = path.join(repoPath, '.git', 'config');
+    const { ino } = fs.statSync(configurationPath);
+    const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+
+    // Git writes a new file with the same content when it deletes a branch that has no configuration
+    runGit('branch', 'other');
+    runGit('branch', '-D', 'other');
+    expect(fs.statSync(configurationPath).ino).not.toBe(ino);
+    takeGitCommands();
+    const state: IDetailedRepoState = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(writeFileSpy).not.toHaveBeenCalled();
+    expect(takeGitCommandNames()).toEqual(['status']);
+  });
+
+  it('reuses the copy of the index when a missing configuration file is created empty', async () => {
+    settleFiles();
+    writeFile('a.txt', 'modified\n');
+    await getStateAsync();
+    const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+
+    // Git reads a missing file as an empty one
+    writeFile('.git/info/attributes', '');
+    takeGitCommands();
+    const state: IDetailedRepoState = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(writeFileSpy).not.toHaveBeenCalled();
+    expect(takeGitCommandNames()).toEqual(['status']);
+  });
+
+  it('reads a configuration file that cannot be read as an empty one, as Git does', async () => {
+    settleFiles();
+    writeFile('a.txt', 'modified\n');
+    // Git ignores a folder in place of the file
+    const attributesPath: string = path.join(repoPath, '.git', 'info', 'attributes');
+    fs.mkdirSync(attributesPath, { recursive: true });
+    await getStateAsync();
+    const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+    takeGitCommands();
+    await expectUncachedStateAsync(await getStateAsync());
+    expect(writeFileSpy).not.toHaveBeenCalled();
+    expect(takeGitCommandNames()).toEqual(['status']);
+
+    fs.rmdirSync(attributesPath);
+    writeFile('.git/info/attributes', '');
+    await expectUncachedStateAsync(await getStateAsync());
+    expect(writeFileSpy).not.toHaveBeenCalled();
+    expect(takeGitCommandNames()).toEqual(['status']);
+  });
+
+  it('hashes files again when a configuration file changes during a call, even if it changes back', async () => {
+    settleFiles();
+    writeFile('a.txt', 'modified\r\n');
+    await getStateAsync();
+    const configurationPath: string = path.join(repoPath, '.git', 'config');
+    const configuration: Buffer = fs.readFileSync(configurationPath);
+    // The next call hashes the file under another configuration, which is gone again when the call ends
+    writeFile('a.txt', 'changed\r\n');
+    beforeSpawn = ({ command }: IGitCommand) => {
+      if (command === 'hash-object') {
+        runGit('config', 'core.autocrlf', 'true');
+      }
+    };
+    afterSpawn = ({ command }: IGitCommand, childProcess: ChildProcess) => {
+      if (command === 'hash-object') {
+        childProcess.once('exit', () => fs.writeFileSync(configurationPath, configuration));
+      }
+    };
+    let state: IDetailedRepoState = await getStateAsync();
+    expect(state.files.get('a.txt')).toBe(hashText('changed\n'));
+    expect(fs.readFileSync(configurationPath)).toEqual(configuration);
+
+    beforeSpawn = undefined;
+    afterSpawn = undefined;
+    const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+    takeGitCommands();
+    state = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(state.files.get('a.txt')).toBe(hashText('changed\r\n'));
+    expect(writeFileSpy).toHaveBeenCalledTimes(1);
+    expect(takeGitCommandNames()).toEqual(['hash-object', 'status']);
+  });
+
+  it('copies the index again after a call that started while a configuration file could change unseen', async () => {
+    const configurationPath: string = path.join(repoPath, '.git', 'config');
+    const changeTimeMs: number = Number(
+      fs.statSync(configurationPath, { bigint: true }).ctimeNs / BigInt(1e6)
+    );
+    // A write right after the last change might not change the stamp of the file
+    const dateNowSpy: jest.SpyInstance = jest.spyOn(Date, 'now').mockReturnValue(changeTimeMs + 50);
+    await getStateAsync();
+    const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+    await expectUncachedStateAsync(await getStateAsync());
+    expect(writeFileSpy).toHaveBeenCalledTimes(1);
+
+    // Any later write changes the stamp, so the call after the next one reuses the copy
+    dateNowSpy.mockReturnValue(changeTimeMs + 5000);
+    await getStateAsync();
+    expect(writeFileSpy).toHaveBeenCalledTimes(2);
+    await expectUncachedStateAsync(await getStateAsync());
+    expect(writeFileSpy).toHaveBeenCalledTimes(2);
+  });
+
   it('reads the index again while its stamp may still change', async () => {
     settleFiles();
     const summarizeSpy: jest.SpyInstance = jest.spyOn(GitIndexFile, 'summarizeGitIndex');

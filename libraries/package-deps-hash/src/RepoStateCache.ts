@@ -7,7 +7,13 @@ import * as path from 'node:path';
 
 import { FileSystem } from '@rushstack/node-core-library/lib/FileSystem';
 
-import { getFileStamp, getSettledBeforeNs, isFileStatSettled } from './FileStamp';
+import {
+  getFileStamp,
+  getSettledBeforeNs,
+  getTimeNs,
+  isFileStatSettled,
+  revealsWriteAfter
+} from './FileStamp';
 import {
   type IGitIndexSummary,
   summarizeGitIndex,
@@ -58,6 +64,7 @@ const INDEX_HEADER_LENGTH: number = 12;
 const NANOSECONDS_PER_SECOND: bigint = BigInt(1e9);
 const PRIVATE_FOLDER_PREFIX: string = 'package-deps-hash-';
 const PRIVATE_INDEX_NAME: string = 'index';
+const EMPTY_CONTENT: Buffer = Buffer.alloc(0);
 const ATTRIBUTES_FILE_NAME: string = '.gitattributes';
 
 // Unlike the other commands, "git status" doesn't pass "--no-optional-locks", so that it can save its refreshed
@@ -81,6 +88,23 @@ interface IGitPaths {
    * The configuration and attributes files that the hashes of files may depend on.
    */
   readonly configurationPaths: ReadonlyArray<string>;
+}
+
+interface IConfigurationFile {
+  readonly path: string;
+  /**
+   * The content of the file. Git reads a missing file as an empty one, and ignores one that it can't read, if it
+   * doesn't fail.
+   */
+  readonly content: Buffer;
+  /**
+   * The stamp of the file when the call read it, or the code of the error that prevented examining it.
+   */
+  readonly stamp: string;
+  /**
+   * Whether any later write to the file changes its stamp.
+   */
+  readonly revealsLaterWrite: boolean;
 }
 
 interface IPrivateIndex {
@@ -153,9 +177,11 @@ function noop(): void {}
  * A call may return the same state as an earlier call, so the state must not be modified.
  *
  * The state also depends on the attributes and configuration of Git, under which `git status` refreshed the copy.
- * The index is copied again, and the files hashed again, when the repository's configuration or `info/attributes`
- * file changes, or when the user's `.gitconfig` file or the Git configuration or attributes file in the user's
- * configuration folder changes. The index is copied again when a `.gitattributes` file changes that `git status`
+ * The index is copied again, and the files hashed again, when the content of the repository's configuration or
+ * `info/attributes` file changes, or of the user's `.gitconfig` file or the Git configuration or attributes file in
+ * the user's configuration folder, or when one of these files may have been written during the previous call, while
+ * Git read it. A file that is rewritten with the same content, as `git branch -D` rewrites the configuration of the
+ * repository, isn't a change. The index is copied again when a `.gitattributes` file changes that `git status`
  * lists as modified or untracked, or that is in a folder that contains a filter path; the call that detects the
  * change computes the state without the cache. The index is also copied again when the filter changes. Changes to
  * the system configuration, to a configuration file included by another, to a custom `core.attributesFile`, or to
@@ -181,7 +207,10 @@ export class RepoStateCache {
   #privateIndex: IPrivateIndex | undefined;
   #tree: ITree | undefined;
   #previousResult: IResult | undefined;
-  #configurationFingerprint: string = '';
+  /**
+   * The configuration files as the last call read them, if Git read the same versions of them during that call
+   */
+  #configurationFiles: ReadonlyArray<IConfigurationFile> | undefined;
   #unsettledFingerprintCount: number = 0;
   readonly #fileHashes: Map<string, IFileHash> = new Map();
 
@@ -238,6 +267,7 @@ export class RepoStateCache {
         return state;
       }
 
+      this.#checkConfigurationFiles();
       if (state) {
         this.#consecutiveFailureCount = 0;
         return state;
@@ -269,13 +299,12 @@ export class RepoStateCache {
     const settledBeforeNs: bigint = getSettledBeforeNs();
     const gitPaths: IGitPaths = await this.#getGitPathsAsync();
     const filterKey: string = JSON.stringify(filterPath ?? []);
-    const configurationFingerprint: string = this.#getFingerprint(
-      gitPaths.configurationPaths,
-      settledBeforeNs
-    );
-    const hasConfigurationChanged: boolean = configurationFingerprint !== this.#configurationFingerprint;
+    const configurationFiles: IConfigurationFile[] = readConfigurationFiles(gitPaths.configurationPaths);
+    // Only the content counts. Git rewrites a configuration file with the same content, for example when
+    // "git branch -D" deletes a branch.
+    const hasConfigurationChanged: boolean = !haveSameContent(this.#configurationFiles, configurationFiles);
+    this.#configurationFiles = configurationFiles;
     if (hasConfigurationChanged) {
-      this.#configurationFingerprint = configurationFingerprint;
       this.#fileHashes.clear();
     }
 
@@ -713,6 +742,21 @@ export class RepoStateCache {
   }
 
   /**
+   * Git reads the configuration files while a call runs. If one of them may have been written since the call read
+   * it, Git may have read another version of it, so the next call treats the configuration as changed.
+   */
+  #checkConfigurationFiles(): void {
+    if (
+      this.#configurationFiles?.some(
+        ({ path: filePath, stamp, revealsLaterWrite }: IConfigurationFile) =>
+          !revealsLaterWrite || getStampOrErrorStamp(filePath) !== stamp
+      )
+    ) {
+      this.#configurationFiles = undefined;
+    }
+  }
+
+  /**
    * Identifies the versions of the files. A file that changed recently gets a fingerprint that matches no other.
    */
   #getFingerprint(filePaths: Iterable<string>, settledBeforeNs: bigint): string {
@@ -755,7 +799,7 @@ export class RepoStateCache {
     this.#privateIndex = undefined;
     this.#tree = undefined;
     this.#previousResult = undefined;
-    this.#configurationFingerprint = '';
+    this.#configurationFiles = undefined;
     this.#fileHashes.clear();
     // Start over in a new folder, in case something deleted this one
     if (this.#privateFolderPath) {
@@ -856,6 +900,59 @@ function tryReadGitIndexEntryCount(indexPath: string): number | undefined {
 function getParentFolderPath(relativePath: string): string {
   const separatorIndex: number = Math.max(relativePath.lastIndexOf('/'), relativePath.lastIndexOf('\\'));
   return separatorIndex < 0 ? '' : relativePath.slice(0, separatorIndex);
+}
+
+function readConfigurationFiles(filePaths: ReadonlyArray<string>): IConfigurationFile[] {
+  // Take the time before examining any of the files, so that a write made after a file's examination is later
+  const timeNs: bigint = getTimeNs();
+  return filePaths.map((filePath: string) => readConfigurationFile(filePath, timeNs));
+}
+
+function readConfigurationFile(filePath: string, timeNs: bigint): IConfigurationFile {
+  let stats: fs.BigIntStats;
+  try {
+    stats = fs.statSync(filePath, { bigint: true });
+  } catch (error) {
+    // Creating the file changes its stamp
+    return { path: filePath, content: EMPTY_CONTENT, stamp: getErrorStamp(error), revealsLaterWrite: true };
+  }
+
+  let content: Buffer = EMPTY_CONTENT;
+  try {
+    content = fs.readFileSync(filePath);
+  } catch {
+    // For example, a folder in place of the file
+  }
+
+  return {
+    path: filePath,
+    content,
+    stamp: getFileStamp(stats),
+    revealsLaterWrite: revealsWriteAfter(stats, timeNs)
+  };
+}
+
+function getStampOrErrorStamp(filePath: string): string {
+  try {
+    return getFileStamp(fs.statSync(filePath, { bigint: true }));
+  } catch (error) {
+    return getErrorStamp(error);
+  }
+}
+
+function getErrorStamp(error: unknown): string {
+  return `!${(error as NodeJS.ErrnoException).code}`;
+}
+
+function haveSameContent(
+  previousFiles: ReadonlyArray<IConfigurationFile> | undefined,
+  files: ReadonlyArray<IConfigurationFile>
+): boolean {
+  // Both lists have a file for each of the same configuration paths, in the same order
+  return (
+    previousFiles?.length === files.length &&
+    files.every(({ content }: IConfigurationFile, i: number) => content.equals(previousFiles[i].content))
+  );
 }
 
 /**

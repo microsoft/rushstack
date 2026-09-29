@@ -15,6 +15,41 @@ import type * as fs from 'node:fs';
 export const SETTLED_FILE_AGE_MS: number = 3000;
 
 /**
+ * A write gets a newer ctime than a file's last change this many milliseconds earlier, on a filesystem whose
+ * timestamps have a fine granularity. It allows for a jiffy on Linux, and for the lag of the kernel's coarse clock
+ * behind this process's clock.
+ */
+const FINE_TIMESTAMP_MARGIN_MS: number = 100;
+
+/**
+ * Timestamps that are whole multiples of 10 milliseconds may come from a filesystem whose timestamps have a coarse
+ * granularity, such as FAT. Other timestamps have a fine granularity.
+ */
+const COARSE_TIMESTAMP_UNIT_NS: bigint = BigInt(1e7);
+
+const NANOSECONDS_PER_MILLISECOND: bigint = BigInt(1e6);
+
+/**
+ * Whether any write to a file made at or after `timeNs` changes the stamp of the file from the stamp of `stats`.
+ *
+ * @remarks
+ * Every write updates the file's ctime, and userspace can't set it. The write gets a newer ctime unless the file's
+ * last change falls within the granularity of the filesystem's timestamps before it.
+ */
+export function revealsWriteAfter(stats: fs.BigIntStats, timeNs: bigint): boolean {
+  const marginMs: number =
+    stats.ctimeNs % COARSE_TIMESTAMP_UNIT_NS === BigInt(0) ? SETTLED_FILE_AGE_MS : FINE_TIMESTAMP_MARGIN_MS;
+  return stats.ctimeNs < timeNs - BigInt(marginMs) * NANOSECONDS_PER_MILLISECOND;
+}
+
+/**
+ * The current time, in nanoseconds since the epoch, to compare with the times of files.
+ */
+export function getTimeNs(): bigint {
+  return BigInt(Date.now()) * NANOSECONDS_PER_MILLISECOND;
+}
+
+/**
  * The ctime and mtime a file must be older than for its stamp to be memoized. Take it before examining any of
  * the files, so that a write made after a file's examination gets a later ctime.
  */
