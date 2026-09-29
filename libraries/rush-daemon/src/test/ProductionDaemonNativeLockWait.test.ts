@@ -8,7 +8,8 @@ import {
   decodeDaemonControlMessage,
   type DaemonControlMessage,
   type IDaemonFrame,
-  type IDaemonNativeLockHolder
+  type IDaemonNativeLockHolder,
+  type IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
 
 import {
@@ -17,7 +18,11 @@ import {
   type INativeCommand,
   type INativeScriptGate
 } from './NativeEngineTestCommands';
-import { createWireEnvelope, DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
+import {
+  createWireEnvelope,
+  DaemonRequestWireClient,
+  type ITerminalExchange
+} from './DaemonRequestWireTestUtilities';
 import {
   createFixtureAsync,
   requestEnvironment,
@@ -119,7 +124,8 @@ describe('native production daemon engine, while a native Rush action holds the 
       await sendRequestAsync(fixture, 'loading', ['build', '--only', 'b']);
       await readNativeLockHolderAsync(fixture.client, 'loading');
 
-      // Waiting for another Rush process is contention, not progress that pauses the followers' wait timeouts.
+      // Waiting for another Rush process is contention, not progress that pauses the followers' wait timeouts. The
+      // followers wait for that process too, and are told which it is (#308).
       behind = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
       await behind.handshakeAsync();
       await behind.sendControlAsync({
@@ -131,16 +137,22 @@ describe('native production daemon engine, while a native Rush action holds the 
           commandOrigin: 'built-in'
         })
       });
-      expect((await behind.readTerminalAsync('behind')).terminal).toMatchObject({
+      const nativeLockHolder: IDaemonNativeLockHolder = getExpectedHolder(first.native);
+      const exchange: ITerminalExchange = await behind.readTerminalAsync('behind');
+      expect(exchange.terminal).toMatchObject({
         kind: 'requestResult',
         payload: {
           exitCode: 1,
           admissionErrorCode: 'wait-timeout',
-          errorMessage: expect.stringMatching(
-            /^The request was not admitted within its 1000ms wait timeout while waiting for another request's load/
-          )
+          errorMessage:
+            "The request was not admitted within its 1000ms wait timeout while waiting for another request's load " +
+            `or reload of the workspace graph, which waits for ${formatNativeLockHolder(nativeLockHolder)} to ` +
+            "release this repository's lock. Use --wait-timeout <seconds> to wait longer."
         }
       });
+      expect(getQueuePositionPayloads(exchange)).toEqual([
+        { position: 1, requestId: 'behind', nativeLockHolder }
+      ]);
 
       await first.gate.releaseAsync();
       expect(await first.native.result).toMatchObject({ exitCode: 0 });
@@ -246,6 +258,15 @@ async function sendRequestAsync(fixture: IFixture, requestId: string, argv: stri
       commandOrigin: 'built-in'
     })
   });
+}
+
+function getQueuePositionPayloads(
+  exchange: ITerminalExchange
+): IDaemonRequestQueuePositionMessage['payload'][] {
+  return exchange.frames
+    .filter((frame: IDaemonFrame) => frame.kind === DaemonFrameType.controlJson)
+    .map((frame: IDaemonFrame) => decodeDaemonControlMessage(frame.payload))
+    .flatMap((message: DaemonControlMessage) => (message.kind === 'queuePosition' ? [message.payload] : []));
 }
 
 /** Reads frames until the daemon says that the request waits for native Rush's repository lock. */

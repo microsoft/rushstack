@@ -196,7 +196,9 @@ fails at once, and the experimental graph request's lease does not wait. A serve
 reload that waits for such a process, since the script does not need the reload: it resolves and starts on the
 current generation at once, as it would have before the reload began, and the reload waits for it only until it
 has started. After an edit to `rush.json` or `common/config/rush/experiments.json`, the client runs it in-process
-at once instead, as it would if no reload were running.
+at once instead, as it would if no reload were running. Other requests that wait behind such a reload, such as
+builds, wait for that process too, and spend their wait timeouts meanwhile; their queue positions carry the same
+`nativeLockHolder`, with their own position, and a request whose timeout ends names the process in its failure.
 
 A client that subscribes with `supportsRequestStarted` (protocol 0.14) gets `requestStarted` once its request has left
 every queue, before anything from the request is applied. A phased batch sends it to each participant after the native

@@ -48,7 +48,9 @@ export interface IDaemonRequestQueuePositionMessage {
     readonly restartsForAnotherRequest?: boolean;
     /**
      * Set while the request waits for a Rush process that the daemon does not run to release the repository's
-     * lock, rather than for other requests. `position` is then 1. Older daemons omit it; older clients ignore it.
+     * lock. `position` is then 1 if the request waits for that process itself, rather than for other requests,
+     * or the request's own position if it waits behind another request's load or reload of the workspace graph
+     * that waits for that process. Older daemons omit it; older clients ignore it.
      */
     readonly nativeLockHolder?: IDaemonNativeLockHolder;
   };

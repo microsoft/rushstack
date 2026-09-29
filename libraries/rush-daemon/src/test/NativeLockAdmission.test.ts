@@ -7,8 +7,13 @@ import type {
   IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
 
-import { RequestSchedulerErrorCode } from '../RequestScheduler';
-import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
+import {
+  type IRequestLease,
+  RequestExclusivityClass,
+  RequestScheduler,
+  RequestSchedulerErrorCode
+} from '../RequestScheduler';
+import { AdmissionProgress, RequestAdmissionController } from '../WorkspaceRequestAdmission';
 
 const HOLDER: IDaemonNativeLockHolder = { pid: 4242, command: 'rush install' };
 const POLL_MS: number = 250;
@@ -99,6 +104,37 @@ function track(promise: Promise<ITestLock>): IAcquisition {
 
 function waitMessage(nativeLockHolder: IDaemonNativeLockHolder): IDaemonRequestQueuePositionMessage {
   return { kind: 'queuePosition', payload: { position: 1, requestId: 'request', nativeLockHolder } };
+}
+
+function positionMessage(
+  position: number,
+  nativeLockHolder?: IDaemonNativeLockHolder
+): IDaemonRequestQueuePositionMessage {
+  return {
+    kind: 'queuePosition',
+    payload: { position, requestId: 'request', ...(nativeLockHolder && { nativeLockHolder }) }
+  };
+}
+
+interface IAdmission {
+  settled: boolean;
+  lease?: IRequestLease;
+  error?: unknown;
+}
+
+function trackAdmission(promise: Promise<IRequestLease | undefined>): IAdmission {
+  const admission: IAdmission = { settled: false };
+  promise.then(
+    (lease: IRequestLease | undefined) => {
+      admission.settled = true;
+      admission.lease = lease;
+    },
+    (error: unknown) => {
+      admission.settled = true;
+      admission.error = error;
+    }
+  );
+  return admission;
 }
 
 describe(`${RequestAdmissionController.name} and native Rush's repository lock`, () => {
@@ -312,5 +348,186 @@ describe(`${RequestAdmissionController.name} and native Rush's repository lock`,
     await jest.advanceTimersByTimeAsync(0);
     expect(acquisition.error).toBe(writeError);
     expect(probe.lock.released).toBe(true);
+  });
+});
+
+describe(`${RequestAdmissionController.name} behind a graph transition that waits for the lock`, () => {
+  let probe: NativeLockProbe;
+  let scheduler: RequestScheduler;
+  let ownerLease: IRequestLease;
+  let transition: AdmissionProgress;
+
+  beforeEach(async () => {
+    jest.useFakeTimers();
+    probe = new NativeLockProbe();
+    scheduler = new RequestScheduler();
+    ownerLease = await scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive });
+    transition = new AdmissionProgress();
+  });
+
+  afterEach(() => {
+    ownerLease.release();
+    jest.useRealTimers();
+  });
+
+  /** The owner of the transition, which holds the gate, waits for the lock. */
+  function waitForLock(owner: ITestController): IAcquisition {
+    return track(owner.controller.acquireNativeLockAsync(probe.tryAcquire, probe.findHolder, transition));
+  }
+
+  it('tells the requests that wait behind it which process it waits for, until it takes the lock', async () => {
+    const owner: ITestController = createController(undefined);
+    const first: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const second: ITestController = createController(undefined);
+    const firstAdmission: IAdmission = trackAdmission(
+      first.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    const secondAdmission: IAdmission = trackAdmission(
+      second.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(first.messages).toEqual([positionMessage(1), positionMessage(1)]);
+    expect(second.messages).toEqual([positionMessage(2)]);
+
+    const lock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(owner.messages).toEqual([waitMessage(HOLDER)]);
+    expect(transition.nativeLockHolder).toEqual(HOLDER);
+    expect(first.messages.slice(2)).toEqual([positionMessage(1, HOLDER)]);
+    expect(second.messages.slice(1)).toEqual([positionMessage(2, HOLDER)]);
+
+    // Another process takes the lock before the reload does.
+    await jest.advanceTimersByTimeAsync(2 * POLL_MS);
+    probe.hold({ pid: 5151 });
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(first.messages.slice(3)).toEqual([positionMessage(1, { pid: 5151 })]);
+    expect(second.messages.slice(2)).toEqual([positionMessage(2, { pid: 5151 })]);
+
+    probe.free();
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(lock).toEqual({ settled: true, lock: probe.lock });
+    expect(transition.nativeLockHolder).toBeUndefined();
+    // They still wait behind the transition, but no longer for another process.
+    expect(first.messages.slice(4)).toEqual([positionMessage(1)]);
+    expect(second.messages.slice(3)).toEqual([positionMessage(2)]);
+    expect(owner.messages).toEqual([waitMessage(HOLDER), waitMessage({ pid: 5151 })]);
+    expect(firstAdmission.settled).toBe(false);
+    expect(secondAdmission.settled).toBe(false);
+
+    const messageCounts: number[] = [first.messages.length, second.messages.length];
+    ownerLease.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(firstAdmission.lease?.exclusivityClass).toBe(RequestExclusivityClass.SharedBuild);
+    expect(secondAdmission.lease?.exclusivityClass).toBe(RequestExclusivityClass.SharedBuild);
+    expect([first.messages.length, second.messages.length]).toEqual(messageCounts);
+
+    // A later wait for the lock, by the owner of the next transition, is nothing to the requests admitted already.
+    probe.hold({ pid: 6161 });
+    const nextLock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(transition.nativeLockHolder).toEqual({ pid: 6161 });
+    expect([first.messages.length, second.messages.length]).toEqual(messageCounts);
+    probe.free();
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(nextLock.lock).toBe(probe.lock);
+    firstAdmission.lease?.release();
+    secondAdmission.lease?.release();
+    for (const { controller } of [owner, first, second]) controller.dispose();
+  });
+
+  it('names the process to a request that starts waiting behind it while it waits for the lock', async () => {
+    const owner: ITestController = createController(undefined);
+    const lock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    const late: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const lateAdmission: IAdmission = trackAdmission(
+      late.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(late.messages).toEqual([positionMessage(1, HOLDER)]);
+
+    probe.free();
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(lock.lock).toBe(probe.lock);
+    expect(late.messages).toEqual([positionMessage(1, HOLDER), positionMessage(1)]);
+    ownerLease.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(lateAdmission.lease).toBeDefined();
+    lateAdmission.lease?.release();
+    owner.controller.dispose();
+    late.controller.dispose();
+  });
+
+  it('names the process in the timeout of a request that waits behind it', async () => {
+    const owner: ITestController = createController(undefined);
+    const follower: ITestController = createController({ waitTimeoutMs: 2000 });
+    const admission: IAdmission = trackAdmission(
+      follower.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    // The owner loads the graph first, which does not count against the follower's timeout.
+    transition.setActive(true);
+    await jest.advanceTimersByTimeAsync(900);
+    transition.setActive(false);
+    waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(1999);
+    expect(admission.settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(admission.error).toMatchObject({
+      code: RequestSchedulerErrorCode.WaitTimeout,
+      message:
+        "The request was not admitted within its 2000ms wait timeout while waiting for another request's load " +
+        'or reload of the workspace graph, which waits for another Rush process (PID 4242: rush install) to ' +
+        "release this repository's lock; 0.9s spent while that request loaded the graph did not count. " +
+        'Use --wait-timeout <seconds> to wait longer.'
+    });
+    expect(follower.messages).toEqual([positionMessage(1), positionMessage(1, HOLDER)]);
+    owner.controller.dispose();
+    follower.controller.dispose();
+  });
+
+  it('does not name the process in a later timeout once it has taken the lock', async () => {
+    const owner: ITestController = createController(undefined);
+    const follower: ITestController = createController({ waitTimeoutMs: 2000 });
+    const admission: IAdmission = trackAdmission(
+      follower.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    const lock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(4 * POLL_MS);
+    probe.free();
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(lock.lock).toBe(probe.lock);
+    await jest.advanceTimersByTimeAsync(2000 - 5 * POLL_MS - 1);
+    expect(admission.settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(admission.error).toMatchObject({
+      code: RequestSchedulerErrorCode.WaitTimeout,
+      message:
+        "The request was not admitted within its 2000ms wait timeout while waiting for another request's load " +
+        'or reload of the workspace graph. Use --wait-timeout <seconds> to wait longer.'
+    });
+    expect(follower.messages).toEqual([positionMessage(1), positionMessage(1, HOLDER), positionMessage(1)]);
+    owner.controller.dispose();
+    follower.controller.dispose();
+  });
+
+  it('does not name the process to a script that stopped waiting to pass it', async () => {
+    const owner: ITestController = createController(undefined);
+    const script: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const stopWaiting: AbortController = new AbortController();
+    const admission: IAdmission = trackAdmission(
+      script.controller.acquireBehindTransitionAsync(scheduler, transition, false, stopWaiting.signal)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(script.messages).toEqual([positionMessage(1)]);
+
+    // As the lifecycle does: the passage opens, and then the owner waits for the lock in the same turn.
+    stopWaiting.abort();
+    waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(admission).toEqual({ settled: true, lease: undefined });
+    expect(owner.messages).toEqual([waitMessage(HOLDER)]);
+    expect(script.messages).toEqual([positionMessage(1)]);
+    owner.controller.dispose();
+    script.controller.dispose();
   });
 });

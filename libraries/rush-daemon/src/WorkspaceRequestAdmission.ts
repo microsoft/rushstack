@@ -252,19 +252,13 @@ class QueuePositionWriter {
       writeQueuePositionAsync.call(client, message);
   }
 
-  /** Reports a wait for native Rush's repository lock, which `holder` holds, as the first queue position. */
-  public enqueueNativeLockWait(holder: IDaemonNativeLockHolder): void {
-    this.#tail = this.#tail
-      .then(() =>
-        this.#writeQueuePositionAsync({
-          kind: 'queuePosition',
-          payload: { position: 1, requestId: this.#requestId, nativeLockHolder: holder }
-        })
-      )
-      .catch((error: unknown) => {
-        this.#failure ??= error;
-        this.#abortController.abort(error);
-      });
+  /**
+   * Reports a wait for native Rush's repository lock, which `holder` holds, at `position`. That is 1 for a request
+   * that waits for the lock itself, and the request's own position for one that waits behind a graph transition
+   * that waits for the lock.
+   */
+  public enqueueNativeLockWait(holder: IDaemonNativeLockHolder, position: number = 1): void {
+    this.#enqueuePayload({ position, requestId: this.#requestId, nativeLockHolder: holder });
   }
 
   public enqueue(
@@ -324,14 +318,25 @@ const reportQueuePosition: ReportQueuePosition = (writer: QueuePositionWriter, p
 
 /**
  * Reports whether a request that other requests wait behind is doing work on their behalf, such as loading the
- * workspace graph that they need.
+ * workspace graph that they need, and which Rush process it waits for while it waits for native Rush's repository
+ * lock instead.
  */
 export class AdmissionProgress {
   readonly #listeners: Set<() => void> = new Set();
+  readonly #nativeLockHolderListeners: Set<() => void> = new Set();
   #active: boolean = false;
+  #nativeLockHolder: IDaemonNativeLockHolder | undefined;
 
   public get active(): boolean {
     return this.#active;
+  }
+
+  /**
+   * While the request waits for another Rush process to release native Rush's repository lock, what is known about
+   * that process.
+   */
+  public get nativeLockHolder(): IDaemonNativeLockHolder | undefined {
+    return this.#nativeLockHolder;
   }
 
   public setActive(active: boolean): void {
@@ -340,9 +345,21 @@ export class AdmissionProgress {
     for (const listener of [...this.#listeners]) listener();
   }
 
+  public setNativeLockHolder(holder: IDaemonNativeLockHolder | undefined): void {
+    if (this.#nativeLockHolder === holder) return;
+    this.#nativeLockHolder = holder;
+    for (const listener of [...this.#nativeLockHolderListeners]) listener();
+  }
+
   public subscribe(listener: () => void): () => void {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
+  }
+
+  /** Calls `listener` whenever `nativeLockHolder` changes, until the returned function is called. */
+  public subscribeToNativeLockHolder(listener: () => void): () => void {
+    this.#nativeLockHolderListeners.add(listener);
+    return () => this.#nativeLockHolderListeners.delete(listener);
   }
 }
 
@@ -568,6 +585,10 @@ export class RequestAdmissionController {
    * this request be admitted at once, ahead of the owner and of the requests that wait behind it; see
    * `IRequestSchedulerAcquireOptions.admitAheadOfQueue`. The lifecycle sets it for a rushx script while the owner of
    * a reload has yet to replace the current generation, which the script needs only to start.
+   *
+   * While the transition waits for another Rush process to release native Rush's repository lock, as
+   * `transition.nativeLockHolder` says, this request waits for that process too: its queue positions name the
+   * process, as the transition's own do, and so does its timeout.
    */
   public acquireBehindTransitionAsync(
     scheduler: RequestScheduler,
@@ -597,6 +618,19 @@ export class RequestAdmissionController {
       ? [this.#abortController.signal, stopWaiting]
       : [this.#abortController.signal];
     const stoppedWaiting = (): boolean => !!stopWaiting?.aborted && !this.#abortController.signal.aborted;
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    let lastPosition: number | undefined;
+    const reportPosition: ReportQueuePosition = (target: QueuePositionWriter, position: number) => {
+      lastPosition = position;
+      const holder: IDaemonNativeLockHolder | undefined = transition.nativeLockHolder;
+      if (holder) target.enqueueNativeLockWait(holder, position);
+      else target.enqueue(position);
+    };
+    // The owner publishes a holder only while it holds the gate exclusively, so no request is admitted meanwhile.
+    const unsubscribe: () => void = transition.subscribeToNativeLockHolder(() => {
+      // A script that stopped waiting, to pass the transition instead, has no position to report again.
+      if (writer && lastPosition !== undefined && !stopWaiting?.aborted) reportPosition(writer, lastPosition);
+    });
     if (remainingMs === undefined || waitTimeoutMs === undefined) {
       try {
         return await this.#acquireAsync(
@@ -605,16 +639,19 @@ export class RequestAdmissionController {
           remainingMs,
           waitingFor,
           AbortSignal.any(abortSignals),
-          reportQueuePosition,
+          reportPosition,
           admitAheadOfQueue
         );
       } catch (error) {
         if (stoppedWaiting()) return undefined;
         throw error;
+      } finally {
+        unsubscribe();
       }
     }
     const exhausted: AbortController = new AbortController();
     let pausedLimitReached: boolean = false;
+    let nativeLockHolder: IDaemonNativeLockHolder | undefined;
     const budget: ProgressPausedBudget = new ProgressPausedBudget(
       remainingMs,
       Math.min(GRAPH_LOAD_WAIT_FACTOR * waitTimeoutMs, MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS),
@@ -622,6 +659,7 @@ export class RequestAdmissionController {
       (reachedPausedLimit: boolean) => {
         if (!exhausted.signal.aborted) {
           pausedLimitReached = reachedPausedLimit;
+          nativeLockHolder = transition.nativeLockHolder;
           exhausted.abort();
         }
       }
@@ -633,26 +671,30 @@ export class RequestAdmissionController {
         undefined,
         waitingFor,
         AbortSignal.any([...abortSignals, exhausted.signal]),
-        reportQueuePosition,
+        reportPosition,
         admitAheadOfQueue
       );
     } catch (error) {
       budget.stop();
       if (stoppedWaiting() && !exhausted.signal.aborted) return undefined;
       if (!exhausted.signal.aborted || this.#abortController.signal.aborted) throw error;
+      const lockWait: string = nativeLockHolder
+        ? `, which waits for ${formatNativeLockHolder(nativeLockHolder)} to release this repository's lock`
+        : '';
       // A zero timeout has no paused allowance, so it fails at once without reaching a limit worth naming.
       const message: string =
         pausedLimitReached && waitTimeoutMs > 0
           ? `The request was not admitted within ${GRAPH_LOAD_WAIT_FACTOR} times its ${waitTimeoutMs}ms wait ` +
             `timeout because ${waitingFor} was still running after ${formatSeconds(budget.pausedMs)}.`
           : `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ` +
-            `${waitingFor}` +
+            `${waitingFor}${lockWait}` +
             `${formatUncountedTime(this.#pausedMs + budget.pausedMs, 'while that request loaded the graph')}.`;
       throw new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,
         `${message} ${WAIT_LONGER_HINT}`
       );
     } finally {
+      unsubscribe();
       budget.stop();
       this.#pausedMs += budget.pausedMs;
       this.#remainingMs = budget.remainingMs;
@@ -811,8 +853,12 @@ export class RequestAdmissionController {
    * {@link RequestAdmissionController.acquireNativeLockAsync} waits for the lock with it. A caller that waits once for
    * several requests uses it directly: it tries the lock again, and then calls `update` for each request, which says
    * when the request may not wait any longer, and finally `endAsync`.
+   *
+   * With `transition`, the progress of a graph transition that the request owns, the process is also recorded there
+   * until the wait ends, so that the requests that wait behind the transition can name it too; see
+   * {@link RequestAdmissionController.acquireBehindTransitionAsync}.
    */
-  public beginNativeLockWait(): INativeLockWait {
+  public beginNativeLockWait(transition?: AdmissionProgress): INativeLockWait {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
     const budgetMs: number | undefined = this.#remainingMs;
@@ -836,12 +882,14 @@ export class RequestAdmissionController {
         if (!error && !ended && key !== reportedHolder) {
           reportedHolder = key;
           writer?.enqueueNativeLockWait(holder);
+          transition?.setNativeLockHolder(holder);
         }
         return error;
       },
       endAsync: (): Promise<void> => {
         if (!ended) {
           this.#spend(Date.now() - startMs);
+          transition?.setNativeLockHolder(undefined);
           ended = writer ? writer.flushAsync() : Promise.resolve();
         }
         return ended;
@@ -852,7 +900,8 @@ export class RequestAdmissionController {
   /**
    * Takes native Rush's repository lock with `tryAcquire`, which returns undefined while another Rush process holds
    * it, and waits for that process as {@link RequestAdmissionController.beginNativeLockWait} describes. `findHolder`
-   * says which process holds the lock.
+   * says which process holds the lock, and `transition`, if the request owns a graph transition, lets the requests
+   * that wait behind it name that process too.
    *
    * @remarks
    * The lock is tried every 250ms, since native Rush does not say when it releases it, and it is released again if
@@ -860,11 +909,12 @@ export class RequestAdmissionController {
    */
   public async acquireNativeLockAsync<TLock extends { release(): void }>(
     tryAcquire: () => TLock | undefined,
-    findHolder: () => IDaemonNativeLockHolder
+    findHolder: () => IDaemonNativeLockHolder,
+    transition?: AdmissionProgress
   ): Promise<TLock> {
     let lock: TLock | undefined = tryAcquire();
     if (lock) return lock;
-    const wait: INativeLockWait = this.beginNativeLockWait();
+    const wait: INativeLockWait = this.beginNativeLockWait(transition);
     const abortSignal: AbortSignal = this.#abortController.signal;
     try {
       while (!lock) {

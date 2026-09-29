@@ -927,7 +927,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
 
   /**
    * Takes native Rush's repository lock for a reload. While another Rush process holds it, served rushx scripts pass
-   * the reload (see `#scriptPassage`), and the reload then waits until each of them has started or failed.
+   * the reload (see `#scriptPassage`), and the reload then waits until each of them has started or failed. The
+   * requests that still wait behind the reload wait for that process too, and `#transitionProgress` names it.
    */
   async #acquireReloadLockAsync(
     admission: RequestAdmissionController,
@@ -939,7 +940,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     try {
       return await admission.acquireNativeLockAsync(
         () => tryAcquireNativeLock(lockFolder),
-        () => findNativeLockHolder(lockFolder)
+        () => findNativeLockHolder(lockFolder),
+        this.#transitionProgress
       );
     } finally {
       await this.#scriptPassage.closeAsync();

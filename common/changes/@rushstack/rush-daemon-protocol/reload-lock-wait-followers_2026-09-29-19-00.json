@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Document that a queue position with `nativeLockHolder` is also sent, with the request's own position, to a request that waits behind another request's load or reload of the workspace graph while that waits for another Rush process to release the repository's lock.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

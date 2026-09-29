@@ -7,6 +7,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
+import { formatNativeLockHolder } from '@rushstack/rush-client-core';
 import {
   DaemonFrameType,
   decodeDaemonControlMessage,
@@ -346,6 +347,8 @@ describe('a served rushx script while a reload waits for another Rush process', 
       expect(countScriptRuns(fixture)).toBe(1);
       expect(reload.settled()).toBe(false);
       expect(fixture.host.workspaceGeneration).toBe(generation);
+      // It passed the reload as soon as the reload began to wait, so it was never told to wait for the holder.
+      expect(script.positionPayloads.filter((p) => p.nativeLockHolder !== undefined)).toEqual([]);
 
       await holder.releaseAsync();
       expectSuccess(await reload.exchange);
@@ -450,6 +453,55 @@ describe('a served rushx script while a reload waits for another Rush process', 
       await waitForAsync(() => reload.settled(), 'the reload to finish');
       expectSuccess(await reload.exchange);
       expect(fixture.host.workspaceGeneration).toBeGreaterThan(generation);
+    } finally {
+      await holder?.releaseAsync();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+});
+
+describe('a served build that waits behind a reload that waits for another Rush process', () => {
+  it('is told which process the reload waits for, and its wait timeout names that process', async () => {
+    const fixture: DaemonGraphTestFixture = await createFixtureAsync();
+    let holder: ILockHolder | undefined;
+    try {
+      expectSuccess(await fixture.runAsync(BUILD_A));
+      holder = await holdRepositoryLockAsync(fixture);
+      const reload: IStreamedRequest = await startReloadAsync(fixture);
+      await waitForLockWaitAsync(reload, holder);
+      const nativeLockHolder: IDaemonNativeLockHolder = getExpectedHolder(holder);
+
+      // Its client used to be told only its position, and its timeout named only the reload (#308).
+      const short: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: 2000 }
+      });
+      expect((await short.exchange).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          exitCode: 1,
+          admissionErrorCode: 'wait-timeout',
+          errorMessage:
+            "The request was not admitted within its 2000ms wait timeout while waiting for another request's " +
+            `load or reload of the workspace graph, which waits for ${formatNativeLockHolder(nativeLockHolder)} ` +
+            "to release this repository's lock. Use --wait-timeout <seconds> to wait longer."
+        }
+      });
+      expect(short.positionPayloads).toEqual([
+        { position: 1, requestId: expect.any(String), nativeLockHolder }
+      ]);
+
+      const long: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+        admission: { waitTimeoutMs: RELOAD_WAIT_TIMEOUT_MS }
+      });
+      await waitForAsync(() => long.positionPayloads.length > 0, 'the build to wait behind the reload');
+      await holder.releaseAsync();
+      expectSuccess(await reload.exchange);
+      expectSuccess(await long.exchange);
+      // Once the reload has the lock, the build still waits for the reload, but not for another process.
+      expect(long.positionPayloads).toEqual([
+        { position: 1, requestId: expect.any(String), nativeLockHolder },
+        { position: 1, requestId: expect.any(String) }
+      ]);
     } finally {
       await holder?.releaseAsync();
       await fixture[Symbol.asyncDispose]();
