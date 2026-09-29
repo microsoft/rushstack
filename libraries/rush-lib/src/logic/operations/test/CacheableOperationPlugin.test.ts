@@ -426,7 +426,8 @@ describe(CacheableOperationPlugin.name, () => {
 
       expect(testGraph.executions).toEqual(['a', 'b']);
       expect(testGraph.cacheWrites).toEqual(['a', 'b']);
-      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
+      // The file has its snapshot hash, so Git is not asked about it
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
     });
 
     it('does not hash files that were saved before the snapshot started', async () => {

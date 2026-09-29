@@ -11,10 +11,25 @@ import { hashFilesAsync } from '@rushstack/package-deps-hash';
 /**
  * How far outside of the snapshot window a file time may be and still count as a save during the window.
  * File times can trail `Date.now()` by a clock tick (about 16 ms on Windows), or by up to 2 seconds on file systems
- * with coarse time stamps (FAT). A file that is flagged by mistake only costs a `git hash-object` call.
+ * with coarse time stamps (FAT). A file that is flagged by mistake is usually only read and hashed again
+ * (see `haveSnapshotHashesChangedAsync`).
  */
 export const FILE_TIME_TOLERANCE_MS: number = 2000;
 const NANOSECONDS_PER_MILLISECOND: bigint = BigInt(1000000);
+
+/**
+ * The largest file that `haveSnapshotHashesChangedAsync` hashes itself. Git hashes larger files, since hashing
+ * them could take longer than starting Git, and would block the event loop.
+ */
+export const MAX_IN_PROCESS_HASH_FILE_SIZE: number = 1024 * 1024;
+
+/**
+ * The algorithm of a Git object hash, by the number of its hexadecimal digits.
+ */
+const GIT_HASH_ALGORITHM_BY_LENGTH: ReadonlyMap<number, string> = new Map([
+  [40, 'sha1'],
+  [64, 'sha256']
+]);
 
 function millisecondsToNanoseconds(timeMs: number): bigint {
   return BigInt(Math.floor(timeMs)) * NANOSECONDS_PER_MILLISECOND;
@@ -181,8 +196,38 @@ export function haveInputFilesChanged(state: IInputFilesState, isNewInput: IsNew
 }
 
 /**
+ * Returns the Git blob hash of the content that a file has on disk, computed with the algorithm of
+ * `expectedHash`, or undefined if it is not hashed in process. Unlike `git hash-object`, it applies no clean
+ * filters (e.g. line ending conversion), so a mismatch does not show that the file changed.
+ */
+function tryGetBlobHash(filePath: string, expectedHash: string): string | undefined {
+  const algorithm: string | undefined = GIT_HASH_ALGORITHM_BY_LENGTH.get(expectedHash.length);
+  if (!algorithm) {
+    return undefined;
+  }
+  let content: Buffer;
+  try {
+    // Not a folder or a FIFO, which cannot be read like a file
+    const stats: fs.Stats | undefined = fs.statSync(filePath, { throwIfNoEntry: false });
+    if (!stats?.isFile() || stats.size > MAX_IN_PROCESS_HASH_FILE_SIZE) {
+      return undefined;
+    }
+    content = fs.readFileSync(filePath);
+  } catch {
+    return undefined;
+  }
+  return crypto.createHash(algorithm).update(`blob ${content.length}\0`).update(content).digest('hex');
+}
+
+/**
  * Returns true if the current Git hash of any of the specified files differs from its hash in the inputs
  * snapshot. If Git was not found or the files cannot be hashed, conservatively returns true.
+ *
+ * @remarks
+ * Each file is hashed in process first, which is much cheaper than starting Git. If the content that a file has on
+ * disk has its snapshot hash, the file is unchanged, since Git's usual clean filters (line ending conversion,
+ * `ident` and Git LFS) leave content that they already cleaned as it is. Only the other files are hashed with
+ * `git hash-object`, which applies the clean filters, as the inputs snapshot did.
  *
  * @param gitPath - The path of the Git executable, if it was found
  * @param rootDirectory - The repository root that the file paths are relative to
@@ -198,8 +243,21 @@ export async function haveSnapshotHashesChangedAsync(
   if (!gitPath || !snapshotHashes) {
     return true;
   }
+  const filePathsToHashWithGit: string[] = [];
+  for (const filePath of filePaths) {
+    const snapshotHash: string | undefined = snapshotHashes.get(filePath);
+    if (snapshotHash === undefined) {
+      return true;
+    }
+    if (tryGetBlobHash(path.resolve(rootDirectory, filePath), snapshotHash) !== snapshotHash) {
+      filePathsToHashWithGit.push(filePath);
+    }
+  }
+  if (filePathsToHashWithGit.length === 0) {
+    return false;
+  }
   try {
-    for (const [filePath, hash] of await hashFilesAsync(rootDirectory, filePaths, gitPath)) {
+    for (const [filePath, hash] of await hashFilesAsync(rootDirectory, filePathsToHashWithGit, gitPath)) {
       if (snapshotHashes.get(filePath) !== hash) {
         return true;
       }

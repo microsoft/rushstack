@@ -1,10 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock('@rushstack/package-deps-hash', () => {
+  const actual: typeof import('@rushstack/package-deps-hash') = jest.requireActual(
+    '@rushstack/package-deps-hash'
+  );
+  return { ...actual, hashFilesAsync: jest.fn(actual.hashFilesAsync) };
+});
+
 import * as child_process from 'node:child_process';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+
+import { hashFilesAsync } from '@rushstack/package-deps-hash';
 
 import {
   captureInputFilesState,
@@ -12,7 +22,9 @@ import {
   getNewFolderEntries,
   hasUntrackedGitFiles,
   haveInputFilesChanged,
-  type IInputFilesState
+  haveSnapshotHashesChangedAsync,
+  type IInputFilesState,
+  MAX_IN_PROCESS_HASH_FILE_SIZE
 } from '../InputFilesStatSignature';
 
 describe('InputFilesStatSignature', () => {
@@ -178,6 +190,124 @@ describe('InputFilesStatSignature', () => {
       expect(captureAt(0, missingFile, fileA).filesChangedDuringSnapshot).toEqual([
         path.relative(tempFolder, fileA)
       ]);
+    });
+  });
+
+  describe(haveSnapshotHashesChangedAsync.name, () => {
+    const gitPath: string = 'git';
+    const pathA: string = 'src/a.ts';
+    const pathB: string = 'src/b.ts';
+
+    function getBlobHash(content: string | Buffer, algorithm: string = 'sha1'): string {
+      return crypto
+        .createHash(algorithm)
+        .update(`blob ${Buffer.byteLength(content)}\0`)
+        .update(content)
+        .digest('hex');
+    }
+
+    function haveHashesChangedAsync(
+      snapshotHashes: ReadonlyMap<string, string>,
+      filePaths: ReadonlyArray<string>
+    ): Promise<boolean> {
+      return haveSnapshotHashesChangedAsync(gitPath, tempFolder, filePaths, snapshotHashes);
+    }
+
+    const hashA: string = getBlobHash('export const a = 1;');
+    const hashB: string = getBlobHash('export const b = 1;');
+
+    beforeEach(() => {
+      jest.mocked(hashFilesAsync).mockClear();
+    });
+
+    it('does not start Git if every file has its snapshot hash', async () => {
+      const snapshotHashes: Map<string, string> = new Map([
+        [pathA, hashA],
+        [pathB, hashB]
+      ]);
+      expect(await haveHashesChangedAsync(snapshotHashes, [pathA, pathB])).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+    });
+
+    it('does not start Git for an unchanged file that was saved in the second before the snapshot started', async () => {
+      const { mtimeMs, ctimeMs } = fs.statSync(fileA);
+      const { filesChangedDuringSnapshot } = captureAt(Math.max(mtimeMs, ctimeMs) + 1000, fileA);
+      expect(filesChangedDuringSnapshot).toEqual([path.relative(tempFolder, fileA)]);
+
+      const snapshotHashes: Map<string, string> = new Map([[filesChangedDuringSnapshot[0], hashA]]);
+      expect(await haveHashesChangedAsync(snapshotHashes, filesChangedDuringSnapshot)).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+    });
+
+    it('asks Git only about the files that do not have their snapshot hashes', async () => {
+      fs.writeFileSync(fileB, 'export const b = 2;');
+      const snapshotHashes: Map<string, string> = new Map([
+        [pathA, hashA],
+        [pathB, hashB]
+      ]);
+      expect(await haveHashesChangedAsync(snapshotHashes, [pathA, pathB])).toBe(true);
+      expect(jest.mocked(hashFilesAsync).mock.calls).toEqual([[tempFolder, [pathB], gitPath]]);
+    });
+
+    it('uses the hash from Git, which applies clean filters, for a file that does not have its snapshot hash', async () => {
+      child_process.execFileSync(gitPath, ['init', '-q'], { cwd: tempFolder, stdio: 'ignore' });
+      fs.writeFileSync(path.join(tempFolder, '.gitattributes'), '*.ts text\n');
+      // Git stores the file with LF line endings
+      const snapshotHashes: Map<string, string> = new Map([[pathA, getBlobHash('export const a = 1;\n')]]);
+
+      fs.writeFileSync(fileA, 'export const a = 1;\r\n');
+      expect(await haveHashesChangedAsync(snapshotHashes, [pathA])).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
+
+      fs.writeFileSync(fileA, 'export const a = 2;\r\n');
+      expect(await haveHashesChangedAsync(snapshotHashes, [pathA])).toBe(true);
+      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports a change without starting Git if a file has no snapshot hash', async () => {
+      expect(await haveHashesChangedAsync(new Map([[pathA, hashA]]), [pathA, pathB])).toBe(true);
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+    });
+
+    it('hashes a file with the algorithm of its snapshot hash', async () => {
+      const snapshotHashes: Map<string, string> = new Map([
+        [pathA, getBlobHash('export const a = 1;', 'sha256')]
+      ]);
+      expect(await haveHashesChangedAsync(snapshotHashes, [pathA])).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+    });
+
+    it(`asks Git about a file larger than ${MAX_IN_PROCESS_HASH_FILE_SIZE} bytes`, async () => {
+      const largestContent: Buffer = Buffer.alloc(MAX_IN_PROCESS_HASH_FILE_SIZE, 'a');
+      fs.writeFileSync(fileA, largestContent);
+      const largestHashes: Map<string, string> = new Map([[pathA, getBlobHash(largestContent)]]);
+      expect(await haveHashesChangedAsync(largestHashes, [pathA])).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+
+      const largerContent: Buffer = Buffer.alloc(MAX_IN_PROCESS_HASH_FILE_SIZE + 1, 'a');
+      fs.writeFileSync(fileA, largerContent);
+      const largerHashes: Map<string, string> = new Map([[pathA, getBlobHash(largerContent)]]);
+      expect(await haveHashesChangedAsync(largerHashes, [pathA])).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a change if a file was deleted', async () => {
+      fs.unlinkSync(fileA);
+      expect(await haveHashesChangedAsync(new Map([[pathA, hashA]]), [pathA])).toBe(true);
+    });
+
+    // E.g. a FIFO, which would block the event loop if it were read in process
+    (process.platform === 'win32' ? it.skip : it)('asks Git about a path that is not a file', async () => {
+      const devicePath: string = '/dev/null';
+      const snapshotHashes: Map<string, string> = new Map([[devicePath, getBlobHash('')]]);
+      expect(await haveHashesChangedAsync(snapshotHashes, [devicePath])).toBe(false);
+      expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a change if Git was not found', async () => {
+      expect(
+        await haveSnapshotHashesChangedAsync(undefined, tempFolder, [pathA], new Map([[pathA, hashA]]))
+      ).toBe(true);
     });
   });
 

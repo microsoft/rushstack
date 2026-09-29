@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "After an operation runs, Rush checks whether its input files that were saved within about 2 seconds of the inputs snapshot still have their snapshot hashes. Rush now hashes these files itself (up to 1 MiB each), and starts `git hash-object` only for the files whose content on disk does not have its snapshot hash, for example because a clean filter such as line ending conversion or Git LFS applies to them. Before, Rush started Git once for each such operation, which cost about 2 ms per operation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
