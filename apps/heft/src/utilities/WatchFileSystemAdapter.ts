@@ -130,6 +130,126 @@ interface ITimeEntry {
 }
 
 /**
+ * What a run read. The run's watcher checks the changes that it reports against this.
+ */
+interface IRunInputs {
+  /**
+   * When the run started. The watcher reports files whose times are close to this time, or later.
+   */
+  baseline: number | undefined;
+  /**
+   * The time of each file that the run read, as the run recorded it
+   */
+  files: ReadonlyMap<string, number>;
+  /**
+   * The folders that the run read
+   */
+  contexts: ReadonlyMap<string, number>;
+  /**
+   * The times that the previous watcher had when the run started
+   */
+  times: ReadonlyMap<string, ITimeEntry> | undefined;
+}
+
+/**
+ * The fields of watchpack's internal `DirectoryWatcher` that {@link refreshPendingTimes} reads.
+ * They aren't part of watchpack's public API, so they are all optional.
+ */
+interface IDirectoryWatcherInternals {
+  path?: string;
+  /**
+   * The names of the files that have an OS event whose `fs.lstat()` hasn't finished yet. The change is
+   * recorded only when the `fs.lstat()` finishes.
+   */
+  _activeEvents?: Map<string, boolean>;
+}
+
+/**
+ * A watchpack instance with the internal state that {@link refreshPendingTimes} reads
+ */
+interface IWatchpackWithInternals extends Watchpack {
+  watcherManager?: {
+    directoryWatchers?: Map<string, IDirectoryWatcherInternals>;
+  };
+}
+
+const OUTDATED_ON_ATTACH_EXPLANATION: string = 'watch (outdated on attach)';
+// A new watcher's first scan reports each file whose mtime is later than the watcher's start time, less the file
+// system's accuracy. A watcher that attaches to the watcher of a folder that has already scanned reports the
+// folder in the same way. Watchpack's other explanations are for events from the file system.
+const SCAN_EXPLANATIONS: ReadonlySet<string> = new Set(['scan (file)', OUTDATED_ON_ATTACH_EXPLANATION]);
+
+function tryLstatSync(filePath: string): fs.Stats | undefined {
+  try {
+    return fs.lstatSync(filePath, { throwIfNoEntry: false });
+  } catch {
+    return undefined;
+  }
+}
+
+function getTimestamp(stats: fs.Stats): number {
+  return stats.mtime.getTime() || stats.ctime.getTime() || Date.now();
+}
+
+/**
+ * Watchpack records a file's new time only when its `fs.lstat()` after the file system's event finishes. If a
+ * run starts before then, the previous watcher's time for the file is from before the change. Read the time
+ * again, so that the run sees the change, and so that the run's watcher knows that the run saw it.
+ */
+function refreshPendingTimes(watcher: Watchpack, times: Map<string, ITimeEntry>): void {
+  const directoryWatchers: Map<string, IDirectoryWatcherInternals> | undefined = (
+    watcher as IWatchpackWithInternals
+  ).watcherManager?.directoryWatchers;
+  if (!(directoryWatchers instanceof Map)) {
+    return;
+  }
+
+  for (const { path: folderPath, _activeEvents: pendingNames } of directoryWatchers.values()) {
+    if (typeof folderPath !== 'string' || !(pendingNames instanceof Map)) {
+      continue;
+    }
+
+    for (const name of pendingNames.keys()) {
+      const filePath: string = path.join(folderPath, name);
+      const stats: fs.Stats | undefined = tryLstatSync(filePath);
+      if (!stats) {
+        times.delete(filePath);
+      } else if (!stats.isDirectory()) {
+        const timestamp: number = getTimestamp(stats);
+        times.set(filePath, { timestamp, safeTime: timestamp });
+      }
+    }
+  }
+}
+
+/**
+ * Returns false if the watcher reported the path only because the path's time is close to the run's start, and
+ * the run has already read the path as it is now.
+ */
+function isReportedChangeNew(filePath: string, explanation: string, inputs: IRunInputs): boolean {
+  if (!SCAN_EXPLANATIONS.has(explanation) || inputs.baseline === undefined) {
+    return true;
+  }
+
+  const stats: fs.Stats | undefined = tryLstatSync(filePath);
+  if (!stats) {
+    return true;
+  }
+
+  if (stats.isDirectory()) {
+    // The watcher of a folder that the run read reports the folder's files one by one
+    return explanation !== OUTDATED_ON_ATTACH_EXPLANATION || !inputs.contexts.has(filePath);
+  }
+
+  if (stats.ctimeMs >= inputs.baseline) {
+    return true;
+  }
+
+  const readTime: number | undefined = inputs.files.get(filePath) ?? inputs.times?.get(filePath)?.timestamp;
+  return readTime !== getTimestamp(stats);
+}
+
+/**
  * A filesystem adapter for use with the "fast-glob" package. This adapter tracks file system accesses
  * to initialize `watchpack`.
  */
@@ -266,6 +386,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       this.#watcher = undefined;
       const times: Map<string, ITimeEntry> = new Map();
       watcher.collectTimeInfoEntries(times, times);
+      refreshPendingTimes(watcher, times);
       // Close the previous watcher instead of only pausing it. A paused watcher keeps its directory watchers,
       // so every run would leak another set of them. A kept watcher also keeps its OS watch on a folder that
       // was deleted and recreated, and later watchers on that folder would share the dead watch, so edits in
@@ -286,10 +407,38 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       return;
     }
 
+    const inputs: IRunInputs = {
+      baseline: this.#lastQueryTime,
+      files: this.#files,
+      contexts: this.#contexts,
+      times: this.#times
+    };
+
     const watcher: Watchpack = new Watchpack({
       aggregateTimeout: 0,
       followSymlinks: false
     });
+
+    // A file that changed just before the run started is reported again when the watcher starts, although the
+    // run has read the change. Call onChange only for a change that the run may not have seen.
+    let hasNewChange: boolean = false;
+    const onReportedChange = (filePath: string, modifiedTime: number, explanation: string): void => {
+      hasNewChange ||= isReportedChangeNew(filePath, explanation, inputs);
+    };
+    const onReportedRemove = (): void => {
+      hasNewChange = true;
+    };
+    const onAggregated = (): void => {
+      if (hasNewChange) {
+        watcher.off('change', onReportedChange);
+        watcher.off('remove', onReportedRemove);
+        watcher.off('aggregated', onAggregated);
+        onChange();
+      }
+    };
+    watcher.on('change', onReportedChange);
+    watcher.on('remove', onReportedRemove);
+    watcher.on('aggregated', onAggregated);
 
     this.#watcher = watcher;
     watcher.watch({
@@ -299,12 +448,11 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       startTime: this.#lastQueryTime
     });
 
+    // The watcher checks its reports against `inputs`, so the next run records into new maps
     this.#lastFiles = this.#files;
     this.#files = new Map();
-    this.#contexts.clear();
+    this.#contexts = new Map();
     this.#missing.clear();
-
-    watcher.once('aggregated', onChange);
   }
 
   /**
