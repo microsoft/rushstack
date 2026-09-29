@@ -10,7 +10,8 @@ import { digestOutputFolders, type IOutputFolderDigest, type IOutputFolderSet } 
 import {
   OutputFolderDigestPool,
   OutputFolderDigester,
-  WORKER_MAX_YOUNG_GENERATION_SIZE_MB
+  WORKER_MAX_YOUNG_GENERATION_SIZE_MB,
+  type IBackgroundOutputFolderDigests
 } from '../OutputFolderDigestPool';
 
 const PROJECT_COUNT: number = 12;
@@ -35,6 +36,64 @@ function createProjects(root: string): IOutputFolderSet[] {
 
 function digestOnCallingThread(folderSets: ReadonlyArray<IOutputFolderSet>): IOutputFolderDigest[] {
   return folderSets.map((folderSet: IOutputFolderSet) => digestOutputFolders(folderSet));
+}
+
+interface ITestWorkerOptions {
+  /** How long the worker waits before it claims the folder sets of a job. */
+  readonly claimDelayMs?: number;
+  /** Written once the worker has claimed every folder set of a job. */
+  readonly claimedMarkerPath?: string;
+  /** How long the worker waits after it claimed the folder sets of a job, before it digests them. */
+  readonly digestDelayMs?: number;
+  /** Whether the worker publishes digests at all. */
+  readonly publish?: boolean;
+}
+
+/** Writes a worker script that claims every folder set of a job at once, and digests them afterwards. */
+function writeTestWorker(
+  scriptPath: string,
+  { claimDelayMs = 0, claimedMarkerPath, digestDelayMs = 0, publish = true }: ITestWorkerOptions
+): string {
+  fs.writeFileSync(
+    scriptPath,
+    [
+      "const fs = require('node:fs');",
+      "const { parentPort, workerData } = require('node:worker_threads');",
+      `const { digestOutputFolders } = require(${JSON.stringify(require.resolve('../OutputFolderDigest'))});`,
+      'const delay = new Int32Array(new SharedArrayBuffer(4));',
+      'parentPort.on("message", ({ jobId, folderSets, state }) => {',
+      `  Atomics.wait(delay, 0, 0, ${claimDelayMs});`,
+      '  const claimed = [];',
+      '  for (let index = Atomics.add(state, 0, 1); index < folderSets.length; index = Atomics.add(state, 0, 1)) {',
+      '    claimed.push(index);',
+      '  }',
+      claimedMarkerPath ? `  fs.writeFileSync(${JSON.stringify(claimedMarkerPath)}, '');` : '',
+      `  Atomics.wait(delay, 0, 0, ${digestDelayMs});`,
+      publish ? '' : '  return;',
+      '  for (const index of claimed) {',
+      '    workerData.resultPort.postMessage([jobId, index, digestOutputFolders(folderSets[index])]);',
+      '  }',
+      '  Atomics.add(state, 1, claimed.length);',
+      '  Atomics.notify(state, 1);',
+      '});'
+    ].join('\n')
+  );
+  return scriptPath;
+}
+
+function waitForFile(filePath: string): void {
+  const sleep: Int32Array = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
+  const deadlineMs: number = performance.now() + 10000;
+  while (!fs.existsSync(filePath)) {
+    if (performance.now() > deadlineMs) {
+      throw new Error(`${filePath} was not written`);
+    }
+    Atomics.wait(sleep, 0, 0, 10);
+  }
+}
+
+function withoutDigests(count: number): undefined[] {
+  return new Array(count).fill(undefined);
 }
 
 describe(OutputFolderDigestPool.name, () => {
@@ -167,6 +226,150 @@ describe(OutputFolderDigestPool.name, () => {
     }
   });
 
+  describe('start', () => {
+    it('digests folder sets on the workers while the caller runs other jobs', () => {
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+        threadCount: 2,
+        claimOnCallingThread: false
+      });
+      try {
+        const background: IBackgroundOutputFolderDigests = pool.start(folderSets);
+        // Each worker serves jobs in order, so this job ends only after every earlier folder set was claimed,
+        // and it reads the digests that the workers published for the earlier job too.
+        expect(pool.digest(folderSets.slice(0, 2))).toEqual(digestOnCallingThread(folderSets.slice(0, 2)));
+        const digests: ReadonlyArray<IOutputFolderDigest | undefined> = background.finish();
+        expect(digests).toEqual(digestOnCallingThread(folderSets));
+        expect(background.finish()).toBe(digests);
+        expect(pool.stalled).toBe(false);
+      } finally {
+        pool.dispose();
+      }
+    });
+
+    it('has no digests for folder sets that no worker claimed', () => {
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+        threadCount: 1,
+        workerScriptPath: writeTestWorker(path.join(root, 'late-worker.js'), { claimDelayMs: 2000 }),
+        claimOnCallingThread: false
+      });
+      try {
+        const startTimeMs: number = performance.now();
+        expect([...pool.start(folderSets).finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+        expect(performance.now() - startTimeMs).toBeLessThan(1000);
+        expect(pool.stalled).toBe(false);
+      } finally {
+        pool.dispose();
+      }
+    });
+
+    it('waits for the folder sets that workers claimed', () => {
+      const claimedMarkerPath: string = path.join(root, 'claimed');
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+        threadCount: 1,
+        workerScriptPath: writeTestWorker(path.join(root, 'slow-worker.js'), {
+          claimedMarkerPath,
+          digestDelayMs: 300
+        }),
+        claimOnCallingThread: false
+      });
+      try {
+        const background: IBackgroundOutputFolderDigests = pool.start(folderSets);
+        waitForFile(claimedMarkerPath);
+        expect(background.finish()).toEqual(digestOnCallingThread(folderSets));
+        expect(pool.stalled).toBe(false);
+      } finally {
+        pool.dispose();
+      }
+    });
+
+    it('drops the digests of a cancelled job', () => {
+      const claimedMarkerPath: string = path.join(root, 'claimed');
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+        threadCount: 1,
+        workerScriptPath: writeTestWorker(path.join(root, 'slow-worker.js'), {
+          claimedMarkerPath,
+          digestDelayMs: 1000
+        }),
+        claimOnCallingThread: false
+      });
+      try {
+        const background: IBackgroundOutputFolderDigests = pool.start(folderSets);
+        waitForFile(claimedMarkerPath);
+        background.cancel();
+        const startTimeMs: number = performance.now();
+        expect([...background.finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+        expect(performance.now() - startTimeMs).toBeLessThan(500);
+
+        // The worker publishes the cancelled digests before it serves this job, which reads and drops them.
+        expect(pool.digest(folderSets.slice(0, 2))).toEqual(digestOnCallingThread(folderSets.slice(0, 2)));
+        expect([...background.finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+        expect(pool.stalled).toBe(false);
+      } finally {
+        pool.dispose();
+      }
+    });
+
+    it('stops the pool if the workers stall', () => {
+      const claimedMarkerPath: string = path.join(root, 'claimed');
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+        threadCount: 1,
+        workerScriptPath: writeTestWorker(path.join(root, 'stalled-worker.js'), {
+          claimedMarkerPath,
+          publish: false
+        }),
+        stallTimeoutMs: 200,
+        claimOnCallingThread: false
+      });
+      try {
+        const background: IBackgroundOutputFolderDigests = pool.start(folderSets);
+        waitForFile(claimedMarkerPath);
+        const dispose: jest.SpyInstance = jest.spyOn(pool, 'dispose');
+        expect([...background.finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+        expect(pool.stalled).toBe(true);
+        expect(dispose).toHaveBeenCalled();
+
+        const startTimeMs: number = performance.now();
+        expect([...pool.start(folderSets).finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+        expect(pool.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
+        expect(performance.now() - startTimeMs).toBeLessThan(200);
+      } finally {
+        pool.dispose();
+      }
+    });
+
+    it('does not wait for a job that started before the pool stalled', () => {
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+        threadCount: 1,
+        workerScriptPath: writeTestWorker(path.join(root, 'stalled-worker.js'), { publish: false }),
+        stallTimeoutMs: 200,
+        claimOnCallingThread: false
+      });
+      try {
+        const background: IBackgroundOutputFolderDigests = pool.start(folderSets);
+        // The worker claims the folder sets of both jobs and publishes nothing.
+        expect(pool.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
+        expect(pool.stalled).toBe(true);
+        const startTimeMs: number = performance.now();
+        expect([...background.finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+        expect(performance.now() - startTimeMs).toBeLessThan(100);
+      } finally {
+        pool.dispose();
+      }
+    });
+
+    it('has nothing to digest without folder sets or after the pool was disposed', () => {
+      const pool: OutputFolderDigestPool = new OutputFolderDigestPool({ threadCount: 1 });
+      try {
+        expect(pool.start([]).finish()).toEqual([]);
+      } finally {
+        pool.dispose();
+      }
+      const background: IBackgroundOutputFolderDigests = pool.start(folderSets);
+      expect([...background.finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+      background.cancel();
+    });
+  });
+
   it('limits the young generation of each worker', () => {
     // Publishes the worker's own young generation limit as the digest of every folder set it claims.
     const limitsWorkerPath: string = path.join(root, 'limits-worker.js');
@@ -235,6 +438,29 @@ describe(OutputFolderDigester.name, () => {
     const disabled: OutputFolderDigester = new OutputFolderDigester({ threadCount: 0, poolStartThresholdMs: -1 });
     expect(disabled.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
     expect(disabled.isParallel).toBe(false);
+  });
+
+  it('starts background digests only while its pool runs', () => {
+    const folderSets: IOutputFolderSet[] = createProjects(root);
+    const digester: OutputFolderDigester = new OutputFolderDigester({
+      threadCount: 2,
+      poolStartThresholdMs: -1
+    });
+    try {
+      expect(digester.start(folderSets)).toBeUndefined();
+      digester.digest(folderSets);
+      expect(digester.isParallel).toBe(true);
+      const background: IBackgroundOutputFolderDigests | undefined = digester.start(folderSets);
+      expect(background).toBeDefined();
+      const expected: IOutputFolderDigest[] = digestOnCallingThread(folderSets);
+      // Folder sets that no worker claimed yet have no digest.
+      (background?.finish() ?? []).forEach((digest: IOutputFolderDigest | undefined, index: number) => {
+        expect(digest).toEqual(digest && expected[index]);
+      });
+    } finally {
+      digester.dispose();
+    }
+    expect(digester.start(folderSets)).toBeUndefined();
   });
 
   it('does not keep the process alive', () => {

@@ -7,13 +7,19 @@ import * as path from 'node:path';
 import {
   OperationStatus,
   type IConfigurableOperation,
+  type IInputsSnapshot,
   type IOperationExecutionResult,
   type IOperationGraph,
+  type IOperationGraphIterationOptions,
   type Operation
 } from '@microsoft/rush-lib';
 
 import type { IOutputFolderDigest, IOutputFolderSet } from './OutputFolderDigest';
-import { getSharedOutputFolderDigester, type OutputFolderDigester } from './OutputFolderDigestPool';
+import {
+  getSharedOutputFolderDigester,
+  type IBackgroundOutputFolderDigests,
+  type OutputFolderDigester
+} from './OutputFolderDigestPool';
 
 const PLUGIN_NAME: 'DaemonOperationOutputFingerprints' = 'DaemonOperationOutputFingerprints';
 
@@ -59,6 +65,16 @@ interface IRecordWalk extends IContentWalk {
   readonly fingerprint: string;
 }
 
+/** Output folders that the digester's worker threads walk while the inputs are reconciled. */
+interface IEarlyWalk {
+  readonly digests: IBackgroundOutputFolderDigests;
+  readonly folderSets: ReadonlyArray<IOutputFolderSet>;
+  /** The index of each walked operation's folder set. */
+  readonly indexByOperation: ReadonlyMap<Operation, number>;
+  /** The inputs snapshot of the reconciliation that started the walk, once that reconciliation succeeded. */
+  inputsSnapshot: IInputsSnapshot | undefined;
+}
+
 /**
  * Detects retained successful or up-to-date operations whose declared output folders were changed outside
  * the daemon.
@@ -78,20 +94,28 @@ interface IRecordWalk extends IContentWalk {
  *   modification time and identity of every entry that is not a folder. This also detects in-place edits
  *   and nested additions, deletions and renames. Its cost grows with the output files of the request's
  *   selection, not with the whole warm graph. Once a walk takes long enough to matter, walks are spread
- *   over a pool of worker threads (see {@link OutputFolderDigester}).
+ *   over a pool of worker threads (see {@link OutputFolderDigester}), and the pool walks the folders that
+ *   the last iteration walked while the inputs are reconciled (see `walkWhileReconcilingAsync`).
  */
 export class OperationOutputFingerprints {
   readonly #digester: OutputFolderDigester;
   readonly #fingerprints: Map<Operation, IOutputFingerprint> = new Map();
   readonly #graph: IOperationGraph;
+  /** The operations whose output folders the last iteration walked. The next one probably walks them again. */
+  #lastWalkedOperations: Set<Operation> = new Set();
+  #earlyWalk: IEarlyWalk | undefined;
 
   public constructor(graph: IOperationGraph, digester: OutputFolderDigester = getSharedOutputFolderDigester()) {
     this.#digester = digester;
     this.#graph = graph;
     graph.hooks.configureIteration.tap(
       { name: PLUGIN_NAME, stage: CONFIGURE_ITERATION_STAGE },
-      (currentStates: ReadonlyMap<Operation, IConfigurableOperation>) => {
-        this.#enableOperationsWithChangedContents(currentStates);
+      (
+        currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
+        lastResults: ReadonlyMap<Operation, IOperationExecutionResult>,
+        context: IOperationGraphIterationOptions
+      ) => {
+        this.#enableOperationsWithChangedContents(currentStates, this.#takeEarlyWalk(context));
       }
     );
     graph.hooks.afterExecuteIterationAsync.tap(
@@ -101,6 +125,43 @@ export class OperationOutputFingerprints {
         return status;
       }
     );
+    graph.abortController.signal.addEventListener('abort', () => this.#takeEarlyWalk()?.digests.cancel(), {
+      once: true
+    });
+  }
+
+  /**
+   * Runs a reconciliation of the inputs while the digester's worker threads walk the output folders that the
+   * last iteration walked, so that the next iteration's content check can use those digests instead of walking.
+   *
+   * @remarks
+   * Only an iteration that uses the inputs snapshot of this reconciliation uses the digests. Every request
+   * that such an iteration serves was received before the reconciliation started, so the walks see each change
+   * that was made before one of those requests was sent, as the inputs snapshot does. A later change can be
+   * missed, as it can by the inputs snapshot, and the next request finds it: an operation keeps its recorded
+   * fingerprint until it produces a new result. No operation writes its outputs during the walks, because the
+   * daemon reconciles only while no iteration runs, including work that continues after an early result.
+   */
+  public async walkWhileReconcilingAsync<TResult extends { readonly inputsSnapshot: IInputsSnapshot }>(
+    reconcileAsync: () => Promise<TResult>
+  ): Promise<TResult> {
+    this.#takeEarlyWalk()?.digests.cancel();
+    const earlyWalk: IEarlyWalk | undefined = this.#graph.abortController.signal.aborted
+      ? undefined
+      : this.#startEarlyWalk();
+    this.#earlyWalk = earlyWalk;
+    try {
+      const result: TResult = await reconcileAsync();
+      if (earlyWalk) {
+        earlyWalk.inputsSnapshot = result.inputsSnapshot;
+      }
+      return result;
+    } catch (error) {
+      if (earlyWalk && this.#earlyWalk === earlyWalk) {
+        this.#takeEarlyWalk()?.digests.cancel();
+      }
+      throw error;
+    }
   }
 
   /**
@@ -135,7 +196,10 @@ export class OperationOutputFingerprints {
    * The recorded fingerprint is kept until the operation produces a new retained result, so an iteration
    * that ends before the operation runs leaves the check in place for the next request.
    */
-  #enableOperationsWithChangedContents(currentStates: ReadonlyMap<Operation, IConfigurableOperation>): void {
+  #enableOperationsWithChangedContents(
+    currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
+    earlyWalk: IEarlyWalk | undefined
+  ): void {
     const checks: ISkipCheck[] = [];
     for (const [operation, state] of currentStates) {
       if (state.enabled || !operation.enabled) {
@@ -153,7 +217,8 @@ export class OperationOutputFingerprints {
         checks.push({ operation, folderSet, entryCount, state, contentFingerprint });
       }
     }
-    const digests: IOutputFolderDigest[] = this.#digestLargestFirst(checks);
+    this.#lastWalkedOperations = new Set(checks.map(({ operation }: ISkipCheck) => operation));
+    const digests: IOutputFolderDigest[] = this.#digestLargestFirst(checks, earlyWalk);
     checks.forEach(({ operation, state, contentFingerprint }: ISkipCheck, index: number) => {
       if (digests[index].digest !== contentFingerprint) {
         enableOperation(operation, state);
@@ -181,13 +246,79 @@ export class OperationOutputFingerprints {
     walks.forEach(({ operation, record, fingerprint }: IRecordWalk, index: number) => {
       const { digest: contentFingerprint, entryCount } = digests[index];
       this.#fingerprints.set(operation, { record, fingerprint, contentFingerprint, entryCount });
+      this.#lastWalkedOperations.add(operation);
     });
   }
 
-  /** Sorts the walks by their expected size, largest first, and returns their digests in that order. */
-  #digestLargestFirst(walks: IContentWalk[]): IOutputFolderDigest[] {
-    walks.sort((left: IContentWalk, right: IContentWalk) => right.entryCount - left.entryCount);
-    return this.#digester.digest(walks.map(({ folderSet }: IContentWalk) => folderSet));
+  /**
+   * Starts walking the output folders that the last iteration walked, if their operations still have a
+   * retained result to check.
+   */
+  #startEarlyWalk(): IEarlyWalk | undefined {
+    const walks: IContentWalk[] = [];
+    for (const operation of this.#lastWalkedOperations) {
+      const entry: IOutputFingerprint | undefined = this.#fingerprints.get(operation);
+      const folderSet: IOutputFolderSet | undefined = getOutputFolderSet(operation);
+      if (entry?.contentFingerprint !== undefined && folderSet && this.#isRetained(operation, entry.record)) {
+        walks.push({ operation, folderSet, entryCount: entry.entryCount });
+      }
+    }
+    sortLargestFirst(walks);
+    const folderSets: IOutputFolderSet[] = walks.map(({ folderSet }: IContentWalk) => folderSet);
+    const digests: IBackgroundOutputFolderDigests | undefined =
+      walks.length > 0 ? this.#digester.start(folderSets) : undefined;
+    return (
+      digests && {
+        digests,
+        folderSets,
+        indexByOperation: new Map(
+          walks.map(({ operation }: IContentWalk, index: number) => [operation, index])
+        ),
+        inputsSnapshot: undefined
+      }
+    );
+  }
+
+  /**
+   * Returns the pending early walk, and forgets it. With a context, returns it only if that iteration uses the
+   * inputs snapshot of the reconciliation that started the walk, and cancels it otherwise.
+   */
+  #takeEarlyWalk(context?: IOperationGraphIterationOptions): IEarlyWalk | undefined {
+    const earlyWalk: IEarlyWalk | undefined = this.#earlyWalk;
+    this.#earlyWalk = undefined;
+    if (
+      !earlyWalk ||
+      !context ||
+      (earlyWalk.inputsSnapshot !== undefined && earlyWalk.inputsSnapshot === context.inputsSnapshot)
+    ) {
+      return earlyWalk;
+    }
+    earlyWalk.digests.cancel();
+    return undefined;
+  }
+
+  /**
+   * Sorts the walks by their expected size, largest first, and returns their digests in that order. Uses the
+   * digests of an early walk of the same folder sets where there are any, and walks the others now.
+   */
+  #digestLargestFirst(walks: IContentWalk[], earlyWalk?: IEarlyWalk): IOutputFolderDigest[] {
+    sortLargestFirst(walks);
+    const digests: (IOutputFolderDigest | undefined)[] = earlyWalk ? takeEarlyDigests(walks, earlyWalk) : [];
+    const missingIndexes: number[] = [];
+    for (let index: number = 0; index < walks.length; index++) {
+      if (!digests[index]) {
+        missingIndexes.push(index);
+      }
+    }
+    if (missingIndexes.length > 0) {
+      const missingDigests: IOutputFolderDigest[] = this.#digester.digest(
+        missingIndexes.map((index: number) => walks[index].folderSet)
+      );
+      missingIndexes.forEach((walkIndex: number, index: number) => {
+        digests[walkIndex] = missingDigests[index];
+      });
+    }
+    return digests as IOutputFolderDigest[];
   }
 
   #isRetained(operation: Operation, record: IOperationExecutionResult): boolean {
@@ -229,6 +360,40 @@ function getOutputFingerprint(operation: Operation): string | undefined {
       return stats ? `${folderName}:${stats.ino}:${stats.mtimeMs}` : `${folderName}:missing`;
     })
     .join('|');
+}
+
+/**
+ * Returns the digest that the early walk computed for each walk's folder set, where it computed one, and
+ * stops the early walk.
+ */
+function takeEarlyDigests(
+  walks: ReadonlyArray<IContentWalk>,
+  { digests, folderSets, indexByOperation }: IEarlyWalk
+): (IOutputFolderDigest | undefined)[] {
+  const earlyIndexes: (number | undefined)[] = walks.map(({ operation, folderSet }: IContentWalk) => {
+    const index: number | undefined = indexByOperation.get(operation);
+    return index !== undefined && isSameFolderSet(folderSets[index], folderSet) ? index : undefined;
+  });
+  if (earlyIndexes.every((index: number | undefined) => index === undefined)) {
+    digests.cancel();
+    return [];
+  }
+  const earlyDigests: ReadonlyArray<IOutputFolderDigest | undefined> = digests.finish();
+  return earlyIndexes.map((index: number | undefined) =>
+    index === undefined ? undefined : earlyDigests[index]
+  );
+}
+
+function sortLargestFirst(walks: IContentWalk[]): void {
+  walks.sort((left: IContentWalk, right: IContentWalk) => right.entryCount - left.entryCount);
+}
+
+function isSameFolderSet(left: IOutputFolderSet, right: IOutputFolderSet): boolean {
+  return (
+    left.projectFolder === right.projectFolder &&
+    left.folderNames.length === right.folderNames.length &&
+    left.folderNames.every((folderName: string, index: number) => folderName === right.folderNames[index])
+  );
 }
 
 function getOutputFolderSet(operation: Operation): IOutputFolderSet | undefined {

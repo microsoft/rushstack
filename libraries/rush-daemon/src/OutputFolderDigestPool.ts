@@ -40,6 +40,20 @@ interface IOutputFolderDigestJob {
 /** `[jobId, index, digest]` */
 type OutputFolderDigestResult = readonly [number, number, IOutputFolderDigest];
 
+/**
+ * Folder sets that the workers of an {@link OutputFolderDigestPool} digest while the calling thread does other
+ * work. Call `finish` or `cancel` once.
+ */
+export interface IBackgroundOutputFolderDigests {
+  /**
+   * Stops the workers from claiming more folder sets, waits for the ones they claimed, and returns their digests,
+   * indexed like the folder sets. A folder set that no worker claimed has no digest.
+   */
+  finish(): ReadonlyArray<IOutputFolderDigest | undefined>;
+  /** Stops the workers from claiming more folder sets, and drops the digests. */
+  cancel(): void;
+}
+
 /** The `workerData` of a pool worker. */
 export interface IOutputFolderDigestWorkerData {
   readonly resultPort: MessagePort;
@@ -92,11 +106,16 @@ export function serveOutputFolderDigestJobs(jobPort: MessagePort, resultPort: Me
  * and `lstat` system calls, so it shortens roughly in proportion to the number of threads. If the workers
  * never start or stop making progress, the calling thread digests what is left, so the results always equal
  * {@link digestOutputFolders}.
+ *
+ * `start` gives folder sets to the workers only, so that the calling thread can do other work while they are
+ * walked, and collects the digests that are ready when it needs them.
  */
 export class OutputFolderDigestPool {
   readonly #threads: IPoolThread[] = [];
   readonly #stallTimeoutMs: number;
   readonly #claimOnCallingThread: boolean;
+  /** The results of each job whose digests are still wanted, by job ID. */
+  readonly #resultsByJobId: Map<number, (IOutputFolderDigest | undefined)[]> = new Map();
   #nextJobId: number = 0;
   #stalled: boolean = false;
 
@@ -139,25 +158,18 @@ export class OutputFolderDigestPool {
   /** Returns the digest of each folder set, in order. */
   public digest(folderSets: ReadonlyArray<IOutputFolderSet>): IOutputFolderDigest[] {
     const results: (IOutputFolderDigest | undefined)[] = new Array(folderSets.length);
-    const state: Int32Array = new Int32Array(
-      new SharedArrayBuffer(JOB_STATE_SLOT_COUNT * Int32Array.BYTES_PER_ELEMENT)
-    );
-    const jobId: number = ++this.#nextJobId;
+    const state: Int32Array = createJobState();
     const parallel: boolean = !this.#stalled && (folderSets.length > 1 || !this.#claimOnCallingThread);
-    if (parallel) {
-      const job: IOutputFolderDigestJob = { jobId, folderSets, state };
-      for (const { worker } of this.#threads) {
-        worker.postMessage(job);
-      }
-    }
+    const jobId: number | undefined = parallel ? this.#postJob(folderSets, state, results) : undefined;
     if (this.#claimOnCallingThread || !parallel) {
       claimAndDigest(folderSets, state, (index: number, digest: IOutputFolderDigest) => {
         results[index] = digest;
       });
     }
-    if (parallel) {
+    if (jobId !== undefined) {
       this.#waitForClaimedFolderSets(state, folderSets.length);
-      this.#receiveResults(jobId, results);
+      this.#receiveResults();
+      this.#resultsByJobId.delete(jobId);
     }
     if (this.#stalled) {
       this.dispose();
@@ -167,6 +179,47 @@ export class OutputFolderDigestPool {
     );
   }
 
+  /**
+   * Starts digesting the folder sets on the workers only, so that the calling thread can do other work meanwhile.
+   * Each digest equals that of {@link digestOutputFolders} at the time its walk ran.
+   */
+  public start(folderSets: ReadonlyArray<IOutputFolderSet>): IBackgroundOutputFolderDigests {
+    const results: (IOutputFolderDigest | undefined)[] = new Array(folderSets.length);
+    if (this.#stalled || folderSets.length === 0) {
+      return { finish: () => results, cancel: () => undefined };
+    }
+    const state: Int32Array = createJobState();
+    const jobId: number = this.#postJob(folderSets, state, results);
+    let settled: boolean = false;
+    /** Returns the number of folder sets that workers claimed. */
+    const stopClaims = (): number => {
+      settled = true;
+      return Math.min(Atomics.exchange(state, NEXT_INDEX_SLOT, folderSets.length), folderSets.length);
+    };
+    return {
+      finish: (): ReadonlyArray<IOutputFolderDigest | undefined> => {
+        if (!settled) {
+          const claimedCount: number = stopClaims();
+          if (!this.#stalled) {
+            this.#waitForClaimedFolderSets(state, claimedCount);
+            this.#receiveResults();
+          }
+          this.#resultsByJobId.delete(jobId);
+          if (this.#stalled) {
+            this.dispose();
+          }
+        }
+        return results;
+      },
+      cancel: (): void => {
+        if (!settled) {
+          stopClaims();
+          this.#resultsByJobId.delete(jobId);
+        }
+      }
+    };
+  }
+
   /** Stops the workers. Later digests run on the calling thread. */
   public dispose(): void {
     this.#stalled = true;
@@ -174,6 +227,20 @@ export class OutputFolderDigestPool {
       resultPort.close();
       void worker.terminate();
     }
+  }
+
+  #postJob(
+    folderSets: ReadonlyArray<IOutputFolderSet>,
+    state: Int32Array,
+    results: (IOutputFolderDigest | undefined)[]
+  ): number {
+    const jobId: number = ++this.#nextJobId;
+    this.#resultsByJobId.set(jobId, results);
+    const job: IOutputFolderDigestJob = { jobId, folderSets, state };
+    for (const { worker } of this.#threads) {
+      worker.postMessage(job);
+    }
+    return jobId;
   }
 
   #waitForClaimedFolderSets(state: Int32Array, count: number): void {
@@ -192,16 +259,20 @@ export class OutputFolderDigestPool {
     }
   }
 
-  #receiveResults(jobId: number, results: (IOutputFolderDigest | undefined)[]): void {
+  /**
+   * Reads every published result, and keeps those of jobs whose digests are still wanted. Results of a job that
+   * finished, was cancelled or stalled are dropped.
+   */
+  #receiveResults(): void {
     for (const { resultPort } of this.#threads) {
       for (
         let received: { message: unknown } | undefined = receiveMessageOnPort(resultPort);
         received !== undefined;
         received = receiveMessageOnPort(resultPort)
       ) {
-        const [resultJobId, index, digest] = received.message as OutputFolderDigestResult;
-        // Results of an earlier job that stalled are dropped.
-        if (resultJobId === jobId) {
+        const [jobId, index, digest] = received.message as OutputFolderDigestResult;
+        const results: (IOutputFolderDigest | undefined)[] | undefined = this.#resultsByJobId.get(jobId);
+        if (results) {
           results[index] = digest;
         }
       }
@@ -255,6 +326,14 @@ export class OutputFolderDigester {
     return digests;
   }
 
+  /**
+   * Starts digesting the folder sets on the pool's workers, so that the calling thread can do other work meanwhile.
+   * Returns undefined if no pool is running; see {@link OutputFolderDigestPool.start}.
+   */
+  public start(folderSets: ReadonlyArray<IOutputFolderSet>): IBackgroundOutputFolderDigests | undefined {
+    return this.#pool && !this.#pool.stalled ? this.#pool.start(folderSets) : undefined;
+  }
+
   /** Stops the pool, if one was started. Later digests run on the calling thread. */
   public dispose(): void {
     this.#threadCount = 0;
@@ -290,4 +369,8 @@ function claimAndDigest(
 function getDefaultThreadCount(): number {
   const parallelism: number = os.availableParallelism?.() ?? os.cpus().length;
   return Math.max(0, Math.min(MAX_POOL_THREAD_COUNT, parallelism - 1));
+}
+
+function createJobState(): Int32Array {
+  return new Int32Array(new SharedArrayBuffer(JOB_STATE_SLOT_COUNT * Int32Array.BYTES_PER_ELEMENT));
 }

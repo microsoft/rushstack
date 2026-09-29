@@ -63,15 +63,23 @@ function addFolderEntries(state: IWalkState, folderPath: string, relativePrefix:
     left.name < right.name ? -1 : left.name > right.name ? 1 : 0
   );
   state.entryCount += entries.length;
+  // With a single trailing separator, even for the root folder.
+  const entryPathPrefix: string = path.join(folderPath, path.sep);
+  // The lines of consecutive entries that are not folders are hashed together, which hashes the same bytes
+  // with far fewer calls.
+  let lines: string = '';
   for (const entry of entries) {
-    const entryPath: string = path.join(folderPath, entry.name);
-    const relativePath: string = `${relativePrefix}${entry.name}`;
+    const relativePath: string = relativePrefix + entry.name;
     if (entry.isDirectory()) {
-      state.hash.update(`${relativePath}\0folder\n`);
-      addFolderEntries(state, entryPath, `${relativePath}/`);
+      state.hash.update(lines + relativePath + '\0folder\n');
+      lines = '';
+      addFolderEntries(state, entryPathPrefix + entry.name, relativePath + '/');
     } else {
-      state.hash.update(`${relativePath}\0${describeEntry(fs.lstatSync(entryPath))}\n`);
+      lines += relativePath + '\0' + describeEntry(fs.lstatSync(entryPathPrefix + entry.name)) + '\n';
     }
+  }
+  if (lines) {
+    state.hash.update(lines);
   }
 }
 

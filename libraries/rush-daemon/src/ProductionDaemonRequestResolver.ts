@@ -446,12 +446,15 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         return {
           ...components,
           reconcileInvalidationsAsync: async () => {
-            const result: IWorkspaceInvalidationReconciliation =
-              await terminal.reconcileWithRequestDiagnosticsAsync(() =>
-                components.reconcileInvalidationsAsync!()
-              );
-            if (!engine.isIncremental) engine.operationGraph.invalidateOperations(undefined, 'rebuild');
-            return result;
+            const reconcileAsync = (): Promise<IWorkspaceInvalidationReconciliation> =>
+              terminal.reconcileWithRequestDiagnosticsAsync(() => components.reconcileInvalidationsAsync!());
+            if (!engine.isIncremental) {
+              // Every operation runs, so no output contents are checked.
+              const rebuildResult: IWorkspaceInvalidationReconciliation = await reconcileAsync();
+              engine.operationGraph.invalidateOperations(undefined, 'rebuild');
+              return rebuildResult;
+            }
+            return await outputFingerprints.walkWhileReconcilingAsync(reconcileAsync);
           }
         };
       } catch (error) {

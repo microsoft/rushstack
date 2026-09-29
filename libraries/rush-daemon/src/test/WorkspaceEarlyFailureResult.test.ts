@@ -18,6 +18,8 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import type { IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
+import type { IOutputFolderSet } from '../OutputFolderDigest';
+import * as outputFolderDigestPool from '../OutputFolderDigestPool';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
@@ -35,6 +37,7 @@ const BUILD_B: string[] = ['build', '--to', 'b', '--parallelism', '3'];
 interface IEarlyFailureFixtureOptions {
   readonly restartable?: boolean;
   readonly slowToStop?: boolean;
+  readonly writesOutputs?: boolean;
 }
 
 /** Keeps the output that it inherits open until the test removes the `hold` marker. */
@@ -46,20 +49,35 @@ const HOLD_OUTPUT_SCRIPT: string = withScriptDeadline(
  * b consumes a and c. a fails, and c holds its build open until the test removes the `hold` marker, so a build of b
  * that returns early on failure leaves c running. With `slowToStop`, c first starts a detached process that shares
  * its output, like a stray watcher: stopping c kills c's process group but not that process, so c's operation ends
- * only when the test removes the marker.
+ * only when the test removes the marker. With `writesOutputs`, c declares its git-ignored `lib` folder as output, and
+ * writes one file there when it starts and another when the test removes the marker.
  */
 function createEarlyFailureFixtureAsync({
   restartable = false,
-  slowToStop = false
+  slowToStop = false,
+  writesOutputs = false
 }: IEarlyFailureFixtureOptions = {}): Promise<DaemonGraphTestFixture> {
   const startOutputHolder: string = slowToStop
     ? `require('node:child_process').spawn(process.execPath,['-e',${JSON.stringify(HOLD_OUTPUT_SCRIPT)}],` +
       "{detached:true,stdio:['ignore','inherit','inherit']}).unref();"
     : '';
+  const startOutputs: string = writesOutputs
+    ? "fs.mkdirSync('lib',{recursive:true});fs.writeFileSync('lib/started.js','');"
+    : '';
+  const finishOutputs: string = writesOutputs ? "fs.writeFileSync('lib/finished.js','');" : '';
   return DaemonGraphTestFixture.createAsync((created: DaemonGraphTestFixture) => {
     if (restartable) {
       setDaemonPolicy(created, {});
       created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    }
+    if (writesOutputs) {
+      fs.appendFileSync(path.join(created.folder, '.gitignore'), '**/lib/\n');
+      created.write(
+        'c/config/rush-project.json',
+        JSON.stringify({
+          operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
+        })
+      );
     }
     created.write('hold', '');
     created.checkInstallation = () => installationChange;
@@ -81,8 +99,10 @@ function createEarlyFailureFixtureAsync({
       withScriptDeadline(
         "const fs=require('node:fs');" +
           startOutputHolder +
+          startOutputs +
           "fs.appendFileSync('../runs.txt','c\\n');" +
-          "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+          `const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);${finishOutputs}` +
+          "console.log('finished-c');}},20);"
       )
     );
   });
@@ -207,6 +227,68 @@ describe('a failed build that returns early', () => {
     } finally {
       fs.rmSync(hold, { force: true });
       await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('walks the outputs of the work that continues only after that work ended, for a later build', async () => {
+    const digester: outputFolderDigestPool.OutputFolderDigester =
+      new outputFolderDigestPool.OutputFolderDigester({
+        threadCount: 2,
+        poolStartThresholdMs: -1
+      });
+    const sharedDigesterSpy: jest.SpyInstance = jest
+      .spyOn(outputFolderDigestPool, 'getSharedOutputFolderDigester')
+      .mockReturnValue(digester);
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync({ writesOutputs: true });
+    const hold: string = path.join(fixture.folder, 'hold');
+    try {
+      // Start the pool, so that each reconciliation walks the output folders on its workers.
+      digester.digest(
+        ['a', 'b'].map((name: string) => ({ projectFolder: fixture.folder, folderNames: [name] }))
+      );
+      expect(digester.isParallel).toBe(true);
+      const startSpy: jest.SpyInstance = jest.spyOn(digester, 'start');
+      fs.rmSync(hold);
+      expect((await fixture.runAsync(['build', '--to', 'c'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+
+      // An edit inside c's outputs makes the next build run c again, and c then holds its build open.
+      fixture.write('hold', '');
+      fixture.write('c/lib/started.js', 'edited');
+      const early: ITerminalExchange = await fixture.runAsync(BUILD_B, { returnEarlyOnFailure: true });
+      expect(early.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, outcome: 'failure' }
+      });
+      await waitForRunsAsync(fixture, 'c', 2);
+      const { projectFolder } = fixture.session.rushConfiguration.getProjectByName('c')!;
+      const walkOfC: IOutputFolderSet[][] = [[{ projectFolder, folderNames: ['lib'] }]];
+      expect(startSpy.mock.calls).toEqual([walkOfC]);
+
+      const later: Promise<ITerminalExchange> = fixture.runAsync([
+        'build',
+        '--to',
+        'c',
+        '--parallelism',
+        '3'
+      ]);
+      await delayAsync(1000);
+      expect(await isSettledAsync(later)).toBe(false);
+      // The last iteration walked c's outputs, but nothing walks them again while c still writes them.
+      expect(startSpy.mock.calls).toEqual([walkOfC]);
+
+      fs.rmSync(hold);
+      expect((await later).terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(startSpy.mock.calls).toEqual([walkOfC, walkOfC]);
+      // That walk found the outputs that c finished, so c did not run again.
+      expect(countRuns(fixture, 'c')).toBe(2);
+    } finally {
+      fs.rmSync(hold, { force: true });
+      await fixture[Symbol.asyncDispose]();
+      sharedDigesterSpy.mockRestore();
+      digester.dispose();
     }
   });
 
