@@ -15,8 +15,8 @@ import {
 
 import { isProcessDefunct } from '../ProcessStartTime';
 
-// An operation process that a stand-in daemon starts; it exits by itself after a minute.
-const OPERATION_SCRIPT: string = 'setTimeout(()=>{},60000)';
+/** An operation process that a stand-in daemon starts; it exits by itself after a minute. */
+export const OPERATION_SCRIPT: string = 'setTimeout(()=>{},60000)';
 // A stand-in daemon: like a phased operation, which is spawned without `detached`, its operation process
 // inherits the daemon's process group. It prints that process's PID.
 const FAKE_DAEMON_SCRIPT: string =

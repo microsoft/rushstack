@@ -10,7 +10,8 @@ import {
   DaemonTransportErrorCode,
   readDaemonLockfile,
   type IDaemonLockfile,
-  type IDaemonPaths
+  type IDaemonPaths,
+  type IDaemonReclaimOptions
 } from '@rushstack/rush-daemon-transport';
 
 import type { DaemonClient } from './DaemonClient';
@@ -74,7 +75,8 @@ export async function observeServingDaemonAsync(
 export async function explainLostConnectionAsync(
   error: unknown,
   daemon: IServingDaemon | undefined,
-  request: IDaemonRequestEnvelope
+  request: IDaemonRequestEnvelope,
+  reclaimOptions?: IDaemonReclaimOptions
 ): Promise<unknown> {
   if (!daemon || !isConnectionLoss(error)) return error;
   const exited: boolean | undefined = await waitForExitAsync(daemon);
@@ -87,7 +89,7 @@ export async function explainLostConnectionAsync(
     );
   }
   const loggedError: string | undefined = readLoggedFatalError(daemon);
-  await reclaimExitedDaemonAsync(daemon);
+  await reclaimExitedDaemonAsync(daemon, reclaimOptions);
   const client: string = request.invocationKind === 'rushx' ? 'rushx-client' : 'rush-client';
   const message: string =
     `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${daemon.pid}) exited while it ran the command; ` +

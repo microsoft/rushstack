@@ -9,9 +9,11 @@ import { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import { IDaemonOrphanReap } from '@rushstack/rush-daemon-transport';
 import { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 import { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
+import { IDaemonReclaimOptions } from '@rushstack/rush-daemon-transport';
 import { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonRequestRejectedMessage } from '@rushstack/rush-daemon-protocol';
 import { IDaemonShutdownAckMessage } from '@rushstack/rush-daemon-protocol';
@@ -109,6 +111,7 @@ export interface IConnectOrAwaitDaemonStartupOptions extends IConnectOrStartDaem
 // @beta
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
     readonly abortSignal?: AbortSignal;
+    readonly onOrphansReaped?: (reap: IDaemonOrphanReap) => void;
     // (undocumented)
     readonly paths: IDaemonPaths;
     readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
@@ -205,7 +208,7 @@ export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOp
 export function inspectDaemonStartupReservation(paths: IDaemonPaths): IDaemonStartupReservationInfo | undefined;
 
 // @beta
-export function reclaimCrashedDaemonAsync(paths: IDaemonPaths): Promise<void>;
+export function reclaimCrashedDaemonAsync(paths: IDaemonPaths, options?: IDaemonReclaimOptions): Promise<void>;
 
 // @beta
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;

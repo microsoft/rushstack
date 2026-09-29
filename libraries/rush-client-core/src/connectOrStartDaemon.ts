@@ -14,6 +14,7 @@ import {
   reclaimStaleDaemonAsync,
   readDaemonLockfile,
   type IDaemonLockfile,
+  type IDaemonOrphanReap,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
@@ -94,6 +95,12 @@ export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectO
   readonly startupTimeoutMs?: number;
   /** Cancels waiting/startup, without stopping startup already handed off to the detached helper. */
   readonly abortSignal?: AbortSignal;
+  /**
+   * Receives the operations that a reclaim stopped because the daemon that left them running had exited: before
+   * a daemon start, or after a connection to a daemon that exited was lost. When omitted, each is reported as a
+   * `RUSH_DAEMON_ORPHANS_REAPED` process warning.
+   */
+  readonly onOrphansReaped?: (reap: IDaemonOrphanReap) => void;
 }
 
 /**
@@ -195,7 +202,7 @@ async function startDaemonAsync(
     if (handoff) return handoff;
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
     await reclaimAbandonedOwnershipAsync(options.paths);
-    await reclaimStaleDaemonAsync(options.paths);
+    await reclaimStaleDaemonAsync(options.paths, { onOrphansReaped: options.onOrphansReaped });
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();
     const helper: IStartupHelper = await spawnDetachedAsync(options, deadline, abandonedHelper);

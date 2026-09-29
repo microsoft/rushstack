@@ -193,7 +193,9 @@ async function executeOnDaemonAsync(
   } catch (error) {
     // After cancellation the caller reports the cancellation, whatever the connection did afterwards.
     if (execution.abortSignal?.aborted) throw error;
-    throw await explainLostConnectionAsync(error, daemon, execution.request);
+    throw await explainLostConnectionAsync(error, daemon, execution.request, {
+      onOrphansReaped: connection.onOrphansReaped
+    });
   }
 }
 

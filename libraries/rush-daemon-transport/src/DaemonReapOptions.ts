@@ -3,6 +3,7 @@
 
 import type { IDaemonProcessGroupOps } from './DaemonProcessGroup';
 import { POSIX_PROCESS_GROUP_OPS } from './DaemonProcessGroup';
+import type { IDaemonOrphanReap, IDaemonReclaimOptions } from './DaemonReclaimOptions';
 
 const WINDOWS_PLATFORM: NodeJS.Platform = 'win32';
 // 0 and 1 are never daemons, and kill(-0)/kill(-1) would signal our own group or every process.
@@ -10,7 +11,7 @@ const FIRST_USER_PID: number = 2;
 const DEFAULT_GRACE_MS: number = 2000;
 
 /** Options for reaping a dead daemon's orphans; every field defaults to the real process. */
-export interface IDaemonOrphanReaperOptions {
+export interface IDaemonOrphanReaperOptions extends IDaemonReclaimOptions {
   readonly ops?: IDaemonProcessGroupOps;
   readonly platform?: NodeJS.Platform;
   readonly selfPid?: number;
@@ -21,7 +22,7 @@ export interface IDaemonOrphanReaperOptions {
 }
 
 /** {@link IDaemonOrphanReaperOptions} with every default applied, for the dead daemon `deadPid`. */
-export interface IReapContext {
+export interface IReapContext extends IDaemonReclaimOptions {
   readonly ops: IDaemonProcessGroupOps;
   readonly platform: NodeJS.Platform;
   readonly selfPid: number;
@@ -46,8 +47,15 @@ export function createReapContext(deadPid: number, options: IDaemonOrphanReaperO
     ops: options.ops ?? POSIX_PROCESS_GROUP_OPS,
     deadPid,
     graceMs: options.graceMs ?? DEFAULT_GRACE_MS,
-    uid: resolveCallerUid(options)
+    uid: resolveCallerUid(options),
+    onOrphansReaped: options.onOrphansReaped
   };
+}
+
+/** Reports the process groups that a reap stopped to `onOrphansReaped`, or else logs `message`. */
+export function reportOrphansReaped(context: IReapContext, reap: IDaemonOrphanReap, message: string): void {
+  if (context.onOrphansReaped) context.onOrphansReaped(reap);
+  else context.ops.log(message);
 }
 
 function isNeitherSelfNorOwnGroup(groupId: number, context: IReapContext): boolean {

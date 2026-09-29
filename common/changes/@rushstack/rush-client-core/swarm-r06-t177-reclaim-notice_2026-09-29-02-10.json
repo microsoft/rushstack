@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add an optional `onOrphansReaped` callback to the connection options and to `reclaimCrashedDaemonAsync()`. It receives the operations that a reclaim stopped, before a daemon start or after a connection to a daemon that exited was lost, instead of the `RUSH_DAEMON_ORPHANS_REAPED` process warning.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

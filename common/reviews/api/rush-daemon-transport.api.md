@@ -93,6 +93,13 @@ export interface IDaemonLockfile {
 }
 
 // @beta
+export interface IDaemonOrphanReap {
+    readonly daemonPid: number;
+    readonly outcome: 'terminated' | 'killed';
+    readonly processGroupIds: readonly number[];
+}
+
+// @beta
 export interface IDaemonPathEnvironment {
     readonly env: Readonly<Record<string, string | undefined>>;
     readonly platform: NodeJS.Platform;
@@ -105,6 +112,11 @@ export interface IDaemonPaths {
     readonly lockfilePath: string;
     readonly runtimeDir?: string;
     readonly socketPath: string;
+}
+
+// @beta
+export interface IDaemonReclaimOptions {
+    readonly onOrphansReaped?: (reap: IDaemonOrphanReap) => void;
 }
 
 // @beta
@@ -121,7 +133,7 @@ export interface IWorkspaceKeyInput {
 export function readDaemonLockfile(lockfilePath: string): IDaemonLockfile | undefined;
 
 // @beta
-export function reclaimStaleDaemonAsync(paths: IDaemonPaths): Promise<void>;
+export function reclaimStaleDaemonAsync(paths: IDaemonPaths, options?: IDaemonReclaimOptions): Promise<void>;
 
 // @beta
 export function removeDaemonArtifacts(lockfilePath: string, socketPath: string): void;

@@ -6,8 +6,14 @@ import type { DaemonOrphanReapOutcome } from './DaemonGroupTermination';
 import type { IDaemonLockfile } from './DaemonLockfile';
 import { reapDeadDaemonOperationGroupsAsync } from './DaemonOperationGroupReaper';
 import { isOwnedEntry } from './DaemonOwnedEntry';
-import { createReapContext, isSignalableGroup, resolveCallerUid } from './DaemonReapOptions';
+import {
+  createReapContext,
+  isSignalableGroup,
+  reportOrphansReaped,
+  resolveCallerUid
+} from './DaemonReapOptions';
 import type { IDaemonOrphanReaperOptions, IReapContext } from './DaemonReapOptions';
+import type { IDaemonOrphanReap } from './DaemonReclaimOptions';
 
 function isOrphanedDaemonGroup(context: IReapContext): boolean {
   return isSignalableGroup(context.deadPid, context) && context.ops.groupExists(context.deadPid);
@@ -32,8 +38,12 @@ export async function reapDeadDaemonProcessGroupAsync(
 ): Promise<DaemonOrphanReapOutcome> {
   const context: IReapContext = createReapContext(deadPid, options);
   if (!isOrphanedDaemonGroup(context)) return 'none';
-  const outcome: DaemonOrphanReapOutcome = await terminateProcessGroupsAsync(context, [deadPid]);
-  context.ops.log(`Reclaimed dead daemon ${deadPid}: its orphaned operation process group was ${outcome}.`);
+  const outcome: IDaemonOrphanReap['outcome'] = await terminateProcessGroupsAsync(context, [deadPid]);
+  reportOrphansReaped(
+    context,
+    { daemonPid: deadPid, processGroupIds: [deadPid], outcome },
+    `Reclaimed dead daemon ${deadPid}: its orphaned operation process group was ${outcome}.`
+  );
   return outcome;
 }
 

@@ -72,10 +72,13 @@ Before it returns that error, it reclaims the exited daemon as the next daemon s
 running the command again, with or without the daemon, does not race the operations the daemon
 left running. While the ownership record names that process, it takes the start mutex and, unless
 a startup is reserved, calls `reclaimStaleDaemonAsync()`, which terminates the orphaned operation
-process groups (each reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning) and removes the
-ownership record and socket. It waits up to 5 seconds while another client holds the start mutex,
-or while the exited process is not reaped yet. If the reclaim fails or times out, the message is
-the same, and the next daemon start reclaims the daemon instead.
+process groups and removes the ownership record and socket. Each set of groups that it stops is
+passed to the connection's optional `onOrphansReaped(reap)` (the daemon's PID, the process groups,
+and whether they were `terminated` or `killed`), so that the caller can say so in its own words;
+without it, each is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. The reclaim before
+a daemon start reports the same way. It waits up to 5 seconds while another client holds the start
+mutex, or while the exited process is not reaped yet. If the reclaim fails or times out, the
+message is the same, and the next daemon start reclaims the daemon instead.
 If the process still runs, the message says that only the connection closed. After the abort
 signal fires, the error is unchanged, so the caller reports the cancellation.
 
@@ -192,7 +195,7 @@ When the ownership record names a PID that no longer exists (on Linux, also an e
 not reaped yet), it reclaims that daemon as described above for a lost connection: under the start
 mutex, only when no startup is reserved, and waiting up to 5 seconds. It does nothing when there is no
 record, when a process with the recorded PID runs, or when the runtime folder is not private, and it
-never throws.
+never throws. Its optional `options.onOrphansReaped` receives what it stopped, as above.
 
 `getDaemonLogFilePath(paths)` is the shared stable path used by both the launcher
 and the CLI's local `daemon logs` reader. Child stdout/stderr are appended across

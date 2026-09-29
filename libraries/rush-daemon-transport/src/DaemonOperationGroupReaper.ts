@@ -11,8 +11,9 @@ import {
 import type { IOperationGroupRecord } from './DaemonOperationGroups';
 import { isOwnedEntry } from './DaemonOwnedEntry';
 import type { IProcessStat } from './DaemonProcessStat';
-import { createReapContext, isSignalableGroup } from './DaemonReapOptions';
+import { createReapContext, isSignalableGroup, reportOrphansReaped } from './DaemonReapOptions';
 import type { IDaemonOrphanReaperOptions, IReapContext } from './DaemonReapOptions';
+import type { IDaemonOrphanReap } from './DaemonReclaimOptions';
 
 const NO_MEMBERS: number = 0;
 const LIST_SEPARATOR: string = ', ';
@@ -41,8 +42,10 @@ async function terminateAndLogAsync(
   context: IReapContext,
   groupIds: number[]
 ): Promise<DaemonOrphanReapOutcome> {
-  const outcome: DaemonOrphanReapOutcome = await terminateProcessGroupsAsync(context, groupIds);
-  context.ops.log(
+  const outcome: IDaemonOrphanReap['outcome'] = await terminateProcessGroupsAsync(context, groupIds);
+  reportOrphansReaped(
+    context,
+    { daemonPid: context.deadPid, processGroupIds: groupIds, outcome },
     `Reclaimed dead daemon ${context.deadPid}: its orphaned operation process groups ` +
       `${groupIds.join(LIST_SEPARATOR)} were ${outcome}.`
   );

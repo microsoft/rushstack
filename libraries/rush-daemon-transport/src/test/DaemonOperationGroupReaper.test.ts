@@ -3,6 +3,8 @@
 
 import { reapDeadDaemonOperationGroupsAsync } from '../DaemonOperationGroupReaper';
 import type { IProcessStat } from '../DaemonProcessStat';
+import type { IDaemonOrphanReaperOptions } from '../DaemonReapOptions';
+import type { IDaemonOrphanReap } from '../DaemonReclaimOptions';
 
 import {
   OPERATION_CHILD,
@@ -31,6 +33,19 @@ it('signals a recorded group whose leader is alive with the recorded start time'
   expect(result.outcome).toBe('terminated');
   expect(result.targets).toEqual([OPERATION_GROUP]);
   expect(result.logs).toEqual([expect.stringContaining(`groups ${OPERATION_GROUP} were terminated`)]);
+});
+
+it('reports a group that needed SIGKILL to onOrphansReaped as killed instead of logging it', async () => {
+  const fake: IFakeGroup = createFakeGroup({ exitsOn: 'SIGKILL', processes: operationTree(OPERATION_GROUP) });
+  const reaps: IDaemonOrphanReap[] = [];
+  const options: IDaemonOrphanReaperOptions = {
+    ...fake.options,
+    onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap)
+  };
+  const lockfilePath: string = recordGroups([OPERATION_GROUP]);
+  await expect(reapDeadDaemonOperationGroupsAsync(lockfilePath, DEAD_PID, options)).resolves.toBe('killed');
+  expect(reaps).toEqual([{ daemonPid: DEAD_PID, processGroupIds: [OPERATION_GROUP], outcome: 'killed' }]);
+  expect(fake.logs).toEqual([]);
 });
 
 it('signals a group whose leader has exited when every live member is in its session', async () => {

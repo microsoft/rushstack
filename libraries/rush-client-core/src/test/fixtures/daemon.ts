@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { spawn } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -18,6 +19,7 @@ import {
 
 import { connectOrStartDaemonAsync } from '../../connectOrStartDaemon';
 import { getDaemonStartupFilePath } from '../../DaemonStartup';
+import { OPERATION_SCRIPT } from '../OrphanedOperation';
 
 async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
@@ -78,7 +80,12 @@ async function mainAsync(): Promise<void> {
           });
         } else if (message.kind === 'requestStart') {
           fs.appendFileSync(path.join(folder, 'requests'), `${daemonVersion}\n`);
-          if (mode === 'crash-on-request' || mode === 'kill-on-request') {
+          if (mode === 'orphan-and-kill-on-request') startOperation();
+          if (
+            mode === 'crash-on-request' ||
+            mode === 'kill-on-request' ||
+            mode === 'orphan-and-kill-on-request'
+          ) {
             exitAbruptly();
             return;
           }
@@ -192,10 +199,21 @@ async function mainAsync(): Promise<void> {
     return closing;
   }
 
+  /**
+   * Like a phased operation, which is spawned without `detached`, starts an operation process in this daemon's
+   * process group, and records its PID in the "operations" file.
+   */
+  function startOperation(): void {
+    const operation = spawn(process.execPath, ['-e', OPERATION_SCRIPT], { stdio: 'ignore' });
+    fs.writeFileSync(path.join(folder, 'operations'), String(operation.pid));
+  }
+
   /** Exits like a crashed daemon, without cleanup. The test expects this exit, so it also counts as stopped. */
   function exitAbruptly(): void {
     fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
-    if (mode === 'kill-on-request') process.kill(process.pid, 'SIGKILL');
+    if (mode === 'kill-on-request' || mode === 'orphan-and-kill-on-request') {
+      process.kill(process.pid, 'SIGKILL');
+    }
     setImmediate(() => {
       throw new Error('fixture daemon crash\nwhile running the request');
     });

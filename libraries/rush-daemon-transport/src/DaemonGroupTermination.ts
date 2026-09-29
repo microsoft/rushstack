@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import type { IReapContext } from './DaemonReapOptions';
+import type { IDaemonOrphanReap } from './DaemonReclaimOptions';
 
 const POLL_INTERVAL_MS: number = 20;
 
 /** Outcome of reaping a dead daemon's orphaned process groups. */
-export type DaemonOrphanReapOutcome = 'none' | 'terminated' | 'killed';
+export type DaemonOrphanReapOutcome = 'none' | IDaemonOrphanReap['outcome'];
 
 function listExistingGroups(context: IReapContext, groupIds: readonly number[]): number[] {
   return groupIds.filter((groupId: number) => context.ops.groupExists(groupId));
@@ -43,7 +44,7 @@ function signalExistingGroups(
 export async function terminateProcessGroupsAsync(
   context: IReapContext,
   groupIds: readonly number[]
-): Promise<DaemonOrphanReapOutcome> {
+): Promise<IDaemonOrphanReap['outcome']> {
   signalExistingGroups(context, groupIds, 'SIGTERM');
   if (await waitForGroupsExitAsync(context, groupIds)) return 'terminated';
   signalExistingGroups(context, groupIds, 'SIGKILL');

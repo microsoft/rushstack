@@ -8,7 +8,8 @@ import {
   readDaemonLockfile,
   reclaimStaleDaemonAsync,
   type IDaemonLockfile,
-  type IDaemonPaths
+  type IDaemonPaths,
+  type IDaemonReclaimOptions
 } from '@rushstack/rush-daemon-transport';
 
 import { isProcessAlive } from './DaemonOwnership';
@@ -38,15 +39,18 @@ export interface IExitedDaemon {
  *
  * @remarks
  * Call it before Rush runs in-process. Like the next daemon start, it terminates the daemon's orphaned
- * operation process groups (each reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning) and removes the
- * ownership record and socket. It does so only under the start mutex and when no startup is reserved, and it
- * waits up to 5 seconds while another client holds the mutex or while the exited process is not reaped yet.
- * It does nothing when there is no record, when a process with the recorded PID runs, or when the runtime
- * folder is not private, and it never throws.
+ * operation process groups and removes the ownership record and socket. Each set of groups that it stops is
+ * reported to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. It does so
+ * only under the start mutex and when no startup is reserved, and it waits up to 5 seconds while another client
+ * holds the mutex or while the exited process is not reaped yet. It does nothing when there is no record, when
+ * a process with the recorded PID runs, or when the runtime folder is not private, and it never throws.
  *
  * @beta
  */
-export async function reclaimCrashedDaemonAsync(paths: IDaemonPaths): Promise<void> {
+export async function reclaimCrashedDaemonAsync(
+  paths: IDaemonPaths,
+  options?: IDaemonReclaimOptions
+): Promise<void> {
   let owner: IDaemonLockfile | undefined;
   try {
     // Every daemon command checks the folder before it trusts the records in it.
@@ -58,16 +62,20 @@ export async function reclaimCrashedDaemonAsync(paths: IDaemonPaths): Promise<vo
     // For example EPERM: the PID exists but cannot be inspected.
     return;
   }
-  await reclaimExitedDaemonAsync({ pid: owner.pid, startedAt: owner.startedAt, paths });
+  await reclaimExitedDaemonAsync({ pid: owner.pid, startedAt: owner.startedAt, paths }, options);
 }
 
 /**
  * Stops the operations that an exited daemon left running, and removes its ownership record and socket, as
- * the next daemon start would (`RUSH_DAEMON_ORPHANS_REAPED` warnings say what was stopped). Best effort: it
- * acts only while the ownership record names that daemon, under the start mutex, and when no startup is
- * reserved. While another client holds the mutex, for example to reclaim the same daemon, it waits.
+ * the next daemon start would (`options.onOrphansReaped` or `RUSH_DAEMON_ORPHANS_REAPED` warnings say what was
+ * stopped). Best effort: it acts only while the ownership record names that daemon, under the start mutex, and
+ * when no startup is reserved. While another client holds the mutex, for example to reclaim the same daemon,
+ * it waits.
  */
-export async function reclaimExitedDaemonAsync(daemon: IExitedDaemon): Promise<void> {
+export async function reclaimExitedDaemonAsync(
+  daemon: IExitedDaemon,
+  options?: IDaemonReclaimOptions
+): Promise<void> {
   const deadline: number = Date.now() + RECLAIM_WAIT_MS;
   try {
     while (isRecordedOwner(daemon)) {
@@ -77,7 +85,7 @@ export async function reclaimExitedDaemonAsync(daemon: IExitedDaemon): Promise<v
         if (lock) {
           try {
             if (isRecordedOwner(daemon) && !readDaemonStartupReservation(daemon.paths)) {
-              await reclaimStaleDaemonAsync(daemon.paths);
+              await reclaimStaleDaemonAsync(daemon.paths, options);
             }
           } finally {
             await lock.releaseAsync();

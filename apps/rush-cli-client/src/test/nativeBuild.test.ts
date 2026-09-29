@@ -56,6 +56,26 @@ function isOperationRunning(pid: number): boolean {
   }
 }
 
+/**
+ * Expects one line of `client` on `stream`, and no Node.js process warning, for the stand-in daemon's
+ * operation.
+ */
+function expectOneReclaimLine(
+  result: IResult,
+  daemonPid: number,
+  stream: 'stdout' | 'stderr',
+  client: 'rush-client' | 'rushx-client' = 'rush-client'
+): void {
+  // The stand-in daemon's operation shares its process group, as a phased operation does.
+  const reclaimLine: string =
+    `${client}: Stopped the operations that the exited daemon (PID ${daemonPid}) left running ` +
+    `(process group ${daemonPid}).`;
+  const output: string = `${result.stdout}\n${result.stderr}`;
+  expect(output.split('\n').filter((line) => line.includes('left running'))).toEqual([reclaimLine]);
+  expect(result[stream]).toContain(reclaimLine);
+  expect(output).not.toMatch(/RUSH_DAEMON_ORPHANS_REAPED|--trace-warnings|\(node:\d+\)/);
+}
+
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -427,12 +447,72 @@ describe('native build through the standalone client', () => {
           expect(isOperationRunning(operationPid)).toBe(true);
           const native: IResult = await invokeAsync(['--no-daemon', 'build']);
           expect(native.code).toBe(0);
-          expect(native.stderr).toContain(`Reclaimed dead daemon ${daemonPid}:`);
+          expectOneReclaimLine(native, daemonPid, 'stderr');
           expect(isOperationRunning(operationPid)).toBe(false);
           expect(fs.existsSync(paths.lockfilePath)).toBe(false);
           expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
         } finally {
           // Only the operation process that this test started, not a process that reused its PID.
+          if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
+        }
+      }),
+    30000
+  );
+
+  (process.platform === 'linux' ? it : it.skip).each([
+    { output: 'legacy', stream: 'stderr' },
+    { output: 'agent', stream: 'stdout' }
+  ] as const)(
+    'stops the operations that a crashed daemon left running before it starts the next daemon ($output output)',
+    ({ output, stream }) =>
+      runWithFixtureAsync(async ({ folder, paths, environment, invokeAsync }) => {
+        environment.RUSHD_OUTPUT = output;
+        const { daemonPid, operationPid } = await startCrashedDaemonAsync(paths);
+        try {
+          const served: IResult = await invokeAsync(['build']);
+          expect(served.code).toBe(0);
+          expect(served.stderr).not.toMatch(/using in-process/i);
+          expectOneReclaimLine(served, daemonPid, stream);
+          expect(isOperationRunning(operationPid)).toBe(false);
+          expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+          expect(JSON.parse((await invokeAsync(['daemon', 'status'])).stdout).pid).not.toBe(daemonPid);
+        } finally {
+          if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
+        }
+      }),
+    30000
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'says rushx-client when rushx stops the operations that a crashed daemon left running',
+    () =>
+      runWithFixtureAsync(async ({ paths, invokeAsync }) => {
+        const { daemonPid, operationPid } = await startCrashedDaemonAsync(paths);
+        try {
+          const script: IResult = await invokeAsync(['build'], true);
+          expect(script.code).toBe(0);
+          expect(script.stderr).not.toMatch(/using in-process/i);
+          expect(script.stdout).toContain('rushx-only');
+          expectOneReclaimLine(script, daemonPid, 'stderr', 'rushx-client');
+          expect(isOperationRunning(operationPid)).toBe(false);
+        } finally {
+          if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
+        }
+      }),
+    30000
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'stops the operations that a crashed daemon left running when "daemon start" starts the next daemon',
+    () =>
+      runWithFixtureAsync(async ({ paths, invokeAsync }) => {
+        const { daemonPid, operationPid } = await startCrashedDaemonAsync(paths);
+        try {
+          const started: IResult = await invokeAsync(['daemon', 'start']);
+          expect(started.code).toBe(0);
+          expectOneReclaimLine(started, daemonPid, 'stderr');
+          expect(isOperationRunning(operationPid)).toBe(false);
+        } finally {
           if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
         }
       }),

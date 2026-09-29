@@ -21,7 +21,7 @@ import {
   type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
-import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
@@ -46,6 +46,7 @@ import {
   type IDaemonRequestNoticeHandlers
 } from './daemonRestartNotice';
 import { formatInProcessFallbackMessage } from './inProcessFallback';
+import { createOrphanReapNoticeHandler, writeStderr } from './daemonReclaimNotice';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
   getBundledRushVersion,
@@ -167,7 +168,9 @@ export async function launchClientAsync(
         columns: request.terminal.columns,
         colorLevel: terminal.supportsColor ? 1 : 0,
         verbosity
-      }
+      },
+      // A reclaim before a start, or after the daemon exited during the command, says what it stopped.
+      onOrphansReaped: createOrphanReapNoticeHandler({ rushx, agentRenderer, writeStderr })
     };
     // While a live daemon or starter can still make the daemon ready, a startup failure rejects with a
     // DaemonStartupPendingError, which is not a DaemonClientError, so Rush does not run in-process next to it.
@@ -362,7 +365,15 @@ async function launchInProcessAsync(
     } catch {
       // Without the daemon's folder there is nothing to reclaim; Rush reports a workspace problem itself.
     }
-    if (paths) await reclaimCrashedDaemonAsync(paths);
+    if (paths) {
+      // Any agent renderer was disposed before Rush runs in-process.
+      const onOrphansReaped: (reap: IDaemonOrphanReap) => void = createOrphanReapNoticeHandler({
+        rushx,
+        agentRenderer: undefined,
+        writeStderr
+      });
+      await reclaimCrashedDaemonAsync(paths, { onOrphansReaped });
+    }
   }
   launchInProcess(argv, rushx, selectedVersion);
 }

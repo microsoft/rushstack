@@ -5,6 +5,7 @@ import { getOperationGroupsFolder, readOperationGroupRecords } from '../DaemonOp
 import type { IOperationGroupRecord } from '../DaemonOperationGroups';
 import type { IDaemonPaths } from '../DaemonPaths';
 import { reclaimStaleDaemonAsync } from '../DaemonReclaim';
+import type { IDaemonOrphanReap } from '../DaemonReclaimOptions';
 
 import {
   killFakeDaemonAsync,
@@ -55,5 +56,34 @@ async function reapsOrphanedOperationGroupsAsync(): Promise<void> {
 posixIt(
   'reaps detached operation groups orphaned by a SIGKILLed daemon, with or without their leader',
   reapsOrphanedOperationGroupsAsync,
+  REAP_TEST_TIMEOUT_MS
+);
+
+async function reportsReapedOperationGroupsAsync(): Promise<void> {
+  const warning: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
+  const paths: IDaemonPaths = createTestDaemonPaths();
+  const fake: IFakeDaemon = await startFakeDaemonAsync(paths);
+  started = identifyStarted([Number(fake.daemon.pid), ...fake.pids]);
+  const [waitingLeader, , exitingLeader] = fake.pids;
+  await killFakeDaemonAsync(fake);
+  expect(await waitUntilAsync(() => isGone(exitingLeader))).toBe(true);
+  writeDeadOwnerLockfile(paths, fake);
+  const reaps: IDaemonOrphanReap[] = [];
+  await reclaimStaleDaemonAsync(paths, { onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap) });
+  expect(await waitUntilAsync(() => !fake.pids.some(isAlive))).toBe(true);
+  const operations: IDaemonOrphanReap[] = reaps.filter((reap: IDaemonOrphanReap) =>
+    reap.processGroupIds.includes(waitingLeader)
+  );
+  expect(operations).toEqual([
+    { daemonPid: Number(fake.daemon.pid), processGroupIds: expect.any(Array), outcome: 'terminated' }
+  ]);
+  const [{ processGroupIds }] = operations;
+  expect(new Set(processGroupIds)).toEqual(new Set([waitingLeader, exitingLeader]));
+  expect(warning).not.toHaveBeenCalled();
+}
+
+posixIt(
+  'reports the reaped operation groups to onOrphansReaped instead of logging them',
+  reportsReapedOperationGroupsAsync,
   REAP_TEST_TIMEOUT_MS
 );

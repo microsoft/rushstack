@@ -6,7 +6,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { reclaimCrashedDaemonAsync } from '../ExitedDaemonReclaim';
 import { isProcessDefunct } from '../ProcessStartTime';
@@ -67,6 +67,19 @@ describe(reclaimCrashedDaemonAsync.name, () => {
       expect.stringContaining(`Reclaimed dead daemon ${daemonPid}:`),
       expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
     );
+  });
+
+  linuxIt('reports what it stopped to onOrphansReaped instead of a process warning', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    const reaps: IDaemonOrphanReap[] = [];
+    await reclaimCrashedDaemonAsync(paths, {
+      onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap)
+    });
+    expect(isRunning(operationPid)).toBe(false);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    expect(reaps).toEqual([{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]);
+    expect(warning).not.toHaveBeenCalled();
   });
 
   linuxIt(

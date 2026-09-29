@@ -11,6 +11,7 @@ import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import {
   DaemonTransportError,
   DaemonTransportErrorCode,
+  type IDaemonOrphanReap,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
@@ -179,6 +180,28 @@ describe(explainLostConnectionAsync.name, () => {
       }
     }
   );
+
+  linuxIt('reports what the reclaim stopped to onOrphansReaped instead of a process warning', async () => {
+    const warning: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
+    try {
+      const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+      recordDaemonOwner(paths, daemonPid);
+      const reaps: IDaemonOrphanReap[] = [];
+      const explained: unknown = await explainLostConnectionAsync(
+        getLostConnection(),
+        getServingDaemon(daemonPid),
+        request,
+        { onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap) }
+      );
+      expect(explained).toMatchObject({ code: 'disconnected', message: getExitMessage(daemonPid) });
+      expect(isRunning(operationPid)).toBe(false);
+      // The stand-in daemon's operation shares its process group, as a phased operation does.
+      expect(reaps).toEqual([{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]);
+      expect(warning).not.toHaveBeenCalled();
+    } finally {
+      warning.mockRestore();
+    }
+  });
 
   linuxIt('reclaims an exited daemon that is not reaped yet once it is reaped', async () => {
     await withUnreapedChildAsync(async (child, parentPid) => {

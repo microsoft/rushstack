@@ -352,10 +352,18 @@ the daemon exits again, to `--no-daemon` (`rushx-client --no-daemon` for Rushx),
 second line the fatal error that the launcher log recorded after the command was sent. Before it
 prints that, the client stops the operations that the exited daemon left running and removes its
 ownership record and socket, as the next daemon start would, so a rerun, with or without
-`--no-daemon`, does not race them. A `RUSH_DAEMON_ORPHANS_REAPED` warning says what it stopped.
+`--no-daemon`, does not race them.
 Rush run in-process, with `--no-daemon` or as a fallback, first does the same when the ownership
 record names a daemon that no longer runs, for example when the client that ran the command was
-killed along with the daemon.
+killed along with the daemon. Each of these reclaims, and the one that `daemon start` or an automatic
+start does, prints one line that says what it stopped, for example:
+
+```
+rush-client: Stopped the operations that the exited daemon (PID 4242) left running (process group 4242).
+```
+
+The line begins "Killed" instead, and ends "they did not exit after SIGTERM", when an operation
+needed SIGKILL. While agent mode shows its progress lines, the line is written among them.
 If rushd still runs, it says that only the connection closed. Ctrl+C and an orderly `daemon stop`
 or `daemon restart` still end a command as cancelled (exit code 130).
 

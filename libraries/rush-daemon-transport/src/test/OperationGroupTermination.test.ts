@@ -4,6 +4,7 @@
 import { reapDeadDaemonOperationGroupsAsync } from '../DaemonOperationGroupReaper';
 import type { IProcessStat } from '../DaemonProcessStat';
 import type { IDaemonOrphanReaperOptions } from '../DaemonReapOptions';
+import type { IDaemonOrphanReap } from '../DaemonReclaimOptions';
 
 import {
   OPERATION_GROUP,
@@ -40,6 +41,21 @@ it('signals every proven group together and escalates the survivors to SIGKILL',
     expect.stringContaining(`${OPERATION_GROUP}, ${OTHER_OPERATION_GROUP} were killed`)
   ]);
   expect(recordsRemain(lockfilePath)).toBe(false);
+});
+
+it('reports every group it stopped to onOrphansReaped instead of logging them', async () => {
+  const fake: IFakeGroup = createOperations({ exitsOn: 'SIGTERM' });
+  const reaps: IDaemonOrphanReap[] = [];
+  const options: IDaemonOrphanReaperOptions = {
+    ...fake.options,
+    onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap)
+  };
+  const lockfilePath: string = recordGroups(BOTH_GROUPS);
+  await expect(reapDeadDaemonOperationGroupsAsync(lockfilePath, DEAD_PID, options)).resolves.toBe(
+    'terminated'
+  );
+  expect(reaps).toEqual([{ daemonPid: DEAD_PID, processGroupIds: BOTH_GROUPS, outcome: 'terminated' }]);
+  expect(fake.logs).toEqual([]);
 });
 
 it('fails the reclaim and keeps the records when a group survives SIGKILL', async () => {

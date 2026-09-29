@@ -16,6 +16,7 @@ import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import {
   readDaemonLockfile,
   type IDaemonLockfile,
+  type IDaemonOrphanReap,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
@@ -49,6 +50,12 @@ import {
   tryTakeOverAbandonedStartupReservationAsync
 } from '../DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
+import {
+  isRunning,
+  recordDaemonOwner,
+  startOrphanedOperationAsync,
+  stopOperationIfRunning
+} from './OrphanedOperation';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 /** How long after a launch a client may take over its reservation once the helper exited. */
@@ -1359,6 +1366,31 @@ describe('detached daemon startup', () => {
       expect(fs.readFileSync(getDaemonLogFilePath(paths), 'utf8')).toContain(earlierCrash);
     });
 
+    (process.platform === 'linux' ? it : it.skip)(
+      'reports the operations that rushd left running to onOrphansReaped',
+      async () => {
+        const reaps: IDaemonOrphanReap[] = [];
+        const connection: IConnectOrStartDaemonOptions = {
+          ...withMode('orphan-and-kill-on-request'),
+          onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap)
+        };
+        const client: DaemonClient = await connectOrStartDaemonAsync(connection);
+        const { pid } = await client.status;
+        const operationsPath: string = path.join(folder, 'operations');
+        try {
+          await expect(
+            executeWithDaemonRestartAsync(client, connection, { request: captureRequest() })
+          ).rejects.toMatchObject({ code: 'disconnected', message: exitedMessage(pid!, false) });
+          expect(isRunning(Number(fs.readFileSync(operationsPath, 'utf8')))).toBe(false);
+          expect(reaps).toEqual([{ daemonPid: pid, processGroupIds: [pid], outcome: 'terminated' }]);
+        } finally {
+          if (fs.existsSync(operationsPath)) {
+            stopOperationIfRunning(Number(fs.readFileSync(operationsPath, 'utf8')));
+          }
+        }
+      }
+    );
+
     it('says the connection closed while rushd still runs', async () => {
       const connection: IConnectOrStartDaemonOptions = withMode('close-on-request');
       const client: DaemonClient = await connectOrStartDaemonAsync(connection);
@@ -1747,6 +1779,34 @@ describe('detached daemon startup', () => {
       const client = await connectOrStartDaemonAsync(options);
       await client.closeAsync();
       expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    }
+  );
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'reports the operations that a crashed daemon left running to onOrphansReaped before a start',
+    async () => {
+      const operationPids: number[] = [];
+      const warning: jest.SpyInstance = jest
+        .spyOn(process, 'emitWarning')
+        .mockImplementation(() => undefined);
+      try {
+        const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+        await leaveStaleSocketAsync();
+        recordDaemonOwner(paths, daemonPid);
+        const reaps: IDaemonOrphanReap[] = [];
+        const client: DaemonClient = await connectOrStartDaemonAsync({
+          ...options,
+          onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap)
+        });
+        await client.closeAsync();
+        expect(isRunning(operationPid)).toBe(false);
+        expect(reaps).toEqual([{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]);
+        expect(warning).not.toHaveBeenCalled();
+        expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+      } finally {
+        warning.mockRestore();
+        operationPids.forEach(stopOperationIfRunning);
+      }
     }
   );
 

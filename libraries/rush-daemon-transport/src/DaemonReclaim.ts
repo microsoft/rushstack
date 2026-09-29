@@ -10,6 +10,7 @@ import { reapOrphansOfDeadOwnerAsync } from './DaemonOrphanReaper';
 import type { IDaemonPaths } from './DaemonPaths';
 import { tryAcquireReclaimLock } from './DaemonReclaimLock';
 import type { DaemonReclaimLockOutcome } from './DaemonReclaimLock';
+import type { IDaemonReclaimOptions } from './DaemonReclaimOptions';
 import { assertDaemonRuntimeDirIsPrivate } from './DaemonRuntimeDir';
 import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 
@@ -17,15 +18,13 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * Reclaims the socket/pipe path when it is held by a dead daemon.
  *
  * @remarks
- * Two-factor stale detection — the lockfile PID must be dead *and* a connect
- * probe must fail — so a daemon that is alive but momentarily unresponsive is
- * never reclaimed underneath itself. Reclaims are serialized through the
- * lockfile mutex ({@link tryAcquireReclaimLock}): only the mutex holder may
- * unlink the socket path, so a concurrent starter cannot delete a socket that
- * another process just bound. Operation processes still running in the dead
- * daemon's process group, or in the operation process groups it recorded, are
- * terminated first (see `DaemonOrphanReaper`). Nothing is read, reaped or
- * removed unless the runtime directory is a private directory of this user.
+ * Two-factor stale detection — the lockfile PID must be dead *and* a connect probe must fail — so a daemon
+ * that is alive but momentarily unresponsive is never reclaimed underneath itself. Reclaims are serialized
+ * through the lockfile mutex ({@link tryAcquireReclaimLock}): only the mutex holder may unlink the socket
+ * path, so a concurrent starter cannot delete a socket that another process just bound. Operation processes
+ * still running in the dead daemon's process group, or in the operation process groups it recorded, are
+ * terminated first (see `DaemonOrphanReaper`) and reported to `options.onOrphansReaped`. Nothing is read,
+ * reaped or removed unless the runtime directory is a private directory of this user.
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a
  * live (or plausibly live) daemon owns the path, or when another starter holds
@@ -35,7 +34,10 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  *
  * @beta
  */
-export async function reclaimStaleDaemonAsync(paths: IDaemonPaths): Promise<void> {
+export async function reclaimStaleDaemonAsync(
+  paths: IDaemonPaths,
+  options?: IDaemonReclaimOptions
+): Promise<void> {
   assertDaemonRuntimeDirIsPrivate(paths);
   // The mutex lives beside the lockfile (never the same file): the lockfile
   // records the *running* daemon's live PID, while the mutex only ever records
@@ -46,7 +48,7 @@ export async function reclaimStaleDaemonAsync(paths: IDaemonPaths): Promise<void
     throwAlreadyRunning(paths, 'another starter holds the reclaim lock');
   }
   try {
-    await reclaimUnderLockAsync(paths);
+    await reclaimUnderLockAsync(paths, options);
   } finally {
     try {
       fs.unlinkSync(reclaimLockPath(paths));
@@ -60,7 +62,7 @@ function reclaimLockPath(paths: IDaemonPaths): string {
   return `${paths.lockfilePath}.reclaim`;
 }
 
-async function reclaimUnderLockAsync(paths: IDaemonPaths): Promise<void> {
+async function reclaimUnderLockAsync(paths: IDaemonPaths, options?: IDaemonReclaimOptions): Promise<void> {
   const owner: ReturnType<typeof readDaemonLockfile> = readDaemonLockfile(paths.lockfilePath);
   if (isLockfilePidAlive(owner)) {
     throwAlreadyRunning(paths, 'its lockfile PID is alive');
@@ -70,7 +72,7 @@ async function reclaimUnderLockAsync(paths: IDaemonPaths): Promise<void> {
     throwAlreadyRunning(paths, 'it answers a connect probe');
   }
   // A daemon that died uncleanly leaves its operations running; stop them before a successor re-runs them.
-  await reapOrphansOfDeadOwnerAsync(paths.lockfilePath, owner);
+  await reapOrphansOfDeadOwnerAsync(paths.lockfilePath, owner, options);
   removeDaemonArtifacts(paths.lockfilePath, paths.socketPath);
 }
 

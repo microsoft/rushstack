@@ -12,6 +12,7 @@ import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import { isDaemonProcessAlive, writeDaemonLockfile } from '../DaemonLockfile';
 import type { IDaemonPaths } from '../DaemonPaths';
 import { reclaimStaleDaemonAsync } from '../DaemonReclaim';
+import type { IDaemonOrphanReap } from '../DaemonReclaimOptions';
 
 import { createTestDaemonPaths } from './TestDaemonFixture';
 
@@ -52,10 +53,8 @@ async function waitUntilDeadAsync(pid: number): Promise<boolean> {
   return false;
 }
 
-posixIt('reaps operation processes orphaned by a SIGKILLed daemon before reclaiming', async () => {
-  const warning: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
-  const { daemonPid, orphanPid } = await createOrphanedGroupAsync();
-  expect(isDaemonProcessAlive(orphanPid)).toBe(true);
+/** Records `daemonPid` as the owner of new test paths. */
+function recordDeadOwner(daemonPid: number): IDaemonPaths {
   const paths: IDaemonPaths = createTestDaemonPaths();
   writeDaemonLockfile(paths.lockfilePath, {
     pid: daemonPid,
@@ -63,8 +62,27 @@ posixIt('reaps operation processes orphaned by a SIGKILLed daemon before reclaim
     startedAt: new Date().toISOString(),
     socketPath: paths.socketPath
   });
-  await reclaimStaleDaemonAsync(paths);
+  return paths;
+}
+
+posixIt('reaps operation processes orphaned by a SIGKILLed daemon before reclaiming', async () => {
+  const warning: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
+  const { daemonPid, orphanPid } = await createOrphanedGroupAsync();
+  expect(isDaemonProcessAlive(orphanPid)).toBe(true);
+  await reclaimStaleDaemonAsync(recordDeadOwner(daemonPid));
   expect(await waitUntilDeadAsync(orphanPid)).toBe(true);
   expect(warning).toHaveBeenCalledWith(expect.stringContaining(`dead daemon ${daemonPid}`), expect.anything());
+  warning.mockRestore();
+});
+
+posixIt('reports what it stopped to onOrphansReaped instead of a process warning', async () => {
+  const warning: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
+  const { daemonPid, orphanPid } = await createOrphanedGroupAsync();
+  const reaps: IDaemonOrphanReap[] = [];
+  const onOrphansReaped = (reap: IDaemonOrphanReap): number => reaps.push(reap);
+  await reclaimStaleDaemonAsync(recordDeadOwner(daemonPid), { onOrphansReaped });
+  expect(await waitUntilDeadAsync(orphanPid)).toBe(true);
+  expect(reaps).toEqual([{ daemonPid, processGroupIds: [daemonPid], outcome: 'terminated' }]);
+  expect(warning).not.toHaveBeenCalled();
   warning.mockRestore();
 });

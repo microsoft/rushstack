@@ -29,6 +29,7 @@ import type { IDaemonPongMessage, IDaemonRequestAdmissionOptions } from '@rushst
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
 import { executeDaemonGraphCommandAsync } from './daemonGraph';
+import { createOrphanReapNoticeHandler, writeStderr } from './daemonReclaimNotice';
 import { writeStreamAsync } from './writeStreamAsync';
 
 const FORCE_STOP_WAIT_MS: number = 15000;
@@ -71,12 +72,16 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   }
   if (!options.rushJsonPath) throw new Error('Daemon management requires a repository containing rush.json.');
   const mayStart: boolean = command === 'start' || command === 'restart';
-  const connectionOptions: IConnectOrStartDaemonOptions = await getDaemonConnectionOptionsAsync(
-    path.dirname(options.rushJsonPath),
-    options.rushVersion,
-    options.environment,
-    mayStart
-  );
+  const connectionOptions: IConnectOrStartDaemonOptions = {
+    ...(await getDaemonConnectionOptionsAsync(
+      path.dirname(options.rushJsonPath),
+      options.rushVersion,
+      options.environment,
+      mayStart
+    )),
+    // A start reclaims a daemon that exited uncleanly, and says what it stopped.
+    onOrphansReaped: createOrphanReapNoticeHandler({ rushx: false, agentRenderer: undefined, writeStderr })
+  };
   if (command === 'logs') {
     if (options.argv[1] !== '--follow') {
       await printDaemonLogAsync(connectionOptions.paths);

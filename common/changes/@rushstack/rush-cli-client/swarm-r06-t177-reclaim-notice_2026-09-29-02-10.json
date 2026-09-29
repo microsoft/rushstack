@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "When the client stops the operations that an exited daemon left running, it now says so in one `rush-client:` line instead of a Node.js `RUSH_DAEMON_ORPHANS_REAPED` process warning.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}
