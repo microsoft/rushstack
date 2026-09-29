@@ -14,6 +14,7 @@ import {
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
   collectPhasedRequestTelemetryRecords,
+  type IPhasedRequestTelemetryMeasure,
   type IPhasedRequestTelemetryReport,
   type IPhasedRequestTelemetrySink
 } from '../PhasedRequestTelemetry';
@@ -37,6 +38,7 @@ const DAEMON_MEASURES: ReadonlyArray<string> = [
   'rush:daemon:admission',
   'rush:daemon:queueWait',
   'rush:daemon:acquireExecutionLease',
+  'rush:daemon:awaitConnectingClients',
   'rush:daemon:reconcileInvalidations',
   'rush:daemon:applySelections',
   'rush:daemon:scheduleIteration',
@@ -286,6 +288,36 @@ describe('phased request telemetry', () => {
         'iteration 2',
         'log queued in iteration 2 (batch 1, early false)'
       ]);
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+
+  it('measures the wait for connecting clients between the execution lease and the reconcile', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient('waiting');
+    client.waitForConnectingClientsAsync = () => new Promise<void>((resolve) => setTimeout(resolve, 20));
+    const sink: RecordingTelemetrySink = new RecordingTelemetrySink(client);
+    try {
+      await router.executeAsync(
+        createRequest('waiting', OPERATION_A),
+        client,
+        false,
+        undefined,
+        undefined,
+        sink
+      );
+
+      const measures: Map<string, IPhasedRequestTelemetryMeasure> = new Map(
+        sink.reports[0].measures.map((measure: IPhasedRequestTelemetryMeasure) => [measure.name, measure])
+      );
+      const lease: IPhasedRequestTelemetryMeasure = measures.get('rush:daemon:acquireExecutionLease')!;
+      const wait: IPhasedRequestTelemetryMeasure = measures.get('rush:daemon:awaitConnectingClients')!;
+      const reconcile: IPhasedRequestTelemetryMeasure = measures.get('rush:daemon:reconcileInvalidations')!;
+      expect(wait.startTimeMs).toBe(lease.endTimeMs);
+      expect(wait.endTimeMs - wait.startTimeMs).toBeGreaterThanOrEqual(10);
+      expect(reconcile.startTimeMs).toBe(wait.endTimeMs);
     } finally {
       await fixture.session[Symbol.asyncDispose]();
     }

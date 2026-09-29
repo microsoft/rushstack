@@ -91,9 +91,17 @@ export class DaemonRequestDispatchError extends Error {
 export interface IDaemonRequestDispatchClient {
   readonly abortSignal: AbortSignal;
   readonly interactiveSession: IInteractiveRequestSession;
+  /**
+   * The `performance.now()` timestamp at which the transport read the request. A host lifecycle reports it as the
+   * request's {@link IDaemonRequestLifecycleInfo.receivedTimeMs}. When it is omitted, the request counts as received
+   * when its dispatch starts.
+   */
+  readonly receivedTimeMs?: number;
   readonly sessionId: string;
   readonly supportsRequestAdmission: boolean;
   getNextEventSequence(): number;
+  /** {@inheritDoc IPhasedRequestClient.waitForConnectingClientsAsync} */
+  waitForConnectingClientsAsync?(): Promise<void>;
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
   writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
   writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
@@ -214,7 +222,7 @@ async function dispatchWorkspaceRequestAsync(
       onExecutionStarting,
       resolved.requestSettings,
       resolved.telemetry,
-      lifecycleInfo?.receivedTimeMs
+      lifecycleInfo?.receivedTimeMs ?? client.receivedTimeMs
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);

@@ -1127,6 +1127,64 @@ describe('shared phased request batching', () => {
     expect(scheduleSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('waits for connecting clients before the reconcile, so that a request one sends meanwhile joins the batch', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      events.push('reconcile');
+      input.read();
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    let second: Promise<IDaemonPhasedRequestResult> | undefined;
+    const waitForConnectingClientsAsync: jest.Mock<Promise<void>, []> = jest.fn(async (): Promise<void> => {
+      // A client that connected while the daemon was busy changes project-c's input, then sends a compatible build.
+      events.push('wait');
+      input.edit();
+      second = router.executeAsync(
+        createRequest('second', OPERATION_C),
+        new TestPhasedRequestClient('two'),
+        false,
+        undefined,
+        undefined,
+        undefined,
+        performance.now()
+      );
+      await settleAsync();
+    });
+    const firstClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    firstClient.waitForConnectingClientsAsync = waitForConnectingClientsAsync;
+
+    expect(await router.executeAsync(createRequest('first', OPERATION_A), firstClient)).toMatchObject({
+      exitCode: 0,
+      outcome: 'success'
+    });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(events).toEqual(['wait', 'reconcile', 'run:C snapshot=1 disk=1']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(waitForConnectingClientsAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not wait for connecting clients before a batch that no other request can join', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const waitForConnectingClientsAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      async (): Promise<void> => undefined
+    );
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    client.waitForConnectingClientsAsync = waitForConnectingClientsAsync;
+
+    expect(
+      await router.executeAsync({ ...createRequest('list', OPERATION_A), commandName: 'list' }, client)
+    ).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(waitForConnectingClientsAsync).not.toHaveBeenCalled();
+  });
+
   it('lets a late shared build wait past a default timeout while a compatible batch executes', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();

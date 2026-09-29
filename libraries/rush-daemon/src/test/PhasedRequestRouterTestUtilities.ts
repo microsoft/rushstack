@@ -34,6 +34,7 @@ import type {
   IWorkspaceSessionMetadata
 } from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
+import type { IWorkspaceWarmSetStatus } from '../WorkspaceWarmSet';
 import { TEST_RUSH_CONFIGURATION, TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 export const TEST_ENGINE_SHAPE: IWorkspaceEngineShape = {
@@ -69,6 +70,8 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public interactiveInputSink: IInteractiveRequestInputSink | undefined;
   public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
+  /** What the router awaits for the daemon's connecting clients before it reconciles this client's batch. */
+  public waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
   readonly #sequenceState: { next: number };
 
   public constructor(sessionIdOrSequenceState: string | { next: number } = 'test-session') {
@@ -195,6 +198,7 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
   public readonly rushConfiguration: RushConfiguration = TEST_RUSH_CONFIGURATION;
   public readonly rushSession: RushSession | undefined = undefined;
   public readonly operationGraph: IOperationGraph;
+  public warmSetStatus: IWorkspaceWarmSetStatus | undefined;
   public onReconcileAsync: (() => Promise<void>) | undefined;
   public acquireExecutionLeaseAsync: (() => Promise<AsyncDisposable | undefined>) | undefined;
 

@@ -24,11 +24,15 @@ export interface IDaemonWireRequestClientOptions {
   readonly abortSignal: AbortSignal;
   readonly getNextEventSequence: () => number;
   readonly interactiveSession: IInteractiveRequestSession;
+  /** The `performance.now()` timestamp at which the control session read the request. */
+  readonly receivedTimeMs: number;
   readonly requestId: string;
   readonly sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
   readonly sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
   readonly sessionId: string;
   readonly supportsRequestAdmission: boolean;
+  /** Waits for the daemon's other connections that have not sent a request yet. Resolves at once if omitted. */
+  readonly waitForConnectingClientsAsync?: () => Promise<void>;
 }
 
 /** Ordered wire destination for one request owned by a control session. @internal */
@@ -37,10 +41,12 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
   readonly #requestId: string;
   readonly #sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
   readonly #sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
+  readonly #waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
   #terminalOutcomeSent: boolean = false;
 
   public readonly abortSignal: AbortSignal;
   public readonly interactiveSession: IInteractiveRequestSession;
+  public readonly receivedTimeMs: number;
   public readonly sessionId: string;
   public readonly supportsRequestAdmission: boolean;
 
@@ -48,15 +54,21 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     this.abortSignal = options.abortSignal;
     this.#getNextEventSequence = options.getNextEventSequence;
     this.interactiveSession = options.interactiveSession;
+    this.receivedTimeMs = options.receivedTimeMs;
     this.#requestId = options.requestId;
     this.#sendControlAsync = options.sendControlAsync;
     this.#sendFrameAsync = options.sendFrameAsync;
     this.sessionId = options.sessionId;
     this.supportsRequestAdmission = options.supportsRequestAdmission;
+    this.#waitForConnectingClientsAsync = options.waitForConnectingClientsAsync;
   }
 
   public getNextEventSequence(): number {
     return this.#getNextEventSequence();
+  }
+
+  public async waitForConnectingClientsAsync(): Promise<void> {
+    await this.#waitForConnectingClientsAsync?.();
   }
 
   public get terminalOutcomeSent(): boolean {

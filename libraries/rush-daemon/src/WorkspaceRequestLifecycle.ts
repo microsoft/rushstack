@@ -258,7 +258,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     destination: IDaemonRequestDispatchClient,
     dispatchWorkspaceRequestAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
-    const receivedTimeMs: number = performance.now();
+    const receivedTimeMs: number = destination.receivedTimeMs ?? performance.now();
     const dispatchAsync: DispatchWorkspaceRequestAsync = (options) =>
       dispatchWorkspaceRequestAsync({
         ...options,
@@ -1391,9 +1391,11 @@ function createLifecycleClient(
   return {
     abortSignal,
     interactiveSession: client.interactiveSession,
+    receivedTimeMs: client.receivedTimeMs,
     sessionId: client.sessionId,
     supportsRequestAdmission: client.supportsRequestAdmission,
     getNextEventSequence: () => client.getNextEventSequence(),
+    waitForConnectingClientsAsync: async () => await client.waitForConnectingClientsAsync?.(),
     writeEventAsync: (event) => {
       state.began = true;
       return client.writeEventAsync(event);

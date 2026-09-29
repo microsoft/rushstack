@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Before a batch of shared builds reconciles its inputs, the daemon waits up to 100 ms for clients that connected but have not sent their request yet, so that their requests can join the batch. Such a client counts as connecting until 100 ms after the daemon last read a frame from it or finished writing one to it. A request now counts as received when the daemon reads its request frame, and the telemetry adds an `awaitConnectingClients` measure.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

@@ -178,10 +178,12 @@ export interface IDaemonRequestDispatchClient {
     getNextEventSequence(): number;
     // (undocumented)
     readonly interactiveSession: IInteractiveRequestSession;
+    readonly receivedTimeMs?: number;
     // (undocumented)
     readonly sessionId: string;
     // (undocumented)
     readonly supportsRequestAdmission: boolean;
+    waitForConnectingClientsAsync?(): Promise<void>;
     // (undocumented)
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     // (undocumented)
@@ -409,6 +411,7 @@ export interface IPhasedRequestClient {
     readonly interactiveSession?: IInteractiveRequestSession;
     readonly sessionId: string;
     readonly supportsRequestAdmission?: boolean;
+    waitForConnectingClientsAsync?(): Promise<void>;
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
     writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;

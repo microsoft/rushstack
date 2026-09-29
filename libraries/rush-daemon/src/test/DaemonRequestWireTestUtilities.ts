@@ -117,6 +117,19 @@ export class DaemonRequestWireClient {
     return this.#connection.closeAsync();
   }
 
+  /**
+   * Stops reading from the socket, so that what the daemon writes backs up in the socket's buffers. Call it only
+   * while no frame is being received.
+   */
+  public pauseReading(): void {
+    this.#connection.socket.pause();
+  }
+
+  /** Reads from the socket again after {@link DaemonRequestWireClient.pauseReading}. */
+  public resumeReading(): void {
+    this.#connection.socket.resume();
+  }
+
   #receive(frame: IDaemonFrame): void {
     const waiter: IFrameWaiter | undefined = this.#waiters.shift();
     if (waiter) waiter.resolve(frame);

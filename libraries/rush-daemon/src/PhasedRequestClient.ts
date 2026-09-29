@@ -55,4 +55,15 @@ export interface IPhasedRequestClient {
 
   /** Writes the request's current one-based scheduler queue position. */
   writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+
+  /**
+   * Resolves once the daemon's other clients that are still connecting have sent their requests, or are not about
+   * to send one. The wait is short and capped.
+   *
+   * @remarks
+   * The router calls it before a batch of shared builds starts its input reconcile. A request that the daemon
+   * receives before then can still join the batch, so a client that connected while the daemon was busy shares the
+   * batch's iteration instead of waiting for it and reconciling again.
+   */
+  waitForConnectingClientsAsync?(): Promise<void>;
 }

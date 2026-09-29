@@ -29,6 +29,7 @@ import type {
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { createGlobalCommandResult } from './CommandResultPolicy';
+import type { ConnectingClientTracker, IConnectingClient } from './ConnectingClientTracker';
 import { DaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
@@ -60,6 +61,8 @@ export interface IDaemonControlSessionOptions {
   readonly checkInstallation?: () => IDaemonInstallationChange | undefined;
   /** Receives a message for the daemon log for each rejected request. */
   readonly onLog?: (message: string) => void;
+  /** Tracks this connection until it sends its first request or starts closing. */
+  readonly connectingClients?: ConnectingClientTracker;
 }
 
 interface IRequestState {
@@ -91,6 +94,7 @@ export class DaemonControlSession {
   readonly #completedRequestIds: Set<string> = new Set();
   readonly #closedPromise: Promise<void>;
   readonly #resolveClosed: () => void;
+  readonly #connectingClient: IConnectingClient | undefined;
   #closePromise: Promise<void> | undefined;
   #connectionClosed: boolean = false;
   #handshakeComplete: boolean = false;
@@ -108,6 +112,7 @@ export class DaemonControlSession {
   public constructor(connection: DaemonFrameConnection, options: IDaemonControlSessionOptions) {
     this.#connection = connection;
     this.#options = options;
+    this.#connectingClient = options.connectingClients?.add();
     const closed: ReturnType<typeof createDeferred> = createDeferred();
     this.#closedPromise = closed.promise;
     this.#resolveClosed = closed.resolve;
@@ -147,6 +152,7 @@ export class DaemonControlSession {
   }
 
   async #handleFrameSafelyAsync(frame: IDaemonFrame): Promise<void> {
+    this.#connectingClient?.touch();
     try {
       await this.#onFrameAsync(frame);
     } catch (error) {
@@ -293,6 +299,7 @@ export class DaemonControlSession {
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
+    const receivedTimeMs: number = performance.now();
     this.#assertRequestLifecycleReady();
     const requestId: string = envelope.requestId;
     if (this.#requestById.has(requestId) || this.#completedRequestIds.has(requestId)) {
@@ -328,15 +335,18 @@ export class DaemonControlSession {
       requestId
     });
     const sessionId: string = this.#sessionId!;
+    const connectingClients: ConnectingClientTracker | undefined = this.#options.connectingClients;
     const client: DaemonWireRequestClient = new DaemonWireRequestClient({
       abortSignal: abortController.signal,
       getNextEventSequence: () => this.#getNextEventSequence(),
       interactiveSession,
+      receivedTimeMs,
       requestId,
       sendControlAsync: (message: DaemonControlMessage) => this.#enqueueControlAsync(message),
       sendFrameAsync: (frame: IDaemonFrame) => this.#enqueueFrameAsync(frame),
       sessionId,
-      supportsRequestAdmission: this.#peerSupportsRequestAdmission
+      supportsRequestAdmission: this.#peerSupportsRequestAdmission,
+      waitForConnectingClientsAsync: connectingClients && (() => connectingClients.waitAsync())
     });
     const state: IRequestState = {
       abortController,
@@ -354,6 +364,8 @@ export class DaemonControlSession {
         releaseActivity?.();
       });
     void state.completion.catch((error: unknown) => this.#handleSendFailureAsync(error));
+    // The request has its receipt time, so a batch that waits for this connection can now close.
+    this.#connectingClient?.settle();
   }
 
   #getNextEventSequence(): number {
@@ -470,7 +482,13 @@ export class DaemonControlSession {
   #enqueueFrameAsync(frame: IDaemonFrame, closeAfterSend: boolean = false): Promise<void> {
     const sendPromise: Promise<void> = this.#sendQueue
       .then(() => this.#connection.sendFrameAsync(frame))
-      .then(() => (closeAfterSend ? this.#connection.closeAsync() : undefined));
+      .then(() => {
+        // Before its request, a client waits for each reply. A large reply (the pong carries the warm set status)
+        // finishes writing only when the event loop runs, so a busy daemon can write it long after the client's
+        // last frame. Its client must not count as idle before it could read the reply.
+        this.#connectingClient?.touch();
+        return closeAfterSend ? this.#connection.closeAsync() : undefined;
+      });
     this.#sendQueue = sendPromise.catch(() => undefined);
     return sendPromise;
   }
@@ -509,6 +527,7 @@ export class DaemonControlSession {
   #markClosing(reason: Error, keepFinishedRequests: boolean = false): void {
     if (this.#isClosing) return;
     this.#isClosing = true;
+    this.#connectingClient?.settle();
     this.#interactiveConnection.close(reason);
     for (const state of this.#requestById.values()) {
       if (!keepFinishedRequests || !state.client.terminalOutcomeSent) {

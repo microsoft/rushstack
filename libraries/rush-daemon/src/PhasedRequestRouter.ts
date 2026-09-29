@@ -105,6 +105,8 @@ interface IBatchTimings {
   readonly startTimeMs: number;
   batchSize: number;
   leasesAcquiredTimeMs: number | undefined;
+  /** The end of the wait for connecting clients, where the input reconcile starts. */
+  reconcileStartTimeMs: number | undefined;
   reconciledTimeMs: number | undefined;
   selectionsAppliedTimeMs: number | undefined;
   /** The start of `scheduleIterationAsync`, which is where a native iteration's duration starts. */
@@ -478,6 +480,7 @@ class PhasedRequestBatchCoordinator {
       startTimeMs: performance.now(),
       batchSize: 0,
       leasesAcquiredTimeMs: undefined,
+      reconcileStartTimeMs: undefined,
       reconciledTimeMs: undefined,
       selectionsAppliedTimeMs: undefined,
       scheduleStartTimeMs: undefined,
@@ -506,9 +509,14 @@ class PhasedRequestBatchCoordinator {
       }
       executionLease = await this.#workspaceSession.acquireExecutionLeaseAsync?.();
       timings.leasesAcquiredTimeMs = performance.now();
+      if (this.#acceptingCurrentBatch) {
+        // A client that connected while the daemon was busy may not have sent its request yet. Let it, so that
+        // the request is received before the reconcile starts and can join this batch.
+        await batch[0].client.waitForConnectingClientsAsync?.();
+      }
       // Requests received before this point made their changes before the reconcile reads the inputs, so they can
       // still join while it runs. Requests received later wait for the next batch, which reconciles again.
-      this.#reconcileStartTimeMs = performance.now();
+      this.#reconcileStartTimeMs = timings.reconcileStartTimeMs = performance.now();
       await this.#workspaceSession.reconcileInvalidationsAsync();
       timings.reconciledTimeMs = performance.now();
 
@@ -1161,7 +1169,8 @@ function createTelemetryMeasures(
   addMeasure('admission', entry.startTimeMs, entry.admittedTimeMs);
   addMeasure('queueWait', entry.admittedTimeMs, executionStartTimeMs);
   addMeasure('acquireExecutionLease', timings.startTimeMs, timings.leasesAcquiredTimeMs);
-  addMeasure('reconcileInvalidations', timings.leasesAcquiredTimeMs, timings.reconciledTimeMs);
+  addMeasure('awaitConnectingClients', timings.leasesAcquiredTimeMs, timings.reconcileStartTimeMs);
+  addMeasure('reconcileInvalidations', timings.reconcileStartTimeMs, timings.reconciledTimeMs);
   addMeasure('applySelections', timings.reconciledTimeMs, timings.selectionsAppliedTimeMs);
   addMeasure('scheduleIteration', timings.scheduleStartTimeMs, timings.scheduledTimeMs);
   addMeasure('executeIteration', timings.executionStartTimeMs, timings.iterationEndTimeMs ?? resultTimeMs);

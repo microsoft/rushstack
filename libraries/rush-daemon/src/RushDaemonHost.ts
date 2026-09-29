@@ -16,6 +16,7 @@ import {
 } from '@rushstack/rush-daemon-transport';
 import type { DaemonFileChange, DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
+import { ConnectingClientTracker } from './ConnectingClientTracker';
 import { DaemonControlSession } from './DaemonControlSession';
 import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
 import { DaemonIdleGarbageCollector, type IDaemonIdleGarbageCollection } from './DaemonIdleGarbageCollector';
@@ -236,6 +237,7 @@ export class RushDaemonHost {
       options.requestResolver,
       requestLifecycle
     );
+    const connectingClients: ConnectingClientTracker = new ConnectingClientTracker();
     let listener: DaemonFrameListener;
     try {
       listener = await DaemonFrameListener.listenAsync(paths, {
@@ -243,6 +245,7 @@ export class RushDaemonHost {
         startedAt: new Date(startedAtMs).toISOString(),
         onConnection: (connection: DaemonFrameConnection) => {
           const session: DaemonControlSession = new DaemonControlSession(connection, {
+            connectingClients,
             daemonVersion: options.daemonVersion,
             dispatcher: requestDispatcher,
             startedAtMs,
