@@ -134,3 +134,74 @@ it('points at the full log of failed operations and operations with warnings, an
     { operationId: ACTIVE_OPERATION, previousStatus: 'READY', status: 'SUCCESS' }
   ]);
 });
+
+const TARGET_OPERATION: string = 'project-a (_phase:test)';
+const FAILED_OPERATION: string = 'project-b (_phase:test)';
+const RUNNING_OPERATION: string = 'project-c (_phase:test)';
+const QUEUED_OPERATION: string = 'project-d (_phase:test)';
+
+function createEarlyFailureSink(onSettled: (unfinishedOperations: number) => void): PhasedRequestEventSink {
+  const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+  return new PhasedRequestEventSink({
+    activeOperationIds: new Set([TARGET_OPERATION, FAILED_OPERATION, RUNNING_OPERATION, QUEUED_OPERATION]),
+    client,
+    getNextSequence: () => client.getNextEventSequence(),
+    onWriteFailure: () => undefined,
+    rushVersion: '5.178.1',
+    earlyFailure: { targetOperationIds: new Set([TARGET_OPERATION]), onSettled }
+  });
+}
+
+function setStatus(record: IOperationExecutionResult, status: OperationStatus): void {
+  (record as { status: OperationStatus }).status = status;
+}
+
+/** Schedules the records, then fails FAILED_OPERATION, which blocks the target while RUNNING_OPERATION runs. */
+function failWhileRunning(
+  sink: PhasedRequestEventSink,
+  queued: IOperationExecutionResult,
+  beforeFailure?: () => void
+): void {
+  const target: IOperationExecutionResult = createRecord(TARGET_OPERATION, OperationStatus.Waiting);
+  const failed: IOperationExecutionResult = createRecord(FAILED_OPERATION, OperationStatus.Executing);
+  sink.onIterationScheduled([
+    target,
+    failed,
+    createRecord(RUNNING_OPERATION, OperationStatus.Executing),
+    queued
+  ]);
+  beforeFailure?.();
+  setStatus(failed, OperationStatus.Failure);
+  sink.onOperationStatusChanged(failed, OperationStatus.Executing);
+  // Blocked operations complete only when the iteration ends.
+  setStatus(target, OperationStatus.Blocked);
+  sink.onOperationCompleted(failed);
+}
+
+describe('the early failure offer', () => {
+  it('counts the unfinished operations that are not silent', () => {
+    const onSettled: jest.Mock = jest.fn();
+    // Like a phase that the project does not define: the result does not list it while it is unfinished.
+    const silent: IOperationExecutionResult = {
+      ...createRecord(QUEUED_OPERATION, OperationStatus.Ready),
+      silent: true
+    } as IOperationExecutionResult;
+
+    failWhileRunning(createEarlyFailureSink(onSettled), silent);
+
+    expect(onSettled.mock.calls).toEqual([[1]]);
+  });
+
+  it('offers nothing once one of its operations was aborted, even before that operation completed', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const queued: IOperationExecutionResult = createRecord(QUEUED_OPERATION, OperationStatus.Ready);
+
+    // An aborted iteration marks the queued operations that it skips as aborted at once, but they complete only
+    // when the iteration ends, after the operations that were already running.
+    failWhileRunning(createEarlyFailureSink(onSettled), queued, () =>
+      setStatus(queued, OperationStatus.Aborted)
+    );
+
+    expect(onSettled).not.toHaveBeenCalled();
+  });
+});

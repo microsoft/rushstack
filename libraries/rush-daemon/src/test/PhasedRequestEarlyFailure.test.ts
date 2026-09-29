@@ -69,13 +69,19 @@ interface IEarlyFailureFixture {
   readonly startedC: Promise<void>;
 }
 
+/** Runs nothing that the user sees, like a phase that the project does not define. */
+class SilentTestOperationRunner extends TestOperationRunner {
+  public override readonly silent: boolean = true;
+}
+
 /**
  * B fails and C is slow. Unless `failBeforeCStarts` is set, B fails only once C runs, so C is executing when B's
  * failure decides a request's result.
  */
 function createEarlyFailureFixture(
   dependencies: ReadonlyArray<readonly [string, string]> = A_CONSUMES_B_AND_C,
-  failBeforeCStarts: boolean = false
+  failBeforeCStarts: boolean = false,
+  silentC: boolean = false
 ): IEarlyFailureFixture {
   const startedC: IDeferred = createDeferred();
   const releaseC: IDeferred = createDeferred();
@@ -93,10 +99,14 @@ function createEarlyFailureFixture(
       ],
       [
         OPERATION_C,
-        new TestOperationRunner(OPERATION_C, OperationStatus.Success, async (): Promise<void> => {
-          startedC.resolve();
-          await releaseC.promise;
-        })
+        new (silentC ? SilentTestOperationRunner : TestOperationRunner)(
+          OPERATION_C,
+          OperationStatus.Success,
+          async (): Promise<void> => {
+            startedC.resolve();
+            await releaseC.promise;
+          }
+        )
       ]
     ]),
     dependencies,
@@ -174,6 +184,7 @@ interface IOrdinaryCase {
   readonly failBeforeCStarts: boolean;
   readonly name: string;
   readonly selection: ReadonlyArray<string>;
+  readonly silentC?: boolean;
 }
 
 /** Requests that ask to return early on failure, but whose failed result can only be written at the end. */
@@ -198,6 +209,15 @@ const ORDINARY_CASES: ReadonlyArray<IOrdinaryCase> = [
     failBeforeCStarts: false,
     name: 'the request is not a shared build',
     selection: [OPERATION_A]
+  },
+  {
+    // An early result would not list C, so it could not say that C continues.
+    commandName: 'build',
+    dependencies: A_CONSUMES_B_AND_C,
+    failBeforeCStarts: false,
+    name: 'only a silent operation is unfinished',
+    selection: [OPERATION_A],
+    silentC: true
   }
 ];
 
@@ -259,8 +279,8 @@ describe('phased requests that return early on failure', () => {
 
   it.each(ORDINARY_CASES)(
     'writes the result after the iteration when $name',
-    async ({ commandName, dependencies, failBeforeCStarts, selection }: IOrdinaryCase) => {
-      const setup: IEarlyFailureFixture = createEarlyFailureFixture(dependencies, failBeforeCStarts);
+    async ({ commandName, dependencies, failBeforeCStarts, selection, silentC }: IOrdinaryCase) => {
+      const setup: IEarlyFailureFixture = createEarlyFailureFixture(dependencies, failBeforeCStarts, silentC);
       const tracked: ITrackedClient = trackClient('agent', setup);
       const resultPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
         setup.router.executeAsync(

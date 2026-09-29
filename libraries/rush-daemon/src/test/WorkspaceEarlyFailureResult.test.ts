@@ -11,7 +11,7 @@ import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
-import type { ITerminalExchange } from './DaemonRequestWireTestUtilities';
+import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 
@@ -19,11 +19,29 @@ jest.setTimeout(60_000);
 
 const BUILD_B: string[] = ['build', '--to', 'b', '--parallelism', '3'];
 
+interface IEarlyFailureFixtureOptions {
+  readonly restartable?: boolean;
+  readonly slowToStop?: boolean;
+}
+
+/** Keeps the output that it inherits open until the test removes the `hold` marker. */
+const HOLD_OUTPUT_SCRIPT: string =
+  "const fs=require('node:fs');const t=setInterval(()=>{if(!fs.existsSync('../hold'))clearInterval(t);},20);";
+
 /**
  * b consumes a and c. a fails, and c holds its build open until the test removes the `hold` marker, so a build of b
- * that returns early on failure leaves c running.
+ * that returns early on failure leaves c running. With `slowToStop`, c first starts a detached process that shares
+ * its output, like a stray watcher: stopping c kills c's process group but not that process, so c's operation ends
+ * only when the test removes the marker.
  */
-function createEarlyFailureFixtureAsync(restartable: boolean = false): Promise<DaemonGraphTestFixture> {
+function createEarlyFailureFixtureAsync({
+  restartable = false,
+  slowToStop = false
+}: IEarlyFailureFixtureOptions = {}): Promise<DaemonGraphTestFixture> {
+  const startOutputHolder: string = slowToStop
+    ? `require('node:child_process').spawn(process.execPath,['-e',${JSON.stringify(HOLD_OUTPUT_SCRIPT)}],` +
+      "{detached:true,stdio:['ignore','inherit','inherit']}).unref();"
+    : '';
   return DaemonGraphTestFixture.createAsync((created: DaemonGraphTestFixture) => {
     if (restartable) {
       setDaemonPolicy(created, {});
@@ -45,7 +63,9 @@ function createEarlyFailureFixtureAsync(restartable: boolean = false): Promise<D
     );
     created.write(
       'c/build.cjs',
-      "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c\\n');" +
+      "const fs=require('node:fs');" +
+        startOutputHolder +
+        "fs.appendFileSync('../runs.txt','c\\n');" +
         "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
     );
   });
@@ -55,9 +75,21 @@ function countRuns(fixture: DaemonGraphTestFixture, name: string): number {
   return fixture.runs().filter((run: string) => run === name).length;
 }
 
-async function waitForRunsAsync(fixture: DaemonGraphTestFixture, name: string, count: number): Promise<void> {
+async function waitUntilAsync(condition: () => boolean): Promise<void> {
   const deadline: number = Date.now() + 30_000;
-  while (countRuns(fixture, name) < count && Date.now() < deadline) await delayAsync(20);
+  while (!condition() && Date.now() < deadline) await delayAsync(20);
+}
+
+async function waitForRunsAsync(fixture: DaemonGraphTestFixture, name: string, count: number): Promise<void> {
+  await waitUntilAsync(() => countRuns(fixture, name) >= count);
+}
+
+/** Counts the stops that the daemon requested; every iteration's start also aborts, without options. */
+function countTerminatingAborts(abortSpy: jest.SpyInstance): number {
+  return abortSpy.mock.calls.filter(
+    ([options]: ReadonlyArray<{ terminateRunning?: boolean } | undefined>) =>
+      options?.terminateRunning === true
+  ).length;
 }
 
 /** Whether an in-process Rush command could take the Rush lock that the daemon holds while it executes. */
@@ -178,6 +210,50 @@ describe('a failed build that returns early', () => {
     }
   });
 
+  it('answers a client that cancels while the work that continues is stopping, without waiting for it to stop', async () => {
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync({ slowToStop: true });
+    const hold: string = path.join(fixture.folder, 'hold');
+    try {
+      await returnEarlyAsync(fixture);
+      const abortSpy: jest.SpyInstance = jest.spyOn(
+        fixture.session.operationGraph!,
+        'abortCurrentIterationAsync'
+      );
+      const client: DaemonRequestWireClient = await fixture.connectAsync();
+      try {
+        const custom: IDaemonRequestEnvelope = fixture.envelope(['test', '--to', 'c'], {
+          commandOrigin: 'custom'
+        });
+        await client.sendControlAsync({ kind: 'requestStart', payload: custom });
+        // Before it rejects `test`, the daemon stops c, which takes until the test removes the marker.
+        await waitUntilAsync(() => countTerminatingAborts(abortSpy) > 0);
+        expect(countTerminatingAborts(abortSpy)).toBe(1);
+        const answer: Promise<ITerminalExchange> = client.readTerminalAsync(custom.requestId);
+        expect(await Promise.race([answer, delayAsync(500).then(() => undefined)])).toBeUndefined();
+
+        // rush-client cancels on Ctrl+C, and gives up on the daemon if it does not answer within 5 seconds.
+        await client.sendControlAsync({ kind: 'requestCancel', payload: { requestId: custom.requestId } });
+        const cancelled: ITerminalExchange | undefined = await Promise.race([
+          answer,
+          delayAsync(3_000).then(() => undefined)
+        ]);
+        expect(cancelled?.terminal).toMatchObject({
+          kind: 'requestRejected',
+          payload: { code: 'unsupported' }
+        });
+        // c is still stopping, so the client must not run `test` in-process now; rush-client reports a command
+        // that it cancelled as cancelled instead.
+        expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
+        expect(isNativeLockFree(fixture)).toBe(false);
+      } finally {
+        await client.closeAsync();
+      }
+    } finally {
+      fs.rmSync(hold, { force: true });
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('leaves the work that continues running for a read-only command or a rushx script that it rejects', async () => {
     const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
     const hold: string = path.join(fixture.folder, 'hold');
@@ -216,7 +292,7 @@ describe('a failed build that returns early', () => {
   });
 
   it('lets a restart for another environment proceed without waiting for the work that continues', async () => {
-    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync(true);
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync({ restartable: true });
     const hold: string = path.join(fixture.folder, 'hold');
     try {
       const before = await pongAsync(fixture);
