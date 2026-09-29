@@ -15,11 +15,13 @@ import {
   captureDaemonRequest,
   connectOrAwaitDaemonStartupAsync,
   executeWithDaemonRestartAsync,
+  reclaimCrashedDaemonAsync,
   type DaemonClient,
   type DaemonClientOutcome,
   type IConnectOrStartDaemonOptions
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
@@ -33,7 +35,7 @@ import {
   getSignalExitCode,
   isCancelledOutcome
 } from './clientCancellation';
-import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
+import { getDaemonConnectionOptionsAsync, getDaemonPaths } from './daemonConnectionOptions';
 import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
@@ -93,7 +95,7 @@ export async function launchClientAsync(
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
     agentRenderer?.dispose();
-    launchInProcess(route.argv, rushx, selectedVersion);
+    await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
     return;
   }
   const terminal: ConsoleTerminalProvider = new ConsoleTerminalProvider();
@@ -170,7 +172,7 @@ export async function launchClientAsync(
       throw error;
     agentRenderer?.dispose();
     process.stderr.write(`rush-client: ${error.message} Using in-process Rush.\n`);
-    launchInProcess(route.argv, rushx, selectedVersion);
+    await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
     return;
   }
   const abort: AbortController = new AbortController();
@@ -306,8 +308,30 @@ export async function launchClientAsync(
   } else {
     agentRenderer?.dispose();
     process.stderr.write(`rush-client: ${outcome.message ?? outcome.reason}; using in-process Rush.\n`);
-    launchInProcess(route.argv, rushx, selectedVersion);
+    await launchInProcessAsync(route.argv, rushx, selectedVersion, rushJsonPath);
   }
+}
+
+/**
+ * Runs Rush in-process. A daemon that crashed while it ran a command can leave its operations running, and
+ * they could overwrite this command's outputs, so they are stopped first, as the next daemon start would.
+ */
+async function launchInProcessAsync(
+  argv: ReadonlyArray<string>,
+  rushx: boolean,
+  selectedVersion: string,
+  rushJsonPath: string | undefined
+): Promise<void> {
+  if (rushJsonPath) {
+    let paths: IDaemonPaths | undefined;
+    try {
+      paths = getDaemonPaths(path.dirname(rushJsonPath), selectedVersion);
+    } catch {
+      // Without the daemon's folder there is nothing to reclaim; Rush reports a workspace problem itself.
+    }
+    if (paths) await reclaimCrashedDaemonAsync(paths);
+  }
+  launchInProcess(argv, rushx, selectedVersion);
 }
 
 function launchInProcess(argv: ReadonlyArray<string>, rushx: boolean, selectedVersion: string): void {

@@ -1,0 +1,136 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { setTimeout as delayAsync } from 'node:timers/promises';
+
+import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
+
+import { reclaimCrashedDaemonAsync } from '../ExitedDaemonReclaim';
+import { isProcessDefunct } from '../ProcessStartTime';
+import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
+import {
+  isRunning,
+  recordDaemonOwner,
+  startOrphanedOperationAsync,
+  startStandInDaemonAsync,
+  stopOperationIfRunning,
+  type IStandInDaemon
+} from './OrphanedOperation';
+import { withUnreapedChildAsync } from './UnreapedChildProcess';
+
+const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
+
+function getDaemonPaths(runtimeDir: string): IDaemonPaths {
+  return {
+    runtimeDir,
+    socketPath: path.join(runtimeDir, 'd.sock'),
+    lockfilePath: path.join(runtimeDir, 'daemon.pid.json')
+  };
+}
+
+describe(reclaimCrashedDaemonAsync.name, () => {
+  let folder: string;
+  let paths: IDaemonPaths;
+  let operationPids: number[];
+  let warning: jest.SpyInstance;
+
+  beforeEach(() => {
+    folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-crash-reclaim-'));
+    paths = getDaemonPaths(folder);
+    operationPids = [];
+    warning = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
+  });
+
+  afterEach(async () => {
+    warning.mockRestore();
+    operationPids.forEach(stopOperationIfRunning);
+    await fs.promises.rm(folder, { recursive: true, force: true });
+  });
+
+  it('does nothing, and creates no runtime folder, when there is no ownership record', async () => {
+    const runtimeDir: string = path.join(folder, 'runtime');
+    await reclaimCrashedDaemonAsync(getDaemonPaths(runtimeDir));
+    expect(fs.existsSync(runtimeDir)).toBe(false);
+    expect(warning).not.toHaveBeenCalled();
+  });
+
+  linuxIt('stops the operations that a crashed daemon left running, and removes its files', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    await reclaimCrashedDaemonAsync(paths);
+    expect(isRunning(operationPid)).toBe(false);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    expect(warning).toHaveBeenCalledWith(
+      expect.stringContaining(`Reclaimed dead daemon ${daemonPid}:`),
+      expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
+    );
+  });
+
+  linuxIt(
+    'leaves a running daemon alone, without waiting while another client holds the start mutex',
+    async () => {
+      const { daemon, operationPid }: IStandInDaemon = await startStandInDaemonAsync(operationPids);
+      // For example, a client that starts or replaces the daemon.
+      const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
+      try {
+        expect(lock).toBeDefined();
+        recordDaemonOwner(paths, daemon.pid!);
+        const startedAt: number = Date.now();
+        await reclaimCrashedDaemonAsync(paths);
+        expect(Date.now() - startedAt).toBeLessThan(1000);
+        expect(isRunning(daemon.pid!)).toBe(true);
+        expect(isRunning(operationPid)).toBe(true);
+        expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+        expect(warning).not.toHaveBeenCalled();
+      } finally {
+        await lock?.releaseAsync();
+        daemon.kill('SIGKILL');
+      }
+    }
+  );
+
+  linuxIt('reclaims a crashed daemon that is not reaped yet once it is reaped', async () => {
+    await withUnreapedChildAsync(async (child, parentPid) => {
+      const deadline: number = Date.now() + 5000;
+      while (!isProcessDefunct(child) && Date.now() < deadline) await delayAsync(20);
+      recordDaemonOwner(paths, child);
+      let settled: boolean = false;
+      const reclaimed: Promise<void> = reclaimCrashedDaemonAsync(paths).finally(() => {
+        settled = true;
+      });
+      await delayAsync(300);
+      expect(settled).toBe(false);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+      // Once its parent exits, init or a subreaper reaps it.
+      process.kill(parentPid, 'SIGTERM');
+      await reclaimed;
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    });
+  });
+
+  linuxIt('does not act on the records in a runtime folder that is not private', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    // Another user could have created a link like this one, for example in /tmp.
+    const link: string = path.join(os.tmpdir(), `${path.basename(folder)}-link`);
+    fs.symlinkSync(folder, link);
+    const linkPaths: IDaemonPaths = getDaemonPaths(link);
+    // It does not even wait for the start mutex there.
+    const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(linkPaths);
+    try {
+      expect(lock).toBeDefined();
+      const startedAt: number = Date.now();
+      await reclaimCrashedDaemonAsync(linkPaths);
+      expect(Date.now() - startedAt).toBeLessThan(1000);
+      expect(isRunning(operationPid)).toBe(true);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+      expect(warning).not.toHaveBeenCalled();
+    } finally {
+      await lock?.releaseAsync();
+      fs.unlinkSync(link);
+    }
+  });
+});

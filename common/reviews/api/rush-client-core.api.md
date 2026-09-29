@@ -183,6 +183,9 @@ export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOp
 export function inspectDaemonStartupReservation(paths: IDaemonPaths): IDaemonStartupReservationInfo | undefined;
 
 // @beta
+export function reclaimCrashedDaemonAsync(paths: IDaemonPaths): Promise<void>;
+
+// @beta
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
 
 // @beta

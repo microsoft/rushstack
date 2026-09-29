@@ -2,17 +2,30 @@
 // See LICENSE in the project root for license information.
 
 import { spawnSync } from 'node:child_process';
+import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
-import { DaemonTransportError, DaemonTransportErrorCode } from '@rushstack/rush-daemon-transport';
+import {
+  DaemonTransportError,
+  DaemonTransportErrorCode,
+  type IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from '../DaemonClientError';
 import { explainLostConnectionAsync, findLoggedFatalError, type IServingDaemon } from '../DaemonDisconnect';
+import { reserveDaemonStartup } from '../DaemonStartup';
 import { isProcessDefunct } from '../ProcessStartTime';
+import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
+import {
+  isRunning,
+  recordDaemonOwner,
+  startOrphanedOperationAsync,
+  stopOperationIfRunning
+} from './OrphanedOperation';
 import { withUnreapedChildAsync } from './UnreapedChildProcess';
 
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
@@ -82,14 +95,38 @@ describe(explainLostConnectionAsync.name, () => {
     environment: {},
     terminal: { isTTY: false, supportsColor: false }
   });
+  let folder: string;
+  let paths: IDaemonPaths;
+  let operationPids: number[];
 
-  function getServingDaemon(pid: number): IServingDaemon {
-    return {
-      pid,
-      startedAt: undefined,
-      logFilePath: path.join(os.tmpdir(), 'missing.log'),
-      logOffset: undefined
+  beforeEach(() => {
+    folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-disconnect-'));
+    paths = {
+      runtimeDir: folder,
+      socketPath: path.join(folder, 'd.sock'),
+      lockfilePath: path.join(folder, 'daemon.pid.json')
     };
+    operationPids = [];
+  });
+
+  afterEach(async () => {
+    operationPids.forEach(stopOperationIfRunning);
+    await fs.promises.rm(folder, { recursive: true, force: true });
+  });
+
+  function getServingDaemon(pid: number, startedAt?: string): IServingDaemon {
+    return { pid, startedAt, logFilePath: path.join(folder, 'missing.log'), logOffset: undefined, paths };
+  }
+
+  function getLostConnection(): DaemonTransportError {
+    return new DaemonTransportError(
+      DaemonTransportErrorCode.transportClosed,
+      'The daemon connection closed.'
+    );
+  }
+
+  function getExitMessage(pid: number): string {
+    return `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${pid}) exited while it ran the command; "rush-client daemon logs" may show why. Run the command again; if the daemon exits again, run the command with "rush-client --no-daemon".`;
   }
 
   it('returns other failures, and failures without a known daemon, unchanged', async () => {
@@ -103,10 +140,7 @@ describe(explainLostConnectionAsync.name, () => {
     await withUnreapedChildAsync(async (child) => {
       const deadline: number = Date.now() + 5000;
       while (!isProcessDefunct(child) && Date.now() < deadline) await delayAsync(20);
-      const closed: DaemonTransportError = new DaemonTransportError(
-        DaemonTransportErrorCode.transportClosed,
-        'The daemon connection closed.'
-      );
+      const closed: DaemonTransportError = getLostConnection();
       const startedAt: number = Date.now();
       const explained: unknown = await explainLostConnectionAsync(closed, getServingDaemon(child), request);
       expect(Date.now() - startedAt).toBeLessThan(500);
@@ -114,8 +148,146 @@ describe(explainLostConnectionAsync.name, () => {
       expect(explained).toMatchObject({
         code: 'disconnected',
         cause: closed,
-        message: `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${child}) exited while it ran the command; "rush-client daemon logs" may show why. Run the command again; if the daemon exits again, run the command with "rush-client --no-daemon".`
+        message: getExitMessage(child)
       });
     });
+  });
+
+  linuxIt(
+    'stops the operations that an exited daemon left running, and removes its files, first',
+    async () => {
+      const warning: jest.SpyInstance = jest
+        .spyOn(process, 'emitWarning')
+        .mockImplementation(() => undefined);
+      try {
+        const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+        recordDaemonOwner(paths, daemonPid);
+        const explained: unknown = await explainLostConnectionAsync(
+          getLostConnection(),
+          getServingDaemon(daemonPid),
+          request
+        );
+        expect(explained).toMatchObject({ code: 'disconnected', message: getExitMessage(daemonPid) });
+        expect(isRunning(operationPid)).toBe(false);
+        expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+        expect(warning).toHaveBeenCalledWith(
+          expect.stringContaining(`Reclaimed dead daemon ${daemonPid}:`),
+          expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
+        );
+      } finally {
+        warning.mockRestore();
+      }
+    }
+  );
+
+  linuxIt('reclaims an exited daemon that is not reaped yet once it is reaped', async () => {
+    await withUnreapedChildAsync(async (child, parentPid) => {
+      const deadline: number = Date.now() + 5000;
+      while (!isProcessDefunct(child) && Date.now() < deadline) await delayAsync(20);
+      recordDaemonOwner(paths, child);
+      let settled: boolean = false;
+      const explained: Promise<unknown> = explainLostConnectionAsync(
+        getLostConnection(),
+        getServingDaemon(child),
+        request
+      ).finally(() => {
+        settled = true;
+      });
+      await delayAsync(300);
+      expect(settled).toBe(false);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+      // Once its parent exits, init or a subreaper reaps it.
+      process.kill(parentPid, 'SIGTERM');
+      expect(await explained).toMatchObject({ message: getExitMessage(child) });
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    });
+  });
+
+  linuxIt('waits while another client holds the start mutex, and leaves the reclaim to it', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
+    expect(lock).toBeDefined();
+    let settled: boolean = false;
+    const explained: Promise<unknown> = explainLostConnectionAsync(
+      getLostConnection(),
+      getServingDaemon(daemonPid),
+      request
+    ).finally(() => {
+      settled = true;
+    });
+    await delayAsync(300);
+    expect(settled).toBe(false);
+    // The other client's reclaim ends by removing the ownership record.
+    fs.unlinkSync(paths.lockfilePath);
+    await lock!.releaseAsync();
+    expect(await explained).toMatchObject({ message: getExitMessage(daemonPid) });
+    expect(isRunning(operationPid)).toBe(true);
+  });
+
+  linuxIt(
+    'gives up after a few seconds while another client keeps the start mutex',
+    async () => {
+      const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+      recordDaemonOwner(paths, daemonPid);
+      const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
+      expect(lock).toBeDefined();
+      try {
+        const startedAt: number = Date.now();
+        expect(
+          await explainLostConnectionAsync(getLostConnection(), getServingDaemon(daemonPid), request)
+        ).toMatchObject({ message: getExitMessage(daemonPid) });
+        expect(Date.now() - startedAt).toBeGreaterThanOrEqual(4500);
+        expect(Date.now() - startedAt).toBeLessThan(10000);
+        expect(isRunning(operationPid)).toBe(true);
+        expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+      } finally {
+        await lock!.releaseAsync();
+      }
+    },
+    20000
+  );
+
+  linuxIt('leaves an exited daemon to the startup that is reserved', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    reserveDaemonStartup(paths, { pid: process.pid, startedAt: new Date().toISOString() });
+    const startedAt: number = Date.now();
+    expect(
+      await explainLostConnectionAsync(getLostConnection(), getServingDaemon(daemonPid), request)
+    ).toMatchObject({ message: getExitMessage(daemonPid) });
+    expect(Date.now() - startedAt).toBeLessThan(1000);
+    expect(isRunning(operationPid)).toBe(true);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+  });
+
+  linuxIt('leaves the files alone when the ownership record names another daemon', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    // A process that has exited, which the record does not name.
+    const otherPid: number = spawnSync(process.execPath, ['-e', '']).pid!;
+    // The same PID, but a record written for another process.
+    for (const daemon of [
+      getServingDaemon(otherPid),
+      getServingDaemon(daemonPid, '2000-01-01T00:00:00.000Z')
+    ]) {
+      expect(await explainLostConnectionAsync(getLostConnection(), daemon, request)).toMatchObject({
+        message: getExitMessage(daemon.pid)
+      });
+      expect(isRunning(operationPid)).toBe(true);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+    }
+  });
+
+  linuxIt('still explains the exit when the reclaim fails', async () => {
+    const { daemonPid, operationPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    // Another process, such as a starting daemon, holds the reclaim's own mutex, so the reclaim throws.
+    fs.writeFileSync(`${paths.lockfilePath}.reclaim`, JSON.stringify({ mutexPid: process.pid }));
+    expect(
+      await explainLostConnectionAsync(getLostConnection(), getServingDaemon(daemonPid), request)
+    ).toMatchObject({ code: 'disconnected', message: getExitMessage(daemonPid) });
+    expect(isRunning(operationPid)).toBe(true);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(true);
   });
 });

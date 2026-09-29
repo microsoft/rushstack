@@ -26,6 +26,7 @@ export {
   type DaemonStartupHelperState,
   type IDaemonStartupReservationInfo
 } from './DaemonStartupReservation';
+export { reclaimCrashedDaemonAsync } from './ExitedDaemonReclaim';
 export {
   executeWithDaemonRestartAsync,
   type IDaemonRestartNotice,

@@ -285,8 +285,14 @@ and is not retried. The diagnostic keeps "Daemon disconnected before delivering 
 command was not retried." and says what happened to rushd. If its process exited (a crash, an
 out-of-memory kill or a signal), it names the PID, points to `rush-client daemon logs` and, if
 the daemon exits again, to `--no-daemon` (`rushx-client --no-daemon` for Rushx), and quotes on a
-second line the fatal error that the launcher log recorded after the command was sent. If
-rushd still runs, it says that only the connection closed. Ctrl+C and an orderly `daemon stop`
+second line the fatal error that the launcher log recorded after the command was sent. Before it
+prints that, the client stops the operations that the exited daemon left running and removes its
+ownership record and socket, as the next daemon start would, so a rerun, with or without
+`--no-daemon`, does not race them. A `RUSH_DAEMON_ORPHANS_REAPED` warning says what it stopped.
+Rush run in-process, with `--no-daemon` or as a fallback, first does the same when the ownership
+record names a daemon that no longer runs, for example when the client that ran the command was
+killed along with the daemon.
+If rushd still runs, it says that only the connection closed. Ctrl+C and an orderly `daemon stop`
 or `daemon restart` still end a command as cancelled (exit code 130).
 
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does

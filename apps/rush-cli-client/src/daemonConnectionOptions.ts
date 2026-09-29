@@ -33,9 +33,7 @@ export function getDaemonConnectionOptions(
       'The synchronous launcher only supports its installed engine; use asynchronous version selection.'
     );
   }
-  const paths: IDaemonPaths = resolveDaemonPathsFromProcess(
-    computeDaemonWorkspaceKey({ canonicalRepoRoot, rushVersion })
-  );
+  const paths: IDaemonPaths = getDaemonPaths(canonicalRepoRoot, rushVersion);
   // Every daemon command trusts files in this folder: the socket, the lockfile, the log and the reservation.
   assertDaemonRuntimeFolderIsPrivate(paths);
   return {
@@ -86,4 +84,11 @@ export async function getDaemonConnectionOptionsAsync(
       environment
     });
   return { ...options, expectedDaemonVersion: launch.daemonVersion, startCommand: launch.startCommand };
+}
+
+/** The runtime files of the workspace's daemon for this Rush version: its socket and ownership record. */
+export function getDaemonPaths(repoRoot: string, rushVersion: string): IDaemonPaths {
+  return resolveDaemonPathsFromProcess(
+    computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync.native(repoRoot), rushVersion })
+  );
 }

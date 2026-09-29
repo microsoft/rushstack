@@ -17,6 +17,7 @@ import type { DaemonClient } from './DaemonClient';
 import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from './DaemonClientError';
 import { getDaemonLogFilePath } from './DaemonLogFile';
 import { isOwnerProcessAlive } from './DaemonOwnership';
+import { reclaimExitedDaemonAsync } from './ExitedDaemonReclaim';
 import { isProcessDefunct } from './ProcessStartTime';
 
 /** A process closes its connections while it exits, so it can briefly outlive them. */
@@ -41,6 +42,8 @@ export interface IServingDaemon {
   readonly startedAt: string | undefined;
   readonly logFilePath: string;
   readonly logOffset: number | undefined;
+  /** The workspace's daemon files, which are reclaimed if the process exits. */
+  readonly paths: IDaemonPaths;
 }
 
 /** Identifies the daemon behind a ready client, or returns undefined for a peer that does not report its PID. */
@@ -56,7 +59,8 @@ export async function observeServingDaemonAsync(
     pid,
     startedAt: owner?.pid === pid ? owner.startedAt : undefined,
     logFilePath,
-    logOffset: tryGetFileSize(logFilePath)
+    logOffset: tryGetFileSize(logFilePath),
+    paths
   };
 }
 
@@ -64,6 +68,8 @@ export async function observeServingDaemonAsync(
  * Explains a connection lost before a request's result by what happened to the daemon process: whether it
  * exited, the fatal error its launcher log recorded, and how to recover. The request is never replayed.
  * Other errors are returned unchanged.
+ * @remarks If the daemon exited, this first reclaims it as the next daemon start would, so that running the
+ * command again, with or without the daemon, cannot race the operations the daemon left running.
  */
 export async function explainLostConnectionAsync(
   error: unknown,
@@ -81,6 +87,7 @@ export async function explainLostConnectionAsync(
     );
   }
   const loggedError: string | undefined = readLoggedFatalError(daemon);
+  await reclaimExitedDaemonAsync(daemon);
   const client: string = request.invocationKind === 'rushx' ? 'rushx-client' : 'rush-client';
   const message: string =
     `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${daemon.pid}) exited while it ran the command; ` +

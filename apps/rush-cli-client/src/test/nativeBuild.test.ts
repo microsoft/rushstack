@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient } from '@rushstack/rush-client-core';
-import { RUSHD_GRAPH_SNAPSHOT } from '@rushstack/rush-daemon-protocol';
+import { DAEMON_PROTOCOL_VERSION, RUSHD_GRAPH_SNAPSHOT } from '@rushstack/rush-daemon-protocol';
+import { writeDaemonLockfile, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import {
   createNativeBuildTestFixture,
   type INativeBuildTestFixture,
@@ -17,6 +18,43 @@ import {
 
 // A pending CLI startup can take 15s; allow its join plus daemon stop/drain and fixture removal.
 const NATIVE_FIXTURE_CLEANUP_TIMEOUT_MS: number = 35_000;
+// An operation process that a stand-in daemon starts; it exits by itself after a minute.
+const OPERATION_SCRIPT: string = 'setTimeout(()=>{},60000)';
+// A stand-in daemon: like a phased operation, its operation process shares the daemon's process group.
+const STAND_IN_DAEMON_SCRIPT: string =
+  "const c=require('node:child_process')" +
+  `.spawn(process.execPath,['-e','${OPERATION_SCRIPT}'],{stdio:'ignore'});` +
+  "process.stdout.write(String(c.pid)+'\\n');setInterval(()=>{},1000);";
+
+/** Records a stand-in daemon as the workspace's daemon, then SIGKILLs only it, so its operation keeps running. */
+async function startCrashedDaemonAsync(
+  paths: IDaemonPaths
+): Promise<{ daemonPid: number; operationPid: number }> {
+  const daemon: ChildProcess = spawn(process.execPath, ['-e', STAND_IN_DAEMON_SCRIPT], {
+    detached: true,
+    stdio: ['ignore', 'pipe', 'ignore']
+  });
+  const [chunk] = (await once(daemon.stdout!, 'data')) as [Buffer];
+  daemon.stdout!.destroy();
+  writeDaemonLockfile(paths.lockfilePath, {
+    pid: daemon.pid!,
+    protocolVersion: DAEMON_PROTOCOL_VERSION,
+    startedAt: new Date().toISOString(),
+    socketPath: paths.socketPath
+  });
+  daemon.kill('SIGKILL');
+  await once(daemon, 'exit');
+  return { daemonPid: daemon.pid!, operationPid: Number(chunk.toString().trim()) };
+}
+
+/** False once the operation process has exited, even before it is reaped: a zombie's command line is empty. */
+function isOperationRunning(pid: number): boolean {
+  try {
+    return fs.readFileSync(`/proc/${pid}/cmdline`, 'utf8').includes(OPERATION_SCRIPT);
+  } catch {
+    return false;
+  }
+}
 
 describe('native build through the standalone client', () => {
   let fixture: INativeBuildTestFixture | undefined;
@@ -334,4 +372,25 @@ describe('native build through the standalone client', () => {
       45000
     );
   });
+
+  (process.platform === 'linux' ? it : it.skip)(
+    'stops the operations that a crashed daemon left running before it builds without the daemon',
+    () =>
+      runWithFixtureAsync(async ({ folder, paths, invokeAsync }) => {
+        const { daemonPid, operationPid } = await startCrashedDaemonAsync(paths);
+        try {
+          expect(isOperationRunning(operationPid)).toBe(true);
+          const native: IResult = await invokeAsync(['--no-daemon', 'build']);
+          expect(native.code).toBe(0);
+          expect(native.stderr).toContain(`Reclaimed dead daemon ${daemonPid}:`);
+          expect(isOperationRunning(operationPid)).toBe(false);
+          expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+          expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
+        } finally {
+          // Only the operation process that this test started, not a process that reused its PID.
+          if (isOperationRunning(operationPid)) process.kill(operationPid, 'SIGKILL');
+        }
+      }),
+    30000
+  );
 });
