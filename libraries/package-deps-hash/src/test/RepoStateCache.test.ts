@@ -11,6 +11,7 @@ import { Executable, type IExecutableSpawnOptions } from '@rushstack/node-core-l
 import * as GitIndexFile from '../GitIndexFile';
 import { getDetailedRepoStateAsync, type IDetailedRepoState } from '../getRepoState';
 import { RepoStateCache } from '../RepoStateCache';
+import { createFsmonitorHook, type IFsmonitorHook } from './FsmonitorHook';
 
 const originalDateNow: () => number = Date.now;
 const originalSpawn: typeof Executable.spawn = Executable.spawn;
@@ -44,6 +45,38 @@ function toComparable(state: IDetailedRepoState): IComparableState {
 interface IGitCommand {
   command: string | undefined;
   usesPrivateIndex: boolean;
+}
+
+interface ITrace2Event {
+  category?: string;
+  key?: string;
+  value?: string;
+}
+
+function getExtension(content: Buffer, signature: string): Buffer | undefined {
+  const extension: GitIndexFile.IGitIndexExtension | undefined = GitIndexFile.parseGitIndexLayout(
+    content,
+    20
+  ).extensions.find((candidate: GitIndexFile.IGitIndexExtension) => candidate.signature === signature);
+  return extension && content.subarray(extension.start, extension.end);
+}
+
+// Sets environment variables, and returns a function that restores their previous values
+function setEnvironmentVariables(variables: Record<string, string>): () => void {
+  const previousValues: [string, string | undefined][] = Object.keys(variables).map((name: string) => [
+    name,
+    process.env[name]
+  ]);
+  Object.assign(process.env, variables);
+  return () => {
+    for (const [name, value] of previousValues) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
+    }
+  };
 }
 
 function getGitCommand(
@@ -900,6 +933,221 @@ describe(RepoStateCache.name, () => {
       expect(state.symlinks.has('link')).toBe(false);
     });
   }
+
+  describe('when the index records the same paths as the copy', () => {
+    // Git doesn't trust the recorded times of a folder that changed in the same second as the index was saved
+    function settleFolders(...relativePaths: string[]): void {
+      const time: number = Math.floor(originalDateNow() / 1000) - 100;
+      for (const relativePath of relativePaths) {
+        fs.utimesSync(path.join(repoPath, relativePath), time, time);
+      }
+    }
+
+    // Returns the state, and the numbers of folders that "git status" read rather than finding their untracked
+    // files in the untracked cache
+    async function getStateAndOpenedFolderCountsAsync(): Promise<[IDetailedRepoState, number[]]> {
+      const tracePath: string = path.join(repoPath, '.git', 'trace2.json');
+      const restoreEnvironment: () => void = setEnvironmentVariables({
+        GIT_TRACE2_EVENT: tracePath,
+        // Git reports the statistics of the untracked cache in a nested region
+        GIT_TRACE2_EVENT_NESTING: '10'
+      });
+      let state: IDetailedRepoState;
+      try {
+        state = await getStateAsync();
+      } finally {
+        restoreEnvironment();
+      }
+
+      const events: ITrace2Event[] = fs
+        .readFileSync(tracePath, 'utf8')
+        .split('\n')
+        .filter((line: string) => line)
+        .map((line: string) => JSON.parse(line));
+      fs.unlinkSync(tracePath);
+      const openedFolderCounts: number[] = events
+        .filter(({ category, key }: ITrace2Event) => category === 'read_directory' && key === 'opendir')
+        .map(({ value }: ITrace2Event) => Number(value));
+      return [state, openedFolderCounts];
+    }
+
+    beforeEach(() => {
+      // Otherwise the configuration files may still change, and the cache copies the index as it is
+      settleFiles();
+    });
+
+    it('keeps the untracked cache of the previous copy', async () => {
+      writeFile('untracked.txt', 'untracked\n');
+      writeFile('dir/untracked.txt', 'untracked\n');
+      settleFolders('.', 'dir');
+      await getStateAsync();
+      const previousPath: string = getPrivateIndexPath();
+      const previousContent: Buffer = fs.readFileSync(previousPath);
+      expect(getExtension(previousContent, 'UNTR')).toBeDefined();
+      // Git saved the copy after the index
+      const previousTime: number = Math.floor(originalDateNow() / 1000) - 50;
+      fs.utimesSync(previousPath, previousTime, previousTime);
+
+      writeFile('a.txt', 'modified\n');
+      runGit('add', 'a.txt');
+      const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+      const utimesSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'utimes');
+      const [state, openedFolderCounts] = await getStateAndOpenedFolderCountsAsync();
+      await expectUncachedStateAsync(state);
+      expect(state.files.get('dir/untracked.txt')).toBe(hashText('untracked\n'));
+      expect(openedFolderCounts).toEqual([0]);
+      expect(writeFileSpy).toHaveBeenCalledTimes(1);
+      expect(getExtension(writeFileSpy.mock.calls[0][1], 'UNTR')).toEqual(
+        getExtension(previousContent, 'UNTR')
+      );
+      // The new copy is older than the previous copy, so that Git doesn't trust the recorded times of any folder
+      // that it didn't trust in the previous copy
+      expect(utimesSpy).toHaveBeenCalledWith(expect.any(String), previousTime - 1, previousTime - 1);
+    });
+
+    it('finds the untracked files that changed since the previous copy', async () => {
+      writeFile('untracked.txt', 'untracked\n');
+      settleFolders('.', 'dir');
+      await getStateAsync();
+
+      writeFile('dir/untracked.txt', 'untracked\n');
+      fs.unlinkSync(path.join(repoPath, 'untracked.txt'));
+      writeFile('a.txt', 'modified\n');
+      runGit('add', 'a.txt');
+      const [state, openedFolderCounts] = await getStateAndOpenedFolderCountsAsync();
+      await expectUncachedStateAsync(state);
+      expect(state.files.get('dir/untracked.txt')).toBe(hashText('untracked\n'));
+      expect(state.files.has('untracked.txt')).toBe(false);
+      expect(openedFolderCounts).toEqual([2]);
+    });
+
+    it('copies the index as it is when the index records other paths', async () => {
+      writeFile('untracked.txt', 'untracked\n');
+      settleFolders('.', 'dir');
+      await getStateAsync();
+
+      // The index records as many files as the copy
+      runGit('rm', '--cached', '--quiet', 'b.txt');
+      runGit('add', 'untracked.txt');
+      const carryOverSpy: jest.SpyInstance = jest.spyOn(GitIndexFile, 'tryCarryOverGitIndexCaches');
+      const state: IDetailedRepoState = await getStateAsync();
+      await expectUncachedStateAsync(state);
+      expect(state.files.get('b.txt')).toBe(hashText('b\n'));
+      expect(carryOverSpy.mock.results).toEqual([{ type: 'return', value: undefined }]);
+    });
+
+    it('returns the same state as getDetailedRepoStateAsync after each command', async () => {
+      const carryOverSpy: jest.SpyInstance = jest.spyOn(GitIndexFile, 'tryCarryOverGitIndexCaches');
+      const commands: (() => void)[] = [
+        () => writeFile('untracked.txt', 'untracked\n'),
+        () => writeFile('a.txt', 'modified\n'),
+        () => runGit('add', 'a.txt'),
+        () => runGit('restore', '--staged', 'a.txt'),
+        () => runGit('stash', '--quiet'),
+        () => runGit('stash', 'pop', '--quiet'),
+        () => runGit('checkout', '--', 'a.txt'),
+        () => writeFile('dir/sub/untracked.txt', 'untracked\n'),
+        () => runGit('add', 'dir/sub/untracked.txt'),
+        () => fs.unlinkSync(path.join(repoPath, 'untracked.txt')),
+        () => runGit('rm', '--cached', '--quiet', 'b.txt'),
+        () => runGit('mv', 'dir/c.txt', 'dir/d.txt'),
+        () => writeFile('dir/d.txt', 'modified\n'),
+        () => runGit('add', '--all')
+      ];
+      await getStateAsync();
+      for (const command of commands) {
+        command();
+        await expectUncachedStateAsync(await getStateAsync());
+      }
+
+      expect(
+        carryOverSpy.mock.results.filter(({ value }: jest.MockResult<Buffer | undefined>) => value)
+      ).not.toHaveLength(0);
+    });
+
+    it('computes the state without the cache when the attributes changed since the previous copy', async () => {
+      writeFile('crlf.txt', 'a\r\n');
+      commit();
+      await getStateAsync();
+      const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
+
+      writeFile('.gitattributes', '*.txt text eol=lf\n');
+      writeFile('a.txt', 'modified\n');
+      runGit('add', 'a.txt');
+      takeGitCommands();
+      let state: IDetailedRepoState = await getStateAsync();
+      await expectUncachedStateAsync(state);
+      expect(writeFileSpy).toHaveBeenCalledTimes(1);
+      // The cache ran "git status" on the new copy, and then computed the state without it
+      expect(takeGitCommands().some(({ usesPrivateIndex }: IGitCommand) => !usesPrivateIndex)).toBe(true);
+
+      takeGitCommands();
+      state = await getStateAsync();
+      await expectUncachedStateAsync(state);
+      expect(writeFileSpy).toHaveBeenCalledTimes(2);
+      expect(takeUsesPrivateIndex()).toBe(true);
+    });
+
+    if (process.platform !== 'win32') {
+      describe('with a file system monitor', () => {
+        let hook: IFsmonitorHook;
+        let restoreEnvironment: () => void;
+
+        function modifyFile(relativePath: string): void {
+          writeFile(relativePath, 'modified\n');
+          hook.logChange(relativePath);
+        }
+
+        beforeEach(() => {
+          hook = createFsmonitorHook(path.join(repoPath, '.git'));
+          // Git applies the configuration in the environment after that of the repository
+          const count: number = Number(process.env.GIT_CONFIG_COUNT || 0);
+          restoreEnvironment = setEnvironmentVariables({
+            [`GIT_CONFIG_KEY_${count}`]: 'core.fsmonitor',
+            [`GIT_CONFIG_VALUE_${count}`]: hook.hookPath,
+            GIT_CONFIG_COUNT: String(count + 1)
+          });
+        });
+
+        afterEach(() => {
+          restoreEnvironment();
+        });
+
+        it('marks the files whose entries changed as changed', async () => {
+          const carryOverSpy: jest.SpyInstance = jest.spyOn(GitIndexFile, 'tryCarryOverGitIndexCaches');
+          await getStateAsync();
+          modifyFile('a.txt');
+          await expectUncachedStateAsync(await getStateAsync());
+          runGit('add', 'a.txt');
+          await expectUncachedStateAsync(await getStateAsync());
+          // Git found the file unchanged since it was added, but the index no longer records its content
+          expect(runGit('ls-files', '-f', 'a.txt')).toBe('H a.txt\n');
+          runGit('restore', '--staged', 'a.txt');
+
+          const state: IDetailedRepoState = await getStateAsync();
+          await expectUncachedStateAsync(state);
+          expect(state.files.get('a.txt')).toBe(hashText('modified\n'));
+          expect(
+            carryOverSpy.mock.results.map(({ value }: jest.MockResult<Buffer | undefined>) => !!value)
+          ).toEqual([true, true]);
+        });
+
+        it('keeps the token of the previous copy rather than that of the index', async () => {
+          await getStateAsync();
+          // Git saves the index with a later token, after the untracked file was created
+          writeFile('dir/new.txt', 'new\n');
+          hook.logChange('dir/new.txt');
+          runGit('status', '--porcelain');
+          modifyFile('b.txt');
+          runGit('add', 'b.txt');
+
+          const state: IDetailedRepoState = await getStateAsync();
+          await expectUncachedStateAsync(state);
+          expect(state.files.get('dir/new.txt')).toBe(hashText('new\n'));
+        });
+      });
+    }
+  });
 
   function hashText(text: string): string {
     return execFileSync('git', ['hash-object', '--stdin', '--no-filters'], {

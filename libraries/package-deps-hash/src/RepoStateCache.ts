@@ -8,7 +8,12 @@ import * as path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library/lib/FileSystem';
 
 import { getFileStamp, getSettledBeforeNs, isFileStatSettled } from './FileStamp';
-import { type IGitIndexSummary, summarizeGitIndex, tryGetGitIndexEntryCount } from './GitIndexFile';
+import {
+  type IGitIndexSummary,
+  summarizeGitIndex,
+  tryCarryOverGitIndexCaches,
+  tryGetGitIndexEntryCount
+} from './GitIndexFile';
 import {
   classifyLocallyModifiedFiles,
   getCleanGitEnvironment,
@@ -105,6 +110,14 @@ interface ITree {
   readonly state: IGitTreeState;
 }
 
+interface ICarriedOverCopy {
+  readonly content: Buffer;
+  /**
+   * The modification time of the previous copy.
+   */
+  readonly previousTimeNs: bigint;
+}
+
 interface IFileHash {
   readonly stamp: string;
   readonly hash: string;
@@ -130,7 +143,10 @@ function noop(): void {}
  * examines every file each time. This class keeps a private copy of the index that `git status` updates, so that
  * each call only examines the files that changed since the previous call. It copies the index again when the
  * files that the index records, or the sizes that it records for them, change, but not when Git merely refreshes
- * the index. While the files that the index records don't change, it also reuses the list of files in the index.
+ * the index. While the index records the same paths, a new copy keeps the untracked cache and the file system
+ * monitor's state of the previous copy, so that `git status` doesn't examine every folder and file again after
+ * `git add`, for example. While the files that the index records don't change, it also reuses the list of files in
+ * the index.
  * It reuses the hash of a file while the identity, size and times of the file and of the `.gitattributes` files in
  * the folders that contain it don't change, and returns the same state as the previous call if nothing changed.
  *
@@ -514,7 +530,16 @@ export class RepoStateCache {
         this.#tree = undefined;
       }
 
-      return await this.#writePrivateIndexAsync(content, stats, summary, filterKey, isRealIndexStampSettled);
+      return await this.#writePrivateIndexAsync(
+        content,
+        stats,
+        summary,
+        filterKey,
+        isRealIndexStampSettled,
+        // Git updated the current copy under the current configuration, and for the same filter
+        isCopyCurrent ? privateIndex : undefined,
+        gitPaths.objectIdLength
+      );
     } finally {
       await handle.close();
     }
@@ -525,18 +550,31 @@ export class RepoStateCache {
     stats: fs.BigIntStats,
     summary: IGitIndexSummary,
     filterKey: string,
-    isRealIndexStampSettled: boolean
+    isRealIndexStampSettled: boolean,
+    previousIndex: IPrivateIndex | undefined,
+    objectIdLength: number
   ): Promise<IPrivateIndex> {
     this.#privateIndex = undefined;
 
+    // If the index records the same paths as the previous copy, the new copy keeps the untracked cache and the file
+    // system monitor's state of the previous copy, so that "git status" doesn't examine every folder again
+    const carriedOverCopy: ICarriedOverCopy | undefined =
+      previousIndex && (await tryCarryOverCachesAsync(previousIndex.path, content, objectIdLength));
     const folderPath: string = this.#getPrivateFolderPath();
     const indexPath: string = path.join(folderPath, PRIVATE_INDEX_NAME);
     const temporaryPath: string = `${indexPath}.new`;
-    await fs.promises.writeFile(temporaryPath, content);
+    await fs.promises.writeFile(temporaryPath, carriedOverCopy?.content ?? content);
     // Git doesn't trust the recorded times and size of a file that changed in the same second as the index was
     // written, because the file may have changed again after it was recorded. Make the copy older than the index,
-    // so that Git doesn't trust any file in the copy that it wouldn't trust in the index.
-    const timeInSeconds: number = Number(stats.mtimeNs / NANOSECONDS_PER_SECOND) - 1;
+    // so that Git doesn't trust any file in the copy that it wouldn't trust in the index. Git trusts the recorded
+    // times of a folder in the untracked cache by the same rule, so a copy that keeps the untracked cache of the
+    // previous copy must be older than that too.
+    let timeNs: bigint = stats.mtimeNs;
+    if (carriedOverCopy && carriedOverCopy.previousTimeNs < timeNs) {
+      timeNs = carriedOverCopy.previousTimeNs;
+    }
+
+    const timeInSeconds: number = Number(timeNs / NANOSECONDS_PER_SECOND) - 1;
     await fs.promises.utimes(temporaryPath, timeInSeconds, timeInSeconds);
     await fs.promises.rename(temporaryPath, indexPath);
 
@@ -548,7 +586,9 @@ export class RepoStateCache {
       filterKey,
       realIndexStamp: getFileStamp(stats),
       isRealIndexStampSettled,
-      attributesFingerprint: undefined,
+      // The file system monitor's state that the new copy keeps says which files Git found unchanged under the
+      // attributes of the previous copy, so the next call must detect a change since then
+      attributesFingerprint: carriedOverCopy ? previousIndex?.attributesFingerprint : undefined,
       hasAttributesChanged: false
     };
     this.#privateIndex = privateIndex;
@@ -753,6 +793,35 @@ function deletePrivateFolder(folderPath: string): void {
 function deletePrivateFolders(): void {
   for (const folderPath of privateFolderPaths) {
     fs.rmSync(folderPath, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Builds a new copy of the index that keeps the untracked cache and the file system monitor's state of the previous
+ * copy. Returns `undefined` if the index records other paths than the previous copy, or if the previous copy can't
+ * be read, in which case the index is copied as it is.
+ */
+async function tryCarryOverCachesAsync(
+  previousPath: string,
+  content: Buffer,
+  objectIdLength: number
+): Promise<ICarriedOverCopy | undefined> {
+  try {
+    const handle: fs.promises.FileHandle = await fs.promises.open(previousPath, 'r');
+    try {
+      const previousStats: fs.BigIntStats = await handle.stat({ bigint: true });
+      const previousContent: Buffer = await handle.readFile();
+      const newContent: Buffer | undefined = tryCarryOverGitIndexCaches(
+        content,
+        previousContent,
+        objectIdLength
+      );
+      return newContent && { content: newContent, previousTimeNs: previousStats.mtimeNs };
+    } finally {
+      await handle.close();
+    }
+  } catch {
+    return undefined;
   }
 }
 
