@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import {
   DaemonClient,
+  DaemonStartupPendingError,
   connectOrStartDaemonAsync,
+  connectToStartingDaemonAsync,
   inspectDaemonStartupReservation,
   requestDaemonShutdownAsync,
   resetDaemonArtifactsAsync,
@@ -36,6 +39,8 @@ export interface IDaemonCommandOptions {
   readonly rushJsonPath?: string;
   readonly rushVersion: string;
   readonly admission?: IDaemonRequestAdmissionOptions;
+  /** The resolved daemon settings. When no daemon runs, status uses them to say what the next command does. */
+  readonly daemonConfiguration?: { readonly enabled: boolean; readonly autoStart: boolean };
 }
 
 export async function executeDaemonCommandAsync(options: IDaemonCommandOptions): Promise<void> {
@@ -96,7 +101,11 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   const client: DaemonClient | undefined =
     command === 'start'
       ? await connectOrStartDaemonAsync(connectionOptions)
-      : await connectExistingAsync(connectionOptions, command !== 'status');
+      : command === 'stop' && options.argv[1] !== '--force'
+        ? await connectForStopAsync(connectionOptions)
+        : command === 'status'
+          ? await connectForStatusAsync(connectionOptions, options)
+          : await connectExistingAsync(connectionOptions, true);
   if (!client) {
     if (command === 'restart') {
       // Nothing to shut down: restart behaves like start.
@@ -172,6 +181,31 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
   }
 }
 
+/**
+ * Connects to the daemon that stop shuts down. When nothing listens yet but a daemon is still starting, stop
+ * waits for it to become ready and then stops it: reporting notRunning would leave it running afterwards.
+ */
+async function connectForStopAsync(options: IConnectOrStartDaemonOptions): Promise<DaemonClient | undefined> {
+  const client: DaemonClient | undefined = await connectExistingAsync(options, true);
+  if (client) return client;
+  try {
+    return await connectToStartingDaemonAsync({
+      ...options,
+      onAwaitStartup: (owner: string, waitMs: number): void => {
+        process.stderr.write(
+          `rush-client: The daemon is not ready yet. ${owner}, so stop waits up to ` +
+            `${Math.round(waitMs / 1000)} s for it to become ready and then stops it.\n`
+        );
+      }
+    });
+  } catch (error) {
+    if (!(error instanceof DaemonStartupPendingError)) throw error;
+    throw new Error(
+      `${error.message} It was not stopped; run "rush-client daemon stop" again once "rush-client daemon status" reports it ready.`
+    );
+  }
+}
+
 /** Returns undefined when nothing listens at the endpoint and `allowAbsent` is set; other failures propagate. */
 async function connectExistingAsync(
   options: IConnectOrStartDaemonOptions,
@@ -189,6 +223,56 @@ async function connectExistingAsync(
     }
     throw explainStartupReservation(explainExitedDaemon(error, options.paths), options.paths);
   }
+}
+
+/**
+ * Connects for `daemon status`. When nothing listens and nothing is left at the endpoint, which is the state
+ * after `daemon stop`, the idle timeout or a signal, it fails with a diagnostic that says so instead of the
+ * transport's refused connection.
+ */
+async function connectForStatusAsync(
+  connectionOptions: IConnectOrStartDaemonOptions,
+  options: IDaemonCommandOptions
+): Promise<DaemonClient> {
+  const { paths } = connectionOptions;
+  try {
+    return await DaemonClient.connectAsync({ socketPath: paths.socketPath });
+  } catch (error) {
+    if (
+      error instanceof DaemonTransportError &&
+      error.code === DaemonTransportErrorCode.connectionRefused &&
+      isEndpointAbsent(paths)
+    ) {
+      throw new DaemonTransportError(error.code, describeAbsentDaemon(options));
+    }
+    throw explainStartupReservation(explainExitedDaemon(error, paths), paths);
+  }
+}
+
+/**
+ * An orderly shutdown removes the ownership record and the socket, and a starting daemon has a startup
+ * reservation. A refused connection with none of them therefore means that no daemon runs or is starting.
+ * Windows names a pipe, which leaves no file behind.
+ */
+function isEndpointAbsent(paths: IDaemonPaths): boolean {
+  return (
+    !fs.existsSync(paths.lockfilePath) &&
+    !inspectDaemonStartupReservation(paths) &&
+    (process.platform === 'win32' || !fs.existsSync(paths.socketPath))
+  );
+}
+
+function describeAbsentDaemon(options: IDaemonCommandOptions): string {
+  const repoRoot: string = path.dirname(options.rushJsonPath!);
+  const absent: string = `No daemon is running for ${repoRoot} (Rush ${options.rushVersion})`;
+  const configuration: IDaemonCommandOptions['daemonConfiguration'] = options.daemonConfiguration;
+  if (!configuration) return `${absent}.`;
+  if (!configuration.enabled) {
+    return `${absent}; the daemon is not enabled here, so rush-client commands run Rush in-process.`;
+  }
+  return configuration.autoStart
+    ? `${absent}; the next rush-client command that uses the daemon starts one.`
+    : `${absent}, and auto-start is off, so rush-client commands run Rush in-process until "rush-client daemon start" starts one.`;
 }
 
 /**

@@ -438,7 +438,14 @@ commands print one JSON object with `state: "ready"`, `socketPath`, and the actu
 pong fields (`uptimeMs`, available versions, optional `pid` and
 `residentMemoryBytes`, and an optional `workspace` snapshot). Exit code 0 means protocol
 readiness, not build support. An unreachable/incompatible endpoint, invalid
-arguments, or startup failure returns exit code 1 with a diagnostic. When the endpoint
+arguments, or startup failure returns exit code 1 with a diagnostic. When no daemon runs
+at all, status also exits 1, and its diagnostic says `No daemon is running for <repository>
+(Rush <version>)` and what the next command does: with `enabled` and `autoStart`, the next
+rush-client command that uses the daemon starts one; otherwise rush-client commands run Rush
+in-process. This is the normal state after `daemon stop`, the idle timeout or SIGTERM. Status
+reports it only when the endpoint refuses connections and neither an ownership record, a startup
+reservation nor (outside Windows) a socket file remains; with any of these, the diagnostic
+still says that it could not connect. When the endpoint
 refuses connections and its ownership record (`<key>.pid.json`) names a PID that no longer
 exists, the diagnostic adds that rushd exited without shutting down (an orderly shutdown
 removes the record) and that `daemon logs` may show why.
@@ -484,7 +491,11 @@ attests a restart request, not completion of successor startup or success of a c
 `rush-client daemon stop` requires protocol >= 0.6 and waits for `shutdownAck`
 followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this
 does not assert successful workspace disposal. Stop is idempotent: when nothing
-listens at the endpoint it reports `state: "notRunning"` with exit code 0. An
+listens at the endpoint and no daemon is starting, it reports `state: "notRunning"` with exit code 0.
+While a daemon is still starting (its startup helper still runs, or another client holds the start
+mutex), stop says so on stderr and waits up to 15 seconds for that daemon to become ready, then stops
+it as below; reporting `notRunning` would leave it running afterwards. If it is still not ready by then,
+stop exits with code 1 and leaves it running; run stop again once `daemon status` reports it ready. An
 unsupported protocol, missing acknowledgement, handshake failure, or timeout
 returns exit code 1. It does not auto-start anything. Before shutdown, it removes a startup
 reservation that remains next to that daemon, as restart does, so that the reservation cannot

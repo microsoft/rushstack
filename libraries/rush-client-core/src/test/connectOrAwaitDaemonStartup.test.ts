@@ -9,12 +9,18 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import { LockFile } from '@rushstack/node-core-library';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { captureDaemonRequest } from '../captureDaemonRequest';
+import type { DaemonClient } from '../DaemonClient';
 import { DaemonClientError } from '../DaemonClientError';
 import { getDaemonStartupFilePath } from '../DaemonStartup';
-import { DaemonStartupPendingError, connectOrAwaitDaemonStartupAsync } from '../connectOrAwaitDaemonStartup';
+import {
+  DaemonStartupPendingError,
+  connectOrAwaitDaemonStartupAsync,
+  connectToStartingDaemonAsync
+} from '../connectOrAwaitDaemonStartup';
 import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
@@ -310,5 +316,118 @@ describe('connectOrAwaitDaemonStartupAsync', () => {
       connectOrAwaitDaemonStartupAsync({ paths, expectedDaemonVersion: 'replacement' })
     ).rejects.toMatchObject({ code: 'versionMismatch' });
     expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+  });
+
+  describe('connectToStartingDaemonAsync', () => {
+    it('returns at once without starting a daemon when nothing is starting', async () => {
+      const started: number = Date.now();
+      const onAwaitStartup: jest.Mock = jest.fn();
+      // Without a start mutex lock file, nothing tries to acquire the mutex (LockFile runs `ps` to do that).
+      const tryAcquire: jest.SpyInstance = jest.spyOn(LockFile, 'tryAcquire');
+      await expect(connectToStartingDaemonAsync({ ...options, onAwaitStartup })).resolves.toBeUndefined();
+      expect(tryAcquire).not.toHaveBeenCalled();
+      // A reservation whose startup helper has exited names no live starter either, and neither does a start
+      // mutex lock file that the helper left behind.
+      const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
+      await once(exited, 'close');
+      fs.writeFileSync(
+        getDaemonStartupFilePath(paths),
+        JSON.stringify({ token: 'fixture', helperPid: exited.pid, helperStartedAt: new Date().toISOString() })
+      );
+      fs.writeFileSync(
+        path.join(folder, `${path.basename(paths.lockfilePath)}-start#${exited.pid}.lock`),
+        'Mon Jan  1 00:00:00 2024'
+      );
+      await expect(connectToStartingDaemonAsync({ ...options, onAwaitStartup })).resolves.toBeUndefined();
+      expect(tryAcquire).toHaveBeenCalled();
+      tryAcquire.mockRestore();
+      expect(Date.now() - started).toBeLessThan(options.startupTimeoutMs!);
+      expect(onAwaitStartup).not.toHaveBeenCalled();
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    });
+
+    it('waits for a daemon that another client is starting and connects to it, whatever its version', async () => {
+      fs.writeFileSync(path.join(folder, 'startup-delay-ms'), '1500');
+      const starter = run('starter.js', [JSON.stringify(options)]);
+      await waitForFileAsync(getDaemonStartupFilePath(paths));
+      const onAwaitStartup: jest.Mock = jest.fn();
+      const client: DaemonClient | undefined = await connectToStartingDaemonAsync({
+        ...options,
+        expectedDaemonVersion: 'replacement',
+        onAwaitStartup
+      });
+      expect(client).toBeDefined();
+      const { pid } = await client!.status;
+      await client!.closeAsync();
+      expect(onAwaitStartup).toHaveBeenCalledTimes(1);
+      expect(onAwaitStartup.mock.calls[0][0]).toMatch(
+        /^(Its startup helper \(PID \d+\) is still waiting for the daemon|Another client is still starting the daemon)$/
+      );
+      expect(onAwaitStartup.mock.calls[0][1]).toBeGreaterThan(0);
+      expect(onAwaitStartup.mock.calls[0][1]).toBeLessThanOrEqual(options.startupTimeoutMs!);
+      expect(await starter.result).toEqual({ code: 0, stdout: '', stderr: '' });
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${pid}\n`);
+    }, 30000);
+
+    it('rejects with DaemonStartupPendingError while the daemon is still starting at the deadline', async () => {
+      fs.writeFileSync(path.join(folder, 'hold-prebind'), '');
+      const starter = run('starter.js', [JSON.stringify(options)]);
+      const daemonPid: number = Number(await waitForFileAsync(path.join(folder, 'prebind')));
+      const helperPid: number = Number(fs.readFileSync(path.join(folder, 'parents'), 'utf8'));
+      const onAwaitStartup: jest.Mock = jest.fn();
+      const started: number = Date.now();
+      const error: unknown = await connectToStartingDaemonAsync({
+        ...options,
+        startupTimeoutMs: 1000,
+        onAwaitStartup
+      }).then(
+        () => undefined,
+        (rejection: unknown) => rejection
+      );
+      expect(Date.now() - started).toBeGreaterThanOrEqual(1000);
+      expect(error).toBeInstanceOf(DaemonStartupPendingError);
+      expect((error as Error).message).toBe(
+        `The daemon at ${paths.socketPath} is still starting after 1 s. Its startup helper (PID ${helperPid}) is still waiting for the daemon.`
+      );
+      expect(onAwaitStartup.mock.calls).toEqual([
+        [`Its startup helper (PID ${helperPid}) is still waiting for the daemon`, expect.any(Number)]
+      ]);
+
+      fs.unlinkSync(path.join(folder, 'hold-prebind'));
+      expect(await starter.result).toEqual({ code: 0, stdout: '', stderr: '' });
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8')).toBe(`${daemonPid}\n`);
+    }, 30000);
+
+    it('waits while another client holds the start mutex, until it is released or the wait is aborted', async () => {
+      const holder = run('startLockHolder.js', [JSON.stringify(paths)]);
+      await waitForFileAsync(path.join(folder, 'lock-held'));
+      const abort: AbortController = new AbortController();
+      const aborted: Promise<unknown> = connectToStartingDaemonAsync({
+        ...options,
+        abortSignal: abort.signal
+      }).then(
+        () => undefined,
+        (rejection: unknown) => rejection
+      );
+      await delayAsync(300);
+      abort.abort();
+      expect(await aborted).toMatchObject({ name: 'AbortError' });
+
+      const onAwaitStartup: jest.Mock = jest.fn();
+      const started: number = Date.now();
+      const waiting: Promise<DaemonClient | undefined> = connectToStartingDaemonAsync({
+        ...options,
+        onAwaitStartup
+      });
+      await delayAsync(500);
+      fs.writeFileSync(path.join(folder, 'release-lock'), '');
+      await expect(waiting).resolves.toBeUndefined();
+      expect(Date.now() - started).toBeGreaterThanOrEqual(500);
+      expect(onAwaitStartup.mock.calls).toEqual([
+        ['Another client is still starting the daemon', expect.any(Number)]
+      ]);
+      expect(await holder.result).toEqual({ code: 0, stdout: '', stderr: '' });
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+    }, 30000);
   });
 });

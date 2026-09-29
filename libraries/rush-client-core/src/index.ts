@@ -36,6 +36,7 @@ export {
 } from './executeWithDaemonRestart';
 export {
   connectOrAwaitDaemonStartupAsync,
+  connectToStartingDaemonAsync,
   DaemonStartupPendingError,
   type IConnectOrAwaitDaemonStartupOptions
 } from './connectOrAwaitDaemonStartup';

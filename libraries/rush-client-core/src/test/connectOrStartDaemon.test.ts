@@ -394,6 +394,30 @@ describe('detached daemon startup', () => {
     );
   });
 
+  it('reports at once a daemon that became ready but was stopped before this client connected', async () => {
+    // The daemon reports another version, so every connect by this client misses its ready window; the helper,
+    // which does not check the version, sees it ready. The daemon then stops like one reached by "daemon stop".
+    const started: number = Date.now();
+    const error: Error = await connectOrStartDaemonAsync({
+      ...options,
+      startupTimeoutMs: 6000,
+      startCommand: {
+        ...options.startCommand!,
+        args: [...options.startCommand!.args, 'other', 'stop-when-ready']
+      }
+    }).then(
+      () => new Error('Expected startup to fail.'),
+      (failure: Error) => failure
+    );
+    expect(error.message).toContain(
+      'Daemon startup failed: the daemon became ready but exited before this client connected'
+    );
+    expect(Date.now() - started).toBeLessThan(3500);
+    expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    expect(fs.existsSync(getDaemonStartupFilePath(paths))).toBe(false);
+  }, 15000);
+
   it('refuses a relaunch while a process accepts connections at the endpoint', async () => {
     const sockets: Set<net.Socket> = new Set();
     // Accepts connections but never completes hello, like a daemon that listens but is not ready.

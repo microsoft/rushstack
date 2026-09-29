@@ -107,7 +107,10 @@ record whose PID now belongs to a process that started after the record's `start
 closed, pointing to `resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`),
 which removes the record, socket and reservation after the same no-listener/no-live-owner checks.
 The helper uses a stable tool cwd, and the starting client awaits its exit after
-readiness. The explicit launcher's cwd is unchanged.
+readiness. The explicit launcher's cwd is unchanged. If the daemon exits after its helper saw it ready
+but before the starting client connected, for example because `rush-client daemon stop` stopped it,
+the client fails with `startupFailed` at once instead of at its deadline: the helper has exited 0, and
+neither an ownership record nor a startup reservation remains.
 
 While its helper runs, a startup reservation is never taken over, however long startup
 takes. Only a known spawn failure (no executable started) releases the reservation
@@ -173,6 +176,14 @@ or when the helper has exited. An ownership record alone does not count, because
 only after binding. Other errors, such as `versionMismatch`, pass through unchanged. Before it keeps
 waiting, it calls the optional `onAwaitStartup(owner, waitMs)` once, with the live process and the
 remaining wait, so that the caller can say why the command has not started yet.
+
+`connectToStartingDaemonAsync()` connects without starting anything, for a caller that must not leave
+a daemon running, such as `rush-client daemon stop`. One refused connection does not show that no daemon
+runs: while one of the same live processes can still make a daemon ready at the endpoint, it waits up
+to one startup deadline for that daemon and connects once it completes hello/ping, whatever its
+implementation version. It resolves `undefined` when nothing listens and none of those processes
+remains, and rejects with `DaemonStartupPendingError` when one is still live at the deadline. It calls
+`onAwaitStartup(owner, waitMs)` once before it waits.
 
 `reclaimCrashedDaemonAsync(paths)` is for a caller that is about to run Rush in-process, as the CLI
 client does for `--no-daemon` and for each fallback. A daemon that crashed or was killed while it ran

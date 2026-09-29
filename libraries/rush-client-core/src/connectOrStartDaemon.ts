@@ -203,6 +203,8 @@ async function startDaemonAsync(
     backoffMs = 50;
     while (Date.now() < deadline) {
       options.abortSignal?.throwIfAborted();
+      // Read before connecting: the helper exits 0 only after it saw the daemon ready.
+      const helperSawReady: boolean = child.exitCode === 0;
       const client: DaemonClient | undefined = await tryConnectAsync(options, deadline);
       if (client) {
         try {
@@ -213,6 +215,13 @@ async function startDaemonAsync(
           await client.closeAsync();
           throw error;
         }
+      }
+      if (helperSawReady && hasReadyDaemonExited(options.paths)) {
+        await waitForHelperExitAsync(helper, options, deadline);
+        throw startupError(
+          options,
+          'failed: the daemon became ready but exited before this client connected, for example because "rush-client daemon stop" stopped it'
+        );
       }
       if ((child.exitCode !== null && child.exitCode !== 0) || child.signalCode !== null) {
         await waitForHelperExitAsync(helper, options, deadline);
@@ -230,6 +239,15 @@ async function startDaemonAsync(
   } finally {
     await lock.releaseAsync();
   }
+}
+
+/**
+ * Whether a daemon that answered hello has since exited. A daemon writes its lockfile before it can answer
+ * hello and removes it as it exits, so a missing lockfile with no startup in progress means it is gone.
+ * Waiting out the deadline instead would report a stop that won the race at readiness as a startup timeout.
+ */
+function hasReadyDaemonExited(paths: IDaemonPaths): boolean {
+  return !fs.existsSync(paths.lockfilePath) && !readDaemonStartupReservation(paths);
 }
 
 /**
@@ -467,7 +485,7 @@ async function tryConnectAsync(
 }
 
 /** Connects and completes hello/ping, whether or not a startup reservation remains. */
-async function tryConnectEndpointAsync(
+export async function tryConnectEndpointAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
 ): Promise<DaemonClient | undefined> {

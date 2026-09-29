@@ -35,6 +35,12 @@ interface IInvocationResult {
   readonly stderr: string;
 }
 
+// What `daemon status` adds when no daemon runs, for each resolved daemon.enabled and daemon.autoStart.
+const NEXT_COMMAND_STARTS: string = '; the next rush-client command that uses the daemon starts one.';
+const AUTO_START_OFF: string =
+  ', and auto-start is off, so rush-client commands run Rush in-process until "rush-client daemon start" starts one.';
+const NOT_ENABLED: string = '; the daemon is not enabled here, so rush-client commands run Rush in-process.';
+
 describe('standalone rushx fallback', () => {
   let folder: string;
   let project: string;
@@ -92,7 +98,8 @@ describe('standalone rushx fallback', () => {
     optIn: boolean,
     fakeTty: boolean = false,
     managementArgs?: ReadonlyArray<string>,
-    environmentOverrides: NodeJS.ProcessEnv = {}
+    environmentOverrides: NodeJS.ProcessEnv = {},
+    onStderr?: (stderr: string) => void
   ): Promise<IInvocationResult> {
     const invocationDaemonPids: Set<number> = daemonPids;
     const entry: string = client
@@ -124,6 +131,7 @@ describe('standalone rushx fallback', () => {
     });
     child.stderr!.on('data', (chunk: Buffer) => {
       stderr += chunk.toString();
+      onStderr?.(stderr);
     });
     const closed: Promise<unknown[]> = once(child, 'close');
     invocationClosures.push(closed);
@@ -140,6 +148,14 @@ describe('standalone rushx fallback', () => {
       if (pid !== process.pid) invocationDaemonPids.add(pid);
     }
     return { code: typeof code === 'number' ? code : undefined, stdout, stderr };
+  }
+
+  /** The client names the repository by the path it found; that spelling of the temporary folder varies by platform. */
+  function expectNoDaemonRunning(result: IInvocationResult, next: string): void {
+    expect(result).toMatchObject({ code: 1, stdout: '' });
+    expect(result.stderr).toMatch(/^rush-client: No daemon is running for /);
+    expect(result.stderr).toContain(`${path.sep}${path.basename(folder)} (Rush ${Rush.version})${next}\n`);
+    expect(result.stderr.split('\n')).toHaveLength(2);
   }
 
   it('preserves native project-script output and exit code for --no-daemon', async () => {
@@ -210,10 +226,14 @@ describe('standalone rushx fallback', () => {
 
   it('status never starts an absent daemon or falls back to command execution', async () => {
     const result: IInvocationResult = await invokeAsync(true, true, false, ['daemon', 'status']);
-    expect(result.code).toBe(1);
-    expect(result.stdout).toBe('');
-    expect(result.stderr).toContain('Could not connect to daemon');
+    expectNoDaemonRunning(result, AUTO_START_OFF);
     expect(result.stderr).not.toContain('using in-process');
+    // What the next command does follows the resolved settings.
+    expectNoDaemonRunning(
+      await invokeAsync(true, true, false, ['daemon', 'status'], { RUSH_DAEMON_AUTO_START: '1' }),
+      NEXT_COMMAND_STARTS
+    );
+    expectNoDaemonRunning(await invokeAsync(true, false, false, ['daemon', 'status']), NOT_ENABLED);
     const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
     expect(fs.existsSync(paths.lockfilePath)).toBe(false);
   });
@@ -241,7 +261,7 @@ describe('standalone rushx fallback', () => {
       expect(fs.existsSync(paths.lockfilePath)).toBe(false);
     }
     const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
-    expect(stopped.code).toBe(1);
+    expectNoDaemonRunning(stopped, NOT_ENABLED);
     const log: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'logs']);
     expect(log.code).toBe(0);
     const isoTime: string = '\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d{3}Z';
@@ -253,6 +273,58 @@ describe('standalone rushx fallback', () => {
       new RegExp(`^${isoTime} rushd \\(PID ${ready![1]}\\) shutting down: idle for 2 s$`, 'm')
     );
   }, 15000);
+
+  it('status says that no daemon is running after daemon stop and after SIGTERM', async () => {
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    try {
+      for (const stopWith of ['daemon stop', 'SIGTERM']) {
+        const started: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
+        expect(started.code).toBe(0);
+        const { pid }: { pid: number } = JSON.parse(started.stdout);
+        expect(pid).not.toBe(process.pid);
+        if (stopWith === 'SIGTERM') {
+          // The daemon that this test just started shuts down in order on SIGTERM.
+          process.kill(pid, 'SIGTERM');
+        } else {
+          expect((await invokeAsync(true, false, false, ['daemon', 'stop'])).code).toBe(0);
+        }
+        await waitForTestProcessExitAsync(pid);
+        expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+        expectNoDaemonRunning(
+          await invokeAsync(true, true, false, ['daemon', 'status'], { RUSH_DAEMON_AUTO_START: '1' }),
+          NEXT_COMMAND_STARTS
+        );
+      }
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+    }
+  }, 30000);
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'status keeps the refused-connection diagnostic for a socket that remains without its daemon',
+    async () => {
+      const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+      fs.mkdirSync(path.dirname(paths.lockfilePath), { recursive: true, mode: 0o700 });
+      const listener: ChildProcess = spawn(
+        process.execPath,
+        [
+          '-e',
+          `require('net').createServer().listen(${JSON.stringify(paths.socketPath)}, () => process.kill(process.pid, 'SIGKILL'))`
+        ],
+        { stdio: 'ignore' }
+      );
+      await once(listener, 'close');
+      try {
+        expect(fs.existsSync(paths.socketPath)).toBe(true);
+        const status: IInvocationResult = await invokeAsync(true, true, false, ['daemon', 'status']);
+        expect(status).toMatchObject({ code: 1, stdout: '' });
+        expect(status.stderr).toBe(`rush-client: Could not connect to daemon at ${paths.socketPath}.\n`);
+      } finally {
+        fs.rmSync(paths.socketPath, { force: true });
+      }
+    }
+  );
 
   it('reads a saved launcher log without connecting or auto-starting', async () => {
     fs.mkdirSync(path.dirname(logFilePath), { recursive: true, mode: 0o700 });
@@ -405,11 +477,15 @@ describe('standalone rushx fallback', () => {
       const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
       const reservation: string = `${paths.lockfilePath}.starting`;
       fs.mkdirSync(path.dirname(paths.lockfilePath), { recursive: true, mode: 0o700 });
-      let helperPid: number = process.pid;
+      // A startup helper that runs until its stdin ends, without ever starting a daemon.
+      const helper: ChildProcess = spawn(process.execPath, ['-e', 'process.stdin.resume()'], {
+        stdio: ['pipe', 'ignore', 'ignore']
+      });
+      const helperClosed: Promise<unknown[]> = once(helper, 'close');
+      const helperPid: number = helper.pid!;
       if (helperState === 'exited') {
-        const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
-        await once(exited, 'close');
-        helperPid = exited.pid!;
+        helper.stdin!.end();
+        await helperClosed;
       }
       const helperStartedAt: Date = new Date();
       fs.writeFileSync(
@@ -417,35 +493,113 @@ describe('standalone rushx fallback', () => {
         JSON.stringify({ token: 'fixture', helperPid, helperStartedAt: helperStartedAt.toISOString() })
       );
       const relaunchAfter: string = new Date(helperStartedAt.getTime() + 15000).toISOString();
-      const status: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
-      expect(status).toMatchObject({ code: 1, stdout: '' });
-      expect(status.stderr).toContain('Could not connect to daemon');
-      expect(status.stderr).toContain(
-        helperState === 'exited'
-          ? `its startup helper (PID ${helperPid}) exited before the daemon became ready. A command that starts the daemon after ${relaunchAfter} takes the reservation over and launches the daemon again, provided that nothing listens at ${paths.socketPath} then. "rush-client daemon logs" may show why the daemon did not become ready.`
-          : `A daemon is starting: its startup helper (PID ${helperPid}) is still waiting for it to become ready; retry shortly.`
-      );
-      const stopped: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop']);
-      expect(stopped).toMatchObject({ code: 0, stderr: '' });
-      expect(JSON.parse(stopped.stdout)).toEqual({
-        state: 'notRunning',
-        socketPath: paths.socketPath,
-        startupReservation: {
-          path: reservation,
-          helperPid,
-          helperState,
-          ...(helperState === 'exited' ? { relaunchAfter } : {})
+      try {
+        const status: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
+        expect(status).toMatchObject({ code: 1, stdout: '' });
+        expect(status.stderr).toContain('Could not connect to daemon');
+        expect(status.stderr).toContain(
+          helperState === 'exited'
+            ? `its startup helper (PID ${helperPid}) exited before the daemon became ready. A command that starts the daemon after ${relaunchAfter} takes the reservation over and launches the daemon again, provided that nothing listens at ${paths.socketPath} then. "rush-client daemon logs" may show why the daemon did not become ready.`
+            : `A daemon is starting: its startup helper (PID ${helperPid}) is still waiting for it to become ready; retry shortly.`
+        );
+        let onStopWaits: () => void = () => undefined;
+        const stopWaits: Promise<void> = new Promise((resolve) => (onStopWaits = resolve));
+        const stopping: Promise<IInvocationResult> = invokeAsync(
+          true,
+          false,
+          false,
+          ['daemon', 'stop'],
+          {},
+          (stderr: string) => {
+            if (stderr.includes('stop waits up to')) onStopWaits();
+          }
+        );
+        if (helperState === 'running') {
+          // Stop waits while the helper runs, and reports the reservation once the helper exits without a daemon.
+          await Promise.race([stopWaits, stopping]);
+          helper.stdin!.end();
+          await helperClosed;
         }
-      });
-      const reset: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
-      expect(reset).toMatchObject({ code: 0, stderr: '' });
-      expect(JSON.parse(reset.stdout)).toEqual({
-        state: 'reset',
-        socketPath: paths.socketPath,
-        removedPaths: [reservation]
-      });
-    }
+        const stopped: IInvocationResult = await stopping;
+        expect(stopped.code).toBe(0);
+        expect(stopped.stderr).toEqual(
+          helperState === 'exited'
+            ? ''
+            : expect.stringMatching(
+                new RegExp(
+                  `^rush-client: The daemon is not ready yet\\. Its startup helper \\(PID ${helperPid}\\) is still waiting for the daemon, so stop waits up to \\d+ s for it to become ready and then stops it\\.\\n$`
+                )
+              )
+        );
+        expect(JSON.parse(stopped.stdout)).toEqual({
+          state: 'notRunning',
+          socketPath: paths.socketPath,
+          startupReservation: { path: reservation, helperPid, helperState: 'exited', relaunchAfter }
+        });
+        const reset: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
+        expect(reset).toMatchObject({ code: 0, stderr: '' });
+        expect(JSON.parse(reset.stdout)).toEqual({
+          state: 'reset',
+          socketPath: paths.socketPath,
+          removedPaths: [reservation]
+        });
+      } finally {
+        if (!helper.stdin!.writableEnded) helper.stdin!.end();
+        await helperClosed;
+      }
+    },
+    30000
   );
+
+  it('stop waits for a daemon that is still starting and then stops it', async () => {
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    const reservation: string = `${paths.lockfilePath}.starting`;
+    fs.mkdirSync(path.dirname(paths.lockfilePath), { recursive: true, mode: 0o700 });
+    // This process stands in for the startup helper: it starts the daemon below while stop waits.
+    fs.writeFileSync(
+      reservation,
+      JSON.stringify({ token: 'fixture', helperPid: process.pid, helperStartedAt: new Date().toISOString() })
+    );
+    try {
+      let onStopWaits: () => void = () => undefined;
+      const stopWaits: Promise<void> = new Promise((resolve) => (onStopWaits = resolve));
+      const stopping: Promise<IInvocationResult> = invokeAsync(
+        true,
+        false,
+        false,
+        ['daemon', 'stop'],
+        {},
+        (stderr: string) => {
+          if (stderr.includes('stop waits up to')) onStopWaits();
+        }
+      );
+      await Promise.race([stopWaits, stopping]);
+      const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+      host = await RushDaemonHost.startAsync({
+        repoRoot: folder,
+        rushVersion: Rush.version,
+        daemonVersion: daemonPackage.version
+      });
+      const stopped: IInvocationResult = await stopping;
+      expect(stopped.code).toBe(0);
+      expect(stopped.stderr).toMatch(
+        new RegExp(
+          `^rush-client: The daemon is not ready yet\\. Its startup helper \\(PID ${process.pid}\\) is still waiting for the daemon, so stop waits up to \\d+ s for it to become ready and then stops it\\.\\n$`
+        )
+      );
+      // Stop resolved the reservation next to the ready daemon before it shut that daemon down.
+      expect(JSON.parse(stopped.stdout)).toEqual({
+        state: 'shutdownAccepted',
+        socketPath: paths.socketPath,
+        cancelledRequests: 0
+      });
+      expect(fs.existsSync(reservation)).toBe(false);
+    } finally {
+      const deadline: number = Date.now() + 7000;
+      while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    }
+  }, 30000);
 
   it('status names a recorded daemon that exited without shutting down', async () => {
     const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);

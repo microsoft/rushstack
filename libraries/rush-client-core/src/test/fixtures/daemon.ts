@@ -17,6 +17,7 @@ import {
 } from '@rushstack/rush-daemon-transport';
 
 import { connectOrStartDaemonAsync } from '../../connectOrStartDaemon';
+import { getDaemonStartupFilePath } from '../../DaemonStartup';
 
 async function mainAsync(): Promise<void> {
   const paths: IDaemonPaths = JSON.parse(process.argv[2]);
@@ -174,7 +175,12 @@ async function mainAsync(): Promise<void> {
   });
   const expiry: number = Date.now() + 10000;
   const timer = setInterval(() => {
-    if (!fs.existsSync(path.join(folder, 'stop')) && Date.now() < expiry) return;
+    const stopRequested: boolean =
+      fs.existsSync(path.join(folder, 'stop')) ||
+      Date.now() >= expiry ||
+      // Like a "daemon stop" that arrives as soon as the startup helper has seen this daemon ready.
+      (mode === 'stop-when-ready' && !fs.existsSync(getDaemonStartupFilePath(paths)));
+    if (!stopRequested) return;
     void stopAsync().catch((error: Error) => {
       process.stderr.write(`${error.stack}\n`);
       process.exitCode = 1;

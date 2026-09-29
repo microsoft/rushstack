@@ -30,6 +30,9 @@ export function connectOrAwaitDaemonStartupAsync(options: IConnectOrAwaitDaemonS
 export function connectOrStartDaemonAsync(options: IConnectOrStartDaemonOptions): Promise<DaemonClient>;
 
 // @beta
+export function connectToStartingDaemonAsync(options: IConnectOrAwaitDaemonStartupOptions): Promise<DaemonClient | undefined>;
+
+// @beta
 export class DaemonClient {
     // (undocumented)
     closeAsync(): Promise<void>;

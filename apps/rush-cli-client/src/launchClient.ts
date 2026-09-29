@@ -87,6 +87,7 @@ export async function launchClientAsync(
       environment,
       rushJsonPath,
       rushVersion: selectedVersion,
+      daemonConfiguration: { enabled: config.enabled, autoStart: config.autoStart },
       admission:
         route.argv[1] === 'graph'
           ? (route.admission ?? { waitTimeoutMs: Math.floor(config.queueTimeoutSeconds * 1000) })
