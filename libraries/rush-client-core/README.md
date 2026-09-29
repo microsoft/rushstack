@@ -72,7 +72,10 @@ Before it returns that error, it reclaims the exited daemon as the next daemon s
 running the command again, with or without the daemon, does not race the operations the daemon
 left running. While the ownership record names that process, it takes the start mutex and, unless
 a startup is reserved, calls `reclaimStaleDaemonAsync()`, which terminates the orphaned operation
-process groups and removes the ownership record and socket. Each set of groups that it stops is
+process groups (and those that other dead daemons recorded but that no ownership record names any
+more) and removes the ownership record and socket. Where `/proc` shows that every process left in a
+group has exited but is not reaped yet (a zombie), the group counts as stopped, because no signal
+can end it. Each set of groups that it stops is
 passed to the connection's optional `onOrphansReaped(reap)` (the daemon's PID, the process groups,
 and whether they were `terminated` or `killed`), so that the caller can say so in its own words;
 without it, each is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. The reclaim before

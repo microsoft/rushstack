@@ -5,6 +5,7 @@ import { terminateProcessGroupsAsync } from './DaemonGroupTermination';
 import type { DaemonOrphanReapOutcome } from './DaemonGroupTermination';
 import type { IDaemonLockfile } from './DaemonLockfile';
 import { reapDeadDaemonOperationGroupsAsync } from './DaemonOperationGroupReaper';
+import { sweepStrandedOperationGroupsAsync } from './DaemonOperationGroupSweep';
 import { isOwnedEntry } from './DaemonOwnedEntry';
 import {
   createReapContext,
@@ -55,16 +56,28 @@ function isOwnRecord(
   return owner !== undefined && isOwnedEntry(lockfilePath, 'file', resolveCallerUid(options));
 }
 
+async function reapRecordedOwnerAsync(
+  lockfilePath: string,
+  owner: IDaemonLockfile | undefined,
+  options: IDaemonOrphanReaperOptions
+): Promise<void> {
+  if (!isOwnRecord(lockfilePath, owner, options)) return;
+  await reapDeadDaemonProcessGroupAsync(owner.pid, options);
+  await reapDeadDaemonOperationGroupsAsync(lockfilePath, owner.pid, options);
+}
+
 /**
- * Reaps the orphaned processes of a reclaimed daemon's recorded owner, if there is one. A lockfile that is a
- * symbolic link, or that another user owns, names no daemon of this user, so nothing is signaled.
+ * Reaps the orphaned processes of a reclaimed daemon's recorded owner, if there is one, and then the
+ * recorded operation groups of other dead daemons that no lockfile names
+ * (see {@link sweepStrandedOperationGroupsAsync}). A lockfile that is a symbolic link, or that another user
+ * owns, names no daemon of this user, so its owner is not signaled, and the sweep skips the owner's folder
+ * too.
  */
 export async function reapOrphansOfDeadOwnerAsync(
   lockfilePath: string,
   owner: IDaemonLockfile | undefined,
   options: IDaemonOrphanReaperOptions = {}
 ): Promise<void> {
-  if (!isOwnRecord(lockfilePath, owner, options)) return;
-  await reapDeadDaemonProcessGroupAsync(owner.pid, options);
-  await reapDeadDaemonOperationGroupsAsync(lockfilePath, owner.pid, options);
+  await reapRecordedOwnerAsync(lockfilePath, owner, options);
+  await sweepStrandedOperationGroupsAsync(lockfilePath, owner?.pid, options);
 }

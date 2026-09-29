@@ -7,6 +7,8 @@ import * as path from 'node:path';
 const FOLDER_INFIX: string = '.groups-';
 const NAME_SEPARATOR: string = '-';
 const RECORD_NAME_PATTERN: RegExp = /^(\d+)-(\d+)$/;
+// A pid as getOperationGroupsFolder() writes it: no sign, no leading zero, and never 0.
+const DAEMON_PID_PATTERN: RegExp = /^[1-9]\d*$/;
 const GROUP_ID_MATCH: number = 1;
 const START_TIME_MATCH: number = 2;
 const DIR_MODE: number = 0o700;
@@ -48,15 +50,30 @@ function isRecord(record: IOperationGroupRecord | undefined): record is IOperati
   return record !== undefined;
 }
 
-/** Reads the recorded groups; a missing or unreadable folder holds none. */
-export function readOperationGroupRecords(folder: string): IOperationGroupRecord[] {
-  let names: string[];
+function readFolderNames(folder: string): string[] {
   try {
-    names = fs.readdirSync(folder);
+    return fs.readdirSync(folder);
   } catch {
     return [];
   }
-  return names.map(parseRecordName).filter(isRecord);
+}
+
+/** Reads the recorded groups; a missing or unreadable folder holds none. */
+export function readOperationGroupRecords(folder: string): IOperationGroupRecord[] {
+  return readFolderNames(folder).map(parseRecordName).filter(isRecord);
+}
+
+/**
+ * The pids of the daemons, running or not, whose record folders are beside `lockfilePath`. A name that
+ * isn't a pid as {@link getOperationGroupsFolder} writes it, or whose number is too large to be exact, is
+ * skipped.
+ */
+export function listOperationGroupsDaemonPids(lockfilePath: string): number[] {
+  const prefix: string = `${path.basename(lockfilePath)}${FOLDER_INFIX}`;
+  return readFolderNames(path.dirname(lockfilePath))
+    .filter((name: string) => name.startsWith(prefix) && DAEMON_PID_PATTERN.test(name.slice(prefix.length)))
+    .map((name: string) => Number(name.slice(prefix.length)))
+    .filter(Number.isSafeInteger);
 }
 
 /** Deletes the sidecar folder and every record in it; idempotent. */

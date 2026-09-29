@@ -22,9 +22,10 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * that is alive but momentarily unresponsive is never reclaimed underneath itself. Reclaims are serialized
  * through the lockfile mutex ({@link tryAcquireReclaimLock}): only the mutex holder may unlink the socket
  * path, so a concurrent starter cannot delete a socket that another process just bound. Operation processes
- * still running in the dead daemon's process group, or in the operation process groups it recorded, are
- * terminated first (see `DaemonOrphanReaper`) and reported to `options.onOrphansReaped`. Nothing is read,
- * reaped or removed unless the runtime directory is a private directory of this user.
+ * still running in the dead daemon's process group, or in the operation process groups that it recorded, are
+ * terminated first, and so are the operation process groups recorded by other daemons that are gone and that
+ * no lockfile names (see `DaemonOrphanReaper`). They are reported to `options.onOrphansReaped`. Nothing is
+ * read, reaped or removed unless the runtime directory is a private directory of this user.
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a
  * live (or plausibly live) daemon owns the path, or when another starter holds

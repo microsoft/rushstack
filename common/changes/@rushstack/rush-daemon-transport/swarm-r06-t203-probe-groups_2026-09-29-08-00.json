@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "When reaping a dead daemon's operation process groups, drop a record whose group has no process at all, as `kill` shows, without reading every process's `/proc` record, so that a reclaim that finds many stale records no longer scans `/proc` once per record.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

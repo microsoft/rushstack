@@ -4,6 +4,7 @@
 import { POSIX_PROCESS_GROUP_OPS } from '../DaemonProcessGroup';
 
 const GROUP_ID: number = 4242;
+const NO_SIGNAL: number = 0;
 
 function throwErrno(code: string): never {
   throw Object.assign(new Error(code), { code });
@@ -11,6 +12,16 @@ function throwErrno(code: string): never {
 
 afterEach(() => {
   jest.restoreAllMocks();
+});
+
+it('treats only ESRCH as proof that a process group has no process at all', () => {
+  const kill: jest.SpyInstance = jest.spyOn(process, 'kill').mockImplementation(() => throwErrno('ESRCH'));
+  expect(POSIX_PROCESS_GROUP_OPS.mayHaveMembers(GROUP_ID)).toBe(false);
+  expect(kill).toHaveBeenCalledWith(-GROUP_ID, NO_SIGNAL);
+  kill.mockImplementation(() => throwErrno('EPERM'));
+  expect(POSIX_PROCESS_GROUP_OPS.mayHaveMembers(GROUP_ID)).toBe(true);
+  kill.mockImplementation(() => true);
+  expect(POSIX_PROCESS_GROUP_OPS.mayHaveMembers(GROUP_ID)).toBe(true);
 });
 
 it('treats only ESRCH as proof that a process group is gone', () => {

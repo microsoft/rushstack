@@ -70,6 +70,7 @@ function createGroupOps(table: IFakeTable): IDaemonProcessGroupOps {
   return {
     isProcessAlive: () => spec.daemonAlive === true,
     groupExists: (groupId: number) => groupExists(table, groupId),
+    mayHaveMembers: (groupId: number) => groupExists(table, groupId),
     signalGroup: (groupId: number, signal: NodeJS.Signals) => {
       table.targets.push(groupId);
       table.signals.push(signal);

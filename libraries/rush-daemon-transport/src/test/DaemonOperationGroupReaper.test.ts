@@ -54,6 +54,14 @@ it('signals a group whose leader has exited when every live member is in its ses
   expect(result.targets).toEqual([OPERATION_GROUP]);
 });
 
+it('signals a group whose leader is a zombie when every live member is in its session', async () => {
+  const zombieLeader: IProcessStat = { ...stat(OPERATION_GROUP, OPERATION_GROUP), exited: true };
+  const processes: IProcessStat[] = [zombieLeader, ...operationTree(OPERATION_GROUP, false)];
+  const result: IFakeGroup & { outcome: string } = await reapAsync(processes);
+  expect(result.outcome).toBe('terminated');
+  expect(result.targets).toEqual([OPERATION_GROUP]);
+});
+
 it('never signals a reused pid: the leader has another start time', async () => {
   const reused: IProcessStat = { ...stat(OPERATION_GROUP, OPERATION_GROUP), startTime: REUSED_START };
   const result: IFakeGroup & { outcome: string } = await reapAsync([reused]);

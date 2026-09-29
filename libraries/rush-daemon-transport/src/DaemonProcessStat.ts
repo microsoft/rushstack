@@ -40,25 +40,36 @@ function parseProcessStat(pid: number, stat: string): IProcessStat {
   };
 }
 
+/** Reads `/proc/<pid>/stat`; throws when the record cannot be read. */
+export function readStatRecord(pid: number): IProcessStat {
+  return parseProcessStat(pid, fs.readFileSync(`${PROC_ROOT}/${pid}/${STAT_FILE_NAME}`, UTF8));
+}
+
 /** Reads `/proc/<pid>/stat`; `undefined` when the process is gone or the platform has no `/proc`. */
 export function readProcessStat(pid: number): IProcessStat | undefined {
   try {
-    return parseProcessStat(pid, fs.readFileSync(`${PROC_ROOT}/${pid}/${STAT_FILE_NAME}`, UTF8));
+    return readStatRecord(pid);
   } catch {
     return undefined;
   }
 }
 
-function isLiveMemberOf(groupId: number, stat: IProcessStat | undefined): stat is IProcessStat {
+/** `true` when `stat` is the record of a process in group `groupId` that has not exited. */
+export function isLiveMemberOf(groupId: number, stat: IProcessStat | undefined): stat is IProcessStat {
   return stat !== undefined && stat.groupId === groupId && !stat.exited;
+}
+
+/** Lists the pids in `/proc`; throws when `/proc` cannot be listed. */
+export function readProcessIds(): number[] {
+  return fs
+    .readdirSync(PROC_ROOT)
+    .filter((name: string) => PID_PATTERN.test(name))
+    .map(Number);
 }
 
 function listProcessIds(): number[] {
   try {
-    return fs
-      .readdirSync(PROC_ROOT)
-      .filter((name: string) => PID_PATTERN.test(name))
-      .map(Number);
+    return readProcessIds();
   } catch {
     return [];
   }
