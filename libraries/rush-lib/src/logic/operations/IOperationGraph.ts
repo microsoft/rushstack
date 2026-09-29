@@ -33,6 +33,18 @@ export interface IOperationGraphIterationOptions {
    * (see `getWorkspaceRequestOperationEnvironment`).
    */
   getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
+
+  /**
+   * Returns the identifier of the request whose environment `getOperationEnvironment` returns for an operation of
+   * this iteration, or `undefined` if there is no such request. When omitted, the iteration serves no identified
+   * request.
+   *
+   * @remarks
+   * A long-lived host can serve several requests in one iteration. A plugin can use this identifier to attribute
+   * each operation to the request that selected it, for example to join per-operation telemetry with that
+   * request's own telemetry entry.
+   */
+  getOperationRequestId?: (operation: Operation) => string | undefined;
 }
 
 /**

@@ -97,6 +97,8 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
 
   startTime?: number;
 
+  getOperationRequestId?: (operation: Operation) => string | undefined;
+
   completedOperations: number;
   totalOperations: number;
 }
@@ -676,12 +678,14 @@ export class OperationGraph implements IOperationGraph {
     const {
       startTime = performance.now(),
       inputsSnapshot = await getInputsSnapshotAsync?.(),
-      getOperationEnvironment
+      getOperationEnvironment,
+      getOperationRequestId
     } = iterationOptions;
     const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
       startTime,
       inputsSnapshot,
-      getOperationEnvironment
+      getOperationEnvironment,
+      getOperationRequestId
     };
 
     const { hooks } = this;
@@ -731,6 +735,7 @@ export class OperationGraph implements IOperationGraph {
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
       getOperationEnvironment,
+      getOperationRequestId,
       invalidate: graph.invalidateOperations.bind(graph),
       get debugMode(): boolean {
         return graph.debugMode;
@@ -893,7 +898,8 @@ export class OperationGraph implements IOperationGraph {
     const iterationOptions: IOperationGraphIterationOptions = {
       inputsSnapshot: iterationContext.inputsSnapshot,
       startTime: iterationContext.startTime,
-      getOperationEnvironment: iterationContext.getOperationEnvironment
+      getOperationEnvironment: iterationContext.getOperationEnvironment,
+      getOperationRequestId: iterationContext.getOperationRequestId
     };
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(

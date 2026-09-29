@@ -778,6 +778,7 @@ export interface _IOperationGraphEventSink {
 // @alpha
 export interface IOperationGraphIterationOptions {
     getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
+    getOperationRequestId?: (operation: Operation) => string | undefined;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
     startTime?: number;

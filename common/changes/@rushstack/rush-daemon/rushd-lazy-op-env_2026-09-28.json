@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Start each phased operation from the daemon's `process.env` as it is when the operation starts, so it sees the variables that a plugin sets, changes or deletes in the same iteration's `beforeExecuteIterationAsync`. Previously the router copied `process.env` when it scheduled the iteration, so operations saw the values from the previous request's hooks.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

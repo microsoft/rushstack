@@ -93,11 +93,15 @@ comparisons (the tier-2 fingerprint and the production resolver's startup-enviro
 `getWorkspaceFingerprintEnvironmentEntries()`, which omits `workspaceFingerprintIgnoredEnvironmentVariables`:
 volatile per-shell, terminal, session and client-routing variables such as `PWD`, `OLDPWD`, `SHLVL`, `_`,
 `TERM`, `COLUMNS`, `WSL_INTEROP`, `SSH_*`, `INIT_CWD`, `RUSH_DAEMON`, `RUSH_DAEMON_AUTO_START` and
-`RUSH_DAEMON_EXPERIMENTAL`. Rush does not read these to configure the engine, build the graph or hash operations,
+`RUSH_DAEMON_EXPERIMENTAL`. Rush does not read these to configure the engine or build the graph,
 so running a command from a project subfolder or another shell reuses the warm workspace. All other environment
 inputs, including every other `RUSH_*` variable, `NODE_*`, npm/pnpm configuration, `PATH` and `HOME`, remain
-unchanged and are checked normally. Phased operation processes inherit the daemon's own environment, so they
-see the daemon's startup values for the ignored variables rather than the submitting shell's values.
+unchanged and are checked normally. Each phased operation process takes the ignored variables from the request
+that selected it (`getWorkspaceRequestOperationEnvironment()`) and hashes its `dependsOnEnvVars` from that
+environment, so it sees the submitting shell's values, as a native command would. The rest of that environment is
+the daemon's `process.env` when the operation starts, so it includes variables that a plugin sets in the same
+iteration's `beforeExecuteIterationAsync`; state hashes use the values from when the iteration was scheduled, before
+those hooks run, as native Rush does.
 Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
 still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
 With the build cache enabled, a cacheable operation whose tracked input files change while the inputs snapshot is
@@ -535,9 +539,15 @@ drains. The result translates only that client's operation subset to Rush's succ
 semantics. Warning-only builds honor the operation's configured `allowWarningsInSuccessfulBuild` state plus the
 request's immutable `RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment override without mutating `process.env`.
 Compatible phased `SHARED-BUILD` requests admitted before the next graph iteration starts are coalesced at a
-deterministic event-loop-turn boundary. The router reconciles retained invalidations once, unions the clients' enabled
-dependency closures, and schedules one iteration. Shared operations execute once, while each client subscribes only
-to its own closure and derives its final result only from that subset. A client does not wait for the other clients'
+deterministic event-loop-turn boundary. Requests are compatible when they have the same request settings and the same
+value of every environment variable that an operation of the graph lists in `dependsOnEnvVars` (an unset variable and
+an empty one hash alike, so they count as the same value), because
+a shared operation runs once, in the environment of the first request that selected it. Iteration hooks get the
+same attribution: `getOperationRequestId` returns the `requestId` of the request whose environment
+`getOperationEnvironment` returns for an operation. The router reconciles
+retained invalidations once, unions the clients' enabled dependency closures, and schedules one iteration. Shared
+operations execute once, while each client subscribes only to its own closure and derives its final result only from
+that subset. A client does not wait for the other clients'
 larger selections: once every operation of its own closure that the iteration scheduled has completed and its output
 has drained, its result is published while the iteration, graph lease, and native execution lease continue for the
 remaining clients. The last client that still needs the iteration receives its result after iteration end and lease

@@ -4,6 +4,7 @@
 import type {
   IOperationExecutionResult,
   IOperationGraph,
+  IOperationGraphIterationOptions,
   IPhasedCommandEngineRequestSettings,
   Operation,
   _IOperationGraphEventSink
@@ -79,8 +80,12 @@ interface IPreparedPhasedRequest {
   /** Lets requests that cannot run alongside this one preempt its workspace admission; see `#settleEntry`. */
   readonly markAdmissionPreemptible: (onPreempted: () => void) => void;
   readonly request: IDaemonPhasedRequest;
-  /** Only requests with the same settings share one graph iteration. */
+  /** The settings that the request's iteration applies to the graph. */
   readonly requestSettings: IPhasedCommandEngineRequestSettings | undefined;
+  /**
+   * Only requests with the same settings, and the same values for every variable that the graph's operations hash,
+   * share one graph iteration.
+   */
   readonly requestSettingsKey: string;
   readonly selection: IResolvedSelection;
   /** The `performance.now()` timestamp at which the daemon received the request; see `#canJoinCurrentBatch`. */
@@ -272,7 +277,7 @@ export class PhasedRequestRouter {
               receivedTimeMs: receivedTimeMs ?? startTimeMs,
               request,
               requestSettings,
-              requestSettingsKey: JSON.stringify(requestSettings ?? null),
+              requestSettingsKey: getRequestSettingsKey(graph, request, requestSettings),
               selection,
               startTimeMs,
               telemetry,
@@ -569,7 +574,7 @@ class PhasedRequestBatchCoordinator {
         timings.scheduleStartTimeMs = performance.now();
         scheduled = await this.#graph.scheduleIterationAsync({
           inputsSnapshot: this.#workspaceSession.inputsSnapshot,
-          getOperationEnvironment: createOperationEnvironmentLookup(participants)
+          ...createOperationParticipantLookups(participants)
         });
         timings.scheduledTimeMs = performance.now();
         if (scheduled) {
@@ -1176,28 +1181,102 @@ function validateRequestIdentity(request: IDaemonPhasedRequest): void {
 }
 
 /**
- * Gives each operation of an iteration the environment of the first participant that selected it, as a native
- * command would run it in its invoker's environment. An operation that several participants share runs once, in
- * the first participant's environment.
+ * Returns the key that decides which requests can share one graph iteration.
+ *
+ * @remarks
+ * An operation that several participants select runs once, in the first participant's environment, and hashes its
+ * `dependsOnEnvVars` from that environment. Variables that do not select a daemon, such as `WT_SESSION`, reach the
+ * operation from each request, so the key includes this request's value of every variable that an operation of the
+ * graph lists in `dependsOnEnvVars`. Requests that disagree on one of them get separate iterations, and each
+ * operation runs and is hashed as it would be for its own requester. The key takes each value as the operation hashes
+ * it, so an unset variable and an empty one are the same value.
  */
-function createOperationEnvironmentLookup(
+function getRequestSettingsKey(
+  graph: IOperationGraph,
+  request: IDaemonPhasedRequest,
+  requestSettings: IPhasedCommandEngineRequestSettings | undefined
+): string {
+  const names: ReadonlyArray<string> = getGraphDependsOnEnvVars(graph);
+  const environment: Readonly<Record<string, string>> =
+    names.length > 0 ? getWorkspaceRequestOperationEnvironment(process.env, request.environment) : {};
+  // InputsSnapshot hashes `environment[name] || ''`.
+  const values: ReadonlyArray<readonly [string, string]> = names.map((name: string) => [
+    name,
+    environment[name] || ''
+  ]);
+  return JSON.stringify([requestSettings ?? null, values]);
+}
+
+/** Returns the names of the environment variables that the graph's operations hash, sorted. */
+function getGraphDependsOnEnvVars(graph: IOperationGraph): ReadonlyArray<string> {
+  const names: Set<string> = new Set();
+  for (const operation of graph.operations) {
+    for (const name of operation.settings?.dependsOnEnvVars ?? []) {
+      names.add(name);
+    }
+  }
+  return Array.from(names).sort(Sort.compareByValue);
+}
+
+/**
+ * The lookups that attribute each operation of an iteration to one of its participants.
+ */
+type IOperationParticipantLookups = Required<
+  Pick<IOperationGraphIterationOptions, 'getOperationEnvironment' | 'getOperationRequestId'>
+>;
+
+/**
+ * Attributes each operation of an iteration to the first participant that selected it, as a native command would
+ * run it for its invoker, or to the first participant if no participant selected it. `getOperationEnvironment`
+ * returns that participant's environment and `getOperationRequestId` its request id, so a plugin can attribute the
+ * operation to the request whose environment it ran in. An operation that several participants share runs once, in
+ * the first participant's environment; the participants agree on the hashed value of every variable that an
+ * operation hashes (see `getRequestSettingsKey`).
+ *
+ * @remarks
+ * Each environment is a copy of the daemon's `process.env` in which the variables that do not select a daemon take
+ * the participant's values. The copy is taken when it is asked for, so an operation starts from `process.env` as it
+ * is when the operation starts, as a native command's operation does. That includes the variables that a plugin
+ * sets, changes or deletes in the same iteration's `beforeExecuteIterationAsync`. Reading `process.env` is slow, and
+ * the graph hashes every operation while it schedules an iteration, so the calls made before the next microtask
+ * share one copy for each participant.
+ */
+function createOperationParticipantLookups(
   participants: ReadonlyArray<IBatchEntry>
-): (operation: Operation) => Readonly<Record<string, string | undefined>> {
-  const environmentByOperation: Map<Operation, Readonly<Record<string, string>>> = new Map();
-  let firstEnvironment: Readonly<Record<string, string>> | undefined;
+): IOperationParticipantLookups {
+  const entryByOperation: Map<Operation, IBatchEntry> = new Map();
   for (const entry of participants) {
-    const environment: Readonly<Record<string, string>> = getWorkspaceRequestOperationEnvironment(
-      process.env,
-      entry.request.environment
-    );
-    firstEnvironment ??= environment;
     for (const operation of entry.selection.activeOperations) {
-      if (!environmentByOperation.has(operation)) {
-        environmentByOperation.set(operation, environment);
+      if (!entryByOperation.has(operation)) {
+        entryByOperation.set(operation, entry);
       }
     }
   }
-  return (operation: Operation) => environmentByOperation.get(operation) ?? firstEnvironment ?? process.env;
+  const firstEntry: IBatchEntry | undefined = participants[0];
+  const getEntry = (operation: Operation): IBatchEntry | undefined =>
+    entryByOperation.get(operation) ?? firstEntry;
+  let environmentByEntry: Map<IBatchEntry, Readonly<Record<string, string>>> | undefined;
+  return {
+    getOperationEnvironment: (operation: Operation) => {
+      const entry: IBatchEntry | undefined = getEntry(operation);
+      if (!entry) {
+        return process.env;
+      }
+      if (!environmentByEntry) {
+        environmentByEntry = new Map();
+        queueMicrotask(() => {
+          environmentByEntry = undefined;
+        });
+      }
+      let environment: Readonly<Record<string, string>> | undefined = environmentByEntry.get(entry);
+      if (!environment) {
+        environment = getWorkspaceRequestOperationEnvironment(process.env, entry.request.environment);
+        environmentByEntry.set(entry, environment);
+      }
+      return environment;
+    },
+    getOperationRequestId: (operation: Operation) => getEntry(operation)?.request.requestId
+  };
 }
 
 function validateNonemptyName(value: string, kind: string): void {

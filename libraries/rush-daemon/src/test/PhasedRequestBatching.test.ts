@@ -10,7 +10,12 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
-import type { IOperationRunnerContext, IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
+import type {
+  IInputsSnapshot,
+  IOperationRunnerContext,
+  IPhasedCommandEngineRequestSettings,
+  IRushConfigurationProjectForSnapshot
+} from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
@@ -20,6 +25,7 @@ import {
   createRoutingFixture
 } from './PhasedRequestRouterTestUtilities';
 import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
+import { TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
@@ -273,6 +279,321 @@ describe('shared phased request batching', () => {
         [OPERATION_C, undefined]
       ])
     );
+  });
+
+  it('gives each operation the request id of the request whose environment it gets', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const iterations: string[][] = [];
+    fixture.graph.hooks.beforeExecuteIterationAsync.tap('test plugin', (records, options) => {
+      const lines: string[] = [];
+      for (const operation of records.keys()) {
+        const session: string | undefined = options.getOperationEnvironment?.(operation)[SESSION_VARIABLE];
+        lines.push(`${operation.name}: ${options.getOperationRequestId?.(operation)} ${session}`);
+      }
+      iterations.push(lines.sort());
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const withSession = (request: IDaemonPhasedRequest, session: string): IDaemonPhasedRequest => ({
+      ...request,
+      environment: { [SESSION_VARIABLE]: session }
+    });
+
+    await Promise.all([
+      router.executeAsync(
+        withSession(createRequest('x', OPERATION_A, OPERATION_C), 'session-X'),
+        new TestPhasedRequestClient('x')
+      ),
+      router.executeAsync(
+        withSession(createRequest('y', OPERATION_B), 'session-Y'),
+        new TestPhasedRequestClient('y')
+      )
+    ]);
+    await router.executeAsync(
+      withSession(createRequest('z', OPERATION_A), 'session-Z'),
+      new TestPhasedRequestClient('z')
+    );
+
+    // An operation that no participant selected gets the first participant's environment and request id.
+    expect(iterations).toEqual([
+      [`${OPERATION_A}: x session-X`, `${OPERATION_B}: y session-Y`, `${OPERATION_C}: x session-X`],
+      [`${OPERATION_A}: z session-Z`, `${OPERATION_B}: z session-Z`, `${OPERATION_C}: z session-Z`]
+    ]);
+  });
+
+  describe('with a plugin that changes process.env in beforeExecuteIterationAsync', () => {
+    const ADDED_VARIABLE: string = 'RUSHD_TEST_ADDED';
+    const CHANGED_VARIABLE: string = 'RUSHD_TEST_CHANGED';
+    const REMOVED_VARIABLE: string = 'RUSHD_TEST_REMOVED';
+    const NAMES: ReadonlyArray<string> = [
+      SESSION_VARIABLE,
+      ADDED_VARIABLE,
+      CHANGED_VARIABLE,
+      REMOVED_VARIABLE
+    ];
+    let savedValues: ReadonlyArray<string | undefined> = [];
+
+    beforeEach(() => {
+      savedValues = NAMES.map((name: string) => process.env[name]);
+      process.env[SESSION_VARIABLE] = 'daemon';
+      delete process.env[ADDED_VARIABLE];
+      process.env[CHANGED_VARIABLE] = 'original';
+      process.env[REMOVED_VARIABLE] = 'original';
+    });
+
+    afterEach(() => {
+      NAMES.forEach((name: string, index: number) => {
+        const value: string | undefined = savedValues[index];
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      });
+    });
+
+    function createFixtureWithPlugin(options?: Parameters<typeof createFixture>[0]): ITestRoutingFixture {
+      const fixture: ITestRoutingFixture = createFixture(options);
+      let iteration: number = 0;
+      fixture.graph.hooks.beforeExecuteIterationAsync.tap('test plugin', () => {
+        iteration++;
+        process.env[ADDED_VARIABLE] = `added-${iteration}`;
+        process.env[CHANGED_VARIABLE] = `changed-${iteration}`;
+        delete process.env[REMOVED_VARIABLE];
+      });
+      return fixture;
+    }
+
+    function withSession(request: IDaemonPhasedRequest, session: string): IDaemonPhasedRequest {
+      return { ...request, environment: { [SESSION_VARIABLE]: session } };
+    }
+
+    function recordEnvironment(seen: string[], operationId: string): TestOperationAction {
+      return async (terminal: ITerminal, context: IOperationRunnerContext): Promise<void> => {
+        const values: string[] = NAMES.map((name: string) => context.environment?.[name] ?? '<unset>');
+        seen.push(`${operationId}: ${values.join(' ')}`);
+      };
+    }
+
+    it("starts each operation from what the same iteration's hook set, changed and deleted, with its requester's session", async () => {
+      const seen: string[] = [];
+      const fixture: ITestRoutingFixture = createFixtureWithPlugin({
+        actionAAsync: recordEnvironment(seen, OPERATION_A),
+        actionCAsync: recordEnvironment(seen, OPERATION_C)
+      });
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(
+          withSession(createRequest('a', OPERATION_A), 'session-A'),
+          new TestPhasedRequestClient('a')
+        ),
+        router.executeAsync(
+          withSession(createRequest('c', OPERATION_C), 'session-C'),
+          new TestPhasedRequestClient('c')
+        )
+      ]);
+      await router.executeAsync(
+        withSession(createRequest('a-again', OPERATION_A), 'session-A-again'),
+        new TestPhasedRequestClient('a-again')
+      );
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(2);
+      expect([...seen].sort()).toEqual([
+        `${OPERATION_A}: session-A added-1 changed-1 <unset>`,
+        `${OPERATION_A}: session-A-again added-2 changed-2 <unset>`,
+        `${OPERATION_C}: session-C added-1 changed-1 <unset>`
+      ]);
+    });
+
+    it('hashes from one copy of each requester environment while scheduling and starts from a copy taken after the hook', async () => {
+      const hashedEnvironments: Map<
+        IRushConfigurationProjectForSnapshot,
+        Readonly<Record<string, string | undefined>> | undefined
+      > = new Map();
+      const seen: string[] = [];
+      const fixture: ITestRoutingFixture = createFixtureWithPlugin({
+        actionAAsync: recordEnvironment(seen, OPERATION_A),
+        actionBAsync: recordEnvironment(seen, OPERATION_B),
+        actionCAsync: recordEnvironment(seen, OPERATION_C)
+      });
+      const inputsSnapshot: IInputsSnapshot = {
+        getOperationOwnStateHash: (
+          project: IRushConfigurationProjectForSnapshot,
+          operationName?: string,
+          environment?: Readonly<Record<string, string | undefined>>
+        ): string => {
+          hashedEnvironments.set(project, environment);
+          return 'hash';
+        },
+        getTrackedFileHashesForOperation: () => new Map(),
+        hasUncommittedChanges: false,
+        hashes: new Map(),
+        rootDirectory: TEST_REPO_ROOT
+      };
+      Object.assign(fixture.session, { inputsSnapshot });
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(
+          withSession(createRequest('x', OPERATION_A, OPERATION_C), 'session-X'),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          withSession(createRequest('y', OPERATION_B), 'session-Y'),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+
+      const [hashedA, hashedB, hashedC] = [OPERATION_A, OPERATION_B, OPERATION_C].map((operationId: string) =>
+        hashedEnvironments.get(fixture.operations.get(operationId)!.associatedProject)
+      );
+      expect(hashedA?.[SESSION_VARIABLE]).toBe('session-X');
+      expect(hashedB?.[SESSION_VARIABLE]).toBe('session-Y');
+      expect(hashedC).toBe(hashedA);
+      expect(hashedA?.[CHANGED_VARIABLE]).toBe('original');
+      expect([...seen].sort()).toEqual([
+        `${OPERATION_A}: session-X added-1 changed-1 <unset>`,
+        `${OPERATION_B}: session-Y added-1 changed-1 <unset>`,
+        `${OPERATION_C}: session-X added-1 changed-1 <unset>`
+      ]);
+    });
+  });
+
+  describe('with an operation that hashes a variable that does not select a daemon', () => {
+    const TERMINAL_VARIABLE: string = 'WT_SESSION';
+    const HOST_VARIABLE: string = 'RUSHD_TEST_HOST_VARIABLE';
+
+    interface IHashedVariableFixture {
+      readonly fixture: ITestRoutingFixture;
+      readonly router: PhasedRequestRouter;
+      readonly runs: ReadonlyArray<string | undefined>;
+      readonly scheduleSpy: jest.SpyInstance;
+    }
+
+    function createHashedVariableFixture(
+      dependsOnEnvVars: string[],
+      actionCAsync?: TestOperationAction
+    ): IHashedVariableFixture {
+      const runs: (string | undefined)[] = [];
+      const fixture: ITestRoutingFixture = createFixture({
+        actionAAsync: async (terminal: ITerminal, context: IOperationRunnerContext): Promise<void> => {
+          runs.push(context.environment?.[TERMINAL_VARIABLE]);
+        },
+        actionCAsync
+      });
+      fixture.operations.get(OPERATION_A)!.settings = { operationName: '_phase:test', dependsOnEnvVars };
+      return {
+        fixture,
+        router: new PhasedRequestRouter(fixture.session),
+        runs,
+        scheduleSpy: jest.spyOn(fixture.graph, 'scheduleIterationAsync')
+      };
+    }
+
+    function createRequestWithEnvironment(
+      requestId: string,
+      environment: Record<string, string>,
+      operationId: string
+    ): IDaemonPhasedRequest {
+      return { ...createRequest(requestId, operationId), environment };
+    }
+
+    it('schedules separate iterations for queued requests that disagree on its value', async () => {
+      const occupierStarted: IDeferred = createDeferred();
+      const releaseOccupier: IDeferred = createDeferred();
+      const { fixture, router, runs, scheduleSpy } = createHashedVariableFixture(
+        [TERMINAL_VARIABLE],
+        async (): Promise<void> => {
+          occupierStarted.resolve();
+          await releaseOccupier.promise;
+        }
+      );
+      const occupier: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+        createRequest('occupier', OPERATION_C),
+        new TestPhasedRequestClient('occupier')
+      );
+      await occupierStarted.promise;
+      const results: Promise<IDaemonPhasedRequestResult[]> = Promise.all([
+        router.executeAsync(
+          createRequestWithEnvironment('x', { [TERMINAL_VARIABLE]: 'wt-X' }, OPERATION_A),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          createRequestWithEnvironment('y', { [TERMINAL_VARIABLE]: 'wt-Y' }, OPERATION_A),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+      releaseOccupier.resolve();
+      await occupier;
+      const [x, y] = await results;
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(3);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(2);
+      expect(runs).toEqual(['wt-X', 'wt-Y']);
+      expect(x).toMatchObject({ exitCode: 0, outcome: 'success' });
+      expect(y).toMatchObject({ exitCode: 0, outcome: 'success' });
+      expect(getResultOperationIds(x)).toEqual([OPERATION_A]);
+      expect(getResultOperationIds(y)).toEqual([OPERATION_A]);
+    });
+
+    it('shares one iteration for requests that agree on its value', async () => {
+      const { fixture, router, runs, scheduleSpy } = createHashedVariableFixture([TERMINAL_VARIABLE]);
+
+      await Promise.all([
+        router.executeAsync(
+          createRequestWithEnvironment(
+            'x',
+            { [TERMINAL_VARIABLE]: 'wt-X', [SESSION_VARIABLE]: 'session-X' },
+            OPERATION_A
+          ),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          createRequestWithEnvironment(
+            'y',
+            { [TERMINAL_VARIABLE]: 'wt-X', [SESSION_VARIABLE]: 'session-Y' },
+            OPERATION_A
+          ),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(runs).toEqual(['wt-X']);
+    });
+
+    it('shares one iteration for an unset value and an empty one, which operations hash alike', async () => {
+      const { fixture, router, runs, scheduleSpy } = createHashedVariableFixture([TERMINAL_VARIABLE]);
+
+      await Promise.all([
+        router.executeAsync(createRequest('unset', OPERATION_A), new TestPhasedRequestClient('unset')),
+        router.executeAsync(
+          createRequestWithEnvironment('empty', { [TERMINAL_VARIABLE]: '' }, OPERATION_A),
+          new TestPhasedRequestClient('empty')
+        )
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(runs).toEqual([undefined]);
+    });
+
+    it('keeps sharing one iteration when requests differ only in a variable that operations take from the daemon', async () => {
+      const { fixture, router, scheduleSpy } = createHashedVariableFixture([HOST_VARIABLE]);
+
+      await Promise.all([
+        router.executeAsync(
+          createRequestWithEnvironment('x', { [HOST_VARIABLE]: 'x' }, OPERATION_A),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          createRequestWithEnvironment('y', { [HOST_VARIABLE]: 'y' }, OPERATION_A),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+    });
   });
 
   it('shares one iteration for disjoint selections while isolating streams, events, and results', async () => {

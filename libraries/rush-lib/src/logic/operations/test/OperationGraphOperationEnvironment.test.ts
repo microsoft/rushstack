@@ -196,4 +196,33 @@ describe('OperationGraph operation environment', () => {
       ['afterExecuteIterationAsync', undefined]
     ]);
   });
+
+  it('gives every iteration hook the request id lookup that the iteration was scheduled with', async () => {
+    const graph: OperationGraph = createGraph([new EnvironmentRecordingRunner('operation')]);
+    type GetOperationRequestId = IOperationGraphIterationOptions['getOperationRequestId'];
+    const received: [string, GetOperationRequestId][] = [];
+    graph.hooks.configureIteration.tap('test', (records, lastResults, options) => {
+      received.push(['configureIteration', options.getOperationRequestId]);
+    });
+    graph.hooks.beforeExecuteIterationAsync.tapPromise('test', async (records, options) => {
+      received.push(['beforeExecuteIterationAsync', options.getOperationRequestId]);
+    });
+    graph.hooks.afterExecuteIterationAsync.tapPromise('test', async (status, records, options) => {
+      received.push(['afterExecuteIterationAsync', options.getOperationRequestId]);
+      return status;
+    });
+    const getOperationRequestId: GetOperationRequestId = () => 'request-A';
+
+    expect((await graph.executeAsync({ getOperationRequestId })).status).toBe(OperationStatus.Success);
+    expect((await graph.executeAsync({})).status).toBe(OperationStatus.Success);
+
+    expect(received).toEqual([
+      ['configureIteration', getOperationRequestId],
+      ['beforeExecuteIterationAsync', getOperationRequestId],
+      ['afterExecuteIterationAsync', getOperationRequestId],
+      ['configureIteration', undefined],
+      ['beforeExecuteIterationAsync', undefined],
+      ['afterExecuteIterationAsync', undefined]
+    ]);
+  });
 });
