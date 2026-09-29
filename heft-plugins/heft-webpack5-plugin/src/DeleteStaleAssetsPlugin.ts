@@ -195,7 +195,8 @@ function getAssetPaths(
  */
 function isInFolder(pathApi: path.PlatformPath, folderPath: string, filePath: string): boolean {
   const relativePath: string = pathApi.relative(folderPath, filePath);
-  // The relative path is absolute if the file is on another drive.
+  // The relative path is absolute if the file is on another drive. On win32 it is also absolute if its first
+  // segment is a drive, e.g. `C:\a.js` for `C:\dist\C:\a.js`.
   return (
     relativePath !== '' &&
     relativePath !== '..' &&
